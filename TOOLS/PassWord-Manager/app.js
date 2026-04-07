@@ -9,6 +9,8 @@ let masterKey = null;
 let vaultEntries = [];
 let currentGroup = "ALL ENTRIES";
 let editingEntryId = null;
+let unlockTime = null;
+let settings = { autolock: 0, autodomain: true };
 
 // --- DOM ELEMENTS ---
 const loginContainer = document.getElementById('login-container');
@@ -19,9 +21,29 @@ const entriesList = document.getElementById('entries-list');
 const groupListContainer = document.getElementById('group-list');
 const currentGroupLabel = document.getElementById('current-group-label');
 
+const addModal = document.getElementById('add-modal');
 const editModal = document.getElementById('edit-modal');
-const closeModalBtn = document.getElementById('close-modal-btn');
-const updateBtn = document.getElementById('update-btn');
+const settingsModal = document.getElementById('settings-modal');
+
+// --- INITIALIZE ---
+chrome.storage.local.get(['vaultSettings'], (result) => {
+    if (result.vaultSettings) {
+        settings = result.vaultSettings;
+        document.getElementById('setting-autolock').value = settings.autolock;
+        document.getElementById('setting-autodomain').checked = settings.autodomain;
+    }
+});
+
+// Auto-lock checker
+setInterval(() => {
+    if (masterKey && settings.autolock > 0 && unlockTime) {
+        const elapsed = (Date.now() - unlockTime) / 60000;
+        if (elapsed >= settings.autolock) {
+            alert("Vault auto-locked due to inactivity.");
+            logout();
+        }
+    }
+}, 30000); // Check every 30s
 
 // --- CRYPTO HELPERS ---
 async function deriveKey(password, salt) {
@@ -52,20 +74,6 @@ async function decrypt(bundle, password) {
     } catch (e) { return null; }
 }
 
-// --- FIELD MANAGEMENT ---
-function createFieldRow(containerId, name, value = "") {
-    const container = document.getElementById(containerId);
-    const row = document.createElement('div');
-    row.className = 'custom-field-row';
-    row.innerHTML = `
-        <input type="text" class="field-name" value="${name}" readonly style="width:80px; color:var(--cp-yellow);">
-        <input type="text" class="field-value" value="${value}">
-        <button class="remove-field-btn danger">X</button>
-    `;
-    row.querySelector('.remove-field-btn').onclick = () => row.remove();
-    container.appendChild(row);
-}
-
 // --- APP LOGIC ---
 async function handleLogin() {
     const password = masterPassInput.value;
@@ -83,6 +91,7 @@ async function handleLogin() {
             } else { loginBtn.disabled = false; return; }
         }
         masterKey = password;
+        unlockTime = Date.now();
         loginContainer.classList.add('hidden');
         vaultContainer.classList.remove('hidden');
         loadVault();
@@ -101,51 +110,31 @@ async function loadVault() {
         }
         updateSuggestions();
         renderGroups();
-        await prefillSearchFromCurrentTab();
+        if (settings.autodomain) await prefillSearchFromCurrentTab();
         renderEntries();
     } catch (e) { console.error(e); }
 }
 
 async function prefillSearchFromCurrentTab() {
-    return new Promise((resolve) => {
-        if (typeof chrome !== 'undefined' && chrome.tabs) {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs[0] && tabs[0].url) {
-                    try {
-                        const url = new URL(tabs[0].url);
-                        let domain = url.hostname;
-                        if (domain.startsWith('www.')) domain = domain.substring(4);
-                        
-                        const searchInput = document.getElementById('global-search');
-                        if (searchInput && domain && !domain.includes('newtab')) {
-                            searchInput.value = domain;
-                            console.log("Prefilled search with domain:", domain);
-                        }
-                    } catch (e) {
-                        console.error("Error parsing tab URL:", e);
-                    }
-                }
-                resolve();
-            });
-        } else {
-            resolve();
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0] && tabs[0].url) {
+            try {
+                const url = new URL(tabs[0].url);
+                let domain = url.hostname;
+                if (domain.startsWith('www.')) domain = domain.substring(4);
+                if (domain && !domain.includes('newtab')) document.getElementById('global-search').value = domain;
+            } catch (e) {}
         }
-    });
+    }
 }
 
 function updateSuggestions() {
     const suggestions = new Set(["Note", "Phone", "Domain", "Email", "URL"]);
-    vaultEntries.forEach(e => {
-        Object.keys(e.fields).forEach(k => suggestions.add(k));
-    });
-    
-    const sorted = Array.from(suggestions).sort();
-    const mainDatalist = document.getElementById('field-suggestions');
-    const editDatalist = document.getElementById('edit-field-suggestions');
-    
-    const html = sorted.map(s => `<option value="${s}">`).join('');
-    mainDatalist.innerHTML = html;
-    editDatalist.innerHTML = html;
+    vaultEntries.forEach(e => Object.keys(e.fields).forEach(k => suggestions.add(k)));
+    const html = Array.from(suggestions).sort().map(s => `<option value="${s}">`).join('');
+    document.getElementById('field-suggestions').innerHTML = html;
+    document.getElementById('edit-field-suggestions').innerHTML = html;
 }
 
 function renderGroups() {
@@ -166,6 +155,8 @@ function renderEntries() {
     entriesList.innerHTML = '';
     const filtered = vaultEntries.filter(e => (currentGroup === "ALL ENTRIES" || e.domain === currentGroup) && (e.domain.toLowerCase().includes(query) || e.u.toLowerCase().includes(query)));
 
+    if (filtered.length === 0) entriesList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--cp-subtext);">NO ENTRIES</div>';
+
     filtered.forEach(e => {
         const div = document.createElement('div');
         div.className = 'entry-item';
@@ -176,12 +167,12 @@ function renderEntries() {
                     <button class="copy-user" data-val="${e.u}">USER</button>
                     <button class="copy-pass" data-val="${e.p}">PASS</button>
                     <button class="edit-btn">EDIT</button>
-                    <button class="del-btn danger">DEL</button>
+                    <button class="del-btn danger">X</button>
                 </div>
             </div>
             <div class="details-toggle">▼ DETAILS ▼</div>
             <div class="entry-details hidden">
-                ${Object.entries(e.fields).map(([k,v]) => `<div class="detail-row"><span class="detail-label">${k}:</span><span>${v}</span><button class="copy-btn" data-val="${v}">COPY</button></div>`).join('')}
+                ${Object.entries(e.fields).map(([k,v]) => `<div class="detail-row"><span class="detail-label">${k}:</span><span>${v}</span><button class="copy-field" data-val="${v}">COPY</button></div>`).join('')}
             </div>
         `;
         div.querySelector('.details-toggle').onclick = () => {
@@ -191,32 +182,22 @@ function renderEntries() {
         };
         div.querySelector('.copy-user').onclick = () => copy(e.u);
         div.querySelector('.copy-pass').onclick = () => copy(e.p);
+        
+        div.querySelectorAll('.copy-field').forEach(btn => {
+            btn.onclick = () => copy(btn.dataset.val);
+        });
+        
         div.querySelector('.edit-btn').onclick = () => openEditModal(e);
         div.querySelector('.del-btn').onclick = async () => { if(confirm("Delete?")) { await client.mutation("passwords:remove", {id: e.id}); loadVault(); } };
         entriesList.appendChild(div);
     });
 }
 
-async function saveEntry() {
-    const domain = document.getElementById('new-domain').value || "UNCATEGORIZED";
-    const u = document.getElementById('new-username').value;
-    const p = document.getElementById('new-password').value;
-    if(!u || !p) return alert("Required fields missing");
+function copy(t) { navigator.clipboard.writeText(t); }
 
-    const fields = {};
-    document.querySelectorAll('#new-custom-fields .custom-field-row').forEach(row => {
-        fields[row.querySelector('.field-name').value] = row.querySelector('.field-value').value;
-    });
+function logout() { location.reload(); }
 
-    const b = await encrypt(u, masterKey);
-    const eP = await encrypt(p, masterKey, b.salt, b.iv);
-    await client.mutation("passwords:add", { domain: domain.toUpperCase(), salt: btoa(String.fromCharCode(...b.salt)), iv: btoa(String.fromCharCode(...b.iv)), u: b.data, p: eP.data, fields: JSON.stringify(fields) });
-    
-    document.getElementById('new-domain').value = ''; document.getElementById('new-username').value = ''; document.getElementById('new-password').value = '';
-    document.getElementById('new-custom-fields').innerHTML = '';
-    loadVault();
-}
-
+// --- MODALS ---
 function openEditModal(e) {
     editingEntryId = e.id;
     document.getElementById('edit-domain').value = e.domain;
@@ -227,43 +208,82 @@ function openEditModal(e) {
     editModal.classList.remove('hidden');
 }
 
-async function updateEntry() {
+function createFieldRow(containerId, name, value = "") {
+    const row = document.createElement('div');
+    row.className = 'custom-field-row';
+    row.innerHTML = `<input type="text" class="field-name" value="${name}" readonly style="width:80px; color:var(--cp-yellow);"><input type="text" class="field-value" value="${value}"><button class="remove-field-btn danger">X</button>`;
+    row.querySelector('.remove-field-btn').onclick = () => row.remove();
+    document.getElementById(containerId).appendChild(row);
+}
+
+// --- PASSWORD GENERATOR (Python Style) ---
+function generatePassword() {
+    const length = parseInt(document.getElementById('gen-length').value);
+    let chars = "abcdefghijklmnopqrstuvwxyz";
+    if (document.getElementById('gen-upper').checked) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (document.getElementById('gen-nums').checked) chars += "0123456789";
+    if (document.getElementById('gen-syms').checked) chars += "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    
+    let pass = "";
+    for (let i = 0; i < length; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    document.getElementById('new-password').value = pass;
+    document.getElementById('new-password').type = 'text';
+}
+
+// --- EVENTS ---
+loginBtn.onclick = handleLogin;
+masterPassInput.onkeypress = (e) => { if(e.key==='Enter') handleLogin(); };
+
+document.getElementById('logout-btn').onclick = logout;
+document.getElementById('settings-btn').onclick = () => settingsModal.classList.remove('hidden');
+document.getElementById('add-btn').onclick = () => addModal.classList.remove('hidden');
+
+// Add Form
+document.getElementById('save-btn').onclick = async () => {
+    const domain = document.getElementById('new-domain').value || "UNCATEGORIZED";
+    const u = document.getElementById('new-username').value;
+    const p = document.getElementById('new-password').value;
+    if(!u || !p) return alert("Required fields missing");
+    const fields = {};
+    document.querySelectorAll('#new-custom-fields .custom-field-row').forEach(row => { fields[row.querySelector('.field-name').value] = row.querySelector('.field-value').value; });
+    const b = await encrypt(u, masterKey);
+    const eP = await encrypt(p, masterKey, b.salt, b.iv);
+    await client.mutation("passwords:add", { domain: domain.toUpperCase(), salt: btoa(String.fromCharCode(...b.salt)), iv: btoa(String.fromCharCode(...b.iv)), u: b.data, p: eP.data, fields: JSON.stringify(fields) });
+    addModal.classList.add('hidden');
+    loadVault();
+};
+document.getElementById('close-add-modal-btn').onclick = () => addModal.classList.add('hidden');
+document.getElementById('add-field-btn').onclick = () => { const n = document.getElementById('new-field-name'); if(n.value) { createFieldRow('new-custom-fields', n.value); n.value = ''; } };
+
+// Generator Panel
+document.getElementById('gen-options-btn').onclick = () => document.getElementById('gen-options-panel').classList.toggle('hidden');
+document.getElementById('gen-length').oninput = (e) => document.getElementById('gen-len-val').innerText = e.target.value;
+document.getElementById('gen-execute-btn').onclick = generatePassword;
+
+// Edit Form
+document.getElementById('update-btn').onclick = async () => {
     const domain = document.getElementById('edit-domain').value.toUpperCase();
     const u = document.getElementById('edit-username').value;
     const p = document.getElementById('edit-password').value;
     const fields = {};
-    document.querySelectorAll('#edit-custom-fields .custom-field-row').forEach(row => {
-        fields[row.querySelector('.field-name').value] = row.querySelector('.field-value').value;
-    });
-
+    document.querySelectorAll('#edit-custom-fields .custom-field-row').forEach(row => { fields[row.querySelector('.field-name').value] = row.querySelector('.field-value').value; });
     const b = await encrypt(u, masterKey);
     const eP = await encrypt(p, masterKey, b.salt, b.iv);
     await client.mutation("passwords:update", { id: editingEntryId, domain, salt: btoa(String.fromCharCode(...b.salt)), iv: btoa(String.fromCharCode(...b.iv)), u: b.data, p: eP.data, fields: JSON.stringify(fields) });
-    
     editModal.classList.add('hidden');
     loadVault();
-}
+};
+document.getElementById('close-modal-btn').onclick = () => editModal.classList.add('hidden');
+document.getElementById('edit-add-field-btn').onclick = () => { const n = document.getElementById('edit-new-field-name'); if(n.value) { createFieldRow('edit-custom-fields', n.value); n.value = ''; } };
 
-function copy(t) { navigator.clipboard.writeText(t); }
+// Settings
+document.getElementById('save-settings-btn').onclick = () => {
+    settings.autolock = parseInt(document.getElementById('setting-autolock').value);
+    settings.autodomain = document.getElementById('setting-autodomain').checked;
+    chrome.storage.local.set({ vaultSettings: settings });
+    settingsModal.classList.add('hidden');
+    loadVault();
+};
+document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.add('hidden');
 
-// --- EVENTS ---
-loginBtn.onclick = handleLogin;
-document.getElementById('logout-btn').onclick = () => location.reload();
-document.getElementById('save-btn').onclick = saveEntry;
-document.getElementById('gen-btn').onclick = () => {
-    const ch = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let p = ""; for(let i=0; i<16; i++) p += ch.charAt(Math.floor(Math.random()*ch.length));
-    document.getElementById('new-password').value = p; document.getElementById('new-password').type = 'text';
-};
-document.getElementById('add-field-btn').onclick = () => {
-    const n = document.getElementById('new-field-name');
-    if(n.value) { createFieldRow('new-custom-fields', n.value); n.value = ''; }
-};
-document.getElementById('edit-add-field-btn').onclick = () => {
-    const n = document.getElementById('edit-new-field-name');
-    if(n.value) { createFieldRow('edit-custom-fields', n.value); n.value = ''; }
-};
-closeModalBtn.onclick = () => editModal.classList.add('hidden');
-updateBtn.onclick = updateEntry;
 document.getElementById('global-search').oninput = renderEntries;
-masterPassInput.onkeypress = (e) => { if(e.key==='Enter') handleLogin(); };

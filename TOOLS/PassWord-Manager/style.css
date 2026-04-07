@@ -1,71 +1,35 @@
 /* Cyberpunk Palette */
 :root {
-    --cp-bg: #050505;
-    --cp-panel: #111111;
-    --cp-yellow: #FCEE0A;
-    --cp-cyan: #00F0FF;
-    --cp-red: #FF003C;
-    --cp-green: #00ff21;
-    --cp-dim: #3a3a3a;
-    --cp-text: #E0E0E0;
-    --cp-subtext: #808080;
+    --cp-bg: #050505; --cp-panel: #111111; --cp-yellow: #FCEE0A; --cp-cyan: #00F0FF;
+    --cp-red: #FF003C; --cp-green: #00ff21; --cp-dim: #3a3a3a; --cp-text: #E0E0E0; --cp-subtext: #808080;
 }
 
 body {
-    background-color: var(--cp-bg);
-    color: var(--cp-text);
-    font-family: 'Consolas', 'Courier New', monospace;
-    margin: 0;
-    padding: 0;
-    width: 650px;
-    min-height: 550px;
+    background-color: var(--cp-bg); color: var(--cp-text); font-family: 'Consolas', monospace;
+    margin: 0; padding: 0; width: 650px; min-height: 550px;
 }
 
 .container { padding: 15px; }
-
-#login-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 520px; /* Slightly less than min-height to account for padding */
-    text-align: center;
-}
-
-#login-container h1 {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-}
-
-#login-container .input-group {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    width: 90%;
-    justify-content: center;
-}
-
-#login-container input {
-    flex-grow: 1;
-}
-
-#login-container button {
-    white-space: nowrap;
-}
-
 .hidden { display: none !important; }
 
-h1 { color: var(--cp-yellow); font-size: 1.2rem; text-shadow: 2px 2px var(--cp-red); margin: 0 0 15px 0; }
-h2, h3 { color: var(--cp-cyan); font-size: 0.9rem; margin-bottom: 10px; text-transform: uppercase; }
+#login-container {
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    height: 520px; text-align: center;
+}
+#login-container h1 { font-size: 1.8rem; margin-bottom: 30px; }
+#login-container .input-group { display: flex; flex-direction: row; gap: 10px; width: 90%; justify-content: center; }
+#login-container input { flex-grow: 1; }
 
 header {
     display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--cp-dim); padding-bottom: 10px; margin-bottom: 15px;
+    border-bottom: 1px solid var(--cp-dim); padding: 10px 15px; margin-bottom: 10px;
 }
+.header-actions { display: flex; gap: 8px; }
+header h1 { color: var(--cp-yellow); font-size: 1.1rem; text-shadow: 1px 1px var(--cp-red); margin: 0; }
 
-.main-layout { display: flex; gap: 15px; }
+.main-layout { display: flex; gap: 15px; padding: 0 15px 15px; }
 .sidebar { width: 180px; border-right: 1px solid var(--cp-dim); padding-right: 10px; }
-.content { flex-grow: 1; }
+.content { flex-grow: 1; max-height: 460px; overflow-y: auto; }
 
 .group-item {
     padding: 8px; cursor: pointer; border-bottom: 1px solid var(--cp-panel);
@@ -74,20 +38,18 @@ header {
 .group-item:hover { background: #1a1a1a; color: var(--cp-yellow); }
 .group-item.active { color: var(--cp-yellow); border-left: 3px solid var(--cp-yellow); background: var(--cp-panel); }
 
-.card { background: var(--cp-panel); border: 1px solid var(--cp-dim); padding: 12px; margin-bottom: 15px; }
-.form { display: flex; flex-direction: column; gap: 8px; }
+.card { background: var(--cp-panel); border: 1px solid var(--cp-dim); padding: 12px; }
+.form { display: flex; flex-direction: column; gap: 10px; }
 
-label { font-size: 0.7rem; color: var(--cp-subtext); margin-bottom: -4px; }
-
-input {
+input, select {
     background: var(--cp-bg); border: 1px solid var(--cp-dim); color: var(--cp-cyan);
     padding: 8px; font-family: inherit; font-size: 0.85rem;
 }
-input:focus { border-color: var(--cp-cyan); outline: none; }
+input[type="range"] { padding: 0; }
 
 button {
     background: var(--cp-dim); color: white; border: 1px solid var(--cp-dim);
-    padding: 8px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem;
+    padding: 8px 12px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem;
 }
 button:hover { border-color: var(--cp-yellow); color: var(--cp-yellow); }
 button.primary { border-color: var(--cp-cyan); color: var(--cp-cyan); }
@@ -96,29 +58,26 @@ button.danger { color: var(--cp-red); border-color: var(--cp-red); }
 .password-row, .add-field-row, .custom-field-row { display: flex; gap: 5px; }
 .password-row input, .add-field-row input, .custom-field-row input { flex-grow: 1; }
 
-.custom-fields-area { margin: 5px 0; display: flex; flex-direction: column; gap: 5px; }
+.gen-panel {
+    background: var(--cp-bg); border: 1px solid var(--cp-dim); padding: 10px;
+    margin-top: 5px; font-size: 0.8rem;
+}
+.checkbox-row { display: flex; justify-content: space-around; margin: 10px 0; }
+
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 100;
+}
+.modal-content { width: 480px; border-color: var(--cp-cyan); }
+.modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+.modal-actions button { flex: 1; }
+
+.setting-row { display: flex; justify-content: space-between; align-items: center; }
+.hint { font-size: 0.7rem; color: var(--cp-subtext); margin: -5px 0 10px 0; }
 
 .entry-item { background: var(--cp-panel); border: 1px solid var(--cp-dim); margin-bottom: 10px; padding: 10px; }
 .entry-header { display: flex; justify-content: space-between; align-items: center; }
 .entry-domain { color: var(--cp-yellow); font-weight: bold; font-size: 0.9rem; }
 .entry-user { color: var(--cp-text); font-size: 0.8rem; }
-.entry-actions { display: flex; gap: 4px; }
-.entry-actions button { padding: 4px 6px; font-size: 0.65rem; }
-
-.details-toggle {
-    text-align: center; font-size: 0.7rem; color: var(--cp-subtext);
-    cursor: pointer; margin-top: 5px; border-top: 1px solid #1a1a1a; padding-top: 5px;
-}
-
-.entry-details { padding: 10px; background: var(--cp-bg); margin-top: 5px; font-size: 0.8rem; }
-.detail-row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
-.detail-label { color: var(--cp-yellow); min-width: 80px; }
-
-/* Modal Styles */
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 100;
-}
-.modal-content { width: 450px; border-color: var(--cp-cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
-.modal-actions { display: flex; gap: 10px; margin-top: 15px; }
-.modal-actions button { flex: 1; }
+.entry-actions { display: flex; gap: 5px; }
+.entry-actions button { padding: 4px 8px; font-size: 0.7rem; }

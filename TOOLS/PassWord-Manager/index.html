@@ -10,15 +10,19 @@
     <div id="login-container" class="container">
         <h1>CYBER-VAULT v1.0</h1>
         <div class="input-group">
-            <input type="password" id="master-password" placeholder="ENTER MASTER PASSWORD">
+            <input type="password" id="master-password" placeholder="ENTER MASTER PASSWORD" autofocus>
             <button id="login-btn">ACCESS SYSTEM</button>
         </div>
     </div>
 
     <div id="vault-container" class="container hidden">
         <header>
-            <h1>VAULT MANAGER</h1>
-            <button id="logout-btn" class="danger">LOCK</button>
+            <h1>VAULT</h1>
+            <div class="header-actions">
+                <button id="add-btn" class="primary" title="Add New">+</button>
+                <button id="settings-btn" title="Settings">⚙</button>
+                <button id="logout-btn" class="danger">LOCK</button>
+            </div>
         </header>
 
         <div class="main-layout">
@@ -29,63 +33,66 @@
             </aside>
 
             <main class="content">
-                <section id="add-entry">
-                    <div class="card">
-                        <h3>NEW CREDENTIAL</h3>
-                        <div class="form" id="main-add-form">
-                            <input type="text" id="new-domain" placeholder="DOMAIN (e.g. google.com)">
-                            <input type="text" id="new-username" placeholder="USERNAME">
-                            <div class="password-row">
-                                <input type="password" id="new-password" placeholder="PASSWORD">
-                                <button id="gen-btn">GEN</button>
-                            </div>
-                            
-                            <div id="new-custom-fields" class="custom-fields-area">
-                                <!-- Dynamic fields here -->
-                            </div>
-                            
-                            <div class="add-field-row">
-                                <input type="text" id="new-field-name" placeholder="FIELD NAME" list="field-suggestions">
-                                <button id="add-field-btn">+</button>
-                            </div>
-                            <datalist id="field-suggestions"></datalist>
-
-                            <button id="save-btn" class="primary">SAVE TO VAULT</button>
-                        </div>
-                    </div>
-                </section>
-
                 <section id="entries-header">
                     <h3 id="current-group-label">ALL ENTRIES</h3>
                 </section>
-
-                <section id="entries-list">
-                    <!-- Entries injected here -->
-                </section>
+                <section id="entries-list"></section>
             </main>
         </div>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- Add Modal -->
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-content card">
+            <h2>NEW CREDENTIAL</h2>
+            <div class="form">
+                <input type="text" id="new-domain" placeholder="DOMAIN (e.g. google.com)">
+                <input type="text" id="new-username" placeholder="USERNAME">
+                <div class="password-row">
+                    <input type="password" id="new-password" placeholder="PASSWORD">
+                    <button id="gen-options-btn">GEN ⚙</button>
+                </div>
+                
+                <div id="gen-options-panel" class="hidden gen-panel">
+                    <label>LENGTH: <span id="gen-len-val">16</span></label>
+                    <input type="range" id="gen-length" min="8" max="64" value="16">
+                    <div class="checkbox-row">
+                        <label><input type="checkbox" id="gen-upper" checked> ABC</label>
+                        <label><input type="checkbox" id="gen-nums" checked> 123</label>
+                        <label><input type="checkbox" id="gen-syms" checked> !@#</label>
+                    </div>
+                    <button id="gen-execute-btn" class="primary">GENERATE & FILL</button>
+                </div>
+
+                <div id="new-custom-fields" class="custom-fields-area"></div>
+                <div class="add-field-row">
+                    <input type="text" id="new-field-name" placeholder="FIELD NAME" list="field-suggestions">
+                    <button id="add-field-btn">+</button>
+                </div>
+                <datalist id="field-suggestions"></datalist>
+
+                <div class="modal-actions">
+                    <button id="save-btn" class="primary">SAVE</button>
+                    <button id="close-add-modal-btn">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal (same as before) -->
     <div id="edit-modal" class="modal hidden">
         <div class="modal-content card">
             <h2>EDIT CREDENTIAL</h2>
             <div class="form">
-                <label>DOMAIN/GROUP:</label>
-                <input type="text" id="edit-domain">
-                <label>USERNAME:</label>
-                <input type="text" id="edit-username">
-                <label>PASSWORD:</label>
-                <input type="text" id="edit-password">
-                
+                <label>DOMAIN:</label><input type="text" id="edit-domain">
+                <label>USERNAME:</label><input type="text" id="edit-username">
+                <label>PASSWORD:</label><input type="text" id="edit-password">
                 <div id="edit-custom-fields" class="custom-fields-area"></div>
-                
                 <div class="add-field-row">
                     <input type="text" id="edit-new-field-name" placeholder="NEW FIELD" list="edit-field-suggestions">
                     <button id="edit-add-field-btn">+</button>
                 </div>
                 <datalist id="edit-field-suggestions"></datalist>
-
                 <div class="modal-actions">
                     <button id="update-btn" class="primary">UPDATE</button>
                     <button id="close-modal-btn">CANCEL</button>
@@ -94,7 +101,28 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content card">
+            <h2>SETTINGS</h2>
+            <div class="form">
+                <div class="setting-row">
+                    <label>AUTO-LOCK (MINS):</label>
+                    <input type="number" id="setting-autolock" min="0" value="0">
+                </div>
+                <div class="setting-row">
+                    <label>AUTO-DOMAIN SEARCH:</label>
+                    <input type="checkbox" id="setting-autodomain" checked>
+                </div>
+                <p class="hint">Set to 0 to disable auto-lock.</p>
+                <div class="modal-actions">
+                    <button id="save-settings-btn" class="primary">SAVE SETTINGS</button>
+                    <button id="close-settings-btn">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
-
