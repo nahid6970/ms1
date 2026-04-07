@@ -43,7 +43,8 @@ KOMOREBI_JSON_PATH = os.path.join(SCRIPT_PATH, CONFIG_FILENAME)
 SVGS = {
     "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
     "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
-    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+    "REFRESH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -457,8 +458,12 @@ class KomorebiApp(QMainWindow):
         self.restore_btn = CyberButton("", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["DOWNLOAD"])
         self.restore_btn.setToolTip("Restore from Cloud")
         self.restore_btn.clicked.connect(self.restore_from_convex)
+
+        self.sync_btn = CyberButton("", color=CP_SUBTEXT, is_outlined=True, svg_data=SVGS["REFRESH"])
+        self.sync_btn.setToolTip("Check sync with last backup")
+        self.sync_btn.clicked.connect(self.check_sync_status)
         
-        for b in [self.add_btn, self.get_info_btn, self.remove_btn, self.save_btn, self.backup_btn, self.restore_btn]:
+        for b in [self.add_btn, self.get_info_btn, self.remove_btn, self.save_btn, self.backup_btn, self.restore_btn, self.sync_btn]:
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_layout.addWidget(b)
             
@@ -539,6 +544,49 @@ class KomorebiApp(QMainWindow):
                     QMessageBox.information(self, "RESTORE", "Restored successfully.")
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
+
+    def _config_for_compare(self, data):
+        """Strip fields irrelevant to sync comparison."""
+        skip = {"$schema", "gui_settings"}
+        return {k: v for k, v in data.items() if k not in skip}
+
+    def _set_backup_badge(self, dirty):
+        """Show/hide a red dot badge on the backup button icon."""
+        svg = SVGS["UPLOAD"]
+        icon_color = CP_CYAN
+        colored_svg = svg.replace('currentColor', icon_color)
+        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+        pix = QPixmap(22, 22)
+        pix.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pix)
+        renderer.render(painter)
+        if dirty:
+            from PyQt6.QtGui import QColor, QBrush
+            painter.setBrush(QBrush(QColor(CP_RED)))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawEllipse(14, 0, 8, 8)
+        painter.end()
+        self.backup_btn.setIcon(QIcon(pix))
+        self.backup_btn.setIconSize(QSize(22, 22))
+
+    def check_sync_status(self):
+        try:
+            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
+            backups = result.get("value", [])
+            if not backups:
+                self._set_backup_badge(True)
+                self.backup_btn.setToolTip("No backups found - local is unsynced")
+                return
+            latest = max(backups, key=lambda b: b["createdAt"])
+            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
+            local = self._config_for_compare(self.config_data)
+            remote_cmp = self._config_for_compare(self._fix_floats(remote))
+            dirty = json.dumps(local, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
+            self._set_backup_badge(dirty)
+            self.backup_btn.setToolTip("Unsaved local changes - backup recommended!" if dirty else "In sync with last backup")
+            self.sync_btn.setToolTip(f"Last checked: {latest['label']} | {'OUT OF SYNC' if dirty else 'IN SYNC'}")
+        except Exception as e:
+            QMessageBox.critical(self, "SYNC CHECK FAILED", str(e))
 
     def apply_theme(self):
         self.setStyleSheet(f"""
