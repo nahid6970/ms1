@@ -152,11 +152,12 @@ class MainWindow(QMainWindow):
         # CONTENT AREA
         content_layout = QHBoxLayout()
         
-        # NAVIGATION LEFT
-        self.prev_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["LEFT"])
-        self.prev_btn.setFixedSize(40, 40)
-        self.prev_btn.clicked.connect(self.show_prev)
-        content_layout.addWidget(self.prev_btn)
+        # NAVIGATION LEFT (TO RECENT)
+        self.recent_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["LEFT"])
+        self.recent_btn.setFixedSize(40, 40)
+        self.recent_btn.setToolTip("Show more recent version")
+        self.recent_btn.clicked.connect(self.show_newer)
+        content_layout.addWidget(self.recent_btn)
 
         # CENTER CODE VIEW
         center_widget = QWidget()
@@ -173,11 +174,12 @@ class MainWindow(QMainWindow):
         
         content_layout.addWidget(center_widget, stretch=1)
 
-        # NAVIGATION RIGHT
-        self.next_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["RIGHT"])
-        self.next_btn.setFixedSize(40, 40)
-        self.next_btn.clicked.connect(self.show_next)
-        content_layout.addWidget(self.next_btn)
+        # NAVIGATION RIGHT (TO PAST)
+        self.past_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["RIGHT"])
+        self.past_btn.setFixedSize(40, 40)
+        self.past_btn.setToolTip("Show older version")
+        self.past_btn.clicked.connect(self.show_older)
+        content_layout.addWidget(self.past_btn)
 
         main_layout.addLayout(content_layout)
         
@@ -239,15 +241,15 @@ class MainWindow(QMainWindow):
 
     def update_nav_buttons(self):
         # Index 0 is most recent.
-        self.prev_btn.setEnabled(self.current_index < len(self.backups) - 1)
-        self.next_btn.setEnabled(self.current_index > 0)
+        self.past_btn.setEnabled(self.current_index < len(self.backups) - 1)
+        self.recent_btn.setEnabled(self.current_index > 0)
 
-    def show_prev(self):
+    def show_older(self):
         if self.current_index < len(self.backups) - 1:
             self.current_index += 1
             self.load_backup_data()
 
-    def show_next(self):
+    def show_newer(self):
         if self.current_index > 0:
             self.current_index -= 1
             self.load_backup_data()
