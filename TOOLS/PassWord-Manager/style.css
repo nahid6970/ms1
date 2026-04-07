@@ -22,6 +22,28 @@ body {
 }
 
 .container { padding: 15px; }
+
+#login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 520px; /* Slightly less than min-height to account for padding */
+    text-align: center;
+}
+
+#login-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+}
+
+#login-container .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 80%;
+}
+
 .hidden { display: none !important; }
 
 h1 { color: var(--cp-yellow); font-size: 1.2rem; text-shadow: 2px 2px var(--cp-red); margin: 0 0 15px 0; }
