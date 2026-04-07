@@ -473,7 +473,29 @@
             "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Action?\" +8801779787186"
         },
         "DSSS": {
-            "images": [],
+            "images": [
+                {
+                    "name": "asdasdasd",
+                    "path": "C:/Users/nahid/Videos/RustDesk\\captured_image_20260407_131324.png",
+                    "confidence": 0.8,
+                    "region": [
+                        780,
+                        365,
+                        925,
+                        400
+                    ],
+                    "actions": [
+                        {
+                            "type": "mouse_click",
+                            "x": 818,
+                            "y": 809,
+                            "delay": 0.1
+                        }
+                    ],
+                    "enabled": true,
+                    "is_folder": false
+                }
+            ],
             "enabled": true,
             "target_window": "LDPlayer",
             "save_path": "C:/Users/nahid/Videos/RustDesk",
