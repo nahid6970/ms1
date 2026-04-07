@@ -32,15 +32,56 @@ CP_DIM = "#3a3a3a"          # Dimmed/Inactive
 CP_TEXT = "#E0E0E0"         # Main Text
 CP_SUBTEXT = "#808080"      # Sub Text
 
+SVGS = {
+    "PLUS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+    "REFRESH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
+    "FOLDER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+    "TERMINAL": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>',
+    "MONITOR": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
+    "KEY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M21 2l-9.6 9.6"></path><path d="M15.5 7.5l2 2 3.5-3.5"></path></svg>',
+    "CLOCK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+    "CLOUD_UP": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4M12 12v9"></path><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>',
+    "CLOUD_DOWN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 17l4 4 4-4M12 12v9"></path><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>',
+    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+    "LAYERS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>'
+}
+
 class CyberButton(QPushButton):
-    def __init__(self, text, parent=None, color=CP_YELLOW, is_outlined=False):
+    def __init__(self, text="", parent=None, color=CP_YELLOW, is_outlined=False, svg_data=None):
         super().__init__(text, parent)
         self.color = color
         self.is_outlined = is_outlined
-        self.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
+        self.svg_data = svg_data
+        self.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFixedHeight(34)
+        if svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
         self.update_style()
+
+    def update_icon(self, color):
+        if not self.svg_data: return
+        colored_svg = self.svg_data.replace('currentColor', color)
+        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+        pix = QPixmap(18, 18)
+        pix.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pix)
+        renderer.render(painter)
+        painter.end()
+        self.setIcon(QIcon(pix))
+        self.setIconSize(QSize(18, 18))
+
+    def enterEvent(self, event):
+        if self.svg_data:
+            self.update_icon(CP_BG if self.is_outlined else self.color)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
+        super().leaveEvent(event)
 
     def update_style(self):
         if self.is_outlined:
@@ -499,8 +540,6 @@ class ConvexLabelDialog(QDialog):
 
 class RestoreDialog(QDialog):
     """Shows list of backups and lets user pick one to restore or delete."""
-    DEL_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FF003C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>'''
-
     def __init__(self, backups, convex_call_fn, parent=None):
         super().__init__(parent)
         self.setWindowTitle("RESTORE FROM BACKUP")
@@ -542,7 +581,7 @@ class RestoreDialog(QDialog):
             del_btn.setToolTip("Delete this backup")
             del_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
 
-            renderer = QSvgRenderer(QByteArray(self.DEL_SVG.encode()))
+            renderer = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
             pix = QPixmap(22, 22)
             pix.fill(Qt.GlobalColor.transparent)
             painter = QPainter(pix)
@@ -619,85 +658,87 @@ class MainWindow(QMainWindow):
         row1_layout = QHBoxLayout()
         row1_layout.setContentsMargins(5, 5, 5, 5)
         
-        # Mode Toggle - color based on loaded mode
+        # Mode Toggle
         mode_color = CP_CYAN if self.current_mode == "REGISTRY" else CP_YELLOW
-        self.mode_btn = CyberButton(f"MODE: {self.current_mode}", color=mode_color, parent=self, is_outlined=False)
-        self.mode_btn.setFixedWidth(160)
+        self.mode_btn = CyberButton(f" {self.current_mode}", color=mode_color, parent=self, svg_data=SVGS["LAYERS"])
+        self.mode_btn.setFixedWidth(140)
         self.mode_btn.clicked.connect(self.toggle_mode)
         row1_layout.addWidget(self.mode_btn)
         
-        # Separator
-        sep = QFrame()
-        sep.setFrameShape(QFrame.Shape.VLine)
-        sep.setStyleSheet(f"color: {CP_DIM};")
+        sep = QFrame(); sep.setFrameShape(QFrame.Shape.VLine); sep.setStyleSheet(f"color: {CP_DIM};")
         row1_layout.addWidget(sep)
 
-        row1_layout.addWidget(CyberButton("NEW_ENTRY", color=CP_YELLOW, parent=self, is_outlined=True))
-        row1_layout.itemAt(2).widget().clicked.connect(self.add_item)
+        self.add_btn = CyberButton(" NEW", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["PLUS"])
+        self.add_btn.clicked.connect(self.add_item)
+        row1_layout.addWidget(self.add_btn)
         
-        row1_layout.addWidget(CyberButton("REFRESH", color=CP_CYAN, parent=self, is_outlined=True))
-        row1_layout.itemAt(3).widget().clicked.connect(self.refresh_items)
+        self.refresh_btn = CyberButton(" REFRESH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["REFRESH"])
+        self.refresh_btn.clicked.connect(self.refresh_items)
+        row1_layout.addWidget(self.refresh_btn)
 
-        row1_layout.addWidget(CyberButton("OPEN_DIRS", color=CP_YELLOW, parent=self, is_outlined=True))
-        row1_layout.itemAt(4).widget().clicked.connect(self.open_startup_dirs)
+        self.dirs_btn = CyberButton(" DIRS", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["FOLDER"])
+        self.dirs_btn.clicked.connect(self.open_startup_dirs)
+        row1_layout.addWidget(self.dirs_btn)
         
-        row1_layout.addWidget(CyberButton("PS1_PATH", color="#00FF00", parent=self, is_outlined=True))
-        row1_layout.itemAt(5).widget().clicked.connect(self.select_ps1_path)
+        self.ps1_btn = CyberButton(" PS1", color="#00FF00", is_outlined=True, svg_data=SVGS["TERMINAL"])
+        self.ps1_btn.clicked.connect(self.select_ps1_path)
+        row1_layout.addWidget(self.ps1_btn)
 
-        # Convex Backup/Restore
-        self.backup_btn = CyberButton("☁", color=CP_CYAN, parent=self, is_outlined=True)
+        self.backup_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["UPLOAD"])
         self.backup_btn.setToolTip("Backup to Cloud")
-        self.backup_btn.setFixedWidth(40)
+        self.backup_btn.setFixedWidth(42)
         self.backup_btn.clicked.connect(self.backup_to_convex)
         row1_layout.addWidget(self.backup_btn)
 
-        self.restore_btn = CyberButton("⬇", color=CP_YELLOW, parent=self, is_outlined=True)
+        self.restore_btn = CyberButton("", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["DOWNLOAD"])
         self.restore_btn.setToolTip("Restore from Cloud")
-        self.restore_btn.setFixedWidth(40)
+        self.restore_btn.setFixedWidth(42)
         self.restore_btn.clicked.connect(self.restore_from_convex)
         row1_layout.addWidget(self.restore_btn)
 
         row1_layout.addStretch()
         
-        # Sorting Controls (moved from row2)
-        row1_layout.addWidget(QLabel("// SORT: "))
-        row1_layout.itemAt(7).widget().setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
+        sort_lbl = QLabel("// SORT:")
+        sort_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 10px;")
+        row1_layout.addWidget(sort_lbl)
         
         self.sort_combo = QComboBox()
         self.sort_combo.addItems(["Name", "Date"])
         self.sort_combo.setCurrentText(self.sort_by)
-        self.sort_combo.setFixedWidth(80)
-        self.sort_combo.setFixedHeight(30)
+        self.sort_combo.setFixedWidth(80); self.sort_combo.setFixedHeight(30)
         self.sort_combo.setStyleSheet(self.get_combo_style())
         self.sort_combo.setCursor(Qt.CursorShape.PointingHandCursor)
         self.sort_combo.currentTextChanged.connect(self.change_sort)
         row1_layout.addWidget(self.sort_combo)
 
-        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, parent=self, is_outlined=True)
-        self.order_btn.setFixedWidth(70)
-        self.order_btn.setFixedHeight(30)
+        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, is_outlined=True)
+        self.order_btn.setFixedWidth(70); self.order_btn.setFixedHeight(30)
         self.order_btn.clicked.connect(self.toggle_sort_order)
         row1_layout.addWidget(self.order_btn)
 
-        # Row 2: Scan & Maintenance (Calculated first to be placed ABOVE)
+        # Row 2: Scan & Maintenance
         row2_layout = QHBoxLayout()
         row2_layout.setContentsMargins(5, 5, 5, 5)
         
-        row2_layout.addWidget(CyberButton("SCAN_SYS", color=CP_TEXT, parent=self, is_outlined=True))
-        row2_layout.itemAt(0).widget().clicked.connect(self.scan_folders)
+        self.scan_sys_btn = CyberButton(" SCAN_SYS", color=CP_TEXT, is_outlined=True, svg_data=SVGS["MONITOR"])
+        self.scan_sys_btn.clicked.connect(self.scan_folders)
+        row2_layout.addWidget(self.scan_sys_btn)
         
-        row2_layout.addWidget(CyberButton("SCAN_REG", color="#FF00FF", parent=self, is_outlined=True))
-        row2_layout.itemAt(1).widget().clicked.connect(self.scan_registry)
+        self.scan_reg_btn = CyberButton(" SCAN_REG", color="#FF00FF", is_outlined=True, svg_data=SVGS["KEY"])
+        self.scan_reg_btn.clicked.connect(self.scan_registry)
+        row2_layout.addWidget(self.scan_reg_btn)
         
-        row2_layout.addWidget(CyberButton("SCAN_TASKS", color="#FFA500", parent=self, is_outlined=True))
-        row2_layout.itemAt(2).widget().clicked.connect(self.scan_tasks)
+        self.scan_tasks_btn = CyberButton(" SCAN_TASKS", color="#FFA500", is_outlined=True, svg_data=SVGS["CLOCK"])
+        self.scan_tasks_btn.clicked.connect(self.scan_tasks)
+        row2_layout.addWidget(self.scan_tasks_btn)
         
-        row2_layout.addWidget(CyberButton("PRUNE_LNK", color=CP_RED, parent=self, is_outlined=True))
-        row2_layout.itemAt(3).widget().clicked.connect(self.delete_matching_shortcuts)
+        self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"])
+        self.prune_btn.clicked.connect(self.delete_matching_shortcuts)
+        row2_layout.addWidget(self.prune_btn)
         
         row2_layout.addStretch()
 
-        # Search box (moved from row1)
+        # Search box
         self.search_input = CyberInput("SEARCH_DB://...", self)
         self.search_input.setFixedWidth(200)
         self.search_input.textChanged.connect(self.filter_items)
@@ -948,8 +989,9 @@ class MainWindow(QMainWindow):
             
         self.save_items() # Save the new mode
         self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
-        self.mode_btn.setText(f"MODE: {self.current_mode}")
+        self.mode_btn.setText(f" {self.current_mode}")
         self.mode_btn.color = color 
+        self.mode_btn.update_icon(CP_BG) # Reset icon color to normal state
         self.mode_btn.update_style()
         self.populate_lists() # Reload widgets with new active state
         self.update_status(f"SWITCHED TO {self.current_mode} MODE")
