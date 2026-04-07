@@ -101,8 +101,36 @@ async function loadVault() {
         }
         updateSuggestions();
         renderGroups();
+        await prefillSearchFromCurrentTab();
         renderEntries();
     } catch (e) { console.error(e); }
+}
+
+async function prefillSearchFromCurrentTab() {
+    return new Promise((resolve) => {
+        if (typeof chrome !== 'undefined' && chrome.tabs) {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0] && tabs[0].url) {
+                    try {
+                        const url = new URL(tabs[0].url);
+                        let domain = url.hostname;
+                        if (domain.startsWith('www.')) domain = domain.substring(4);
+                        
+                        const searchInput = document.getElementById('global-search');
+                        if (searchInput && domain && !domain.includes('newtab')) {
+                            searchInput.value = domain;
+                            console.log("Prefilled search with domain:", domain);
+                        }
+                    } catch (e) {
+                        console.error("Error parsing tab URL:", e);
+                    }
+                }
+                resolve();
+            });
+        } else {
+            resolve();
+        }
+    });
 }
 
 function updateSuggestions() {

@@ -3,7 +3,7 @@
   "name": "Cyber-Vault Manager",
   "version": "1.0",
   "description": "Cyberpunk themed password manager with Convex backend",
-  "permissions": ["storage", "clipboardWrite"],
+  "permissions": ["storage", "clipboardWrite", "tabs"],
   "host_permissions": [
     "https://*.convex.cloud/*"
   ],
