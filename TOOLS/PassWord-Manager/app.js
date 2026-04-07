@@ -273,7 +273,21 @@ masterPassInput.onkeypress = (e) => { if(e.key==='Enter') handleLogin(); };
 
 document.getElementById('logout-btn').onclick = logout;
 document.getElementById('settings-btn').onclick = () => settingsModal.classList.remove('hidden');
-document.getElementById('add-btn').onclick = () => addModal.classList.remove('hidden');
+document.getElementById('add-btn').onclick = async () => {
+    const domainInput = document.getElementById('new-domain');
+    domainInput.value = '';
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0]?.url) {
+            try {
+                let d = new URL(tabs[0].url).hostname;
+                if (d.startsWith('www.')) d = d.substring(4);
+                domainInput.value = d.toUpperCase();
+            } catch(e) {}
+        }
+    }
+    addModal.classList.remove('hidden');
+};
 
 // Add Form
 document.getElementById('save-btn').onclick = async () => {
