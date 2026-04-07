@@ -1,0 +1,785 @@
+[
+  {
+    "name": "ahk_v2",
+    "type": "Command",
+    "paths": [
+      "C:\\@delta\\ms1\\ahk_v2.ahk"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\@delta\\ms1\\ahk_v2.ahk\"",
+    "ExecutableType": "other",
+    "script_enabled": false,
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "ollama-chat (8000)",
+    "type": "Command",
+    "paths": [
+      "C:\\Windows\\System32\\cmd.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\test_project\\ollama-chat-app\\server.py",
+    "ExecutableType": "cmd",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5001 - Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5001_share_text\\share_text.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5002 - Share File",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5003 - Drive",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5005 - GameARR",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5006 - Run Commands",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5006_Run_Commands\\Run_Commands.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5007 - ControlBy Android",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5008 - Valorant Match",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5009 - MCQ",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5009_MCQ\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5010 - CoC",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5010_coc\\Clash_of_Clans.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Clipboard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\scripts\\clipboard.py",
+    "added_at": 1768273756.591541,
+    "script_enabled": false
+  },
+  {
+    "type": "Command",
+    "name": "Komorebi",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "mypygui",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Open WebUI",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Remote Control",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Square-Corner",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "SSHD",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Sync",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\sync.ps1"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Syncthing",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Virtual_Monitor",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "Command",
+    "name": "Disable Defender",
+    "paths": [
+      "C:\\@delta\\ms1\\scripts\\disable_defender.ps1"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541,
+    "script_enabled": false
+  },
+  {
+    "type": "App",
+    "name": "AMDNoiseSuppression",
+    "paths": [
+      "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
+    ],
+    "Command": "",
+    "script_enabled": false,
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "BijoyBayanno",
+    "paths": [
+      "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Capture2Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Cloudflare WARP",
+    "paths": [
+      "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "DesktopCoral",
+    "paths": [
+      "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Ditto",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Flow.Launcher",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\FlowLauncher\\app-1.19.4\\Flow.Launcher.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Free Download Manager",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Softdeluxe\\Free Download Manager\\fdm.exe"
+    ],
+    "Command": "--hidden",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Ollama",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Prowlarr",
+    "type": "App",
+    "paths": [
+      "C:/ProgramData/Prowlarr/bin/Prowlarr.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "qBittorrent",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
+    ],
+    "Command": "\"--profile=\" \"--configuration=\"",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Radarr",
+    "paths": [
+      "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "RssGuard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Sonarr",
+    "paths": [
+      "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "Text-Grab",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\text-grab\\current\\Text-Grab.exe"
+    ],
+    "Command": "",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A",
+    "paths": [
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "Command": "--no-startup-window /prefetch:5",
+    "added_at": 1768273756.591541
+  },
+  {
+    "type": "App",
+    "name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA",
+    "paths": [
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "Command": "--no-startup-window --win-session-start",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5000 - myhome",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "KeyWiz",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5011 - TV Show",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5015 - JOB",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5013 - Movies",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Huntarr",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Huntarr\\Huntarr.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5016 - Sync W Android",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5012 - Gallery",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5012_share_images\\share_images.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "KDE Connect",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\KDE Connect\\bin\\kdeconnect-indicator.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Tailscale",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Tailscale\\tailscale-ipn.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Jackett",
+    "type": "App",
+    "paths": [
+      "C:\\ProgramData\\Jackett\\JackettTray.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 4999 - Startup Setup",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\4999_startup\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 4998 - Applist",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist_app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5555 - Terminal",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5555_terminal\\myterminal.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "QuickLook",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+    ],
+    "Command": "/autorun",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Audio Share (cmd)",
+    "type": "Command",
+    "paths": [
+      "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    ],
+    "Command": "as-cmd --bind=192.168.0.101",
+    "ExecutableType": "cmd",
+    "added_at": 1768273756.591541,
+    "script_enabled": false
+  },
+  {
+    "name": "Audio Share (app)",
+    "type": "App",
+    "paths": [
+      "C:\\@delta\\msBackups\\AudioShareServer.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5017 - Audio Stream",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5017_audio_stream\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "RustDesk",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\rustdesk\\current\\RustDesk.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "RustDesk Tray",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\RustDesk\\rustdesk.exe"
+    ],
+    "Command": "--tray",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "ngnix",
+    "type": "App",
+    "paths": [
+      "C:\\@delta\\msBackups\\@nginx\\nginx.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5018 - Excelly",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "n8n",
+    "type": "Command",
+    "paths": [
+      "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe\" -ArgumentList \"C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk\"",
+    "ExecutableType": "ahk_v2",
+    "script_enabled": false,
+    "added_at": 1768850037.376232
+  },
+  {
+    "name": "web host",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\web_host.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Flask - 5004 - Paint",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
+    "ExecutableType": "pythonw",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "ShareX",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\ShareX.lnk"
+    ],
+    "Command": "",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "WingetUI / UNIGET",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"
+    ],
+    "Command": "--daemon",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe\" -ArgumentList \"--daemon\"",
+    "ExecutableType": "other",
+    "script_enabled": false,
+    "added_at": 1774754711.519753
+  },
+  {
+    "name": "YASB",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\YASB\\yasb.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\YASB\\yasb.exe\"",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Podman Desktop",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Podman Desktop\\Podman Desktop.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Podman Desktop\\Podman Desktop.exe\"",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "tvncontrol",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\TightVNC\\tvnserver.exe"
+    ],
+    "Command": "-controlservice -slave",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\TightVNC\\tvnserver.exe\" -ArgumentList \"-controlservice -slave\"",
+    "ExecutableType": "other",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Autorun for nahid",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\PowerToys\\PowerToys.exe"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files\\PowerToys\\PowerToys.exe\"",
+    "ExecutableType": "other",
+    "origin": "TaskScheduler",
+    "original_name": "Autorun for nahid",
+    "added_at": 1768273756.591541
+  },
+  {
+    "name": "Claude",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\AnthropicClaude\\claude.exe"
+    ],
+    "Command": "--startup",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\AnthropicClaude\\claude.exe\" -ArgumentList \"--startup\"",
+    "ExecutableType": "other",
+    "added_at": 1768794897.4872663
+  },
+  {
+    "name": "Chrome Extension Manager Listener",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\db\\@run_from_db\\chrome_ext_manager\\extension_manager.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\test_project\\my-first-extension\\@chrome_ext_manager\\extension_manager.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1769513702.432895
+  },
+  {
+    "name": "RCLONE SYNC",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1771037792.422986
+  },
+  {
+    "name": "Komorebi Tray Status",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1772010062.5365136
+  },
+  {
+    "name": "Bazarr",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\msBackups\\bazarr\\bazarr.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\msBackups\\bazarr\\bazarr.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1773294824.1902173
+  },
+  {
+    "name": "CPU FAN Check",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\TOOLS\\CPU.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1775017807.0811055
+  },
+  {
+    "name": "NETWORK-SPEED",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py\"",
+    "ExecutableType": "pythonw",
+    "script_enabled": false,
+    "added_at": 1775242478.333501
+  },
+  {
+    "name": "GlassWire",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files (x86)\\GlassWire\\glasswire.exe"
+    ],
+    "Command": "-hide",
+    "ps1_command": "Start-Process -FilePath \"C:\\Program Files (x86)\\GlassWire\\glasswire.exe\" -ArgumentList \"-hide\"",
+    "ExecutableType": "other",
+    "added_at": 1775278696.850471
+  }
+]
