@@ -415,7 +415,7 @@ class KomorebiApp(QMainWindow):
         msg.setStyleSheet(f"QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas'; }} QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; min-width: 100px; }}")
         
         click_btn = msg.addButton("CLICK MODE", QMessageBox.ButtonRole.ActionRole)
-        time_btn = msg.addButton("TIMEOUT (5S)", QMessageBox.ButtonRole.ActionRole)
+        time_btn = msg.addButton("TIMEOUT (3)", QMessageBox.ButtonRole.ActionRole)
         cancel_btn = msg.addButton("CANCEL", QMessageBox.ButtonRole.RejectRole)
         
         msg.exec()
@@ -423,7 +423,7 @@ class KomorebiApp(QMainWindow):
         if msg.clickedButton() == click_btn:
             self.start_click_capture()
         elif msg.clickedButton() == time_btn:
-            self.start_timeout_capture(5)
+            self.start_timeout_capture(3)
 
     def start_click_capture(self):
         self.get_info_btn.setText("CLICK TARGET WINDOW...")
@@ -452,7 +452,7 @@ class KomorebiApp(QMainWindow):
             self.update_timeout_button()
 
     def update_timeout_button(self):
-        self.get_info_btn.setText(f"CAPTURING IN {self.remaining_time}S...")
+        self.get_info_btn.setText(f"CAPTURING IN {self.remaining_time}...")
 
     def poll_capture(self):
         lbutton = win32api.GetAsyncKeyState(0x01)
