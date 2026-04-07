@@ -118,7 +118,7 @@ class ConvexLabelDialog(QDialog):
         btns = QHBoxLayout()
         ok = CyberButton("BACKUP", color=CP_CYAN)
         ok.clicked.connect(self.accept)
-        self.check_btn = CyberButton("", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["UPLOAD"])
+        self.check_btn = CyberButton("CHECK", color=CP_YELLOW, is_outlined=True)
         self.check_btn.setToolTip("Check if backup is needed")
         self.check_btn.clicked.connect(self._check_sync)
         cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
