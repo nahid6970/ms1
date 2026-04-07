@@ -146,7 +146,7 @@ class RestoreDialog(QDialog):
         self.selected_id = None
         self._convex_call = convex_call_fn
         self._backups = list(backups)
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; }} QLabel {{ color: {CP_TEXT}; }}")
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; font-family: 'Consolas'; font-size: 10pt; }} QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }} QPushButton {{ font-family: 'Consolas'; font-size: 10pt; font-weight: bold; }}")
         self._layout = QVBoxLayout(self)
         self._layout.addWidget(QLabel("Select a backup to restore:"))
         self._scroll = QScrollArea()
@@ -171,7 +171,7 @@ class RestoreDialog(QDialog):
             row = QHBoxLayout()
             
             btn = QPushButton(f"  {dt}  —  {b['label']}")
-            btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a;")
+            btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a; font-family: 'Consolas'; font-size: 10pt; font-weight: bold;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
             
             # Delete button with SVG icon
