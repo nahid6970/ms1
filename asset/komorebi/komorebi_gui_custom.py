@@ -4,7 +4,7 @@ import json
 import time
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QCheckBox, QComboBox, QDialog, QFormLayout, QFrame, QMessageBox)
+                             QCheckBox, QComboBox, QDialog, QFormLayout, QFrame, QMessageBox, QSpinBox)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 
 # Optional imports for window info capture
@@ -243,7 +243,26 @@ class KomorebiApp(QMainWindow):
         self.settings_panel.setFixedWidth(300)
         self.settings_panel.setVisible(False)
         settings_layout = QVBoxLayout(self.settings_panel)
-        settings_layout.addWidget(QLabel("Advanced customization options..."))
+        
+        # Timeout Setting
+        settings_layout.addWidget(QLabel("CAPTURE TIMEOUT (SEC):"))
+        self.timeout_spin = QSpinBox()
+        self.timeout_spin.setRange(1, 30)
+        self.timeout_spin.setValue(self.config_data.get("gui_settings", {}).get("capture_timeout", 3))
+        self.timeout_spin.valueChanged.connect(self.update_gui_settings)
+        settings_layout.addWidget(self.timeout_spin)
+        
+        settings_layout.addSpacing(10)
+        
+        # Strategy Setting
+        settings_layout.addWidget(QLabel("CAPTURE STRATEGY:"))
+        self.strategy_combo = QComboBox()
+        self.strategy_combo.addItems(["Hover (Mouse)", "Focus (Active)"])
+        current_strategy = self.config_data.get("gui_settings", {}).get("capture_strategy", "Hover (Mouse)")
+        self.strategy_combo.setCurrentText(current_strategy)
+        self.strategy_combo.currentTextChanged.connect(self.update_gui_settings)
+        settings_layout.addWidget(self.strategy_combo)
+        
         settings_layout.addStretch()
         self.content_stack.addWidget(self.settings_panel)
         
@@ -301,19 +320,27 @@ class KomorebiApp(QMainWindow):
 
     def load_config(self):
         if not os.path.exists(KOMOREBI_JSON_PATH):
-            return {"ignore_rules": [], "tray_and_multi_window_applications": []}
+            return {"ignore_rules": [], "tray_and_multi_window_applications": [], "gui_settings": {}}
         try:
             with open(KOMOREBI_JSON_PATH, 'r') as f:
                 return json.load(f)
-        except: return {"ignore_rules": [], "tray_and_multi_window_applications": []}
+        except: return {"ignore_rules": [], "tray_and_multi_window_applications": [], "gui_settings": {}}
 
     def save_config(self):
         try:
+            if hasattr(self, "timeout_spin"):
+                self.update_gui_settings()
             with open(KOMOREBI_JSON_PATH, 'w') as f:
                 json.dump(self.config_data, f, indent=4)
             QMessageBox.information(self, "SUCCESS", "CONFIG SAVED TO SYSTEM.")
         except Exception as e:
             QMessageBox.critical(self, "ERROR", f"SAVE FAILED: {e}")
+
+    def update_gui_settings(self):
+        if "gui_settings" not in self.config_data:
+            self.config_data["gui_settings"] = {}
+        self.config_data["gui_settings"]["capture_timeout"] = self.timeout_spin.value()
+        self.config_data["gui_settings"]["capture_strategy"] = self.strategy_combo.currentText()
 
     def refresh_list(self):
         # Clear list
@@ -409,13 +436,15 @@ class KomorebiApp(QMainWindow):
             QMessageBox.critical(self, "ERROR", "PYWIN32 NOT INSTALLED.")
             return
 
+        timeout = self.config_data.get("gui_settings", {}).get("capture_timeout", 3)
+
         msg = QMessageBox(self)
         msg.setWindowTitle("CAPTURE MODE")
         msg.setText("CHOOSE HOW TO CAPTURE WINDOW INFO:")
         msg.setStyleSheet(f"QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas'; }} QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; min-width: 100px; }}")
         
         click_btn = msg.addButton("CLICK MODE", QMessageBox.ButtonRole.ActionRole)
-        time_btn = msg.addButton("TIMEOUT (3)", QMessageBox.ButtonRole.ActionRole)
+        time_btn = msg.addButton(f"TIMEOUT ({timeout})", QMessageBox.ButtonRole.ActionRole)
         cancel_btn = msg.addButton("CANCEL", QMessageBox.ButtonRole.RejectRole)
         
         msg.exec()
@@ -423,7 +452,7 @@ class KomorebiApp(QMainWindow):
         if msg.clickedButton() == click_btn:
             self.start_click_capture()
         elif msg.clickedButton() == time_btn:
-            self.start_timeout_capture(3)
+            self.start_timeout_capture(timeout)
 
     def start_click_capture(self):
         self.get_info_btn.setText("CLICK TARGET WINDOW...")
@@ -468,8 +497,14 @@ class KomorebiApp(QMainWindow):
         self.get_info_btn.setStyleSheet("")
         self.apply_theme() # Reset colors
         
-        pos = win32api.GetCursorPos()
-        hwnd = win32gui.WindowFromPoint(pos)
+        strategy = self.config_data.get("gui_settings", {}).get("capture_strategy", "Hover (Mouse)")
+        
+        if strategy == "Hover (Mouse)":
+            pos = win32api.GetCursorPos()
+            hwnd = win32gui.WindowFromPoint(pos)
+        else:
+            hwnd = win32gui.GetForegroundWindow()
+
         if not hwnd: return
         hwnd = win32gui.GetAncestor(hwnd, 2)
         
