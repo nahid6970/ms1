@@ -39,11 +39,22 @@ setInterval(() => {
     if (masterKey && settings.autolock > 0 && unlockTime) {
         const elapsed = (Date.now() - unlockTime) / 60000;
         if (elapsed >= settings.autolock) {
-            alert("Vault auto-locked due to inactivity.");
+            console.log("Auto-lock triggered");
             logout();
         }
     }
-}, 30000); // Check every 30s
+}, 10000); // Check every 10s
+
+function resetActivityTimer() {
+    if (masterKey) {
+        unlockTime = Date.now();
+    }
+}
+
+// Global activity listeners
+window.addEventListener('click', resetActivityTimer);
+window.addEventListener('keypress', resetActivityTimer);
+window.addEventListener('mousemove', resetActivityTimer);
 
 // --- CRYPTO HELPERS ---
 async function deriveKey(password, salt) {

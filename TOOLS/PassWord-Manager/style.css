@@ -16,8 +16,21 @@ body {
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     height: 520px; text-align: center;
 }
-#login-container h1 { font-size: 1.8rem; margin-bottom: 30px; }
-#login-container .input-group { display: flex; flex-direction: row; gap: 10px; width: 90%; justify-content: center; }
+#login-container h1 { 
+    font-size: 2.2rem; 
+    margin-bottom: 30px; 
+    color: var(--cp-yellow);
+    text-shadow: 3px 3px var(--cp-red), 0 0 10px rgba(252, 238, 10, 0.3);
+    letter-spacing: 2px;
+}
+
+#login-container .input-group { 
+    display: flex; flex-direction: row; gap: 10px; width: 90%; justify-content: center; 
+    background: var(--cp-panel);
+    padding: 20px;
+    border: 1px solid var(--cp-dim);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+}
 #login-container input { flex-grow: 1; }
 
 header {
