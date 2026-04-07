@@ -43,8 +43,7 @@ KOMOREBI_JSON_PATH = os.path.join(SCRIPT_PATH, CONFIG_FILENAME)
 SVGS = {
     "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
     "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
-    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
-    "REFRESH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -98,10 +97,12 @@ class CyberButton(QPushButton):
 
 class ConvexLabelDialog(QDialog):
     """Simple dialog to get a backup label from the user."""
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, convex_call_fn=None, config_data=None):
         super().__init__(parent)
         self.setWindowTitle("BACKUP LABEL")
-        self.setFixedWidth(380)
+        self.setFixedWidth(420)
+        self._convex_call = convex_call_fn
+        self._config_data = config_data or {}
         self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }}")
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Enter a label for this backup:"))
@@ -109,17 +110,63 @@ class ConvexLabelDialog(QDialog):
         self.inp.setPlaceholderText("e.g. before v2 update")
         layout.addWidget(self.inp)
 
+        self.status_lbl = QLabel("")
+        self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_lbl.setStyleSheet("font-family: Consolas; font-size: 9pt; padding: 4px;")
+        layout.addWidget(self.status_lbl)
+
         btns = QHBoxLayout()
         ok = CyberButton("BACKUP", color=CP_CYAN)
         ok.clicked.connect(self.accept)
+        self.check_btn = CyberButton("", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["UPLOAD"])
+        self.check_btn.setToolTip("Check if backup is needed")
+        self.check_btn.clicked.connect(self._check_sync)
         cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
         cancel.clicked.connect(self.reject)
-        btns.addWidget(ok); btns.addWidget(cancel)
+        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(cancel)
         layout.addLayout(btns)
 
+    def _check_sync(self):
+        if not self._convex_call:
+            self.status_lbl.setText("No connection available.")
+            return
+        try:
+            self.check_btn.setEnabled(False)
+            self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText("Checking...")
+            QApplication.processEvents()
+            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
+            backups = result.get("value", [])
+            if not backups:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText("⚠ No backups found — backup recommended!")
+                return
+            latest = max(backups, key=lambda b: b["createdAt"])
+            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
+            skip = {"$schema", "gui_settings"}
+            local = {k: v for k, v in self._config_data.items() if k not in skip}
+            def fix(obj):
+                if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
+                if isinstance(obj, list): return [fix(i) for i in obj]
+                if isinstance(obj, float) and obj.is_integer(): return int(obj)
+                return obj
+            remote_cmp = {k: v for k, v in fix(remote).items() if k not in skip}
+            dirty = json.dumps(local, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
+            if dirty:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"⚠ OUT OF SYNC with '{latest['label']}' — backup recommended!")
+            else:
+                self.status_lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"✔ In sync with '{latest['label']}' — no backup needed.")
+        except Exception as e:
+            self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText(f"Error: {e}")
+        finally:
+            self.check_btn.setEnabled(True)
+
     @staticmethod
-    def get_label(parent=None):
-        dlg = ConvexLabelDialog(parent)
+    def get_label(parent=None, convex_call_fn=None, config_data=None):
+        dlg = ConvexLabelDialog(parent, convex_call_fn=convex_call_fn, config_data=config_data)
         ok = dlg.exec() == QDialog.DialogCode.Accepted
         return dlg.inp.text(), ok
 
@@ -459,11 +506,7 @@ class KomorebiApp(QMainWindow):
         self.restore_btn.setToolTip("Restore from Cloud")
         self.restore_btn.clicked.connect(self.restore_from_convex)
 
-        self.sync_btn = CyberButton("", color=CP_SUBTEXT, is_outlined=True, svg_data=SVGS["REFRESH"])
-        self.sync_btn.setToolTip("Check sync with last backup")
-        self.sync_btn.clicked.connect(self.check_sync_status)
-        
-        for b in [self.add_btn, self.get_info_btn, self.remove_btn, self.save_btn, self.backup_btn, self.restore_btn, self.sync_btn]:
+        for b in [self.add_btn, self.get_info_btn, self.remove_btn, self.save_btn, self.backup_btn, self.restore_btn]:
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_layout.addWidget(b)
             
@@ -493,7 +536,7 @@ class KomorebiApp(QMainWindow):
             if hasattr(self, "timeout_spin"):
                 self.update_gui_settings()
                 
-            label, ok = ConvexLabelDialog.get_label(self)
+            label, ok = ConvexLabelDialog.get_label(self, convex_call_fn=self._convex_call, config_data=self.config_data)
             if not ok or not label.strip(): return
             
             # Convex does not allow fields starting with $ (like $schema)
@@ -544,49 +587,6 @@ class KomorebiApp(QMainWindow):
                     QMessageBox.information(self, "RESTORE", "Restored successfully.")
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
-
-    def _config_for_compare(self, data):
-        """Strip fields irrelevant to sync comparison."""
-        skip = {"$schema", "gui_settings"}
-        return {k: v for k, v in data.items() if k not in skip}
-
-    def _set_backup_badge(self, dirty):
-        """Show/hide a red dot badge on the backup button icon."""
-        svg = SVGS["UPLOAD"]
-        icon_color = CP_CYAN
-        colored_svg = svg.replace('currentColor', icon_color)
-        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
-        pix = QPixmap(22, 22)
-        pix.fill(Qt.GlobalColor.transparent)
-        painter = QPainter(pix)
-        renderer.render(painter)
-        if dirty:
-            from PyQt6.QtGui import QColor, QBrush
-            painter.setBrush(QBrush(QColor(CP_RED)))
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawEllipse(14, 0, 8, 8)
-        painter.end()
-        self.backup_btn.setIcon(QIcon(pix))
-        self.backup_btn.setIconSize(QSize(22, 22))
-
-    def check_sync_status(self):
-        try:
-            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
-            backups = result.get("value", [])
-            if not backups:
-                self._set_backup_badge(True)
-                self.backup_btn.setToolTip("No backups found - local is unsynced")
-                return
-            latest = max(backups, key=lambda b: b["createdAt"])
-            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
-            local = self._config_for_compare(self.config_data)
-            remote_cmp = self._config_for_compare(self._fix_floats(remote))
-            dirty = json.dumps(local, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
-            self._set_backup_badge(dirty)
-            self.backup_btn.setToolTip("Unsaved local changes - backup recommended!" if dirty else "In sync with last backup")
-            self.sync_btn.setToolTip(f"Last checked: {latest['label']} | {'OUT OF SYNC' if dirty else 'IN SYNC'}")
-        except Exception as e:
-            QMessageBox.critical(self, "SYNC CHECK FAILED", str(e))
 
     def apply_theme(self):
         self.setStyleSheet(f"""
