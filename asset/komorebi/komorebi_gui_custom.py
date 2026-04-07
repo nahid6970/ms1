@@ -301,11 +301,11 @@ class KomorebiApp(QMainWindow):
 
     def load_config(self):
         if not os.path.exists(KOMOREBI_JSON_PATH):
-            return {"float_rules": [], "tray_and_multi_window_applications": []}
+            return {"ignore_rules": [], "tray_and_multi_window_applications": []}
         try:
             with open(KOMOREBI_JSON_PATH, 'r') as f:
                 return json.load(f)
-        except: return {"float_rules": [], "tray_and_multi_window_applications": []}
+        except: return {"ignore_rules": [], "tray_and_multi_window_applications": []}
 
     def save_config(self):
         try:
@@ -326,7 +326,7 @@ class KomorebiApp(QMainWindow):
         
         # Unify data for display
         unified = {}
-        for r in self.config_data.get("float_rules", []):
+        for r in self.config_data.get("ignore_rules", []):
             k = (r["kind"], r["id"], r.get("matching_strategy", "Equals"))
             unified[k] = {**r, "is_float": True, "is_tray": False, "matching_strategy": k[2]}
             
@@ -375,8 +375,8 @@ class KomorebiApp(QMainWindow):
         tray_added = False
         
         if res["is_float"]:
-            if base not in self.config_data.setdefault("float_rules", []):
-                self.config_data["float_rules"].append(base)
+            if base not in self.config_data.setdefault("ignore_rules", []):
+                self.config_data["ignore_rules"].append(base)
                 float_added = True
                 
         if res["is_tray"]:
@@ -399,8 +399,8 @@ class KomorebiApp(QMainWindow):
 
     def remove_item_internal(self, val):
         base = {"kind": val["kind"], "id": val["id"], "matching_strategy": val["matching_strategy"]}
-        if base in self.config_data.get("float_rules", []):
-            self.config_data["float_rules"].remove(base)
+        if base in self.config_data.get("ignore_rules", []):
+            self.config_data["ignore_rules"].remove(base)
         if base in self.config_data.get("tray_and_multi_window_applications", []):
             self.config_data["tray_and_multi_window_applications"].remove(base)
 
@@ -408,15 +408,51 @@ class KomorebiApp(QMainWindow):
         if not PYWIN32_AVAILABLE:
             QMessageBox.critical(self, "ERROR", "PYWIN32 NOT INSTALLED.")
             return
+
+        msg = QMessageBox(self)
+        msg.setWindowTitle("CAPTURE MODE")
+        msg.setText("CHOOSE HOW TO CAPTURE WINDOW INFO:")
+        msg.setStyleSheet(f"QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas'; }} QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; min-width: 100px; }}")
         
+        click_btn = msg.addButton("CLICK MODE", QMessageBox.ButtonRole.ActionRole)
+        time_btn = msg.addButton("TIMEOUT (5S)", QMessageBox.ButtonRole.ActionRole)
+        cancel_btn = msg.addButton("CANCEL", QMessageBox.ButtonRole.RejectRole)
+        
+        msg.exec()
+        
+        if msg.clickedButton() == click_btn:
+            self.start_click_capture()
+        elif msg.clickedButton() == time_btn:
+            self.start_timeout_capture(5)
+
+    def start_click_capture(self):
         self.get_info_btn.setText("CLICK TARGET WINDOW...")
         self.get_info_btn.setStyleSheet(f"background-color: {CP_ORANGE}; color: black;")
         
-        # Timer to poll for mouse release then click
         self.capture_timer = QTimer()
         self.capture_timer.timeout.connect(self.poll_capture)
         self.capture_timer.start(50)
         self.waiting_for_release = True
+
+    def start_timeout_capture(self, seconds):
+        self.remaining_time = seconds
+        self.get_info_btn.setStyleSheet(f"background-color: {CP_RED}; color: white;")
+        
+        self.capture_timer = QTimer()
+        self.capture_timer.timeout.connect(self.poll_timeout)
+        self.capture_timer.start(1000)
+        self.update_timeout_button()
+
+    def poll_timeout(self):
+        self.remaining_time -= 1
+        if self.remaining_time <= 0:
+            self.capture_timer.stop()
+            self.finish_capture()
+        else:
+            self.update_timeout_button()
+
+    def update_timeout_button(self):
+        self.get_info_btn.setText(f"CAPTURING IN {self.remaining_time}S...")
 
     def poll_capture(self):
         lbutton = win32api.GetAsyncKeyState(0x01)
