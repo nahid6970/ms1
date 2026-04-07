@@ -360,6 +360,15 @@
             "kind": "Class",
             "id": "ConsoleWindowClass",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "explorer.exe",
+            "matching_strategy": "Legacy"
         }
-    ]
+    ],
+    "gui_settings": {
+        "capture_timeout": 3,
+        "capture_strategy": "Hover (Mouse)"
+    }
 }
