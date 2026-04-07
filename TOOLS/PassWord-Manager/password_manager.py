@@ -195,6 +195,10 @@ class EditDialog(QDialog):
         if name and name not in self.extra_fields_widgets and name.lower() not in ["u", "p"]:
             self.add_field_row(name, "")
             self.new_field_name.clear()
+            # Add to suggestions so it's available in the menu immediately
+            if name not in self.field_suggestions:
+                self.field_suggestions.append(name)
+                self.field_suggestions.sort()
         elif not name:
             QMessageBox.warning(self, "WARN", "FIELD NAME CANNOT BE EMPTY")
         else:
