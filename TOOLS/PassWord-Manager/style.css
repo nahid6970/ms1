@@ -102,3 +102,6 @@ button.danger { color: var(--cp-red); border-color: var(--cp-red); }
 .detail-label { color: var(--cp-yellow); min-width: 70px; flex-shrink: 0; }
 .detail-row span:nth-child(2) { flex-grow: 1; color: var(--cp-cyan); word-break: break-all; }
 .detail-row .copy-field { padding: 2px 6px; font-size: 0.7rem; flex-shrink: 0; }
+
+.entry-actions button, .copy-field { display: inline-flex; align-items: center; justify-content: center; }
+.entry-actions button svg, .copy-field svg { pointer-events: none; }
