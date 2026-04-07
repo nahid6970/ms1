@@ -73,12 +73,15 @@ class CryptoManager:
             return None
 
 class EditDialog(QDialog):
-    def __init__(self, entry, field_suggestions, parent=None):
+    def __init__(self, entry, field_suggestions, all_groups, current_group, parent=None):
         super().__init__(parent)
         self.setWindowTitle("EDIT CREDENTIALS")
         self.setFixedWidth(450)
         self.entry = entry.copy()
         self.field_suggestions = field_suggestions
+        self.all_groups = all_groups
+        self.current_group = current_group
+        
         if "fields" not in self.entry:
             self.entry["fields"] = {}
         # Ensure Domain is in the fields by default for display
@@ -104,6 +107,28 @@ class EditDialog(QDialog):
     def init_ui(self):
         self.layout = QVBoxLayout(self)
         
+        # Group Selection Row
+        group_layout = QHBoxLayout()
+        self.group_selector = QComboBox()
+        self.group_selector.addItems(self.all_groups)
+        self.group_selector.setCurrentText(self.current_group)
+        self.group_selector.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        
+        new_grp_btn = QPushButton("+")
+        new_grp_btn.setFixedWidth(30)
+        new_grp_btn.setToolTip("Create new group and move here")
+        new_grp_btn.clicked.connect(self.create_new_group)
+        
+        group_layout.addWidget(QLabel("MOVE TO GROUP:"))
+        group_layout.addWidget(self.group_selector)
+        group_layout.addWidget(new_grp_btn)
+        self.layout.addLayout(group_layout)
+        
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setStyleSheet(f"background-color: {CP_DIM};")
+        self.layout.addWidget(line)
+
         self.form = QFormLayout()
         self.u_input = QLineEdit(self.entry.get("u", ""))
         self.p_input = QLineEdit(self.entry.get("p", ""))
@@ -165,6 +190,14 @@ class EditDialog(QDialog):
         
         self.layout.addStretch()
         self.layout.addLayout(btns)
+
+    def create_new_group(self):
+        name, ok = QInputDialog.getText(self, "NEW GROUP", "ENTER GROUP NAME:")
+        if ok and name:
+            name = name.strip().upper()
+            if self.group_selector.findText(name) == -1:
+                self.group_selector.addItem(name)
+            self.group_selector.setCurrentText(name)
 
     def add_field_row(self, name, value):
         if name in self.extra_fields_widgets:
@@ -230,7 +263,7 @@ class EditDialog(QDialog):
             "p": self.p_input.text(),
             "fields": {name: edit.text() for name, edit in self.extra_fields_widgets.items()}
         }
-        return data
+        return data, self.group_selector.currentText()
 
 class PasswordEntry(QFrame):
     edit_requested = pyqtSignal()
@@ -617,30 +650,46 @@ class MainWindow(QMainWindow):
                 self.group_list.setCurrentText(name)
                 self.save_vault()
 
+    @staticmethod
+    def clean_domain(url):
+        if not url: return "UNCATEGORIZED"
+        d = url.strip().lower()
+        if "://" in d:
+            d = d.split("://")[1]
+        d = d.split("/")[0]
+        if d.startswith("www."):
+            d = d[4:]
+        return d.upper() if d else "UNCATEGORIZED"
+
     def save_entry(self):
-        domain_grp = self.group_list.currentText()
-        if not domain_grp:
-            QMessageBox.warning(self, "WARN", "SELECT OR CREATE A DOMAIN FIRST")
-            return
-            
-        u = self.u_input.text()
-        p = self.p_input.text()
+        u = self.u_input.text().strip()
+        p = self.p_input.text().strip()
         d = self.d_input.text().strip()
         
         if u and p:
+            # Automatic Grouping
+            target_grp = self.clean_domain(d)
+            
+            if target_grp not in self.vault_data:
+                self.vault_data[target_grp] = []
+            
             fields = {}
             if d:
                 fields["Domain"] = d
                 
-            self.vault_data[domain_grp].append({"u": u, "p": p, "fields": fields})
+            self.vault_data[target_grp].append({"u": u, "p": p, "fields": fields})
+            
             self.u_input.clear()
             self.p_input.clear()
             self.d_input.clear()
-            self.p_input.setEchoMode(QLineEdit.EchoMode.Password) # Reset echo mode
+            self.p_input.setEchoMode(QLineEdit.EchoMode.Password)
+            
             self.save_vault()
+            self.refresh_groups()
+            self.group_list.setCurrentText(target_grp)
             self.load_entries()
         else:
-            QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
+            QMessageBox.warning(self, "WARN", "USERNAME AND PASSWORD CANNOT BE EMPTY")
 
     def get_all_field_names(self):
         names = set()
@@ -703,15 +752,32 @@ class MainWindow(QMainWindow):
     def edit_specific_entry(self, domain, index):
         entry = self.vault_data[domain][index]
         suggestions = self.get_all_field_names()
+        all_groups = sorted(list(self.vault_data.keys()))
         
-        dlg = EditDialog(entry, suggestions, self)
+        dlg = EditDialog(entry, suggestions, all_groups, domain, self)
         dlg.setStyleSheet(self.get_stylesheet())
         
         if dlg.exec():
-            new_data = dlg.get_data()
+            new_data, target_group = dlg.get_data()
             if new_data["u"] and new_data["p"]:
-                self.vault_data[domain][index] = new_data
+                # Handle moving between groups
+                if target_group != domain:
+                    # Remove from old
+                    del self.vault_data[domain][index]
+                    if not self.vault_data[domain] and domain != "UNCATEGORIZED":
+                         del self.vault_data[domain]
+                    
+                    # Add to new
+                    if target_group not in self.vault_data:
+                        self.vault_data[target_group] = []
+                    self.vault_data[target_group].append(new_data)
+                else:
+                    self.vault_data[domain][index] = new_data
+                
                 self.save_vault()
+                self.refresh_groups()
+                if not self.global_search.text():
+                    self.group_list.setCurrentText(target_group)
                 self.load_entries()
             else:
                 QMessageBox.warning(self, "WARN", "FIELDS CANNOT BE EMPTY")
