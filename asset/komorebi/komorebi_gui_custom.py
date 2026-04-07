@@ -365,6 +365,11 @@ class KomorebiApp(QMainWindow):
         self.search_input.setPlaceholderText("SEARCH RULES [EXE, CLASS, TITLE]...")
         self.search_input.textChanged.connect(self.refresh_list)
         top_bar.addWidget(self.search_input, 4)
+
+        self.sort_combo = QComboBox()
+        self.sort_combo.addItems(["SORT: NAME \u2191", "SORT: NAME \u2193", "SORT: DATE \u2191", "SORT: DATE \u2193"])
+        self.sort_combo.currentIndexChanged.connect(self.refresh_list)
+        top_bar.addWidget(self.sort_combo)
         
         self.restart_btn = QPushButton("RESTART")
         self.restart_btn.setFixedWidth(100)
@@ -597,16 +602,25 @@ class KomorebiApp(QMainWindow):
         
         # Unify data for display
         unified = {}
+        order = {}
+        idx = 0
         for r in self.config_data.get("ignore_rules", []):
             k = (r["kind"], r["id"], r.get("matching_strategy", "Equals"))
             unified[k] = {**r, "is_float": True, "is_tray": False, "matching_strategy": k[2]}
+            order.setdefault(k, idx); idx += 1
             
         for a in self.config_data.get("tray_and_multi_window_applications", []):
             k = (a["kind"], a["id"], a.get("matching_strategy", "Equals"))
             if k in unified: unified[k]["is_tray"] = True
             else: unified[k] = {**a, "is_float": False, "is_tray": True, "matching_strategy": k[2]}
+            order.setdefault(k, idx); idx += 1
             
-        items = sorted(unified.values(), key=lambda x: x["id"].lower())
+        sort_mode = self.sort_combo.currentText() if hasattr(self, 'sort_combo') else 'SORT: NAME ↑'
+        if 'NAME' in sort_mode:
+            items = sorted(unified.items(), key=lambda x: x[1]['id'].lower(), reverse='↓' in sort_mode)
+        else:
+            items = sorted(unified.items(), key=lambda x: order[x[0]], reverse='↓' in sort_mode)
+        items = [v for _, v in items]
         for data in items:
             if query and query not in f"{data['id']} {data['kind']}".lower():
                 continue
