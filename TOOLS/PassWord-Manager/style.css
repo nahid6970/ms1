@@ -31,7 +31,7 @@ body {
     border: 1px solid var(--cp-dim);
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
-#login-container input { flex-grow: 1; }
+#login-container input { flex-grow: 1; border-color: var(--cp-yellow); }
 
 header {
     display: flex; justify-content: space-between; align-items: center;
@@ -56,13 +56,13 @@ header h1 { color: var(--cp-yellow); font-size: 1.1rem; text-shadow: 1px 1px var
 
 input, select {
     background: var(--cp-bg); border: 1px solid var(--cp-dim); color: var(--cp-cyan);
-    padding: 8px; font-family: inherit; font-size: 0.85rem;
+    padding: 8px; font-family: inherit; font-size: 0.85rem; border-radius: 0;
 }
 input[type="range"] { padding: 0; }
 
 button {
     background: var(--cp-dim); color: white; border: 1px solid var(--cp-dim);
-    padding: 8px 12px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem;
+    padding: 8px 12px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem; border-radius: 0;
 }
 button:hover { border-color: var(--cp-yellow); color: var(--cp-yellow); }
 button.primary { border-color: var(--cp-cyan); color: var(--cp-cyan); }

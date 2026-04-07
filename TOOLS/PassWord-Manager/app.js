@@ -35,7 +35,7 @@ async function init() {
     }
     if (result.sessionData && result.sessionData.unlockTime && result.sessionData.masterKey) {
         const elapsed = (Date.now() - result.sessionData.unlockTime) / 60000;
-        if (settings.autolock === 0 || elapsed < settings.autolock) {
+        if (settings.autolock > 0 && elapsed < settings.autolock) {
             masterKey = result.sessionData.masterKey;
             unlockTime = result.sessionData.unlockTime;
             loginContainer.classList.add('hidden');
@@ -223,7 +223,16 @@ function renderEntries() {
 
 function copy(t) { navigator.clipboard.writeText(t); }
 
-function logout() { chrome.storage.local.remove('sessionData'); location.reload(); }
+function logout() {
+    chrome.storage.local.remove('sessionData');
+    masterKey = null;
+    unlockTime = null;
+    vaultEntries = [];
+    masterPassInput.value = '';
+    loginContainer.classList.remove('hidden');
+    vaultContainer.classList.add('hidden');
+    masterPassInput.focus();
+}
 
 // --- MODALS ---
 function openEditModal(e) {
