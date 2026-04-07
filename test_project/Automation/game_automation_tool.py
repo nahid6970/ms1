@@ -2,6 +2,7 @@ import subprocess
 import sys
 import customtkinter as ctk
 from customtkinter import CTkInputDialog
+import tkinter as tk
 from tkinter import filedialog, messagebox
 import json
 import os
@@ -11,6 +12,7 @@ import pyautogui
 import pygetwindow as gw
 from datetime import datetime
 from pathlib import Path
+from PIL import Image, ImageGrab, ImageTk, ImageDraw
 
 # Try to import keyboard module, fallback if not available
 try:
@@ -18,6 +20,163 @@ try:
     KEYBOARD_AVAILABLE = True
 except ImportError:
     KEYBOARD_AVAILABLE = False
+
+# Enable DPI awareness on Windows for accurate screenshot coordinates
+try:
+    from ctypes import windll
+    windll.shcore.SetProcessDpiAwareness(1)
+except Exception:
+    pass
+
+class RegionSelector:
+    def __init__(self, master=None, zoom_factor=2.0, zoom_size=200):
+        self.root = tk.Toplevel(master)
+        self.root.withdraw()
+        
+        # Get Virtual Desktop metrics for multi-monitor support
+        try:
+            from ctypes import windll
+            SM_XVIRTUALSCREEN = 76
+            SM_YVIRTUALSCREEN = 77
+            SM_CXVIRTUALSCREEN = 78
+            SM_CYVIRTUALSCREEN = 79
+            self.v_left = windll.user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
+            self.v_top = windll.user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
+            self.v_width = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+            self.v_height = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+        except:
+            # Fallback to primary screen info
+            self.v_left = 0
+            self.v_top = 0
+            self.v_width = self.root.winfo_screenwidth()
+            self.v_height = self.root.winfo_screenheight()
+
+        # Capture the whole screen first (matches virtual desktop coordinates)
+        self.screen_img = ImageGrab.grab(all_screens=True)
+        self.screen_width, self.screen_height = self.screen_img.size
+        
+        # Position window across the entire virtual desktop
+        self.root.geometry(f"{self.v_width}x{self.v_height}+{self.v_left}+{self.v_top}")
+        self.root.overrideredirect(True)
+        self.root.attributes('-alpha', 0.3)
+        self.root.attributes('-topmost', True)
+        self.root.config(cursor="cross")
+
+        self.zoom_factor = zoom_factor
+        self.zoom_size = zoom_size
+        self.zoom_radius = zoom_size // 2
+
+        self.root.after(100, self.root.deiconify)
+        self.root.after(150, lambda: (self.root.focus_set(), self.root.lift()))
+        
+        try:
+            self.root.after(200, lambda: self.root.grab_set())
+        except:
+            pass
+
+        self.canvas = tk.Canvas(self.root, cursor="cross", bg="black", highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+
+        # Instructions
+        self.canvas.create_text(self.screen_width // 2, self.screen_height - 50, 
+                                 text="CLICK and DRAG to capture region | ESC to cancel", 
+                                 fill="white", font=("Arial", 20, "bold"))
+
+        self.start_x = None
+        self.start_y = None
+        self.rect = None
+        self.selection = None
+        
+        # Crosshair lines
+        self.v_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
+        self.h_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
+
+        # Magnifier elements
+        self.zoom_canvas = tk.Canvas(self.canvas, width=self.zoom_size, height=self.zoom_size, 
+                                     highlightthickness=2, highlightbackground="#00ffff")
+        self.zoom_id = None
+
+        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_move_press)
+        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
+        self.canvas.bind("<Motion>", self.on_mouse_move)
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
+
+    def update_magnifier(self, x, y):
+        # Calculate coordinates for screen grab crop
+        crop_size = int(self.zoom_size / self.zoom_factor)
+        left = x - crop_size // 2
+        top = y - crop_size // 2
+        right = left + crop_size
+        bottom = top + crop_size
+
+        # Crop and resize
+        crop = self.screen_img.crop((left, top, right, bottom))
+        zoomed = crop.resize((self.zoom_size, self.zoom_size), Image.NEAREST)
+        
+        # Convert to PhotoImage
+        self.zoom_photo = ImageTk.PhotoImage(zoomed)
+        
+        # Update or create magnifier on canvas
+        if self.zoom_id:
+            self.zoom_canvas.delete("all")
+            self.zoom_canvas.create_image(0, 0, anchor="nw", image=self.zoom_photo)
+            # Add a crosshair in the magnifier
+            mid = self.zoom_size // 2
+            self.zoom_canvas.create_line(mid, 0, mid, self.zoom_size, fill="red", width=1)
+            self.zoom_canvas.create_line(0, mid, self.zoom_size, mid, fill="red", width=1)
+        else:
+            self.zoom_id = self.zoom_canvas.create_image(0, 0, anchor="nw", image=self.zoom_photo)
+
+        # Position magnifier near cursor but not under it
+        mag_x = x + 20
+        mag_y = y + 20
+        if mag_x + self.zoom_size > self.screen_width:
+            mag_x = x - self.zoom_size - 20
+        if mag_y + self.zoom_size > self.screen_height:
+            mag_y = y - self.zoom_size - 20
+        
+        self.zoom_canvas.place(x=mag_x, y=mag_y)
+
+    def on_mouse_move(self, event):
+        # Use absolute pointer coordinates and offset by virtual left/top
+        # to match the ImageGrab (0,0) starting point
+        x = self.root.winfo_pointerx() - self.v_left
+        y = self.root.winfo_pointery() - self.v_top
+        self.canvas.coords(self.v_line, x, 0, x, self.screen_height)
+        self.canvas.coords(self.h_line, 0, y, self.screen_width, y)
+        self.update_magnifier(x, y)
+
+    def on_button_press(self, event):
+        self.start_x = self.root.winfo_pointerx() - self.v_left
+        self.start_y = self.root.winfo_pointery() - self.v_top
+        self.rect = self.canvas.create_rectangle(
+            self.start_x, self.start_y, self.start_x, self.start_y, 
+            outline='#00ffff', width=3
+        )
+
+    def on_move_press(self, event):
+        cur_x = self.root.winfo_pointerx() - self.v_left
+        cur_y = self.root.winfo_pointery() - self.v_top
+        self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
+        self.on_mouse_move(event)
+
+    def on_button_release(self, event):
+        end_x = self.root.winfo_pointerx() - self.v_left
+        end_y = self.root.winfo_pointery() - self.v_top
+        x1 = min(self.start_x, end_x)
+        y1 = min(self.start_y, end_y)
+        x2 = max(self.start_x, end_x)
+        y2 = max(self.start_y, end_y)
+        
+        if x2 - x1 > 2 and y2 - y1 > 2:
+            self.selection = (x1, y1, x2, y2)
+        
+        self.root.destroy()
+
+    def get_selection(self):
+        self.root.wait_window()
+        return self.selection
 
 class GameAutomationTool(ctk.CTk):
     def __init__(self):
@@ -303,7 +462,7 @@ class GameAutomationTool(ctk.CTk):
 
         dialog = ctk.CTkToplevel(self)
         dialog.title(f"Settings for {event_name}")
-        dialog.geometry("400x300")
+        dialog.geometry("450x450")
         dialog.transient(self)
         dialog.grab_set()
 
@@ -312,6 +471,15 @@ class GameAutomationTool(ctk.CTk):
 
         ctk.CTkLabel(dialog, text="Target Window Title:").pack(anchor="w", padx=20, pady=(10, 0))
         ctk.CTkEntry(dialog, textvariable=target_window_var, width=300).pack(padx=20, fill=ctk.X)
+
+        # Save Path setting
+        current_save_path = self.events_data[event_name].get("save_path", "")
+        save_path_var = ctk.StringVar(value=current_save_path)
+        ctk.CTkLabel(dialog, text="Image Save Path:").pack(anchor="w", padx=20, pady=(10, 0))
+        save_path_frame = ctk.CTkFrame(dialog)
+        save_path_frame.pack(padx=20, fill=ctk.X)
+        ctk.CTkEntry(save_path_frame, textvariable=save_path_var, width=300).pack(side=ctk.LEFT, fill=ctk.X, expand=True)
+        ctk.CTkButton(save_path_frame, text="Browse", width=60, command=lambda: self.browse_save_path(save_path_var)).pack(side=ctk.RIGHT, padx=(5, 0))
 
         # Timer settings
         timer_enabled_var = ctk.BooleanVar(value=self.events_data[event_name].get("timer_enabled", False))
@@ -327,6 +495,7 @@ class GameAutomationTool(ctk.CTk):
         def save_settings():
             new_target_window = target_window_var.get()
             self.events_data[event_name]["target_window"] = new_target_window
+            self.events_data[event_name]["save_path"] = save_path_var.get()
 
             try:
                 timer_duration = int(timer_duration_var.get())
@@ -349,6 +518,11 @@ class GameAutomationTool(ctk.CTk):
         ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
 
         dialog.wait_window()
+
+    def browse_save_path(self, var):
+        path = filedialog.askdirectory()
+        if path:
+            var.set(path)
 
     def add_image(self):
         event_name = self.selected_event.get()
@@ -560,7 +734,7 @@ class GameAutomationTool(ctk.CTk):
         ctk.CTkEntry(region_frame, textvariable=y1_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkEntry(region_frame, textvariable=x2_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkEntry(region_frame, textvariable=y2_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(region_frame, text="Get Region", command=lambda: self.get_screen_region(x1_var, y1_var, x2_var, y2_var)).pack(side=ctk.RIGHT, padx=(10, 0))
+        ctk.CTkButton(region_frame, text="Get Region", command=lambda: self.get_screen_region(x1_var, y1_var, x2_var, y2_var, path_var, name_var, event_name, dialog)).pack(side=ctk.RIGHT, padx=(10, 0))
 
         # Actions Section
         ctk.CTkLabel(dialog, text="Actions:", font=("Arial", 12, "bold")).pack(anchor="w", padx=20, pady=(10, 0))
@@ -973,35 +1147,47 @@ class GameAutomationTool(ctk.CTk):
             if filename:
                 path_var.set(filename)
 
-    def get_screen_region(self, x1_var, y1_var, x2_var, y2_var):
-        if not KEYBOARD_AVAILABLE:
-            messagebox.showerror("Error", "Keyboard module not available. Cannot capture region.")
-            return
+    def get_screen_region(self, x1_var, y1_var, x2_var, y2_var, path_var=None, name_var=None, event_name=None, dialog=None):
+        self.log_status("Opening region selector...")
+        try:
+            selector = RegionSelector(master=dialog)
+            selection = selector.get_selection()
+            if not selection:
+                self.log_status("Region selection cancelled.")
+                return
 
-        messagebox.showinfo("Get Region", "Move mouse to first corner and press SPACE. Then move to second corner and press SPACE again.")
-        self.log_status("Waiting for SPACE key for first corner...")
+            x1, y1, x2, y2 = selection
+            x1_var.set(x1)
+            y1_var.set(y1)
+            x2_var.set(x2)
+            y2_var.set(y2)
+            self.log_status(f"Region captured: ({x1}, {y1}, {x2}, {y2})")
 
-        def capture_region_thread():
-            try:
-                keyboard.wait('space')
-                x1, y1 = pyautogui.position()
-                self.log_status(f"First corner captured: ({x1}, {y1})")
-                x1_var.set(x1)
-                y1_var.set(y1)
-
-                self.log_status("Waiting for SPACE key for second corner...")
-                keyboard.wait('space')
-                x2, y2 = pyautogui.position()
-                self.log_status(f"Second corner captured: ({x2}, {y2})")
-                x2_var.set(x2)
-                y2_var.set(y2)
-
-                messagebox.showinfo("Region Captured", f"Region: ({x1}, {y1}, {x2}, {y2})")
-            except Exception as e:
-                self.log_status(f"Error capturing region: {str(e)}")
-                messagebox.showerror("Error", f"Failed to capture region: {str(e)}")
-
-        threading.Thread(target=capture_region_thread, daemon=True).start()
+            if event_name and path_var:
+                save_path = self.events_data[event_name].get("save_path", "")
+                if not save_path:
+                    save_path = os.path.join(os.getcwd(), "captured_images", event_name)
+                
+                if not os.path.exists(save_path):
+                    os.makedirs(save_path, exist_ok=True)
+                
+                img_name = name_var.get() if name_var and name_var.get() else "captured_image"
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"{img_name}_{timestamp}.png"
+                filepath = os.path.join(save_path, filename)
+                
+                # Use the image already captured by the selector for consistency
+                img = selector.screen_img.crop(selection)
+                img.save(filepath)
+                path_var.set(filepath)
+                self.log_status(f"Screenshot saved to: {filepath}")
+            
+            messagebox.showinfo("Region Captured", f"Region: ({x1}, {y1}, {x2}, {y2})\nImage saved to: {filepath if event_name else 'N/A'}")
+        except Exception as e:
+            self.log_status(f"Error in get_screen_region: {str(e)}")
+            import traceback
+            self.log_status(traceback.format_exc())
+            messagebox.showerror("Capture Error", f"Failed to capture region: {str(e)}")
 
     def get_click_position(self, x_var, y_var):
         if not KEYBOARD_AVAILABLE:

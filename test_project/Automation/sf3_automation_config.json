@@ -471,6 +471,15 @@
             "timer_enabled": false,
             "timer_duration": 60,
             "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Action?\" +8801779787186"
+        },
+        "DSSS": {
+            "images": [],
+            "enabled": true,
+            "target_window": "LDPlayer",
+            "save_path": "C:/Users/nahid/Videos/RustDesk",
+            "timer_enabled": false,
+            "timer_duration": 60,
+            "timer_command": ""
         }
     },
     "last_selected_event": "Action",
