@@ -33,10 +33,14 @@ async function init() {
         document.getElementById('setting-autolock').value = settings.autolock;
         document.getElementById('setting-autodomain').checked = settings.autodomain;
     }
-    if (result.sessionData && result.sessionData.unlockTime) {
+    if (result.sessionData && result.sessionData.unlockTime && result.sessionData.masterKey) {
         const elapsed = (Date.now() - result.sessionData.unlockTime) / 60000;
         if (settings.autolock === 0 || elapsed < settings.autolock) {
+            masterKey = result.sessionData.masterKey;
             unlockTime = result.sessionData.unlockTime;
+            loginContainer.classList.add('hidden');
+            vaultContainer.classList.remove('hidden');
+            loadVault();
         } else {
             chrome.storage.local.remove('sessionData');
         }
@@ -58,7 +62,7 @@ setInterval(() => {
 function resetActivityTimer() {
     if (masterKey) {
         unlockTime = Date.now();
-        chrome.storage.local.set({ sessionData: { unlockTime } });
+        chrome.storage.local.set({ sessionData: { unlockTime, masterKey } });
     }
 }
 
@@ -114,7 +118,7 @@ async function handleLogin() {
         }
         masterKey = password;
         unlockTime = Date.now();
-        chrome.storage.local.set({ sessionData: { unlockTime } });
+        chrome.storage.local.set({ sessionData: { unlockTime, masterKey: password } });
         loginContainer.classList.add('hidden');
         vaultContainer.classList.remove('hidden');
         loadVault();
@@ -193,15 +197,16 @@ function renderEntries() {
                     <button class="del-btn danger">X</button>
                 </div>
             </div>
-            <div class="details-toggle">▼ DETAILS ▼</div>
+            ${Object.keys(e.fields).length ? '<div class="details-toggle">▼ DETAILS ▼</div>' : ''}
             <div class="entry-details hidden">
                 ${Object.entries(e.fields).map(([k,v]) => `<div class="detail-row"><span class="detail-label">${k}:</span><span>${v}</span><button class="copy-field" data-val="${v}">COPY</button></div>`).join('')}
             </div>
         `;
-        div.querySelector('.details-toggle').onclick = () => {
+        const toggle = div.querySelector('.details-toggle');
+        if (toggle) toggle.onclick = () => {
             const det = div.querySelector('.entry-details');
             const h = det.classList.toggle('hidden');
-            div.querySelector('.details-toggle').innerText = h ? "▼ DETAILS ▼" : "▲ HIDE ▲";
+            toggle.innerText = h ? "▼ DETAILS ▼" : "▲ HIDE ▲";
         };
         div.querySelector('.copy-user').onclick = () => copy(e.u);
         div.querySelector('.copy-pass').onclick = () => copy(e.p);
@@ -218,7 +223,7 @@ function renderEntries() {
 
 function copy(t) { navigator.clipboard.writeText(t); }
 
-function logout() { location.reload(); }
+function logout() { chrome.storage.local.remove('sessionData'); location.reload(); }
 
 // --- MODALS ---
 function openEditModal(e) {
