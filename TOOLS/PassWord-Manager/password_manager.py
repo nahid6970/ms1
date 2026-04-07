@@ -11,7 +11,9 @@ from PyQt6.QtWidgets import (
     QCheckBox, QSlider, QDialog
 )
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtGui import QIcon, QPixmap, QPainter
+from PyQt6.QtSvg import QSvgRenderer
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -84,6 +86,21 @@ class EditDialog(QDialog):
             self.entry["fields"]["Domain"] = ""
         self.init_ui()
 
+    def get_svg_icon(self, svg_data, size, color):
+        renderer = QSvgRenderer(svg_data.encode('utf-8'))
+        pixmap = QPixmap(size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        
+        # Color the icon
+        painter = QPainter(pixmap)
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+        painter.fillRect(pixmap.rect(), color)
+        painter.end()
+        return QIcon(pixmap)
+
     def init_ui(self):
         self.layout = QVBoxLayout(self)
         
@@ -110,16 +127,23 @@ class EditDialog(QDialog):
         self.new_field_name = QLineEdit()
         self.new_field_name.setPlaceholderText("New Field Name")
         
-        # Using clearer emoji-like icons
-        add_field_btn = QPushButton("➕")
+        # Using SVG icons instead of emojis
+        from PyQt6.QtGui import QColor
+        
+        # SVG Plus Icon
+        svg_add = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>'
+        add_field_btn = QPushButton()
+        add_field_btn.setIcon(self.get_svg_icon(svg_add, QSize(20, 20), QColor(CP_TEXT)))
         add_field_btn.setFixedWidth(40)
         add_field_btn.setToolTip("Add new custom field")
         add_field_btn.clicked.connect(self.add_custom_field)
         
-        self.suggest_btn = QPushButton("📋")
+        # SVG Suggestions Icon
+        svg_list = '<svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="3" y="5" width="2" height="2" fill="white"/><rect x="3" y="11" width="2" height="2" fill="white"/><rect x="3" y="17" width="2" height="2" fill="white"/></svg>'
+        self.suggest_btn = QPushButton()
+        self.suggest_btn.setIcon(self.get_svg_icon(svg_list, QSize(20, 20), QColor(CP_CYAN)))
         self.suggest_btn.setFixedWidth(40)
         self.suggest_btn.setToolTip("Show suggested fields")
-        self.suggest_btn.setStyleSheet(f"color: {CP_CYAN};")
         self.suggest_btn.clicked.connect(self.show_suggestions)
         
         add_field_layout.addWidget(QLabel("ADD FIELD:"))
