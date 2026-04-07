@@ -46,7 +46,12 @@ SCRIPT_NAME = "my_script_name"           # unique key for this script
 ### Step 3 — Add dialog classes (before your MainWindow class)
 Copy both classes from `script_manager_gui_qt.py`:
 - `ConvexLabelDialog` — prompts for a backup label
-- `RestoreDialog` — lists backups and lets user pick one
+- `RestoreDialog` — lists backups, lets user pick one to restore, and has a per-row delete button (SVG trash icon) that deletes from Convex immediately without closing the dialog
+
+Note: `RestoreDialog.__init__` takes `(backups, convex_call_fn, parent)` — pass `self._convex_call` as the second arg:
+```python
+dlg = RestoreDialog(backups, self._convex_call, self)
+```
 
 ### Step 4 — Add methods to your MainWindow class
 Copy these three methods from `script_manager_gui_qt.py`:
@@ -119,8 +124,9 @@ If your method is named differently, update the call inside `restore_from_convex
 1. User clicks ⬇
 2. Script queries Convex for all backups for this `SCRIPT_NAME`
 3. `RestoreDialog` shows them sorted newest-first with date + label
-4. User picks one → full JSON is fetched and written to disk
-5. UI reloads
+4. Each row has a red trash SVG button — clicking it deletes that backup from Convex instantly and removes the row from the list (dialog stays open)
+5. User picks one → full JSON is fetched and written to disk
+6. UI reloads
 
 ---
 
@@ -155,6 +161,12 @@ result = convex_call(CONVEX_URL, "query", {
     "args": {"id": backup_id}
 })
 config = result["value"]
+
+# Delete a backup
+convex_call(CONVEX_URL, "mutation", {
+    "path": "functions:remove",
+    "args": {"id": backup_id}
+})
 ```
 
 ---
@@ -164,4 +176,4 @@ config = result["value"]
 - The Convex backend stays live even when your terminal is closed
 - Free tier: 40 deployments/month — only `npx convex dev/deploy` counts, not data operations
 - To add a new script: just use a different `SCRIPT_NAME`, no Convex changes needed
-- To delete old backups: use the Convex dashboard at `https://dashboard.convex.dev`
+- To delete old backups: use the red trash button in the restore dialog, or the Convex dashboard at `https://dashboard.convex.dev`
