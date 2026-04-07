@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber-Vault Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="login-container" class="container">
+        <h1>CYBER-VAULT v1.0</h1>
+        <div class="input-group">
+            <input type="password" id="master-password" placeholder="ENTER MASTER PASSWORD">
+            <button id="login-btn">ACCESS SYSTEM</button>
+        </div>
+    </div>
+
+    <div id="vault-container" class="container hidden">
+        <header>
+            <h1>VAULT MANAGER</h1>
+            <button id="logout-btn" class="danger">LOCK</button>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar for Groups -->
+            <aside class="sidebar">
+                <h2>DOMAINS</h2>
+                <input type="text" id="global-search" placeholder="SEARCH...">
+                <div id="group-list">
+                    <!-- Groups injected here -->
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                <section id="add-entry">
+                    <div class="card">
+                        <h3>NEW CREDENTIAL</h3>
+                        <div class="form">
+                            <input type="text" id="new-domain" placeholder="DOMAIN (e.g. google.com)">
+                            <input type="text" id="new-username" placeholder="USERNAME">
+                            <div class="password-row">
+                                <input type="password" id="new-password" placeholder="PASSWORD">
+                                <button id="gen-btn">GEN</button>
+                            </div>
+                            <button id="save-btn" class="primary">SAVE TO VAULT</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="entries-header">
+                    <h3 id="current-group-label">ALL ENTRIES</h3>
+                </section>
+
+                <section id="entries-list">
+                    <!-- Entries will be injected here -->
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

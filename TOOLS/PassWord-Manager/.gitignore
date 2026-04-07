@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Convex
+.convex/
+.env.local
+
+# Build Output
+dist/
+
+# Generated Assets in root (now in public/)
+icon16.png
+icon48.png
+icon128.png
+
+# Python
+__pycache__/
+*.pyc
+generate_icons.py
+
+# OS Files
+.DS_Store
+Thumbs.db

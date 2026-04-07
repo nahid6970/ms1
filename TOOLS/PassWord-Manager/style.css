@@ -1,0 +1,224 @@
+/* Cyberpunk Palette */
+:root {
+    --cp-bg: #050505;
+    --cp-panel: #111111;
+    --cp-yellow: #FCEE0A;
+    --cp-cyan: #00F0FF;
+    --cp-red: #FF003C;
+    --cp-green: #00ff21;
+    --cp-dim: #3a3a3a;
+    --cp-text: #E0E0E0;
+    --cp-subtext: #808080;
+}
+
+body {
+    background-color: var(--cp-bg);
+    color: var(--cp-text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    width: 600px; /* Wider to accommodate sidebar */
+    min-height: 500px;
+}
+
+.container {
+    padding: 15px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1 {
+    color: var(--cp-yellow);
+    font-size: 1.2rem;
+    text-shadow: 2px 2px var(--cp-red);
+    margin: 0 0 15px 0;
+}
+
+h2, h3 {
+    color: var(--cp-cyan);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--cp-dim);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.main-layout {
+    display: flex;
+    gap: 15px;
+}
+
+.sidebar {
+    width: 180px;
+    border-right: 1px solid var(--cp-dim);
+    padding-right: 10px;
+}
+
+.content {
+    flex-grow: 1;
+}
+
+#group-list {
+    margin-top: 10px;
+}
+
+.group-item {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--cp-panel);
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.group-item:hover {
+    background: #1a1a1a;
+    color: var(--cp-yellow);
+}
+
+.group-item.active {
+    color: var(--cp-yellow);
+    border-left: 3px solid var(--cp-yellow);
+    background: var(--cp-panel);
+}
+
+.card {
+    background: var(--cp-panel);
+    border: 1px solid var(--cp-dim);
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+input {
+    background: var(--cp-bg);
+    border: 1px solid var(--cp-dim);
+    color: var(--cp-cyan);
+    padding: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+input:focus {
+    border-color: var(--cp-cyan);
+    outline: none;
+}
+
+button {
+    background: var(--cp-dim);
+    color: white;
+    border: 1px solid var(--cp-dim);
+    padding: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+button:hover {
+    border-color: var(--cp-yellow);
+    color: var(--cp-yellow);
+}
+
+button.primary {
+    border-color: var(--cp-cyan);
+    color: var(--cp-cyan);
+}
+
+button.danger {
+    color: var(--cp-red);
+    border-color: var(--cp-red);
+}
+
+.password-row {
+    display: flex;
+    gap: 5px;
+}
+
+.password-row input {
+    flex-grow: 1;
+}
+
+.entry-item {
+    background: var(--cp-panel);
+    border: 1px solid var(--cp-dim);
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.entry-info {
+    flex-grow: 1;
+}
+
+.entry-domain {
+    color: var(--cp-yellow);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.entry-user {
+    color: var(--cp-text);
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+.entry-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.entry-actions button {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+}
+
+.details-toggle {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--cp-subtext);
+    cursor: pointer;
+    margin-top: 5px;
+    border-top: 1px solid #1a1a1a;
+    padding-top: 5px;
+}
+
+.details-toggle:hover {
+    color: var(--cp-cyan);
+}
+
+.entry-details {
+    padding: 10px;
+    background: var(--cp-bg);
+    margin-top: 5px;
+    font-size: 0.8rem;
+    border-left: 2px solid var(--cp-dim);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.detail-label {
+    color: var(--cp-yellow);
+}

@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Cyber-Vault Manager",
+  "version": "1.0",
+  "description": "Cyberpunk themed password manager with Convex backend",
+  "permissions": ["storage", "clipboardWrite"],
+  "host_permissions": [
+    "https://*.convex.cloud/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
