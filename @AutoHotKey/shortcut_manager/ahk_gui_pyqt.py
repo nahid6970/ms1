@@ -4,6 +4,7 @@ import os
 import re
 import urllib.request
 import webbrowser
+import difflib
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
@@ -37,7 +38,9 @@ CP_SUBTEXT = "#888888"
 SVGS = {
     "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
     "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
-    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2-0 0 1 2 2v2"></path></svg>',
+    "EYE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+    "DIFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -89,6 +92,73 @@ class CyberButton(QPushButton):
                 QPushButton:hover {{ background-color: {CP_BG}; color: {self.color}; border: 1px solid {self.color}; }}
             """)
 
+class DiffDialog(QDialog):
+    """GitHub-style color-coded comparison view."""
+    def __init__(self, local_data, remote_data, title="SYSTEM // DIFF_VIEW", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.resize(900, 700)
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}")
+        
+        layout = QVBoxLayout(self)
+        
+        header = QLabel("COMPARISON: REMOTE (RED) vs LOCAL (GREEN)")
+        header.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
+        header.setStyleSheet(f"color: {CP_YELLOW}; padding: 5px;")
+        layout.addWidget(header)
+
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"""
+            QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }}
+            QScrollBar::handle:vertical {{ background: {CP_DIM}; }}
+        """)
+        
+        content = QWidget()
+        content.setStyleSheet(f"background-color: {CP_PANEL};")
+        vbox = QVBoxLayout(content)
+        vbox.setSpacing(0)
+        vbox.setContentsMargins(5, 5, 5, 5)
+
+        # Fix floats in both for accurate comparison
+        def fix(obj):
+            if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
+            if isinstance(obj, list): return [fix(i) for i in obj]
+            if isinstance(obj, float) and obj.is_integer(): return int(obj)
+            return obj
+
+        local_str = json.dumps(fix(local_data), indent=2, sort_keys=True).splitlines()
+        remote_str = json.dumps(fix(remote_data), indent=2, sort_keys=True).splitlines()
+        
+        diff = list(difflib.unified_diff(remote_str, local_str, fromfile='Backup', tofile='Local', lineterm=''))
+        
+        if not diff:
+            lbl = QLabel("No differences detected.")
+            lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: 'Consolas'; padding: 10px;")
+            vbox.addWidget(lbl)
+        else:
+            for line in diff:
+                lbl = QLabel(line)
+                lbl.setFont(QFont("Consolas", 9))
+                if line.startswith('+'):
+                    lbl.setStyleSheet("background-color: #12261e; color: #3fb950; padding: 1px 4px;")
+                elif line.startswith('-'):
+                    lbl.setStyleSheet("background-color: #2c1619; color: #f85149; padding: 1px 4px;")
+                elif line.startswith('@@'):
+                    lbl.setStyleSheet(f"background-color: #0d1117; color: {CP_CYAN}; padding: 1px 4px;")
+                else:
+                    lbl.setStyleSheet(f"color: {CP_TEXT}; padding: 1px 4px;")
+                vbox.addWidget(lbl)
+        
+        vbox.addStretch()
+        self.scroll.setWidget(content)
+        layout.addWidget(self.scroll)
+        
+        close = CyberButton("CLOSE PROTOCOL", color=CP_DIM, is_outlined=True)
+        close.clicked.connect(self.accept)
+        layout.addWidget(close)
+
 class ConvexLabelDialog(QDialog):
     """Backup label dialog with inline CHECK button to compare local vs latest backup."""
     def __init__(self, parent=None, convex_call_fn=None, config_data=None):
@@ -97,6 +167,7 @@ class ConvexLabelDialog(QDialog):
         self.setFixedWidth(420)
         self._convex_call = convex_call_fn
         self._config_data = config_data or {}
+        self._remote_data = None
         self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }}")
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Enter a label for this backup:"))
@@ -114,10 +185,20 @@ class ConvexLabelDialog(QDialog):
         ok.clicked.connect(self.accept)
         self.check_btn = CyberButton("CHECK", color=CP_YELLOW, is_outlined=True)
         self.check_btn.clicked.connect(self._check_sync)
+        
+        self.diff_btn = CyberButton("DIFF", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["DIFF"])
+        self.diff_btn.clicked.connect(self._show_diff)
+        self.diff_btn.hide()
+
         cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
         cancel.clicked.connect(self.reject)
-        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(cancel)
+        
+        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(self.diff_btn); btns.addWidget(cancel)
         layout.addLayout(btns)
+
+    def _show_diff(self):
+        if self._remote_data is not None:
+            DiffDialog(self._config_data, self._remote_data, parent=self).exec()
 
     def _check_sync(self):
         if not self._convex_call:
@@ -135,22 +216,28 @@ class ConvexLabelDialog(QDialog):
                 self.status_lbl.setText("⚠ No backups found — backup recommended!")
                 return
             latest = max(backups, key=lambda b: b["createdAt"])
-            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
-            skip = {"$schema", "gui_settings"}
-            local = {k: v for k, v in self._config_data.items() if k not in skip}
+            remote_raw = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
+            
             def fix(obj):
                 if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
                 if isinstance(obj, list): return [fix(i) for i in obj]
                 if isinstance(obj, float) and obj.is_integer(): return int(obj)
                 return obj
-            remote_cmp = {k: v for k, v in fix(remote).items() if k not in skip}
-            dirty = json.dumps(local, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
+            
+            self._remote_data = fix(remote_raw)
+            skip = {"$schema", "gui_settings"}
+            local_cmp = {k: v for k, v in self._config_data.items() if k not in skip}
+            remote_cmp = {k: v for k, v in self._remote_data.items() if k not in skip}
+            
+            dirty = json.dumps(local_cmp, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
             if dirty:
                 self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
                 self.status_lbl.setText(f"⚠ OUT OF SYNC with '{latest['label']}' — backup recommended!")
+                self.diff_btn.show()
             else:
                 self.status_lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: Consolas; font-size: 9pt; padding: 4px;")
                 self.status_lbl.setText(f"✔ In sync with '{latest['label']}' — no backup needed.")
+                self.diff_btn.hide()
         except Exception as e:
             self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
             self.status_lbl.setText(f"Error: {e}")
@@ -218,11 +305,43 @@ class RestoreDialog(QDialog):
             del_btn.setIcon(QIcon(pix))
             del_btn.clicked.connect(lambda checked, bid=b["id"]: self._delete(bid))
 
+            # Diff button with DIFF SVG
+            diff_btn = QPushButton()
+            diff_btn.setFixedSize(32, 32)
+            diff_btn.setToolTip("Compare with local config")
+            diff_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
+            renderer_diff = QSvgRenderer(QByteArray(SVGS["DIFF"].replace('currentColor', CP_YELLOW).encode()))
+            pix_diff = QPixmap(22, 22)
+            pix_diff.fill(Qt.GlobalColor.transparent)
+            painter_diff = QPainter(pix_diff)
+            renderer_diff.render(painter_diff)
+            painter_diff.end()
+            diff_btn.setIcon(QIcon(pix_diff))
+            diff_btn.clicked.connect(lambda checked, bid=b["id"], lbl=b["label"]: self._diff_check(bid, lbl))
+
             row.addWidget(btn)
+            row.addWidget(diff_btn)
             row.addWidget(del_btn)
             vbox.addLayout(row)
         vbox.addStretch()
         self._scroll.setWidget(inner)
+
+    def _diff_check(self, backup_id, label):
+        try:
+            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": backup_id}}).get("value", {})
+            # Local config from parent
+            parent = self.parent()
+            local_config = {
+                "script_shortcuts": parent.script_shortcuts,
+                "text_shortcuts": parent.text_shortcuts,
+                "startup_scripts": parent.startup_scripts,
+                "context_shortcuts": parent.context_shortcuts,
+                "app_font_family": parent.app_font_family
+            }
+            
+            DiffDialog(local_config, remote, title=f"DIFF // {label}", parent=self).exec()
+        except Exception as e:
+            QMessageBox.critical(self, "DIFF FAILED", str(e))
 
     def _delete(self, backup_id):
         try:
