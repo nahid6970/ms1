@@ -1303,11 +1303,21 @@ class MainWindow(QMainWindow):
                     
                     # Fallback generation if ps1_command empty
                     if not cmd:
-                         path = item["paths"][0]
-                         args = item.get("Command", "")
-                         cmd = f'Start-Process -FilePath "{path}"'
-                         if args: cmd += f' -ArgumentList "{args}"'
-                         if item.get("run_as_admin"): cmd += ' -Verb RunAs'
+                        path = item["paths"][0]
+                        args = item.get("Command", "")
+                        ext = os.path.splitext(path)[1].lower()
+                        if ext == ".ps1":
+                            cmd = f'Start-Process powershell -ArgumentList \'-File "{path}"{(" " + args) if args else ""}\''
+                        elif ext in (".bat", ".cmd"):
+                            cmd = f'Start-Process cmd -ArgumentList \'/c "{path}"{(" " + args) if args else ""}\''
+                        elif ext == ".py":
+                            cmd = f'Start-Process python -ArgumentList \'"{path}"{(" " + args) if args else ""}\''
+                        else:
+                            cmd = f'Start-Process -FilePath "{path}"'
+                            if args: cmd += f' -ArgumentList "{args}"'
+                        if item.get("run_as_admin"): cmd += ' -Verb RunAs'
+                    elif item.get("run_as_admin") and "-Verb RunAs" not in cmd:
+                        cmd += ' -Verb RunAs'
                     
                     content += f"# {name}\n"
                     content += "try {\n"
@@ -1334,12 +1344,27 @@ class MainWindow(QMainWindow):
             path = item["paths"][0]
             cmd = item.get("Command", "")
             run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
+            ext = os.path.splitext(path)[1].lower()
+
             if run_as_admin:
-                ps_args = f'-FilePath "{path}"'
-                if cmd:
-                    ps_args += f' -ArgumentList "{cmd}"'
-                ps_args += " -Verb RunAs"
-                subprocess.Popen(["powershell", "-NoProfile", "-Command", f"Start-Process {ps_args}"])
+                # Wrap in Start-Process with -Verb RunAs via the appropriate host
+                if ext == ".ps1":
+                    inner = f'-File "{path}"'
+                    if cmd: inner += f' {cmd}'
+                    ps_cmd = f'Start-Process powershell -ArgumentList \'{inner}\' -Verb RunAs'
+                elif ext == ".bat" or ext == ".cmd":
+                    inner = f'/c "{path}"'
+                    if cmd: inner += f' {cmd}'
+                    ps_cmd = f'Start-Process cmd -ArgumentList \'{inner}\' -Verb RunAs'
+                elif ext == ".py":
+                    inner = f'"{path}"'
+                    if cmd: inner += f' {cmd}'
+                    ps_cmd = f'Start-Process python -ArgumentList \'{inner}\' -Verb RunAs'
+                else:
+                    ps_cmd = f'Start-Process "{path}"'
+                    if cmd: ps_cmd += f' -ArgumentList \'{cmd}\''
+                    ps_cmd += ' -Verb RunAs'
+                subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd])
                 self.update_status(f"EXECUTING AS ADMIN: {item['name']}")
             else:
                 full = f'"{path}" {cmd}' if cmd else f'"{path}"'
