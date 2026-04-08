@@ -256,11 +256,16 @@
             let parent;
             if (t.pos === -1) {
                 parent = document.getElementById(`${t.player[0]}-${i % 4}`);
+            } else if (t.pos === 57) {
+                // TOKEN FINISHED (Goes to the matching center triangle)
+                const triMap = { red: 'r', green: 'g', yellow: 'y', blue: 'b' };
+                parent = document.querySelector(`.center .t-${triMap[t.player]}`);
             } else if (t.pos >= 52) {
                 parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
             } else {
                 parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
             }
+
 
             if (parent) {
                 if (!token) {
