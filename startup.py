@@ -377,7 +377,7 @@ class ItemDialog(QDialog):
     def on_exec_type_changed(self, text):
         common_paths = {
             "pythonw": r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe",
-            "pwsh": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            "pwsh": r"C:\Program Files\PowerShell\7\pwsh.exe",
             "cmd": r"C:\Windows\System32\cmd.exe",
             "powershell": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
             "ahk_v2": r"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe"
@@ -1307,7 +1307,9 @@ class MainWindow(QMainWindow):
                         args = item.get("Command", "")
                         ext = os.path.splitext(path)[1].lower()
                         if ext == ".ps1":
-                            cmd = f'Start-Process powershell -ArgumentList \'-File "{path}"{(" " + args) if args else ""}\''
+                            inner_cmd = f'& "{path}"{(" " + args) if args else ""}'
+                            encoded = __import__('base64').b64encode(inner_cmd.encode('utf-16-le')).decode()
+                            cmd = f"Start-Process powershell -ArgumentList '-EncodedCommand', '{encoded}'"
                         elif ext in (".bat", ".cmd"):
                             cmd = f'Start-Process cmd -ArgumentList \'/c "{path}"{(" " + args) if args else ""}\''
                         elif ext == ".py":
@@ -1349,9 +1351,10 @@ class MainWindow(QMainWindow):
             if run_as_admin:
                 # Wrap in Start-Process with -Verb RunAs via the appropriate host
                 if ext == ".ps1":
-                    inner = f'-File "{path}"'
-                    if cmd: inner += f' {cmd}'
-                    ps_cmd = f'Start-Process powershell -ArgumentList \'{inner}\' -Verb RunAs'
+                    inner_cmd = f'& "{path}"'
+                    if cmd: inner_cmd += f' {cmd}'
+                    encoded = __import__('base64').b64encode(inner_cmd.encode('utf-16-le')).decode()
+                    ps_cmd = f'Start-Process powershell -ArgumentList \'-EncodedCommand\', \'{encoded}\' -Verb RunAs'
                 elif ext == ".bat" or ext == ".cmd":
                     inner = f'/c "{path}"'
                     if cmd: inner += f' {cmd}'
