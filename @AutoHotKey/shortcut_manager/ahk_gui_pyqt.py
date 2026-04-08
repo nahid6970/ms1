@@ -31,39 +31,141 @@ CP_RED = "#FF003C"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_GREEN = "#00ff21"
+CP_SUBTEXT = "#888888"
+
+# SVG Collection
+SVGS = {
+    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
+    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+}
+
+class CyberButton(QPushButton):
+    """Modern button with SVG icon support and dynamic hover color-switching."""
+    def __init__(self, text="", parent=None, color=CP_YELLOW, is_outlined=False, svg_data=None):
+        super().__init__(text, parent)
+        self.color = color
+        self.is_outlined = is_outlined
+        self.svg_data = svg_data
+        self.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedHeight(34)
+        if svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
+        self.update_style()
+
+    def update_icon(self, color):
+        if not self.svg_data: return
+        # Inject color into SVG currentColor placeholder
+        colored_svg = self.svg_data.replace('currentColor', color)
+        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+        pix = QPixmap(18, 18)
+        pix.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pix)
+        renderer.render(painter)
+        painter.end()
+        self.setIcon(QIcon(pix))
+        self.setIconSize(QSize(18, 18))
+
+    def enterEvent(self, event):
+        if self.svg_data:
+            self.update_icon(CP_BG if self.is_outlined else self.color)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
+        super().leaveEvent(event)
+
+    def update_style(self):
+        if self.is_outlined:
+            self.setStyleSheet(f"""
+                QPushButton {{ background-color: transparent; color: {self.color}; border: 2px solid {self.color}; padding: 5px 15px; font-family: 'Consolas'; }}
+                QPushButton:hover {{ background-color: {self.color}; color: {CP_BG}; }}
+            """)
+        else:
+            self.setStyleSheet(f"""
+                QPushButton {{ background-color: {self.color}; color: {CP_BG}; border: none; padding: 5px 15px; font-family: 'Consolas'; }}
+                QPushButton:hover {{ background-color: {CP_BG}; color: {self.color}; border: 1px solid {self.color}; }}
+            """)
 
 class ConvexLabelDialog(QDialog):
-    """Simple dialog to get a backup label from the user."""
-    def __init__(self, parent=None):
+    """Backup label dialog with inline CHECK button to compare local vs latest backup."""
+    def __init__(self, parent=None, convex_call_fn=None, config_data=None):
         super().__init__(parent)
         self.setWindowTitle("BACKUP LABEL")
-        self.setFixedWidth(380)
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_CYAN}; }}")
+        self.setFixedWidth(420)
+        self._convex_call = convex_call_fn
+        self._config_data = config_data or {}
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }}")
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Enter a label for this backup:"))
         self.inp = QLineEdit()
         self.inp.setPlaceholderText("e.g. before v2 update")
         layout.addWidget(self.inp)
+
+        self.status_lbl = QLabel("")
+        self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_lbl.setStyleSheet("font-family: Consolas; font-size: 9pt; padding: 4px;")
+        layout.addWidget(self.status_lbl)
+
         btns = QHBoxLayout()
-        ok = QPushButton("BACKUP")
-        ok.setStyleSheet(f"background: {CP_CYAN}; color: black; font-weight: bold;")
+        ok = CyberButton("BACKUP", color=CP_CYAN)
         ok.clicked.connect(self.accept)
-        cancel = QPushButton("CANCEL")
+        self.check_btn = CyberButton("CHECK", color=CP_YELLOW, is_outlined=True)
+        self.check_btn.clicked.connect(self._check_sync)
+        cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
         cancel.clicked.connect(self.reject)
-        btns.addWidget(ok); btns.addWidget(cancel)
+        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(cancel)
         layout.addLayout(btns)
 
+    def _check_sync(self):
+        if not self._convex_call:
+            self.status_lbl.setText("No connection available.")
+            return
+        try:
+            self.check_btn.setEnabled(False)
+            self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText("Checking...")
+            QApplication.processEvents()
+            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
+            backups = result.get("value", [])
+            if not backups:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText("⚠ No backups found — backup recommended!")
+                return
+            latest = max(backups, key=lambda b: b["createdAt"])
+            remote = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", {})
+            skip = {"$schema", "gui_settings"}
+            local = {k: v for k, v in self._config_data.items() if k not in skip}
+            def fix(obj):
+                if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
+                if isinstance(obj, list): return [fix(i) for i in obj]
+                if isinstance(obj, float) and obj.is_integer(): return int(obj)
+                return obj
+            remote_cmp = {k: v for k, v in fix(remote).items() if k not in skip}
+            dirty = json.dumps(local, sort_keys=True) != json.dumps(remote_cmp, sort_keys=True)
+            if dirty:
+                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"⚠ OUT OF SYNC with '{latest['label']}' — backup recommended!")
+            else:
+                self.status_lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+                self.status_lbl.setText(f"✔ In sync with '{latest['label']}' — no backup needed.")
+        except Exception as e:
+            self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
+            self.status_lbl.setText(f"Error: {e}")
+        finally:
+            self.check_btn.setEnabled(True)
+
     @staticmethod
-    def get_label(parent=None):
-        dlg = ConvexLabelDialog(parent)
+    def get_label(parent=None, convex_call_fn=None, config_data=None):
+        dlg = ConvexLabelDialog(parent, convex_call_fn=convex_call_fn, config_data=config_data)
         ok = dlg.exec() == QDialog.DialogCode.Accepted
         return dlg.inp.text(), ok
 
 
 class RestoreDialog(QDialog):
     """Shows list of backups and lets user pick one to restore or delete."""
-    DEL_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FF003C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>'''
-
     def __init__(self, backups, convex_call_fn, parent=None):
         super().__init__(parent)
         self.setWindowTitle("RESTORE FROM BACKUP")
@@ -71,7 +173,7 @@ class RestoreDialog(QDialog):
         self.selected_id = None
         self._convex_call = convex_call_fn
         self._backups = list(backups)
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; }} QLabel {{ color: {CP_TEXT}; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}")
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; font-family: 'Consolas'; font-size: 10pt; }} QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }} QPushButton {{ font-family: 'Consolas'; font-size: 10pt; font-weight: bold; }}")
         self._layout = QVBoxLayout(self)
         self._layout.addWidget(QLabel("Select a backup to restore:"))
         self._scroll = QScrollArea()
@@ -79,7 +181,8 @@ class RestoreDialog(QDialog):
         self._scroll.setStyleSheet("background: transparent; border: 1px solid #3a3a3a;")
         self._scroll.setFixedHeight(300)
         self._layout.addWidget(self._scroll)
-        cancel = QPushButton("CANCEL")
+        
+        cancel = CyberButton("ABORT", color=CP_DIM, is_outlined=True)
         cancel.clicked.connect(self.reject)
         self._layout.addWidget(cancel)
         self._render_list()
@@ -90,21 +193,23 @@ class RestoreDialog(QDialog):
         inner.setStyleSheet(f"background: {CP_PANEL};")
         vbox = QVBoxLayout(inner)
         vbox.setSpacing(4)
-        vbox.setContentsMargins(4, 4, 4, 4)
         for b in self._backups:
-            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %H:%M")
+            # 12-hour format: %I:%M %p
+            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
             row = QHBoxLayout()
-            row.setSpacing(4)
-            btn = QPushButton(f"  {dt}  —  {b['label']}")
+
+            # Separator: ->
+            btn = QPushButton(f"  {dt}  ->  {b['label']}")
             btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
+
             # Delete button with SVG icon
             del_btn = QPushButton()
             del_btn.setFixedSize(32, 32)
-            del_btn.setToolTip("Delete this backup")
             del_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
-            
-            renderer = QSvgRenderer(QByteArray(self.DEL_SVG.encode()))
+
+            # Render TRASH icon with RED color
+            renderer = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
             pix = QPixmap(22, 22)
             pix.fill(Qt.GlobalColor.transparent)
             painter = QPainter(pix)
@@ -112,6 +217,7 @@ class RestoreDialog(QDialog):
             painter.end()
             del_btn.setIcon(QIcon(pix))
             del_btn.clicked.connect(lambda checked, bid=b["id"]: self._delete(bid))
+
             row.addWidget(btn)
             row.addWidget(del_btn)
             vbox.addLayout(row)
@@ -1259,35 +1365,15 @@ class AHKShortcutEditor(QMainWindow):
         self.settings_btn.clicked.connect(self.open_settings_dialog)
         top_layout.addWidget(self.settings_btn)
 
-        # Backup button
-        self.backup_btn = QPushButton("☁")
+        # Backup button (Cyan Upload)
+        self.backup_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["UPLOAD"])
         self.backup_btn.setToolTip("Backup config to Convex cloud")
-        self.backup_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #1a3a5c;
-                color: #00F0FF;
-                border: 1px solid #00F0FF;
-            }
-            QPushButton:hover {
-                background-color: #214d7a;
-            }
-        """)
         self.backup_btn.clicked.connect(self.backup_to_convex)
         top_layout.addWidget(self.backup_btn)
 
-        # Restore button
-        self.restore_btn = QPushButton("⬇")
+        # Restore button (Yellow Download)
+        self.restore_btn = CyberButton("", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["DOWNLOAD"])
         self.restore_btn.setToolTip("Restore config from Convex cloud")
-        self.restore_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #1a3a5c;
-                color: #FCEE0A;
-                border: 1px solid #FCEE0A;
-            }
-            QPushButton:hover {
-                background-color: #214d7a;
-            }
-        """)
         self.restore_btn.clicked.connect(self.restore_from_convex)
         top_layout.addWidget(self.restore_btn)
 
@@ -1530,10 +1616,7 @@ class AHKShortcutEditor(QMainWindow):
         if not CONVEX_URL:
             QMessageBox.warning(self, "CONVEX", "Set CONVEX_URL in the script first.")
             return
-        label, ok = ConvexLabelDialog.get_label(self)
-        if not ok or not label.strip():
-            return
-        
+            
         # Prepare data for backup
         backup_data = {
             "script_shortcuts": self.script_shortcuts,
@@ -1542,13 +1625,20 @@ class AHKShortcutEditor(QMainWindow):
             "context_shortcuts": self.context_shortcuts,
             "app_font_family": self.app_font_family
         }
+
+        label, ok = ConvexLabelDialog.get_label(self, convex_call_fn=self._convex_call, config_data=backup_data)
+        if not ok or not label.strip():
+            return
         
         try:
-            self._convex_call("mutation", {
+            res = self._convex_call("mutation", {
                 "path": "functions:save",
                 "args": {"scriptName": SCRIPT_NAME, "label": label.strip(), "data": backup_data}
             })
-            QMessageBox.information(self, "BACKUP", f'Config backed up: "{label.strip()}"')
+            if res.get("status") == "success":
+                QMessageBox.information(self, "BACKUP", f'Config backed up: "{label.strip()}"')
+            else:
+                QMessageBox.warning(self, "BACKUP ERROR", str(res))
         except Exception as e:
             QMessageBox.critical(self, "BACKUP FAILED", str(e))
 
