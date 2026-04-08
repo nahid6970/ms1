@@ -177,7 +177,7 @@
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
     const START_INDEXES = [1, 14, 40, 27];
     const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
-    const MAX_POS = 56; // 50 board steps + 5 stretch steps + 1 home
+    const MAX_POS = 56; 
     let lastProcessedTurnId = "";
     let localState = null;
     let isRolling = false;
@@ -283,11 +283,12 @@
                 // TOKEN FINISHED (Goes to the matching center triangle)
                 const triMap = { red: 'r', green: 'g', yellow: 'y', blue: 'b' };
                 parent = document.querySelector(`.center .t-${triMap[t.player]}`);
-            } else if (t.pos >= 50) {
-                parent = document.getElementById(`stretch-${t.player}-${t.pos - 50}`);
+            } else if (t.pos >= 51) {
+                parent = document.getElementById(`stretch-${t.player}-${t.pos - 51}`);
             } else {
                 parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
             }
+
 
 
 
@@ -309,9 +310,16 @@
                     token.onclick = null;
                 }
 
+                // Testing Mode: Right click to move backwards
+                token.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    if (isTesting) localMoveBack(i);
+                };
+
                 if (token.parentElement !== parent) {
                     parent.appendChild(token);
                 }
+
             }
         });
 
@@ -420,6 +428,18 @@
             turnId: Date.now().toString(),
         });
     }
+
+    async function localMoveBack(tokenIndex) {
+        if (!localState) return;
+        const tokens = [...localState.tokens.map(t => ({...t}))];
+        const token = tokens[tokenIndex];
+        
+        if (token.pos > -1) {
+            token.pos--;
+            await updateGameState({ tokens, turnId: Date.now().toString() });
+        }
+    }
+
 
     async function localSkipTurn(playerIndex) {
         if (!localState || localState.waitingForRoll || localState.currentPlayer !== playerIndex) return;
