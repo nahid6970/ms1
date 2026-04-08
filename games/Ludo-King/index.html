@@ -241,6 +241,18 @@
     function renderTokens(state, validMoves) {
         state.tokens.forEach((t, i) => {
             const playerIdx = Math.floor(i / 4);
+            
+            // Check if player is actually in the game
+            let isActive = true;
+            if (state.numPlayers === 2) isActive = (playerIdx === 1 || playerIdx === 2);
+            else if (state.numPlayers === 3) isActive = (playerIdx < 3);
+
+            let token = document.getElementById(`token-${i}`);
+            if (!isActive) {
+                if (token) token.remove();
+                return;
+            }
+
             let parent;
             if (t.pos === -1) {
                 parent = document.getElementById(`${t.player[0]}-${i % 4}`);
@@ -251,7 +263,6 @@
             }
 
             if (parent) {
-                let token = document.getElementById(`token-${i}`);
                 if (!token) {
                     token = document.createElement('div');
                     token.id = `token-${i}`;
@@ -259,7 +270,6 @@
                     token.style.background = `var(--${t.player})`;
                 }
                 
-                // Update properties without recreating
                 const isClickable = !state.waitingForRoll && validMoves.includes(i);
                 if (isClickable) {
                     token.classList.add('pulse');
@@ -269,19 +279,24 @@
                     token.onclick = null;
                 }
 
-                // Append if parent changed
                 if (token.parentElement !== parent) {
                     parent.appendChild(token);
                 }
             }
         });
 
-        // Cleanup any extra tokens if they existed (unlikely here but good practice)
+        // Cleanup stale tokens
         document.querySelectorAll('.token').forEach(el => {
             const id = parseInt(el.id.replace('token-', ''));
-            if (isNaN(id) || id >= state.tokens.length) el.remove();
+            const playerIdx = Math.floor(id / 4);
+            let isActive = true;
+            if (state.numPlayers === 2) isActive = (playerIdx === 1 || playerIdx === 2);
+            else if (state.numPlayers === 3) isActive = (playerIdx < 3);
+
+            if (isNaN(id) || id >= state.tokens.length || !isActive) el.remove();
         });
     }
+
 
 
     async function localRollDice(playerIndex) {
