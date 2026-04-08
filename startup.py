@@ -148,7 +148,7 @@ class StartupItemWidget(QFrame):
         self.setFrameShape(QFrame.Shape.StyledPanel)
         
         # Determine border color based on activity
-        self.border_color = CP_YELLOW if self.is_active else CP_DIM
+        self.border_color = CP_RED if (self.is_active and self.item.get("run_as_admin")) else (CP_YELLOW if self.is_active else CP_DIM)
         
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -246,7 +246,7 @@ class StartupItemWidget(QFrame):
         menu.exec(self.mapToGlobal(pos))
 
     def update_style(self):
-        color = CP_YELLOW if self.is_active else CP_DIM
+        color = CP_RED if (self.is_active and self.item.get("run_as_admin")) else (CP_YELLOW if self.is_active else CP_DIM)
         bg_col = "#0f0f15"
         self.setStyleSheet(f"""
             StartupItemWidget {{
