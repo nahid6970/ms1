@@ -153,13 +153,43 @@
     const turnIndicator = document.getElementById('player-turn-indicator');
     const colors = ['Red', 'Green', 'Yellow', 'Blue'];
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
+    const START_INDEXES = [1, 14, 40, 27];
     const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
     let lastProcessedTurnId = "";
+    let localState = null;
 
     const STAR_SVG = `<svg class="star" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
 
+    function getAbsPos(playerIdx, relativePos) {
+        if (relativePos === -1 || relativePos >= 52) return -1;
+        return (relativePos + START_INDEXES[playerIdx]) % 52;
+    }
+
+    function getNextPlayer(curr, total) {
+        if (total === 2) return curr === 1 ? 2 : 1;
+        if (total === 3) return (curr + 1) % 3;
+        return (curr + 1) % 4;
+    }
+
+    async function updateGameState(patch) {
+        if (!localState) return;
+        localState = { ...localState, ...patch, timestamp: Date.now() };
+        renderUI(localState);
+        await client.mutation("game:setState", { patch: localState });
+    }
+
     async function updateUI() {
         const state = await client.query("game:getGameState");
+        if (!state) return;
+        
+        // Only update if someone else changed the state or we don't have one
+        if (!localState || state.turnId !== localState.turnId || state.timestamp > localState.timestamp) {
+            localState = state;
+            renderUI(state);
+        }
+    }
+
+    function renderUI(state) {
         if (!state) return;
 
         diceEl.innerText = state.diceValue;
@@ -187,15 +217,11 @@
 
             if (lastProcessedTurnId !== state.turnId) {
                 lastProcessedTurnId = state.turnId;
-                setTimeout(async () => {
-                    if (validMoves.length === 0) {
-                        await client.mutation("game:skipTurn", { playerIndex: state.currentPlayer });
-                        updateUI();
-                    } else if (validMoves.length === 1) {
-                        await client.mutation("game:moveToken", { tokenIndex: validMoves[0] });
-                        updateUI();
-                    }
-                }, 1000);
+                if (validMoves.length === 0) {
+                    setTimeout(() => localSkipTurn(state.currentPlayer), 1000);
+                } else if (validMoves.length === 1) {
+                    setTimeout(() => localMoveToken(validMoves[0]), 1000);
+                }
             }
         }
 
@@ -208,7 +234,10 @@
             const playerIdx = Math.floor(i / 4);
             let parent;
             if (t.pos === -1) parent = document.getElementById(`${t.player[0]}-${i % 4}`);
-            else if (t.pos >= 52) parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
+            else if (t.pos >= 52) {
+                const stretchId = `stretch-${t.player}-${t.pos - 52}`;
+                parent = document.getElementById(stretchId);
+            }
             else parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
 
             if (parent) {
@@ -217,29 +246,125 @@
                 token.style.background = `var(--${t.player})`;
                 if (!state.waitingForRoll && validMoves.includes(i)) {
                     token.classList.add('pulse');
-                    token.onclick = async () => {
-                        await client.mutation("game:moveToken", { tokenIndex: i });
-                        updateUI();
-                    };
+                    token.onclick = () => localMoveToken(i);
                 }
                 parent.appendChild(token);
             }
         });
     }
 
-    rollBtn.onclick = async () => {
-        const state = await client.query("game:getGameState");
-        if (state) {
-            await client.mutation("game:rollDice", { playerIndex: state.currentPlayer });
-            updateUI();
+    async function localRollDice(playerIndex) {
+        if (!localState || !localState.waitingForRoll || localState.currentPlayer !== playerIndex) return;
+
+        const diceValue = Math.floor(Math.random() * 6) + 1;
+        let sixCount = localState.sixCount;
+        if (diceValue === 6) sixCount++; else sixCount = 0;
+
+        if (sixCount === 3) {
+            await updateGameState({
+                diceValue, sixCount: 0,
+                currentPlayer: getNextPlayer(localState.currentPlayer, localState.numPlayers),
+                waitingForRoll: true,
+                turnId: Date.now().toString(),
+            });
+            return;
         }
+
+        await updateGameState({ diceValue, sixCount, waitingForRoll: false });
+    }
+
+    async function localMoveToken(tokenIndex) {
+        if (!localState || localState.waitingForRoll) return;
+
+        const playerIndex = Math.floor(tokenIndex / 4);
+        if (playerIndex !== localState.currentPlayer) return;
+
+        const tokens = [...localState.tokens.map(t => ({...t}))];
+        const token = tokens[tokenIndex];
+        let extraTurn = false;
+
+        if (token.pos === -1) {
+            if (localState.diceValue === 6) { token.pos = 0; extraTurn = true; }
+            else return;
+        } else {
+            const newPos = token.pos + localState.diceValue;
+            if (newPos <= 57) {
+                token.pos = newPos;
+                if (localState.diceValue === 6) extraTurn = true;
+                if (newPos === 57) extraTurn = true; // Bonus for reaching home
+            } else return;
+        }
+
+        // Capture Logic
+        const myAbsPos = getAbsPos(localState.currentPlayer, token.pos);
+        const isAtSafeSquare = SAFE_SQUARES.includes(myAbsPos);
+
+        if (myAbsPos !== -1 && !isAtSafeSquare) {
+            for (let i = 0; i < tokens.length; i++) {
+                const otherPlayerIdx = Math.floor(i / 4);
+                if (otherPlayerIdx !== localState.currentPlayer) {
+                    const otherAbsPos = getAbsPos(otherPlayerIdx, tokens[i].pos);
+                    if (otherAbsPos === myAbsPos) {
+                        tokens[i].pos = -1; // Capture!
+                        extraTurn = true; 
+                    }
+                }
+            }
+        }
+
+        let nextPlayer = localState.currentPlayer;
+        if (!extraTurn) nextPlayer = getNextPlayer(localState.currentPlayer, localState.numPlayers);
+
+        await updateGameState({
+            tokens,
+            currentPlayer: nextPlayer,
+            waitingForRoll: true,
+            sixCount: extraTurn ? localState.sixCount : 0,
+            turnId: Date.now().toString(),
+        });
+    }
+
+    async function localSkipTurn(playerIndex) {
+        if (!localState || localState.waitingForRoll || localState.currentPlayer !== playerIndex) return;
+        await updateGameState({
+            currentPlayer: getNextPlayer(localState.currentPlayer, localState.numPlayers),
+            waitingForRoll: true,
+            sixCount: 0,
+            turnId: Date.now().toString(),
+        });
+    }
+
+    rollBtn.onclick = () => {
+        if (localState) localRollDice(localState.currentPlayer);
     };
 
     window.startGame = async (num) => {
-        await client.mutation("game:startNewGame", { numPlayers: num });
+        let firstPlayer = 0;
+        if (num === 2) firstPlayer = 1;
+
+        const initialState = {
+            status: "playing",
+            numPlayers: num,
+            currentPlayer: firstPlayer, 
+            diceValue: 1,
+            waitingForRoll: true,
+            sixCount: 0,
+            turnId: Date.now().toString(),
+            tokens: [
+                { player: 'red', pos: -1 }, { player: 'red', pos: -1 }, { player: 'red', pos: -1 }, { player: 'red', pos: -1 },
+                { player: 'green', pos: -1 }, { player: 'green', pos: -1 }, { player: 'green', pos: -1 }, { player: 'green', pos: -1 },
+                { player: 'yellow', pos: -1 }, { player: 'yellow', pos: -1 }, { player: 'yellow', pos: -1 }, { player: 'yellow', pos: -1 },
+                { player: 'blue', pos: -1 }, { player: 'blue', pos: -1 }, { player: 'blue', pos: -1 }, { player: 'blue', pos: -1 },
+            ],
+            timestamp: Date.now(),
+        };
+
+        localState = initialState;
+        renderUI(localState);
+        await client.mutation("game:setState", { patch: localState });
         document.getElementById('menu-overlay').classList.add('hidden');
-        updateUI();
     };
+
 
     function generateBoard() {
         const board = document.getElementById('board');
@@ -319,7 +444,7 @@
 
     generateBoard();
     updateUI();
-    setInterval(updateUI, 2000);
+    setInterval(updateUI, 500);
     checkContinue();
 </script>
 
