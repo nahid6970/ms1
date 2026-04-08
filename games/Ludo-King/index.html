@@ -59,10 +59,10 @@
         .y-h { grid-area: 10 / 1 / 16 / 7; background: var(--yellow); }
         .b-h { grid-area: 10 / 10 / 16 / 16; background: var(--blue); }
         
-        .red { background-color: var(--red); }
-        .green { background-color: var(--green); }
-        .yellow { background-color: var(--yellow); }
-        .blue { background-color: var(--blue); }
+        .path-color.red { background-color: var(--red); }
+        .path-color.green { background-color: var(--green); }
+        .path-color.yellow { background-color: var(--yellow); }
+        .path-color.blue { background-color: var(--blue); }
 
         .center {
             grid-area: 7 / 7 / 10 / 10; position: relative; background: white;
@@ -80,11 +80,36 @@
         }
 
         .token {
-            width: 32px; height: 32px; border-radius: 50%; border: 3px solid white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 50; cursor: pointer; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 24px; height: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 50%; left: 50%;
+            /* Center the base of the pin */
+            transform: translate(-50%, -85%);
+            transition: all 0.2s ease-out;
+            z-index: 50;
+            pointer-events: auto;
         }
+        .token svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4)); }
+        
+        .token.active-player svg {
+             filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+             transform: scale(1.1);
+        }
+
+        .token.pulse svg {
+            animation: bounce 1.5s infinite alternate;
+        }
+        @keyframes bounce { 
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        /* Color the internal circle of the pin */
+        .token.red .pin-core { fill: var(--red); }
+        .token.green .pin-core { fill: var(--green); }
+        .token.yellow .pin-core { fill: var(--yellow); }
+        .token.blue .pin-core { fill: var(--blue); }
 
         /* Center offsets for victory tokens */
         .t-r .token { left: 25%; }
@@ -206,6 +231,12 @@
     let isTesting = false;
 
     const STAR_SVG = `<svg class="star" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
+    const PIN_SVG = `
+        <svg viewBox="0 0 100 120">
+            <path d="M50,10 C30,10 15,25 15,45 C15,75 50,115 50,115 C50,115 85,75 85,45 C85,25 70,10 50,10 Z" fill="white" stroke="#666" stroke-width="1.5" />
+            <circle class="pin-core" cx="50" cy="45" r="23" />
+        </svg>
+    `;
 
     function getAbsPos(playerIdx, relativePos) {
         if (relativePos === -1 || relativePos >= 52) return -1;
@@ -320,9 +351,14 @@
                     token = document.createElement('div');
                     token.id = `token-${i}`;
                     token.className = `token ${t.player}`;
-                    token.style.background = `var(--${t.player})`;
+                    token.innerHTML = PIN_SVG;
+                    token.style.color = `var(--${t.player})`; 
                 }
                 
+                const isCurrentTurn = state.currentPlayer === playerIdx;
+                if (isCurrentTurn) token.classList.add('active-player');
+                else token.classList.remove('active-player');
+
                 const isClickable = !state.waitingForRoll && validMoves.includes(i);
                 if (isClickable) {
                     token.classList.add('pulse');
@@ -342,8 +378,27 @@
                     parent.appendChild(token);
                 }
 
+                // Dynamic Scaling & Overlap Handling
+                let scale = isCurrentTurn ? 1.2 : 1.0;
+                let offset = { x: 0, y: 0 };
+
+                if (!parent.closest('.center')) {
+                    const siblings = Array.from(parent.querySelectorAll('.token'));
+                    const count = siblings.length;
+                    const index = siblings.indexOf(token);
+                    
+                    if (count > 1) {
+                        scale *= 0.75; // Moderate shrink
+                        offset.x = (index % 2 === 0 ? -10 : 10);
+                        offset.y = (index > 1 ? 10 : -10);
+                    }
+                    token.style.zIndex = 50 + index + (isCurrentTurn ? 100 : 0);
+                }
+
+                token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`;
             }
         });
+
 
         // Cleanup stale tokens
         document.querySelectorAll('.token').forEach(el => {
@@ -548,10 +603,10 @@
             const cell = document.createElement('div');
             cell.className = 'c'; cell.id = `path-${i}`;
             cell.style.gridRow = p.r; cell.style.gridColumn = p.c;
-            if (i === 1) cell.classList.add('red');
-            if (i === 14) cell.classList.add('green');
-            if (i === 27) cell.classList.add('blue');
-            if (i === 40) cell.classList.add('yellow');
+            if (i === 1) cell.classList.add('path-color', 'red');
+            if (i === 14) cell.classList.add('path-color', 'green');
+            if (i === 27) cell.classList.add('path-color', 'blue');
+            if (i === 40) cell.classList.add('path-color', 'yellow');
             if (SAFE_SQUARES.includes(i)) cell.innerHTML = STAR_SVG;
             board.appendChild(cell);
         });
@@ -566,7 +621,7 @@
         Object.keys(HOME_STRETCH).forEach(color => {
             HOME_STRETCH[color].forEach((p, i) => {
                 const cell = document.createElement('div');
-                cell.className = `c ${color}`; cell.id = `stretch-${color}-${i}`;
+                cell.className = `c path-color ${color}`; cell.id = `stretch-${color}-${i}`;
                 cell.style.gridRow = p.r; cell.style.gridColumn = p.c;
                 board.appendChild(cell);
             });
