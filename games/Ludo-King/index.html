@@ -329,7 +329,12 @@
                 return;
             }
 
-            await updateGameState({ diceValue, sixCount, waitingForRoll: false });
+            await updateGameState({ 
+                diceValue, 
+                sixCount, 
+                waitingForRoll: false,
+                turnId: Date.now().toString() 
+            });
             isRolling = false;
         }, 600);
     }
