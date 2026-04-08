@@ -228,6 +228,10 @@ class StartupItemWidget(QFrame):
         launch_action = QAction("EXECUTE PROTOCOL", self)
         launch_action.triggered.connect(lambda: self.launched.emit(self.item))
         menu.addAction(launch_action)
+
+        launch_admin_action = QAction("EXECUTE AS ADMIN", self)
+        launch_admin_action.triggered.connect(lambda: self.launched.emit({**self.item, "_run_as_admin": True}))
+        menu.addAction(launch_admin_action)
         
         edit_action = QAction("EDIT CONFIG", self)
         edit_action.triggered.connect(lambda: self.edited.emit(self.item))
@@ -344,6 +348,15 @@ class ItemDialog(QDialog):
         self.ps1_input = CyberInput("Complete PowerShell command line...")
         layout.addWidget(self.ps1_input)
 
+        # Run as Admin
+        self.admin_check = QCheckBox("RUN AS ADMIN")
+        self.admin_check.setStyleSheet(f"""
+            QCheckBox {{ color: {CP_RED}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
+            QCheckBox::indicator:checked {{ background: {CP_RED}; border: 1px solid {CP_RED}; }}
+        """)
+        layout.addWidget(self.admin_check)
+
         layout.addStretch()
 
         # Buttons
@@ -379,6 +392,7 @@ class ItemDialog(QDialog):
         self.args_input.setText(self.item.get("Command", ""))
         self.ps1_input.setText(self.item.get("ps1_command", ""))
         self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
+        self.admin_check.setChecked(self.item.get("run_as_admin", False))
 
     def save_item(self):
         if not self.name_input.text():
@@ -400,6 +414,7 @@ class ItemDialog(QDialog):
             "Command": self.args_input.text(),
             "ps1_command": ps_cmd,
             "ExecutableType": self.exec_type_combo.currentText(),
+            "run_as_admin": self.admin_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
@@ -1292,6 +1307,7 @@ class MainWindow(QMainWindow):
                          args = item.get("Command", "")
                          cmd = f'Start-Process -FilePath "{path}"'
                          if args: cmd += f' -ArgumentList "{args}"'
+                         if item.get("run_as_admin"): cmd += ' -Verb RunAs'
                     
                     content += f"# {name}\n"
                     content += "try {\n"
@@ -1315,11 +1331,20 @@ class MainWindow(QMainWindow):
 
     def handle_launch(self, item):
         try:
-             path = item["paths"][0]
-             cmd = item.get("Command", "")
-             full = f'"{path}" {cmd}' if cmd else f'"{path}"'
-             subprocess.Popen(f'start "" {full}', shell=True)
-             self.update_status(f"EXECUTING: {item['name']}")
+            path = item["paths"][0]
+            cmd = item.get("Command", "")
+            run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
+            if run_as_admin:
+                ps_args = f'-FilePath "{path}"'
+                if cmd:
+                    ps_args += f' -ArgumentList "{cmd}"'
+                ps_args += " -Verb RunAs"
+                subprocess.Popen(["powershell", "-NoProfile", "-Command", f"Start-Process {ps_args}"])
+                self.update_status(f"EXECUTING AS ADMIN: {item['name']}")
+            else:
+                full = f'"{path}" {cmd}' if cmd else f'"{path}"'
+                subprocess.Popen(f'start "" {full}', shell=True)
+                self.update_status(f"EXECUTING: {item['name']}")
         except Exception as e:
             self.update_status(f"EXEC FACTOR FAILED: {str(e)}")
 
