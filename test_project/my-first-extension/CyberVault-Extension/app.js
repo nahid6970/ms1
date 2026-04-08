@@ -317,7 +317,7 @@ document.getElementById('add-btn').onclick = async () => {
         if (tabs[0]?.url) {
             try {
                 let d = extractBaseDomain(new URL(tabs[0].url).hostname);
-                domainInput.value = d.toUpperCase();
+                domainInput.value = d.toLowerCase();
             } catch(e) {}
         }
     }
@@ -334,7 +334,7 @@ document.getElementById('save-btn').onclick = async () => {
     document.querySelectorAll('#new-custom-fields .custom-field-row').forEach(row => { fields[row.querySelector('.field-name').value] = row.querySelector('.field-value').value; });
     const b = await encrypt(u, masterKey);
     const eP = await encrypt(p, masterKey, b.salt, b.iv);
-    await client.mutation("passwords:add", { domain: domain.toUpperCase(), salt: btoa(String.fromCharCode(...b.salt)), iv: btoa(String.fromCharCode(...b.iv)), u: b.data, p: eP.data, fields: JSON.stringify(fields) });
+    await client.mutation("passwords:add", { domain: domain.toLowerCase(), salt: btoa(String.fromCharCode(...b.salt)), iv: btoa(String.fromCharCode(...b.iv)), u: b.data, p: eP.data, fields: JSON.stringify(fields) });
     addModal.classList.add('hidden');
     loadVault();
 };
@@ -348,7 +348,7 @@ document.getElementById('gen-execute-btn').onclick = generatePassword;
 
 // Edit Form
 document.getElementById('update-btn').onclick = async () => {
-    const domain = document.getElementById('edit-domain').value.toUpperCase();
+    const domain = document.getElementById('edit-domain').value.toLowerCase();
     const u = document.getElementById('edit-username').value;
     const p = document.getElementById('edit-password').value;
     const fields = {};
