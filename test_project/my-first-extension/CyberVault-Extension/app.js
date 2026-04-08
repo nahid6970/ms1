@@ -10,7 +10,7 @@ let vaultEntries = [];
 let currentGroup = "ALL ENTRIES";
 let editingEntryId = null;
 let unlockTime = null;
-let settings = { autolock: 0, autodomain: true };
+let settings = { autolock: 0, autodomain: true, aliases: "" };
 
 // --- DOM ELEMENTS ---
 const loginContainer = document.getElementById('login-container');
@@ -29,9 +29,10 @@ const settingsModal = document.getElementById('settings-modal');
 async function init() {
     const result = await chrome.storage.local.get(['vaultSettings', 'sessionData']);
     if (result.vaultSettings) {
-        settings = result.vaultSettings;
+        settings = { ...settings, ...result.vaultSettings };
         document.getElementById('setting-autolock').value = settings.autolock;
         document.getElementById('setting-autodomain').checked = settings.autodomain;
+        document.getElementById('setting-aliases').value = settings.aliases || "";
     }
     if (result.sessionData && result.sessionData.unlockTime && result.sessionData.masterKey) {
         const elapsed = (Date.now() - result.sessionData.unlockTime) / 60000;
@@ -163,7 +164,20 @@ async function prefillSearchFromCurrentTab() {
         if (tabs[0] && tabs[0].url) {
             try {
                 const url = new URL(tabs[0].url);
-                let domain = extractBaseDomain(url.hostname);
+                let domain = extractBaseDomain(url.hostname).toLowerCase();
+                
+                // Resolve Aliases
+                if (settings.aliases) {
+                    const aliasLines = settings.aliases.split('\n');
+                    for (const line of aliasLines) {
+                        const [alias, target] = line.split('=').map(s => s.trim().toLowerCase());
+                        if (alias && target && domain === alias) {
+                            domain = target;
+                            break;
+                        }
+                    }
+                }
+
                 if (domain && !domain.includes('newtab')) document.getElementById('global-search').value = domain;
             } catch (e) {}
         }
@@ -352,6 +366,7 @@ document.getElementById('edit-add-field-btn').onclick = () => { const n = docume
 document.getElementById('save-settings-btn').onclick = () => {
     settings.autolock = parseInt(document.getElementById('setting-autolock').value);
     settings.autodomain = document.getElementById('setting-autodomain').checked;
+    settings.aliases = document.getElementById('setting-aliases').value;
     chrome.storage.local.set({ vaultSettings: settings });
     settingsModal.classList.add('hidden');
     loadVault();

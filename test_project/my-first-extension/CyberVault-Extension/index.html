@@ -114,7 +114,15 @@
                     <label>AUTO-DOMAIN SEARCH:</label>
                     <input type="checkbox" id="setting-autodomain" checked>
                 </div>
-                <p class="hint">Set to 0 to disable auto-lock.</p>
+                
+                <hr style="border:1px solid var(--cp-border); margin:15px 0;">
+                
+                <div class="setting-row" style="display:block;">
+                    <label>DOMAIN ALIASES (e.g. youtube.com=google.com):</label>
+                    <textarea id="setting-aliases" rows="4" style="width:100%; margin-top:10px; background:var(--cp-bg); color:var(--cp-text); border:1px solid var(--cp-border); padding:5px; font-family:monospace;" placeholder="youtube.com=google.com&#10;gmail.com=google.com"></textarea>
+                </div>
+
+                <p class="hint">One alias per line. format: subdomain=maindomain</p>
                 <div class="modal-actions">
                     <button id="save-settings-btn" class="primary">SAVE SETTINGS</button>
                     <button id="close-settings-btn">CLOSE</button>
