@@ -6,7 +6,7 @@
     <title>Ludo Master</title>
     <style>
         :root {
-            --red: #ff0000; --green: #00a000; --yellow: #ffff00; --blue: #0099ff;
+            --red: #ff0000; --green: #00a000; --yellow: #e6ac00; --blue: #0099ff;
             --white: #ffffff; --border: #333; --cell-size: 40px;
         }
 
@@ -283,7 +283,7 @@
         diceEl.innerText = state.diceValue;
         const activeColor = colors[state.currentPlayer];
         diceEl.style.backgroundColor = `var(--${activeColor.toLowerCase()})`;
-        diceEl.style.color = activeColor === 'Yellow' ? '#333' : 'white';
+        diceEl.style.color = 'white';
         
         const validMoves = [];
         state.tokens.forEach((t, i) => {
