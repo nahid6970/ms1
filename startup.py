@@ -1249,6 +1249,27 @@ class MainWindow(QMainWindow):
 
         self.filter_items(self.search_input.text())
 
+
+    VBS_DIR = r"C:\@delta\output\startup\vbs"
+
+    def _make_vbs(self, item):
+        os.makedirs(self.VBS_DIR, exist_ok=True)
+        path = item["paths"][0]
+        args = item.get("Command", "")
+        ext = os.path.splitext(path)[1].lower()
+        if ext == ".ps1":
+            exe, run_args = "powershell.exe", f'-ExecutionPolicy Bypass -File "{path}"' + (f' {args}' if args else '')
+        elif ext in (".bat", ".cmd"):
+            exe, run_args = "cmd.exe", f'/c "{path}"' + (f' {args}' if args else '')
+        elif ext == ".py":
+            exe, run_args = "python.exe", f'"{path}"' + (f' {args}' if args else '')
+        else:
+            exe, run_args = path, args
+        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_admin.vbs")
+        with open(vbs_path, "w") as f:
+            f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "runas", 1\n')
+        return vbs_path
+
     def check_registry(self, item):
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
@@ -1265,9 +1286,13 @@ class MainWindow(QMainWindow):
             try:
                 if should_enable:
                      with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                        path = item["paths"][0]
-                        command = item.get("Command", "")
-                        full = f'"{path}" {command}' if command else f'"{path}"'
+                        if item.get("run_as_admin"):
+                            vbs_path = self._make_vbs(item)
+                            full = f'wscript.exe "{vbs_path}"'
+                        else:
+                            path = item["paths"][0]
+                            command = item.get("Command", "")
+                            full = f'"{path}" {command}' if command else f'"{path}"'
                         winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
                 else:
                      with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:

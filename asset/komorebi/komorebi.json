@@ -303,6 +303,11 @@
             "kind": "Class",
             "id": "ConsoleWindowClass",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "explorer.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
