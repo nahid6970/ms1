@@ -1247,6 +1247,8 @@ class MainWindow(QMainWindow):
             else:
                 self.app_container.addWidget(widget)
 
+        self.filter_items(self.search_input.text())
+
     def check_registry(self, item):
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
