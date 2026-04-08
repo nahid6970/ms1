@@ -100,6 +100,16 @@
         #dice:active:not(.disabled) { transform: translateY(2px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         #dice.disabled { cursor: not-allowed; opacity: 0.8; filter: grayscale(0.5); }
         
+        #test-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .test-btn {
+            padding: 10px; background: #9b59b6; color: white; border: none; border-radius: 8px;
+            font-weight: bold; cursor: pointer; transition: background 0.2s;
+        }
+        .test-btn:hover { background: #8e44ad; }
+        .test-btn:active { transform: translateY(2px); }
+
+        .btn-test-mode { background: #9b59b6; color: white; }
+        
         .shake { animation: shake 0.4s ease-in-out; }
         @keyframes shake {
             0% { transform: rotate(0deg); }
@@ -124,10 +134,12 @@
         <h2>Ludo Master</h2>
         <button id="btn-continue" class="menu-btn btn-primary hidden">CONTINUE GAME</button>
         <button id="btn-new-game" class="menu-btn btn-success">NEW GAME</button>
+        <button id="btn-testing" class="menu-btn btn-test-mode">TESTING MODE</button>
     </div>
     <div id="player-select" class="menu-card hidden">
         <h2>Select Players</h2>
         <div>
+            <button class="menu-btn btn-player" onclick="startGame(1)">1</button>
             <button class="menu-btn btn-player" onclick="startGame(2)">2</button>
             <button class="menu-btn btn-player" onclick="startGame(3)">3</button>
             <button class="menu-btn btn-player" onclick="startGame(4)">4</button>
@@ -146,6 +158,14 @@
 
 <div id="dice-container">
     <div id="dice">1</div>
+    <div id="test-controls" class="hidden">
+        <button class="test-btn" onclick="testRoll(1)">1</button>
+        <button class="test-btn" onclick="testRoll(2)">2</button>
+        <button class="test-btn" onclick="testRoll(3)">3</button>
+        <button class="test-btn" onclick="testRoll(4)">4</button>
+        <button class="test-btn" onclick="testRoll(5)">5</button>
+        <button class="test-btn" onclick="testRoll(6)">6</button>
+    </div>
 </div>
 
 <script type="module">
@@ -157,9 +177,11 @@
     const START_INDEX = { 'red': 1, 'green': 14, 'yellow': 40, 'blue': 27 };
     const START_INDEXES = [1, 14, 40, 27];
     const SAFE_SQUARES = [1, 9, 14, 22, 27, 35, 40, 48];
+    const MAX_POS = 56; // 50 board steps + 5 stretch steps + 1 home
     let lastProcessedTurnId = "";
     let localState = null;
     let isRolling = false;
+    let isTesting = false;
 
     const STAR_SVG = `<svg class="star" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>`;
 
@@ -170,8 +192,7 @@
 
     function getNextPlayer(curr, total) {
         if (total === 2) return curr === 1 ? 2 : 1;
-        if (total === 3) return (curr + 1) % 3;
-        return (curr + 1) % 4;
+        return (curr + 1) % total;
     }
 
     async function updateGameState(patch) {
@@ -215,15 +236,17 @@
         state.tokens.forEach((t, i) => {
             if (Math.floor(i/4) === state.currentPlayer) {
                 if (t.pos === -1) { if (state.diceValue === 6) validMoves.push(i); }
-                else if (t.pos + state.diceValue <= 57) { validMoves.push(i); }
+                else if (t.pos + state.diceValue <= MAX_POS) { validMoves.push(i); }
             }
         });
 
         if (state.waitingForRoll) {
             diceEl.classList.remove('disabled');
+            if (isTesting) document.getElementById('test-controls').classList.remove('hidden');
             lastProcessedTurnId = state.turnId;
         } else {
             diceEl.classList.add('disabled');
+            document.getElementById('test-controls').classList.add('hidden');
             // Turn automation: only if turnId is new to avoid "speedrun" loops
             if (lastProcessedTurnId !== state.turnId) {
                 lastProcessedTurnId = state.turnId;
@@ -256,15 +279,17 @@
             let parent;
             if (t.pos === -1) {
                 parent = document.getElementById(`${t.player[0]}-${i % 4}`);
-            } else if (t.pos === 57) {
+            } else if (t.pos === MAX_POS) {
                 // TOKEN FINISHED (Goes to the matching center triangle)
                 const triMap = { red: 'r', green: 'g', yellow: 'y', blue: 'b' };
                 parent = document.querySelector(`.center .t-${triMap[t.player]}`);
-            } else if (t.pos >= 52) {
-                parent = document.getElementById(`stretch-${t.player}-${t.pos - 52}`);
+            } else if (t.pos >= 50) {
+                parent = document.getElementById(`stretch-${t.player}-${t.pos - 50}`);
             } else {
                 parent = document.getElementById(`path-${(t.pos + START_INDEX[t.player]) % 52}`);
             }
+
+
 
 
             if (parent) {
@@ -306,6 +331,7 @@
 
     async function localRollDice(playerIndex) {
         if (!localState || !localState.waitingForRoll || localState.currentPlayer !== playerIndex || isRolling) return;
+        if (isTesting) return; // Dice click ignored in testing mode (use buttons)
         isRolling = true;
         diceEl.classList.add('disabled');
 
@@ -359,10 +385,10 @@
             else return;
         } else {
             const newPos = token.pos + localState.diceValue;
-            if (newPos <= 57) {
+            if (newPos <= MAX_POS) {
                 token.pos = newPos;
                 if (localState.diceValue === 6) extraTurn = true;
-                if (newPos === 57) extraTurn = true; // Bonus for reaching home
+                if (newPos === MAX_POS) extraTurn = true; // Bonus for reaching home
             } else return;
         }
 
@@ -438,6 +464,29 @@
         renderUI(localState);
         await client.mutation("game:setState", { patch: localState });
         document.getElementById('menu-overlay').classList.add('hidden');
+    };
+
+    window.testRoll = async (val) => {
+        if (!localState || !localState.waitingForRoll) return;
+        let sixCount = localState.sixCount;
+        if (val === 6) sixCount++; else sixCount = 0;
+
+        if (sixCount === 3) {
+            await updateGameState({
+                diceValue: val, sixCount: 0,
+                currentPlayer: getNextPlayer(localState.currentPlayer, localState.numPlayers),
+                waitingForRoll: true,
+                turnId: Date.now().toString(),
+            });
+            return;
+        }
+        await updateGameState({ diceValue: val, sixCount, waitingForRoll: false, turnId: Date.now().toString() });
+    };
+
+    document.getElementById('btn-testing').onclick = () => {
+        isTesting = true;
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('player-select').classList.remove('hidden');
     };
 
 
