@@ -149,12 +149,15 @@ function extractBaseDomain(hostname) {
     let parts = hostname.split('.');
     if (parts.length <= 2) return hostname;
 
-    // Common multi-part TLDs (heuristic)
-    const multiPartTLDs = ["com.au", "co.uk", "net.uk", "org.uk", "co.jp", "com.br", "com.mx", "gov.uk", "ac.uk"];
-    let lastTwo = parts.slice(-2).join('.');
-    if (multiPartTLDs.includes(lastTwo)) {
+    let last = parts[parts.length - 1];
+    let secondLast = parts[parts.length - 2];
+
+    // Heuristic for multi-part TLDs (e.g. .gov.bd, .co.uk, .com.au)
+    // Most follow the pattern: <domain>.<2-3 chars>.<2 chars country code>
+    if (last.length === 2 && secondLast.length <= 3) {
         return parts.slice(-3).join('.');
     }
+
     return parts.slice(-2).join('.');
 }
 
