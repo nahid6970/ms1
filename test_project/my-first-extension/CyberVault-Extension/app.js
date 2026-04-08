@@ -142,14 +142,28 @@ async function loadVault() {
     } catch (e) { console.error(e); }
 }
 
+// --- UTILS ---
+function extractBaseDomain(hostname) {
+    if (!hostname) return "";
+    let parts = hostname.split('.');
+    if (parts.length <= 2) return hostname;
+
+    // Common multi-part TLDs (heuristic)
+    const multiPartTLDs = ["com.au", "co.uk", "net.uk", "org.uk", "co.jp", "com.br", "com.mx", "gov.uk", "ac.uk"];
+    let lastTwo = parts.slice(-2).join('.');
+    if (multiPartTLDs.includes(lastTwo)) {
+        return parts.slice(-3).join('.');
+    }
+    return parts.slice(-2).join('.');
+}
+
 async function prefillSearchFromCurrentTab() {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs[0] && tabs[0].url) {
             try {
                 const url = new URL(tabs[0].url);
-                let domain = url.hostname;
-                if (domain.startsWith('www.')) domain = domain.substring(4);
+                let domain = extractBaseDomain(url.hostname);
                 if (domain && !domain.includes('newtab')) document.getElementById('global-search').value = domain;
             } catch (e) {}
         }
@@ -180,7 +194,12 @@ function renderGroups() {
 function renderEntries() {
     const query = document.getElementById('global-search').value.toLowerCase();
     entriesList.innerHTML = '';
-    const filtered = vaultEntries.filter(e => (currentGroup === "ALL ENTRIES" || e.domain === currentGroup) && (e.domain.toLowerCase().includes(query) || e.u.toLowerCase().includes(query)));
+    const filtered = vaultEntries.filter(e => {
+        const domainMatch = currentGroup === "ALL ENTRIES" || e.domain === currentGroup;
+        const entryDomain = e.domain.toLowerCase();
+        const searchMatch = entryDomain.includes(query) || query.includes(entryDomain) || e.u.toLowerCase().includes(query);
+        return domainMatch && searchMatch;
+    });
 
     if (filtered.length === 0) entriesList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--cp-subtext);">NO ENTRIES</div>';
 
@@ -283,8 +302,7 @@ document.getElementById('add-btn').onclick = async () => {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs[0]?.url) {
             try {
-                let d = new URL(tabs[0].url).hostname;
-                if (d.startsWith('www.')) d = d.substring(4);
+                let d = extractBaseDomain(new URL(tabs[0].url).hostname);
                 domainInput.value = d.toUpperCase();
             } catch(e) {}
         }
