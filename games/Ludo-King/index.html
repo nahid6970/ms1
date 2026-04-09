@@ -397,12 +397,15 @@
                     }
                 } else {
                     const count = siblings.length;
-                    const spread = 16;
+                    const spread = 11;
+                    scale *= 0.8; // Shrink slightly to avoid clipping behind the edges
                     
                     if (parent.classList.contains('t-g') || parent.classList.contains('t-y')) {
-                        offset.x = (index - (count - 1) / 2) * spread;
+                        // For the Top/Bottom triangles, spread them horizontally but gently shift center left slightly (-2px) to account for optical SVG centering.
+                        offset.x = (index - (count - 1) / 2) * spread - 1;
                         offset.y = 0;
                     } else {
+                        // For Left/Right triangles, spread vertically
                         offset.x = 0;
                         offset.y = (index - (count - 1) / 2) * spread;
                     }
