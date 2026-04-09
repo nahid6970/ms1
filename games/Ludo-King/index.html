@@ -380,47 +380,12 @@
                     parent.appendChild(token);
                 }
 
-                // Dynamic Scaling & Overlap Handling
-                let scale = isCurrentTurn ? 1.2 : 1.0;
-                let offset = { x: 0, y: 0 };
 
-                                const siblings = Array.from(parent.querySelectorAll('.token'));
-                const index = siblings.indexOf(token);
-                token.style.zIndex = 50 + index + (isCurrentTurn ? 100 : 0);
-
-                if (!inCenter) {
-                    const count = siblings.length;
-                    if (count > 1) {
-                        scale *= (count > 4 ? 0.6 : 0.75);
-                        
-                        const angle = (index / count) * 2 * Math.PI - (Math.PI / 2);
-                        const radius = count > 4 ? 13 : 10;
-                        
-                        offset.x = Math.cos(angle) * radius;
-                        offset.y = Math.sin(angle) * radius;
-                    }
-                } else {
-                    const count = siblings.length;
-                    const spread = 11;
-                    scale *= 0.8; // Shrink slightly to avoid clipping behind the edges
-                    
-                    if (parent.classList.contains('t-g') || parent.classList.contains('t-y')) {
-                        // For the Top/Bottom triangles, spread them horizontally but gently shift center left slightly (-2px) to account for optical SVG centering.
-                        offset.x = (index - (count - 1) / 2) * spread - 1;
-                        offset.y = 0;
-                    } else {
-                        // For Left/Right triangles, spread vertically
-                        offset.x = 0;
-                        offset.y = (index - (count - 1) / 2) * spread;
-                    }
-                }
-
-                token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`;
             }
         });
 
 
-        // Cleanup stale tokens
+        // Cleanup stale tokens FIRST
         document.querySelectorAll('.token').forEach(el => {
             const id = parseInt(el.id.replace('token-', ''));
             const playerIdx = Math.floor(id / 4);
@@ -429,6 +394,46 @@
             else if (state.numPlayers === 3) isActive = (playerIdx < 3);
 
             if (isNaN(id) || id >= state.tokens.length || !isActive) el.remove();
+        });
+
+        // SECOND PASS for final overlapping logic
+        document.querySelectorAll('.token').forEach(token => {
+            const id = parseInt(token.id.replace('token-', ''));
+            const parent = token.parentElement;
+            if (!parent) return;
+            const playerIdx = Math.floor(id / 4);
+            const inCenter = !!parent.closest('.center');
+            const isCurrentTurn = state.currentPlayer === playerIdx && !inCenter;
+            
+            let scale = isCurrentTurn ? 1.2 : 1.0;
+            let offset = { x: 0, y: 0 };
+            
+            const siblings = Array.from(parent.querySelectorAll('.token'));
+            const index = siblings.indexOf(token);
+            token.style.zIndex = 50 + index + (isCurrentTurn ? 100 : 0);
+
+            if (!inCenter) {
+                const count = siblings.length;
+                if (count > 1) {
+                    scale *= (count > 4 ? 0.6 : 0.75);
+                    const angle = (index / count) * 2 * Math.PI - (Math.PI / 2);
+                    const radius = count > 4 ? 13 : 10;
+                    offset.x = Math.cos(angle) * radius;
+                    offset.y = Math.sin(angle) * radius;
+                }
+            } else {
+                const count = siblings.length;
+                const spread = 11;
+                scale *= 0.8; // Shrink slightly
+                if (parent.classList.contains('t-g') || parent.classList.contains('t-y')) {
+                    offset.x = (index - (count - 1) / 2) * spread - 1;
+                    offset.y = 0;
+                } else {
+                    offset.x = 0;
+                    offset.y = (index - (count - 1) / 2) * spread;
+                }
+            }
+            token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`;
         });
     }
 
