@@ -248,6 +248,20 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def get_uncommitted_diff(directory, scope="."):
+        """Get the diff between working tree/index and HEAD"""
+        try:
+            git_scope = scope if scope and scope.strip() else "."
+            
+            # Get detailed diff compared to HEAD
+            cmd_diff = ["git", "diff", "HEAD", "--color=never", "--", git_scope]
+            diff_result = subprocess.check_output(cmd_diff, cwd=directory, text=True, encoding='utf-8', errors='replace')
+            
+            return {"success": {"diff": diff_result}}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def get_local_changes(directory):
         """Get list of files that have local changes (modified, deleted, staged, etc.)"""
         try:
@@ -926,9 +940,16 @@ class MainWindow(QMainWindow):
         rel_path = self.current_diff_sections[idx]['name']
         directory = self.path_input.text()
         
+        target_hash = commit_hash
+        if commit_hash == "* UNCOMMITTED *":
+            target_hash = "HEAD"
+            msg = f"Discard local changes for this file (restore to HEAD)?\n\nFile: {rel_path}"
+        else:
+            msg = f"Restore single file to commit version [{commit_hash}]?\n\nFile: {rel_path}"
+
         confirm = QMessageBox.question(
             self, "Confirm File Restore",
-            f"Restore single file to commit version [{commit_hash}]?\n\nFile: {rel_path}",
+            msg,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
@@ -939,14 +960,14 @@ class MainWindow(QMainWindow):
             
             # Get git root for correct path
             base_dir = GitWorker.get_git_root(directory)
-            result = GitWorker.checkout_file(base_dir, commit_hash, rel_path)
+            result = GitWorker.checkout_file(base_dir, target_hash, rel_path)
             
             if "success" in result:
-                self.restored_files[rel_path] = commit_hash
+                self.restored_files[rel_path] = target_hash
                 self.render_diff_html()
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: RESTORED {rel_path}")
-                QMessageBox.information(self, "Success", f"Successfully restored {rel_path} to version {commit_hash}.")
+                QMessageBox.information(self, "Success", f"Successfully restored {rel_path} to version {target_hash}.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("RESTORE FAILED")
@@ -1110,16 +1131,21 @@ class MainWindow(QMainWindow):
         directory = self.path_input.text()
         scope = self.scope_input.text() or "."
         
-        compare_mode = self.compare_to_head_cb.isChecked()
-        loading_text = "Loading changes since commit..." if compare_mode else "Loading commit changes..."
-        self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>{loading_text}</div>")
-        QApplication.processEvents()
-        
-        if compare_mode:
-            result = GitWorker.get_diff_between(directory, commit_hash, "HEAD", scope)
+        if commit_hash == "* UNCOMMITTED *":
+            self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>Loading uncommitted changes...</div>")
+            QApplication.processEvents()
+            result = GitWorker.get_uncommitted_diff(directory, scope)
         else:
-            # We want just the specific commit diff, but scoped to the path
-            result = GitWorker.get_diff_between(directory, f"{commit_hash}^", commit_hash, scope)
+            compare_mode = self.compare_to_head_cb.isChecked()
+            loading_text = "Loading changes since commit..." if compare_mode else "Loading commit changes..."
+            self.diff_display.setHtml(f"<div style='color: {CP_YELLOW}; padding: 20px;'>{loading_text}</div>")
+            QApplication.processEvents()
+            
+            if compare_mode:
+                result = GitWorker.get_diff_between(directory, commit_hash, "HEAD", scope)
+            else:
+                # We want just the specific commit diff, but scoped to the path
+                result = GitWorker.get_diff_between(directory, f"{commit_hash}^", commit_hash, scope)
             
         if "error" in result:
             self.diff_display.setHtml(f"<div style='color: {CP_RED}; padding: 20px;'>Error loading diff:<br>{result['error']}</div>")
@@ -1145,6 +1171,10 @@ class MainWindow(QMainWindow):
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
         
+        if commit_hash == "* UNCOMMITTED *":
+            QMessageBox.information(self, "No Hash", "Uncommitted changes do not have a commit hash yet.")
+            return
+
         clipboard = QApplication.clipboard()
         clipboard.setText(commit_hash)
         
@@ -1207,8 +1237,39 @@ class MainWindow(QMainWindow):
             return
 
         commits = result["success"]
-        self.table.setRowCount(len(commits))
         
+        # Check for local changes
+        directory = self.path_input.text().strip()
+        local_changes_res = GitWorker.get_local_changes(directory)
+        
+        has_local = False
+        if "success" in local_changes_res and local_changes_res["success"]:
+            has_local = True
+            
+        total_rows = len(commits)
+        if has_local:
+            total_rows += 1
+            
+        self.table.setRowCount(total_rows)
+        
+        row_offset = 0
+        if has_local:
+            items = [
+                QTableWidgetItem("* UNCOMMITTED *"),
+                QTableWidgetItem("-"),
+                QTableWidgetItem("YOU"),
+                QTableWidgetItem(f"Local changes in {len(local_changes_res['success'])} file(s)")
+            ]
+            items[0].setForeground(QColor(CP_RED))
+            items[1].setForeground(QColor(CP_TEXT))
+            items[2].setForeground(QColor(CP_CYAN))
+            items[3].setForeground(QColor(CP_YELLOW))
+            
+            for col, item in enumerate(items):
+                item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                self.table.setItem(0, col, item)
+            row_offset = 1
+
         for i, commit in enumerate(commits):
             items = [
                 QTableWidgetItem(commit['hash']),
@@ -1225,12 +1286,13 @@ class MainWindow(QMainWindow):
             
             for col, item in enumerate(items):
                 item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
-                self.table.setItem(i, col, item)
+                self.table.setItem(i + row_offset, col, item)
 
         self.update_table_active_state()
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
         limit_text = f" (LIMIT: {self.commit_limit})" if self.commit_limit > 0 else " (ALL)"
-        self.status_label.setText(f"LOADED {len(commits)} COMMITS{limit_text}")
+        loaded_count = len(commits) + (1 if has_local else 0)
+        self.status_label.setText(f"LOADED {loaded_count} ENTRIES{limit_text}")
 
         self.table.viewport().update()
 
@@ -1265,6 +1327,11 @@ class MainWindow(QMainWindow):
 
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
+        
+        if commit_hash == "* UNCOMMITTED *":
+            QMessageBox.information(self, "Action Not Applicable", "You cannot 'restore' to the uncommitted state as it represents your current working files.")
+            return
+
         commit_msg = self.table.item(row, 3).text()
         directory = self.path_input.text()
 
@@ -1299,7 +1366,15 @@ class MainWindow(QMainWindow):
 
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
-        commit_msg = self.table.item(row, 3).text()
+        
+        if commit_hash == "* UNCOMMITTED *":
+            # For uncommitted, 'parent' is HEAD (restoring to last committed state)
+            parent_hash = "HEAD"
+            commit_msg = "Uncommitted Changes"
+        else:
+            parent_hash = f"{commit_hash}^"
+            commit_msg = self.table.item(row, 3).text()
+
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
         
@@ -1313,14 +1388,11 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "No Files", "No files found.")
             return
 
-        # Use parent commit (commit before the selected one)
-        parent_hash = f"{commit_hash}^"
-
         confirm = QMessageBox.question(
             self, "Replace with Previous Version",
             f"Replace current files with the version BEFORE:\n\n[{commit_hash}] {commit_msg}\n\n"
             f"Files to replace: {len(target_files)}\n\n"
-            f"⚠️ This will use the parent commit ({parent_hash})",
+            f"⚠️ This will use the target version ({parent_hash})",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
@@ -1345,7 +1417,7 @@ class MainWindow(QMainWindow):
             if success_count == len(target_files):
                 self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
                 self.status_label.setText(f"SUCCESS: {success_count} FILE(S) REPLACED")
-                QMessageBox.information(self, "Success", f"Replaced {success_count} file(s) with parent commit version.")
+                QMessageBox.information(self, "Success", f"Replaced {success_count} file(s) with version {parent_hash}.")
             else:
                 self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
                 self.status_label.setText("REPLACE PARTIALLY FAILED")
@@ -1360,6 +1432,11 @@ class MainWindow(QMainWindow):
 
         row = selected_items[0].row()
         commit_hash = self.table.item(row, 0).text()
+        
+        if commit_hash == "* UNCOMMITTED *":
+            QMessageBox.information(self, "Action Not Applicable", "You cannot restore files 'from' the uncommitted state as they are already in your working directory.")
+            return
+
         commit_msg = self.table.item(row, 3).text()
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
