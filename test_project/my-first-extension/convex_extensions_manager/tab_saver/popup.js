@@ -11,6 +11,9 @@ function displayTabs(tabs) {
   const tabList = document.getElementById('tabList');
   const tabCount = document.getElementById('tabCount');
   
+  // Sort tabs by id descending (newest first)
+  tabs.sort((a, b) => b.id - a.id);
+  
   tabCount.textContent = tabs.length;
   
   if (tabs.length === 0) {

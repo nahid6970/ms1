@@ -24,7 +24,6 @@
     </div>
 
     <div class="footer">
-      <button id="clearAll" class="btn btn-danger">Clear All</button>
       <button id="saveToConvex" class="btn btn-primary">💾 Save</button>
       <button id="loadFromConvex" class="btn btn-success">📥 Load</button>
     </div>
@@ -34,7 +33,7 @@
   <div id="settingsModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>⚙️ Icon Settings</h2>
+        <h2>⚙️ Settings</h2>
         <button id="closeModal" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -48,7 +47,11 @@
           <input type="range" id="channelIconSize" min="12" max="24" value="18" step="2">
           <span id="channelIconValue">18px</span>
         </div>
-        <button id="resetSettings" class="btn btn-secondary">Reset to Default</button>
+        
+        <div class="settings-actions">
+          <button id="resetSettings" class="btn btn-secondary">Reset Settings</button>
+          <button id="clearAll" class="btn btn-danger">Clear All Saved Tabs</button>
+        </div>
       </div>
     </div>
   </div>

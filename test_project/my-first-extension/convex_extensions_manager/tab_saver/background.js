@@ -138,7 +138,7 @@ function saveTab(savedTabs, tab, favicon, channelIcon = null) {
     savedAt: new Date().toISOString()
   };
   
-  savedTabs.push(newTab);
+  savedTabs.unshift(newTab);
   
   // Save to storage
   chrome.storage.local.set({ savedTabs: savedTabs }, () => {
