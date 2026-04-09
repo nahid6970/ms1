@@ -654,6 +654,20 @@
 
 
 
+    async function rewindAnimation(tokenIndex, fromPos) {
+        if (fromPos < 0) return;
+        isRolling = true; // Block other actions during rewind
+        const tempTokens = [...localState.tokens.map(t => ({...t}))];
+        
+        // Fast reverse traversal
+        for (let p = fromPos - 1; p >= -1; p--) {
+            tempTokens[tokenIndex].pos = p;
+            renderTokens({ ...localState, tokens: tempTokens }, []); 
+            await new Promise(r => setTimeout(r, 40)); 
+        }
+        isRolling = false;
+    }
+
     async function localRollDice(playerIndex) {
         if (!currentUser) return;
         const mySeat = Object.keys(localState.playerMap || {}).find(k => localState.playerMap[k] === currentUser.username);
@@ -732,13 +746,15 @@
         const myAbsPos = getAbsPos(localState.currentPlayer, token.pos);
         const isAtSafeSquare = SAFE_SQUARES.includes(myAbsPos);
 
+        let capturedInfo = [];
         if (myAbsPos !== -1 && !isAtSafeSquare) {
             for (let i = 0; i < tokens.length; i++) {
                 const otherPlayerIdx = Math.floor(i / 4);
                 if (otherPlayerIdx !== localState.currentPlayer) {
                     const otherAbsPos = getAbsPos(otherPlayerIdx, tokens[i].pos);
                     if (otherAbsPos === myAbsPos) {
-                        tokens[i].pos = -1; // Capture!
+                        capturedInfo.push({ index: i, startPos: tokens[i].pos });
+                        tokens[i].pos = -1; // Capture in final state
                         extraTurn = true; 
                         if (stats) {
                             stats[localState.currentPlayer].captures++;
@@ -746,6 +762,12 @@
                         }
                     }
                 }
+            }
+        }
+
+        if (capturedInfo.length > 0) {
+            for (const item of capturedInfo) {
+                await rewindAnimation(item.index, item.startPos);
             }
         }
 
