@@ -159,13 +159,14 @@
             to { transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.5); }
         }
 
-        #results-popup {
+        #results-popup, #details-popup {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center;
             z-index: 2000; flex-direction: column; gap: 20px;
+            backdrop-filter: blur(5px);
         }
         .ranking-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; font-size: 24px; }
-        .ranking-list li { padding: 10px 15px; margin: 5px 0; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: bold; background: white; border: 2px solid #ccc; }
+        .ranking-list li { padding: 10px 20px; margin: 10px 0; border-radius: 12px; display: flex; align-items: center; gap: 15px; font-weight: bold; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
 
         .hidden { display: none !important; }
     </style>
@@ -196,6 +197,15 @@
         <h2>Game Over</h2>
         <ul id="ranking-list" class="ranking-list"></ul>
         <button onclick="showMainMenu(); document.getElementById('results-popup').classList.add('hidden');" class="menu-btn btn-success">PLAY AGAIN</button>
+        <button onclick="document.getElementById('details-popup').classList.remove('hidden');" class="menu-btn btn-primary">SHOW DETAILS</button>
+    </div>
+</div>
+
+<div id="details-popup" class="hidden">
+    <div class="menu-card" style="max-height: 80vh; overflow-y: auto; text-align: left;">
+        <h2>Game Stats</h2>
+        <div id="stats-content"></div>
+        <button onclick="document.getElementById('details-popup').classList.add('hidden');" class="menu-btn">Close</button>
     </div>
 </div>
 
@@ -479,12 +489,14 @@
         
         // Wait for the animation to finish
         setTimeout(async () => {
+            const stats = localState.stats ? JSON.parse(JSON.stringify(localState.stats)) : null;
+            if (stats) stats[localState.currentPlayer].dice[diceValue]++;
             let sixCount = localState.sixCount;
             if (diceValue === 6) sixCount++; else sixCount = 0;
 
             if (sixCount === 3) {
                 await updateGameState({
-                    diceValue, sixCount: 0,
+                    diceValue, sixCount: 0, stats: stats || localState.stats,
                     currentPlayer: getNextPlayer(localState.currentPlayer, localState.numPlayers, localState.winners),
                     waitingForRoll: true,
                     turnId: Date.now().toString(),
@@ -494,7 +506,7 @@
 
             await updateGameState({ 
                 diceValue, 
-                sixCount, 
+                sixCount, stats: stats || localState.stats,
                 waitingForRoll: false,
                 turnId: Date.now().toString() 
             });
@@ -524,6 +536,7 @@
             } else return;
         }
 
+        const stats = localState.stats ? JSON.parse(JSON.stringify(localState.stats)) : null;
         // Capture Logic
         const myAbsPos = getAbsPos(localState.currentPlayer, token.pos);
         const isAtSafeSquare = SAFE_SQUARES.includes(myAbsPos);
@@ -536,6 +549,10 @@
                     if (otherAbsPos === myAbsPos) {
                         tokens[i].pos = -1; // Capture!
                         extraTurn = true; 
+                        if (stats) {
+                            stats[localState.currentPlayer].captures++;
+                            stats[otherPlayerIdx].captured++;
+                        }
                     }
                 }
             }
@@ -571,6 +588,7 @@
         await updateGameState({
             tokens,
             winners,
+            stats: stats || localState.stats,
             status: patchStatus,
             currentPlayer: nextPlayer,
             waitingForRoll: !gameOver,
@@ -613,10 +631,17 @@
         let firstPlayer = 0;
         if (num === 2) firstPlayer = 1;
 
+        const initialStats = Array(4).fill(0).map(() => ({
+            dice: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0},
+            captures: 0,
+            captured: 0
+        }));
+
         const initialState = {
             status: "playing",
             numPlayers: num,
             winners: [],
+            stats: initialStats,
             currentPlayer: firstPlayer, 
             diceValue: 1,
             waitingForRoll: true,
@@ -639,19 +664,21 @@
 
     window.testRoll = async (val) => {
         if (!localState || !localState.waitingForRoll) return;
+        const stats = localState.stats ? JSON.parse(JSON.stringify(localState.stats)) : null;
+        if (stats) stats[localState.currentPlayer].dice[val]++;
         let sixCount = localState.sixCount;
         if (val === 6) sixCount++; else sixCount = 0;
 
         if (sixCount === 3) {
             await updateGameState({
-                diceValue: val, sixCount: 0,
+                diceValue: val, sixCount: 0, stats: stats || localState.stats,
                 currentPlayer: getNextPlayer(localState.currentPlayer, localState.numPlayers, localState.winners),
                 waitingForRoll: true,
                 turnId: Date.now().toString(),
             });
             return;
         }
-        await updateGameState({ diceValue: val, sixCount, waitingForRoll: false, turnId: Date.now().toString() });
+        await updateGameState({ diceValue: val, sixCount, stats: stats || localState.stats, waitingForRoll: false, turnId: Date.now().toString() });
     };
 
     document.getElementById('btn-testing').onclick = () => {
@@ -745,6 +772,39 @@
             li.innerHTML = `<span>${pos}</span> - ${names[colorCodes[pIdx]]}`;
             list.appendChild(li);
         });
+
+        const statsContainer = document.getElementById('stats-content');
+        statsContainer.innerHTML = '';
+        if (localState.stats) {
+            localState.stats.forEach((st, idx) => {
+                const isActive = localState.numPlayers === 2 ? (idx === 1 || idx === 3) : (idx < localState.numPlayers);
+                if (!isActive) return;
+
+                const stDiv = document.createElement('div');
+                stDiv.style.marginBottom = '20px';
+                stDiv.style.background = '#f8f9fa';
+                stDiv.style.padding = '15px';
+                stDiv.style.borderRadius = '10px';
+                stDiv.style.borderLeft = `5px solid var(--${colorCodes[idx]})`;
+                
+                stDiv.innerHTML = `
+                    <h3 style="margin-top:0; color:var(--${colorCodes[idx]})">${names[colorCodes[idx]]} Team</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:14px;">
+                        <div>
+                            <strong>🎲 Dice Rolls:</strong><br>
+                            6: ${st.dice[6]} | 5: ${st.dice[5]} | 4: ${st.dice[4]}<br>
+                            3: ${st.dice[3]} | 2: ${st.dice[2]} | 1: ${st.dice[1]}
+                        </div>
+                        <div>
+                            <strong>⚔️ Battle Stats:</strong><br>
+                            Captures: ${st.captures}<br>
+                            Lost: ${st.captured}
+                        </div>
+                    </div>
+                `;
+                statsContainer.appendChild(stDiv);
+            });
+        }
         document.getElementById('results-popup').classList.remove('hidden');
     };
 
