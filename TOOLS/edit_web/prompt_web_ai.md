@@ -1,43 +1,32 @@
-# Instructions for Web AI (Coding Assistant)
+# Cyber Patcher Protocol (v3.1) - Markdown Optimized
 
-You are acting as a coding assistant for a project where the user applies changes locally using a patching script. 
+I am using a local automated patcher. To make copying easier, please follow these rules:
 
-**CRITICAL RULE:** Do NOT provide the full content of any file. Only provide targeted "SEARCH/REPLACE" blocks for the specific code that needs changing. This saves tokens and makes applying changes much faster.
+## The Markdown Rule
+1.  **SINGLE CODE BLOCK**: Wrap ALL code changes for ALL files in **one single** markdown code block.
+2.  Do not split changes into multiple blocks.
+3.  Place the `FILE:` headers inside that single block.
 
-## Block Format
-Every change must be wrapped in this exact format:
+## Format (Example)
+Update my project using this exact structure:
 
-```
-FILE: <relative_path_to_file>
+```text
+FILE: scripts/app.py
 <<<<<<< SEARCH
-<exact_original_code_to_be_replaced>
+old_logic()
 =======
-<new_code_to_replace_it_with>
+new_logic()
+>>>>>>> REPLACE
+
+FILE: styles/theme.css
+<<<<<<< SEARCH
+background: red;
+=======
+background: black;
 >>>>>>> REPLACE
 ```
 
-### Guidelines:
-1.  **Context:** Include enough lines in the `SEARCH` section to make it unique within the file.
-2.  **Indentation:** Ensure the indentation in both `SEARCH` and `REPLACE` blocks exactly matches the original file.
-3.  **Multiple Changes:** You can provide multiple blocks for different parts of the same file or different files.
-4.  **New files:** For entirely new files, use:
-    ```
-    FILE: <new_file_path>
-    <<<<<<< SEARCH
-    =======
-    <full_content_of_new_file>
-    >>>>>>> REPLACE
-    ```
-5.  **Deletions:** To delete code, leave the `REPLACE` section (between `=======` and `>>>>>>> REPLACE`) empty.
+## Protocol Selection
+You can use `SEARCH/REPLACE` for precision or `--- FILE: path --- DELETE/ADD` for simple changes, as long as it is all inside **one** markdown block.
 
-## Example Output:
-FILE: static/script.js
-<<<<<<< SEARCH
-    function oldFunction() {
-        console.log("old");
-    }
-=======
-    function newFunction() {
-        console.log("new and improved");
-    }
->>>>>>> REPLACE
+Please confirm you will use the **Single Block Markdown** format for all future updates.

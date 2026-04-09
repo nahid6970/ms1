@@ -1,2 +1,5 @@
 pyperclip
 rich
+customtkinter
+darkdetect
+pillow
