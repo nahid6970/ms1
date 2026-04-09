@@ -789,18 +789,33 @@
                 
                 stDiv.innerHTML = `
                     <h3 style="margin-top:0; color:var(--${colorCodes[idx]})">${names[colorCodes[idx]]} Team</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:14px;">
-                        <div>
-                            <strong>🎲 Dice Rolls:</strong><br>
-                            6: ${st.dice[6]} | 5: ${st.dice[5]} | 4: ${st.dice[4]}<br>
-                            3: ${st.dice[3]} | 2: ${st.dice[2]} | 1: ${st.dice[1]}
-                        </div>
-                        <div>
-                            <strong>⚔️ Battle Stats:</strong><br>
-                            Captures: ${st.captures}<br>
-                            Lost: ${st.captured}
-                        </div>
-                    </div>
+                    
+                    <table style="width:100%; border-collapse: collapse; text-align: center; background: white; border-radius: 6px; overflow: hidden; border: 1px solid #eee;">
+                        <thead style="background: #f1f1f1; font-size: 11px; color: #666;">
+                            <tr>
+                                <th style="padding: 6px; border: 1px solid #eee;">1</th>
+                                <th style="padding: 6px; border: 1px solid #eee;">2</th>
+                                <th style="padding: 6px; border: 1px solid #eee;">3</th>
+                                <th style="padding: 6px; border: 1px solid #eee;">4</th>
+                                <th style="padding: 6px; border: 1px solid #eee;">5</th>
+                                <th style="padding: 6px; border: 1px solid #eee;">6</th>
+                                <th style="padding: 6px; border: 1px solid #eee; background: #e8f5e9;">Cuts (⚔️)</th>
+                                <th style="padding: 6px; border: 1px solid #eee; background: #ffebee;">Lost (💀)</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 14px;">
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[1]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[2]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[3]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[4]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[5]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee;">${st.dice[6]}</td>
+                                <td style="padding: 8px; border: 1px solid #eee; font-weight: bold; color: #2e7d32; background: #f1f8e9;">${st.captures}</td>
+                                <td style="padding: 8px; border: 1px solid #eee; font-weight: bold; color: #c62828; background: #fffbfa;">${st.captured}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 `;
                 statsContainer.appendChild(stDiv);
             });
