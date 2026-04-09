@@ -391,9 +391,13 @@
                 if (!inCenter) {
                     const count = siblings.length;
                     if (count > 1) {
-                        scale *= 0.75;
-                        offset.x = (index % 2 === 0 ? -10 : 10);
-                        offset.y = (index > 1 ? 10 : -10);
+                        scale *= (count > 4 ? 0.6 : 0.75);
+                        
+                        const angle = (index / count) * 2 * Math.PI - (Math.PI / 2);
+                        const radius = count > 4 ? 13 : 10;
+                        
+                        offset.x = Math.cos(angle) * radius;
+                        offset.y = Math.sin(angle) * radius;
                     }
                 } else {
                     const count = siblings.length;
