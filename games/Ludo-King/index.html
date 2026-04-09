@@ -218,16 +218,6 @@
         <button id="btn-continue" class="menu-btn btn-primary hidden">CONTINUE GAME</button>
         <button id="btn-new-game" class="menu-btn btn-success">NEW GAME</button>
         
-        <div id="seat-lobby" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-            <p style="font-weight: bold; margin-bottom: 10px;">Select Your Seat:</p>
-            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                <button id="seat-0" class="menu-btn btn-player" style="background: var(--red); color: white;" onclick="takeSeat(0)">RED</button>
-                <button id="seat-1" class="menu-btn btn-player" style="background: var(--green); color: white;" onclick="takeSeat(1)">GREEN</button>
-                <button id="seat-2" class="menu-btn btn-player" style="background: var(--blue); color: white;" onclick="takeSeat(2)">BLUE</button>
-                <button id="seat-3" class="menu-btn btn-player" style="background: var(--yellow); color: white;" onclick="takeSeat(3)">YELLOW</button>
-            </div>
-        </div>
-
         <button id="btn-testing" class="menu-btn btn-test-mode" style="margin-top: 20px;">TESTING MODE</button>
     </div>
     <div id="player-select" class="menu-card hidden">
@@ -239,6 +229,17 @@
             <button class="menu-btn btn-player" onclick="startGame(4)">4</button>
         </div>
         <button onclick="showMainMenu()" class="menu-btn">Back</button>
+    </div>
+    <div id="lobby-select" class="menu-card hidden">
+        <h2>Choose Color</h2>
+        <div id="lobby-buttons" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <button id="lobby-0" class="menu-btn btn-player" style="background: var(--red); color: white;" onclick="takeSeat(0)">RED</button>
+            <button id="lobby-1" class="menu-btn btn-player" style="background: var(--green); color: white;" onclick="takeSeat(1)">GREEN</button>
+            <button id="lobby-2" class="menu-btn btn-player" style="background: var(--blue); color: white;" onclick="takeSeat(2)">BLUE</button>
+            <button id="lobby-3" class="menu-btn btn-player" style="background: var(--yellow); color: white;" onclick="takeSeat(3)">YELLOW</button>
+        </div>
+        <button id="btn-enter-game" class="menu-btn btn-success hidden" onclick="document.getElementById('menu-overlay').classList.add('hidden')">ENTER GAME</button>
+        <p id="lobby-wait" style="font-size: 14px; color: #7f8c8d;">Select a seat to continue...</p>
     </div>
 </div>
 
@@ -322,6 +323,7 @@
     window.logout = () => {
         localStorage.removeItem('ludoUser');
         currentUser = null;
+        document.getElementById('badge-name').innerText = "";
         checkLogin();
     };
 
@@ -358,17 +360,14 @@
     };
 
     function updateLobbyUI(state) {
-        if (!state || state.status !== "playing") {
-            document.getElementById('seat-lobby').classList.add('hidden');
-            return;
-        }
-        document.getElementById('seat-lobby').classList.remove('hidden');
+        if (!state) return;
         
         const map = state.playerMap || {};
         const availableIdxs = state.numPlayers === 2 ? [1, 3] : (state.numPlayers === 3 ? [0, 1, 2] : [0, 1, 2, 3]);
+        let myIdx = -1;
 
         [0, 1, 2, 3].forEach(i => {
-            const btn = document.getElementById(`seat-${i}`);
+            const btn = document.getElementById(`lobby-${i}`);
             const isAvailable = availableIdxs.includes(i);
             const takenBy = map[i];
             
@@ -378,10 +377,14 @@
                 btn.style.display = 'inline-block';
                 if (takenBy) {
                     btn.innerText = takenBy.toUpperCase();
-                    btn.disabled = (takenBy !== currentUser.username);
-                    btn.style.opacity = (takenBy === currentUser.username) ? '1' : '0.5';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.border = 'none';
                     
-                    if (takenBy === currentUser.username) {
+                    if (takenBy === currentUser?.username) {
+                        myIdx = i;
+                        btn.style.opacity = '1';
+                        btn.style.border = '4px solid white';
                         const rotations = [270, 180, 90, 0];
                         document.documentElement.style.setProperty('--board-rotate', `${rotations[i]}deg`);
                         document.getElementById('badge-color').style.background = ['#ff0000', '#00a000', '#0099ff', '#e6ac00'][i];
@@ -390,9 +393,18 @@
                     btn.innerText = ['RED', 'GREEN', 'BLUE', 'YELLOW'][i];
                     btn.disabled = false;
                     btn.style.opacity = '1';
+                    btn.style.border = 'none';
                 }
             }
         });
+
+        if (myIdx !== -1) {
+            document.getElementById('btn-enter-game').classList.remove('hidden');
+            document.getElementById('lobby-wait').innerText = "Seat reserved. You are ready!";
+        } else {
+            document.getElementById('btn-enter-game').classList.add('hidden');
+            document.getElementById('lobby-wait').innerText = "Select a seat to continue...";
+        }
     }
 
     const diceEl = document.getElementById('dice');
@@ -825,7 +837,11 @@
         localState = initialState;
         renderUI(localState);
         await client.mutation("game:setState", { patch: localState });
-        document.getElementById('menu-overlay').classList.add('hidden');
+        
+        // Show seat selection
+        document.getElementById('player-select').classList.add('hidden');
+        document.getElementById('lobby-select').classList.remove('hidden');
+        updateLobbyUI(localState);
     };
 
     window.testRoll = async (val) => {
@@ -913,16 +929,31 @@
     document.getElementById('btn-new-game').onclick = () => {
         document.getElementById('main-menu').classList.add('hidden');
         document.getElementById('player-select').classList.remove('hidden');
+        document.getElementById('lobby-select').classList.add('hidden');
     };
 
     window.showMainMenu = () => {
         document.getElementById('main-menu').classList.remove('hidden');
         document.getElementById('player-select').classList.add('hidden');
+        document.getElementById('lobby-select').classList.add('hidden');
     };
 
     document.getElementById('btn-continue').onclick = () => {
-        document.getElementById('menu-overlay').classList.add('hidden');
-        updateUI();
+        if (localState?.status === "finished") {
+             document.getElementById('menu-overlay').classList.add('hidden');
+             window.showResultsPopup(localState.winners);
+             return;
+        }
+        
+        const mySeat = Object.keys(localState?.playerMap || {}).find(k => localState.playerMap[k] === currentUser?.username);
+        if (mySeat === undefined) {
+             document.getElementById('main-menu').classList.add('hidden');
+             document.getElementById('lobby-select').classList.remove('hidden');
+             updateLobbyUI(localState);
+        } else {
+             document.getElementById('menu-overlay').classList.add('hidden');
+             updateUI();
+        }
     };
 
     window.showResultsPopup = (winners) => {
