@@ -90,11 +90,14 @@
             cursor: pointer;
             position: absolute;
             top: 50%; left: 50%;
-            /* Center the base of the pin */
-            transform: translate(-50%, -85%);
-            transition: all 0.2s ease-out;
             z-index: 50;
             pointer-events: auto;
+        }
+        .token-inner {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            transform: translate(0, -35%); /* Shift to pin base */
+            transition: all 0.2s ease-out;
         }
         .token svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4)); }
         
@@ -477,7 +480,7 @@
                     token = document.createElement('div');
                     token.id = `token-${i}`;
                     token.className = `token ${t.player}`;
-                    token.innerHTML = PIN_SVG;
+                    token.innerHTML = `<div class="token-inner">${PIN_SVG}</div>`;
                     token.style.color = `var(--${t.player})`; 
                 }
                 
@@ -559,7 +562,11 @@
                 }
             }
             const angle = [270, 180, 90, 0][currentUser ? currentUser.playerIdx : 3];
-            token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) rotate(${-angle}deg) scale(${scale})`;
+            token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`;
+            const inner = token.querySelector('.token-inner');
+            if (inner) {
+                inner.style.transform = `rotate(${-angle}deg) translate(0, -35%) scale(${scale})`;
+            }
         });
     }
 
