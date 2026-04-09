@@ -496,7 +496,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-Notes_BT = tk.Label(ROOT1, text="NOTE", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Notes_BT = tk.Label(ROOT1, text="\uf249", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 Notes_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
 Notes_BT.bind("<Button-1>", lambda event=None: subprocess.Popen('notepad.exe'))
 
@@ -613,7 +613,7 @@ VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('
 # ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
 # ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\test_project\ollama-chat-app\server.py'))
 
-Calc_BT = tk.Label(ROOT1, text="CALC", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Calc_BT = tk.Label(ROOT1, text="\udb81\udca1", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 Calc_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
 Calc_BT.bind("<Button-1>", lambda event=None: subprocess.Popen('calc.exe'))
 
