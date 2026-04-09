@@ -9,6 +9,7 @@
         :root {
             --red: #ff0000; --green: #00a000; --yellow: #e6ac00; --blue: #0099ff;
             --white: #ffffff; --border: #333; --cell-size: 40px;
+            --board-rotate: 0deg;
         }
 
         body {
@@ -44,6 +45,8 @@
             grid-template-rows: repeat(15, var(--cell-size));
             background-color: var(--white); border: 2px solid var(--border);
             box-shadow: 0 0 50px rgba(0,0,0,0.3); position: relative;
+            transform: rotate(var(--board-rotate));
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .c { border: 0.5px solid #aaa; box-sizing: border-box; position: relative; }
@@ -78,6 +81,8 @@
         .star {
             position: absolute; top: 15%; left: 15%; width: 70%; height: 70%;
             fill: rgba(0,0,0,0.4); z-index: 1; pointer-events: none;
+            transform: rotate(calc(-1 * var(--board-rotate)));
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .token {
@@ -304,6 +309,10 @@
             document.getElementById('badge-name').innerText = currentUser.username.toUpperCase();
             const badgeColor = ['#ff0000', '#00a000', '#0099ff', '#e6ac00'][currentUser.playerIdx];
             document.getElementById('badge-color').style.background = badgeColor;
+            
+            // Sync rotation on reload
+            const rotations = [270, 180, 90, 0];
+            document.documentElement.style.setProperty('--board-rotate', `${rotations[currentUser.playerIdx]}deg`);
         }
     }
 
@@ -319,6 +328,11 @@
         if (USERS[u] && USERS[u].pass === p) {
             currentUser = { username: u, playerIdx: USERS[u].idx };
             localStorage.setItem('ludoUser', JSON.stringify(currentUser));
+            
+            // Set board rotation
+            const rotations = [270, 180, 90, 0]; // Red(0), Green(1), Blue(2), Yellow(3) to bring to bottom-left
+            document.documentElement.style.setProperty('--board-rotate', `${rotations[currentUser.playerIdx]}deg`);
+            
             checkLogin();
         } else {
             document.getElementById('login-error').classList.remove('hidden');
@@ -544,7 +558,8 @@
                     offset.y = (index - (count - 1) / 2) * spread;
                 }
             }
-            token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`;
+            const angle = [270, 180, 90, 0][currentUser ? currentUser.playerIdx : 3];
+            token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) rotate(${-angle}deg) scale(${scale})`;
         });
     }
 
