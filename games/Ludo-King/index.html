@@ -107,7 +107,7 @@
         }
 
         .token.pulse svg {
-            animation: bounce 1.5s infinite alternate;
+            /* Handled by tokenGlow */
         }
         @keyframes bounce { 
             from { transform: translateY(0); }
@@ -152,19 +152,13 @@
 
         .btn-test-mode { background: #9b59b6; color: white; }
         
-        .shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(15deg) scale(1.1); }
-            50% { transform: rotate(-15deg) scale(1.1); }
-            75% { transform: rotate(10deg) scale(1.05); }
-            100% { transform: rotate(0deg) scale(1); }
+        .token.pulse svg {
+             animation: tokenGlow 1.2s infinite alternate ease-in-out;
+             z-index: 100;
         }
-        
-        .pulse { animation: pulse 0.8s infinite alternate; }
-        @keyframes pulse {
-            from { transform: translate(-50%, -50%) scale(1); filter: brightness(1.2); }
-            to { transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.5); }
+        @keyframes tokenGlow {
+            from { filter: drop-shadow(0 0 2px currentColor) brightness(1); }
+            to { filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 15px currentColor) brightness(1.4); }
         }
 
         #results-popup, #details-popup {
@@ -223,7 +217,18 @@
         <h2>Ludo Master</h2>
         <button id="btn-continue" class="menu-btn btn-primary hidden">CONTINUE GAME</button>
         <button id="btn-new-game" class="menu-btn btn-success">NEW GAME</button>
-        <button id="btn-testing" class="menu-btn btn-test-mode">TESTING MODE</button>
+        
+        <div id="seat-lobby" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+            <p style="font-weight: bold; margin-bottom: 10px;">Select Your Seat:</p>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button id="seat-0" class="menu-btn btn-player" style="background: var(--red); color: white;" onclick="takeSeat(0)">RED</button>
+                <button id="seat-1" class="menu-btn btn-player" style="background: var(--green); color: white;" onclick="takeSeat(1)">GREEN</button>
+                <button id="seat-2" class="menu-btn btn-player" style="background: var(--blue); color: white;" onclick="takeSeat(2)">BLUE</button>
+                <button id="seat-3" class="menu-btn btn-player" style="background: var(--yellow); color: white;" onclick="takeSeat(3)">YELLOW</button>
+            </div>
+        </div>
+
+        <button id="btn-testing" class="menu-btn btn-test-mode" style="margin-top: 20px;">TESTING MODE</button>
     </div>
     <div id="player-select" class="menu-card hidden">
         <h2>Select Players</h2>
@@ -310,12 +315,7 @@
             document.getElementById('menu-overlay').classList.remove('hidden');
             document.getElementById('user-badge').classList.remove('hidden');
             document.getElementById('badge-name').innerText = currentUser.username.toUpperCase();
-            const badgeColor = ['#ff0000', '#00a000', '#0099ff', '#e6ac00'][currentUser.playerIdx];
-            document.getElementById('badge-color').style.background = badgeColor;
-            
-            // Sync rotation on reload
-            const rotations = [270, 180, 90, 0];
-            document.documentElement.style.setProperty('--board-rotate', `${rotations[currentUser.playerIdx]}deg`);
+            document.getElementById('badge-color').style.background = '#ccc';
         }
     }
 
@@ -329,19 +329,71 @@
         const u = document.getElementById('username').value.toLowerCase();
         const p = document.getElementById('password').value;
         if (USERS[u] && USERS[u].pass === p) {
-            currentUser = { username: u, playerIdx: USERS[u].idx };
+            currentUser = { username: u };
             localStorage.setItem('ludoUser', JSON.stringify(currentUser));
-            
-            // Set board rotation
-            const rotations = [270, 180, 90, 0]; // Red(0), Green(1), Blue(2), Yellow(3) to bring to bottom-left
-            document.documentElement.style.setProperty('--board-rotate', `${rotations[currentUser.playerIdx]}deg`);
-            
             checkLogin();
         } else {
             document.getElementById('login-error').classList.remove('hidden');
         }
     };
     checkLogin();
+
+    window.takeSeat = async (idx) => {
+        if (!localState || !currentUser) return;
+        const playerMap = { ...(localState.playerMap || {}) };
+        
+        // Remove me from other seats first
+        for (const k in playerMap) {
+            if (playerMap[k] === currentUser.username) delete playerMap[k];
+        }
+        
+        // Check if seat is taken by someone else
+        if (playerMap[idx] && playerMap[idx] !== currentUser.username) {
+            alert("Seat already taken!");
+            return;
+        }
+
+        playerMap[idx] = currentUser.username;
+        await updateGameState({ playerMap });
+    };
+
+    function updateLobbyUI(state) {
+        if (!state || state.status !== "playing") {
+            document.getElementById('seat-lobby').classList.add('hidden');
+            return;
+        }
+        document.getElementById('seat-lobby').classList.remove('hidden');
+        
+        const map = state.playerMap || {};
+        const availableIdxs = state.numPlayers === 2 ? [1, 3] : (state.numPlayers === 3 ? [0, 1, 2] : [0, 1, 2, 3]);
+
+        [0, 1, 2, 3].forEach(i => {
+            const btn = document.getElementById(`seat-${i}`);
+            const isAvailable = availableIdxs.includes(i);
+            const takenBy = map[i];
+            
+            if (!isAvailable) {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'inline-block';
+                if (takenBy) {
+                    btn.innerText = takenBy.toUpperCase();
+                    btn.disabled = (takenBy !== currentUser.username);
+                    btn.style.opacity = (takenBy === currentUser.username) ? '1' : '0.5';
+                    
+                    if (takenBy === currentUser.username) {
+                        const rotations = [270, 180, 90, 0];
+                        document.documentElement.style.setProperty('--board-rotate', `${rotations[i]}deg`);
+                        document.getElementById('badge-color').style.background = ['#ff0000', '#00a000', '#0099ff', '#e6ac00'][i];
+                    }
+                } else {
+                    btn.innerText = ['RED', 'GREEN', 'BLUE', 'YELLOW'][i];
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            }
+        });
+    }
 
     const diceEl = document.getElementById('dice');
     const colors = ['Red', 'Green', 'Blue', 'Yellow'];
@@ -396,11 +448,13 @@
         if (!localState || serverTurnId > localTurnId) {
             localState = state;
             renderUI(state);
+            updateLobbyUI(state);
         } else if (serverTurnId === localTurnId) {
             // If same turn, check if the server has a newer timestamp (e.g. from a different player)
             if (state.timestamp > localState.timestamp) {
                 localState = state;
                 renderUI(state);
+                updateLobbyUI(state);
             }
         }
     }
@@ -441,6 +495,7 @@
         }
 
         renderTokens(state, validMoves);
+        updateLobbyUI(state);
     }
 
     function renderTokens(state, validMoves) {
@@ -561,7 +616,9 @@
                     offset.y = (index - (count - 1) / 2) * spread;
                 }
             }
-            const angle = [270, 180, 90, 0][currentUser ? currentUser.playerIdx : 3];
+            const mySeatIdx = Object.keys(state.playerMap || {}).find(k => state.playerMap[k] === currentUser?.username);
+            const viewIdx = mySeatIdx !== undefined ? parseInt(mySeatIdx) : 3;
+            const angle = [270, 180, 90, 0][viewIdx];
             token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`;
             const inner = token.querySelector('.token-inner');
             if (inner) {
@@ -573,7 +630,10 @@
 
 
     async function localRollDice(playerIndex) {
-        if (!currentUser || currentUser.playerIdx !== playerIndex) return;
+        if (!currentUser) return;
+        const mySeat = Object.keys(localState.playerMap || {}).find(k => localState.playerMap[k] === currentUser.username);
+        if (mySeat === undefined || parseInt(mySeat) !== playerIndex) return;
+        
         if (!localState || !localState.waitingForRoll || localState.currentPlayer !== playerIndex || isRolling) return;
         if (isTesting) return; // Dice click ignored in testing mode (use buttons)
         isRolling = true;
@@ -620,7 +680,10 @@
         if (!localState || localState.waitingForRoll) return;
 
         const playerIndex = Math.floor(tokenIndex / 4);
-        if (!currentUser || currentUser.playerIdx !== playerIndex) return;
+        if (!currentUser) return;
+        const mySeat = Object.keys(localState.playerMap || {}).find(k => localState.playerMap[k] === currentUser.username);
+        if (mySeat === undefined || parseInt(mySeat) !== playerIndex) return;
+
         if (playerIndex !== localState.currentPlayer) return;
 
         const tokens = [...localState.tokens.map(t => ({...t}))];
@@ -745,8 +808,8 @@
             numPlayers: num,
             winners: [],
             stats: initialStats,
-            currentPlayer: firstPlayer, 
-            diceValue: 1,
+            playerMap: {},
+            currentPlayer: firstPlayer,             diceValue: 1,
             waitingForRoll: true,
             sixCount: 0,
             turnId: Date.now().toString(),
