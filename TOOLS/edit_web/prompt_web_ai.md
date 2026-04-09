@@ -1,32 +1,40 @@
-# Cyber Patcher Protocol (v3.1) - Markdown Optimized
+# Cyber Patcher Protocol (v5.0) - RANGE SUPPORT
 
-I am using a local automated patcher. To make copying easier, please follow these rules:
+I am using a local automated patcher. To optimize for large file modifications, please follow these rules:
 
-## The Markdown Rule
-1.  **SINGLE CODE BLOCK**: Wrap ALL code changes for ALL files in **one single** markdown code block.
-2.  Do not split changes into multiple blocks.
-3.  Place the `FILE:` headers inside that single block.
+---
 
-## Format (Example)
-Update my project using this exact structure:
+## 🚀 Option A: RANGE PATCHING (Best for Large Blocks)
+Use this if you are deleting or replacing a large section of code. You only need to provide the "Anchor" lines for the start and end.
 
 ```text
-FILE: scripts/app.py
-<<<<<<< SEARCH
-old_logic()
-=======
-new_logic()
->>>>>>> REPLACE
+FILE: <relative_path>
+RANGE START: <exact_first_line_of_block>
+RANGE END: <exact_last_line_of_block>
+REPLACE WITH:
+<new_code_or_leave_empty_to_delete>
+--- END RANGE ---
+```
 
-FILE: styles/theme.css
+---
+
+## 🎯 Option B: SEARCH/REPLACE (Best for Small Edits)
+Use this for targeted single-line or small multi-line changes.
+
+```text
+FILE: <relative_path>
 <<<<<<< SEARCH
-background: red;
+<original_code>
 =======
-background: black;
+<updated_code>
 >>>>>>> REPLACE
 ```
 
-## Protocol Selection
-You can use `SEARCH/REPLACE` for precision or `--- FILE: path --- DELETE/ADD` for simple changes, as long as it is all inside **one** markdown block.
+---
 
-Please confirm you will use the **Single Block Markdown** format for all future updates.
+## Important Rules:
+1.  **Anchors**: Ensure the `RANGE START` and `RANGE END` lines are unique enough to be found.
+2.  **Single Block**: Provide all changes in **One Single Markdown Code Block**.
+3.  **Clean Code**: Do not include conversational text inside the code block.
+
+Please confirm you understand how to use the **RANGE** format for large deletions.

@@ -491,9 +491,6 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 #! ███████╗███████╗██║        ██║
 #! ╚══════╝╚══════╝╚═╝        ╚═╝
 
-uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
-uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
-
 Notes_BT = tk.Label(ROOT1, text="\uf249", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 Notes_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
 Notes_BT.bind("<Button-1>", lambda event=None: subprocess.Popen('notepad.exe'))
@@ -1481,7 +1478,6 @@ update_cpu_core_bars()
 
 
 
-update_uptime_label()
 update_info_labels()
 # check_window_topmost()
 # Lockbox_update_label(LockBox_lb)
