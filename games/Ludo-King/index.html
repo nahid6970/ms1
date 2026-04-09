@@ -169,9 +169,46 @@
         .ranking-list li { padding: 10px 20px; margin: 10px 0; border-radius: 12px; display: flex; align-items: center; gap: 15px; font-weight: bold; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
 
         .hidden { display: none !important; }
+
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            display: flex; justify-content: center; align-items: center;
+            z-index: 3000; transition: opacity 0.5s ease;
+        }
+        .menu-input {
+            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd;
+            border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none;
+            transition: border-color 0.3s;
+        }
+        .menu-input:focus { border-color: #3498db; }
+        
+        #user-badge {
+            position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.9);
+            color: #333; padding: 10px 15px; border-radius: 25px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 500; display: flex; align-items: center; gap: 8px;
+        }
+        .badge-dot { width: 10px; height: 10px; border-radius: 50%; }
     </style>
 </head>
 <body>
+
+<div id="login-overlay">
+    <div class="menu-card" style="box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <h2 style="margin-bottom: 25px; color: #1e3c72;">Member Access</h2>
+        <input type="text" id="username" placeholder="Username (p1-p4)" class="menu-input">
+        <input type="password" id="password" placeholder="Password (player1-4)" class="menu-input">
+        <div id="login-error" style="color: #e74c3c; font-size: 14px; margin-bottom: 10px;" class="hidden">⚠️ Access Denied: Invalid Credentials</div>
+        <button id="btn-login" class="menu-btn btn-success">AUTHENTICATE</button>
+        <p style="font-size: 12px; color: #7f8c8d; margin-top: 15px;">Official Ludo Master Online Terminal</p>
+    </div>
+</div>
+
+<div id="user-badge" class="hidden">
+    <div class="badge-dot" id="badge-color"></div>
+    <span id="badge-name"></span>
+    <button onclick="logout()" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:12px; margin-left:10px; padding:0; text-decoration:underline;">Logout</button>
+</div>
 
 <div id="menu-overlay">
     <div id="main-menu" class="menu-card">
@@ -246,6 +283,48 @@
 <script type="module">
     import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
     const client = new ConvexHttpClient("https://silent-scorpion-207.convex.cloud");
+
+    const USERS = {
+        'p1': { pass: 'player1', idx: 0 },
+        'p2': { pass: 'player2', idx: 1 },
+        'p3': { pass: 'player3', idx: 2 },
+        'p4': { pass: 'player4', idx: 3 },
+    };
+    let currentUser = JSON.parse(localStorage.getItem('ludoUser'));
+
+    function checkLogin() {
+        if (!currentUser) {
+            document.getElementById('login-overlay').classList.remove('hidden');
+            document.getElementById('menu-overlay').classList.add('hidden');
+            document.getElementById('user-badge').classList.add('hidden');
+        } else {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('menu-overlay').classList.remove('hidden');
+            document.getElementById('user-badge').classList.remove('hidden');
+            document.getElementById('badge-name').innerText = currentUser.username.toUpperCase();
+            const badgeColor = ['#ff0000', '#00a000', '#0099ff', '#e6ac00'][currentUser.playerIdx];
+            document.getElementById('badge-color').style.background = badgeColor;
+        }
+    }
+
+    window.logout = () => {
+        localStorage.removeItem('ludoUser');
+        currentUser = null;
+        checkLogin();
+    };
+
+    document.getElementById('btn-login').onclick = () => {
+        const u = document.getElementById('username').value.toLowerCase();
+        const p = document.getElementById('password').value;
+        if (USERS[u] && USERS[u].pass === p) {
+            currentUser = { username: u, playerIdx: USERS[u].idx };
+            localStorage.setItem('ludoUser', JSON.stringify(currentUser));
+            checkLogin();
+        } else {
+            document.getElementById('login-error').classList.remove('hidden');
+        }
+    };
+    checkLogin();
 
     const diceEl = document.getElementById('dice');
     const colors = ['Red', 'Green', 'Blue', 'Yellow'];
@@ -472,6 +551,7 @@
 
 
     async function localRollDice(playerIndex) {
+        if (!currentUser || currentUser.playerIdx !== playerIndex) return;
         if (!localState || !localState.waitingForRoll || localState.currentPlayer !== playerIndex || isRolling) return;
         if (isTesting) return; // Dice click ignored in testing mode (use buttons)
         isRolling = true;
@@ -518,6 +598,7 @@
         if (!localState || localState.waitingForRoll) return;
 
         const playerIndex = Math.floor(tokenIndex / 4);
+        if (!currentUser || currentUser.playerIdx !== playerIndex) return;
         if (playerIndex !== localState.currentPlayer) return;
 
         const tokens = [...localState.tokens.map(t => ({...t}))];
