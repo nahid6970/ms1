@@ -66,7 +66,7 @@ def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_show.pack()
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#00ffff")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
@@ -291,7 +291,6 @@ def update_info_labels():
     disk_c_usage, disk_d_usage = get_disk_info()
     upload_speed, download_speed = get_net_speed()
     LB_CPU['text'] = f'{cpu_usage}%'
-    LB_RAM['text'] = f'{ram_usage}%'
     LB_GPU.config(text=f'{gpu_usage}%')
     LB_DUC['text'] = f'\uf0a0 {disk_c_usage}%'
     LB_DUD['text'] = f'\uf0a0 {disk_d_usage}%'
@@ -338,7 +337,6 @@ def update_info_labels():
     #     logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Download: {download_speed}, Upload: {upload_speed}\n")
 
     # Change background and foreground color based on usage thresholds
-    LB_RAM.config(bg='#ff934b' if ram_usage > 80 else '#1d2027', fg='#1d2027' if ram_usage > 80 else '#ff934b')
     LB_CPU.config(bg='#14bcff' if cpu_usage > 80 else '#1d2027', fg='#1d2027' if cpu_usage > 80 else '#14bcff')
     LB_DUC.config(bg='#f12c2f' if disk_c_usage > 90 else '#044568', fg='#FFFFFF' if disk_c_usage > 90 else '#fff')
     LB_DUD.config(bg='#f12c2f' if disk_d_usage > 90 else '#044568', fg='#FFFFFF' if disk_d_usage > 90 else '#fff')
@@ -1182,10 +1180,6 @@ LB_CPU.bind("<Control-Button-1>",lambda event=None: subprocess.Popen(['code', r'
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_GPU.bind("<Button-1>",None)
-
-LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#f08d0c",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
-LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_RAM.bind("<Button-1>",None)
 
 LB_DUC=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUC.pack(side="left",padx=(3,0 ),pady=(0,0))
