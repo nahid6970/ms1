@@ -13,7 +13,7 @@ class CyberPatcherApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("CYBER PATCHER v3.2 - SAFETY EDITION")
+        self.title("CYBER PATCHER v3.5 - MULTI-BLOCK EDITION")
         self.geometry("1150x900")
 
         # State
@@ -27,7 +27,7 @@ class CyberPatcherApp(ctk.CTk):
         self.sidebar = ctk.CTkFrame(self, width=280, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         
-        self.logo_label = ctk.CTkLabel(self.sidebar, text="CYBER\nPATCHER v3.2", font=ctk.CTkFont(size=26, weight="bold", family="JetBrains Mono"))
+        self.logo_label = ctk.CTkLabel(self.sidebar, text="CYBER\nPATCHER v3.5", font=ctk.CTkFont(size=26, weight="bold", family="JetBrains Mono"))
         self.logo_label.pack(pady=30)
 
         # Project Path
@@ -79,35 +79,34 @@ class CyberPatcherApp(ctk.CTk):
         content = self.text_editor.get("1.0", "end")
         content = re.sub(r"```[a-zA-Z]*\n", "", content)
         content = content.replace("```", "")
-        # Critical Safety: Remove accidental nested markers that cause SyntaxErrors
-        markers = [r"<<<<<<< SEARCH", r"=======", r">>>>>>> REPLACE", r"--- FILE:.*?---", r"--- END FILE ---"]
-        for m in markers:
-            content = re.sub(m + r".*?\n", "", content, flags=re.MULTILINE)
-        
         self.text_editor.delete("1.0", "end")
         self.text_editor.insert("1.0", content.strip())
-        self.update_status("Cleaned formatting and redundant markers.")
+        self.update_status("Cleaned formatting.")
 
     def generate_prompt_combined(self):
         root = self.project_path.get()
-        prompt = f"""# Protocol: Cyber Patcher Implementation
+        prompt = f"""# Protocol: Multi-Block Patcher
 Project Root: {root}
 
-To prevent SyntaxErrors, provide ALL changes inside ONE single Markdown code block. 
+Use one FILE: header followed by multiple SEARCH/REPLACE blocks for each file.
 
 Format:
 FILE: relative/path/to/file.py
 <<<<<<< SEARCH
-(exact original lines)
+(block 1 old)
 =======
-(new code)
+(block 1 new)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+(block 2 old)
+=======
+(block 2 new)
 >>>>>>> REPLACE
 """
         self.text_editor.delete("1.0", "end")
         self.text_editor.insert("1.0", prompt)
 
     def normalize_text(self, text):
-        """Removes trailing whitespace from each line and uses \n line endings."""
         return "\n".join([line.rstrip() for line in text.splitlines()])
 
     def apply_changes(self):
@@ -118,73 +117,89 @@ FILE: relative/path/to/file.py
             messagebox.showerror("Error", "Invalid Project Root!")
             return
 
-        # Pattern matches
-        p1 = re.compile(r"FILE:\s*(?P<path>[^\n]+)\n<<<<<<< SEARCH\n(?P<search>.*?)\n=======\n(?P<replace>.*?)\n>>>>>>> REPLACE", re.DOTALL)
-        p2 = re.compile(r"--- FILE:\s*(?P<path>[^\n-]+)---\nDELETE:\n(?P<search>.*?)\nADD:\n(?P<replace>.*?)\n--- END FILE ---", re.DOTALL)
-
-        matches = list(p1.finditer(content)) + list(p2.finditer(content))
-
-        if not matches:
-            messagebox.showwarning("No Blocks", "No recognized change blocks found.")
+        # Split content by FILE: header OR --- FILE: header
+        file_segments = re.split(r"(?:FILE:|--- FILE:)\s*([^\n-]+)(?:---|)\n", content)
+        
+        if len(file_segments) < 2:
+            messagebox.showwarning("No Blocks", "No FILE: headers found.")
             return
 
         success_count = 0
         fail_count = 0
         log = []
 
-        for match in matches:
-            rel_path = match.group("path").strip().strip("`\"' ")
-            search_str = self.normalize_text(match.group("search"))
-            replace_str = self.normalize_text(match.group("replace"))
+        # re.split with a group returns [pre-match, group1, match-content, ...]
+        for i in range(1, len(file_segments), 2):
+            rel_path = file_segments[i].strip().strip("`\"' ")
+            blocks_text = file_segments[i+1]
             
-            # MAJOR SAFETY: If REPLACE contains markers, AI messed up. Strip them.
-            bad_markers = ["<<<<<<< SEARCH", "=======", ">>>>>>> REPLACE"]
-            for bm in bad_markers:
-                if bm in replace_str:
-                    replace_str = replace_str.replace(bm, f"# [SECURITY] Removed {bm}")
-
             full_path = root_path / rel_path
             
-            if not search_str.strip() and not full_path.exists():
-                try:
-                    full_path.parent.mkdir(parents=True, exist_ok=True)
-                    with open(full_path, "w", encoding="utf-8") as f:
-                        f.write(replace_str)
-                    success_count += 1
-                    log.append(f"CREATED: {rel_path}")
-                    continue
-                except Exception as e:
-                    fail_count += 1
-                    log.append(f"ERROR: {rel_path} - {e}")
-                    continue
-
-            if not full_path.exists():
-                fail_count += 1
-                log.append(f"NOT FOUND: {full_path}")
+            # Extract blocks from this file's segment
+            p1 = re.compile(r"<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE", re.DOTALL)
+            p2 = re.compile(r"DELETE:\n(.*?)\nADD:\n(.*?)\n--- END FILE ---", re.DOTALL)
+            
+            matches = list(p1.finditer(blocks_text)) + list(p2.finditer(blocks_text))
+            
+            if not matches:
                 continue
 
-            try:
-                with open(full_path, "r", encoding="utf-8") as f:
-                    file_text_raw = f.read()
-                    file_text_norm = self.normalize_text(file_text_raw)
+            # Load file content
+            file_text_raw = ""
+            file_text_norm = ""
+            line_ending = "\n"
+            
+            exists = full_path.exists()
+            if exists:
+                try:
+                    with open(full_path, "r", encoding="utf-8") as f:
+                        file_text_raw = f.read()
+                        file_text_norm = self.normalize_text(file_text_raw)
+                        line_ending = "\r\n" if "\r\n" in file_text_raw else "\n"
+                except Exception as e:
+                    log.append(f"CRITICAL: Could not read {rel_path} - {e}")
+                    fail_count += 1
+                    continue
+            
+            current_file_modified = False
+            
+            for m in matches:
+                search_str = self.normalize_text(m.group(1))
+                replace_str = self.normalize_text(m.group(2))
                 
+                # New file creation
+                if not search_str.strip() and not exists:
+                    try:
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        with open(full_path, "w", encoding="utf-8") as f:
+                            f.write(replace_str)
+                        success_count += 1
+                        log.append(f"CREATED: {rel_path}")
+                        exists = True # Flag as exists now
+                        file_text_norm = replace_str # Update buffer
+                        current_file_modified = True
+                        continue
+                    except Exception as e:
+                        fail_count += 1
+                        log.append(f"ERROR: {rel_path} - {e}")
+                        continue
+
+                # Patch existing
                 if search_str in file_text_norm:
-                    # Apply replace to normalized text
-                    new_text = file_text_norm.replace(search_str, replace_str, 1)
-                    
-                    # Detect original line ending for writing
-                    le = "\r\n" if "\r\n" in file_text_raw else "\n"
-                    
-                    with open(full_path, "w", encoding="utf-8", newline=le) as f:
-                        f.write(new_text)
+                    file_text_norm = file_text_norm.replace(search_str, replace_str, 1)
                     success_count += 1
-                    log.append(f"SUCCESS: {rel_path}")
+                    current_file_modified = True
+                    log.append(f"PATCHED: {rel_path} (Block Match)")
                 else:
                     fail_count += 1
-                    log.append(f"MISMATCH: {rel_path} (Code in file didn't match SEARCH block)")
-            except Exception as e:
-                fail_count += 1
-                log.append(f"CRITICAL: {rel_path} - {e}")
+                    log.append(f"MISMATCH: {rel_path} - A block could not be matched.")
+
+            if current_file_modified:
+                try:
+                    with open(full_path, "w", encoding="utf-8", newline=line_ending) as f:
+                        f.write(file_text_norm)
+                except Exception as e:
+                    log.append(f"WRITE ERROR: {rel_path} - {e}")
 
         summary = f"Process Finished\n✅ Success: {success_count}\n❌ Failed: {fail_count}\n\n" + "\n".join(log)
         messagebox.showinfo("Result", summary)

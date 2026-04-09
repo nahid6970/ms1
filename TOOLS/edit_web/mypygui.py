@@ -496,11 +496,9 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
-OS_LB.bind( "<Button-1>", lambda event=None: subprocess.Popen( r'cmd /c start windows.py', cwd=r'C:\\@delta\\ms1\\New folder\\'))
-OS_LB.bind("<Button-3>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\@@init\windows.py"], shell=True))
-OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\@delta\ms1\@@init\windows.py'))
+Notes_BT = tk.Label(ROOT1, text="NOTE", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Notes_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
+Notes_BT.bind("<Button-1>", lambda event=None: subprocess.Popen('notepad.exe'))
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
@@ -615,10 +613,9 @@ VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('
 # ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
 # ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\test_project\ollama-chat-app\server.py'))
 
-path_replace = tk.Label(ROOT1,text="PathR", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
-path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\@delta\ms1\path_tracker.py'))
-path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\path_tracker.py'))
+Calc_BT = tk.Label(ROOT1, text="CALC", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Calc_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
+Calc_BT.bind("<Button-1>", lambda event=None: subprocess.Popen('calc.exe'))
 
 Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
                       height=0, width=0, relief="flat", highlightthickness=0,
@@ -836,9 +833,9 @@ def check_git_status(git_path, queue):
         return
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
-    
+
     label_text = next((r["label"] for r in repos if r["path"] == git_path), "?")
-    
+
     if "nothing to commit, working tree clean" in git_status.stdout:
         queue.put((git_path, label_text, "#00ff21"))  # Green
     else:
@@ -946,7 +943,7 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,10))
 # Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 # Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
 # compare_path_file()
- 
+
 
 
 
