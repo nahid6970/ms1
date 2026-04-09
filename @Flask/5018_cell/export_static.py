@@ -720,6 +720,27 @@ def generate_static_html(data, custom_syntaxes):
             flex-direction: column;
             gap: 2px;
             flex: 1;
+            position: relative;
+        }
+
+        .current-sheet-info > div[onclick] {
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .current-sheet-info > div[onclick]::after {
+            content: '▼';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .current-sheet-info > div[onclick]:hover::after {
+            opacity: 1;
         }
 
         .current-sheet-title {
@@ -731,6 +752,43 @@ def generate_static_html(data, custom_syntaxes):
         .current-category-title {
             font-size: 12px;
             color: #666;
+        }
+
+        .subsheet-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .subsheet-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .subsheet-dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .subsheet-dropdown-item.active {
+            background: #e7f3ff;
+            color: #007bff;
+            font-weight: 600;
         }
 
         /* Tree Items - Cyberpunk Theme */
@@ -1076,52 +1134,9 @@ def generate_static_html(data, custom_syntaxes):
             padding: 0 4px;
         }
 
-        /* Sub-Sheet Navigation Bar */
+        /* Sub-Sheet Navigation Bar (Deprecated in static export) */
         .subsheet-bar {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-            min-height: 50px;
-        }
-
-        .subsheet-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .subsheet-tab {
-            padding: 8px 16px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .subsheet-tab:hover {
-            background: #e9ecef;
-            border-color: #007bff;
-        }
-
-        .subsheet-tab.active {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-            font-weight: 600;
-        }
-
-        .subsheet-tab-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            display: none;
         }
 
         /* Settings Modal */
@@ -1538,9 +1553,6 @@ def generate_static_html(data, custom_syntaxes):
                 const currentCat = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || 'Uncategorized';
                 document.getElementById('currentCategoryTitle').textContent = currentCat;
             }
-
-            // Update sub-sheet bar
-            renderSubSheetBar();
         }
 
         function switchSheet(index) {
@@ -1557,44 +1569,53 @@ def generate_static_html(data, custom_syntaxes):
             }, 0);
         }
 
-        function renderSubSheetBar() {
-            const subsheetTabs = document.getElementById('subsheetTabs');
-            if (!subsheetTabs) return;
+        function toggleSubSheetDropdown() {
+            const dropdown = document.getElementById('subSheetDropdown');
+            const isVisible = dropdown.style.display === 'block';
             
-            subsheetTabs.innerHTML = '';
+            if (isVisible) {
+                dropdown.style.display = 'none';
+            } else {
+                renderSubSheetDropdown();
+                dropdown.style.display = 'block';
+            }
+        }
 
-            // Get current sheet's parent (if it's a sub-sheet) or use current sheet as parent
+        function renderSubSheetDropdown() {
+            const dropdown = document.getElementById('subSheetDropdown');
+            if (!dropdown) return;
+            
+            dropdown.innerHTML = '';
+            
             const currentSheetData = tableData.sheets[currentSheet];
-            const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
+            const parentIndex = (currentSheetData && currentSheetData.parentSheet !== undefined) ? currentSheetData.parentSheet : currentSheet;
             const parentSheet = tableData.sheets[parentIndex];
-
+            
             if (!parentSheet) return;
-
-            // Add parent sheet tab
-            const parentTab = document.createElement('div');
-            parentTab.className = `subsheet-tab ${currentSheet === parentIndex ? 'active' : ''}`;
             
-            const parentName = document.createElement('span');
-            parentName.className = 'subsheet-tab-name';
-            parentName.textContent = parentSheet.name;
+            const parentItem = document.createElement('div');
+            parentItem.className = `subsheet-dropdown-item ${currentSheet === parentIndex ? 'active' : ''}`;
+            parentItem.textContent = parentSheet.name;
             
-            parentTab.appendChild(parentName);
-            parentTab.onclick = () => switchSheet(parentIndex);
-            subsheetTabs.appendChild(parentTab);
-
-            // Add sub-sheets
+            parentItem.onclick = () => {
+                switchSheet(parentIndex);
+                dropdown.style.display = 'none';
+            };
+            
+            dropdown.appendChild(parentItem);
+            
             tableData.sheets.forEach((sheet, index) => {
                 if (sheet.parentSheet === parentIndex) {
-                    const tab = document.createElement('div');
-                    tab.className = `subsheet-tab ${currentSheet === index ? 'active' : ''}`;
+                    const item = document.createElement('div');
+                    item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
+                    item.textContent = '  ' + sheet.name;
                     
-                    const name = document.createElement('span');
-                    name.className = 'subsheet-tab-name';
-                    name.textContent = sheet.name;
+                    item.onclick = () => {
+                        switchSheet(index);
+                        dropdown.style.display = 'none';
+                    };
                     
-                    tab.appendChild(name);
-                    tab.onclick = () => switchSheet(index);
-                    subsheetTabs.appendChild(tab);
+                    dropdown.appendChild(item);
                 }
             });
         }
@@ -3177,10 +3198,19 @@ def generate_static_html(data, custom_syntaxes):
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
-            const sheetSelector = document.querySelector('.sheet-selector');
-            const sheetList = document.getElementById('sheetList');
-            if (!sheetSelector.contains(event.target)) {
-                sheetList.classList.remove('show');
+            // Close dropdowns when clicking outside
+            if (event.target && event.target.closest) {
+                const sheetInfo = event.target.closest('.current-sheet-info');
+                const subsheetDropdown = document.getElementById('subSheetDropdown');
+                if (!sheetInfo && subsheetDropdown) {
+                    subsheetDropdown.style.display = 'none';
+                }
+            }
+
+            const sidebar = document.getElementById('sidebar');
+            const btnMenu = document.querySelector('.btn-menu');
+            if (sidebar && sidebar.classList.contains('show') && !sidebar.contains(event.target) && !btnMenu.contains(event.target)) {
+                toggleSidebar();
             }
 
             // Toggle correct answer on click
@@ -3712,10 +3742,13 @@ def generate_static_html(data, custom_syntaxes):
         <!-- Main Header with Sheet Info -->
         <div class="main-header">
             <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
-            <div class="header-info-wrapper">
-                <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
-                <span class="header-separator">•</span>
-                <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+            <div class="current-sheet-info">
+                <div onclick="toggleSubSheetDropdown()" style="cursor: pointer;" title="Click to see all sub-sheets">
+                    <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
+                    <span class="header-separator">•</span>
+                    <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+                </div>
+                <div id="subSheetDropdown" class="subsheet-dropdown-menu"></div>
             </div>
         </div>
 
@@ -3759,12 +3792,8 @@ def generate_static_html(data, custom_syntaxes):
             </button>
         </div>
 
-        <!-- Sub-Sheet Navigation Bar -->
-        <div class="subsheet-bar" id="subsheetBar">
-            <div class="subsheet-tabs" id="subsheetTabs">
-                <!-- Sub-sheets will be rendered here -->
-            </div>
-        </div>
+        <!-- Sub-Sheet Navigation (Deprecated in static export) -->
+        <div class="subsheet-bar" id="subsheetBar" style="display: none;"></div>
 
         <div class="table-container">
             <table id="dataTable">
