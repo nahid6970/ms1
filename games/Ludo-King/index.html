@@ -356,7 +356,8 @@
                     token.style.color = `var(--${t.player})`; 
                 }
                 
-                const isCurrentTurn = state.currentPlayer === playerIdx;
+                const inCenter = !!parent.closest('.center');
+                const isCurrentTurn = state.currentPlayer === playerIdx && !inCenter;
                 if (isCurrentTurn) token.classList.add('active-player');
                 else token.classList.remove('active-player');
 
@@ -383,17 +384,28 @@
                 let scale = isCurrentTurn ? 1.2 : 1.0;
                 let offset = { x: 0, y: 0 };
 
-                if (!parent.closest('.center')) {
-                    const siblings = Array.from(parent.querySelectorAll('.token'));
+                                const siblings = Array.from(parent.querySelectorAll('.token'));
+                const index = siblings.indexOf(token);
+                token.style.zIndex = 50 + index + (isCurrentTurn ? 100 : 0);
+
+                if (!inCenter) {
                     const count = siblings.length;
-                    const index = siblings.indexOf(token);
-                    
                     if (count > 1) {
-                        scale *= 0.75; // Moderate shrink
+                        scale *= 0.75;
                         offset.x = (index % 2 === 0 ? -10 : 10);
                         offset.y = (index > 1 ? 10 : -10);
                     }
-                    token.style.zIndex = 50 + index + (isCurrentTurn ? 100 : 0);
+                } else {
+                    const count = siblings.length;
+                    const spread = 16;
+                    
+                    if (parent.classList.contains('t-g') || parent.classList.contains('t-y')) {
+                        offset.x = (index - (count - 1) / 2) * spread;
+                        offset.y = 0;
+                    } else {
+                        offset.x = 0;
+                        offset.y = (index - (count - 1) / 2) * spread;
+                    }
                 }
 
                 token.style.transform = `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${scale})`;
