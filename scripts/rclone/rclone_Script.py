@@ -115,7 +115,7 @@ class BrowserDialog(QDialog):
     def __init__(self, parent, start_path):
         super().__init__(parent)
         self.setWindowTitle(f"Browsing: {start_path}")
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(800, 600)
         self.setStyleSheet(parent.styleSheet())
         
         self.current_path = start_path
@@ -143,15 +143,27 @@ class BrowserDialog(QDialog):
         self.select_btn = QPushButton("SELECT CURRENT FOLDER")
         self.select_btn.clicked.connect(self._select_current)
         
+        self.back_btn = QPushButton("BACK")
+        self.back_btn.clicked.connect(self._go_back)
+
         self.cancel_btn = QPushButton("CANCEL")
         self.cancel_btn.clicked.connect(self.reject)
         
         btn_layout.addWidget(self.select_btn)
         btn_layout.addStretch()
+        btn_layout.addWidget(self.back_btn)
         btn_layout.addWidget(self.cancel_btn)
         layout.addLayout(btn_layout)
         
         self._fetch_content(self.current_path)
+
+    def _go_back(self):
+        # Remove trailing slash and find previous one
+        path = self.current_path.rstrip("/")
+        idx = path.rfind("/")
+        if idx != -1:
+            new_path = path[:idx + 1]
+            self._fetch_content(new_path)
 
     def _fetch_content(self, path):
         self.setWindowTitle(f"Browsing: {path}")
