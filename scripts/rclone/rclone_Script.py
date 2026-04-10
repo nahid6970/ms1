@@ -558,9 +558,16 @@ class RcloneApp(QMainWindow):
         frm   = self.from_input.text().strip()
         to    = self.to_input.text().strip()
 
-        parts = ["rclone", cmd, stor, frm, to]
+        # Wrap paths in double quotes to handle spaces correctly in the shell
+        q_stor = f'"{stor}"' if stor else ""
+        q_frm  = f'"{frm}"' if frm else ""
+        q_to   = f'"{to}"' if to else ""
+
+        parts = ["rclone", cmd, q_stor, q_frm, q_to]
         if cmd == "mount":
-            parts.append(f"c:/{stor.strip(':/')}/")
+            # For mount, use the unquoted storage name to derive the mount point, then quote it
+            mount_path = f"c:/{stor.strip(':/')}/"
+            parts.append(f'"{mount_path}"')
 
         for i, (_, flag, _) in enumerate(self.flag_defs):
             if self.flag_labels[i].active:
@@ -568,11 +575,14 @@ class RcloneApp(QMainWindow):
 
         for i, (_, prefix, _) in enumerate(self.filter_defs):
             if self.filter_labels[i].active:
-                parts.append(f"{prefix}={self.filter_entries[i].text()}")
+                # Quote the filter value to handle potential spaces
+                val = self.filter_entries[i].text()
+                parts.append(f'{prefix}="{val}"')
 
         grep = self.grep_entry.text().strip()
         if grep:
-            parts.append(f"| grep -i {grep}")
+            # Quote grep text to handle spaces
+            parts.append(f'| grep -i "{grep}"')
 
         final = " ".join(p for p in parts if p)
         print("Executing:", final)
