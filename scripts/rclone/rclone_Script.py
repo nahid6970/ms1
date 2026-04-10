@@ -110,20 +110,29 @@ class FolderFetcher(QThread):
     def run(self):
         try:
             base = self.path.rstrip("/") + "/"
-            p_dirs  = subprocess.Popen(["rclone", "lsd", self.path],
-                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            p_files = subprocess.Popen(["rclone", "lsf", "--max-depth", "1", "--files-only", self.path],
-                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            self._procs = [p_dirs, p_files]
+            # Use lsf for clean output and correct handling of spaces.
+            # Dirs in lsf output always end with a trailing slash.
+            p = subprocess.Popen(
+                ["rclone", "lsf", "--max-depth", "1", "--format", "p", "--drive-acknowledge-abuse", self.path],
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            self._procs = [p]
             
-            dirs_out,  _ = p_dirs.communicate(timeout=15)
-            files_out, _ = p_files.communicate(timeout=15)
+            out, _ = p.communicate(timeout=15)
+            lines = out.decode("utf-8", errors="replace").splitlines()
 
-            def parse(raw):
-                return [base + line.split()[-1]
-                        for line in raw.decode("utf-8", errors="replace").splitlines() if line.split()]
+            dirs = []
+            files = []
+            for line in lines:
+                name = line.strip()
+                if not name: continue
+                full_path = base + name
+                if name.endswith("/"):
+                    dirs.append(full_path)
+                else:
+                    files.append(full_path)
 
-            self.done.emit(parse(dirs_out) + parse(files_out))
+            self.done.emit(dirs + files)
         except Exception:
             self.done.emit([])
 
