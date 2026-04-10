@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QRadioButton, QButtonGroup,
     QGroupBox, QGridLayout, QListWidget, QScrollArea, QDialog, QFormLayout, QSpinBox,
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QEvent
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
@@ -98,20 +98,118 @@ QScrollBar::handle:vertical {{
 }}
 """
 
+# ── BROWSER DIALOG ──────────────────────────────────────────────────────────
+class BrowserDialog(QDialog):
+    def __init__(self, parent, start_path):
+        super().__init__(parent)
+        self.setWindowTitle(f"Browsing: {start_path}")
+        self.setMinimumSize(600, 500)
+        self.setStyleSheet(parent.styleSheet())
+        
+        self.current_path = start_path
+        self.selected_path = None
+        self._all_items = []
+        
+        layout = QVBoxLayout(self)
+        
+        # Search Box
+        search_layout = QHBoxLayout()
+        search_layout.addWidget(QLabel("Search:"))
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filter current view...")
+        self.search_input.textChanged.connect(self._filter_list)
+        search_layout.addWidget(self.search_input)
+        layout.addLayout(search_layout)
+        
+        # List View
+        self.list_widget = QListWidget()
+        self.list_widget.itemDoubleClicked.connect(self._on_double_click)
+        layout.addWidget(self.list_widget)
+        
+        # Bottom Buttons
+        btn_layout = QHBoxLayout()
+        self.select_btn = QPushButton("SELECT CURRENT FOLDER")
+        self.select_btn.clicked.connect(self._select_current)
+        
+        self.cancel_btn = QPushButton("CANCEL")
+        self.cancel_btn.clicked.connect(self.reject)
+        
+        btn_layout.addWidget(self.select_btn)
+        btn_layout.addStretch()
+        btn_layout.addWidget(self.cancel_btn)
+        layout.addLayout(btn_layout)
+        
+        self._fetch_content(self.current_path)
+
+    def _fetch_content(self, path):
+        self.setWindowTitle(f"Browsing: {path}")
+        self.current_path = path
+        self.list_widget.clear()
+        self.list_widget.addItem("Loading...")
+        
+        self._fetcher = FolderFetcher(path)
+        self._fetcher.done.connect(self._populate)
+        self._fetcher.start()
+
+    def _populate(self, items):
+        self.list_widget.clear()
+        # We store the raw items (with trailing slashes for folders)
+        self._all_items = items
+        self._filter_list(self.search_input.text())
+
+    def _filter_list(self, text):
+        self.list_widget.clear()
+        search = text.lower()
+        
+        # Re-fetch the folders vs files logic to ensure folders stay top
+        dirs = []
+        files = []
+        
+        for full_path in self._all_items:
+            # item from fetcher is full path. We show just the tail.
+            name = full_path.split("/")[-1] or full_path.split("/")[-2]
+            if search and search not in name.lower():
+                continue
+                
+            if full_path.endswith("/"):
+                dirs.append(full_path)
+            else:
+                files.append(full_path)
+        
+        for d in dirs:
+            item = QListWidget().addItem("") # placeholder to get correct type
+            item = self.list_widget.addItem(f"📁 {d.split('/')[-2]}/")
+            self.list_widget.item(self.list_widget.count()-1).setData(Qt.ItemDataRole.UserRole, d)
+            
+        for f in files:
+            self.list_widget.addItem(f"📄 {f.split('/')[-1]}")
+            self.list_widget.item(self.list_widget.count()-1).setData(Qt.ItemDataRole.UserRole, f)
+
+    def _on_double_click(self, item):
+        path = item.data(Qt.ItemDataRole.UserRole)
+        if path.endswith("/"):
+            self._fetch_content(path)
+        else:
+            self.selected_path = path
+            self.accept()
+
+    def _select_current(self):
+        self.selected_path = self.current_path
+        self.accept()
+
 # ── FOLDER FETCH THREAD ───────────────────────────────────────────────────────
 class FolderFetcher(QThread):
     done = pyqtSignal(list)
 
     def __init__(self, path):
         super().__init__()
-        self.path = path
+        self.path = path.rstrip("/") + "/"
         self._procs = []
 
     def run(self):
         try:
-            base = self.path.rstrip("/") + "/"
-            # Use lsf for clean output and correct handling of spaces.
-            # Dirs in lsf output always end with a trailing slash.
+            # Use lsf for spaces. We KEEP the trailing slash for folders
+            # so the dialog knows how to navigate.
             p = subprocess.Popen(
                 ["rclone", "lsf", "--max-depth", "1", "--format", "p", "--drive-acknowledge-abuse", self.path],
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
@@ -121,18 +219,14 @@ class FolderFetcher(QThread):
             out, _ = p.communicate(timeout=15)
             lines = out.decode("utf-8", errors="replace").splitlines()
 
-            dirs = []
-            files = []
+            items = []
             for line in lines:
                 name = line.strip()
                 if not name: continue
-                full_path = base + name
-                if name.endswith("/"):
-                    dirs.append(full_path)
-                else:
-                    files.append(full_path)
+                # full path with slash if it's a directory
+                items.append(self.path + name)
 
-            self.done.emit(dirs + files)
+            self.done.emit(items)
         except Exception:
             self.done.emit([])
 
@@ -143,7 +237,7 @@ class FolderFetcher(QThread):
         self.wait(100)
 
 
-# ── PATH INPUT WITH FLOATING DROPDOWN ────────────────────────────────────────
+# ── PATH INPUT WITH TAB-TRIGGERED POPUP ──────────────────────────────────────
 class PathInput(QLineEdit):
     STORAGE_PREFIXES = [
         "C:/", "D:/",
@@ -158,30 +252,6 @@ class PathInput(QLineEdit):
         super().__init__()
         self.setPlaceholderText(placeholder)
         self.setMinimumWidth(420)
-        self._fetcher = None
-        self._all_items = []
-        self._last_fetched_path = ""
-
-        # Floating popup — no focus steal
-        self._popup = QListWidget(None)
-        self._popup.setWindowFlags(
-            Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
-        )
-        self._popup.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self._popup.setStyleSheet(f"""
-            QListWidget {{
-                background-color: {CP_PANEL};
-                color: {CP_CYAN};
-                border: 1px solid {CP_CYAN};
-                font-family: Consolas;
-                font-size: 10pt;
-            }}
-            QListWidget::item:hover {{ background-color: #1a1a1a; }}
-            QListWidget::item:selected {{ background-color: {CP_CYAN}; color: #000; }}
-        """)
-        self._popup.itemClicked.connect(self._on_item_clicked)
-
-        self.textChanged.connect(self._on_text_changed)
 
     def _matching_prefix(self, text):
         for p in self.STORAGE_PREFIXES:
@@ -189,109 +259,25 @@ class PathInput(QLineEdit):
                 return p
         return None
 
-    def _on_text_changed(self, text):
-        # Only show dropdown if a slash is present
-        if "/" not in text:
-            self._popup.hide()
-            self._all_items = []
-            self._last_fetched_path = ""
-            return
-
-        # Handle Folder Suggestions
-        last_slash_idx = text.rfind("/")
-        base_path = text[:last_slash_idx + 1]
-        search_term = text[last_slash_idx + 1:]
-
-        # Trigger fetch if we hit a new directory
-        if text.endswith("/") and self._matching_prefix(text):
-            if text != self._last_fetched_path:
-                if self._fetcher and self._fetcher.isRunning():
-                    try: self._fetcher.done.disconnect()
-                    except: pass
-                    self._fetcher.stop()
-                self._fetcher = FolderFetcher(text)
-                self._fetcher.done.connect(self._populate)
-                self._fetcher.start()
-
-        # Filter existing items if base_path matches our cache
-        if self._all_items and base_path == self._last_fetched_path:
-            matches = [item for item in self._all_items if search_term.lower() in item.lower()]
-            if matches:
-                self._update_popup(matches)
-            else:
-                self._popup.hide()
-        elif not text.endswith("/") and not self._all_items:
-             self._popup.hide()
-
-    def _populate(self, folders):
-        if not self._fetcher: return
-        self._last_fetched_path = self._fetcher.path
-        self._all_items = folders
-
-        text = self.text()
-        if "/" not in text:
-            self._popup.hide()
-            return
-
-        last_slash_idx = text.rfind("/")
-        search_term = text[last_slash_idx + 1:]
-
-        matches = [item for item in self._all_items if search_term.lower() in item.lower()]
-        if matches:
-            self._update_popup(matches)
-        else:
-            self._popup.hide()
-
-    def _update_popup(self, items):
-        if not items or "/" not in self.text():
-            self._popup.hide()
-            return
+    def event(self, e):
+        # Intercept Tab key before focus navigation takes it
+        if e.type() == QEvent.Type.KeyPress and e.key() == Qt.Key.Key_Tab:
+            path = self.text().strip()
+            if path:
+                # Ensure path ends in slash for rclone if it looks like a remote/dir
+                if ":" in path and not path.endswith("/"):
+                    path += "/"
+                
+                dlg = BrowserDialog(self.window(), path)
+                if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_path:
+                    self.setText(dlg.selected_path)
+                return True # Mark event as handled to prevent focus skip
         
-        self._popup.clear()
-        for i in items:
-            self._popup.addItem(i)
-        
-        pos = self.mapToGlobal(self.rect().bottomLeft())
-        self._popup.move(pos)
-        self._popup.setFixedWidth(self.width())
-        row_h = self._popup.sizeHintForRow(0) + 2
-        self._popup.setFixedHeight(min(len(items), 10) * row_h + 4)
-        self._popup.show()
-
-    def focusInEvent(self, e):
-        super().focusInEvent(e)
-
-    def _on_item_clicked(self, item):
-        if not item: return
-        path = item.text() # Capture text BEFORE setText, as setText can trigger clear()
-        self.setText(path)
-        if not path.endswith("/"):
-            self._popup.hide()
+        return super().event(e)
 
     def keyPressEvent(self, e):
-        key = e.key()
-        if self._popup.isVisible():
-            cur = self._popup.currentRow()
-            count = self._popup.count()
-            if key == Qt.Key.Key_Down:
-                self._popup.setCurrentRow(min(cur + 1, count - 1))
-                return
-            if key == Qt.Key.Key_Up:
-                self._popup.setCurrentRow(max(cur - 1, 0))
-                return
-            if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
-                item = self._popup.currentItem()
-                if item:
-                    self._on_item_clicked(item)
-                return
-            if key == Qt.Key.Key_Escape:
-                self._popup.hide()
-                return
+        # We handle Tab in event(), so just call super for others
         super().keyPressEvent(e)
-
-    def resizeEvent(self, e):
-        super().resizeEvent(e)
-        self._popup.setFixedWidth(self.width())
 
 
 # ── TOGGLE LABEL (flag chip) ──────────────────────────────────────────────────
