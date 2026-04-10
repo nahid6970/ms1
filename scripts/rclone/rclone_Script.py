@@ -161,9 +161,17 @@ class BrowserDialog(QDialog):
         # Remove trailing slash and find previous one
         path = self.current_path.rstrip("/")
         idx = path.rfind("/")
+        
+        # If it's something like "cgu:/", idx will be at the end of "cgu:".
+        # We need to make sure we don't go past the root prefix.
         if idx != -1:
             new_path = path[:idx + 1]
-            self._fetch_content(new_path)
+            if not new_path.endswith("/"):
+                new_path += "/"
+            
+            # Prevent going to empty or invalid path
+            if len(new_path) > 1:
+                self._fetch_content(new_path)
 
     def _fetch_content(self, path):
         self.setWindowTitle(f"Browsing: {path}")
@@ -171,42 +179,55 @@ class BrowserDialog(QDialog):
         self.list_widget.clear()
         self.list_widget.addItem("Loading...")
         
+        if hasattr(self, "_fetcher") and self._fetcher.isRunning():
+            self._fetcher.stop()
+
         self._fetcher = FolderFetcher(path)
         self._fetcher.done.connect(self._populate)
         self._fetcher.start()
 
     def _populate(self, items):
         self.list_widget.clear()
-        # We store the raw items (with trailing slashes for folders)
         self._all_items = items
+        
+        if not items:
+            self.list_widget.addItem("(No files or folders found here)")
+            return
+            
         self._filter_list(self.search_input.text())
 
     def _filter_list(self, text):
-        self.list_widget.clear()
         search = text.lower()
         
-        # Re-fetch the folders vs files logic to ensure folders stay top
-        dirs = []
-        files = []
-        
+        # Filter logic
+        matches = []
         for full_path in self._all_items:
-            # item from fetcher is full path. We show just the tail.
-            name = full_path.split("/")[-1] or full_path.split("/")[-2]
-            if search and search not in name.lower():
-                continue
-                
-            if full_path.endswith("/"):
-                dirs.append(full_path)
-            else:
-                files.append(full_path)
+            # Handle both folder and file naming
+            name = full_path.split("/")[-1] or (full_path.split("/")[-2] + "/")
+            if not search or search in name.lower():
+                matches.append(full_path)
         
-        for d in dirs:
-            item = QListWidget().addItem("") # placeholder to get correct type
-            item = self.list_widget.addItem(f"📁 {d.split('/')[-2]}/")
+        self.list_widget.clear()
+        if not matches and self._all_items:
+            self.list_widget.addItem("(No matches for your search)")
+            return
+        elif not matches:
+            self.list_widget.addItem("(No files or folders found here)")
+            return
+
+        # Sort: Folders first
+        dirs = [p for p in matches if p.endswith("/")]
+        files = [p for p in matches if not p.endswith("/")]
+        
+        for d in sorted(dirs):
+            # Show just the folder name in the list
+            display_name = d.rstrip("/").split("/")[-1] + "/"
+            self.list_widget.addItem(f"📁 {display_name}")
             self.list_widget.item(self.list_widget.count()-1).setData(Qt.ItemDataRole.UserRole, d)
             
-        for f in files:
-            self.list_widget.addItem(f"📄 {f.split('/')[-1]}")
+        for f in sorted(files):
+            display_name = f.split("/")[-1]
+            self.list_widget.addItem(f"📄 {display_name}")
             self.list_widget.item(self.list_widget.count()-1).setData(Qt.ItemDataRole.UserRole, f)
 
     def _on_double_click(self, item):
