@@ -91,10 +91,22 @@ QRadioButton::indicator:checked {{
 }}
 QScrollArea {{ background: transparent; border: none; }}
 QScrollBar:vertical {{
-    background: {CP_BG}; width: 8px;
+    background: {CP_BG}; width: 10px; margin: 0px;
 }}
 QScrollBar::handle:vertical {{
-    background: {CP_DIM}; min-height: 20px;
+    background: {CP_CYAN}; min-height: 20px; border-radius: 5px;
+}}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+    height: 0px; background: none;
+}}
+QScrollBar:horizontal {{
+    background: {CP_BG}; height: 10px; margin: 0px;
+}}
+QScrollBar::handle:horizontal {{
+    background: {CP_CYAN}; min-width: 20px; border-radius: 5px;
+}}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+    width: 0px; background: none;
 }}
 """
 
