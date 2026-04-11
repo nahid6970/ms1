@@ -359,6 +359,17 @@ class GitWorker:
             return {"error": f"Error removing lock: {str(e)}"}
 
     @staticmethod
+    def get_pending_push_count(directory):
+        """Check how many commits are waiting to be pushed"""
+        try:
+            # This command counts commits in HEAD that are not in upstream
+            cmd = ["git", "rev-list", "--count", "HEAD", "@{u}..HEAD"]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding="utf-8", stderr=subprocess.DEVNULL)
+            return int(result.strip())
+        except:
+            return 0
+
+    @staticmethod
     def parse_diff(diff_text):
         """Parse git diff into file sections"""
         lines = diff_text.split("\n")
@@ -758,6 +769,14 @@ class MainWindow(QMainWindow):
         
         self.repo_scroll.setWidget(self.repo_container)
         repo_bar_layout.addWidget(self.repo_scroll)
+        
+        refresh_repos_btn = QPushButton("🔄")
+        refresh_repos_btn.setFixedSize(26, 26)
+        refresh_repos_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        refresh_repos_btn.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; font-size: 12pt;")
+        refresh_repos_btn.clicked.connect(self.refresh_repo_buttons)
+        refresh_repos_btn.setToolTip("Refresh all repository statuses")
+        repo_bar_layout.addWidget(refresh_repos_btn)
         
         layout.addLayout(repo_bar_layout)
         # --- END REPO QUICK BAR ---
@@ -1888,10 +1907,30 @@ class GitOpsDialog(QDialog):
         
         layout.addLayout(btn_layout)
         
-        # Status Label inside Dialog
+        # Status & Info
+        info_layout = QHBoxLayout()
+        
         self.status_label = QLabel("READY")
         self.status_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
-        layout.addWidget(self.status_label)
+        
+        self.pending_push_label = QLabel("")
+        self.pending_push_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;")
+        
+        info_layout.addWidget(self.status_label)
+        info_layout.addStretch()
+        info_layout.addWidget(self.pending_push_label)
+        
+        layout.addLayout(info_layout)
+        
+        self.update_push_status()
+
+    def update_push_status(self):
+        """Check and display how many commits are pending push"""
+        count = GitWorker.get_pending_push_count(self.directory)
+        if count > 0:
+            self.pending_push_label.setText(f"🚀 PENDING PUSH: {count}")
+        else:
+            self.pending_push_label.setText("")
 
     def fix_git_lock(self):
         result = GitWorker.fix_lock(self.directory)
@@ -1923,6 +1962,7 @@ class GitOpsDialog(QDialog):
             self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
             self.status_label.setText(f"SUCCESS: COMMITTED")
             self.commit_msg_input.clear()
+            self.update_push_status() # Update rocket icon
             self.parent_window.load_commits() # Refresh table
             QMessageBox.information(self, "Success", f"Committed with message:\n{message}")
         else:
@@ -1939,6 +1979,7 @@ class GitOpsDialog(QDialog):
         if "success" in result:
             self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
             self.status_label.setText(f"SUCCESS: PUSHED")
+            self.update_push_status() # Rocket should disappear
             QMessageBox.information(self, "Success", "Pushed to remote.")
         else:
             self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
