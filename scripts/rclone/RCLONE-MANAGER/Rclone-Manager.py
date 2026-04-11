@@ -362,6 +362,8 @@ class RcloneApp(QMainWindow):
         cfg = self._load_settings()
         cfg["flags"]   = [lbl.active for lbl in self.flag_labels]
         cfg["filters"] = [lbl.active for lbl in self.filter_labels]
+        if hasattr(self, "tool_labels"):
+            cfg["tools"] = [lbl.active for lbl in self.tool_labels]
         with open(self.SETTINGS_FILE, "w") as f:
             json.dump(cfg, f)
 
@@ -516,6 +518,22 @@ class RcloneApp(QMainWindow):
         grep_layout.addWidget(self.grep_entry)
         right.addWidget(grep_group)
 
+        # ── Tools ─────────────────────────────────────────────────────────────
+        tools_group = QGroupBox("TOOLS")
+        tools_layout = QHBoxLayout(tools_group)
+        self.tool_labels = []
+        tool_defs = [
+            ("Show Total Size", False),
+            ("Show File Count", False)
+        ]
+        saved_tools = self._load_settings().get("tools", [])
+        for i, (name, active) in enumerate(tool_defs):
+            state = saved_tools[i] if i < len(saved_tools) else active
+            lbl = ToggleLabel(name, state, on_change=self._save_toggles)
+            self.tool_labels.append(lbl)
+            tools_layout.addWidget(lbl)
+        right.addWidget(tools_group)
+
         right.addStretch()
         outer.addLayout(right, stretch=3)
 
@@ -585,6 +603,26 @@ class RcloneApp(QMainWindow):
             parts.append(f'| grep -i "{grep}"')
 
         final = " ".join(p for p in parts if p)
+
+        # ── TOOLS ─────────────────────────────────────────────────────────────
+        # 1. File Count (Captures current listing/grep output and counts lines)
+        if self.tool_labels[1].active:
+            final = f'({final}) > %TEMP%\\rclone_out.txt & type %TEMP%\\rclone_out.txt & echo. & powershell -NoProfile -Command "Write-Host \'── LISTED COUNT ──\' -ForegroundColor Yellow" & find /c /v "" < %TEMP%\\rclone_out.txt'
+
+        # 2. Total Size (Runs rclone size on the source path)
+        if self.tool_labels[0].active:
+            s_parts = ["rclone", "size", q_stor, q_frm]
+            # Pass relevant flags/filters to the size command
+            for i, (_, f, _) in enumerate(self.flag_defs):
+                if self.flag_labels[i].active and ("drive" in f or "list" in f):
+                    s_parts.append(f)
+            for i, (_, pref, _) in enumerate(self.filter_defs):
+                if self.filter_labels[i].active:
+                    s_parts.append(f'{pref}="{self.filter_entries[i].text()}"')
+            s_cmd = " ".join(p for p in s_parts if p)
+            final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── SIZE SUMMARY ──\' -ForegroundColor Yellow" & {s_cmd}'
+        # ──────────────────────────────────────────────────────────────────────
+
         print("Executing:", final)
 
         # Escape special characters for the echo command to prevent them from being interpreted as pipes/redirects
