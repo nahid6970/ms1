@@ -1,4 +1,4 @@
-# Convex Config Backup — Integration Guide
+﻿# Convex Config Backup — Integration Guide
 
 Add cloud backup/restore (with full version history and unified sync management) to any Python PyQt script using Convex.
 
@@ -107,6 +107,12 @@ class DiffDialog(QDialog):
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
+        # Apply neon scrollbar styling
+        self.scroll.setStyleSheet("""
+            QScrollBar:vertical { background: #050505; width: 10px; margin: 0px; }
+            QScrollBar::handle:vertical { background: #00F0FF; min-height: 20px; border-radius: 5px; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; background: none; }
+        """)
         content = QWidget()
         vbox = QVBoxLayout(content)
         vbox.setSpacing(0)
@@ -177,6 +183,12 @@ class CloudSyncDialog(QDialog):
         layout.addWidget(QLabel("CLOUD BACKUP HISTORY:"))
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
+        # Apply neon scrollbar styling
+        self.scroll.setStyleSheet("""
+            QScrollBar:vertical { background: #050505; width: 10px; margin: 0px; }
+            QScrollBar::handle:vertical { background: #00F0FF; min-height: 20px; border-radius: 5px; }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; background: none; }
+        """)
         layout.addWidget(self.scroll)
         
         QTimer.singleShot(10, self._fetch_and_render)
@@ -248,3 +260,8 @@ def open_cloud_sync(self):
 - **Git-Style Diff**: Use `difflib.unified_diff` to highlight changes before restoring.
 - **Immuntability**: Backups are preserved by timestamp; history is shown newest first.
 - **Validation**: Use the `CHECK` button to ensure you don't overwrite newer changes unintentionally.
+
+# IMPORTANT Rules
+- **Relative Paths:** ALWAYS use relative paths (e.g., `os.path.join(os.path.dirname(__file__), 'settings.json')`) so the script works when launched from any directory.
+- **Restart Button:** Add a "↺ RESTART" button that executes `os.execv(sys.executable, [sys.executable] + sys.argv)` to quickly apply code changes.
+- **Settings System:** Include a "⚙ SETTINGS" button and a SettingsDialog for user customizations (keep it extensible but empty by default).

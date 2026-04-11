@@ -1,6 +1,6 @@
-# Cyberpunk UI Theme Guide
+﻿# Cyberpunk UI Theme Guide
 
-This document outlines the visual style, color palette, and widget stylesheets used in `script_manager_gui_qt.py`. Use this guide to bootstrap new PyQt6 applications with the same Cyberpunk aesthetic.
+This document outlines the visual style, color palette, and widget stylesheets used in script_manager_gui_qt.py. Use this guide to bootstrap new PyQt6 applications with the same Cyberpunk aesthetic.
 
 ## 1. Color Palette
 
@@ -145,13 +145,47 @@ QMenu::item:selected {
 }
 ```
 
-### Scroll Area
-Transparent and frameless to blend into the background.
+### Scroll Area & Scrollbars
+Transparent area with custom neon cyan handles.
 
 ```css
 QScrollArea {
     background: transparent;
     border: none;
+}
+
+QScrollBar:vertical {
+    background: #050505;
+    width: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #00F0FF;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background: #050505;
+    height: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #00F0FF;
+    min-width: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+    background: none;
 }
 ```
 
@@ -190,6 +224,7 @@ Copy this to start a new project with the theme pre-applied.
 
 ```python
 import sys
+import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout)
 from PyQt6.QtCore import Qt
@@ -229,6 +264,10 @@ class App(QMainWindow):
                 border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
             }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+            
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
         """)
 
         # Layout
@@ -258,7 +297,7 @@ if __name__ == "__main__":
     sys.exit(app.exec())
 ```
 
-#IMPORTANT Rules
-- USE relative path so when i launch it from another directory it properly loads json file etc
-- ADD a restart button so the script restarts itself bcz sometime i change a lot of things in the script  and need to restart the app many times
-- when creating a new project, add a setting button and setting panel where i can add different things i can customize by default keep it empty
+# IMPORTANT Rules
+- **Relative Paths:** ALWAYS use relative paths (e.g., `os.path.join(os.path.dirname(__file__), 'settings.json')`) so the script works when launched from any directory.
+- **Restart Button:** Add a "↺ RESTART" button that executes `os.execv(sys.executable, [sys.executable] + sys.argv)` to quickly apply code changes.
+- **Settings System:** Include a "⚙ SETTINGS" button and a SettingsDialog for user customizations (keep it extensible but empty by default).
