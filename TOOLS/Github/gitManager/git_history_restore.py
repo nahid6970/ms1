@@ -119,6 +119,17 @@ class CommitLoaderThread(QThread):
 
 class GitWorker:
     @staticmethod
+    def is_repo_clean(directory):
+        """Check if git repository has uncommitted changes"""
+        try:
+            # Check for modified/staged/untracked files
+            cmd = ["git", "status", "--porcelain"]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding="utf-8")
+            return len(result.strip()) == 0
+        except:
+            return False
+
+    @staticmethod
     def get_commits(directory, limit=None, scope="."):
         if not os.path.isdir(directory):
             return {"error": "Invalid directory"}
@@ -422,6 +433,114 @@ class GitWorker:
 
 # --- UI COMPONENTS ---
 
+# --- REPO MANAGEMENT COMPONENTS ---
+
+class RepoButton(QPushButton):
+    """Button representing a saved repository at the top bar"""
+    clicked_path = pyqtSignal(str)
+    remove_requested = pyqtSignal(str)
+
+    def __init__(self, name, path, is_clean=True):
+        super().__init__(name)
+        self.repo_path = path
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.update_status(is_clean)
+        self.setToolTip(path)
+        
+    def update_status(self, is_clean):
+        dot_color = CP_GREEN if is_clean else CP_RED
+        self.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                padding: 5px 15px;
+                padding-left: 25px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+                text-align: left;
+                min-width: 100px;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+            }}
+        """)
+        # Create a small status dot
+        self.status_dot = QLabel("●", self)
+        self.status_dot.setStyleSheet(f"color: {dot_color}; font-size: 14pt; background: transparent;")
+        self.status_dot.move(8, 2)
+        self.status_dot.show()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked_path.emit(self.repo_path)
+        super().mousePressEvent(event)
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background-color: {CP_RED}; color: white; }}")
+        remove_action = menu.addAction("🗑️ Remove Repository")
+        action = menu.exec(event.globalPos())
+        if action == remove_action:
+            self.remove_requested.emit(self.repo_path)
+
+class AddRepoDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Add Repository")
+        self.resize(500, 200)
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; }} QLabel {{ color: {CP_TEXT}; }}")
+        
+        layout = QVBoxLayout(self)
+        
+        # Name
+        name_layout = QHBoxLayout()
+        name_layout.addWidget(QLabel("Friendly Name:"))
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("e.g., My Awesome Project")
+        name_layout.addWidget(self.name_input)
+        layout.addLayout(name_layout)
+        
+        # Path
+        path_layout = QHBoxLayout()
+        path_layout.addWidget(QLabel("Repo Path:"))
+        self.path_input = QLineEdit()
+        path_layout.addWidget(self.path_input)
+        browse_btn = QPushButton("...")
+        browse_btn.clicked.connect(self.browse)
+        path_layout.addWidget(browse_btn)
+        layout.addLayout(path_layout)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(self.reject)
+        add_btn = CyberButton("ADD REPO", CP_DIM, CP_GREEN)
+        add_btn.clicked.connect(self.validate_and_accept)
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(add_btn)
+        layout.addLayout(btn_layout)
+
+    def browse(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select Git Repository")
+        if directory:
+            self.path_input.setText(directory)
+            if not self.name_input.text():
+                self.name_input.setText(os.path.basename(directory))
+
+    def validate_and_accept(self):
+        name = self.name_input.text().strip()
+        path = self.path_input.text().strip()
+        if not name or not path:
+            QMessageBox.warning(self, "Required Fields", "Please enter both name and path.")
+            return
+        if not os.path.isdir(path):
+            QMessageBox.warning(self, "Invalid Path", "The specified directory does not exist.")
+            return
+        self.accept()
+
 class CyberButton(QPushButton):
     def __init__(self, text, color=CP_DIM, hover_color=CP_YELLOW, text_color="white", hover_text_color="black"):
         super().__init__(text)
@@ -502,6 +621,7 @@ class MainWindow(QMainWindow):
         self.current_diff_sections = []  # Store parsed diff sections
         self.active_commit_hash = None # Track currently restored full commit
         self.restored_files = {} # Track restored files: {rel_path: commit_hash}
+        self.saved_repos = [] # List of {"name": str, "path": str}
         
         # Load config first to get window size
         self.load_config()
@@ -597,11 +717,42 @@ class MainWindow(QMainWindow):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
 
+        # --- REPO QUICK BAR ---
+        repo_bar_layout = QHBoxLayout()
+        repo_bar_layout.setSpacing(10)
+        
+        add_repo_btn = QPushButton("+")
+        add_repo_btn.setFixedSize(30, 30)
+        add_repo_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        add_repo_btn.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; font-weight: bold; font-size: 14pt;")
+        add_repo_btn.clicked.connect(self.add_repo_dialog)
+        repo_bar_layout.addWidget(add_repo_btn)
+        
+        from PyQt6.QtWidgets import QScrollArea
+        self.repo_scroll = QScrollArea()
+        self.repo_scroll.setWidgetResizable(True)
+        self.repo_scroll.setFixedHeight(50)
+        self.repo_scroll.setFrameShape(QAbstractItemView.Shape.NoFrame)
+        self.repo_scroll.setStyleSheet(f"background-color: transparent;")
+        self.repo_scroll.horizontalScrollBar().setStyleSheet(f"height: 4px; background: {CP_BG};")
+        
+        self.repo_container = QWidget()
+        self.repo_container_layout = QHBoxLayout(self.repo_container)
+        self.repo_container_layout.setContentsMargins(0, 0, 0, 0)
+        self.repo_container_layout.setSpacing(10)
+        self.repo_container_layout.addStretch()
+        
+        self.repo_scroll.setWidget(self.repo_container)
+        repo_bar_layout.addWidget(self.repo_scroll)
+        
+        layout.addLayout(repo_bar_layout)
+        # --- END REPO QUICK BAR ---
+
         path_layout = QHBoxLayout()
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select Git Directory...")
         
-        last_path = self.load_config()
+        last_path = self.last_directory
         self.path_input.setText(last_path if last_path and os.path.isdir(last_path) else os.getcwd())
             
         self.path_input.returnPressed.connect(self.load_commits)
@@ -634,6 +785,9 @@ class MainWindow(QMainWindow):
         path_layout.addWidget(settings_btn)
         path_layout.addWidget(load_btn)
         layout.addLayout(path_layout)
+
+        # Refresh repo buttons after UI is ready
+        self.refresh_repo_buttons()
 
         # Main content splitter (Table + Diff Panel)
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -1229,7 +1383,53 @@ class MainWindow(QMainWindow):
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
         self.status_label.setText(f"HASH COPIED: {commit_hash}")
 
+    def add_repo_dialog(self):
+        dialog = AddRepoDialog(self)
+        if dialog.exec():
+            name = dialog.name_input.text()
+            path = dialog.path_input.text()
+            # Check if already exists
+            if any(r["path"] == path for r in self.saved_repos):
+                QMessageBox.information(self, "Exists", "This repository is already in your quick bar.")
+                return
+            
+            self.saved_repos.append({"name": name, "path": path})
+            self.save_config()
+            self.refresh_repo_buttons()
+
+    def refresh_repo_buttons(self):
+        # Clear existing buttons
+        for i in reversed(range(self.repo_container_layout.count())):
+            widget = self.repo_container_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+        
+        # Re-add buttons
+        for repo in self.saved_repos:
+            path = repo["path"]
+            name = repo["name"]
+            is_clean = GitWorker.is_repo_clean(path)
+            btn = RepoButton(name, path, is_clean)
+            btn.clicked_path.connect(self.set_directory)
+            btn.remove_requested.connect(self.remove_repo)
+            # Insert before the stretch
+            self.repo_container_layout.insertWidget(self.repo_container_layout.count() - 1, btn)
+
+    def set_directory(self, path):
+        if os.path.isdir(path):
+            self.path_input.setText(path)
+            self.load_commits()
+        else:
+            QMessageBox.warning(self, "Invalid Path", f"Directory not found: {path}")
+
+    def remove_repo(self, path):
+        self.saved_repos = [r for r in self.saved_repos if r["path"] != path]
+        self.save_config()
+        self.refresh_repo_buttons()
+
     def load_config(self):
+        self.last_directory = ""
         try:
             if os.path.exists(self.config_file):
                 with open(self.config_file, 'r') as f:
@@ -1238,20 +1438,25 @@ class MainWindow(QMainWindow):
                     self.window_width = data.get("window_width", 1400)
                     self.window_height = data.get("window_height", 700)
                     self.split_ratio = data.get("split_ratio", [2, 3])
-                    return data.get("last_directory", "")
+                    self.saved_repos = data.get("saved_repos", [])
+                    self.last_directory = data.get("last_directory", "")
+                    return self.last_directory
         except: pass
         return ""
 
     def save_config(self):
         directory = self.path_input.text() if hasattr(self, 'path_input') else ""
         try:
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
             with open(self.config_file, 'w') as f:
                 json.dump({
                     "last_directory": directory,
                     "commit_limit": self.commit_limit,
                     "window_width": self.window_width,
                     "window_height": self.window_height,
-                    "split_ratio": self.split_ratio
+                    "split_ratio": self.split_ratio,
+                    "saved_repos": self.saved_repos
                 }, f)
         except: pass
 
