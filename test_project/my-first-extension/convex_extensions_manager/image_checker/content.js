@@ -223,12 +223,11 @@ function runExtension() {
         // --- De-duplication Logic ---
         // If we are on YouTube, strictly ignore inner elements to prevent double-marking
         if (location.hostname.includes('youtube.com')) {
+            // Never auto-process the main player during scan — only on explicit click
+            if (element.closest('#movie_player') || element.tagName === 'VIDEO') return;
+
             const ytContainer = element.closest('ytd-thumbnail, ytd-playlist-thumbnail, .ytd-thumbnail');
             if (ytContainer && element !== ytContainer) {
-                // If we found an inner element but we are tracking the container, stop.
-                // But wait, the loop might process the inner element BEFORE the container.
-                // We should only process the CONTAINER.
-                // If 'element' is NOT one of the containers, and it IS inside one, skip.
                 if (!['YTD-THUMBNAIL', 'YTD-PLAYLIST-THUMBNAIL'].includes(element.tagName) &&
                     !element.classList.contains('ytd-thumbnail')) return;
             }
