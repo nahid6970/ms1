@@ -66,6 +66,11 @@
                 "type": "folder",
                 "target": "C:\\@delta\\ms1\\asset\\gemini\\policies",
                 "fake": "C:\\Users\\nahid\\.gemini\\policies"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\gemini\\trustedFolders.json",
+                "fake": "C:\\Users\\nahid\\.gemini\\trustedFolders.json"
             }
         ],
         "copy_mode": false
