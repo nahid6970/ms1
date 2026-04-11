@@ -345,6 +345,20 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def fix_lock(directory):
+        """Remove git lock files that might be stuck (e.g. index.lock)"""
+        try:
+            # We need the git root to find the .git folder accurately
+            root = GitWorker.get_git_root(directory)
+            lock_path = os.path.join(root, ".git", "index.lock")
+            if os.path.exists(lock_path):
+                os.remove(lock_path)
+                return {"success": "Successfully removed index.lock"}
+            return {"info": "No index.lock found."}
+        except Exception as e:
+            return {"error": f"Error removing lock: {str(e)}"}
+
+    @staticmethod
     def parse_diff(diff_text):
         """Parse git diff into file sections"""
         lines = diff_text.split("\n")
@@ -1863,9 +1877,14 @@ class GitOpsDialog(QDialog):
         pull_btn = CyberButton("PULL", CP_DIM, CP_YELLOW)
         pull_btn.clicked.connect(self.pull_git)
         
+        fix_btn = CyberButton("FIX LOCK", CP_DIM, CP_RED)
+        fix_btn.clicked.connect(self.fix_git_lock)
+        fix_btn.setToolTip("Remove .git/index.lock if git is stuck")
+        
         btn_layout.addWidget(commit_btn)
         btn_layout.addWidget(push_btn)
         btn_layout.addWidget(pull_btn)
+        btn_layout.addWidget(fix_btn)
         
         layout.addLayout(btn_layout)
         
@@ -1873,6 +1892,21 @@ class GitOpsDialog(QDialog):
         self.status_label = QLabel("READY")
         self.status_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
         layout.addWidget(self.status_label)
+
+    def fix_git_lock(self):
+        result = GitWorker.fix_lock(self.directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText("LOCK FIXED")
+            QMessageBox.information(self, "Success", result["success"])
+        elif "info" in result:
+            self.status_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+            self.status_label.setText("NO LOCK FOUND")
+            QMessageBox.information(self, "Info", result["info"])
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("FIX FAILED")
+            QMessageBox.critical(self, "Error", result["error"])
 
     def commit_git(self):
         message = self.commit_msg_input.text().strip()
