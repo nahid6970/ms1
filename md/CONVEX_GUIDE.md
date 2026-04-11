@@ -1,13 +1,13 @@
-﻿# Convex Project Setup Guide
+# Convex Project Setup Guide
 
 ## Project Structure
 ```
 project/
-â”œâ”€â”€ convex/
-â”‚   â””â”€â”€ functions.ts          # Backend functions (queries, mutations)
-â”œâ”€â”€ index.html                 # Frontend (can be any framework)
-â”œâ”€â”€ package.json
-â””â”€â”€ package-lock.json
+├── convex/
+│   └── functions.ts          # Backend functions (queries, mutations)
+├── index.html                 # Frontend (can be any framework)
+├── package.json
+└── package-lock.json
 ```
 
 ## Initial Setup
@@ -105,9 +105,9 @@ If file is `convex/functions.ts`, call functions as:
 ### File Structure
 ```
 project/
-â”œâ”€â”€ index.html
-â”œâ”€â”€ style.css
-â””â”€â”€ app.js
+├── index.html
+├── style.css
+└── app.js
 ```
 
 ### index.html
@@ -269,10 +269,3 @@ const html = `<div onclick="func('${id}', \`${text.replace(/`/g, '\\`')}\`)">`;
 - [ ] Replace `YOUR_CONVEX_URL_HERE` with actual URL
 - [ ] Test locally by opening HTML in browser
 - [ ] For production: run `npx convex deploy` manually and use prod URL
-
-
-# IMPORTANT Rules
-- **Relative Paths:** ALWAYS use relative paths (e.g., `os.path.join(os.path.dirname(__file__), 'settings.json')`) so the script works when launched from any directory.
-- **Restart Button:** Add a "â†º RESTART" button that executes `os.execv(sys.executable, [sys.executable] + sys.argv)` to quickly apply code changes.
-- **Settings System:** Include a "âš™ SETTINGS" button and a SettingsDialog for user customizations (keep it extensible but empty by default).
-
