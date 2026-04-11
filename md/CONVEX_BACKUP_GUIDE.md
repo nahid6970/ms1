@@ -1,4 +1,4 @@
-﻿# Convex Config Backup — Integration Guide
+# Convex Config Backup — Integration Guide
 
 Add cloud backup/restore (with full version history and unified sync management) to any Python PyQt script using Convex.
 
@@ -260,8 +260,3 @@ def open_cloud_sync(self):
 - **Git-Style Diff**: Use `difflib.unified_diff` to highlight changes before restoring.
 - **Immuntability**: Backups are preserved by timestamp; history is shown newest first.
 - **Validation**: Use the `CHECK` button to ensure you don't overwrite newer changes unintentionally.
-
-# IMPORTANT Rules
-- **Relative Paths:** ALWAYS use relative paths (e.g., `os.path.join(os.path.dirname(__file__), 'settings.json')`) so the script works when launched from any directory.
-- **Restart Button:** Add a "↺ RESTART" button that executes `os.execv(sys.executable, [sys.executable] + sys.argv)` to quickly apply code changes.
-- **Settings System:** Include a "⚙ SETTINGS" button and a SettingsDialog for user customizations (keep it extensible but empty by default).
