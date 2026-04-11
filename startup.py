@@ -1756,7 +1756,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
 
 def make_app_icon():
-    svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><polyline points="10,46 24,20 32,34 40,26 54,46" fill="none" stroke="#FCEE0A" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="14" r="5" fill="#00F0FF"/></svg>'
+    svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><path d="M32 6 C22 6 14 18 14 30 L14 38 L20 44 L20 52 L26 52 L26 46 L38 46 L38 52 L44 52 L44 44 L50 38 L50 30 C50 18 42 6 32 6Z" fill="#FCEE0A"/><circle cx="32" cy="26" r="6" fill="#050505"/><path d="M20 44 L16 54 L26 50Z" fill="#FF003C"/><path d="M44 44 L48 54 L38 50Z" fill="#FF003C"/><circle cx="32" cy="26" r="3" fill="#00F0FF"/></svg>'
     renderer = QSvgRenderer(QByteArray(svg))
     pix = QPixmap(64, 64)
     pix.fill(Qt.GlobalColor.transparent)
