@@ -1,3 +1,5 @@
+import ctypes
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('nahid6970.mySTARTUP.subproduct.version')
 import sys
 import os
 import json
