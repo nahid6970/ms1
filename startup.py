@@ -1755,9 +1755,20 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
 
+def make_app_icon():
+    svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><polyline points="10,46 24,20 32,34 40,26 54,46" fill="none" stroke="#FCEE0A" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="14" r="5" fill="#00F0FF"/></svg>'
+    renderer = QSvgRenderer(QByteArray(svg))
+    pix = QPixmap(64, 64)
+    pix.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pix)
+    renderer.render(painter)
+    painter.end()
+    return QIcon(pix)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setWindowIcon(make_app_icon())
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
