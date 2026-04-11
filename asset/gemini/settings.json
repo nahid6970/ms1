@@ -35,5 +35,9 @@
     "shell": {
       "showColor": false
     }
-  }
+  },
+  "workspaces": [
+    "C:/@delta/ms1",
+    "C:/@delta/db"
+  ]
 }
