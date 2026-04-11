@@ -735,35 +735,14 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(main_splitter)
 
-        # --- GIT OPERATIONS PANEL ---
-        git_op_layout = QHBoxLayout()
-        git_op_layout.setSpacing(10)
-        
-        self.commit_msg_input = QLineEdit()
-        self.commit_msg_input.setPlaceholderText("Enter commit message (empty for date/time)...")
-        
-        commit_btn = CyberButton("COMMIT", CP_DIM, CP_GREEN)
-        commit_btn.clicked.connect(self.commit_git)
-        
-        push_btn = CyberButton("PUSH", CP_DIM, CP_CYAN)
-        push_btn.clicked.connect(self.push_git)
-        
-        pull_btn = CyberButton("PULL", CP_DIM, CP_YELLOW)
-        pull_btn.clicked.connect(self.pull_git)
-        
-        git_op_layout.addWidget(QLabel("GIT:"))
-        git_op_layout.addWidget(self.commit_msg_input)
-        git_op_layout.addWidget(commit_btn)
-        git_op_layout.addWidget(push_btn)
-        git_op_layout.addWidget(pull_btn)
-        
-        layout.addLayout(git_op_layout)
-
         action_layout = QHBoxLayout()
         self.status_label = QLabel("READY")
         self.status_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         self.status_label.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_label.mousePressEvent = self.change_commit_limit
+        
+        git_console_btn = CyberButton("GIT CONSOLE", CP_GREEN, CP_GREEN, "black", "black")
+        git_console_btn.clicked.connect(self.open_git_console)
         
         copy_hash_btn = CyberButton("COPY HASH", CP_DIM, CP_CYAN, "white", "black")
         copy_hash_btn.clicked.connect(self.copy_hash)
@@ -779,6 +758,7 @@ class MainWindow(QMainWindow):
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
+        action_layout.addWidget(git_console_btn)
         action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(explore_btn)
         action_layout.addWidget(restore_files_btn)
@@ -792,6 +772,16 @@ class MainWindow(QMainWindow):
 
         if os.path.isdir(self.path_input.text()):
             self.load_commits()
+
+    def open_git_console(self):
+        """Open the git operations popup dialog"""
+        directory = self.path_input.text().strip()
+        if not directory or not os.path.isdir(directory):
+            QMessageBox.warning(self, "No Directory", "Please select a valid git directory first.")
+            return
+            
+        dialog = GitOpsDialog(self, directory)
+        dialog.exec()
 
     def change_commit_limit(self, event):
         """Open dialog to change commit limit"""
@@ -1614,6 +1604,118 @@ class MainWindow(QMainWindow):
                 self.status_label.setText("RESTORE PARTIALLY FAILED")
                 QMessageBox.warning(self, "Partial Success", f"Restored {success_count} file(s).\nFailed: {len(failed)}")
 
+
+# --- GIT OPERATIONS DIALOG ---
+class GitOpsDialog(QDialog):
+    def __init__(self, parent, directory):
+        super().__init__(parent)
+        self.directory = directory
+        self.parent_window = parent
+        self.setWindowTitle("GIT OPERATIONS // CONSOLE")
+        self.resize(600, 200)
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QLineEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 10px;
+                font-size: 11pt;
+            }}
+            QLabel {{ color: {CP_YELLOW}; font-weight: bold; }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Message Input
+        msg_layout = QVBoxLayout()
+        msg_layout.addWidget(QLabel("COMMIT MESSAGE:"))
+        self.commit_msg_input = QLineEdit()
+        self.commit_msg_input.setPlaceholderText("Enter message (leave empty for date/time)...")
+        self.commit_msg_input.returnPressed.connect(self.commit_git)
+        msg_layout.addWidget(self.commit_msg_input)
+        layout.addLayout(msg_layout)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(15)
+        
+        commit_btn = CyberButton("COMMIT", CP_DIM, CP_GREEN)
+        commit_btn.clicked.connect(self.commit_git)
+        
+        push_btn = CyberButton("PUSH", CP_DIM, CP_CYAN)
+        push_btn.clicked.connect(self.push_git)
+        
+        pull_btn = CyberButton("PULL", CP_DIM, CP_YELLOW)
+        pull_btn.clicked.connect(self.pull_git)
+        
+        btn_layout.addWidget(commit_btn)
+        btn_layout.addWidget(push_btn)
+        btn_layout.addWidget(pull_btn)
+        
+        layout.addLayout(btn_layout)
+        
+        # Status Label inside Dialog
+        self.status_label = QLabel("READY")
+        self.status_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+        layout.addWidget(self.status_label)
+
+    def commit_git(self):
+        message = self.commit_msg_input.text().strip()
+        if not message:
+            from datetime import datetime
+            message = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+            
+        self.status_label.setText("COMMITTING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.commit(self.directory, message)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: COMMITTED")
+            self.commit_msg_input.clear()
+            self.parent_window.load_commits() # Refresh table
+            QMessageBox.information(self, "Success", f"Committed with message:\n{message}")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("COMMIT FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
+
+    def push_git(self):
+        self.status_label.setText("PUSHING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.push(self.directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: PUSHED")
+            QMessageBox.information(self, "Success", "Pushed to remote.")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("PUSH FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
+
+    def pull_git(self):
+        self.status_label.setText("PULLING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.pull(self.directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: PULLED")
+            self.parent_window.load_commits() # Refresh table
+            QMessageBox.information(self, "Success", "Pulled from remote.")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("PULL FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
 
 # --- SETTINGS DIALOG ---
 class SettingsDialog(QDialog):
