@@ -300,6 +300,40 @@ class GitWorker:
             return {"error": str(e)}
 
     @staticmethod
+    def commit(directory, message):
+        """Add all changes and commit with the given message"""
+        try:
+            subprocess.check_call(["git", "add", "."], cwd=directory)
+            subprocess.check_call(["git", "commit", "-m", message], cwd=directory)
+            return {"success": True}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def push(directory):
+        """Push changes to remote"""
+        try:
+            subprocess.check_call(["git", "push"], cwd=directory)
+            return {"success": True}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def pull(directory):
+        """Pull changes from remote"""
+        try:
+            subprocess.check_call(["git", "pull"], cwd=directory)
+            return {"success": True}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def parse_diff(diff_text):
         """Parse git diff into file sections"""
         lines = diff_text.split("\n")
@@ -700,6 +734,30 @@ class MainWindow(QMainWindow):
         self.main_splitter = main_splitter  # Store reference for settings
         
         layout.addWidget(main_splitter)
+
+        # --- GIT OPERATIONS PANEL ---
+        git_op_layout = QHBoxLayout()
+        git_op_layout.setSpacing(10)
+        
+        self.commit_msg_input = QLineEdit()
+        self.commit_msg_input.setPlaceholderText("Enter commit message (empty for date/time)...")
+        
+        commit_btn = CyberButton("COMMIT", CP_DIM, CP_GREEN)
+        commit_btn.clicked.connect(self.commit_git)
+        
+        push_btn = CyberButton("PUSH", CP_DIM, CP_CYAN)
+        push_btn.clicked.connect(self.push_git)
+        
+        pull_btn = CyberButton("PULL", CP_DIM, CP_YELLOW)
+        pull_btn.clicked.connect(self.pull_git)
+        
+        git_op_layout.addWidget(QLabel("GIT:"))
+        git_op_layout.addWidget(self.commit_msg_input)
+        git_op_layout.addWidget(commit_btn)
+        git_op_layout.addWidget(push_btn)
+        git_op_layout.addWidget(pull_btn)
+        
+        layout.addLayout(git_op_layout)
 
         action_layout = QHBoxLayout()
         self.status_label = QLabel("READY")
@@ -1228,6 +1286,77 @@ class MainWindow(QMainWindow):
         self.loader_thread = CommitLoaderThread(directory, self.commit_limit, self.scope_input.text())
         self.loader_thread.finished.connect(self.on_commits_loaded)
         self.loader_thread.start()
+
+    def commit_git(self):
+        """Add all and commit changes"""
+        directory = self.path_input.text().strip()
+        if not directory: 
+            QMessageBox.warning(self, "No Directory", "Please select a git directory first.")
+            return
+        
+        message = self.commit_msg_input.text().strip()
+        if not message:
+            from datetime import datetime
+            message = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+            
+        self.status_label.setText("COMMITTING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.commit(directory, message)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: COMMITTED")
+            self.commit_msg_input.clear()
+            self.load_commits() # Refresh table
+            QMessageBox.information(self, "Success", f"Committed with message:\n{message}")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("COMMIT FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
+
+    def push_git(self):
+        """Push changes to remote"""
+        directory = self.path_input.text().strip()
+        if not directory: 
+            QMessageBox.warning(self, "No Directory", "Please select a git directory first.")
+            return
+        
+        self.status_label.setText("PUSHING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.push(directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: PUSHED")
+            QMessageBox.information(self, "Success", "Pushed to remote.")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("PUSH FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
+
+    def pull_git(self):
+        """Pull changes from remote"""
+        directory = self.path_input.text().strip()
+        if not directory: 
+            QMessageBox.warning(self, "No Directory", "Please select a git directory first.")
+            return
+        
+        self.status_label.setText("PULLING...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.pull(directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
+            self.status_label.setText(f"SUCCESS: PULLED")
+            self.load_commits() # Refresh table
+            QMessageBox.information(self, "Success", "Pulled from remote.")
+        else:
+            self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold;")
+            self.status_label.setText("PULL FAILED")
+            QMessageBox.critical(self, "Error", result['error'])
 
     def on_commits_loaded(self, result):
         """Called when commits are loaded in background thread"""
