@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu, QSizePolicy
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem
@@ -444,6 +444,7 @@ class RepoButton(QPushButton):
         super().__init__(name)
         self.repo_path = path
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         self.update_status(is_clean)
         self.setToolTip(path)
         
@@ -454,12 +455,10 @@ class RepoButton(QPushButton):
                 background-color: {CP_PANEL};
                 color: {CP_TEXT};
                 border: 1px solid {CP_DIM};
-                padding: 5px 15px;
-                padding-left: 25px;
+                padding: 4px 12px 4px 22px;
                 font-family: 'Consolas';
                 font-size: 9pt;
                 text-align: left;
-                min-width: 100px;
             }}
             QPushButton:hover {{
                 background-color: {CP_DIM};
@@ -468,8 +467,8 @@ class RepoButton(QPushButton):
         """)
         # Create a small status dot
         self.status_dot = QLabel("●", self)
-        self.status_dot.setStyleSheet(f"color: {dot_color}; font-size: 14pt; background: transparent;")
-        self.status_dot.move(8, 2)
+        self.status_dot.setStyleSheet(f"color: {dot_color}; font-size: 12pt; background: transparent;")
+        self.status_dot.move(6, 1)
         self.status_dot.show()
 
     def mousePressEvent(self, event):
@@ -714,15 +713,16 @@ class MainWindow(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(0)
+        layout.setContentsMargins(20, 0, 20, 5)
 
         # --- REPO QUICK BAR ---
         repo_bar_layout = QHBoxLayout()
-        repo_bar_layout.setSpacing(10)
+        repo_bar_layout.setSpacing(5)
+        repo_bar_layout.setContentsMargins(0, 5, 0, 5)
         
         add_repo_btn = QPushButton("+")
-        add_repo_btn.setFixedSize(30, 30)
+        add_repo_btn.setFixedSize(26, 26)
         add_repo_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         add_repo_btn.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_GREEN}; border: 1px solid {CP_DIM}; font-weight: bold; font-size: 14pt;")
         add_repo_btn.clicked.connect(self.add_repo_dialog)
@@ -731,15 +731,15 @@ class MainWindow(QMainWindow):
         from PyQt6.QtWidgets import QScrollArea
         self.repo_scroll = QScrollArea()
         self.repo_scroll.setWidgetResizable(True)
-        self.repo_scroll.setFixedHeight(50)
+        self.repo_scroll.setFixedHeight(32)
         self.repo_scroll.setFrameShape(QAbstractItemView.Shape.NoFrame)
         self.repo_scroll.setStyleSheet(f"background-color: transparent;")
-        self.repo_scroll.horizontalScrollBar().setStyleSheet(f"height: 4px; background: {CP_BG};")
+        self.repo_scroll.horizontalScrollBar().setStyleSheet(f"height: 2px; background: {CP_BG};")
         
         self.repo_container = QWidget()
         self.repo_container_layout = QHBoxLayout(self.repo_container)
         self.repo_container_layout.setContentsMargins(0, 0, 0, 0)
-        self.repo_container_layout.setSpacing(10)
+        self.repo_container_layout.setSpacing(5)
         self.repo_container_layout.addStretch()
         
         self.repo_scroll.setWidget(self.repo_container)
@@ -748,7 +748,12 @@ class MainWindow(QMainWindow):
         layout.addLayout(repo_bar_layout)
         # --- END REPO QUICK BAR ---
 
+        # Add a small spacing manually between repo bar and path layout
+        layout.addSpacing(5)
+
         path_layout = QHBoxLayout()
+        path_layout.setSpacing(10)
+        path_layout.setContentsMargins(0, 0, 0, 5)
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select Git Directory...")
         
