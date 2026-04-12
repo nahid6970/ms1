@@ -36,7 +36,7 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
-CP_FONT = "Consolas"
+CP_FONT = "JetBrainsMono NF"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "mypygui_config.json")
@@ -202,7 +202,8 @@ def create_dynamic_button(parent, btn_cfg, category, index=None):
     font = tuple(btn_cfg.get("font", [CP_FONT, 14, "bold"]))
     bg = btn_cfg.get("bg", CP_PANEL)
     fg = btn_cfg.get("fg", CP_TEXT)
-    lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=bg, fg=fg, font=font, relief="flat", cursor="hand2")
+    # Reduced internal padding to 2 and removed trailing space for tighter look
+    lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=bg, fg=fg, font=font, relief="flat", cursor="hand2", padx=2, anchor="center")
     lbl.pack(side="left", padx=(1, 1))
     bindings = btn_cfg.get("bindings", {})
     for event, action in bindings.items():
@@ -345,7 +346,7 @@ def update_git_gui():
 tk.Label(ROOT1, text="\udb80\udea2", bg=CP_BG, fg=CP_YELLOW, font=(CP_FONT, 18, "bold")).pack(side="left")
 
 for repo in repos:
-    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_TEXT, font=(CP_FONT, 12, "bold"), text=repo["label"])
+    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_TEXT, font=(CP_FONT, 12, "bold"), text=repo["label"], padx=2, anchor="center")
     lbl.pack(side="left")
     lbl.bind("<Button-1>", lambda e, p=repo["path"]: run_command(f"cd {p} ; gitter"))
     status_labels[repo["name"]] = lbl
@@ -357,7 +358,7 @@ tk.Label(ROOT1, text="]", bg=CP_BG, fg=CP_DIM, font=(CP_FONT, 18, "bold")).pack(
 
 for key, cfg in CONFIG.get("rclone_commands", {}).items():
     if "id" not in cfg: cfg["id"] = key
-    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_CYAN, text=cfg["label"], font=(CP_FONT, 14, "bold"), cursor="hand2")
+    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_CYAN, text=cfg["label"], font=(CP_FONT, 14, "bold"), cursor="hand2", padx=2, anchor="center")
     lbl.pack(side="left", padx=5)
     lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands"))
 
@@ -376,15 +377,15 @@ Download_lb.pack(side="left", padx=3)
 Upload_lb = tk.Label(ROOT2, bg=CP_BG, fg=CP_TEXT, font=(CP_FONT, 10, "bold"))
 Upload_lb.pack(side="left", padx=3)
 
-LB_CPU = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_CYAN, width=5, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"))
+LB_CPU = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_CYAN, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"), padx=5)
 LB_CPU.pack(side="left", padx=3)
-LB_GPU = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_GREEN, width=5, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"))
+LB_GPU = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_GREEN, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"), padx=5)
 LB_GPU.pack(side="left", padx=3)
-LB_RAM = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_ORANGE, width=5, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"))
+LB_RAM = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_ORANGE, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"), padx=5)
 LB_RAM.pack(side="left", padx=3)
-LB_DUC = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_TEXT, width=8, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"))
+LB_DUC = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_TEXT, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"), padx=5)
 LB_DUC.pack(side="left", padx=3)
-LB_DUD = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_TEXT, width=8, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"))
+LB_DUD = tk.Label(ROOT2, bg=CP_PANEL, fg=CP_TEXT, relief="flat", highlightthickness=1, highlightbackground=CP_DIM, font=(CP_FONT, 10, "bold"), padx=5)
 LB_DUD.pack(side="left", padx=3)
 
 time_left_label = tk.Label(ROOT2, text="\udb86\udee1", font=(CP_FONT, 16, "bold"), fg=CP_YELLOW, bg=CP_BG, cursor="hand2")
