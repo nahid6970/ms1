@@ -939,6 +939,10 @@ class MainWindow(QMainWindow):
         self.scan_tasks_btn = CyberButton(" SCAN_TASKS", color="#FFA500", is_outlined=True, svg_data=SVGS["CLOCK"])
         self.scan_tasks_btn.clicked.connect(self.scan_tasks)
         row2_layout.addWidget(self.scan_tasks_btn)
+
+        self.scan_uwp_btn = CyberButton(" SCAN_UWP", color="#00FF88", is_outlined=True, svg_data=SVGS["LAYERS"])
+        self.scan_uwp_btn.clicked.connect(self.scan_uwp)
+        row2_layout.addWidget(self.scan_uwp_btn)
         
         self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"])
         self.prune_btn.clicked.connect(self.delete_matching_shortcuts)
@@ -1678,6 +1682,90 @@ class MainWindow(QMainWindow):
                     
         except Exception as e:
              self.update_status(f"TASK SCAN EXCEPTION: {str(e)}")
+
+    def scan_uwp(self):
+        self.update_status("SCANNING STORE APPS...")
+        QApplication.processEvents()
+        
+        found_items = []
+        names = {i["name"].lower() for i in self.items}
+        
+        # This PS script looks for 'windows.startupTask' extensions in Appx manifests
+        ps_cmd = """
+        Get-AppxPackage | Get-AppxPackageManifest | ForEach-Object {
+            $manifest = $_
+            $xml = [xml]$manifest.Value
+            $namespace = new-object Xml.XmlNamespaceManager $xml.NameTable
+            $namespace.AddNamespace("u", "http://schemas.microsoft.com/appx/manifest/foundation/windows10")
+            $namespace.AddNamespace("u5", "http://schemas.microsoft.com/appx/manifest/uap/windows10/5")
+            
+            $nodes = $xml.SelectNodes("//u5:StartupTask", $namespace)
+            foreach ($node in $nodes) {
+                [PSCustomObject]@{
+                    Name = $xml.Package.Properties.DisplayName
+                    PackageFullName = $xml.Package.Identity.Name
+                    TaskId = $node.TaskId
+                }
+            }
+        } | ConvertTo-Json -Compress
+        """
+        
+        try:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            process = subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd], 
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                     text=True, startupinfo=startupinfo)
+            stdout, stderr = process.communicate()
+            
+            if not stdout.strip():
+                self.update_status("UWP SCAN COMPLETE: 0 NEW")
+                return
+
+            data = []
+            parsed = json.loads(stdout)
+            if isinstance(parsed, dict): data = [parsed]
+            elif isinstance(parsed, list): data = parsed
+
+            for app in data:
+                app_name = app.get("Name", "")
+                pkg_name = app.get("PackageFullName", "")
+                task_id = app.get("TaskId", "")
+                
+                if not app_name or app_name.lower() in names: continue
+                
+                # UWP apps start via a specific protocol or the 'explorer.exe shell:AppsFolder\...' path
+                # But for startup tasks, we can use the 'Start-Process' with the AppUserModelId if we had it,
+                # or just use the TaskId logic. A common way to trigger UWP startup is:
+                ps1_cmd = f'# UWP Startup Task for {app_name}\n'
+                ps1_cmd += f'# Task ID: {task_id}\n'
+                ps1_cmd += f'Write-Host "UWP tasks are managed by Windows. This entry is for tracking."'
+                
+                found_items.append({
+                    "name": f"{app_name} (UWP)",
+                    "type": "App",
+                    "paths": [f"UWP://{pkg_name}"],
+                    "Command": task_id,
+                    "ps1_command": ps1_cmd,
+                    "ExecutableType": "other",
+                    "origin": "UWP",
+                    "added_at": time.time()
+                })
+
+            if found_items:
+                dialog = ScanResultsDialog(found_items, self, title="SYSTEM // SCAN_UWP")
+                if dialog.exec():
+                    selected = dialog.selected_items
+                    if selected:
+                        self.items.extend(selected)
+                        self.save_items()
+                        self.populate_lists()
+                        self.update_status(f"IMPORTED {len(selected)} UWP ENTRIES")
+            else:
+                self.update_status("UWP SCAN COMPLETE: NO NEW ENTRIES")
+
+        except Exception as e:
+            self.update_status(f"UWP SCAN ERROR: {str(e)}")
 
     def delete_matching_shortcuts(self):
         start_folders = [
