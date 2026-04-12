@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-04-11T12:34:53.308941",
+    "timestamp": "2026-04-12T10:49:42.652389",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -145,6 +145,10 @@
             },
             "TakeOwnership": {
                 "command": "powershell.exe -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /c /l & pause' -Verb runAs\""
+            },
+            "VirusTotal Scan": {
+                "MUIVerb": "VirusTotal Scan",
+                "command": "powershell.exe -Command \"$h=(Get-FileHash '\"%V\"').Hash; curl.exe -s -X POST -H 'x-apikey: a4203342501524109fa5505a77c2934cff3d137982d61fe725fb0c01bfbfe538' -F 'file=@\"%V\"' https://www.virustotal.com/api/v3/files; Start-Process \\\"https://www.virustotal.com/gui/file/$h\\\"\""
             }
         }
     },
