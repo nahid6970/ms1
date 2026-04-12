@@ -47,18 +47,28 @@ CONFIG = load_config()
 def handle_action(action_cfg):
     if not action_cfg: return
     atype = action_cfg.get("type")
+    cmd = action_cfg.get("cmd")
+    cwd = action_cfg.get("cwd")
+    admin = action_cfg.get("admin", False)
+    hide = action_cfg.get("hide", False)
+    
+    if admin:
+        # Launch as admin using shell execute "runas"
+        try:
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable if atype=="python" else "cmd.exe", 
+                                               f"/c {cmd}" if atype!="python" else cmd, cwd, 1 if not hide else 0)
+        except Exception as e:
+            print(f"Admin launch failed: {e}")
+        return
+
+    flags = subprocess.CREATE_NO_WINDOW if hide else 0
+    
     if atype == "subprocess":
-        cmd = action_cfg.get("cmd")
-        cwd = action_cfg.get("cwd")
-        no_window = action_cfg.get("no_window", False)
-        flags = subprocess.CREATE_NO_WINDOW if no_window else 0
         subprocess.Popen(cmd, cwd=cwd, shell=True, creationflags=flags)
     elif atype == "run_command":
-        run_command(action_cfg.get("cmd"))
+        run_command(cmd)
     elif atype == "python":
-        cmd = action_cfg.get("cmd")
-        cwd = action_cfg.get("cwd")
-        subprocess.Popen([sys.executable, cmd], cwd=cwd)
+        subprocess.Popen([sys.executable, cmd], cwd=cwd, creationflags=flags)
     elif atype == "function":
         func_name = action_cfg.get("func")
         if func_name == "restart": restart()
@@ -68,40 +78,106 @@ def handle_action(action_cfg):
 def open_edit_gui(item_cfg, category, index=None):
     edit_win = tk.Toplevel(ROOT)
     edit_win.title(f"Edit {item_cfg.get('id', 'Item')}")
-    edit_win.geometry("500x600")
+    edit_win.geometry("700x850")
     edit_win.configure(bg="#282c34")
     edit_win.attributes("-topmost", True)
 
+    # Scrollable frame for many options
+    canvas = tk.Canvas(edit_win, bg="#282c34", highlightthickness=0)
+    scrollbar = ttk.Scrollbar(edit_win, orient="vertical", command=canvas.yview)
+    scroll_frame = tk.Frame(canvas, bg="#282c34")
+
+    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Basic Info
     fields = ["text", "fg", "bg", "id"]
     entries = {}
-
     for i, field in enumerate(fields):
-        tk.Label(edit_win, text=field, fg="white", bg="#282c34").grid(row=i, column=0, padx=10, pady=5)
-        ent = tk.Entry(edit_win, width=40)
+        tk.Label(scroll_frame, text=field.upper(), fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=i, column=0, padx=10, pady=5, sticky="w")
+        ent = tk.Entry(scroll_frame, width=50, bg="#1d2027", fg="white", insertbackground="white")
         ent.insert(0, str(item_cfg.get(field, "")))
-        ent.grid(row=i, column=1, padx=10, pady=5)
+        ent.grid(row=i, column=1, padx=10, pady=5, sticky="w")
         entries[field] = ent
 
-    # Bindings editing (simplified for now)
-    tk.Label(edit_win, text="Bindings (JSON string):", fg="white", bg="#282c34").grid(row=len(fields), column=0, padx=10, pady=5)
-    bindings_text = tk.Text(edit_win, height=10, width=40)
-    bindings_text.insert("1.0", json.dumps(item_cfg.get("bindings", {}), indent=2))
-    bindings_text.grid(row=len(fields), column=1, padx=10, pady=5)
+    # Bindings Sections
+    click_types = [
+        ("Left Click", "Button-1"),
+        ("Right Click", "Button-3"),
+        ("Ctrl + Left Click", "Control-Button-1"),
+        ("Ctrl + Right Click", "Control-Button-3")
+    ]
+    
+    binding_inputs = {}
+    current_row = len(fields)
+
+    for label, key in click_types:
+        frame = tk.LabelFrame(scroll_frame, text=label, fg="#61afef", bg="#282c34", font=("Arial", 11, "bold"), padx=10, pady=10)
+        frame.grid(row=current_row, column=0, columnspan=2, padx=10, pady=15, sticky="nsew")
+        current_row += 1
+        
+        cfg = item_cfg.get("bindings", {}).get(key, {})
+        
+        # Command
+        tk.Label(frame, text="Command:", fg="white", bg="#282c34").grid(row=0, column=0, sticky="w")
+        cmd_ent = tk.Entry(frame, width=60, bg="#1d2027", fg="white", insertbackground="white")
+        cmd_ent.insert(0, cfg.get("cmd", cfg.get("func", "")))
+        cmd_ent.grid(row=0, column=1, padx=5, pady=2)
+        
+        # Type Dropdown
+        tk.Label(frame, text="Type:", fg="white", bg="#282c34").grid(row=1, column=0, sticky="w")
+        type_var = tk.StringVar(value=cfg.get("type", "subprocess"))
+        type_combo = ttk.Combobox(frame, textvariable=type_var, values=["subprocess", "run_command", "python", "function"], state="readonly", width=20)
+        type_combo.grid(row=1, column=1, padx=5, pady=2, sticky="w")
+        
+        # Options
+        opt_frame = tk.Frame(frame, bg="#282c34")
+        opt_frame.grid(row=2, column=1, sticky="w")
+        
+        hide_var = tk.BooleanVar(value=cfg.get("hide", False))
+        tk.Checkbutton(opt_frame, text="Hide Terminal", variable=hide_var, fg="white", bg="#282c34", selectcolor="#1d2027", activebackground="#282c34", activeforeground="white").pack(side="left")
+        
+        admin_var = tk.BooleanVar(value=cfg.get("admin", False))
+        tk.Checkbutton(opt_frame, text="Run as Admin", variable=admin_var, fg="white", bg="#282c34", selectcolor="#1d2027", activebackground="#282c34", activeforeground="white").pack(side="left", padx=20)
+        
+        binding_inputs[key] = {
+            "cmd": cmd_ent,
+            "type": type_var,
+            "hide": hide_var,
+            "admin": admin_var
+        }
 
     def save():
         for field in fields:
             item_cfg[field] = entries[field].get()
-        try:
-            item_cfg["bindings"] = json.loads(bindings_text.get("1.0", "end"))
-        except:
-            messagebox.showerror("Error", "Invalid JSON in bindings")
-            return
+        
+        new_bindings = {}
+        for key, inputs in binding_inputs.items():
+            cmd = inputs["cmd"].get()
+            if not cmd: continue
+            
+            b_type = inputs["type"].get()
+            new_bindings[key] = {
+                "type": b_type,
+                "hide": inputs["hide"].get(),
+                "admin": inputs["admin"].get()
+            }
+            if b_type == "function":
+                new_bindings[key]["func"] = cmd
+            else:
+                new_bindings[key]["cmd"] = cmd
+        
+        item_cfg["bindings"] = new_bindings
         
         config = load_config()
         if category in config:
             if index is not None:
                 config[category][index] = item_cfg
-            else: # For dicts like rclone_commands
+            else: 
                 config[category][item_cfg["id"]] = item_cfg
         
         save_config(config)
@@ -109,7 +185,7 @@ def open_edit_gui(item_cfg, category, index=None):
         if messagebox.askyesno("Restart", "Settings saved. Restart GUI to apply?"):
             restart()
 
-    tk.Button(edit_win, text="Save", command=save).grid(row=len(fields)+1, column=0, columnspan=2, pady=20)
+    tk.Button(scroll_frame, text="SAVE CONFIGURATION", command=save, bg="#98c379", fg="black", font=("Arial", 12, "bold"), pady=10).grid(row=current_row, column=0, columnspan=2, pady=30, sticky="nsew")
 
 def create_dynamic_button(parent, btn_cfg, category, index=None):
     widget_type = btn_cfg.get("widget_type", "Label")
@@ -126,11 +202,16 @@ def create_dynamic_button(parent, btn_cfg, category, index=None):
     
     bindings = btn_cfg.get("bindings", {})
     for event, action in bindings.items():
-        lbl.bind(f"<{event}>", lambda e, a=action: handle_action(a))
+        # Handle simple string function calls for backward compatibility if any
+        if isinstance(action, str):
+            lbl.bind(f"<{event}>", lambda e, a=action: handle_action({"type": "function", "func": a}))
+        else:
+            lbl.bind(f"<{event}>", lambda e, a=action: handle_action(a))
     
     # Shift+Click for editing
     lbl.bind("<Shift-Button-1>", lambda e: open_edit_gui(btn_cfg, category, index))
     return lbl
+
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
