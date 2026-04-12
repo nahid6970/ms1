@@ -943,6 +943,10 @@ class MainWindow(QMainWindow):
         self.scan_uwp_btn = CyberButton(" SCAN_UWP", color="#00FF88", is_outlined=True, svg_data=SVGS["LAYERS"])
         self.scan_uwp_btn.clicked.connect(self.scan_uwp)
         row2_layout.addWidget(self.scan_uwp_btn)
+
+        self.scan_srv_btn = CyberButton(" SCAN_SRV", color="#00F0FF", is_outlined=True, svg_data=SVGS["TERMINAL"])
+        self.scan_srv_btn.clicked.connect(self.scan_services)
+        row2_layout.addWidget(self.scan_srv_btn)
         
         self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"])
         self.prune_btn.clicked.connect(self.delete_matching_shortcuts)
@@ -1498,15 +1502,21 @@ class MainWindow(QMainWindow):
         self.update_status("SCANNING DIRECTORIES...")
         start_folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
-            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
+            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"),
+            os.path.expandvars(r"%LOCALAPPDATA%\Programs"),
+            os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WindowsApps")
         ]
         found_items = []
         names = {i["name"].lower() for i in self.items}
         
         for d in start_folders:
             if os.path.exists(d):
+                # For WindowsApps, we only want .exe files (aliases)
+                is_alias_dir = "WindowsApps" in d
+                
                 for f in os.listdir(d):
-                    if f.lower().endswith(('.exe', '.lnk', '.bat', '.cmd', '.url')):
+                    exts = ('.exe') if is_alias_dir else ('.exe', '.lnk', '.bat', '.cmd', '.url')
+                    if f.lower().endswith(exts):
                         name = os.path.splitext(f)[0]
                         if name.lower() in names: continue
                             
@@ -1518,14 +1528,17 @@ class MainWindow(QMainWindow):
                             if resolved and os.path.exists(resolved):
                                 real_path = resolved
                         
+                        origin = "AppAlias" if is_alias_dir else "Folder"
                         ps1_cmd = f'Start-Process -FilePath "{real_path}"'
+                        
                         found_items.append({
-                            "name": name,
+                            "name": f"{name} ({origin})",
                             "type": "App" if real_path.lower().endswith(".exe") else "Command",
                             "paths": [real_path],
                             "Command": "", 
                             "ps1_command": ps1_cmd,
                             "ExecutableType": "other",
+                            "origin": origin,
                             "added_at": time.time()
                         })
         
@@ -1788,6 +1801,72 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.update_status(f"UWP SCAN ERROR: {str(e)}")
+
+    def scan_services(self):
+        self.update_status("SCANNING SERVICES...")
+        QApplication.processEvents()
+        
+        found_items = []
+        names = {i["name"].lower() for i in self.items}
+        
+        # Look for non-Windows services that start automatically
+        ps_cmd = """
+        Get-CimInstance Win32_Service | Where-Object { 
+            $_.StartMode -eq "Auto" -and 
+            $_.PathName -notmatch "svchost.exe" -and 
+            $_.PathName -notmatch "C:\\\\Windows\\\\system32"
+        } | Select-Object Name, DisplayName, PathName | ConvertTo-Json -Compress
+        """
+        
+        try:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            process = subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd], 
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                     text=True, startupinfo=startupinfo)
+            stdout, stderr = process.communicate()
+            
+            if stdout.strip():
+                data = []
+                parsed = json.loads(stdout)
+                if isinstance(parsed, dict): data = [parsed]
+                elif isinstance(parsed, list): data = parsed
+
+                for srv in data:
+                    name = srv.get("DisplayName", "")
+                    internal_name = srv.get("Name", "")
+                    path = srv.get("PathName", "")
+                    
+                    if not name or name.lower() in names: continue
+                    
+                    # Cleanup path (services often have quotes and args)
+                    clean_path = path.strip('"').split(' -')[0].split(' /')[0].strip()
+                    
+                    found_items.append({
+                        "name": f"{name} (Service)",
+                        "type": "App",
+                        "paths": [clean_path],
+                        "Command": internal_name,
+                        "ps1_command": f"Start-Service -Name '{internal_name}'",
+                        "ExecutableType": "other",
+                        "origin": "Service",
+                        "added_at": time.time()
+                    })
+
+            if found_items:
+                dialog = ScanResultsDialog(found_items, self, title="SYSTEM // SCAN_SERVICES")
+                if dialog.exec():
+                    selected = dialog.selected_items
+                    if selected:
+                        self.items.extend(selected)
+                        self.save_items()
+                        self.populate_lists()
+                        self.update_status(f"IMPORTED {len(selected)} SERVICES")
+            else:
+                self.update_status("SERVICE SCAN COMPLETE: NO NEW ENTRIES")
+
+        except Exception as e:
+            self.update_status(f"SERVICE SCAN ERROR: {str(e)}")
 
     def delete_matching_shortcuts(self):
         start_folders = [
