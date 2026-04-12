@@ -1278,7 +1278,7 @@ class MainWindow(QMainWindow):
         for item in sorted_items:
             is_active = False
             if self.current_mode == "REGISTRY":
-                is_active = self.check_registry(item)
+                is_active = self.check_item_os_status(item)
             else:
                 is_active = item.get("script_enabled", False)
 
@@ -1318,50 +1318,73 @@ class MainWindow(QMainWindow):
             f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "runas", 1\n')
         return vbs_path
 
-    def check_registry(self, item):
+    def check_item_os_status(self, item):
+        origin = item.get("origin", "Registry")
         try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
-                winreg.QueryValueEx(reg_key, item["name"])
-                return True
+            if origin == "Service":
+                srv_name = item.get("Command", "")
+                ps_cmd = f"(Get-Service -Name '{srv_name}').StartType"
+                process = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True)
+                return "Automatic" in process.stdout or "Manual" in process.stdout
+            
+            elif origin == "TaskScheduler":
+                task_name = item.get("original_name", "")
+                ps_cmd = f"(Get-ScheduledTask -TaskName '{task_name}').State"
+                process = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True)
+                return "Disabled" not in process.stdout
+
+            elif "UWP" in origin:
+                # UWP status is complex to query, fallback to local tracking for now
+                return item.get("script_enabled", False)
+
+            else: # Registry or Folder
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
+                    winreg.QueryValueEx(reg_key, item["name"])
+                    return True
         except:
             return False
 
     def handle_toggle(self, item, current_state):
         should_enable = not current_state
+        origin = item.get("origin", "Registry")
         
         if self.current_mode == "REGISTRY":
-            reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             try:
-                if should_enable:
-                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                        if item.get("run_as_admin"):
-                            vbs_path = self._make_vbs(item)
-                            full = f'wscript.exe "{vbs_path}"'
+                if origin == "Service":
+                    srv_name = item.get("Command", "") # Internal service name
+                    mode = "auto" if should_enable else "disabled"
+                    subprocess.run(f'sc.exe config "{srv_name}" start= {mode}', shell=True, check=True)
+                    if not should_enable: subprocess.run(f'sc.exe stop "{srv_name}"', shell=True)
+                
+                elif origin == "TaskScheduler":
+                    task_name = item.get("original_name", "")
+                    flag = "/ENABLE" if should_enable else "/DISABLE"
+                    subprocess.run(f'schtasks /Change /TN "{task_name}" {flag}', shell=True, check=True)
+
+                else: # Standard Registry
+                    reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
+                        if should_enable:
+                            if item.get("run_as_admin"):
+                                vbs_path = self._make_vbs(item)
+                                full = f'wscript.exe "{vbs_path}"'
+                            else:
+                                path = item["paths"][0]
+                                command = item.get("Command", "")
+                                full = f'"{path}" {command}' if command else f'"{path}"'
+                            winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
                         else:
-                            path = item["paths"][0]
-                            command = item.get("Command", "")
-                            full = f'"{path}" {command}' if command else f'"{path}"'
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
-                else:
-                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                        winreg.DeleteValue(reg_key, item["name"])
+                            winreg.DeleteValue(reg_key, item["name"])
                 
                 self.widgets_map[item["name"]].set_active(should_enable)
-                self.update_status(f"REGISTRY UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
+                self.update_status(f"OS UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
             except Exception as e:
-                self.update_status(f"REGISTRY ERROR: {str(e)}")
+                self.update_status(f"OS UPDATE ERROR: {str(e)}")
         else:
-            # SCRIPT MODE
-            # We need to find the item in self.items to update it, as item is a dict copy? 
-            # Actually item passed from widget is likely the one in self.items if passed by ref.
-            # But let's be safe and update self.items then save.
-            
-            # Update the item active state
+            # SCRIPT MODE - remains the same, just local state update
             item["script_enabled"] = should_enable 
             self.save_items()
             self.generate_ps1()
-            
-            # The widget holds the item dict, so if it's the same ref, it's fine.
             self.widgets_map[item["name"]].set_active(should_enable)
             self.update_status(f"SCRIPT UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
 
