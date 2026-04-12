@@ -185,7 +185,36 @@ def open_edit_gui(item_cfg, category, index=None):
         if messagebox.askyesno("Restart", "Settings saved. Restart GUI to apply?"):
             restart()
 
-    tk.Button(scroll_frame, text="SAVE CONFIGURATION", command=save, bg="#98c379", fg="black", font=("Arial", 12, "bold"), pady=10).grid(row=current_row, column=0, columnspan=2, pady=30, sticky="nsew")
+    def delete():
+        if not messagebox.askyesno("Delete", f"Are you sure you want to delete '{item_cfg.get('id', 'this item')}'?"):
+            return
+        
+        config = load_config()
+        if category in config:
+            if isinstance(config[category], list):
+                # It's a list (buttons_left, buttons_right)
+                if index is not None and 0 <= index < len(config[category]):
+                    config[category].pop(index)
+                else:
+                    # Try to find by id if index is not reliable
+                    item_id = item_cfg.get("id")
+                    config[category] = [item for item in config[category] if item.get("id") != item_id]
+            else:
+                # It's a dict (rclone_commands)
+                item_id = item_cfg.get("id")
+                if item_id in config[category]:
+                    del config[category][item_id]
+        
+        save_config(config)
+        edit_win.destroy()
+        if messagebox.askyesno("Restart", "Item deleted. Restart GUI to apply?"):
+            restart()
+
+    btn_frame = tk.Frame(scroll_frame, bg="#282c34")
+    btn_frame.grid(row=current_row, column=0, columnspan=2, pady=30, sticky="nsew")
+    
+    tk.Button(btn_frame, text="SAVE CONFIGURATION", command=save, bg="#98c379", fg="black", font=("Arial", 12, "bold"), pady=10).pack(side="left", fill="x", expand=True, padx=(0, 5))
+    tk.Button(btn_frame, text="DELETE ITEM", command=delete, bg="#e06c75", fg="black", font=("Arial", 12, "bold"), pady=10).pack(side="left", fill="x", expand=True, padx=(5, 0))
 
 def create_dynamic_button(parent, btn_cfg, category, index=None):
     widget_type = btn_cfg.get("widget_type", "Label")
