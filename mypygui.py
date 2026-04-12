@@ -262,11 +262,30 @@ def create_custom_border(parent):
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
-def run_command(pwsh_command):
-    """Run a PowerShell command in a new terminal window."""
-    # Using 'start' (Windows shell command) to open a new window
-    # Using pwsh with -NoExit so the window stays open
-    subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
+def run_command(command, admin=False, hide=False, no_exit=True):
+    """Run a command (defaulting to PowerShell) with options for admin and visibility."""
+    if admin:
+        try:
+            # Use ShellExecuteW for 'runas' elevation
+            # pwsh -NoExit -Command if no_exit is True
+            # cmd /c if hide is True
+            executable = "pwsh"
+            args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
+        except Exception as e:
+            print(f"Admin run_command failed: {e}")
+        return
+
+    # Non-admin run
+    if hide:
+        subprocess.Popen(["pwsh", "-Command", command], creationflags=subprocess.CREATE_NO_WINDOW)
+    else:
+        # Launching in a new visible window
+        cmd_list = ["start", "pwsh"]
+        if no_exit:
+            cmd_list.append("-NoExit")
+        cmd_list.extend(["-Command", command])
+        subprocess.Popen(" ".join(cmd_list), shell=True)
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
@@ -981,17 +1000,20 @@ def on_label_click(event, cfg):
 
 def ctrl_left_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        # Replace placeholders and run the left_click_cmd command
-        cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        run_command(actual_cmd)
+        # Use handle_action for consistency
+        action = cfg.get("bindings", {}).get("Control-Button-1", {
+            "type": "run_command",
+            "cmd": cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO").replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        })
+        handle_action(action)
 
 def ctrl_right_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        # Replace placeholders and run the right_click_cmd command
-        cmd = cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list")
-        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        run_command(actual_cmd)
+        action = cfg.get("bindings", {}).get("Control-Button-3", {
+            "type": "run_command",
+            "cmd": cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list").replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        })
+        handle_action(action)
 
 # Periodically check using rclone
 def check_and_update(label, cfg):
@@ -1032,6 +1054,11 @@ def create_rclone_gui():
 
 # Call GUI init
 create_rclone_gui()
+
+# Add a permanent "ADD NEW" button to ROOT1
+add_new_bt = tk.Label(ROOT1, text="\uf415", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
+add_new_bt.pack(side="left", padx=(10, 5))
+add_new_bt.bind("<Button-1>", lambda e: open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": "#1d2027", "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left"))
 
 
 # ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
