@@ -992,7 +992,10 @@ class MainWindow(QMainWindow):
             (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Run"),
             (winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run"),
             (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\RunOnce"),
-            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\RunOnce")
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\RunOnce"),
+            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run"),
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run"),
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows NT\CurrentVersion\Windows\Run")
         ]
 
         for hkey, path in reg_paths:
@@ -1690,7 +1693,34 @@ class MainWindow(QMainWindow):
         found_items = []
         names = {i["name"].lower() for i in self.items}
         
-        # This PS script looks for 'windows.startupTask' extensions in Appx manifests
+        # 1. Check AppModel Registry (Where modern apps like ChatGPT often hide)
+        uwp_reg_path = r"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData"
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, uwp_reg_path, 0, winreg.KEY_READ) as root:
+                # Iterate through package family names
+                for i in range(winreg.QueryInfoKey(root)[0]):
+                    pkg_family = winreg.EnumKey(root, i)
+                    try:
+                        task_path = f"{uwp_reg_path}\\{pkg_family}\\Microsoft.Windows.StartupTask"
+                        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, task_path, 0, winreg.KEY_READ) as task_root:
+                            for j in range(winreg.QueryInfoKey(task_root)[0]):
+                                task_id = winreg.EnumKey(task_root, j)
+                                if task_id.lower() in names: continue
+                                
+                                found_items.append({
+                                    "name": f"{pkg_family} ({task_id})",
+                                    "type": "App",
+                                    "paths": [f"UWP://{pkg_family}"],
+                                    "Command": task_id,
+                                    "ps1_command": f"# UWP StartupTask: {task_id}",
+                                    "ExecutableType": "other",
+                                    "origin": "UWP_Registry",
+                                    "added_at": time.time()
+                                })
+                    except: continue
+        except: pass
+
+        # 2. Check Appx Package Manifests via PowerShell
         ps_cmd = """
         Get-AppxPackage | Get-AppxPackageManifest | ForEach-Object {
             $manifest = $_
@@ -1718,39 +1748,31 @@ class MainWindow(QMainWindow):
                                      text=True, startupinfo=startupinfo)
             stdout, stderr = process.communicate()
             
-            if not stdout.strip():
-                self.update_status("UWP SCAN COMPLETE: 0 NEW")
-                return
+            if stdout.strip():
+                data = []
+                parsed = json.loads(stdout)
+                if isinstance(parsed, dict): data = [parsed]
+                elif isinstance(parsed, list): data = parsed
 
-            data = []
-            parsed = json.loads(stdout)
-            if isinstance(parsed, dict): data = [parsed]
-            elif isinstance(parsed, list): data = parsed
-
-            for app in data:
-                app_name = app.get("Name", "")
-                pkg_name = app.get("PackageFullName", "")
-                task_id = app.get("TaskId", "")
-                
-                if not app_name or app_name.lower() in names: continue
-                
-                # UWP apps start via a specific protocol or the 'explorer.exe shell:AppsFolder\...' path
-                # But for startup tasks, we can use the 'Start-Process' with the AppUserModelId if we had it,
-                # or just use the TaskId logic. A common way to trigger UWP startup is:
-                ps1_cmd = f'# UWP Startup Task for {app_name}\n'
-                ps1_cmd += f'# Task ID: {task_id}\n'
-                ps1_cmd += f'Write-Host "UWP tasks are managed by Windows. This entry is for tracking."'
-                
-                found_items.append({
-                    "name": f"{app_name} (UWP)",
-                    "type": "App",
-                    "paths": [f"UWP://{pkg_name}"],
-                    "Command": task_id,
-                    "ps1_command": ps1_cmd,
-                    "ExecutableType": "other",
-                    "origin": "UWP",
-                    "added_at": time.time()
-                })
+                for app in data:
+                    app_name = app.get("Name", "")
+                    pkg_name = app.get("PackageFullName", "")
+                    task_id = app.get("TaskId", "")
+                    
+                    # Avoid duplicates from step 1
+                    full_name = f"{app_name} (UWP)"
+                    if not app_name or full_name.lower() in names: continue
+                    
+                    found_items.append({
+                        "name": full_name,
+                        "type": "App",
+                        "paths": [f"UWP://{pkg_name}"],
+                        "Command": task_id,
+                        "ps1_command": f"# UWP Startup Task for {app_name}",
+                        "ExecutableType": "other",
+                        "origin": "UWP_Manifest",
+                        "added_at": time.time()
+                    })
 
             if found_items:
                 dialog = ScanResultsDialog(found_items, self, title="SYSTEM // SCAN_UWP")
