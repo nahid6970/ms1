@@ -11,6 +11,7 @@ const linksList = document.getElementById('links-list');
 const emptyState = document.getElementById('empty-state');
 const linksContainer = document.getElementById('links-container');
 const addBtn = document.getElementById('add-btn');
+const addSeparatorBtn = document.getElementById('add-separator-btn');
 const settingsBtn = document.getElementById('settings-btn');
 const addFirstBtn = document.getElementById('add-first-btn');
 const saveToConvexBtn = document.getElementById('saveToConvex');
@@ -137,47 +138,60 @@ function renderLinks() {
 
     links.forEach((link) => {
         const item = document.createElement('div');
-        item.className = 'link-item';
         item.draggable = true;
 
-        // Calculate Border Color based on Opacity
-        const opacityHex = Math.round((globalSettings.borderOpacity / 100) * 255).toString(16).padStart(2, '0');
-        const borderColor = link.color ? `${link.color}${opacityHex}` : `rgba(51, 51, 51, ${globalSettings.borderOpacity / 100})`;
-        const shadowColor = link.color ? `${link.color}${Math.round((globalSettings.borderOpacity / 100) * 0.4 * 255).toString(16).padStart(2, '0')}` : `rgba(0, 0, 0, ${globalSettings.borderOpacity / 100 * 0.3})`;
+        if (link.type === 'separator') {
+            item.className = 'separator-item';
+            item.innerHTML = '<div class="separator-line"></div>';
+        } else {
+            item.className = 'link-item';
 
-        // Define Icon Styles
-        let iconBoxStyle = `border-radius: ${globalSettings.borderRadius}px; border-color: ${borderColor};`;
-        
-        if (link.color) {
-            if (link.isSolid) {
-                iconBoxStyle += `background: ${link.color}; box-shadow: 0 4px 10px ${shadowColor};`;
-            } else {
-                iconBoxStyle += `background: ${link.color}15; box-shadow: 0 0 15px ${shadowColor};`;
+            // Calculate Border Color based on Opacity
+            const opacityHex = Math.round((globalSettings.borderOpacity / 100) * 255).toString(16).padStart(2, '0');
+            const borderColor = link.color ? `${link.color}${opacityHex}` : `rgba(51, 51, 51, ${globalSettings.borderOpacity / 100})`;
+            const shadowColor = link.color ? `${link.color}${Math.round((globalSettings.borderOpacity / 100) * 0.4 * 255).toString(16).padStart(2, '0')}` : `rgba(0, 0, 0, ${globalSettings.borderOpacity / 100 * 0.3})`;
+
+            // Define Icon Styles
+            let iconBoxStyle = `border-radius: ${globalSettings.borderRadius}px; border-color: ${borderColor};`;
+            
+            if (link.color) {
+                if (link.isSolid) {
+                    iconBoxStyle += `background: ${link.color}; box-shadow: 0 4px 10px ${shadowColor};`;
+                } else {
+                    iconBoxStyle += `background: ${link.color}15; box-shadow: 0 0 15px ${shadowColor};`;
+                }
             }
+            
+            // If opacity is 0, make border truly invisible
+            if (globalSettings.borderOpacity === 0) {
+                iconBoxStyle += "border-width: 0;";
+            }
+
+            const imgStyle = `width: ${globalSettings.iconSize}px; height: ${globalSettings.iconSize}px;`;
+
+            item.innerHTML = `
+                <div class="favicon-box" style="${iconBoxStyle}">
+                    <img src="${link.icon || ''}" style="${imgStyle}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
+                </div>
+            `;
+
+            // Left Click to Open
+            item.addEventListener('click', (e) => {
+                window.open(link.url, '_blank');
+            });
         }
-        
-        // If opacity is 0, make border truly invisible
-        if (globalSettings.borderOpacity === 0) {
-            iconBoxStyle += "border-width: 0;";
-        }
-
-        const imgStyle = `width: ${globalSettings.iconSize}px; height: ${globalSettings.iconSize}px;`;
-
-        item.innerHTML = `
-            <div class="favicon-box" style="${iconBoxStyle}">
-                <img src="${link.icon || ''}" style="${imgStyle}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
-            </div>
-        `;
-
-        // Left Click to Open
-        item.addEventListener('click', (e) => {
-            window.open(link.url, '_blank');
-        });
 
         // Right Click for Context Menu
         item.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             currentRightClickedLinkId = link.id;
+
+            // Hide Edit for separators
+            if (link.type === 'separator') {
+                ctxEdit.classList.add('hidden');
+            } else {
+                ctxEdit.classList.remove('hidden');
+            }
 
             contextMenu.style.left = `${e.clientX}px`;
             contextMenu.style.top = `${e.clientY}px`;
@@ -257,6 +271,13 @@ function saveLinks() {
 }
 
 addBtn.addEventListener('click', () => triggerBrowserModal());
+addSeparatorBtn.addEventListener('click', () => {
+    links.push({
+        id: 'sep-' + Date.now(),
+        type: 'separator'
+    });
+    saveLinks();
+});
 settingsBtn.addEventListener('click', () => triggerSettingsModal());
 addFirstBtn.addEventListener('click', () => triggerBrowserModal());
 
