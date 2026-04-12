@@ -475,6 +475,11 @@ class ScanResultsDialog(QDialog):
         sub_header = QLabel(f"{self.dialog_title} - SELECT ITEMS:")
         sub_header.setStyleSheet(f"color: {CP_SUBTEXT};")
         layout.addWidget(sub_header)
+
+        # Search box
+        self.search_input = CyberInput("FILTER_RESULTS://...", self)
+        self.search_input.textChanged.connect(self.filter_results)
+        layout.addWidget(self.search_input)
         
         # Scroll area for items
         scroll = QScrollArea()
@@ -530,6 +535,14 @@ class ScanResultsDialog(QDialog):
     def accept_selection(self):
         self.selected_items = [item for cb, item in self.checkboxes if cb.isChecked()]
         self.accept()
+
+    def filter_results(self, text):
+        text = text.lower()
+        for cb, item in self.checkboxes:
+            # Check item paths which might be a list or direct string
+            path_val = item['paths'][0] if isinstance(item.get('paths'), list) else item.get('path', '')
+            visible = text in item['name'].lower() or text in path_val.lower()
+            cb.setVisible(visible)
 
 class DiffDialog(QDialog):
     """GitHub-style color-coded comparison view."""
@@ -699,6 +712,12 @@ class RestoreDialog(QDialog):
         self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; }} QLabel {{ color: {CP_TEXT}; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}")
         self._layout = QVBoxLayout(self)
         self._layout.addWidget(QLabel("Select a backup to restore:"))
+        
+        # Search box
+        self.search_input = CyberInput("FILTER_BACKUPS://...", self)
+        self.search_input.textChanged.connect(self.filter_backups)
+        self._layout.addWidget(self.search_input)
+
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
         self._scroll.setStyleSheet("background: transparent; border: 1px solid #3a3a3a;")
@@ -707,6 +726,7 @@ class RestoreDialog(QDialog):
         cancel = QPushButton("CANCEL")
         cancel.clicked.connect(self.reject)
         self._layout.addWidget(cancel)
+        self._rows = [] # Store (widget, backup_dict)
         self._render_list()
 
     def _render_list(self):
@@ -716,10 +736,15 @@ class RestoreDialog(QDialog):
         vbox = QVBoxLayout(inner)
         vbox.setSpacing(4)
         vbox.setContentsMargins(4, 4, 4, 4)
+        self._rows.clear()
         for b in self._backups:
             dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
-            row = QHBoxLayout()
+            
+            row_widget = QWidget()
+            row = QHBoxLayout(row_widget)
             row.setSpacing(4)
+            row.setContentsMargins(0, 0, 0, 0)
+
             btn = QPushButton(f"  {dt}  ->  {b['label']}")
             btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a; font-family: 'Consolas'; font-size: 10pt; font-weight: bold;")
             btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
@@ -757,9 +782,16 @@ class RestoreDialog(QDialog):
             row.addWidget(btn)
             row.addWidget(diff_btn)
             row.addWidget(del_btn)
-            vbox.addLayout(row)
+            vbox.addWidget(row_widget)
+            self._rows.append((row_widget, b, dt))
         vbox.addStretch()
         self._scroll.setWidget(inner)
+
+    def filter_backups(self, text):
+        text = text.lower()
+        for widget, b, dt in self._rows:
+            visible = text in b['label'].lower() or text in dt.lower()
+            widget.setVisible(visible)
 
     def _diff(self, backup_id):
         try:
