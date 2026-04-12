@@ -38,14 +38,15 @@ CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 CP_FONT = "Consolas"
 
-CONFIG_FILE = "mypygui_config.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(SCRIPT_DIR, "mypygui_config.json")
 
 def load_config():
     try:
         with open(CONFIG_FILE, "r") as f:
             return json.load(f)
     except Exception as e:
-        print(f"Error loading config: {e}")
+        print(f"Error loading config from {CONFIG_FILE}: {e}")
         return {}
 
 def save_config(config):
@@ -53,7 +54,7 @@ def save_config(config):
         with open(CONFIG_FILE, "w") as f:
             json.dump(config, f, indent=4)
     except Exception as e:
-        print(f"Error saving config: {e}")
+        print(f"Error saving config to {CONFIG_FILE}: {e}")
 
 CONFIG = load_config()
 
@@ -241,7 +242,7 @@ def run_command(command, admin=False, hide=False, no_exit=True):
 
 def restart(event=None):
     ROOT.destroy()
-    subprocess.Popen([sys.executable] + sys.argv)
+    os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + sys.argv[1:])
 
 def close_window(event=None): ROOT.destroy()
 
@@ -323,10 +324,14 @@ repos = CONFIG.get("git_repos", [])
 def check_git_status_thread():
     while True:
         for repo in repos:
-            if os.path.exists(repo["path"]):
-                os.chdir(repo["path"])
-                clean = "nothing to commit, working tree clean" in subprocess.run(["git", "status"], capture_output=True, text=True).stdout
-                queue.put((repo["name"], repo["label"], CP_GREEN if clean else CP_RED))
+            path = repo.get("path")
+            if path and os.path.exists(path):
+                try:
+                    res = subprocess.run(["git", "status"], capture_output=True, text=True, cwd=path)
+                    clean = "nothing to commit, working tree clean" in res.stdout
+                    queue.put((repo["name"], repo["label"], CP_GREEN if clean else CP_RED))
+                except Exception as e:
+                    print(f"Git check failed for {path}: {e}")
         time.sleep(5)
 
 def update_git_gui():
