@@ -22,7 +22,13 @@
             "src": "C:/@delta/msBackups",
             "dst": "gu:/msBackups",
             "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
-            "label": "\udb85\ude32"
+            "label": "\udb85\ude32",
+            "id": "msBackups",
+            "text": "",
+            "fg": "",
+            "bg": "",
+            "padx": "0",
+            "bindings": {}
         },
         "software": {
             "cmd": "rclone check src dst --fast-list --size-only",
@@ -54,7 +60,13 @@
             "log": "C:/Users/nahid/script_output/rclone/Pictures_check.log",
             "label": "\uf03e",
             "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
-            "right_click_cmd": "rclone sync dst src -P --fast-list"
+            "right_click_cmd": "rclone sync dst src -P --fast-list",
+            "id": "Photos",
+            "text": "",
+            "fg": "",
+            "bg": "",
+            "padx": "0",
+            "bindings": {}
         }
     },
     "buttons_left": [

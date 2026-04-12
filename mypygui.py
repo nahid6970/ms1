@@ -106,14 +106,16 @@ def open_edit_gui(item_cfg, category, index=None):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    fields = ["text", "fg", "bg", "id"]
+    # Basic Info
+    fields = ["text", "fg", "bg", "padx", "id"]
     entries = {}
     for i, field in enumerate(fields):
         tk.Label(scroll_frame, text=field.upper(), fg=CP_YELLOW, bg=CP_BG, font=(CP_FONT, 10, "bold")).grid(row=i, column=0, padx=10, pady=5, sticky="w")
         ent = tk.Entry(scroll_frame, width=50, bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, font=(CP_FONT, 10), highlightthickness=1, highlightbackground=CP_DIM)
-        ent.insert(0, str(item_cfg.get(field, "")))
+        ent.insert(0, str(item_cfg.get(field, "" if field != "padx" else "2")))
         ent.grid(row=i, column=1, padx=10, pady=5, sticky="w")
         entries[field] = ent
+
 
     click_types = [
         ("Left Click", "Button-1"),
@@ -202,8 +204,9 @@ def create_dynamic_button(parent, btn_cfg, category, index=None):
     font = tuple(btn_cfg.get("font", [CP_FONT, 14, "bold"]))
     bg = btn_cfg.get("bg", CP_PANEL)
     fg = btn_cfg.get("fg", CP_TEXT)
-    # Reduced internal padding to 2 and removed trailing space for tighter look
-    lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=bg, fg=fg, font=font, relief="flat", cursor="hand2", padx=2, anchor="center")
+    # Use padx from config if available, default to 2
+    px = int(btn_cfg.get("padx", 2))
+    lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=bg, fg=fg, font=font, relief="flat", cursor="hand2", padx=px, anchor="center")
     lbl.pack(side="left", padx=(1, 1))
     bindings = btn_cfg.get("bindings", {})
     for event, action in bindings.items():
@@ -343,7 +346,8 @@ def update_git_gui():
         except: pass
         time.sleep(0.5)
 
-tk.Label(ROOT1, text="\udb80\udea2", bg=CP_BG, fg=CP_YELLOW, font=(CP_FONT, 18, "bold")).pack(side="left")
+# Git Backup All Icon - Added trailing space and padding
+tk.Label(ROOT1, text="\udb80\udea2 ", bg=CP_BG, fg=CP_YELLOW, font=(CP_FONT, 18, "bold"), padx=3).pack(side="left")
 
 for repo in repos:
     lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_TEXT, font=(CP_FONT, 12, "bold"), text=repo["label"], padx=2, anchor="center")
@@ -358,11 +362,12 @@ tk.Label(ROOT1, text="]", bg=CP_BG, fg=CP_DIM, font=(CP_FONT, 18, "bold")).pack(
 
 for key, cfg in CONFIG.get("rclone_commands", {}).items():
     if "id" not in cfg: cfg["id"] = key
-    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_CYAN, text=cfg["label"], font=(CP_FONT, 14, "bold"), cursor="hand2", padx=2, anchor="center")
+    # Added trailing space to label text to prevent icon clipping (Gallery/Image icons)
+    lbl = tk.Label(ROOT1, bg=CP_BG, fg=CP_CYAN, text=cfg["label"] + " ", font=(CP_FONT, 14, "bold"), cursor="hand2", padx=2, anchor="center")
     lbl.pack(side="left", padx=5)
     lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands"))
 
-tk.Label(ROOT1, text="\uf415", bg=CP_BG, fg=CP_GREEN, font=(CP_FONT, 18, "bold"), cursor="hand2").pack(side="left", padx=5)
+tk.Label(ROOT1, text="\uf415 ", bg=CP_BG, fg=CP_GREEN, font=(CP_FONT, 18, "bold"), cursor="hand2", padx=3).pack(side="left", padx=5)
 
 cpu_core_frame = CTkFrame(ROOT2, fg_color=CP_PANEL, border_width=1, border_color=CP_DIM)
 cpu_core_frame.pack(side="left", padx=3)
