@@ -953,7 +953,10 @@ class MainWindow(QMainWindow):
 
         reg_paths = [
             (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run"),
-            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Run")
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Run"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run"),
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\RunOnce"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\RunOnce")
         ]
 
         for hkey, path in reg_paths:
@@ -1526,20 +1529,22 @@ class MainWindow(QMainWindow):
             ps_cmd = """
             Get-ScheduledTask | Where-Object { $_.State -ne 'Disabled' } | ForEach-Object {
                 $t = $_
-                $action = $t.Actions[0]
-                if ($action.Execute) {
-                    $isLogon = $false
-                    foreach ($trig in $t.Triggers) {
-                        if ($trig.ToString() -match 'Logon' -or $trig.Id -eq 'LogonTrigger') { 
-                            $isLogon = $true 
+                if ($t.Actions -and $t.Triggers) {
+                    $action = $t.Actions | Where-Object { $_ -and ($_.Execute -or $_.ClassId) } | Select-Object -First 1
+                    if ($action) {
+                        $validTrigger = $t.Triggers | Where-Object { 
+                            $_ -and (
+                                ($_.ToString() -match 'Logon') -or 
+                                ($_.ToString() -match 'Boot') -or 
+                                ($_.Id -eq 'LogonTrigger')
+                            )
                         }
-                    }
-                    
-                    if ($isLogon) {
-                        [PSCustomObject]@{
-                            TaskName = $t.TaskName
-                            Execute = $action.Execute
-                            Arguments = $action.Arguments
+                        if ($validTrigger) {
+                            [PSCustomObject]@{
+                                TaskName = $t.TaskName
+                                Execute = if ($action.Execute) { $action.Execute } else { "COM: " + $action.ClassId }
+                                Arguments = $action.Arguments
+                            }
                         }
                     }
                 }
