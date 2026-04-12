@@ -22,7 +22,115 @@ import threading
 import time
 import tkinter as tk
 import win32gui
+import json
 import win32process
+
+CONFIG_FILE = "mypygui_config.json"
+
+def load_config():
+    try:
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading config: {e}")
+        return {}
+
+def save_config(config):
+    try:
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config, f, indent=4)
+    except Exception as e:
+        print(f"Error saving config: {e}")
+
+CONFIG = load_config()
+
+def handle_action(action_cfg):
+    if not action_cfg: return
+    atype = action_cfg.get("type")
+    if atype == "subprocess":
+        cmd = action_cfg.get("cmd")
+        cwd = action_cfg.get("cwd")
+        no_window = action_cfg.get("no_window", False)
+        flags = subprocess.CREATE_NO_WINDOW if no_window else 0
+        subprocess.Popen(cmd, cwd=cwd, shell=True, creationflags=flags)
+    elif atype == "run_command":
+        run_command(action_cfg.get("cmd"))
+    elif atype == "python":
+        cmd = action_cfg.get("cmd")
+        cwd = action_cfg.get("cwd")
+        subprocess.Popen([sys.executable, cmd], cwd=cwd)
+    elif atype == "function":
+        func_name = action_cfg.get("func")
+        if func_name == "restart": restart()
+        elif func_name == "close_window": close_window()
+        elif func_name == "clear_screen": clear_screen()
+
+def open_edit_gui(item_cfg, category, index=None):
+    edit_win = tk.Toplevel(ROOT)
+    edit_win.title(f"Edit {item_cfg.get('id', 'Item')}")
+    edit_win.geometry("500x600")
+    edit_win.configure(bg="#282c34")
+    edit_win.attributes("-topmost", True)
+
+    fields = ["text", "fg", "bg", "id"]
+    entries = {}
+
+    for i, field in enumerate(fields):
+        tk.Label(edit_win, text=field, fg="white", bg="#282c34").grid(row=i, column=0, padx=10, pady=5)
+        ent = tk.Entry(edit_win, width=40)
+        ent.insert(0, str(item_cfg.get(field, "")))
+        ent.grid(row=i, column=1, padx=10, pady=5)
+        entries[field] = ent
+
+    # Bindings editing (simplified for now)
+    tk.Label(edit_win, text="Bindings (JSON string):", fg="white", bg="#282c34").grid(row=len(fields), column=0, padx=10, pady=5)
+    bindings_text = tk.Text(edit_win, height=10, width=40)
+    bindings_text.insert("1.0", json.dumps(item_cfg.get("bindings", {}), indent=2))
+    bindings_text.grid(row=len(fields), column=1, padx=10, pady=5)
+
+    def save():
+        for field in fields:
+            item_cfg[field] = entries[field].get()
+        try:
+            item_cfg["bindings"] = json.loads(bindings_text.get("1.0", "end"))
+        except:
+            messagebox.showerror("Error", "Invalid JSON in bindings")
+            return
+        
+        config = load_config()
+        if category in config:
+            if index is not None:
+                config[category][index] = item_cfg
+            else: # For dicts like rclone_commands
+                config[category][item_cfg["id"]] = item_cfg
+        
+        save_config(config)
+        edit_win.destroy()
+        if messagebox.askyesno("Restart", "Settings saved. Restart GUI to apply?"):
+            restart()
+
+    tk.Button(edit_win, text="Save", command=save).grid(row=len(fields)+1, column=0, columnspan=2, pady=20)
+
+def create_dynamic_button(parent, btn_cfg, category, index=None):
+    widget_type = btn_cfg.get("widget_type", "Label")
+    font = tuple(btn_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"]))
+    
+    if widget_type == "CTkLabel":
+        lbl = CTkLabel(parent, text=btn_cfg.get("text", ""), text_color=btn_cfg.get("fg", "white"), font=font)
+    elif widget_type == "CTkButton":
+        lbl = CTkButton(parent, text=btn_cfg.get("text", ""), text_color=btn_cfg.get("fg", "white"), fg_color=btn_cfg.get("bg", "#1d2027"), font=font, width=0, height=10)
+    else:
+        lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=btn_cfg.get("bg", "#1d2027"), fg=btn_cfg.get("fg", "white"), font=font, relief="flat")
+    
+    lbl.pack(side="left", padx=(1, 1))
+    
+    bindings = btn_cfg.get("bindings", {})
+    for event, action in bindings.items():
+        lbl.bind(f"<{event}>", lambda e, a=action: handle_action(a))
+    
+    # Shift+Click for editing
+    lbl.bind("<Shift-Button-1>", lambda e: open_edit_gui(btn_cfg, category, index))
+    return lbl
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -484,8 +592,6 @@ ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
-
-
 #! ██╗     ███████╗███████╗████████╗
 #! ██║     ██╔════╝██╔════╝╚══██╔══╝
 #! ██║     █████╗  █████╗     ██║
@@ -496,179 +602,10 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
-OS_LB.bind( "<Button-1>", lambda event=None: subprocess.Popen( r'cmd /c start windows.py', cwd=r'C:\\@delta\\ms1\\New folder\\'))
-OS_LB.bind("<Button-3>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\@@init\windows.py"], shell=True))
-OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\@delta\ms1\@@init\windows.py'))
+# Load dynamic buttons for ROOT1
+for idx, btn_cfg in enumerate(CONFIG.get("buttons_left", [])):
+    create_dynamic_button(ROOT1, btn_cfg, "buttons_left", idx)
 
-Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-Update.pack(side="left",padx=(0,0),pady=(1,0))
-Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\update.ps1"], shell=True))
-Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\update.ps1"], shell=True))
-
-# Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-# Update.pack(side="left",padx=(0,0),pady=(1,0))
-# Update.bind("<Button-1>",lambda event:subprocess.Popen(["C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"], shell=True))
-
-
-Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
-Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
-
-Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\@delta\ms1\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\startup.py"], shell=True))
-
-
-# ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-# ProcessPRLS_bt.pack(side="left",padx=(10,0),pady=(1,0))
-# ProcessPRLS_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
-# ProcessPRLS_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
-
-AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
-AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\@delta\ms1\@Flask\4998_Applist\applist.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\@delta\ms1\@Flask\4998_Applist\applist.py"], shell=True))
-AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
-
-Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#fcfcfc")
-Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen([sys.executable, r"C:\@delta\ms1\scripts\rclone\RCLONE-MANAGER\Rclone-Manager.py"], creationflags=subprocess.CREATE_NO_WINDOW))
-Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\rclone\\RCLONE-MANAGER\\Rclone-Manager.py"], shell=True))
-
-Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
-Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
-Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
-
-# ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-# ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
-# ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
-# ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
-
-# ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-# ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))
-# ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\python\\bar_1.py"], shell=True))
-# ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\python\\bar_1.py"], shell=True))
-
-# ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-# ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
-# ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\shortcut.py"], shell=True))
-# ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\shortcut.py"], shell=True))
-
-# PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w", font=("JetBrainsMono NFP",16,"bold"))
-# PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
-# PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_FULL.py"], shell=True))
-# PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_FULL.py"],shell=True))
-# PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
-# PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
-
-PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\uf05b",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-PositionXY_CrossHair_bt.pack(side="left",padx=(3,0),pady=(0,0))
-PositionXY_CrossHair_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True))
-PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py"],shell=True))
-PositionXY_CrossHair_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"], shell=True))
-PositionXY_CrossHair_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"],shell=True))
-
-ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
-ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\color\\color_picker.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_picker.py"],shell=True))
-ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
-
-Info_lb=tk.Label(ROOT1, text="\udb80\udefc",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-Info_lb.pack(side="left",padx=(3,3),pady=(0,0))
-Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\info.py"], shell=True))
-Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\info.py"], shell=True))
-# Info_lb.bind("<Button-1>",lambda event:get_active_window_info())
-
-# wifi_reboot_lb=tk.Label(ROOT1, text="\udb85\udec4",bg="#1d2027",fg="#3ac0ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-# wifi_reboot_lb.pack(side="left",padx=(3,3),pady=(0,0))
-# wifi_reboot_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\@delta\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
-# wifi_reboot_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
-
-# LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-# LockBox_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
-
-VirtualMonitor_lb = tk.Label(ROOT1,text="2nd", bg="#1d2027", fg="#8ab9ff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-VirtualMonitor_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\@delta\\ms1\\scripts\\2nd_Monitor.py'))
-VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\@delta\\ms1\\scripts\\2nd_Monitor.py'))
-
-# ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-# ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\SH3\\SH3V2.py'))
-# ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\pyautogui\sf3_Lcpu.py'))
-# ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\scripts\pyautogui\sf3_Lcpu.py'))
-# ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\@delta\ms1\scripts\pyautogui\sf3_Hcpu.py'))
-# ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command(r'code C:\@delta\ms1\scripts\pyautogui\sf3_Hcpu.py'))
-
-# ollama_lb = tk.Label(ROOT1,text="ollama", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-# ollama_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
-# ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\@delta\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
-# ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\test_project\ollama-chat-app\server.py'))
-
-path_replace = tk.Label(ROOT1,text="PathR", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
-path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\@delta\ms1\path_tracker.py'))
-path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\@delta\ms1\path_tracker.py'))
-
-Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
-                      height=0, width=0, relief="flat", highlightthickness=0,
-                      highlightbackground="#ffffff", anchor="w",
-                      font=("JetBrainsMono NFP", 16, "bold"))
-Automation.pack(side="left", padx=(0, 0), pady=(0, 0))
-Automation.bind("<Button-1>", lambda event=None: subprocess.Popen(
-    r'cmd /c game_automation_tool.py',
-    cwd=r'C:\@delta\ms1\test_project\Automation',
-    shell=True
-))
-Automation.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
-    r'code game_automation_tool.py',
-    cwd=r'C:\@delta\ms1\test_project\Automation',
-    shell=True
-))
-
-KomoBT = tk.Label(ROOT1, text="KOMO", bg="#1d2027", fg="#8319f5",
-                      height=0, width=0, relief="flat", highlightthickness=0,
-                      highlightbackground="#ffffff", anchor="w",
-                      font=("JetBrainsMono NFP", 16, "bold"))
-KomoBT.pack(side="left", padx=(0, 0), pady=(0, 0))
-KomoBT.bind("<Button-1>", lambda event=None: subprocess.Popen(
-    r'cmd /c komorebi_gui_custom.py',
-    cwd=r'C:\@delta\ms1\asset\komorebi',
-    shell=True
-))
-KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
-    r'code komorebi_gui_custom.py',
-    cwd=r'C:\@delta\ms1\asset\komorebi',
-    shell=True
-))
-
-AHKPY_BT = tk.Label(ROOT1, text="AHK", bg="#1d2027", fg="#84ff8e",
-                      height=0, width=0, relief="flat", highlightthickness=0,
-                      highlightbackground="#ffffff", anchor="w",
-                      font=("JetBrainsMono NFP", 16, "bold"))
-AHKPY_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
-AHKPY_BT.bind(
-    "<Button-1>",
-    lambda event=None: subprocess.Popen(
-        [sys.executable, r'C:\@delta\ms1\@AutoHotKey\shortcut_manager\ahk_gui_pyqt.py'],
-        cwd=r'C:\@delta\ms1\@AutoHotKey'
-    )
-)
-AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
-    r'code C:\@delta\ms1\@AutoHotKey\shortcut_manager\ahk_gui_pyqt.py',
-    cwd=r'C:\@delta\ms1\@AutoHotKey',
-    shell=True
-))
 
 
 #! FFMPEG
@@ -816,17 +753,12 @@ AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 
+CONFIG = load_config()
+
 #! Github status
 # Define your repositories here
 queue = Queue()
-repos = [
-    {"name": "ms1", "path": "C:\\@delta\\ms1", "label": "ms1"},
-    {"name": "db", "path": "C:\\@delta\\db", "label": "db"},
-    {"name": "test", "path": "C:\\@delta\\test", "label": "test"},
-    # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
-    # {"name": "ms3", "path": "C:\\ms3", "label": "3"},
-    # Add more as needed
-]
+repos = CONFIG.get("git_repos", [])
 
 status_labels = {}
 
@@ -955,56 +887,7 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,10))
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
 os.makedirs(LOG_DIR, exist_ok=True)
 
-commands = {
-    "msBackups": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "C:/@delta/msBackups",
-        "dst": "gu:/msBackups",
-        "log": f"{LOG_DIR}/msBackups_check.log",
-        "label": "\udb85\ude32"
-    },
-    "software": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/software",
-        "dst": "gu:/software",
-        "log": f"{LOG_DIR}/software_check.log",
-        "label": "\uf40e"
-    },
-    "song": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/song",
-        "dst": "gu:/song",
-        "log": f"{LOG_DIR}/song_check.log",
-        "label": "\uec1b"
-    },
-    "ms1": {
-        "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
-        "src": "C:/@delta/ms1/",
-        "dst": "o0:/ms1/",
-        "log": f"{LOG_DIR}/ms1_check.log",
-        "label": "ms1",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
-    },
-
-    "Photos": {
-        "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
-        "src": "C:/Users/nahid/Pictures/",
-        "dst": "gu:/Pictures/",
-        "log": f"{LOG_DIR}/Pictures_check.log",
-        "label": "\uf03e",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list"
-    },
-}
-
-# # Show log output in Notepad
-# def on_label_click(event, cfg):
-#     try:
-#         notepadpp_path = r"C:\Program Files\Notepad++\notepad++.exe"
-#         subprocess.Popen([notepadpp_path, cfg["log"]])
-#     except Exception as e:
-#         print(f"Error opening log file for {cfg['label']}: {e}")
+commands = CONFIG.get("rclone_commands", {})
 
 # Show log output in Microsoft Edit in a new PowerShell terminal
 def on_label_click(event, cfg):
@@ -1045,8 +928,9 @@ def check_and_update(label, cfg):
     threading.Thread(target=run_check).start()
 
 # GUI setup
-def create_gui():
+def create_rclone_gui():
     for key, cfg in commands.items():
+        if "id" not in cfg: cfg["id"] = key
         lbl = tk.Label(
             ROOT1,
             width=0,
@@ -1061,11 +945,13 @@ def create_gui():
         lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))           # left click
         lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
         lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
+        lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands")) # Shift+Click edit
 
         check_and_update(lbl, cfg)
 
 # Call GUI init
-create_gui()
+create_rclone_gui()
+
 
 # ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
@@ -1455,29 +1341,16 @@ def force_restart(event):
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
         # subprocess.run(["shutdown", "/r", "/t", "0"])
 
-Shut_Reboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
-Shut_Reboot.pack(side="left",padx=(1,1),pady=(0,0))
-Shut_Reboot.bind("<Button-1>",force_shutdown)
-Shut_Reboot.bind("<Button-3>",force_restart)
+# Load dynamic buttons for ROOT2
+for idx, btn_cfg in enumerate(CONFIG.get("buttons_right", [])):
+    create_dynamic_button(ROOT2, btn_cfg, "buttons_right", idx)
 
-LB_R=tk.Label(ROOT2 ,text="\uf2f1", bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"))
-LB_R.pack(side="left",padx=(1,1 ),pady=(0,0))
-LB_R.bind("<Button-1>",restart)
-
-# LB_L=tk.Label(ROOT2,bg="#1d2027",fg="#00FF00",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106")
-# LB_L.pack(side="left",padx=(3,0 ),pady=(0,0))
-# LB_L.bind("<Button-1>",lambda event:toggle_window_size('line'))
-
-# LB_M=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"),text="\uea72")
-# LB_M.pack(side="left",padx=(3,0 ),pady=(0,0))
-# LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
-
-LB_XXX=tk.Label(ROOT2, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
-LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
-LB_XXX.bind("<Button-1>",close_window)
+LB_R=None # Dummy to avoid errors if referenced elsewhere
+LB_XXX=None # Dummy to avoid errors if referenced elsewhere
 
 #! Slider Left
 #! Slider Right
+
 
 cpu_core_bars = []
 for i in range(psutil.cpu_count()):

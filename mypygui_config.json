@@ -1,0 +1,472 @@
+{
+    "git_repos": [
+        {
+            "name": "ms1",
+            "path": "C:\\@delta\\ms1",
+            "label": "ms1"
+        },
+        {
+            "name": "db",
+            "path": "C:\\@delta\\db",
+            "label": "db"
+        },
+        {
+            "name": "test",
+            "path": "C:\\@delta\\test",
+            "label": "test"
+        }
+    ],
+    "rclone_commands": {
+        "msBackups": {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": "C:/@delta/msBackups",
+            "dst": "gu:/msBackups",
+            "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
+            "label": "\udb85\ude32"
+        },
+        "software": {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": "D:/software",
+            "dst": "gu:/software",
+            "log": "C:/Users/nahid/script_output/rclone/software_check.log",
+            "label": "\uf40e"
+        },
+        "song": {
+            "cmd": "rclone check src dst --fast-list --size-only",
+            "src": "D:/song",
+            "dst": "gu:/song",
+            "log": "C:/Users/nahid/script_output/rclone/song_check.log",
+            "label": "\uec1b"
+        },
+        "ms1": {
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
+            "src": "C:/@delta/ms1/",
+            "dst": "o0:/ms1/",
+            "log": "C:/Users/nahid/script_output/rclone/ms1_check.log",
+            "label": "ms1",
+            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        },
+        "Photos": {
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"",
+            "src": "C:/Users/nahid/Pictures/",
+            "dst": "gu:/Pictures/",
+            "log": "C:/Users/nahid/script_output/rclone/Pictures_check.log",
+            "label": "\uf03e",
+            "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
+            "right_click_cmd": "rclone sync dst src -P --fast-list"
+        }
+    },
+    "buttons_left": [
+        {
+            "id": "OS_LB",
+            "text": "OS",
+            "fg": "#59e3a7",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c start windows.py",
+                    "cwd": "C:\\@delta\\ms1\\@@init\\"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\@@init\\windows.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\@@init\\windows.py"
+                }
+            }
+        },
+        {
+            "id": "Update",
+            "text": "\uf01b",
+            "fg": "#16a2ff",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\scripts\\update.ps1"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\update.ps1"
+                }
+            }
+        },
+        {
+            "id": "Tools_bt",
+            "text": "\ueb51",
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"
+                }
+            }
+        },
+        {
+            "id": "Startup_bt",
+            "text": "\uf4cc",
+            "fg": "#10b153",
+            "font": [
+                "JetBrainsMono NFP",
+                25,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\startup.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\startup.py"
+                }
+            }
+        },
+        {
+            "id": "AppManagement_bt",
+            "text": "\uf40e",
+            "fg": "#26b2f3",
+            "font": [
+                "JetBrainsMono NFP",
+                25,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                }
+            }
+        },
+        {
+            "id": "Rclone_bt",
+            "text": "\uef2c",
+            "fg": "#fcfcfc",
+            "font": [
+                "JetBrainsMono NFP",
+                25,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "python C:\\@delta\\ms1\\scripts\\rclone\\RCLONE-MANAGER\\Rclone-Manager.py",
+                    "no_window": true
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\rclone\\RCLONE-MANAGER\\Rclone-Manager.py"
+                }
+            }
+        },
+        {
+            "id": "Folder_bt",
+            "text": "\ueaf7",
+            "fg": "#ffd900",
+            "font": [
+                "JetBrainsMono NFP",
+                25,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
+                }
+            }
+        },
+        {
+            "id": "PositionXY_CrossHair_bt",
+            "text": "\uf05b",
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"
+                }
+            }
+        },
+        {
+            "id": "ColorTool_bt",
+            "text": "\ue22b",
+            "fg": "#c588fd",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\color\\color_picker.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_picker.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
+                }
+            }
+        },
+        {
+            "id": "Info_lb",
+            "text": "\udb80\udefc",
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\info.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\info.py"
+                }
+            }
+        },
+        {
+            "id": "VirtualMonitor_lb",
+            "text": "2nd",
+            "fg": "#8ab9ff",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\2nd_Monitor.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\2nd_Monitor.py"
+                }
+            }
+        },
+        {
+            "id": "path_replace",
+            "text": "PathR",
+            "fg": "#86ff45",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c C:\\@delta\\ms1\\path_tracker.py"
+                },
+                "Control-Button-1": {
+                    "type": "run_command",
+                    "cmd": "code C:\\@delta\\ms1\\path_tracker.py"
+                }
+            }
+        },
+        {
+            "id": "Automation",
+            "text": "AutoM",
+            "fg": "#ffab2d",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c game_automation_tool.py",
+                    "cwd": "C:\\@delta\\ms1\\test_project\\Automation"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "code game_automation_tool.py",
+                    "cwd": "C:\\@delta\\ms1\\test_project\\Automation"
+                }
+            }
+        },
+        {
+            "id": "KomoBT",
+            "text": "KOMO",
+            "fg": "#8319f5",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "cmd /c komorebi_gui_custom.py",
+                    "cwd": "C:\\@delta\\ms1\\asset\\komorebi"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "code komorebi_gui_custom.py",
+                    "cwd": "C:\\@delta\\ms1\\asset\\komorebi"
+                }
+            }
+        },
+        {
+            "id": "AHKPY_BT",
+            "text": "AHK",
+            "fg": "#84ff8e",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "python",
+                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
+                    "cwd": "C:\\@delta\\ms1\\@AutoHotKey"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "cmd": "code C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
+                    "cwd": "C:\\@delta\\ms1\\@AutoHotKey"
+                }
+            }
+        },
+        {
+            "id": "Sonarr_bt",
+            "text": "\udb81\udff4",
+            "fg": "#ffdb75",
+            "bg": "#000000",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "explorer D:\\Downloads\\@Sonarr"
+                }
+            }
+        },
+        {
+            "id": "Radarr_bt",
+            "text": "\udb83\udfce",
+            "fg": "#ffdb75",
+            "bg": "#000000",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "cmd": "explorer D:\\Downloads\\@Radarr"
+                }
+            }
+        }
+    ],
+    "buttons_right": [
+        {
+            "id": "LB_R",
+            "text": "\uf2f1",
+            "fg": "#26b2f3",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "function",
+                    "func": "restart"
+                }
+            }
+        },
+        {
+            "id": "LB_XXX",
+            "text": "\uf2d3",
+            "fg": "#ff0000",
+            "font": [
+                "JetBrainsMono NFP",
+                18,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "function",
+                    "func": "close_window"
+                }
+            }
+        }
+    ]
+}
