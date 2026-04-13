@@ -25,7 +25,7 @@ import win32gui
 import json
 import win32process
 
-CONFIG_FILE = "mypygui_config.json"
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
 def load_config():
     try:
