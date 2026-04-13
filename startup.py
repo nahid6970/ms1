@@ -943,10 +943,6 @@ class MainWindow(QMainWindow):
         self.scan_uwp_btn = CyberButton(" SCAN_UWP", color="#00FF88", is_outlined=True, svg_data=SVGS["LAYERS"])
         self.scan_uwp_btn.clicked.connect(self.scan_uwp)
         row2_layout.addWidget(self.scan_uwp_btn)
-
-        self.scan_srv_btn = CyberButton(" SCAN_SRV", color="#00F0FF", is_outlined=True, svg_data=SVGS["TERMINAL"])
-        self.scan_srv_btn.clicked.connect(self.scan_services)
-        row2_layout.addWidget(self.scan_srv_btn)
         
         self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"])
         self.prune_btn.clicked.connect(self.delete_matching_shortcuts)
@@ -1278,7 +1274,7 @@ class MainWindow(QMainWindow):
         for item in sorted_items:
             is_active = False
             if self.current_mode == "REGISTRY":
-                is_active = self.check_item_os_status(item)
+                is_active = self.check_registry(item)
             else:
                 is_active = item.get("script_enabled", False)
 
@@ -1318,73 +1314,50 @@ class MainWindow(QMainWindow):
             f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "runas", 1\n')
         return vbs_path
 
-    def check_item_os_status(self, item):
-        origin = item.get("origin", "Registry")
+    def check_registry(self, item):
         try:
-            if origin == "Service":
-                srv_name = item.get("Command", "")
-                ps_cmd = f"(Get-Service -Name '{srv_name}').StartType"
-                process = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True)
-                return "Automatic" in process.stdout or "Manual" in process.stdout
-            
-            elif origin == "TaskScheduler":
-                task_name = item.get("original_name", "")
-                ps_cmd = f"(Get-ScheduledTask -TaskName '{task_name}').State"
-                process = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True)
-                return "Disabled" not in process.stdout
-
-            elif "UWP" in origin:
-                # UWP status is complex to query, fallback to local tracking for now
-                return item.get("script_enabled", False)
-
-            else: # Registry or Folder
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
-                    winreg.QueryValueEx(reg_key, item["name"])
-                    return True
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
+                winreg.QueryValueEx(reg_key, item["name"])
+                return True
         except:
             return False
 
     def handle_toggle(self, item, current_state):
         should_enable = not current_state
-        origin = item.get("origin", "Registry")
         
         if self.current_mode == "REGISTRY":
+            reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             try:
-                if origin == "Service":
-                    srv_name = item.get("Command", "") # Internal service name
-                    mode = "auto" if should_enable else "disabled"
-                    subprocess.run(f'sc.exe config "{srv_name}" start= {mode}', shell=True, check=True)
-                    if not should_enable: subprocess.run(f'sc.exe stop "{srv_name}"', shell=True)
-                
-                elif origin == "TaskScheduler":
-                    task_name = item.get("original_name", "")
-                    flag = "/ENABLE" if should_enable else "/DISABLE"
-                    subprocess.run(f'schtasks /Change /TN "{task_name}" {flag}', shell=True, check=True)
-
-                else: # Standard Registry
-                    reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
-                        if should_enable:
-                            if item.get("run_as_admin"):
-                                vbs_path = self._make_vbs(item)
-                                full = f'wscript.exe "{vbs_path}"'
-                            else:
-                                path = item["paths"][0]
-                                command = item.get("Command", "")
-                                full = f'"{path}" {command}' if command else f'"{path}"'
-                            winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
+                if should_enable:
+                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
+                        if item.get("run_as_admin"):
+                            vbs_path = self._make_vbs(item)
+                            full = f'wscript.exe "{vbs_path}"'
                         else:
-                            winreg.DeleteValue(reg_key, item["name"])
+                            path = item["paths"][0]
+                            command = item.get("Command", "")
+                            full = f'"{path}" {command}' if command else f'"{path}"'
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full)
+                else:
+                     with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
+                        winreg.DeleteValue(reg_key, item["name"])
                 
                 self.widgets_map[item["name"]].set_active(should_enable)
-                self.update_status(f"OS UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
+                self.update_status(f"REGISTRY UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
             except Exception as e:
-                self.update_status(f"OS UPDATE ERROR: {str(e)}")
+                self.update_status(f"REGISTRY ERROR: {str(e)}")
         else:
-            # SCRIPT MODE - remains the same, just local state update
+            # SCRIPT MODE
+            # We need to find the item in self.items to update it, as item is a dict copy? 
+            # Actually item passed from widget is likely the one in self.items if passed by ref.
+            # But let's be safe and update self.items then save.
+            
+            # Update the item active state
             item["script_enabled"] = should_enable 
             self.save_items()
             self.generate_ps1()
+            
+            # The widget holds the item dict, so if it's the same ref, it's fine.
             self.widgets_map[item["name"]].set_active(should_enable)
             self.update_status(f"SCRIPT UPDATED: {item['name']} -> {'ON' if should_enable else 'OFF'}")
 
@@ -1525,21 +1498,15 @@ class MainWindow(QMainWindow):
         self.update_status("SCANNING DIRECTORIES...")
         start_folders = [
             os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
-            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"),
-            os.path.expandvars(r"%LOCALAPPDATA%\Programs"),
-            os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WindowsApps")
+            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
         ]
         found_items = []
         names = {i["name"].lower() for i in self.items}
         
         for d in start_folders:
             if os.path.exists(d):
-                # For WindowsApps, we only want .exe files (aliases)
-                is_alias_dir = "WindowsApps" in d
-                
                 for f in os.listdir(d):
-                    exts = ('.exe') if is_alias_dir else ('.exe', '.lnk', '.bat', '.cmd', '.url')
-                    if f.lower().endswith(exts):
+                    if f.lower().endswith(('.exe', '.lnk', '.bat', '.cmd', '.url')):
                         name = os.path.splitext(f)[0]
                         if name.lower() in names: continue
                             
@@ -1551,17 +1518,14 @@ class MainWindow(QMainWindow):
                             if resolved and os.path.exists(resolved):
                                 real_path = resolved
                         
-                        origin = "AppAlias" if is_alias_dir else "Folder"
                         ps1_cmd = f'Start-Process -FilePath "{real_path}"'
-                        
                         found_items.append({
-                            "name": f"{name} ({origin})",
+                            "name": name,
                             "type": "App" if real_path.lower().endswith(".exe") else "Command",
                             "paths": [real_path],
                             "Command": "", 
                             "ps1_command": ps1_cmd,
                             "ExecutableType": "other",
-                            "origin": origin,
                             "added_at": time.time()
                         })
         
@@ -1824,72 +1788,6 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             self.update_status(f"UWP SCAN ERROR: {str(e)}")
-
-    def scan_services(self):
-        self.update_status("SCANNING SERVICES...")
-        QApplication.processEvents()
-        
-        found_items = []
-        names = {i["name"].lower() for i in self.items}
-        
-        # Look for non-Windows services that start automatically
-        ps_cmd = """
-        Get-CimInstance Win32_Service | Where-Object { 
-            $_.StartMode -eq "Auto" -and 
-            $_.PathName -notmatch "svchost.exe" -and 
-            $_.PathName -notmatch "C:\\\\Windows\\\\system32"
-        } | Select-Object Name, DisplayName, PathName | ConvertTo-Json -Compress
-        """
-        
-        try:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            process = subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd], 
-                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                                     text=True, startupinfo=startupinfo)
-            stdout, stderr = process.communicate()
-            
-            if stdout.strip():
-                data = []
-                parsed = json.loads(stdout)
-                if isinstance(parsed, dict): data = [parsed]
-                elif isinstance(parsed, list): data = parsed
-
-                for srv in data:
-                    name = srv.get("DisplayName", "")
-                    internal_name = srv.get("Name", "")
-                    path = srv.get("PathName", "")
-                    
-                    if not name or name.lower() in names: continue
-                    
-                    # Cleanup path (services often have quotes and args)
-                    clean_path = path.strip('"').split(' -')[0].split(' /')[0].strip()
-                    
-                    found_items.append({
-                        "name": f"{name} (Service)",
-                        "type": "App",
-                        "paths": [clean_path],
-                        "Command": internal_name,
-                        "ps1_command": f"Start-Service -Name '{internal_name}'",
-                        "ExecutableType": "other",
-                        "origin": "Service",
-                        "added_at": time.time()
-                    })
-
-            if found_items:
-                dialog = ScanResultsDialog(found_items, self, title="SYSTEM // SCAN_SERVICES")
-                if dialog.exec():
-                    selected = dialog.selected_items
-                    if selected:
-                        self.items.extend(selected)
-                        self.save_items()
-                        self.populate_lists()
-                        self.update_status(f"IMPORTED {len(selected)} SERVICES")
-            else:
-                self.update_status("SERVICE SCAN COMPLETE: NO NEW ENTRIES")
-
-        except Exception as e:
-            self.update_status(f"SERVICE SCAN ERROR: {str(e)}")
 
     def delete_matching_shortcuts(self):
         start_folders = [
