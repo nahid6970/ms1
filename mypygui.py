@@ -1052,12 +1052,13 @@ def check_and_update(label, cfg):
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
         with open(cfg["log"], "r") as f:
             content = f.read()
-        if not "ERROR" in content:
-            label.config(text=cfg["label"], fg="#06de22")
-        else:
-            label.config(text=cfg["label"], fg="red")
-        label.after(600000, lambda: threading.Thread(target=run_check).start())  # repeat every 10 minutes
-    threading.Thread(target=run_check).start()
+        color = "#06de22" if "ERROR" not in content else "red"
+        try:
+            ROOT.after(0, lambda c=color: label.config(text=cfg["label"], fg=c))
+            ROOT.after(600000, lambda: threading.Thread(target=run_check, daemon=True).start())
+        except Exception:
+            pass
+    threading.Thread(target=run_check, daemon=True).start()
 
 # GUI setup
 def create_rclone_gui():
