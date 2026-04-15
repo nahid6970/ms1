@@ -87,6 +87,28 @@ function removeTab(tabId) {
   });
 }
 
+// Add all currently open browser tabs
+document.getElementById('addAllTabs').addEventListener('click', (e) => {
+  const button = e.target;
+  chrome.tabs.query({}, (browserTabs) => {
+    chrome.storage.local.get(['savedTabs'], (result) => {
+      const savedTabs = result.savedTabs || [];
+      const existingUrls = new Set(savedTabs.map(t => t.url));
+      const newTabs = browserTabs
+        .filter(t => t.url && !existingUrls.has(t.url))
+        .map(t => ({ id: Date.now() + Math.random(), title: t.title || t.url, url: t.url, favicon: t.favIconUrl || '' }));
+      if (newTabs.length === 0) {
+        showButtonFeedback(button, false, 'No new tabs');
+        return;
+      }
+      chrome.storage.local.set({ savedTabs: [...savedTabs, ...newTabs] }, () => {
+        showButtonFeedback(button, true, `Added ${newTabs.length}!`);
+        loadTabs();
+      });
+    });
+  });
+});
+
 // Clear all tabs
 document.getElementById('clearAll').addEventListener('click', (e) => {
   const button = e.target;
