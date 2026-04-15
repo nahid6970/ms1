@@ -61,6 +61,8 @@ class ArtScene(QGraphicsScene):
         super().__init__(parent)
         self.setBackgroundBrush(QColor(CP_BG))
         self.setSceneRect(-5000, -5000, 10000, 10000)
+        self.show_grid = False
+        self.grid_size = 20
         self.center_marker = QGraphicsLineItem(-15, 0, 15, 0)
         self.center_marker.setPen(QPen(QColor(CP_YELLOW), 1))
         self.center_marker_v = QGraphicsLineItem(0, -15, 0, 15)
@@ -69,6 +71,20 @@ class ArtScene(QGraphicsScene):
         self.addItem(self.center_marker_v)
         self.center_marker.is_art_item = False
         self.center_marker_v.is_art_item = False
+
+    def drawBackground(self, painter, rect):
+        super().drawBackground(painter, rect)
+        if not self.show_grid: return
+        pen = QPen(QColor(CP_DIM), 0.5)
+        painter.setPen(pen)
+        left = int(rect.left()) - (int(rect.left()) % self.grid_size)
+        top = int(rect.top()) - (int(rect.top()) % self.grid_size)
+        lines = []
+        for x in range(left, int(rect.right()) + 1, self.grid_size):
+            lines.append(QLineF(x, rect.top(), x, rect.bottom()))
+        for y in range(top, int(rect.bottom()) + 1, self.grid_size):
+            lines.append(QLineF(rect.left(), y, rect.right(), y))
+        painter.drawLines(lines)
 
 class ArtView(QGraphicsView):
     def __init__(self, scene, parent=None):
@@ -84,11 +100,19 @@ class ArtView(QGraphicsView):
         self.symmetry_mode = "None"; self.mirror_count = 4; self.undo_stack = []; self.redo_stack = []
         self.poly_points = []; self.curve_state = 0; self.curve_points = []
         self.is_sharp = True; self.custom_shapes = {}
+        self.snap_to_grid = False; self.grid_size = 20
 
     def get_pen(self, alpha=255):
         cap = Qt.PenCapStyle.SquareCap if self.is_sharp else Qt.PenCapStyle.RoundCap
         join = Qt.PenJoinStyle.MiterJoin if self.is_sharp else Qt.PenJoinStyle.RoundJoin
         return QPen(QColor(*self.pen_color.getRgb()[:3], alpha), self.pen_width, Qt.PenStyle.SolidLine, cap, join)
+
+    def snap_point(self, point):
+        if self.snap_to_grid:
+            x = round(point.x() / self.grid_size) * self.grid_size
+            y = round(point.y() / self.grid_size) * self.grid_size
+            return QPointF(x, y)
+        return point
 
     def save_to_undo(self, item, action="add"):
         self.undo_stack.append((action, item)); self.redo_stack.clear()
@@ -97,7 +121,7 @@ class ArtView(QGraphicsView):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8; self.scale(zoom, zoom)
 
     def mousePressEvent(self, event):
-        scene_pos = self.mapToScene(event.pos()); self.start_point = scene_pos
+        scene_pos = self.snap_point(self.mapToScene(event.pos())); self.start_point = scene_pos
         if event.button() == Qt.MouseButton.LeftButton:
             if self.tool == "brush":
                 self.drawing = True; self.create_brush_item(scene_pos)
@@ -130,7 +154,7 @@ class ArtView(QGraphicsView):
             elif self.tool == "curve": self.finish_curve()
 
     def mouseMoveEvent(self, event):
-        scene_pos = self.mapToScene(event.pos())
+        scene_pos = self.snap_point(self.mapToScene(event.pos()))
         if self.drawing:
             if self.current_item:
                 local_pos = scene_pos - self.current_item.pos()
@@ -468,6 +492,12 @@ class SVGArtApp(QMainWindow):
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSpinBox(); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
         self.btn_sharp = QPushButton("SHARP"); self.btn_sharp.setCheckable(True); self.btn_sharp.setChecked(True); self.btn_sharp.clicked.connect(self.toggle_sharp); self.tb_props.addWidget(self.btn_sharp)
+        
+        self.tb_grid = QToolBar("Grid"); self.tb_grid.setObjectName("GridToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_grid)
+        self.btn_show_grid = QPushButton("GRID"); self.btn_show_grid.setCheckable(True); self.btn_show_grid.clicked.connect(self.toggle_grid); self.tb_grid.addWidget(self.btn_show_grid)
+        self.btn_snap_grid = QPushButton("SNAP"); self.btn_snap_grid.setCheckable(True); self.btn_snap_grid.clicked.connect(self.toggle_snap); self.tb_grid.addWidget(self.btn_snap_grid)
+        self.tb_grid.addWidget(QLabel(" SIZE: ")); self.grid_size_spin = QSpinBox(); self.grid_size_spin.setRange(5, 200); self.grid_size_spin.setValue(20); self.grid_size_spin.valueChanged.connect(self.change_grid_size); self.tb_grid.addWidget(self.grid_size_spin)
+
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
         self.tb_sym.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSpinBox(); self.mirror_spin.setRange(2, 100); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.tb_sym.addWidget(self.mirror_spin)
@@ -496,6 +526,21 @@ class SVGArtApp(QMainWindow):
         self.view.is_sharp = self.btn_sharp.isChecked()
         color = CP_GREEN if self.view.is_sharp else CP_DIM
         self.btn_sharp.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
+
+    def toggle_grid(self):
+        self.scene.show_grid = self.btn_show_grid.isChecked()
+        color = CP_CYAN if self.scene.show_grid else CP_DIM
+        self.btn_show_grid.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
+        self.scene.update()
+
+    def toggle_snap(self):
+        self.view.snap_to_grid = self.btn_snap_grid.isChecked()
+        color = CP_GREEN if self.view.snap_to_grid else CP_DIM
+        self.btn_snap_grid.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
+
+    def change_grid_size(self, v):
+        self.view.grid_size = v; self.scene.grid_size = v; self.scene.update()
+
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
@@ -557,13 +602,19 @@ class SVGArtApp(QMainWindow):
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
+                    
+                    self.scene.show_grid = s.get("show_grid", False); self.btn_show_grid.setChecked(self.scene.show_grid); self.toggle_grid()
+                    self.view.snap_to_grid = s.get("snap_to_grid", False); self.btn_snap_grid.setChecked(self.view.snap_to_grid); self.toggle_snap()
+                    gs = s.get("grid_size", 20); self.view.grid_size = gs; self.scene.grid_size = gs; self.grid_size_spin.setValue(gs)
+
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
                         if self.view.image_item: self.view.image_item.setPos(s.get("img_x", 0), s.get("img_y", 0))
             except: pass
 
     def save_settings(self):
-        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp}
+        s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp,
+             "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
