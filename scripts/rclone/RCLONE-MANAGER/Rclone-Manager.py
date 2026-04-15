@@ -361,6 +361,7 @@ class RcloneApp(QMainWindow):
     def _save_toggles(self):
         cfg = self._load_settings()
         cfg["flags"]   = [lbl.active for lbl in self.flag_labels]
+        cfg["options"] = [lbl.active for lbl in self.option_labels]
         cfg["filters"] = [lbl.active for lbl in self.filter_labels]
         if hasattr(self, "tool_labels"):
             cfg["tools"] = [lbl.active for lbl in self.tool_labels]
@@ -442,6 +443,25 @@ class RcloneApp(QMainWindow):
         ft_layout.addWidget(self.to_input, 1, 1)
         left.addWidget(ft_group)
 
+        # ── Options ────────────────────────────────────────────────────────────────────────
+        options_group = QGroupBox("OPTIONS")
+        options_layout = QHBoxLayout(options_group)
+        options_layout.setSpacing(4)
+        self.option_labels = []
+        option_defs = [
+            ("Progress", "-P",        True),
+            ("Dry Run",  "--dry-run",  False),
+        ]
+        self.option_defs = option_defs
+        saved_options = self._load_settings().get("options", [])
+        for i, (name, _, active) in enumerate(option_defs):
+            state = saved_options[i] if i < len(saved_options) else active
+            lbl = ToggleLabel(name, state, on_change=self._save_toggles)
+            self.option_labels.append(lbl)
+            options_layout.addWidget(lbl)
+        options_layout.addStretch()
+        left.addWidget(options_group)
+
         # ── Main Flags ────────────────────────────────────────────────────────
         flags_group = QGroupBox("FLAGS")
         flags_grid = QGridLayout(flags_group)
@@ -451,8 +471,6 @@ class RcloneApp(QMainWindow):
             ("Fast List",               "--fast-list",                      True),
             ("Readable",                "--human-readable",                  True),
             ("Acknowledge Abuse",       "--drive-acknowledge-abuse",         True),
-            ("Progress",                "-P",                                True),
-            ("Dry Run",                 "--dry-run",                         False),
             ("Web Gui **Rcd",           "--rc-web-gui",                      False),
             ("vfs-cache",               "--vfs-cache-mode writes",           False),
             ("Verbose Lengthy",         "-vv",                               False),
@@ -587,6 +605,9 @@ class RcloneApp(QMainWindow):
             mount_path = f"c:/{stor.strip(':/')}/"
             parts.append(f'"{mount_path}"')
 
+        for i, (_, flag, _) in enumerate(self.option_defs):
+            if self.option_labels[i].active:
+                parts.append(flag)
         for i, (_, flag, _) in enumerate(self.flag_defs):
             if self.flag_labels[i].active:
                 parts.append(flag)
