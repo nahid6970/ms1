@@ -1144,5 +1144,11 @@
     "ID": "SUSE.RancherDesktop",
     "Source": "winget",
     "Category": "General"
+  },
+  {
+    "Name": "ImageMagick Latest",
+    "ID": "ImageMagick.ImageMagick.Q16",
+    "Source": "winget",
+    "Category": "General"
   }
 ]
