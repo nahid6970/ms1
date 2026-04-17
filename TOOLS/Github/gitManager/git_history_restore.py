@@ -370,6 +370,37 @@ class GitWorker:
             return 0
 
     @staticmethod
+    def get_reflog(directory):
+        """Get the git reflog to find dropped/lost commits"""
+        try:
+            cmd = ["git", "reflog", "--pretty=format:%h|%ad|%gs", "--date=format:%Y-%m-%d--%H:%M"]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
+            entries = []
+            for line in result.strip().split('\n'):
+                if not line: continue
+                parts = line.split('|', 2)
+                if len(parts) == 3:
+                    entries.append({
+                        "hash": parts[0],
+                        "date": parts[1],
+                        "message": parts[2]
+                    })
+            return {"success": entries}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def reset_hard(directory, commit_hash):
+        """Hard reset the repository to a specific commit"""
+        try:
+            subprocess.check_call(["git", "reset", "--hard", commit_hash], cwd=directory)
+            return {"success": True}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Git Error: {e}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def parse_diff(diff_text):
         """Parse git diff into file sections"""
         lines = diff_text.split("\n")
@@ -1896,6 +1927,10 @@ class GitOpsDialog(QDialog):
         pull_btn = CyberButton("PULL", CP_DIM, CP_YELLOW)
         pull_btn.clicked.connect(self.pull_git)
         
+        reflog_btn = CyberButton("REFLOG", CP_DIM, CP_CYAN)
+        reflog_btn.clicked.connect(self.open_reflog)
+        reflog_btn.setToolTip("View reflog to recover dropped/lost commits")
+        
         fix_btn = CyberButton("FIX LOCK", CP_DIM, CP_RED)
         fix_btn.clicked.connect(self.fix_git_lock)
         fix_btn.setToolTip("Remove .git/index.lock if git is stuck")
@@ -1903,6 +1938,7 @@ class GitOpsDialog(QDialog):
         btn_layout.addWidget(commit_btn)
         btn_layout.addWidget(push_btn)
         btn_layout.addWidget(pull_btn)
+        btn_layout.addWidget(reflog_btn)
         btn_layout.addWidget(fix_btn)
         
         layout.addLayout(btn_layout)
@@ -1931,6 +1967,21 @@ class GitOpsDialog(QDialog):
             self.pending_push_label.setText(f"🚀 PENDING PUSH: {count}")
         else:
             self.pending_push_label.setText("")
+
+    def open_reflog(self):
+        """Fetch reflog entries and open the dialog"""
+        self.status_label.setText("FETCHING REFLOG...")
+        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        QApplication.processEvents()
+        
+        result = GitWorker.get_reflog(self.directory)
+        if "success" in result:
+            self.status_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+            self.status_label.setText("READY")
+            dialog = ReflogDialog(self, self.directory, result["success"])
+            dialog.exec()
+        else:
+            QMessageBox.critical(self, "Error", result["error"])
 
     def fix_git_lock(self):
         result = GitWorker.fix_lock(self.directory)
@@ -2327,6 +2378,112 @@ class FileTimelineDialog(QDialog):
                 self.table.viewport().update()
         else:
             QMessageBox.warning(self, "Selection Required", "Please select a version to restore.")
+
+# --- REFLOG DIALOG ---
+class ReflogDialog(QDialog):
+    def __init__(self, parent, directory, entries):
+        super().__init__(parent)
+        self.directory = directory
+        self.setWindowTitle("GIT REFLOG // RECOVER DROPPED COMMITS")
+        self.resize(1000, 600)
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QTableWidget {{
+                background-color: {CP_PANEL};
+                gridline-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+            }}
+            QHeaderView::section {{
+                background-color: {CP_DIM};
+                color: {CP_YELLOW};
+                padding: 6px;
+                font-weight: bold;
+            }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        header = QLabel("SELECT A COMMIT TO RECOVER (HARD RESET):")
+        header.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 11pt;")
+        layout.addWidget(header)
+        
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["HASH", "DATE", "ACTION/SELECTOR"])
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        
+        # Apply Custom Delegate for hover
+        self.delegate = CyberDelegate(self.table)
+        self.table.setItemDelegate(self.delegate)
+        self.table.cellEntered.connect(self.on_cell_entered)
+        self.table.setMouseTracking(True)
+        
+        self.table.setRowCount(len(entries))
+        for i, entry in enumerate(entries):
+            items = [
+                QTableWidgetItem(entry['hash']),
+                QTableWidgetItem(entry['date']),
+                QTableWidgetItem(entry['message'])
+            ]
+            items[0].setForeground(QColor(CP_YELLOW))
+            items[1].setForeground(QColor(CP_TEXT))
+            items[2].setForeground(QColor(CP_CYAN))
+            
+            for col, item in enumerate(items):
+                self.table.setItem(i, col, item)
+                
+        layout.addWidget(self.table)
+        
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
+        cancel_btn.clicked.connect(self.reject)
+        
+        recover_btn = CyberButton("RECOVER (HARD RESET)", CP_DIM, CP_GREEN)
+        recover_btn.clicked.connect(self.recover_selected)
+        
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(recover_btn)
+        layout.addLayout(btn_layout)
+
+    def on_cell_entered(self, row, column):
+        self.delegate.hovered_row = row
+        self.table.viewport().update()
+
+    def recover_selected(self):
+        selected = self.table.selectedItems()
+        if not selected:
+            QMessageBox.warning(self, "No Selection", "Please select an entry to recover.")
+            return
+            
+        row = selected[0].row()
+        commit_hash = self.table.item(row, 0).text()
+        msg = self.table.item(row, 2).text()
+        
+        confirm = QMessageBox.question(
+            self, "Confirm Recovery",
+            f"Are you sure you want to perform a HARD RESET to:\n\n[{commit_hash}] {msg}\n\n⚠️ This will discard all current uncommitted changes!",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if confirm == QMessageBox.StandardButton.Yes:
+            result = GitWorker.reset_hard(self.directory, commit_hash)
+            if "success" in result:
+                QMessageBox.information(self, "Success", f"Repository reset to {commit_hash}")
+                self.accept()
+                if hasattr(self.parent(), "parent_window"):
+                    self.parent().parent_window.load_commits()
+            else:
+                QMessageBox.critical(self, "Error", result["error"])
 
 # --- COMMIT EXPLORER DIALOG ---
 class CommitExplorerDialog(QDialog):
