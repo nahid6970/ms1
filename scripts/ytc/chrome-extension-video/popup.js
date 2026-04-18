@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const currentUrl = tab.url;
   document.getElementById('url').value = currentUrl;
+
+  // Check if it's a playlist URL
+  if (currentUrl.includes('list=')) {
+    if (!currentUrl.includes('v=')) {
+      setStatus('PLAYLISTS ARE IGNORED. Only individual videos are supported.');
+      document.getElementById('fetchFormats').disabled = true;
+    } else {
+      setStatus('READY (Playlist detected - only this video will be downloaded)');
+    }
+  }
   
   // Restore saved state for this URL
   chrome.storage.local.get(['videoFormats', 'audioFormats', 'selectedVideo', 'selectedAudio', 'lastUrl'], (data) => {

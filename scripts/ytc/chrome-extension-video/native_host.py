@@ -50,7 +50,7 @@ def fetch_formats(message):
     try:
         url = message['url']
         
-        command = ['yt-dlp', '--dump-json', '--extractor-args', 'youtube:player_client=default', url]
+        command = ['yt-dlp', '--no-playlist', '--dump-json', '--extractor-args', 'youtube:player_client=default', url]
         
         process = subprocess.Popen(
             command,
@@ -124,6 +124,7 @@ def download_video(message):
         
         command = [
             'yt-dlp',
+            '--no-playlist',
             '-f', format_str,
             '-o', f'{save_dir}/%(title)s.%(ext)s',
             '--extractor-args', 'youtube:player_client=default',
