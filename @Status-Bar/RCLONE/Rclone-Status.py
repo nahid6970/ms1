@@ -931,7 +931,7 @@ def check_and_update(label, cfg):
                             output_buffer.append(f"{'*'*40}")
                             
                             process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                            with open(sync_log_path, "w") as f:
+                            with open(sync_log_path, "w", encoding='utf-8') as f:
                                 for line in process.stdout:
                                     f.write(line)
                                     if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
@@ -950,7 +950,7 @@ def check_and_update(label, cfg):
                                 print(f"{'*'*40}")
                             
                             process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                            with open(sync_log_path, "w") as f:
+                            with open(sync_log_path, "w", encoding='utf-8') as f:
                                 for line in process.stdout:
                                     f.write(line)
                                     if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
@@ -960,7 +960,7 @@ def check_and_update(label, cfg):
                             with output_lock:
                                 print(f"{'*'*40}\n")
                     else:
-                        with open(sync_log_path, "w") as f:
+                        with open(sync_log_path, "w", encoding='utf-8') as f:
                             subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
 
                     with output_lock:
