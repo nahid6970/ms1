@@ -1,3 +1,52 @@
+# Image Markdown Feature - Implementation Summary
+
+## Feature Overview
+Added support for standard markdown image syntax `![alt](url)` with custom dimension support `![alt;width;height](url)`.
+
+## Implementation Status: ✅ COMPLETE
+
+### Rule of 6 - All Requirements Met
+
+1. ✅ **Parsing Logic (static/script.js)**
+   - `parseMarkdownInline()` - Added image regex and dimension splitting.
+   - `oldParseMarkdownBody()` - Integrated image parsing for multi-line/block contexts.
+
+2. ✅ **Detection (static/script.js)**
+   - `checkHasMarkdown()` - Added `str.includes('![')` check.
+
+3. ✅ **Stripping (static/script.js)**
+   - `stripMarkdown()` - Removes image tags while preserving alt text.
+
+4. ✅ **Static Detection (export_static.py)**
+   - Updated `hasMarkdown` detection logic to identify `![` markers.
+
+5. ✅ **Static Parsing (export_static.py)**
+   - Synced `parseMarkdownInline` and `oldParseMarkdownBody` logic into the Python script.
+
+6. ✅ **User Guide (templates/index.html)**
+   - Added "Images" section with 3 examples to the Markdown Formatting Guide modal.
+
+### Additional Implementations
+
+7. ✅ **Visual Styling (static/style.css)**
+   - Added `.markdown-preview img` styles for responsive fitting and margins.
+
+8. ✅ **Extended Syntax**
+   - Supports `;width` and `;width;height` parameters within the alt text brackets.
+
+## Files Modified
+
+1. `static/script.js` - Core parsing and detection
+2. `export_static.py` - Static export support
+3. `static/style.css` - Preview styling
+4. `templates/index.html` - User guide
+5. `md/IMAGE_MARKDOWN.md` - Detailed documentation (NEW)
+
+## Date Completed
+2026-04-18
+
+---
+
 # Text Stroke Feature - Implementation Summary
 
 ## Feature Overview

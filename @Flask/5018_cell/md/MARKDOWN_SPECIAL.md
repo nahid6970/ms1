@@ -9,6 +9,15 @@
 - `ŝŝ5:THICK TEXTŝŝ` → 5px stroke
 **Details:** See `md/TEXT_STROKE.md`.
 
+## Images
+**Syntax:** `![alt text](url)` or `![alt;width;height](url)`
+**Output:** Displays an image in the cell preview.
+**Features:**
+- Default: `max-width: 100%`
+- Custom sizing: Use `;` to separate width and height in the alt brackets.
+**Example:** `![My Logo;200px](https://example.com/logo.png)`
+**Details:** See `md/IMAGE_MARKDOWN.md`.
+
 ## List Items
 **Syntax:** 
 - `- item` → Bullet list (•)

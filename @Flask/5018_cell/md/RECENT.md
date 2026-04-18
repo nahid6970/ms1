@@ -1,5 +1,42 @@
 # Recent Development Log
 
+## [2026-04-18 11:45] - Image Markdown Support
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🖼️ New Image Markdown Support
+- **Feature**: Added standard markdown image support `![alt](url)` with dimension extensions.
+- **Extended Syntax**:
+  - `![alt;width](url)`
+  - `![alt;width;height](url)`
+- **Styling**: 
+  - Images automatically fit cell width (`max-width: 100%`).
+  - Added specific `.markdown-preview img` styles in `static/style.css`.
+- **Integration**:
+  - **Live Preview**: Updated `static/script.js` (detection, parsing, and stripping).
+  - **Static Export**: Updated `export_static.py` for consistent offline rendering.
+  - **Documentation**: Added "Images" section to the Markdown Formatting Guide modal in `templates/index.html`.
+
+**Files Modified:**
+- `static/script.js` - Updated `checkHasMarkdown`, `parseMarkdownInline`, `oldParseMarkdownBody`, `stripMarkdown`.
+- `export_static.py` - Updated `hasMarkdown` check and parsing functions.
+- `static/style.css` - Added image-specific preview styles.
+- `templates/index.html` - Updated Markdown Guide modal.
+- `md/IMAGE_MARKDOWN.md` - Created new feature documentation.
+- `md/RECENT.md`, `md/IMPLEMENTATION_SUMMARY.md`, `md/MARKDOWN_SPECIAL.md` - Updated references.
+
+**Current Status:**
+- ✅ Images render correctly in preview and static export.
+- ✅ Custom sizing (width/height) supported.
+- ✅ Accessibility (alt text) preserved.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-05 10:50] - Fixed Scrollbar Drag Lag in Visual Mode
 
 **Session Duration:** 0.1 hours
