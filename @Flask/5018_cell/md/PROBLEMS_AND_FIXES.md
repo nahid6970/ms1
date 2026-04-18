@@ -5,6 +5,30 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-04-18 23:49] - Image Regex Over-Escaped in Static Export
+
+**Problem:** Images (`![alt](url)`) rendered as blank in static export HTML.
+
+**Root Cause:** `export_static.py` used `!\\\[...\\\]` in the Python string, which produced `!\\[...\\]` in the JS output — matching a literal backslash, not `![`.
+
+**Solution:** Changed to `!\[([^\]]+)\]\(([^)]+)\)` in both `parseMarkdownInline` and `oldParseMarkdownBody`, matching `script.js`.
+
+**Files Modified:** `export_static.py`
+
+---
+
+## [2026-04-18 23:49] - Image Gap After Inline Images in Preview
+
+**Problem:** Text following an image had an unwanted vertical gap in the markdown preview.
+
+**Root Cause:** `.markdown-preview img` had `display: block` and `margin: 5px 0`.
+
+**Solution:** Changed to `display: inline; vertical-align: middle;`.
+
+**Files Modified:** `static/style.css`
+
+---
+
 ## [2026-04-05 10:50] - Scrollbar Drag Lag in Visual Mode
 
 **Problem:**

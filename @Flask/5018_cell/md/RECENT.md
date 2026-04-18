@@ -1,5 +1,34 @@
 # Recent Development Log
 
+## [2026-04-18 23:49] - Fixed Image Markdown Bugs
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🐛 Fixed Image Regex in Static Export
+- **Problem**: Images (`![alt](url)`) rendered as empty/nothing in static export HTML.
+- **Root Cause**: Over-escaped regex in `export_static.py` — `!\\\[` produced `!\\[` in JS output, which matched a literal backslash instead of `![`.
+- **Solution**: Corrected to `!\[([^\]]+)\]\(([^)]+)\)` (matching `script.js`) in both `parseMarkdownInline` and `oldParseMarkdownBody`.
+
+### 🐛 Fixed Image Gap in Main App Preview
+- **Problem**: Text after an image had an unwanted vertical gap.
+- **Root Cause**: `.markdown-preview img` had `display: block` and `margin: 5px 0`.
+- **Solution**: Changed to `display: inline; vertical-align: middle;`.
+
+**Files Modified:**
+- `export_static.py` - Fixed image regex escaping in `parseMarkdownInline` and `oldParseMarkdownBody`
+- `static/style.css` - Fixed `.markdown-preview img` display/margin
+
+**Current Status:**
+- ✅ Images render correctly in static export
+- ✅ No gap after images in main app preview
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-18 11:45] - Image Markdown Support
 
 **Session Duration:** 0.5 hours
