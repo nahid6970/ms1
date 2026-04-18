@@ -313,6 +313,11 @@
             "kind": "Exe",
             "id": "ABDownloadManager.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "JDownloader2.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -379,6 +384,11 @@
         {
             "kind": "Exe",
             "id": "ABDownloadManager.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "JDownloader2.exe",
             "matching_strategy": "Legacy"
         }
     ],
