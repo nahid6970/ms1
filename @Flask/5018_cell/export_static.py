@@ -2145,7 +2145,7 @@ def generate_static_html(data, custom_syntaxes):
             });
 
             // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
-            formatted = formatted.replace(/!\\\[([^\\\]]+)\\\]\\\(([^)]+)\\\)/g, (match, alt, url) => {
+            formatted = formatted.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, (match, alt, url) => {
                 const parts = alt.split(';');
                 const altText = parts[0];
                 const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
@@ -2509,7 +2509,7 @@ def generate_static_html(data, custom_syntaxes):
                 });
 
                 // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
-                formatted = formatted.replace(/!\\\[([^\\\]]+)\\\]\\\(([^)]+)\\\)/g, (match, alt, url) => {
+                formatted = formatted.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, (match, alt, url) => {
                     const parts = alt.split(';');
                     const altText = parts[0];
                     const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
