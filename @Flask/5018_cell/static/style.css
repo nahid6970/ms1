@@ -1052,8 +1052,8 @@ code {
 .markdown-preview img {
     max-width: 100%;
     height: auto;
-    display: block;
-    margin: 5px 0;
+    display: inline;
+    vertical-align: middle;
 }
 
 .markdown-preview mark {
