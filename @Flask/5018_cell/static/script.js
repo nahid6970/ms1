@@ -1588,6 +1588,7 @@ function checkHasMarkdown(value) {
         str.includes('{fg:') ||
         str.includes('{bg:') ||
         str.includes('{link:') ||
+        str.includes('![') ||
         (str.includes('http') && str.includes('[')) ||
         str.includes('{{') ||
         str.includes('$') ||  // LaTeX math syntax
@@ -3216,6 +3217,15 @@ function parseMarkdownInline(text, cellStyle = {}) {
         });
     }
 
+    // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
+    formatted = formatted.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, (match, alt, url) => {
+        const parts = alt.split(';');
+        const altText = parts[0];
+        const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
+        const height = parts[2] ? `height="${parts[2]}" ` : '';
+        return `<img src="${url}" alt="${altText}" ${width}${height}>`;
+    });
+
     // Links: {link:url}text{/} -> <a href="url">text</a>
     formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
@@ -3961,6 +3971,15 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // Links: {link:url}text{/} -> <a href="url">text</a>
         formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
             return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
+
+        // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
+        formatted = formatted.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, (match, alt, url) => {
+            const parts = alt.split(';');
+            const altText = parts[0];
+            const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
+            const height = parts[2] ? `height="${parts[2]}" ` : '';
+            return `<img src="${url}" alt="${altText}" ${width}${height}>`;
         });
 
         // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
@@ -9123,6 +9142,9 @@ function stripMarkdown(text, preserveLinks = false) {
         // Remove new link markers but keep both URL and text: url[text] -> url text
         stripped = stripped.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, '$1 $2');
     }
+
+    // Remove image markers but keep alt text: ![alt](url) -> alt
+    stripped = stripped.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, '$1');
 
     // Remove LaTeX math markers: $text$ -> text, $text$ -> text
     stripped = stripped.replace(/\$\$(.*?)\$\$/g, '$1');

@@ -1694,6 +1694,7 @@ def generate_static_html(data, custom_syntaxes):
                     const cellValue = row[colIndex] || '';
                     const hasMarkdown = cellValue.includes('\\\\(') || 
                         cellValue.includes('$') ||  // LaTeX math syntax
+                        cellValue.includes('![') || // Image support
                         cellValue.includes('[[') || 
                         cellValue.includes('**') || 
                         cellValue.includes('__') || 
@@ -2143,6 +2144,15 @@ def generate_static_html(data, custom_syntaxes):
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
             });
 
+            // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
+            formatted = formatted.replace(/!\\\[([^\\\]]+)\\\]\\\(([^)]+)\\\)/g, (match, alt, url) => {
+                const parts = alt.split(';');
+                const altText = parts[0];
+                const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
+                const height = parts[2] ? `height="${parts[2]}" ` : '';
+                return `<img src="${url}" alt="${altText}" ${width}${height}>`;
+            });
+
             // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
             formatted = formatted.replace(/\\{((?:fg:[^;\\}\\s]+)?(?:;)?(?:bg:[^;\\}\\s]+)?)\\}(.+?)\\{\\/\\}/g, (match, styles, text) => {
                 const styleObj = {};
@@ -2496,6 +2506,15 @@ def generate_static_html(data, custom_syntaxes):
                 // Links: {link:url}text{/} -> <a href="url">text</a>
                 formatted = formatted.replace(/\\{link:([^}]+)\\}(.+?)\\{\\/\\}/g, (match, url, text) => {
                     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+                });
+
+                // Images: ![alt](url) or ![alt;width](url) or ![alt;width;height](url)
+                formatted = formatted.replace(/!\\\[([^\\\]]+)\\\]\\\(([^)]+)\\\)/g, (match, alt, url) => {
+                    const parts = alt.split(';');
+                    const altText = parts[0];
+                    const width = parts[1] ? `width="${parts[1]}" ` : 'style="max-width: 100%;" ';
+                    const height = parts[2] ? `height="${parts[2]}" ` : '';
+                    return `<img src="${url}" alt="${altText}" ${width}${height}>`;
                 });
 
                 // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)

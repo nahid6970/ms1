@@ -1049,6 +1049,13 @@ code {
     -webkit-box-decoration-break: clone;
 }
 
+.markdown-preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 5px 0;
+}
+
 .markdown-preview mark {
     background: black;
     color: white !important;
