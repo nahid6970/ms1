@@ -109,6 +109,8 @@
 
 .qs-checkbox input:checked + .qs-check-mark {
     background: #00ff88;
+    border-color: #00ff88;
+    box-shadow: inset 0 0 0 2px #111;
 }
 
 .qs-checkbox input:checked + .qs-check-mark::after {
