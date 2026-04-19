@@ -93,38 +93,26 @@
     /* Offset for missing label */
 }
 .qs-checkbox input {
-    all: revert;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
+    display: none;
 }
-
 
 .qs-check-mark {
-    width: 18px;
-    height: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.2);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #00ff88;
+    border-radius: 2px;
+    background: #111;
     display: inline-block;
     position: relative;
+    flex-shrink: 0;
 }
 
-.qs-checkbox input:checked+.qs-check-mark {
-    background: #38bdf8;
-    border-color: #38bdf8;
+.qs-checkbox input:checked + .qs-check-mark {
+    background: #00ff88;
 }
 
-.qs-checkbox input:checked+.qs-check-mark::after {
-    content: "";
-    position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+.qs-checkbox input:checked + .qs-check-mark::after {
+    content: none;
 }
 
 .qs-label {
