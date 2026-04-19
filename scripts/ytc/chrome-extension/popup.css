@@ -48,6 +48,24 @@ body {
   font-size: 9pt;
 }
 
+.prompt-input {
+  width: 100%;
+  height: 80px;
+  background-color: #10161d;
+  border: 1px solid #ff003c;
+  padding: 8px;
+  color: #e0e0e0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 9pt;
+  resize: vertical;
+}
+
+.prompt-input:focus {
+  outline: none;
+  border-color: #00ff9f;
+}
+
 .select {
   width: 100%;
   background-color: #10161d;

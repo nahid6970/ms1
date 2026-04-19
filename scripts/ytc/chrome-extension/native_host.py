@@ -75,7 +75,7 @@ def parse_time_input(time_str):
     return None
 
 
-def convert_to_txt(file_path, time_range=None):
+def convert_to_txt(file_path, time_range=None, keep_original=False):
     """Convert SRT/VTT to clean TXT with optional time filtering"""
     try:
         txt_path = os.path.splitext(file_path)[0] + ".txt"
@@ -148,19 +148,19 @@ def convert_to_txt(file_path, time_range=None):
         # Create final text content
         txt_content = "\n".join(final_lines)
         
-        # Write to file
-        with open(txt_path, 'w', encoding='utf-8') as f:
-            f.write(txt_content)
-        
-        # Remove original file
-        try:
-            os.remove(file_path)
-        except:
-            pass
+        # Write to file only if not just for return
+        if not keep_original:
+            with open(txt_path, 'w', encoding='utf-16' if os.name == 'nt' else 'utf-8') as f:
+                f.write(txt_content)
+            
+            # Remove original file
+            try:
+                os.remove(file_path)
+            except:
+                pass
         
         return txt_content
     except Exception as e:
-        send_message({"success": False, "error": f"Conversion error: {str(e)}"})
         return None
 
 
@@ -174,8 +174,10 @@ def process_subtitles(save_dir, format_type, time_range, start_time):
                 
                 # Check if file was created after download started
                 if os.path.getmtime(full_path) > start_time - 5:
-                    if format_type == 'txt':
-                        txt_content = convert_to_txt(full_path, time_range)
+                    # Always get the text content to return to the extension
+                    # but only delete original if format_type is 'txt'
+                    is_txt = (format_type == 'txt')
+                    txt_content = convert_to_txt(full_path, time_range, keep_original=not is_txt)
     except Exception as e:
         send_message({"success": False, "error": f"Processing error: {str(e)}"})
     
@@ -221,14 +223,12 @@ def execute_download(message):
             send_message({"success": False, "error": stderr})
             return
         
-        # Process subtitles if needed
-        txt_content = None
-        if format_type == 'txt' or time_range:
-            txt_content = process_subtitles(save_dir, format_type, time_range, download_start)
+        # Process subtitles - always return text content if possible
+        txt_content = process_subtitles(save_dir, format_type, time_range, download_start)
         
         # Copy to clipboard if requested
         clipboard_copied = False
-        if copy_to_clipboard and format_type == 'txt' and txt_content:
+        if copy_to_clipboard and txt_content:
             try:
                 import pyperclip
                 pyperclip.copy(txt_content)

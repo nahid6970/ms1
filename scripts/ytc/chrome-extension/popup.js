@@ -21,12 +21,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     useTimeline: false,
     startTime: '',
     endTime: '',
-    saveDir: ''
+    saveDir: '',
+    customPrompt: '',
+    sendToAIStudio: false
   }, (settings) => {
     document.getElementById('language').value = settings.language;
     document.getElementById('format').value = settings.format;
     document.getElementById('autoSub').checked = settings.autoSub;
     document.getElementById('copyToClipboard').checked = settings.copyToClipboard;
+    document.getElementById('customPrompt').value = settings.customPrompt || '';
+    document.getElementById('sendToAIStudio').checked = settings.sendToAIStudio || false;
     
     // Only override timeline if no URL timestamp was found
     if (!timeMatch) {
@@ -76,6 +80,8 @@ document.getElementById('extract').addEventListener('click', async () => {
   const useTimeline = document.getElementById('useTimeline').checked;
   const startTime = document.getElementById('startTime').value;
   const endTime = document.getElementById('endTime').value;
+  const customPrompt = document.getElementById('customPrompt').value;
+  const sendToAIStudio = document.getElementById('sendToAIStudio').checked;
   
   // Save current settings
   chrome.storage.sync.set({
@@ -85,7 +91,9 @@ document.getElementById('extract').addEventListener('click', async () => {
     copyToClipboard,
     useTimeline,
     startTime,
-    endTime
+    endTime,
+    customPrompt,
+    sendToAIStudio
   });
   
   // Get save directory from settings
@@ -119,11 +127,28 @@ document.getElementById('extract').addEventListener('click', async () => {
     extractBtn.disabled = false;
     
     if (response.success) {
-      if (response.clipboardCopied) {
-        setStatus('COMPLETE! TEXT COPIED TO CLIPBOARD');
-      } else {
-        setStatus('EXTRACTION COMPLETE!');
+      let statusMsg = 'EXTRACTION COMPLETE!';
+      const content = response.data?.content || response.content;
+      
+      // Handle Google AI Studio integration
+      if (sendToAIStudio && content) {
+        const combinedText = `${customPrompt}\n\nSUBTITLES:\n${content}`;
+        
+        setStatus('INJECTING TO AI STUDIO...');
+        chrome.runtime.sendMessage({
+          action: 'injectToAIStudio',
+          text: combinedText
+        });
+        
+        setTimeout(() => setStatus('READY'), 3000);
+        return;
       }
+
+      if (response.clipboardCopied || response.data?.clipboardCopied) {
+        statusMsg = 'COMPLETE! TEXT COPIED TO CLIPBOARD';
+      }
+      
+      setStatus(statusMsg);
       setTimeout(() => setStatus('READY'), 3000);
     } else {
       setStatus(`ERROR: ${response.error}`);
