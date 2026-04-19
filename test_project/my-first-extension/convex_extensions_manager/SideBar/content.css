@@ -97,6 +97,8 @@
 
 .qs-checkbox input {
     display: none;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 .qs-check-mark {
