@@ -315,6 +315,7 @@ if (loadFromConvexBtn) {
             
             // Be more lenient with what we consider "valid" data (must be a truthy object)
             if (response && response.success !== false && response.data && typeof response.data === 'object') {
+                chrome.storage.local.clear(() => {
                 chrome.storage.local.set(response.data, () => {
                     loadFromConvexBtn.classList.add('success');
                     loadFromConvexBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>`;
@@ -337,6 +338,7 @@ if (loadFromConvexBtn) {
                         loadFromConvexBtn.innerHTML = originalContent;
                         loadFromConvexBtn.classList.remove('success');
                     }, 2000);
+                });
                 });
             } else {
                 console.error('Restore failed or no data found:', response);

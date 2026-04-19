@@ -52,13 +52,6 @@ async function loadDataFromConvex() {
 }
 
 // Auto-save on storage changes
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'local') {
-    chrome.storage.local.get(null, (items) => {
-      sendDataToConvex(items);
-    });
-  }
-});
 
 // Handle manual save/load requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
