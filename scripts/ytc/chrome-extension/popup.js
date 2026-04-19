@@ -22,15 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     startTime: '',
     endTime: '',
     saveDir: '',
-    customPrompt: '',
-    sendToAIStudio: false
+    sendToAIStudio: false,
+    showViewer: true
   }, (settings) => {
     document.getElementById('language').value = settings.language;
     document.getElementById('format').value = settings.format;
     document.getElementById('autoSub').checked = settings.autoSub;
     document.getElementById('copyToClipboard').checked = settings.copyToClipboard;
-    document.getElementById('customPrompt').value = settings.customPrompt || '';
     document.getElementById('sendToAIStudio').checked = settings.sendToAIStudio || false;
+    document.getElementById('showViewer').checked = settings.showViewer !== undefined ? settings.showViewer : true;
     
     // Only override timeline if no URL timestamp was found
     if (!timeMatch) {
@@ -80,8 +80,8 @@ document.getElementById('extract').addEventListener('click', async () => {
   const useTimeline = document.getElementById('useTimeline').checked;
   const startTime = document.getElementById('startTime').value;
   const endTime = document.getElementById('endTime').value;
-  const customPrompt = document.getElementById('customPrompt').value;
   const sendToAIStudio = document.getElementById('sendToAIStudio').checked;
+  const showViewer = document.getElementById('showViewer').checked;
   
   // Save current settings
   chrome.storage.sync.set({
@@ -92,12 +92,12 @@ document.getElementById('extract').addEventListener('click', async () => {
     useTimeline,
     startTime,
     endTime,
-    customPrompt,
-    sendToAIStudio
+    sendToAIStudio,
+    showViewer
   });
   
-  // Get save directory from settings
-  const settings = await chrome.storage.sync.get({ saveDir: '' });
+  // Get save directory and custom prompt from settings
+  const settings = await chrome.storage.sync.get({ saveDir: '', customPrompt: '' });
   
   if (!settings.saveDir) {
     setStatus('ERROR: Set save directory in settings first!');
@@ -132,7 +132,7 @@ document.getElementById('extract').addEventListener('click', async () => {
       
       // Handle Google AI Studio integration
       if (sendToAIStudio && content) {
-        const combinedText = `${customPrompt}\n\nSUBTITLES:\n${content}`;
+        const combinedText = `${settings.customPrompt}\n\nSUBTITLES:\n${content}`;
         
         setStatus('INJECTING TO AI STUDIO...');
         chrome.runtime.sendMessage({

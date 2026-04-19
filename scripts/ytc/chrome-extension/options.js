@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     defaultLanguage: 'en',
     defaultFormat: 'srt',
     defaultAutoSub: false,
-    defaultCopyClipboard: false
+    defaultCopyClipboard: false,
+    customPrompt: ''
   }, (settings) => {
     document.getElementById('saveDir').value = settings.saveDir;
     document.getElementById('authMethod').value = settings.authMethod;
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('defaultFormat').value = settings.defaultFormat;
     document.getElementById('defaultAutoSub').checked = settings.defaultAutoSub;
     document.getElementById('defaultCopyClipboard').checked = settings.defaultCopyClipboard;
+    document.getElementById('customPrompt').value = settings.customPrompt || '';
     
     toggleAuthSections();
   });
@@ -52,7 +54,8 @@ document.getElementById('save').addEventListener('click', () => {
     defaultLanguage: document.getElementById('defaultLanguage').value,
     defaultFormat: document.getElementById('defaultFormat').value,
     defaultAutoSub: document.getElementById('defaultAutoSub').checked,
-    defaultCopyClipboard: document.getElementById('defaultCopyClipboard').checked
+    defaultCopyClipboard: document.getElementById('defaultCopyClipboard').checked,
+    customPrompt: document.getElementById('customPrompt').value
   };
   
   chrome.storage.sync.set(settings, () => {
