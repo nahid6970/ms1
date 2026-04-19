@@ -5,6 +5,7 @@
     "description": "A slim, customizable sidebar that stays with you.",
     "permissions": [
         "storage",
+        "sessionStorage",
         "contextMenus"
     ],
     "host_permissions": [

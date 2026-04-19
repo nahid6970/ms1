@@ -24,23 +24,32 @@ const ctxDelete = document.getElementById('ctx-delete');
 let currentRightClickedLinkId = null;
 
 // Initial Load
-function init() {
-    chrome.storage.local.get(['sidebar_links', 'itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
-        globalSettings = {
-            itemsPerRow: result.itemsPerRow || 4,
-            extraPadding: result.extraPadding || 20,
-            iconSize: result.iconSize || 28,
-            borderRadius: result.borderRadius !== undefined ? result.borderRadius : 8,
-            borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : 100
-        };
+const CACHE_KEYS = ['sidebar_links', 'itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'];
 
-        if (result.sidebar_links && result.sidebar_links.length > 0) {
-            links = result.sidebar_links;
-            applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
-            renderLinks();
-        } else {
-            showEmptyState(true);
-        }
+function applyResult(result) {
+    globalSettings = {
+        itemsPerRow: result.itemsPerRow || 4,
+        extraPadding: result.extraPadding || 20,
+        iconSize: result.iconSize || 28,
+        borderRadius: result.borderRadius !== undefined ? result.borderRadius : 8,
+        borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : 100
+    };
+    if (result.sidebar_links && result.sidebar_links.length > 0) {
+        links = result.sidebar_links;
+        applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
+        renderLinks();
+    } else {
+        showEmptyState(true);
+    }
+}
+
+function init() {
+    chrome.storage.session.get(CACHE_KEYS, (cached) => {
+        if (cached.sidebar_links) applyResult(cached);
+        chrome.storage.local.get(CACHE_KEYS, (result) => {
+            chrome.storage.session.set(result);
+            if (!cached.sidebar_links) applyResult(result);
+        });
     });
 
     // Close context menu on any click
@@ -77,6 +86,10 @@ function applyGridLayout(itemsPerRow, extraPadding = 20) {
 // Listen for updates from other contexts
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local') {
+        // Keep session cache in sync
+        const update = {};
+        Object.keys(changes).forEach(k => { update[k] = changes[k].newValue; });
+        chrome.storage.session.set(update);
         let needsReRender = false;
         
         if (changes.sidebar_links) {
