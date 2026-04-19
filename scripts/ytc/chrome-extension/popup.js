@@ -132,12 +132,11 @@ document.getElementById('extract').addEventListener('click', async () => {
       
       // Handle Google AI Studio integration
       if (sendToAIStudio && content) {
-        const combinedText = `${settings.customPrompt}\n\nSUBTITLES:\n${content}`;
-        
         setStatus('INJECTING TO AI STUDIO...');
         chrome.runtime.sendMessage({
           action: 'injectToAIStudio',
-          text: combinedText
+          prompt: settings.customPrompt,
+          subtitles: content
         });
         
         setTimeout(() => setStatus('READY'), 3000);

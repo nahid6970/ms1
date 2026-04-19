@@ -8,12 +8,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   
   if (request.action === 'injectToAIStudio') {
-    injectToAIStudio(request.text);
+    injectToAIStudio(request.prompt, request.subtitles);
     sendResponse({ success: true });
   }
 });
 
-async function injectToAIStudio(text) {
+async function injectToAIStudio(prompt, subtitles) {
   const tab = await chrome.tabs.create({ url: 'https://aistudio.google.com/prompts/new_chat' });
   
   // Wait for tab to load
@@ -21,29 +21,42 @@ async function injectToAIStudio(text) {
     if (tabId === tab.id && info.status === 'complete') {
       chrome.tabs.onUpdated.removeListener(listener);
       
-      // Inject script to find and fill the textarea
+      // Inject script to find and fill the textarea + simulate file drop
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        args: [text],
-        func: (textToInject) => {
-          // AI Studio uses a complex editor (ProseMirror/Lexical)
-          // We'll try to find the contenteditable or textarea
+        args: [prompt, subtitles],
+        func: (promptText, subtitleText) => {
           const tryInject = () => {
             const editor = document.querySelector('div[contenteditable="true"]') || 
                            document.querySelector('textarea') ||
-                           document.querySelector('.prompt-textarea');
+                           document.querySelector('.prompt-textarea') ||
+                           document.querySelector('ms-prompt-input');
             
             if (editor) {
+              // 1. Inject the prompt text
               editor.focus();
-              
-              // For contenteditable
               if (editor.getAttribute('contenteditable') === 'true') {
-                document.execCommand('insertText', false, textToInject);
+                document.execCommand('insertText', false, promptText);
               } else {
-                // For standard textarea
-                editor.value = textToInject;
+                editor.value = promptText;
                 editor.dispatchEvent(new Event('input', { bubbles: true }));
               }
+
+              // 2. Simulate dropping the subtitles as a file
+              const blob = new Blob([subtitleText], { type: 'text/plain' });
+              const file = new File([blob], 'subtitles.txt', { type: 'text/plain' });
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              
+              const dropEvent = new DragEvent('drop', {
+                bubbles: true,
+                cancelable: true,
+                dataTransfer: dataTransfer
+              });
+              
+              // Dispatch drop on the editor or the body
+              editor.dispatchEvent(dropEvent);
+              
               return true;
             }
             return false;
@@ -56,7 +69,7 @@ async function injectToAIStudio(text) {
               clearInterval(interval);
             }
             attempts++;
-          }, 500);
+          }, 800);
         }
       });
     }
