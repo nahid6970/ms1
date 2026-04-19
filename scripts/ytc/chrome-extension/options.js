@@ -5,20 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     authMethod: 'none',
     browser: 'chrome',
     cookieFile: '',
-    defaultLanguage: 'en',
-    defaultFormat: 'srt',
-    defaultAutoSub: false,
-    defaultCopyClipboard: false,
     customPrompt: ''
   }, (settings) => {
     document.getElementById('saveDir').value = settings.saveDir;
     document.getElementById('authMethod').value = settings.authMethod;
     document.getElementById('browser').value = settings.browser;
     document.getElementById('cookieFile').value = settings.cookieFile;
-    document.getElementById('defaultLanguage').value = settings.defaultLanguage;
-    document.getElementById('defaultFormat').value = settings.defaultFormat;
-    document.getElementById('defaultAutoSub').checked = settings.defaultAutoSub;
-    document.getElementById('defaultCopyClipboard').checked = settings.defaultCopyClipboard;
     document.getElementById('customPrompt').value = settings.customPrompt || '';
     
     toggleAuthSections();
@@ -51,10 +43,6 @@ document.getElementById('save').addEventListener('click', () => {
     authMethod: document.getElementById('authMethod').value,
     browser: document.getElementById('browser').value,
     cookieFile: document.getElementById('cookieFile').value,
-    defaultLanguage: document.getElementById('defaultLanguage').value,
-    defaultFormat: document.getElementById('defaultFormat').value,
-    defaultAutoSub: document.getElementById('defaultAutoSub').checked,
-    defaultCopyClipboard: document.getElementById('defaultCopyClipboard').checked,
     customPrompt: document.getElementById('customPrompt').value
   };
   
