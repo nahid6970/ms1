@@ -1,16 +1,23 @@
 # YTC Subtitle Extractor - Chrome Extension
 
-A Chrome extension that extracts subtitles from any video site using yt-dlp. Based on the subtitle functionality from ytc_qt.py.
+A Chrome extension that extracts subtitles from any video site using yt-dlp and automates AI-driven summaries via Google AI Studio.
 
-## Features
+## New Features (v1.1.0)
+
+- **Google AI Studio Integration:** Automatically open [Google AI Studio](https://aistudio.google.com/prompts/new_chat) and inject extracted subtitles along with a custom prompt.
+- **Automated Text Injection:** No more manual copy-pasting; the extension handles the input for you.
+- **Enhanced Cookie Management:** Support for Edge, Brave, and manual `cookies.txt` files to bypass Chrome's database locking issues.
+- **Flexible UI:** Toggle the subtitle viewer window on or off based on your preference.
+- **JS Runtime Support:** Verification for Node.js/Deno runtimes required by modern YouTube player logic.
+
+## Core Features
 
 - Extract subtitles from any video URL (YouTube, Vimeo, etc.)
 - Support for multiple languages (English, Bengali, Hindi, All)
 - Multiple output formats (SRT, VTT, TXT)
 - Auto-generated subtitle support
 - Timeline range selection (extract specific time ranges)
-- Configurable default settings
-- Cookie-based authentication (browser or file)
+- Configurable custom prompts for AI analysis
 
 ## Installation
 
@@ -21,7 +28,10 @@ A Chrome extension that extracts subtitles from any video site using yt-dlp. Bas
    pip install yt-dlp
    ```
 
-2. **Ensure yt-dlp is in PATH**:
+2. **Install a JavaScript Runtime (Recommended)**:
+   Install [Node.js](https://nodejs.org/) and ensure it's in your system PATH. Modern YouTube extraction often requires a JS runtime.
+
+3. **Ensure yt-dlp is in PATH**:
    ```bash
    yt-dlp --version
    ```
@@ -40,8 +50,7 @@ A Chrome extension that extracts subtitles from any video site using yt-dlp. Bas
    - Select the `chrome-extension` folder
 
 3. **Get the Extension ID**:
-   - Copy the Extension ID from `chrome://extensions/`
-   - It looks like: `abcdefghijklmnopqrstuvwxyz123456`
+   - Copy the Extension ID from `chrome://extensions/` (e.g., `abcdefghijklmnopqrstuvwxyz123456`)
 
 4. **Update the Manifest**:
    - Open `com.ytc.subtitle_extractor.json`
@@ -49,120 +58,48 @@ A Chrome extension that extracts subtitles from any video site using yt-dlp. Bas
    - Save the file
 
 5. **Reload the Extension**:
-   - Go back to `chrome://extensions/`
-   - Click the reload icon on your extension
-
-6. **Configure Settings**:
-   - Click the extension icon
-   - Click "⚙️ Settings"
-   - Set your save directory (e.g., `C:\Downloads\Subtitles`)
-   - Configure authentication if needed
-   - Set default values
-   - Click "SAVE SETTINGS"
+   - Go back to `chrome://extensions/` and click the reload icon on your extension.
 
 ## Usage
 
-1. Navigate to any video page (YouTube, Vimeo, etc.)
-2. Click the extension icon
-3. The current URL will be auto-populated
-4. Select your preferences:
-   - Language (English, Bengali, Hindi, All)
-   - Format (SRT, VTT, TXT)
-   - Include auto-generated subtitles (optional)
-   - Timeline range (optional)
-5. Click "EXTRACT SUBTITLES"
-6. Subtitles will be saved to your configured directory
+1. **Configure Settings**:
+   - Click the extension icon -> "⚙️ Settings"
+   - Set your **Save Directory**.
+   - Enter your **Default Custom Prompt** (e.g., "Summarize this video in bullet points:").
+   - Click "SAVE SETTINGS".
 
-## Settings
+2. **Extraction**:
+   - Navigate to a video page.
+   - Select your format (SRT, VTT, or TXT).
+   - Check **"SEND TO GOOGLE AI STUDIO"** if you want automatic AI analysis.
+   - Click **"EXTRACT SUBTITLES"**.
 
-### Save Directory
-The folder where subtitles will be saved. Must be a full path.
+## Google AI Studio Integration
 
-Example: `C:\Downloads\Subtitles`
+When enabled, the extension will:
+1. Extract the subtitles using `yt-dlp`.
+2. Combine the subtitles with your saved **Custom Prompt**.
+3. Open a new chat tab at Google AI Studio.
+4. **Automatically inject** the text into the chat box so you can start processing immediately.
 
-### Authentication
-For private or age-restricted videos:
+## Authentication & Errors
 
-- **None**: No authentication
-- **Browser Cookies**: Use cookies from your browser (Chrome, Firefox, Edge, Opera, Brave)
-- **Cookie File**: Use a Netscape format cookie file
-
-### Default Values
-Set default preferences for:
-- Language
-- Format
-- Auto-generated subtitles
-
-## Timeline Range
-
-Extract subtitles for a specific time range:
-
-- **Format**: Accepts seconds (`3062`) or time format (`51:02` or `1:30:45`)
-- **Auto-detection**: If the URL contains `?t=3040`, it will auto-populate the start time
-
-## Supported Sites
-
-Any site supported by yt-dlp, including:
-- YouTube
-- Vimeo
-- Dailymotion
-- Facebook
-- Twitter
-- And 1000+ more sites
+### "Could not copy Chrome cookie database"
+Chrome locks its database while running. If you see this error:
+1. Go to **Settings**.
+2. Change **Authentication** to **Browser Cookies** and select **Edge** (or Brave/Firefox).
+3. Ensure you have logged into YouTube at least once in that other browser.
+4. Alternatively, use a **Cookie File** exported via a browser extension (like "Get cookies.txt LOCALLY").
 
 ## Troubleshooting
 
-### "Native host has exited" error
-- Make sure `install_host.py` was run successfully
-- Verify the Extension ID in `com.ytc.subtitle_extractor.json` matches your actual ID
-- Check that `native_host.py` has the correct path in the manifest
-
-### "yt-dlp not found" error
-- Ensure yt-dlp is installed: `pip install yt-dlp`
-- Verify it's in PATH: `yt-dlp --version`
-
-### No subtitles downloaded
-- Check if the video has subtitles available
-- Try enabling "Include auto-generated" option
-- Try different language options
-- Check authentication settings for private videos
-
-### Permission errors
-- Ensure the save directory exists and is writable
-- Run Chrome as administrator if needed
-
-## File Structure
-
-```
-chrome-extension/
-├── manifest.json              # Extension manifest
-├── popup.html                 # Main popup UI
-├── popup.js                   # Popup logic
-├── popup.css                  # Popup styles
-├── options.html               # Settings page UI
-├── options.js                 # Settings logic
-├── options.css                # Settings styles
-├── background.js              # Background service worker
-├── native_host.py             # Native messaging host
-├── install_host.py            # Installation script
-├── com.ytc.subtitle_extractor.json  # Native host manifest
-└── README.md                  # This file
-```
-
-## Technical Details
-
-### Native Messaging
-The extension uses Chrome's Native Messaging API to communicate with a Python script that executes yt-dlp commands. This is necessary because Chrome extensions cannot directly execute system commands.
-
-### Subtitle Processing
-- Downloads subtitles using yt-dlp
-- Converts to requested format (SRT, VTT, or TXT)
-- For TXT format: removes timestamps, duplicates, and formatting
-- Supports timeline filtering for specific time ranges
+- **Native host has exited:** Verify the Extension ID in `com.ytc.subtitle_extractor.json`.
+- **429 Too Many Requests:** Ensure you are using a Cookie source (Edge, File, etc.) to authenticate as a logged-in user.
+- **JS Runtime Warning:** Install Node.js or Deno and restart your terminal/browser.
 
 ## Credits
 
-Based on the subtitle extraction functionality from `ytc_qt.py`.
+Based on the subtitle extraction functionality from `ytc_qt.py`. Updated with modern AI integration and improved authentication handling.
 
 ## License
 
