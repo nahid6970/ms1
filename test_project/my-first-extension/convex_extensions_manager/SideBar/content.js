@@ -31,6 +31,13 @@
             Solid
           </label>
         </div>
+        <div class="qs-style-field">
+          <label class="qs-checkbox">
+            <input type="checkbox" id="qs-newline-input">
+            <span class="qs-check-mark"></span>
+            New Line
+          </label>
+        </div>
       </div>
       <div class="qs-actions">
         <button id="qs-cancel" class="qs-btn qs-secondary">Cancel</button>
@@ -47,6 +54,7 @@
   const imgInput = document.getElementById('qs-img-input');
   const colorInput = document.getElementById('qs-color-input');
   const solidInput = document.getElementById('qs-solid-input');
+  const newLineInput = document.getElementById('qs-newline-input');
   const saveBtn = document.getElementById('qs-save');
   const cancelBtn = document.getElementById('qs-cancel');
 
@@ -119,6 +127,7 @@
         imgInput.value = isGoogleFavicon ? '' : (link.icon || '');
         colorInput.value = link.color || '#38bdf8';
         solidInput.checked = link.isSolid || false;
+        newLineInput.checked = link.newLine || false;
       } else {
         titleText.textContent = 'New Link';
         editIdInput.value = '';
@@ -126,6 +135,7 @@
         urlInput.value = window.location.href;
         colorInput.value = '#38bdf8';
         solidInput.checked = false;
+        newLineInput.checked = false;
         chrome.runtime.sendMessage({ action: 'getSmartFavicon', url: window.location.href }, (icon) => {
           if (icon) imgInput.value = icon;
         });
@@ -133,7 +143,7 @@
       overlay.classList.add('visible');
       titleInput.focus();
     } else if (request.action === 'open_settings') {
-      chrome.storage.sync.get(['itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
+      chrome.storage.local.get(['itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'], (result) => {
         itemsSlider.value = result.itemsPerRow || 4;
         itemsValue.textContent = itemsSlider.value;
         paddingSlider.value = result.extraPadding || 20;
@@ -164,7 +174,7 @@
       borderRadius: parseInt(radiusSlider.value),
       borderOpacity: parseInt(opacitySlider.value)
     };
-    chrome.storage.sync.set(settings, () => {
+    chrome.storage.local.set(settings, () => {
       settingsOverlay.classList.remove('visible');
       chrome.runtime.sendMessage({ action: 'settings_updated' });
     });
@@ -178,6 +188,7 @@
     const imgUrl = imgInput.value.trim();
     const color = colorInput.value;
     const isSolid = solidInput.checked;
+    const newLine = newLineInput.checked;
     const editId = editIdInput.value;
 
     if (!url) return;
@@ -186,13 +197,14 @@
     let domain = '';
     try { domain = new URL(url).hostname; } catch (e) { return; }
 
-    chrome.storage.sync.get(['sidebar_links'], (result) => {
+    chrome.storage.local.get(['sidebar_links'], (result) => {
       let links = result.sidebar_links || [];
       const linkData = {
         title: title || domain,
         url: url,
         color: color,
         isSolid: isSolid,
+        newLine: newLine,
         icon: imgUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
       };
 
@@ -202,7 +214,7 @@
         links.push({ id: Date.now().toString(), ...linkData });
       }
 
-      chrome.storage.sync.set({ sidebar_links: links }, () => {
+      chrome.storage.local.set({ sidebar_links: links }, () => {
         overlay.classList.remove('visible');
       });
     });

@@ -25,9 +25,26 @@ async function sendDataToConvex(data) {
 // Load data from Convex
 async function loadDataFromConvex() {
   try {
-    const data = await client.query("functions:get", { extensionName: EXTENSION_NAME });
-    console.log('Data loaded from Convex:', data);
-    return { success: true, data };
+    const result = await client.query("functions:get", { extensionName: EXTENSION_NAME });
+    console.log('Result loaded from Convex:', result);
+    
+    // If result is null, no record was found
+    if (!result) return { success: true, data: null };
+
+    // Try to find the storage object. If there is a 'data' field, it's likely a document record.
+    // Otherwise, it might be the data object itself.
+    let storageData = null;
+    if (result.data && typeof result.data === 'object') {
+      storageData = result.data;
+    } else {
+      // It might be the storage object directly, but let's filter out Convex internal fields
+      storageData = { ...result };
+      delete storageData._id;
+      delete storageData._creationTime;
+      delete storageData.extensionName;
+    }
+
+    return { success: true, data: storageData };
   } catch (error) {
     console.error('Failed to load data from Convex:', error);
     return { success: false, error: error.message };
@@ -148,7 +165,7 @@ async function getSmartFavicon(url) {
 async function addUrlToSidebar(url, title) {
   if (!url) return;
 
-  chrome.storage.sync.get(['sidebar_links'], async (result) => {
+  chrome.storage.local.get(['sidebar_links'], async (result) => {
     let links = result.sidebar_links || [];
     if (links.some(l => l.url === url)) return;
 
@@ -163,11 +180,12 @@ async function addUrlToSidebar(url, title) {
       url: url,
       color: '#38bdf8',
       isSolid: false,
+      newLine: false,
       icon
     };
 
     links.push(newLink);
-    chrome.storage.sync.set({ sidebar_links: links }, () => {
+    chrome.storage.local.set({ sidebar_links: links }, () => {
       console.log('Added to sidebar:', newLink);
     });
   });
