@@ -487,20 +487,16 @@ function handleKeyboardShortcuts(e) {
     if (e.key === 'F3') {
         e.preventDefault();
         const activeElement = document.activeElement;
-        const selection = window.getSelection();
 
-        // Check for selection in contenteditable (WYSIWYG mode)
+        // Open for contenteditable (WYSIWYG mode) - no selection required
         if (activeElement.classList && activeElement.classList.contains('markdown-preview') &&
             activeElement.isContentEditable) {
-            if (selection && !selection.isCollapsed && selection.toString().trim()) {
-                showQuickFormatter(activeElement);
-                return;
-            }
+            showQuickFormatter(activeElement);
+            return;
         }
 
-        // Check for selection in input/textarea (legacy mode)
-        if ((activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
-            activeElement.selectionStart !== activeElement.selectionEnd) {
+        // Open for input/textarea (legacy mode) - no selection required
+        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
             showQuickFormatter(activeElement);
         }
     }
@@ -9682,7 +9678,8 @@ function showQuickFormatter(inputElement) {
                 text: selection.toString()
             };
         } else {
-            return; // No selection, don't show
+            // No selection - still open, cursor position used for insertions
+            quickFormatterSelection = { isContentEditable: true, range: null, text: '' };
         }
     } else {
         // Handle input/textarea (legacy mode)
@@ -10245,6 +10242,103 @@ function padTextToWidth(text, targetWidth) {
     const spacesNeeded = Math.max(0, targetWidth - currentWidth);
     return text + ' '.repeat(spacesNeeded);
 }
+
+function showTableInserter(event) {
+    lastQuickFormatterAction = Date.now();
+    const existing = document.getElementById('tableInserterPopup');
+    if (existing) { existing.remove(); return; }
+
+    const popup = document.createElement('div');
+    popup.id = 'tableInserterPopup';
+    popup.style.cssText = 'position:fixed;background:#fff;border:1px solid #ccc;border-radius:6px;padding:12px;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:200px;';
+
+    popup.innerHTML = `
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Insert Table</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <label style="font-size:12px;">Rows</label>
+            <input id="tblRows" type="number" value="3" min="1" max="50" style="width:55px;padding:3px 6px;border:1px solid #ccc;border-radius:4px;">
+            <label style="font-size:12px;">Cols</label>
+            <input id="tblCols" type="number" value="3" min="1" max="20" style="width:55px;padding:3px 6px;border:1px solid #ccc;border-radius:4px;">
+        </div>
+        <div style="display:flex;gap:6px;">
+            <button onclick="doInsertTable()" style="flex:1;padding:5px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Insert</button>
+            <button onclick="document.getElementById('tableInserterPopup').remove()" style="padding:5px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;">✕</button>
+        </div>
+    `;
+
+    // Position near the button
+    const btn = event.target.closest('button');
+    const rect = btn ? btn.getBoundingClientRect() : { left: window.innerWidth/2, bottom: window.innerHeight/2 };
+    popup.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+    popup.style.top = (rect.bottom + 6) + 'px';
+
+    document.body.appendChild(popup);
+    popup.querySelector('#tblRows').focus();
+
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function handler(e) {
+            if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                popup.remove();
+                document.removeEventListener('click', handler);
+            }
+        });
+    }, 100);
+}
+
+function doInsertTable() {
+    const rows = parseInt(document.getElementById('tblRows').value) || 3;
+    const cols = parseInt(document.getElementById('tblCols').value) || 3;
+    document.getElementById('tableInserterPopup').remove();
+
+    if (!quickFormatterTarget) return;
+    lastQuickFormatterAction = Date.now();
+
+    // Build pipe table string
+    const header  = '| ' + Array.from({length: cols}, (_, i) => `Col${i+1}`).join(' | ') + ' |';
+    const sep     = '| ' + Array.from({length: cols}, () => '---').join(' | ') + ' |';
+    const dataRow = '| ' + Array.from({length: cols}, () => '  ').join(' | ') + ' |';
+    const table   = [header, sep, ...Array(rows).fill(dataRow)].join('\n');
+
+    const input = quickFormatterTarget;
+
+    if (quickFormatterSelection.isContentEditable) {
+        // Use saved range or current cursor
+        const range = quickFormatterSelection.range || (window.getSelection().rangeCount > 0 ? window.getSelection().getRangeAt(0) : null);
+        if (!range) return;
+        range.deleteContents();
+        const textNode = document.createTextNode(table);
+        range.insertNode(textNode);
+
+        // Sync to underlying input
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            actualInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    } else {
+        const start = quickFormatterSelection.start;
+        const end   = quickFormatterSelection.end;
+        const newText = input.value.substring(0, start) + table + input.value.substring(end);
+        input.value = newText;
+
+        const td = input.closest('td');
+        if (td) {
+            const rowIndex = parseInt(td.dataset.row);
+            const colIndex = parseInt(td.dataset.col);
+            if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+                tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newText;
+                saveData();
+            }
+        }
+        input.focus();
+        input.setSelectionRange(start, start + table.length);
+    }
+
+    closeQuickFormatter();
+}
+
 
 function formatPipeTable(event) {
     console.log('formatPipeTable called!');
