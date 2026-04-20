@@ -51,8 +51,8 @@ C:\Users\<you>\
         ├── node_modules\
         └── package.json
 
-%APPDATA%\yt-dlp\
-└── plugins\                     ← NOT needed if installed via pip
+%APPDATA%\yt-dlp\plugins\          ← NOT needed, ignore this folder
+                                   (only used for manual/Scoop installs)
 
 Chrome Extension folder (load unpacked from here):
 <project>\chrome-extension\
@@ -153,6 +153,46 @@ Expected output should include:
 ### `npm error ENOENT: package.json not found`
 **Cause:** Running `npm install` from the repo root instead of the `server` subfolder.  
 **Fix:** `cd bgutil-ytdlp-pot-provider/server` first, then `npm ci`.
+
+---
+
+## Keeping Things Updated
+
+If downloads suddenly break, update in this order:
+
+### 1. Update yt-dlp (do this first, most common fix)
+```bash
+pip install -U yt-dlp
+```
+
+### 2. Update bgutil plugin (if yt-dlp update alone didn't fix it)
+```bash
+pip install -U bgutil-ytdlp-pot-provider
+```
+
+### 3. Update bgutil server (only if plugin update requires it)
+```bash
+cd C:\Users\<you>\bgutil-ytdlp-pot-provider
+git pull
+cd server
+npm ci
+npx tsc
+```
+Then restart the server: `node build/main.js`
+
+> POT tokens refresh automatically every 12 hours — no manual action needed.
+
+---
+
+## Why `npm ci` + `npx tsc` Instead of Just `npm install`?
+
+The bgutil server is written in **TypeScript**, not plain JavaScript. Node.js can't run TypeScript directly, so it must be compiled first:
+
+- `npm ci` — installs dependencies (stricter than `npm install`, uses exact locked versions)
+- `npx tsc` — compiles TypeScript → JavaScript into the `build/` folder
+- `node build/main.js` — runs the compiled output
+
+The `build/` folder is not in the repo — you generate it locally with `tsc`.
 
 ---
 
