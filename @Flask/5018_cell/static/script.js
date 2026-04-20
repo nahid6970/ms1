@@ -10250,40 +10250,21 @@ function showTableInserter(event) {
 
     const popup = document.createElement('div');
     popup.id = 'tableInserterPopup';
-    popup.style.cssText = 'position:fixed;background:#fff;border:1px solid #ccc;border-radius:6px;padding:12px;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:200px;';
+    popup.style.cssText = 'margin-top:8px;padding:8px 10px;background:#f0f7ff;border:1px solid #007bff;border-radius:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
 
     popup.innerHTML = `
-        <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Insert Table</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-            <label style="font-size:12px;">Rows</label>
-            <input id="tblRows" type="number" value="3" min="1" max="50" style="width:55px;padding:3px 6px;border:1px solid #ccc;border-radius:4px;">
-            <label style="font-size:12px;">Cols</label>
-            <input id="tblCols" type="number" value="3" min="1" max="20" style="width:55px;padding:3px 6px;border:1px solid #ccc;border-radius:4px;">
-        </div>
-        <div style="display:flex;gap:6px;">
-            <button onclick="doInsertTable()" style="flex:1;padding:5px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Insert</button>
-            <button onclick="document.getElementById('tableInserterPopup').remove()" style="padding:5px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;">✕</button>
-        </div>
+        <span style="font-size:12px;font-weight:600;color:#007bff;">Table:</span>
+        <label style="font-size:12px;color:#333;">Rows</label>
+        <input id="tblRows" type="number" value="3" min="1" max="50" style="width:48px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
+        <label style="font-size:12px;color:#333;">Cols</label>
+        <input id="tblCols" type="number" value="3" min="1" max="20" style="width:48px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
+        <button onclick="doInsertTable()" style="padding:4px 12px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">Insert</button>
+        <button onclick="document.getElementById('tableInserterPopup').remove()" style="padding:4px 8px;background:none;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;color:#666;">✕</button>
     `;
 
-    // Position near the button
-    const btn = event.target.closest('button');
-    const rect = btn ? btn.getBoundingClientRect() : { left: window.innerWidth/2, bottom: window.innerHeight/2 };
-    popup.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-    popup.style.top = (rect.bottom + 6) + 'px';
-
-    document.body.appendChild(popup);
+    // Append inside the formatter (stays within, no floating)
+    document.getElementById('quickFormatter').appendChild(popup);
     popup.querySelector('#tblRows').focus();
-
-    // Close on outside click
-    setTimeout(() => {
-        document.addEventListener('click', function handler(e) {
-            if (!popup.contains(e.target) && !btn.contains(e.target)) {
-                popup.remove();
-                document.removeEventListener('click', handler);
-            }
-        });
-    }, 100);
 }
 
 function doInsertTable() {
@@ -10303,8 +10284,17 @@ function doInsertTable() {
     const input = quickFormatterTarget;
 
     if (quickFormatterSelection.isContentEditable) {
-        // Use saved range or current cursor
-        const range = quickFormatterSelection.range || (window.getSelection().rangeCount > 0 ? window.getSelection().getRangeAt(0) : null);
+        // Refocus the cell first so we can get/use its range
+        if (quickFormatterSelection.range) {
+            quickFormatterTarget.focus();
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(quickFormatterSelection.range);
+        } else {
+            quickFormatterTarget.focus();
+        }
+        const sel2 = window.getSelection();
+        const range = sel2.rangeCount > 0 ? sel2.getRangeAt(0) : null;
         if (!range) return;
         range.deleteContents();
         const textNode = document.createTextNode(table);
