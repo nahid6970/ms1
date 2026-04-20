@@ -9672,16 +9672,19 @@ function showQuickFormatter(inputElement) {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0);
+            const charOffset = extractRawTextBeforeCaret(inputElement, range).length;
             quickFormatterSelection = {
                 isContentEditable: true,
                 range: range.cloneRange(),
+                charOffset,
                 text: selection.toString()
             };
         } else {
-            // No text selected but save cursor position as a collapsed range
+            // No text selected - save cursor as char offset (survives focus loss)
             const sel = window.getSelection();
             const cursorRange = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
-            quickFormatterSelection = { isContentEditable: true, range: cursorRange, text: '' };
+            const charOffset = cursorRange ? extractRawTextBeforeCaret(inputElement, cursorRange).length : 0;
+            quickFormatterSelection = { isContentEditable: true, range: cursorRange, charOffset, text: '' };
         }
     } else {
         // Handle input/textarea (legacy mode)
@@ -10286,15 +10289,11 @@ function doInsertTable() {
     const input = quickFormatterTarget;
 
     if (quickFormatterSelection.isContentEditable) {
-        // Refocus the cell first so we can get/use its range
-        if (quickFormatterSelection.range) {
-            quickFormatterTarget.focus();
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(quickFormatterSelection.range);
-        } else {
-            quickFormatterTarget.focus();
-        }
+        // Refocus and restore cursor by char offset (survives focus loss from clicking inputs)
+        input.focus();
+        const insertOffset = quickFormatterSelection.charOffset || 0;
+        setCaretPosition(input, insertOffset);
+
         const sel2 = window.getSelection();
         const range = sel2.rangeCount > 0 ? sel2.getRangeAt(0) : null;
         if (!range) return;
