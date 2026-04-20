@@ -9678,8 +9678,10 @@ function showQuickFormatter(inputElement) {
                 text: selection.toString()
             };
         } else {
-            // No selection - still open, cursor position used for insertions
-            quickFormatterSelection = { isContentEditable: true, range: null, text: '' };
+            // No text selected but save cursor position as a collapsed range
+            const sel = window.getSelection();
+            const cursorRange = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+            quickFormatterSelection = { isContentEditable: true, range: cursorRange, text: '' };
         }
     } else {
         // Handle input/textarea (legacy mode)
@@ -10255,9 +10257,9 @@ function showTableInserter(event) {
     popup.innerHTML = `
         <span style="font-size:12px;font-weight:600;color:#007bff;">Table:</span>
         <label style="font-size:12px;color:#333;">Rows</label>
-        <input id="tblRows" type="number" value="3" min="1" max="50" style="width:48px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
+        <input id="tblRows" type="text" inputmode="numeric" pattern="[0-9]*" value="3" style="width:40px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
         <label style="font-size:12px;color:#333;">Cols</label>
-        <input id="tblCols" type="number" value="3" min="1" max="20" style="width:48px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
+        <input id="tblCols" type="text" inputmode="numeric" pattern="[0-9]*" value="3" style="width:40px;padding:3px 6px;border:1px solid #007bff;border-radius:4px;font-size:12px;text-align:center;">
         <button onclick="doInsertTable()" style="padding:4px 12px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">Insert</button>
         <button onclick="document.getElementById('tableInserterPopup').remove()" style="padding:4px 8px;background:none;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;color:#666;">✕</button>
     `;
