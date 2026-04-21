@@ -41,6 +41,16 @@ class SymPath(QGraphicsPathItem, SymItem):
         QGraphicsPathItem.__init__(self, *args, **kwargs)
         SymItem.__init__(self)
         self.path_points = []
+        self.multi_colors = []
+
+    def paint(self, painter, option, widget):
+        if self.multi_colors:
+            painter.setPen(self.pen())
+            for path, color in self.multi_colors:
+                painter.setBrush(QBrush(QColor(color)))
+                painter.drawPath(path)
+        else:
+            super().paint(painter, option, widget)
 
 class SymRect(QGraphicsRectItem, SymItem):
     def __init__(self, *args, **kwargs):
@@ -180,7 +190,9 @@ class ArtView(QGraphicsView):
                     path.moveTo(top_x, 0); path.lineTo(0, local_pos.y()); path.lineTo(local_pos.x(), local_pos.y()); path.closeSubpath()
                     self.current_item.setPath(path); self.update_clones(self.current_item)
                 elif self.tool.startswith("custom:") and hasattr(self.current_item, '_custom_base'):
-                    self.current_item.setPath(self._scale_custom_path(self.current_item._custom_base, local_pos))
+                    path, multi = self._scale_custom_path(self.current_item._custom_base, local_pos)
+                    self.current_item.setPath(path)
+                    self.current_item.multi_colors = multi
                     self.update_clones(self.current_item)
             if self.tool == "eraser": self.erase_at(scene_pos)
             elif self.tool == "move_image" and self.image_item:
@@ -233,7 +245,9 @@ class ArtView(QGraphicsView):
                 self.scene().addItem(clone); item.symmetry_clones.append(clone)
 
     def clone_item(self, item):
-        if isinstance(item, QGraphicsPathItem): clone = SymPath(item.path())
+        if isinstance(item, QGraphicsPathItem):
+            clone = SymPath(item.path())
+            if hasattr(item, 'multi_colors'): clone.multi_colors = item.multi_colors
         elif isinstance(item, QGraphicsRectItem): clone = SymRect(item.rect())
         elif isinstance(item, QGraphicsEllipseItem): clone = SymEllipse(item.rect())
         elif isinstance(item, QGraphicsLineItem): clone = SymLine(item.line())
@@ -246,7 +260,9 @@ class ArtView(QGraphicsView):
     def update_clones(self, item):
         cx, cy = self.sym_center.x(), self.sym_center.y()
         for i, clone in enumerate(item.symmetry_clones):
-            if isinstance(item, QGraphicsPathItem): clone.setPath(item.path())
+            if isinstance(item, QGraphicsPathItem):
+                clone.setPath(item.path())
+                if hasattr(item, 'multi_colors'): clone.multi_colors = item.multi_colors
             elif isinstance(item, QGraphicsRectItem): clone.setRect(item.rect())
             elif isinstance(item, QGraphicsEllipseItem): clone.setRect(item.rect())
             elif isinstance(item, QGraphicsLineItem): clone.setLine(item.line())
@@ -313,16 +329,32 @@ class ArtView(QGraphicsView):
 
     def _scale_custom_path(self, points, local_pos):
         """Scale stored path points (normalized 0-1) to fit drag bounding box."""
-        path = QPainterPath()
         w, h = local_pos.x() or 1, local_pos.y() or 1
-        for i, (cmd, *args) in enumerate(points):
-            scaled = [QPointF(p[0] * w, p[1] * h) for p in args]
-            if cmd == "M": path.moveTo(scaled[0])
-            elif cmd == "L": path.lineTo(scaled[0])
-            elif cmd == "Q": path.quadTo(scaled[0], scaled[1])
-            elif cmd == "C": path.cubicTo(scaled[0], scaled[1], scaled[2])
-            elif cmd == "Z": path.closeSubpath()
-        return path
+        full_path = QPainterPath()
+        current_path = QPainterPath()
+        current_color = None
+        multi_colors = []
+        for cmd, *args in points:
+            if cmd == "COLOR":
+                if not current_path.isEmpty() and current_color:
+                    multi_colors.append((current_path, current_color))
+                current_path = QPainterPath()
+                current_color = args[0]
+                continue
+            scaled = [QPointF(a[0] * w, a[1] * h) for a in args]
+            if cmd == "M": 
+                current_path.moveTo(scaled[0]); full_path.moveTo(scaled[0])
+            elif cmd == "L": 
+                current_path.lineTo(scaled[0]); full_path.lineTo(scaled[0])
+            elif cmd == "Q": 
+                current_path.quadTo(scaled[0], scaled[1]); full_path.quadTo(scaled[0], scaled[1])
+            elif cmd == "C": 
+                current_path.cubicTo(scaled[0], scaled[1], scaled[2]); full_path.cubicTo(scaled[0], scaled[1], scaled[2])
+            elif cmd == "Z": 
+                current_path.closeSubpath(); full_path.closeSubpath()
+        if not current_path.isEmpty() and current_color:
+            multi_colors.append((current_path, current_color))
+        return full_path, multi_colors
 
     def collect_art_as_shape(self):
         """Collect all art items and return normalized path commands (0-1 range)."""
@@ -452,18 +484,25 @@ class ShapePickerDialog(QDialog):
     @staticmethod
     def build_pixmap(cmds, w, h):
         px = QPixmap(w, h); px.fill(QColor(CP_PANEL))
-        p = QPainter(px); p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setPen(QPen(QColor(CP_CYAN), 1.5))
-        path = QPainterPath()
+        painter = QPainter(px); painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pw, ph = w - 10, h - 10
+        current_color = CP_CYAN
+        path = QPainterPath()
+        def flush():
+            if not path.isEmpty():
+                painter.setPen(QPen(QColor(current_color), 1))
+                painter.setBrush(QBrush(QColor(current_color)))
+                painter.drawPath(path)
         for cmd, *args in cmds:
+            if cmd == "COLOR":
+                flush(); path = QPainterPath(); current_color = args[0]; continue
             pts = [QPointF(a[0] * pw + 5, a[1] * ph + 5) for a in args]
             if cmd == "M": path.moveTo(pts[0])
             elif cmd == "L": path.lineTo(pts[0])
             elif cmd == "Q": path.quadTo(pts[0], pts[1])
             elif cmd == "C": path.cubicTo(pts[0], pts[1], pts[2])
             elif cmd == "Z": path.closeSubpath()
-        p.drawPath(path); p.end()
+        flush(); painter.end()
         return px
 
     def _pick(self, name): self.selected = name; self.accept()
@@ -637,60 +676,98 @@ class SVGArtApp(QMainWindow):
                     QMessageBox.warning(self, "Error", "Could not parse SVG code. Ensure it has a <path d='...' /> or valid path data.")
 
     def parse_svg_to_shape(self, svg_code):
-        d_match = re.search(r'\bd=["\']([^"\']+)["\']', svg_code)
-        d_string = d_match.group(1) if d_match else svg_code
+        # 1. Extract global matrix transform if any
+        gm_match = re.search(r'transform=["\']matrix\(([^)]+)\)["\']', svg_code)
+        gm = [float(v) for v in re.split(r'[,\s]+', gm_match.group(1).strip())] if gm_match else None
+        def transform_pt(x, y):
+            if gm and len(gm) == 6: return gm[0]*x + gm[2]*y + gm[4], gm[1]*x + gm[3]*y + gm[5]
+            return x, y
+
+        # 2. Extract all path tags and their fills
+        path_tags = re.findall(r'<path[^>]*>', svg_code)
+        if not path_tags:
+            d_matches = re.findall(r'\bd=["\']([^"\']+)["\']', svg_code)
+            if not d_matches: d_matches = [svg_code]
+            path_tags = [f'<path d="{d}"/>' for d in d_matches]
+
+        all_commands = []; all_pts = []
         token_pattern = re.compile(r'([a-zA-Z])|([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)')
-        tokens = []
-        for m in token_pattern.finditer(d_string):
-            if m.group(1): tokens.append(m.group(1))
-            else: tokens.append(float(m.group(2)))
-        commands = []; i = 0; cur_x, cur_y = 0, 0; last_cmd = ""
-        while i < len(tokens):
-            token = tokens[i]
-            if isinstance(token, str): cmd = token; i += 1
-            else: cmd = last_cmd
-            if not cmd: break
-            try:
-                if cmd in 'Mm':
-                    x, y = tokens[i], tokens[i+1]; i += 2
-                    if cmd == 'm': x += cur_x; y += cur_y
-                    commands.append(["M", [x, y]]); cur_x, cur_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
-                elif cmd in 'Ll':
-                    x, y = tokens[i], tokens[i+1]; i += 2
-                    if cmd == 'l': x += cur_x; y += cur_y
-                    commands.append(["L", [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
-                elif cmd in 'Hh':
-                    x = tokens[i]; i += 1
-                    if cmd == 'h': x += cur_x
-                    commands.append(["L", [x, cur_y]]); cur_x = x; last_cmd = cmd
-                elif cmd in 'Vv':
-                    y = tokens[i]; i += 1
-                    if cmd == 'v': y += cur_y
-                    commands.append(["L", [cur_x, y]]); cur_y = y; last_cmd = cmd
-                elif cmd in 'Qq':
-                    x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
-                    if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
-                    commands.append(["Q", [x1, y1], [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
-                elif cmd in 'Cc':
-                    x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
-                    if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
-                    commands.append(["C", [x1, y1], [x2, y2], [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
-                elif cmd in 'Zz':
-                    commands.append(["Z"]); last_cmd = ""
-                else: i += 1
-            except: break
-        if not commands: return None
-        all_pts = []
-        for c in commands:
-            for pt in c[1:]: all_pts.append(QPointF(pt[0], pt[1]))
-        if not all_pts: return None
+        
+        for tag in path_tags:
+            d_match = re.search(r'\bd=["\']([^"\']+)["\']', tag)
+            if not d_match: continue
+            
+            fill = None
+            fill_match = re.search(r'fill=["\']([^"\']+)["\']', tag)
+            if fill_match: fill = fill_match.group(1).strip()
+            else:
+                style_match = re.search(r'style=["\'][^"\']*fill:([^;]+)', tag)
+                if style_match: fill = style_match.group(1).strip()
+            
+            if fill and fill != "none": all_commands.append(["COLOR", fill])
+            
+            tokens = []
+            for m in token_pattern.finditer(d_match.group(1)):
+                if m.group(1): tokens.append(m.group(1))
+                else: tokens.append(float(m.group(2)))
+            
+            i = 0; cur_x, cur_y = 0, 0; last_cmd = ""
+            while i < len(tokens):
+                token = tokens[i]
+                if isinstance(token, str): cmd = token; i += 1
+                else: cmd = last_cmd
+                if not cmd: break
+                try:
+                    if cmd in 'Mm':
+                        x, y = tokens[i], tokens[i+1]; i += 2
+                        if cmd == 'm': x += cur_x; y += cur_y
+                        tx, ty = transform_pt(x, y); all_commands.append(["M", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                        cur_x, cur_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
+                    elif cmd in 'Ll':
+                        x, y = tokens[i], tokens[i+1]; i += 2
+                        if cmd == 'l': x += cur_x; y += cur_y
+                        tx, ty = transform_pt(x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                        cur_x, cur_y = x, y; last_cmd = cmd
+                    elif cmd in 'Hh':
+                        x = tokens[i]; i += 1
+                        if cmd == 'h': x += cur_x
+                        tx, ty = transform_pt(x, cur_y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                        cur_x = x; last_cmd = cmd
+                    elif cmd in 'Vv':
+                        y = tokens[i]; i += 1
+                        if cmd == 'v': y += cur_y
+                        tx, ty = transform_pt(cur_x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                        cur_y = y; last_cmd = cmd
+                    elif cmd in 'Qq':
+                        x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                        if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
+                        tx1, ty1 = transform_pt(x1, y1); tx, ty = transform_pt(x, y)
+                        all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
+                        cur_x, cur_y = x, y; last_cmd = cmd
+                    elif cmd in 'Cc':
+                        x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                        if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
+                        tx1, ty1 = transform_pt(x1, y1); tx2, ty2 = transform_pt(x2, y2); tx, ty = transform_pt(x, y)
+                        all_commands.append(["C", [tx1, ty1], [tx2, ty2], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx2, ty2), QPointF(tx, ty)])
+                        cur_x, cur_y = x, y; last_cmd = cmd
+                    elif cmd in 'Zz':
+                        all_commands.append(["Z"]); last_cmd = ""
+                    else: i += 1
+                except: break
+
+        if not all_commands or not all_pts: return None
+        
+        # 3. Precise normalization using all points' bounding box
         rect = QRectF(all_pts[0], all_pts[0])
         for p in all_pts[1:]: rect = rect.united(QRectF(p, p))
         w, h = rect.width() or 1, rect.height() or 1
+        
         norm_cmds = []
-        for c in commands:
-            pts = [[(p[0]-rect.x())/w, (p[1]-rect.y())/h] for p in c[1:]]
-            norm_cmds.append([c[0]] + pts)
+        for c in all_commands:
+            if c[0] == "COLOR": norm_cmds.append(c)
+            else:
+                pts = [[(p[0]-rect.x())/w, (p[1]-rect.y())/h] for p in c[1:]]
+                norm_cmds.append([c[0]] + pts)
         return norm_cmds
 
     def load_settings(self):
