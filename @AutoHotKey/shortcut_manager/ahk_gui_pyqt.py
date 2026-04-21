@@ -1081,6 +1081,14 @@ class AHKShortcutEditor(QMainWindow):
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
             "Imported": "#FFA07A", "Tools": "#98D8C8", "Window": "#F7DC6F", "File": "#BB8FCE"
         }
+        # Section expanded/collapsed states
+        self.section_states = {
+            "script": True,
+            "context": True,
+            "startup": True,
+            "text": True,
+            "file": True
+        }
 
         # Settings for remembering preferences
         self.settings = QSettings("AHKEditor", "ShortcutEditor")
@@ -1293,6 +1301,7 @@ class AHKShortcutEditor(QMainWindow):
 
         # Text browser for HTML display
         self.text_browser = QTextBrowser()
+        self.text_browser.setOpenLinks(False)
         self.text_browser.setOpenExternalLinks(False)
         self.text_browser.anchorClicked.connect(self.handle_click)
         self.text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -1355,53 +1364,63 @@ class AHKShortcutEditor(QMainWindow):
         event.accept()
 
     def handle_click(self, url):
-        """Handle clicks on shortcuts"""
-        url_str = url.toString()
-        if url_str.startswith("select://"):
-            parts = url_str.replace("select://", "").split("/")
-            if len(parts) == 2:
-                shortcut_type, index = parts
-                index = int(index)
+        """Handle clicks on shortcuts and section headers"""
+        scheme = url.scheme()
+        host = url.host()
+        path = url.path().strip('/')
 
-                if shortcut_type == "script" and index < len(self.script_shortcuts):
-                    self.selected_shortcut = self.script_shortcuts[index]
-                    self.selected_type = "script"
-                elif shortcut_type == "text" and index < len(self.text_shortcuts):
-                    self.selected_shortcut = self.text_shortcuts[index]
-                    self.selected_type = "text"
-                elif shortcut_type == "file" and index < len(self.file_shortcuts):
-                    self.selected_shortcut = self.file_shortcuts[index]
-                    self.selected_type = "file"
-                elif shortcut_type == "context" and index < len(self.context_shortcuts):
-                    self.selected_shortcut = self.context_shortcuts[index]
-                    self.selected_type = "context"
-                elif shortcut_type == "startup" and index < len(self.startup_scripts):
-                    self.selected_shortcut = self.startup_scripts[index]
-                    self.selected_type = "startup"
-
-                # Update display to show selection
+        if scheme == "toggle-section":
+            section = host
+            if section in self.section_states:
+                self.section_states[section] = not self.section_states[section]
                 self.update_display()
+            return
 
-        elif url_str.startswith("toggle://"):
-            parts = url_str.replace("toggle://", "").split("/")
-            if len(parts) == 2:
-                shortcut_type, index = parts
-                index = int(index)
+        if scheme == "select":
+            shortcut_type = host
+            try:
+                index = int(path)
+            except ValueError:
+                return
 
-                # Toggle the enabled state
-                if shortcut_type == "script" and index < len(self.script_shortcuts):
-                    self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
-                elif shortcut_type == "text" and index < len(self.text_shortcuts):
-                    self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
-                elif shortcut_type == "file" and index < len(self.file_shortcuts):
-                    self.file_shortcuts[index]["enabled"] = not self.file_shortcuts[index].get("enabled", True)
-                elif shortcut_type == "context" and index < len(self.context_shortcuts):
-                    self.context_shortcuts[index]["enabled"] = not self.context_shortcuts[index].get("enabled", True)
-                elif shortcut_type == "startup" and index < len(self.startup_scripts):
-                    self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
+            if shortcut_type == "script" and index < len(self.script_shortcuts):
+                self.selected_shortcut = self.script_shortcuts[index]
+                self.selected_type = "script"
+            elif shortcut_type == "text" and index < len(self.text_shortcuts):
+                self.selected_shortcut = self.text_shortcuts[index]
+                self.selected_type = "text"
+            elif shortcut_type == "file" and index < len(self.file_shortcuts):
+                self.selected_shortcut = self.file_shortcuts[index]
+                self.selected_type = "file"
+            elif shortcut_type == "context" and index < len(self.context_shortcuts):
+                self.selected_shortcut = self.context_shortcuts[index]
+                self.selected_type = "context"
+            elif shortcut_type == "startup" and index < len(self.startup_scripts):
+                self.selected_shortcut = self.startup_scripts[index]
+                self.selected_type = "startup"
 
-                self.save_shortcuts_json()
-                self.update_display()
+            self.update_display()
+
+        elif scheme == "toggle":
+            shortcut_type = host
+            try:
+                index = int(path)
+            except ValueError:
+                return
+
+            if shortcut_type == "script" and index < len(self.script_shortcuts):
+                self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "text" and index < len(self.text_shortcuts):
+                self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "file" and index < len(self.file_shortcuts):
+                self.file_shortcuts[index]["enabled"] = not self.file_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "context" and index < len(self.context_shortcuts):
+                self.context_shortcuts[index]["enabled"] = not self.context_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "startup" and index < len(self.startup_scripts):
+                self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
+
+            self.save_shortcuts_json()
+            self.update_display()
 
     def show_context_menu(self, position):
         """Show context menu on right-click"""
@@ -1524,6 +1543,9 @@ class AHKShortcutEditor(QMainWindow):
         QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
 
     def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, startup_scripts, group_by_category):
+        def get_toggle_icon(section):
+            return "▾" if self.section_states.get(section, True) else "▸"
+
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -1543,6 +1565,10 @@ class AHKShortcutEditor(QMainWindow):
                     font-weight: bold;
                     margin: 15px 0 5px 0;
                     color: #61dafb;
+                }}
+                .section-title a {{
+                    color: #61dafb;
+                    text-decoration: none;
                 }}
                 .section-title:first-child {{
                     margin-top: 5px;
@@ -1606,139 +1632,144 @@ class AHKShortcutEditor(QMainWindow):
         <body>
             <div class="container">
                 <div class="column">
-                    <div class="section-title">Script Shortcuts</div>
+                    <div class="section-title"><a href="app://toggle-section/script">{get_toggle_icon('script')} Script Shortcuts</a></div>
         """
 
-        if group_by_category:
-            # Group script shortcuts by category
-            script_categories = {}
-            for shortcut in script_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in script_categories:
-                    script_categories[category] = []
-                script_categories[category].append(shortcut)
+        if self.section_states.get("script", True):
+            if group_by_category:
+                # Group script shortcuts by category
+                script_categories = {}
+                for shortcut in script_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in script_categories:
+                        script_categories[category] = []
+                    script_categories[category].append(shortcut)
 
-            for i, category in enumerate(sorted(script_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+                for i, category in enumerate(sorted(script_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
 
-                for shortcut in sorted(script_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                    for shortcut in sorted(script_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                        original_index = self.script_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "script", original_index, True)
+            else:
+                # Flat list
+                for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.script_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "script", original_index, True)
-        else:
-            # Flat list
-            for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
-                original_index = self.script_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "script", original_index, False)
+                    html += self.generate_shortcut_html(shortcut, "script", original_index, False)
 
-        html += """
+        html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title">Context Shortcuts</div>
+                    <div class="section-title"><a href="app://toggle-section/context">{get_toggle_icon('context')} Context Shortcuts</a></div>
         """
 
-        if group_by_category:
-            context_categories = {}
-            for shortcut in context_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in context_categories:
-                    context_categories[category] = []
-                context_categories[category].append(shortcut)
+        if self.section_states.get("context", True):
+            if group_by_category:
+                context_categories = {}
+                for shortcut in context_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in context_categories:
+                        context_categories[category] = []
+                    context_categories[category].append(shortcut)
 
-            for i, category in enumerate(sorted(context_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+                for i, category in enumerate(sorted(context_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
 
-                for shortcut in sorted(context_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                    for shortcut in sorted(context_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                        original_index = self.context_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "context", original_index, True)
+            else:
+                for shortcut in sorted(context_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.context_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "context", original_index, True)
-        else:
-            for shortcut in sorted(context_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
-                original_index = self.context_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "context", original_index, False)
+                    html += self.generate_shortcut_html(shortcut, "context", original_index, False)
 
-        html += """
-                    <div class="section-title">Background Scripts</div>
+        html += f"""
+                    <div class="section-title"><a href="app://toggle-section/startup">{get_toggle_icon('startup')} Background Scripts</a></div>
         """
 
-        if group_by_category:
-            startup_categories = {}
-            for shortcut in startup_scripts:
-                category = shortcut.get('category', 'General')
-                if category not in startup_categories:
-                    startup_categories[category] = []
-                startup_categories[category].append(shortcut)
+        if self.section_states.get("startup", True):
+            if group_by_category:
+                startup_categories = {}
+                for shortcut in startup_scripts:
+                    category = shortcut.get('category', 'General')
+                    if category not in startup_categories:
+                        startup_categories[category] = []
+                    startup_categories[category].append(shortcut)
 
-            for i, category in enumerate(sorted(startup_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+                for i, category in enumerate(sorted(startup_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
 
-                for shortcut in sorted(startup_categories[category], key=lambda x: x.get('name', '').lower()):
+                    for shortcut in sorted(startup_categories[category], key=lambda x: x.get('name', '').lower()):
+                        original_index = self.startup_scripts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "startup", original_index, True)
+            else:
+                for shortcut in sorted(startup_scripts, key=lambda x: x.get('name', '').lower()):
                     original_index = self.startup_scripts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "startup", original_index, True)
-        else:
-            for shortcut in sorted(startup_scripts, key=lambda x: x.get('name', '').lower()):
-                original_index = self.startup_scripts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "startup", original_index, False)
+                    html += self.generate_shortcut_html(shortcut, "startup", original_index, False)
 
-        html += """
+        html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title">Text Shortcuts</div>
+                    <div class="section-title"><a href="app://toggle-section/text">{get_toggle_icon('text')} Text Shortcuts</a></div>
         """
 
-        if group_by_category:
-            # Group text shortcuts by category
-            text_categories = {}
-            for shortcut in text_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in text_categories:
-                    text_categories[category] = []
-                text_categories[category].append(shortcut)
+        if self.section_states.get("text", True):
+            if group_by_category:
+                # Group text shortcuts by category
+                text_categories = {}
+                for shortcut in text_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in text_categories:
+                        text_categories[category] = []
+                    text_categories[category].append(shortcut)
 
-            for i, category in enumerate(sorted(text_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+                for i, category in enumerate(sorted(text_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
 
-                for shortcut in sorted(text_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                    for shortcut in sorted(text_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                        original_index = self.text_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "text", original_index, True)
+            else:
+                # Flat list
+                for shortcut in sorted(text_shortcuts, key=lambda x: x.get('trigger', '').lower()):
                     original_index = self.text_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "text", original_index, True)
-        else:
-            # Flat list
-            for shortcut in sorted(text_shortcuts, key=lambda x: x.get('trigger', '').lower()):
-                original_index = self.text_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "text", original_index, False)
+                    html += self.generate_shortcut_html(shortcut, "text", original_index, False)
 
-        html += """
-                    <div class="section-title">File Shortcuts</div>
+        html += f"""
+                    <div class="section-title"><a href="app://toggle-section/file">{get_toggle_icon('file')} File Shortcuts</a></div>
         """
 
-        if group_by_category:
-            # Group file shortcuts by category
-            file_categories = {}
-            for shortcut in file_shortcuts:
-                category = shortcut.get('category', 'General')
-                if category not in file_categories:
-                    file_categories[category] = []
-                file_categories[category].append(shortcut)
+        if self.section_states.get("file", True):
+            if group_by_category:
+                # Group file shortcuts by category
+                file_categories = {}
+                for shortcut in file_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in file_categories:
+                        file_categories[category] = []
+                    file_categories[category].append(shortcut)
 
-            for i, category in enumerate(sorted(file_categories.keys())):
-                color = self.get_category_color(category)
-                first_class = " first-in-section" if i == 0 else ""
-                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+                for i, category in enumerate(sorted(file_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
 
-                for shortcut in sorted(file_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                    for shortcut in sorted(file_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                        original_index = self.file_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "file", original_index, True)
+            else:
+                # Flat list
+                for shortcut in sorted(file_shortcuts, key=lambda x: x.get('trigger', '').lower()):
                     original_index = self.file_shortcuts.index(shortcut)
-                    html += self.generate_shortcut_html(shortcut, "file", original_index, True)
-        else:
-            # Flat list
-            for shortcut in sorted(file_shortcuts, key=lambda x: x.get('trigger', '').lower()):
-                original_index = self.file_shortcuts.index(shortcut)
-                html += self.generate_shortcut_html(shortcut, "file", original_index, False)
+                    html += self.generate_shortcut_html(shortcut, "file", original_index, False)
 
         html += """
                 </div>
