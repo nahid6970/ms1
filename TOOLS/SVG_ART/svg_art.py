@@ -348,7 +348,7 @@ class ArtView(QGraphicsView):
                 current_color = args[0]
                 continue
             if cmd == "FILLRULE":
-                fr = Qt.FillRule.EvenOddFill if args[0] == "evenodd" else Qt.FillRule.WindingFill
+                fr = Qt.FillRule.OddEvenFill if args[0] == "evenodd" else Qt.FillRule.WindingFill
                 full_path.setFillRule(fr)
                 current_path.setFillRule(fr)
                 continue
@@ -400,13 +400,13 @@ class ArtView(QGraphicsView):
                 if hasattr(item, 'multi_colors') and item.multi_colors:
                     for path, color in item.multi_colors:
                         commands.append(["COLOR", color])
-                        if path.fillRule() == Qt.FillRule.EvenOddFill:
+                        if path.fillRule() == Qt.FillRule.OddEvenFill:
                             commands.append(["FILLRULE", "evenodd"])
                         self._add_path_to_commands(path, item, bounds, w, h, commands)
                 else:
                     if item.brush().style() != Qt.BrushStyle.NoBrush:
                         commands.append(["COLOR", item.brush().color().name()])
-                    if item.path().fillRule() == Qt.FillRule.EvenOddFill:
+                    if item.path().fillRule() == Qt.FillRule.OddEvenFill:
                         commands.append(["FILLRULE", "evenodd"])
                     self._add_path_to_commands(item.path(), item, bounds, w, h, commands)
             elif isinstance(item, QGraphicsRectItem):
@@ -693,15 +693,29 @@ class SVGArtApp(QMainWindow):
         if dlg.exec():
             name = dlg.name_edit.text().strip()
             svg_code = dlg.text_edit.toPlainText().strip()
-            if name and svg_code:
+            if svg_code:
                 cmds = self.parse_svg_to_shape(svg_code)
                 if cmds:
-                    self.view.custom_shapes[name] = cmds
-                    self._shape_pixmap_cache[name] = ShapePickerDialog.build_pixmap(cmds, 100, 100)
-                    self.save_custom_shapes()
-                    QMessageBox.information(self, "Success", f"Shape '{name}' added!")
+                    # Insert directly into canvas at 300x300 size
+                    full_path, multi = self.view._scale_custom_path(cmds, QPointF(300, 300))
+                    item = SymPath(full_path)
+                    item.multi_colors = multi
+                    
+                    # Check for FILLRULE in commands to set fill rule
+                    for c in cmds:
+                        if c[0] == "FILLRULE":
+                            fr = Qt.FillRule.OddEvenFill if c[1] == "evenodd" else Qt.FillRule.WindingFill
+                            item.path().setFillRule(fr)
+                            for p, _ in item.multi_colors: p.setFillRule(fr)
+
+                    item.setPos(self.view.sym_center)
+                    item.setPen(self.view.get_pen())
+                    self.scene.addItem(item)
+                    self.view.create_symmetry_clones(item)
+                    self.view.save_to_undo(item)
+                    self.statusBar().showMessage(f"SVG inserted at center. Use '+' button to save it to library if desired.")
                 else:
-                    QMessageBox.warning(self, "Error", "Could not parse SVG code. Ensure it has a <path d='...' /> or valid path data.")
+                    QMessageBox.warning(self, "Error", "Could not parse SVG code.")
 
     def parse_svg_to_shape(self, svg_code):
         token_pattern = re.compile(r'([a-zA-Z])|([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)')
