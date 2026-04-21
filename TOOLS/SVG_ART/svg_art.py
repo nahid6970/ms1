@@ -72,7 +72,8 @@ class DiffDialog(QDialog):
             return obj
         l_str = json.dumps(fix(local_data), indent=2, sort_keys=True).splitlines()
         r_str = json.dumps(fix(remote_data), indent=2, sort_keys=True).splitlines()
-        diff = list(difflib.unified_diff(r_str, l_str, fromfile='Backup', tofile='Local', lineterm=''))
+        # Use a large context (n) to show the whole file, including unchanged custom shapes
+        diff = list(difflib.unified_diff(r_str, l_str, fromfile='Backup', tofile='Local', lineterm='', n=10000))
         if not diff: vbox.addWidget(QLabel("No differences detected."))
         else:
             for line in diff:
