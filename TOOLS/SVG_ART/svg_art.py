@@ -115,7 +115,6 @@ class ArtView(QGraphicsView):
         self.poly_points = []; self.curve_state = 0; self.curve_points = []
         self.is_sharp = True; self.custom_shapes = {}
         self.snap_to_grid = False; self.grid_size = 20
-        self.shape_scale = 1.0; self.stretch_shape = False
 
     def get_pen(self, alpha=255):
         cap = Qt.PenCapStyle.SquareCap if self.is_sharp else Qt.PenCapStyle.RoundCap
@@ -194,8 +193,7 @@ class ArtView(QGraphicsView):
                     path.moveTo(top_x, 0); path.lineTo(0, local_pos.y()); path.lineTo(local_pos.x(), local_pos.y()); path.closeSubpath()
                     self.current_item.setPath(path); self.update_clones(self.current_item)
                 elif self.tool.startswith("custom:") and hasattr(self.current_item, '_custom_base'):
-                    scaled_local = local_pos * self.shape_scale
-                    path, multi = self._scale_custom_path(self.current_item._custom_base, scaled_local)
+                    path, multi = self._scale_custom_path(self.current_item._custom_base, local_pos)
                     self.current_item.setPath(path)
                     self.current_item.multi_colors = multi
                     self.update_clones(self.current_item)
@@ -335,13 +333,6 @@ class ArtView(QGraphicsView):
     def _scale_custom_path(self, points, local_pos):
         """Scale stored path points (normalized 0-1) to fit drag bounding box."""
         w, h = local_pos.x() or 1, local_pos.y() or 1
-        
-        # If not stretching, find the square that fits inside w,h while preserving aspect
-        if not self.stretch_shape:
-            side = min(abs(w), abs(h))
-            w = side * (1 if w > 0 else -1)
-            h = side * (1 if h > 0 else -1)
-
         full_path = QPainterPath()
         full_path.setFillRule(Qt.FillRule.WindingFill)
         current_path = QPainterPath()
@@ -565,12 +556,6 @@ class SVGInputDialog(QDialog):
         self.text_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; font-size: 9pt;")
         self.text_edit.setPlaceholderText("<path d=\"M 10 10 L 90 90 ...\" />\nor just the path data: M 10 10 L 90 90 ...")
         layout.addWidget(self.text_edit)
-        layout.addWidget(QLabel("PLACEMENT SIZE (px):"))
-        self.size_spin = QSpinBox()
-        self.size_spin.setRange(10, 5000)
-        self.size_spin.setValue(150)
-        self.size_spin.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; padding: 5px;")
-        layout.addWidget(self.size_spin)
         btns = QHBoxLayout()
         self.btn_ok = QPushButton("IMPORT")
         self.btn_ok.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold; padding: 8px;")
@@ -594,8 +579,6 @@ class SVGArtApp(QMainWindow):
         self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN)
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
-        self.tb_shapes.addWidget(QLabel(" SCALE: ")); self.shape_scale_spin = QSlider(Qt.Orientation.Horizontal); self.shape_scale_spin.setRange(1, 50); self.shape_scale_spin.setValue(10); self.shape_scale_spin.setFixedWidth(80); self.shape_scale_spin.valueChanged.connect(self.set_shape_scale); self.tb_shapes.addWidget(self.shape_scale_spin)
-        self.btn_stretch = QPushButton("RATIO"); self.btn_stretch.setCheckable(True); self.btn_stretch.clicked.connect(self.toggle_stretch); self.tb_shapes.addWidget(self.btn_stretch)
         btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(btn_add_shape)
         btn_import_svg = QPushButton("SVG+"); btn_import_svg.setToolTip("Import shape by SVG code"); btn_import_svg.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 10pt; padding: 0px 6px;"); btn_import_svg.clicked.connect(self.add_svg_shape); self.tb_shapes.addWidget(btn_import_svg)
         btn_list_shapes = QPushButton("SHAPE"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_shapes.addWidget(btn_list_shapes)
@@ -633,12 +616,6 @@ class SVGArtApp(QMainWindow):
     def choose_color(self):
         c = QColorDialog.getColor(self.view.pen_color, self, "COLOR")
         if c.isValid(): self.view.pen_color = c; self.update_color_ui(c)
-    def set_shape_scale(self, v): self.view.shape_scale = v / 10.0
-    def toggle_stretch(self):
-        self.view.stretch_shape = self.btn_stretch.isChecked()
-        color = CP_GREEN if self.view.stretch_shape else CP_DIM
-        self.btn_stretch.setStyleSheet(f"background-color: {color}; color: white; font-weight: bold; padding: 4px 8px;")
-
     def change_thickness(self, v): self.view.pen_width = v
     def toggle_sharp(self):
         self.view.is_sharp = self.btn_sharp.isChecked()
@@ -719,9 +696,8 @@ class SVGArtApp(QMainWindow):
             if svg_code:
                 cmds = self.parse_svg_to_shape(svg_code)
                 if cmds:
-                    sz = dlg.size_spin.value()
-                    # Insert directly into canvas at chosen size
-                    full_path, multi = self.view._scale_custom_path(cmds, QPointF(sz, sz))
+                    # Insert directly into canvas at 300x300 size
+                    full_path, multi = self.view._scale_custom_path(cmds, QPointF(300, 300))
                     item = SymPath(full_path)
                     item.multi_colors = multi
                     
@@ -919,9 +895,6 @@ class SVGArtApp(QMainWindow):
                     self.scene.show_grid = s.get("show_grid", False); self.btn_show_grid.setChecked(self.scene.show_grid); self.toggle_grid()
                     self.view.snap_to_grid = s.get("snap_to_grid", False); self.btn_snap_grid.setChecked(self.view.snap_to_grid); self.toggle_snap()
                     gs = s.get("grid_size", 20); self.view.grid_size = gs; self.scene.grid_size = gs; self.grid_size_spin.setValue(gs)
-                    
-                    self.view.shape_scale = s.get("shape_scale", 1.0); self.shape_scale_spin.setValue(int(self.view.shape_scale * 10))
-                    self.view.stretch_shape = s.get("stretch_shape", False); self.btn_stretch.setChecked(self.view.stretch_shape); self.toggle_stretch()
 
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
@@ -930,8 +903,7 @@ class SVGArtApp(QMainWindow):
 
     def save_settings(self):
         s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp,
-             "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size,
-             "shape_scale": self.view.shape_scale, "stretch_shape": self.view.stretch_shape}
+             "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
