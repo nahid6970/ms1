@@ -334,12 +334,13 @@ class ArtView(QGraphicsView):
     def create_symmetry_clones(self, item):
         if self.symmetry_mode == "None": return
         cx, cy = self.sym_center.x(), self.sym_center.y()
+        mc = int(self.mirror_count)
         if self.symmetry_mode == "Radial":
-            for i in range(1, self.mirror_count):
+            for i in range(1, mc):
                 clone = self.clone_item(item)
                 if not clone: continue
                 clone.clone_type = "radial"
-                angle = i * (360 / self.mirror_count); tr = QTransform().translate(cx, cy).rotate(angle).translate(-cx, -cy)
+                angle = i * (360 / mc); tr = QTransform().translate(cx, cy).rotate(angle).translate(-cx, -cy)
                 clone.setPos(tr.map(item.pos())); clone.setRotation(angle); self.scene().addItem(clone); item.symmetry_clones.append(clone)
         elif "Reflect" in self.symmetry_mode:
             modes = []
@@ -784,7 +785,7 @@ class SVGArtApp(QMainWindow):
     def _fix_floats(self, obj):
         if isinstance(obj, dict): return {k: self._fix_floats(v) for k, v in obj.items()}
         if isinstance(obj, list): return [self._fix_floats(i) for i in obj]
-        if isinstance(obj, int): return float(obj)
+        if isinstance(obj, float) and obj.is_integer(): return int(obj)
         return obj
 
     def open_cloud_sync(self):
@@ -800,9 +801,10 @@ class SVGArtApp(QMainWindow):
             res = self._convex_call("query", {"path": "functions:get", "args": {"id": dlg.selected_id}})
             data = res.get("value")
             if data:
+                data = self._fix_floats(data)
                 # Restore custom shapes
                 if "custom_shapes" in data:
-                    self.view.custom_shapes = self._fix_floats(data["custom_shapes"])
+                    self.view.custom_shapes = data["custom_shapes"]
                     self.save_custom_shapes()
                     self._shape_pixmap_cache = {name: ShapePickerDialog.build_pixmap(cmds, 100, 100) for name, cmds in self.view.custom_shapes.items()}
                 # Restore settings
