@@ -8,8 +8,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy, QScrollArea)
-from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize
-from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray
+from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor, QIcon, QPixmap, QPainter
+from PyQt6.QtSvg import QSvgRenderer
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
@@ -17,9 +18,75 @@ SHORTCUTS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "
 # Ensure directory exists
 os.makedirs(os.path.dirname(SHORTCUTS_JSON_PATH), exist_ok=True)
 
-# Cyberpunk-style colors
-CP_BG = "#050505"
-CP_CYAN = "#00F0FF"
+# CYBERPUNK THEME PALETTE
+CP_BG = "#050505"           # Main Window Background
+CP_PANEL = "#111111"        # Panel/Input Background
+CP_YELLOW = "#FCEE0A"       # Accent: Yellow
+CP_CYAN = "#00F0FF"         # Accent: Cyan
+CP_RED = "#FF003C"          # Accent: Red
+CP_GREEN = "#00ff21"        # Accent: Green
+CP_ORANGE = "#ff934b"       # Accent: Orange
+CP_DIM = "#3a3a3a"          # Dimmed/Borders/Inactive
+CP_TEXT = "#E0E0E0"         # Primary Text
+CP_SUBTEXT = "#808080"      # Secondary Text
+
+# SVG Collection
+SVGS = {
+    "PLUS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+    "SETTINGS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+    "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10a2 2 0 0 0 2-2 2 2 0 0 0-2-2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 10 10 0 0 0-10-10z"></path><circle cx="7.5" cy="10.5" r=".5"></circle><circle cx="10.5" cy="7.5" r=".5"></circle><circle cx="13.5" cy="7.5" r=".5"></circle><circle cx="16.5" cy="10.5" r=".5"></circle></svg>',
+    "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
+    "ROCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>'
+}
+
+class CyberButton(QPushButton):
+    """Modern button with SVG icon support and dynamic hover color-switching."""
+    def __init__(self, text="", parent=None, color=CP_YELLOW, is_outlined=False, svg_data=None):
+        super().__init__(text, parent)
+        self.color = color
+        self.is_outlined = is_outlined
+        self.svg_data = svg_data
+        self.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedHeight(34)
+        if svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
+        self.update_style()
+
+    def update_icon(self, color):
+        if not self.svg_data: return
+        # Inject color into SVG currentColor placeholder
+        colored_svg = self.svg_data.replace('currentColor', color)
+        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+        pix = QPixmap(18, 18)
+        pix.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pix)
+        renderer.render(painter)
+        painter.end()
+        self.setIcon(QIcon(pix))
+        self.setIconSize(QSize(18, 18))
+
+    def enterEvent(self, event):
+        if self.svg_data:
+            self.update_icon(CP_BG if self.is_outlined else self.color)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.svg_data:
+            self.update_icon(self.color if self.is_outlined else CP_BG)
+        super().leaveEvent(event)
+
+    def update_style(self):
+        if self.is_outlined:
+            self.setStyleSheet(f"""
+                QPushButton {{ background-color: transparent; color: {self.color}; border: 2px solid {self.color}; padding: 5px 15px; font-family: 'Consolas'; }}
+                QPushButton:hover {{ background-color: {self.color}; color: {CP_BG}; }}
+            """)
+        else:
+            self.setStyleSheet(f"""
+                QPushButton {{ background-color: {self.color}; color: {CP_BG}; border: none; padding: 5px 15px; font-family: 'Consolas'; }}
+                QPushButton:hover {{ background-color: {CP_BG}; color: {self.color}; border: 1px solid {self.color}; }}
+            """)
 
 class ShortcutBuilderPopup(QDialog):
     def __init__(self, parent=None, initial_value=""):
@@ -1075,7 +1142,7 @@ class AHKShortcutEditor(QMainWindow):
         self.file_shortcuts = []
         self.startup_scripts = []
         self.context_shortcuts = []
-        self.app_font_family = "JetBrains Mono" # Default
+        self.app_font_family = "Consolas" # Default per theme guide
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
@@ -1113,82 +1180,52 @@ class AHKShortcutEditor(QMainWindow):
         top_layout.setSpacing(10)
         top_layout.setContentsMargins(10, 5, 10, 5)
 
-        # Better styling for the whole app
+        # Apply Global Theme
         self.setStyleSheet(f"""
-            QMainWindow {{ background-color: #1e1e1e; }}
+            QMainWindow, QDialog {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            
+            QLineEdit, QComboBox, QPlainTextEdit, QTextEdit {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+            }}
+            QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QComboBox:focus {{
+                border: 1px solid {CP_CYAN};
+            }}
+            
             QPushButton {{
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 14px;
-                border-radius: 6px;
-                padding: 6px 12px;
-                height: 28px;
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
             }}
-            QLineEdit {{
-                background-color: #2d2d2d;
-                border: 1px solid #444;
-                border-radius: 6px;
-                padding: 0px 10px;  /* Reduced vertical padding to match fixed height */
-                color: #ffffff;
-                font-size: 14px;
-                height: 28px;
+            QPushButton:hover {{
+                background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
             }}
-            QLineEdit:focus {{
-                border-color: #61dafb;
+            QPushButton:pressed {{
+                background-color: {CP_YELLOW}; color: black;
             }}
+            
+            QGroupBox {{
+                border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
+            }}
+            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+            
             QMenu {{
-                background-color: #2d2d2d;
-                color: white;
-                border: 1px solid #444;
+                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};
             }}
             QMenu::item:selected {{
-                background-color: #3d3d3d;
+                background-color: {CP_CYAN}; color: {CP_BG};
             }}
             
             /* Cyberpunk Scrollbar */
-            QScrollBar:vertical {{
-                background: {CP_BG};
-                width: 10px;
-                margin: 0px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {CP_CYAN};
-                min-height: 20px;
-                border-radius: 5px;
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-                height: 0px;
-                background: none;
-            }}
-            QScrollBar:horizontal {{
-                background: {CP_BG};
-                height: 10px;
-                margin: 0px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {CP_CYAN};
-                min-width: 20px;
-                border-radius: 5px;
-            }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
-                width: 0px;
-                background: none;
-            }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+            
+            QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; background: none; }}
         """)
 
         # Add button with menu
-        self.add_btn = QPushButton("+ Add")
-        self.add_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ea44f;
-                color: white;
-                font-weight: bold;
-                border: 1px solid #288f44;
-            }
-            QPushButton:hover {
-                background-color: #34bc5a;
-            }
-            QPushButton::menu-indicator { image: none; }
-        """)
+        self.add_btn = CyberButton(" ADD", color=CP_GREEN, svg_data=SVGS["PLUS"])
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
@@ -1207,7 +1244,7 @@ class AHKShortcutEditor(QMainWindow):
             QCheckBox {
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 24px;
-                color: #61dafb;
+                color: #00F0FF;
                 margin-left: 5px;
                 margin-right: 5px;
             }
@@ -1216,34 +1253,19 @@ class AHKShortcutEditor(QMainWindow):
         top_layout.addWidget(self.category_toggle)
 
         # Color button
-        self.colors_btn = QPushButton("🎨 Colors")
-        self.colors_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #6f42c1;
-                color: white;
-                border: 1px solid #5a32a3;
-            }
-            QPushButton:hover {
-                background-color: #8250df;
-            }
-        """)
+        self.colors_btn = CyberButton(" COLORS", color=CP_ORANGE, is_outlined=True, svg_data=SVGS["PALETTE"])
         self.colors_btn.clicked.connect(self.open_color_dialog)
         top_layout.addWidget(self.colors_btn)
 
         # Settings button
-        self.settings_btn = QPushButton("⚙ Settings")
-        self.settings_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #444;
-                color: white;
-                border: 1px solid #555;
-            }
-            QPushButton:hover {
-                background-color: #555;
-            }
-        """)
+        self.settings_btn = CyberButton(" SETTINGS", color=CP_TEXT, is_outlined=True, svg_data=SVGS["SETTINGS"])
         self.settings_btn.clicked.connect(self.open_settings_dialog)
         top_layout.addWidget(self.settings_btn)
+
+        # Restart button
+        self.restart_btn = CyberButton(" RESTART", color=CP_RED, is_outlined=True, svg_data=SVGS["RESTART"])
+        self.restart_btn.clicked.connect(self.restart_app)
+        top_layout.addWidget(self.restart_btn)
 
         # Search box
         self.search_edit = HotkeyLineEdit()
@@ -1251,27 +1273,28 @@ class AHKShortcutEditor(QMainWindow):
         self.search_edit.setPlaceholderText(" Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
         self.search_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.search_edit.setStyleSheet("font-family: 'Segoe UI', sans-serif;")
+        self.search_edit.setFixedHeight(34)
         
         self.record_search_btn = QPushButton("⌨")
         self.record_search_btn.setCheckable(True)
         self.record_search_btn.setFixedWidth(40)
-        self.record_search_btn.setStyleSheet("""
-            QPushButton {
+        self.record_search_btn.setFixedHeight(34)
+        self.record_search_btn.setStyleSheet(f"""
+            QPushButton {{
                 font-family: 'Segoe UI', sans-serif;
-                background-color: #2d2d2d;
-                border: 1px solid #444;
-                color: #888;
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+                color: {CP_SUBTEXT};
                 font-size: 18px;
-            }
-            QPushButton:checked {
-                background-color: #61dafb;
-                color: black;
-                border-color: #61dafb;
-            }
-            QPushButton:hover {
-                border-color: #61dafb;
-            }
+            }}
+            QPushButton:checked {{
+                background-color: {CP_CYAN};
+                color: {CP_BG};
+                border-color: {CP_CYAN};
+            }}
+            QPushButton:hover {{
+                border-color: {CP_CYAN};
+            }}
         """)
         self.record_search_btn.clicked.connect(lambda checked: self.search_edit.set_recording(checked))
         self.search_edit.record_button = self.record_search_btn
@@ -1279,23 +1302,10 @@ class AHKShortcutEditor(QMainWindow):
         top_layout.addWidget(self.search_edit)
         top_layout.addWidget(self.record_search_btn)
 
-        # Removed the addStretch() to let the search bar expand
-
         # Generate button
-        generate_btn = QPushButton("🚀 Generate AHK")
-        generate_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2188ff;
-                color: white;
-                font-weight: bold;
-                border: 1px solid #1c73d9;
-            }
-            QPushButton:hover {
-                background-color: #3b9bff;
-            }
-        """)
-        generate_btn.clicked.connect(self.generate_ahk_script)
-        top_layout.addWidget(generate_btn)
+        self.generate_btn = CyberButton(" GENERATE", color=CP_YELLOW, svg_data=SVGS["ROCKET"])
+        self.generate_btn.clicked.connect(self.generate_ahk_script)
+        top_layout.addWidget(self.generate_btn)
 
         layout.addLayout(top_layout)
 
@@ -1309,6 +1319,7 @@ class AHKShortcutEditor(QMainWindow):
         # Enable mouse tracking for double-click detection
         self.text_browser.setMouseTracking(True)
         self.text_browser.viewport().installEventFilter(self)
+        self.text_browser.setStyleSheet(f"background-color: {CP_BG}; border: none;")
         layout.addWidget(self.text_browser)
 
         # Context menu for shortcuts
@@ -1333,6 +1344,10 @@ class AHKShortcutEditor(QMainWindow):
         # Force update of elements that might have their own font set
         if hasattr(self, 'text_browser'):
             self.update_display() # Refresh HTML with new font
+
+    def restart_app(self):
+        """Restart the application to apply changes."""
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def open_settings_dialog(self):
         dialog = SettingsDialog(self)
