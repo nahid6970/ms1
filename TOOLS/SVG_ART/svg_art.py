@@ -42,6 +42,9 @@ class SymPath(QGraphicsPathItem, SymItem):
         SymItem.__init__(self)
         self.path_points = []
         self.multi_colors = []
+        p = self.path()
+        p.setFillRule(Qt.FillRule.WindingFill)
+        self.setPath(p)
 
     def paint(self, painter, option, widget):
         if self.multi_colors:
@@ -331,7 +334,9 @@ class ArtView(QGraphicsView):
         """Scale stored path points (normalized 0-1) to fit drag bounding box."""
         w, h = local_pos.x() or 1, local_pos.y() or 1
         full_path = QPainterPath()
+        full_path.setFillRule(Qt.FillRule.WindingFill)
         current_path = QPainterPath()
+        current_path.setFillRule(Qt.FillRule.WindingFill)
         current_color = None
         multi_colors = []
         for cmd, *args in points:
@@ -339,7 +344,13 @@ class ArtView(QGraphicsView):
                 if not current_path.isEmpty() and current_color:
                     multi_colors.append((current_path, current_color))
                 current_path = QPainterPath()
+                current_path.setFillRule(Qt.FillRule.WindingFill)
                 current_color = args[0]
+                continue
+            if cmd == "FILLRULE":
+                fr = Qt.FillRule.EvenOddFill if args[0] == "evenodd" else Qt.FillRule.WindingFill
+                full_path.setFillRule(fr)
+                current_path.setFillRule(fr)
                 continue
             scaled = [QPointF(a[0] * w, a[1] * h) for a in args]
             if cmd == "M": 
@@ -485,18 +496,19 @@ class ShapePickerDialog(QDialog):
     def build_pixmap(cmds, w, h):
         px = QPixmap(w, h); px.fill(QColor(CP_PANEL))
         painter = QPainter(px); painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pw, ph = w - 10, h - 10
+        margin = min(w, h) * 0.15
+        pw, ph = w - 2 * margin, h - 2 * margin
         current_color = CP_CYAN
         path = QPainterPath()
         def flush():
             if not path.isEmpty():
-                painter.setPen(QPen(QColor(current_color), 1))
+                painter.setPen(QPen(QColor(current_color), 0.5))
                 painter.setBrush(QBrush(QColor(current_color)))
                 painter.drawPath(path)
         for cmd, *args in cmds:
             if cmd == "COLOR":
                 flush(); path = QPainterPath(); current_color = args[0]; continue
-            pts = [QPointF(a[0] * pw + 5, a[1] * ph + 5) for a in args]
+            pts = [QPointF(a[0] * pw + margin, a[1] * ph + margin) for a in args]
             if cmd == "M": path.moveTo(pts[0])
             elif cmd == "L": path.lineTo(pts[0])
             elif cmd == "Q": path.quadTo(pts[0], pts[1])
@@ -676,97 +688,167 @@ class SVGArtApp(QMainWindow):
                     QMessageBox.warning(self, "Error", "Could not parse SVG code. Ensure it has a <path d='...' /> or valid path data.")
 
     def parse_svg_to_shape(self, svg_code):
-        # 1. Extract global matrix transform if any
-        gm_match = re.search(r'transform=["\']matrix\(([^)]+)\)["\']', svg_code)
-        gm = [float(v) for v in re.split(r'[,\s]+', gm_match.group(1).strip())] if gm_match else None
-        def transform_pt(x, y):
-            if gm and len(gm) == 6: return gm[0]*x + gm[2]*y + gm[4], gm[1]*x + gm[3]*y + gm[5]
-            return x, y
+        token_pattern = re.compile(r'([a-zA-Z])|([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)')
+        
+        def parse_transform(t_str):
+            trans = QTransform()
+            if not t_str: return trans
+            for m in re.finditer(r'([a-z]+)\s*\(([^)]+)\)', t_str):
+                name = m.group(1); vals = [float(v) for v in re.split(r'[,\s]+', m.group(2).strip()) if v]
+                if name == "matrix" and len(vals) == 6:
+                    trans = QTransform(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]) * trans
+                elif name == "translate": trans.translate(vals[0], vals[1] if len(vals)>1 else 0)
+                elif name == "scale": trans.scale(vals[0], vals[1] if len(vals)>1 else vals[0])
+                elif name == "rotate":
+                    if len(vals) == 3: trans.translate(vals[1], vals[2]); trans.rotate(vals[0]); trans.translate(-vals[1], -vals[2])
+                    else: trans.rotate(vals[0])
+            return trans
 
-        # 2. Extract all path tags and their fills
-        path_tags = re.findall(r'<path[^>]*>', svg_code)
-        if not path_tags:
+        tags = re.findall(r'<(path|rect|circle|ellipse|g|/g)\b([^>]*)>', svg_code, re.I)
+        if not tags:
             d_matches = re.findall(r'\bd=["\']([^"\']+)["\']', svg_code)
             if not d_matches: d_matches = [svg_code]
-            path_tags = [f'<path d="{d}"/>' for d in d_matches]
+            tags = [("path", f' d="{d}"') for d in d_matches]
 
-        all_commands = []; all_pts = []
-        token_pattern = re.compile(r'([a-zA-Z])|([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)')
+        transform_stack = [QTransform()]; all_commands = []; all_pts = []
         
-        for tag in path_tags:
-            d_match = re.search(r'\bd=["\']([^"\']+)["\']', tag)
-            if not d_match: continue
+        for tag_name, attr_str in tags:
+            tag_name = tag_name.lower()
+            if tag_name == "g":
+                m = re.search(r'transform=["\']([^"\']+)["\']', attr_str)
+                transform_stack.append(parse_transform(m.group(1)) * transform_stack[-1])
+                continue
+            elif tag_name == "/g":
+                if len(transform_stack) > 1: transform_stack.pop()
+                continue
             
-            fill = None
-            fill_match = re.search(r'fill=["\']([^"\']+)["\']', tag)
-            if fill_match: fill = fill_match.group(1).strip()
+            ct = transform_stack[-1]
+            m = re.search(r'transform=["\']([^"\']+)["\']', attr_str)
+            if m: ct = parse_transform(m.group(1)) * ct
+            def t_pt(x, y):
+                p = ct.map(QPointF(x, y)); return p.x(), p.y()
+
+            fill = None; m = re.search(r'fill=["\']([^"\']+)["\']', attr_str)
+            if m: fill = m.group(1).strip()
             else:
-                style_match = re.search(r'style=["\'][^"\']*fill:([^;]+)', tag)
-                if style_match: fill = style_match.group(1).strip()
-            
-            if fill and fill != "none": all_commands.append(["COLOR", fill])
-            
-            tokens = []
-            for m in token_pattern.finditer(d_match.group(1)):
-                if m.group(1): tokens.append(m.group(1))
-                else: tokens.append(float(m.group(2)))
-            
-            i = 0; cur_x, cur_y = 0, 0; last_cmd = ""
-            while i < len(tokens):
-                token = tokens[i]
-                if isinstance(token, str): cmd = token; i += 1
-                else: cmd = last_cmd
-                if not cmd: break
+                m = re.search(r'style=["\'][^"\']*fill:([^;]+)', attr_str)
+                if m: fill = m.group(1).strip()
+            if fill and fill.lower() != "none": all_commands.append(["COLOR", fill])
+
+            fr = "nonzero"; m = re.search(r'fill-rule=["\']([^"\']+)["\']', attr_str)
+            if m: fr = m.group(1).strip()
+            else:
+                m = re.search(r'style=["\'][^"\']*fill-rule:([^;]+)', attr_str)
+                if m: fr = m.group(1).strip()
+            if fr == "evenodd": all_commands.append(["FILLRULE", "evenodd"])
+
+            if tag_name == "path":
+                dm = re.search(r'\bd=["\']([^"\']+)["\']', attr_str)
+                if not dm: continue
+                tokens = []
+                for m in token_pattern.finditer(dm.group(1)):
+                    if m.group(1): tokens.append(m.group(1))
+                    else: tokens.append(float(m.group(2)))
+                i = 0; cur_x, cur_y = 0, 0; last_cmd = ""; start_x, start_y = 0, 0
+                lbx, lby = 0, 0
+                while i < len(tokens):
+                    token = tokens[i]
+                    if isinstance(token, str): cmd = token; i += 1
+                    else: cmd = last_cmd
+                    if not cmd: break
+                    try:
+                        if cmd in 'Mm':
+                            x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'm': x += cur_x; y += cur_y
+                            tx, ty = t_pt(x, y); all_commands.append(["M", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                            cur_x, cur_y = x, y; start_x, start_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
+                        elif cmd in 'Ll':
+                            x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'l': x += cur_x; y += cur_y
+                            tx, ty = t_pt(x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                            cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Hh':
+                            x = tokens[i]; i += 1
+                            if cmd == 'h': x += cur_x
+                            tx, ty = t_pt(x, cur_y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                            cur_x = x; last_cmd = cmd
+                        elif cmd in 'Vv':
+                            y = tokens[i]; i += 1
+                            if cmd == 'v': y += cur_y
+                            tx, ty = t_pt(cur_x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                            cur_y = y; last_cmd = cmd
+                        elif cmd in 'Qq':
+                            x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
+                            tx1, ty1 = t_pt(x1, y1); tx, ty = t_pt(x, y); lbx, lby = x1, y1
+                            all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
+                            cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Cc':
+                            x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
+                            tx1, ty1 = t_pt(x1, y1); tx2, ty2 = t_pt(x2, y2); tx, ty = t_pt(x, y); lbx, lby = x2, y2
+                            all_commands.append(["C", [tx1, ty1], [tx2, ty2], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx2, ty2), QPointF(tx, ty)])
+                            cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Ss':
+                            x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 's': x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
+                            x1, y1 = (2*cur_x - lbx, 2*cur_y - lby) if last_cmd in 'CcSs' else (cur_x, cur_y)
+                            tx1, ty1 = t_pt(x1, y1); tx2, ty2 = t_pt(x2, y2); tx, ty = t_pt(x, y); lbx, lby = x2, y2
+                            all_commands.append(["C", [tx1, ty1], [tx2, ty2], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx2, ty2), QPointF(tx, ty)])
+                            cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Tt':
+                            x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 't': x += cur_x; y += cur_y
+                            x1, y1 = (2*cur_x - lbx, 2*cur_y - lby) if last_cmd in 'QqTt' else (cur_x, cur_y)
+                            tx1, ty1 = t_pt(x1, y1); tx, ty = t_pt(x, y); lbx, lby = x1, y1
+                            all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
+                            cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Zz':
+                            all_commands.append(["Z"]); cur_x, cur_y = start_x, start_y; last_cmd = ""
+                        else: i += 1
+                    except: break
+            elif tag_name == "rect":
                 try:
-                    if cmd in 'Mm':
-                        x, y = tokens[i], tokens[i+1]; i += 2
-                        if cmd == 'm': x += cur_x; y += cur_y
-                        tx, ty = transform_pt(x, y); all_commands.append(["M", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                        cur_x, cur_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
-                    elif cmd in 'Ll':
-                        x, y = tokens[i], tokens[i+1]; i += 2
-                        if cmd == 'l': x += cur_x; y += cur_y
-                        tx, ty = transform_pt(x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                        cur_x, cur_y = x, y; last_cmd = cmd
-                    elif cmd in 'Hh':
-                        x = tokens[i]; i += 1
-                        if cmd == 'h': x += cur_x
-                        tx, ty = transform_pt(x, cur_y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                        cur_x = x; last_cmd = cmd
-                    elif cmd in 'Vv':
-                        y = tokens[i]; i += 1
-                        if cmd == 'v': y += cur_y
-                        tx, ty = transform_pt(cur_x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                        cur_y = y; last_cmd = cmd
-                    elif cmd in 'Qq':
-                        x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
-                        if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
-                        tx1, ty1 = transform_pt(x1, y1); tx, ty = transform_pt(x, y)
-                        all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
-                        cur_x, cur_y = x, y; last_cmd = cmd
-                    elif cmd in 'Cc':
-                        x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
-                        if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
-                        tx1, ty1 = transform_pt(x1, y1); tx2, ty2 = transform_pt(x2, y2); tx, ty = transform_pt(x, y)
-                        all_commands.append(["C", [tx1, ty1], [tx2, ty2], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx2, ty2), QPointF(tx, ty)])
-                        cur_x, cur_y = x, y; last_cmd = cmd
-                    elif cmd in 'Zz':
-                        all_commands.append(["Z"]); last_cmd = ""
-                    else: i += 1
-                except: break
+                    x = float(re.search(r'\bx=["\']([^"\']+)["\']', attr_str).group(1)) if 'x=' in attr_str else 0
+                    y = float(re.search(r'\by=["\']([^"\']+)["\']', attr_str).group(1)) if 'y=' in attr_str else 0
+                    w = float(re.search(r'\bwidth=["\']([^"\']+)["\']', attr_str).group(1))
+                    h = float(re.search(r'\bheight=["\']([^"\']+)["\']', attr_str).group(1))
+                    pts = [[x,y], [x+w,y], [x+w,y+h], [x,y+h]]; tp = [t_pt(px, py) for px, py in pts]
+                    all_commands.append(["M", tp[0]])
+                    for p in tp[1:]: all_commands.append(["L", p])
+                    all_commands.append(["Z"]); all_pts.extend([QPointF(*p) for p in tp])
+                except: pass
+            elif tag_name in ["circle", "ellipse"]:
+                try:
+                    cx = float(re.search(r'cx=["\']([^"\']+)["\']', attr_str).group(1)) if 'cx=' in attr_str else 0
+                    cy = float(re.search(r'cy=["\']([^"\']+)["\']', attr_str).group(1)) if 'cy=' in attr_str else 0
+                    rx = float(re.search(r'rx=["\']([^"\']+)["\']', attr_str).group(1)) if 'rx=' in attr_str else float(re.search(r'r=["\']([^"\']+)["\']', attr_str).group(1))
+                    ry = float(re.search(r'ry=["\']([^"\']+)["\']', attr_str).group(1)) if 'ry=' in attr_str else rx
+                    k = 0.5522847498
+                    pts = [[cx, cy-ry], [cx+k*rx, cy-ry], [cx+rx, cy-k*ry], [cx+rx, cy], [cx+rx, cy+k*ry], [cx+k*rx, cy+ry], [cx, cy+ry], [cx-k*rx, cy+ry], [cx-rx, cy+k*ry], [cx-rx, cy], [cx-rx, cy-k*ry], [cx-k*rx, cy-ry]]
+                    tp = [t_pt(px, py) for px, py in pts]
+                    all_commands.append(["M", tp[0]])
+                    all_commands.append(["C", tp[1], tp[2], tp[3]])
+                    all_commands.append(["C", tp[4], tp[5], tp[6]])
+                    all_commands.append(["C", tp[7], tp[8], tp[9]])
+                    all_commands.append(["C", tp[10], tp[11], tp[0]])
+                    all_commands.append(["Z"]); all_pts.extend([QPointF(*p) for p in tp])
+                except: pass
 
         if not all_commands or not all_pts: return None
         
-        # 3. Precise normalization using all points' bounding box
+        # 3. Precise normalization (preserve aspect ratio)
         rect = QRectF(all_pts[0], all_pts[0])
         for p in all_pts[1:]: rect = rect.united(QRectF(p, p))
-        w, h = rect.width() or 1, rect.height() or 1
+        side = max(rect.width(), rect.height()) or 1
+        offset_x = (side - rect.width()) / 2
+        offset_y = (side - rect.height()) / 2
         
         norm_cmds = []
         for c in all_commands:
-            if c[0] == "COLOR": norm_cmds.append(c)
+            if c[0] in ["COLOR", "FILLRULE"]: norm_cmds.append(c)
             else:
-                pts = [[(p[0]-rect.x())/w, (p[1]-rect.y())/h] for p in c[1:]]
+                pts = [[(p[0] - rect.x() + offset_x) / side, (p[1] - rect.y() + offset_y) / side] for p in c[1:]]
                 norm_cmds.append([c[0]] + pts)
         return norm_cmds
 
