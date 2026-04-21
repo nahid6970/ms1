@@ -527,7 +527,7 @@
         {
             "category": "General",
             "description": "convex guidline",
-            "enabled": true,
+            "enabled": false,
             "name": "convex guidline (Copy)",
             "replacement": "C:\\@delta\\ms1\\md\\CONVEX_BACKUP_GUIDE.md",
             "trigger": ";convex2"
@@ -540,6 +540,14 @@
             "description": "",
             "trigger": ";theme",
             "file_path": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
+            "enabled": true
+        },
+        {
+            "name": "sync script setting with convex",
+            "category": "General",
+            "description": "",
+            "trigger": ";convexsync",
+            "file_path": "C:\\@delta\\ms1\\md\\CONVEX_BACKUP_GUIDE.md",
             "enabled": true
         }
     ],
@@ -619,5 +627,6 @@
             "enabled": true
         }
     ],
-    "app_font_family": "Consolas"
+    "app_font_family": "Consolas",
+    "app_font_size": 10
 }
