@@ -367,6 +367,24 @@ class ArtView(QGraphicsView):
             multi_colors.append((current_path, current_color))
         return full_path, multi_colors
 
+    def _add_path_to_commands(self, path, item, bounds, w, h, commands):
+        current_c = []
+        for i in range(path.elementCount()):
+            el = path.elementAt(i)
+            sp = item.mapToScene(QPointF(el.x, el.y))
+            nx, ny = (sp.x() - bounds.x()) / w, (sp.y() - bounds.y()) / h
+            if el.type == QPainterPath.ElementType.MoveToElement:
+                commands.append(["M", [nx, ny]])
+            elif el.type == QPainterPath.ElementType.LineToElement:
+                commands.append(["L", [nx, ny]])
+            elif el.type == QPainterPath.ElementType.CurveToElement:
+                current_c = [[nx, ny]]
+            elif el.type == QPainterPath.ElementType.CurveToDataElement:
+                current_c.append([nx, ny])
+                if len(current_c) == 3:
+                    commands.append(["C", current_c[0], current_c[1], current_c[2]])
+                    current_c = []
+
     def collect_art_as_shape(self):
         """Collect all art items and return normalized path commands (0-1 range)."""
         items = [i for i in self.scene().items() if getattr(i, 'is_art_item', False)]
@@ -376,43 +394,41 @@ class ArtView(QGraphicsView):
         if bounds.isEmpty(): return None
         w, h = bounds.width() or 1, bounds.height() or 1
         commands = []
+        items.sort(key=lambda x: x.zValue())
         for item in items:
             if isinstance(item, QGraphicsPathItem):
-                path = item.path()
-                for i in range(path.elementCount()):
-                    el = path.elementAt(i)
-                    sp = item.mapToScene(QPointF(el.x, el.y))
-                    nx, ny = (sp.x() - bounds.x()) / w, (sp.y() - bounds.y()) / h
-                    if el.type == QPainterPath.ElementType.MoveToElement: commands.append(["M", [nx, ny]])
-                    elif el.type == QPainterPath.ElementType.LineToElement: commands.append(["L", [nx, ny]])
-                    elif el.type == QPainterPath.ElementType.CurveToElement: commands.append(["_C", [nx, ny]])
-                    elif el.type == QPainterPath.ElementType.CurveToDataElement:
-                        if commands and commands[-1][0] in ["_C", "_CD"]:
-                            commands.append(["_CD", [nx, ny]])
-                            # flush cubic when we have 3 control points
-                            ctrl = [c for c in commands if c[0] in ["_C", "_CD"]]
-                            if len(ctrl) >= 2:
-                                pts = [c[1] for c in ctrl[-2:]] + [[nx, ny]]
-                                commands = [c for c in commands if c[0] not in ["_C", "_CD"]]
-                                commands.append(["C", pts[0], pts[1], [nx, ny]])
+                if hasattr(item, 'multi_colors') and item.multi_colors:
+                    for path, color in item.multi_colors:
+                        commands.append(["COLOR", color])
+                        if path.fillRule() == Qt.FillRule.EvenOddFill:
+                            commands.append(["FILLRULE", "evenodd"])
+                        self._add_path_to_commands(path, item, bounds, w, h, commands)
+                else:
+                    if item.brush().style() != Qt.BrushStyle.NoBrush:
+                        commands.append(["COLOR", item.brush().color().name()])
+                    if item.path().fillRule() == Qt.FillRule.EvenOddFill:
+                        commands.append(["FILLRULE", "evenodd"])
+                    self._add_path_to_commands(item.path(), item, bounds, w, h, commands)
             elif isinstance(item, QGraphicsRectItem):
+                commands.append(["COLOR", item.brush().color().name()])
                 r = item.mapRectToScene(item.rect())
-                pts = [(r.left(), r.top()), (r.right(), r.top()), (r.right(), r.bottom()), (r.left(), r.bottom())]
-                commands.append(["M", [(pts[0][0]-bounds.x())/w, (pts[0][1]-bounds.y())/h]])
-                for px, py in pts[1:]: commands.append(["L", [(px-bounds.x())/w, (py-bounds.y())/h]])
+                pts = [[(r.left()-bounds.x())/w, (r.top()-bounds.y())/h], 
+                       [(r.right()-bounds.x())/w, (r.top()-bounds.y())/h],
+                       [(r.right()-bounds.x())/w, (r.bottom()-bounds.y())/h],
+                       [(r.left()-bounds.x())/w, (r.bottom()-bounds.y())/h]]
+                commands.append(["M", pts[0]])
+                for p in pts[1:]: commands.append(["L", p])
                 commands.append(["Z"])
             elif isinstance(item, QGraphicsEllipseItem):
+                commands.append(["COLOR", item.brush().color().name()])
                 r = item.mapRectToScene(item.rect())
                 cx, cy = (r.center().x()-bounds.x())/w, (r.center().y()-bounds.y())/h
                 rx, ry = r.width()/2/w, r.height()/2/h
-                # approximate ellipse with 4 cubic beziers
                 k = 0.5523
-                commands += [["M",[cx,cy-ry]],["C",[cx+k*rx,cy-ry],[cx+rx,cy-k*ry],[cx+rx,cy]],
+                commands += [["M",[cx,cy-ry]],["C",[cx+k*rx,cy-ry],[cx+rx,cy-k*rx],[cx+rx,cy]],
                               ["C",[cx+rx,cy+k*ry],[cx+k*rx,cy+ry],[cx,cy+ry]],
                               ["C",[cx-k*rx,cy+ry],[cx-rx,cy+k*ry],[cx-rx,cy]],
                               ["C",[cx-rx,cy-k*ry],[cx-k*rx,cy-ry],[cx,cy-ry]],["Z"]]
-        # clean up any leftover _C/_CD
-        commands = [c for c in commands if not c[0].startswith("_")]
         return commands
 
     def erase_at(self, pos):
