@@ -1,0 +1,613 @@
+{
+    "script_shortcuts": [
+        {
+            "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")",
+            "category": "Script",
+            "description": "Opens PowerShell as administrator",
+            "enabled": false,
+            "hotkey": "!x",
+            "name": "Open Terminal Admin"
+        },
+        {
+            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\@delta\\ms1\\scripts\\run\\Run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
+            "category": "Launch",
+            "description": "Opens run.py in the ms1 directory",
+            "enabled": true,
+            "hotkey": "ScrollLock",
+            "name": "Run Python Script"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")",
+            "category": "Launch",
+            "description": "Switch to internal monitor only",
+            "hotkey": "RAlt & Numpad1",
+            "name": "Monitor Internal"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")",
+            "category": "Launch",
+            "description": "Switch to external monitor only",
+            "hotkey": "RAlt & Numpad2",
+            "name": "Monitor External"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")",
+            "category": "Launch",
+            "description": "Extend display to both monitors",
+            "hotkey": "RAlt & Numpad3",
+            "name": "Monitor Extend"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\output\\ahk\\generate_Button_AHK.ahk\", \"\", \"Hide\")",
+            "category": "Launch",
+            "description": "Opens Bio.ahk GUI",
+            "enabled": true,
+            "hotkey": "!b",
+            "name": "Bio GUI"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\TOOLS\\Ultimate_Gui.py\", \"\", \"Hide\")",
+            "category": "Launch",
+            "description": "Opens Ultimate_Gui.py",
+            "hotkey": "!u",
+            "name": "Ultimate GUI"
+        },
+        {
+            "action": "Always_on_Top()\nAlways_on_Top(){\n    static alwaysOnTop := false\n    if (alwaysOnTop) {\n        WinSetAlwaysOnTop(false, \"A\")\n    } else {\n        WinSetAlwaysOnTop(true, \"A\")\n    }\n    alwaysOnTop := !alwaysOnTop\n}",
+            "category": "Script",
+            "description": "Toggles always on top for active window",
+            "hotkey": "#t",
+            "name": "Always On Top Toggle"
+        },
+        {
+            "action": "KillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",
+            "category": "Script",
+            "description": "Forcefully kills the process under mouse cursor",
+            "enabled": true,
+            "hotkey": "!q",
+            "name": "Kill Foreground Process"
+        },
+        {
+            "action": "CopyPath_File()\nCopyPath_File() {\n    ClipboardBackup := ClipboardAll()\n    A_Clipboard := \"\" \n    Send(\"^c\")\n    Errorlevel := !ClipWait(1)\n    if ErrorLevel\n    {\n    MsgBox(\"No valid file path found.\")\n    }\n    else\n    {\n    ClipBoardContent := A_Clipboard\n    ; V1toV2: StrReplace() is not case sensitive\n    ; check for StringCaseSense in v1 source script\n    ; and change the CaseSense param in StrReplace() if necessary\n    ClipBoardContent := StrReplace(ClipBoardContent, \"`n\", \"`t\")\n    A_Clipboard := ClipboardBackup\n    A_Clipboard := ClipBoardContent\n    TrayTip(\"Copy as Path\", \"Copied `\"\" ClipBoardContent \"`\" to clipboard.\")\n    }}",
+            "category": "Script",
+            "description": "",
+            "hotkey": "^!m",
+            "name": "Copy Path"
+        },
+        {
+            "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}",
+            "category": "Script",
+            "description": "",
+            "hotkey": "^!+r",
+            "name": "Kill (dnplayer/python/) + Change Display"
+        },
+        {
+            "action": "RestartGlance()\nRestartGlance() {\n    try {\n        RunWait(\"taskkill /F /IM glance.exe\", , \"Hide\")\n    }\n    Run('\"C:\\@delta\\msBackups\\glance\\glance.exe\" --config \"C:\\@delta\\ms1\\asset\\Glance\\glance.yml\"', , \"Hide\")\n}",
+            "category": "System",
+            "description": "Kills and restarts Glance with config",
+            "enabled": true,
+            "hotkey": "^!g",
+            "name": "Restart Glance"
+        },
+        {
+            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
+            "category": "Launch",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#x",
+            "name": "Script Manager"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\@Flask\\4999_startup\\startup.py\", , \"Hide\")",
+            "category": "Launch",
+            "description": "",
+            "hotkey": "#s",
+            "name": "Startup Setup"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py\", , \"Hide\")",
+            "category": "General",
+            "description": "",
+            "hotkey": "^+m",
+            "name": "CrossHair"
+        },
+        {
+            "action": "Run('pwsh -c explorer.exe', , 'Hide')",
+            "category": "Script",
+            "description": "",
+            "hotkey": "LAlt & e",
+            "name": "Explorer Restart"
+        },
+        {
+            "action": "replacewith_()\nreplacewith_()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Replace all spaces with underscores\n        ClipboardContent := StrReplace(ClipboardContent, A_Space, \"_\")\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
+            "category": "Text",
+            "description": "",
+            "hotkey": "RAlt & Space",
+            "name": "Replace Space with _"
+        },
+        {
+            "action": "replacedashwithspace()\nreplacedashwithspace()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Replace all dashes with spaces\n        ClipboardContent := StrReplace(ClipboardContent, \"-\", A_Space)\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
+            "category": "Text",
+            "description": "",
+            "hotkey": "RAlt & -",
+            "name": "Replace - w Space"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")",
+            "category": "Display",
+            "description": "",
+            "enabled": true,
+            "hotkey": "!1",
+            "name": "Send Apps to 2nd Display"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")",
+            "category": "General",
+            "description": "",
+            "enabled": false,
+            "hotkey": "^!n",
+            "name": "Open w VScode"
+        },
+        {
+            "action": "Center_Focused_Window()\nCenter_Focused_Window() {\n    ; Get the handle of the active (focused) window\n    hwnd := WinGetID(\"A\")\n    ; Get the position and size of the active window\n    WinGetPos(&x, &y, &w, &h, \"ahk_id \" hwnd)\n    ; Get the screen width and height\n    ScreenWidth := SysGet(78)\n    ScreenHeight := SysGet(79)\n    ; Calculate new position to center the window\n    newX := (ScreenWidth - w) / 2\n    newY := (ScreenHeight - h) / 2\n    ; Move the window to the calculated position\n    WinMove(newX, newY, , , \"ahk_id \" hwnd)\n}",
+            "category": "Display",
+            "description": "",
+            "hotkey": "LAlt & c",
+            "name": "Center Apps Window"
+        },
+        {
+            "action": "Toggle_Screen_Blackout() {\n    static blackoutState := 0\n    static myGui := \"\"\n    \n    if (blackoutState = 0) {\n        blackoutState := 1\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\")\n        myGui.BackColor := \"Black\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        blackoutState := 0\n        myGui.Destroy()\n        myGui := \"\"\n    }\n}",
+            "category": "Display",
+            "description": "",
+            "hotkey": "^!b",
+            "name": "Black Screen"
+        },
+        {
+            "action": "Toggle_Screen_Whiteout() {\n    static whiteState := 0\n    static myGui := \"\"\n    \n    if (whiteState = 0) {\n        whiteState := 1\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\")\n        myGui.BackColor := \"ffffff\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        whiteState := 0\n        myGui.Destroy()\n        myGui := \"\"\n    }\n}",
+            "category": "Display",
+            "description": "",
+            "hotkey": "^!w",
+            "name": "White Screen"
+        },
+        {
+            "action": "{\n    ClipSaved := ClipboardAll()\n    A_Clipboard := \"\"               ; Clear clipboard\n    ; Get the active window title\n    ActiveTitle := WinGetTitle(\"A\")\n    ; If the active window is VSCode, simulate the shortcut to copy the file path\n    if InStr(ActiveTitle, \"Visual Studio Code\") {\n        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)\n        Send(\"+!c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    } else {\n        ; Send Ctrl+C to copy the selected file path in other environments\n        Send(\"^c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    }\n    if (A_Clipboard != \"\") {\n        ; Get the selected file path from the clipboard\n        FilePath := A_Clipboard\n        ; Extract the directory from the file path\n        SplitPath(FilePath, , &FileDir)\n        Ext := SubStr(FilePath, (InStr(FilePath, \".\", 0, -1) + 1)<1 ? (InStr(FilePath, \".\", 0, -1) + 1)-1 : (InStr(FilePath, \".\", 0, -1) + 1))\n        ; Check the extension and run the appropriate command with working directory\n        if (Ext = \"py\") {\n            Run(\"cmd /k python `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"ps1\") {\n            Run(\"cmd /k powershell -ExecutionPolicy Bypass -File `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"bat\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"ahk\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else {\n            MsgBox(\"Unsupported file type: \" Ext)\n        }\n    } else {\n        MsgBox(\"No file path selected or copied.\")\n    }\n    ; Restore original clipboard content\n    A_Clipboard := ClipSaved\n    return\n}",
+            "category": "General",
+            "description": "",
+            "hotkey": "^!+Enter",
+            "name": "Execute Script W/O Closing"
+        },
+        {
+            "action": "AddSmartBorder()\nAddSmartBorder()\n{\n    ; Copy selected text\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    ClipWait(1)\n    if !A_Clipboard {\n        MsgBox \"Nothing selected!\"\n        return\n    }\n    \n    ; Detect language/file type from window title\n    activeTitle := WinGetTitle(\"A\")\n    commentStyle := DetectCommentStyle(activeTitle)\n    \n    ; Split into lines and normalize tabs → spaces\n    rawLines := StrSplit(A_Clipboard, \"`n\", \"`r\")\n    maxLen := 0\n    for i, line in rawLines {\n        clean := StrReplace(line, \"`t\", \"    \")\n        rawLines[i] := clean\n        if (StrLen(clean) > maxLen)\n            maxLen := StrLen(clean)\n    }\n    \n    ; Build borders (only borders are commented, content stays as-is)\n    borderChar := commentStyle.border\n    topBorder := commentStyle.prefix . \" \" . StrRepeat(borderChar, maxLen + 3)\n    bottomBorder := topBorder\n    \n    ; Assemble output: commented borders + content with commented side borders\n    output := topBorder . \"`r`n\"\n    for line in rawLines {\n        ; Calculate padding to align vertical border with horizontal border end\n        padding := StrRepeat(\" \", maxLen + 4 - StrLen(line))\n        output .= line . padding . commentStyle.prefix . \"`r`n\"\n    }\n    output .= bottomBorder\n    \n    ; Replace selection with bordered text\n    A_Clipboard := output\n    Sleep 50\n    Send(\"^v\")\n}\n\nDetectCommentStyle(windowTitle) {\n    ; Convert to lowercase for easier matching\n    title := StrLower(windowTitle)\n    \n    ; Detect based on file extension or application\n    if (InStr(title, \".py\") || InStr(title, \"python\") || InStr(title, \"pycharm\")) {\n        return {type: \"line\", prefix: \"#\", border: \"#\"}\n    } else if (InStr(title, \".ps1\") || InStr(title, \"powershell\") || InStr(title, \"ise\")) {\n        return {type: \"line\", prefix: \"#\", border: \"#\"}\n    } else if (InStr(title, \".css\")) {\n        return {type: \"line\", prefix: \"/*\", border: \"*\"}\n    } else if (InStr(title, \".js\") || InStr(title, \".ts\") || InStr(title, \".java\") || InStr(title, \".c\") || InStr(title, \".cpp\")) {\n        return {type: \"line\", prefix: \"//\", border: \"/\"}\n    } else if (InStr(title, \".ahk\") || InStr(title, \"autohotkey\")) {\n        return {type: \"line\", prefix: \";\", border: \"#\"}\n    } else if (InStr(title, \".bat\") || InStr(title, \".cmd\")) {\n        return {type: \"line\", prefix: \"REM\", border: \"=\"}\n    } else {\n        ; Default fallback\n        return {type: \"line\", prefix: \"#\", border: \"#\"}\n    }\n}\n\nStrRepeat(char, count) {\n    result := \"\"\n    Loop count\n        result .= char\n    return result\n}",
+            "category": "Text",
+            "description": "",
+            "hotkey": "^+b",
+            "name": "Border"
+        },
+        {
+            "action": "MergeAllExplorerWindows()\n\nMergeAllExplorerWindows() {\n    ; Get the target window to merge everything into\n    mainWindow := WinActive(\"ahk_class CabinetWClass\")\n    if (!mainWindow)\n        mainWindow := WinExist(\"ahk_class CabinetWClass\")\n    \n    if (!mainWindow) {\n        Run(\"explorer.exe\")\n        return\n    }\n\n    pathsToOpen := []\n    sourceHwnds := Map()\n\n    ; Collect all paths from all explorer tabs\n    shellApp := ComObject(\"Shell.Application\")\n    \n    for window in shellApp.Windows {\n        try {\n            if (window.Name != \"Windows Explorer\" && window.Name != \"File Explorer\")\n                continue\n                \n            thisHwnd := 0\n            try {\n                thisHwnd := window.HWND\n            } catch {\n                continue\n            }\n            \n            if (!thisHwnd || thisHwnd == 0)\n                continue\n\n            if (thisHwnd != mainWindow) {\n                path := \"\"\n                try {\n                    path := window.Document.Folder.Self.Path\n                } catch {\n                    try {\n                        path := window.LocationURL\n                    } catch {\n                        path := window.LocationName\n                    }\n                }\n                \n                if (path != \"\" && path != \"This PC\") {\n                    pathsToOpen.Push(path)\n                    sourceHwnds[thisHwnd] := true\n                }\n            }\n        } catch {\n            continue\n        }\n    }\n\n    if (pathsToOpen.Length == 0 && sourceHwnds.Count == 0) {\n        return\n    }\n\n    ; Backup clipboard\n    clipSaved := ClipboardAll()\n\n    WinActivate(\"ahk_id \" . mainWindow)\n    if (!WinWaitActive(\"ahk_id \" . mainWindow, , 2)) {\n        A_Clipboard := clipSaved\n        return\n    }\n\n    ; --- DELIBERATE AND STABLE NAVIGATION ---\n    for p in pathsToOpen {\n        cleanPath := p\n        \n        if InStr(cleanPath, \"file:///\") {\n            cleanPath := StrReplace(cleanPath, \"file:///\", \"\")\n            cleanPath := StrReplace(cleanPath, \"/\", \"\\\")\n            cleanPath := StrReplace(cleanPath, \"%20\", \" \")\n        }\n        \n        ; 1. Create a new tab and wait for animation to complete\n        Send(\"^t\")\n        Sleep(800) ; Increased for stability\n        \n        ; 2. Focus address bar\n        Send(\"^l\")\n        Sleep(400)\n        \n        ; 3. Clear existing text just in case\n        Send(\"^a\") ; Select all\n        Sleep(100)\n        Send(\"{BackSpace}\")\n        Sleep(200)\n        \n        ; 4. Update clipboard and PASTE\n        A_Clipboard := cleanPath\n        Sleep(200) ; Give OS time to register clipboard change\n        Send(\"^v\")\n        Sleep(400) ; Crucial: Wait for the text to actually appear in the box\n        \n        ; 5. Navigation\n        Send(\"{Enter}\")\n        Sleep(1000) ; Wait for navigation to commit before moving to the next tab\n    }\n\n    ; Restore original clipboard\n    A_Clipboard := clipSaved\n\n    ; Close other windows\n    for hwnd, _ in sourceHwnds {\n        try {\n            if WinExist(\"ahk_id \" . hwnd) {\n                WinClose(\"ahk_id \" . hwnd)\n                if (WinExist(\"ahk_id \" . hwnd)) {\n                    Sleep(500)\n                    WinKill(\"ahk_id \" . hwnd)\n                }\n            }\n        }\n    }\n\n    WinActivate(\"ahk_id \" . mainWindow)\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#e",
+            "name": "Merge all window in a single explorer"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": false,
+            "hotkey": "!n",
+            "name": "autofill job field"
+        },
+        {
+            "action": "OpenWithEditor() {\n    ; Backup current clipboard content\n    ClipboardBackup := ClipboardAll()\n    \n    ; Clear clipboard and copy the selected file path\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    if !ClipWait(1) {\n        MsgBox(\"No valid file path found.\")\n        A_Clipboard := ClipboardBackup\n        return\n    }\n    \n    ClipBoardContent := A_Clipboard\n    if InStr(ClipBoardContent, \"\\\") {\n        ; Handle multiple files (split by newline)\n        FilePaths := \"\"\n        Loop Parse, ClipBoardContent, \"`n\", \"`r\" {\n            if (A_LoopField != \"\") {\n                FilePaths .= '\"' . A_LoopField . '\" '\n            }\n        }\n        if (FilePaths != \"\") {\n            ; Use pythonw to run without console window\n            Run('pythonw \"C:\\@delta\\ms1\\scripts\\run\\editor_chooser.py\" ' . FilePaths, , \"Hide\")\n        }\n    } else {\n        MsgBox(\"No valid file path found.\")\n    }\n    \n    ; Restore original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "^!n",
+            "name": "Open With Preferred Editor"
+        },
+        {
+            "action": "komo_start_stop()\nkomo_start_stop() {\nRunWait \"powershell.exe -Command Stop-Process -Name komorebi -ErrorAction SilentlyContinue\", , \"Hide\"\nRun \"komorebic.exe start\", , \"Hide\"\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "^+k",
+            "name": "komorebi stop/start"
+        },
+        {
+            "action": "KeySequence()\nKeySequence() {\n    Send \"^!{Numpad2}\"\n    Sleep 250\n    Send \"{Enter}\"\n    Sleep 250\n    Send \"^!{Numpad1}\"\n}",
+            "category": "Text",
+            "description": "Sleep 250 //    Send \" -> \"",
+            "enabled": true,
+            "hotkey": "^q",
+            "name": "Quick Shortcut"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "PrintScreen",
+            "name": "Take Screenshot"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#f",
+            "name": "Open Folder gui"
+        },
+        {
+            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py\", \"\", \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#v",
+            "name": "Gallery View"
+        },
+        {
+            "action": "DropClipboard()\nDropClipboard() {\n    ; 1. Get current text from clipboard\n    clipText := A_Clipboard\n    if (clipText == \"\") {\n        ShowNotification(\"Clipboard is empty!\", \"Warning\")\n        return\n    }\n\n\n    ; 2. Create a temporary folder and file\n    tempDir := A_Temp \"\\AutoInsert\"\n    if !DirExist(tempDir)\n        DirCreate(tempDir)\n    \n    ; Create a unique filename using timestamp\n    fileName := \"clip_\" A_Now \"_\" A_TickCount \".txt\"\n    filePath := tempDir \"\\\" fileName\n    \n    try {\n        ; Write clipboard content to the new file with UTF-8 encoding (supports Bangla, etc.)\n        if FileExist(filePath)\n            FileDelete(filePath)\n        ; \"UTF-8\" includes the BOM (Byte Order Mark), which helps Windows apps recognize the text as Unicode.\n        FileAppend(clipText, filePath, \"UTF-8\")\n    } catch Error as err {\n        MsgBox(\"Failed to create temporary file:`n\" err.Message)\n        return\n    }\n\n\n    ; 3. Prepare the Clipboard for \"Smart Drop\"\n    ; We set both File (CF_HDROP) and Text (CF_UNICODETEXT) formats.\n    ; This allows Windows to decide: if it's a folder, drop the file; if it's a text field, paste the path.\n    if !SetClipboardSmart(filePath) {\n        MsgBox(\"Failed to set clipboard data.\")\n        return\n    }\n\n\n    ; 4. Perform the \"Drop\" action\n    ; Get window and position under mouse\n    MouseGetPos(&mX, &mY, &hWnd)\n    \n    ; Optional: Activate the window to ensure it receives the focus/paste\n    try {\n        WinActivate(\"ahk_id \" hWnd)\n    }\n    \n    ; Small click to focus the exact element under the mouse\n    Click(mX, mY)\n    Sleep(100) ; Wait for focus to settle\n    \n    ; Send Paste command\n    Send(\"^v\")\n\n\n    ShowNotification(\"Dropped: \" fileName \"`n(File & Path ready)\", \"Success\")\n}\n\n\n; --- Helper Functions ---\n\n\n/**\n * Sets the clipboard to contain both the file object (for dropping into folders/apps)\n * and the file path string (for pasting into text fields).\n */\nSetClipboardSmart(filePath) {\n    if !DllCall(\"OpenClipboard\", \"ptr\", A_ScriptHwnd)\n        return false\n    \n    DllCall(\"EmptyClipboard\")\n\n\n    ; -- 1. Set CF_UNICODETEXT (Pasting path into text fields) --\n    hText := DllCall(\"GlobalAlloc\", \"uint\", 0x42, \"ptr\", (StrLen(filePath) + 1) * 2, \"ptr\")\n    pText := DllCall(\"GlobalLock\", \"ptr\", hText, \"ptr\")\n    StrPut(filePath, pText, \"UTF-16\")\n    DllCall(\"GlobalUnlock\", \"ptr\", hText)\n    DllCall(\"SetClipboardData\", \"uint\", 13, \"ptr\", hText) ; 13 = CF_UNICODETEXT\n\n\n    ; -- 2. Set CF_HDROP (Dropping file into folders/browser uploads) --\n    ; DROPFILES structure is 20 bytes\n    charCount := StrLen(filePath) + 2 ; +1 for null, +1 for double null (required for file lists)\n    hDrop := DllCall(\"GlobalAlloc\", \"uint\", 0x42, \"ptr\", 20 + (charCount * 2), \"ptr\")\n    pDrop := DllCall(\"GlobalLock\", \"ptr\", hDrop, \"ptr\")\n    \n    NumPut(\"uint\", 20, pDrop, 0)   ; pFiles: offset to file list\n    NumPut(\"uint\", 1, pDrop, 16)  ; fWide: 1 means Unicode\n    \n    ; Copy path to the offset 20\n    StrPut(filePath, pDrop + 20, \"UTF-16\")\n    ; Double null termination (already handled by GlobalAlloc zero-init, but for safety:)\n    NumPut(\"ushort\", 0, pDrop + 20 + (StrLen(filePath) * 2), 0)\n    \n    DllCall(\"GlobalUnlock\", \"ptr\", hDrop)\n    DllCall(\"SetClipboardData\", \"uint\", 15, \"ptr\", hDrop) ; 15 = CF_HDROP\n\n\n    DllCall(\"CloseClipboard\")\n    return true\n}\n\n\nShowNotification(msg, title := \"\") {\n    ToolTip(title ? title \": \" msg : msg)\n    SetTimer(() => ToolTip(), -2500)\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "^+i",
+            "name": "DropClipboard Insert To Field"
+        },
+        {
+            "action": "GoToSleep() {\n    ; 0 = Standby (Sleep), 1 = Hibernate\n    DllCall(\"PowrProf\\SetSuspendState\", \"Int\", 0, \"Int\", 0, \"Int\", 0)\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#l",
+            "name": "Go To SleepMode"
+        },
+        {
+            "action": "Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#1",
+            "name": "Komorebi W1"
+        },
+        {
+            "action": "Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#2",
+            "name": "Komorebi W2"
+        },
+        {
+            "action": "ShowWorkspace()\nShowWorkspace() {\n    static toggle := 0\n    static wsGui := \"\"\n    \n    if (toggle == 0) {\n        Run(\"komorebic.exe focus-workspace 1\", , \"Hide\")\n        toggle := 1\n        num := \"2\"\n    } else {\n        Run(\"komorebic.exe focus-workspace 0\", , \"Hide\")\n        toggle := 0\n        num := \"1\"\n    }\n    \n    if (wsGui)\n        wsGui.Destroy()\n    \n    wsGui := Gui(\"+AlwaysOnTop -Caption +ToolWindow\")\n    wsGui.BackColor := \"000000\"\n    wsGui.SetFont(\"s80 bold\", \"Consolas\")\n    wsGui.Add(\"Text\", \"cWhite Center w300 h120\", num)\n    wsGui.Show(\"NoActivate\")\n    WinGetPos(&x, &y, &w, &h, wsGui)\n    wsGui.Move((1920-w)/2, (1080-h)/2)\n    SetTimer(() => wsGui.Destroy(), -800)\n}",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#q",
+            "name": "Komorebi Toggle Workspace"
+        },
+        {
+            "action": "OpenFocusedDirectory()\n\n; Ensure script runs as admin to interact with admin windows\nif !A_IsAdmin {\n    try {\n        Run('*RunAs \"' . A_AhkPath . '\" /restart \"' . A_ScriptFullPath . '\"')\n    }\n    ExitApp()\n}\n\nOpenFocusedDirectory() {\n    try {\n        hwnd := WinExist(\"A\")\n        if !hwnd\n            return\n            \n        pid := WinGetPID(\"ahk_id \" hwnd)\n        processName := WinGetProcessName(\"ahk_id \" hwnd)\n        \n        finalPath := \"\"\n        \n        ; Handle script interpreters\n        if (processName ~= \"i)python|powershell|pwsh|autohotkey\") {\n            try {\n                for proc in ComObjGet(\"winmgmts:\").ExecQuery(\"Select CommandLine from Win32_Process Where ProcessId = \" pid) {\n                    cmdLine := proc.CommandLine\n                    if !cmdLine\n                        continue\n                        \n                    ; Look for paths ending in script extensions in the command line\n                    if RegExMatch(cmdLine, 'i)\"([^\"]+\\.(py|ps1|ahk|bat|cmd))\"', &match)\n                        finalPath := match[1]\n                    else if RegExMatch(cmdLine, 'i)\\s([^\\s]+\\.(py|ps1|ahk|bat|cmd))(\\s|$)', &match)\n                        finalPath := match[1]\n                }\n            }\n        }\n        \n        if (finalPath == \"\") {\n            try {\n                finalPath := WinGetProcessPath(\"ahk_id \" hwnd)\n            }\n        }\n            \n        if (finalPath != \"\") {\n            SplitPath(finalPath, , &dir)\n            if DirExist(dir)\n                Run(dir)\n        }\n    }\n}",
+            "category": "Navigation",
+            "description": "Opens the directory of the focused application or script",
+            "enabled": true,
+            "hotkey": "!f",
+            "name": "Open Focused App Directory"
+        },
+        {
+            "action": "PasteOneLine()\nPasteOneLine() {\n    original := A_Clipboard\n    oneLine := StrReplace(A_Clipboard, \"`r`n\", \" \")\n    oneLine := StrReplace(oneLine, \"`n\", \" \")\n    oneLine := RegExReplace(oneLine, \"\\s+\", \" \")\n    A_Clipboard := Trim(oneLine)\n    Send(\"^v\")\n    Sleep(200)\n    A_Clipboard := original\n}",
+            "category": "Text",
+            "description": "Pastes clipboard as a single line",
+            "enabled": true,
+            "hotkey": "^+v",
+            "name": "Paste as One Line"
+        }
+    ],
+    "text_shortcuts": [
+        {
+            "category": "AHK",
+            "description": "Inserts AHK v1 header requirement",
+            "enabled": true,
+            "name": "AutoHotkey Version 1",
+            "replacement": "#Requires AutoHotkey v1.0",
+            "trigger": ";v1"
+        },
+        {
+            "category": "AHK",
+            "description": "Inserts AHK v2 header requirement",
+            "enabled": true,
+            "name": "AutoHotkey Version 2",
+            "replacement": "{#}Requires AutoHotkey v2.0",
+            "trigger": ";v2"
+        },
+        {
+            "category": "Path",
+            "description": "Windows startup registry path run",
+            "name": "Registry Run Path",
+            "replacement": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "trigger": ";run"
+        },
+        {
+            "category": "Shell",
+            "description": "PowerShell command to create symbolic link",
+            "name": "PowerShell Symlink",
+            "replacement": "New-Item -ItemType SymbolicLink -Path \"Fake\" -Target \"Original\" -Force",
+            "trigger": ";mklink"
+        },
+        {
+            "category": "Icon/Emoji/Sign",
+            "description": "  󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼",
+            "name": "Symbols",
+            "replacement": "",
+            "trigger": ";--"
+        },
+        {
+            "category": "Icon/Emoji/Sign",
+            "description": "",
+            "name": "Star",
+            "replacement": "",
+            "trigger": ";star"
+        },
+        {
+            "category": "Path",
+            "description": "",
+            "name": "Db path",
+            "replacement": "C:\\@delta\\db",
+            "trigger": ";db"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Changes for Ai to know that i made on my files",
+            "replacement": "ok i have made some changes from last time  so keep that in mind now",
+            "trigger": ";change"
+        },
+        {
+            "category": "Text",
+            "description": "",
+            "enabled": true,
+            "name": "Percentage %",
+            "replacement": "℅",
+            "trigger": ";%"
+        },
+        {
+            "category": "Math Sign",
+            "description": "",
+            "enabled": true,
+            "name": "not equal",
+            "replacement": "≠",
+            "trigger": ";notequal"
+        },
+        {
+            "category": "Math Sign",
+            "description": "",
+            "enabled": true,
+            "name": "Theta Sign",
+            "replacement": "θ",
+            "trigger": ";theta"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Custom Syntex [Half]",
+            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\ntry to use table for organizing similar types things\nmostly use bengla language other than some names or important things\nNo advertisement or any other talk like about coaching etc only study note\nFor math use katex or latex formatting with \\(Math\\) or $Math$ and also dont use math signs for any number or math related text. just only use for any eqation or signs that need it\nFor math follow this kind of structure for question examples:-\n| সমস্যা নং | বিষয়বস্তু | ইকুয়েশন (Equation) ও সমাধান |\n| --- | --- | --- |",
+            "trigger": ";cms"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Cyberpunk styling with pyqt",
+            "replacement": "# Cyberpunk UI Theme Guide\n\n\nA reusable styling reference for PyQt6 applications with a dark, neon-accented cyberpunk aesthetic.\n\n\n---\n\n\n## Color Palette\n\n\n```python\n# Core Colors\nCP_BG = \"#050505\"           # Main Background (almost black)\nCP_PANEL = \"#111111\"        # Panel/Card Background\nCP_DIM = \"#3a3a3a\"          # Dimmed/Inactive elements, borders\n\n\n# Text Colors\nCP_TEXT = \"#E0E0E0\"         # Primary text\nCP_SUBTEXT = \"#808080\"      # Secondary/muted text\n\n\n# Accent Colors\nCP_YELLOW = \"#FCEE0A\"       # Primary accent (Cyber Yellow)\nCP_CYAN = \"#00F0FF\"         # Secondary accent (Neon Cyan)\nCP_RED = \"#FF003C\"          # Error/Delete/Danger\nCP_GREEN = \"#00FF00\"        # Success/Confirm\nCP_MAGENTA = \"#FF00FF\"      # Alternate accent\nCP_ORANGE = \"#FFA500\"       # Warning/Highlight\n```\n\n\n---\n\n\n## Typography\n\n\n- **Primary Font:** `Consolas` (monospace)\n- **Fallback:** Any monospace font\n- **Weights:** Normal (400), Bold (700)\n- **Sizes:**\n  - Headers: 16px bold\n  - Section titles: 11-12px bold\n  - Body text: 10-11px\n  - Labels/Status: 8-9px\n  - Timestamps: 7px\n\n\n```python\nfrom PyQt6.QtGui import QFont\n\n\n# Header\nQFont(\"Consolas\", 16, QFont.Weight.Bold)\n\n\n# Section Title\nQFont(\"Consolas\", 11, QFont.Weight.Bold)\n\n\n# Body/Button\nQFont(\"Consolas\", 10, QFont.Weight.Bold)\n\n\n# Small Labels\nQFont(\"Consolas\", 8)\n```\n\n\n---\n\n\n## Button Styles\n\n\n### Solid Button (Primary Action)\n```python\nQPushButton {\n    background-color: #FCEE0A;\n    color: #050505;\n    border: none;\n    padding: 5px 15px;\n    font-family: 'Consolas';\n    font-weight: bold;\n}\nQPushButton:hover {\n    background-color: #050505;\n    color: #FCEE0A;\n    border: 1px solid #FCEE0A;\n}\n```\n\n\n### Outlined Button (Secondary Action)\n```python\nQPushButton {\n    background-color: transparent;\n    color: #FCEE0A;\n    border: 2px solid #FCEE0A;\n    padding: 5px 15px;\n    font-family: 'Consolas';\n    font-weight: bold;\n}\nQPushButton:hover {\n    background-color: #FCEE0A;\n    color: #050505;\n}\n```\n\n\n### Danger Button\n```python\nQPushButton {\n    background-color: transparent;\n    color: #FF003C;\n    border: 2px solid #FF003C;\n    padding: 5px 15px;\n    font-family: 'Consolas';\n}\nQPushButton:hover {\n    background-color: #FF003C;\n    color: #050505;\n}\n```\n\n\n---\n\n\n## Input Fields\n\n\n```python\nQLineEdit {\n    background-color: #111111;\n    color: #FCEE0A;\n    border: 1px solid #3a3a3a;\n    padding: 8px;\n    font-family: 'Consolas';\n}\nQLineEdit:focus {\n    border: 1px solid #00F0FF;\n}\nQLineEdit::placeholder {\n    color: #808080;\n}\n```\n\n\n---\n\n\n## Dropdown / ComboBox\n\n\n```python\nQComboBox {\n    background-color: transparent;\n    color: #00F0FF;\n    border: 1px solid #00F0FF;\n    padding: 5px 15px;\n    font-family: 'Consolas';\n    font-weight: bold;\n}\nQComboBox:hover {\n    background-color: #00F0FF;\n    color: #050505;\n}\nQComboBox::drop-down {\n    border: 0px;\n    width: 0px;\n}\nQComboBox QAbstractItemView {\n    background-color: #111111;\n    color: #E0E0E0;\n    selection-background-color: #00F0FF;\n    selection-color: #050505;\n    border: 1px solid #00F0FF;\n    outline: none;\n}\n```\n\n\n---\n\n\n## Checkbox\n\n\n```python\nQCheckBox {\n    color: #E0E0E0;\n    font-family: 'Consolas';\n    font-size: 11px;\n    spacing: 10px;\n    padding: 10px;\n    border: 1px solid #111111;\n    background: #111111;\n}\nQCheckBox::indicator {\n    width: 14px;\n    height: 14px;\n    border: 1px solid #3a3a3a;\n    background: #050505;\n}\nQCheckBox::indicator:checked {\n    background: #FCEE0A;\n    border: 1px solid #FCEE0A;\n}\nQCheckBox::indicator:hover {\n    border: 1px solid #00F0FF;\n}\nQCheckBox:hover {\n    border: 1px solid #3a3a3a;\n    background: #1a1a25;\n}\n```\n\n\n---\n\n\n## Context Menu\n\n\n```python\nQMenu {\n    background-color: #050505;\n    color: #E0E0E0;\n    border: 1px solid #00F0FF;\n    font-family: 'Consolas';\n}\nQMenu::item {\n    padding: 6px 25px;\n    background-color: transparent;\n}\nQMenu::item:selected {\n    background-color: #00F0FF;\n    color: #050505;\n}\n```\n\n\n---\n\n\n## Scrollbar\n\n\n```python\nQScrollBar:vertical {\n    background: #050505;\n    width: 8px;\n}\nQScrollBar::handle:vertical {\n    background: #3a3a3a;\n}\nQScrollBar::handle:vertical:hover {\n    background: #00F0FF;\n}\n```\n\n\n---\n\n\n## Cards / List Items\n\n\n```python\n/* Item card with left accent border */\nQFrame {\n    background-color: #0f0f15;\n    border-left: 3px solid #FCEE0A;  /* Active state */\n    border-bottom: 1px solid #111111;\n}\nQFrame:hover {\n    background-color: #1a1a25;\n}\n\n\n/* Inactive state: change border-left to #3a3a3a */\n```\n\n\n---\n\n\n## Status Toggle Button\n\n\n```python\n/* Active State */\nQPushButton {\n    background-color: #FCEE0A;\n    color: #050505;\n    border: 1px solid #FCEE0A;\n    border-radius: 0px;\n}\n\n\n/* Inactive State */\nQPushButton {\n    background-color: transparent;\n    color: #808080;\n    border: 1px solid #3a3a3a;\n    border-radius: 0px;\n}\nQPushButton:hover {\n    border: 1px solid #00F0FF;\n    color: #00F0FF;\n}\n```\n\n\n---\n\n\n## Dialog Windows\n\n\n```python\nQDialog {\n    background-color: #050505;\n    border: 1px solid #3a3a3a;\n}\nQDialog QLabel {\n    color: #00F0FF;\n    font-family: 'Consolas';\n    font-weight: bold;\n    font-size: 12px;\n}\n```\n\n\n---\n\n\n## Headers & Labels\n\n\n```python\n/* Main Title */\nQLabel {\n    color: #FCEE0A;\n    font-family: 'Consolas';\n    font-size: 16px;\n    font-weight: bold;\n    letter-spacing: 2px;\n}\n\n\n/* Section Header */\nQLabel {\n    color: #808080;\n    font-family: 'Consolas';\n    font-size: 11px;\n    font-weight: bold;\n    padding-bottom: 5px;\n    border-bottom: 2px solid #3a3a3a;\n}\n\n\n/* Status Text */\nQLabel {\n    color: #00F0FF;\n    font-family: 'Consolas';\n    font-size: 10px;\n}\n```\n\n\n---\n\n\n## Splitter\n\n\n```python\nQSplitter::handle {\n    background-color: #3a3a3a;\n}\nQSplitter::handle:hover {\n    background-color: #00F0FF;\n}\n```\n\n\n---\n\n\n## Design Principles\n\n\n1. **Dark Foundation:** Near-black backgrounds (#050505, #111111)\n2. **Neon Accents:** Yellow for primary, Cyan for secondary, Red for danger\n3. **Monospace Typography:** Consolas throughout for that terminal/hacker feel\n4. **Sharp Edges:** No border-radius (0px) for that angular cyberpunk look\n5. **Hover States:** Invert colors on hover (bg becomes text color, text becomes bg)\n6. **Left Border Accents:** Use colored left borders to indicate state/importance\n7. **Uppercase Text:** Headers and labels in uppercase for impact\n8. **Minimal Padding:** Tight, efficient layouts\n9. **Status Indicators:** Text-based (\"ON\"/\"OFF\", \"ACTV\") rather than icons\n\n\n---\n\n\n## Naming Conventions\n\n\nUse tech/system-inspired terminology:\n- \"EXECUTE PROTOCOL\" instead of \"Run\"\n- \"PURGE ENTRY\" instead of \"Delete\"\n- \"EDIT CONFIG\" instead of \"Edit\"\n- \"SCAN_SYS\" instead of \"Scan System\"\n- \"UPLOAD\" instead of \"Save\"\n- \"ABORT\" instead of \"Cancel\"\n- \"IDENTITY // NAME\" instead of \"Name\"\n- \"SOURCE // PATH\" instead of \"Path\"\n\n\n---\n\n\n## Quick Start Template\n\n\n```python\nfrom PyQt6.QtWidgets import QApplication, QMainWindow\nfrom PyQt6.QtGui import QFont\n\n\n# Palette\nCP_BG = \"#050505\"\nCP_PANEL = \"#111111\"\nCP_YELLOW = \"#FCEE0A\"\nCP_CYAN = \"#00F0FF\"\nCP_RED = \"#FF003C\"\nCP_DIM = \"#3a3a3a\"\nCP_TEXT = \"#E0E0E0\"\nCP_SUBTEXT = \"#808080\"\n\n\nclass MainWindow(QMainWindow):\n    def __init__(self):\n        super().__init__()\n        self.setStyleSheet(f\"QMainWindow {{ background-color: {CP_BG}; }}\")\n        # ... your UI setup\n\n\nif __name__ == \"__main__\":\n    app = QApplication([])\n    app.setStyle(\"Fusion\")  # Important for consistent styling\n    window = MainWindow()\n    window.show()\n    app.exec()\n```\n\n\n---\n\n\n*Generated from startup.py cyberpunk theme implementation*",
+            "trigger": ";cyberpunk"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Check summary and unorganized data in ai",
+            "replacement": "here is everything added to summary or it missed something",
+            "trigger": ";check"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "AI Instruction Prompt 1",
+            "replacement": "IMPORTANT:\n- here when i say commit then commit the current changes in my github and then push\n- only commit when i type \"commit\"\n- use emoji ✅when resolved any bug and ⚠️ when facing any issue etc to make the commit message more attractive\n- also first update the md files then commit [update whatever md files needs update like recent changes, problem solving md, new feature md etc]\n- use only 1 line for commit message",
+            "trigger": ";commit"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "AI - Instruction For md file",
+            "replacement": "For Projects Always create a Dev.md file and discuss important thing about the project general idea important things etc and also make a md directory where u will add Provlems_Solution.md where u will update  problems and how we resolved them in this structure\n\n## Template for New Entries\n## [YYYY-MM-DD HH:MM] - Brief Problem Title\n\n**Problem:** \nDescription of the issue observed\n\n**Root Cause:** \nWhat was actually causing the problem\n\n**Solution:** \nHow it was fixed (include key code changes)\n\n**Files Modified:**\n- `file1.js` - Brief description of change\n- `file2.css` - Brief description of change\n\n**Related Issues:** Links to related problems or \"None\"",
+            "trigger": ";ai1"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Unresolved ai orompt",
+            "replacement": "still shows as power in both checked and unchecked situatin ok add it to problem & talk about how u tried to reslove it i will use another ai",
+            "trigger": ";unresolved"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "path fix in python script",
+            "replacement": "SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))\nCONFIG_FILE = os.path.join(SCRIPT_DIR, \"projects_config.json\")",
+            "trigger": ";path"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Theme Guidlines & Rules",
+            "replacement": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
+            "trigger": ";theme"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "diamon list dot",
+            "replacement": "💠",
+            "trigger": ";dot"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Cloudinary Name",
+            "replacement": "dwc7hjiub",
+            "trigger": ";cloud"
+        },
+        {
+            "category": "General",
+            "description": "domain name",
+            "enabled": true,
+            "name": "domain full name",
+            "replacement": "nahid@192.168.0.101",
+            "trigger": ";domain"
+        },
+        {
+            "category": "General",
+            "description": "convex guidline",
+            "enabled": true,
+            "name": "convex guidline",
+            "replacement": "C:\\@delta\\ms1\\CONVEX_GUIDE.md",
+            "trigger": ";convex"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "missed notes",
+            "replacement": "if u missed any notes then give the missing notes",
+            "trigger": ";missed"
+        },
+        {
+            "category": "Path",
+            "description": "Insert context menu guide file path",
+            "enabled": true,
+            "name": "Context Menu Guide Path",
+            "replacement": "# Context Menu Command Reference\n\nI have a GUI app that manages Windows right-click context menu entries. When I ask for context menu commands, provide ONLY the command string itself - nothing else.\n\n## What to Provide\n\nJust the command line, like:\n```\ncmd.exe /k cd /d \"%1\"\n```\n\n## Placeholders\n\n- `%1` - Selected file/folder path\n- `%V` - Directory path (backgrounds)\n\n## Examples\n\n**Open Terminal:**\n```\ncmd.exe /k cd /d \"%1\"\n```\n\n**Copy Path:**\n```\ncmd /c echo %1 | clip\n```\n\n**Run Python Script:**\n```\npythonw \"C:\\path\\to\\script.py\" \"%1\"\n```\n\n**PowerShell Script:**\n```\npowershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File \"C:\\path\\to\\script.ps1\" \"%1\"\n```\n\n## Notes\n\n- Use `pythonw` to avoid terminal windows\n- Wrap paths in quotes: `\"%1\"`\n- Don't include menu labels, scope, or explanations - just the command",
+            "trigger": ";context"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Career Objective",
+            "replacement": "Highly motivated MBA graduate from the University of Dhaka with a major in Finance, seeking to leverage a deep understanding of financial modeling, risk assessment, and corporate valuation. Eager to apply rigorous academic training and analytical skills to a challenging role in a leading financial institution. Committed to driving data-backed decisions and contributing to organizational growth in the fast-paced Bangladeshi financial sector",
+            "trigger": ";career"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Allow Port",
+            "replacement": "New-NetFirewallRule -DisplayName \"Allow Port XXXX\" -Direction Inbound -Action Allow -Protocol TCP -LocalPort XXXX -Profile Any",
+            "trigger": ";port"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "Recent Changes",
+            "replacement": "You are an assistant whose job is to provide latest updates about major international and Bangladeshi organizations.\nFocus on organizations like WTO, UN, EU, G7, IMF, World Bank, COP etc and also important Bangladesh organizations.\nOnly include recent and important changes such as:\n-- New appointments (President, Chairman, Director-General, Secretary-General, etc.)\n-- Leadership changes or replacements\n-- Major structural or policy changes (if highly relevant)\nIgnore minor or less important updates.\n##Output Format Rules##\nAlways present information in a table format\nKeep it short, exam-focused, and easy to memorize\nUse this structure:\n| Organization | Position | New Person | Country | Year |\n| Example | President | Name | Country | 2025 |\n##Extra Instructions##\nHighlight important names using bold\nDo NOT include unnecessary explanation\nEnsure all information is accurate and up-to-date\nPrioritize updates from last 1year\n\n\nmake the study note with this custom syntex formet. here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing",
+            "trigger": ";recent"
+        },
+        {
+            "category": "General",
+            "description": "convex guidline",
+            "enabled": true,
+            "name": "convex guidline (Copy)",
+            "replacement": "C:\\@delta\\ms1\\md\\CONVEX_BACKUP_GUIDE.md",
+            "trigger": ";convex2"
+        }
+    ],
+    "startup_scripts": [
+        {
+            "action": ";! Macro Recorder Logic\nGlobal MacroBuffer := []\nGlobal IsRecordingMacro := false\n\n; Use a dedicated InputHook to capture all keys including modifiers\nGlobal MacroHook := InputHook(\"V\")\nMacroHook.KeyOpt(\"{All}\", \"N\")\nMacroHook.OnKeyDown := (hook, vk, sc) => MacroBuffer.Push(\"{vk\" . Format(\"{:X}\", vk) . \"sc\" . Format(\"{:X}\", sc) . \"}\")\n\n^r:: { ; Ctrl+R to toggle recording\n    Global IsRecordingMacro, MacroBuffer\n    if !IsRecordingMacro {\n        MacroBuffer := []\n        IsRecordingMacro := true\n        MacroHook.Start()\n        ToolTip(\"● RECORDING MACRO\")\n        SetTimer(() => ToolTip(), -1000)\n    } else {\n        MacroHook.Stop()\n        IsRecordingMacro := false\n        ; Remove the last key (the Ctrl+R that stopped the recording)\n        if MacroBuffer.Length > 0\n            MacroBuffer.Pop()\n        ToolTip(\"■ MACRO SAVED\")\n        SetTimer(() => ToolTip(), -1000)\n    }\n}\n\n^e:: { ; Ctrl+E to Playback\n    Global IsRecordingMacro, MacroBuffer\n    if IsRecordingMacro || MacroBuffer.Length == 0\n        return\n    \n    ToolTip(\"▶ PLAYING\")\n    SetTimer(() => ToolTip(), -500)\n    \n    ; Play back with small delay for stability\n    for key in MacroBuffer {\n        SendEvent(key)\n        Sleep(5)\n    }\n}",
+            "category": "System",
+            "description": "Ctrl+R to Record/Stop, Ctrl+E to Playback",
+            "enabled": false,
+            "name": "Macro Recorder (Vim Style)"
+        },
+        {
+            "action": "~;:: {\n    static en_to_bn := Map(\n        \"0\", \"০\", \"1\", \"১\", \"2\", \"২\", \"3\", \"৩\", \"4\", \"৪\",\n        \"5\", \"৫\", \"6\", \"৬\", \"7\", \"৭\", \"8\", \"৮\", \"9\", \"৯\"\n    )\n    \n    ih := InputHook(\"V\", \"{Space}{Enter}{Tab}{Esc}\")\n    \n    ; Nested function for character validation\n    ih.OnChar := OnCharHandler\n    OnCharHandler(h, char) {\n        if !(char ~= \"^\\d$\")\n            h.Stop()\n    }\n    \n    ih.Start()\n    ih.Wait()\n    \n    if (ih.EndReason == \"EndKey\" && ih.Input != \"\") {\n        en_digits := ih.Input\n        bn_digits := \"\"\n        Loop Parse, en_digits\n            bn_digits .= en_to_bn[A_LoopField]\n        \n        bs_count := StrLen(en_digits) + 2\n        \n        if (ih.EndKey == \"Enter\") {\n            Send \"{BackSpace}{BackSpace \" . (bs_count - 1) . \"}\"\n            SendInput bn_digits\n            Send \"{Enter}\"\n        } else {\n            Send \"{BackSpace \" . bs_count . \"}\"\n            SendInput bn_digits\n            Send \"{\" . ih.EndKey . \"}\"\n        }\n    }\n}",
+            "category": "Text",
+            "description": "Converts ;[numbers] to Bengali after Space (Fixed letters conflict)",
+            "enabled": true,
+            "name": "Smart Bengali Numbers"
+        },
+        {
+            "action": ";! Explorer Tabs Hook\nDllCall(\"RegisterShellHookWindow\", \"Ptr\", A_ScriptHwnd)\nmsgNum := DllCall(\"RegisterWindowMessage\", \"Str\", \"SHELLHOOK\")\nOnMessage(msgNum, ShellMessage)\n\nShellMessage(wParam, lParam, *) {\n    if (wParam == 1) {\n        try {\n            if (WinGetClass(lParam) == \"CabinetWClass\")\n                SetTimer(MergeTab.Bind(lParam), -200)\n        }\n    }\n}\n\nMergeTab(hNewWnd) {\n    if !WinExist(hNewWnd)\n        return\n\n    allExplorers := WinGetList(\"ahk_class CabinetWClass\")\n    targetWnd := 0\n    \n    for hWnd in allExplorers {\n        if (hWnd != hNewWnd) {\n            targetWnd := hWnd\n            break\n        }\n    }\n\n    if (!targetWnd)\n        return\n\n    newPath := \"\"\n    Loop 10 {\n        try {\n            sh := ComObject(\"Shell.Application\")\n            for window in sh.Windows {\n                try {\n                    if (window.hwnd == hNewWnd) {\n                        try {\n                            newPath := window.Document.Folder.Self.Path\n                        } catch {\n                            newPath := window.LocationURL\n                        }\n                        break\n                    }\n                }\n            }\n        }\n        if (newPath != \"\")\n            break\n        Sleep(100)\n    }\n\n    if (newPath == \"\")\n        return\n\n    try {\n        WinClose(hNewWnd)\n        WinActivate(targetWnd)\n        Sleep(100)\n        Send(\"^t\")\n        Sleep(200)\n        Send(\"{Esc}\")\n        Sleep(50)\n        Send(\"!d\")\n        Sleep(50)\n        Send(\"^a\")\n        Sleep(50)\n        SendText(newPath)\n        Sleep(100)\n        Send(\"{Enter}\")\n        Sleep(50)\n        Send(\"{Esc}\")\n    }\n}",
+            "category": "General",
+            "description": "",
+            "enabled": false,
+            "name": "Explorer Tabs Hook"
+        },
+        {
+            "action": "::;er::এর\n::;r::র\n::;e::ে",
+            "category": "General",
+            "description": "eng to bng",
+            "enabled": true,
+            "name": "English TO Bangla Text"
+        }
+    ],
+    "context_shortcuts": [
+        {
+            "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm-ss\"))",
+            "category": "Terminal",
+            "description": "Save current Gemini chat session",
+            "enabled": true,
+            "hotkey": "^s",
+            "name": "Gemini Save Chat",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "Ready"
+        },
+        {
+            "action": "SendText(\"/chat resume \")",
+            "category": "Terminal",
+            "description": "Resume previous Gemini chat session",
+            "enabled": true,
+            "hotkey": "^r",
+            "name": "Gemini Resume Chat",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "Ready"
+        },
+        {
+            "action": "SendText(\"/stats session\")",
+            "category": "Terminal",
+            "description": "Save current Gemini chat session",
+            "enabled": true,
+            "hotkey": "^/",
+            "name": "Gemini Session",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "Ready"
+        },
+        {
+            "name": "Chrome close window vct",
+            "category": "General",
+            "description": "",
+            "hotkey": "Numpad0",
+            "window_title": "VCT",
+            "process_name": "chrome.exe",
+            "window_class": "",
+            "action": "{\n        Send \"^w\"\n}",
+            "enabled": true
+        }
+    ],
+    "app_font_family": "Consolas"
+}

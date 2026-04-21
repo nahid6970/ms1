@@ -15,7 +15,7 @@ from PyQt6.QtSvg import QSvgRenderer
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
-SHORTCUTS_JSON_PATH = r"C:\@delta\output\ahk\ahk_shortcuts.json"
+SHORTCUTS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ahk_shortcuts.json")
 # Ensure directory exists
 os.makedirs(os.path.dirname(SHORTCUTS_JSON_PATH), exist_ok=True)
 
