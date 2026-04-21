@@ -35,7 +35,16 @@ SVGS = {
     "REDO": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>',
     "IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
     "SAVE_DISK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
-    "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
+    "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>',
+    "BRUSH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-3.91.35-7.07 3.73-7.07 7.72 0 1.1.9 2 2 2 3.99 0 7.37-3.16 7.72-7.07"></path><path d="m2 22 3-3"></path></svg>',
+    "POLYGON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 21 2 12l5.5-9h9l5.5 9-5.5 9z"></path></svg>',
+    "CURVE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14.5V3.5a2 2 0 0 0-2-2 3.5 3.5 0 0 1-3.5 3.5 2 2 0 0 1-2-2 3.5 3.5 0 0 0-3.5 3.5v11"></path><path d="M17 17.5a2.5 2.5 0 0 0-5 0"></path><path d="M7 17.5a2.5 2.5 0 0 0-5 0"></path><path d="M22 17.5a2.5 2.5 0 0 0-5 0"></path></svg>',
+    "ERASER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>',
+    "PAINT_BUCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"></path><path d="m5 13 5.3 5.3"></path><path d="M12 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"></path></svg>',
+    "EYEDROPPER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 7.85-7.85"></path><path d="M10.5 11.5l1.5 1.5 8.5-8.5-3-3-8.5 8.5Z"></path></svg>',
+    "RECTANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg>',
+    "CIRCLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',
+    "TRIANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -710,11 +719,11 @@ class SVGArtApp(QMainWindow):
     def setup_ui(self):
         self.central_widget = QWidget(); self.setCentralWidget(self.central_widget); self.main_layout = QVBoxLayout(self.central_widget)
         self.tb_main = QToolBar("Main"); self.tb_main.setObjectName("MainToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_main)
-        self.add_tool_action(self.tb_main, "BRUSH", "brush", CP_CYAN); self.brush_combo = QComboBox(); self.brush_combo.addItems(["Marker", "Airbrush", "Multiline", "Highlighter"]); self.brush_combo.currentTextChanged.connect(self.set_brush_type); self.tb_main.addWidget(self.brush_combo)
+        self.add_tool_action(self.tb_main, "BRUSH", "brush", CP_CYAN, SVGS["BRUSH"]); self.brush_combo = QComboBox(); self.brush_combo.addItems(["Marker", "Airbrush", "Multiline", "Highlighter"]); self.brush_combo.currentTextChanged.connect(self.set_brush_type); self.tb_main.addWidget(self.brush_combo)
         self.tb_main.addWidget(QLabel(" LINES: ")); self.multi_slider = QSpinBox(); self.multi_slider.setRange(1, 100); self.multi_slider.setValue(3); self.multi_slider.valueChanged.connect(self.set_multi_count); self.tb_main.addWidget(self.multi_slider)
-        self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN)
+        self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN, SVGS["POLYGON"]); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN, SVGS["CURVE"]); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED, SVGS["ERASER"]); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW, SVGS["PAINT_BUCKET"]); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN, SVGS["EYEDROPPER"])
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
-        self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
+        self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE, SVGS["RECTANGLE"]); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE, SVGS["CIRCLE"]); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE, SVGS["TRIANGLE"])
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
 
         self.tb_library = QToolBar("Library"); self.tb_library.setObjectName("LibraryToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_library)
@@ -763,8 +772,14 @@ class SVGArtApp(QMainWindow):
         u_act = QAction("Undo", self); u_act.setShortcut(QKeySequence("Ctrl+Z")); u_act.triggered.connect(self.undo); self.addAction(u_act)
         r_act = QAction("Redo", self); r_act.setShortcut(QKeySequence("Ctrl+Y")); r_act.triggered.connect(self.redo); self.addAction(r_act)
 
-    def add_tool_action(self, tb, text, tool_name, color):
-        btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold;"); btn.clicked.connect(lambda: self.set_tool(tool_name)); tb.addWidget(btn)
+    def add_tool_action(self, tb, text, tool_name, color, svg_data=None):
+        if svg_data:
+            btn = ConvexButton(parent=self, color=color, svg_data=svg_data)
+            btn.setToolTip(text)
+        else:
+            btn = QPushButton(text)
+            btn.setStyleSheet(f"color: {color}; font-weight: bold;")
+        btn.clicked.connect(lambda: self.set_tool(tool_name)); tb.addWidget(btn)
     def add_system_action(self, tb, text, func, color):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold; border: 1px solid {color};"); btn.clicked.connect(func); tb.addWidget(btn)
     def set_tool(self, tool): self.view.tool = tool; self.view.current_item = None
