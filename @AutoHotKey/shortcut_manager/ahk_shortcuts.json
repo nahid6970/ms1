@@ -447,7 +447,7 @@
         {
             "category": "General",
             "description": "",
-            "enabled": true,
+            "enabled": false,
             "name": "Theme Guidlines & Rules",
             "replacement": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
             "trigger": ";theme"
@@ -531,6 +531,16 @@
             "name": "convex guidline (Copy)",
             "replacement": "C:\\@delta\\ms1\\md\\CONVEX_BACKUP_GUIDE.md",
             "trigger": ";convex2"
+        }
+    ],
+    "file_shortcuts": [
+        {
+            "name": "theme dropdown file",
+            "category": "General",
+            "description": "",
+            "trigger": ";theme",
+            "file_path": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
+            "enabled": true
         }
     ],
     "startup_scripts": [

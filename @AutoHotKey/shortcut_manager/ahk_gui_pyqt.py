@@ -661,6 +661,24 @@ class AddEditShortcutDialog(QDialog):
             self.trigger_edit = QLineEdit()
             self.trigger_edit.setPlaceholderText("e.g., ;v1, ;run")
             form_layout.addWidget(self.trigger_edit)
+        elif self.shortcut_type == "file":
+            # Trigger
+            form_layout.addWidget(QLabel("Trigger (without ::):"))
+            self.trigger_edit = QLineEdit()
+            self.trigger_edit.setPlaceholderText("e.g., ;theme, ;file")
+            form_layout.addWidget(self.trigger_edit)
+            
+            # File Path
+            form_layout.addWidget(QLabel("File Path:"))
+            file_row = QHBoxLayout()
+            self.file_path_edit = QLineEdit()
+            self.file_path_edit.setPlaceholderText("C:\\path\\to\\file.ext or @..\\path")
+            self.browse_btn = QPushButton("Browse")
+            from PyQt6.QtWidgets import QFileDialog
+            self.browse_btn.clicked.connect(self.browse_file)
+            file_row.addWidget(self.file_path_edit)
+            file_row.addWidget(self.browse_btn)
+            form_layout.addLayout(file_row)
         # Background script type has no hotkey/trigger
         
         # Add form layout to top layout
@@ -814,6 +832,11 @@ SendText("Hello World")"""
         result.extend(existing_sorted)
         return result
 
+    def browse_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select File to Drop")
+        if file_path:
+            self.file_path_edit.setText(file_path)
+
     def populate_fields(self):
         self.name_edit.setText(self.shortcut_data.get("name", ""))
         self.category_combo.setCurrentText(self.shortcut_data.get("category", ""))
@@ -831,7 +854,10 @@ SendText("Hello World")"""
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
-        else:
+        elif self.shortcut_type == "file":
+            self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
+            self.file_path_edit.setText(self.shortcut_data.get("file_path", ""))
+        else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
 
@@ -1178,6 +1204,22 @@ SendText("Hello World")"""
                 "action": action,
                 "enabled": enabled
             }
+        elif self.shortcut_type == "file":
+            trigger = self.trigger_edit.text().strip()
+            file_path = self.file_path_edit.text().strip()
+
+            if not trigger or not file_path:
+                QMessageBox.warning(self, "Warning", "Both trigger and file path are required.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "trigger": trigger,
+                "file_path": file_path,
+                "enabled": enabled
+            }
         else: # self.shortcut_type == "text"
             trigger = self.trigger_edit.text().strip()
             replacement = self.replacement_edit.toPlainText().strip()
@@ -1206,6 +1248,8 @@ SendText("Hello World")"""
                 self.parent_window.context_shortcuts.append(shortcut_data)
             elif self.shortcut_type == "startup":
                 self.parent_window.startup_scripts.append(shortcut_data)
+            elif self.shortcut_type == "file":
+                self.parent_window.file_shortcuts.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
 
@@ -1351,6 +1395,7 @@ class AHKShortcutEditor(QMainWindow):
         super().__init__()
         self.script_shortcuts = []
         self.text_shortcuts = []
+        self.file_shortcuts = []
         self.startup_scripts = []
         self.context_shortcuts = []
         self.app_font_family = "JetBrains Mono" # Default
@@ -1432,6 +1477,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
+        self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
         self.add_menu.addAction("Background Script", lambda: self.open_add_dialog("startup"))
         self.add_btn.setMenu(self.add_menu)
@@ -1628,6 +1674,9 @@ class AHKShortcutEditor(QMainWindow):
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
                     self.selected_shortcut = self.text_shortcuts[index]
                     self.selected_type = "text"
+                elif shortcut_type == "file" and index < len(self.file_shortcuts):
+                    self.selected_shortcut = self.file_shortcuts[index]
+                    self.selected_type = "file"
                 elif shortcut_type == "context" and index < len(self.context_shortcuts):
                     self.selected_shortcut = self.context_shortcuts[index]
                     self.selected_type = "context"
@@ -1649,6 +1698,8 @@ class AHKShortcutEditor(QMainWindow):
                     self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "text" and index < len(self.text_shortcuts):
                     self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
+                elif shortcut_type == "file" and index < len(self.file_shortcuts):
+                    self.file_shortcuts[index]["enabled"] = not self.file_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "context" and index < len(self.context_shortcuts):
                     self.context_shortcuts[index]["enabled"] = not self.context_shortcuts[index].get("enabled", True)
                 elif shortcut_type == "startup" and index < len(self.startup_scripts):
@@ -1699,9 +1750,18 @@ class AHKShortcutEditor(QMainWindow):
                     data = self._fix_floats(json.load(f))
                     self.script_shortcuts = data.get("script_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
+                    self.file_shortcuts = data.get("file_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
                     self.context_shortcuts = data.get("context_shortcuts", [])
                     self.app_font_family = data.get("app_font_family", "JetBrains Mono")
+                    
+                    # Fix-up: Move file shortcuts that were accidentally saved in text_shortcuts
+                    to_move = [s for s in self.text_shortcuts if "file_path" in s]
+                    for s in to_move:
+                        self.text_shortcuts.remove(s)
+                        self.file_shortcuts.append(s)
+                    if to_move:
+                        self.save_shortcuts_json()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load shortcuts JSON: {e}")
                 self.create_default_shortcuts()
@@ -1740,6 +1800,7 @@ class AHKShortcutEditor(QMainWindow):
         backup_data = {
             "script_shortcuts": self.script_shortcuts,
             "text_shortcuts": self.text_shortcuts,
+            "file_shortcuts": self.file_shortcuts,
             "startup_scripts": self.startup_scripts,
             "context_shortcuts": self.context_shortcuts,
             "app_font_family": self.app_font_family
@@ -1789,6 +1850,7 @@ class AHKShortcutEditor(QMainWindow):
                 
                 self.script_shortcuts = data.get("script_shortcuts", [])
                 self.text_shortcuts = data.get("text_shortcuts", [])
+                self.file_shortcuts = data.get("file_shortcuts", [])
                 self.startup_scripts = data.get("startup_scripts", [])
                 self.context_shortcuts = data.get("context_shortcuts", [])
                 self.app_font_family = data.get("app_font_family", "JetBrains Mono")
@@ -1811,12 +1873,14 @@ class AHKShortcutEditor(QMainWindow):
             {"name": "AHK Version 2", "category": "AutoHotkey", "description": "AutoHotkey v2 header",
              "trigger": ";v2", "replacement": "#Requires AutoHotkey v2.0", "enabled": True}
         ]
+        self.file_shortcuts = []
 
     def save_shortcuts_json(self):
         try:
             data = {
                 "script_shortcuts": self.script_shortcuts, 
                 "text_shortcuts": self.text_shortcuts,
+                "file_shortcuts": self.file_shortcuts,
                 "startup_scripts": self.startup_scripts,
                 "context_shortcuts": self.context_shortcuts,
                 "app_font_family": self.app_font_family
@@ -1841,12 +1905,14 @@ class AHKShortcutEditor(QMainWindow):
                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_text = [s for s in self.text_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
+        filtered_file = [s for s in self.file_shortcuts
+                        if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')} {s.get('file_path', '')}".lower()]
         filtered_context = [s for s in self.context_shortcuts
                            if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')}".lower()]
         filtered_startup = [s for s in self.startup_scripts
                            if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
 
-        html = self.generate_html(filtered_script, filtered_text, filtered_context, filtered_startup, group_by_category)
+        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_startup, group_by_category)
         
         # Only set HTML if it changed or it's an interaction
         self.text_browser.setHtml(html)
@@ -1855,7 +1921,7 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
 
-    def generate_html(self, script_shortcuts, text_shortcuts, context_shortcuts, startup_scripts, group_by_category):
+    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, startup_scripts, group_by_category):
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -2046,6 +2112,33 @@ class AHKShortcutEditor(QMainWindow):
                 html += self.generate_shortcut_html(shortcut, "text", original_index, False)
 
         html += """
+                    <div class="section-title">File Shortcuts</div>
+        """
+
+        if group_by_category:
+            # Group file shortcuts by category
+            file_categories = {}
+            for shortcut in file_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in file_categories:
+                    file_categories[category] = []
+                file_categories[category].append(shortcut)
+
+            for i, category in enumerate(sorted(file_categories.keys())):
+                color = self.get_category_color(category)
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                for shortcut in sorted(file_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                    original_index = self.file_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "file", original_index, True)
+        else:
+            # Flat list
+            for shortcut in sorted(file_shortcuts, key=lambda x: x.get('trigger', '').lower()):
+                original_index = self.file_shortcuts.index(shortcut)
+                html += self.generate_shortcut_html(shortcut, "file", original_index, False)
+
+        html += """
                 </div>
             </div>
         </body>
@@ -2149,8 +2242,8 @@ class AHKShortcutEditor(QMainWindow):
         # For script and context shortcuts, clear the hotkey to avoid conflicts
         if self.selected_type in ["script", "context"]:
             duplicated['hotkey'] = ""
-        # For text shortcuts, clear the trigger
-        elif self.selected_type == "text":
+        # For text and file shortcuts, clear the trigger
+        elif self.selected_type in ["text", "file"]:
             duplicated['trigger'] = ""
         
         # Add to the appropriate list
@@ -2160,6 +2253,8 @@ class AHKShortcutEditor(QMainWindow):
             self.context_shortcuts.append(duplicated)
         elif self.selected_type == "startup":
             self.startup_scripts.append(duplicated)
+        elif self.selected_type == "file":
+            self.file_shortcuts.append(duplicated)
         else:
             self.text_shortcuts.append(duplicated)
         
@@ -2189,6 +2284,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.context_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "startup":
                 self.startup_scripts.remove(self.selected_shortcut)
+            elif self.selected_type == "file":
+                self.file_shortcuts.remove(self.selected_shortcut)
             else:
                 self.text_shortcuts.remove(self.selected_shortcut)
 
@@ -2215,6 +2312,57 @@ class AHKShortcutEditor(QMainWindow):
                 "        return",
                 "    SendInput \"^v\"",
                 "    Sleep 250  ; Wait for paste to complete before restoring clipboard",
+                "    A_Clipboard := Old",
+                "}",
+                "",
+                "SetClipboardFiles(files) {",
+                "    Static CF_HDROP := 15",
+                "    If !IsObject(files)",
+                "        files := [files]",
+                "    ",
+                "    size := 20",
+                "    for file in files",
+                "        size += (StrLen(file) + 1) * 2",
+                "    size += 2",
+                "    ",
+                "    hGlobal := DllCall(\"GlobalAlloc\", \"uint\", 0x42, \"ptr\", size, \"ptr\")",
+                "    pDrop := DllCall(\"GlobalLock\", \"ptr\", hGlobal, \"ptr\")",
+                "    ",
+                "    NumPut(\"uint\", 20, pDrop + 0)",
+                "    NumPut(\"uint\", 1, pDrop + 16)",
+                "    ",
+                "    offset := 20",
+                "    for file in files {",
+                "        StrPut(file, pDrop + offset, \"UTF-16\")",
+                "        offset += (StrLen(file) + 1) * 2",
+                "    }",
+                "    NumPut(\"ushort\", 0, pDrop + offset)",
+                "    ",
+                "    DllCall(\"GlobalUnlock\", \"ptr\", hGlobal)",
+                "    DllCall(\"OpenClipboard\", \"ptr\", 0)",
+                "    DllCall(\"EmptyClipboard\")",
+                "    DllCall(\"SetClipboardData\", \"uint\", CF_HDROP, \"ptr\", hGlobal)",
+                "    DllCall(\"CloseClipboard\")",
+                "}",
+                "",
+                "PasteFile(filePath) {",
+                "    ; Resolve relative path if it starts with @",
+                "    if SubStr(filePath, 1, 1) = \"@\" {",
+                "        pathOnly := SubStr(filePath, 2)",
+                "        filePath := A_ScriptDir \"\\\" pathOnly",
+                "    }",
+                "    ",
+                "    if !FileExist(filePath) {",
+                "        ToolTip \"File not found: \" filePath",
+                "        SetTimer () => ToolTip(), -3000",
+                "        return",
+                "    }",
+                "    ",
+                "    Old := ClipboardAll()",
+                "    SetClipboardFiles(filePath)",
+                "    Sleep 50  ; Wait for hotstring backspacing to finish",
+                "    Send \"^v\"",
+                "    Sleep 500",
                 "    A_Clipboard := Old",
                 "}",
                 ""
@@ -2373,6 +2521,23 @@ class AHKShortcutEditor(QMainWindow):
                         # Single line: Use single quotes to robustly handle double quotes in content
                         safe_replacement = replacement.replace("'", "''")
                         output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
+                    output_lines.append("")
+
+            # Add enabled file shortcuts
+            enabled_files = [s for s in self.file_shortcuts if s.get('enabled', True)]
+            if enabled_files:
+                output_lines.append(";! === FILE SHORTCUTS ===")
+                for shortcut in enabled_files:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    
+                    trigger = shortcut.get('trigger', '')
+                    file_path = shortcut.get('file_path', '')
+                    
+                    # Escape single quotes in path
+                    safe_path = file_path.replace("'", "''")
+                    output_lines.append(f":X:{trigger}::PasteFile('{safe_path}')")
                     output_lines.append("")
 
             output_dir = r"C:\@delta\output\ahk"
