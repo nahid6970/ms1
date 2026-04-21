@@ -111,8 +111,12 @@ class DiffDialog(QDialog):
         self.scroll.setWidgetResizable(True)
         self.scroll.setStyleSheet(f"""
             QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}
-            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+            QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; background: none; }}
         """)
         
         content = QWidget()
@@ -265,7 +269,12 @@ class RestoreDialog(QDialog):
         self._layout.addWidget(QLabel("Select a backup to restore:"))
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
-        self._scroll.setStyleSheet("background: transparent; border: 1px solid #3a3a3a;")
+        self._scroll.setStyleSheet(f"""
+            QScrollArea {{ background: transparent; border: 1px solid #3a3a3a; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+        """)
         self._scroll.setFixedHeight(300)
         self._layout.addWidget(self._scroll)
         
@@ -528,6 +537,12 @@ class AddEditShortcutDialog(QDialog):
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {shortcut_type.capitalize()} Shortcut")
         self.setModal(True)
         self.resize(500, 400)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: #1e1e1e; color: white; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+        """)
 
         self.setup_ui()
         if shortcut_data:
@@ -982,7 +997,12 @@ SendText("Hello World")"""
         from PyQt6.QtWidgets import QScrollArea
         toc_scroll = QScrollArea()
         toc_scroll.setWidgetResizable(True)
-        toc_scroll.setStyleSheet('QScrollArea { background:#1a1a1a; border:1px solid #444; border-radius:5px; }')
+        toc_scroll.setStyleSheet(f"""
+            QScrollArea {{ background:#1a1a1a; border:1px solid #444; border-radius:5px; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+        """)
         toc_widget = QWidget()
         toc_widget.setStyleSheet('background:#1a1a1a;')
         toc_layout = QVBoxLayout(toc_widget)
@@ -1429,16 +1449,16 @@ class AHKShortcutEditor(QMainWindow):
         top_layout.setContentsMargins(10, 5, 10, 5)
 
         # Better styling for the whole app
-        self.setStyleSheet("""
-            QMainWindow { background-color: #1e1e1e; }
-            QPushButton {
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: #1e1e1e; }}
+            QPushButton {{
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 14px;
                 border-radius: 6px;
                 padding: 6px 12px;
                 height: 28px;
-            }
-            QLineEdit {
+            }}
+            QLineEdit {{
                 background-color: #2d2d2d;
                 border: 1px solid #444;
                 border-radius: 6px;
@@ -1446,18 +1466,48 @@ class AHKShortcutEditor(QMainWindow):
                 color: #ffffff;
                 font-size: 14px;
                 height: 28px;
-            }
-            QLineEdit:focus {
+            }}
+            QLineEdit:focus {{
                 border-color: #61dafb;
-            }
-            QMenu {
+            }}
+            QMenu {{
                 background-color: #2d2d2d;
                 color: white;
                 border: 1px solid #444;
-            }
-            QMenu::item:selected {
+            }}
+            QMenu::item:selected {{
                 background-color: #3d3d3d;
-            }
+            }}
+            
+            /* Cyberpunk Scrollbar */
+            QScrollBar:vertical {{
+                background: {CP_BG};
+                width: 10px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {CP_CYAN};
+                min-height: 20px;
+                border-radius: 5px;
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+                background: none;
+            }}
+            QScrollBar:horizontal {{
+                background: {CP_BG};
+                height: 10px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {CP_CYAN};
+                min-width: 20px;
+                border-radius: 5px;
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+                background: none;
+            }}
         """)
 
         # Add button with menu
