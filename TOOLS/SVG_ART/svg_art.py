@@ -30,7 +30,12 @@ SVGS = {
     "SYNC": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>',
     "SHAPE_LIB": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>',
     "ADD_SHAPE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-    "IMPORT_SVG": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>'
+    "IMPORT_SVG": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>',
+    "UNDO": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>',
+    "REDO": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>',
+    "IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+    "SAVE_DISK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
+    "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -733,11 +738,27 @@ class SVGArtApp(QMainWindow):
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
         self.tb_sym.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSpinBox(); self.mirror_spin.setRange(2, 100); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.tb_sym.addWidget(self.mirror_spin)
         self.tb_sys = QToolBar("System"); self.tb_sys.setObjectName("SystemToolbar"); self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.tb_sys)
-        self.add_system_action(self.tb_sys, "CLEAN", self.clear_art, CP_RED); self.add_system_action(self.tb_sys, "UNDO", self.undo, CP_YELLOW); self.add_system_action(self.tb_sys, "REDO", self.redo, CP_GREEN)
-        self.add_system_action(self.tb_sys, "IMG", self.load_image, CP_CYAN); self.add_system_action(self.tb_sys, "SAVE", self.save_svg, CP_GREEN)
+        
+        btn_clean = ConvexButton(parent=self, color=CP_RED, svg_data=SVGS["TRASH"])
+        btn_clean.setToolTip("Clear all art items"); btn_clean.clicked.connect(self.clear_art); self.tb_sys.addWidget(btn_clean)
+        
+        btn_undo = ConvexButton(parent=self, color=CP_YELLOW, svg_data=SVGS["UNDO"])
+        btn_undo.setToolTip("Undo last action"); btn_undo.clicked.connect(self.undo); self.tb_sys.addWidget(btn_undo)
+        
+        btn_redo = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["REDO"])
+        btn_redo.setToolTip("Redo last undone action"); btn_redo.clicked.connect(self.redo); self.tb_sys.addWidget(btn_redo)
+        
+        btn_img = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["IMAGE"])
+        btn_img.setToolTip("Load background image"); btn_img.clicked.connect(self.load_image); self.tb_sys.addWidget(btn_img)
+        
+        btn_save = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["SAVE_DISK"])
+        btn_save.setToolTip("Export as SVG file"); btn_save.clicked.connect(self.save_svg); self.tb_sys.addWidget(btn_save)
+
         sync_btn = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["SYNC"])
         sync_btn.setToolTip("Cloud Sync Manager"); sync_btn.clicked.connect(self.open_cloud_sync); self.tb_sys.addWidget(sync_btn)
-        self.add_system_action(self.tb_sys, "RST", self.restart_app, CP_RED)
+        
+        btn_rst = ConvexButton(parent=self, color=CP_RED, svg_data=SVGS["RESTART"])
+        btn_rst.setToolTip("Restart application"); btn_rst.clicked.connect(self.restart_app); self.tb_sys.addWidget(btn_rst)
         self.scene = ArtScene(); self.view = ArtView(self.scene, self); self.main_layout.addWidget(self.view)
         u_act = QAction("Undo", self); u_act.setShortcut(QKeySequence("Ctrl+Z")); u_act.triggered.connect(self.undo); self.addAction(u_act)
         r_act = QAction("Redo", self); r_act.setShortcut(QKeySequence("Ctrl+Y")); r_act.triggered.connect(self.redo); self.addAction(r_act)
