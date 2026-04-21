@@ -3,17 +3,127 @@ import os
 import math
 import json
 import re
+import urllib.request
+import difflib
+from functools import partial
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QToolBar, QFileDialog, QColorDialog, QSlider, 
                              QLabel, QGraphicsView, QGraphicsScene, QGraphicsPathItem,
                              QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsPixmapItem, QFrame, QGroupBox, QFormLayout, QDialog, 
                              QSizePolicy, QComboBox, QGraphicsBlurEffect, QInputDialog,
-                             QMessageBox, QMenu, QSpinBox, QPlainTextEdit, QLineEdit)
-from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize, QByteArray
-from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence)
+                             QMessageBox, QMenu, QSpinBox, QPlainTextEdit, QLineEdit, QScrollArea)
+from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize, QByteArray, QTimer
+from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence, QFont)
 from PyQt6 import QtSvg
-from PyQt6.QtSvg import QSvgGenerator
+from PyQt6.QtSvg import QSvgGenerator, QSvgRenderer
+
+# CONVEX CONFIG
+CONVEX_URL = "https://different-gnat-734.convex.cloud"
+SCRIPT_NAME = "svg_art_tool"
+
+SVGS = {
+    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
+    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+    "DIFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
+    "SYNC": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>'
+}
+
+class ConvexButton(QPushButton):
+    def __init__(self, text="", parent=None, color="#FCEE0A", is_outlined=False, svg_data=None):
+        super().__init__(text, parent)
+        self.color = color; self.is_outlined = is_outlined; self.svg_data = svg_data
+        self.setFont(QFont("Consolas", 9, QFont.Weight.Bold)); self.setCursor(Qt.CursorShape.PointingHandCursor); self.setFixedHeight(34)
+        if svg_data: self.update_icon(self.color if self.is_outlined else "#050505")
+        self.update_style()
+
+    def update_icon(self, color):
+        if not self.svg_data: return
+        colored_svg = self.svg_data.replace('currentColor', color)
+        renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+        pix = QPixmap(18, 18); pix.fill(Qt.GlobalColor.transparent); painter = QPainter(pix)
+        renderer.render(painter); painter.end(); self.setIcon(QIcon(pix)); self.setIconSize(QSize(18, 18))
+
+    def enterEvent(self, event):
+        if self.svg_data: self.update_icon("#050505" if self.is_outlined else self.color)
+        super().enterEvent(event)
+    def leaveEvent(self, event):
+        if self.svg_data: self.update_icon(self.color if self.is_outlined else "#050505")
+        super().leaveEvent(event)
+    def update_style(self):
+        if self.is_outlined: self.setStyleSheet(f"QPushButton {{ background-color: transparent; color: {self.color}; border: 2px solid {self.color}; padding: 5px 15px; }} QPushButton:hover {{ background-color: {self.color}; color: #050505; }}")
+        else: self.setStyleSheet(f"QPushButton {{ background-color: {self.color}; color: #050505; border: none; padding: 5px 15px; }} QPushButton:hover {{ background-color: #050505; color: {self.color}; border: 1px solid {self.color}; }}")
+
+class DiffDialog(QDialog):
+    def __init__(self, local_data, remote_data, title="SYSTEM // DIFF_VIEW", parent=None):
+        super().__init__(parent); self.setWindowTitle(title); self.resize(900, 700)
+        self.setStyleSheet(f"background-color: {CP_BG}; border: 2px solid {CP_CYAN};")
+        layout = QVBoxLayout(self)
+        header = QLabel("COMPARISON: REMOTE (RED) vs LOCAL (GREEN)")
+        header.setStyleSheet(f"color: {CP_YELLOW}; font-family: Consolas; font-weight: bold;"); layout.addWidget(header)
+        self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}")
+        content = QWidget(); vbox = QVBoxLayout(content); vbox.setSpacing(0)
+        def fix(obj):
+            if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
+            if isinstance(obj, list): return [fix(i) for i in obj]
+            if isinstance(obj, float) and obj.is_integer(): return int(obj)
+            return obj
+        l_str = json.dumps(fix(local_data), indent=2, sort_keys=True).splitlines()
+        r_str = json.dumps(fix(remote_data), indent=2, sort_keys=True).splitlines()
+        diff = list(difflib.unified_diff(r_str, l_str, fromfile='Backup', tofile='Local', lineterm=''))
+        if not diff: vbox.addWidget(QLabel("No differences detected."))
+        else:
+            for line in diff:
+                lbl = QLabel(line); lbl.setFont(QFont("Consolas", 9))
+                if line.startswith('+'): lbl.setStyleSheet("background-color: #12261e; color: #3fb950;")
+                elif line.startswith('-'): lbl.setStyleSheet("background-color: #2c1619; color: #f85149;")
+                else: lbl.setStyleSheet(f"color: {CP_TEXT};")
+                vbox.addWidget(lbl)
+        vbox.addStretch(); self.scroll.setWidget(content); layout.addWidget(self.scroll)
+        close = ConvexButton("CLOSE", color=CP_DIM, is_outlined=True)
+        close.clicked.connect(self.accept); layout.addWidget(close)
+
+class CloudSyncDialog(QDialog):
+    def __init__(self, convex_call_fn, config_data, parent=None):
+        super().__init__(parent); self.setWindowTitle("CLOUD // SYNC MANAGER"); self.resize(550, 750)
+        self._convex_call = convex_call_fn; self._config_data = config_data; self._backups = []
+        self.selected_id = None; self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; font-family: Consolas; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 8px; }} QGroupBox {{ color: {CP_YELLOW}; font-weight: bold; border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 15px; }}")
+        layout = QVBoxLayout(self); grp_new = QGroupBox("CREATE NEW BACKUP"); new_lay = QVBoxLayout(grp_new)
+        self.inp_label = QLineEdit(); self.inp_label.setPlaceholderText("Enter backup label..."); new_lay.addWidget(self.inp_label)
+        btn_row = QHBoxLayout(); self.btn_backup = ConvexButton("UPLOAD", color=CP_CYAN, svg_data=SVGS["UPLOAD"])
+        self.btn_backup.clicked.connect(self._do_backup); btn_row.addWidget(self.btn_backup); new_lay.addLayout(btn_row); layout.addWidget(grp_new)
+        layout.addWidget(QLabel("CLOUD BACKUP HISTORY:")); self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; border-radius: 5px; }}")
+        layout.addWidget(self.scroll); QTimer.singleShot(10, self._fetch_and_render)
+
+    def _fetch_and_render(self):
+        try:
+            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
+            self._backups = result.get("value", [])
+            import datetime; inner = QWidget(); vbox = QVBoxLayout(inner)
+            for b in sorted(self._backups, key=lambda x: x["createdAt"], reverse=True):
+                dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
+                row = QHBoxLayout(); btn = QPushButton(f"  {dt}  ->  {b['label']}")
+                btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; font-family: Consolas;")
+                btn.clicked.connect(lambda checked, bid=b["id"]: self._select_restore(bid))
+                diff_btn = QPushButton(); diff_btn.setFixedSize(32, 32); rd = QSvgRenderer(QByteArray(SVGS["DIFF"].replace('currentColor', CP_YELLOW).encode()))
+                px = QPixmap(20, 20); px.fill(Qt.GlobalColor.transparent); pn = QPainter(px); rd.render(pn); pn.end()
+                diff_btn.setIcon(QIcon(px)); diff_btn.clicked.connect(lambda checked, bid=b["id"], lbl=b["label"]: self._show_list_diff(bid, lbl))
+                row.addWidget(btn); row.addWidget(diff_btn); vbox.addLayout(row)
+            vbox.addStretch(); self.scroll.setWidget(inner)
+        except: pass
+
+    def _do_backup(self):
+        label = self.inp_label.text().strip()
+        if not label: return
+        self._convex_call("mutation", {"path": "functions:save", "args": {"scriptName": SCRIPT_NAME, "label": label, "data": self._config_data}})
+        self.inp_label.clear(); self._fetch_and_render()
+    def _show_list_diff(self, bid, label):
+        remote = self._convex_call("query", {"path": "functions:get", "args": {"id": bid}}).get("value", {})
+        DiffDialog(self._config_data, remote, title=f"DIFF // {label}", parent=self).exec()
+    def _select_restore(self, bid): self.selected_id = bid; self.accept()
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -603,7 +713,10 @@ class SVGArtApp(QMainWindow):
         self.tb_sym.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSpinBox(); self.mirror_spin.setRange(2, 100); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.tb_sym.addWidget(self.mirror_spin)
         self.tb_sys = QToolBar("System"); self.tb_sys.setObjectName("SystemToolbar"); self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.tb_sys)
         self.add_system_action(self.tb_sys, "CLEAN", self.clear_art, CP_RED); self.add_system_action(self.tb_sys, "UNDO", self.undo, CP_YELLOW); self.add_system_action(self.tb_sys, "REDO", self.redo, CP_GREEN)
-        self.add_system_action(self.tb_sys, "IMG", self.load_image, CP_CYAN); self.add_system_action(self.tb_sys, "SAVE", self.save_svg, CP_GREEN); self.add_system_action(self.tb_sys, "RST", self.restart_app, CP_RED)
+        self.add_system_action(self.tb_sys, "IMG", self.load_image, CP_CYAN); self.add_system_action(self.tb_sys, "SAVE", self.save_svg, CP_GREEN)
+        sync_btn = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["SYNC"])
+        sync_btn.setToolTip("Cloud Sync Manager"); sync_btn.clicked.connect(self.open_cloud_sync); self.tb_sys.addWidget(sync_btn)
+        self.add_system_action(self.tb_sys, "RST", self.restart_app, CP_RED)
         self.scene = ArtScene(); self.view = ArtView(self.scene, self); self.main_layout.addWidget(self.view)
         u_act = QAction("Undo", self); u_act.setShortcut(QKeySequence("Ctrl+Z")); u_act.triggered.connect(self.undo); self.addAction(u_act)
         r_act = QAction("Redo", self); r_act.setShortcut(QKeySequence("Ctrl+Y")); r_act.triggered.connect(self.redo); self.addAction(r_act)
@@ -661,6 +774,42 @@ class SVGArtApp(QMainWindow):
             if r.isEmpty(): r = QRectF(0, 0, 800, 600)
             g = QSvgGenerator(); g.setFileName(f); g.setSize(r.size().toSize()); g.setViewBox(r); painter = QPainter(g); self.scene.render(painter, r, r); painter.end(); [i.show() for i in hidden]
     def restart_app(self): self.save_settings(); os.execl(sys.executable, sys.executable, *sys.argv)
+
+    def _convex_call(self, type, payload):
+        try:
+            req = urllib.request.Request(f"{CONVEX_URL}/api/{type}", data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req) as res: return json.loads(res.read().decode())
+        except Exception as e: print(f"Cloud Error: {e}"); return {}
+
+    def _fix_floats(self, obj):
+        if isinstance(obj, dict): return {k: self._fix_floats(v) for k, v in obj.items()}
+        if isinstance(obj, list): return [self._fix_floats(i) for i in obj]
+        if isinstance(obj, int): return float(obj)
+        return obj
+
+    def open_cloud_sync(self):
+        # Gather all data to sync
+        self.save_settings()
+        self.save_custom_shapes()
+        config_data = {"custom_shapes": self.view.custom_shapes}
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, 'r') as f: config_data["settings"] = json.load(f)
+        
+        dlg = CloudSyncDialog(self._convex_call, config_data, self)
+        if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_id:
+            res = self._convex_call("query", {"path": "functions:get", "args": {"id": dlg.selected_id}})
+            data = res.get("value")
+            if data:
+                # Restore custom shapes
+                if "custom_shapes" in data:
+                    self.view.custom_shapes = self._fix_floats(data["custom_shapes"])
+                    self.save_custom_shapes()
+                    self._shape_pixmap_cache = {name: ShapePickerDialog.build_pixmap(cmds, 100, 100) for name, cmds in self.view.custom_shapes.items()}
+                # Restore settings
+                if "settings" in data:
+                    with open(SETTINGS_FILE, 'w') as f: json.dump(data["settings"], f)
+                    self.load_settings()
+                QMessageBox.information(self, "RESTORE", "Cloud backup restored successfully.")
 
     def load_custom_shapes(self):
         if os.path.exists(CUSTOM_SHAPES_FILE):
