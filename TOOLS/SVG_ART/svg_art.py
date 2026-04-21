@@ -27,7 +27,10 @@ SVGS = {
     "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
     "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
     "DIFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
-    "SYNC": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>'
+    "SYNC": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>',
+    "SHAPE_LIB": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>',
+    "ADD_SHAPE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+    "IMPORT_SVG": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -710,9 +713,12 @@ class SVGArtApp(QMainWindow):
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
 
         self.tb_library = QToolBar("Library"); self.tb_library.setObjectName("LibraryToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_library)
-        btn_list_shapes = QPushButton("SHAPE"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_library.addWidget(btn_list_shapes)
-        btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_library.addWidget(btn_add_shape)
-        btn_import_svg = QPushButton("SVG+"); btn_import_svg.setToolTip("Import shape by SVG code"); btn_import_svg.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 10pt; padding: 0px 6px;"); btn_import_svg.clicked.connect(self.add_svg_shape); self.tb_library.addWidget(btn_import_svg)
+        btn_list_shapes = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["SHAPE_LIB"])
+        btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_library.addWidget(btn_list_shapes)
+        btn_add_shape = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["ADD_SHAPE"])
+        btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_library.addWidget(btn_add_shape)
+        btn_import_svg = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["IMPORT_SVG"])
+        btn_import_svg.setToolTip("Import shape by SVG code"); btn_import_svg.clicked.connect(self.add_svg_shape); self.tb_library.addWidget(btn_import_svg)
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSpinBox(); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
