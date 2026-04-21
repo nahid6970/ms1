@@ -57,14 +57,14 @@ class ConvexButton(QPushButton):
 
 class DiffDialog(QDialog):
     def __init__(self, local_data, remote_data, title="SYSTEM // DIFF_VIEW", parent=None):
-        super().__init__(parent); self.setWindowTitle(title); self.resize(900, 700)
-        self.setStyleSheet(f"background-color: {CP_BG}; border: 2px solid {CP_CYAN};")
+        super().__init__(parent); self.setWindowTitle(title); self.resize(900, 700); self.setObjectName("DiffDialog")
+        self.setStyleSheet(f"#DiffDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ border: none; }}")
         layout = QVBoxLayout(self)
         header = QLabel("COMPARISON: REMOTE (RED) vs LOCAL (GREEN)")
         header.setStyleSheet(f"color: {CP_YELLOW}; font-family: Consolas; font-weight: bold;"); layout.addWidget(header)
         self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}")
-        content = QWidget(); vbox = QVBoxLayout(content); vbox.setSpacing(0)
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }} QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}")
+        content = QWidget(); vbox = QVBoxLayout(content); vbox.setSpacing(0); vbox.setContentsMargins(0,0,0,0)
         def fix(obj):
             if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
             if isinstance(obj, list): return [fix(i) for i in obj]
@@ -76,7 +76,7 @@ class DiffDialog(QDialog):
         if not diff: vbox.addWidget(QLabel("No differences detected."))
         else:
             for line in diff:
-                lbl = QLabel(line); lbl.setFont(QFont("Consolas", 9))
+                lbl = QLabel(line); lbl.setFont(QFont("Consolas", 9)); lbl.setContentsMargins(5, 1, 5, 1)
                 if line.startswith('+'): lbl.setStyleSheet("background-color: #12261e; color: #3fb950;")
                 elif line.startswith('-'): lbl.setStyleSheet("background-color: #2c1619; color: #f85149;")
                 else: lbl.setStyleSheet(f"color: {CP_TEXT};")
@@ -108,10 +108,16 @@ class CloudSyncDialog(QDialog):
                 row = QHBoxLayout(); btn = QPushButton(f"  {dt}  ->  {b['label']}")
                 btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; font-family: Consolas;")
                 btn.clicked.connect(lambda checked, bid=b["id"]: self._select_restore(bid))
+                
                 diff_btn = QPushButton(); diff_btn.setFixedSize(32, 32); rd = QSvgRenderer(QByteArray(SVGS["DIFF"].replace('currentColor', CP_YELLOW).encode()))
                 px = QPixmap(20, 20); px.fill(Qt.GlobalColor.transparent); pn = QPainter(px); rd.render(pn); pn.end()
                 diff_btn.setIcon(QIcon(px)); diff_btn.clicked.connect(lambda checked, bid=b["id"], lbl=b["label"]: self._show_list_diff(bid, lbl))
-                row.addWidget(btn); row.addWidget(diff_btn); vbox.addLayout(row)
+                
+                del_btn = QPushButton(); del_btn.setFixedSize(32, 32); rd_del = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
+                px_del = QPixmap(20, 20); px_del.fill(Qt.GlobalColor.transparent); pn_del = QPainter(px_del); rd_del.render(pn_del); pn_del.end()
+                del_btn.setIcon(QIcon(px_del)); del_btn.clicked.connect(lambda checked, bid=b["id"]: self._do_remove(bid))
+                
+                row.addWidget(btn); row.addWidget(diff_btn); row.addWidget(del_btn); vbox.addLayout(row)
             vbox.addStretch(); self.scroll.setWidget(inner)
         except: pass
 
@@ -120,6 +126,11 @@ class CloudSyncDialog(QDialog):
         if not label: return
         self._convex_call("mutation", {"path": "functions:save", "args": {"scriptName": SCRIPT_NAME, "label": label, "data": self._config_data}})
         self.inp_label.clear(); self._fetch_and_render()
+
+    def _do_remove(self, bid):
+        if QMessageBox.question(self, "DELETE", "Delete this cloud backup permanently?") == QMessageBox.StandardButton.Yes:
+            self._convex_call("mutation", {"path": "functions:remove", "args": {"id": bid}})
+            self._fetch_and_render()
     def _show_list_diff(self, bid, label):
         remote = self._convex_call("query", {"path": "functions:get", "args": {"id": bid}}).get("value", {})
         DiffDialog(self._config_data, remote, title=f"DIFF // {label}", parent=self).exec()
