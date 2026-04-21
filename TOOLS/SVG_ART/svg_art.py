@@ -2,13 +2,14 @@ import sys
 import os
 import math
 import json
+import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QToolBar, QFileDialog, QColorDialog, QSlider, 
                              QLabel, QGraphicsView, QGraphicsScene, QGraphicsPathItem,
                              QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsPixmapItem, QFrame, QGroupBox, QFormLayout, QDialog, 
                              QSizePolicy, QComboBox, QGraphicsBlurEffect, QInputDialog,
-                             QMessageBox, QMenu, QSpinBox)
+                             QMessageBox, QMenu, QSpinBox, QPlainTextEdit, QLineEdit)
 from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize, QByteArray
 from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence)
 from PyQt6 import QtSvg
@@ -472,6 +473,32 @@ class ShapePickerDialog(QDialog):
         self._build_grid(); self.adjustSize()
 
 
+class SVGInputDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("IMPORT SVG SHAPE")
+        self.setFixedSize(500, 450)
+        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("SHAPE NAME:"))
+        self.name_edit = QLineEdit()
+        self.name_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; padding: 5px;")
+        layout.addWidget(self.name_edit)
+        layout.addWidget(QLabel("SVG CODE / PATH DATA (d=...):"))
+        self.text_edit = QPlainTextEdit()
+        self.text_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; font-size: 9pt;")
+        self.text_edit.setPlaceholderText("<path d=\"M 10 10 L 90 90 ...\" />\nor just the path data: M 10 10 L 90 90 ...")
+        layout.addWidget(self.text_edit)
+        btns = QHBoxLayout()
+        self.btn_ok = QPushButton("IMPORT")
+        self.btn_ok.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold; padding: 8px;")
+        self.btn_ok.clicked.connect(self.accept)
+        self.btn_cancel = QPushButton("CANCEL")
+        self.btn_cancel.setStyleSheet(f"background-color: {CP_DIM}; color: white; padding: 8px;")
+        self.btn_cancel.clicked.connect(self.reject)
+        btns.addWidget(self.btn_ok); btns.addWidget(self.btn_cancel)
+        layout.addLayout(btns)
+
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
@@ -486,6 +513,7 @@ class SVGArtApp(QMainWindow):
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE)
         btn_add_shape = QPushButton("+"); btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt; padding: 0px 6px;"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_shapes.addWidget(btn_add_shape)
+        btn_import_svg = QPushButton("SVG+"); btn_import_svg.setToolTip("Import shape by SVG code"); btn_import_svg.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 10pt; padding: 0px 6px;"); btn_import_svg.clicked.connect(self.add_svg_shape); self.tb_shapes.addWidget(btn_import_svg)
         btn_list_shapes = QPushButton("SHAPE"); btn_list_shapes.setToolTip("Browse custom shapes"); btn_list_shapes.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;"); btn_list_shapes.clicked.connect(self.show_shape_picker); self.tb_shapes.addWidget(btn_list_shapes)
         self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
@@ -592,6 +620,78 @@ class SVGArtApp(QMainWindow):
         dlg = ShapePickerDialog(self.view.custom_shapes, self._shape_pixmap_cache, self.save_custom_shapes, self)
         if dlg.exec() and dlg.selected:
             self.set_tool(f"custom:{dlg.selected}")
+
+    def add_svg_shape(self):
+        dlg = SVGInputDialog(self)
+        if dlg.exec():
+            name = dlg.name_edit.text().strip()
+            svg_code = dlg.text_edit.toPlainText().strip()
+            if name and svg_code:
+                cmds = self.parse_svg_to_shape(svg_code)
+                if cmds:
+                    self.view.custom_shapes[name] = cmds
+                    self._shape_pixmap_cache[name] = ShapePickerDialog.build_pixmap(cmds, 100, 100)
+                    self.save_custom_shapes()
+                    QMessageBox.information(self, "Success", f"Shape '{name}' added!")
+                else:
+                    QMessageBox.warning(self, "Error", "Could not parse SVG code. Ensure it has a <path d='...' /> or valid path data.")
+
+    def parse_svg_to_shape(self, svg_code):
+        d_match = re.search(r'\bd=["\']([^"\']+)["\']', svg_code)
+        d_string = d_match.group(1) if d_match else svg_code
+        token_pattern = re.compile(r'([a-zA-Z])|([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)')
+        tokens = []
+        for m in token_pattern.finditer(d_string):
+            if m.group(1): tokens.append(m.group(1))
+            else: tokens.append(float(m.group(2)))
+        commands = []; i = 0; cur_x, cur_y = 0, 0; last_cmd = ""
+        while i < len(tokens):
+            token = tokens[i]
+            if isinstance(token, str): cmd = token; i += 1
+            else: cmd = last_cmd
+            if not cmd: break
+            try:
+                if cmd in 'Mm':
+                    x, y = tokens[i], tokens[i+1]; i += 2
+                    if cmd == 'm': x += cur_x; y += cur_y
+                    commands.append(["M", [x, y]]); cur_x, cur_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
+                elif cmd in 'Ll':
+                    x, y = tokens[i], tokens[i+1]; i += 2
+                    if cmd == 'l': x += cur_x; y += cur_y
+                    commands.append(["L", [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
+                elif cmd in 'Hh':
+                    x = tokens[i]; i += 1
+                    if cmd == 'h': x += cur_x
+                    commands.append(["L", [x, cur_y]]); cur_x = x; last_cmd = cmd
+                elif cmd in 'Vv':
+                    y = tokens[i]; i += 1
+                    if cmd == 'v': y += cur_y
+                    commands.append(["L", [cur_x, y]]); cur_y = y; last_cmd = cmd
+                elif cmd in 'Qq':
+                    x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                    if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
+                    commands.append(["Q", [x1, y1], [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
+                elif cmd in 'Cc':
+                    x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                    if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
+                    commands.append(["C", [x1, y1], [x2, y2], [x, y]]); cur_x, cur_y = x, y; last_cmd = cmd
+                elif cmd in 'Zz':
+                    commands.append(["Z"]); last_cmd = ""
+                else: i += 1
+            except: break
+        if not commands: return None
+        all_pts = []
+        for c in commands:
+            for pt in c[1:]: all_pts.append(QPointF(pt[0], pt[1]))
+        if not all_pts: return None
+        rect = QRectF(all_pts[0], all_pts[0])
+        for p in all_pts[1:]: rect = rect.united(QRectF(p, p))
+        w, h = rect.width() or 1, rect.height() or 1
+        norm_cmds = []
+        for c in commands:
+            pts = [[(p[0]-rect.x())/w, (p[1]-rect.y())/h] for p in c[1:]]
+            norm_cmds.append([c[0]] + pts)
+        return norm_cmds
 
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):
