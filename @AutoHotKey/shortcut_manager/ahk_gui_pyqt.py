@@ -1689,8 +1689,13 @@ class AHKShortcutEditor(QMainWindow):
         return self.category_colors.get(category, "#B0B0B0")
 
     def update_display(self):
-        scrollbar = self.text_browser.verticalScrollBar()
-        scroll_position = scrollbar.value()
+        if not hasattr(self, 'text_browser'): return
+
+        v_bar = self.text_browser.verticalScrollBar()
+        # Capture current state
+        scroll_pos = v_bar.value()
+        # Use a generous margin for bottom detection to prevent "creeping up"
+        at_bottom = v_bar.maximum() > 0 and scroll_pos >= v_bar.maximum() - 15
 
         search_query = self.search_edit.text().lower()
         group_by_category = self.category_toggle.isChecked()
@@ -1709,12 +1714,35 @@ class AHKShortcutEditor(QMainWindow):
 
         html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_startup, group_by_category)
         
-        # Only set HTML if it changed or it's an interaction
+        # Block signals and updates to prevent flickering/jumping
+        v_bar.blockSignals(True)
+        self.text_browser.setUpdatesEnabled(False)
         self.text_browser.setHtml(html)
-        scrollbar.setValue(scroll_position)
-        # Second pass restoration for dynamic heights
+        
+        # Force the document layout to recalculate synchronously
+        # Accessing documentSize() triggers the layout engine to update the scrollbar range
+        _ = self.text_browser.document().documentLayout().documentSize()
+        
+        # Immediate restoration
+        if at_bottom:
+            v_bar.setValue(v_bar.maximum())
+        else:
+            v_bar.setValue(scroll_pos)
+            
+        self.text_browser.setUpdatesEnabled(True)
+        v_bar.blockSignals(False)
+
+        # Backup restoration in next event loop to handle any delayed layout shifts
+        def backup_restore():
+            v_bar.blockSignals(True)
+            if at_bottom:
+                v_bar.setValue(v_bar.maximum())
+            else:
+                v_bar.setValue(scroll_pos)
+            v_bar.blockSignals(False)
+        
         from PyQt6.QtCore import QTimer
-        QTimer.singleShot(1, lambda: scrollbar.setValue(scroll_position))
+        QTimer.singleShot(0, backup_restore)
 
     def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, startup_scripts, group_by_category):
         def get_toggle_icon(section):
