@@ -476,17 +476,26 @@ class ShapePickerDialog(QDialog):
     def __init__(self, custom_shapes, pixmap_cache, on_delete, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Custom Shapes"); self.setModal(True)
+        self.setMinimumSize(460, 300)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
         self.selected = None; self.custom_shapes = custom_shapes
         self.pixmap_cache = pixmap_cache; self.on_delete = on_delete
-        self.layout_ = QVBoxLayout(self); self.layout_.setSizeConstraint(QVBoxLayout.SizeConstraint.SetFixedSize)
+        self.layout_ = QVBoxLayout(self); self.layout_.setSizeConstraint(QVBoxLayout.SizeConstraint.SetMinAndMaxSize)
         self._build_grid()
 
     def _build_grid(self):
         from PyQt6.QtWidgets import QGridLayout
-        if self.layout_.count():
-            old = self.layout_.takeAt(0).widget()
-            if old: old.deleteLater()
+        while self.layout_.count():
+            item = self.layout_.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+
+        if not self.custom_shapes:
+            lbl = QLabel("NO CUSTOM SHAPES FOUND\nUSE '+' TO SAVE YOUR ART")
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 12pt; font-weight: bold; margin: 40px;")
+            self.layout_.addWidget(lbl)
+            return
+
         container = QWidget(); gl = QGridLayout(container); gl.setSpacing(10); gl.setContentsMargins(10,10,10,10)
         COLS, SIZE, LABEL_H = 4, 100, 36
         for i, (name, cmds) in enumerate(self.custom_shapes.items()):
