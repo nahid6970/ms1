@@ -1098,10 +1098,22 @@ class SettingsDialog(QDialog):
                 color: {CP_CYAN};
                 border: 1px solid {CP_DIM};
                 padding: 4px;
+                min-height: 24px;
             }}
             QComboBox::drop-down {{
-                border: none;
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
                 width: 20px;
+                border-left-width: 1px;
+                border-left-color: {CP_DIM};
+                border-left-style: solid;
+            }}
+            QComboBox::down-arrow {{
+                image: none;
+                border-top: 5px solid {CP_CYAN};
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                margin-top: 2px;
             }}
             QComboBox QAbstractItemView {{
                 background-color: {CP_PANEL};
@@ -1218,6 +1230,28 @@ class AHKShortcutEditor(QMainWindow):
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
             }}
             QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QComboBox:focus {{
+                border: 1px solid {CP_CYAN};
+            }}
+            QComboBox::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left-width: 1px;
+                border-left-color: {CP_DIM};
+                border-left-style: solid;
+            }}
+            QComboBox::down-arrow {{
+                image: none;
+                border-top: 5px solid {CP_CYAN};
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                margin-top: 2px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {CP_CYAN};
+                selection-color: {CP_BG};
                 border: 1px solid {CP_CYAN};
             }}
             
@@ -1367,12 +1401,14 @@ class AHKShortcutEditor(QMainWindow):
         self.selected_type = None
 
     def apply_global_font(self):
-        """Apply the selected font family globally to the application"""
-        font = QFont(self.app_font_family, 10)
+        """Apply the selected font family and size globally to the application"""
+        font = QFont(self.app_font_family, self.app_font_size)
         QApplication.instance().setFont(font)
         # Force update of elements that might have their own font set
         if hasattr(self, 'text_browser'):
             self.update_display() # Refresh HTML with new font
+            # Update the base font size in HTML too
+            self.text_browser.setStyleSheet(f"background-color: {CP_BG}; border: none; font-size: {self.app_font_size}pt;")
 
     def restart_app(self):
         """Restart the application to apply changes."""
@@ -1511,7 +1547,8 @@ class AHKShortcutEditor(QMainWindow):
                     self.file_shortcuts = data.get("file_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
                     self.context_shortcuts = data.get("context_shortcuts", [])
-                    self.app_font_family = data.get("app_font_family", "JetBrains Mono")
+                    self.app_font_family = data.get("app_font_family", "Consolas")
+                    self.app_font_size = data.get("app_font_size", 10)
                     
                     # Fix-up: Move file shortcuts that were accidentally saved in text_shortcuts
                     to_move = [s for s in self.text_shortcuts if "file_path" in s]
@@ -1548,7 +1585,8 @@ class AHKShortcutEditor(QMainWindow):
                 "file_shortcuts": self.file_shortcuts,
                 "startup_scripts": self.startup_scripts,
                 "context_shortcuts": self.context_shortcuts,
-                "app_font_family": self.app_font_family
+                "app_font_family": self.app_font_family,
+                "app_font_size": self.app_font_size
             }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
