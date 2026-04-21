@@ -1632,7 +1632,7 @@ class AHKShortcutEditor(QMainWindow):
         <body>
             <div class="container">
                 <div class="column">
-                    <div class="section-title"><a href="app://toggle-section/script">{get_toggle_icon('script')} Script Shortcuts</a></div>
+                    <div class="section-title"><a href="toggle-section://script">{get_toggle_icon('script')} Script Shortcuts</a></div>
         """
 
         if self.section_states.get("script", True):
@@ -1662,7 +1662,7 @@ class AHKShortcutEditor(QMainWindow):
         html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title"><a href="app://toggle-section/context">{get_toggle_icon('context')} Context Shortcuts</a></div>
+                    <div class="section-title"><a href="toggle-section://context">{get_toggle_icon('context')} Context Shortcuts</a></div>
         """
 
         if self.section_states.get("context", True):
@@ -1688,7 +1688,7 @@ class AHKShortcutEditor(QMainWindow):
                     html += self.generate_shortcut_html(shortcut, "context", original_index, False)
 
         html += f"""
-                    <div class="section-title"><a href="app://toggle-section/startup">{get_toggle_icon('startup')} Background Scripts</a></div>
+                    <div class="section-title"><a href="toggle-section://startup">{get_toggle_icon('startup')} Background Scripts</a></div>
         """
 
         if self.section_states.get("startup", True):
@@ -1716,7 +1716,7 @@ class AHKShortcutEditor(QMainWindow):
         html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title"><a href="app://toggle-section/text">{get_toggle_icon('text')} Text Shortcuts</a></div>
+                    <div class="section-title"><a href="toggle-section://text">{get_toggle_icon('text')} Text Shortcuts</a></div>
         """
 
         if self.section_states.get("text", True):
@@ -1744,7 +1744,7 @@ class AHKShortcutEditor(QMainWindow):
                     html += self.generate_shortcut_html(shortcut, "text", original_index, False)
 
         html += f"""
-                    <div class="section-title"><a href="app://toggle-section/file">{get_toggle_icon('file')} File Shortcuts</a></div>
+                    <div class="section-title"><a href="toggle-section://file">{get_toggle_icon('file')} File Shortcuts</a></div>
         """
 
         if self.section_states.get("file", True):
