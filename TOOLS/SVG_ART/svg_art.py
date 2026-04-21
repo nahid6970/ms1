@@ -544,13 +544,9 @@ class SVGInputDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("IMPORT SVG SHAPE")
-        self.setFixedSize(500, 450)
+        self.setFixedSize(500, 380)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("SHAPE NAME:"))
-        self.name_edit = QLineEdit()
-        self.name_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; padding: 5px;")
-        layout.addWidget(self.name_edit)
         layout.addWidget(QLabel("SVG CODE / PATH DATA (d=...):"))
         self.text_edit = QPlainTextEdit()
         self.text_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; font-size: 9pt;")
@@ -691,7 +687,6 @@ class SVGArtApp(QMainWindow):
     def add_svg_shape(self):
         dlg = SVGInputDialog(self)
         if dlg.exec():
-            name = dlg.name_edit.text().strip()
             svg_code = dlg.text_edit.toPlainText().strip()
             if svg_code:
                 cmds = self.parse_svg_to_shape(svg_code)
@@ -746,7 +741,8 @@ class SVGArtApp(QMainWindow):
             tag_name = tag_name.lower()
             if tag_name == "g":
                 m = re.search(r'transform=["\']([^"\']+)["\']', attr_str)
-                transform_stack.append(parse_transform(m.group(1)) * transform_stack[-1])
+                t_str = m.group(1) if m else ""
+                transform_stack.append(parse_transform(t_str) * transform_stack[-1])
                 continue
             elif tag_name == "/g":
                 if len(transform_stack) > 1: transform_stack.pop()
