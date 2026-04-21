@@ -41,21 +41,20 @@ SVGS = {
 
 class CyberButton(QPushButton):
     """Modern button with SVG icon support and dynamic hover color-switching."""
-    def __init__(self, text="", parent=None, color=CP_YELLOW, is_outlined=False, svg_data=None):
+    def __init__(self, text="", parent=None, color=CP_DIM, is_outlined=False, svg_data=None):
         super().__init__(text, parent)
         self.color = color
         self.is_outlined = is_outlined
         self.svg_data = svg_data
-        self.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
+        self.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFixedHeight(34)
         if svg_data:
-            self.update_icon(self.color if self.is_outlined else CP_BG)
+            self.update_icon(CP_TEXT if self.color == CP_DIM else CP_BG)
         self.update_style()
 
     def update_icon(self, color):
         if not self.svg_data: return
-        # Inject color into SVG currentColor placeholder
         colored_svg = self.svg_data.replace('currentColor', color)
         renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
         pix = QPixmap(18, 18)
@@ -68,23 +67,26 @@ class CyberButton(QPushButton):
 
     def enterEvent(self, event):
         if self.svg_data:
-            self.update_icon(CP_BG if self.is_outlined else self.color)
+            self.update_icon(CP_YELLOW if self.color == CP_DIM else CP_BG)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
         if self.svg_data:
-            self.update_icon(self.color if self.is_outlined else CP_BG)
+            self.update_icon(CP_TEXT if self.color == CP_DIM else CP_BG)
         super().leaveEvent(event)
 
     def update_style(self):
-        if self.is_outlined:
+        # Match guide: Dark gray buttons highlight yellow on hover
+        if self.color == CP_DIM:
             self.setStyleSheet(f"""
-                QPushButton {{ background-color: transparent; color: {self.color}; border: 2px solid {self.color}; padding: 5px 15px; font-family: 'Consolas'; }}
-                QPushButton:hover {{ background-color: {self.color}; color: {CP_BG}; }}
+                QPushButton {{ background-color: {CP_DIM}; color: white; border: 1px solid {CP_DIM}; padding: 6px 12px; border-radius: 0px; }}
+                QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+                QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
             """)
         else:
+            # Special accent buttons (Add, Generate) still use their specific colors but with sharp corners
             self.setStyleSheet(f"""
-                QPushButton {{ background-color: {self.color}; color: {CP_BG}; border: none; padding: 5px 15px; font-family: 'Consolas'; }}
+                QPushButton {{ background-color: {self.color}; color: {CP_BG}; border: none; padding: 6px 12px; border-radius: 0px; }}
                 QPushButton:hover {{ background-color: {CP_BG}; color: {self.color}; border: 1px solid {self.color}; }}
             """)
 
@@ -1223,15 +1225,135 @@ class AHKShortcutEditor(QMainWindow):
 
         # Apply Global Theme
         self.setStyleSheet(f"""
-            QMainWindow, QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            
-            QLineEdit, QComboBox, QPlainTextEdit, QTextEdit {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+            QMainWindow, QDialog {{
+                background-color: {CP_BG};
             }}
+            QWidget {{
+                color: {CP_TEXT};
+                font-family: 'Consolas';
+                font-size: 10pt;
+            }}
+            
+            QLineEdit, QSpinBox, QComboBox, QPlainTextEdit, QTextEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+                selection-background-color: {CP_CYAN};
+                selection-color: #000000;
+            }}
+
             QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QComboBox:focus {{
                 border: 1px solid {CP_CYAN};
             }}
+
+            QSpinBox::up-button, QSpinBox::down-button {{
+                width: 0px; 
+                border: none;
+            }}
+            
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                color: white;
+                padding: 6px 12px;
+                font-weight: bold;
+                border-radius: 0px;
+            }}
+
+            QPushButton:hover {{
+                background-color: #2a2a2a;
+                border: 1px solid {CP_YELLOW};
+                color: {CP_YELLOW};
+            }}
+
+            QPushButton:pressed {{
+                background-color: {CP_YELLOW};
+                color: black;
+            }}
+            
+            QGroupBox {{
+                border: 1px solid {CP_DIM};
+                margin-top: 10px;
+                padding-top: 10px;
+                font-weight: bold;
+                color: {CP_YELLOW};
+            }}
+
+            QGroupBox::title {{
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 0 5px;
+            }}
+            
+            QCheckBox {{
+                spacing: 8px;
+                color: {CP_TEXT};
+            }}
+
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+            }}
+
+            QCheckBox::indicator:checked {{
+                background: {CP_YELLOW};
+                border-color: {CP_YELLOW};
+            }}
+            
+            QMenu {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                border: 1px solid {CP_CYAN};
+            }}
+
+            QMenu::item:selected {{
+                background-color: {CP_CYAN};
+                color: {CP_BG};
+            }}
+            
+            QScrollArea {{
+                background: transparent;
+                border: none;
+            }}
+
+            QScrollBar:vertical {{
+                background: {CP_BG};
+                width: 10px;
+                margin: 0px;
+            }}
+
+            QScrollBar::handle:vertical {{
+                background: {CP_CYAN};
+                min-height: 20px;
+                border-radius: 5px;
+            }}
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+                background: none;
+            }}
+
+            QScrollBar:horizontal {{
+                background: {CP_BG};
+                height: 10px;
+                margin: 0px;
+            }}
+
+            QScrollBar::handle:horizontal {{
+                background: {CP_CYAN};
+                min-width: 20px;
+                border-radius: 5px;
+            }}
+
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+                background: none;
+            }}
+
+            /* Specialized ComboBox dropdown styling */
             QComboBox::drop-down {{
                 subcontrol-origin: padding;
                 subcontrol-position: top right;
@@ -1253,38 +1375,8 @@ class AHKShortcutEditor(QMainWindow):
                 selection-background-color: {CP_CYAN};
                 selection-color: {CP_BG};
                 border: 1px solid {CP_CYAN};
+                outline: none;
             }}
-            
-            QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
-            }}
-            QPushButton:pressed {{
-                background-color: {CP_YELLOW}; color: black;
-            }}
-            
-            QGroupBox {{
-                border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
-            }}
-            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-            
-            QMenu {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};
-            }}
-            QMenu::item:selected {{
-                background-color: {CP_CYAN}; color: {CP_BG};
-            }}
-            
-            /* Cyberpunk Scrollbar */
-            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
-            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
-            
-            QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0px; }}
-            QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; background: none; }}
         """)
 
         # Add button with menu
@@ -1634,80 +1726,79 @@ class AHKShortcutEditor(QMainWindow):
         <head>
             <style>
                 body {{
-                    font-family: '{self.app_font_family}', 'Segoe UI', sans-serif;
+                    font-family: 'Consolas', 'Segoe UI', sans-serif;
                     margin: 10px 20px;
-                    background: #2b2b2b;
-                    color: #ffffff;
-                    font-size: 18px; /* High visibility base size */
+                    background: {CP_BG};
+                    color: {CP_TEXT};
+                    font-size: {self.app_font_size}pt;
                 }}
                 .container {{ display: flex; gap: 20px; }}
                 .column {{ flex: 1; }}
                 .section-title {{
-                    font-size: 24px;
+                    font-size: 1.4em;
                     font-weight: bold;
                     margin: 15px 0 5px 0;
-                    color: #61dafb;
+                    color: {CP_CYAN};
                 }}
                 .section-title a {{
-                    color: #61dafb;
+                    color: {CP_CYAN};
                     text-decoration: none;
                 }}
                 .section-title:first-child {{
                     margin-top: 5px;
                 }}
                 .category-header {{
-                    font-size: 22px;
+                    font-size: 1.2em;
                     font-weight: bold;
                     margin: 12px 0 3px 0;
                     padding: 3px 10px;
-                    border-radius: 5px;
-                    background: #404040;
+                    border-radius: 2px;
+                    background: {CP_PANEL};
+                    border-bottom: 1px solid {CP_DIM};
                 }}
                 .category-header.first-in-section {{
                     margin-top: 8px;
                 }}
                 .shortcut-item {{
-                    padding: 2px 10px;
-                    margin: 1px 0;
-                    border-radius: 5px;
+                    padding: 2px 5px;
+                    margin: 2px 0;
+                    border-radius: 0px;
                     cursor: pointer;
                     transition: background 0.2s;
-                    border-left: 3px solid transparent;
+                    border-left: 2px solid transparent;
                 }}
                 .shortcut-item:hover {{
-                    background: rgba(255,255,255,0.05);
-                    border-left-color: #61dafb;
+                    background: rgba(0, 240, 255, 0.05);
+                    border-left-color: {CP_CYAN};
                 }}
                 .shortcut-item.selected {{
-                    background: rgba(97, 218, 251, 0.2);
-                    border-left-color: #61dafb;
+                    background: rgba(0, 240, 255, 0.15);
+                    border-left-color: {CP_CYAN};
                 }}
                 .shortcut-key {{
                     color: #ffffff;
                     font-weight: bold;
-                    font-size: 18px;
                     white-space: nowrap;
                     padding-right: 15px;
                 }}
                 .shortcut-separator {{
-                    color: #32CD32;
+                    color: {CP_GREEN};
                     font-weight: bold;
-                    font-size: 22px;
+                    font-size: 1.1em;
                     vertical-align: middle;
                     white-space: nowrap;
                 }}
                 .shortcut-name {{
-                    color: #ffffff;
-                    font-size: 18px;
+                    color: {CP_TEXT};
                 }}
                 .shortcut-desc {{
-                    color: #888;
-                    font-size: 15px;
+                    color: {CP_SUBTEXT};
+                    font-size: 0.85em;
                 }}
-                .status-enabled {{ color: #27ae60; }}
-                .status-disabled {{ color: #ff5555; }}
+                .status-enabled {{ color: {CP_GREEN}; }}
+                .status-disabled {{ color: {CP_RED}; }}
                 
-                .indent {{ margin-left: 20px; }}
+                .indent {{ margin-left: 15px; }}
                 a {{ text-decoration: none; color: inherit; }}
             </style>
         </head>
