@@ -27,8 +27,8 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-SETTINGS_FILE = os.path.join(r"C:\@delta\output\svg_art", "settings.json")
-CUSTOM_SHAPES_FILE = os.path.join(r"C:\@delta\output\svg_art", "custom_shapes.json")
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+CUSTOM_SHAPES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "custom_shapes.json")
 
 class SymItem:
     def __init__(self):
