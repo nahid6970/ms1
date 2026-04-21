@@ -1089,7 +1089,28 @@ class SettingsDialog(QDialog):
         self.parent_window = parent
         self.setWindowTitle("Settings")
         self.setModal(True)
-        self.resize(400, 200)
+        self.resize(450, 300)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+            QComboBox, QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+            QComboBox::drop-down {{
+                border: none;
+                width: 20px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {CP_CYAN};
+                selection-color: {CP_BG};
+                border: 1px solid {CP_CYAN};
+            }}
+        """)
         self.setup_ui()
 
     def setup_ui(self):
@@ -1100,25 +1121,30 @@ class SettingsDialog(QDialog):
         font_layout = QHBoxLayout()
         font_layout.addWidget(QLabel("Application Font:"))
         
-        from PyQt6.QtWidgets import QFontComboBox
+        from PyQt6.QtWidgets import QFontComboBox, QSpinBox
         self.font_combo = QFontComboBox()
-        
-        # Try to find the current font in the list
-        current_font = self.parent_window.app_font_family
-        self.font_combo.setCurrentFont(QFont(current_font))
-        
+        self.font_combo.setCurrentFont(QFont(self.parent_window.app_font_family))
         font_layout.addWidget(self.font_combo)
         layout.addLayout(font_layout)
+
+        # Font Size
+        size_layout = QHBoxLayout()
+        size_layout.addWidget(QLabel("Font Size:"))
+        self.size_spin = QSpinBox()
+        self.size_spin.setRange(8, 24)
+        self.size_spin.setValue(self.parent_window.app_font_size)
+        size_layout.addWidget(self.size_spin)
+        size_layout.addStretch()
+        layout.addLayout(size_layout)
 
         layout.addWidget(QLabel("<small><i>Note: Some icons require a Nerd Font (NFP) to display correctly.</i></small>"))
 
         # Buttons
         buttons = QHBoxLayout()
-        save_btn = QPushButton("Save && Apply")
-        save_btn.setStyleSheet("background-color: #2ea44f; color: white; font-weight: bold;")
+        save_btn = CyberButton(" SAVE && APPLY", color=CP_GREEN)
         save_btn.clicked.connect(self.save_settings)
         
-        close_btn = QPushButton("Close")
+        close_btn = CyberButton(" CLOSE", color=CP_DIM, is_outlined=True)
         close_btn.clicked.connect(self.close)
         
         buttons.addStretch()
@@ -1128,10 +1154,12 @@ class SettingsDialog(QDialog):
 
     def save_settings(self):
         new_font = self.font_combo.currentFont().family()
+        new_size = self.size_spin.value()
         self.parent_window.app_font_family = new_font
+        self.parent_window.app_font_size = new_size
         self.parent_window.apply_global_font()
         self.parent_window.save_shortcuts_json()
-        QMessageBox.information(self, "Success", f"Font updated to '{new_font}' and applied!")
+        QMessageBox.information(self, "Success", f"Settings updated and applied!")
 
 
 class AHKShortcutEditor(QMainWindow):
@@ -1143,6 +1171,7 @@ class AHKShortcutEditor(QMainWindow):
         self.startup_scripts = []
         self.context_shortcuts = []
         self.app_font_family = "Consolas" # Default per theme guide
+        self.app_font_size = 10
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
