@@ -3,47 +3,50 @@ import os
 import sys
 
 def show_popup():
-    # Width 77 includes borders
+    # Width 75 for the inner content matches the requested box size
     inner_width = 75
     
     def line(text=""):
-        return f" │ {text.ljust(inner_width)} │"
+        # The line function now ensures exact width with 2 spaces padding at the start
+        # unless it's an empty line for spacing
+        if text.strip():
+            return f"  │  {text.ljust(inner_width - 2)}│"
+        return f"  │  {' ' * (inner_width - 2)}│"
 
     def center(text=""):
-        return f" │ {text.center(inner_width)} │"
+        return f"  │{text.center(inner_width)}│"
 
     def divider():
-        return f" ├{'─' * (inner_width + 2)}┤"
+        return f"  ├{'─' * inner_width}┤"
 
     content = [
-        f" ┌{'─' * (inner_width + 2)}┐",
+        f"  ┌{'─' * inner_width}┐",
         center("SHORTCUTS MENU"),
-        center("(Cyberpunk Ed.)"),
         divider(),
-        line(" [ FUNCTION KEYS ]"),
-        line(" F1         : Show this shortcuts help window"),
-        line(" F2         : Toggle image preview mode (chafa/viu vs QuickLook)"),
-        line(" F3         : Toggle view mode (Full Path vs Filename)"),
-        line(" F4         : Refresh file list"),
-        line(" F5         : Toggle bookmark on/off (Prompts for custom name)"),
-        line(" F6         : Rename bookmark custom name"),
+        line("[ FUNCTION KEYS ]"),
+        line("F1        : Show this shortcuts help window"),
+        line("F2        : Toggle image preview mode (chafa/viu vs QuickLook)"),
+        line("F3        : Toggle view mode (Full Path vs Filename)"),
+        line("F4        : Refresh file list"),
+        line("F5        : Toggle bookmark on/off (Prompts for custom name)"),
+        line("F6        : Rename bookmark custom name"),
         line(),
-        line(" [ CONTROL KEYS ]"),
-        line(" Ctrl-C     : Copy full file path to clipboard"),
-        line(" Ctrl-N     : Open file with Editor Chooser"),
-        line(" Ctrl-O     : Open file location in Explorer"),
-        line(" Ctrl-P     : Toggle preview window on/off"),
-        line(" Ctrl-R     : Run file with PowerShell Start-Process"),
+        line("[ CONTROL KEYS ]"),
+        line("Ctrl-C    : Copy full file path to clipboard"),
+        line("Ctrl-N    : Open file with Editor Chooser"),
+        line("Ctrl-O    : Open file location in Explorer"),
+        line("Ctrl-P    : Toggle preview window on/off"),
+        line("Ctrl-R    : Run file with PowerShell Start-Process"),
         line(),
-        line(" [ NAVIGATION & OTHER ]"),
-        line(" Alt-Up     : Move bookmarked file up in order"),
-        line(" Alt-Down   : Move bookmarked file down in order"),
-        line(" Enter      : Show action menu (Editor/Folder/Run/Copy/Terminal)"),
-        line(" Tab        : Multi-select files"),
-        line(" ?          : Toggle the top help header"),
-        f" └{'─' * (inner_width + 2)}┘",
-        "   Bookmarked files (marked with *) appear first in the list!",
+        line("[ NAVIGATION & OTHER ]"),
+        line("Alt-Up    : Move bookmarked file up in order"),
+        line("Alt-Down  : Move bookmarked file down in order"),
+        line("Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)"),
+        line("Tab       : Multi-select files"),
+        line("?         : Toggle the top help header"),
+        f"  └{'─' * inner_width}┘",
         "",
+        "   Bookmarked files (marked with *) appear first in the list!",
         "   [ Press ENTER to return ]"
     ]
 

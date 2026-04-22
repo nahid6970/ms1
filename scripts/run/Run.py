@@ -578,12 +578,27 @@ if __name__ == "__main__":
                 row += f"{c}{key} {w}{desc}{padding}{g}│ "
             return row + r
 
+        g = "\033[90m" # Grey
+        r = "\033[0m"  # Reset
+        w = "\033[97m" # White
+        
+        # 4 columns * 18 width + 5 borders (start, 3 mid, end) = 4*18 + 5 = 77
+        # Actually 4 * (1 (edge) + 1 (space) + 18 (content)) + 1 (last edge)
+        # In make_row: width is 18. Each cell is "key desc padding". 
+        # Total width = 2 (start) + 18 + 2 (mid) + 18 + 2 (mid) + 18 + 2 (mid) + 18 + 2 (end) = 82?
+        # Let's calculate: "│ " (2) + 18 + "│ " (2) + 18 + "│ " (2) + 18 + "│ " (2) + 18 + "│" (1) = 81
+        total_width = 81
+        top_border = f"{g}┌{'─' * (total_width - 2)}┐{r}"
+        mid_border = f"{g}├{'─' * (total_width - 2)}┤{r}"
+        bot_border = f"{g}└{'─' * (total_width - 2)}┘{r}"
+        header_title = f"{g}│{w}{'SHORTCUTS QUICK-REFERENCE'.center(total_width - 2)}{g}│{r}"
+
         line1 = make_row([("F1", "Help"), ("F2", "Preview"), ("F3", "View"), ("F4", "Refresh")])
         line2 = make_row([("F5", "B-Mark"), ("F6", "Rename"), ("Ctrl-C", "Copy"), ("Ctrl-N", "Editor")])
         line3 = make_row([("Ctrl-O", "Folder"), ("Ctrl-P", "Prev"), ("Ctrl-R", "Run"), ("Alt-Up/Dn", "Move")])
         line4 = make_row([("Enter", "Menu"), ("Tab", "Select"), ("?", "Header"), (" ", " ")])
         
-        help_header = f"{line1}\n{line2}\n{line3}\n{line4}"
+        help_header = f"{top_border}\n{header_title}\n{mid_border}\n{line1}\n{line2}\n{line3}\n{line4}\n{bot_border}"
          
         fzf_args = [
             "fzf",
