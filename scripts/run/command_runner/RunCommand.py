@@ -134,19 +134,28 @@ def run_command_ui():
     # Scripts
 
     shortcuts_text = r"""
-Shortcuts available:
-  Enter     : Run selected command (opens terminal chooser)
-  F1        : Show this help window
-  F5        : Bookmark/Unbookmark selected command
-  Alt-Up    : Move bookmarked command up in order
-  Alt-Down  : Move bookmarked command down in order
-  Del       : Remove from history or bookmarks
-  Ctrl-C    : Copy command to clipboard
-  Ctrl-R    : Refresh history/bookmarks list
-  ?         : Toggle help header at the top
-  ESC       : Exit
-
-Bookmarks are marked with *. History is marked with HIST.
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           COMMANDS MENU                                   │
+│                           (Cyberpunk Ed.)                                 │
+├───────────────────────────────────────────────────────────────────────────┤
+│  [ NAVIGATION ]                                                           │
+│  Enter     : Run selected command (opens terminal chooser)                │
+│  F1        : Show this help window                                        │
+│  ESC       : Exit                                                         │
+│                                                                           │
+│  [ MANAGEMENT ]                                                           │
+│  F5        : Bookmark/Unbookmark selected command                         │
+│  Alt-Up    : Move bookmarked command up in order                         │
+│  Alt-Down  : Move bookmarked command down in order                       │
+│  Del       : Remove from history or bookmarks                             │
+│                                                                           │
+│  [ UTILS ]                                                                │
+│  Ctrl-C    : Copy command to clipboard                                    │
+│  Ctrl-R    : Refresh history/bookmarks list                               │
+│  ?         : Toggle help header at the top                                │
+│                                                                           │
+│  Bookmarks are marked with *. History is marked with HIST.               │
+└───────────────────────────────────────────────────────────────────────────┘
 """
     
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as help_file:

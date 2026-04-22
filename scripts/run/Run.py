@@ -76,8 +76,34 @@ def search_directories_and_files():
     # Ignore list
     ignore_list = [".git", ".pyc"]
 
-    # Shortcut list text for F1 display has been moved to view_shortcuts.py
-    
+    # Shortcut list text for F1 display
+    shortcuts_text = r"""┌───────────────────────────────────────────────────────────────────────────┐
+│                            SHORTCUTS MENU                                 │
+│                            (Cyberpunk Ed.)                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│  [ FUNCTION KEYS ]                                                        │
+│  F1        : Show this shortcuts help window                              │
+│  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
+│  F3        : Toggle view mode (Full Path vs Filename)                     │
+│  F4        : Refresh file list                                            │
+│  F5        : Toggle bookmark on/off (Prompts for custom name)             │
+│  F6        : Rename bookmark custom name                                  │
+│                                                                           │
+│  [ CONTROL KEYS ]                                                         │
+│  Ctrl-C    : Copy full file path to clipboard                             │
+│  Ctrl-N    : Open file with Editor Chooser                                │
+│  Ctrl-O    : Open file location in Explorer                               │
+│  Ctrl-P    : Toggle preview window on/off                                 │
+│  Ctrl-R    : Run file with PowerShell Start-Process                       │
+│                                                                           │
+│  [ NAVIGATION & OTHER ]                                                   │
+│  Alt-Up    : Move bookmarked file up in order                             │
+│  Alt-Down  : Move bookmarked file down in order                           │
+│  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
+│  Tab       : Multi-select files                                           │
+│  ?         : Toggle the top help header                                   │
+└───────────────────────────────────────────────────────────────────────────┘"""
+
     # Create a state file to track preview mode (chafa vs quicklook)
     state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
     
@@ -227,10 +253,15 @@ Start-Sleep -Milliseconds 500
 '''
 
     # Create temp files
+    temp_shortcut_file = None
     preview_script_file = None
     toggle_script_file = None
     
     try:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as temp_file:
+            temp_file.write(shortcuts_text)
+            temp_shortcut_file = temp_file.name
+
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
             preview_script.write(preview_script_content)
             preview_script_file = preview_script.name
@@ -562,43 +593,35 @@ if __name__ == "__main__":
             reorder_script.write(bookmark_reorder_script_content)
             bookmark_reorder_script_file = reorder_script.name
         
-        # Prepare fzf arguments with PowerShell preview for images and F2 toggle
-        # Compact multiline help header with perfect grid alignment
-        def make_row(cells, width=18):
-            g = "\033[90m" # Grey
-            c = "\033[96m" # Cyan
-            w = "\033[97m" # White
-            r = "\033[0m"  # Reset
-            
-            row = f"{g}│ "
-            for key, desc in cells:
-                # Key + Space + Desc
-                visible_text = f"{key} {desc}"
-                padding = " " * (width - len(visible_text))
-                row += f"{c}{key} {w}{desc}{padding}{g}│ "
-            return row + r
-
-        g = "\033[90m" # Grey
-        r = "\033[0m"  # Reset
-        w = "\033[97m" # White
-        
-        # 4 columns * 18 width + 5 borders (start, 3 mid, end) = 4*18 + 5 = 77
-        # Actually 4 * (1 (edge) + 1 (space) + 18 (content)) + 1 (last edge)
-        # In make_row: width is 18. Each cell is "key desc padding". 
-        # Total width = 2 (start) + 18 + 2 (mid) + 18 + 2 (mid) + 18 + 2 (mid) + 18 + 2 (end) = 82?
-        # Let's calculate: "│ " (2) + 18 + "│ " (2) + 18 + "│ " (2) + 18 + "│ " (2) + 18 + "│" (1) = 81
-        total_width = 81
-        top_border = f"{g}┌{'─' * (total_width - 2)}┐{r}"
-        mid_border = f"{g}├{'─' * (total_width - 2)}┤{r}"
-        bot_border = f"{g}└{'─' * (total_width - 2)}┘{r}"
-        header_title = f"{g}│{w}{'SHORTCUTS QUICK-REFERENCE'.center(total_width - 2)}{g}│{r}"
-
-        line1 = make_row([("F1", "Help"), ("F2", "Preview"), ("F3", "View"), ("F4", "Refresh")])
-        line2 = make_row([("F5", "B-Mark"), ("F6", "Rename"), ("Ctrl-C", "Copy"), ("Ctrl-N", "Editor")])
-        line3 = make_row([("Ctrl-O", "Folder"), ("Ctrl-P", "Prev"), ("Ctrl-R", "Run"), ("Alt-Up/Dn", "Move")])
-        line4 = make_row([("Enter", "Menu"), ("Tab", "Select"), ("?", "Header"), (" ", " ")])
-        
-        help_header = f"{top_border}\n{header_title}\n{mid_border}\n{line1}\n{line2}\n{line3}\n{line4}\n{bot_border}"
+        # Cyberpunk style help header (toggled by ?)
+        help_header = r"""
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            SHORTCUTS MENU                                 │
+│                            (Cyberpunk Ed.)                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│  [ FUNCTION KEYS ]                                                        │
+│  F1        : Show this shortcuts help window                              │
+│  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
+│  F3        : Toggle view mode (Full Path vs Filename)                     │
+│  F4        : Refresh file list                                            │
+│  F5        : Toggle bookmark on/off (Prompts for custom name)             │
+│  F6        : Rename bookmark custom name                                  │
+│                                                                           │
+│  [ CONTROL KEYS ]                                                         │
+│  Ctrl-C    : Copy full file path to clipboard                             │
+│  Ctrl-N    : Open file with Editor Chooser                                │
+│  Ctrl-O    : Open file location in Explorer                               │
+│  Ctrl-P    : Toggle preview window on/off                                 │
+│  Ctrl-R    : Run file with PowerShell Start-Process                       │
+│                                                                           │
+│  [ NAVIGATION & OTHER ]                                                   │
+│  Alt-Up    : Move bookmarked file up in order                             │
+│  Alt-Down  : Move bookmarked file down in order                           │
+│  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
+│  Tab       : Multi-select files                                           │
+│  ?         : Toggle the top help header                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+"""
          
         fzf_args = [
             "fzf",
@@ -620,7 +643,7 @@ if __name__ == "__main__":
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{2})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
-            f"--bind=f1:execute(python \"{os.path.join(script_dir, 'view_shortcuts.py')}\")",
+            f"--bind=f1:execute-silent(cmd /c start cmd /k \"chcp 65001 >nul & type {temp_shortcut_file} & pause\")",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
@@ -660,6 +683,10 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
     finally:
+        # Clean up the temporary file and state file
+        if temp_shortcut_file and os.path.exists(temp_shortcut_file):
+            os.remove(temp_shortcut_file)
+        
         # Clean up state file when program exits
         state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
         if os.path.exists(state_file):
