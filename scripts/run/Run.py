@@ -459,15 +459,27 @@ if os.path.exists(bookmarks_file):
 # Helper function to format display
 def format_display(full_path, is_bookmarked):
     marker = "* " if is_bookmarked else "  "
+    is_dir = os.path.isdir(full_path)
+    
     if view_mode == "name":
-        parent = os.path.basename(os.path.dirname(full_path))
-        file = os.path.basename(full_path)
-        display = f"{{marker}}{{file}} ({{parent}})"
+        path_norm = full_path.rstrip(os.sep)
+        name = os.path.basename(path_norm)
+        if not name and ":" in path_norm:
+            name = path_norm
+            parent = ""
+        else:
+            parent = os.path.basename(os.path.dirname(path_norm))
+        display = f"{{marker}}{{name}} ({{parent}})"
     else:
         display = f"{{marker}}{{full_path}}"
     
-    if is_bookmarked:
-        display = f"\033[92m{{display}}\033[0m"
+    if is_dir:
+        if is_bookmarked:
+            display = f"\033[93m{{display}}\033[0m"  # Yellow
+        else:
+            display = f"\033[92m{{display}}\033[0m"  # Green
+    elif is_bookmarked:
+        display = f"\033[92m{{display}}\033[0m"      # Green for bookmarked files
     
     return display
 
@@ -479,11 +491,19 @@ for bm in bookmarks:
         print(f"{{display}}\\t{{bm}}")
         printed_paths.add(bm)
 
-# Output other files
+# Output other files and directories
 for root_dir in directories:
     if not os.path.isdir(root_dir):
         continue
-    for root, _, files in os.walk(root_dir, onerror=lambda e: None):
+    for root, dirs, files in os.walk(root_dir, onerror=lambda e: None):
+        # Process the current directory (root)
+        if root not in printed_paths:
+            if not any(ignore_item in root for ignore_item in ignore_list):
+                display = format_display(root, False)
+                print(f"{{display}}\\t{{root}}")
+                printed_paths.add(root)
+        
+        # Process files in this directory
         for file in files:
             full_path = os.path.join(root, file)
             if full_path in printed_paths:
@@ -492,6 +512,7 @@ for root_dir in directories:
                 continue
             display = format_display(full_path, False)
             print(f"{{display}}\\t{{full_path}}")
+            printed_paths.add(full_path)
 '''
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as feeder_script:
