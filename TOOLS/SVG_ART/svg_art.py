@@ -493,7 +493,13 @@ class ArtView(QGraphicsView):
                 full_path.setFillRule(fr)
                 current_path.setFillRule(fr)
                 continue
-            scaled = [QPointF(a[0] * w, a[1] * h) for a in args]
+            
+            # Ensure we only process coordinate pairs
+            try:
+                scaled = [QPointF(a[0] * w, a[1] * h) for a in args]
+            except (TypeError, IndexError):
+                continue
+
             if cmd == "M": 
                 current_path.moveTo(scaled[0]); full_path.moveTo(scaled[0])
             elif cmd == "L": 
@@ -527,22 +533,28 @@ class ArtView(QGraphicsView):
                     current_c = []
 
     def collect_art_as_shape(self):
-        """Collect all art items and return normalized path commands (0-1 range)."""
-        items = [i for i in self.scene().items() if getattr(i, 'is_art_item', False)]
+        """Collect current visible art items and return normalized commands."""
+        items = [i for i in self.scene().items() if getattr(i, 'is_art_item', False) and i.isVisible()]
         if not items: return None
+        
         bounds = QRectF()
         for item in items: bounds = bounds.united(item.mapToScene(item.boundingRect()).boundingRect())
         if bounds.isEmpty(): return None
+        
+        return self.collect_from_items(items, bounds)
+
+    def collect_from_items(self, items, bounds):
+        """Standardized processor to turn QGraphicsItems into normalized shape commands."""
         w, h = bounds.width() or 1, bounds.height() or 1
         commands = []
         items.sort(key=lambda x: x.zValue())
+        
         for item in items:
             if isinstance(item, QGraphicsPathItem):
                 if hasattr(item, 'multi_colors') and item.multi_colors:
                     for path, color in item.multi_colors:
                         commands.append(["COLOR", color])
-                        if path.fillRule() == Qt.FillRule.OddEvenFill:
-                            commands.append(["FILLRULE", "evenodd"])
+                        if path.fillRule() == Qt.FillRule.OddEvenFill: commands.append(["FILLRULE", "evenodd"])
                         self._add_path_to_commands(path, item, bounds, w, h, commands)
                 else:
                     if item.brush().style() != Qt.BrushStyle.NoBrush:
@@ -700,9 +712,16 @@ class SVGInputDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("IMPORT SVG SHAPE")
-        self.setFixedSize(500, 380)
+        self.setFixedSize(500, 440)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
         layout = QVBoxLayout(self)
+        
+        layout.addWidget(QLabel("SHAPE NAME:"))
+        self.name_edit = QLineEdit()
+        self.name_edit.setPlaceholderText("Enter shape name...")
+        self.name_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; padding: 8px;")
+        layout.addWidget(self.name_edit)
+
         layout.addWidget(QLabel("SVG CODE / PATH DATA (d=...):"))
         self.text_edit = QPlainTextEdit()
         self.text_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; font-size: 9pt;")
@@ -896,9 +915,12 @@ class SVGArtApp(QMainWindow):
             QMessageBox.warning(self, "No Art", "Draw something first to save as a custom shape."); return
         name, ok = QInputDialog.getText(self, "Shape Name", "Enter shape name:")
         if ok and name.strip():
-            n = name.strip(); self.view.custom_shapes[n] = cmds
-            self._shape_pixmap_cache[n] = ShapePickerDialog.build_pixmap(cmds, 100, 100)
-            self.save_custom_shapes()
+            self.save_named_shape(name.strip(), cmds)
+
+    def save_named_shape(self, name, cmds):
+        self.view.custom_shapes[name] = cmds
+        self._shape_pixmap_cache[name] = ShapePickerDialog.build_pixmap(cmds, 100, 100)
+        self.save_custom_shapes()
 
     def show_shape_picker(self):
         if not self.view.custom_shapes:
@@ -911,29 +933,38 @@ class SVGArtApp(QMainWindow):
         dlg = SVGInputDialog(self)
         if dlg.exec():
             svg_code = dlg.text_edit.toPlainText().strip()
-            if svg_code:
-                cmds = self.parse_svg_to_shape(svg_code)
-                if cmds:
-                    # Insert directly into canvas at 300x300 size
-                    full_path, multi = self.view._scale_custom_path(cmds, QPointF(300, 300))
-                    item = SymPath(full_path)
-                    item.multi_colors = multi
-                    
-                    # Check for FILLRULE in commands to set fill rule
-                    for c in cmds:
-                        if c[0] == "FILLRULE":
-                            fr = Qt.FillRule.OddEvenFill if c[1] == "evenodd" else Qt.FillRule.WindingFill
-                            item.path().setFillRule(fr)
-                            for p, _ in item.multi_colors: p.setFillRule(fr)
+            name = dlg.name_edit.text().strip()
+            if not (svg_code and name):
+                if not name: QMessageBox.warning(self, "Missing Name", "Please enter a name.")
+                return
+                
+            cmds = self.parse_svg_to_shape(svg_code)
+            if not cmds:
+                QMessageBox.warning(self, "Error", "Could not parse SVG code.")
+                return
 
-                    item.setPos(self.view.sym_center)
-                    item.setPen(self.view.get_pen())
-                    self.scene.addItem(item)
-                    self.view.create_symmetry_clones(item)
-                    self.view.save_to_undo(item)
-                    self.statusBar().showMessage(f"SVG inserted at center. Use '+' button to save it to library if desired.")
-                else:
-                    QMessageBox.warning(self, "Error", "Could not parse SVG code.")
+            # 1. Staging items in an invisible scene for perfect normalization parity with '+'
+            staging_scene = QGraphicsScene()
+            # Render at standard size (500x500) for high-fidelity processing
+            path, multi = self.view._scale_custom_path(cmds, QPointF(500, 500))
+            tmp = SymPath(path)
+            tmp.multi_colors = multi
+            tmp.setPen(self.view.get_pen())
+            tmp.is_art_item = True # CRITICAL: Processor uses this flag
+            staging_scene.addItem(tmp)
+            
+            # 2. Trace the staged item using the unified system processor
+            final_cmds = self.view.collect_from_items([tmp], tmp.sceneBoundingRect())
+            
+            if final_cmds:
+                self.save_named_shape(name, final_cmds)
+                # Force refresh cache
+                self._shape_pixmap_cache[name] = ShapePickerDialog.build_pixmap(final_cmds, 100, 100)
+                self.set_tool(f"custom:{name}")
+                self.statusBar().showMessage(f"SVG '{name}' processed ({len(final_cmds)} cmds). Ready to draw.")
+            else:
+                self.statusBar().showMessage("Error: Staging failed to capture shape data.")
+                QMessageBox.warning(self, "Error", "Staging failed to capture shape data.")
 
     def parse_svg_to_shape(self, svg_code):
         token_pattern = re.compile(r'([a-zA-Z])|([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)')
@@ -1085,21 +1116,7 @@ class SVGArtApp(QMainWindow):
                 except: pass
 
         if not all_commands or not all_pts: return None
-        
-        # 3. Precise normalization (preserve aspect ratio)
-        rect = QRectF(all_pts[0], all_pts[0])
-        for p in all_pts[1:]: rect = rect.united(QRectF(p, p))
-        side = max(rect.width(), rect.height()) or 1
-        offset_x = (side - rect.width()) / 2
-        offset_y = (side - rect.height()) / 2
-        
-        norm_cmds = []
-        for c in all_commands:
-            if c[0] in ["COLOR", "FILLRULE"]: norm_cmds.append(c)
-            else:
-                pts = [[(p[0] - rect.x() + offset_x) / side, (p[1] - rect.y() + offset_y) / side] for p in c[1:]]
-                norm_cmds.append([c[0]] + pts)
-        return norm_cmds
+        return all_commands
 
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):
