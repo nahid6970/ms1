@@ -47,7 +47,9 @@ SVGS = {
     "RECTANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg>',
     "CIRCLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',
     "TRIANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>',
-    "CENTER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>'
+    "CENTER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>',
+    "ZOOM_IN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>',
+    "ZOOM_OUT": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -937,6 +939,13 @@ class SVGArtApp(QMainWindow):
         btn_import_svg.setToolTip("Import shape by SVG code"); btn_import_svg.clicked.connect(self.add_svg_shape); self.tb_library.addWidget(btn_import_svg)
         btn_add_shape = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["ADD_SHAPE"])
         btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_library.addWidget(btn_add_shape)
+        
+        self.tb_zoom = QToolBar("Zoom"); self.tb_zoom.setObjectName("ZoomToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_zoom)
+        btn_zoom_in = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["ZOOM_IN"])
+        btn_zoom_in.setToolTip("Zoom In"); btn_zoom_in.clicked.connect(self.zoom_in); self.tb_zoom.addWidget(btn_zoom_in)
+        btn_zoom_out = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["ZOOM_OUT"])
+        btn_zoom_out.setToolTip("Zoom Out"); btn_zoom_out.clicked.connect(self.zoom_out); self.tb_zoom.addWidget(btn_zoom_out)
+
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
         self.tb_props.addWidget(QLabel(" THICK: ")); self.thickness_slider = QSpinBox(); self.thickness_slider.setRange(1, 100); self.thickness_slider.setValue(3); self.thickness_slider.valueChanged.connect(self.change_thickness); self.tb_props.addWidget(self.thickness_slider)
@@ -1020,6 +1029,8 @@ class SVGArtApp(QMainWindow):
 
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
+    def zoom_in(self): self.view.scale(1.25, 1.25)
+    def zoom_out(self): self.view.scale(0.8, 0.8)
     def recenter_view(self):
         self.view.resetTransform()
         self.view.centerOn(0, 0)
