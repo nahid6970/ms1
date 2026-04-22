@@ -712,7 +712,7 @@ class SVGInputDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("IMPORT SVG SHAPE")
-        self.setFixedSize(500, 440)
+        self.resize(600, 600)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: 'Consolas';")
         layout = QVBoxLayout(self)
         
@@ -727,6 +727,23 @@ class SVGInputDialog(QDialog):
         self.text_edit.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; font-size: 9pt;")
         self.text_edit.setPlaceholderText("<path d=\"M 10 10 L 90 90 ...\" />\nor just the path data: M 10 10 L 90 90 ...")
         layout.addWidget(self.text_edit)
+
+        layout.addWidget(QLabel("EXTRACTED COLORS (CLICK TO REPLACE):"))
+        self.color_scroll = QScrollArea()
+        self.color_scroll.setWidgetResizable(True)
+        self.color_scroll.setFixedHeight(70)
+        self.color_scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}")
+        self.color_widget = QWidget()
+        self.color_layout = QHBoxLayout(self.color_widget)
+        self.color_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.color_scroll.setWidget(self.color_widget)
+        layout.addWidget(self.color_scroll)
+
+        self.color_timer = QTimer()
+        self.color_timer.setSingleShot(True)
+        self.color_timer.timeout.connect(self.update_color_panel)
+        self.text_edit.textChanged.connect(lambda: self.color_timer.start(500))
+
         btns = QHBoxLayout()
         self.btn_ok = QPushButton("IMPORT")
         self.btn_ok.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold; padding: 8px;")
@@ -736,6 +753,41 @@ class SVGInputDialog(QDialog):
         self.btn_cancel.clicked.connect(self.reject)
         btns.addWidget(self.btn_ok); btns.addWidget(self.btn_cancel)
         layout.addLayout(btns)
+        
+        self.update_color_panel()
+
+    def update_color_panel(self):
+        while self.color_layout.count():
+            item = self.color_layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        
+        svg = self.text_edit.toPlainText()
+        colors = sorted(list(set(re.findall(r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}', svg))), key=len, reverse=True)
+        
+        if not colors:
+            lbl = QLabel("No hex colors found")
+            lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic;")
+            self.color_layout.addWidget(lbl)
+        else:
+            for c in colors:
+                btn = QPushButton()
+                btn.setFixedSize(40, 40)
+                btn.setToolTip(f"Replace {c}")
+                btn.setStyleSheet(f"background-color: {c}; border: 2px solid {CP_DIM}; border-radius: 4px;")
+                btn.clicked.connect(partial(self.pick_replacement_color, c))
+                self.color_layout.addWidget(btn)
+        self.color_layout.addStretch()
+
+    def pick_replacement_color(self, old_color):
+        curr = QColor(old_color) if old_color.startswith('#') else QColor(Qt.GlobalColor.black)
+        c = QColorDialog.getColor(curr, self, f"Replace {old_color}")
+        if c.isValid():
+            new_color = c.name().upper()
+            svg = self.text_edit.toPlainText()
+            pattern = re.compile(re.escape(old_color), re.IGNORECASE)
+            new_svg = pattern.sub(new_color, svg)
+            self.text_edit.setPlainText(new_svg)
+            self.update_color_panel()
 
 class SVGArtApp(QMainWindow):
     def __init__(self):
