@@ -475,9 +475,9 @@ def format_display(full_path, is_bookmarked):
     
     if is_dir:
         if is_bookmarked:
-            display = f"\033[93m{{display}}\033[0m"  # Yellow
+            display = f"\033[95m{{display}}\033[0m"  # Pink
         else:
-            display = f"\033[92m{{display}}\033[0m"  # Green
+            display = f"\033[93m{{display}}\033[0m"  # Yellow
     elif is_bookmarked:
         display = f"\033[92m{{display}}\033[0m"      # Green for bookmarked files
     
