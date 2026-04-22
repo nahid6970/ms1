@@ -9,7 +9,7 @@
             "name": "Open Terminal Admin"
         },
         {
-            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\@delta\\ms1\\scripts\\run\\Run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
+            "action": "run_py_script()\nrun_py_script()\n{\n    Run('wt python.exe \"C:\\@delta\\ms1\\scripts\\run\\Run.py\"', , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
             "category": "Launch",
             "description": "Opens run.py in the ms1 directory",
             "enabled": true,
@@ -98,14 +98,14 @@
             "name": "Script Manager"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\@Flask\\4999_startup\\startup.py\", , \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\@Flask\\4999_startup\\startup.py\"', , \"Hide\")",
             "category": "Launch",
             "description": "",
             "hotkey": "#s",
             "name": "Startup Setup"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py\", , \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\scripts\\xy\\XY_CroosHair.py\"', , \"Hide\")",
             "category": "General",
             "description": "",
             "hotkey": "^+m",
@@ -170,7 +170,7 @@
             "name": "White Screen"
         },
         {
-            "action": "{\n    ClipSaved := ClipboardAll()\n    A_Clipboard := \"\"               ; Clear clipboard\n    ; Get the active window title\n    ActiveTitle := WinGetTitle(\"A\")\n    ; If the active window is VSCode, simulate the shortcut to copy the file path\n    if InStr(ActiveTitle, \"Visual Studio Code\") {\n        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)\n        Send(\"+!c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    } else {\n        ; Send Ctrl+C to copy the selected file path in other environments\n        Send(\"^c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    }\n    if (A_Clipboard != \"\") {\n        ; Get the selected file path from the clipboard\n        FilePath := A_Clipboard\n        ; Extract the directory from the file path\n        SplitPath(FilePath, , &FileDir)\n        Ext := SubStr(FilePath, (InStr(FilePath, \".\", 0, -1) + 1)<1 ? (InStr(FilePath, \".\", 0, -1) + 1)-1 : (InStr(FilePath, \".\", 0, -1) + 1))\n        ; Check the extension and run the appropriate command with working directory\n        if (Ext = \"py\") {\n            Run(\"cmd /k python `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"ps1\") {\n            Run(\"cmd /k powershell -ExecutionPolicy Bypass -File `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"bat\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else if (Ext = \"ahk\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", FileDir, , &PID)\n        } else {\n            MsgBox(\"Unsupported file type: \" Ext)\n        }\n    } else {\n        MsgBox(\"No file path selected or copied.\")\n    }\n    ; Restore original clipboard content\n    A_Clipboard := ClipSaved\n    return\n}",
+            "action": "{\n    ClipSaved := ClipboardAll()\n    A_Clipboard := \"\"               ; Clear clipboard\n    ; Get the active window title\n    ActiveTitle := WinGetTitle(\"A\")\n    ; If the active window is VSCode, simulate the shortcut to copy the file path\n    if InStr(ActiveTitle, \"Visual Studio Code\") {\n        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)\n        Send(\"+!c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    } else {\n        ; Send Ctrl+C to copy the selected file path in other environments\n        Send(\"^c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    }\n    if (A_Clipboard != \"\") {\n        ; Get the selected file path from the clipboard\n        FilePath := A_Clipboard\n        ; Extract the directory from the file path\n        SplitPath(FilePath, , &FileDir)\n        Ext := SubStr(FilePath, (InStr(FilePath, \".\", 0, -1) + 1)<1 ? (InStr(FilePath, \".\", 0, -1) + 1)-1 : (InStr(FilePath, \".\", 0, -1) + 1))\n        \n        ; Helper to run in terminal (try wt first, fallback to cmd)\n        RunInTerminal(cmd, dir) {\n            try {\n                Run(\"wt \" . cmd, dir)\n            } catch {\n                Run(cmd, dir)\n            }\n        }\n\n        ; Check the extension and run the appropriate command with working directory\n        if (Ext = \"py\") {\n            RunInTerminal(\"cmd /k python `\"\" FilePath \"`\"\", FileDir)\n        } else if (Ext = \"ps1\") {\n            RunInTerminal(\"cmd /k powershell -ExecutionPolicy Bypass -File `\"\" FilePath \"`\"\", FileDir)\n        } else if (Ext = \"bat\") {\n            RunInTerminal(\"cmd /k `\"\" FilePath \"`\"\", FileDir)\n        } else if (Ext = \"ahk\") {\n            RunInTerminal(\"cmd /k `\"\" FilePath \"`\"\", FileDir)\n        } else {\n            MsgBox(\"Unsupported file type: \" Ext)\n        }\n    } else {\n        MsgBox(\"No file path selected or copied.\")\n    }\n    ; Restore original clipboard content\n    A_Clipboard := ClipSaved\n    return\n}",
             "category": "General",
             "description": "",
             "hotkey": "^!+Enter",
@@ -232,7 +232,7 @@
             "name": "Take Screenshot"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\", \"\", \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py\"', , \"Hide\")",
             "category": "General",
             "description": "",
             "enabled": true,
@@ -240,7 +240,7 @@
             "name": "Open Folder gui"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py\", \"\", \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py\"', , \"Hide\")",
             "category": "General",
             "description": "",
             "enabled": true,
@@ -288,7 +288,7 @@
             "name": "Komorebi Toggle Workspace"
         },
         {
-            "action": "OpenFocusedDirectory()\n\n; Ensure script runs as admin to interact with admin windows\nif !A_IsAdmin {\n    try {\n        Run('*RunAs \"' . A_AhkPath . '\" /restart \"' . A_ScriptFullPath . '\"')\n    }\n    ExitApp()\n}\n\nOpenFocusedDirectory() {\n    try {\n        hwnd := WinExist(\"A\")\n        if !hwnd\n            return\n            \n        pid := WinGetPID(\"ahk_id \" hwnd)\n        processName := WinGetProcessName(\"ahk_id \" hwnd)\n        \n        finalPath := \"\"\n        \n        ; Handle script interpreters\n        if (processName ~= \"i)python|powershell|pwsh|autohotkey\") {\n            try {\n                for proc in ComObjGet(\"winmgmts:\").ExecQuery(\"Select CommandLine from Win32_Process Where ProcessId = \" pid) {\n                    cmdLine := proc.CommandLine\n                    if !cmdLine\n                        continue\n                        \n                    ; Look for paths ending in script extensions in the command line\n                    if RegExMatch(cmdLine, 'i)\"([^\"]+\\.(py|ps1|ahk|bat|cmd))\"', &match)\n                        finalPath := match[1]\n                    else if RegExMatch(cmdLine, 'i)\\s([^\\s]+\\.(py|ps1|ahk|bat|cmd))(\\s|$)', &match)\n                        finalPath := match[1]\n                }\n            }\n        }\n        \n        if (finalPath == \"\") {\n            try {\n                finalPath := WinGetProcessPath(\"ahk_id \" hwnd)\n            }\n        }\n            \n        if (finalPath != \"\") {\n            SplitPath(finalPath, , &dir)\n            if DirExist(dir)\n                Run(dir)\n        }\n    }\n}",
+            "action": "OpenFocusedDirectory()\n\nOpenFocusedDirectory() {\n    try {\n        hwnd := WinExist(\"A\")\n        if !hwnd\n            return\n            \n        pid := WinGetPID(\"ahk_id \" hwnd)\n        processName := WinGetProcessName(\"ahk_id \" hwnd)\n        \n        finalPath := \"\"\n        \n        ; 1. Try WMI to get command line (Best for scripts)\n        try {\n            for proc in ComObjGet(\"winmgmts:\").ExecQuery(\"Select CommandLine from Win32_Process Where ProcessId = \" pid) {\n                cmdLine := proc.CommandLine\n                if !cmdLine\n                    continue\n                    \n                ; Look for paths in quotes first\n                if RegExMatch(cmdLine, 'i)\"([^\"]+\\.(py|ps1|ahk|bat|cmd))\"', &match)\n                    finalPath := match[1]\n                ; Then look for unquoted paths after space\n                else if RegExMatch(cmdLine, 'i)\\s([^\\s]+\\.(py|ps1|ahk|bat|cmd))(\\s|$)', &match)\n                    finalPath := match[1]\n            }\n        }\n\n        ; 2. Fallback: Check window title for a path (Good for editors/IDEs)\n        if (finalPath == \"\") {\n            title := WinGetTitle(\"ahk_id \" hwnd)\n            ; Look for something that looks like a Windows path with common extensions\n            if RegExMatch(title, 'i)([a-zA-Z]:\\\\[^:<>|\"?*]+\\.[a-zA-Z0-9]+)', &match) {\n                if FileExist(match[1])\n                    finalPath := match[1]\n            }\n        }\n        \n        ; 3. Final Fallback: Use the executable path\n        if (finalPath == \"\") {\n            try {\n                finalPath := WinGetProcessPath(\"ahk_id \" hwnd)\n            }\n        }\n            \n        if (finalPath != \"\") {\n            SplitPath(finalPath, , &dir)\n            if (dir != \"\" && DirExist(dir))\n                Run('explorer.exe \"' . dir . '\"')\n            else if (dir == \"\" && FileExist(finalPath)) {\n                ; If it's just a file name or path failed SplitPath, try to get dir from full path\n                dir := RegExReplace(finalPath, \"\\\\[^\\\\]+$\")\n                if DirExist(dir)\n                    Run('explorer.exe \"' . dir . '\"')\n            }\n        }\n    }\n}",
             "category": "Navigation",
             "description": "Opens the directory of the focused application or script",
             "enabled": true,
