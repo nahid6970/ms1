@@ -686,8 +686,10 @@ class ShapePickerDialog(QDialog):
             edit_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             edit_btn.clicked.connect(lambda checked, n=name: self._rename_shape(n))
             
-            del_btn = QPushButton("✕"); del_btn.setFixedSize(22, 22); del_btn.setToolTip("Remove Shape")
-            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 10pt; font-weight: bold;")
+            del_btn = QPushButton(); del_btn.setFixedSize(22, 22); del_btn.setToolTip("Remove Shape")
+            rd_del = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
+            px_del = QPixmap(18, 18); px_del.fill(Qt.GlobalColor.transparent); pn_del = QPainter(px_del); rd_del.render(pn_del); pn_del.end()
+            del_btn.setIcon(QIcon(px_del)); del_btn.setStyleSheet("background: transparent; border: none;")
             del_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             del_btn.clicked.connect(lambda checked, n=name: self._delete(n))
             
