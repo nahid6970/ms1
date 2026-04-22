@@ -634,12 +634,12 @@ class ArtView(QGraphicsView):
 class ShapePickerDialog(QDialog):
     def __init__(self, custom_shapes, pixmap_cache, on_delete, parent=None):
         super().__init__(parent)
+        self.app = parent
         self.setWindowTitle("Custom Shapes"); self.setModal(True)
-        self.setMinimumSize(550, 400)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
         self.selected = None; self.custom_shapes = custom_shapes
         self.pixmap_cache = pixmap_cache; self.on_delete = on_delete
-        self.columns = 4
+        self.columns = getattr(self.app, 'library_columns', 4)
         
         self.layout_ = QVBoxLayout(self)
         
@@ -673,11 +673,22 @@ class ShapePickerDialog(QDialog):
 
     def _update_cols(self, val):
         self.columns = val
+        if self.app:
+            self.app.library_columns = val
+            self.app.save_settings()
         self._build_grid()
 
     def _build_grid(self):
         from PyQt6.QtWidgets import QGridLayout
         
+        # Calculate dynamic width based on columns
+        CELL_W = 120 # SIZE (100) + cell margins/border
+        SPACING = 15
+        MARGINS = 40 # Total side margins + scrollbar allowance
+        target_w = (self.columns * CELL_W) + ((self.columns - 1) * SPACING) + MARGINS
+        self.setFixedWidth(max(400, min(1400, target_w)))
+        self.setMinimumHeight(500)
+
         # Clear existing container
         if self.scroll.widget():
             self.scroll.widget().deleteLater()
@@ -1349,6 +1360,7 @@ class SVGArtApp(QMainWindow):
                     s = json.load(f)
                     if "geom" in s: self.restoreGeometry(QByteArray.fromHex(s["geom"].encode()))
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
+                    self.library_columns = s.get("library_columns", 4)
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
                     
@@ -1363,7 +1375,8 @@ class SVGArtApp(QMainWindow):
 
     def save_settings(self):
         s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp,
-             "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size}
+             "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size,
+             "library_columns": getattr(self, 'library_columns', 4)}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
