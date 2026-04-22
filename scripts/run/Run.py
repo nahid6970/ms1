@@ -44,6 +44,7 @@ def search_directories_and_files():
 
     # Add directories (comment any line freely without breaking syntax)
     directories.append(r"C:\@delta\ms1")
+    directories.append(r"C:\@delta\db")
     directories.append(r"C:\@delta\msBackups")
     directories.append(r"C:\Users\nahid\Pictures")
     directories.append("D:\\")
