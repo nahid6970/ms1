@@ -190,7 +190,10 @@ class SymPath(QGraphicsPathItem, SymItem):
         if self.multi_colors:
             painter.setPen(self.pen())
             for path, color in self.multi_colors:
-                painter.setBrush(QBrush(QColor(color)))
+                if color == "transparent":
+                    painter.setBrush(Qt.BrushStyle.NoBrush)
+                else:
+                    painter.setBrush(QBrush(QColor(color)))
                 painter.drawPath(path)
         else:
             super().paint(painter, option, widget)
@@ -483,10 +486,10 @@ class ArtView(QGraphicsView):
         multi_colors = []
         for cmd, *args in points:
             if cmd == "COLOR":
-                if not current_path.isEmpty() and current_color:
-                    multi_colors.append((current_path, current_color))
-                current_path = QPainterPath()
-                current_path.setFillRule(Qt.FillRule.WindingFill)
+                if not current_path.isEmpty():
+                    multi_colors.append((current_path, current_color or "#00F0FF"))
+                    current_path = QPainterPath()
+                    current_path.setFillRule(Qt.FillRule.WindingFill)
                 current_color = args[0]
                 continue
             if cmd == "FILLRULE":
@@ -696,7 +699,8 @@ class ShapePickerDialog(QDialog):
         def flush_path():
             nonlocal current_path
             if current_path:
-                return f'  <path fill="{color}" d="{current_path.strip()}" />\n'
+                fill = "none" if color == "transparent" else color
+                return f'  <path fill="{fill}" d="{current_path.strip()}" />\n'
             return ""
 
         for cmd, *args in cmds:
@@ -726,8 +730,11 @@ class ShapePickerDialog(QDialog):
         path = QPainterPath()
         def flush():
             if not path.isEmpty():
-                painter.setPen(QPen(QColor(current_color), 0.5))
-                painter.setBrush(QBrush(QColor(current_color)))
+                painter.setPen(QPen(QColor(current_color if current_color != "transparent" else "#00000000"), 0.5))
+                if current_color == "transparent":
+                    painter.setBrush(Qt.BrushStyle.NoBrush)
+                else:
+                    painter.setBrush(QBrush(QColor(current_color)))
                 painter.drawPath(path)
         for cmd, *args in cmds:
             if cmd == "COLOR":
@@ -1111,7 +1118,9 @@ class SVGArtApp(QMainWindow):
             else:
                 m = re.search(r'style=["\'][^"\']*fill:([^;]+)', attr_str)
                 if m: fill = m.group(1).strip()
-            if fill and fill.lower() != "none": all_commands.append(["COLOR", fill])
+            
+            if fill and fill.lower() == "none": fill = "transparent"
+            if fill: all_commands.append(["COLOR", fill])
 
             fr = "nonzero"; m = re.search(r'fill-rule=["\']([^"\']+)["\']', attr_str)
             if m: fr = m.group(1).strip()
