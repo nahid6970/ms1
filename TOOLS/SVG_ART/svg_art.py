@@ -46,7 +46,8 @@ SVGS = {
     "EYEDROPPER": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17.8 2.2c-1-1-2.6-1-3.6 0L12.4 4l-.7-.7c-.4-.4-1-.4-1.4 0l-.8.7c-.4.4-.4 1 0 1.4l5 5c.4.4 1 .4 1.4 0l.7-.7c.4-.4.4-1 0-1.4l-.6-.7 1.8-1.8c1-1 1-2.6 0-3.6zM4.4 12c-2.2 2.2-.9 3.2-2.9 5.8l.7.7c2.6-2 3.6-.7 5.8-2.9l5.1-5.1-3.6-3.6L4.4 12z"></path></svg>',
     "RECTANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg>',
     "CIRCLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>',
-    "TRIANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>'
+    "TRIANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>',
+    "CENTER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -221,14 +222,11 @@ class ArtScene(QGraphicsScene):
         self.setSceneRect(-5000, -5000, 10000, 10000)
         self.show_grid = False
         self.grid_size = 20
-        self.center_marker = QGraphicsLineItem(-15, 0, 15, 0)
-        self.center_marker.setPen(QPen(QColor(CP_YELLOW), 1))
-        self.center_marker_v = QGraphicsLineItem(0, -15, 0, 15)
-        self.center_marker_v.setPen(QPen(QColor(CP_YELLOW), 1))
+        self.center_marker = QGraphicsEllipseItem(-3, -3, 6, 6)
+        self.center_marker.setPen(QPen(Qt.PenStyle.NoPen))
+        self.center_marker.setBrush(QBrush(QColor(CP_YELLOW)))
         self.addItem(self.center_marker)
-        self.addItem(self.center_marker_v)
         self.center_marker.is_art_item = False
-        self.center_marker_v.is_art_item = False
 
     def drawBackground(self, painter, rect):
         super().drawBackground(painter, rect)
@@ -352,7 +350,7 @@ class ArtView(QGraphicsView):
                 self.start_point = scene_pos
             elif self.tool == "move_sym":
                 delta = scene_pos - self.start_point; self.sym_center += delta; self.start_point = scene_pos
-                self.scene().center_marker.setPos(self.sym_center); self.scene().center_marker_v.setPos(self.sym_center)
+                self.scene().center_marker.setPos(self.sym_center)
         if self.tool == "poly" and self.poly_points: self.update_poly(scene_pos)
         elif self.tool == "curve" and self.curve_state > 0: self.update_curve_preview(scene_pos)
         super().mouseMoveEvent(event)
@@ -620,7 +618,7 @@ class ArtView(QGraphicsView):
         if a == "add":
             self.scene().removeItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]; self.redo_stack.append((a, i))
         elif a == "remove":
-            self.scene().addItem(i); [self.scene().addItem(c) for c in getattr(i, 'symmetry_clones', [])]; self.redo_stack.append((a, i))
+            self.scene().addItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]; self.redo_stack.append((a, i))
         elif a == "fill":
             old = i[2]; i.setBrush(old); [c.setBrush(old) for c in getattr(i, 'symmetry_clones', [])]
 
@@ -919,6 +917,7 @@ class SVGInputDialog(QDialog):
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
+        self.library_columns = 4
         self.setup_ui(); self.apply_theme(); self.toggle_sharp(); self.load_settings(); self.load_custom_shapes()
 
     def setup_ui(self):
@@ -961,6 +960,9 @@ class SVGArtApp(QMainWindow):
         
         btn_redo = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["REDO"])
         btn_redo.setToolTip("Redo last undone action"); btn_redo.clicked.connect(self.redo); self.tb_sys.addWidget(btn_redo)
+
+        btn_recenter = ConvexButton(parent=self, color=CP_YELLOW, svg_data=SVGS["CENTER"])
+        btn_recenter.setToolTip("Recenter view"); btn_recenter.clicked.connect(self.recenter_view); self.tb_sys.addWidget(btn_recenter)
         
         btn_img = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["IMAGE"])
         btn_img.setToolTip("Load background image"); btn_img.clicked.connect(self.load_image); self.tb_sys.addWidget(btn_img)
@@ -1018,6 +1020,9 @@ class SVGArtApp(QMainWindow):
 
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
+    def recenter_view(self):
+        self.view.resetTransform()
+        self.view.centerOn(0, 0)
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
     def load_image(self, path=None):
         if not path: path, _ = QFileDialog.getOpenFileName(self, "IMG", "", "Images (*.png *.jpg *.jpeg *.bmp)")
@@ -1361,7 +1366,7 @@ class SVGArtApp(QMainWindow):
                     if "geom" in s: self.restoreGeometry(QByteArray.fromHex(s["geom"].encode()))
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
                     self.library_columns = s.get("library_columns", 4)
-                    self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.scene.center_marker_v.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
+                    self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
                     
                     self.scene.show_grid = s.get("show_grid", False); self.btn_show_grid.setChecked(self.scene.show_grid); self.toggle_grid()
