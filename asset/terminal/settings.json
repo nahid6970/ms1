@@ -86,7 +86,7 @@
             "experimental.retroTerminalEffect": false,
             "font": 
             {
-                "face": "Consolas",
+                "face": "JetBrainsMono Nerd Font",
                 "size": 12
             },
             "opacity": 75,

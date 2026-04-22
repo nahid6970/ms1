@@ -14,12 +14,31 @@ def toggle_bookmark(file_path):
     if os.path.exists(BOOKMARKS_FILE):
         try:
             with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
-                bookmarks = json.load(f)
+                data = json.load(f)
+                bookmarks = [b if isinstance(b, dict) else {"path": b, "name": ""} for b in data]
         except: pass
-    if file_path in bookmarks:
-        bookmarks.remove(file_path)
+    
+    existing = next((b for b in bookmarks if b['path'] == file_path), None)
+    if existing:
+        bookmarks.remove(existing)
     else:
-        bookmarks.append(file_path)
+        # Redirect stdin to the console to allow input inside fzf execute
+        old_stdin = sys.stdin
+        try:
+            if os.name == 'nt':
+                sys.stdin = open('CON', 'r')
+            else:
+                sys.stdin = open('/dev/tty', 'r')
+            
+            print(f"\n\033[96mBookmarking: {file_path}\033[0m")
+            name = input("Enter custom name (leave empty for default): ").strip()
+            bookmarks.append({"path": file_path, "name": name})
+        except Exception as e:
+            print(f"Error getting input: {e}")
+            bookmarks.append({"path": file_path, "name": ""})
+        finally:
+            sys.stdin = old_stdin
+        
     with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
@@ -27,10 +46,12 @@ def move_bookmark(file_path, direction):
     if not os.path.exists(BOOKMARKS_FILE): return
     try:
         with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
-            bookmarks = json.load(f)
+            data = json.load(f)
+            bookmarks = [b if isinstance(b, dict) else {"path": b, "name": ""} for b in data]
     except: return
-    if file_path not in bookmarks: return
-    idx = bookmarks.index(file_path)
+    
+    idx = next((i for i, b in enumerate(bookmarks) if b['path'] == file_path), -1)
+    if idx == -1: return
     new_idx = idx + direction
     if 0 <= new_idx < len(bookmarks):
         bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
@@ -452,7 +473,8 @@ bookmarks = []
 if os.path.exists(bookmarks_file):
     try:
         with open(bookmarks_file, 'r', encoding='utf-8') as f:
-            bookmarks = json.load(f)
+            data = json.load(f)
+            bookmarks = [b if isinstance(b, dict) else {{"path": b, "name": ""}} for b in data]
     except:
         bookmarks = []
 
@@ -461,7 +483,15 @@ def format_display(full_path, is_bookmarked):
     marker = "* " if is_bookmarked else "  "
     is_dir = os.path.isdir(full_path)
     
-    if view_mode == "name":
+    custom_name = ""
+    if is_bookmarked:
+        bm = next((b for b in bookmarks if b['path'] == full_path), None)
+        if bm:
+            custom_name = bm.get('name', '')
+
+    if custom_name:
+        display = f"{{marker}}{{custom_name}}"
+    elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
         if not name and ":" in path_norm:
@@ -485,7 +515,8 @@ def format_display(full_path, is_bookmarked):
 
 # Output bookmarked files first
 printed_paths = set()
-for bm in bookmarks:
+for bm_item in bookmarks:
+    bm = bm_item['path']
     if os.path.exists(bm):
         display = format_display(bm, True)
         print(f"{{display}}\\t{{bm}}")
@@ -532,16 +563,15 @@ def move_bookmark(file_path, direction):
         return
     try:
         with open(bookmarks_file, 'r', encoding='utf-8') as f:
-            bookmarks = json.load(f)
+            data = json.load(f)
+            bookmarks = [b if isinstance(b, dict) else {{"path": b, "name": ""}} for b in data]
     except:
         return
     
-    if file_path not in bookmarks:
-        return
+    idx = next((i for i, b in enumerate(bookmarks) if b['path'] == file_path), -1)
+    if idx == -1: return
     
-    idx = bookmarks.index(file_path)
     new_idx = idx + direction
-    
     if 0 <= new_idx < len(bookmarks):
         bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
         with open(bookmarks_file, 'w', encoding='utf-8') as f:
@@ -585,7 +615,7 @@ if __name__ == "__main__":
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
-            f"--bind=f5:execute-silent(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
