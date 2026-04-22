@@ -242,6 +242,7 @@ class ArtScene(QGraphicsScene):
 class ArtView(QGraphicsView):
     def __init__(self, scene, parent=None):
         super().__init__(scene, parent)
+        self.app = parent # Store reference to SVGArtApp
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
@@ -593,7 +594,8 @@ class ArtView(QGraphicsView):
     def pick_color(self, pos):
         item = self.scene().itemAt(pos, QTransform())
         if item and hasattr(item, 'pen'):
-            self.pen_color = item.pen().color(); self.parent().update_color_ui(self.pen_color)
+            self.pen_color = item.pen().color()
+            if self.app: self.app.update_color_ui(self.pen_color)
 
     def undo(self):
         if not self.undo_stack: return
