@@ -79,18 +79,18 @@ def search_directories_and_files():
     # Shortcut list text for F1 display
     shortcuts_text = r"""
 Shortcuts available:
-  Enter     : Show action menu (Editor/VSCode/Folder/Run/Copy/Terminal) - works with multi-select
-  Ctrl-n    : Open file with editor chooser - works with multi-select
-  Ctrl-o    : Open file location in Explorer - works with multi-select  
-  Ctrl-c    : Copy full file path to clipboard - works with multi-select
-  Ctrl-r    : Run file with PowerShell Start-Process - works with multi-select
-  Ctrl-p    : Toggle preview window on/off
   F1        : Show this shortcuts help window
   F2        : Toggle between chafa/viu and QuickLook for image preview
   F3        : Toggle view mode (Full Path / Filename)
   F5        : Toggle bookmark on/off
+  Ctrl-c    : Copy full file path to clipboard - works with multi-select
+  Ctrl-n    : Open file with editor chooser - works with multi-select
+  Ctrl-o    : Open file location in Explorer - works with multi-select  
+  Ctrl-p    : Toggle preview window on/off
+  Ctrl-r    : Run file with PowerShell Start-Process - works with multi-select
   Alt-Up    : Move bookmarked file up in order
   Alt-Down  : Move bookmarked file down in order
+  Enter     : Show action menu (Editor/VSCode/Folder/Run/Copy/Terminal) - works with multi-select
   ?         : Show this help
   
 Multi-select: Use Tab to select multiple files, then use any action
@@ -588,7 +588,7 @@ if __name__ == "__main__":
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         # Compact multiline help header
-        help_header = "Enter: Menu       | F3: Toggle View    | F5: Bookmark\nCtrl-N: Editor    | F2: Toggle Preview | Alt-Up: Move Up\nCtrl-O: Explorer  | Ctrl-C: Copy Path  | Alt-Down: Move Down\nCtrl-R: Run File"
+        help_header = "F1: Help          | F2: Preview Mode   | F3: View Mode      | F5: Bookmark\nCtrl-C: Copy Path | Ctrl-N: Editor     | Ctrl-O: Explorer   | Ctrl-R: Run File\nAlt-Up: Move Up   | Alt-Down: Move Down| Enter: Menu        | ?: Toggle Header"
          
         fzf_args = [
             "fzf",
