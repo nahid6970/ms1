@@ -82,7 +82,9 @@ Shortcuts available:
   F1        : Show this shortcuts help window
   F2        : Toggle between chafa/viu and QuickLook for image preview
   F3        : Toggle view mode (Full Path / Filename)
+  F4        : Refresh file list
   F5        : Toggle bookmark on/off
+  F6        : Rename bookmark custom name
   Ctrl-c    : Copy full file path to clipboard - works with multi-select
   Ctrl-n    : Open file with editor chooser - works with multi-select
   Ctrl-o    : Open file location in Explorer - works with multi-select  
@@ -588,7 +590,7 @@ if __name__ == "__main__":
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         # Compact multiline help header
-        help_header = "F1: Help          | F2: Preview Mode   | F3: View Mode      | F5: Bookmark\nCtrl-C: Copy Path | Ctrl-N: Editor     | Ctrl-O: Explorer   | Ctrl-R: Run File\nAlt-Up: Move Up   | Alt-Down: Move Down| Enter: Menu        | ?: Toggle Header"
+        help_header = "F1: Help | F2: Preview | F3: View | F4: Refresh | F5: Bookmark | F6: Rename\nCtrl-C: Copy | Ctrl-N: Editor | Ctrl-O: Explorer | Ctrl-R: Run File\nAlt-Up/Down: Move | Enter: Menu | ?: Toggle Header"
          
         fzf_args = [
             "fzf",
@@ -613,7 +615,9 @@ if __name__ == "__main__":
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
+            f"--bind=f4:reload(python \"{feeder_script_file}\")",
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
@@ -660,10 +664,50 @@ if __name__ == "__main__":
             except:
                 pass
 
+def rename_bookmark(file_path):
+    if not os.path.exists(BOOKMARKS_FILE): return
+    try:
+        with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            bookmarks = [b if isinstance(b, dict) else {"path": b, "name": ""} for b in data]
+    except: return
+    
+    bm = next((b for b in bookmarks if b['path'] == file_path), None)
+    if not bm:
+        print(f"\n\033[93mItem is not bookmarked. Bookmark it first (F5).\033[0m")
+        import time
+        time.sleep(1)
+        return
+        
+    try:
+        con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+        with open(con_path, 'r') as f_in:
+            print(f"\n\033[96mRenaming Bookmark: {file_path}\033[0m")
+            print(f"Current name: {bm.get('name', 'None')}")
+            print("Enter new custom name (leave empty for default, Ctrl+C to cancel): ", end='', flush=True)
+            new_name = f_in.readline().strip()
+            bm['name'] = new_name
+    except KeyboardInterrupt:
+        print("\n\033[91mCancelled renaming.\033[0m")
+        import time
+        time.sleep(1)
+        return
+    except Exception as e:
+        print(f"Error: {e}")
+        import time
+        time.sleep(1)
+        return
+        
+    with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--toggle-bookmark" and len(sys.argv) > 2:
             toggle_bookmark(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--rename-bookmark" and len(sys.argv) > 2:
+            rename_bookmark(sys.argv[2])
             sys.exit(0)
         elif sys.argv[1] == "--move-bookmark" and len(sys.argv) > 3:
             direction = -1 if sys.argv[2] == "up" else 1
