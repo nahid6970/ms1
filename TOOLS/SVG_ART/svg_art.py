@@ -36,6 +36,7 @@ SVGS = {
     "IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
     "SAVE_DISK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
     "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>',
+    "COPY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
     "BRUSH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-3.91.35-7.07 3.73-7.07 7.72 0 1.1.9 2 2 2 3.99 0 7.37-3.16 7.72-7.07"></path><path d="m2 22 3-3"></path></svg>',
     "POLYGON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line></svg>',
     "CURVE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c5-15 14-15 14 0"></path></svg>',
@@ -651,7 +652,7 @@ class ShapePickerDialog(QDialog):
             return
 
         container = QWidget(); gl = QGridLayout(container); gl.setSpacing(10); gl.setContentsMargins(10,10,10,10)
-        COLS, SIZE, LABEL_H = 4, 100, 36
+        COLS, SIZE, LABEL_H = 4, 100, 44
         for i, (name, cmds) in enumerate(self.custom_shapes.items()):
             cell = QWidget(); cell.setFixedSize(SIZE + 4, SIZE + LABEL_H)
             cell.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
@@ -664,12 +665,56 @@ class ShapePickerDialog(QDialog):
             nl = QLabel(name.upper()); nl.setStyleSheet(f"color: {CP_ORANGE}; font-size: 7pt; font-weight: bold; border: none;")
             nl.setAlignment(Qt.AlignmentFlag.AlignCenter); nl.setFixedHeight(18)
             vl.addWidget(nl)
-            del_btn = QPushButton("✕ remove"); del_btn.setFixedHeight(16)
-            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 7pt; padding: 0;")
+            
+            ctrls = QHBoxLayout(); ctrls.setSpacing(10); ctrls.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            copy_btn = QPushButton(); copy_btn.setFixedSize(22, 22); copy_btn.setToolTip("Copy SVG Code")
+            rd = QSvgRenderer(QByteArray(SVGS["COPY"].replace('currentColor', CP_CYAN).encode()))
+            px = QPixmap(18, 18); px.fill(Qt.GlobalColor.transparent); pn = QPainter(px); rd.render(pn); pn.end()
+            copy_btn.setIcon(QIcon(px)); copy_btn.setStyleSheet("background: transparent; border: none;")
+            copy_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            copy_btn.clicked.connect(lambda checked, n=name: self._copy_shape(n))
+            
+            del_btn = QPushButton("✕"); del_btn.setFixedSize(22, 22); del_btn.setToolTip("Remove Shape")
+            del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 10pt; font-weight: bold;")
+            del_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             del_btn.clicked.connect(lambda checked, n=name: self._delete(n))
-            vl.addWidget(del_btn)
+            
+            ctrls.addWidget(copy_btn); ctrls.addWidget(del_btn)
+            vl.addLayout(ctrls)
+            
             gl.addWidget(cell, i // COLS, i % COLS)
         self.layout_.addWidget(container)
+
+    def _copy_shape(self, name):
+        cmds = self.custom_shapes.get(name, [])
+        if not cmds: return
+        
+        svg_output = f'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n'
+        current_path = ""; color = "#00F0FF"
+        
+        def flush_path():
+            nonlocal current_path
+            if current_path:
+                return f'  <path fill="{color}" d="{current_path.strip()}" />\n'
+            return ""
+
+        for cmd, *args in cmds:
+            if cmd == "COLOR":
+                svg_output += flush_path()
+                current_path = ""; color = args[0]; continue
+            if cmd == "FILLRULE": continue
+            
+            pts = args
+            if cmd == "M": current_path += f"M{pts[0][0]*100},{pts[0][1]*100} "
+            elif cmd == "L": current_path += f"L{pts[0][0]*100},{pts[0][1]*100} "
+            elif cmd == "Q": current_path += f"Q{pts[0][0]*100},{pts[0][1]*100} {pts[1][0]*100},{pts[1][1]*100} "
+            elif cmd == "C": current_path += f"C{pts[0][0]*100},{pts[0][1]*100} {pts[1][0]*100},{pts[1][1]*100} {pts[2][0]*100},{pts[2][1]*100} "
+            elif cmd == "Z": current_path += "Z "
+            
+        svg_output += flush_path()
+        svg_output += "</svg>"
+        QApplication.clipboard().setText(svg_output)
 
     @staticmethod
     def build_pixmap(cmds, w, h):
