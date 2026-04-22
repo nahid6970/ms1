@@ -635,37 +635,78 @@ class ShapePickerDialog(QDialog):
     def __init__(self, custom_shapes, pixmap_cache, on_delete, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Custom Shapes"); self.setModal(True)
-        self.setMinimumSize(460, 300)
+        self.setMinimumSize(550, 400)
         self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;")
         self.selected = None; self.custom_shapes = custom_shapes
         self.pixmap_cache = pixmap_cache; self.on_delete = on_delete
-        self.layout_ = QVBoxLayout(self); self.layout_.setSizeConstraint(QVBoxLayout.SizeConstraint.SetMinAndMaxSize)
+        self.columns = 4
+        
+        self.layout_ = QVBoxLayout(self)
+        
+        # Header: Search and Column Controls
+        header = QHBoxLayout()
+        
+        header.addWidget(QLabel("SEARCH:"))
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Filter shapes...")
+        self.search_edit.setStyleSheet(f"background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px;")
+        self.search_edit.textChanged.connect(self._build_grid)
+        header.addWidget(self.search_edit, stretch=1)
+        
+        header.addSpacing(20)
+        header.addWidget(QLabel("COLS:"))
+        self.col_spin = QSpinBox()
+        self.col_spin.setRange(1, 10); self.col_spin.setValue(self.columns)
+        self.col_spin.setStyleSheet(f"background: {CP_PANEL}; color: {CP_YELLOW}; border: 1px solid {CP_DIM}; padding: 5px; min-width: 50px;")
+        self.col_spin.valueChanged.connect(self._update_cols)
+        header.addWidget(self.col_spin)
+        
+        self.layout_.addLayout(header)
+        
+        # Scroll Area for the Grid
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }} QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_DIM}; }}")
+        self.layout_.addWidget(self.scroll)
+        
+        self._build_grid()
+
+    def _update_cols(self, val):
+        self.columns = val
         self._build_grid()
 
     def _build_grid(self):
         from PyQt6.QtWidgets import QGridLayout
-        while self.layout_.count():
-            item = self.layout_.takeAt(0)
-            if item.widget(): item.widget().deleteLater()
+        
+        # Clear existing container
+        if self.scroll.widget():
+            self.scroll.widget().deleteLater()
 
-        if not self.custom_shapes:
-            lbl = QLabel("NO CUSTOM SHAPES FOUND\nUSE '+' TO SAVE YOUR ART")
-            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        search_text = self.search_edit.text().lower().strip()
+        filtered_shapes = {n: c for n, c in self.custom_shapes.items() if search_text in n.lower()}
+
+        if not filtered_shapes:
+            container = QWidget(); vbox = QVBoxLayout(container)
+            msg = "NO MATCHES FOUND" if self.custom_shapes else "NO CUSTOM SHAPES FOUND"
+            lbl = QLabel(msg); lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 12pt; font-weight: bold; margin: 40px;")
-            self.layout_.addWidget(lbl)
+            vbox.addWidget(lbl); self.scroll.setWidget(container)
             return
 
-        container = QWidget(); gl = QGridLayout(container); gl.setSpacing(10); gl.setContentsMargins(10,10,10,10)
-        COLS, SIZE, LABEL_H = 4, 100, 44
-        for i, (name, cmds) in enumerate(self.custom_shapes.items()):
-            cell = QWidget(); cell.setFixedSize(SIZE + 4, SIZE + LABEL_H)
+        container = QWidget(); gl = QGridLayout(container); gl.setSpacing(15); gl.setContentsMargins(10,10,10,10)
+        SIZE, LABEL_H = 100, 44
+        
+        for i, (name, cmds) in enumerate(filtered_shapes.items()):
+            cell = QWidget(); cell.setFixedSize(SIZE + 10, SIZE + LABEL_H + 10)
             cell.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
-            vl = QVBoxLayout(cell); vl.setContentsMargins(2, 2, 2, 2); vl.setSpacing(0)
+            vl = QVBoxLayout(cell); vl.setContentsMargins(4, 4, 4, 4); vl.setSpacing(2)
+            
             lbl = QLabel(); lbl.setFixedSize(SIZE, SIZE)
             lbl.setPixmap(self.pixmap_cache.get(name) or self.build_pixmap(cmds, SIZE, SIZE))
             lbl.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             lbl.mousePressEvent = lambda e, n=name: self._pick(n)
             vl.addWidget(lbl)
+            
             nl = QLabel(name.upper()); nl.setStyleSheet(f"color: {CP_ORANGE}; font-size: 7pt; font-weight: bold; border: none;")
             nl.setAlignment(Qt.AlignmentFlag.AlignCenter); nl.setFixedHeight(18)
             vl.addWidget(nl)
@@ -696,8 +737,11 @@ class ShapePickerDialog(QDialog):
             ctrls.addWidget(copy_btn); ctrls.addWidget(edit_btn); ctrls.addWidget(del_btn)
             vl.addLayout(ctrls)
             
-            gl.addWidget(cell, i // COLS, i % COLS)
-        self.layout_.addWidget(container)
+            gl.addWidget(cell, i // self.columns, i % self.columns)
+        
+        gl.setRowStretch(gl.rowCount(), 1)
+        gl.setColumnStretch(self.columns, 1)
+        self.scroll.setWidget(container)
 
     def _rename_shape(self, old_name):
         new_name, ok = QInputDialog.getText(self, "Rename Shape", f"Enter new name for '{old_name}':", text=old_name)
