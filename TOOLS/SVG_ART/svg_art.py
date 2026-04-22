@@ -403,7 +403,7 @@ class ArtView(QGraphicsView):
         else: return None
         clone.setPen(item.pen()); clone.setBrush(item.brush()); clone.is_art_item = True
         if item.graphicsEffect():
-            blur = QGraphicsBlurEffect(); blur.setBlurRadius(item.graphicsEffect().blurRadius()); clone.setGraphicsEffect(blur)
+            blur = QGraphicsBlurEffect(); blur.setBlurRadius(self.pen_width * 1.5); clone.setGraphicsEffect(blur)
         return clone
 
     def update_clones(self, item):
@@ -955,6 +955,7 @@ class SVGArtApp(QMainWindow):
         self.btn_show_grid = QPushButton("GRID"); self.btn_show_grid.setCheckable(True); self.btn_show_grid.clicked.connect(self.toggle_grid); self.tb_grid.addWidget(self.btn_show_grid)
         self.btn_snap_grid = QPushButton("SNAP"); self.btn_snap_grid.setCheckable(True); self.btn_snap_grid.clicked.connect(self.toggle_snap); self.tb_grid.addWidget(self.btn_snap_grid)
         self.tb_grid.addWidget(QLabel(" SIZE: ")); self.grid_size_spin = QSpinBox(); self.grid_size_spin.setRange(5, 200); self.grid_size_spin.setValue(20); self.grid_size_spin.valueChanged.connect(self.change_grid_size); self.tb_grid.addWidget(self.grid_size_spin)
+        self.btn_canvas_bg = QPushButton("BG"); self.btn_canvas_bg.setToolTip("Change Canvas Background"); self.btn_canvas_bg.clicked.connect(self.choose_canvas_bg); self.tb_grid.addWidget(self.btn_canvas_bg)
 
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
@@ -1027,6 +1028,12 @@ class SVGArtApp(QMainWindow):
     def change_grid_size(self, v):
         self.view.grid_size = v; self.scene.grid_size = v; self.scene.update()
 
+    def choose_canvas_bg(self):
+        c = QColorDialog.getColor(self.scene.backgroundBrush().color(), self, "CANVAS BACKGROUND")
+        if c.isValid():
+            self.scene.setBackgroundBrush(QColor(c))
+            self.save_settings()
+
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
     def zoom_in(self): self.view.scale(1.25, 1.25)
@@ -1050,7 +1057,17 @@ class SVGArtApp(QMainWindow):
                 if not getattr(i, 'is_art_item', False): (i.hide(), hidden.append(i)) if i.isVisible() else None
                 else: r = r.united(i.sceneBoundingRect())
             if r.isEmpty(): r = QRectF(0, 0, 800, 600)
-            g = QSvgGenerator(); g.setFileName(f); g.setSize(r.size().toSize()); g.setViewBox(r); painter = QPainter(g); self.scene.render(painter, r, r); painter.end(); [i.show() for i in hidden]
+            
+            # Temporarily disable background for transparent export
+            old_bg = self.scene.backgroundBrush()
+            self.scene.setBackgroundBrush(QBrush(Qt.BrushStyle.NoBrush))
+            
+            g = QSvgGenerator(); g.setFileName(f); g.setSize(r.size().toSize()); g.setViewBox(r); painter = QPainter(g); self.scene.render(painter, r, r); painter.end()
+            
+            # Restore background
+            self.scene.setBackgroundBrush(old_bg)
+            [i.show() for i in hidden]
+            
     def restart_app(self): self.save_settings(); os.execl(sys.executable, sys.executable, *sys.argv)
 
     def _convex_call(self, type, payload):
@@ -1383,6 +1400,9 @@ class SVGArtApp(QMainWindow):
                     self.scene.show_grid = s.get("show_grid", False); self.btn_show_grid.setChecked(self.scene.show_grid); self.toggle_grid()
                     self.view.snap_to_grid = s.get("snap_to_grid", False); self.btn_snap_grid.setChecked(self.view.snap_to_grid); self.toggle_snap()
                     gs = s.get("grid_size", 20); self.view.grid_size = gs; self.scene.grid_size = gs; self.grid_size_spin.setValue(gs)
+                    
+                    cbg = s.get("canvas_bg", CP_BG)
+                    self.scene.setBackgroundBrush(QColor(cbg))
 
                     if ip and os.path.exists(ip):
                         self.load_image(ip)
@@ -1392,7 +1412,8 @@ class SVGArtApp(QMainWindow):
     def save_settings(self):
         s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp,
              "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size,
-             "library_columns": getattr(self, 'library_columns', 4)}
+             "library_columns": getattr(self, 'library_columns', 4),
+             "canvas_bg": self.scene.backgroundBrush().color().name()}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
             with open(SETTINGS_FILE, 'w') as f: json.dump(s, f)
