@@ -1080,6 +1080,7 @@ class SVGArtApp(QMainWindow):
                     else: trans.rotate(vals[0])
             return trans
 
+        # Improved tag splitting to handle complex nested shapes
         tags = re.findall(r'<(path|rect|circle|ellipse|g|/g)\b([^>]*)>', svg_code, re.I)
         if not tags:
             d_matches = re.findall(r'\bd=["\']([^"\']+)["\']', svg_code)
@@ -1126,40 +1127,37 @@ class SVGArtApp(QMainWindow):
                 for m in token_pattern.finditer(dm.group(1)):
                     if m.group(1): tokens.append(m.group(1))
                     else: tokens.append(float(m.group(2)))
+                
                 i = 0; cur_x, cur_y = 0, 0; last_cmd = ""; start_x, start_y = 0, 0
-                lbx, lby = 0, 0
+                lbx, lby = 0, 0 # Last control point for smooth curves
+                
                 while i < len(tokens):
                     token = tokens[i]
                     if isinstance(token, str): cmd = token; i += 1
                     else: cmd = last_cmd
                     if not cmd: break
+                    
                     try:
                         if cmd in 'Mm':
                             x, y = tokens[i], tokens[i+1]; i += 2
                             if cmd == 'm': x += cur_x; y += cur_y
                             tx, ty = t_pt(x, y); all_commands.append(["M", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                            cur_x, cur_y = x, y; start_x, start_y = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
+                            cur_x, cur_y = x, y; start_x, start_y = x, y; lbx, lby = x, y; last_cmd = 'L' if cmd == 'M' else 'l'
                         elif cmd in 'Ll':
                             x, y = tokens[i], tokens[i+1]; i += 2
                             if cmd == 'l': x += cur_x; y += cur_y
                             tx, ty = t_pt(x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                            cur_x, cur_y = x, y; last_cmd = cmd
+                            cur_x, cur_y = x, y; lbx, lby = x, y; last_cmd = cmd
                         elif cmd in 'Hh':
                             x = tokens[i]; i += 1
                             if cmd == 'h': x += cur_x
                             tx, ty = t_pt(x, cur_y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                            cur_x = x; last_cmd = cmd
+                            cur_x = x; lbx, lby = x, cur_y; last_cmd = cmd
                         elif cmd in 'Vv':
                             y = tokens[i]; i += 1
                             if cmd == 'v': y += cur_y
                             tx, ty = t_pt(cur_x, y); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
-                            cur_y = y; last_cmd = cmd
-                        elif cmd in 'Qq':
-                            x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
-                            if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
-                            tx1, ty1 = t_pt(x1, y1); tx, ty = t_pt(x, y); lbx, lby = x1, y1
-                            all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
-                            cur_x, cur_y = x, y; last_cmd = cmd
+                            cur_y = y; lbx, lby = cur_x, y; last_cmd = cmd
                         elif cmd in 'Cc':
                             x1, y1 = tokens[i], tokens[i+1]; i += 2; x2, y2 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
                             if cmd == 'c': x1 += cur_x; y1 += cur_y; x2 += cur_x; y2 += cur_y; x += cur_x; y += cur_y
@@ -1173,6 +1171,12 @@ class SVGArtApp(QMainWindow):
                             tx1, ty1 = t_pt(x1, y1); tx2, ty2 = t_pt(x2, y2); tx, ty = t_pt(x, y); lbx, lby = x2, y2
                             all_commands.append(["C", [tx1, ty1], [tx2, ty2], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx2, ty2), QPointF(tx, ty)])
                             cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Qq':
+                            x1, y1 = tokens[i], tokens[i+1]; i += 2; x, y = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'q': x1 += cur_x; y1 += cur_y; x += cur_x; y += cur_y
+                            tx1, ty1 = t_pt(x1, y1); tx, ty = t_pt(x, y); lbx, lby = x1, y1
+                            all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
+                            cur_x, cur_y = x, y; last_cmd = cmd
                         elif cmd in 'Tt':
                             x, y = tokens[i], tokens[i+1]; i += 2
                             if cmd == 't': x += cur_x; y += cur_y
@@ -1180,6 +1184,56 @@ class SVGArtApp(QMainWindow):
                             tx1, ty1 = t_pt(x1, y1); tx, ty = t_pt(x, y); lbx, lby = x1, y1
                             all_commands.append(["Q", [tx1, ty1], [tx, ty]]); all_pts.extend([QPointF(tx1, ty1), QPointF(tx, ty)])
                             cur_x, cur_y = x, y; last_cmd = cmd
+                        elif cmd in 'Aa':
+                            # --- Proper SVG Arc-to-Bezier Converter ---
+                            rx, ry = abs(tokens[i]), abs(tokens[i+1]); i += 2
+                            rot = math.radians(tokens[i] % 360); i += 1
+                            large, sweep = bool(tokens[i]), bool(tokens[i+1]); i += 2
+                            x1, y1 = tokens[i], tokens[i+1]; i += 2
+                            if cmd == 'a': x1 += cur_x; y1 += cur_y
+                            
+                            if cur_x == x1 and cur_y == y1: continue
+                            if rx == 0 or ry == 0: 
+                                tx, ty = t_pt(x1, y1); all_commands.append(["L", [tx, ty]]); all_pts.append(QPointF(tx, ty))
+                            else:
+                                # Center Parameterization Conversion
+                                dx, dy = (cur_x - x1)/2.0, (cur_y - y1)/2.0
+                                x1p =  math.cos(rot)*dx + math.sin(rot)*dy
+                                y1p = -math.sin(rot)*dx + math.cos(rot)*dy
+                                check = (x1p*x1p)/(rx*rx) + (y1p*y1p)/(ry*ry)
+                                if check > 1: rx *= math.sqrt(check); ry *= math.sqrt(check)
+                                sign = -1 if large == sweep else 1
+                                sq = ((rx*rx*ry*ry)-(rx*rx*y1p*y1p)-(ry*ry*x1p*x1p)) / ((rx*rx*y1p*y1p)+(ry*ry*x1p*x1p))
+                                coef = sign * math.sqrt(max(0, sq))
+                                cxp, cyp = coef*((rx*y1p)/ry), coef*(-(ry*x1p)/rx)
+                                cx = math.cos(rot)*cxp - math.sin(rot)*cyp + (cur_x + x1)/2.0
+                                cy = math.sin(rot)*cxp + math.cos(rot)*cyp + (cur_y + y1)/2.0
+                                # Use QPainterPath helper
+                                helper = QPainterPath(); helper.moveTo(cur_x, cur_y)
+                                # arcTo uses sweep angles, not coordinates
+                                def angle(ux, uy, vx, vy):
+                                    dot = ux*vx + uy*vy; len = math.sqrt(ux*ux + uy*uy) * math.sqrt(vx*vx + vy*vy)
+                                    ang = math.acos(max(-1, min(1, dot/len))); return -ang if ux*vy - uy*vx < 0 else ang
+                                start_ang = angle(1, 0, (x1p-cxp)/rx, (y1p-cyp)/ry)
+                                sweep_ang = angle((x1p-cxp)/rx, (y1p-cyp)/ry, (-x1p-cxp)/rx, (-y1p-cyp)/ry) % (2*math.pi)
+                                if not sweep and sweep_ang > 0: sweep_ang -= 2*math.pi
+                                elif sweep and sweep_ang < 0: sweep_ang += 2*math.pi
+                                helper.arcTo(cx-rx, cy-ry, rx*2, ry*2, -math.degrees(start_ang), -math.degrees(sweep_ang))
+                                
+                                # Iterate elements with proper skipping of curve data
+                                k = 1
+                                while k < helper.elementCount():
+                                    el = helper.elementAt(k)
+                                    tx, ty = t_pt(el.x, el.y); all_pts.append(QPointF(tx, ty))
+                                    if el.type == QPainterPath.ElementType.LineToElement:
+                                        all_commands.append(["L", [tx, ty]]); k += 1
+                                    elif el.type == QPainterPath.ElementType.CurveToElement:
+                                        e1, e2 = helper.elementAt(k+1), helper.elementAt(k+2)
+                                        t1x, t1y = t_pt(e1.x, e1.y); t2x, t2y = t_pt(e2.x, e2.y)
+                                        all_commands.append(["C", [tx, ty], [t1x, t1y], [t2x, t2y]]); k += 3
+                                    else: k += 1
+                            
+                            cur_x, cur_y = x1, y1; lbx, lby = x1, y1; last_cmd = cmd
                         elif cmd in 'Zz':
                             all_commands.append(["Z"]); cur_x, cur_y = start_x, start_y; last_cmd = ""
                         else: i += 1
@@ -1190,7 +1244,7 @@ class SVGArtApp(QMainWindow):
                     y = float(re.search(r'\by=["\']([^"\']+)["\']', attr_str).group(1)) if 'y=' in attr_str else 0
                     w = float(re.search(r'\bwidth=["\']([^"\']+)["\']', attr_str).group(1))
                     h = float(re.search(r'\bheight=["\']([^"\']+)["\']', attr_str).group(1))
-                    pts = [[x,y], [x+w,y], [x+w,y+h], [x,y+h]]; tp = [t_pt(px, py) for px, py in pts]
+                    tp = [t_pt(x,y), t_pt(x+w,y), t_pt(x+w,y+h), t_pt(x,y+h)]
                     all_commands.append(["M", tp[0]])
                     for p in tp[1:]: all_commands.append(["L", p])
                     all_commands.append(["Z"]); all_pts.extend([QPointF(*p) for p in tp])
@@ -1201,8 +1255,8 @@ class SVGArtApp(QMainWindow):
                     cy = float(re.search(r'cy=["\']([^"\']+)["\']', attr_str).group(1)) if 'cy=' in attr_str else 0
                     rx = float(re.search(r'rx=["\']([^"\']+)["\']', attr_str).group(1)) if 'rx=' in attr_str else float(re.search(r'r=["\']([^"\']+)["\']', attr_str).group(1))
                     ry = float(re.search(r'ry=["\']([^"\']+)["\']', attr_str).group(1)) if 'ry=' in attr_str else rx
-                    k = 0.5522847498
-                    pts = [[cx, cy-ry], [cx+k*rx, cy-ry], [cx+rx, cy-k*ry], [cx+rx, cy], [cx+rx, cy+k*ry], [cx+k*rx, cy+ry], [cx, cy+ry], [cx-k*rx, cy+ry], [cx-rx, cy+k*ry], [cx-rx, cy], [cx-rx, cy-k*ry], [cx-k*rx, cy-ry]]
+                    k = 0.5523
+                    pts = [[cx,cy-ry],[cx+k*rx,cy-ry],[cx+rx,cy-k*rx],[cx+rx,cy],[cx+rx,cy+k*ry],[cx+k*rx,cy+ry],[cx,cy+ry],[cx-k*rx,cy+ry],[cx-rx,cy+k*ry],[cx-rx,cy],[cx-rx,cy-k*ry],[cx-k*rx,cy-ry]]
                     tp = [t_pt(px, py) for px, py in pts]
                     all_commands.append(["M", tp[0]])
                     all_commands.append(["C", tp[1], tp[2], tp[3]])
