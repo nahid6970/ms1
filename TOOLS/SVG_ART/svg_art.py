@@ -37,6 +37,7 @@ SVGS = {
     "SAVE_DISK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
     "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>',
     "COPY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+    "EDIT": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
     "BRUSH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"></path><path d="M7.07 14.94c-3.91.35-7.07 3.73-7.07 7.72 0 1.1.9 2 2 2 3.99 0 7.37-3.16 7.72-7.07"></path><path d="m2 22 3-3"></path></svg>',
     "POLYGON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line></svg>',
     "CURVE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c5-15 14-15 14 0"></path></svg>',
@@ -677,17 +678,34 @@ class ShapePickerDialog(QDialog):
             copy_btn.setIcon(QIcon(px)); copy_btn.setStyleSheet("background: transparent; border: none;")
             copy_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             copy_btn.clicked.connect(lambda checked, n=name: self._copy_shape(n))
+
+            edit_btn = QPushButton(); edit_btn.setFixedSize(22, 22); edit_btn.setToolTip("Rename Shape")
+            rd_edit = QSvgRenderer(QByteArray(SVGS["EDIT"].replace('currentColor', CP_YELLOW).encode()))
+            px_edit = QPixmap(18, 18); px_edit.fill(Qt.GlobalColor.transparent); pn_edit = QPainter(px_edit); rd_edit.render(pn_edit); pn_edit.end()
+            edit_btn.setIcon(QIcon(px_edit)); edit_btn.setStyleSheet("background: transparent; border: none;")
+            edit_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            edit_btn.clicked.connect(lambda checked, n=name: self._rename_shape(n))
             
             del_btn = QPushButton("✕"); del_btn.setFixedSize(22, 22); del_btn.setToolTip("Remove Shape")
             del_btn.setStyleSheet(f"color: {CP_RED}; background: transparent; border: none; font-size: 10pt; font-weight: bold;")
             del_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             del_btn.clicked.connect(lambda checked, n=name: self._delete(n))
             
-            ctrls.addWidget(copy_btn); ctrls.addWidget(del_btn)
+            ctrls.addWidget(copy_btn); ctrls.addWidget(edit_btn); ctrls.addWidget(del_btn)
             vl.addLayout(ctrls)
             
             gl.addWidget(cell, i // COLS, i % COLS)
         self.layout_.addWidget(container)
+
+    def _rename_shape(self, old_name):
+        new_name, ok = QInputDialog.getText(self, "Rename Shape", f"Enter new name for '{old_name}':", text=old_name)
+        if ok and new_name.strip() and new_name.strip() != old_name:
+            n = new_name.strip()
+            self.custom_shapes[n] = self.custom_shapes.pop(old_name)
+            if old_name in self.pixmap_cache:
+                self.pixmap_cache[n] = self.pixmap_cache.pop(old_name)
+            self.on_delete() # This triggers the save_custom_shapes callback
+            self._build_grid()
 
     def _copy_shape(self, name):
         cmds = self.custom_shapes.get(name, [])
