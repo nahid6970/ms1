@@ -133,14 +133,11 @@ def run_command_ui():
     
     # Scripts
 
-    shortcuts_text = r"""
-┌───────────────────────────────────────────────────────────────────────────┐
+    shortcuts_text = r"""┌───────────────────────────────────────────────────────────────────────────┐
 │                           COMMANDS MENU                                   │
-│                           (Cyberpunk Ed.)                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  [ NAVIGATION ]                                                           │
 │  Enter     : Run selected command (opens terminal chooser)                │
-│  F1        : Show this help window                                        │
 │  ESC       : Exit                                                         │
 │                                                                           │
 │  [ MANAGEMENT ]                                                           │
@@ -152,11 +149,10 @@ def run_command_ui():
 │  [ UTILS ]                                                                │
 │  Ctrl-C    : Copy command to clipboard                                    │
 │  Ctrl-R    : Refresh history/bookmarks list                               │
-│  ?         : Toggle help header at the top                                │
+│  ?         : Toggle this shortcuts help header                            │
 │                                                                           │
 │  Bookmarks are marked with *. History is marked with HIST.               │
-└───────────────────────────────────────────────────────────────────────────┘
-"""
+└───────────────────────────────────────────────────────────────────────────┘"""
     
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as help_file:
         help_file.write(shortcuts_text)
@@ -207,7 +203,7 @@ if len(sys.argv) > 1:
         copy_file.write(copy_script_content)
         copy_path = copy_file.name
 
-    help_header = "Enter: Choose Terminal | F1: Help | F5: Toggle Bookmark\nDel: Remove | Ctrl-C: Copy | Ctrl-R: Refresh | ?: Toggle Help"
+    help_header = shortcuts_text
 
     fzf_args = [
         "fzf",
@@ -230,7 +226,6 @@ if len(sys.argv) > 1:
         # Ctrl-C: Copy to clipboard
         f'--bind=ctrl-c:execute-silent(python "{copy_path}" {{1}})',
         f'--bind=ctrl-r:reload(python "{script_path}" --feed)+clear-query',
-        f'--bind=f1:execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)',
         f'--bind=alt-up:execute-silent(python "{script_path}" --move-bookmark up {{1}})+reload(python "{script_path}" --feed)+up',
         f'--bind=alt-down:execute-silent(python "{script_path}" --move-bookmark down {{1}})+reload(python "{script_path}" --feed)+down',
         "--bind=?:toggle-header",

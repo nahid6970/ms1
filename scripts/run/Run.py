@@ -76,13 +76,11 @@ def search_directories_and_files():
     # Ignore list
     ignore_list = [".git", ".pyc"]
 
-    # Shortcut list text for F1 display
+    # Shortcut list text for display
     shortcuts_text = r"""┌───────────────────────────────────────────────────────────────────────────┐
 │                            SHORTCUTS MENU                                 │
-│                            (Cyberpunk Ed.)                                │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  [ FUNCTION KEYS ]                                                        │
-│  F1        : Show this shortcuts help window                              │
 │  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
 │  F3        : Toggle view mode (Full Path vs Filename)                     │
 │  F4        : Refresh file list                                            │
@@ -101,7 +99,7 @@ def search_directories_and_files():
 │  Alt-Down  : Move bookmarked file down in order                           │
 │  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
 │  Tab       : Multi-select files                                           │
-│  ?         : Toggle the top help header                                   │
+│  ?         : Toggle this shortcuts help header                            │
 └───────────────────────────────────────────────────────────────────────────┘"""
 
     # Create a state file to track preview mode (chafa vs quicklook)
@@ -593,14 +591,11 @@ if __name__ == "__main__":
             reorder_script.write(bookmark_reorder_script_content)
             bookmark_reorder_script_file = reorder_script.name
         
-        # Cyberpunk style help header (toggled by ?)
-        help_header = r"""
-┌───────────────────────────────────────────────────────────────────────────┐
+        # Shortcut help header (toggled by ?)
+        help_header = r"""┌───────────────────────────────────────────────────────────────────────────┐
 │                            SHORTCUTS MENU                                 │
-│                            (Cyberpunk Ed.)                                │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  [ FUNCTION KEYS ]                                                        │
-│  F1        : Show this shortcuts help window                              │
 │  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
 │  F3        : Toggle view mode (Full Path vs Filename)                     │
 │  F4        : Refresh file list                                            │
@@ -619,9 +614,8 @@ if __name__ == "__main__":
 │  Alt-Down  : Move bookmarked file down in order                           │
 │  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
 │  Tab       : Multi-select files                                           │
-│  ?         : Toggle the top help header                                   │
-└───────────────────────────────────────────────────────────────────────────┘
-"""
+│  ?         : Toggle this shortcuts help header                            │
+└───────────────────────────────────────────────────────────────────────────┘"""
          
         fzf_args = [
             "fzf",
@@ -643,7 +637,6 @@ if __name__ == "__main__":
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{2})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
-            f"--bind=f1:execute-silent(cmd /c start cmd /k \"chcp 65001 >nul & type {temp_shortcut_file} & pause\")",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
