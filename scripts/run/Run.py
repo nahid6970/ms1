@@ -563,18 +563,25 @@ if __name__ == "__main__":
             bookmark_reorder_script_file = reorder_script.name
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
-        # Compact multiline help header with Cyberpunk styling and perfect alignment
-        def make_cell(key, desc, width=17):
-            visible_len = len(key) + 1 + len(desc)
-            return f"\033[96m{key} \033[97m{desc}{' ' * (width - visible_len)}"
+        # Compact multiline help header with perfect grid alignment
+        def make_row(cells, width=18):
+            g = "\033[90m" # Grey
+            c = "\033[96m" # Cyan
+            w = "\033[97m" # White
+            r = "\033[0m"  # Reset
+            
+            row = f"{g}│ "
+            for key, desc in cells:
+                # Key + Space + Desc
+                visible_text = f"{key} {desc}"
+                padding = " " * (width - len(visible_text))
+                row += f"{c}{key} {w}{desc}{padding}{g}│ "
+            return row + r
 
-        g = "\033[90m" # Grey separators
-        sep = f"{g}│ \033[0m"
-        
-        line1 = make_cell("F1", "Help")    + sep + make_cell("F2", "Preview") + sep + make_cell("F3", "View")    + sep + make_cell("F4", "Refresh")
-        line2 = make_cell("F5", "B-Mark")  + sep + make_cell("F6", "Rename")  + sep + make_cell("CTRL-C", "Copy") + sep + make_cell("CTRL-N", "Editor")
-        line3 = make_cell("CTRL-O", "Folder") + sep + make_cell("CTRL-P", "Prev") + sep + make_cell("CTRL-R", "Run")  + sep + make_cell("ALT-UP/DN", "Move")
-        line4 = make_cell("ENTER", "Menu")   + sep + make_cell("TAB", "Select")  + sep + make_cell("?", "Header")
+        line1 = make_row([("F1", "Help"), ("F2", "Preview"), ("F3", "View"), ("F4", "Refresh")])
+        line2 = make_row([("F5", "B-Mark"), ("F6", "Rename"), ("Ctrl-C", "Copy"), ("Ctrl-N", "Editor")])
+        line3 = make_row([("Ctrl-O", "Folder"), ("Ctrl-P", "Prev"), ("Ctrl-R", "Run"), ("Alt-Up/Dn", "Move")])
+        line4 = make_row([("Enter", "Menu"), ("Tab", "Select"), ("?", "Header"), (" ", " ")])
         
         help_header = f"{line1}\n{line2}\n{line3}\n{line4}"
          
