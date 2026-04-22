@@ -38,11 +38,12 @@ To match existing tools, key bindings must be implemented as follows:
 | Key | Action | Implementation Detail |
 | :--- | :--- | :--- |
 | **Enter** | Primary Action | Use `execute-silent(...) + reload(feeder)` to prevent terminal clearing AND maintain responsiveness on Windows. |
-| **?** | Toggle Header | Use `--no-header` + `--bind=start:toggle-header` + `--bind=?:toggle-header`. |
-| **F1** | Help Window | `execute-silent(cmd /c start cmd /k type "{help_path}" ^& pause)` |
+| **?** | Box Help Menu | Use `--no-header` + `--bind=start:toggle-header` + `--bind=?:toggle-header`. Displays the box-style shortcuts menu. |
 | **F5** | Bookmark | Use `execute(...)` (not silent) to allow for an interactive custom name prompt. |
 | **Del** | Remove | `execute-silent(python remove_script.py {selection}) + reload(feeder)` |
 | **Ctrl-R** | Refresh | `reload(python feeder.py)` |
+
+> **Note**: Avoid using F1 popups. Consolidate all shortcut help into the box-style header toggled by `?`.
 
 ## 4. Interactive Console Input within FZF
 When using `execute(...)` to prompt for input (e.g., custom bookmark names):
