@@ -437,8 +437,9 @@ def main():
         if folder == "CLIPBOARD":
             send_to_clipboard(img)
         elif folder == "CLIPBOARD_PATH":
-            # Save to first folder or Home/Screenshots
-            save_dir = folders[0]["path"] if folders else os.path.join(os.path.expanduser("~"), "Screenshots")
+            import tempfile
+            # Save to a dedicated subfolder in the system temp directory
+            save_dir = os.path.join(tempfile.gettempdir(), "screenshot_temp")
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir, exist_ok=True)
             
