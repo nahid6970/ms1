@@ -114,11 +114,11 @@ class FolderChooser:
         self.font_small = (self.font_name, 8)
         self.font_title = (self.font_name + " Bold", 11)
         
-        self.root.config(bg="#1a1a1a")
+        self.root.config(bg=self.accent_main)
 
         # Main Container
         self.container = tk.Frame(self.root, bg=self.bg_color)
-        self.container.pack(fill="both", expand=True, padx=2, pady=2)
+        self.container.pack(fill="both", expand=True, padx=1, pady=1)
 
         # Header
         self.header = tk.Frame(self.container, bg=self.bg_color, cursor="fleur")
