@@ -76,29 +76,8 @@ def search_directories_and_files():
     # Ignore list
     ignore_list = [".git", ".pyc"]
 
-    # Shortcut list text for F1 display
-    shortcuts_text = r"""
-Shortcuts available:
-  F1        : Show this shortcuts help window
-  F2        : Toggle between chafa/viu and QuickLook for image preview
-  F3        : Toggle view mode (Full Path / Filename)
-  F4        : Refresh file list
-  F5        : Toggle bookmark on/off
-  F6        : Rename bookmark custom name
-  Ctrl-c    : Copy full file path to clipboard - works with multi-select
-  Ctrl-n    : Open file with editor chooser - works with multi-select
-  Ctrl-o    : Open file location in Explorer - works with multi-select  
-  Ctrl-p    : Toggle preview window on/off
-  Ctrl-r    : Run file with PowerShell Start-Process - works with multi-select
-  Alt-Up    : Move bookmarked file up in order
-  Alt-Down  : Move bookmarked file down in order
-  Enter     : Show action menu (Editor/VSCode/Folder/Run/Copy/Terminal) - works with multi-select
-  ?         : Show this help
-  
-Multi-select: Use Tab to select multiple files, then use any action
-Bookmarked files (marked with *) appear first in the list!
-"""
-
+    # Shortcut list text for F1 display has been moved to view_shortcuts.py
+    
     # Create a state file to track preview mode (chafa vs quicklook)
     state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
     
@@ -248,15 +227,10 @@ Start-Sleep -Milliseconds 500
 '''
 
     # Create temp files
-    temp_shortcut_file = None
     preview_script_file = None
     toggle_script_file = None
     
     try:
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as temp_file:
-            temp_file.write(shortcuts_text)
-            temp_shortcut_file = temp_file.name
-
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
             preview_script.write(preview_script_content)
             preview_script_file = preview_script.name
@@ -589,8 +563,20 @@ if __name__ == "__main__":
             bookmark_reorder_script_file = reorder_script.name
         
         # Prepare fzf arguments with PowerShell preview for images and F2 toggle
-        # Compact multiline help header
-        help_header = "F1: Help | F2: Preview | F3: View | F4: Refresh | F5: Bookmark | F6: Rename\nCtrl-C: Copy | Ctrl-N: Editor | Ctrl-O: Explorer | Ctrl-R: Run File\nAlt-Up/Down: Move | Enter: Menu | ?: Toggle Header"
+        # Compact multiline help header with Cyberpunk styling and perfect alignment
+        def make_cell(key, desc, width=17):
+            visible_len = len(key) + 1 + len(desc)
+            return f"\033[96m{key} \033[97m{desc}{' ' * (width - visible_len)}"
+
+        g = "\033[90m" # Grey separators
+        sep = f"{g}│ \033[0m"
+        
+        line1 = make_cell("F1", "Help")    + sep + make_cell("F2", "Preview") + sep + make_cell("F3", "View")    + sep + make_cell("F4", "Refresh")
+        line2 = make_cell("F5", "B-Mark")  + sep + make_cell("F6", "Rename")  + sep + make_cell("CTRL-C", "Copy") + sep + make_cell("CTRL-N", "Editor")
+        line3 = make_cell("CTRL-O", "Folder") + sep + make_cell("CTRL-P", "Prev") + sep + make_cell("CTRL-R", "Run")  + sep + make_cell("ALT-UP/DN", "Move")
+        line4 = make_cell("ENTER", "Menu")   + sep + make_cell("TAB", "Select")  + sep + make_cell("?", "Header")
+        
+        help_header = f"{line1}\n{line2}\n{line3}\n{line4}"
          
         fzf_args = [
             "fzf",
@@ -612,7 +598,7 @@ if __name__ == "__main__":
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{2})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
-            f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
+            f"--bind=f1:execute(python \"{os.path.join(script_dir, 'view_shortcuts.py')}\")",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
@@ -652,10 +638,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
     finally:
-        # Clean up the temporary file and state file
-        if temp_shortcut_file and os.path.exists(temp_shortcut_file):
-            os.remove(temp_shortcut_file)
-        
         # Clean up state file when program exits
         state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
         if os.path.exists(state_file):
