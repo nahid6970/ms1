@@ -673,6 +673,11 @@ class ShapePickerDialog(QDialog):
         for cmd, *args in cmds:
             if cmd == "COLOR":
                 flush(); path = QPainterPath(); current_color = args[0]; continue
+            if cmd == "FILLRULE":
+                # Optionally set fill rule if path exists, or just skip
+                fr = Qt.FillRule.OddEvenFill if args[0] == "evenodd" else Qt.FillRule.WindingFill
+                path.setFillRule(fr)
+                continue
             pts = [QPointF(a[0] * pw + margin, a[1] * ph + margin) for a in args]
             if cmd == "M": path.moveTo(pts[0])
             elif cmd == "L": path.lineTo(pts[0])
