@@ -22,22 +22,20 @@ def toggle_bookmark(file_path):
     if existing:
         bookmarks.remove(existing)
     else:
-        # Redirect stdin to the console to allow input inside fzf execute
-        old_stdin = sys.stdin
+        # Open console device directly for interactive input
         try:
-            if os.name == 'nt':
-                sys.stdin = open('CON', 'r')
-            else:
-                sys.stdin = open('/dev/tty', 'r')
-            
-            print(f"\n\033[96mBookmarking: {file_path}\033[0m")
-            name = input("Enter custom name (leave empty for default): ").strip()
-            bookmarks.append({"path": file_path, "name": name})
+            con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+            with open(con_path, 'r') as f_in:
+                print(f"\n\033[96mBookmarking: {file_path}\033[0m")
+                print("Enter custom name (leave empty for default, Ctrl+C to cancel): ", end='', flush=True)
+                name = f_in.readline().strip()
+                bookmarks.append({"path": file_path, "name": name})
+        except KeyboardInterrupt:
+            print("\n\033[91mCancelled bookmark addition.\033[0m")
+            return
         except Exception as e:
-            print(f"Error getting input: {e}")
+            # Fallback for non-interactive environments
             bookmarks.append({"path": file_path, "name": ""})
-        finally:
-            sys.stdin = old_stdin
         
     with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
