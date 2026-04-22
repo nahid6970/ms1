@@ -181,7 +181,7 @@ class FolderChooser:
         self.list_container.update_idletasks()
         # Increased dimensions for 36pt icons
         width = 820 
-        total_items = 1 + len(self.folders) + 1
+        total_items = len(self.folders) + 4 # CLIPBOARD, CLIP+PATH, CHROME, ADD
         rows = (total_items + 4) // 5
         height = 110 + (rows * 135)
         
@@ -189,7 +189,7 @@ class FolderChooser:
         screen_height = self.root.winfo_screenheight()
         center_x = int(screen_width/2 - width/2)
         center_y = int(screen_height/2 - height/2)
-        self.root.geometry(f'{width}x{height}+{center_x}+{center_y}')
+        self.root.geometry(f"{width}x{height}+{center_x}+{center_y}")
 
     def render_folders(self):
         for widget in self.list_container.winfo_children():
@@ -197,12 +197,13 @@ class FolderChooser:
 
         all_items = []
         # (path/label, color, icon, card_type, index)
-        all_items.append(('CLIPBOARD', "#00d4ff", "📋", "CLIPBOARD", -1))
-        all_items.append(('CHROME', "#ff9900", "🌏", "BROWSER", -2))
+        all_items.append(("CLIPBOARD", "#00d4ff", "📋", "CLIPBOARD", -1))
+        all_items.append(("CLIP+PATH", "#00ffcc", "🔗", "CLIPBOARD_PATH", -3))
+        all_items.append(("CHROME", "#ff9900", "🌏", "BROWSER", -2))
         
         for i, f_data in enumerate(self.folders):
-            icon = f_data.get('icon', "\ueaf7")
-            all_items.append((f_data['path'], f_data['color'], icon, "FOLDER", i))
+            icon = f_data.get("icon", "\ueaf7")
+            all_items.append((f_data["path"], f_data["color"], icon, "FOLDER", i))
 
         for idx, (path, color, icon, card_type, f_idx) in enumerate(all_items):
             row = idx // 5
@@ -253,6 +254,8 @@ class FolderChooser:
             if not self.edit_mode:
                 if card_type == "CLIPBOARD":
                     w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD"))
+                elif card_type == "CLIPBOARD_PATH":
+                    w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD_PATH"))
                 elif card_type == "BROWSER":
                     w.bind("<Button-1>", lambda e: self.open_in_browser())
                 else: # FOLDER
@@ -263,7 +266,7 @@ class FolderChooser:
             w.bind("<Enter>", lambda e, c=card, col=color: self.on_hover(c, col))
             w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
 
-    def open_in_browser(self):
+    def open_in_browser(self) -> None:
         import tempfile
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -274,7 +277,7 @@ class FolderChooser:
             self.img.save(filepath)
             
             # Open in Chrome (Windows)
-            subprocess.run(f'start chrome "{filepath}"', shell=True)
+            subprocess.run(f"start chrome \"{filepath}\"", shell=True)
             self.root.destroy()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open browser: {e}")
@@ -323,11 +326,11 @@ class FolderChooser:
 
     def change_folder_color(self, index):
         self.is_dialog_open = True
-        color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]['color'], parent=self.root)[1]
+        color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]["color"], parent=self.root)[1]
         self.is_dialog_open = False
         self.root.focus_force()
         if color:
-            self.folders[index]['color'] = color
+            self.folders[index]["color"] = color
             save_folders(self.folders)
             self.render_folders()
 
@@ -336,12 +339,12 @@ class FolderChooser:
         self.is_dialog_open = True
         # Added parent=self.root to ensure it doesn't get buried
         new_icon = simpledialog.askstring("Folder Icon", "Paste new icon glyph:", 
-                                         initialvalue=self.folders[index].get('icon', "\ueaf7"),
+                                         initialvalue=self.folders[index].get("icon", "\ueaf7"),
                                          parent=self.root)
         self.is_dialog_open = False
         self.root.focus_force()
         if new_icon:
-            self.folders[index]['icon'] = new_icon
+            self.folders[index]["icon"] = new_icon
             save_folders(self.folders)
             self.render_folders()
 
@@ -398,7 +401,7 @@ class FolderChooser:
         self.root.mainloop()
         return self.choice
 
-def send_to_clipboard(img):
+def send_to_clipboard(img, text_path=None):
     try:
         import win32clipboard
         output = io.BytesIO()
@@ -408,6 +411,8 @@ def send_to_clipboard(img):
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
         win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        if text_path:
+            win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT, text_path)
         win32clipboard.CloseClipboard()
         return True
     except Exception as e:
@@ -431,6 +436,17 @@ def main():
 
         if folder == "CLIPBOARD":
             send_to_clipboard(img)
+        elif folder == "CLIPBOARD_PATH":
+            # Save to first folder or Home/Screenshots
+            save_dir = folders[0]["path"] if folders else os.path.join(os.path.expanduser("~"), "Screenshots")
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir, exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"screenshot_{timestamp}.png"
+            filepath = os.path.join(save_dir, filename)
+            img.save(filepath)
+            send_to_clipboard(img, filepath)
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"screenshot_{timestamp}.png"
@@ -446,6 +462,7 @@ def main():
         temp_root.withdraw()
         messagebox.showerror("Script Error", f"{error_msg}")
         temp_root.destroy()
+
 
 if __name__ == "__main__":
     main()
