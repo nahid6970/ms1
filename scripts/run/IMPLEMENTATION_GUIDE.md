@@ -29,6 +29,7 @@ This document outlines the standard architecture, visual style, and shortcut con
     - **Bookmarked Folders**: Cyan (Index 51)
     - **Normal Files**: Grey (Index 250)
     - **Bookmarked Files**: Light Green (Index 121)
+  - **Customization**: Use the Theme Chooser (F7) to pick colors manually or use the **Randomize** button for quick aesthetic generation.
 - **Markers**: 
   - Use `* ` (star + space) for bookmarked items.
   - Use `  ` (two spaces) for normal items to maintain alignment.
@@ -86,3 +87,4 @@ When passing selections to helper scripts, always quote the placeholders to hand
 ## 8. PyQt6 GUI Standards
 - **Style**: Use the `CP_` palette (Cyberpunk Yellow: `#FCEE0A`, Cyan: `#00F0FF`, Red: `#FF003C`).
 - **Behavior**: Set `Qt.WindowType.WindowStaysOnTopHint` and close the window on `focusOutEvent` or `ActivationChange` for a "popup" feel.
+- **Features**: Include a "🎲 RANDOMIZE" button for quick experimentation and a "↺ RESTART" button for code hot-reloading.
