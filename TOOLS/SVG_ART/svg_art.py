@@ -329,7 +329,7 @@ class ArtView(QGraphicsView):
                     path, multi = self._scale_custom_path(self.custom_shapes[cname], QPointF(size, size))
                     item = SymPath(path); item.multi_colors = multi
                 
-                item.setPos(pos); item.setPen(Qt.PenStyle.NoPen)
+                item.setPos(pos); item.setPen(QPen(Qt.PenStyle.NoPen))
                 if not getattr(item, 'multi_colors', None):
                     item.setBrush(QBrush(QColor(hex_c)))
                 item.is_art_item = True; item._shader_group = hex_c
