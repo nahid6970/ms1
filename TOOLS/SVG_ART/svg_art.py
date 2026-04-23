@@ -318,16 +318,16 @@ class ArtView(QGraphicsView):
         for i, (hex_c, pts) in enumerate(sorted_colors):
             # SHAPE SELECTION LOGIC
             if shape_type == "Cycle":
-                stype = i % (3 + len(custom_names))
+                stype = i % 3 # Only Rect, Circle, Triangle
             elif shape_type == "Rect": stype = 0
-            elif shape_type == "Ellipse": stype = 1
+            elif shape_type == "Circle": stype = 1
             elif shape_type == "Triangle": stype = 2
             elif shape_type == "All Customs":
                 stype = (3 + (i % len(custom_names))) if custom_names else (i % 3)
             elif shape_type in custom_names:
                 stype = 3 + custom_names.index(shape_type)
             else:
-                stype = i % (3 + len(custom_names))
+                stype = i % 3
 
             size = step_x * 0.8
             
@@ -1308,7 +1308,7 @@ class SVGArtApp(QMainWindow):
         if not hasattr(self, 'shader_shape_combo'): return
         curr = self.shader_shape_combo.currentText()
         self.shader_shape_combo.clear()
-        base = ["Cycle", "Rect", "Ellipse", "Triangle", "All Customs"]
+        base = ["Cycle", "Rect", "Circle", "Triangle", "All Customs"]
         self.shader_shape_combo.addItems(base)
         
         # Add custom shapes sorted alphabetically
