@@ -669,7 +669,6 @@ if __name__ == "__main__":
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f7:execute(python \"{os.path.join(script_dir, 'configurator_gui.py')}\")+reload(python \"{feeder_script_file}\")",
-            f"--bind=f8:execute(python \"{os.path.join(script_dir, 'configurator_gui.py')}\" --ignore)+reload(python \"{feeder_script_file}\")",
             f"--bind=ctrl-h:execute(python \"{os.path.join(script_dir, 'configurator_gui.py')}\" --help)+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
