@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QGroupBox, 
                              QGridLayout, QScrollArea, QFrame, QDialog, 
                              QPlainTextEdit, QTabWidget, QTableWidget, QTableWidgetItem, 
-                             QHeaderView, QListWidget, QListWidgetItem, QLineEdit)
+                             QHeaderView, QListWidget, QListWidgetItem, QLineEdit, QFileDialog)
 from PyQt6.QtCore import Qt, pyqtSignal
 
 # PALETTE
@@ -72,7 +72,7 @@ class ConfiguratorGUI(QMainWindow):
     def __init__(self, start_tab=0):
         super().__init__()
         self.setWindowTitle("FZF SYSTEM CONFIGURATOR")
-        self.setMinimumSize(700, 850)
+        self.setMinimumSize(800, 850)
         
         # Default config
         self.config = {
@@ -83,13 +83,15 @@ class ConfiguratorGUI(QMainWindow):
                 "file_bookmark": 121
             },
             "visibility": {
-                ".git": False,
-                "__pycache__": False,
-                "node_modules": False,
-                ".venv": False,
-                ".vscode": False,
-                "obj": False,
-                "bin": False
+                ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
+                ".vscode": False, "obj": False, "bin": False
+            },
+            "search_roots": {
+                r"C:\@delta\ms1": True,
+                r"C:\@delta\db": True,
+                r"C:\@delta\msBackups": True,
+                r"C:\Users\nahid\Pictures": True,
+                "D:\\": True
             }
         }
         self.load_settings()
@@ -104,14 +106,8 @@ class ConfiguratorGUI(QMainWindow):
                 with open(CONFIG_FILE, 'r') as f:
                     data = json.load(f)
                     if "theme" in data: self.config["theme"].update(data["theme"])
-                    
-                    # Handle migration from old ignore_list to new visibility dict
-                    if "visibility" in data:
-                        self.config["visibility"] = data["visibility"]
-                    elif "ignore_list" in data:
-                        # Migrate: old ignore_list items become False (hidden)
-                        for item in data["ignore_list"]:
-                            self.config["visibility"][item] = False
+                    if "visibility" in data: self.config["visibility"] = data["visibility"]
+                    if "search_roots" in data: self.config["search_roots"] = data["search_roots"]
             except: pass
 
     def save_settings(self):
@@ -121,6 +117,12 @@ class ConfiguratorGUI(QMainWindow):
             item = self.visibility_list.item(i)
             self.config["visibility"][item.text()] = (item.checkState() == Qt.CheckState.Checked)
         
+        # Update search roots from checklist
+        self.config["search_roots"] = {}
+        for i in range(self.roots_list.count()):
+            item = self.roots_list.item(i)
+            self.config["search_roots"][item.text()] = (item.checkState() == Qt.CheckState.Checked)
+            
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
         with open(CONFIG_FILE, 'w') as f:
             json.dump(self.config, f, indent=4)
@@ -137,24 +139,41 @@ class ConfiguratorGUI(QMainWindow):
 
         self.tabs = QTabWidget()
         
-        # --- Tab 1: Colors ---
+        # --- Tab 1: Search Roots ---
+        roots_tab = QWidget()
+        roots_layout = QVBoxLayout(roots_tab)
+        roots_layout.addWidget(QLabel("SEARCH DIRECTORIES (Root paths to crawl):"))
+        self.roots_list = QListWidget()
+        for path, enabled in sorted(self.config["search_roots"].items()):
+            self.add_root_item(path, enabled)
+        roots_layout.addWidget(self.roots_list)
+        
+        root_btn_layout = QHBoxLayout()
+        btn_add_root = QPushButton("+ ADD DIRECTORY")
+        btn_add_root.clicked.connect(self.browse_root)
+        btn_remove_root = QPushButton("- REMOVE SELECTED")
+        btn_remove_root.clicked.connect(self.remove_root)
+        root_btn_layout.addWidget(btn_add_root)
+        root_btn_layout.addWidget(btn_remove_root)
+        roots_layout.addLayout(root_btn_layout)
+        self.tabs.addTab(roots_tab, "📂 SEARCH DIRS")
+
+        # --- Tab 2: Colors ---
         color_tab = QWidget()
         color_layout = QVBoxLayout(color_tab)
         sel_layout = QGridLayout()
-        self.btn_folder_normal = QPushButton("NORMAL FOLDER")
-        self.btn_folder_bookmark = QPushButton("BOOKMARK FOLDER")
-        self.btn_file_normal = QPushButton("NORMAL FILE")
-        self.btn_file_bookmark = QPushButton("BOOKMARK FILE")
-        btns = [(self.btn_folder_normal, "folder_normal"), 
-                (self.btn_folder_bookmark, "folder_bookmark"),
-                (self.btn_file_normal, "file_normal"),
-                (self.btn_file_bookmark, "file_bookmark")]
-        for i, (b, key) in enumerate(btns):
+        btns = [("NORMAL FOLDER", "folder_normal"), ("BOOKMARK FOLDER", "folder_bookmark"),
+                ("NORMAL FILE", "file_normal"), ("BOOKMARK FILE", "file_bookmark")]
+        self.color_btns = {}
+        for i, (lbl, key) in enumerate(btns):
+            b = QPushButton(lbl)
             b.setCheckable(True)
             b.clicked.connect(lambda checked, k=key: self.set_editing(k))
             sel_layout.addWidget(b, i // 2, i % 2)
-        self.btn_folder_normal.setChecked(True)
+            self.color_btns[key] = b
+        self.color_btns["folder_normal"].setChecked(True)
         color_layout.addLayout(sel_layout)
+        
         preview_group = QGroupBox("LIVE PREVIEW")
         preview_layout = QVBoxLayout()
         self.lbl_preview_folder_normal = QLabel("  folder_name")
@@ -167,6 +186,7 @@ class ConfiguratorGUI(QMainWindow):
         preview_layout.addWidget(self.lbl_preview_file_bookmark)
         preview_group.setLayout(preview_layout)
         color_layout.addWidget(preview_group)
+        
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         grid_widget = QWidget()
@@ -180,55 +200,36 @@ class ConfiguratorGUI(QMainWindow):
         color_layout.addWidget(scroll)
         self.tabs.addTab(color_tab, "🎨 COLORS")
 
-        # --- Tab 2: Visibility (Checklist) ---
+        # --- Tab 3: Visibility (Ignore) ---
         visibility_tab = QWidget()
         visibility_layout = QVBoxLayout(visibility_tab)
-        
-        info_lbl = QLabel("FOLDER VISIBILITY (Uncheck to hide from search):")
-        info_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        visibility_layout.addWidget(info_lbl)
-        
+        visibility_layout.addWidget(QLabel("FOLDER VISIBILITY (Internal folder names to hide):"))
         self.visibility_list = QListWidget()
         for folder, is_visible in sorted(self.config["visibility"].items()):
             self.add_visibility_item(folder, is_visible)
         visibility_layout.addWidget(self.visibility_list)
         
-        # Add New Folder Section
-        add_layout = QHBoxLayout()
+        add_vis_layout = QHBoxLayout()
         self.new_folder_input = QLineEdit()
-        self.new_folder_input.setPlaceholderText("Enter folder name to manage (e.g. build)...")
-        btn_add_folder = QPushButton("+ ADD FOLDER")
-        btn_add_folder.clicked.connect(self.add_new_folder)
-        add_layout.addWidget(self.new_folder_input)
-        add_layout.addWidget(btn_add_folder)
-        visibility_layout.addLayout(add_layout)
-        
+        self.new_folder_input.setPlaceholderText("Enter folder name (e.g. node_modules)...")
+        btn_add_vis = QPushButton("+ ADD")
+        btn_add_vis.clicked.connect(self.add_new_visibility)
+        add_vis_layout.addWidget(self.new_folder_input)
+        add_vis_layout.addWidget(btn_add_vis)
+        visibility_layout.addLayout(add_vis_layout)
         self.tabs.addTab(visibility_tab, "👁 VISIBILITY")
 
-        # --- Tab 3: Shortcuts ---
+        # --- Tab 4: Shortcuts ---
         shortcuts_tab = QWidget()
         shortcuts_layout = QVBoxLayout(shortcuts_tab)
         shortcut_table = QTableWidget(14, 2)
         shortcut_table.setHorizontalHeaderLabels(["KEY", "ACTION"])
         shortcut_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         shortcut_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        shortcut_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        data = [
-            ("Enter", "Action Menu (Editor/Folder/Run/Copy)"),
-            ("Tab", "Multi-select files"),
-            ("F2", "Toggle Image Preview Mode"),
-            ("F3", "Toggle View Mode (Path vs Name)"),
-            ("F4", "Refresh File List"),
-            ("F5", "Toggle Bookmark (Set Name)"),
-            ("F6", "Rename Bookmark"),
-            ("F7", "Open Color Theme GUI"),
-            ("F8", "Open Visibility Manager"),
-            ("Ctrl-C", "Copy path to clipboard"),
-            ("Ctrl-H", "Open this Help GUI"),
-            ("Ctrl-O", "Open location in Explorer"),
-            ("Ctrl-P", "Toggle Preview Window"),
-            ("Alt-Up/Down", "Move Bookmark order"),
-        ]
+        data = [("Enter", "Action Menu"), ("Tab", "Multi-select"), ("F2", "Image Mode"), ("F3", "Path vs Name"),
+                ("F4", "Refresh"), ("F5", "Bookmark"), ("F6", "Rename"), ("F7", "Open Config (Colors)"),
+                ("F8", "Open Config (Visibility)"), ("Ctrl-C", "Copy Path"), ("Ctrl-H", "Full Help GUI"),
+                ("Ctrl-O", "Explorer"), ("Ctrl-P", "Preview"), ("Alt-Up/Down", "Order")]
         for i, (key, action) in enumerate(data):
             shortcut_table.setItem(i, 0, QTableWidgetItem(key))
             shortcut_table.setItem(i, 1, QTableWidgetItem(action))
@@ -256,47 +257,57 @@ class ConfiguratorGUI(QMainWindow):
         act_layout.addWidget(btn_restart)
         main_layout.addLayout(act_layout)
 
+    def add_root_item(self, path, enabled):
+        item = QListWidgetItem(path)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(Qt.CheckState.Checked if enabled else Qt.CheckState.Unchecked)
+        self.roots_list.addItem(item)
+
+    def browse_root(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Search Directory")
+        if path:
+            path = os.path.normpath(path)
+            # Check if exists
+            for i in range(self.roots_list.count()):
+                if self.roots_list.item(i).text().lower() == path.lower(): return
+            self.add_root_item(path, True)
+
+    def remove_root(self):
+        for item in self.roots_list.selectedItems():
+            self.roots_list.takeItem(self.roots_list.row(item))
+
     def add_visibility_item(self, folder, is_visible):
         item = QListWidgetItem(folder)
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
         item.setCheckState(Qt.CheckState.Checked if is_visible else Qt.CheckState.Unchecked)
         self.visibility_list.addItem(item)
 
-    def add_new_folder(self):
+    def add_new_visibility(self):
         name = self.new_folder_input.text().strip()
         if name:
-            # Check if already exists
-            exists = False
             for i in range(self.visibility_list.count()):
-                if self.visibility_list.item(i).text() == name:
-                    exists = True
-                    break
-            if not exists:
-                self.add_visibility_item(name, True)
-                self.new_folder_input.clear()
+                if self.visibility_list.item(i).text() == name: return
+            self.add_visibility_item(name, True)
+            self.new_folder_input.clear()
 
     def set_editing(self, key):
         self.current_editing = key
-        self.btn_folder_normal.setChecked(key == "folder_normal")
-        self.btn_folder_bookmark.setChecked(key == "folder_bookmark")
-        self.btn_file_normal.setChecked(key == "file_normal")
-        self.btn_file_bookmark.setChecked(key == "file_bookmark")
+        for k, b in self.color_btns.items(): b.setChecked(k == key)
 
     def color_selected(self, index):
         self.config["theme"][self.current_editing] = index
         self.update_previews()
 
     def randomize_colors(self):
-        for key in self.config["theme"]:
-            self.config["theme"][key] = random.randint(0, 255)
+        for key in self.config["theme"]: self.config["theme"][key] = random.randint(0, 255)
         self.update_previews()
 
     def update_previews(self):
-        theme = self.config["theme"]
-        self.lbl_preview_folder_normal.setStyleSheet(f"color: {get_ansi_color_hex(theme['folder_normal'])};")
-        self.lbl_preview_folder_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(theme['folder_bookmark'])};")
-        self.lbl_preview_file_normal.setStyleSheet(f"color: {get_ansi_color_hex(theme['file_normal'])};")
-        self.lbl_preview_file_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(theme['file_bookmark'])};")
+        t = self.config["theme"]
+        self.lbl_preview_folder_normal.setStyleSheet(f"color: {get_ansi_color_hex(t['folder_normal'])};")
+        self.lbl_preview_folder_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(t['folder_bookmark'])};")
+        self.lbl_preview_file_normal.setStyleSheet(f"color: {get_ansi_color_hex(t['file_normal'])};")
+        self.lbl_preview_file_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(t['file_bookmark'])};")
 
     def show_settings(self):
         SettingsDialog(self).exec()
@@ -310,7 +321,7 @@ class ConfiguratorGUI(QMainWindow):
             QTabBar::tab:selected {{ background: {CP_DIM}; color: {CP_CYAN}; border-bottom: 2px solid {CP_CYAN}; }}
             QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 15px; padding-top: 15px; font-weight: bold; color: {CP_YELLOW}; }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-            QLineEdit, QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; }}
+            QLineEdit, QPlainTextEdit, QListWidget, QTableWidget {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; }}
             QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:checked {{ background-color: {CP_CYAN}; color: black; }}
@@ -318,17 +329,14 @@ class ConfiguratorGUI(QMainWindow):
             QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
             QTableWidget {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; gridline-color: {CP_DIM}; }}
             QHeaderView::section {{ background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 4px; border: 1px solid {CP_BG}; font-weight: bold; }}
-            QListWidget {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; outline: none; }}
-            QListWidget::item {{ padding: 5px; border-bottom: 1px solid {CP_DIM}; }}
-            QListWidget::item:selected {{ background-color: {CP_DIM}; color: {CP_CYAN}; }}
         """)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     start_tab = 0
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--ignore": start_tab = 1
-        elif sys.argv[1] == "--help" or sys.argv[1] == "-h": start_tab = 2
+        if sys.argv[1] == "--ignore": start_tab = 2
+        elif sys.argv[1] == "--help" or sys.argv[1] == "-h": start_tab = 3
     window = ConfiguratorGUI(start_tab)
     window.show()
     sys.exit(app.exec())

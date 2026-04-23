@@ -58,22 +58,31 @@ def move_bookmark(file_path, direction):
 
 
 def search_directories_and_files():
-    # Start with an empty list
+    # Load search roots from config
+    config_file = r"C:\@delta\db\FZF_launcher\config.json"
     directories = []
-
-    # Add directories (comment any line freely without breaking syntax)
-    directories.append(r"C:\@delta\ms1")
-    directories.append(r"C:\@delta\db")
-    directories.append(r"C:\@delta\msBackups")
-    directories.append(r"C:\Users\nahid\Pictures")
-    directories.append("D:\\")
-    # directories.append("C:\\Program Files\\WindowsApps")
-    # directories.append("C:\\Users\\nahid")
+    if os.path.exists(config_file):
+        try:
+            with open(config_file, 'r') as f:
+                cfg = json.load(f)
+                roots = cfg.get("search_roots", {})
+                directories = [path for path, enabled in roots.items() if enabled]
+        except: pass
+    
+    # Fallback to defaults if config is empty or missing
+    if not directories:
+        directories = [
+            r"C:\@delta\ms1",
+            r"C:\@delta\db",
+            r"C:\@delta\msBackups",
+            r"C:\Users\nahid\Pictures",
+            "D:\\"
+        ]
 
     # Filter out empty or None directories
     directories = [d for d in directories if d and d.strip()]
 
-    # Ignore list
+    # Ignore list (for initial load check)
     ignore_list = [".git", ".pyc"]
 
     # Shortcut list text for display
