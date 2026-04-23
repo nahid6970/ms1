@@ -47,10 +47,14 @@
     </div>
 
     <div class="section">
-      <label class="section-title">AI STUDIO SETTINGS:</label>
-      <div class="subsection">
-        <label>Custom Prompt (sent with subtitles):</label>
-        <textarea id="customPrompt" class="prompt-input" placeholder="e.g., Summarize this video..."></textarea>
+      <label class="section-title">AI STUDIO PROMPTS:</label>
+      <div id="promptsList" class="prompts-list">
+        <!-- Prompts will be added here dynamically -->
+      </div>
+      <div class="add-prompt-section">
+        <input type="text" id="newPromptName" class="text-input" placeholder="Prompt Name (e.g., Summary)">
+        <textarea id="newPromptText" class="prompt-input" style="height: 80px;" placeholder="Prompt text..."></textarea>
+        <button id="addPrompt" class="browse-btn" style="margin-top: 10px; width: 100%;">+ ADD NEW PROMPT</button>
       </div>
     </div>
 

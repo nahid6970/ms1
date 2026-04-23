@@ -5,16 +5,62 @@ document.addEventListener('DOMContentLoaded', () => {
     authMethod: 'none',
     browser: 'chrome',
     cookieFile: '',
-    customPrompt: ''
+    prompts: []
   }, (settings) => {
     document.getElementById('saveDir').value = settings.saveDir;
     document.getElementById('authMethod').value = settings.authMethod;
     document.getElementById('browser').value = settings.browser;
     document.getElementById('cookieFile').value = settings.cookieFile;
-    document.getElementById('customPrompt').value = settings.customPrompt || '';
     
+    renderPrompts(settings.prompts);
     toggleAuthSections();
   });
+});
+
+let currentPrompts = [];
+
+function renderPrompts(prompts) {
+  currentPrompts = prompts || [];
+  const list = document.getElementById('promptsList');
+  list.innerHTML = '';
+  
+  currentPrompts.forEach((p, index) => {
+    const item = document.createElement('div');
+    item.className = 'prompt-item';
+    item.innerHTML = `
+      <div class="prompt-header">
+        <span class="prompt-name">${p.name}</span>
+        <button class="delete-prompt" data-index="${index}">×</button>
+      </div>
+      <div class="prompt-text-preview">${p.text}</div>
+    `;
+    list.appendChild(item);
+  });
+  
+  // Add delete listeners
+  document.querySelectorAll('.delete-prompt').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const index = parseInt(e.target.dataset.index);
+      currentPrompts.splice(index, 1);
+      renderPrompts(currentPrompts);
+    });
+  });
+}
+
+document.getElementById('addPrompt').addEventListener('click', () => {
+  const nameInput = document.getElementById('newPromptName');
+  const textInput = document.getElementById('newPromptText');
+  const name = nameInput.value.trim();
+  const text = textInput.value.trim();
+  
+  if (name && text) {
+    currentPrompts.push({ name, text });
+    renderPrompts(currentPrompts);
+    nameInput.value = '';
+    textInput.value = '';
+  } else {
+    alert('Please enter both name and prompt text.');
+  }
 });
 
 // Auth method change handler
@@ -43,7 +89,7 @@ document.getElementById('save').addEventListener('click', () => {
     authMethod: document.getElementById('authMethod').value,
     browser: document.getElementById('browser').value,
     cookieFile: document.getElementById('cookieFile').value,
-    customPrompt: document.getElementById('customPrompt').value
+    prompts: currentPrompts
   };
   
   chrome.storage.sync.set(settings, () => {

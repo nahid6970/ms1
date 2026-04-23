@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     endTime: '',
     saveDir: '',
     sendToAIStudio: false,
-    showViewer: true
+    showViewer: true,
+    lastSelectedPrompt: '',
+    prompts: []
   }, (settings) => {
     document.getElementById('language').value = settings.language;
     document.getElementById('format').value = settings.format;
@@ -31,6 +33,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('copyToClipboard').checked = settings.copyToClipboard;
     document.getElementById('sendToAIStudio').checked = settings.sendToAIStudio || false;
     document.getElementById('showViewer').checked = settings.showViewer !== undefined ? settings.showViewer : true;
+    
+    // Populate prompts dropdown
+    const promptSelect = document.getElementById('promptSelect');
+    if (settings.prompts && settings.prompts.length > 0) {
+      settings.prompts.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        promptSelect.appendChild(opt);
+      });
+      
+      if (settings.lastSelectedPrompt) {
+        promptSelect.value = settings.lastSelectedPrompt;
+      }
+    }
     
     // Only override timeline if no URL timestamp was found
     if (!timeMatch) {
@@ -82,6 +99,7 @@ document.getElementById('extract').addEventListener('click', async () => {
   const endTime = document.getElementById('endTime').value;
   const sendToAIStudio = document.getElementById('sendToAIStudio').checked;
   const showViewer = document.getElementById('showViewer').checked;
+  const lastSelectedPrompt = document.getElementById('promptSelect').value;
   
   // Save current settings
   chrome.storage.sync.set({
@@ -93,15 +111,27 @@ document.getElementById('extract').addEventListener('click', async () => {
     startTime,
     endTime,
     sendToAIStudio,
-    showViewer
+    showViewer,
+    lastSelectedPrompt
   });
   
-  // Get save directory and custom prompt from settings
-  const settings = await chrome.storage.sync.get({ saveDir: '', customPrompt: '' });
+  // Get save directory and prompts from settings
+  const settings = await chrome.storage.sync.get({ saveDir: '', prompts: [] });
   
   if (!settings.saveDir) {
     setStatus('ERROR: Set save directory in settings first!');
     return;
+  }
+  
+  // Find selected prompt text
+  let selectedPromptText = '';
+  if (sendToAIStudio) {
+    if (!lastSelectedPrompt) {
+      setStatus('ERROR: Select a prompt first!');
+      return;
+    }
+    const promptObj = settings.prompts.find(p => p.name === lastSelectedPrompt);
+    selectedPromptText = promptObj ? promptObj.text : '';
   }
   
   // Disable button and show progress
@@ -135,7 +165,7 @@ document.getElementById('extract').addEventListener('click', async () => {
         setStatus('INJECTING TO AI STUDIO...');
         chrome.runtime.sendMessage({
           action: 'injectToAIStudio',
-          prompt: settings.customPrompt,
+          prompt: selectedPromptText,
           subtitles: content
         });
         
