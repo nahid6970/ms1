@@ -413,25 +413,30 @@ class ArtView(QGraphicsView):
             return self.transform().m11()
 
     def wheelEvent(self, event):
-        zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
+        step = 5.0
+        if self.app and hasattr(self.app, 'zoom_step_spin'):
+            step = self.app.zoom_step_spin.value()
+        
+        factor = (1.0 + step/100.0) if event.angleDelta().y() > 0 else (1.0 / (1.0 + step/100.0))
+        
         if self.tool == "move_image" and self.image_item:
-            self.image_item.setScale(self.image_item.scale() * zoom)
+            self.image_item.setScale(self.image_item.scale() * factor)
             event.accept()
         elif self.tool == "move_svg":
             for item in self.scene().items():
                 if getattr(item, 'is_art_item', False):
-                    item.setScale(item.scale() * zoom)
+                    item.setScale(item.scale() * factor)
             event.accept()
         elif self.tool == "move_all":
             if self.image_item:
-                self.image_item.setScale(self.image_item.scale() * zoom)
+                self.image_item.setScale(self.image_item.scale() * factor)
             for item in self.scene().items():
                 if getattr(item, 'is_art_item', False):
-                    item.setScale(item.scale() * zoom)
+                    item.setScale(item.scale() * factor)
             event.accept()
         else:
-            self.scale(zoom, zoom)
-            # No accept needed for view scale as it's the default action
+            self.scale(factor, factor)
+        if self.app: self.app.sync_zoom_ui()
 
     def mousePressEvent(self, event):
         scene_pos = self.snap_point(self.mapToScene(event.pos())); self.start_point = scene_pos
@@ -1119,6 +1124,7 @@ class SVGArtApp(QMainWindow):
         btn_zoom_out = QPushButton("ZOOM OUT"); btn_zoom_out.clicked.connect(self.zoom_out); self.tb_zoom.addWidget(btn_zoom_out)
         self.tb_zoom.addWidget(QLabel(" TARGET: ")); self.zoom_target_combo = QComboBox(); self.zoom_target_combo.addItems(["Both", "Image", "SVG"]); self.zoom_target_combo.currentTextChanged.connect(self.sync_zoom_ui); self.tb_zoom.addWidget(self.zoom_target_combo)
         self.tb_zoom.addWidget(QLabel(" VAL%: ")); self.zoom_spin = QSpinBox(); self.zoom_spin.setRange(1, 5000); self.zoom_spin.setValue(100); self.zoom_spin.setSuffix("%"); self.zoom_spin.valueChanged.connect(self.zoom_val_changed); self.tb_zoom.addWidget(self.zoom_spin)
+        self.tb_zoom.addWidget(QLabel(" STEP%: ")); self.zoom_step_spin = QSpinBox(); self.zoom_step_spin.setRange(1, 100); self.zoom_step_spin.setValue(5); self.zoom_step_spin.setSuffix("%"); self.tb_zoom.addWidget(self.zoom_step_spin)
 
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
@@ -1175,6 +1181,9 @@ class SVGArtApp(QMainWindow):
         btn_rst.setToolTip("Restart application"); btn_rst.clicked.connect(self.restart_app); self.tb_sys.addWidget(btn_rst)
         u_act = QAction("Undo", self); u_act.setShortcut(QKeySequence("Ctrl+Z")); u_act.triggered.connect(self.undo); self.addAction(u_act)
         r_act = QAction("Redo", self); r_act.setShortcut(QKeySequence("Ctrl+Y")); r_act.triggered.connect(self.redo); self.addAction(r_act)
+        
+        zi_act = QAction("Zoom In", self); zi_act.setShortcuts([QKeySequence("Ctrl++"), QKeySequence("Ctrl+=")]); zi_act.triggered.connect(self.zoom_in); self.addAction(zi_act)
+        zo_act = QAction("Zoom Out", self); zo_act.setShortcut(QKeySequence("Ctrl+-")); zo_act.triggered.connect(self.zoom_out); self.addAction(zo_act)
 
     def add_tool_action(self, tb, text, tool_name, color, svg_data=None):
         if svg_data:
