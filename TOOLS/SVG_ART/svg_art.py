@@ -282,7 +282,7 @@ class ArtView(QGraphicsView):
     def save_to_undo(self, item, action="add"):
         self.undo_stack.append((action, item)); self.redo_stack.clear()
 
-    def scan_image_to_shaders(self, color_count=5, density=50, noise=0, auto_clr=False):
+    def scan_image_to_shaders(self, color_count=5, density=50, noise=0, auto_clr=False, shape_type="Cycle"):
         if not self.image_item:
             QMessageBox.warning(self.app, "No Image", "Load a background image first.")
             return
@@ -316,7 +316,19 @@ class ArtView(QGraphicsView):
         custom_names = list(self.custom_shapes.keys())
         
         for i, (hex_c, pts) in enumerate(sorted_colors):
-            stype = i % (3 + len(custom_names))
+            # SHAPE SELECTION LOGIC
+            if shape_type == "Cycle":
+                stype = i % (3 + len(custom_names))
+            elif shape_type == "Rect": stype = 0
+            elif shape_type == "Ellipse": stype = 1
+            elif shape_type == "Triangle": stype = 2
+            elif shape_type == "All Customs":
+                stype = (3 + (i % len(custom_names))) if custom_names else (i % 3)
+            elif shape_type in custom_names:
+                stype = 3 + custom_names.index(shape_type)
+            else:
+                stype = i % (3 + len(custom_names))
+
             size = step_x * 0.8
             
             for px, py in pts:
@@ -331,9 +343,12 @@ class ArtView(QGraphicsView):
                     path = QPainterPath(); path.moveTo(size/2, 0); path.lineTo(0, size); path.lineTo(size, size); path.closeSubpath()
                     item = SymPath(path)
                 else:
-                    cname = custom_names[stype - 3]
-                    path, multi = self._scale_custom_path(self.custom_shapes[cname], QPointF(size, size))
-                    item = SymPath(path); item.multi_colors = multi
+                    cidx = stype - 3
+                    if 0 <= cidx < len(custom_names):
+                        cname = custom_names[cidx]
+                        path, multi = self._scale_custom_path(self.custom_shapes[cname], QPointF(size, size))
+                        item = SymPath(path); item.multi_colors = multi
+                    else: item = SymRect(0, 0, size, size) # Final fallback
                 
                 item.setPos(pos); item.setPen(QPen(Qt.PenStyle.NoPen))
                 if not getattr(item, 'multi_colors', None):
@@ -356,12 +371,22 @@ class ArtView(QGraphicsView):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
         if self.tool == "move_image" and self.image_item:
             self.image_item.setScale(self.image_item.scale() * zoom)
+            event.accept()
         elif self.tool == "move_svg":
             for item in self.scene().items():
                 if getattr(item, 'is_art_item', False):
                     item.setScale(item.scale() * zoom)
+            event.accept()
+        elif self.tool == "move_all":
+            if self.image_item:
+                self.image_item.setScale(self.image_item.scale() * zoom)
+            for item in self.scene().items():
+                if getattr(item, 'is_art_item', False):
+                    item.setScale(item.scale() * zoom)
+            event.accept()
         else:
             self.scale(zoom, zoom)
+            # No accept needed for view scale as it's the default action
 
     def mousePressEvent(self, event):
         scene_pos = self.snap_point(self.mapToScene(event.pos())); self.start_point = scene_pos
@@ -1069,6 +1094,7 @@ class SVGArtApp(QMainWindow):
         self.shader_colors_spin = QSpinBox(); self.shader_colors_spin.setRange(1, 20); self.shader_colors_spin.setValue(5); self.tb_shader.addWidget(self.shader_colors_spin)
         self.tb_shader.addWidget(QLabel(" DEN: ")); self.shader_density_spin = QSpinBox(); self.shader_density_spin.setRange(10, 200); self.shader_density_spin.setValue(50); self.tb_shader.addWidget(self.shader_density_spin)
         self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
+        self.tb_shader.addWidget(QLabel(" SHP: ")); self.shader_shape_combo = QComboBox(); self.update_shader_shape_list(); self.tb_shader.addWidget(self.shader_shape_combo)
 
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
 
@@ -1151,7 +1177,8 @@ class SVGArtApp(QMainWindow):
                 self.shader_colors_spin.value(), 
                 self.shader_density_spin.value(), 
                 self.shader_noise_spin.value(),
-                auto_clr=self.chk_auto_clr.isChecked()
+                auto_clr=self.chk_auto_clr.isChecked(),
+                shape_type=self.shader_shape_combo.currentText()
             )
             return
         self.view.tool = tool; self.view.current_item = None
@@ -1274,7 +1301,26 @@ class SVGArtApp(QMainWindow):
         try:
             os.makedirs(os.path.dirname(CUSTOM_SHAPES_FILE), exist_ok=True)
             with open(CUSTOM_SHAPES_FILE, 'w') as f: json.dump(self.view.custom_shapes, f)
+            self.update_shader_shape_list()
         except: pass
+
+    def update_shader_shape_list(self):
+        if not hasattr(self, 'shader_shape_combo'): return
+        curr = self.shader_shape_combo.currentText()
+        self.shader_shape_combo.clear()
+        base = ["Cycle", "Rect", "Ellipse", "Triangle", "All Customs"]
+        self.shader_shape_combo.addItems(base)
+        
+        # Add custom shapes sorted alphabetically
+        if hasattr(self, 'view') and self.view.custom_shapes:
+            customs = sorted(self.view.custom_shapes.keys())
+            if customs:
+                self.shader_shape_combo.insertSeparator(self.shader_shape_combo.count())
+                self.shader_shape_combo.addItems(customs)
+        
+        idx = self.shader_shape_combo.findText(curr)
+        if idx >= 0: self.shader_shape_combo.setCurrentIndex(idx)
+        else: self.shader_shape_combo.setCurrentIndex(0)
 
     def add_custom_shape(self):
         cmds = self.view.collect_art_as_shape()
