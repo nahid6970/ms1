@@ -24,7 +24,7 @@ This document outlines the standard architecture, visual style, and shortcut con
   --color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff
   ```
 - **Item Colors (ANSI)**:
-  - **Normal Folders**: Yellow (`\033[93m`)
+  - **Normal Folders**: Orange (`\033[38;5;208m`)
   - **Bookmarked Folders**: Cyan (`\033[38;5;51m`)
   - **Bookmarked Files**: Light Green (`\033[38;5;121m`)
 - **Markers**: 
