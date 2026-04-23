@@ -446,7 +446,7 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
         
         # Create file feeder script that outputs files in different formats based on view mode
         bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
-        theme_file = r"C:\@delta\db\FZF_launcher\theme.json"
+        config_file = r"C:\@delta\db\FZF_launcher\config.json"
         feeder_script_content = f'''
 import os
 import sys
@@ -457,9 +457,8 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 view_mode_file = r"{view_mode_file}"
 bookmarks_file = r"{bookmarks_file}"
-theme_file = r"{theme_file}"
+config_file = r"{config_file}"
 directories = {repr(directories)}
-ignore_list = {repr(ignore_list)}
 
 # Read current view mode
 view_mode = "full"
@@ -473,13 +472,21 @@ if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
     with open(view_mode_file, 'w') as f:
         f.write(view_mode)
 
-# Load theme
-theme = {{"folder_normal": 208, "folder_bookmark": 51, "file_normal": 250, "file_bookmark": 121}}
-if os.path.exists(theme_file):
+# Load config
+config = {{
+    "theme": {{"folder_normal": 208, "folder_bookmark": 51, "file_normal": 250, "file_bookmark": 121}},
+    "ignore_list": [".git", "__pycache__", "node_modules", ".venv", ".vscode", "obj", "bin"]
+}}
+if os.path.exists(config_file):
     try:
-        with open(theme_file, 'r') as f:
-            theme.update(json.load(f))
+        with open(config_file, 'r') as f:
+            data = json.load(f)
+            if "theme" in data: config["theme"].update(data["theme"])
+            if "ignore_list" in data: config["ignore_list"] = data["ignore_list"]
     except: pass
+
+theme = config["theme"]
+ignore_list = config["ignore_list"]
 
 # Load bookmarks
 bookmarks = []
@@ -542,9 +549,13 @@ for root_dir in directories:
     if not os.path.isdir(root_dir):
         continue
     for root, dirs, files in os.walk(root_dir, onerror=lambda e: None):
+        # Prune ignored directories
+        dirs[:] = [d for d in dirs if d not in ignore_list and not any(i in d for i in ignore_list)]
+        
         # Process the current directory (root)
         if root not in printed_paths:
-            if not any(ignore_item in root for ignore_item in ignore_list):
+            # Final check to avoid showing ignored root paths
+            if not any(i in root for i in ignore_list):
                 display = format_display(root, False)
                 print(f"{{display}}\\t{{root}}")
                 printed_paths.add(root)
@@ -554,7 +565,7 @@ for root_dir in directories:
             full_path = os.path.join(root, file)
             if full_path in printed_paths:
                 continue
-            if any(ignore_item in full_path for ignore_item in ignore_list):
+            if any(i in full_path for i in ignore_list):
                 continue
             display = format_display(full_path, False)
             print(f"{{display}}\\t{{full_path}}")
@@ -614,6 +625,7 @@ if __name__ == "__main__":
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
 │  F7        : Open Theme Chooser GUI (Customize Colors)                    │
+│  F8        : Manage Ignore List (Exclude Folders)                         │
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
@@ -656,6 +668,7 @@ if __name__ == "__main__":
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f7:execute(python \"{os.path.join(script_dir, 'theme_chooser.py')}\")+reload(python \"{feeder_script_file}\")",
+            f"--bind=f8:execute(python \"{os.path.join(script_dir, 'theme_chooser.py')}\" --ignore)+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
@@ -753,3 +766,4 @@ if __name__ == "__main__":
             sys.exit(0)
     
     search_directories_and_files()
+
