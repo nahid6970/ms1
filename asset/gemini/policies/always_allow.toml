@@ -37,18 +37,7 @@ decision = "allow"
 priority = 999
 
 [[rule]]
-toolName = "show_task_complete_notification"
-decision = "allow"
-priority = 999
-
-[[rule]]
 mcpName = "*"
-toolName = "*"
-decision = "allow"
-priority = 999
-
-[[rule]]
-mcpName = "notify"
 toolName = "*"
 decision = "allow"
 priority = 999

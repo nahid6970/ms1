@@ -22,14 +22,7 @@
                                   "requireConsent":  false
                               }
               },
-    "mcpServers":  {
-                       "notify":  {
-                                      "command":  "python",
-                                      "args":  [
-                                                   "c:/Users/nahid/.gemini/task_complete_mcp.py"
-                                               ]
-                                  }
-                   },
+    "mcpServers":  {},
     "tools":  {
                   "auto_approve":  true,
                   "shell":  {
