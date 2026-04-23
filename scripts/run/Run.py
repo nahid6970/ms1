@@ -512,7 +512,7 @@ def format_display(full_path, is_bookmarked):
         else:
             display = f"\033[93m{{display}}\033[0m"  # Yellow
     elif is_bookmarked:
-        display = f"\033[92m{{display}}\033[0m"      # Green for bookmarked files
+        display = f"\033[38;5;121m{{display}}\033[0m"      # Light green for bookmarked files
     
     return display
 
