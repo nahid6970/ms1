@@ -388,6 +388,29 @@ class ArtView(QGraphicsView):
                     item.setScale(item.scale() * factor)
         else:
             self.scale(factor, factor)
+        if self.app: self.app.sync_zoom_ui()
+
+    def set_absolute_zoom(self, scale, target="Both"):
+        if target == "Image" and self.image_item:
+            self.image_item.setScale(scale)
+        elif target == "SVG":
+            for item in self.scene().items():
+                if getattr(item, 'is_art_item', False):
+                    item.setScale(scale)
+        else:
+            self.resetTransform()
+            self.scale(scale, scale)
+
+    def get_target_scale(self, target="Both"):
+        if target == "Image" and self.image_item:
+            return self.image_item.scale()
+        elif target == "SVG":
+            # Return scale of first art item found, or 1.0
+            for item in self.scene().items():
+                if getattr(item, 'is_art_item', False): return item.scale()
+            return 1.0
+        else:
+            return self.transform().m11()
 
     def wheelEvent(self, event):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
@@ -1094,7 +1117,8 @@ class SVGArtApp(QMainWindow):
         self.tb_zoom = QToolBar("Zoom"); self.tb_zoom.setObjectName("ZoomToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_zoom)
         btn_zoom_in = QPushButton("ZOOM IN"); btn_zoom_in.clicked.connect(self.zoom_in); self.tb_zoom.addWidget(btn_zoom_in)
         btn_zoom_out = QPushButton("ZOOM OUT"); btn_zoom_out.clicked.connect(self.zoom_out); self.tb_zoom.addWidget(btn_zoom_out)
-        self.tb_zoom.addWidget(QLabel(" TARGET: ")); self.zoom_target_combo = QComboBox(); self.zoom_target_combo.addItems(["Both", "Image", "SVG"]); self.tb_zoom.addWidget(self.zoom_target_combo)
+        self.tb_zoom.addWidget(QLabel(" TARGET: ")); self.zoom_target_combo = QComboBox(); self.zoom_target_combo.addItems(["Both", "Image", "SVG"]); self.zoom_target_combo.currentTextChanged.connect(self.sync_zoom_ui); self.tb_zoom.addWidget(self.zoom_target_combo)
+        self.tb_zoom.addWidget(QLabel(" VAL%: ")); self.zoom_spin = QSpinBox(); self.zoom_spin.setRange(1, 5000); self.zoom_spin.setValue(100); self.zoom_spin.setSuffix("%"); self.zoom_spin.valueChanged.connect(self.zoom_val_changed); self.tb_zoom.addWidget(self.zoom_spin)
 
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
@@ -1241,6 +1265,19 @@ class SVGArtApp(QMainWindow):
     def redo(self): self.view.redo()
     def zoom_in(self): self.view.apply_zoom(1.25, self.zoom_target_combo.currentText())
     def zoom_out(self): self.view.apply_zoom(0.8, self.zoom_target_combo.currentText())
+
+    def zoom_val_changed(self, val):
+        # Prevent recursive calls by blocking signals temporarily
+        self.zoom_spin.blockSignals(True)
+        self.view.set_absolute_zoom(val / 100.0, self.zoom_target_combo.currentText())
+        self.zoom_spin.blockSignals(False)
+
+    def sync_zoom_ui(self):
+        self.zoom_spin.blockSignals(True)
+        scale = self.view.get_target_scale(self.zoom_target_combo.currentText())
+        self.zoom_spin.setValue(int(scale * 100))
+        self.zoom_spin.blockSignals(False)
+
     def recenter_view(self):
         self.view.resetTransform()
         self.view.centerOn(0, 0)
