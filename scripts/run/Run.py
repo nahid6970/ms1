@@ -626,7 +626,6 @@ if __name__ == "__main__":
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
 │  F7        : Open Theme Chooser GUI (Customize Colors)                    │
-│  F8        : Manage Ignore List (Exclude Folders)                         │
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
