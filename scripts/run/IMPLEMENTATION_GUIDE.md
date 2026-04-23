@@ -27,6 +27,7 @@ This document outlines the standard architecture, visual style, and shortcut con
   - **Dynamic System**: Colors are loaded from `theme.json`. Defaults:
     - **Normal Folders**: Orange (Index 208)
     - **Bookmarked Folders**: Cyan (Index 51)
+    - **Normal Files**: Grey (Index 250)
     - **Bookmarked Files**: Light Green (Index 121)
 - **Markers**: 
   - Use `* ` (star + space) for bookmarked items.

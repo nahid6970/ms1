@@ -78,11 +78,12 @@ class ThemeChooser(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FZF THEME CHOOSER")
-        self.setMinimumSize(600, 700)
+        self.setMinimumSize(600, 750)
         
         self.theme = {
             "folder_normal": 208,
             "folder_bookmark": 51,
+            "file_normal": 250,
             "file_bookmark": 121
         }
         self.load_settings()
@@ -120,17 +121,21 @@ class ThemeChooser(QMainWindow):
         layout.addWidget(header)
         
         # Selection Buttons
-        sel_layout = QHBoxLayout()
+        sel_layout = QGridLayout()
         self.btn_folder_normal = QPushButton("NORMAL FOLDER")
         self.btn_folder_bookmark = QPushButton("BOOKMARK FOLDER")
+        self.btn_file_normal = QPushButton("NORMAL FILE")
         self.btn_file_bookmark = QPushButton("BOOKMARK FILE")
         
-        for b, key in [(self.btn_folder_normal, "folder_normal"), 
-                       (self.btn_folder_bookmark, "folder_bookmark"), 
-                       (self.btn_file_bookmark, "file_bookmark")]:
+        btns = [(self.btn_folder_normal, "folder_normal"), 
+                (self.btn_folder_bookmark, "folder_bookmark"),
+                (self.btn_file_normal, "file_normal"),
+                (self.btn_file_bookmark, "file_bookmark")]
+        
+        for i, (b, key) in enumerate(btns):
             b.setCheckable(True)
             b.clicked.connect(lambda checked, k=key: self.set_editing(k))
-            sel_layout.addWidget(b)
+            sel_layout.addWidget(b, i // 2, i % 2)
         
         self.btn_folder_normal.setChecked(True)
         layout.addLayout(sel_layout)
@@ -141,10 +146,12 @@ class ThemeChooser(QMainWindow):
         
         self.lbl_preview_folder_normal = QLabel("  folder_name")
         self.lbl_preview_folder_bookmark = QLabel("* bookmarked_folder")
+        self.lbl_preview_file_normal = QLabel("  normal_file.txt")
         self.lbl_preview_file_bookmark = QLabel("* bookmarked_file.txt")
         
         preview_layout.addWidget(self.lbl_preview_folder_normal)
         preview_layout.addWidget(self.lbl_preview_folder_bookmark)
+        preview_layout.addWidget(self.lbl_preview_file_normal)
         preview_layout.addWidget(self.lbl_preview_file_bookmark)
         preview_group.setLayout(preview_layout)
         layout.addWidget(preview_group)
@@ -191,6 +198,7 @@ class ThemeChooser(QMainWindow):
         self.current_editing = key
         self.btn_folder_normal.setChecked(key == "folder_normal")
         self.btn_folder_bookmark.setChecked(key == "folder_bookmark")
+        self.btn_file_normal.setChecked(key == "file_normal")
         self.btn_file_bookmark.setChecked(key == "file_bookmark")
 
     def color_selected(self, index):
@@ -200,6 +208,7 @@ class ThemeChooser(QMainWindow):
     def update_previews(self):
         self.lbl_preview_folder_normal.setStyleSheet(f"color: {get_ansi_color_hex(self.theme['folder_normal'])};")
         self.lbl_preview_folder_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(self.theme['folder_bookmark'])};")
+        self.lbl_preview_file_normal.setStyleSheet(f"color: {get_ansi_color_hex(self.theme['file_normal'])};")
         self.lbl_preview_file_bookmark.setStyleSheet(f"color: {get_ansi_color_hex(self.theme['file_bookmark'])};")
 
     def apply_styles(self):

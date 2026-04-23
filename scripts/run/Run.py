@@ -523,6 +523,8 @@ def format_display(full_path, is_bookmarked):
             display = f"\033[38;5;{{theme['folder_normal']}}m{{display}}\033[0m"
     elif is_bookmarked:
         display = f"\033[38;5;{{theme['file_bookmark']}}m{{display}}\033[0m"
+    else:
+        display = f"\033[38;5;{{theme['file_normal']}}m{{display}}\033[0m"
     
     return display
 
