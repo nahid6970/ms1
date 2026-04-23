@@ -24,9 +24,10 @@ This document outlines the standard architecture, visual style, and shortcut con
   --color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff
   ```
 - **Item Colors (ANSI)**:
-  - **Normal Folders**: Orange (`\033[38;5;208m`)
-  - **Bookmarked Folders**: Cyan (`\033[38;5;51m`)
-  - **Bookmarked Files**: Light Green (`\033[38;5;121m`)
+  - **Dynamic System**: Colors are loaded from `theme.json`. Defaults:
+    - **Normal Folders**: Orange (Index 208)
+    - **Bookmarked Folders**: Cyan (Index 51)
+    - **Bookmarked Files**: Light Green (Index 121)
 - **Markers**: 
   - Use `* ` (star + space) for bookmarked items.
   - Use `  ` (two spaces) for normal items to maintain alignment.
@@ -40,6 +41,8 @@ To match existing tools, key bindings must be implemented as follows:
 | **Enter** | Primary Action | Use `execute-silent(...) + reload(feeder)` to prevent terminal clearing AND maintain responsiveness on Windows. |
 | **?** | Box Help Menu | Use `--no-header` + `--bind=start:toggle-header` + `--bind=?:toggle-header`. Displays the box-style shortcuts menu. |
 | **F5** | Bookmark | Use `execute(...)` (not silent) to allow for an interactive custom name prompt. |
+| **F6** | Rename | `execute(...)` (Interactive rename prompt) |
+| **F7** | Theme GUI | `execute(python theme_chooser.py) + reload(feeder)` |
 | **Del** | Remove | `execute-silent(python remove_script.py {selection}) + reload(feeder)` |
 | **Ctrl-R** | Refresh | `reload(python feeder.py)` |
 
