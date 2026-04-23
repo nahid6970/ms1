@@ -1231,22 +1231,42 @@ class SVGArtApp(QMainWindow):
             return
         dlg = QDialog(self); dlg.setWindowTitle("RECOLOR GROUPS"); layout = QVBoxLayout(dlg)
         dlg.setStyleSheet(f"background: {CP_BG}; border: 1px solid {CP_CYAN};")
+        
+        scroll = QScrollArea(); scroll.setWidgetResizable(True)
+        container = QWidget(); vbox = QVBoxLayout(container)
+        
         for hex_c, items in groups.items():
             row = QHBoxLayout(); btn = QPushButton(); btn.setFixedSize(60, 30)
             btn.setStyleSheet(f"background-color: {hex_c}; border: 2px solid white;")
             btn.clicked.connect(lambda checked, h=hex_c, itms=items, b=btn: self._recolor_group(h, itms, b))
-            row.addWidget(btn); row.addWidget(QLabel(f"Group: {hex_c} ({len(items)} items)"))
-            layout.addLayout(row)
+            
+            trns_btn = QPushButton("TRNS"); trns_btn.setFixedSize(50, 30)
+            trns_btn.setStyleSheet(f"background: {CP_DIM}; color: {CP_TEXT}; font-size: 8pt;")
+            trns_btn.clicked.connect(lambda checked, itms=items, b=btn: self._recolor_group("transparent", itms, b))
+            
+            row.addWidget(btn); row.addWidget(trns_btn)
+            row.addWidget(QLabel(f"Group: {hex_c} ({len(items)} items)"))
+            vbox.addLayout(row)
+        
+        scroll.setWidget(container); layout.addWidget(scroll)
         close = ConvexButton("CLOSE", color=CP_DIM, is_outlined=True); close.clicked.connect(dlg.accept); layout.addWidget(close); dlg.exec()
 
-    def _recolor_group(self, old_hex, items, btn):
-        c = QColorDialog.getColor(QColor(old_hex), self, "New Group Color")
-        if c.isValid():
-            new_hex = c.name().upper()
+    def _recolor_group(self, color_val, items, btn):
+        if color_val == "transparent":
             for item in items:
-                item.setBrush(QBrush(c))
-                item._shader_group = new_hex
-            btn.setStyleSheet(f"background-color: {new_hex}; border: 2px solid white;")
+                if hasattr(item, 'multi_colors'): item.multi_colors = []
+                item.setBrush(QBrush(Qt.BrushStyle.NoBrush))
+                item._shader_group = "transparent"
+            btn.setStyleSheet("background-color: transparent; border: 2px dashed #555;")
+        else:
+            c = QColorDialog.getColor(QColor(color_val if color_val != "transparent" else "#FFFFFF"), self, "New Group Color")
+            if c.isValid():
+                new_hex = c.name().upper()
+                for item in items:
+                    if hasattr(item, 'multi_colors'): item.multi_colors = []
+                    item.setBrush(QBrush(c))
+                    item._shader_group = new_hex
+                btn.setStyleSheet(f"background-color: {new_hex}; border: 2px solid white;")
 
     def update_move_mode(self, mode):
         mapping = {
