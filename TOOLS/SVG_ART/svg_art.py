@@ -379,6 +379,16 @@ class ArtView(QGraphicsView):
             self.image_path = ""
             self.app.statusBar().showMessage("Background image removed.")
 
+    def apply_zoom(self, factor, target="Both"):
+        if target == "Image" and self.image_item:
+            self.image_item.setScale(self.image_item.scale() * factor)
+        elif target == "SVG":
+            for item in self.scene().items():
+                if getattr(item, 'is_art_item', False):
+                    item.setScale(item.scale() * factor)
+        else:
+            self.scale(factor, factor)
+
     def wheelEvent(self, event):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
         if self.tool == "move_image" and self.image_item:
@@ -1082,10 +1092,9 @@ class SVGArtApp(QMainWindow):
         btn_add_shape.setToolTip("Save current art as custom shape"); btn_add_shape.clicked.connect(self.add_custom_shape); self.tb_library.addWidget(btn_add_shape)
         
         self.tb_zoom = QToolBar("Zoom"); self.tb_zoom.setObjectName("ZoomToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_zoom)
-        btn_zoom_in = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["ZOOM_IN"])
-        btn_zoom_in.setToolTip("Zoom In"); btn_zoom_in.clicked.connect(self.zoom_in); self.tb_zoom.addWidget(btn_zoom_in)
-        btn_zoom_out = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["ZOOM_OUT"])
-        btn_zoom_out.setToolTip("Zoom Out"); btn_zoom_out.clicked.connect(self.zoom_out); self.tb_zoom.addWidget(btn_zoom_out)
+        btn_zoom_in = QPushButton("ZOOM IN"); btn_zoom_in.clicked.connect(self.zoom_in); self.tb_zoom.addWidget(btn_zoom_in)
+        btn_zoom_out = QPushButton("ZOOM OUT"); btn_zoom_out.clicked.connect(self.zoom_out); self.tb_zoom.addWidget(btn_zoom_out)
+        self.tb_zoom.addWidget(QLabel(" TARGET: ")); self.zoom_target_combo = QComboBox(); self.zoom_target_combo.addItems(["Both", "Image", "SVG"]); self.tb_zoom.addWidget(self.zoom_target_combo)
 
         self.tb_props = QToolBar("Properties"); self.tb_props.setObjectName("PropsToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_props)
         self.btn_color = QPushButton("COLOR"); self.btn_color.clicked.connect(self.choose_color); self.tb_props.addWidget(self.btn_color)
@@ -1230,8 +1239,8 @@ class SVGArtApp(QMainWindow):
 
     def undo(self): self.view.undo()
     def redo(self): self.view.redo()
-    def zoom_in(self): self.view.scale(1.25, 1.25)
-    def zoom_out(self): self.view.scale(0.8, 0.8)
+    def zoom_in(self): self.view.apply_zoom(1.25, self.zoom_target_combo.currentText())
+    def zoom_out(self): self.view.apply_zoom(0.8, self.zoom_target_combo.currentText())
     def recenter_view(self):
         self.view.resetTransform()
         self.view.centerOn(0, 0)
