@@ -265,6 +265,13 @@ class ArtView(QGraphicsView):
         self.poly_points = []; self.curve_state = 0; self.curve_points = []
         self.is_sharp = True; self.custom_shapes = {}
         self.snap_to_grid = False; self.grid_size = 20
+        
+        # Eraser Preview
+        self.eraser_preview = QGraphicsEllipseItem()
+        self.eraser_preview.setPen(QPen(QColor(255, 255, 255, 150), 1))
+        self.eraser_preview.setBrush(QBrush(QColor(255, 255, 255, 50)))
+        self.eraser_preview.setZValue(10000); self.eraser_preview.setVisible(False)
+        self.eraser_preview.is_art_item = False; self.scene().addItem(self.eraser_preview)
 
     def get_pen(self, alpha=255):
         cap = Qt.PenCapStyle.SquareCap if self.is_sharp else Qt.PenCapStyle.RoundCap
@@ -472,6 +479,15 @@ class ArtView(QGraphicsView):
 
     def mouseMoveEvent(self, event):
         scene_pos = self.snap_point(self.mapToScene(event.pos()))
+        
+        # Update Eraser Preview
+        if self.tool == "eraser":
+            r = max(1, self.pen_width / 2.0)
+            self.eraser_preview.setRect(-r, -r, self.pen_width, self.pen_width)
+            self.eraser_preview.setPos(scene_pos); self.eraser_preview.setVisible(True)
+        else:
+            self.eraser_preview.setVisible(False)
+
         if self.drawing:
             if self.current_item:
                 local_pos = scene_pos - self.current_item.pos()
@@ -754,7 +770,12 @@ class ArtView(QGraphicsView):
         return commands
 
     def erase_at(self, pos):
-        items = self.scene().items(pos)
+        # Create a circular area based on brush thickness
+        radius = max(1, self.pen_width / 2.0)
+        path = QPainterPath()
+        path.addEllipse(pos, radius, radius)
+        
+        items = self.scene().items(path, Qt.ItemSelectionMode.IntersectsItemShape)
         for item in items:
             if getattr(item, 'is_art_item', False):
                 [self.scene().removeItem(c) for c in getattr(item, 'symmetry_clones', [])]; self.scene().removeItem(item); self.save_to_undo(item, "remove")
