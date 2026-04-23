@@ -446,6 +446,7 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
         
         # Create file feeder script that outputs files in different formats based on view mode
         bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
+        theme_file = r"C:\@delta\db\FZF_launcher\theme.json"
         feeder_script_content = f'''
 import os
 import sys
@@ -456,6 +457,7 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 view_mode_file = r"{view_mode_file}"
 bookmarks_file = r"{bookmarks_file}"
+theme_file = r"{theme_file}"
 directories = {repr(directories)}
 ignore_list = {repr(ignore_list)}
 
@@ -470,6 +472,14 @@ if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
     view_mode = "name" if view_mode == "full" else "full"
     with open(view_mode_file, 'w') as f:
         f.write(view_mode)
+
+# Load theme
+theme = {{"folder_normal": 208, "folder_bookmark": 51, "file_bookmark": 121}}
+if os.path.exists(theme_file):
+    try:
+        with open(theme_file, 'r') as f:
+            theme.update(json.load(f))
+    except: pass
 
 # Load bookmarks
 bookmarks = []
@@ -508,11 +518,11 @@ def format_display(full_path, is_bookmarked):
     
     if is_dir:
         if is_bookmarked:
-            display = f"\033[38;5;51m{{display}}\033[0m"  # Cyan for bookmarked folders
+            display = f"\033[38;5;{{theme['folder_bookmark']}}m{{display}}\033[0m"
         else:
-            display = f"\033[38;5;208m{{display}}\033[0m"  # Orange for normal folders
+            display = f"\033[38;5;{{theme['folder_normal']}}m{{display}}\033[0m"
     elif is_bookmarked:
-        display = f"\033[38;5;121m{{display}}\033[0m"      # Light green for bookmarked files
+        display = f"\033[38;5;{{theme['file_bookmark']}}m{{display}}\033[0m"
     
     return display
 
@@ -601,6 +611,7 @@ if __name__ == "__main__":
 │  F4        : Refresh file list                                            │
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
+│  F7        : Open Theme Chooser GUI (Customize Colors)                    │
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
@@ -642,6 +653,7 @@ if __name__ == "__main__":
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
+            f"--bind=f7:execute(python \"{os.path.join(script_dir, 'theme_chooser.py')}\")+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
