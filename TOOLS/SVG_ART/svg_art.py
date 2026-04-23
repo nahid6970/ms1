@@ -302,13 +302,25 @@ class ArtView(QGraphicsView):
                 c = image.pixelColor(x, y)
                 if c.alpha() < 50: continue
                 # Quantization logic
-                q = 1 if auto_clr else 16
-                qc = QColor((c.red()//q)*q, (c.green()//q)*q, (c.blue()//q)*q)
+                if auto_clr:
+                    # 8-bit color binning (3R, 3G, 2B) -> 256 possible buckets
+                    qr = (c.red() >> 5) << 5
+                    qg = (c.green() >> 5) << 5
+                    qb = (c.blue() >> 6) << 6
+                    qc = QColor(qr, qg, qb)
+                else:
+                    q = 16
+                    qc = QColor((c.red()//q)*q, (c.green()//q)*q, (c.blue()//q)*q)
+                
                 hex_c = qc.name()
                 if hex_c not in color_map: color_map[hex_c] = []
                 color_map[hex_c].append((x, y))
         
-        sorted_colors = sorted(color_map.items(), key=lambda x: len(x[1]), reverse=True)[:color_count]
+        if auto_clr:
+            # In 8-bit mode, we take ALL found buckets (max 256) to ensure no pixels are missed
+            sorted_colors = list(color_map.items())
+        else:
+            sorted_colors = sorted(color_map.items(), key=lambda x: len(x[1]), reverse=True)[:color_count]
         
         import random
         batch = []
