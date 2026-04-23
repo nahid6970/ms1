@@ -24,12 +24,13 @@ This document outlines the standard architecture, visual style, and shortcut con
   --color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff
   ```
 - **Item Colors (ANSI)**:
-  - **Dynamic System**: Colors are loaded from `theme.json`. Defaults:
+  - **Dynamic System**: Configuration is loaded from `config.json`. Defaults:
     - **Normal Folders**: Orange (Index 208)
     - **Bookmarked Folders**: Cyan (Index 51)
     - **Normal Files**: Grey (Index 250)
     - **Bookmarked Files**: Light Green (Index 121)
-  - **Customization**: Use the Theme Chooser (F7) to pick colors manually or use the **Randomize** button for quick aesthetic generation.
+  - **Management**: Use the System Configurator (F7) to pick colors, manage **Search Roots** (which folders to crawl), and toggle **Folder Visibility** (which folders to hide).
+  - **Aesthetics**: Use the **Randomize** button for quick aesthetic generation.
 - **Markers**: 
   - Use `* ` (star + space) for bookmarked items.
   - Use `  ` (two spaces) for normal items to maintain alignment.
@@ -44,7 +45,8 @@ To match existing tools, key bindings must be implemented as follows:
 | **?** | Box Help Menu | Use `--no-header` + `--bind=start:toggle-header` + `--bind=?:toggle-header`. Displays the box-style shortcuts menu. |
 | **F5** | Bookmark | Use `execute(...)` (not silent) to allow for an interactive custom name prompt. |
 | **F6** | Rename | `execute(...)` (Interactive rename prompt) |
-| **F7** | Theme GUI | `execute(python theme_chooser.py) + reload(feeder)` |
+| **F7** | System Config | `execute(python configurator_gui.py) + reload(feeder)` |
+| **Ctrl-H** | Help GUI | `execute(python configurator_gui.py --help) + reload(feeder)` |
 | **Del** | Remove | `execute-silent(python remove_script.py {selection}) + reload(feeder)` |
 | **Ctrl-R** | Refresh | `reload(python feeder.py)` |
 
@@ -87,4 +89,9 @@ When passing selections to helper scripts, always quote the placeholders to hand
 ## 8. PyQt6 GUI Standards
 - **Style**: Use the `CP_` palette (Cyberpunk Yellow: `#FCEE0A`, Cyan: `#00F0FF`, Red: `#FF003C`).
 - **Behavior**: Set `Qt.WindowType.WindowStaysOnTopHint` and close the window on `focusOutEvent` or `ActivationChange` for a "popup" feel.
-- **Features**: Include a "🎲 RANDOMIZE" button for quick experimentation and a "↺ RESTART" button for code hot-reloading.
+- **Features**:
+  - **Randomization**: Include a "🎲 RANDOMIZE" button for quick aesthetic generation.
+  - **Hot-Reload**: Include a "↺ RESTART" button for code hot-reloading.
+  - **Search Roots**: Use a checklist to manage root directories (crawl/skip).
+  - **Folder Visibility**: Use a checklist to hide internal folder names (like `node_modules`).
+  - **Shortcuts Table**: Include a searchable table of all terminal keybindings.
