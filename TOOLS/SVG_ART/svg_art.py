@@ -91,7 +91,7 @@ class DiffDialog(QDialog):
         header = QLabel("COMPARISON: REMOTE (RED) vs LOCAL (GREEN)")
         header.setStyleSheet(f"color: {CP_YELLOW}; font-family: Consolas; font-weight: bold;"); layout.addWidget(header)
         self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }} QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}")
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }}")
         content = QWidget(); vbox = QVBoxLayout(content); vbox.setSpacing(0); vbox.setContentsMargins(0,0,0,0)
         def fix(obj):
             if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
@@ -124,7 +124,6 @@ class CloudSyncDialog(QDialog):
         btn_row = QHBoxLayout(); self.btn_backup = ConvexButton("UPLOAD", color=CP_CYAN, svg_data=SVGS["UPLOAD"])
         self.btn_backup.clicked.connect(self._do_backup); btn_row.addWidget(self.btn_backup); new_lay.addLayout(btn_row); layout.addWidget(grp_new)
         layout.addWidget(QLabel("CLOUD BACKUP HISTORY:")); self.scroll = QScrollArea(); self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_CYAN}; border-radius: 5px; }}")
         layout.addWidget(self.scroll); QTimer.singleShot(10, self._fetch_and_render)
 
     def _fetch_and_render(self):
@@ -843,7 +842,7 @@ class ShapePickerDialog(QDialog):
         # Scroll Area for the Grid
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }} QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }} QScrollBar::handle:vertical {{ background: {CP_DIM}; }}")
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }}")
         self.layout_.addWidget(self.scroll)
         
         self._build_grid()
@@ -1715,7 +1714,33 @@ class SVGArtApp(QMainWindow):
 
     def closeEvent(self, e): self.save_settings(); super().closeEvent(e)
     def apply_theme(self):
-        self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }} QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }} QToolBar {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; spacing: 5px; padding: 3px; }} QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 4px 8px; font-weight: bold; font-size: 9pt; }} QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }} QComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 2px; }} QSpinBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 2px; max-width: 36px; }} QSpinBox::up-button, QSpinBox::down-button {{ width: 0; height: 0; border: none; }} QStatusBar {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border-top: 1px solid {CP_DIM}; }}")
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QToolBar {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; spacing: 5px; padding: 3px; }}
+            
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 4px 8px; font-weight: bold; font-size: 9pt; }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+            
+            QComboBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 2px; }}
+            
+            QSpinBox {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 2px; max-width: 42px; }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0; height: 0; border: none; }}
+            
+            QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            
+            QStatusBar {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border-top: 1px solid {CP_DIM}; }}
+            
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+            
+            QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0px; }}
+            QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; background: none; }}
+        """)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv); window = SVGArtApp(); window.show(); sys.exit(app.exec())

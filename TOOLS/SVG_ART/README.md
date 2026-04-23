@@ -1,36 +1,58 @@
-# NEURAL ART V1.0 - SVG EDITOR
+# NEURAL ART V1.6.2 - SYNCED SVG EDITOR
 
-A Cyberpunk-themed SVG art tool designed for map alignment and smooth drawing.
+A high-fidelity, Cyberpunk-themed SVG art and neural vectorization tool designed for seamless drawing, map alignment, and image-to-shader processing.
 
-## Key Features
-- **Smooth Art:** Use the **PEN** tool for freehand drawing with a Cyberpunk aesthetic.
-- **Map Alignment:**
-    - **LOAD IMG:** Insert a map image behind your art.
-    - **MOVE IMG:** Move only the background image to realign it with your SVG art.
-    - **MOVE SVG:** Move all your SVG drawings to realign them with the map.
-    - **Middle Mouse:** Pan the entire view (SVG + Image together).
-    - **Scroll Wheel:** Zoom in/out for precise work.
-- **Tools:**
-    - **PEN:** Cyberpunk cyan pen.
-    - **ERASER:** Removes any item it touches.
-    - **RECT/CIRCLE/LINE:** Standard shapes.
-    - **COLOR:** Pick your accent color.
-    - **THICK:** Slider to adjust stroke width.
-- **Save:** Export your creation as a standard `.svg` file.
-- **System:**
-    - **RESTART:** Hot-reload the application.
-    - **SET:** Access system settings.
+## 🚀 Key Features
 
-## Getting Started
-Run the script using Python:
+### 🎨 Drawing & Neural Shaders
+- **Smooth Art:** Antialiased drawing with Marker, Airbrush, Multiline, and Highlighter brush types.
+- **Neural Scanner (New!):**
+    - **SCAN:** Automatically transform any background image into a stylized grid of vector shapes.
+    - **AUTO Mode:** High-fidelity 8-bit color binning (256 groups) to capture every single pixel perfectly.
+    - **Smart Cycling:** "Cycle" mode automatically rotates between Rectangle, Circle, and Triangle shaders.
+    - **Custom Shaders:** Use your own **Custom Shapes** library to rebuild images with specific logos or designs.
+- **Group Recolor:** Manage entire detected color groups instantly. Change every "forest green" grid item to "neon pink" with one click.
+
+### 📐 Positioning & Move Mode (New!)
+- **Dedicated Move Toolbar:** Separate toolbar for positioning to prevent conflicts with drawing tools.
+- **Move Modes:**
+    - **None:** Locked mode for safe painting.
+    - **Image:** Move and scale just the background.
+    - **SVG:** Move and scale only your art layers.
+    - **Both:** Move everything together.
+    - **Symmetry Center:** Interactively reposition the center of your radial/reflection symmetry.
+
+### 🔍 Advanced Scaling & Zoom
+- **Targeted Zoom:** Choose exactly what to scale (**Both**, **Image**, or **SVG**) using the **TARGET** dropdown.
+- **Manual Control:**
+    - **VAL%:** Type an exact percentage (1% to 5000%) for numerical precision.
+    - **STEP%:** Customize how much each zoom increment adds/removes (Default: 5%).
+- **Shortcuts:** **Ctrl + Plus (+)** and **Ctrl + Minus (-)** for rapid navigation.
+
+### 🛠️ Toolset & Customization
+- **Shapes:** Rect, Circle, Triangle, and Polygon tools.
+- **Custom Shapes:** Save any selection of your art as a reusable custom shape or import external SVG path data.
+- **Symmetry:** Radial (up to 100 mirrors) and Reflection (H, V, Both) support.
+- **Grid System:** Toggleable grid with snapping and custom sizing.
+- **Backgrounds:** Change canvas background color or load/remove images (Red **X** button).
+
+## ⌨️ Keyboard Shortcuts
+- **Ctrl + Z / Y:** Undo / Redo (Supports batch undo for image scans).
+- **Ctrl + Plus (+):** Zoom In (Target-aware).
+- **Ctrl + Minus (-):** Zoom Out (Target-aware).
+- **Escape:** Cancel current Polygon/Curve drawing.
+- **Middle Mouse:** Pan the entire workspace.
+
+## 🛠️ Getting Started
+Run the script using Python 3 and PyQt6:
 ```bash
 python svg_art.py
 ```
 
-## Alignment Workflow
-1. Load your map image using `LOAD IMG`.
-2. Draw your section using the `PEN` or other tools.
-3. If you need to "slide" the map for more space:
-    - Use `MOVE IMG` to reposition the map while keeping your SVG fixed.
-    - OR use `MOVE SVG` to move your drawings while keeping the map fixed.
-    - Align the previous portion of your art with the new map section for seamless continuation.
+## 📋 Neural Workflow
+1. **Load Image:** Use the cyan **IMAGE** button on the right.
+2. **Align:** Select **MOVE MODE: Image** to position and scale your background.
+3. **Scan:** Set your **DEN** (Density) and check **AUTO**. Select a **SHP** (Shape) and click **SCAN**.
+4. **Recolor:** Use the **PALETTE** icon to tweak the color groups.
+5. **Draw:** Switch **MOVE MODE** to **None** and use the **PEN** or **POLY** tools to finish your piece.
+6. **Export:** Click the green **SAVE** disk icon to get your standard `.svg` file.
