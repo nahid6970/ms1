@@ -227,8 +227,8 @@ class ConfiguratorGUI(QMainWindow):
         shortcut_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         shortcut_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         data = [("Enter", "Action Menu"), ("Tab", "Multi-select"), ("F2", "Image Mode"), ("F3", "Path vs Name"),
-                ("F4", "Refresh"), ("F5", "Bookmark"), ("F6", "Rename"), ("F7", "Open Config (Colors)"),
-                ("F8", "Open Config (Visibility)"), ("Ctrl-C", "Copy Path"), ("Ctrl-H", "Full Help GUI"),
+                ("F4", "Refresh"), ("F5", "Bookmark"), ("F6", "Rename"), ("F7", "Open System Configuration"),
+                ("Ctrl-C", "Copy Path"), ("Ctrl-H", "Full Help GUI"),
                 ("Ctrl-O", "Explorer"), ("Ctrl-P", "Preview"), ("Alt-Up/Down", "Order")]
         for i, (key, action) in enumerate(data):
             shortcut_table.setItem(i, 0, QTableWidgetItem(key))

@@ -90,7 +90,7 @@ def search_directories_and_files():
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
-│  F7: Theme GUI  F8: Ignore GUI Ctrl-H: Full Help GUI                      │
+│  F7: Configuration             Ctrl-H: Full Help GUI                      │
 │                                                                           │
 │  Ctrl-C: Copy   Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run │
 │  Alt-Up/Down: Move Bookmark    Enter: Action Menu     Tab: Multi-select   │
