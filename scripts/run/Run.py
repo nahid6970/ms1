@@ -80,26 +80,12 @@ def search_directories_and_files():
     shortcuts_text = r"""┌───────────────────────────────────────────────────────────────────────────┐
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
-│  [ FUNCTION KEYS ]                                                        │
-│  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
-│  F3        : Toggle view mode (Full Path vs Filename)                     │
-│  F4        : Refresh file list                                            │
-│  F5        : Toggle bookmark on/off (Prompts for custom name)             │
-│  F6        : Rename bookmark custom name                                  │
+│  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
+│  F7: Theme GUI  F8: Ignore GUI Ctrl-H: Full Help GUI                      │
 │                                                                           │
-│  [ CONTROL KEYS ]                                                         │
-│  Ctrl-C    : Copy full file path to clipboard                             │
-│  Ctrl-N    : Open file with Editor Chooser                                │
-│  Ctrl-O    : Open file location in Explorer                               │
-│  Ctrl-P    : Toggle preview window on/off                                 │
-│  Ctrl-R    : Run file with PowerShell Start-Process                       │
-│                                                                           │
-│  [ NAVIGATION & OTHER ]                                                   │
-│  Alt-Up    : Move bookmarked file up in order                             │
-│  Alt-Down  : Move bookmarked file down in order                           │
-│  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
-│  Tab       : Multi-select files                                           │
-│  ?         : Toggle this shortcuts help header                            │
+│  Ctrl-C: Copy   Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run │
+│  Alt-Up/Down: Move Bookmark    Enter: Action Menu     Tab: Multi-select   │
+│  ?: Toggle this header                                                    │
 └───────────────────────────────────────────────────────────────────────────┘"""
 
     # Create a state file to track preview mode (chafa vs quicklook)

@@ -6,7 +6,7 @@ import random
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QGroupBox, 
                              QGridLayout, QScrollArea, QFrame, QDialog, 
-                             QPlainTextEdit, QTabWidget)
+                             QPlainTextEdit, QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView)
 from PyQt6.QtCore import Qt, pyqtSignal
 
 # PALETTE
@@ -71,7 +71,7 @@ class ThemeChooser(QMainWindow):
     def __init__(self, start_tab=0):
         super().__init__()
         self.setWindowTitle("FZF SYSTEM CONFIGURATOR")
-        self.setMinimumSize(650, 800)
+        self.setMinimumSize(700, 850)
         
         self.config = {
             "theme": {
@@ -175,6 +175,40 @@ class ThemeChooser(QMainWindow):
         ignore_layout.addWidget(QLabel("Files or folders containing these strings will be hidden."))
         self.tabs.addTab(ignore_tab, "🚫 IGNORE LIST")
 
+        # --- Tab 3: Shortcuts ---
+        shortcuts_tab = QWidget()
+        shortcuts_layout = QVBoxLayout(shortcuts_tab)
+        
+        shortcut_table = QTableWidget(14, 2)
+        shortcut_table.setHorizontalHeaderLabels(["KEY", "ACTION"])
+        shortcut_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        shortcut_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        shortcut_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
+        
+        data = [
+            ("Enter", "Action Menu (Editor/Folder/Run/Copy)"),
+            ("Tab", "Multi-select files"),
+            ("F2", "Toggle Image Preview Mode"),
+            ("F3", "Toggle View Mode (Path vs Name)"),
+            ("F4", "Refresh File List"),
+            ("F5", "Toggle Bookmark (Set Name)"),
+            ("F6", "Rename Bookmark"),
+            ("F7", "Open Color Theme GUI"),
+            ("F8", "Open Ignore List Manager"),
+            ("Ctrl-C", "Copy path to clipboard"),
+            ("Ctrl-O", "Open location in Explorer"),
+            ("Ctrl-P", "Toggle Preview Window"),
+            ("Alt-Up/Down", "Move Bookmark order"),
+            ("?", "Toggle Terminal Help Header"),
+        ]
+        
+        for i, (key, action) in enumerate(data):
+            shortcut_table.setItem(i, 0, QTableWidgetItem(key))
+            shortcut_table.setItem(i, 1, QTableWidgetItem(action))
+            
+        shortcuts_layout.addWidget(shortcut_table)
+        self.tabs.addTab(shortcuts_tab, "⌨ SHORTCUTS")
+
         self.tabs.setCurrentIndex(start_tab)
         main_layout.addWidget(self.tabs)
         
@@ -237,13 +271,16 @@ class ThemeChooser(QMainWindow):
             QPushButton:checked {{ background-color: {CP_CYAN}; color: black; }}
             QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }}
             QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QTableWidget {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; gridline-color: {CP_DIM}; }}
+            QHeaderView::section {{ background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 4px; border: 1px solid {CP_BG}; font-weight: bold; }}
         """)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     start_tab = 0
-    if len(sys.argv) > 1 and sys.argv[1] == "--ignore":
-        start_tab = 1
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--ignore": start_tab = 1
+        elif sys.argv[1] == "--help" or sys.argv[1] == "-h": start_tab = 2
     window = ThemeChooser(start_tab)
     window.show()
     sys.exit(app.exec())
