@@ -12,7 +12,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QGraphicsRectItem, QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsPixmapItem, QFrame, QGroupBox, QFormLayout, QDialog, 
                              QSizePolicy, QComboBox, QGraphicsBlurEffect, QInputDialog,
-                             QMessageBox, QMenu, QSpinBox, QPlainTextEdit, QLineEdit, QScrollArea)
+                             QMessageBox, QMenu, QSpinBox, QPlainTextEdit, QLineEdit, QScrollArea,
+                             QCheckBox)
 from PyQt6.QtCore import Qt, QPointF, QRectF, QLineF, QSize, QByteArray, QTimer
 from PyQt6.QtGui import (QPainter, QPen, QColor, QPainterPath, QPixmap, QCursor, QAction, QIcon, QTransform, QBrush, QKeySequence, QFont)
 from PyQt6 import QtSvg
@@ -52,7 +53,9 @@ SVGS = {
     "ZOOM_OUT": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>',
     "SCAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg>',
     "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H17c2.8 0 5-2.2 5-5 0-5.5-4.5-10-10-10z"></path></svg>',
-    "GLITCH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>'
+    "GLITCH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
+    "MOVE_ALL": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"></path></svg>',
+    "REMOVE_IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -279,10 +282,12 @@ class ArtView(QGraphicsView):
     def save_to_undo(self, item, action="add"):
         self.undo_stack.append((action, item)); self.redo_stack.clear()
 
-    def scan_image_to_shaders(self, color_count=5, density=50, noise=0):
+    def scan_image_to_shaders(self, color_count=5, density=50, noise=0, auto_clr=False):
         if not self.image_item:
             QMessageBox.warning(self.app, "No Image", "Load a background image first.")
             return
+        
+        if auto_clr: color_count = 256
         
         pixmap = self.image_item.pixmap()
         image = pixmap.toImage()
@@ -296,8 +301,9 @@ class ArtView(QGraphicsView):
             for x in range(0, w, step_x):
                 c = image.pixelColor(x, y)
                 if c.alpha() < 50: continue
-                # Simple quantization to 16-level buckets
-                qc = QColor((c.red()//16)*16, (c.green()//16)*16, (c.blue()//16)*16)
+                # Quantization logic
+                q = 1 if auto_clr else 16
+                qc = QColor((c.red()//q)*q, (c.green()//q)*q, (c.blue()//q)*q)
                 hex_c = qc.name()
                 if hex_c not in color_map: color_map[hex_c] = []
                 color_map[hex_c].append((x, y))
@@ -339,8 +345,23 @@ class ArtView(QGraphicsView):
             self.save_to_undo(batch, "add_batch")
             self.app.statusBar().showMessage(f"Generated {len(batch)} shader items across {len(sorted_colors)} colors.")
 
+    def remove_background_image(self):
+        if self.image_item:
+            self.scene().removeItem(self.image_item)
+            self.image_item = None
+            self.image_path = ""
+            self.app.statusBar().showMessage("Background image removed.")
+
     def wheelEvent(self, event):
-        zoom = 1.25 if event.angleDelta().y() > 0 else 0.8; self.scale(zoom, zoom)
+        zoom = 1.25 if event.angleDelta().y() > 0 else 0.8
+        if self.tool == "move_image" and self.image_item:
+            self.image_item.setScale(self.image_item.scale() * zoom)
+        elif self.tool == "move_svg":
+            for item in self.scene().items():
+                if getattr(item, 'is_art_item', False):
+                    item.setScale(item.scale() * zoom)
+        else:
+            self.scale(zoom, zoom)
 
     def mousePressEvent(self, event):
         scene_pos = self.snap_point(self.mapToScene(event.pos())); self.start_point = scene_pos
@@ -368,7 +389,7 @@ class ArtView(QGraphicsView):
             elif self.tool == "fill": self.apply_fill(scene_pos)
             elif self.tool == "picker": self.pick_color(scene_pos)
             elif self.tool == "eraser": self.drawing = True; self.erase_at(scene_pos)
-            elif self.tool in ["move_image", "move_svg", "move_sym"]: self.drawing = True
+            elif self.tool in ["move_image", "move_svg", "move_sym", "move_all"]: self.drawing = True
         elif event.button() == Qt.MouseButton.MiddleButton:
             self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag); super().mousePressEvent(event)
         elif event.button() == Qt.MouseButton.RightButton:
@@ -410,6 +431,12 @@ class ArtView(QGraphicsView):
                 delta = scene_pos - self.start_point; self.image_item.setPos(self.image_item.pos() + delta); self.start_point = scene_pos
             elif self.tool == "move_svg":
                 delta = scene_pos - self.start_point
+                for item in self.scene().items():
+                    if getattr(item, 'is_art_item', False): item.setPos(item.pos() + delta)
+                self.start_point = scene_pos
+            elif self.tool == "move_all":
+                delta = scene_pos - self.start_point
+                if self.image_item: self.image_item.setPos(self.image_item.pos() + delta)
                 for item in self.scene().items():
                     if getattr(item, 'is_art_item', False): item.setPos(item.pos() + delta)
                 self.start_point = scene_pos
@@ -999,13 +1026,15 @@ class SVGArtApp(QMainWindow):
 
     def setup_ui(self):
         self.central_widget = QWidget(); self.setCentralWidget(self.central_widget); self.main_layout = QVBoxLayout(self.central_widget)
+        self.scene = ArtScene(); self.view = ArtView(self.scene, self); self.main_layout.addWidget(self.view)
+        
         self.tb_main = QToolBar("Main"); self.tb_main.setObjectName("MainToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_main)
         self.add_tool_action(self.tb_main, "BRUSH", "brush", CP_CYAN, SVGS["BRUSH"]); self.brush_combo = QComboBox(); self.brush_combo.addItems(["Marker", "Airbrush", "Multiline", "Highlighter"]); self.brush_combo.currentTextChanged.connect(self.set_brush_type); self.tb_main.addWidget(self.brush_combo)
         self.tb_main.addWidget(QLabel(" LINES: ")); self.multi_slider = QSpinBox(); self.multi_slider.setRange(1, 100); self.multi_slider.setValue(3); self.multi_slider.valueChanged.connect(self.set_multi_count); self.tb_main.addWidget(self.multi_slider)
         self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN, SVGS["POLYGON"]); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN, SVGS["CURVE"]); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED, SVGS["ERASER"]); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW, SVGS["PAINT_BUCKET"]); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN, SVGS["EYEDROPPER"])
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE, SVGS["RECTANGLE"]); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE, SVGS["CIRCLE"]); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE, SVGS["TRIANGLE"])
-        self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
+        self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE ALL", "move_all", CP_GREEN, SVGS["MOVE_ALL"]); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
 
         self.tb_library = QToolBar("Library"); self.tb_library.setObjectName("LibraryToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_library)
         btn_list_shapes = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["SHAPE_LIB"])
@@ -1036,7 +1065,8 @@ class SVGArtApp(QMainWindow):
         self.add_tool_action(self.tb_shader, "SCAN", "scan_img", CP_YELLOW, SVGS["SCAN"])
         btn_recolor = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["PALETTE"])
         btn_recolor.setToolTip("Manage Color Groups"); btn_recolor.clicked.connect(self.manage_shader_colors); self.tb_shader.addWidget(btn_recolor)
-        self.tb_shader.addWidget(QLabel(" CLR: ")); self.shader_colors_spin = QSpinBox(); self.shader_colors_spin.setRange(1, 20); self.shader_colors_spin.setValue(5); self.tb_shader.addWidget(self.shader_colors_spin)
+        self.tb_shader.addWidget(QLabel(" CLR: ")); self.chk_auto_clr = QCheckBox("AUTO"); self.chk_auto_clr.setToolTip("Auto-detect all colors (8-bit)"); self.tb_shader.addWidget(self.chk_auto_clr)
+        self.shader_colors_spin = QSpinBox(); self.shader_colors_spin.setRange(1, 20); self.shader_colors_spin.setValue(5); self.tb_shader.addWidget(self.shader_colors_spin)
         self.tb_shader.addWidget(QLabel(" DEN: ")); self.shader_density_spin = QSpinBox(); self.shader_density_spin.setRange(10, 200); self.shader_density_spin.setValue(50); self.tb_shader.addWidget(self.shader_density_spin)
         self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
 
@@ -1061,6 +1091,9 @@ class SVGArtApp(QMainWindow):
         btn_img = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["IMAGE"])
         btn_img.setToolTip("Load background image"); btn_img.clicked.connect(self.load_image); self.tb_sys.addWidget(btn_img)
         
+        self.btn_remove_img = ConvexButton(parent=self, color=CP_RED, svg_data=SVGS["REMOVE_IMAGE"])
+        self.btn_remove_img.setToolTip("Remove background image"); self.btn_remove_img.clicked.connect(self.view.remove_background_image); self.tb_sys.addWidget(self.btn_remove_img)
+        
         btn_save = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["SAVE_DISK"])
         btn_save.setToolTip("Export as SVG file"); btn_save.clicked.connect(self.save_svg); self.tb_sys.addWidget(btn_save)
 
@@ -1069,7 +1102,6 @@ class SVGArtApp(QMainWindow):
         
         btn_rst = ConvexButton(parent=self, color=CP_RED, svg_data=SVGS["RESTART"])
         btn_rst.setToolTip("Restart application"); btn_rst.clicked.connect(self.restart_app); self.tb_sys.addWidget(btn_rst)
-        self.scene = ArtScene(); self.view = ArtView(self.scene, self); self.main_layout.addWidget(self.view)
         u_act = QAction("Undo", self); u_act.setShortcut(QKeySequence("Ctrl+Z")); u_act.triggered.connect(self.undo); self.addAction(u_act)
         r_act = QAction("Redo", self); r_act.setShortcut(QKeySequence("Ctrl+Y")); r_act.triggered.connect(self.redo); self.addAction(r_act)
 
@@ -1115,7 +1147,12 @@ class SVGArtApp(QMainWindow):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold; border: 1px solid {color};"); btn.clicked.connect(func); tb.addWidget(btn)
     def set_tool(self, tool):
         if tool == "scan_img":
-            self.view.scan_image_to_shaders(self.shader_colors_spin.value(), self.shader_density_spin.value(), self.shader_noise_spin.value())
+            self.view.scan_image_to_shaders(
+                self.shader_colors_spin.value(), 
+                self.shader_density_spin.value(), 
+                self.shader_noise_spin.value(),
+                auto_clr=self.chk_auto_clr.isChecked()
+            )
             return
         self.view.tool = tool; self.view.current_item = None
     def set_brush_type(self, b): self.view.brush_type = b.lower(); self.set_tool("brush")
