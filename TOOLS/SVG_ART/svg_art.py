@@ -1095,7 +1095,7 @@ class SVGInputDialog(QDialog):
 class SVGArtApp(QMainWindow):
     def __init__(self):
         super().__init__(); self.setWindowTitle("NEURAL ART V1.6.2 - SYNCED"); self.resize(1400, 900)
-        self.library_columns = 4
+        self.library_columns = 4; self.last_dir = ""
         self.setup_ui(); self.apply_theme(); self.toggle_sharp(); self.load_settings(); self.load_custom_shapes()
 
     def setup_ui(self):
@@ -1317,15 +1317,18 @@ class SVGArtApp(QMainWindow):
         self.view.centerOn(0, 0)
     def clear_art(self): [self.scene.removeItem(i) for i in self.scene.items() if getattr(i, 'is_art_item', False)]
     def load_image(self, path=None):
-        if not path: path, _ = QFileDialog.getOpenFileName(self, "IMG", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        if not path:
+            path, _ = QFileDialog.getOpenFileName(self, "IMG", self.last_dir, "Images (*.png *.jpg *.jpeg *.bmp)")
+            if path: self.last_dir = os.path.dirname(path)
         if path and os.path.exists(path):
             pix = QPixmap(path)
             if not pix.isNull():
                 if self.view.image_item: self.scene.removeItem(self.view.image_item)
                 self.view.image_item = QGraphicsPixmapItem(pix); self.view.image_item.setZValue(-1); self.view.image_item.is_art_item = False; self.view.image_path = path; self.scene.addItem(self.view.image_item)
     def save_svg(self):
-        f, _ = QFileDialog.getSaveFileName(self, "SAVE SVG", "art.svg", "SVG files (*.svg)")
+        f, _ = QFileDialog.getSaveFileName(self, "SAVE SVG", os.path.join(self.last_dir, "art.svg"), "SVG files (*.svg)")
         if f:
+            self.last_dir = os.path.dirname(f)
             hidden = []; r = QRectF()
             for i in self.scene.items():
                 if not getattr(i, 'is_art_item', False): (i.hide(), hidden.append(i)) if i.isVisible() else None
@@ -1686,7 +1689,7 @@ class SVGArtApp(QMainWindow):
                     s = json.load(f)
                     if "geom" in s: self.restoreGeometry(QByteArray.fromHex(s["geom"].encode()))
                     if "state" in s: self.restoreState(QByteArray.fromHex(s["state"].encode()))
-                    self.library_columns = s.get("library_columns", 4)
+                    self.library_columns = s.get("library_columns", 4); self.last_dir = s.get("last_dir", "")
                     self.view.tool = s.get("tool", "brush"); self.view.brush_type = s.get("brush_type", "marker"); self.view.pen_color = QColor(s.get("color", CP_CYAN)); self.view.pen_width = s.get("width", 3); self.view.multi_line_count = s.get("multi_count", 3); sm = s.get("symmetry_mode", "None"); self.view.symmetry_mode = sm; self.sym_combo.setCurrentText(sm); self.view.mirror_count = s.get("mirror_count", 4); self.view.sym_center = QPointF(s.get("sym_x", 0), s.get("sym_y", 0)); self.scene.center_marker.setPos(self.view.sym_center); self.brush_combo.setCurrentText(self.view.brush_type.capitalize()); self.thickness_slider.setValue(self.view.pen_width); self.multi_slider.setValue(self.view.multi_line_count); self.mirror_spin.setValue(self.view.mirror_count); self.update_color_ui(self.view.pen_color); ip = s.get("img_path", "")
                     self.view.is_sharp = s.get("is_sharp", True); self.btn_sharp.setChecked(self.view.is_sharp); self.toggle_sharp()
                     
@@ -1706,6 +1709,7 @@ class SVGArtApp(QMainWindow):
         s = {"geom": self.saveGeometry().toHex().data().decode(), "state": self.saveState().toHex().data().decode(), "tool": self.view.tool, "brush_type": self.view.brush_type, "color": self.view.pen_color.name(), "width": self.view.pen_width, "multi_count": self.view.multi_line_count, "symmetry_mode": self.view.symmetry_mode, "mirror_count": self.view.mirror_count, "sym_x": self.view.sym_center.x(), "sym_y": self.view.sym_center.y(), "img_path": self.view.image_path, "img_x": self.view.image_item.x() if self.view.image_item else 0, "img_y": self.view.image_item.y() if self.view.image_item else 0, "is_sharp": self.view.is_sharp,
              "show_grid": self.scene.show_grid, "snap_to_grid": self.view.snap_to_grid, "grid_size": self.view.grid_size,
              "library_columns": getattr(self, 'library_columns', 4),
+             "last_dir": self.last_dir,
              "canvas_bg": self.scene.backgroundBrush().color().name()}
         try:
             os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
