@@ -25,7 +25,7 @@ This document outlines the standard architecture, visual style, and shortcut con
   ```
 - **Item Colors (ANSI)**:
   - **Normal Folders**: Yellow (`\033[93m`)
-  - **Bookmarked Folders**: Pink (`\033[95m`)
+  - **Bookmarked Folders**: Cyan (`\033[38;5;51m`)
   - **Bookmarked Files**: Light Green (`\033[38;5;121m`)
 - **Markers**: 
   - Use `* ` (star + space) for bookmarked items.
