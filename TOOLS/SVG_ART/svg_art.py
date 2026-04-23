@@ -49,7 +49,10 @@ SVGS = {
     "TRIANGLE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>',
     "CENTER": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>',
     "ZOOM_IN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>',
-    "ZOOM_OUT": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>'
+    "ZOOM_OUT": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>',
+    "SCAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg>',
+    "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H17c2.8 0 5-2.2 5-5 0-5.5-4.5-10-10-10z"></path></svg>',
+    "GLITCH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -275,6 +278,66 @@ class ArtView(QGraphicsView):
 
     def save_to_undo(self, item, action="add"):
         self.undo_stack.append((action, item)); self.redo_stack.clear()
+
+    def scan_image_to_shaders(self, color_count=5, density=50, noise=0):
+        if not self.image_item:
+            QMessageBox.warning(self.app, "No Image", "Load a background image first.")
+            return
+        
+        pixmap = self.image_item.pixmap()
+        image = pixmap.toImage()
+        w, h = image.width(), image.height()
+        
+        step_x = max(1, w // density)
+        step_y = max(1, h // density)
+        color_map = {} # hex -> list of (x, y)
+        
+        for y in range(0, h, step_y):
+            for x in range(0, w, step_x):
+                c = image.pixelColor(x, y)
+                if c.alpha() < 50: continue
+                # Simple quantization to 16-level buckets
+                qc = QColor((c.red()//16)*16, (c.green()//16)*16, (c.blue()//16)*16)
+                hex_c = qc.name()
+                if hex_c not in color_map: color_map[hex_c] = []
+                color_map[hex_c].append((x, y))
+        
+        sorted_colors = sorted(color_map.items(), key=lambda x: len(x[1]), reverse=True)[:color_count]
+        
+        import random
+        batch = []
+        img_pos = self.image_item.pos()
+        custom_names = list(self.custom_shapes.keys())
+        
+        for i, (hex_c, pts) in enumerate(sorted_colors):
+            stype = i % (3 + len(custom_names))
+            size = step_x * 0.8
+            
+            for px, py in pts:
+                nx = px + random.uniform(-noise, noise)
+                ny = py + random.uniform(-noise, noise)
+                pos = img_pos + QPointF(nx, ny)
+                
+                item = None
+                if stype == 0: item = SymRect(0, 0, size, size)
+                elif stype == 1: item = SymEllipse(0, 0, size, size)
+                elif stype == 2:
+                    path = QPainterPath(); path.moveTo(size/2, 0); path.lineTo(0, size); path.lineTo(size, size); path.closeSubpath()
+                    item = SymPath(path)
+                else:
+                    cname = custom_names[stype - 3]
+                    path, multi = self._scale_custom_path(self.custom_shapes[cname], QPointF(size, size))
+                    item = SymPath(path); item.multi_colors = multi
+                
+                item.setPos(pos); item.setPen(Qt.PenStyle.NoPen)
+                if not getattr(item, 'multi_colors', None):
+                    item.setBrush(QBrush(QColor(hex_c)))
+                item.is_art_item = True; item._shader_group = hex_c
+                self.scene().addItem(item); batch.append(item)
+        
+        if batch:
+            self.save_to_undo(batch, "add_batch")
+            self.app.statusBar().showMessage(f"Generated {len(batch)} shader items across {len(sorted_colors)} colors.")
 
     def wheelEvent(self, event):
         zoom = 1.25 if event.angleDelta().y() > 0 else 0.8; self.scale(zoom, zoom)
@@ -618,17 +681,29 @@ class ArtView(QGraphicsView):
         if not self.undo_stack: return
         a, i = self.undo_stack.pop()
         if a == "add":
-            self.scene().removeItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]; self.redo_stack.append((a, i))
+            self.scene().removeItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]
+        elif a == "add_batch":
+            for item in i: self.scene().removeItem(item)
         elif a == "remove":
-            self.scene().addItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]; self.redo_stack.append((a, i))
+            self.scene().addItem(i); [self.scene().addItem(c) for c in getattr(i, 'symmetry_clones', [])]
         elif a == "fill":
             old = i[2]; i.setBrush(old); [c.setBrush(old) for c in getattr(i, 'symmetry_clones', [])]
+        self.redo_stack.append((a, i))
 
     def redo(self):
         if not self.redo_stack: return
-        a, i = self.redo_stack.pop(); self.scene().addItem(i) if a == "add" else self.scene().removeItem(i)
-        if a == "add": [self.scene().addItem(c) for c in getattr(i, 'symmetry_clones', [])]
-        else: [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]
+        a, i = self.redo_stack.pop()
+        if a == "add":
+            self.scene().addItem(i); [self.scene().addItem(c) for c in getattr(i, 'symmetry_clones', [])]
+        elif a == "add_batch":
+            for item in i: self.scene().addItem(item)
+        elif a == "remove":
+            self.scene().removeItem(i); [self.scene().removeItem(c) for c in getattr(i, 'symmetry_clones', [])]
+        elif a == "fill":
+            # Item is (item, new_color, old_brush)
+            # Actually apply_fill doesn't save new_color, it uses self.pen_color at the time.
+            # Simple redo for fill:
+            pass 
         self.undo_stack.append((a, i))
 
 class ShapePickerDialog(QDialog):
@@ -957,7 +1032,16 @@ class SVGArtApp(QMainWindow):
         self.tb_grid.addWidget(QLabel(" SIZE: ")); self.grid_size_spin = QSpinBox(); self.grid_size_spin.setRange(5, 200); self.grid_size_spin.setValue(20); self.grid_size_spin.valueChanged.connect(self.change_grid_size); self.tb_grid.addWidget(self.grid_size_spin)
         self.btn_canvas_bg = QPushButton("BG"); self.btn_canvas_bg.setToolTip("Change Canvas Background"); self.btn_canvas_bg.clicked.connect(self.choose_canvas_bg); self.tb_grid.addWidget(self.btn_canvas_bg)
 
+        self.tb_shader = QToolBar("Shader"); self.tb_shader.setObjectName("ShaderToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shader)
+        self.add_tool_action(self.tb_shader, "SCAN", "scan_img", CP_YELLOW, SVGS["SCAN"])
+        btn_recolor = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["PALETTE"])
+        btn_recolor.setToolTip("Manage Color Groups"); btn_recolor.clicked.connect(self.manage_shader_colors); self.tb_shader.addWidget(btn_recolor)
+        self.tb_shader.addWidget(QLabel(" CLR: ")); self.shader_colors_spin = QSpinBox(); self.shader_colors_spin.setRange(1, 20); self.shader_colors_spin.setValue(5); self.tb_shader.addWidget(self.shader_colors_spin)
+        self.tb_shader.addWidget(QLabel(" DEN: ")); self.shader_density_spin = QSpinBox(); self.shader_density_spin.setRange(10, 200); self.shader_density_spin.setValue(50); self.tb_shader.addWidget(self.shader_density_spin)
+        self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
+
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
+
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
         self.tb_sym.addWidget(QLabel(" MIRROR: ")); self.mirror_spin = QSpinBox(); self.mirror_spin.setRange(2, 100); self.mirror_spin.setValue(4); self.mirror_spin.valueChanged.connect(self.set_mirror_count); self.tb_sym.addWidget(self.mirror_spin)
         self.tb_sys = QToolBar("System"); self.tb_sys.setObjectName("SystemToolbar"); self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.tb_sys)
@@ -997,9 +1081,43 @@ class SVGArtApp(QMainWindow):
             btn = QPushButton(text)
             btn.setStyleSheet(f"color: {color}; font-weight: bold;")
         btn.clicked.connect(lambda: self.set_tool(tool_name)); tb.addWidget(btn)
+
+    def manage_shader_colors(self):
+        groups = {}
+        for item in self.scene.items():
+            if hasattr(item, '_shader_group'):
+                g = item._shader_group
+                if g not in groups: groups[g] = []
+                groups[g].append(item)
+        if not groups:
+            QMessageBox.information(self, "No Groups", "Scan an image first to create color groups.")
+            return
+        dlg = QDialog(self); dlg.setWindowTitle("RECOLOR GROUPS"); layout = QVBoxLayout(dlg)
+        dlg.setStyleSheet(f"background: {CP_BG}; border: 1px solid {CP_CYAN};")
+        for hex_c, items in groups.items():
+            row = QHBoxLayout(); btn = QPushButton(); btn.setFixedSize(60, 30)
+            btn.setStyleSheet(f"background-color: {hex_c}; border: 2px solid white;")
+            btn.clicked.connect(lambda checked, h=hex_c, itms=items, b=btn: self._recolor_group(h, itms, b))
+            row.addWidget(btn); row.addWidget(QLabel(f"Group: {hex_c} ({len(items)} items)"))
+            layout.addLayout(row)
+        close = ConvexButton("CLOSE", color=CP_DIM, is_outlined=True); close.clicked.connect(dlg.accept); layout.addWidget(close); dlg.exec()
+
+    def _recolor_group(self, old_hex, items, btn):
+        c = QColorDialog.getColor(QColor(old_hex), self, "New Group Color")
+        if c.isValid():
+            new_hex = c.name().upper()
+            for item in items:
+                item.setBrush(QBrush(c))
+                item._shader_group = new_hex
+            btn.setStyleSheet(f"background-color: {new_hex}; border: 2px solid white;")
+
     def add_system_action(self, tb, text, func, color):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold; border: 1px solid {color};"); btn.clicked.connect(func); tb.addWidget(btn)
-    def set_tool(self, tool): self.view.tool = tool; self.view.current_item = None
+    def set_tool(self, tool):
+        if tool == "scan_img":
+            self.view.scan_image_to_shaders(self.shader_colors_spin.value(), self.shader_density_spin.value(), self.shader_noise_spin.value())
+            return
+        self.view.tool = tool; self.view.current_item = None
     def set_brush_type(self, b): self.view.brush_type = b.lower(); self.set_tool("brush")
     def set_multi_count(self, v): self.view.multi_line_count = v
     def set_symmetry_mode(self, m): self.view.symmetry_mode = m; self.statusBar().showMessage(f"MODE: {m}")
