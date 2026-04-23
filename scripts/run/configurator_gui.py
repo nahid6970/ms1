@@ -6,7 +6,8 @@ import random
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QGroupBox, 
                              QGridLayout, QScrollArea, QFrame, QDialog, 
-                             QPlainTextEdit, QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView)
+                             QPlainTextEdit, QTabWidget, QTableWidget, QTableWidgetItem, 
+                             QHeaderView, QListWidget, QListWidgetItem, QLineEdit)
 from PyQt6.QtCore import Qt, pyqtSignal
 
 # PALETTE
@@ -51,7 +52,7 @@ class SettingsDialog(QDialog):
         lbl_title.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         layout.addWidget(lbl_title)
         layout.addWidget(QLabel("- Theme Persistence: ACTIVE"))
-        layout.addWidget(QLabel("- Ignore Logic: PRUNING"))
+        layout.addWidget(QLabel("- Visibility Logic: CHECKLIST"))
         layout.addStretch()
         btn_close = QPushButton("CLOSE")
         btn_close.clicked.connect(self.accept)
@@ -67,12 +68,13 @@ class ColorButton(QPushButton):
         self.setStyleSheet(f"background-color: {get_ansi_color_hex(index)}; border: 1px solid #333;")
         self.clicked.connect(lambda: self.clicked_with_index.emit(self.index))
 
-class ThemeChooser(QMainWindow):
+class ConfiguratorGUI(QMainWindow):
     def __init__(self, start_tab=0):
         super().__init__()
         self.setWindowTitle("FZF SYSTEM CONFIGURATOR")
         self.setMinimumSize(700, 850)
         
+        # Default config
         self.config = {
             "theme": {
                 "folder_normal": 208,
@@ -80,7 +82,15 @@ class ThemeChooser(QMainWindow):
                 "file_normal": 250,
                 "file_bookmark": 121
             },
-            "ignore_list": [".git", "__pycache__", "node_modules", ".venv", ".vscode", "obj", "bin"]
+            "visibility": {
+                ".git": False,
+                "__pycache__": False,
+                "node_modules": False,
+                ".venv": False,
+                ".vscode": False,
+                "obj": False,
+                "bin": False
+            }
         }
         self.load_settings()
         self.current_editing = "folder_normal"
@@ -89,23 +99,28 @@ class ThemeChooser(QMainWindow):
         self.update_previews()
 
     def load_settings(self):
-        legacy_file = r"C:\@delta\db\FZF_launcher\theme.json"
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, 'r') as f:
                     data = json.load(f)
                     if "theme" in data: self.config["theme"].update(data["theme"])
-                    if "ignore_list" in data: self.config["ignore_list"] = data["ignore_list"]
-            except: pass
-        elif os.path.exists(legacy_file):
-            try:
-                with open(legacy_file, 'r') as f:
-                    self.config["theme"].update(json.load(f))
+                    
+                    # Handle migration from old ignore_list to new visibility dict
+                    if "visibility" in data:
+                        self.config["visibility"] = data["visibility"]
+                    elif "ignore_list" in data:
+                        # Migrate: old ignore_list items become False (hidden)
+                        for item in data["ignore_list"]:
+                            self.config["visibility"][item] = False
             except: pass
 
     def save_settings(self):
-        lines = self.ignore_edit.toPlainText().split('\n')
-        self.config["ignore_list"] = [l.strip() for l in lines if l.strip()]
+        # Update visibility from checklist
+        self.config["visibility"] = {}
+        for i in range(self.visibility_list.count()):
+            item = self.visibility_list.item(i)
+            self.config["visibility"][item.text()] = (item.checkState() == Qt.CheckState.Checked)
+        
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
         with open(CONFIG_FILE, 'w') as f:
             json.dump(self.config, f, indent=4)
@@ -165,26 +180,39 @@ class ThemeChooser(QMainWindow):
         color_layout.addWidget(scroll)
         self.tabs.addTab(color_tab, "🎨 COLORS")
 
-        # --- Tab 2: Ignore List ---
-        ignore_tab = QWidget()
-        ignore_layout = QVBoxLayout(ignore_tab)
-        ignore_layout.addWidget(QLabel("EXCLUDE PATHS/FOLDERS (One per line):"))
-        self.ignore_edit = QPlainTextEdit()
-        self.ignore_edit.setPlainText('\n'.join(self.config["ignore_list"]))
-        ignore_layout.addWidget(self.ignore_edit)
-        ignore_layout.addWidget(QLabel("Files or folders containing these strings will be hidden."))
-        self.tabs.addTab(ignore_tab, "🚫 IGNORE LIST")
+        # --- Tab 2: Visibility (Checklist) ---
+        visibility_tab = QWidget()
+        visibility_layout = QVBoxLayout(visibility_tab)
+        
+        info_lbl = QLabel("FOLDER VISIBILITY (Uncheck to hide from search):")
+        info_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        visibility_layout.addWidget(info_lbl)
+        
+        self.visibility_list = QListWidget()
+        for folder, is_visible in sorted(self.config["visibility"].items()):
+            self.add_visibility_item(folder, is_visible)
+        visibility_layout.addWidget(self.visibility_list)
+        
+        # Add New Folder Section
+        add_layout = QHBoxLayout()
+        self.new_folder_input = QLineEdit()
+        self.new_folder_input.setPlaceholderText("Enter folder name to manage (e.g. build)...")
+        btn_add_folder = QPushButton("+ ADD FOLDER")
+        btn_add_folder.clicked.connect(self.add_new_folder)
+        add_layout.addWidget(self.new_folder_input)
+        add_layout.addWidget(btn_add_folder)
+        visibility_layout.addLayout(add_layout)
+        
+        self.tabs.addTab(visibility_tab, "👁 VISIBILITY")
 
         # --- Tab 3: Shortcuts ---
         shortcuts_tab = QWidget()
         shortcuts_layout = QVBoxLayout(shortcuts_tab)
-        
         shortcut_table = QTableWidget(14, 2)
         shortcut_table.setHorizontalHeaderLabels(["KEY", "ACTION"])
         shortcut_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         shortcut_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         shortcut_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        
         data = [
             ("Enter", "Action Menu (Editor/Folder/Run/Copy)"),
             ("Tab", "Multi-select files"),
@@ -194,18 +222,16 @@ class ThemeChooser(QMainWindow):
             ("F5", "Toggle Bookmark (Set Name)"),
             ("F6", "Rename Bookmark"),
             ("F7", "Open Color Theme GUI"),
-            ("F8", "Open Ignore List Manager"),
+            ("F8", "Open Visibility Manager"),
             ("Ctrl-C", "Copy path to clipboard"),
+            ("Ctrl-H", "Open this Help GUI"),
             ("Ctrl-O", "Open location in Explorer"),
             ("Ctrl-P", "Toggle Preview Window"),
             ("Alt-Up/Down", "Move Bookmark order"),
-            ("?", "Toggle Terminal Help Header"),
         ]
-        
         for i, (key, action) in enumerate(data):
             shortcut_table.setItem(i, 0, QTableWidgetItem(key))
             shortcut_table.setItem(i, 1, QTableWidgetItem(action))
-            
         shortcuts_layout.addWidget(shortcut_table)
         self.tabs.addTab(shortcuts_tab, "⌨ SHORTCUTS")
 
@@ -229,6 +255,25 @@ class ThemeChooser(QMainWindow):
         act_layout.addWidget(btn_save)
         act_layout.addWidget(btn_restart)
         main_layout.addLayout(act_layout)
+
+    def add_visibility_item(self, folder, is_visible):
+        item = QListWidgetItem(folder)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(Qt.CheckState.Checked if is_visible else Qt.CheckState.Unchecked)
+        self.visibility_list.addItem(item)
+
+    def add_new_folder(self):
+        name = self.new_folder_input.text().strip()
+        if name:
+            # Check if already exists
+            exists = False
+            for i in range(self.visibility_list.count()):
+                if self.visibility_list.item(i).text() == name:
+                    exists = True
+                    break
+            if not exists:
+                self.add_visibility_item(name, True)
+                self.new_folder_input.clear()
 
     def set_editing(self, key):
         self.current_editing = key
@@ -273,6 +318,9 @@ class ThemeChooser(QMainWindow):
             QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
             QTableWidget {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; gridline-color: {CP_DIM}; }}
             QHeaderView::section {{ background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 4px; border: 1px solid {CP_BG}; font-weight: bold; }}
+            QListWidget {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; outline: none; }}
+            QListWidget::item {{ padding: 5px; border-bottom: 1px solid {CP_DIM}; }}
+            QListWidget::item:selected {{ background-color: {CP_DIM}; color: {CP_CYAN}; }}
         """)
 
 if __name__ == "__main__":
@@ -281,6 +329,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--ignore": start_tab = 1
         elif sys.argv[1] == "--help" or sys.argv[1] == "-h": start_tab = 2
-    window = ThemeChooser(start_tab)
+    window = ConfiguratorGUI(start_tab)
     window.show()
     sys.exit(app.exec())

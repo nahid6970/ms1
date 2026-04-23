@@ -461,18 +461,24 @@ if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
 # Load config
 config = {{
     "theme": {{"folder_normal": 208, "folder_bookmark": 51, "file_normal": 250, "file_bookmark": 121}},
-    "ignore_list": [".git", "__pycache__", "node_modules", ".venv", ".vscode", "obj", "bin"]
+    "visibility": {{
+        ".git": False, "__pycache__": False, "node_modules": False, ".venv": False, 
+        ".vscode": False, "obj": False, "bin": False
+    }}
 }}
 if os.path.exists(config_file):
     try:
         with open(config_file, 'r') as f:
             data = json.load(f)
             if "theme" in data: config["theme"].update(data["theme"])
-            if "ignore_list" in data: config["ignore_list"] = data["ignore_list"]
+            if "visibility" in data: config["visibility"] = data["visibility"]
+            elif "ignore_list" in data:
+                for item in data["ignore_list"]: config["visibility"][item] = False
     except: pass
 
 theme = config["theme"]
-ignore_list = config["ignore_list"]
+# Ignore list is now defined as anything marked False in visibility
+ignore_list = [k for k, v in config["visibility"].items() if v == False]
 
 # Load bookmarks
 bookmarks = []
