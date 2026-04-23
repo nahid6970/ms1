@@ -474,7 +474,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
         f.write(view_mode)
 
 # Load theme
-theme = {{"folder_normal": 208, "folder_bookmark": 51, "file_bookmark": 121}}
+theme = {{"folder_normal": 208, "folder_bookmark": 51, "file_normal": 250, "file_bookmark": 121}}
 if os.path.exists(theme_file):
     try:
         with open(theme_file, 'r') as f:
