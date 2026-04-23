@@ -1092,7 +1092,7 @@ class SVGArtApp(QMainWindow):
         btn_recolor.setToolTip("Manage Color Groups"); btn_recolor.clicked.connect(self.manage_shader_colors); self.tb_shader.addWidget(btn_recolor)
         self.tb_shader.addWidget(QLabel(" CLR: ")); self.chk_auto_clr = QCheckBox("AUTO"); self.chk_auto_clr.setToolTip("Auto-detect all colors (8-bit)"); self.tb_shader.addWidget(self.chk_auto_clr)
         self.shader_colors_spin = QSpinBox(); self.shader_colors_spin.setRange(1, 20); self.shader_colors_spin.setValue(5); self.tb_shader.addWidget(self.shader_colors_spin)
-        self.tb_shader.addWidget(QLabel(" DEN: ")); self.shader_density_spin = QSpinBox(); self.shader_density_spin.setRange(10, 200); self.shader_density_spin.setValue(50); self.tb_shader.addWidget(self.shader_density_spin)
+        self.tb_shader.addWidget(QLabel(" DEN: ")); self.shader_density_spin = QSpinBox(); self.shader_density_spin.setRange(10, 500); self.shader_density_spin.setValue(50); self.tb_shader.addWidget(self.shader_density_spin)
         self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
         self.tb_shader.addWidget(QLabel(" SHP: ")); self.shader_shape_combo = QComboBox(); self.update_shader_shape_list(); self.tb_shader.addWidget(self.shader_shape_combo)
 
