@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import subprocess
+import random
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QGroupBox, 
                              QGridLayout, QScrollArea, QFrame, QDialog)
@@ -177,6 +178,9 @@ class ThemeChooser(QMainWindow):
         btn_settings = QPushButton("⚙ SETTINGS")
         btn_settings.clicked.connect(self.show_settings)
         
+        btn_random = QPushButton("🎲 RANDOMIZE")
+        btn_random.clicked.connect(self.randomize_colors)
+        
         btn_save = QPushButton("SAVE CHANGES")
         btn_save.clicked.connect(self.save_settings)
         btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
@@ -185,10 +189,16 @@ class ThemeChooser(QMainWindow):
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
         
         act_layout.addWidget(btn_settings)
+        act_layout.addWidget(btn_random)
         act_layout.addStretch()
         act_layout.addWidget(btn_save)
         act_layout.addWidget(btn_restart)
         layout.addLayout(act_layout)
+
+    def randomize_colors(self):
+        for key in self.theme:
+            self.theme[key] = random.randint(0, 255)
+        self.update_previews()
 
     def show_settings(self):
         dialog = SettingsDialog(self)
