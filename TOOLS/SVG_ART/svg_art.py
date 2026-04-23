@@ -1109,7 +1109,12 @@ class SVGArtApp(QMainWindow):
         self.add_tool_action(self.tb_main, "POLY", "poly", CP_GREEN, SVGS["POLYGON"]); self.add_tool_action(self.tb_main, "CURVE", "curve", CP_GREEN, SVGS["CURVE"]); self.add_tool_action(self.tb_main, "ERASE", "eraser", CP_RED, SVGS["ERASER"]); self.add_tool_action(self.tb_main, "FILL", "fill", CP_YELLOW, SVGS["PAINT_BUCKET"]); self.add_tool_action(self.tb_main, "PICK", "picker", CP_CYAN, SVGS["EYEDROPPER"])
         self.tb_shapes = QToolBar("Shapes"); self.tb_shapes.setObjectName("ShapesToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_shapes)
         self.add_tool_action(self.tb_shapes, "RECT", "rect", CP_ORANGE, SVGS["RECTANGLE"]); self.add_tool_action(self.tb_shapes, "CIRC", "ellipse", CP_ORANGE, SVGS["CIRCLE"]); self.add_tool_action(self.tb_shapes, "TRI", "triangle", CP_ORANGE, SVGS["TRIANGLE"])
-        self.tb_shapes.addSeparator(); self.add_tool_action(self.tb_shapes, "MOVE IMG", "move_image", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE SVG", "move_svg", CP_SUBTEXT); self.add_tool_action(self.tb_shapes, "MOVE ALL", "move_all", CP_GREEN, SVGS["MOVE_ALL"]); self.add_tool_action(self.tb_shapes, "MOVE SYM", "move_sym", CP_YELLOW)
+
+        self.tb_move = QToolBar("Move"); self.tb_move.setObjectName("MoveToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_move)
+        self.tb_move.addWidget(QLabel(" MOVE MODE: ")); self.move_mode_combo = QComboBox()
+        self.move_mode_combo.addItems(["None", "Image", "SVG", "Both", "Symmetry Center"])
+        self.move_mode_combo.currentTextChanged.connect(self.update_move_mode)
+        self.tb_move.addWidget(self.move_mode_combo)
 
         self.tb_library = QToolBar("Library"); self.tb_library.setObjectName("LibraryToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_library)
         btn_list_shapes = ConvexButton(parent=self, color=CP_CYAN, svg_data=SVGS["SHAPE_LIB"])
@@ -1223,6 +1228,20 @@ class SVGArtApp(QMainWindow):
                 item._shader_group = new_hex
             btn.setStyleSheet(f"background-color: {new_hex}; border: 2px solid white;")
 
+    def update_move_mode(self, mode):
+        mapping = {
+            "None": "brush", # Default back to brush when none is picked
+            "Image": "move_image",
+            "SVG": "move_svg",
+            "Both": "move_all",
+            "Symmetry Center": "move_sym"
+        }
+        tool = mapping.get(mode, "brush")
+        # Update view tool but DON'T trigger a recursive set_tool call
+        self.view.tool = tool
+        self.view.current_item = None
+        self.statusBar().showMessage(f"MOVE MODE: {mode}")
+
     def add_system_action(self, tb, text, func, color):
         btn = QPushButton(text); btn.setStyleSheet(f"color: {color}; font-weight: bold; border: 1px solid {color};"); btn.clicked.connect(func); tb.addWidget(btn)
     def set_tool(self, tool):
@@ -1235,6 +1254,13 @@ class SVGArtApp(QMainWindow):
                 shape_type=self.shader_shape_combo.currentText()
             )
             return
+        
+        # Reset Move dropdown if a standard tool is picked
+        if hasattr(self, 'move_mode_combo') and not tool.startswith("move_"):
+            self.move_mode_combo.blockSignals(True)
+            self.move_mode_combo.setCurrentText("None")
+            self.move_mode_combo.blockSignals(False)
+
         self.view.tool = tool; self.view.current_item = None
     def set_brush_type(self, b): self.view.brush_type = b.lower(); self.set_tool("brush")
     def set_multi_count(self, v): self.view.multi_line_count = v
