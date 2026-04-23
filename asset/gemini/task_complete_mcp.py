@@ -76,7 +76,7 @@ def run_server():
                     "tools": [
                         {
                             "name": "show_task_complete_notification",
-                            "description": "Shows a cyberpunk-styled notification popup to alert the user that the AI task is complete. Call this as the LAST action after finishing your work.",
+                            "description": "Shows a professional-styled notification popup to alert the user that the AI task is complete. Call this as the LAST action after finishing your work.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {}
