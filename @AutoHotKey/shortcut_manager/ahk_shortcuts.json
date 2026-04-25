@@ -302,6 +302,14 @@
             "enabled": true,
             "hotkey": "^+v",
             "name": "Paste as One Line"
+        },
+        {
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\move_selected_files.py\"', , \"Hide\")",
+            "category": "Launch",
+            "description": "",
+            "hotkey": "!m",
+            "name": "move selected files",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
