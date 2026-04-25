@@ -177,6 +177,37 @@ class FileMoverUI:
         self.header.bind("<ButtonPress-1>", self.start_move)
         self.header.bind("<B1-Motion>", self.do_move)
 
+        # File List Section
+        self.file_list_frame = tk.Frame(self.container, bg="#151515")
+        self.file_list_frame.pack(fill="x", padx=15, pady=5)
+        
+        file_count_label = tk.Label(self.file_list_frame, text="FILES TO MOVE:", 
+                                   font=(self.font_name, 8, "bold"), bg="#151515", fg="#444444")
+        file_count_label.pack(anchor="w", padx=5)
+
+        self.list_canvas = tk.Canvas(self.file_list_frame, bg="#151515", height=60, 
+                                    highlightthickness=0, bd=0)
+        self.scrollbar = tk.Scrollbar(self.file_list_frame, orient="vertical", 
+                                     command=self.list_canvas.yview, width=8)
+        self.scrollable_file_frame = tk.Frame(self.list_canvas, bg="#151515")
+
+        self.scrollable_file_frame.bind(
+            "<Configure>",
+            lambda e: self.list_canvas.configure(scrollregion=self.list_canvas.bbox("all"))
+        )
+
+        self.list_canvas.create_window((0, 0), window=self.scrollable_file_frame, anchor="nw")
+        self.list_canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.list_canvas.pack(side="left", fill="both", expand=True)
+        if len(self.files_to_move) > 3:
+            self.scrollbar.pack(side="right", fill="y")
+
+        for f_path in self.files_to_move:
+            fname = os.path.basename(f_path)
+            tk.Label(self.scrollable_file_frame, text=f"• {fname}", 
+                     font=(self.font_name, 9), bg="#151515", fg="#888888").pack(anchor="w", padx=10)
+
         self.list_container = tk.Frame(self.container, bg=self.bg_color)
         self.list_container.pack(fill="both", expand=True, padx=10, pady=10)
         
@@ -210,14 +241,24 @@ class FileMoverUI:
         self.render_folders()
 
     def update_window_size(self):
-        self.list_container.update_idletasks()
-        width = 820 
-        total_items = len(self.folders) + 1 # ADD
-        rows = (total_items + 4) // 5
-        height = 110 + (rows * 135)
+        self.root.update_idletasks()
+        # Calculate width: 5 columns * (150 card + 10 padding) + 30 container padding
+        width = 830 
+        
+        # Calculate dynamic height based on content
+        # header (~50) + file_list (~85) + list_container + footer (~40)
+        content_height = self.container.winfo_reqheight()
+        
+        # Add a small buffer for the border
+        height = content_height + 2
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
+        
+        # Cap height to 80% of screen and center
+        if height > screen_height * 0.8:
+            height = int(screen_height * 0.8)
+            
         center_x = int(screen_width/2 - width/2)
         center_y = int(screen_height/2 - height/2)
         self.root.geometry(f"{width}x{height}+{center_x}+{center_y}")
