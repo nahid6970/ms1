@@ -177,7 +177,10 @@ class FileMoverUI:
         self.header.bind("<ButtonPress-1>", self.start_move)
         self.header.bind("<B1-Motion>", self.do_move)
 
-        # File List Section
+        self.list_container = tk.Frame(self.container, bg=self.bg_color)
+        self.list_container.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # File List Section (Now below folder list)
         self.file_list_frame = tk.Frame(self.container, bg="#151515")
         self.file_list_frame.pack(fill="x", padx=15, pady=5)
         
@@ -185,7 +188,8 @@ class FileMoverUI:
                                    font=(self.font_name, 8, "bold"), bg="#151515", fg="#444444")
         file_count_label.pack(anchor="w", padx=5)
 
-        self.list_canvas = tk.Canvas(self.file_list_frame, bg="#151515", height=60, 
+        # Increased height to 200 to show ~10 files
+        self.list_canvas = tk.Canvas(self.file_list_frame, bg="#151515", height=200, 
                                     highlightthickness=0, bd=0)
         self.scrollbar = tk.Scrollbar(self.file_list_frame, orient="vertical", 
                                      command=self.list_canvas.yview, width=8)
@@ -200,7 +204,8 @@ class FileMoverUI:
         self.list_canvas.configure(yscrollcommand=self.scrollbar.set)
 
         self.list_canvas.pack(side="left", fill="both", expand=True)
-        if len(self.files_to_move) > 3:
+        # Always show scrollbar if many files, or if list is large
+        if len(self.files_to_move) > 10:
             self.scrollbar.pack(side="right", fill="y")
 
         for f_path in self.files_to_move:
@@ -208,9 +213,6 @@ class FileMoverUI:
             tk.Label(self.scrollable_file_frame, text=f"• {fname}", 
                      font=(self.font_name, 9), bg="#151515", fg="#888888").pack(anchor="w", padx=10)
 
-        self.list_container = tk.Frame(self.container, bg=self.bg_color)
-        self.list_container.pack(fill="both", expand=True, padx=10, pady=10)
-        
         self.render_folders()
 
         self.footer = tk.Frame(self.container, bg=self.bg_color)
