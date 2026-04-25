@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import messagebox, filedialog, simpledialog, colorchooser
 import os
 import json
 import shutil
@@ -141,6 +141,7 @@ class FileMoverUI:
         self.folders = folders
         self.files_to_move = files_to_move
         self.edit_mode = False
+        self.is_dialog_open = False
 
         # Colors & Theme (Matching region_screenshot.py)
         self.bg_color = "#0e0e0e"
@@ -245,6 +246,19 @@ class FileMoverUI:
 
         if self.edit_mode:
             card.config(highlightbackground=self.accent_edit, highlightthickness=1)
+            
+            # Management Buttons at bottom
+            # Color
+            col_l = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
+            col_l.place(x=10, y=90)
+            col_l.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
+            
+            # Icon 
+            ico_l = tk.Label(card, text="🔣", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
+            ico_l.place(x=65, y=90)
+            ico_l.bind("<Button-1>", lambda e, i=index: self.change_folder_icon(i))
+
+            # Delete
             del_l = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
             del_l.place(x=125, y=90)
             del_l.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
@@ -256,6 +270,28 @@ class FileMoverUI:
                 w.config(cursor="hand2")
             w.bind("<Enter>", lambda e, c=card: self.on_hover(c))
             w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
+
+    def change_folder_color(self, index):
+        self.is_dialog_open = True
+        color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]["color"], parent=self.root)[1]
+        self.is_dialog_open = False
+        self.root.focus_force()
+        if color:
+            self.folders[index]["color"] = color
+            save_folders(self.folders)
+            self.render_folders()
+
+    def change_folder_icon(self, index):
+        self.is_dialog_open = True
+        new_icon = simpledialog.askstring("Folder Icon", "Paste new icon glyph:", 
+                                         initialvalue=self.folders[index].get("icon", "\ueaf7"),
+                                         parent=self.root)
+        self.is_dialog_open = False
+        self.root.focus_force()
+        if new_icon:
+            self.folders[index]["icon"] = new_icon
+            save_folders(self.folders)
+            self.render_folders()
 
     def create_add_button(self, row, col):
         card = tk.Frame(self.list_container, bg="#121212", width=150, height=120)
@@ -269,9 +305,17 @@ class FileMoverUI:
         icon_label.bind("<Button-1>", lambda e: self.add_new_folder())
         
         for w in [card, icon_label]:
-            w.bind("<Enter>", lambda e: card.config(bg="#1a1a1a"))
-            w.bind("<Leave>", lambda e: card.config(bg="#121212"))
+            w.bind("<Enter>", lambda e: self.on_add_hover(card, icon_label))
+            w.bind("<Leave>", lambda e: self.on_add_leave(card, icon_label))
             w.config(cursor="hand2")
+
+    def on_add_hover(self, card, label):
+        card.config(bg="#1a1a1a")
+        label.config(bg="#1a1a1a")
+
+    def on_add_leave(self, card, label):
+        card.config(bg="#121212")
+        label.config(bg="#121212")
 
     def on_hover(self, card):
         if not self.edit_mode:
@@ -286,7 +330,10 @@ class FileMoverUI:
                 w.config(bg="#1a1a1a")
 
     def add_new_folder(self):
+        self.is_dialog_open = True
         path = filedialog.askdirectory(parent=self.root)
+        self.is_dialog_open = False
+        self.root.focus_force()
         if path:
             self.folders.append({"path": path, "color": "#00ff41"})
             save_folders(self.folders)
@@ -294,11 +341,14 @@ class FileMoverUI:
             self.update_window_size()
 
     def remove_folder(self, index):
+        self.is_dialog_open = True
         if messagebox.askyesno("Confirm", "Remove this folder?", parent=self.root):
             self.folders.pop(index)
             save_folders(self.folders)
             self.render_folders()
             self.update_window_size()
+        self.is_dialog_open = False
+        self.root.focus_force()
 
     def execute_move(self, target_dir):
         if not os.path.exists(target_dir):
