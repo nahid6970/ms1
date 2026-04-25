@@ -304,7 +304,7 @@
             "name": "Paste as One Line"
         },
         {
-            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\move_selected_files.py\"', , \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\file_mover.py\"', , \"Hide\")",
             "category": "Launch",
             "description": "",
             "hotkey": "!m",

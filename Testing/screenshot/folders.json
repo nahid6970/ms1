@@ -7,5 +7,9 @@
         "path": "C:/Users/nahid/Pictures/edu",
         "color": "#ff0000",
         "icon": "\udb80\ude19"
+    },
+    {
+        "path": "C:/Users/nahid/Pictures/trash",
+        "color": "#00ff41"
     }
 ]
