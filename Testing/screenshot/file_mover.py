@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog, colorchooser
+from tkinter import messagebox, filedialog, simpledialog, colorchooser, ttk
 import os
 import json
 import shutil
@@ -138,6 +138,22 @@ class FileMoverUI:
         self.root = tk.Tk()
         self.root.overrideredirect(True)
         self.root.attributes('-topmost', True)
+
+        # Setup TTK Style for Cyberpunk Scrollbar
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        self.style.configure("Cyber.Vertical.TScrollbar", 
+                            gripcount=0,
+                            background="#00F0FF",      # Handle (CP_CYAN)
+                            troughcolor="#050505",    # Background (CP_BG)
+                            bordercolor="#050505",
+                            arrowcolor="#00F0FF",
+                            lightcolor="#00F0FF",
+                            darkcolor="#00F0FF",
+                            relief="flat")
+        self.style.map("Cyber.Vertical.TScrollbar",
+                      background=[('active', '#00F0FF'), ('pressed', '#FCEE0A')])
+
         self.folders = folders
         self.files_to_move = files_to_move
         self.edit_mode = False
@@ -188,11 +204,15 @@ class FileMoverUI:
                                    font=(self.font_name, 8, "bold"), bg="#151515", fg="#444444")
         file_count_label.pack(anchor="w", padx=5)
 
-        # Increased height to 200 to show ~10 files
+        # Dynamic height (max 200)
         self.list_canvas = tk.Canvas(self.file_list_frame, bg="#151515", height=200, 
                                     highlightthickness=0, bd=0)
-        self.scrollbar = tk.Scrollbar(self.file_list_frame, orient="vertical", 
-                                     command=self.list_canvas.yview, width=8)
+        
+        # TTK Scrollbar for Cyberpunk styling
+        self.scrollbar = ttk.Scrollbar(self.file_list_frame, orient="vertical", 
+                                      command=self.list_canvas.yview,
+                                      style="Cyber.Vertical.TScrollbar")
+        
         self.scrollable_file_frame = tk.Frame(self.list_canvas, bg="#151515")
 
         self.scrollable_file_frame.bind(
@@ -213,7 +233,6 @@ class FileMoverUI:
         # Update and adjust canvas height dynamically
         self.scrollable_file_frame.update_idletasks()
         list_req_height = self.scrollable_file_frame.winfo_reqheight()
-        # Cap at 200px (approx 10 files) but shrink if fewer
         canvas_height = min(list_req_height, 200) if list_req_height > 0 else 60
         self.list_canvas.config(height=canvas_height)
 
@@ -251,20 +270,13 @@ class FileMoverUI:
 
     def update_window_size(self):
         self.root.update_idletasks()
-        # Calculate width: 5 columns * (150 card + 10 padding) + 30 container padding
         width = 830 
-        
-        # Calculate dynamic height based on content
-        # header (~50) + file_list (~85) + list_container + footer (~40)
         content_height = self.container.winfo_reqheight()
-        
-        # Add a small buffer for the border
         height = content_height + 2
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         
-        # Cap height to 80% of screen and center
         if height > screen_height * 0.8:
             height = int(screen_height * 0.8)
             
@@ -304,7 +316,6 @@ class FileMoverUI:
         if self.edit_mode:
             card.config(highlightbackground=self.accent_edit, highlightthickness=1)
             
-            # Management Buttons at bottom
             # Color
             col_l = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
             col_l.place(x=10, y=90)
@@ -421,7 +432,6 @@ class FileMoverUI:
             if os.path.exists(dest_path):
                 dialog = CollisionDialog(self.root, filename)
                 if dialog.result == 'rename':
-                    # Generate unique name
                     name, ext = os.path.splitext(filename)
                     counter = 1
                     while os.path.exists(os.path.join(target_dir, f"{name}_{counter}{ext}")):
@@ -458,7 +468,6 @@ class FileMoverUI:
         self.root.mainloop()
 
 def main():
-    # 1. Gather files
     files = get_explorer_selected_files()
     if not files:
         files = get_photos_app_file()
@@ -466,10 +475,7 @@ def main():
     if not files:
         return
 
-    # 2. Load folders
     folders = load_folders()
-    
-    # 3. Show UI
     mover = FileMoverUI(folders, files)
     mover.run()
 
