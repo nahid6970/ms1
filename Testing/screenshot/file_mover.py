@@ -204,14 +204,21 @@ class FileMoverUI:
         self.list_canvas.configure(yscrollcommand=self.scrollbar.set)
 
         self.list_canvas.pack(side="left", fill="both", expand=True)
-        # Always show scrollbar if many files, or if list is large
-        if len(self.files_to_move) > 10:
-            self.scrollbar.pack(side="right", fill="y")
-
+        
         for f_path in self.files_to_move:
             fname = os.path.basename(f_path)
             tk.Label(self.scrollable_file_frame, text=f"• {fname}", 
                      font=(self.font_name, 9), bg="#151515", fg="#888888").pack(anchor="w", padx=10)
+
+        # Update and adjust canvas height dynamically
+        self.scrollable_file_frame.update_idletasks()
+        list_req_height = self.scrollable_file_frame.winfo_reqheight()
+        # Cap at 200px (approx 10 files) but shrink if fewer
+        canvas_height = min(list_req_height, 200) if list_req_height > 0 else 60
+        self.list_canvas.config(height=canvas_height)
+
+        if len(self.files_to_move) > 10:
+            self.scrollbar.pack(side="right", fill="y")
 
         self.render_folders()
 
