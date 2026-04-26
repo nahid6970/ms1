@@ -518,11 +518,19 @@ class ScanWorker(QObject):
 class ImageTile(QFrame):
     changed = pyqtSignal()
 
-    def __init__(self, record: ImageRecord, base_hash: int, thumbnail_size: int, parent: Optional[QWidget] = None) -> None:
+    def __init__(
+        self,
+        record: ImageRecord,
+        base_hash: int,
+        thumbnail_size: int,
+        thumbnail: Optional[QPixmap] = None,
+        parent: Optional[QWidget] = None,
+    ) -> None:
         super().__init__(parent)
         self.record = record
         self.base_hash = base_hash
         self.thumbnail_size = thumbnail_size
+        self.thumbnail = thumbnail
         self.setObjectName("ImageTile")
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -570,17 +578,11 @@ class ImageTile(QFrame):
         self.folder_label.setStyleSheet(f"color: {CP_CYAN};")
 
     def _load_thumbnail(self) -> None:
-        pixmap = QPixmap(self.record.path)
+        pixmap = self.thumbnail if self.thumbnail is not None else QPixmap(self.record.path)
         if pixmap.isNull():
             self.thumb_label.setText("NO PREVIEW")
             return
-        scaled = pixmap.scaled(
-            self.thumbnail_size,
-            self.thumbnail_size,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation,
-        )
-        self.thumb_label.setPixmap(scaled)
+        self.thumb_label.setPixmap(pixmap)
 
     def contextMenuEvent(self, event) -> None:  # pragma: no cover - GUI event
         menu = QMenu(self)
@@ -642,9 +644,14 @@ class ImageTile(QFrame):
             QMessageBox.warning(self, "Rename Failed", "Target file already exists.")
             return
         try:
+            old_path = self.record.path
             os.rename(self.record.path, new_path)
             self.record.path = new_path
             self.name_label.setText(os.path.basename(new_path))
+            app_window = self.window()
+            if isinstance(app_window, DuplicateImageFinderApp):
+                app_window.invalidate_thumbnail(old_path)
+                app_window.invalidate_thumbnail(new_path)
             self.refresh_labels()
             self.changed.emit()
         except OSError as exc:
@@ -661,7 +668,11 @@ class ImageTile(QFrame):
         if answer != QMessageBox.StandardButton.Yes:
             return
         try:
+            old_path = self.record.path
             os.remove(self.record.path)
+            app_window = self.window()
+            if isinstance(app_window, DuplicateImageFinderApp):
+                app_window.invalidate_thumbnail(old_path)
             self.setDisabled(True)
             self.setVisible(False)
             self.changed.emit()
@@ -678,6 +689,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.scan_worker: Optional[ScanWorker] = None
         self.current_groups: List[dict] = []
         self.skipped_group_keys: set[Tuple[str, ...]] = set()
+        self.thumbnail_cache: Dict[Tuple[str, int], QPixmap] = {}
         self._restoring_folder_state = False
 
         self.setWindowTitle("Duplicate Image Finder")
@@ -1140,6 +1152,29 @@ class DuplicateImageFinderApp(QMainWindow):
     def group_key(self, items: List[ImageRecord]) -> Tuple[str, ...]:
         return tuple(sorted(item.path for item in items))
 
+    def thumbnail_cache_key(self, path: str) -> Tuple[str, int]:
+        return (os.path.normcase(path), self.thumbnail_size)
+
+    def invalidate_thumbnail(self, path: str) -> None:
+        self.thumbnail_cache.pop(self.thumbnail_cache_key(path), None)
+
+    def get_thumbnail(self, path: str) -> QPixmap:
+        cache_key = self.thumbnail_cache_key(path)
+        cached = self.thumbnail_cache.get(cache_key)
+        if cached is not None and not cached.isNull():
+            return cached
+        pixmap = QPixmap(path)
+        if pixmap.isNull():
+            return pixmap
+        scaled = pixmap.scaled(
+            self.thumbnail_size,
+            self.thumbnail_size,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        self.thumbnail_cache[cache_key] = scaled
+        return scaled
+
     def skip_group(self, group_key: Tuple[str, ...]) -> None:
         self.skipped_group_keys.add(group_key)
         self.render_groups()
@@ -1163,6 +1198,7 @@ class DuplicateImageFinderApp(QMainWindow):
         for item in existing_items:
             try:
                 os.remove(item.path)
+                self.invalidate_thumbnail(item.path)
             except OSError:
                 failed_paths.append(item.path)
 
@@ -1180,6 +1216,7 @@ class DuplicateImageFinderApp(QMainWindow):
     def render_groups(self) -> None:
         scroll_bar = self.results_table.verticalScrollBar()
         scroll_value = scroll_bar.value()
+        self.results_table.setUpdatesEnabled(False)
         self.results_table.setRowCount(0)
         for group in self.current_groups:
             items = [item for item in group["items"] if os.path.exists(item.path)]
@@ -1198,7 +1235,8 @@ class DuplicateImageFinderApp(QMainWindow):
             row_layout.setSpacing(8)
 
             for record in items:
-                tile = ImageTile(record, base_hash, self.thumbnail_size)
+                thumbnail = self.get_thumbnail(record.path)
+                tile = ImageTile(record, base_hash, self.thumbnail_size, thumbnail=thumbnail)
                 tile.changed.connect(self.render_groups)
                 row_layout.addWidget(tile)
 
@@ -1223,6 +1261,8 @@ class DuplicateImageFinderApp(QMainWindow):
 
             self.results_table.setCellWidget(row, 0, scroller)
             self.results_table.setRowHeight(row, self.thumbnail_size + 120)
+        self.results_table.setUpdatesEnabled(True)
+        self.results_table.viewport().update()
         QTimer.singleShot(0, lambda: scroll_bar.setValue(min(scroll_value, scroll_bar.maximum())))
 
     def restart_app(self) -> None:
@@ -1236,6 +1276,8 @@ class DuplicateImageFinderApp(QMainWindow):
         dialog = SettingsDialog(self)
         if dialog.exec():
             self.settings_data.update(dialog.values())
+            if self.thumbnail_size != self.settings_data["thumbnail_size"]:
+                self.thumbnail_cache.clear()
             self.thumbnail_size = self.settings_data["thumbnail_size"]
             self.persist_state()
             self.render_groups()
