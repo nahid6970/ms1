@@ -717,10 +717,6 @@ class DuplicateImageFinderApp(QMainWindow):
         self.cancel_button = QPushButton("CANCEL")
         self.cancel_button.clicked.connect(self.cancel_scan)
         self.cancel_button.setEnabled(False)
-        self.progress_label = QLabel("Ready.")
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMaximum(1)
-        self.progress_bar.setValue(0)
 
         action_row = QHBoxLayout()
         action_row.addWidget(self.scan_button)
@@ -729,8 +725,6 @@ class DuplicateImageFinderApp(QMainWindow):
 
         controls_layout.addLayout(match_layout)
         controls_layout.addLayout(action_row)
-        controls_layout.addWidget(self.progress_label)
-        controls_layout.addWidget(self.progress_bar)
         controls_layout.addStretch()
 
         results_group = QGroupBox("MATCH GROUPS")
@@ -752,6 +746,12 @@ class DuplicateImageFinderApp(QMainWindow):
 
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("READY")
+        self.status_progress = QProgressBar()
+        self.status_progress.setFixedWidth(220)
+        self.status_progress.setMaximum(1)
+        self.status_progress.setValue(0)
+        self.status_progress.setVisible(False)
+        self.statusBar().addPermanentWidget(self.status_progress)
 
     def restore_saved_state(self) -> None:
         self.match_spin.blockSignals(True)
@@ -821,11 +821,12 @@ class DuplicateImageFinderApp(QMainWindow):
             return
         self.results_table.setRowCount(0)
         self.current_groups = []
-        self.progress_bar.setMaximum(1)
-        self.progress_bar.setValue(0)
+        self.status_progress.setMaximum(1)
+        self.status_progress.setValue(0)
+        self.status_progress.setVisible(True)
         self.scan_button.setEnabled(False)
         self.cancel_button.setEnabled(True)
-        self.statusBar().showMessage("SCANNING")
+        self.statusBar().showMessage("SCANNING...")
 
         self.scan_thread = QThread(self)
         self.scan_worker = ScanWorker(folders, self.match_spin.value())
@@ -846,12 +847,12 @@ class DuplicateImageFinderApp(QMainWindow):
     def cancel_scan(self) -> None:
         if self.scan_worker is not None:
             self.scan_worker.cancel()
-            self.progress_label.setText("Cancelling...")
+            self.statusBar().showMessage("CANCELLING...")
 
     def cleanup_scan_thread(self, *_args) -> None:
         self.scan_button.setEnabled(True)
         self.cancel_button.setEnabled(False)
-        self.statusBar().showMessage("READY")
+        self.status_progress.setVisible(False)
         if self.scan_thread is not None:
             self.scan_thread.quit()
             self.scan_thread.wait()
@@ -860,23 +861,23 @@ class DuplicateImageFinderApp(QMainWindow):
         self.scan_worker = None
 
     def on_progress(self, message: str) -> None:
-        self.progress_label.setText(message)
+        self.statusBar().showMessage(message)
 
     def on_progress_value(self, current: int, total: int) -> None:
-        self.progress_bar.setMaximum(max(total, 1))
-        self.progress_bar.setValue(current)
+        self.status_progress.setMaximum(max(total, 1))
+        self.status_progress.setValue(current)
 
     def on_scan_finished(self, groups: List[dict]) -> None:
         self.current_groups = groups
         self.render_groups()
-        self.progress_label.setText(f"Finished. Found {len(groups)} duplicate groups.")
+        self.statusBar().showMessage(f"Finished. Found {len(groups)} duplicate groups.")
 
     def on_scan_failed(self, error: str) -> None:
         QMessageBox.critical(self, "Scan Failed", error)
-        self.progress_label.setText("Scan failed.")
+        self.statusBar().showMessage("Scan failed.")
 
     def on_scan_cancelled(self) -> None:
-        self.progress_label.setText("Scan cancelled.")
+        self.statusBar().showMessage("Scan cancelled.")
 
     def render_groups(self) -> None:
         self.results_table.setRowCount(0)
