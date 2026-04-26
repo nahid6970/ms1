@@ -37,6 +37,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from PIL import Image, ImageOps
+import ctypes
+from PyQt6.QtCore import QByteArray, QTimer
+from PyQt6.QtGui import QPainter
+from PyQt6.QtSvg import QSvgRenderer
 
 
 CP_BG = "#050505"
@@ -49,6 +53,8 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+
+APP_USER_MODEL_ID = "delta.imagefoldermover.1"
 
 IMAGE_EXTENSIONS = {
     ".jpg",
@@ -75,6 +81,66 @@ def settings_path() -> str:
 def checkbox_check_icon_path() -> str:
     return os.path.join(app_dir(), "image_folder_mover_check.svg")
 
+
+def app_icon_ico_path() -> str:
+    return os.path.join(app_dir(), "image_folder_mover_icon.ico")
+
+def icon_svg_markup() -> str:
+    return f"""
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
+        <rect width='512' height='512' fill='{CP_BG}'/>
+        <path fill='{CP_CYAN}' d='M378.413,0H208.297h-13.168l-9.314,9.314L57.02,138.102l-9.314,9.314v13.176v265.514c0,47.36,38.527,85.895,85.895,85.895h244.812c47.353,0,85.881-38.535,85.881-85.895V85.896C464.294,38.528,425.766,0,378.413,0zM432.497,426.105c0,29.877-24.214,54.091-54.084,54.091H133.601c-29.87,0-54.084-24.214-54.084-54.091V160.591h83.717c24.884,0,45.063-20.178,45.063-45.07V31.804h170.116c29.87,0,54.084,24.214,54.084,54.092V426.105z'/>
+        <path fill='{CP_CYAN}' d='M162.94,251.968c-5.851,0-10.054,4.21-10.054,10.592v72.804c0,6.388,4.203,10.599,10.054,10.599c5.698,0,9.915-4.21,9.915-10.599V262.56C172.855,256.178,168.638,251.968,162.94,251.968z'/>
+        <path fill='{CP_CYAN}' d='M265.621,251.968c-5.977,0-9.244,3.261-12.219,10.326l-19.299,44.547h-0.545l-19.69-44.547c-3.114-7.066-6.382-10.326-12.358-10.326c-6.647,0-11.004,4.622-11.004,11.954v72.398c0,6.109,3.812,9.643,9.245,9.643c5.153,0,8.965-3.534,8.965-9.643v-44.554h0.67l14.398,33.138c2.848,6.522,5.167,8.428,9.775,8.428c4.622,0,6.926-1.906,9.789-8.428l14.258-33.138h0.684v44.554c0,6.109,3.658,9.643,9.091,9.643c5.432,0,9.105-3.534,9.105-9.643v-72.398C276.486,256.59,272.269,251.968,265.621,251.968z'/>
+        <path fill='{CP_CYAN}' d='M356.363,293.806h-19.02c-5.153,0-8.42,3.121-8.42,7.876c0,4.755,3.268,7.876,8.42,7.876h6.256c0.545,0,0.81,0.272,0.81,0.816c0,3.533-0.266,6.654-1.089,9.098c-1.9,5.844-7.737,9.51-14.803,9.51c-8.015,0-13.043-3.938-15.068-10.187c-1.089-3.393-1.494-7.876-1.494-19.83c0-11.953,0.406-16.296,1.494-19.696c2.025-6.382,6.927-10.32,14.802-10.32c5.977,0,10.459,1.899,13.993,6.786c2.709,3.805,5.432,4.895,8.825,4.895c5.028,0,9.091-3.666,9.091-8.965c0-2.171-0.67-4.078-1.76-5.977c-4.888-8.287-15.207-14.397-30.149-14.397c-16.436,0-29.199,7.471-33.962,22.412c-2.038,6.515-2.583,11.682-2.583,25.262c0,13.581,0.545,18.74,2.583,25.262c4.762,14.942,17.526,22.413,33.962,22.413c16.436,0,28.921-8.288,33.683-23.09c1.634-5.16,2.304-12.77,2.304-20.919v-0.95C364.238,296.654,361.39,293.806,356.363,293.806z'/>
+    </svg>
+    """
+
+def ensure_app_icon() -> None:
+    svg_markup = icon_svg_markup()
+    renderer = QSvgRenderer(QByteArray(svg_markup.encode('utf-8')))
+    pixmap = QPixmap(256, 256)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    image = pixmap.toImage()
+    ptr = image.bits()
+    ptr.setsize(image.sizeInBytes())
+    pil_image = Image.frombytes('RGBA', (image.width(), image.height()), bytes(ptr), 'raw', 'BGRA')
+    pil_image.save(app_icon_ico_path(), format='ICO', sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
+
+def make_app_icon() -> QIcon:
+    try:
+        ensure_app_icon()
+    except Exception:
+        pass
+    icon = QIcon(app_icon_ico_path())
+    return icon if not icon.isNull() else QIcon()
+
+def set_windows_app_id() -> None:
+    if not sys.platform.startswith('win'):
+        return
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_USER_MODEL_ID)
+    except (AttributeError, OSError):
+        pass
+
+def apply_windows_window_icon(window) -> None:
+    if not sys.platform.startswith('win'):
+        return
+    try:
+        icon_path = app_icon_ico_path()
+        if not os.path.exists(icon_path):
+            return
+        user32 = ctypes.windll.user32
+        hicon = user32.LoadImageW(None, icon_path, 1, 0, 0, 0x0010)
+        if hicon:
+            hwnd = int(window.winId())
+            user32.SendMessageW(hwnd, 0x0080, 1, hicon)
+            user32.SendMessageW(hwnd, 0x0080, 0, hicon)
+    except (AttributeError, OSError):
+        pass
 
 def ensure_checkbox_check_icon() -> str:
     path = checkbox_check_icon_path()
@@ -1100,11 +1166,16 @@ class ImageFolderMoverApp(QMainWindow):
 
 
 def main() -> int:
+    set_windows_app_id()
     app = QApplication(sys.argv)
+    app.setApplicationName("Image Folder Mover")
+    app.setDesktopFileName(APP_USER_MODEL_ID)
+    app.setWindowIcon(make_app_icon())
     window = ImageFolderMoverApp()
     screen = app.primaryScreen().availableGeometry()
     window.move((screen.width() - window.width()) // 2, (screen.height() - window.height()) // 2)
     window.show()
+    QTimer.singleShot(0, lambda: apply_windows_window_icon(window))
     return app.exec()
 
 
