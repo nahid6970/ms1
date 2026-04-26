@@ -5,8 +5,8 @@ import sys
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QColor, QIcon, QPixmap
+from PyQt6.QtCore import QObject, Qt, QSize, QThread, pyqtSignal
+from PyQt6.QtGui import QAction, QColor, QCursor, QIcon, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QAbstractItemView,
@@ -24,7 +24,9 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMainWindow,
+    QMenu,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QScrollArea,
     QSplitter,
@@ -68,6 +70,22 @@ def app_dir() -> str:
 
 def settings_path() -> str:
     return os.path.join(app_dir(), "image_folder_mover_settings.json")
+
+
+def checkbox_check_icon_path() -> str:
+    return os.path.join(app_dir(), "image_folder_mover_check.svg")
+
+
+def ensure_checkbox_check_icon() -> str:
+    path = checkbox_check_icon_path()
+    svg_markup = f"""
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M3 8.5 L6.2 11.5 L13 4.5" fill="none" stroke="{CP_YELLOW}" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>
+    """
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(svg_markup)
+    return path.replace("\\", "/")
 
 
 def default_settings() -> Dict[str, Any]:
@@ -251,24 +269,86 @@ class SourceFoldersWidget(QTableWidget):
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
 
+class ScanWorker(QObject):
+    progress = pyqtSignal(str)
+    progress_value = pyqtSignal(int, int)
+    finished = pyqtSignal(list)
+    failed = pyqtSignal(str)
+    cancelled = pyqtSignal()
+
+    def __init__(self, folders: List[str]) -> None:
+        super().__init__()
+        self.folders = folders
+        self._cancel_requested = False
+
+    def cancel(self) -> None:
+        self._cancel_requested = True
+
+    def run(self) -> None:
+        try:
+            image_paths: List[Tuple[str, str]] = []
+            for folder in self.folders:
+                self.progress.emit(f"Scanning folder: {folder}")
+                for root, _, files in os.walk(folder):
+                    if self._cancel_requested:
+                        self.cancelled.emit()
+                        return
+                    for name in files:
+                        if os.path.splitext(name)[1].lower() in IMAGE_EXTENSIONS:
+                            image_paths.append((os.path.join(root, name), folder))
+
+            total = len(image_paths)
+            entries: List[ImageEntry] = []
+            for index, (path, source_folder) in enumerate(image_paths, start=1):
+                if self._cancel_requested:
+                    self.cancelled.emit()
+                    return
+                self.progress.emit(f"Loading {index}/{total}: {os.path.basename(path)}")
+                self.progress_value.emit(index, total)
+                try:
+                    with Image.open(path) as image:
+                        image = ImageOps.exif_transpose(image)
+                        width, height = image.size
+                    entries.append(
+                        ImageEntry(
+                            path=path,
+                            source_folder=source_folder,
+                            width=width,
+                            height=height,
+                            file_size=os.path.getsize(path),
+                        )
+                    )
+                except Exception:
+                    continue
+
+            entries.sort(key=lambda item: item.path.lower())
+            self.finished.emit(entries)
+        except Exception as exc:
+            self.failed.emit(str(exc))
+
+
 class ImageFolderMoverApp(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.settings_data = load_settings()
         self.thumbnail_size = int(self.settings_data.get("thumbnail_size", THUMB_SIZE))
         self.images: List[ImageEntry] = []
+        self.destination_entries: List[Dict[str, str]] = []
         self.current_index = -1
         self._restoring_sources = False
         self.thumbnail_cache: Dict[Tuple[str, int], QPixmap] = {}
+        self.scan_thread: Optional[QThread] = None
+        self.scan_worker: Optional[ScanWorker] = None
 
         self.setWindowTitle("Image Folder Mover")
         self.resize(1720, 980)
         self._apply_theme()
         self._build_ui()
         self.restore_state()
-        self.reload_images()
+        self.set_current_index(-1)
 
     def _apply_theme(self) -> None:
+        checkbox_icon = ensure_checkbox_check_icon()
         self.setStyleSheet(
             f"""
             QMainWindow, QDialog {{
@@ -338,6 +418,7 @@ class ImageFolderMoverApp(QMainWindow):
             QCheckBox::indicator:checked {{
                 background: {CP_PANEL};
                 border: 1px solid {CP_YELLOW};
+                image: url({checkbox_icon});
             }}
             QTableWidget, QListWidget {{
                 background-color: {CP_PANEL};
@@ -390,6 +471,9 @@ class ImageFolderMoverApp(QMainWindow):
                 border: 1px solid {CP_DIM};
                 background-color: {CP_PANEL};
             }}
+            QStatusBar::item {{
+                border: none;
+            }}
             """
         )
 
@@ -418,6 +502,12 @@ class ImageFolderMoverApp(QMainWindow):
 
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("READY")
+        self.status_progress = QProgressBar()
+        self.status_progress.setFixedWidth(220)
+        self.status_progress.setMaximum(1)
+        self.status_progress.setValue(0)
+        self.status_progress.setVisible(False)
+        self.statusBar().addPermanentWidget(self.status_progress)
 
     def build_left_panel(self) -> QWidget:
         panel = QWidget()
@@ -431,12 +521,18 @@ class ImageFolderMoverApp(QMainWindow):
         add_btn = QPushButton("ADD FOLDERS")
         remove_btn = QPushButton("REMOVE SELECTED")
         clear_btn = QPushButton("CLEAR")
-        refresh_btn = QPushButton("REFRESH")
+        scan_btn = QPushButton("SCAN")
+        scan_btn.setObjectName("PrimaryButton")
+        cancel_btn = QPushButton("CANCEL")
+        cancel_btn.setEnabled(False)
         add_btn.clicked.connect(self.add_source_folders)
         remove_btn.clicked.connect(self.remove_selected_source_folders)
         clear_btn.clicked.connect(self.clear_source_folders)
-        refresh_btn.clicked.connect(self.reload_images)
-        for button in (add_btn, remove_btn, clear_btn, refresh_btn):
+        scan_btn.clicked.connect(self.start_scan)
+        cancel_btn.clicked.connect(self.cancel_scan)
+        self.scan_button = scan_btn
+        self.cancel_button = cancel_btn
+        for button in (add_btn, remove_btn, clear_btn, scan_btn, cancel_btn):
             button_row.addWidget(button)
         button_row.addStretch()
         group_layout.addLayout(button_row)
@@ -520,28 +616,11 @@ class ImageFolderMoverApp(QMainWindow):
 
         button_row = QHBoxLayout()
         add_btn = QPushButton("ADD TARGET")
-        edit_btn = QPushButton("EDIT TARGET")
-        remove_btn = QPushButton("REMOVE TARGET")
         add_btn.clicked.connect(self.add_destination_folder)
-        edit_btn.clicked.connect(self.edit_selected_destination_folder)
-        remove_btn.clicked.connect(self.remove_selected_destination_folder)
         button_row.addWidget(add_btn)
-        button_row.addWidget(edit_btn)
-        button_row.addWidget(remove_btn)
+        button_row.addWidget(QLabel("Right-click a card to edit or remove."))
+        button_row.addStretch()
         group_layout.addLayout(button_row)
-
-        self.destination_table = QTableWidget(0, 4)
-        self.destination_table.setHorizontalHeaderLabels(["NAME", "PATH", "BG", "FG"])
-        self.destination_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.destination_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.destination_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        self.destination_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        self.destination_table.verticalHeader().setVisible(False)
-        self.destination_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.destination_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.destination_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.destination_table.setMinimumHeight(260)
-        group_layout.addWidget(self.destination_table)
 
         self.destination_buttons_scroll = QScrollArea()
         self.destination_buttons_scroll.setWidgetResizable(True)
@@ -570,15 +649,13 @@ class ImageFolderMoverApp(QMainWindow):
                 self.append_source_folder_row(path, bool(entry.get("enabled", True)))
         self._restoring_sources = False
 
-        self.destination_table.setRowCount(0)
-        for entry in self.settings_data.get("destination_folders", []):
-            self.append_destination_table_row(entry)
+        self.destination_entries = [dict(entry) for entry in self.settings_data.get("destination_folders", [])]
         self.refresh_destination_buttons()
         self.update_source_folder_label()
 
     def persist_state(self) -> None:
         self.settings_data["source_folders"] = self.source_folder_entries()
-        self.settings_data["destination_folders"] = self.destination_folder_entries()
+        self.settings_data["destination_folders"] = [dict(entry) for entry in self.destination_entries]
         self.settings_data["thumbnail_size"] = self.thumbnail_size
         save_settings(self.settings_data)
 
@@ -593,23 +670,7 @@ class ImageFolderMoverApp(QMainWindow):
         return entries
 
     def destination_folder_entries(self) -> List[Dict[str, str]]:
-        entries: List[Dict[str, str]] = []
-        for row in range(self.destination_table.rowCount()):
-            name_item = self.destination_table.item(row, 0)
-            path_item = self.destination_table.item(row, 1)
-            bg_item = self.destination_table.item(row, 2)
-            fg_item = self.destination_table.item(row, 3)
-            if None in (name_item, path_item, bg_item, fg_item):
-                continue
-            entries.append(
-                {
-                    "name": name_item.text(),
-                    "path": path_item.text(),
-                    "bg": bg_item.text(),
-                    "fg": fg_item.text(),
-                }
-            )
-        return entries
+        return [dict(entry) for entry in self.destination_entries]
 
     def append_source_folder_row(self, folder: str, enabled: bool = True) -> None:
         row = self.source_table.rowCount()
@@ -641,7 +702,7 @@ class ImageFolderMoverApp(QMainWindow):
             self.rebind_source_remove_buttons()
             self.persist_state()
             self.update_source_folder_label()
-            self.reload_images()
+            self.statusBar().showMessage("Source folders updated. Click SCAN to reload images.")
 
     def rebind_source_remove_buttons(self) -> None:
         for row in range(self.source_table.rowCount()):
@@ -658,7 +719,7 @@ class ImageFolderMoverApp(QMainWindow):
             return
         self.persist_state()
         self.update_source_folder_label()
-        self.reload_images()
+        self.statusBar().showMessage("Source folders updated. Click SCAN to reload images.")
 
     def update_source_folder_label(self) -> None:
         enabled = len(self.enabled_source_folders())
@@ -689,7 +750,7 @@ class ImageFolderMoverApp(QMainWindow):
                     self.append_source_folder_row(folder, True)
             self.persist_state()
             self.update_source_folder_label()
-            self.reload_images()
+            self.statusBar().showMessage("Source folders added. Click SCAN to load images.")
 
     def remove_selected_source_folders(self) -> None:
         rows = sorted({index.row() for index in self.source_table.selectionModel().selectedRows()}, reverse=True)
@@ -698,21 +759,16 @@ class ImageFolderMoverApp(QMainWindow):
         self.rebind_source_remove_buttons()
         self.persist_state()
         self.update_source_folder_label()
-        self.reload_images()
+        self.statusBar().showMessage("Source folders updated. Click SCAN to reload images.")
 
     def clear_source_folders(self) -> None:
         self.source_table.setRowCount(0)
         self.persist_state()
         self.update_source_folder_label()
-        self.reload_images()
-
-    def append_destination_table_row(self, entry: Dict[str, str]) -> None:
-        row = self.destination_table.rowCount()
-        self.destination_table.insertRow(row)
-        self.destination_table.setItem(row, 0, QTableWidgetItem(entry["name"]))
-        self.destination_table.setItem(row, 1, QTableWidgetItem(entry["path"]))
-        self.destination_table.setItem(row, 2, QTableWidgetItem(entry["bg"]))
-        self.destination_table.setItem(row, 3, QTableWidgetItem(entry["fg"]))
+        self.images = []
+        self.populate_thumbnails()
+        self.set_current_index(-1)
+        self.statusBar().showMessage("Source folders cleared.")
 
     def add_destination_folder(self) -> None:
         dialog = DestinationFolderDialog(self)
@@ -722,21 +778,14 @@ class ImageFolderMoverApp(QMainWindow):
                 QMessageBox.warning(self, "Invalid Target", "Name and path are required.")
                 return
             os.makedirs(values["path"], exist_ok=True)
-            self.append_destination_table_row(values)
+            self.destination_entries.append(values)
             self.persist_state()
             self.refresh_destination_buttons()
 
-    def edit_selected_destination_folder(self) -> None:
-        row = self.destination_table.currentRow()
-        if row < 0:
-            QMessageBox.warning(self, "No Target Selected", "Select a target row to edit.")
+    def edit_destination_folder(self, index: int) -> None:
+        if not (0 <= index < len(self.destination_entries)):
             return
-        initial = {
-            "name": self.destination_table.item(row, 0).text(),
-            "path": self.destination_table.item(row, 1).text(),
-            "bg": self.destination_table.item(row, 2).text(),
-            "fg": self.destination_table.item(row, 3).text(),
-        }
+        initial = dict(self.destination_entries[index])
         dialog = DestinationFolderDialog(self, initial)
         if dialog.exec():
             values = dialog.values()
@@ -744,17 +793,14 @@ class ImageFolderMoverApp(QMainWindow):
                 QMessageBox.warning(self, "Invalid Target", "Name and path are required.")
                 return
             os.makedirs(values["path"], exist_ok=True)
-            for column, value in enumerate((values["name"], values["path"], values["bg"], values["fg"])):
-                self.destination_table.setItem(row, column, QTableWidgetItem(value))
+            self.destination_entries[index] = values
             self.persist_state()
             self.refresh_destination_buttons()
 
-    def remove_selected_destination_folder(self) -> None:
-        row = self.destination_table.currentRow()
-        if row < 0:
-            QMessageBox.warning(self, "No Target Selected", "Select a target row to remove.")
+    def remove_destination_folder(self, index: int) -> None:
+        if not (0 <= index < len(self.destination_entries)):
             return
-        self.destination_table.removeRow(row)
+        self.destination_entries.pop(index)
         self.persist_state()
         self.refresh_destination_buttons()
 
@@ -767,7 +813,7 @@ class ImageFolderMoverApp(QMainWindow):
 
     def refresh_destination_buttons(self) -> None:
         self.clear_destination_buttons()
-        for entry in self.destination_folder_entries():
+        for index, entry in enumerate(self.destination_entries):
             button = QPushButton(entry["name"])
             button.setMinimumHeight(54)
             button.setStyleSheet(
@@ -786,38 +832,78 @@ class ImageFolderMoverApp(QMainWindow):
                 """
             )
             button.clicked.connect(lambda _checked=False, target=entry: self.move_current_image(target))
+            button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            button.customContextMenuRequested.connect(
+                lambda _pos, idx=index, btn=button: self.show_destination_button_menu(idx, btn)
+            )
+            button.setToolTip(entry["path"])
             self.destination_buttons_layout.addWidget(button)
         self.destination_buttons_layout.addStretch()
 
-    def reload_images(self) -> None:
+    def show_destination_button_menu(self, index: int, button: QPushButton) -> None:
+        menu = QMenu(self)
+        edit_action = QAction("EDIT", self)
+        remove_action = QAction("REMOVE", self)
+        edit_action.triggered.connect(lambda: self.edit_destination_folder(index))
+        remove_action.triggered.connect(lambda: self.remove_destination_folder(index))
+        menu.addAction(edit_action)
+        menu.addAction(remove_action)
+        menu.exec(button.mapToGlobal(button.rect().bottomLeft()))
+
+    def start_scan(self) -> None:
+        folders = self.enabled_source_folders()
+        if not folders:
+            QMessageBox.warning(self, "No Folders", "Add and enable at least one source folder.")
+            return
+
+        self.scan_button.setEnabled(False)
+        self.cancel_button.setEnabled(True)
+        self.status_progress.setMaximum(1)
+        self.status_progress.setValue(0)
+        self.status_progress.setVisible(True)
+        self.statusBar().showMessage("SCANNING...")
+
+        self.scan_thread = QThread(self)
+        self.scan_worker = ScanWorker(folders)
+        self.scan_worker.moveToThread(self.scan_thread)
+        self.scan_thread.started.connect(self.scan_worker.run)
+        self.scan_worker.progress.connect(self.on_scan_progress)
+        self.scan_worker.progress_value.connect(self.on_scan_progress_value)
+        self.scan_worker.finished.connect(self.on_scan_finished)
+        self.scan_worker.failed.connect(self.on_scan_failed)
+        self.scan_worker.cancelled.connect(self.on_scan_cancelled)
+        self.scan_worker.finished.connect(self.cleanup_scan_thread)
+        self.scan_worker.failed.connect(self.cleanup_scan_thread)
+        self.scan_worker.cancelled.connect(self.cleanup_scan_thread)
+        self.scan_thread.start()
+
+    def cancel_scan(self) -> None:
+        if self.scan_worker is not None:
+            self.scan_worker.cancel()
+            self.statusBar().showMessage("CANCELLING...")
+
+    def cleanup_scan_thread(self, *_args) -> None:
+        self.scan_button.setEnabled(True)
+        self.cancel_button.setEnabled(False)
+        self.status_progress.setVisible(False)
+        if self.scan_thread is not None:
+            self.scan_thread.quit()
+            self.scan_thread.wait()
+            self.scan_thread.deleteLater()
+            self.scan_thread = None
+        self.scan_worker = None
+
+    def on_scan_progress(self, message: str) -> None:
+        self.statusBar().showMessage(message)
+
+    def on_scan_progress_value(self, current: int, total: int) -> None:
+        self.status_progress.setMaximum(max(total, 1))
+        self.status_progress.setValue(current)
+
+    def on_scan_finished(self, entries: List[ImageEntry]) -> None:
         current_path = self.images[self.current_index].path if 0 <= self.current_index < len(self.images) else None
-        self.images = []
-
-        for folder in self.enabled_source_folders():
-            for root, _, files in os.walk(folder):
-                for name in files:
-                    if os.path.splitext(name)[1].lower() not in IMAGE_EXTENSIONS:
-                        continue
-                    path = os.path.join(root, name)
-                    try:
-                        with Image.open(path) as image:
-                            image = ImageOps.exif_transpose(image)
-                            width, height = image.size
-                        self.images.append(
-                            ImageEntry(
-                                path=path,
-                                source_folder=folder,
-                                width=width,
-                                height=height,
-                                file_size=os.path.getsize(path),
-                            )
-                        )
-                    except Exception:
-                        continue
-
-        self.images.sort(key=lambda item: item.path.lower())
+        self.images = entries
         self.populate_thumbnails()
-
         if current_path:
             for index, entry in enumerate(self.images):
                 if entry.path == current_path:
@@ -827,8 +913,14 @@ class ImageFolderMoverApp(QMainWindow):
                 self.set_current_index(0 if self.images else -1)
         else:
             self.set_current_index(0 if self.images else -1)
-
         self.statusBar().showMessage(f"Loaded {len(self.images)} images.")
+
+    def on_scan_failed(self, error: str) -> None:
+        QMessageBox.critical(self, "Scan Failed", error)
+        self.statusBar().showMessage("Scan failed.")
+
+    def on_scan_cancelled(self) -> None:
+        self.statusBar().showMessage("Scan cancelled.")
 
     def thumbnail_cache_key(self, path: str) -> Tuple[str, int]:
         return (os.path.normcase(path), self.thumbnail_size)
