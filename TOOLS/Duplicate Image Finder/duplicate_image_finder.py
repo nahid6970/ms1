@@ -4,7 +4,7 @@ import os
 import sys
 import hashlib
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction, QCursor, QPixmap
@@ -187,19 +187,33 @@ class BKTree:
         return matches
 
 
-def load_settings() -> Dict[str, int]:
+def default_settings() -> Dict[str, Any]:
+    return {
+        "thumbnail_size": THUMB_SIZE,
+        "match_ratio": 92,
+        "folders": [],
+    }
+
+
+def load_settings() -> Dict[str, Any]:
     path = settings_path()
     if not os.path.exists(path):
-        return {"thumbnail_size": THUMB_SIZE}
+        return default_settings()
     try:
         with open(path, "r", encoding="utf-8") as handle:
             data = json.load(handle)
-        return {"thumbnail_size": int(data.get("thumbnail_size", THUMB_SIZE))}
+        settings = default_settings()
+        settings["thumbnail_size"] = int(data.get("thumbnail_size", THUMB_SIZE))
+        settings["match_ratio"] = max(60, min(100, int(data.get("match_ratio", 92))))
+        folders = data.get("folders", [])
+        if isinstance(folders, list):
+            settings["folders"] = [folder for folder in folders if isinstance(folder, str)]
+        return settings
     except (OSError, ValueError, TypeError, json.JSONDecodeError):
-        return {"thumbnail_size": THUMB_SIZE}
+        return default_settings()
 
 
-def save_settings(data: Dict[str, int]) -> None:
+def save_settings(data: Dict[str, Any]) -> None:
     with open(settings_path(), "w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=2)
 
@@ -527,6 +541,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.resize(1480, 860)
         self._apply_theme()
         self._build_ui()
+        self.restore_saved_state()
 
     def _apply_theme(self) -> None:
         self.setStyleSheet(
@@ -680,12 +695,11 @@ class DuplicateImageFinderApp(QMainWindow):
         match_label = QLabel("MATCH RATIO")
         self.match_slider = QSlider(Qt.Orientation.Horizontal)
         self.match_slider.setRange(60, 100)
-        self.match_slider.setValue(92)
         self.match_spin = QSpinBox()
         self.match_spin.setRange(60, 100)
-        self.match_spin.setValue(92)
         self.match_slider.valueChanged.connect(self.match_spin.setValue)
         self.match_spin.valueChanged.connect(self.match_slider.setValue)
+        self.match_spin.valueChanged.connect(self.on_match_ratio_changed)
         match_layout.addWidget(match_label)
         match_layout.addWidget(self.match_slider, 1)
         match_layout.addWidget(self.match_spin)
@@ -728,6 +742,35 @@ class DuplicateImageFinderApp(QMainWindow):
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("READY")
 
+    def restore_saved_state(self) -> None:
+        self.match_spin.blockSignals(True)
+        self.match_slider.blockSignals(True)
+        saved_ratio = int(self.settings_data.get("match_ratio", 92))
+        self.match_spin.setValue(saved_ratio)
+        self.match_slider.setValue(saved_ratio)
+        self.match_spin.blockSignals(False)
+        self.match_slider.blockSignals(False)
+
+        self.folder_table.setRowCount(0)
+        for folder in self.settings_data.get("folders", []):
+            if os.path.isdir(folder):
+                self.append_folder_row(folder)
+
+    def append_folder_row(self, folder: str) -> None:
+        row = self.folder_table.rowCount()
+        self.folder_table.insertRow(row)
+        self.folder_table.setItem(row, 0, QTableWidgetItem(folder))
+
+    def persist_state(self) -> None:
+        self.settings_data["thumbnail_size"] = self.thumbnail_size
+        self.settings_data["match_ratio"] = self.match_spin.value()
+        self.settings_data["folders"] = self.selected_folders()
+        save_settings(self.settings_data)
+
+    def on_match_ratio_changed(self, value: int) -> None:
+        self.settings_data["match_ratio"] = value
+        save_settings(self.settings_data)
+
     def add_folders(self) -> None:
         dialog = QFileDialog(self, "Select Folders")
         dialog.setFileMode(QFileDialog.FileMode.Directory)
@@ -744,17 +787,18 @@ class DuplicateImageFinderApp(QMainWindow):
             existing = {self.folder_table.item(row, 0).text() for row in range(self.folder_table.rowCount())}
             for folder in folders:
                 if folder not in existing:
-                    row = self.folder_table.rowCount()
-                    self.folder_table.insertRow(row)
-                    self.folder_table.setItem(row, 0, QTableWidgetItem(folder))
+                    self.append_folder_row(folder)
+            self.persist_state()
 
     def remove_selected_folders(self) -> None:
         rows = sorted({index.row() for index in self.folder_table.selectionModel().selectedRows()}, reverse=True)
         for row in rows:
             self.folder_table.removeRow(row)
+        self.persist_state()
 
     def clear_folders(self) -> None:
         self.folder_table.setRowCount(0)
+        self.persist_state()
 
     def selected_folders(self) -> List[str]:
         return [self.folder_table.item(row, 0).text() for row in range(self.folder_table.rowCount())]
@@ -865,7 +909,7 @@ class DuplicateImageFinderApp(QMainWindow):
         if dialog.exec():
             self.settings_data.update(dialog.values())
             self.thumbnail_size = self.settings_data["thumbnail_size"]
-            save_settings(self.settings_data)
+            self.persist_state()
             self.render_groups()
 
 
