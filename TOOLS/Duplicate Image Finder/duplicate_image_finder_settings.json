@@ -24,6 +24,10 @@
     },
     {
       "path": "C:/Users/nahid/Pictures",
+      "enabled": false
+    },
+    {
+      "path": "C:/Users/nahid/Desktop/SyncFolders",
       "enabled": true
     }
   ]

@@ -611,22 +611,29 @@ class ImagePreviewDialog(QDialog):
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_label.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: #000000;")
+        self.image_label.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidget(self.image_label)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.scroll_area.setStyleSheet("border: none; background: transparent;")
+        self.scroll_area.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         layout.addWidget(self.scroll_area, 1)
 
         nav_layout = QHBoxLayout()
         self.prev_btn = QPushButton("◀ PREVIOUS")
+        self.del_btn = QPushButton("DELETE IMAGE")
         self.next_btn = QPushButton("NEXT ▶")
+        
         self.prev_btn.clicked.connect(self.show_prev)
+        self.del_btn.clicked.connect(self.delete_current)
         self.next_btn.clicked.connect(self.show_next)
         
-        for btn in (self.prev_btn, self.next_btn):
-            btn.setFixedWidth(120)
+        self.del_btn.setStyleSheet(f"background-color: {CP_RED}; color: white;")
+        
+        for btn in (self.prev_btn, self.del_btn, self.next_btn):
+            btn.setFixedWidth(140)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             nav_layout.addWidget(btn)
@@ -642,28 +649,69 @@ class ImagePreviewDialog(QDialog):
             self.show_prev()
         elif event.key() == Qt.Key.Key_Right:
             self.show_next()
+        elif event.key() == Qt.Key.Key_Delete:
+            self.delete_current()
         elif event.key() == Qt.Key.Key_Escape:
             self.accept()
         else:
             super().keyPressEvent(event)
 
     def show_prev(self) -> None:
-        self.index = (self.index - 1) % len(self.items)
-        self.update_display()
+        if self.index > 0:
+            self.index -= 1
+            self.update_display()
 
     def show_next(self) -> None:
-        self.index = (self.index + 1) % len(self.items)
-        self.update_display()
+        if self.index < len(self.items) - 1:
+            self.index += 1
+            self.update_display()
+
+    def delete_current(self) -> None:
+        record = self.items[self.index]
+        answer = QMessageBox.question(
+            self,
+            "Delete Image",
+            f"Delete this image from disk?\n\n{record.path}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            os.remove(record.path)
+            parent_window = self.parent()
+            if isinstance(parent_window, DuplicateImageFinderApp):
+                parent_window.invalidate_thumbnail(record.path)
+            
+            self.items.pop(self.index)
+            
+            if not self.items:
+                self.accept()
+                return
+
+            if self.index >= len(self.items):
+                self.index = len(self.items) - 1
+            
+            self.update_display()
+        except OSError as exc:
+            QMessageBox.critical(self, "Delete Failed", str(exc))
 
     def update_display(self) -> None:
+        if not self.items:
+            return
+            
         record = self.items[self.index]
         pixmap = QPixmap(record.path)
+        
+        self.prev_btn.setEnabled(self.index > 0)
+        self.next_btn.setEnabled(self.index < len(self.items) - 1)
+
         if pixmap.isNull():
             self.image_label.setText("FAILED TO LOAD IMAGE")
             self.info_label.setText(f"ERROR: {record.path}")
             return
 
-        # Scale image to fit but keep quality
         scaled = pixmap.scaled(
             self.scroll_area.size() - QSize(20, 20),
             Qt.AspectRatioMode.KeepAspectRatio,
