@@ -1,0 +1,17 @@
+{
+  "source_folders": [
+    {
+      "path": "C:/Users/nahid/Pictures/facebook",
+      "enabled": true
+    }
+  ],
+  "destination_folders": [
+    {
+      "name": "Sussy",
+      "path": "C:/Users/nahid/Pictures/sassybaka",
+      "bg": "#3a3a3a",
+      "fg": "#E0E0E0"
+    }
+  ],
+  "thumbnail_size": 108
+}
