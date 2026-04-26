@@ -60,8 +60,8 @@ IMAGE_EXTENSIONS = {
     ".tif",
     ".tiff",
 }
-PREVIEW_SIZE = 760
-THUMB_SIZE = 108
+PREVIEW_SIZE = 800
+THUMB_SIZE = 90
 
 
 def app_dir() -> str:
@@ -181,6 +181,7 @@ class DestinationFolderDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("DESTINATION FOLDER")
         self.resize(520, 260)
+        self.delete_requested = False
         self._build_ui(initial or {})
 
     def _build_ui(self, initial: Dict[str, str]) -> None:
@@ -224,6 +225,12 @@ class DestinationFolderDialog(QDialog):
         layout.addLayout(form)
 
         buttons = QHBoxLayout()
+        if initial:
+            delete_btn = QPushButton("DELETE TARGET")
+            delete_btn.setStyleSheet(f"background-color: {CP_RED}; color: white;")
+            delete_btn.clicked.connect(self.request_delete)
+            buttons.addWidget(delete_btn)
+
         buttons.addStretch()
         save_btn = QPushButton("SAVE")
         cancel_btn = QPushButton("CANCEL")
@@ -232,6 +239,10 @@ class DestinationFolderDialog(QDialog):
         buttons.addWidget(save_btn)
         buttons.addWidget(cancel_btn)
         layout.addLayout(buttons)
+
+    def request_delete(self) -> None:
+        self.delete_requested = True
+        self.accept()
 
     def browse_folder(self) -> None:
         folder = QFileDialog.getExistingDirectory(self, "Select Destination Folder")
@@ -498,7 +509,7 @@ class ImageFolderMoverApp(QMainWindow):
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
         splitter.setStretchFactor(2, 0)
-        splitter.setSizes([360, 980, 360])
+        splitter.setSizes([360, 1060, 300])
 
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("READY")
@@ -788,6 +799,9 @@ class ImageFolderMoverApp(QMainWindow):
         initial = dict(self.destination_entries[index])
         dialog = DestinationFolderDialog(self, initial)
         if dialog.exec():
+            if dialog.delete_requested:
+                self.remove_destination_folder(index)
+                return
             values = dialog.values()
             if not values["name"] or not values["path"]:
                 QMessageBox.warning(self, "Invalid Target", "Name and path are required.")
@@ -1042,4 +1056,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
