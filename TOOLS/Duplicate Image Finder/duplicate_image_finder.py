@@ -628,10 +628,13 @@ class ImagePreviewDialog(QDialog):
         for btn in (self.prev_btn, self.next_btn):
             btn.setFixedWidth(120)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             nav_layout.addWidget(btn)
         
         layout.addLayout(nav_layout)
         
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFocus()
         self.update_display()
 
     def keyPressEvent(self, event) -> None:
