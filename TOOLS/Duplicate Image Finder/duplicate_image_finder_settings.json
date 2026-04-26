@@ -19,11 +19,11 @@
       "enabled": false
     },
     {
-      "path": "D:/New folder",
+      "path": "C:/@delta/msBackups/@JOB",
       "enabled": false
     },
     {
-      "path": "C:/@delta/msBackups",
+      "path": "C:/Users/nahid/Pictures",
       "enabled": true
     }
   ]

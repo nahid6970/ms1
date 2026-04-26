@@ -1145,6 +1145,39 @@ class DuplicateImageFinderApp(QMainWindow):
         self.skipped_group_keys.add(group_key)
         self.render_groups()
 
+    def delete_group(self, items: List[ImageRecord]) -> None:
+        existing_items = [item for item in items if os.path.exists(item.path)]
+        if not existing_items:
+            self.render_groups()
+            return
+        answer = QMessageBox.question(
+            self,
+            "Delete Group",
+            f"Delete all {len(existing_items)} images in this row?\n\nThis is permanent.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        failed_paths: List[str] = []
+        for item in existing_items:
+            try:
+                os.remove(item.path)
+            except OSError:
+                failed_paths.append(item.path)
+
+        if failed_paths:
+            preview = "\n".join(failed_paths[:5])
+            extra = "" if len(failed_paths) <= 5 else f"\n...and {len(failed_paths) - 5} more."
+            QMessageBox.warning(
+                self,
+                "Delete Incomplete",
+                f"Some files could not be deleted:\n\n{preview}{extra}",
+            )
+
+        self.render_groups()
+
     def render_groups(self) -> None:
         scroll_bar = self.results_table.verticalScrollBar()
         scroll_value = scroll_bar.value()
@@ -1175,6 +1208,12 @@ class DuplicateImageFinderApp(QMainWindow):
             skip_button.setFixedWidth(62)
             skip_button.clicked.connect(lambda _checked=False, key=group_key: self.skip_group(key))
             row_layout.addWidget(skip_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+
+            delete_row_button = QPushButton("DELETE ROW")
+            delete_row_button.setCursor(Qt.CursorShape.PointingHandCursor)
+            delete_row_button.setFixedWidth(102)
+            delete_row_button.clicked.connect(lambda _checked=False, group_items=list(items): self.delete_group(group_items))
+            row_layout.addWidget(delete_row_button, alignment=Qt.AlignmentFlag.AlignVCenter)
             row_layout.addStretch()
 
             scroller = QScrollArea()
