@@ -836,7 +836,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.clear_destination_buttons()
         for index, entry in enumerate(self.destination_entries):
             button = QPushButton(entry["name"])
-            button.setMinimumHeight(54)
+            button.setMinimumHeight(30)
             button.setStyleSheet(
                 f"""
                 QPushButton {{
