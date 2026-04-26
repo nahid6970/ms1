@@ -12,6 +12,7 @@ from PyQt6.QtGui import QAction, QCursor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QAbstractItemView,
+    QCheckBox,
     QDialog,
     QFileDialog,
     QFormLayout,
@@ -85,6 +86,10 @@ def app_icon_ico_path() -> str:
     return os.path.join(app_dir(), "duplicate_image_finder_icon.ico")
 
 
+def checkbox_check_icon_path() -> str:
+    return os.path.join(app_dir(), "duplicate_image_finder_check.svg")
+
+
 def set_windows_app_id() -> None:
     if not sys.platform.startswith("win"):
         return
@@ -128,6 +133,18 @@ def ensure_app_icon_files() -> None:
         "BGRA",
     )
     pil_image.save(app_icon_ico_path(), format="ICO", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+
+
+def ensure_checkbox_check_icon() -> str:
+    path = checkbox_check_icon_path()
+    svg_markup = f"""
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M3 8.5 L6.2 11.5 L13 4.5" fill="none" stroke="{CP_YELLOW}" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>
+    """
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(svg_markup)
+    return path.replace("\\", "/")
 
 
 def make_app_icon() -> QIcon:
@@ -670,6 +687,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.restore_saved_state()
 
     def _apply_theme(self) -> None:
+        checkbox_icon = ensure_checkbox_check_icon()
         self.setStyleSheet(
             f"""
             QMainWindow, QDialog {{
@@ -743,6 +761,25 @@ class DuplicateImageFinderApp(QMainWindow):
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 0 5px;
+            }}
+            QCheckBox {{
+                spacing: 0px;
+                color: {CP_TEXT};
+            }}
+            QCheckBox::indicator {{
+                width: 16px;
+                height: 16px;
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+            }}
+            QCheckBox::indicator:unchecked {{
+                background: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {CP_PANEL};
+                border: 1px solid {CP_YELLOW};
+                image: url({checkbox_icon});
             }}
             QTableWidget {{
                 background-color: {CP_PANEL};
@@ -850,7 +887,6 @@ class DuplicateImageFinderApp(QMainWindow):
         self.folder_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.folder_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.folder_table.setMaximumHeight(180)
-        self.folder_table.itemChanged.connect(self.on_folder_table_item_changed)
         controls_layout.addWidget(self.folder_table)
 
         match_layout = QHBoxLayout()
@@ -928,14 +964,17 @@ class DuplicateImageFinderApp(QMainWindow):
     def append_folder_row(self, folder: str, enabled: bool = True) -> None:
         row = self.folder_table.rowCount()
         self.folder_table.insertRow(row)
-        check_item = QTableWidgetItem()
-        check_item.setFlags(
-            Qt.ItemFlag.ItemIsEnabled
-            | Qt.ItemFlag.ItemIsUserCheckable
-            | Qt.ItemFlag.ItemIsSelectable
-        )
-        check_item.setCheckState(Qt.CheckState.Checked if enabled else Qt.CheckState.Unchecked)
-        self.folder_table.setItem(row, 0, check_item)
+
+        check_container = QWidget()
+        check_layout = QHBoxLayout(check_container)
+        check_layout.setContentsMargins(0, 0, 0, 0)
+        check_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        check_box = QCheckBox()
+        check_box.setChecked(enabled)
+        check_box.stateChanged.connect(lambda _state, box=check_box: self.on_folder_checkbox_changed(box))
+        check_layout.addWidget(check_box)
+        self.folder_table.setCellWidget(row, 0, check_container)
+
         self.folder_table.setItem(row, 1, QTableWidgetItem(folder))
         remove_button = QPushButton("REMOVE")
         remove_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -969,13 +1008,14 @@ class DuplicateImageFinderApp(QMainWindow):
         entries: List[Dict[str, Any]] = []
         for row in range(self.folder_table.rowCount()):
             path_item = self.folder_table.item(row, 1)
-            check_item = self.folder_table.item(row, 0)
-            if path_item is None or check_item is None:
+            check_container = self.folder_table.cellWidget(row, 0)
+            check_box = check_container.findChild(QCheckBox) if check_container is not None else None
+            if path_item is None or check_box is None:
                 continue
             entries.append(
                 {
                     "path": path_item.text(),
-                    "enabled": check_item.checkState() == Qt.CheckState.Checked,
+                    "enabled": check_box.isChecked(),
                 }
             )
         return entries
@@ -984,11 +1024,10 @@ class DuplicateImageFinderApp(QMainWindow):
         self.settings_data["match_ratio"] = value
         save_settings(self.settings_data)
 
-    def on_folder_table_item_changed(self, item: QTableWidgetItem) -> None:
+    def on_folder_checkbox_changed(self, _checkbox: QCheckBox) -> None:
         if self._restoring_folder_state:
             return
-        if item.column() == 0:
-            self.persist_state()
+        self.persist_state()
 
     def add_folders(self) -> None:
         dialog = QFileDialog(self, "Select Folders")
@@ -1024,10 +1063,11 @@ class DuplicateImageFinderApp(QMainWindow):
         folders: List[str] = []
         for row in range(self.folder_table.rowCount()):
             path_item = self.folder_table.item(row, 1)
-            check_item = self.folder_table.item(row, 0)
-            if path_item is None or check_item is None:
+            check_container = self.folder_table.cellWidget(row, 0)
+            check_box = check_container.findChild(QCheckBox) if check_container is not None else None
+            if path_item is None or check_box is None:
                 continue
-            if check_item.checkState() == Qt.CheckState.Checked:
+            if check_box.isChecked():
                 folders.append(path_item.text())
         return folders
 
