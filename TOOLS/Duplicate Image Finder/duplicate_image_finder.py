@@ -735,11 +735,9 @@ class DuplicateImageFinderApp(QMainWindow):
 
         results_group = QGroupBox("MATCH GROUPS")
         results_layout = QVBoxLayout(results_group)
-        self.results_table = QTableWidget(0, 3)
-        self.results_table.setHorizontalHeaderLabels(["GROUP", "LOWEST MATCH", "MATCHED IMAGES"])
-        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self.results_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.results_table = QTableWidget(0, 1)
+        self.results_table.setHorizontalHeaderLabels(["MATCHED IMAGES"])
+        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.results_table.verticalHeader().setVisible(False)
         self.results_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.results_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
@@ -887,12 +885,8 @@ class DuplicateImageFinderApp(QMainWindow):
             if len(items) < 2:
                 continue
             base_hash = group["base_hash"]
-            ratios = [similarity_ratio(base_hash, item.dhash) for item in items if item.dhash != base_hash]
-            group_ratio = (min(ratios) if ratios else 1.0) * 100
             row = self.results_table.rowCount()
             self.results_table.insertRow(row)
-            self.results_table.setItem(row, 0, QTableWidgetItem(f"GROUP {group_index} ({len(items)})"))
-            self.results_table.setItem(row, 1, QTableWidgetItem(f"{group_ratio:.1f}%"))
 
             row_widget = QWidget()
             row_layout = QHBoxLayout(row_widget)
@@ -911,7 +905,7 @@ class DuplicateImageFinderApp(QMainWindow):
             scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             scroller.setWidget(row_widget)
 
-            self.results_table.setCellWidget(row, 2, scroller)
+            self.results_table.setCellWidget(row, 0, scroller)
             self.results_table.setRowHeight(row, self.thumbnail_size + 80)
 
     def restart_app(self) -> None:
