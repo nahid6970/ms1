@@ -301,7 +301,18 @@ def load_settings() -> Dict[str, Any]:
         settings["match_ratio"] = max(60, min(100, int(data.get("match_ratio", 92))))
         folders = data.get("folders", [])
         if isinstance(folders, list):
-            settings["folders"] = [folder for folder in folders if isinstance(folder, str)]
+            normalized_folders = []
+            for folder in folders:
+                if isinstance(folder, str):
+                    normalized_folders.append({"path": folder, "enabled": True})
+                elif isinstance(folder, dict) and isinstance(folder.get("path"), str):
+                    normalized_folders.append(
+                        {
+                            "path": folder["path"],
+                            "enabled": bool(folder.get("enabled", True)),
+                        }
+                    )
+            settings["folders"] = normalized_folders
         return settings
     except (OSError, ValueError, TypeError, json.JSONDecodeError):
         return default_settings()
@@ -649,6 +660,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.scan_thread: Optional[QThread] = None
         self.scan_worker: Optional[ScanWorker] = None
         self.current_groups: List[dict] = []
+        self._restoring_folder_state = False
 
         self.setWindowTitle("Duplicate Image Finder")
         self.setWindowIcon(make_app_icon())
@@ -826,16 +838,19 @@ class DuplicateImageFinderApp(QMainWindow):
         folder_buttons.addStretch()
         controls_layout.addLayout(folder_buttons)
 
-        self.folder_table = QTableWidget(0, 2)
-        self.folder_table.setHorizontalHeaderLabels(["FOLDERS TO SCAN", "REMOVE"])
-        self.folder_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.folder_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self.folder_table.setColumnWidth(1, 90)
+        self.folder_table = QTableWidget(0, 3)
+        self.folder_table.setHorizontalHeaderLabels(["USE", "FOLDERS TO SCAN", "REMOVE"])
+        self.folder_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.folder_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.folder_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.folder_table.setColumnWidth(0, 56)
+        self.folder_table.setColumnWidth(2, 90)
         self.folder_table.verticalHeader().setVisible(False)
         self.folder_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.folder_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.folder_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.folder_table.setMaximumHeight(180)
+        self.folder_table.itemChanged.connect(self.on_folder_table_item_changed)
         controls_layout.addWidget(self.folder_table)
 
         match_layout = QHBoxLayout()
@@ -894,6 +909,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.statusBar().addPermanentWidget(self.status_progress)
 
     def restore_saved_state(self) -> None:
+        self._restoring_folder_state = True
         self.match_spin.blockSignals(True)
         self.match_slider.blockSignals(True)
         saved_ratio = int(self.settings_data.get("match_ratio", 92))
@@ -903,19 +919,29 @@ class DuplicateImageFinderApp(QMainWindow):
         self.match_slider.blockSignals(False)
 
         self.folder_table.setRowCount(0)
-        for folder in self.settings_data.get("folders", []):
-            if os.path.isdir(folder):
-                self.append_folder_row(folder)
+        for folder_entry in self.settings_data.get("folders", []):
+            folder_path = folder_entry.get("path", "")
+            if os.path.isdir(folder_path):
+                self.append_folder_row(folder_path, bool(folder_entry.get("enabled", True)))
+        self._restoring_folder_state = False
 
-    def append_folder_row(self, folder: str) -> None:
+    def append_folder_row(self, folder: str, enabled: bool = True) -> None:
         row = self.folder_table.rowCount()
         self.folder_table.insertRow(row)
-        self.folder_table.setItem(row, 0, QTableWidgetItem(folder))
+        check_item = QTableWidgetItem()
+        check_item.setFlags(
+            Qt.ItemFlag.ItemIsEnabled
+            | Qt.ItemFlag.ItemIsUserCheckable
+            | Qt.ItemFlag.ItemIsSelectable
+        )
+        check_item.setCheckState(Qt.CheckState.Checked if enabled else Qt.CheckState.Unchecked)
+        self.folder_table.setItem(row, 0, check_item)
+        self.folder_table.setItem(row, 1, QTableWidgetItem(folder))
         remove_button = QPushButton("REMOVE")
         remove_button.setCursor(Qt.CursorShape.PointingHandCursor)
         remove_button.setFixedWidth(78)
         remove_button.clicked.connect(lambda _checked=False, r=row: self.remove_folder_row(r))
-        self.folder_table.setCellWidget(row, 1, remove_button)
+        self.folder_table.setCellWidget(row, 2, remove_button)
 
     def remove_folder_row(self, row: int) -> None:
         if 0 <= row < self.folder_table.rowCount():
@@ -925,7 +951,7 @@ class DuplicateImageFinderApp(QMainWindow):
 
     def rebind_folder_remove_buttons(self) -> None:
         for row in range(self.folder_table.rowCount()):
-            button = self.folder_table.cellWidget(row, 1)
+            button = self.folder_table.cellWidget(row, 2)
             if isinstance(button, QPushButton):
                 try:
                     button.clicked.disconnect()
@@ -936,12 +962,33 @@ class DuplicateImageFinderApp(QMainWindow):
     def persist_state(self) -> None:
         self.settings_data["thumbnail_size"] = self.thumbnail_size
         self.settings_data["match_ratio"] = self.match_spin.value()
-        self.settings_data["folders"] = self.selected_folders()
+        self.settings_data["folders"] = self.folder_entries()
         save_settings(self.settings_data)
+
+    def folder_entries(self) -> List[Dict[str, Any]]:
+        entries: List[Dict[str, Any]] = []
+        for row in range(self.folder_table.rowCount()):
+            path_item = self.folder_table.item(row, 1)
+            check_item = self.folder_table.item(row, 0)
+            if path_item is None or check_item is None:
+                continue
+            entries.append(
+                {
+                    "path": path_item.text(),
+                    "enabled": check_item.checkState() == Qt.CheckState.Checked,
+                }
+            )
+        return entries
 
     def on_match_ratio_changed(self, value: int) -> None:
         self.settings_data["match_ratio"] = value
         save_settings(self.settings_data)
+
+    def on_folder_table_item_changed(self, item: QTableWidgetItem) -> None:
+        if self._restoring_folder_state:
+            return
+        if item.column() == 0:
+            self.persist_state()
 
     def add_folders(self) -> None:
         dialog = QFileDialog(self, "Select Folders")
@@ -956,7 +1003,7 @@ class DuplicateImageFinderApp(QMainWindow):
             tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         if dialog.exec():
             folders = dialog.selectedFiles()
-            existing = {self.folder_table.item(row, 0).text() for row in range(self.folder_table.rowCount())}
+            existing = {self.folder_table.item(row, 1).text() for row in range(self.folder_table.rowCount())}
             for folder in folders:
                 if folder not in existing:
                     self.append_folder_row(folder)
@@ -974,7 +1021,15 @@ class DuplicateImageFinderApp(QMainWindow):
         self.persist_state()
 
     def selected_folders(self) -> List[str]:
-        return [self.folder_table.item(row, 0).text() for row in range(self.folder_table.rowCount())]
+        folders: List[str] = []
+        for row in range(self.folder_table.rowCount()):
+            path_item = self.folder_table.item(row, 1)
+            check_item = self.folder_table.item(row, 0)
+            if path_item is None or check_item is None:
+                continue
+            if check_item.checkState() == Qt.CheckState.Checked:
+                folders.append(path_item.text())
+        return folders
 
     def start_scan(self) -> None:
         folders = self.selected_folders()

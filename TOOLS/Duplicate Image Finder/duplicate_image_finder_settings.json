@@ -2,9 +2,21 @@
   "thumbnail_size": 140,
   "match_ratio": 90,
   "folders": [
-    "C:/Users/nahid/Pictures/facebook",
-    "C:/Users/nahid/Pictures/from_android",
-    "C:/Users/nahid/Pictures/mx",
-    "C:/Users/nahid/Pictures/sassybaka"
+    {
+      "path": "C:/Users/nahid/Pictures/facebook",
+      "enabled": true
+    },
+    {
+      "path": "C:/Users/nahid/Pictures/from_android",
+      "enabled": true
+    },
+    {
+      "path": "C:/Users/nahid/Pictures/mx",
+      "enabled": true
+    },
+    {
+      "path": "C:/Users/nahid/Pictures/sassybaka",
+      "enabled": true
+    }
   ]
 }
