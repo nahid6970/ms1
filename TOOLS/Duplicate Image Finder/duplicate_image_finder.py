@@ -3,11 +3,12 @@ import math
 import os
 import sys
 import hashlib
+import ctypes
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from PyQt6.QtCore import QObject, Qt, QThread, QProcess, pyqtSignal
-from PyQt6.QtGui import QAction, QCursor, QPixmap
+from PyQt6.QtCore import QByteArray, QObject, Qt, QThread, QProcess, QTimer, pyqtSignal
+from PyQt6.QtGui import QAction, QCursor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QAbstractItemView,
@@ -38,6 +39,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from PIL import Image, ImageOps
+from PyQt6.QtSvg import QSvgRenderer
 
 
 # CYBERPUNK THEME PALETTE
@@ -64,6 +66,7 @@ IMAGE_EXTENSIONS = {
 }
 HASH_BITS = 256
 THUMB_SIZE = 140
+APP_USER_MODEL_ID = "delta.duplicateimagefinder.1"
 
 
 def app_dir() -> str:
@@ -72,6 +75,96 @@ def app_dir() -> str:
 
 def settings_path() -> str:
     return os.path.join(app_dir(), "duplicate_image_finder_settings.json")
+
+
+def app_icon_svg_path() -> str:
+    return os.path.join(app_dir(), "duplicate_image_finder_icon.svg")
+
+
+def app_icon_ico_path() -> str:
+    return os.path.join(app_dir(), "duplicate_image_finder_icon.ico")
+
+
+def set_windows_app_id() -> None:
+    if not sys.platform.startswith("win"):
+        return
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_USER_MODEL_ID)
+    except (AttributeError, OSError):
+        pass
+
+
+def icon_svg_markup() -> str:
+    return f"""
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <rect x="6" y="6" width="52" height="52" fill="{CP_BG}" stroke="{CP_CYAN}" stroke-width="3"/>
+        <rect x="16" y="18" width="18" height="18" fill="none" stroke="{CP_YELLOW}" stroke-width="4"/>
+        <rect x="30" y="28" width="18" height="18" fill="none" stroke="{CP_YELLOW}" stroke-width="4"/>
+        <line x1="34" y1="22" x2="48" y2="36" stroke="{CP_RED}" stroke-width="3"/>
+        <text x="32" y="58" text-anchor="middle" font-family="Consolas, monospace" font-size="11" font-weight="700" fill="{CP_CYAN}">DIF</text>
+    </svg>
+    """
+
+
+def ensure_app_icon_files() -> None:
+    svg_markup = icon_svg_markup()
+    with open(app_icon_svg_path(), "w", encoding="utf-8") as handle:
+        handle.write(svg_markup)
+
+    renderer = QSvgRenderer(QByteArray(svg_markup.encode("utf-8")))
+    pixmap = QPixmap(256, 256)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    image = pixmap.toImage()
+    ptr = image.bits()
+    ptr.setsize(image.sizeInBytes())
+    pil_image = Image.frombytes(
+        "RGBA",
+        (image.width(), image.height()),
+        bytes(ptr),
+        "raw",
+        "BGRA",
+    )
+    pil_image.save(app_icon_ico_path(), format="ICO", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+
+
+def make_app_icon() -> QIcon:
+    ensure_app_icon_files()
+    icon = QIcon(app_icon_ico_path())
+    if not icon.isNull():
+        return icon
+    svg = icon_svg_markup().encode("utf-8")
+    renderer = QSvgRenderer(QByteArray(svg))
+    pixmap = QPixmap(64, 64)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    return QIcon(pixmap)
+
+
+def apply_windows_window_icon(window: QMainWindow) -> None:
+    if not sys.platform.startswith("win"):
+        return
+    try:
+        icon_path = app_icon_ico_path()
+        if not os.path.exists(icon_path):
+            return
+        user32 = ctypes.windll.user32
+        wm_seticon = 0x0080
+        icon_big = 1
+        icon_small = 0
+        image_icon = 1
+        lr_loadfromfile = 0x0010
+        hicon = user32.LoadImageW(None, icon_path, image_icon, 0, 0, lr_loadfromfile)
+        if hicon:
+            hwnd = int(window.winId())
+            user32.SendMessageW(hwnd, wm_seticon, icon_big, hicon)
+            user32.SendMessageW(hwnd, wm_seticon, icon_small, hicon)
+    except (AttributeError, OSError):
+        pass
 
 
 @dataclass
@@ -539,6 +632,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.current_groups: List[dict] = []
 
         self.setWindowTitle("Duplicate Image Finder")
+        self.setWindowIcon(make_app_icon())
         self.resize(1480, 860)
         self._apply_theme()
         self._build_ui()
@@ -953,9 +1047,14 @@ class DuplicateImageFinderApp(QMainWindow):
 
 
 def main() -> int:
+    set_windows_app_id()
     app = QApplication(sys.argv)
+    app.setApplicationName("Duplicate Image Finder")
+    app.setDesktopFileName(APP_USER_MODEL_ID)
+    app.setWindowIcon(make_app_icon())
     window = DuplicateImageFinderApp()
     window.show()
+    QTimer.singleShot(0, lambda: apply_windows_window_icon(window))
     return app.exec()
 
 
