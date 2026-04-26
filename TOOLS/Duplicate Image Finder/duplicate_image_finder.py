@@ -431,18 +431,42 @@ class ImageTile(QFrame):
     def contextMenuEvent(self, event) -> None:  # pragma: no cover - GUI event
         menu = QMenu(self)
         open_folder_action = QAction("OPEN FOLDER", self)
+        open_image_action = QAction("OPEN IMAGE", self)
         rename_action = QAction("RENAME", self)
         delete_action = QAction("DELETE", self)
 
         open_folder_action.triggered.connect(self.open_parent_folder)
+        open_image_action.triggered.connect(self.open_image)
         rename_action.triggered.connect(self.rename_file)
         delete_action.triggered.connect(self.delete_file)
 
+        menu.addAction(open_image_action)
         menu.addAction(open_folder_action)
         menu.addAction(rename_action)
         menu.addSeparator()
         menu.addAction(delete_action)
         menu.exec(QCursor.pos())
+
+    def mouseDoubleClickEvent(self, event) -> None:  # pragma: no cover - GUI event
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.open_image()
+            event.accept()
+            return
+        super().mouseDoubleClickEvent(event)
+
+    def open_image(self) -> None:
+        if not os.path.exists(self.record.path):
+            QMessageBox.warning(self, "Open Failed", "Image file no longer exists.")
+            return
+        try:
+            if sys.platform.startswith("win"):
+                os.startfile(self.record.path)  # type: ignore[attr-defined]
+            elif sys.platform == "darwin":
+                os.system(f'open "{self.record.path}"')
+            else:
+                os.system(f'xdg-open "{self.record.path}"')
+        except OSError as exc:
+            QMessageBox.critical(self, "Open Failed", str(exc))
 
     def open_parent_folder(self) -> None:
         folder = os.path.dirname(self.record.path)
