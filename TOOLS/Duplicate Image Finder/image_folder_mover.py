@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from PyQt6.QtCore import QObject, Qt, QSize, QThread, pyqtSignal
-from PyQt6.QtGui import QAction, QColor, QCursor, QIcon, QPixmap
+from PyQt6.QtGui import QAction, QColor, QCursor, QIcon, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QAbstractItemView,
@@ -355,6 +355,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.resize(1720, 980)
         self._apply_theme()
         self._build_ui()
+        self._setup_shortcuts()
         self.restore_state()
         self.set_current_index(-1)
 
@@ -1017,6 +1018,19 @@ class ImageFolderMoverApp(QMainWindow):
         if not self.images:
             return
         self.set_current_index(self.current_index + delta)
+
+    def _setup_shortcuts(self) -> None:
+        prev_act = QAction(self)
+        prev_act.setShortcut(QKeySequence(Qt.Key.Key_Left))
+        prev_act.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        prev_act.triggered.connect(lambda: self.step_image(-1))
+        self.addAction(prev_act)
+
+        next_act = QAction(self)
+        next_act.setShortcut(QKeySequence(Qt.Key.Key_Right))
+        next_act.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        next_act.triggered.connect(lambda: self.step_image(1))
+        self.addAction(next_act)
 
     def move_current_image(self, target: Dict[str, str]) -> None:
         if not (0 <= self.current_index < len(self.images)):
