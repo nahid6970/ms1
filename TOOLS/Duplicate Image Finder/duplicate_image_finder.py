@@ -6,7 +6,7 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, Qt, QThread, QProcess, pyqtSignal
 from PyQt6.QtGui import QAction, QCursor, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -909,7 +909,11 @@ class DuplicateImageFinderApp(QMainWindow):
             self.results_table.setRowHeight(row, self.thumbnail_size + 80)
 
     def restart_app(self) -> None:
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        started = QProcess.startDetached(sys.executable, sys.argv)
+        if not started:
+            QMessageBox.critical(self, "Restart Failed", "Could not relaunch the application.")
+            return
+        QApplication.instance().quit()
 
     def open_settings(self) -> None:
         dialog = SettingsDialog(self)
