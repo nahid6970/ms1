@@ -33,6 +33,7 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTreeView,
+    QSplitter,
     QVBoxLayout,
     QWidget,
 )
@@ -660,9 +661,16 @@ class DuplicateImageFinderApp(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
+        root.setContentsMargins(10, 10, 10, 10)
+        root.setSpacing(10)
+
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setChildrenCollapsible(False)
+        root.addWidget(splitter, 1)
 
         controls_group = QGroupBox("SCAN CONTROLS")
         controls_layout = QVBoxLayout(controls_group)
+        controls_layout.setSpacing(10)
 
         folder_buttons = QHBoxLayout()
         add_btn = QPushButton("ADD FOLDERS")
@@ -723,7 +731,7 @@ class DuplicateImageFinderApp(QMainWindow):
         controls_layout.addLayout(action_row)
         controls_layout.addWidget(self.progress_label)
         controls_layout.addWidget(self.progress_bar)
-        root.addWidget(controls_group)
+        controls_layout.addStretch()
 
         results_group = QGroupBox("MATCH GROUPS")
         results_layout = QVBoxLayout(results_group)
@@ -737,7 +745,12 @@ class DuplicateImageFinderApp(QMainWindow):
         self.results_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.results_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         results_layout.addWidget(self.results_table)
-        root.addWidget(results_group, 1)
+
+        splitter.addWidget(controls_group)
+        splitter.addWidget(results_group)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setSizes([360, 1080])
 
         self.setStatusBar(QStatusBar())
         self.statusBar().showMessage("READY")
