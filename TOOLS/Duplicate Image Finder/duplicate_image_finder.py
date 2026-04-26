@@ -585,6 +585,100 @@ class ScanWorker(QObject):
         return results
 
 
+class ImagePreviewDialog(QDialog):
+    def __init__(self, items: List[ImageRecord], start_index: int, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.items = items
+        self.index = start_index
+        self.setWindowTitle("IMAGE PREVIEW")
+        self.setModal(True)
+        self.resize(1280, 860)
+        
+        # Cyberpunk styling
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
+        """)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
+        
+        self.info_label = QLabel()
+        self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 11pt; font-weight: bold; background: {CP_PANEL}; padding: 5px;")
+        layout.addWidget(self.info_label)
+
+        self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.image_label.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: #000000;")
+        
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidget(self.image_label)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.scroll_area.setStyleSheet("border: none; background: transparent;")
+        layout.addWidget(self.scroll_area, 1)
+
+        nav_layout = QHBoxLayout()
+        self.prev_btn = QPushButton("◀ PREVIOUS")
+        self.next_btn = QPushButton("NEXT ▶")
+        self.prev_btn.clicked.connect(self.show_prev)
+        self.next_btn.clicked.connect(self.show_next)
+        
+        for btn in (self.prev_btn, self.next_btn):
+            btn.setFixedWidth(120)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            nav_layout.addWidget(btn)
+        
+        layout.addLayout(nav_layout)
+        
+        self.update_display()
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Left:
+            self.show_prev()
+        elif event.key() == Qt.Key.Key_Right:
+            self.show_next()
+        elif event.key() == Qt.Key.Key_Escape:
+            self.accept()
+        else:
+            super().keyPressEvent(event)
+
+    def show_prev(self) -> None:
+        self.index = (self.index - 1) % len(self.items)
+        self.update_display()
+
+    def show_next(self) -> None:
+        self.index = (self.index + 1) % len(self.items)
+        self.update_display()
+
+    def update_display(self) -> None:
+        record = self.items[self.index]
+        pixmap = QPixmap(record.path)
+        if pixmap.isNull():
+            self.image_label.setText("FAILED TO LOAD IMAGE")
+            self.info_label.setText(f"ERROR: {record.path}")
+            return
+
+        # Scale image to fit but keep quality
+        scaled = pixmap.scaled(
+            self.scroll_area.size() - QSize(20, 20),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.image_label.setPixmap(scaled)
+        
+        folder = os.path.basename(os.path.dirname(record.path))
+        self.info_label.setText(
+            f"[{self.index + 1}/{len(self.items)}] {os.path.basename(record.path)} | "
+            f"{record.resolution} | {format_bytes(record.file_size)} | Folder: {folder}"
+        )
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self.update_display()
+
+
 class ImageTile(QFrame):
     changed = pyqtSignal()
 
@@ -593,6 +687,7 @@ class ImageTile(QFrame):
         record: ImageRecord,
         base_hash: int,
         thumbnail_size: int,
+        group_items: Optional[List[ImageRecord]] = None,
         thumbnail: Optional[QPixmap] = None,
         parent: Optional[QWidget] = None,
     ) -> None:
@@ -601,6 +696,7 @@ class ImageTile(QFrame):
         self.base_hash = base_hash
         self.thumbnail_size = thumbnail_size
         self.thumbnail = thumbnail
+        self.group_items = group_items or [record]
         self.setObjectName("ImageTile")
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -658,16 +754,16 @@ class ImageTile(QFrame):
     def contextMenuEvent(self, event) -> None:  # pragma: no cover - GUI event
         menu = QMenu(self)
         open_folder_action = QAction("OPEN FOLDER", self)
-        open_image_action = QAction("OPEN IMAGE", self)
+        open_system_action = QAction("OPEN IN SYSTEM VIEWER", self)
         rename_action = QAction("RENAME", self)
         delete_action = QAction("DELETE", self)
 
         open_folder_action.triggered.connect(self.open_parent_folder)
-        open_image_action.triggered.connect(self.open_image)
+        open_system_action.triggered.connect(self.open_in_system_viewer)
         rename_action.triggered.connect(self.rename_file)
         delete_action.triggered.connect(self.delete_file)
 
-        menu.addAction(open_image_action)
+        menu.addAction(open_system_action)
         menu.addAction(open_folder_action)
         menu.addAction(rename_action)
         menu.addSeparator()
@@ -682,6 +778,14 @@ class ImageTile(QFrame):
         super().mouseDoubleClickEvent(event)
 
     def open_image(self) -> None:
+        if not os.path.exists(self.record.path):
+            QMessageBox.warning(self, "Open Failed", "Image file no longer exists.")
+            return
+        
+        dialog = ImagePreviewDialog(self.group_items, self.group_items.index(self.record), self.window())
+        dialog.exec()
+
+    def open_in_system_viewer(self) -> None:
         if not os.path.exists(self.record.path):
             QMessageBox.warning(self, "Open Failed", "Image file no longer exists.")
             return
@@ -1342,9 +1446,10 @@ class DuplicateImageFinderApp(QMainWindow):
             flow_widget = QWidget()
             flow_layout = FlowLayout(flow_widget)
             flow_layout.setSpacing(10)
+            group_items_list = list(items)
             for record in items:
                 thumbnail = self.get_thumbnail(record.path)
-                tile = ImageTile(record, base_hash, self.thumbnail_size, thumbnail=thumbnail)
+                tile = ImageTile(record, base_hash, self.thumbnail_size, group_items=group_items_list, thumbnail=thumbnail)
                 tile.changed.connect(self.render_groups)
                 flow_layout.addWidget(tile)
             
