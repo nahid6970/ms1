@@ -618,6 +618,9 @@ class DuplicateImageFinderApp(QMainWindow):
                 background-color: {CP_CYAN};
                 color: {CP_BG};
             }}
+            QStatusBar::item {{
+                border: none;
+            }}
             QScrollArea {{
                 background: transparent;
                 border: none;
