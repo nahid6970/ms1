@@ -1,6 +1,6 @@
 {
   "thumbnail_size": 140,
-  "match_ratio": 80,
+  "match_ratio": 90,
   "folders": [
     {
       "path": "C:/Users/nahid/Pictures/facebook",
@@ -28,6 +28,14 @@
     },
     {
       "path": "C:/Users/nahid/Desktop/SyncFolders",
+      "enabled": false
+    },
+    {
+      "path": "D:/f1",
+      "enabled": false
+    },
+    {
+      "path": "D:/megascr",
       "enabled": true
     }
   ]
