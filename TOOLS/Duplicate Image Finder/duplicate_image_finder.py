@@ -1047,7 +1047,7 @@ class DuplicateImageFinderApp(QMainWindow):
             scroller.setWidget(row_widget)
 
             self.results_table.setCellWidget(row, 0, scroller)
-            self.results_table.setRowHeight(row, self.thumbnail_size + 80)
+            self.results_table.setRowHeight(row, self.thumbnail_size + 120)
 
     def restart_app(self) -> None:
         started = QProcess.startDetached(sys.executable, sys.argv)
