@@ -586,6 +586,8 @@ class ScanWorker(QObject):
 
 
 class ImagePreviewDialog(QDialog):
+    changed = pyqtSignal()
+
     def __init__(self, items: List[ImageRecord], start_index: int, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.items = items
@@ -685,6 +687,7 @@ class ImagePreviewDialog(QDialog):
                 parent_window.invalidate_thumbnail(record.path)
             
             self.items.pop(self.index)
+            self.changed.emit()
             
             if not self.items:
                 self.accept()
@@ -833,8 +836,14 @@ class ImageTile(QFrame):
             QMessageBox.warning(self, "Open Failed", "Image file no longer exists.")
             return
         
-        dialog = ImagePreviewDialog(self.group_items, self.group_items.index(self.record), self.window())
-        dialog.exec()
+        try:
+            app_window = self.window()
+            dialog = ImagePreviewDialog(self.group_items, self.group_items.index(self.record), app_window)
+            if isinstance(app_window, DuplicateImageFinderApp):
+                dialog.changed.connect(app_window.render_groups)
+            dialog.exec()
+        except Exception as exc:
+            QMessageBox.critical(self, "Preview Error", f"An error occurred while opening preview: {exc}")
 
     def open_in_system_viewer(self) -> None:
         if not os.path.exists(self.record.path):
