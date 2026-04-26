@@ -692,9 +692,11 @@ class DuplicateImageFinderApp(QMainWindow):
         folder_buttons.addStretch()
         controls_layout.addLayout(folder_buttons)
 
-        self.folder_table = QTableWidget(0, 1)
-        self.folder_table.setHorizontalHeaderLabels(["FOLDERS TO SCAN"])
+        self.folder_table = QTableWidget(0, 2)
+        self.folder_table.setHorizontalHeaderLabels(["FOLDERS TO SCAN", "REMOVE"])
         self.folder_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.folder_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.folder_table.setColumnWidth(1, 90)
         self.folder_table.verticalHeader().setVisible(False)
         self.folder_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.folder_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -774,6 +776,27 @@ class DuplicateImageFinderApp(QMainWindow):
         row = self.folder_table.rowCount()
         self.folder_table.insertRow(row)
         self.folder_table.setItem(row, 0, QTableWidgetItem(folder))
+        remove_button = QPushButton("REMOVE")
+        remove_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        remove_button.setFixedWidth(78)
+        remove_button.clicked.connect(lambda _checked=False, r=row: self.remove_folder_row(r))
+        self.folder_table.setCellWidget(row, 1, remove_button)
+
+    def remove_folder_row(self, row: int) -> None:
+        if 0 <= row < self.folder_table.rowCount():
+            self.folder_table.removeRow(row)
+            self.rebind_folder_remove_buttons()
+            self.persist_state()
+
+    def rebind_folder_remove_buttons(self) -> None:
+        for row in range(self.folder_table.rowCount()):
+            button = self.folder_table.cellWidget(row, 1)
+            if isinstance(button, QPushButton):
+                try:
+                    button.clicked.disconnect()
+                except TypeError:
+                    pass
+                button.clicked.connect(lambda _checked=False, r=row: self.remove_folder_row(r))
 
     def persist_state(self) -> None:
         self.settings_data["thumbnail_size"] = self.thumbnail_size
@@ -808,6 +831,7 @@ class DuplicateImageFinderApp(QMainWindow):
         rows = sorted({index.row() for index in self.folder_table.selectionModel().selectedRows()}, reverse=True)
         for row in rows:
             self.folder_table.removeRow(row)
+        self.rebind_folder_remove_buttons()
         self.persist_state()
 
     def clear_folders(self) -> None:
