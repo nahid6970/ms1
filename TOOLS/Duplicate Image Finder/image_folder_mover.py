@@ -576,7 +576,7 @@ class ImageFolderMoverApp(QMainWindow):
 
         self.preview_label = QLabel("NO IMAGE")
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setMinimumHeight(480)
+        self.preview_label.setMinimumHeight(600)
         preview_frame_layout.addWidget(self.preview_label, 1)
         preview_layout.addWidget(self.preview_frame, 1)
 
@@ -597,7 +597,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.thumb_list.setIconSize(QSize(self.thumbnail_size, self.thumbnail_size))
         self.thumb_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.thumb_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.thumb_list.setFixedHeight(self.thumbnail_size + 96)
+        self.thumb_list.setFixedHeight(self.thumbnail_size + 84)
         self.thumb_list.currentRowChanged.connect(self.on_thumbnail_selected)
         thumbs_layout.addWidget(self.thumb_list)
 
