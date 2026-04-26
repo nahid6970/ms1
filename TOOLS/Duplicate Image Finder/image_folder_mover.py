@@ -93,6 +93,7 @@ def default_settings() -> Dict[str, Any]:
         "source_folders": [],
         "destination_folders": [],
         "thumbnail_size": THUMB_SIZE,
+        "show_thumbnails": True,
     }
 
 
@@ -105,6 +106,7 @@ def load_settings() -> Dict[str, Any]:
             data = json.load(handle)
         settings = default_settings()
         settings["thumbnail_size"] = int(data.get("thumbnail_size", THUMB_SIZE))
+        settings["show_thumbnails"] = bool(data.get("show_thumbnails", True))
 
         source_folders = data.get("source_folders", [])
         normalized_sources = []
@@ -343,6 +345,7 @@ class ImageFolderMoverApp(QMainWindow):
         super().__init__()
         self.settings_data = load_settings()
         self.thumbnail_size = int(self.settings_data.get("thumbnail_size", THUMB_SIZE))
+        self.show_thumbnails = bool(self.settings_data.get("show_thumbnails", True))
         self.images: List[ImageEntry] = []
         self.destination_entries: List[Dict[str, str]] = []
         self.current_index = -1
@@ -531,20 +534,17 @@ class ImageFolderMoverApp(QMainWindow):
 
         button_row = QHBoxLayout()
         add_btn = QPushButton("ADD FOLDERS")
-        remove_btn = QPushButton("REMOVE SELECTED")
-        clear_btn = QPushButton("CLEAR")
+        settings_btn = QPushButton("SETTINGS")
         scan_btn = QPushButton("SCAN")
         scan_btn.setObjectName("PrimaryButton")
-        cancel_btn = QPushButton("CANCEL")
-        cancel_btn.setEnabled(False)
         add_btn.clicked.connect(self.add_source_folders)
-        remove_btn.clicked.connect(self.remove_selected_source_folders)
-        clear_btn.clicked.connect(self.clear_source_folders)
+        settings_btn.clicked.connect(self.open_settings_dialog)
         scan_btn.clicked.connect(self.start_scan)
-        cancel_btn.clicked.connect(self.cancel_scan)
         self.scan_button = scan_btn
-        self.cancel_button = cancel_btn
-        for button in (add_btn, remove_btn, clear_btn, scan_btn, cancel_btn):
+        self.cancel_button = QPushButton("CANCEL")
+        self.cancel_button.setEnabled(False)
+        self.cancel_button.clicked.connect(self.cancel_scan)
+        for button in (add_btn, settings_btn, scan_btn):
             button_row.addWidget(button)
         button_row.addStretch()
         group_layout.addLayout(button_row)
@@ -613,8 +613,10 @@ class ImageFolderMoverApp(QMainWindow):
         self.thumb_list.currentRowChanged.connect(self.on_thumbnail_selected)
         thumbs_layout.addWidget(self.thumb_list)
 
+        self.thumbs_group = thumbs_group
         layout.addWidget(preview_group, 1)
         layout.addWidget(thumbs_group)
+        thumbs_group.setVisible(self.show_thumbnails)
         return panel
 
     def build_right_panel(self) -> QWidget:
@@ -668,6 +670,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.settings_data["source_folders"] = self.source_folder_entries()
         self.settings_data["destination_folders"] = [dict(entry) for entry in self.destination_entries]
         self.settings_data["thumbnail_size"] = self.thumbnail_size
+        self.settings_data["show_thumbnails"] = self.show_thumbnails
         save_settings(self.settings_data)
 
     def source_folder_entries(self) -> List[Dict[str, Any]]:
@@ -1030,6 +1033,28 @@ class ImageFolderMoverApp(QMainWindow):
         next_act.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
         next_act.triggered.connect(lambda: self.step_image(1))
         self.addAction(next_act)
+
+    def open_settings_dialog(self) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("SETTINGS")
+        dialog.resize(300, 120)
+        layout = QVBoxLayout(dialog)
+        cb = QCheckBox("Show Thumbnails")
+        cb.setChecked(self.show_thumbnails)
+        layout.addWidget(cb)
+        buttons = QHBoxLayout()
+        save_btn = QPushButton("SAVE")
+        cancel_btn = QPushButton("CANCEL")
+        save_btn.clicked.connect(dialog.accept)
+        cancel_btn.clicked.connect(dialog.reject)
+        buttons.addStretch()
+        buttons.addWidget(save_btn)
+        buttons.addWidget(cancel_btn)
+        layout.addLayout(buttons)
+        if dialog.exec():
+            self.show_thumbnails = cb.isChecked()
+            self.thumbs_group.setVisible(self.show_thumbnails)
+            self.persist_state()
 
     def move_current_image(self, target: Dict[str, str]) -> None:
         if not (0 <= self.current_index < len(self.images)):

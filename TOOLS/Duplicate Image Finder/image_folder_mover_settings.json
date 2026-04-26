@@ -19,5 +19,6 @@
       "fg": "#E0E0E0"
     }
   ],
-  "thumbnail_size": 108
+  "thumbnail_size": 108,
+  "show_thumbnails": false
 }
