@@ -7,7 +7,7 @@ import ctypes
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from PyQt6.QtCore import QByteArray, QObject, Qt, QThread, QProcess, QTimer, pyqtSignal
+from PyQt6.QtCore import QByteArray, QObject, Qt, QThread, QProcess, QTimer, pyqtSignal, QPoint, QRect, QSize
 from PyQt6.QtGui import QAction, QCursor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QLayout,
     QLineEdit,
     QListView,
     QMainWindow,
@@ -298,6 +299,75 @@ class BKTree:
         return matches
 
 
+class FlowLayout(QLayout):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._items = []
+
+    def __del__(self):
+        while self._items:
+            self.takeAt(0)
+
+    def addItem(self, item):
+        self._items.append(item)
+
+    def count(self):
+        return len(self._items)
+
+    def itemAt(self, index):
+        if 0 <= index < len(self._items):
+            return self._items[index]
+        return None
+
+    def takeAt(self, index):
+        if 0 <= index < len(self._items):
+            return self._items.pop(index)
+        return None
+
+    def expandingDirections(self):
+        return Qt.Orientation(0)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        return self._do_layout(QRect(0, 0, width, 0), True)
+
+    def setGeometry(self, rect):
+        super().setGeometry(rect)
+        self._do_layout(rect, False)
+
+    def sizeHint(self):
+        return self.minimumSize()
+
+    def minimumSize(self):
+        size = QSize()
+        for item in self._items:
+            size = size.expandedTo(item.minimumSize())
+        m = self.contentsMargins()
+        size += QSize(m.left() + m.right(), m.top() + m.bottom())
+        return size
+
+    def _do_layout(self, rect, test_only):
+        m = self.contentsMargins()
+        eff = rect.adjusted(+m.left(), +m.top(), -m.right(), -m.bottom())
+        x, y = eff.x(), eff.y()
+        line_height = 0
+        spacing = self.spacing()
+        if spacing == -1: spacing = 10
+        for item in self._items:
+            hint = item.sizeHint()
+            if x + hint.width() > eff.right() and line_height > 0:
+                x = eff.x()
+                y += line_height + spacing
+                line_height = 0
+            if not test_only:
+                item.setGeometry(QRect(QPoint(x, y), hint))
+            x += hint.width() + spacing
+            line_height = max(line_height, hint.height())
+        return y + line_height - rect.y() + m.bottom()
+
+
 def default_settings() -> Dict[str, Any]:
     return {
         "thumbnail_size": THUMB_SIZE,
@@ -534,6 +604,7 @@ class ImageTile(QFrame):
         self.setObjectName("ImageTile")
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFixedWidth(thumbnail_size + 24)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -932,14 +1003,17 @@ class DuplicateImageFinderApp(QMainWindow):
 
         results_group = QGroupBox("MATCH GROUPS")
         results_layout = QVBoxLayout(results_group)
-        self.results_table = QTableWidget(0, 1)
-        self.results_table.setHorizontalHeaderLabels(["MATCHED IMAGES"])
-        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.results_table.verticalHeader().setVisible(False)
-        self.results_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.results_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.results_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        results_layout.addWidget(self.results_table)
+        self.results_scroll = QScrollArea()
+        self.results_scroll.setWidgetResizable(True)
+        self.results_scroll.setStyleSheet("background-color: transparent; border: none;")
+        self.results_container = QWidget()
+        self.results_container.setStyleSheet(f"background-color: {CP_BG};")
+        self.results_list_layout = QVBoxLayout(self.results_container)
+        self.results_list_layout.setContentsMargins(0, 0, 0, 0)
+        self.results_list_layout.setSpacing(15)
+        self.results_list_layout.addStretch()
+        self.results_scroll.setWidget(self.results_container)
+        results_layout.addWidget(self.results_scroll)
 
         splitter.addWidget(controls_group)
         splitter.addWidget(results_group)
@@ -955,6 +1029,12 @@ class DuplicateImageFinderApp(QMainWindow):
         self.status_progress.setValue(0)
         self.status_progress.setVisible(False)
         self.statusBar().addPermanentWidget(self.status_progress)
+
+    def clear_results(self) -> None:
+        while self.results_list_layout.count() > 1:
+            item = self.results_list_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
     def restore_saved_state(self) -> None:
         self._restoring_folder_state = True
@@ -1088,7 +1168,7 @@ class DuplicateImageFinderApp(QMainWindow):
         if not folders:
             QMessageBox.warning(self, "No Folders", "Add at least one folder to scan.")
             return
-        self.results_table.setRowCount(0)
+        self.clear_results()
         self.current_groups = []
         self.skipped_group_keys.clear()
         self.status_progress.setMaximum(1)
@@ -1214,10 +1294,11 @@ class DuplicateImageFinderApp(QMainWindow):
         self.render_groups()
 
     def render_groups(self) -> None:
-        scroll_bar = self.results_table.verticalScrollBar()
+        scroll_bar = self.results_scroll.verticalScrollBar()
         scroll_value = scroll_bar.value()
-        self.results_table.setUpdatesEnabled(False)
-        self.results_table.setRowCount(0)
+        
+        self.clear_results()
+        
         for group in self.current_groups:
             items = [item for item in group["items"] if os.path.exists(item.path)]
             if len(items) < 2:
@@ -1225,44 +1306,52 @@ class DuplicateImageFinderApp(QMainWindow):
             group_key = self.group_key(items)
             if group_key in self.skipped_group_keys:
                 continue
+            
             base_hash = group["base_hash"]
-            row = self.results_table.rowCount()
-            self.results_table.insertRow(row)
-
-            row_widget = QWidget()
-            row_layout = QHBoxLayout(row_widget)
-            row_layout.setContentsMargins(4, 4, 4, 4)
-            row_layout.setSpacing(8)
-
+            
+            group_frame = QFrame()
+            group_frame.setObjectName("GroupFrame")
+            group_frame.setStyleSheet(f"QFrame#GroupFrame {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; border-radius: 4px; }}")
+            group_vbox = QVBoxLayout(group_frame)
+            group_vbox.setContentsMargins(10, 10, 10, 10)
+            group_vbox.setSpacing(10)
+            
+            header = QWidget()
+            header_layout = QHBoxLayout(header)
+            header_layout.setContentsMargins(0, 0, 0, 0)
+            
+            match_info = QLabel(f"MATCH: {group['match_ratio']}% | {len(items)} IMAGES")
+            match_info.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
+            header_layout.addWidget(match_info)
+            header_layout.addStretch()
+            
+            skip_btn = QPushButton("SKIP")
+            skip_btn.setFixedWidth(80)
+            skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            skip_btn.clicked.connect(lambda _ch, key=group_key: self.skip_group(key))
+            
+            del_btn = QPushButton("DELETE GROUP")
+            del_btn.setFixedWidth(130)
+            del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            del_btn.clicked.connect(lambda _ch, itms=list(items): self.delete_group(itms))
+            
+            header_layout.addWidget(skip_btn)
+            header_layout.addWidget(del_btn)
+            group_vbox.addWidget(header)
+            
+            flow_widget = QWidget()
+            flow_layout = FlowLayout(flow_widget)
+            flow_layout.setSpacing(10)
             for record in items:
                 thumbnail = self.get_thumbnail(record.path)
                 tile = ImageTile(record, base_hash, self.thumbnail_size, thumbnail=thumbnail)
                 tile.changed.connect(self.render_groups)
-                row_layout.addWidget(tile)
+                flow_layout.addWidget(tile)
+            
+            group_vbox.addWidget(flow_widget)
+            self.results_list_layout.insertWidget(self.results_list_layout.count() - 1, group_frame)
 
-            skip_button = QPushButton("SKIP")
-            skip_button.setCursor(Qt.CursorShape.PointingHandCursor)
-            skip_button.setFixedWidth(62)
-            skip_button.clicked.connect(lambda _checked=False, key=group_key: self.skip_group(key))
-            row_layout.addWidget(skip_button, alignment=Qt.AlignmentFlag.AlignVCenter)
-
-            delete_row_button = QPushButton("DELETE ROW")
-            delete_row_button.setCursor(Qt.CursorShape.PointingHandCursor)
-            delete_row_button.setFixedWidth(102)
-            delete_row_button.clicked.connect(lambda _checked=False, group_items=list(items): self.delete_group(group_items))
-            row_layout.addWidget(delete_row_button, alignment=Qt.AlignmentFlag.AlignVCenter)
-            row_layout.addStretch()
-
-            scroller = QScrollArea()
-            scroller.setWidgetResizable(True)
-            scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-            scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-            scroller.setWidget(row_widget)
-
-            self.results_table.setCellWidget(row, 0, scroller)
-            self.results_table.setRowHeight(row, self.thumbnail_size + 120)
-        self.results_table.setUpdatesEnabled(True)
-        self.results_table.viewport().update()
+        self.statusBar().showMessage(f"Found {len(self.current_groups)} duplicate groups.")
         QTimer.singleShot(0, lambda: scroll_bar.setValue(min(scroll_value, scroll_bar.maximum())))
 
     def restart_app(self) -> None:
