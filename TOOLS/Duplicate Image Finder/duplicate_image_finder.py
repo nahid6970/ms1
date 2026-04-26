@@ -514,14 +514,32 @@ class ImageTile(QFrame):
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.name_label)
 
-        ratio = similarity_ratio(base_hash, record.dhash) * 100
-        meta_text = f"{record.resolution} | {format_bytes(record.file_size)}\nMatch: {ratio:.1f}%"
-        self.meta_label = QLabel(meta_text)
-        self.meta_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.meta_label.setStyleSheet(f"color: {CP_SUBTEXT};")
-        layout.addWidget(self.meta_label)
+        self.info_label = QLabel(f"{record.resolution} | {format_bytes(record.file_size)}")
+        self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.info_label.setStyleSheet(f"color: {CP_SUBTEXT};")
+        layout.addWidget(self.info_label)
+
+        self.match_label = QLabel()
+        self.match_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.match_label)
+
+        self.folder_label = QLabel()
+        self.folder_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.folder_label.setWordWrap(True)
+        layout.addWidget(self.folder_label)
+
+        self.refresh_labels()
 
         self._load_thumbnail()
+
+    def refresh_labels(self) -> None:
+        ratio = similarity_ratio(self.base_hash, self.record.dhash) * 100
+        match_color = CP_GREEN if round(ratio, 1) >= 100.0 else CP_SUBTEXT
+        self.match_label.setText(f"Match: {ratio:.1f}%")
+        self.match_label.setStyleSheet(f"color: {match_color}; font-weight: bold;")
+        folder_name = os.path.basename(os.path.dirname(self.record.path)) or os.path.dirname(self.record.path)
+        self.folder_label.setText(f"Folder: {folder_name}")
+        self.folder_label.setStyleSheet(f"color: {CP_CYAN};")
 
     def _load_thumbnail(self) -> None:
         pixmap = QPixmap(self.record.path)
@@ -599,6 +617,7 @@ class ImageTile(QFrame):
             os.rename(self.record.path, new_path)
             self.record.path = new_path
             self.name_label.setText(os.path.basename(new_path))
+            self.refresh_labels()
             self.changed.emit()
         except OSError as exc:
             QMessageBox.critical(self, "Rename Failed", str(exc))
