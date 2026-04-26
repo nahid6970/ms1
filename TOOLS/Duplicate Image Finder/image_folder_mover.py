@@ -630,7 +630,6 @@ class ImageFolderMoverApp(QMainWindow):
         add_btn = QPushButton("ADD TARGET")
         add_btn.clicked.connect(self.add_destination_folder)
         button_row.addWidget(add_btn)
-        button_row.addWidget(QLabel("Right-click a card to edit or remove."))
         button_row.addStretch()
         group_layout.addLayout(button_row)
 
