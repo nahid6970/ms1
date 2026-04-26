@@ -699,6 +699,27 @@ class DuplicateImageFinderApp(QMainWindow):
                 background-color: {CP_YELLOW};
                 color: black;
             }}
+            QPushButton#ScanButton {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+                color: #050505;
+                padding: 8px 14px;
+            }}
+            QPushButton#ScanButton:hover {{
+                background-color: #34ff57;
+                border: 1px solid {CP_YELLOW};
+                color: #050505;
+            }}
+            QPushButton#ScanButton:pressed {{
+                background-color: {CP_YELLOW};
+                border: 1px solid {CP_YELLOW};
+                color: #050505;
+            }}
+            QPushButton#ScanButton:disabled {{
+                background-color: #1c4f25;
+                border: 1px solid #1c4f25;
+                color: #7fb78a;
+            }}
             QGroupBox {{
                 border: 1px solid {CP_DIM};
                 margin-top: 10px;
@@ -831,6 +852,7 @@ class DuplicateImageFinderApp(QMainWindow):
         match_layout.addWidget(self.match_spin)
 
         self.scan_button = QPushButton("SCAN FOR DUPLICATES")
+        self.scan_button.setObjectName("ScanButton")
         self.scan_button.clicked.connect(self.start_scan)
         self.cancel_button = QPushButton("CANCEL")
         self.cancel_button.clicked.connect(self.cancel_scan)
