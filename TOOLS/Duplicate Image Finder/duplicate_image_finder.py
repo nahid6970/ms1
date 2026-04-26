@@ -887,8 +887,8 @@ class DuplicateImageFinderApp(QMainWindow):
         self.folder_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.folder_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.folder_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.folder_table.setMaximumHeight(180)
-        controls_layout.addWidget(self.folder_table)
+        self.folder_table.setMinimumHeight(220)
+        controls_layout.addWidget(self.folder_table, 1)
 
         match_layout = QHBoxLayout()
         match_label = QLabel("MATCH RATIO")
@@ -917,7 +917,6 @@ class DuplicateImageFinderApp(QMainWindow):
 
         controls_layout.addLayout(match_layout)
         controls_layout.addLayout(action_row)
-        controls_layout.addStretch()
 
         results_group = QGroupBox("MATCH GROUPS")
         results_layout = QVBoxLayout(results_group)
