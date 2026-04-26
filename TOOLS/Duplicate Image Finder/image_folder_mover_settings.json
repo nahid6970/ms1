@@ -20,5 +20,6 @@
     }
   ],
   "thumbnail_size": 108,
-  "show_thumbnails": false
+  "show_thumbnails": false,
+  "window_height": 800
 }

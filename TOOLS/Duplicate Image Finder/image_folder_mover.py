@@ -94,6 +94,7 @@ def default_settings() -> Dict[str, Any]:
         "destination_folders": [],
         "thumbnail_size": THUMB_SIZE,
         "show_thumbnails": True,
+        "window_height": 980,
     }
 
 
@@ -107,6 +108,7 @@ def load_settings() -> Dict[str, Any]:
         settings = default_settings()
         settings["thumbnail_size"] = int(data.get("thumbnail_size", THUMB_SIZE))
         settings["show_thumbnails"] = bool(data.get("show_thumbnails", True))
+        settings["window_height"] = int(data.get("window_height", 980))
 
         source_folders = data.get("source_folders", [])
         normalized_sources = []
@@ -346,6 +348,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.settings_data = load_settings()
         self.thumbnail_size = int(self.settings_data.get("thumbnail_size", THUMB_SIZE))
         self.show_thumbnails = bool(self.settings_data.get("show_thumbnails", True))
+        self.window_height = int(self.settings_data.get("window_height", 980))
         self.images: List[ImageEntry] = []
         self.destination_entries: List[Dict[str, str]] = []
         self.current_index = -1
@@ -355,7 +358,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.scan_worker: Optional[ScanWorker] = None
 
         self.setWindowTitle("Image Folder Mover")
-        self.resize(1720, 980)
+        self.resize(1720, self.window_height)
         self._apply_theme()
         self._build_ui()
         self._setup_shortcuts()
@@ -671,6 +674,7 @@ class ImageFolderMoverApp(QMainWindow):
         self.settings_data["destination_folders"] = [dict(entry) for entry in self.destination_entries]
         self.settings_data["thumbnail_size"] = self.thumbnail_size
         self.settings_data["show_thumbnails"] = self.show_thumbnails
+        self.settings_data["window_height"] = self.window_height
         save_settings(self.settings_data)
 
     def source_folder_entries(self) -> List[Dict[str, Any]]:
@@ -1037,11 +1041,19 @@ class ImageFolderMoverApp(QMainWindow):
     def open_settings_dialog(self) -> None:
         dialog = QDialog(self)
         dialog.setWindowTitle("SETTINGS")
-        dialog.resize(300, 120)
+        dialog.resize(320, 160)
         layout = QVBoxLayout(dialog)
         cb = QCheckBox("Show Thumbnails")
         cb.setChecked(self.show_thumbnails)
         layout.addWidget(cb)
+        from PyQt6.QtWidgets import QSpinBox
+        height_row = QHBoxLayout()
+        height_row.addWidget(QLabel("Window Height:"))
+        height_spin = QSpinBox()
+        height_spin.setRange(400, 4000)
+        height_spin.setValue(self.window_height)
+        height_row.addWidget(height_spin)
+        layout.addLayout(height_row)
         buttons = QHBoxLayout()
         save_btn = QPushButton("SAVE")
         cancel_btn = QPushButton("CANCEL")
@@ -1054,6 +1066,8 @@ class ImageFolderMoverApp(QMainWindow):
         if dialog.exec():
             self.show_thumbnails = cb.isChecked()
             self.thumbs_group.setVisible(self.show_thumbnails)
+            self.window_height = height_spin.value()
+            self.resize(self.width(), self.window_height)
             self.persist_state()
 
     def move_current_image(self, target: Dict[str, str]) -> None:
