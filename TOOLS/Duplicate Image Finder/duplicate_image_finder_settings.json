@@ -4,18 +4,26 @@
   "folders": [
     {
       "path": "C:/Users/nahid/Pictures/facebook",
-      "enabled": true
+      "enabled": false
     },
     {
       "path": "C:/Users/nahid/Pictures/from_android",
-      "enabled": true
+      "enabled": false
     },
     {
       "path": "C:/Users/nahid/Pictures/mx",
-      "enabled": true
+      "enabled": false
     },
     {
       "path": "C:/Users/nahid/Pictures/sassybaka",
+      "enabled": false
+    },
+    {
+      "path": "D:/New folder",
+      "enabled": false
+    },
+    {
+      "path": "C:/@delta/msBackups",
       "enabled": true
     }
   ]

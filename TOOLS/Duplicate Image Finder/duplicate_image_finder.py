@@ -677,6 +677,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.scan_thread: Optional[QThread] = None
         self.scan_worker: Optional[ScanWorker] = None
         self.current_groups: List[dict] = []
+        self.skipped_group_keys: set[Tuple[str, ...]] = set()
         self._restoring_folder_state = False
 
         self.setWindowTitle("Duplicate Image Finder")
@@ -1078,6 +1079,7 @@ class DuplicateImageFinderApp(QMainWindow):
             return
         self.results_table.setRowCount(0)
         self.current_groups = []
+        self.skipped_group_keys.clear()
         self.status_progress.setMaximum(1)
         self.status_progress.setValue(0)
         self.status_progress.setVisible(True)
@@ -1136,17 +1138,45 @@ class DuplicateImageFinderApp(QMainWindow):
     def on_scan_cancelled(self) -> None:
         self.statusBar().showMessage("Scan cancelled.")
 
+    def group_key(self, items: List[ImageRecord]) -> Tuple[str, ...]:
+        return tuple(sorted(item.path for item in items))
+
+    def skip_group(self, group_key: Tuple[str, ...]) -> None:
+        self.skipped_group_keys.add(group_key)
+        self.render_groups()
+
     def render_groups(self) -> None:
+        scroll_bar = self.results_table.verticalScrollBar()
+        scroll_value = scroll_bar.value()
         self.results_table.setRowCount(0)
-        for group_index, group in enumerate(self.current_groups, start=1):
+        for group in self.current_groups:
             items = [item for item in group["items"] if os.path.exists(item.path)]
             if len(items) < 2:
+                continue
+            group_key = self.group_key(items)
+            if group_key in self.skipped_group_keys:
                 continue
             base_hash = group["base_hash"]
             row = self.results_table.rowCount()
             self.results_table.insertRow(row)
 
+            cell_widget = QWidget()
+            cell_layout = QVBoxLayout(cell_widget)
+            cell_layout.setContentsMargins(4, 4, 4, 4)
+            cell_layout.setSpacing(6)
+
+            header_layout = QHBoxLayout()
+            header_layout.setContentsMargins(0, 0, 0, 0)
+            header_layout.addStretch()
+            skip_button = QPushButton("SKIP")
+            skip_button.setCursor(Qt.CursorShape.PointingHandCursor)
+            skip_button.setFixedWidth(62)
+            skip_button.clicked.connect(lambda _checked=False, key=group_key: self.skip_group(key))
+            header_layout.addWidget(skip_button)
+            cell_layout.addLayout(header_layout)
+
             row_widget = QWidget()
+            row_widget.setObjectName("GroupRowWidget")
             row_layout = QHBoxLayout(row_widget)
             row_layout.setContentsMargins(4, 4, 4, 4)
             row_layout.setSpacing(8)
@@ -1162,9 +1192,11 @@ class DuplicateImageFinderApp(QMainWindow):
             scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             scroller.setWidget(row_widget)
+            cell_layout.addWidget(scroller)
 
-            self.results_table.setCellWidget(row, 0, scroller)
-            self.results_table.setRowHeight(row, self.thumbnail_size + 120)
+            self.results_table.setCellWidget(row, 0, cell_widget)
+            self.results_table.setRowHeight(row, self.thumbnail_size + 156)
+        QTimer.singleShot(0, lambda: scroll_bar.setValue(min(scroll_value, scroll_bar.maximum())))
 
     def restart_app(self) -> None:
         started = QProcess.startDetached(sys.executable, sys.argv)
