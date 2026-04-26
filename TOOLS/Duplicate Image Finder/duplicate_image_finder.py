@@ -1160,23 +1160,7 @@ class DuplicateImageFinderApp(QMainWindow):
             row = self.results_table.rowCount()
             self.results_table.insertRow(row)
 
-            cell_widget = QWidget()
-            cell_layout = QVBoxLayout(cell_widget)
-            cell_layout.setContentsMargins(4, 4, 4, 4)
-            cell_layout.setSpacing(6)
-
-            header_layout = QHBoxLayout()
-            header_layout.setContentsMargins(0, 0, 0, 0)
-            header_layout.addStretch()
-            skip_button = QPushButton("SKIP")
-            skip_button.setCursor(Qt.CursorShape.PointingHandCursor)
-            skip_button.setFixedWidth(62)
-            skip_button.clicked.connect(lambda _checked=False, key=group_key: self.skip_group(key))
-            header_layout.addWidget(skip_button)
-            cell_layout.addLayout(header_layout)
-
             row_widget = QWidget()
-            row_widget.setObjectName("GroupRowWidget")
             row_layout = QHBoxLayout(row_widget)
             row_layout.setContentsMargins(4, 4, 4, 4)
             row_layout.setSpacing(8)
@@ -1185,6 +1169,12 @@ class DuplicateImageFinderApp(QMainWindow):
                 tile = ImageTile(record, base_hash, self.thumbnail_size)
                 tile.changed.connect(self.render_groups)
                 row_layout.addWidget(tile)
+
+            skip_button = QPushButton("SKIP")
+            skip_button.setCursor(Qt.CursorShape.PointingHandCursor)
+            skip_button.setFixedWidth(62)
+            skip_button.clicked.connect(lambda _checked=False, key=group_key: self.skip_group(key))
+            row_layout.addWidget(skip_button, alignment=Qt.AlignmentFlag.AlignVCenter)
             row_layout.addStretch()
 
             scroller = QScrollArea()
@@ -1192,10 +1182,9 @@ class DuplicateImageFinderApp(QMainWindow):
             scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             scroller.setWidget(row_widget)
-            cell_layout.addWidget(scroller)
 
-            self.results_table.setCellWidget(row, 0, cell_widget)
-            self.results_table.setRowHeight(row, self.thumbnail_size + 156)
+            self.results_table.setCellWidget(row, 0, scroller)
+            self.results_table.setRowHeight(row, self.thumbnail_size + 120)
         QTimer.singleShot(0, lambda: scroll_bar.setValue(min(scroll_value, scroll_bar.maximum())))
 
     def restart_app(self) -> None:
