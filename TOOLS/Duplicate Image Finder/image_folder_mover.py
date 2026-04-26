@@ -1102,6 +1102,8 @@ class ImageFolderMoverApp(QMainWindow):
 def main() -> int:
     app = QApplication(sys.argv)
     window = ImageFolderMoverApp()
+    screen = app.primaryScreen().availableGeometry()
+    window.move((screen.width() - window.width()) // 2, (screen.height() - window.height()) // 2)
     window.show()
     return app.exec()
 
