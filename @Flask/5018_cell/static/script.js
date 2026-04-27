@@ -13832,6 +13832,20 @@ function renderSidebar() {
         const currentCat = tableData.sheetCategories[currentSheet] || 'Uncategorized';
         document.getElementById('currentCategoryTitle').textContent = currentCat;
 
+        // Toggle Sub-sheet dropdown button based on existence of sub-sheets
+        const btnSubSheet = document.getElementById('btnSubSheetDropdown');
+        if (btnSubSheet) {
+            const parentIndex = currentSheetObj.parentSheet !== undefined ? currentSheetObj.parentSheet : currentSheet;
+            const hasSubSheets = tableData.sheets.some((s, idx) => s.parentSheet === parentIndex && idx !== parentIndex);
+            
+            // Show if it HAS sub-sheets OR if it IS a sub-sheet (so you can go back to parent)
+            if (hasSubSheets || currentSheetObj.parentSheet !== undefined) {
+                btnSubSheet.style.display = 'flex';
+            } else {
+                btnSubSheet.style.display = 'none';
+            }
+        }
+
         // Apply category colors to sheet-tabs bar
         const sheetTabsBar = document.querySelector('.sheet-tabs');
         if (sheetTabsBar) {
