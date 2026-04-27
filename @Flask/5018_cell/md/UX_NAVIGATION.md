@@ -7,7 +7,7 @@
 - Sheet context menus (Rename, Set Colors, Move to Category, Delete).
 - Drag and drop reorganization.
 - Search modes (🔍 Category, * All Sheets, # Content).
-- **Category Colors**: Right-click any category to set custom background and text colors.
+- **Category Colors**: Right-click any category to set custom background and text colors. These colors apply **strictly** to the F1 window and Sidebar tree items for organizational visual grouping.
 - **CSS:** `.f1-popup`, `.f1-search-mode-toggle`, `.f1-category-title`.
 
 ## Recent Sheets Popup (F2)
@@ -80,7 +80,7 @@
   - **Menu Button (⋮)**: Opens a compact dropdown showing the parent and all sibling sub-sheets. Automatically hides if no sub-sheets exist.
   - **Quick Add (+)**: Instant creation of a new sub-sheet under the current parent.
 - **Compact Dropdown**: A cyberpunk-themed (dark green/black) menu matching the F2 aesthetic. Supports right-click management (Rename, Delete, Colors) directly from the list.
-- **Inheritance**: Sub-sheets automatically adopt their parent category's color theme unless overridden.
+- **Inheritance**: Sub-sheets inherit custom background/text colors from their **Parent Sheet** (if set). They no longer inherit from the Parent Category to avoid UI clutter in the header.
 - **Navigation Bar**: Horizontal sub-sheet bar remains available below the toolbar for tabbed navigation.
 - Deletion cascade (Parent -> Children).
 

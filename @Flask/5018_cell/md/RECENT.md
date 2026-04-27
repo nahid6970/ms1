@@ -1,5 +1,36 @@
 # Recent Development Log
 
+## [2026-04-27 16:15] - Isolated Category Colors & Documentation Update
+
+**Session Duration:** 0.6 hours
+
+**What We Accomplished:**
+
+### 🎨 Color System Refinement
+- **Category Isolation**: Removed aggressive color inheritance where category styles (bg/fg) were leaking into the main sheet header and sub-sheets.
+- **Header Cleanup**: Standardized the main sheet title and action pill to use theme-default colors (cyberpunk green/black) instead of inheriting category colors.
+- **Sub-sheet Consistency**: Sub-sheets (both in the bar and the new dropdown) now only use their own specific colors or the default theme.
+- **F1/Sidebar Focus**: Category colors are now strictly visual aids for the F1 navigation window and the sidebar tree view.
+
+### 🔧 Code Quality & Maintenance
+- **Refined Event Handlers**: Cleaned up `static/script.js` to prevent redundant style applications during `renderSidebar` and `renderSubSheetBar`.
+- **Documentation Sync**: Updated `UX_NAVIGATION.md` and `RECENT.md` to reflect these behavioral changes.
+
+**Files Modified:**
+- `static/script.js` - Removed inheritance logic from `renderSubSheetBar`, `renderSubSheetDropdown`, and `renderSidebar`.
+- `md/RECENT.md` - Added this log.
+- `md/UX_NAVIGATION.md` - Updated category color behavior description.
+
+**Current Status:**
+- ✅ Category colors no longer clash with sheet-level styling.
+- ✅ Header UI remains clean and consistent across different categories.
+- ✅ Documentation accurately reflects current behavior.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-27 15:30] - Enhanced Sub-sheet UI & Action Header
 
 **Session Duration:** 0.8 hours
