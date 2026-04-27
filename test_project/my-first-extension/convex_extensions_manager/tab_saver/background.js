@@ -56,7 +56,7 @@ function updateBadge() {
       // Show 9+ for counts over 9
       const badgeText = count > 9 ? '9+' : count.toString();
       chrome.action.setBadgeText({ text: badgeText });
-      chrome.action.setBadgeBackgroundColor({ color: '#667eea' });
+      chrome.action.setBadgeBackgroundColor({ color: '#00f3ff' }); 
     } else {
       chrome.action.setBadgeText({ text: '' });
     }
@@ -78,9 +78,6 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "saveAndCloseTab") {
-    console.log('Context menu clicked for tab:', tab.id);
-    
-    // Attempt to inject the deadline modal
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => {
@@ -90,32 +87,39 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           const overlay = document.createElement('div');
           overlay.id = id + '-overlay';
-          overlay.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2147483646; transition: opacity 0.3s; pointer-events: auto;';
+          overlay.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.9); z-index: 2147483646; transition: opacity 0.3s; pointer-events: auto; backdrop-filter: blur(8px);';
           
           const modal = document.createElement('div');
           modal.id = id;
-          modal.style = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 2147483647; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; gap: 15px; width: 320px; color: #333; line-height: 1.5; pointer-events: auto;';
+          modal.style = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: #0d0d12; padding: 0; border: 1px solid #00f3ff; 
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); 
+            z-index: 2147483647; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            display: flex; flex-direction: column; width: 320px; color: #fff; pointer-events: auto;
+          `;
           
           modal.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">⏰</span>
-                <h3 style="margin:0; font-size: 18px; font-weight: 600; color: #333;">Set Deadline</h3>
+            <div style="background: #00f3ff; color: #000; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;">Set Deadline</span>
+              <button id="closeBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #000; font-weight: bold; line-height: 1; padding: 0;">&times;</button>
+            </div>
+            
+            <div style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Days from today</label>
+                <input type="number" id="deadlineDays" min="1" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='#00f3ff'" onblur="this.style.borderColor='#333'">
               </div>
-              <button id="closeBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999; padding: 5px;">&times;</button>
-            </div>
-            <p style="margin: 0; font-size: 13px; color: #666;">Optional: Track days left for this task.</p>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-size: 12px; font-weight: 600; color: #444;">Days from today:</label>
-              <input type="number" id="deadlineDays" min="1" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; color: black; width: 100%;">
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-size: 12px; font-weight: 600; color: #444;">Pick a date:</label>
-              <input type="date" id="deadlineDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; cursor: pointer; background: white; color: black; width: 100%;">
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 10px;">
-              <button id="cancelBtn" style="flex: 1; padding: 12px; border: 1px solid #ddd; background: white; color: #666; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
-              <button id="saveBtn" style="flex: 1.5; padding: 12px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 14px;">Save & Close</button>
+              
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Pick a date</label>
+                <input type="date" id="deadlineDate" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; cursor: pointer; width: 100%; color-scheme: dark;" onfocus="this.style.borderColor='#00f3ff'" onblur="this.style.borderColor='#333'">
+              </div>
+              
+              <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button id="cancelBtn" style="flex: 1; padding: 12px; border: 1px solid #333; background: transparent; color: #999; font-weight: 700; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">Cancel</button>
+                <button id="saveBtn" style="flex: 1.5; padding: 12px; border: none; background: #00f3ff; color: #000; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.2s;">Save & Close</button>
+              </div>
             </div>
           `;
           
@@ -124,7 +128,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           const daysInput = modal.querySelector('#deadlineDays');
           const dateInput = modal.querySelector('#deadlineDate');
+          const cancelBtn = modal.querySelector('#cancelBtn');
+          const saveBtn = modal.querySelector('#saveBtn');
+
           daysInput.focus();
+
+          cancelBtn.onmouseover = () => { cancelBtn.style.borderColor = '#666'; cancelBtn.style.color = '#fff'; };
+          cancelBtn.onmouseout = () => { cancelBtn.style.borderColor = '#333'; cancelBtn.style.color = '#999'; };
+          saveBtn.onmouseover = () => { saveBtn.style.opacity = '0.8'; };
+          saveBtn.onmouseout = () => { saveBtn.style.opacity = '1'; };
 
           daysInput.addEventListener('input', () => { if (daysInput.value) dateInput.value = ''; });
           dateInput.addEventListener('input', () => { if (dateInput.value) daysInput.value = ''; });
@@ -156,12 +168,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               d.setHours(23, 59, 59, 999);
               finish(d.getTime());
             } else {
-              // No input means no deadline, but still save and close
               finish(null);
             }
           };
 
-          // Close on escape
           window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && document.getElementById(id)) {
               removeUI();
