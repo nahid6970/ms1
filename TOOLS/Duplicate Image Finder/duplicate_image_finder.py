@@ -193,7 +193,6 @@ class ImageRecord:
     file_size: int
     digest: str
     dhash: int
-    dhash_coarse: int
 
     @property
     def resolution(self) -> str:
@@ -373,7 +372,6 @@ def default_settings() -> Dict[str, Any]:
     return {
         "thumbnail_size": THUMB_SIZE,
         "match_ratio": 92,
-        "crop_match": False,
         "folders": [],
     }
 
@@ -387,7 +385,7 @@ def load_settings() -> Dict[str, Any]:
             data = json.load(handle)
         settings = default_settings()
         settings["thumbnail_size"] = int(data.get("thumbnail_size", THUMB_SIZE))
-        settings["match_ratio"] = max(60, min(100, int(data.get("match_ratio", 92))))
+        settings["match_ratio"] = max(1, min(100, int(data.get("match_ratio", 92))))
         folders = data.get("folders", [])
         if isinstance(folders, list):
             normalized_folders = []
@@ -426,8 +424,8 @@ def hamming_distance(left: int, right: int) -> int:
     return (left ^ right).bit_count()
 
 
-def similarity_ratio(left: int, right: int, bits: int = HASH_BITS) -> float:
-    return 1.0 - (hamming_distance(left, right) / bits)
+def similarity_ratio(left: int, right: int) -> float:
+    return 1.0 - (hamming_distance(left, right) / HASH_BITS)
 
 
 def sha1_digest(path: str) -> str:
@@ -438,36 +436,21 @@ def sha1_digest(path: str) -> str:
     return digest.hexdigest()
 
 
-def compute_dhash(path: str) -> Tuple[int, int, int, int]:
+def compute_dhash(path: str) -> Tuple[int, int, int]:
     with Image.open(path) as image:
         image = ImageOps.exif_transpose(image)
         rgb = image.convert("RGB")
         width, height = rgb.size
-        # Standard 16x16 hash (256 bits)
         resized = rgb.convert("L").resize((17, 16), Image.Resampling.LANCZOS)
         pixels = list(resized.getdata())
-        
-        # Coarse 8x8 hash (64 bits) for crop matching
-        resized_coarse = rgb.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
-        pixels_coarse = list(resized_coarse.getdata())
-        
-    dhash = 0
+    result = 0
     for row in range(16):
         row_start = row * 17
         for col in range(16):
-            dhash <<= 1
+            result <<= 1
             if pixels[row_start + col] > pixels[row_start + col + 1]:
-                dhash |= 1
-                
-    dhash_coarse = 0
-    for row in range(8):
-        row_start = row * 9
-        for col in range(8):
-            dhash_coarse <<= 1
-            if pixels_coarse[row_start + col] > pixels_coarse[row_start + col + 1]:
-                dhash_coarse |= 1
-                
-    return dhash, dhash_coarse, width, height
+                result |= 1
+    return result, width, height
 
 
 class ScanWorker(QObject):
@@ -477,11 +460,10 @@ class ScanWorker(QObject):
     failed = pyqtSignal(str)
     cancelled = pyqtSignal()
 
-    def __init__(self, folders: List[str], min_ratio: int, crop_match: bool = False) -> None:
+    def __init__(self, folders: List[str], min_ratio: int) -> None:
         super().__init__()
         self.folders = folders
         self.min_ratio = min_ratio
-        self.crop_match = crop_match
         self._cancel_requested = False
 
     def cancel(self) -> None:
@@ -500,7 +482,6 @@ class ScanWorker(QObject):
                 self.cancelled.emit()
                 return
 
-            self.progress.emit("Grouping similar images...")
             groups = self._build_groups(records)
             if self._cancel_requested:
                 self.cancelled.emit()
@@ -532,15 +513,14 @@ class ScanWorker(QObject):
             self.progress.emit(f"Hashing {index}/{total}: {os.path.basename(path)}")
             self.progress_value.emit(index, total)
             try:
-                dhash, dhash_coarse, width, height = compute_dhash(path)
+                dhash_value, width, height = compute_dhash(path)
                 record = ImageRecord(
                     path=path,
                     width=width,
                     height=height,
                     file_size=os.path.getsize(path),
                     digest=sha1_digest(path),
-                    dhash=dhash,
-                    dhash_coarse=dhash_coarse
+                    dhash=dhash_value,
                 )
                 records.append(record)
             except Exception as exc:
@@ -551,29 +531,20 @@ class ScanWorker(QObject):
         if not records:
             return []
 
-        # Use 64 bits for crop mode, 256 bits otherwise
-        bits = 64 if self.crop_match else 256
-        max_distance = math.floor((100 - self.min_ratio) * bits / 100)
-        
+        max_distance = math.floor((100 - self.min_ratio) * HASH_BITS / 100)
         uf = UnionFind(len(records))
         digest_map: Dict[str, List[int]] = {}
         tree = BKTree()
 
         for index, record in enumerate(records):
             digest_map.setdefault(record.digest, []).append(index)
-            
-            # Use appropriate hash based on mode
-            current_hash = record.dhash_coarse if self.crop_match else record.dhash
-            
-            candidates = tree.search(current_hash, max_distance)
+            candidates = tree.search(record.dhash, max_distance)
             for candidate_index in candidates:
                 candidate = records[candidate_index]
-                candidate_hash = candidate.dhash_coarse if self.crop_match else candidate.dhash
-                
-                ratio = similarity_ratio(current_hash, candidate_hash, bits=bits)
+                ratio = similarity_ratio(record.dhash, candidate.dhash)
                 if ratio * 100 >= self.min_ratio:
                     uf.union(index, candidate_index)
-            tree.add(index, current_hash)
+            tree.add(index, record.dhash)
 
         for duplicate_indexes in digest_map.values():
             if len(duplicate_indexes) > 1:
@@ -592,33 +563,19 @@ class ScanWorker(QObject):
                 continue
             items = [records[idx] for idx in indexes]
             base = max(items, key=lambda item: (item.width * item.height, item.file_size))
-            
             ranked = sorted(
                 items,
                 key=lambda item: (
                     0 if item.path == base.path else 1,
-                    -similarity_ratio(
-                        base.dhash_coarse if self.crop_match else base.dhash,
-                        item.dhash_coarse if self.crop_match else item.dhash,
-                        bits=bits
-                    ),
+                    -similarity_ratio(base.dhash, item.dhash),
                     item.path.lower(),
                 ),
             )
-            
-            # Use selected bits for ratio display
-            base_h = base.dhash_coarse if self.crop_match else base.dhash
-            best_ratio = min(
-                similarity_ratio(base_h, itm.dhash_coarse if self.crop_match else itm.dhash, bits=bits) 
-                for itm in ranked if itm.path != base.path
-            )
-            
+            best_ratio = min(similarity_ratio(base.dhash, item.dhash) for item in ranked if item.path != base.path)
             results.append(
                 {
                     "base_path": base.path,
                     "base_hash": base.dhash,
-                    "base_hash_coarse": base.dhash_coarse,
-                    "crop_mode": self.crop_match,
                     "match_ratio": round(best_ratio * 100, 1),
                     "items": ranked,
                 }
@@ -785,7 +742,6 @@ class ImageTile(QFrame):
         base_hash: int,
         thumbnail_size: int,
         group_items: Optional[List[ImageRecord]] = None,
-        crop_mode: bool = False,
         thumbnail: Optional[QPixmap] = None,
         parent: Optional[QWidget] = None,
     ) -> None:
@@ -795,7 +751,6 @@ class ImageTile(QFrame):
         self.thumbnail_size = thumbnail_size
         self.thumbnail = thumbnail
         self.group_items = group_items or [record]
-        self.crop_mode = crop_mode
         self.setObjectName("ImageTile")
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -835,9 +790,7 @@ class ImageTile(QFrame):
         self._load_thumbnail()
 
     def refresh_labels(self) -> None:
-        bits = 64 if self.crop_mode else 256
-        current_h = self.record.dhash_coarse if self.crop_mode else self.record.dhash
-        ratio = similarity_ratio(self.base_hash, current_h, bits=bits) * 100
+        ratio = similarity_ratio(self.base_hash, self.record.dhash) * 100
         match_color = CP_GREEN if round(ratio, 1) >= 100.0 else CP_SUBTEXT
         self.match_label.setText(f"Match: {ratio:.1f}%")
         self.match_label.setStyleSheet(f"color: {match_color}; font-weight: bold;")
@@ -1187,21 +1140,15 @@ class DuplicateImageFinderApp(QMainWindow):
         match_layout = QHBoxLayout()
         match_label = QLabel("MATCH RATIO")
         self.match_slider = QSlider(Qt.Orientation.Horizontal)
-        self.match_slider.setRange(60, 100)
+        self.match_slider.setRange(1, 100)
         self.match_spin = QSpinBox()
-        self.match_spin.setRange(60, 100)
-        
-        self.crop_check = QCheckBox("CROP MATCH MODE")
-        self.crop_check.setToolTip("Enables detection of cropped or slightly modified images (uses coarser hashing).")
-        self.crop_check.stateChanged.connect(self.persist_state)
-
+        self.match_spin.setRange(1, 100)
         self.match_slider.valueChanged.connect(self.match_spin.setValue)
         self.match_spin.valueChanged.connect(self.match_slider.setValue)
         self.match_spin.valueChanged.connect(self.on_match_ratio_changed)
         match_layout.addWidget(match_label)
         match_layout.addWidget(self.match_slider, 1)
         match_layout.addWidget(self.match_spin)
-        match_layout.addWidget(self.crop_check)
 
         self.scan_button = QPushButton("SCAN FOR DUPLICATES")
         self.scan_button.setObjectName("ScanButton")
@@ -1257,16 +1204,11 @@ class DuplicateImageFinderApp(QMainWindow):
         self._restoring_folder_state = True
         self.match_spin.blockSignals(True)
         self.match_slider.blockSignals(True)
-        self.crop_check.blockSignals(True)
-
         saved_ratio = int(self.settings_data.get("match_ratio", 92))
         self.match_spin.setValue(saved_ratio)
         self.match_slider.setValue(saved_ratio)
-        self.crop_check.setChecked(bool(self.settings_data.get("crop_match", False)))
-
         self.match_spin.blockSignals(False)
         self.match_slider.blockSignals(False)
-        self.crop_check.blockSignals(False)
 
         self.folder_table.setRowCount(0)
         for folder_entry in self.settings_data.get("folders", []):
@@ -1315,7 +1257,6 @@ class DuplicateImageFinderApp(QMainWindow):
     def persist_state(self) -> None:
         self.settings_data["thumbnail_size"] = self.thumbnail_size
         self.settings_data["match_ratio"] = self.match_spin.value()
-        self.settings_data["crop_match"] = self.crop_check.isChecked()
         self.settings_data["folders"] = self.folder_entries()
         save_settings(self.settings_data)
 
@@ -1402,7 +1343,7 @@ class DuplicateImageFinderApp(QMainWindow):
         self.statusBar().showMessage("SCANNING...")
 
         self.scan_thread = QThread(self)
-        self.scan_worker = ScanWorker(folders, self.match_spin.value(), self.crop_check.isChecked())
+        self.scan_worker = ScanWorker(folders, self.match_spin.value())
         self.scan_worker.moveToThread(self.scan_thread)
 
         self.scan_thread.started.connect(self.scan_worker.run)
@@ -1530,8 +1471,7 @@ class DuplicateImageFinderApp(QMainWindow):
             if group_key in self.skipped_group_keys:
                 continue
             
-            crop_mode = group.get("crop_mode", False)
-            base_hash = group["base_hash_coarse"] if crop_mode else group["base_hash"]
+            base_hash = group["base_hash"]
             
             group_frame = QFrame()
             group_frame.setObjectName("GroupFrame")
@@ -1544,8 +1484,7 @@ class DuplicateImageFinderApp(QMainWindow):
             header_layout = QHBoxLayout(header)
             header_layout.setContentsMargins(0, 0, 0, 0)
             
-            match_text = "CROP MATCH" if crop_mode else "MATCH"
-            match_info = QLabel(f"{match_text}: {group['match_ratio']}% | {len(items)} IMAGES")
+            match_info = QLabel(f"MATCH: {group['match_ratio']}% | {len(items)} IMAGES")
             match_info.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
             header_layout.addWidget(match_info)
             header_layout.addStretch()
@@ -1570,14 +1509,7 @@ class DuplicateImageFinderApp(QMainWindow):
             group_items_list = list(items)
             for record in items:
                 thumbnail = self.get_thumbnail(record.path)
-                tile = ImageTile(
-                    record, 
-                    base_hash, 
-                    self.thumbnail_size, 
-                    group_items=group_items_list, 
-                    crop_mode=crop_mode, 
-                    thumbnail=thumbnail
-                )
+                tile = ImageTile(record, base_hash, self.thumbnail_size, group_items=group_items_list, thumbnail=thumbnail)
                 tile.changed.connect(self.render_groups)
                 flow_layout.addWidget(tile)
             
