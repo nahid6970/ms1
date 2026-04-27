@@ -69,7 +69,7 @@ function displayTabs(tabs) {
         badgeClass += ' urgent';
       } else {
         text = `${diffDays}`;
-        if (diffDays <= 2) badgeClass += ' urgent';
+        if (diffDays <= 3) badgeClass += ' urgent';
         else badgeClass += ' safe';
       }
       

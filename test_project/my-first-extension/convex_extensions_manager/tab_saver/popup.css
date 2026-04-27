@@ -187,9 +187,11 @@ body {
 
 .tab-deadline.urgent {
   background: #ff4757;
-  color: white;
-  border-color: #ff3838;
-  animation: pulse 2s infinite;
+  color: #ffffff;
+  border-color: #eb3b5a;
+  animation: pulse 1.5s infinite;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  font-weight: 900;
 }
 
 .tab-deadline.safe {
