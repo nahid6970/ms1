@@ -6465,9 +6465,7 @@ function renderSubSheetBar() {
 
     // Apply parent sheet colors to subsheet bar
     if (subsheetBar) {
-        const sheetCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || 'Uncategorized';
-        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
-        const bgColor = parentSheet.bgColor || (catStyle ? catStyle.bgColor : null);
+        const bgColor = parentSheet.bgColor;
 
         if (bgColor) {
             subsheetBar.style.setProperty('background-color', bgColor, 'important');
@@ -6480,11 +6478,8 @@ function renderSubSheetBar() {
 
     // Function to apply colors to a tab
     const applyTabColors = (tab, sheet, sheetIdx, isActive) => {
-        const sheetCategory = tableData.sheetCategories[sheetIdx] || tableData.sheetCategories[String(sheetIdx)] || 'Uncategorized';
-        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
-
-        const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
-        const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
+        const bgColor = sheet.bgColor;
+        const fgColor = sheet.fgColor;
 
         if (bgColor) {
             tab.style.setProperty('background-color', bgColor, 'important');
@@ -6767,17 +6762,12 @@ function renderSubSheetDropdown() {
     if (!parentSheet) return;
     
     const applyColors = (item, sheet, sheetIdx) => {
-        const sheetCategory = tableData.sheetCategories[sheetIdx] || tableData.sheetCategories[String(sheetIdx)] || 'Uncategorized';
-        const catStyle = tableData.categoryStyles ? tableData.categoryStyles[sheetCategory] : null;
-        const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
-        const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
+        const bgColor = sheet.bgColor;
+        const fgColor = sheet.fgColor;
         
         // Only apply if custom colors exist, otherwise use theme defaults from CSS
         if (bgColor) item.style.backgroundColor = bgColor;
         if (fgColor) item.style.color = fgColor;
-        
-        // If active, we might want to override the color to keep contrast, 
-        // but the .active class in CSS handles the basic green/black theme.
     };
     
     const parentItem = document.createElement('div');
@@ -13846,51 +13836,19 @@ function renderSidebar() {
             }
         }
 
-        // Apply category colors to sheet-tabs bar
+        // Ensure header colors don't inherit from category
         const sheetTabsBar = document.querySelector('.sheet-tabs');
         if (sheetTabsBar) {
-            const catStyle = tableData.categoryStyles ? tableData.categoryStyles[currentCat] : null;
-            if (catStyle) {
-                if (catStyle.bgColor) {
-                    sheetTabsBar.style.setProperty('background-color', catStyle.bgColor, 'important');
-                    sheetTabsBar.style.setProperty('border-color', 'rgba(255,255,255,0.1)', 'important');
-                } else {
-                    sheetTabsBar.style.removeProperty('background-color');
-                    sheetTabsBar.style.removeProperty('border-color');
-                }
-                if (catStyle.fgColor) {
-                    sheetTabsBar.style.setProperty('color', catStyle.fgColor, 'important');
-                    // Update titles and buttons inside
-                    const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                    titles.forEach(t => t.style.setProperty('color', catStyle.fgColor, 'important'));
-                    const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
-                    buttons.forEach(b => {
-                        b.style.setProperty('color', catStyle.fgColor, 'important');
-                        b.style.setProperty('border-color', catStyle.fgColor, 'important');
-                    });
-                } else {
-                    sheetTabsBar.style.removeProperty('color');
-                    const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                    titles.forEach(t => t.style.removeProperty('color'));
-                    const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
-                    buttons.forEach(b => {
-                        b.style.removeProperty('color');
-                        b.style.removeProperty('border-color');
-                    });
-                }
-            } else {
-                // Reset to default
-                sheetTabsBar.style.removeProperty('background-color');
-                sheetTabsBar.style.removeProperty('color');
-                sheetTabsBar.style.removeProperty('border-color');
-                const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
-                titles.forEach(t => t.style.removeProperty('color'));
-                const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
-                buttons.forEach(b => {
-                    b.style.removeProperty('color');
-                    b.style.removeProperty('border-color');
-                });
-            }
+            sheetTabsBar.style.removeProperty('background-color');
+            sheetTabsBar.style.removeProperty('border-color');
+            sheetTabsBar.style.removeProperty('color');
+            const titles = sheetTabsBar.querySelectorAll('.current-sheet-title, .current-category-title');
+            titles.forEach(t => t.style.removeProperty('color'));
+            const buttons = sheetTabsBar.querySelectorAll('.btn-menu, .btn-sheet-action');
+            buttons.forEach(b => {
+                b.style.removeProperty('color');
+                b.style.removeProperty('border-color');
+            });
         }
     }
 
