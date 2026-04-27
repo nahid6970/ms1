@@ -216,7 +216,7 @@
             "name": "komorebi stop/start"
         },
         {
-            "action": "KeySequence()\nKeySequence() {\n    Send \"| \"\nSleep 250\n    Send \"^!{Numpad2}\"\nSleep 250\n    Sendtext \" | \"\nSleep 250\n    Send \"^!{Numpad1}\"\nSleep 250\n    Sendtext \"|\"\n}",
+            "action": "KeySequence()\nKeySequence() {\n    Send \"| \"\nSleep 250\n    Send \"^!{Numpad2}\"\nSleep 250\n    Sendtext \" | \"\nSleep 250\n    Send \"^!{Numpad1}\"\nSleep 250\n    Sendtext \" |\"\n}",
             "category": "Text",
             "description": "Sleep 250 //    Send \" -> \"",
             "enabled": true,
