@@ -51,7 +51,6 @@ function displayTabs(tabs) {
     let deadlineHTML = '';
     if (tab.deadline) {
       const now = new Date();
-      // Reset times to compare only dates
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       const target = new Date(tab.deadline);
       const targetDate = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
@@ -86,13 +85,11 @@ function displayTabs(tabs) {
       <button class="tab-remove" data-id="${tab.id}">×</button>
     `;
     
-    // Click on tab info to open URL
     const tabInfo = tabItem.querySelector('.tab-info');
     tabInfo.addEventListener('click', () => {
       chrome.tabs.create({ url: tab.url });
     });
     
-    // Click on remove button to delete tab
     const removeBtn = tabItem.querySelector('.tab-remove');
     removeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -158,8 +155,6 @@ document.getElementById('clearAll').addEventListener('click', (e) => {
 // Show button feedback
 function showButtonFeedback(button, success, message) {
   const originalText = button.innerHTML;
-  const originalClass = button.className;
-  
   if (success) {
     button.innerHTML = '✓ ' + message;
     button.style.background = '#4CAF50';
@@ -167,12 +162,9 @@ function showButtonFeedback(button, success, message) {
     button.innerHTML = '✗ ' + message;
     button.style.background = '#f44336';
   }
-  
   button.disabled = true;
-  
   setTimeout(() => {
     button.innerHTML = originalText;
-    button.className = originalClass;
     button.style.background = '';
     button.disabled = false;
   }, 2000);
@@ -212,117 +204,121 @@ document.getElementById('loadFromConvex').addEventListener('click', (e) => {
   });
 });
 
-// Load tabs when popup opens
-loadTabs();
-
 // Settings functionality
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const closeModal = document.getElementById('closeModal');
+const resetSettings = document.getElementById('resetSettings');
+
+// Inputs
 const ytIconSize = document.getElementById('ytIconSize');
 const channelIconSize = document.getElementById('channelIconSize');
 const ytIconValue = document.getElementById('ytIconValue');
 const channelIconValue = document.getElementById('channelIconValue');
-const resetSettings = document.getElementById('resetSettings');
+
+const urgentBg = document.getElementById('urgentBg');
+const urgentFg = document.getElementById('urgentFg');
+const urgentBorder = document.getElementById('urgentBorder');
+const safeBg = document.getElementById('safeBg');
+const safeFg = document.getElementById('safeFg');
+const safeBorder = document.getElementById('safeBorder');
 
 // Load saved settings
 function loadSettings() {
-  chrome.storage.local.get(['iconSettings'], (result) => {
-    const settings = result.iconSettings || {
-      ytIconSize: 20,
-      channelIconSize: 18
+  chrome.storage.local.get(['iconSettings', 'deadlineSettings'], (result) => {
+    const iconSettings = result.iconSettings || { ytIconSize: 20, channelIconSize: 18 };
+    const deadlineSettings = result.deadlineSettings || {
+      urgentBg: '#ff4757', urgentFg: '#ffffff', urgentBorder: '#eb3b5a',
+      safeBg: '#e3f2fd', safeFg: '#1976d2', safeBorder: '#bbdefb'
     };
     
-    ytIconSize.value = settings.ytIconSize;
-    channelIconSize.value = settings.channelIconSize;
-    ytIconValue.textContent = settings.ytIconSize + 'px';
-    channelIconValue.textContent = settings.channelIconSize + 'px';
+    // Icons
+    ytIconSize.value = iconSettings.ytIconSize;
+    channelIconSize.value = iconSettings.channelIconSize;
+    ytIconValue.textContent = iconSettings.ytIconSize + 'px';
+    channelIconValue.textContent = iconSettings.channelIconSize + 'px';
     
-    applyIconSizes(settings.ytIconSize, settings.channelIconSize);
+    // Deadlines
+    urgentBg.value = deadlineSettings.urgentBg;
+    urgentFg.value = deadlineSettings.urgentFg;
+    urgentBorder.value = deadlineSettings.urgentBorder;
+    safeBg.value = deadlineSettings.safeBg;
+    safeFg.value = deadlineSettings.safeFg;
+    safeBorder.value = deadlineSettings.safeBorder;
+    
+    applySettings(iconSettings, deadlineSettings);
   });
 }
 
-// Apply icon sizes to CSS
-function applyIconSizes(ytSize, channelSize) {
-  // Update CSS variables or directly modify styles
-  const style = document.createElement('style');
-  style.id = 'dynamic-icon-styles';
+// Apply settings to CSS
+function applySettings(icons, deadlines) {
+  const styleId = 'dynamic-settings-styles';
+  let style = document.getElementById(styleId);
+  if (style) style.remove();
   
-  // Remove existing dynamic styles
-  const existingStyle = document.getElementById('dynamic-icon-styles');
-  if (existingStyle) {
-    existingStyle.remove();
-  }
-  
+  style = document.createElement('style');
+  style.id = styleId;
   style.textContent = `
-    .tab-favicon-container {
-      width: ${ytSize}px !important;
-      height: ${ytSize}px !important;
+    .tab-favicon-container { width: ${icons.ytIconSize}px !important; height: ${icons.ytIconSize}px !important; }
+    .tab-favicon-yt { width: ${icons.ytIconSize}px !important; height: ${icons.ytIconSize}px !important; }
+    .tab-favicon-channel { width: ${icons.channelIconSize}px !important; height: ${icons.channelIconSize}px !important; }
+    
+    .tab-deadline.urgent { 
+      background-color: ${deadlines.urgentBg} !important; 
+      color: ${deadlines.urgentFg} !important; 
+      border-color: ${deadlines.urgentBorder} !important; 
     }
-    .tab-favicon-yt {
-      width: ${ytSize}px !important;
-      height: ${ytSize}px !important;
-    }
-    .tab-favicon-channel {
-      width: ${channelSize}px !important;
-      height: ${channelSize}px !important;
+    .tab-deadline.safe { 
+      background-color: ${deadlines.safeBg} !important; 
+      color: ${deadlines.safeFg} !important; 
+      border-color: ${deadlines.safeBorder} !important; 
     }
   `;
-  
   document.head.appendChild(style);
 }
 
 // Save settings
-function saveSettings() {
-  const settings = {
+function saveAllSettings() {
+  const iconSettings = {
     ytIconSize: parseInt(ytIconSize.value),
     channelIconSize: parseInt(channelIconSize.value)
   };
+  const deadlineSettings = {
+    urgentBg: urgentBg.value, urgentFg: urgentFg.value, urgentBorder: urgentBorder.value,
+    safeBg: safeBg.value, safeFg: safeFg.value, safeBorder: safeBorder.value
+  };
   
-  chrome.storage.local.set({ iconSettings: settings }, () => {
-    applyIconSizes(settings.ytIconSize, settings.channelIconSize);
+  chrome.storage.local.set({ iconSettings, deadlineSettings }, () => {
+    applySettings(iconSettings, deadlineSettings);
   });
 }
 
-// Open settings modal
-settingsBtn.addEventListener('click', () => {
-  settingsModal.classList.add('show');
+// Event Listeners
+[ytIconSize, channelIconSize, urgentBg, urgentFg, urgentBorder, safeBg, safeFg, safeBorder].forEach(el => {
+  el.addEventListener('input', () => {
+    if (el === ytIconSize) ytIconValue.textContent = el.value + 'px';
+    if (el === channelIconSize) channelIconValue.textContent = el.value + 'px';
+    saveAllSettings();
+  });
 });
 
-// Close settings modal
-closeModal.addEventListener('click', () => {
-  settingsModal.classList.remove('show');
-});
+settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+closeModal.addEventListener('click', () => settingsModal.classList.remove('show'));
+settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
 
-// Close modal when clicking outside
-settingsModal.addEventListener('click', (e) => {
-  if (e.target === settingsModal) {
-    settingsModal.classList.remove('show');
-  }
-});
-
-// Update YouTube icon size
-ytIconSize.addEventListener('input', (e) => {
-  const value = e.target.value;
-  ytIconValue.textContent = value + 'px';
-  saveSettings();
-});
-
-// Update channel icon size
-channelIconSize.addEventListener('input', (e) => {
-  const value = e.target.value;
-  channelIconValue.textContent = value + 'px';
-  saveSettings();
-});
-
-// Reset settings to default
 resetSettings.addEventListener('click', () => {
   ytIconSize.value = 20;
   channelIconSize.value = 18;
-  ytIconValue.textContent = '20px';
-  channelIconValue.textContent = '18px';
-  saveSettings();
+  urgentBg.value = '#ff4757';
+  urgentFg.value = '#ffffff';
+  urgentBorder.value = '#eb3b5a';
+  safeBg.value = '#e3f2fd';
+  safeFg.value = '#1976d2';
+  safeBorder.value = '#bbdefb';
+  saveAllSettings();
+  loadSettings();
 });
 
-// Load settings on startup
+// Initial load
+loadTabs();
 loadSettings();
