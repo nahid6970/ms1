@@ -6725,15 +6725,23 @@ function showSubSheetContextMenu(event, sheetIndex) {
 }
 
 
-function toggleSubSheetDropdown() {
+function addSubSheetFromHeader(event) {
+    if (event) event.stopPropagation();
+    const currentSheetData = tableData.sheets[currentSheet];
+    const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
+    addSubSheet(parentIndex);
+}
+
+function toggleSubSheetDropdown(event) {
+    if (event) event.stopPropagation();
     const dropdown = document.getElementById('subSheetDropdown');
     const isVisible = dropdown.style.display === 'block';
     
     if (isVisible) {
         dropdown.style.display = 'none';
     } else {
-        const sheetInfo = document.querySelector('.current-sheet-info');
-        const rect = sheetInfo.getBoundingClientRect();
+        const dots = document.querySelector('.subsheet-dots');
+        const rect = dots.getBoundingClientRect();
         dropdown.style.left = rect.left + 'px';
         dropdown.style.top = rect.bottom + 5 + 'px';
         
@@ -6760,13 +6768,17 @@ function renderSubSheetDropdown() {
         const bgColor = sheet.bgColor || (catStyle ? catStyle.bgColor : null);
         const fgColor = sheet.fgColor || (catStyle ? catStyle.fgColor : null);
         
+        // Only apply if custom colors exist, otherwise use theme defaults from CSS
         if (bgColor) item.style.backgroundColor = bgColor;
         if (fgColor) item.style.color = fgColor;
+        
+        // If active, we might want to override the color to keep contrast, 
+        // but the .active class in CSS handles the basic green/black theme.
     };
     
     const parentItem = document.createElement('div');
-    parentItem.className = `subsheet-dropdown-item ${currentSheet === parentIndex ? 'active' : ''}`;
-    parentItem.textContent = parentSheet.name;
+    parentItem.className = `subsheet-dropdown-item is-parent ${currentSheet === parentIndex ? 'active' : ''}`;
+    parentItem.innerHTML = `<span>📂</span> <span>${parentSheet.name}</span>`;
     applyColors(parentItem, parentSheet, parentIndex);
     
     parentItem.onclick = (e) => {
@@ -6788,7 +6800,7 @@ function renderSubSheetDropdown() {
         if (sheet.parentSheet === parentIndex) {
             const item = document.createElement('div');
             item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
-            item.textContent = '  ' + sheet.name;
+            item.innerHTML = `<span>📄</span> <span>${sheet.name}</span>`;
             applyColors(item, sheet, index);
             
             item.onclick = (e) => {
@@ -6807,15 +6819,6 @@ function renderSubSheetDropdown() {
             dropdown.appendChild(item);
         }
     });
-    
-    const addItem = document.createElement('div');
-    addItem.className = 'subsheet-dropdown-add';
-    addItem.innerHTML = '<span>+</span><span>Add Sub-sheet</span>';
-    addItem.onclick = () => {
-        addSubSheet(parentIndex);
-        dropdown.style.display = 'none';
-    };
-    dropdown.appendChild(addItem);
 }
 
 document.addEventListener('click', (e) => {

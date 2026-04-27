@@ -98,10 +98,16 @@
     <div class="container">
         <div class="sheet-tabs">
             <button class="btn-menu" onclick="toggleSidebar()" title="Open Navigation">☰</button>
-            <div class="current-sheet-info" style="position: relative;">
-                <div onclick="toggleSubSheetDropdown()" style="cursor: pointer;" title="Click to see all sub-sheets">
+            <div class="current-sheet-info">
+                <div class="sheet-dropdown-trigger" onclick="toggleSubSheetDropdown(event)" title="Click to see all sub-sheets">
                     <span id="currentSheetTitle" class="current-sheet-title">Sheet1</span>
                     <span id="currentCategoryTitle" class="current-category-title">Uncategorized</span>
+                </div>
+                <div class="subsheet-dots" onclick="toggleSubSheetDropdown(event)" title="Click to see all sub-sheets">
+                    <span class="subsheet-dot-icon">·</span>
+                </div>
+                <div class="subsheet-quick-add" onclick="addSubSheetFromHeader(event)" title="Add Sub-sheet">
+                    <span class="subsheet-add-icon">+</span>
                 </div>
                 <div id="subSheetDropdown" class="subsheet-dropdown-menu" style="display: none;"></div>
             </div>
