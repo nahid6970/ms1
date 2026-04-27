@@ -59,34 +59,18 @@ body {
     display: flex;
     flex-direction: row !important;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     flex-shrink: 0;
     flex-wrap: nowrap !important;
+    height: 32px;
 }
 
-.sheet-dropdown-trigger {
-    position: relative;
-    padding-right: 20px;
-    cursor: pointer;
+.current-sheet-titles {
     display: flex;
     flex-direction: column;
     gap: 0;
     min-width: max-content;
-}
-
-.sheet-dropdown-trigger::after {
-    content: '▼';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 10px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.sheet-dropdown-trigger:hover::after {
-    opacity: 1;
+    justify-content: center;
 }
 
 .subsheet-dots, .subsheet-quick-add {
@@ -108,6 +92,20 @@ body {
     background: rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.1);
     color: #000;
+}
+
+.subsheet-dot-icon {
+    font-size: 28px;
+    line-height: 22px;
+    height: 22px;
+    display: block;
+}
+
+.subsheet-add-icon {
+    font-size: 18px;
+    line-height: 22px;
+    height: 22px;
+    display: block;
 }
 
 
