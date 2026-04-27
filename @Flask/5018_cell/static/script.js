@@ -6735,13 +6735,17 @@ function addSubSheetFromHeader(event) {
 function toggleSubSheetDropdown(event) {
     if (event) event.stopPropagation();
     const dropdown = document.getElementById('subSheetDropdown');
+    if (!dropdown) return;
     const isVisible = dropdown.style.display === 'block';
     
     if (isVisible) {
         dropdown.style.display = 'none';
     } else {
-        const dots = document.querySelector('.subsheet-dots');
-        const rect = dots.getBoundingClientRect();
+        // Use event target for positioning if available, otherwise fallback to container
+        const target = event ? event.currentTarget : document.querySelector('.current-sheet-actions');
+        if (!target) return;
+        
+        const rect = target.getBoundingClientRect();
         dropdown.style.left = rect.left + 'px';
         dropdown.style.top = rect.bottom + 5 + 'px';
         

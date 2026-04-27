@@ -73,39 +73,38 @@ body {
     justify-content: center;
 }
 
-.subsheet-dots, .subsheet-quick-add {
+.current-sheet-actions {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 2px 6px;
+    gap: 4px;
+    height: 24px;
+    margin-left: 4px;
+}
+
+.sheet-action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
     background: transparent;
+    border: none;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
     color: #666;
-    font-weight: bold;
-    border: 1px solid transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    line-height: 1;
 }
 
-.subsheet-dots:hover, .subsheet-quick-add:hover {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
+.sheet-action-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
     color: #000;
-}
-
-.subsheet-dot-icon {
-    font-size: 28px;
-    line-height: 22px;
-    height: 22px;
-    display: block;
-}
-
-.subsheet-add-icon {
-    font-size: 18px;
-    line-height: 22px;
-    height: 22px;
-    display: block;
 }
 
 
