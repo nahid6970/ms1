@@ -97,9 +97,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           modal.style = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 2147483647; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; gap: 15px; width: 320px; color: #333; line-height: 1.5; pointer-events: auto;';
           
           modal.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-              <span style="font-size: 24px;">⏰</span>
-              <h3 style="margin:0; font-size: 18px; font-weight: 600; color: #333;">Set Deadline</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">⏰</span>
+                <h3 style="margin:0; font-size: 18px; font-weight: 600; color: #333;">Set Deadline</h3>
+              </div>
+              <button id="closeBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999; padding: 5px;">&times;</button>
             </div>
             <p style="margin: 0; font-size: 13px; color: #666;">Optional: Track days left for this task.</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -111,8 +114,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               <input type="date" id="deadlineDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; cursor: pointer; background: white; color: black; width: 100%;">
             </div>
             <div style="display: flex; gap: 12px; margin-top: 10px;">
-              <button id="skipBtn" style="flex: 1; padding: 12px; border: none; background: #f0f0f0; color: #666; font-weight: 600; border-radius: 8px; cursor: pointer;">Skip</button>
-              <button id="saveBtn" style="flex: 1; padding: 12px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; border-radius: 8px; cursor: pointer;">Set</button>
+              <button id="cancelBtn" style="flex: 1; padding: 12px; border: 1px solid #ddd; background: white; color: #666; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
+              <button id="saveBtn" style="flex: 1.5; padding: 12px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 14px;">Save & Close</button>
             </div>
           `;
           
@@ -126,13 +129,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           daysInput.addEventListener('input', () => { if (daysInput.value) dateInput.value = ''; });
           dateInput.addEventListener('input', () => { if (dateInput.value) daysInput.value = ''; });
 
-          const finish = (deadline) => {
-            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline });
+          const removeUI = () => {
             document.body.removeChild(modal);
             document.body.removeChild(overlay);
           };
+
+          const finish = (deadline) => {
+            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline });
+            removeUI();
+          };
           
-          modal.querySelector('#skipBtn').onclick = (e) => { e.stopPropagation(); finish(null); };
+          modal.querySelector('#cancelBtn').onclick = (e) => { e.stopPropagation(); removeUI(); };
+          modal.querySelector('#closeBtn').onclick = (e) => { e.stopPropagation(); removeUI(); };
           
           modal.querySelector('#saveBtn').onclick = (e) => {
             e.stopPropagation();
@@ -148,9 +156,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               d.setHours(23, 59, 59, 999);
               finish(d.getTime());
             } else {
+              // No input means no deadline, but still save and close
               finish(null);
             }
           };
+
+          // Close on escape
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById(id)) {
+              removeUI();
+            }
+          }, { once: true });
+
         } catch (e) {
           console.error('Modal injection error:', e);
           chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: null, error: e.message });
@@ -158,7 +175,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       }
     }).catch((err) => {
       console.error('Failed to inject script:', err);
-      // Fallback: Save tab without deadline if script injection is blocked (e.g. on chrome:// pages)
       handleTabSaving(tab, null);
     });
   }
