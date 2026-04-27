@@ -107,10 +107,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             <p style="margin: 0; font-size: 13px; color: #666;">Optional: Track days left for this task.</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <label style="font-size: 12px; font-weight: 600; color: #444;">Days from today:</label>
-              <input type="number" id="deadlineDays" placeholder="e.g. 7" min="1" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; color: black; width: 100%;">
+              <input type="number" id="deadlineDays" min="1" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; color: black; width: 100%;">
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-size: 12px; font-weight: 600; color: #444;">Or pick a date:</label>
+              <label style="font-size: 12px; font-weight: 600; color: #444;">Pick a date:</label>
               <input type="date" id="deadlineDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; cursor: pointer; background: white; color: black; width: 100%;">
             </div>
             <div style="display: flex; gap: 12px; margin-top: 10px;">
