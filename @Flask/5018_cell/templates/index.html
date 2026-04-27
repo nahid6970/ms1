@@ -111,6 +111,13 @@
             </div>
 
             <div class="sheet-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()"
+                        title="Search in all cells">
+                    <button onclick="toggleVoiceSearch()" oncontextmenu="toggleVoiceLang(event)" id="voiceSearchBtn" class="btn-voice-search" title="Voice search (Right-click for language)"></button>                <button onclick="moveMatchedRows()" id="moveMatchesBtn" class="btn-move-matches"
+                        title="Move matched rows to top" style="display: none;">⇅</button>
+                    <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
+                </div>
                 <div style="position: relative;">
                     <button onclick="toggleLastEditedPopup()" class="btn-sheet-action" id="btnLastEdited"
                         title="Bookmark">🕒</button>
@@ -220,14 +227,6 @@
                 <button onclick="nextSingleRow()" class="btn-icon" id="btnNextRow" title="Next Row" disabled>
                     <span>➡️</span>
                 </button>
-            </div>
-
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchTable()"
-                    title="Search in all cells">
-                <button onclick="toggleVoiceSearch()" oncontextmenu="toggleVoiceLang(event)" id="voiceSearchBtn" class="btn-voice-search" title="Voice search (Right-click for language)"></button>                <button onclick="moveMatchedRows()" id="moveMatchesBtn" class="btn-move-matches"
-                    title="Move matched rows to top" style="display: none;">⇅</button>
-                <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
 
             <div class="font-size-control">

@@ -12,7 +12,10 @@
 - **Sub-sheet Consistency**: Sub-sheets (both in the bar and the new dropdown) now only use their own specific colors or the default theme.
 - **F1/Sidebar Focus**: Category colors are now strictly visual aids for the F1 navigation window and the sidebar tree view.
 
-### 🔧 Code Quality & Maintenance
+### 🚀 Toolbar & Header Enhancements
+- **Search Box Relocation**: Moved the search box from the secondary toolbar to the main header, positioned conveniently to the left of the Bookmark button.
+- **Improved Header Compactness**: Integrated search into the `.sheet-controls` group, freeing up vertical space in the secondary toolbar.
+- **Ribbon Toggle Sync**: Search box now toggles visibility along with the main sheet header (F4).
 - **Refined Event Handlers**: Cleaned up `static/script.js` to prevent redundant style applications during `renderSidebar` and `renderSubSheetBar`.
 - **Documentation Sync**: Updated `UX_NAVIGATION.md` and `RECENT.md` to reflect these behavioral changes.
 
