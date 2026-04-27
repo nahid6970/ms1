@@ -37,7 +37,6 @@ function displayTabs(tabs) {
     
     let faviconHTML;
     if (isYouTube && tab.channelIcon) {
-      // YouTube with channel icon - show both
       faviconHTML = `
         <div class="tab-favicon-container">
           <img src="${favicon}" class="tab-favicon-yt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>▶️</text></svg>'">
@@ -45,8 +44,39 @@ function displayTabs(tabs) {
         </div>
       `;
     } else {
-      // Regular favicon
       faviconHTML = `<img src="${favicon}" class="tab-favicon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>'">`;
+    }
+    
+    // Calculate days left for deadline
+    let deadlineHTML = '';
+    if (tab.deadline) {
+      const now = new Date();
+      // Reset times to compare only dates
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const target = new Date(tab.deadline);
+      const targetDate = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
+      
+      const diffDays = Math.round((targetDate - today) / (1000 * 60 * 60 * 24));
+      
+      let badgeClass = 'tab-deadline';
+      let text = '';
+      
+      if (diffDays < 0) {
+        text = 'Overdue';
+        badgeClass += ' urgent';
+      } else if (diffDays === 0) {
+        text = 'Due today';
+        badgeClass += ' urgent';
+      } else if (diffDays === 1) {
+        text = '1 day left';
+        badgeClass += ' urgent';
+      } else {
+        text = `${diffDays} days left`;
+        if (diffDays <= 2) badgeClass += ' urgent';
+        else badgeClass += ' safe';
+      }
+      
+      deadlineHTML = `<div class="${badgeClass}">${text}</div>`;
     }
     
     tabItem.innerHTML = `
@@ -55,6 +85,7 @@ function displayTabs(tabs) {
         <div class="tab-title">${tab.title}</div>
         <div class="tab-url">${tab.url}</div>
       </div>
+      ${deadlineHTML}
       <button class="tab-remove" data-id="${tab.id}">×</button>
     `;
     

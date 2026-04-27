@@ -78,79 +78,146 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "saveAndCloseTab") {
-    // Get current saved tabs
-    chrome.storage.local.get(['savedTabs'], (result) => {
-      const savedTabs = result.savedTabs || [];
-      
-      // Get custom favicon for YouTube
-      let favicon = tab.favIconUrl || '';
-      
-      // For YouTube videos, try to get channel icon
-      if (tab.url.includes('youtube.com/watch')) {
-        // Execute script to get channel icon from the page
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => {
-            // Try multiple selectors to get channel avatar
-            const selectors = [
-              '#owner #avatar img',
-              'ytd-video-owner-renderer #avatar img',
-              '#channel-thumbnail img',
-              'yt-img-shadow img',
-              '#avatar img'
-            ];
-            
-            for (const selector of selectors) {
-              const img = document.querySelector(selector);
-              if (img && img.src && !img.src.includes('data:')) {
-                return img.src;
-              }
-            }
-            return null;
-          }
-        }).then((results) => {
-          const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
-          console.log('Channel icon found:', channelIcon);
+    console.log('Context menu clicked for tab:', tab.id);
+    
+    // Attempt to inject the deadline modal
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        try {
+          const id = 'tab-saver-deadline-modal';
+          if (document.getElementById(id)) return;
+
+          const overlay = document.createElement('div');
+          overlay.id = id + '-overlay';
+          overlay.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2147483646; transition: opacity 0.3s; pointer-events: auto;';
           
-          // Add tab with both YouTube favicon and channel icon
-          saveTab(savedTabs, tab, favicon, channelIcon);
-        }).catch((error) => {
-          console.error('Failed to get channel icon:', error);
-          // If script fails, use default favicon only
-          saveTab(savedTabs, tab, favicon, null);
-        });
-      } else {
-        // For non-YouTube tabs, save immediately
-        saveTab(savedTabs, tab, favicon, null);
+          const modal = document.createElement('div');
+          modal.id = id;
+          modal.style = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 2147483647; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; gap: 15px; width: 320px; color: #333; line-height: 1.5; pointer-events: auto;';
+          
+          modal.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+              <span style="font-size: 24px;">⏰</span>
+              <h3 style="margin:0; font-size: 18px; font-weight: 600; color: #333;">Set Deadline</h3>
+            </div>
+            <p style="margin: 0; font-size: 13px; color: #666;">Optional: Track days left for this task.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 12px; font-weight: 600; color: #444;">Days from today:</label>
+              <input type="number" id="deadlineDays" placeholder="e.g. 7" min="1" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; color: black; width: 100%;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 12px; font-weight: 600; color: #444;">Or pick a date:</label>
+              <input type="date" id="deadlineDate" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; cursor: pointer; background: white; color: black; width: 100%;">
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 10px;">
+              <button id="skipBtn" style="flex: 1; padding: 12px; border: none; background: #f0f0f0; color: #666; font-weight: 600; border-radius: 8px; cursor: pointer;">Skip</button>
+              <button id="saveBtn" style="flex: 1; padding: 12px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; border-radius: 8px; cursor: pointer;">Set</button>
+            </div>
+          `;
+          
+          document.body.appendChild(overlay);
+          document.body.appendChild(modal);
+
+          const daysInput = modal.querySelector('#deadlineDays');
+          const dateInput = modal.querySelector('#deadlineDate');
+          daysInput.focus();
+
+          daysInput.addEventListener('input', () => { if (daysInput.value) dateInput.value = ''; });
+          dateInput.addEventListener('input', () => { if (dateInput.value) daysInput.value = ''; });
+
+          const finish = (deadline) => {
+            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline });
+            document.body.removeChild(modal);
+            document.body.removeChild(overlay);
+          };
+          
+          modal.querySelector('#skipBtn').onclick = (e) => { e.stopPropagation(); finish(null); };
+          
+          modal.querySelector('#saveBtn').onclick = (e) => {
+            e.stopPropagation();
+            const days = daysInput.value;
+            const date = dateInput.value;
+            if (date) {
+              const d = new Date(date);
+              d.setHours(23, 59, 59, 999);
+              finish(d.getTime());
+            } else if (days) {
+              const d = new Date();
+              d.setDate(d.getDate() + parseInt(days));
+              d.setHours(23, 59, 59, 999);
+              finish(d.getTime());
+            } else {
+              finish(null);
+            }
+          };
+        } catch (e) {
+          console.error('Modal injection error:', e);
+          chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: null, error: e.message });
+        }
       }
+    }).catch((err) => {
+      console.error('Failed to inject script:', err);
+      // Fallback: Save tab without deadline if script injection is blocked (e.g. on chrome:// pages)
+      handleTabSaving(tab, null);
     });
   }
 });
 
+// Main function to handle tab saving logic
+function handleTabSaving(tab, deadline) {
+  chrome.storage.local.get(['savedTabs'], (result) => {
+    const savedTabs = result.savedTabs || [];
+    let favicon = tab.favIconUrl || '';
+    
+    if (tab.url.includes('youtube.com/watch')) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          const selectors = ['#owner #avatar img', 'ytd-video-owner-renderer #avatar img', '#channel-thumbnail img', 'yt-img-shadow img', '#avatar img'];
+          for (const selector of selectors) {
+            const img = document.querySelector(selector);
+            if (img && img.src && !img.src.includes('data:')) return img.src;
+          }
+          return null;
+        }
+      }).then((results) => {
+        const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
+        saveTab(savedTabs, tab, favicon, channelIcon, deadline);
+      }).catch(() => {
+        saveTab(savedTabs, tab, favicon, null, deadline);
+      });
+    } else {
+      saveTab(savedTabs, tab, favicon, null, deadline);
+    }
+  });
+}
+
 // Helper function to save tab
-function saveTab(savedTabs, tab, favicon, channelIcon = null) {
+function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null) {
   const newTab = {
     id: Date.now(),
     title: tab.title,
     url: tab.url,
     favicon: favicon,
-    channelIcon: channelIcon, // Store channel icon separately
-    savedAt: new Date().toISOString()
+    channelIcon: channelIcon,
+    savedAt: new Date().toISOString(),
+    deadline: deadline
   };
   
   savedTabs.unshift(newTab);
   
-  // Save to storage
   chrome.storage.local.set({ savedTabs: savedTabs }, () => {
-    console.log('Tab saved:', newTab);
-    
-    // Close the tab
     chrome.tabs.remove(tab.id);
   });
 }
 
-// Handle manual save/load requests from popup
+// Handle messages from injected scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'deadlineSelected') {
+    handleTabSaving(sender.tab, message.deadline);
+  }
+  
   if (message.action === 'saveToConvex') {
     sendDataToConvex(message.data)
       .then(result => sendResponse(result))
