@@ -76,13 +76,12 @@
 ## Sub-Sheet Hierarchy
 **Purpose:** Organize sheets in a parent-child structure.
 **UI Elements:**
-- Horizontal sub-sheet bar below toolbar.
-- Parent tab always first, followed by sub-sheets.
-- **Dynamic Themes**: The bar inherits the parent sheet's background color.
-- **Customizable Tabs**: Right-click any tab to set unique colors.
+- **Action Pill**: A subtle container next to the main sheet title containing:
+  - **Menu Button (⋮)**: Opens a compact dropdown showing the parent and all sibling sub-sheets. Automatically hides if no sub-sheets exist.
+  - **Quick Add (+)**: Instant creation of a new sub-sheet under the current parent.
+- **Compact Dropdown**: A cyberpunk-themed (dark green/black) menu matching the F2 aesthetic. Supports right-click management (Rename, Delete, Colors) directly from the list.
 - **Inheritance**: Sub-sheets automatically adopt their parent category's color theme unless overridden.
-- **Professional Look**: Square borders and distinct active-tab indicators.
-- Right-click tabs to manage.
+- **Navigation Bar**: Horizontal sub-sheet bar remains available below the toolbar for tabbed navigation.
 - Deletion cascade (Parent -> Children).
 
 ## UI Aesthetic (Square Design)

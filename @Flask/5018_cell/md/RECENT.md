@@ -1,5 +1,38 @@
 # Recent Development Log
 
+## [2026-04-27 15:30] - Enhanced Sub-sheet UI & Action Header
+
+**Session Duration:** 0.8 hours
+
+**What We Accomplished:**
+
+### 🎨 Modernized Sub-sheet Navigation
+- **Action Pill**: Grouped subsheet actions into a subtle "pill" container next to the main sheet name.
+- **Improved Icons**: Replaced the hover dropdown with a vertical ellipsis (⋮) for the menu and a (+) button for quick adding.
+- **Compact Dropdown**: Redesigned the subsheet dropdown to match the F2 cyberpunk aesthetic (dark green/black theme).
+- **Alignment**: Standardized icons using flexbox and JetBrains Mono for perfect visual balance.
+
+### 🔧 UI Logic Refinements
+- **Conditional Visibility**: The ⋮ menu button now automatically hides if a sheet has no subsheets, reducing UI clutter.
+- **Clean Titles**: Removed the dropdown arrow and functionality from the main sheet name to prevent accidental clicks.
+- **Context Preservation**: Full right-click functionality (Rename, Delete, Colors) maintained in the new dropdown menu.
+- **Positioning**: Dropdown now anchors precisely to the action pill.
+
+**Files Modified:**
+- `templates/index.html` - Restructured `current-sheet-info` and added the action pill.
+- `static/style.css` - Overhauled dropdown, action buttons, and header layout styles.
+- `static/script.js` - Updated `toggleSubSheetDropdown`, `renderSubSheetDropdown`, and `updateTreeUI` logic.
+
+**Current Status:**
+- ✅ Modernized, compact navigation for hierarchical sheets.
+- ✅ Balanced and aligned header icons.
+- ✅ Cleaner UI for sheets without children.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-18 23:49] - Fixed Image Markdown Bugs
 
 **Session Duration:** 0.1 hours
