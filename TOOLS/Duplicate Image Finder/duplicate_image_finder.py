@@ -33,6 +33,7 @@ from PyQt6.QtWidgets import (
     QSlider,
     QSpinBox,
     QStatusBar,
+    QSystemTrayIcon,
     QTableWidget,
     QTableWidgetItem,
     QTreeView,
@@ -927,6 +928,10 @@ class DuplicateImageFinderApp(QMainWindow):
         self.thumbnail_cache: Dict[Tuple[str, int], QPixmap] = {}
         self._restoring_folder_state = False
 
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(self.windowIcon())
+        self.tray_icon.show()
+
         self.setWindowTitle("Duplicate Image Finder")
         self.setWindowIcon(make_app_icon())
         self.resize(1480, 860)
@@ -1384,7 +1389,19 @@ class DuplicateImageFinderApp(QMainWindow):
     def on_scan_finished(self, groups: List[dict]) -> None:
         self.current_groups = groups
         self.render_groups()
-        self.statusBar().showMessage(f"Finished. Found {len(groups)} duplicate groups.")
+        msg = f"Finished. Found {len(groups)} duplicate groups."
+        self.statusBar().showMessage(msg)
+        
+        # Show system notification
+        self.tray_icon.showMessage(
+            "Scan Complete",
+            msg,
+            QSystemTrayIcon.MessageIcon.Information,
+            5000
+        )
+        
+        # Flash taskbar icon / notify user
+        QApplication.alert(self)
 
     def on_scan_failed(self, error: str) -> None:
         QMessageBox.critical(self, "Scan Failed", error)
