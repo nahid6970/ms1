@@ -397,7 +397,7 @@ class RcloneApp(QMainWindow):
         cmd_group = QGroupBox("COMMAND")
         cmd_layout = QHBoxLayout(cmd_group)
         self.cmd_group_btn = QButtonGroup(self)
-        for val in ["ls", "copy", "sync", "tree", "ncdu", "size", "mount", "rcd", "about"]:
+        for val in ["ls", "copy", "move", "sync", "tree", "ncdu", "size", "mount", "rcd", "about"]:
             rb = QRadioButton(val)
             if val == "ls":
                 rb.setChecked(True)
