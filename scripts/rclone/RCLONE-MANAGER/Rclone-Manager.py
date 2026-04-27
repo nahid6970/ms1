@@ -483,6 +483,12 @@ class RcloneApp(QMainWindow):
             ("Skip Shortcuts",          "--drive-skip-shortcuts",            False),
             ("Date **tree",             "-D",                                False),
             ("Modified Time **tree",    "-t",                                False),
+            ("Size Only",               "--size-only",                       False),
+            ("Checksum",                "--checksum",                        False),
+            ("Server Side Copy",        "--drive-server-side-across-configs",False),
+            ("Ignore Existing",         "--ignore-existing",                 False),
+            ("No Traverse",             "--no-traverse",                     False),
+            ("Update (Skip Newer)",     "--update",                          False),
         ]
         self.flag_defs = flag_defs
         saved_flags = self._load_settings().get("flags", [])
