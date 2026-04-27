@@ -6,13 +6,27 @@ function loadTabs() {
   });
 }
 
+// Variables for context menu and modal
+let currentRightClickedTabId = null;
+const customContextMenu = document.getElementById('customContextMenu');
+const deadlineModal = document.getElementById('deadlineModal');
+const editDeadlineDays = document.getElementById('editDeadlineDays');
+const editDeadlineDate = document.getElementById('editDeadlineDate');
+
 // Display tabs in the popup
 function displayTabs(tabs) {
   const tabList = document.getElementById('tabList');
   const tabCount = document.getElementById('tabCount');
   
-  // Sort tabs by id descending (newest first)
-  tabs.sort((a, b) => b.id - a.id);
+  // Sort tabs: deadlines first (soonest first), then newest first for those without deadlines
+  tabs.sort((a, b) => {
+    if (a.deadline && b.deadline) {
+      return a.deadline - b.deadline;
+    }
+    if (a.deadline) return -1;
+    if (b.deadline) return 1;
+    return b.id - a.id;
+  });
   
   tabCount.textContent = tabs.length;
   
@@ -31,6 +45,24 @@ function displayTabs(tabs) {
   tabs.forEach((tab) => {
     const tabItem = document.createElement('div');
     tabItem.className = 'tab-item';
+    
+    // Custom context menu for tab items
+    tabItem.oncontextmenu = (e) => {
+      e.preventDefault();
+      currentRightClickedTabId = tab.id;
+      
+      // Position menu
+      customContextMenu.style.top = `${e.clientY}px`;
+      customContextMenu.style.left = `${e.clientX}px`;
+      customContextMenu.classList.add('show');
+      
+      // Close menu when clicking elsewhere
+      const closeMenu = () => {
+        customContextMenu.classList.remove('show');
+        document.removeEventListener('click', closeMenu);
+      };
+      setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    };
     
     const isYouTube = tab.url.includes('youtube.com/watch');
     const favicon = tab.favicon || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="20" font-size="20">🌐</text></svg>';
@@ -99,6 +131,54 @@ function displayTabs(tabs) {
     tabList.appendChild(tabItem);
   });
 }
+
+// Open deadline modal from context menu
+document.getElementById('menuSetDeadline').onclick = () => {
+  editDeadlineDays.value = '';
+  editDeadlineDate.value = '';
+  deadlineModal.classList.add('show');
+};
+
+// Handle deadline update
+document.getElementById('saveDeadlineBtn').onclick = () => {
+  const days = editDeadlineDays.value;
+  const date = editDeadlineDate.value;
+  let deadline = null;
+  
+  if (date) {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    deadline = d.getTime();
+  } else if (days) {
+    const d = new Date();
+    d.setDate(d.getDate() + parseInt(days));
+    d.setHours(23, 59, 59, 999);
+    deadline = d.getTime();
+  }
+  
+  chrome.storage.local.get(['savedTabs'], (result) => {
+    const savedTabs = result.savedTabs || [];
+    const updatedTabs = savedTabs.map(tab => {
+      if (tab.id === currentRightClickedTabId) {
+        return { ...tab, deadline: deadline };
+      }
+      return tab;
+    });
+    
+    chrome.storage.local.set({ savedTabs: updatedTabs }, () => {
+      deadlineModal.classList.remove('show');
+      loadTabs();
+    });
+  });
+};
+
+// Close deadline modals
+document.getElementById('closeDeadlineModal').onclick = () => deadlineModal.classList.remove('show');
+document.getElementById('cancelDeadlineBtn').onclick = () => deadlineModal.classList.remove('show');
+
+// Clear inputs when one is used
+editDeadlineDays.addEventListener('input', () => { if (editDeadlineDays.value) editDeadlineDate.value = ''; });
+editDeadlineDate.addEventListener('input', () => { if (editDeadlineDays.value) editDeadlineDays.value = ''; });
 
 // Remove a tab from the list
 function removeTab(tabId) {
