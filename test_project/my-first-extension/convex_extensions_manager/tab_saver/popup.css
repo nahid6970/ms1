@@ -181,6 +181,8 @@ body {
   white-space: nowrap;
   border: 1px solid #ffcccc;
   margin-left: auto;
+  min-width: 28px;
+  text-align: center;
 }
 
 .tab-deadline.urgent {

@@ -85,6 +85,24 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           const id = 'tab-saver-deadline-modal';
           if (document.getElementById(id)) return;
 
+          // Add style to hide number arrows
+          let style = document.getElementById(id + '-style');
+          if (!style) {
+            style = document.createElement('style');
+            style.id = id + '-style';
+            style.textContent = `
+              #deadlineDays::-webkit-outer-spin-button,
+              #deadlineDays::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+              #deadlineDays {
+                -moz-appearance: textfield;
+              }
+            `;
+            document.head.appendChild(style);
+          }
+
           const overlay = document.createElement('div');
           overlay.id = id + '-overlay';
           overlay.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.9); z-index: 2147483646; transition: opacity 0.3s; pointer-events: auto; backdrop-filter: blur(8px);';

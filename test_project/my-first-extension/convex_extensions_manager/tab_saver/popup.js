@@ -62,16 +62,13 @@ function displayTabs(tabs) {
       let text = '';
       
       if (diffDays < 0) {
-        text = 'Overdue';
+        text = '!!';
         badgeClass += ' urgent';
       } else if (diffDays === 0) {
-        text = 'Due today';
-        badgeClass += ' urgent';
-      } else if (diffDays === 1) {
-        text = '1 day left';
+        text = '0';
         badgeClass += ' urgent';
       } else {
-        text = `${diffDays} days left`;
+        text = `${diffDays}`;
         if (diffDays <= 2) badgeClass += ' urgent';
         else badgeClass += ' safe';
       }
