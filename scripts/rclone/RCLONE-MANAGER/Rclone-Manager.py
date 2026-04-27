@@ -542,7 +542,11 @@ class RcloneApp(QMainWindow):
         self.tool_labels = []
         tool_defs = [
             ("Show Total Size", False),
-            ("Show File Count", False)
+            ("Show File Count", False),
+            ("Check (Verify)",  False),
+            ("Empty Trash",     False),
+            ("Dedupe",          False),
+            ("Log to File",     False)
         ]
         saved_tools = self._load_settings().get("tools", [])
         for i, (name, active) in enumerate(tool_defs):
@@ -573,10 +577,15 @@ class RcloneApp(QMainWindow):
         settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         settings_btn.clicked.connect(self.open_settings)
 
+        config_btn = QPushButton("🛠  CONFIG")
+        config_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        config_btn.clicked.connect(lambda: subprocess.Popen("start cmd /k rclone config", shell=True))
+
         btn_row.addWidget(exec_btn)
         btn_row.addWidget(clear_btn)
         btn_row.addWidget(restart_btn)
         btn_row.addWidget(settings_btn)
+        btn_row.addWidget(config_btn)
         btn_row.addStretch()
         root.addLayout(btn_row)
 
@@ -633,7 +642,6 @@ class RcloneApp(QMainWindow):
         # 2. Total Size (Runs rclone size on the source path)
         if self.tool_labels[0].active:
             s_parts = ["rclone", "size", q_stor, q_frm]
-            # Pass relevant flags/filters to the size command
             for i, (_, f, _) in enumerate(self.flag_defs):
                 if self.flag_labels[i].active and ("drive" in f or "list" in f):
                     s_parts.append(f)
@@ -642,6 +650,25 @@ class RcloneApp(QMainWindow):
                     s_parts.append(f'{pref}="{self.filter_entries[i].text()}"')
             s_cmd = " ".join(p for p in s_parts if p)
             final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── SIZE SUMMARY ──\' -ForegroundColor Yellow" & {s_cmd}'
+
+        # 3. Check (Verify Source vs Destination)
+        if self.tool_labels[2].active:
+            c_cmd = f'rclone check {q_stor} {q_frm} {q_to}'
+            final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── CHECK / VERIFY ──\' -ForegroundColor Yellow" & {c_cmd}'
+
+        # 4. Empty Trash (Cleanup)
+        if self.tool_labels[3].active:
+            cl_cmd = f'rclone cleanup {q_stor} {q_frm}'
+            final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── CLEANUP (TRASH) ──\' -ForegroundColor Yellow" & {cl_cmd}'
+
+        # 5. Dedupe (Find/Fix Duplicates)
+        if self.tool_labels[4].active:
+            d_cmd = f'rclone dedupe {q_stor} {q_frm}'
+            final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── DEDUPE (INTERACTIVE) ──\' -ForegroundColor Yellow" & {d_cmd}'
+
+        # 6. Log to File
+        if self.tool_labels[5].active:
+            final += " --log-file=rclone.log --log-level=INFO"
         # ──────────────────────────────────────────────────────────────────────
 
         print("Executing:", final)
