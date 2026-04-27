@@ -538,7 +538,7 @@ class RcloneApp(QMainWindow):
 
         # ── Tools ─────────────────────────────────────────────────────────────
         tools_group = QGroupBox("TOOLS")
-        tools_layout = QHBoxLayout(tools_group)
+        tools_layout = QVBoxLayout(tools_group)
         self.tool_labels = []
         tool_defs = [
             ("Show Total Size", False),
