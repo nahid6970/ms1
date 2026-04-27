@@ -219,17 +219,20 @@ const channelIconValue = document.getElementById('channelIconValue');
 const urgentBg = document.getElementById('urgentBg');
 const urgentFg = document.getElementById('urgentFg');
 const urgentBorder = document.getElementById('urgentBorder');
+const urgentBold = document.getElementById('urgentBold');
+
 const safeBg = document.getElementById('safeBg');
 const safeFg = document.getElementById('safeFg');
 const safeBorder = document.getElementById('safeBorder');
+const safeBold = document.getElementById('safeBold');
 
 // Load saved settings
 function loadSettings() {
   chrome.storage.local.get(['iconSettings', 'deadlineSettings'], (result) => {
     const iconSettings = result.iconSettings || { ytIconSize: 20, channelIconSize: 18 };
     const deadlineSettings = result.deadlineSettings || {
-      urgentBg: '#ff4757', urgentFg: '#ffffff', urgentBorder: '#eb3b5a',
-      safeBg: '#e3f2fd', safeFg: '#1976d2', safeBorder: '#bbdefb'
+      urgentBg: '#ff4757', urgentFg: '#ffffff', urgentBorder: '#eb3b5a', urgentBold: true,
+      safeBg: '#e3f2fd', safeFg: '#1976d2', safeBorder: '#bbdefb', safeBold: false
     };
     
     // Icons
@@ -242,9 +245,12 @@ function loadSettings() {
     urgentBg.value = deadlineSettings.urgentBg;
     urgentFg.value = deadlineSettings.urgentFg;
     urgentBorder.value = deadlineSettings.urgentBorder;
+    urgentBold.checked = deadlineSettings.urgentBold;
+    
     safeBg.value = deadlineSettings.safeBg;
     safeFg.value = deadlineSettings.safeFg;
     safeBorder.value = deadlineSettings.safeBorder;
+    safeBold.checked = deadlineSettings.safeBold;
     
     applySettings(iconSettings, deadlineSettings);
   });
@@ -267,11 +273,13 @@ function applySettings(icons, deadlines) {
       background-color: ${deadlines.urgentBg} !important; 
       color: ${deadlines.urgentFg} !important; 
       border-color: ${deadlines.urgentBorder} !important; 
+      font-weight: ${deadlines.urgentBold ? '900' : '500'} !important;
     }
     .tab-deadline.safe { 
       background-color: ${deadlines.safeBg} !important; 
       color: ${deadlines.safeFg} !important; 
       border-color: ${deadlines.safeBorder} !important; 
+      font-weight: ${deadlines.safeBold ? '900' : '500'} !important;
     }
   `;
   document.head.appendChild(style);
@@ -284,8 +292,8 @@ function saveAllSettings() {
     channelIconSize: parseInt(channelIconSize.value)
   };
   const deadlineSettings = {
-    urgentBg: urgentBg.value, urgentFg: urgentFg.value, urgentBorder: urgentBorder.value,
-    safeBg: safeBg.value, safeFg: safeFg.value, safeBorder: safeBorder.value
+    urgentBg: urgentBg.value, urgentFg: urgentFg.value, urgentBorder: urgentBorder.value, urgentBold: urgentBold.checked,
+    safeBg: safeBg.value, safeFg: safeFg.value, safeBorder: safeBorder.value, safeBold: safeBold.checked
   };
   
   chrome.storage.local.set({ iconSettings, deadlineSettings }, () => {
@@ -294,8 +302,9 @@ function saveAllSettings() {
 }
 
 // Event Listeners
-[ytIconSize, channelIconSize, urgentBg, urgentFg, urgentBorder, safeBg, safeFg, safeBorder].forEach(el => {
-  el.addEventListener('input', () => {
+[ytIconSize, channelIconSize, urgentBg, urgentFg, urgentBorder, urgentBold, safeBg, safeFg, safeBorder, safeBold].forEach(el => {
+  const eventType = el.type === 'checkbox' ? 'change' : 'input';
+  el.addEventListener(eventType, () => {
     if (el === ytIconSize) ytIconValue.textContent = el.value + 'px';
     if (el === channelIconSize) channelIconValue.textContent = el.value + 'px';
     saveAllSettings();
@@ -312,9 +321,11 @@ resetSettings.addEventListener('click', () => {
   urgentBg.value = '#ff4757';
   urgentFg.value = '#ffffff';
   urgentBorder.value = '#eb3b5a';
+  urgentBold.checked = true;
   safeBg.value = '#e3f2fd';
   safeFg.value = '#1976d2';
   safeBorder.value = '#bbdefb';
+  safeBold.checked = false;
   saveAllSettings();
   loadSettings();
 });
