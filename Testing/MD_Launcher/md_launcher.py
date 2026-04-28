@@ -2,7 +2,7 @@ import sys
 import os
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox)
+                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QFontComboBox)
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
 from PyQt5.QtGui import QFont, QDrag
 
@@ -120,6 +120,25 @@ class SettingsDialog(QDialog):
         self.types_input.setStyleSheet(f"background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 0 8px;")
         layout.addWidget(self.types_input)
 
+        # --- Font ---
+        layout.addWidget(self._section("FONT"))
+        font_row = QHBoxLayout()
+        font_row.setSpacing(12)
+
+        self.font_combo = QFontComboBox()
+        self.font_combo.setCurrentFont(QFont(config.get("font_family", "Consolas")))
+        self.font_combo.setFixedHeight(30)
+        self.font_combo.setStyleSheet(f"background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 0 4px; font-family: Consolas;")
+
+        self.font_size_spin = self._spinbox(config.get("font_size", 9), 6, 24)
+
+        font_row.addWidget(QLabel("Family:"))
+        font_row.addWidget(self.font_combo, 1)
+        font_row.addSpacing(12)
+        font_row.addWidget(QLabel("Size:"))
+        font_row.addWidget(self.font_size_spin)
+        layout.addLayout(font_row)
+
         layout.addStretch()
 
         # --- Apply / Close ---
@@ -202,6 +221,8 @@ class SettingsDialog(QDialog):
         self.config["row_height"] = self.height_spin.value()
         raw = self.types_input.text()
         self.config["file_types"] = [t.strip() for t in raw.split(",") if t.strip()]
+        self.config["font_family"] = self.font_combo.currentFont().family()
+        self.config["font_size"] = self.font_size_spin.value()
         save_config(self.config)
         self.applied.emit()
 
@@ -209,7 +230,7 @@ class SettingsDialog(QDialog):
 class MDRow(QWidget):
     clicked = pyqtSignal()
 
-    def __init__(self, file_path, height=24, parent=None):
+    def __init__(self, file_path, height=24, font_family="Consolas", font_size=9, parent=None):
         super().__init__(parent)
         self.file_path = file_path
         self.file_name = os.path.basename(file_path)
@@ -222,7 +243,7 @@ class MDRow(QWidget):
         layout.setSpacing(0)
 
         self.name_label = QLabel(self.file_name)
-        self.name_label.setFont(QFont("Consolas", 9))
+        self.name_label.setFont(QFont(font_family, font_size))
         self.name_label.setStyleSheet(f"background: transparent; color: {CP_TEXT}; border: none;")
 
         layout.addWidget(self.name_label)
@@ -369,11 +390,13 @@ class MDLauncher(QMainWindow):
 
         self.list_layout.setSpacing(self.config.get("row_spacing", 0))
         row_height = self.config.get("row_height", 24)
+        font_family = self.config.get("font_family", "Consolas")
+        font_size = self.config.get("font_size", 9)
         q = query.lower()
         filtered = [p for p in self.all_files if q in os.path.basename(p).lower()]
 
         for i, path in enumerate(filtered):
-            row = MDRow(path, height=row_height)
+            row = MDRow(path, height=row_height, font_family=font_family, font_size=font_size)
             row.clicked.connect(lambda idx=i: self.set_index(idx))
             self.list_layout.insertWidget(self.list_layout.count() - 1, row)
             self.rows.append(row)
