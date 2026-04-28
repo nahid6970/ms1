@@ -41,7 +41,7 @@ BTN_STYLE = f"""
 """
 
 class SettingsDialog(QDialog):
-    applied = pyqtSignal()
+    applied = pyqtSignal(bool)
 
     def __init__(self, config, parent=None):
         super().__init__(parent, Qt.WindowStaysOnTopHint)
@@ -218,14 +218,14 @@ class SettingsDialog(QDialog):
                 self.config["folders"].append(folder)
                 save_config(self.config)
                 self._refresh_folders()
-                self.applied.emit()
+                self.applied.emit(True)
 
     def _remove_folder(self, folder):
         if folder in self.config["folders"]:
             self.config["folders"].remove(folder)
             save_config(self.config)
             self._refresh_folders()
-            self.applied.emit()
+            self.applied.emit(True)
 
     def _apply(self):
         self.config["win_w"] = self.w_spin.value()
@@ -239,7 +239,7 @@ class SettingsDialog(QDialog):
         self.config["font_family"] = self.font_combo.currentFont().family()
         self.config["font_size"] = self.font_size_spin.value()
         save_config(self.config)
-        self.applied.emit()
+        self.applied.emit(False)
 
 
 class MDRow(QWidget):
@@ -297,6 +297,7 @@ class MDLauncher(QMainWindow):
         self.rows = []
         self.current_idx = 0
         self._settings_dialog = None
+        self._initial_scan_done = False
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -364,8 +365,6 @@ class MDLauncher(QMainWindow):
         self.scroll.viewport().setStyleSheet(f"background: {CP_BG};")
         main_layout.addWidget(self.scroll)
 
-        self.scan_files()
-
         self.focus_timer = QTimer(self)
         self.focus_timer.timeout.connect(self.check_focus)
         QTimer.singleShot(500, lambda: self.focus_timer.start(100))
@@ -382,13 +381,23 @@ class MDLauncher(QMainWindow):
         self._settings_dialog = dlg
         dlg.show()
 
-    def _on_settings_applied(self):
+    def _on_settings_applied(self, should_rescan=True):
         w = self.config.get("win_w", 600)
         h = self.config.get("win_h", 400)
         x = self.config.get("win_x", (QApplication.primaryScreen().geometry().width() - w) // 2)
         y = self.config.get("win_y", 10)
         self.setGeometry(x, y, w, h)
-        self.scan_files()
+        self.list_layout.setSpacing(self.config.get("row_spacing", 0))
+        if should_rescan:
+            self.scan_files()
+        else:
+            self.filter_files(self.search.text())
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not self._initial_scan_done:
+            self._initial_scan_done = True
+            QTimer.singleShot(0, self.scan_files)
 
     def scan_files(self):
         self.all_files = []
