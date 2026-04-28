@@ -4,7 +4,7 @@
             "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")",
             "category": "Script",
             "description": "Opens PowerShell as administrator",
-            "enabled": false,
+            "enabled": true,
             "hotkey": "!x",
             "name": "Open Terminal Admin"
         },
