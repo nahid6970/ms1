@@ -92,6 +92,20 @@ class SettingsDialog(QDialog):
         add_btn.clicked.connect(self._add_folder)
         layout.addWidget(add_btn)
 
+        # --- File Types ---
+        layout.addWidget(self._section("FILE TYPES"))
+        type_hint = QLabel("Extensions to show (comma separated, e.g. .md, .py) — leave empty for all")
+        type_hint.setFont(QFont("Consolas", 8))
+        type_hint.setStyleSheet(f"color: {CP_SUBTEXT}; border: none; background: transparent;")
+        layout.addWidget(type_hint)
+
+        self.types_input = QLineEdit()
+        self.types_input.setFont(QFont("Consolas", 9))
+        self.types_input.setFixedHeight(30)
+        self.types_input.setText(", ".join(config.get("file_types", [])))
+        self.types_input.setStyleSheet(f"background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 0 8px;")
+        layout.addWidget(self.types_input)
+
         layout.addStretch()
 
         # --- Apply / Close ---
@@ -170,6 +184,8 @@ class SettingsDialog(QDialog):
     def _apply(self):
         self.config["win_w"] = self.w_spin.value()
         self.config["win_h"] = self.h_spin.value()
+        raw = self.types_input.text()
+        self.config["file_types"] = [t.strip() for t in raw.split(",") if t.strip()]
         save_config(self.config)
         self.applied.emit()
 
@@ -320,11 +336,12 @@ class MDLauncher(QMainWindow):
 
     def scan_files(self):
         self.all_files = []
+        exts = self.config.get("file_types", [])
         for folder in self.config.get("folders", []):
             os.makedirs(folder, exist_ok=True)
             for root, _, files in os.walk(folder):
                 for f in files:
-                    if f.endswith(".md"):
+                    if not exts or any(f.endswith(e) for e in exts):
                         self.all_files.append(os.path.join(root, f))
         self.filter_files(self.search.text())
 
