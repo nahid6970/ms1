@@ -310,6 +310,14 @@
             "hotkey": "!m",
             "name": "move selected files",
             "enabled": false
+        },
+        {
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher.py\"', , \"Hide\")",
+            "category": "Launch",
+            "description": "",
+            "hotkey": "!d",
+            "name": "drag files from the gui",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
