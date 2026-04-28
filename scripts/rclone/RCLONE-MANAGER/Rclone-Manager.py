@@ -513,8 +513,8 @@ class RcloneApp(QMainWindow):
         filter_grid.setColumnStretch(1, 1)
         filter_defs = [
             ("Transfers", "--transfers", "4"),
-            ("Include",   "--include",   "*.jpg"),
-            ("Exclude",   "--exclude",   "*.jpg"),
+            ("Include",   "--include",   "*.jpg, *.png"),
+            ("Exclude",   "--exclude",   "*.jpg, *.png"),
             ("Max Age",   "--max-age",   "1d"),
             ("Min Age",   "--min-age",   "1d"),
             ("Max Size",  "--max-size",  "100M"),
@@ -629,9 +629,9 @@ class RcloneApp(QMainWindow):
 
         for i, (_, prefix, _) in enumerate(self.filter_defs):
             if self.filter_labels[i].active:
-                # Quote the filter value to handle potential spaces
                 val = self.filter_entries[i].text()
-                parts.append(f'{prefix}="{val}"')
+                for v in [x.strip() for x in val.split(',') if x.strip()]:
+                    parts.append(f'{prefix}="{v}"')
 
         grep = self.grep_entry.text().strip()
         if grep:
@@ -653,7 +653,8 @@ class RcloneApp(QMainWindow):
                     s_parts.append(f)
             for i, (_, pref, _) in enumerate(self.filter_defs):
                 if self.filter_labels[i].active:
-                    s_parts.append(f'{pref}="{self.filter_entries[i].text()}"')
+                    for v in [x.strip() for x in self.filter_entries[i].text().split(',') if x.strip()]:
+                        s_parts.append(f'{pref}="{v}"')
             s_cmd = " ".join(p for p in s_parts if p)
             final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── SIZE SUMMARY ──\' -ForegroundColor Yellow" & {s_cmd}'
 
