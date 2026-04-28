@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
   const scriptListDiv = document.getElementById('scriptList');
   const statusText = document.getElementById('statusText');
+  const fallbackScriptPath = 'user_scripts/local_server_fallback.js';
+  const defaultFallbackSettings = {
+    localServerUrl: 'http://192.168.0.101:5000/',
+    siteUrl: 'https://nahid6970.github.io/db/5000_myhome/myhome',
+    mode: 'local'
+  };
+
+  function normalizeSettings(settings = {}) {
+    return {
+      localServerUrl: (settings.localServerUrl || defaultFallbackSettings.localServerUrl).trim(),
+      siteUrl: (settings.siteUrl || defaultFallbackSettings.siteUrl).trim(),
+      mode: settings.mode === 'site' ? 'site' : defaultFallbackSettings.mode
+    };
+  }
 
 
 
@@ -86,25 +100,46 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings) {
     const scriptInfo = generateScriptInfo(scriptPath);
+    const isFallbackScript = scriptPath === fallbackScriptPath;
+    const modeLabel = fallbackSettings.mode === 'site' ? 'SITE' : 'LOCAL';
 
     const scriptItem = document.createElement('div');
     scriptItem.className = `script-item ${isEnabled ? 'enabled' : 'disabled'}`;
     scriptItem.dataset.scriptPath = scriptPath;
 
     scriptItem.innerHTML = `
-      <div class="script-info">
-        <div class="script-icon">${isEnabled ? '✓' : '○'}</div>
-        <div class="script-details">
-          <div class="script-name">${scriptInfo.name}</div>
-          <div class="script-path">${scriptInfo.description}</div>
+      <div class="script-main">
+        <div class="script-info">
+          <div class="script-icon">${isEnabled ? '✓' : '○'}</div>
+          <div class="script-details">
+            <div class="script-name">${scriptInfo.name}</div>
+            <div class="script-path">${scriptInfo.description}</div>
+          </div>
+        </div>
+        <div class="script-actions">
+          ${isFallbackScript ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
+          ${isFallbackScript ? `<button class="mode-btn ${fallbackSettings.mode}" data-script="${scriptPath}">${modeLabel}</button>` : ''}
+          <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
+            ${isEnabled ? 'ON' : 'OFF'}
+          </button>
         </div>
       </div>
-      <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
-        ${isEnabled ? 'ON' : 'OFF'}
-      </button>
     `;
+
+    if (isFallbackScript) {
+      const fallbackSettingsDiv = document.createElement('div');
+      fallbackSettingsDiv.className = 'fallback-settings hidden';
+      fallbackSettingsDiv.innerHTML = `
+        <label class="settings-label" for="localServerUrl">Local server URL</label>
+        <input id="localServerUrl" class="settings-input" type="url" value="${fallbackSettings.localServerUrl}" placeholder="http://127.0.0.1:5000/">
+        <label class="settings-label" for="siteUrl">Site URL</label>
+        <input id="siteUrl" class="settings-input" type="url" value="${fallbackSettings.siteUrl}" placeholder="https://example.com">
+        <div class="settings-hint">Mode LOCAL = try server first. Mode SITE = always open site URL.</div>
+      `;
+      scriptItem.appendChild(fallbackSettingsDiv);
+    }
 
     return scriptItem;
   }
@@ -128,6 +163,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function saveFallbackSettings(settings) {
+    const normalized = normalizeSettings(settings);
+    chrome.storage.local.set({ fallbackSettings: normalized }, () => {
+      console.log('Fallback settings saved:', normalized);
+    });
+  }
+
+  function toggleFallbackMode(currentSettings) {
+    const nextMode = currentSettings.mode === 'site' ? 'local' : 'site';
+    saveFallbackSettings({
+      ...currentSettings,
+      mode: nextMode
+    });
+    loadScriptList();
+  }
+
+  function attachFallbackSettingsHandlers(scriptItem, fallbackSettings) {
+    const localServerInput = scriptItem.querySelector('#localServerUrl');
+    const siteUrlInput = scriptItem.querySelector('#siteUrl');
+    const modeButton = scriptItem.querySelector('.mode-btn');
+    const settingsButton = scriptItem.querySelector('.settings-btn');
+    const settingsPanel = scriptItem.querySelector('.fallback-settings');
+
+    if (settingsButton && settingsPanel) {
+      settingsButton.addEventListener('click', () => {
+        const isHidden = settingsPanel.classList.toggle('hidden');
+        settingsButton.textContent = isHidden ? 'SET' : 'CLOSE';
+        settingsButton.setAttribute('aria-expanded', String(!isHidden));
+      });
+    }
+
+    if (localServerInput) {
+      localServerInput.addEventListener('change', () => {
+        saveFallbackSettings({
+          ...fallbackSettings,
+          localServerUrl: localServerInput.value
+        });
+      });
+    }
+
+    if (siteUrlInput) {
+      siteUrlInput.addEventListener('change', () => {
+        saveFallbackSettings({
+          ...fallbackSettings,
+          siteUrl: siteUrlInput.value
+        });
+      });
+    }
+
+    if (modeButton) {
+      modeButton.addEventListener('click', () => {
+        toggleFallbackMode(fallbackSettings);
+      });
+    }
+  }
+
   async function loadScriptList() {
     try {
       statusText.textContent = 'Discovering scripts...';
@@ -141,8 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings'], (result) => {
         const enabledScripts = result.enabledScripts || {};
+        const fallbackSettings = normalizeSettings(result.fallbackSettings);
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -150,13 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings);
           
           // Add click handler to toggle button
           const toggleBtn = scriptItem.querySelector('.toggle-btn');
           toggleBtn.addEventListener('click', () => {
             toggleScript(scriptPath, isEnabled);
           });
+
+          if (scriptPath === fallbackScriptPath) {
+            attachFallbackSettingsHandlers(scriptItem, fallbackSettings);
+          }
           
           scriptListDiv.appendChild(scriptItem);
         });

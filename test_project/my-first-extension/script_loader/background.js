@@ -1,13 +1,48 @@
+const DEFAULT_FALLBACK_SETTINGS = {
+  localServerUrl: 'http://192.168.0.101:5000/',
+  siteUrl: 'https://nahid6970.github.io/db/5000_myhome/myhome',
+  mode: 'local'
+};
+
+function normalizeUrl(url) {
+  if (!url) {
+    return '';
+  }
+
+  return url.trim();
+}
+
+function getFallbackSettings(result) {
+  return {
+    localServerUrl: normalizeUrl(result.fallbackSettings?.localServerUrl) || DEFAULT_FALLBACK_SETTINGS.localServerUrl,
+    siteUrl: normalizeUrl(result.fallbackSettings?.siteUrl) || DEFAULT_FALLBACK_SETTINGS.siteUrl,
+    mode: result.fallbackSettings?.mode === 'site' ? 'site' : DEFAULT_FALLBACK_SETTINGS.mode
+  };
+}
+
+function redirectToSite(tabId, siteUrl, reason) {
+  console.log(reason, siteUrl);
+  chrome.tabs.update(tabId, { url: siteUrl });
+}
+
 // Listen for tab updates
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // Handle local server fallback redirection
   if (changeInfo.status === 'complete' && tab.url) {
-    chrome.storage.local.get(['enabledScripts'], (result) => {
+    chrome.storage.local.get(['enabledScripts', 'fallbackSettings'], (result) => {
       const enabledScripts = result.enabledScripts || {};
+      const fallbackSettings = getFallbackSettings(result);
+      const localServerUrl = fallbackSettings.localServerUrl;
+      const siteUrl = fallbackSettings.siteUrl;
       
       // Check if local server fallback script is enabled
       if (enabledScripts['user_scripts/local_server_fallback.js'] && 
-          tab.url.startsWith('http://192.168.0.101:5000/')) {
+          localServerUrl &&
+          tab.url.startsWith(localServerUrl)) {
+        if (fallbackSettings.mode === 'site') {
+          redirectToSite(tabId, siteUrl, 'Fallback mode set to site, redirecting immediately to:');
+          return;
+        }
         
         // Check if this is a Chrome error page
         chrome.scripting.executeScript({
@@ -19,17 +54,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           }
         }).then((results) => {
           if (results && results[0] && results[0].result) {
-            console.log('Local server unavailable, redirecting to fallback...');
-            chrome.tabs.update(tabId, {
-              url: 'https://nahid6970.github.io/db/5000_myhome/myhome'
-            });
+            redirectToSite(tabId, siteUrl, 'Local server unavailable, redirecting to fallback:');
           }
         }).catch(() => {
           // If we can't execute script (likely an error page), redirect anyway
-          console.log('Cannot execute script on error page, redirecting to fallback...');
-          chrome.tabs.update(tabId, {
-            url: 'https://nahid6970.github.io/db/5000_myhome/myhome'
-          });
+          redirectToSite(tabId, siteUrl, 'Cannot execute script on error page, redirecting to fallback:');
         });
       }
     });
@@ -65,6 +94,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Listen for extension installation
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Script Manager Extension installed');
+  chrome.storage.local.get(['fallbackSettings'], (result) => {
+    if (!result.fallbackSettings) {
+      chrome.storage.local.set({ fallbackSettings: DEFAULT_FALLBACK_SETTINGS });
+    }
+  });
 });
 
 // Optional: Listen for storage changes to debug
