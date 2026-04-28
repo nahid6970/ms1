@@ -6662,6 +6662,24 @@ function updateSubSheetOverflow() {
     }
 }
 
+async function promoteToMainSheet(sheetIndex) {
+    const sheet = tableData.sheets[sheetIndex];
+    if (!sheet || sheet.parentSheet === undefined || sheet.parentSheet === null) return;
+
+    const parentIndex = sheet.parentSheet;
+    // Inherit the parent's category so it stays in the same category group
+    const parentCategory = tableData.sheetCategories[parentIndex] || tableData.sheetCategories[String(parentIndex)] || null;
+    if (parentCategory) {
+        tableData.sheetCategories[sheetIndex] = parentCategory;
+    }
+    delete sheet.parentSheet;
+
+    await saveData();
+    renderSidebar();
+    renderSubSheetBar();
+    showToast(`"${sheet.name}" moved to main sheet`, 'success');
+}
+
 function showSubSheetContextMenu(event, sheetIndex) {
     // Remove any existing context menu
     const existingMenu = document.getElementById('subsheetContextMenu');
@@ -6706,6 +6724,19 @@ function showSubSheetContextMenu(event, sheetIndex) {
 
     menu.appendChild(renameItem);
     menu.appendChild(colorItem);
+
+    // "Move to Main Sheet" only for sub-sheets (those with a parentSheet)
+    const sheet = tableData.sheets[sheetIndex];
+    if (sheet && sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
+        const promoteItem = document.createElement('div');
+        promoteItem.className = 'context-menu-item';
+        promoteItem.innerHTML = '<span>⬆️</span><span>Move to Main Sheet</span>';
+        promoteItem.onclick = () => {
+            promoteToMainSheet(sheetIndex);
+            menu.remove();
+        };
+        menu.appendChild(promoteItem);
+    }
     menu.appendChild(deleteItem);
     document.body.appendChild(menu);
 

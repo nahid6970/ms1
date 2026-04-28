@@ -1,5 +1,31 @@
 # Recent Development Log
 
+## [2026-04-28 13:47] - Move Subsheet to Main Sheet via Context Menu
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎯 Promote Subsheet to Main Sheet
+- **Feature**: Right-clicking a subsheet tab in the subsheet bar now shows a ⬆️ **Move to Main Sheet** option.
+- **Logic**: Added `promoteToMainSheet(sheetIndex)` which deletes the `parentSheet` property from the sheet, making it a top-level sheet.
+- **Category Safety**: The promoted sheet inherits its parent's category so it appears in the correct category group — no cross-category bleed.
+- **Index Safety**: No sheets are reordered or spliced, so all `sheetCategories` indices remain intact.
+- **Visibility**: The menu item only appears for actual subsheets (those with `parentSheet` set), not for the parent tab.
+
+**Files Modified:**
+- `static/script.js` — Added `promoteToMainSheet()` function and conditional menu item in `showSubSheetContextMenu`.
+
+**Current Status:**
+- ✅ Right-click on subsheet tab shows "Move to Main Sheet" option.
+- ✅ Promoted sheet becomes a top-level sheet in the same category.
+- ✅ File indexing and category assignments remain consistent.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-27 16:15] - Isolated Category Colors & Documentation Update
 
 **Session Duration:** 0.6 hours
