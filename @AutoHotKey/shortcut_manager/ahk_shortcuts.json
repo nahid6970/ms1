@@ -309,7 +309,7 @@
             "description": "",
             "hotkey": "!m",
             "name": "move selected files",
-            "enabled": true
+            "enabled": false
         }
     ],
     "text_shortcuts": [
