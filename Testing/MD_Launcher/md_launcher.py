@@ -121,7 +121,7 @@ class MDLauncher(QMainWindow):
         screen = QApplication.primaryScreen().geometry()
         self.win_w = int(screen.width() * self.config.get("window_width_percent", 0.8))
         self.win_h = 280
-        self.setGeometry((screen.width() - self.win_w) // 2, (screen.height() - self.win_h) // 2, self.win_w, self.win_h)
+        self.setGeometry((screen.width() - self.win_w) // 2, 10, self.win_w, self.win_h)
         
         # UI Setup
         self.central_widget = QWidget()
