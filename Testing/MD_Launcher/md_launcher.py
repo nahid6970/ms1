@@ -78,6 +78,19 @@ class SettingsDialog(QDialog):
         size_row.addStretch()
         layout.addLayout(size_row)
 
+        pos_row = QHBoxLayout()
+        pos_row.setSpacing(12)
+        screen = QApplication.primaryScreen().geometry()
+        self.x_spin = self._spinbox(config.get("win_x", (screen.width() - 600) // 2), 0, screen.width())
+        self.y_spin = self._spinbox(config.get("win_y", 10), 0, screen.height())
+        pos_row.addWidget(QLabel("X:"))
+        pos_row.addWidget(self.x_spin)
+        pos_row.addSpacing(16)
+        pos_row.addWidget(QLabel("Y:"))
+        pos_row.addWidget(self.y_spin)
+        pos_row.addStretch()
+        layout.addLayout(pos_row)
+
         # --- Row Spacing ---
         layout.addWidget(self._section("ROW SPACING"))
         spacing_row = QHBoxLayout()
@@ -217,6 +230,8 @@ class SettingsDialog(QDialog):
     def _apply(self):
         self.config["win_w"] = self.w_spin.value()
         self.config["win_h"] = self.h_spin.value()
+        self.config["win_x"] = self.x_spin.value()
+        self.config["win_y"] = self.y_spin.value()
         self.config["row_spacing"] = self.spacing_spin.value()
         self.config["row_height"] = self.height_spin.value()
         raw = self.types_input.text()
@@ -289,7 +304,9 @@ class MDLauncher(QMainWindow):
         screen = QApplication.primaryScreen().geometry()
         w = self.config.get("win_w", 600)
         h = self.config.get("win_h", 400)
-        self.setGeometry((screen.width() - w) // 2, 10, w, h)
+        x = self.config.get("win_x", (screen.width() - w) // 2)
+        y = self.config.get("win_y", 10)
+        self.setGeometry(x, y, w, h)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -368,8 +385,9 @@ class MDLauncher(QMainWindow):
     def _on_settings_applied(self):
         w = self.config.get("win_w", 600)
         h = self.config.get("win_h", 400)
-        screen = QApplication.primaryScreen().geometry()
-        self.setGeometry((screen.width() - w) // 2, 10, w, h)
+        x = self.config.get("win_x", (QApplication.primaryScreen().geometry().width() - w) // 2)
+        y = self.config.get("win_y", 10)
+        self.setGeometry(x, y, w, h)
         self.scan_files()
 
     def scan_files(self):
