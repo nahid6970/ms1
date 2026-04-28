@@ -293,9 +293,10 @@ class MDLauncher(QMainWindow):
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll.setStyleSheet(f"""
             QScrollArea {{ background: transparent; border: none; }}
-            QScrollBar:vertical {{ background: {CP_BG}; width: 6px; margin: 0; }}
+            QScrollBar:vertical {{ background: transparent; width: 6px; margin: 0; }}
             QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 3px; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; background: none; }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: transparent; }}
         """)
 
         self.list_widget = QWidget()
