@@ -44,16 +44,10 @@ class MDRow(QWidget):
         layout.setContentsMargins(12, 0, 12, 0)
         layout.setSpacing(10)
 
-        icon = QLabel("◈")
-        icon.setFont(QFont("Consolas", 11))
-        icon.setFixedWidth(18)
-        icon.setStyleSheet(f"background: transparent; color: {CP_CYAN};")
-
         self.name_label = QLabel(self.file_name)
         self.name_label.setFont(QFont("Consolas", 9))
         self.name_label.setStyleSheet(f"background: transparent; color: {CP_TEXT};")
 
-        layout.addWidget(icon)
         layout.addWidget(self.name_label)
         layout.addStretch()
 
