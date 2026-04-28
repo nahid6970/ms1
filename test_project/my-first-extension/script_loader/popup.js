@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       localServerUrl: (settings.localServerUrl || defaultFallbackSettings.localServerUrl).trim(),
       siteUrl: (settings.siteUrl || defaultFallbackSettings.siteUrl).trim(),
-      mode: settings.mode === 'site' ? 'site' : defaultFallbackSettings.mode
+      mode: ['local', 'site', 'chrome'].includes(settings.mode) ? settings.mode : defaultFallbackSettings.mode
     };
   }
 
@@ -103,7 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function createScriptItem(scriptPath, isEnabled, fallbackSettings) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
-    const modeLabel = fallbackSettings.mode === 'site' ? 'SITE' : 'LOCAL';
+    const modeLabels = {
+      local: 'LOCAL',
+      site: 'SITE',
+      chrome: 'CHROME'
+    };
+    const modeLabel = modeLabels[fallbackSettings.mode] || 'LOCAL';
 
     const scriptItem = document.createElement('div');
     scriptItem.className = `script-item ${isEnabled ? 'enabled' : 'disabled'}`;
@@ -136,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <input id="localServerUrl" class="settings-input" type="url" value="${fallbackSettings.localServerUrl}" placeholder="http://127.0.0.1:5000/">
         <label class="settings-label" for="siteUrl">Site URL</label>
         <input id="siteUrl" class="settings-input" type="url" value="${fallbackSettings.siteUrl}" placeholder="https://example.com">
-        <div class="settings-hint">Mode LOCAL = try server first. Mode SITE = always open site URL.</div>
+        <div class="settings-hint">Mode LOCAL = try server first. Mode SITE = always open site URL. Mode CHROME = use Chrome's default new tab page.</div>
       `;
       scriptItem.appendChild(fallbackSettingsDiv);
     }
@@ -171,7 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function toggleFallbackMode(currentSettings) {
-    const nextMode = currentSettings.mode === 'site' ? 'local' : 'site';
+    const modeOrder = ['local', 'site', 'chrome'];
+    const currentIndex = modeOrder.indexOf(currentSettings.mode);
+    const nextMode = modeOrder[(currentIndex + 1) % modeOrder.length];
     saveFallbackSettings({
       ...currentSettings,
       mode: nextMode

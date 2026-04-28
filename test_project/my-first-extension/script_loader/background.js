@@ -4,6 +4,13 @@ const DEFAULT_FALLBACK_SETTINGS = {
   mode: 'local'
 };
 
+const NEW_TAB_URLS = new Set([
+  'chrome://newtab/',
+  'chrome://new-tab-page/',
+  'about:newtab'
+]);
+const CHROME_NEW_TAB_URL = 'chrome://newtab/';
+
 function normalizeUrl(url) {
   if (!url) {
     return '';
@@ -16,13 +23,51 @@ function getFallbackSettings(result) {
   return {
     localServerUrl: normalizeUrl(result.fallbackSettings?.localServerUrl) || DEFAULT_FALLBACK_SETTINGS.localServerUrl,
     siteUrl: normalizeUrl(result.fallbackSettings?.siteUrl) || DEFAULT_FALLBACK_SETTINGS.siteUrl,
-    mode: result.fallbackSettings?.mode === 'site' ? 'site' : DEFAULT_FALLBACK_SETTINGS.mode
+    mode: ['local', 'site', 'chrome'].includes(result.fallbackSettings?.mode)
+      ? result.fallbackSettings.mode
+      : DEFAULT_FALLBACK_SETTINGS.mode
   };
 }
 
-function redirectToSite(tabId, siteUrl, reason) {
-  console.log(reason, siteUrl);
-  chrome.tabs.update(tabId, { url: siteUrl });
+function getModeTargetUrl(fallbackSettings) {
+  if (fallbackSettings.mode === 'site') {
+    return fallbackSettings.siteUrl;
+  }
+
+  if (fallbackSettings.mode === 'chrome') {
+    return CHROME_NEW_TAB_URL;
+  }
+
+  return fallbackSettings.localServerUrl;
+}
+
+function redirectToModeTarget(tabId, fallbackSettings, reason) {
+  const targetUrl = getModeTargetUrl(fallbackSettings);
+  console.log(reason, targetUrl);
+  chrome.tabs.update(tabId, { url: targetUrl });
+}
+
+function handleNewTabRedirect(tab) {
+  const candidateUrl = tab.pendingUrl || tab.url || '';
+
+  if (!NEW_TAB_URLS.has(candidateUrl)) {
+    return;
+  }
+
+  chrome.storage.local.get(['enabledScripts', 'fallbackSettings'], (result) => {
+    const enabledScripts = result.enabledScripts || {};
+    const fallbackSettings = getFallbackSettings(result);
+
+    if (!enabledScripts['user_scripts/local_server_fallback.js']) {
+      return;
+    }
+
+    if (fallbackSettings.mode === 'chrome') {
+      return;
+    }
+
+    redirectToModeTarget(tab.id, fallbackSettings, 'Redirecting new tab using fallback mode:');
+  });
 }
 
 // Listen for tab updates
@@ -33,14 +78,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       const enabledScripts = result.enabledScripts || {};
       const fallbackSettings = getFallbackSettings(result);
       const localServerUrl = fallbackSettings.localServerUrl;
-      const siteUrl = fallbackSettings.siteUrl;
       
       // Check if local server fallback script is enabled
       if (enabledScripts['user_scripts/local_server_fallback.js'] && 
           localServerUrl &&
           tab.url.startsWith(localServerUrl)) {
-        if (fallbackSettings.mode === 'site') {
-          redirectToSite(tabId, siteUrl, 'Fallback mode set to site, redirecting immediately to:');
+        if (fallbackSettings.mode === 'site' || fallbackSettings.mode === 'chrome') {
+          redirectToModeTarget(tabId, fallbackSettings, 'Fallback mode bypassing local server, redirecting to:');
           return;
         }
         
@@ -54,11 +98,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           }
         }).then((results) => {
           if (results && results[0] && results[0].result) {
-            redirectToSite(tabId, siteUrl, 'Local server unavailable, redirecting to fallback:');
+            redirectToModeTarget(tabId, { ...fallbackSettings, mode: 'site' }, 'Local server unavailable, redirecting to fallback:');
           }
         }).catch(() => {
           // If we can't execute script (likely an error page), redirect anyway
-          redirectToSite(tabId, siteUrl, 'Cannot execute script on error page, redirecting to fallback:');
+          redirectToModeTarget(tabId, { ...fallbackSettings, mode: 'site' }, 'Cannot execute script on error page, redirecting to fallback:');
         });
       }
     });
@@ -99,6 +143,10 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.local.set({ fallbackSettings: DEFAULT_FALLBACK_SETTINGS });
     }
   });
+});
+
+chrome.tabs.onCreated.addListener((tab) => {
+  handleNewTabRedirect(tab);
 });
 
 // Optional: Listen for storage changes to debug

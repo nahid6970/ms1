@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "scripting",
-    "downloads"
+    "downloads",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -21,9 +22,6 @@
       "48": "assets/icons/img-48x48.png",
       "16": "assets/icons/img-16x16.png"
     }
-  },
-  "chrome_url_overrides": {
-    "newtab": "newtab.html"
   },
    "icons": {
       "128": "assets/icons/img-128x128.png",
