@@ -1,9 +1,8 @@
 import sys
 import os
 import json
-import subprocess
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog)
+                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
 from PyQt5.QtGui import QFont, QDrag
 
@@ -14,16 +13,16 @@ CP_CYAN = "#00F0FF"
 CP_RED = "#FF003C"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
+CP_SUBTEXT = "#808080"
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "md_launcher_config.json")
 
 def load_config():
-    default = {"folders": ["C:/@delta/ms1/md"], "window_width_percent": 0.4}
+    default = {"folders": ["C:/@delta/ms1/md"], "win_w": 600, "win_h": 400}
     try:
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
                 data = json.load(f)
-                # migrate old single-folder config
                 if "md_folder" in data and "folders" not in data:
                     data["folders"] = [data["md_folder"]]
                 return {**default, **data}
@@ -33,6 +32,146 @@ def load_config():
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
+
+
+BTN_STYLE = f"""
+    QPushButton {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px 12px; font-family: Consolas; font-size: 9pt; }}
+    QPushButton:hover {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
+    QPushButton:pressed {{ background: {CP_CYAN}; color: {CP_BG}; }}
+"""
+
+class SettingsDialog(QDialog):
+    applied = pyqtSignal()
+
+    def __init__(self, config, parent=None):
+        super().__init__(parent, Qt.WindowStaysOnTopHint)
+        self.config = config
+        self.setWindowTitle("Settings")
+        self.setModal(False)
+        self.setMinimumWidth(420)
+        self.setStyleSheet(f"""
+            QDialog {{ background: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; }}
+            QLabel {{ color: {CP_TEXT}; background: transparent; border: none; }}
+            QSpinBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 2px 6px; font-family: Consolas; }}
+            QSpinBox:focus {{ border-color: {CP_CYAN}; }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0; border: none; }}
+        """)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(16, 16, 16, 16)
+
+        # --- Window Size ---
+        layout.addWidget(self._section("WINDOW SIZE"))
+
+        size_row = QHBoxLayout()
+        size_row.setSpacing(12)
+
+        self.w_spin = self._spinbox(config.get("win_w", 600), 200, 3840)
+        self.h_spin = self._spinbox(config.get("win_h", 400), 100, 2160)
+
+        size_row.addWidget(QLabel("Width:"))
+        size_row.addWidget(self.w_spin)
+        size_row.addSpacing(16)
+        size_row.addWidget(QLabel("Height:"))
+        size_row.addWidget(self.h_spin)
+        size_row.addStretch()
+        layout.addLayout(size_row)
+
+        # --- Folders ---
+        layout.addWidget(self._section("FOLDERS"))
+
+        self.folder_layout = QVBoxLayout()
+        self.folder_layout.setSpacing(4)
+        layout.addLayout(self.folder_layout)
+        self._refresh_folders()
+
+        add_btn = QPushButton("+ Add Folder")
+        add_btn.setCursor(Qt.PointingHandCursor)
+        add_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_CYAN}; border: none; text-align: left; padding: 2px 0; font-family: Consolas; font-size: 9pt; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
+        add_btn.clicked.connect(self._add_folder)
+        layout.addWidget(add_btn)
+
+        layout.addStretch()
+
+        # --- Apply / Close ---
+        btn_row = QHBoxLayout()
+        apply_btn = QPushButton("Apply")
+        apply_btn.setCursor(Qt.PointingHandCursor)
+        apply_btn.setStyleSheet(BTN_STYLE)
+        apply_btn.clicked.connect(self._apply)
+
+        close_btn = QPushButton("Close")
+        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setStyleSheet(BTN_STYLE)
+        close_btn.clicked.connect(self.close)
+
+        btn_row.addStretch()
+        btn_row.addWidget(apply_btn)
+        btn_row.addWidget(close_btn)
+        layout.addLayout(btn_row)
+
+    def _section(self, text):
+        lbl = QLabel(text)
+        lbl.setFont(QFont("Consolas", 8, QFont.Bold))
+        lbl.setStyleSheet(f"color: {CP_YELLOW}; background: transparent; border: none;")
+        return lbl
+
+    def _spinbox(self, value, min_, max_):
+        sb = QSpinBox()
+        sb.setRange(min_, max_)
+        sb.setValue(value)
+        sb.setFixedWidth(80)
+        return sb
+
+    def _refresh_folders(self):
+        while self.folder_layout.count():
+            item = self.folder_layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+
+        for folder in self.config.get("folders", []):
+            row = QWidget()
+            row.setStyleSheet("background: transparent;")
+            rl = QHBoxLayout(row)
+            rl.setContentsMargins(0, 0, 0, 0)
+            rl.setSpacing(8)
+
+            lbl = QLabel(folder)
+            lbl.setFont(QFont("Consolas", 8))
+            lbl.setStyleSheet(f"color: {CP_SUBTEXT}; border: none; background: transparent;")
+
+            rm = QPushButton("✕")
+            rm.setFixedSize(20, 20)
+            rm.setCursor(Qt.PointingHandCursor)
+            rm.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; }} QPushButton:hover {{ color: {CP_RED}; }}")
+            rm.clicked.connect(lambda _, f=folder: self._remove_folder(f))
+
+            rl.addWidget(lbl, 1)
+            rl.addWidget(rm)
+            self.folder_layout.addWidget(row)
+
+    def _add_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if folder:
+            folder = folder.replace("\\", "/")
+            if folder not in self.config["folders"]:
+                self.config["folders"].append(folder)
+                save_config(self.config)
+                self._refresh_folders()
+                self.applied.emit()
+
+    def _remove_folder(self, folder):
+        if folder in self.config["folders"]:
+            self.config["folders"].remove(folder)
+            save_config(self.config)
+            self._refresh_folders()
+            self.applied.emit()
+
+    def _apply(self):
+        self.config["win_w"] = self.w_spin.value()
+        self.config["win_h"] = self.h_spin.value()
+        save_config(self.config)
+        self.applied.emit()
 
 
 class MDRow(QWidget):
@@ -81,84 +220,6 @@ class MDRow(QWidget):
         drag.exec_(Qt.CopyAction)
 
 
-class SettingsPanel(QWidget):
-    changed = pyqtSignal()
-
-    def __init__(self, config, parent=None):
-        super().__init__(parent)
-        self.config = config
-        self.setObjectName("settings")
-        self.setStyleSheet(f"QWidget#settings {{ background: {CP_PANEL}; border-top: 1px solid {CP_DIM}; }} QLabel {{ border: none; background: transparent; color: {CP_TEXT}; }}")
-
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(8, 6, 8, 6)
-        self.layout.setSpacing(4)
-
-        # Add folder button
-        add_btn = QPushButton("+ Add Folder")
-        add_btn.setFont(QFont("Consolas", 9))
-        add_btn.setCursor(Qt.PointingHandCursor)
-        add_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_CYAN}; border: none; text-align: left; padding: 2px 4px; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
-        add_btn.clicked.connect(self.add_folder)
-        self.layout.addWidget(add_btn)
-
-        self.folder_list_layout = QVBoxLayout()
-        self.folder_list_layout.setSpacing(2)
-        self.layout.addLayout(self.folder_list_layout)
-
-        self.refresh_list()
-
-    def refresh_list(self):
-        # Clear
-        while self.folder_list_layout.count():
-            w = self.folder_list_layout.takeAt(0).widget()
-            if w: w.deleteLater()
-
-        for folder in self.config.get("folders", []):
-            row = QWidget()
-            row.setStyleSheet("background: transparent;")
-            rl = QHBoxLayout(row)
-            rl.setContentsMargins(0, 0, 0, 0)
-            rl.setSpacing(6)
-
-            lbl = QLabel(folder)
-            lbl.setFont(QFont("Consolas", 8))
-            lbl.setStyleSheet(f"color: {CP_SUBTEXT}; border: none; background: transparent;")
-
-            rm = QPushButton("✕")
-            rm.setFixedSize(18, 18)
-            rm.setCursor(Qt.PointingHandCursor)
-            rm.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; font-size: 10px; }} QPushButton:hover {{ color: {CP_RED}; }}")
-            rm.clicked.connect(lambda _, f=folder: self.remove_folder(f))
-
-            rl.addWidget(lbl, 1)
-            rl.addWidget(rm)
-            self.folder_list_layout.addWidget(row)
-
-    def add_folder(self):
-        parent_win = self.window()
-        if hasattr(parent_win, 'block_close'): parent_win.block_close = True
-        folder = QFileDialog.getExistingDirectory(self, "Select Folder")
-        if hasattr(parent_win, 'block_close'): parent_win.block_close = False
-        if folder:
-            folder = folder.replace("\\", "/")
-            if folder not in self.config["folders"]:
-                self.config["folders"].append(folder)
-                save_config(self.config)
-                self.refresh_list()
-                self.changed.emit()
-        parent_win.activateWindow()
-
-    def remove_folder(self, folder):
-        if folder in self.config["folders"]:
-            self.config["folders"].remove(folder)
-            save_config(self.config)
-            self.refresh_list()
-            self.changed.emit()
-
-
-CP_SUBTEXT = "#808080"
-
 class MDLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -167,14 +228,15 @@ class MDLauncher(QMainWindow):
         self.all_files = []
         self.rows = []
         self.current_idx = 0
-        self.settings_visible = False
+        self._settings_dialog = None
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         screen = QApplication.primaryScreen().geometry()
-        self.win_w = int(screen.width() * self.config.get("window_width_percent", 0.4))
-        self.setGeometry((screen.width() - self.win_w) // 2, 10, self.win_w, 400)
+        w = self.config.get("win_w", 600)
+        h = self.config.get("win_h", 400)
+        self.setGeometry((screen.width() - w) // 2, 10, w, h)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -198,21 +260,15 @@ class MDLauncher(QMainWindow):
         self.search.setStyleSheet(f"background: transparent; color: {CP_CYAN}; border: none; padding: 0 12px;")
         self.search.textChanged.connect(self.filter_files)
 
-        self.settings_btn = QPushButton("⚙")
-        self.settings_btn.setFixedSize(36, 36)
-        self.settings_btn.setCursor(Qt.PointingHandCursor)
-        self.settings_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; font-size: 14px; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
-        self.settings_btn.clicked.connect(self.toggle_settings)
+        settings_btn = QPushButton("⚙")
+        settings_btn.setFixedSize(36, 36)
+        settings_btn.setCursor(Qt.PointingHandCursor)
+        settings_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; font-size: 14px; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
+        settings_btn.clicked.connect(self.open_settings)
 
         sr_layout.addWidget(self.search)
-        sr_layout.addWidget(self.settings_btn)
+        sr_layout.addWidget(settings_btn)
         main_layout.addWidget(search_row)
-
-        # Settings panel (hidden by default)
-        self.settings_panel = SettingsPanel(self.config)
-        self.settings_panel.changed.connect(self.scan_files)
-        self.settings_panel.setVisible(False)
-        main_layout.addWidget(self.settings_panel)
 
         # Scroll area
         self.scroll = QScrollArea()
@@ -243,13 +299,24 @@ class MDLauncher(QMainWindow):
         self.focus_timer.timeout.connect(self.check_focus)
         QTimer.singleShot(500, lambda: self.focus_timer.start(100))
 
-    def toggle_settings(self):
-        self.settings_visible = not self.settings_visible
-        self.settings_panel.setVisible(self.settings_visible)
-        self.settings_btn.setStyleSheet(
-            f"QPushButton {{ background: transparent; color: {CP_YELLOW if self.settings_visible else CP_DIM}; border: none; font-size: 14px; }} QPushButton:hover {{ color: {CP_YELLOW}; }}"
-        )
-        self._resize()
+    def open_settings(self):
+        if self._settings_dialog and self._settings_dialog.isVisible():
+            self._settings_dialog.raise_()
+            self._settings_dialog.activateWindow()
+            return
+        self.block_close = True
+        dlg = SettingsDialog(self.config, self)
+        dlg.applied.connect(self._on_settings_applied)
+        dlg.finished.connect(lambda: setattr(self, 'block_close', False))
+        self._settings_dialog = dlg
+        dlg.show()
+
+    def _on_settings_applied(self):
+        w = self.config.get("win_w", 600)
+        h = self.config.get("win_h", 400)
+        screen = QApplication.primaryScreen().geometry()
+        self.setGeometry((screen.width() - w) // 2, 10, w, h)
+        self.scan_files()
 
     def scan_files(self):
         self.all_files = []
@@ -279,13 +346,6 @@ class MDLauncher(QMainWindow):
         if self.rows:
             self.rows[0].set_selected(True)
 
-        self._resize()
-
-    def _resize(self):
-        settings_h = self.settings_panel.sizeHint().height() if self.settings_visible else 0
-        h = 36 + settings_h + min(len(self.rows), 12) * 36 + 4
-        self.setFixedHeight(h)
-
     def set_index(self, idx):
         if not self.rows: return
         if 0 <= self.current_idx < len(self.rows):
@@ -296,6 +356,8 @@ class MDLauncher(QMainWindow):
     def check_focus(self):
         if self.block_close: return
         if not self.isActiveWindow():
+            if self._settings_dialog and self._settings_dialog.isVisible():
+                return
             self.close()
 
     def closeEvent(self, event):

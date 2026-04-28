@@ -1,4 +1,7 @@
 {
-    "folders": ["C:/@delta/ms1/md"],
-    "window_width_percent": 0.4
+    "folders": [
+        "C:/@delta/ms1/md"
+    ],
+    "win_w": 600,
+    "win_h": 400
 }
