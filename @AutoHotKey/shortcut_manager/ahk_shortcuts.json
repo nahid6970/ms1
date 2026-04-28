@@ -547,6 +547,14 @@
             "name": "convex guidline (Copy)",
             "replacement": "C:\\@delta\\ms1\\md\\CONVEX_BACKUP_GUIDE.md",
             "trigger": ";convex2"
+        },
+        {
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "name": "git message ask from ai",
+            "replacement": "also give me a sentence for git commit message",
+            "trigger": ";gitm"
         }
     ],
     "file_shortcuts": [
