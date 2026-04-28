@@ -174,10 +174,10 @@ class MDLauncher(QMainWindow):
 
         self.scan_files()
         
-        # Focus Timer
+        # Focus Timer - delayed start so window can gain focus first
         self.focus_timer = QTimer(self)
         self.focus_timer.timeout.connect(self.check_focus)
-        self.focus_timer.start(200)
+        QTimer.singleShot(500, lambda: self.focus_timer.start(100))
 
     def scan_files(self):
         # Clear existing
@@ -258,4 +258,6 @@ if __name__ == "__main__":
     app.setStyle("Fusion")
     launcher = MDLauncher()
     launcher.show()
+    launcher.activateWindow()
+    launcher.raise_()
     sys.exit(app.exec_())
