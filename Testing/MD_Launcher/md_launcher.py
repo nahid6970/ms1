@@ -2,9 +2,9 @@ import sys
 import os
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QFontComboBox)
+                             QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QComboBox)
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
-from PyQt5.QtGui import QFont, QDrag
+from PyQt5.QtGui import QFont, QDrag, QFontDatabase
 
 CP_BG = "#050505"
 CP_PANEL = "#111111"
@@ -125,10 +125,31 @@ class SettingsDialog(QDialog):
         font_row = QHBoxLayout()
         font_row.setSpacing(12)
 
-        self.font_combo = QFontComboBox()
-        self.font_combo.setCurrentFont(QFont(config.get("font_family", "Consolas")))
+        self.font_combo = QComboBox()
+        self.font_combo.addItems(sorted(QFontDatabase().families()))
+        idx = self.font_combo.findText(config.get("font_family", "Consolas"), Qt.MatchExactly)
+        if idx >= 0: self.font_combo.setCurrentIndex(idx)
         self.font_combo.setFixedHeight(30)
-        self.font_combo.setStyleSheet(f"background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 0 4px; font-family: Consolas;")
+        self.font_combo.setStyleSheet(f"""
+            QComboBox {{
+                background: {CP_PANEL}; color: {CP_CYAN};
+                border: 1px solid {CP_DIM}; padding: 0 8px;
+                font-family: Consolas; font-size: 9pt;
+            }}
+            QComboBox:focus {{ border-color: {CP_CYAN}; }}
+            QComboBox::drop-down {{ border: none; width: 20px; }}
+            QComboBox::down-arrow {{ image: none; width: 0; height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 6px solid {CP_CYAN};
+            }}
+            QComboBox QAbstractItemView {{
+                background: {CP_PANEL}; color: {CP_TEXT};
+                border: 1px solid {CP_CYAN};
+                selection-background-color: {CP_CYAN};
+                selection-color: {CP_BG};
+            }}
+        """)
 
         self.font_size_spin = self._spinbox(config.get("font_size", 9), 6, 24)
 
@@ -221,7 +242,7 @@ class SettingsDialog(QDialog):
         self.config["row_height"] = self.height_spin.value()
         raw = self.types_input.text()
         self.config["file_types"] = [t.strip() for t in raw.split(",") if t.strip()]
-        self.config["font_family"] = self.font_combo.currentFont().family()
+        self.config["font_family"] = self.font_combo.currentText()
         self.config["font_size"] = self.font_size_spin.value()
         save_config(self.config)
         self.applied.emit()
