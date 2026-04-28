@@ -83,7 +83,11 @@ class SettingsDialog(QDialog):
         spacing_row = QHBoxLayout()
         spacing_row.setSpacing(12)
         self.spacing_spin = self._spinbox(config.get("row_spacing", 0), 0, 40)
-        spacing_row.addWidget(QLabel("Spacing (px):"))
+        self.height_spin = self._spinbox(config.get("row_height", 24), 16, 60)
+        spacing_row.addWidget(QLabel("Row height:"))
+        spacing_row.addWidget(self.height_spin)
+        spacing_row.addSpacing(16)
+        spacing_row.addWidget(QLabel("Gap:"))
         spacing_row.addWidget(self.spacing_spin)
         spacing_row.addStretch()
         layout.addLayout(spacing_row)
@@ -195,6 +199,7 @@ class SettingsDialog(QDialog):
         self.config["win_w"] = self.w_spin.value()
         self.config["win_h"] = self.h_spin.value()
         self.config["row_spacing"] = self.spacing_spin.value()
+        self.config["row_height"] = self.height_spin.value()
         raw = self.types_input.text()
         self.config["file_types"] = [t.strip() for t in raw.split(",") if t.strip()]
         save_config(self.config)
@@ -204,11 +209,11 @@ class SettingsDialog(QDialog):
 class MDRow(QWidget):
     clicked = pyqtSignal()
 
-    def __init__(self, file_path, parent=None):
+    def __init__(self, file_path, height=24, parent=None):
         super().__init__(parent)
         self.file_path = file_path
         self.file_name = os.path.basename(file_path)
-        self.setFixedHeight(36)
+        self.setFixedHeight(height)
         self.setObjectName("row")
         self.setCursor(Qt.PointingHandCursor)
 
@@ -363,11 +368,12 @@ class MDLauncher(QMainWindow):
         self.rows = []
 
         self.list_layout.setSpacing(self.config.get("row_spacing", 0))
+        row_height = self.config.get("row_height", 24)
         q = query.lower()
         filtered = [p for p in self.all_files if q in os.path.basename(p).lower()]
 
         for i, path in enumerate(filtered):
-            row = MDRow(path)
+            row = MDRow(path, height=row_height)
             row.clicked.connect(lambda idx=i: self.set_index(idx))
             self.list_layout.insertWidget(self.list_layout.count() - 1, row)
             self.rows.append(row)
