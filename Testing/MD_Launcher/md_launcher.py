@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QComboBox, QFontComboBox)
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
 from PyQt5.QtGui import QFont, QDrag, QFontDatabase
@@ -64,46 +64,31 @@ class SettingsDialog(QDialog):
         # --- Window Size ---
         layout.addWidget(self._section("WINDOW SIZE"))
 
-        size_row = QHBoxLayout()
-        size_row.setSpacing(12)
-
         self.w_spin = self._spinbox(config.get("win_w", 600), 200, 3840)
         self.h_spin = self._spinbox(config.get("win_h", 400), 100, 2160)
 
-        size_row.addWidget(QLabel("Width:"))
-        size_row.addWidget(self.w_spin)
-        size_row.addSpacing(16)
-        size_row.addWidget(QLabel("Height:"))
-        size_row.addWidget(self.h_spin)
-        size_row.addStretch()
-        layout.addLayout(size_row)
-
-        pos_row = QHBoxLayout()
-        pos_row.setSpacing(12)
         screen = QApplication.primaryScreen().geometry()
         self.x_spin = self._spinbox(config.get("win_x", (screen.width() - 600) // 2), 0, screen.width())
         self.y_spin = self._spinbox(config.get("win_y", 10), 0, screen.height())
-        pos_row.addWidget(QLabel("X:"))
-        pos_row.addWidget(self.x_spin)
-        pos_row.addSpacing(16)
-        pos_row.addWidget(QLabel("Y:"))
-        pos_row.addWidget(self.y_spin)
-        pos_row.addStretch()
-        layout.addLayout(pos_row)
+
+        geometry_grid = QGridLayout()
+        geometry_grid.setHorizontalSpacing(12)
+        geometry_grid.setVerticalSpacing(8)
+        geometry_grid.setColumnStretch(4, 1)
+        self._add_spin_pair_row(geometry_grid, 0, "Width:", self.w_spin, "Height:", self.h_spin)
+        self._add_spin_pair_row(geometry_grid, 1, "X:", self.x_spin, "Y:", self.y_spin)
+        layout.addLayout(geometry_grid)
 
         # --- Row Spacing ---
         layout.addWidget(self._section("ROW SPACING"))
-        spacing_row = QHBoxLayout()
-        spacing_row.setSpacing(12)
         self.spacing_spin = self._spinbox(config.get("row_spacing", 0), 0, 40)
         self.height_spin = self._spinbox(config.get("row_height", 24), 16, 60)
-        spacing_row.addWidget(QLabel("Row height:"))
-        spacing_row.addWidget(self.height_spin)
-        spacing_row.addSpacing(16)
-        spacing_row.addWidget(QLabel("Gap:"))
-        spacing_row.addWidget(self.spacing_spin)
-        spacing_row.addStretch()
-        layout.addLayout(spacing_row)
+        spacing_grid = QGridLayout()
+        spacing_grid.setHorizontalSpacing(12)
+        spacing_grid.setVerticalSpacing(8)
+        spacing_grid.setColumnStretch(4, 1)
+        self._add_spin_pair_row(spacing_grid, 0, "Row height:", self.height_spin, "Gap:", self.spacing_spin)
+        layout.addLayout(spacing_grid)
 
         # --- Folders ---
         layout.addWidget(self._section("FOLDERS"))
@@ -183,6 +168,16 @@ class SettingsDialog(QDialog):
         sb.setValue(value)
         sb.setFixedWidth(80)
         return sb
+
+    def _add_spin_pair_row(self, grid, row, left_text, left_spin, right_text, right_spin):
+        left_label = QLabel(left_text)
+        right_label = QLabel(right_text)
+        left_label.setFixedWidth(72)
+        right_label.setFixedWidth(72)
+        grid.addWidget(left_label, row, 0)
+        grid.addWidget(left_spin, row, 1)
+        grid.addWidget(right_label, row, 2)
+        grid.addWidget(right_spin, row, 3)
 
     def _refresh_folders(self):
         while self.folder_layout.count():
