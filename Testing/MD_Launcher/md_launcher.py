@@ -38,6 +38,7 @@ class MDRow(QWidget):
         self.file_path = file_path
         self.file_name = os.path.basename(file_path)
         self.setFixedHeight(36)
+        self.setObjectName("row")
         self.setCursor(Qt.PointingHandCursor)
 
         layout = QHBoxLayout(self)
@@ -55,9 +56,9 @@ class MDRow(QWidget):
 
     def _set_style(self, selected):
         if selected:
-            self.setStyleSheet(f"background: #1a1a1a; border-left: 2px solid {CP_YELLOW};")
+            self.setStyleSheet(f"QWidget#row {{ background: #1a1a1a; border-left: 2px solid {CP_YELLOW}; }} QLabel {{ background: transparent; border: none; }}")
         else:
-            self.setStyleSheet(f"background: transparent; border-left: 2px solid transparent;")
+            self.setStyleSheet(f"QWidget#row {{ background: transparent; border-left: 2px solid transparent; }} QLabel {{ background: transparent; border: none; }}")
 
     def set_selected(self, selected):
         self._set_style(selected)
