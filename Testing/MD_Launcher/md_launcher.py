@@ -78,6 +78,16 @@ class SettingsDialog(QDialog):
         size_row.addStretch()
         layout.addLayout(size_row)
 
+        # --- Row Spacing ---
+        layout.addWidget(self._section("ROW SPACING"))
+        spacing_row = QHBoxLayout()
+        spacing_row.setSpacing(12)
+        self.spacing_spin = self._spinbox(config.get("row_spacing", 0), 0, 40)
+        spacing_row.addWidget(QLabel("Spacing (px):"))
+        spacing_row.addWidget(self.spacing_spin)
+        spacing_row.addStretch()
+        layout.addLayout(spacing_row)
+
         # --- Folders ---
         layout.addWidget(self._section("FOLDERS"))
 
@@ -184,6 +194,7 @@ class SettingsDialog(QDialog):
     def _apply(self):
         self.config["win_w"] = self.w_spin.value()
         self.config["win_h"] = self.h_spin.value()
+        self.config["row_spacing"] = self.spacing_spin.value()
         raw = self.types_input.text()
         self.config["file_types"] = [t.strip() for t in raw.split(",") if t.strip()]
         save_config(self.config)
@@ -351,6 +362,7 @@ class MDLauncher(QMainWindow):
             row.setParent(None)
         self.rows = []
 
+        self.list_layout.setSpacing(self.config.get("row_spacing", 0))
         q = query.lower()
         filtered = [p for p in self.all_files if q in os.path.basename(p).lower()]
 

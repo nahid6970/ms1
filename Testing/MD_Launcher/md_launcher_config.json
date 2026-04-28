@@ -3,5 +3,7 @@
         "C:/@delta/ms1/md"
     ],
     "win_w": 600,
-    "win_h": 400
+    "win_h": 400,
+    "row_spacing": 0,
+    "file_types": []
 }
