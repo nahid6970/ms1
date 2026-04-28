@@ -55,9 +55,10 @@ class MDCard(QFrame):
         
         # Name
         self.name_label = QLabel(self.file_name)
-        self.name_label.setFont(QFont("Consolas", 10, QFont.Bold))
-        self.name_label.setWordWrap(True)
+        self.name_label.setFont(QFont("Consolas", 8))
+        self.name_label.setWordWrap(False)
         self.name_label.setAlignment(Qt.AlignCenter)
+        self.name_label.setMaximumWidth(140)
         self.name_label.setStyleSheet("background: transparent; color: " + CP_TEXT)
         
         layout.addStretch()
@@ -69,7 +70,6 @@ class MDCard(QFrame):
             MDCard {{
                 background-color: {CP_PANEL};
                 border: 1px solid {CP_DIM};
-                border-radius: 10px;
             }}
             MDCard:hover {{
                 border: 1px solid {CP_CYAN};
@@ -102,9 +102,9 @@ class MDCard(QFrame):
     def set_selected(self, selected):
         self.is_selected = selected
         if selected:
-            self.setStyleSheet(f"MDCard {{ background-color: #222; border: 2px solid {CP_YELLOW}; border-radius: 10px; }}")
+            self.setStyleSheet(f"MDCard {{ background-color: #222; border: 2px solid {CP_YELLOW}; }}")
         else:
-            self.setStyleSheet(f"MDCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 10px; }}")
+            self.setStyleSheet(f"MDCard {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; }}")
 
 class MDLauncher(QMainWindow):
     def __init__(self):
@@ -129,7 +129,6 @@ class MDLauncher(QMainWindow):
         self.central_widget.setStyleSheet(f"""
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #111, stop:1 #050505);
             border: 1px solid {CP_DIM};
-            border-radius: 15px;
         """)
         
         self.layout_main = QVBoxLayout(self.central_widget)
