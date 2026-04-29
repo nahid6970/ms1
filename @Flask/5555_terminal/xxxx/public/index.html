@@ -172,21 +172,21 @@
         dot.classList.remove('connected');
         statusText.textContent = 'Disconnected';
       };
-
-      // Terminal input → server
-      term.onData((data) => {
-        if (ws.readyState === WebSocket.OPEN)
-          ws.send(JSON.stringify({ type: 'input', data }));
-      });
-
-      // Resize terminal when window resizes
-      const ro = new ResizeObserver(() => {
-        fitAddon.fit();
-        if (ws.readyState === WebSocket.OPEN)
-          ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
-      });
-      ro.observe(document.querySelector('.output-wrapper'));
     }
+
+    // Terminal input → server
+    term.onData((data) => {
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: 'input', data }));
+    });
+
+    // Resize terminal when window resizes
+    const ro = new ResizeObserver(() => {
+      fitAddon.fit();
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    });
+    ro.observe(document.querySelector('.output-wrapper'));
 
     document.getElementById('reconnect-btn').addEventListener('click', () => {
       if (ws) ws.close();
