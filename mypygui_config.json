@@ -185,21 +185,32 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c start C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
                 },
                 "Control-Button-3": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 5,
+            "padx_right": 5
         },
         {
             "id": "Rclone_bt",
@@ -521,5 +532,9 @@
                 }
             }
         }
-    ]
+    ],
+    "rclone_settings": {
+        "interval_min": 5,
+        "simultaneous": false
+    }
 }

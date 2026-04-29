@@ -1181,6 +1181,9 @@ def ctrl_right_click(event, cfg):
 
 # Periodically check using rclone
 rclone_status = {}  # key -> color
+_rclone_cfg = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
+RCLONE_INTERVAL_MS = int(_rclone_cfg.get("interval_min", 10)) * 60000
+RCLONE_SIMULTANEOUS = bool(_rclone_cfg.get("simultaneous", True))
 
 def update_toggle_bt_color():
     if not rclone_status: return
@@ -1200,7 +1203,7 @@ def check_and_update(label, cfg):
         update_toggle_bt_color()
         try:
             ROOT.after(0, lambda c=color: label.config(text=cfg["label"], fg=c))
-            ROOT.after(600000, lambda: threading.Thread(target=run_check, daemon=True).start())
+            ROOT.after(RCLONE_INTERVAL_MS, lambda: threading.Thread(target=run_check, daemon=True).start())
         except Exception:
             pass
     threading.Thread(target=run_check, daemon=True).start()
@@ -1250,11 +1253,107 @@ rclone_toggle_bt = tk.Label(ROOT1, text="\uef2c", bg="#1d2027", fg="#fcfcfc",
 rclone_toggle_bt.pack(side="left", padx=(5, 5))
 rclone_toggle_bt.bind("<Button-1>", toggle_rclone_popup)
 
-# Start background rclone status checks using dummy labels
-for _key, _cfg in commands.items():
-    if "id" not in _cfg: _cfg["id"] = _key
-    _lbl = tk.Label(ROOT, text="")  # hidden dummy label
-    check_and_update(_lbl, _cfg)
+# Start background rclone status checks
+def _start_rclone_checks():
+    _items = list(commands.items())
+    def _run_sequential(items):
+        if not items: return
+        _key, _cfg = items[0]
+        if "id" not in _cfg: _cfg["id"] = _key
+        _lbl = tk.Label(ROOT, text="")
+        check_and_update(_lbl, _cfg)
+        ROOT.after(100, lambda: _run_sequential(items[1:]))
+    if RCLONE_SIMULTANEOUS:
+        for _key, _cfg in _items:
+            if "id" not in _cfg: _cfg["id"] = _key
+            _lbl = tk.Label(ROOT, text="")
+            check_and_update(_lbl, _cfg)
+    else:
+        _run_sequential(_items)
+_start_rclone_checks()
+
+def open_rclone_settings():
+    import sys as _sys
+    _qt_app = QApplication.instance() or QApplication(_sys.argv)
+
+    CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"
+    CP_RED="#FF003C"; CP_GREEN="#00ff21"; CP_DIM="#3a3a3a"; CP_TEXT="#E0E0E0"
+
+    QSS = f"""
+        QDialog, QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; font-size: 10pt; }}
+        QLineEdit, QComboBox, QSpinBox {{
+            background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+        }}
+        QLineEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
+        QPushButton {{
+            background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
+        }}
+        QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
+        QPushButton#btn_save {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
+        QPushButton#btn_save:hover {{ background-color: {CP_GREEN}; color: black; }}
+        QGroupBox {{
+            border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 8px; font-weight: bold; color: {CP_YELLOW};
+        }}
+        QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+        QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
+        QCheckBox::indicator {{ width: 13px; height: 13px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+        QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+    """
+
+    dlg = QDialog()
+    dlg.setWindowTitle("Rclone Settings")
+    dlg.resize(380, 200)
+    dlg.setStyleSheet(QSS)
+    dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+
+    layout = QVBoxLayout(dlg)
+    layout.setContentsMargins(14, 14, 14, 14)
+    layout.setSpacing(10)
+
+    title = QLabel("// RCLONE SETTINGS")
+    title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold;")
+    layout.addWidget(title)
+
+    grp = QGroupBox("CHECK BEHAVIOUR")
+    form = QFormLayout()
+    form.setSpacing(8)
+    grp.setLayout(form)
+
+    cfg_now = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
+
+    interval_le = QLineEdit(str(cfg_now.get("interval_min", 10)))
+    simul_chk   = QCheckBox("Run simultaneously")
+    simul_chk.setChecked(bool(cfg_now.get("simultaneous", True)))
+
+    form.addRow("INTERVAL (min)", interval_le)
+    form.addRow("", simul_chk)
+    layout.addWidget(grp)
+
+    btn_save = QPushButton("SAVE")
+    btn_save.setObjectName("btn_save")
+    btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+    layout.addWidget(btn_save)
+
+    def save():
+        global RCLONE_INTERVAL_MS, RCLONE_SIMULTANEOUS
+        try: mins = int(interval_le.text())
+        except ValueError: mins = 10
+        simul = simul_chk.isChecked()
+        config = load_config()
+        config["rclone_settings"] = {"interval_min": mins, "simultaneous": simul}
+        save_config(config)
+        RCLONE_INTERVAL_MS = mins * 60000
+        RCLONE_SIMULTANEOUS = simul
+        dlg.accept()
+
+    btn_save.clicked.connect(save)
+    dlg.exec()
+
+rclone_settings_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#808080",
+                               font=("JetBrainsMono NFP", 14, "bold"), cursor="hand2")
+rclone_settings_bt.pack(side="left", padx=(0, 5))
+rclone_settings_bt.bind("<Button-1>", lambda e: open_rclone_settings())
 
 # Add a permanent "ADD NEW" button to ROOT1
 add_new_bt = tk.Label(ROOT1, text="+", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
