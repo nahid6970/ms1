@@ -981,10 +981,6 @@ DelGitIgnore = tk.Label(ROOT1, text="\udb82\udde7", bg="#1d2027", fg="#ffffff", 
 DelGitIgnore.pack(side="left")
 DelGitIgnore.bind("<Button-1>", delete_git_lock_files)
 
-# Start background threads
-threading.Thread(target=update_status, daemon=True).start()
-threading.Thread(target=update_gui, daemon=True).start()
-
 #! For Github Status
 status_thread = threading.Thread(target=update_status, daemon=True)
 gui_thread = threading.Thread(target=update_gui, daemon=True)
