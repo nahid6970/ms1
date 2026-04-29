@@ -31,6 +31,8 @@ class PowerShellSession:
                     ['powershell', '-Command', f'Get-Command -Syntax; $null = Get-Content "{self.profile_path}" | ForEach-Object {{ [System.Management.Automation.PSParser]::Tokenize($_, [ref]$null) }}'],
                     capture_output=True,
                     text=True,
+                encoding='utf-8',
+                errors='replace',
                     timeout=5,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
                 )
@@ -40,6 +42,8 @@ class PowerShellSession:
                     ['powershell', '-Command', f'. "{self.profile_path}"'],
                     capture_output=True,
                     text=True,
+                encoding='utf-8',
+                errors='replace',
                     timeout=15,
                     cwd=self.current_directory,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -84,6 +88,8 @@ class PowerShellSession:
                 ['powershell', '-Command', full_command],
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 timeout=30,
                 cwd=self.current_directory,  # Run in current directory
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -148,6 +154,10 @@ class PowerShellSession:
 # Global session
 pwsh_session = PowerShellSession()
 
+# Extend PATH for subprocess so user-installed CLIs are available
+_extra_paths = [r'C:\Users\nahid\AppData\Local\Kiro-Cli']
+os.environ['PATH'] = os.environ.get('PATH', '') + os.pathsep + os.pathsep.join(_extra_paths)
+
 @app.route('/')
 def index():
     return render_template('terminal.html')
@@ -189,6 +199,8 @@ def stream_command():
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 cwd=pwsh_session.current_directory,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
