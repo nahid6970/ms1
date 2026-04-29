@@ -81,6 +81,24 @@
 
     .status-bar span { margin-right: auto; }
 
+    .mobile-keys-panel {
+      display: none;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      right: 10px;
+      background: #0d1117;
+      border: 1px solid #00ffaa33;
+      border-radius: 6px;
+      padding: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    .mobile-keys-panel.active { display: grid; }
+    .mobile-keys-panel .btn { width: 100%; height: 35px; font-weight: bold; }
+
     .btn {
       border: none;
       border-radius: 4px;
@@ -105,9 +123,26 @@
     <div class="output-wrapper">
       <div id="terminal"></div>
     </div>
+
+    <!-- Mobile Keys Panel -->
+    <div class="mobile-keys-panel" id="keys-panel">
+      <button class="btn" data-key="\t">TAB</button>
+      <button class="btn" data-key="\x03">CTRL+C</button>
+      <button class="btn" data-key="\x04">CTRL+D</button>
+      <button class="btn" data-key="\x1a">CTRL+Z</button>
+      <button class="btn" data-key="\x1b[1~">HOME</button>
+      <button class="btn" data-key="\x1b[4~">END</button>
+      <button class="btn" data-key="\x1b[5~">PGUP</button>
+      <button class="btn" data-key="\x1b[6~">PGDN</button>
+      <button class="btn" data-key="\x1b[D">LEFT</button>
+      <button class="btn" data-key="\x1b[C">RIGHT</button>
+      <button class="btn" data-key="|">PIPE</button>
+      <button class="btn" data-key="/">SLASH</button>
+    </div>
+
     <div class="status-bar">
       <div class="status-dot" id="status-dot"></div>
-      <span id="status-text">Connecting...</span>
+      <button class="btn" id="toggle-keys-btn" style="width: auto; padding: 0 10px; margin-right: auto; color: #00ffaa;">KEYS</button>
       <button class="btn" id="esc-btn" title="Escape">ESC</button>
       <button class="btn" id="up-btn" title="Up Arrow">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -161,7 +196,6 @@
     fitAddon.fit();
 
     const dot = document.getElementById('status-dot');
-    const statusText = document.getElementById('status-text');
     let ws;
 
     function connect() {
@@ -169,7 +203,6 @@
 
       ws.onopen = () => {
         dot.classList.add('connected');
-        statusText.textContent = 'Connected — PowerShell';
         // Send initial terminal size
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
       };
@@ -181,7 +214,6 @@
 
       ws.onclose = () => {
         dot.classList.remove('connected');
-        statusText.textContent = 'Disconnected';
       };
     }
 
@@ -220,14 +252,45 @@
       term.focus();
     });
 
+    // Mobile Keys Panel Logic
+    const keysPanel = document.getElementById('keys-panel');
+    const toggleKeysBtn = document.getElementById('toggle-keys-btn');
+
+    toggleKeysBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      keysPanel.classList.toggle('active');
+      toggleKeysBtn.style.background = keysPanel.classList.contains('active') ? '#00ffaa22' : '';
+    });
+
+    keysPanel.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-key');
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          // Unescape backslash sequences
+          const data = key.replace(/\\x([0-9a-fA-F]{2})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+                          .replace(/\\t/g, '\t');
+          ws.send(JSON.stringify({ type: 'input', data }));
+        }
+        term.focus();
+      });
+    });
+
+    // Close panel when clicking terminal
+    document.querySelector('.terminal-container').addEventListener('touchstart', (e) => {
+      if (!keysPanel.contains(e.target) && e.target !== toggleKeysBtn) {
+        keysPanel.classList.remove('active');
+        toggleKeysBtn.style.background = '';
+      }
+    });
+
     connect();
     term.focus();
 
     // Pinch to Zoom for Mobile
     let lastTouchDistance = 0;
-    const terminalElement = document.getElementById('terminal');
+    const container = document.querySelector('.terminal-container');
 
-    terminalElement.addEventListener('touchstart', (e) => {
+    container.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         lastTouchDistance = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
@@ -236,7 +299,7 @@
       }
     }, { passive: false });
 
-    terminalElement.addEventListener('touchmove', (e) => {
+    container.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
         const distance = Math.hypot(
@@ -246,9 +309,10 @@
 
         if (lastTouchDistance > 0) {
           const delta = distance - lastTouchDistance;
-          if (Math.abs(delta) > 10) { // Threshold for smoother zooming
+          // Reduced threshold for more responsive zoom
+          if (Math.abs(delta) > 5) { 
             let newSize = term.options.fontSize + (delta > 0 ? 1 : -1);
-            newSize = Math.max(6, Math.min(40, newSize));
+            newSize = Math.max(8, Math.min(30, newSize)); // Slightly safer range
             
             if (newSize !== term.options.fontSize) {
               term.options.fontSize = newSize;
@@ -262,6 +326,7 @@
         }
       }
     }, { passive: false });
+
   </script>
 </body>
 </html>
