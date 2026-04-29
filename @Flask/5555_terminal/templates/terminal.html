@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -281,26 +281,45 @@
             outputDiv.appendChild(loadingDiv);
             
             try {
-                const response = await fetch('/execute', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command })
-                });
-                const result = await response.json();
-                outputDiv.removeChild(loadingDiv);
-                if (result.output) {
-                    addToOutput(result.output, result.error ? 'error-text' : 'output-text');
-                }
-                await convex.mutation("functions:add", { command });
-                await loadHistory();
+                const es = new EventSource('/stream?command=' + encodeURIComponent(command));
+                let outputDiv2 = null;
+                let hasError = false;
+
+                es.onmessage = (e) => {
+                    const data = JSON.parse(e.data);
+                    if (loadingDiv.parentNode) outputDiv.removeChild(loadingDiv);
+                    if (!outputDiv2) {
+                        outputDiv2 = document.createElement('div');
+                        outputDiv2.className = 'output-text';
+                        outputDiv.appendChild(outputDiv2);
+                    }
+                    if (data.error) hasError = true;
+                    outputDiv2.className = hasError ? 'error-text' : 'output-text';
+                    outputDiv2.innerHTML += (outputDiv2.innerHTML ? '\n' : '') + data.line;
+                    outputDiv.scrollTop = outputDiv.scrollHeight;
+                    if (data.done) {
+                        es.close();
+                        convex.mutation("functions:add", { command }).then(() => loadHistory());
+                        executeBtn.disabled = false;
+                        executeBtn.textContent = '▲';
+                        commandInput.focus();
+                    }
+                };
+
+                es.onerror = () => {
+                    es.close();
+                    if (loadingDiv.parentNode) outputDiv.removeChild(loadingDiv);
+                    if (!outputDiv2) addToOutput('Stream error', 'error-text');
+                    executeBtn.disabled = false;
+                    executeBtn.textContent = '▲';
+                    commandInput.focus();
+                };
+                return; // finally runs immediately, handle re-enable in SSE callbacks
             } catch (error) {
                 if (loadingDiv.parentNode) outputDiv.removeChild(loadingDiv);
                 addToOutput(`Error: ${error.message}`, 'error-text');
             } finally {
-                executeBtn.disabled = false;
-                executeBtn.textContent = '▲';
-                commandInput.focus();
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+                // SSE path returns early; this only runs on sync errors
             }
         }
 

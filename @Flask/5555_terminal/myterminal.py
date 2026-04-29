@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+﻿from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 import subprocess
 import json
 import os
@@ -171,6 +171,42 @@ def execute_command():
         'error': has_error
     })
 
+
+@app.route('/stream', methods=['GET'])
+def stream_command():
+    command = request.args.get('command', '').strip()
+    if not command:
+        return Response('data: \n\n', mimetype='text/event-stream')
+
+    def generate():
+        try:
+            full_command = command
+            if pwsh_session.profile_loaded and os.path.exists(pwsh_session.profile_path):
+                full_command = f'. "{pwsh_session.profile_path}"; {command}'
+
+            proc = subprocess.Popen(
+                ['powershell', '-Command', full_command],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                cwd=pwsh_session.current_directory,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+            )
+
+            for line in iter(proc.stdout.readline, ''):
+                yield f'data: {json.dumps({"line": line.rstrip()})}\n\n'
+
+            proc.stdout.close()
+            proc.wait()
+            has_error = proc.returncode != 0
+            location = f'<span class="command-text">Location: {pwsh_session.current_directory}</span>'
+            yield f'data: {json.dumps({"line": location, "done": True, "error": has_error})}\n\n'
+
+        except Exception as e:
+            yield f'data: {json.dumps({"line": str(e), "done": True, "error": True})}\n\n'
+
+    return Response(stream_with_context(generate()), mimetype='text/event-stream',
+                    headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 @app.route('/profile-status', methods=['GET'])
 def get_profile_status():
     """Get PowerShell profile status"""
