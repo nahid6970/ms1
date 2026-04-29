@@ -1090,7 +1090,7 @@ def toggle_rclone_popup(event=None):
     rclone_popup.update_idletasks()
     pw = rclone_popup.winfo_reqwidth()
     ph = rclone_popup.winfo_reqheight()
-    bx = rclone_toggle_bt.winfo_rootx()
+    bx = rclone_toggle_bt.winfo_rootx() + rclone_toggle_bt.winfo_width() // 2 - pw // 2
     by = ROOT.winfo_rooty()
     rclone_popup.geometry(f"{pw}x{ph}+{bx}+{by - ph}")
 
