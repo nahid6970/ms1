@@ -119,11 +119,12 @@
             color: #ffffff;
             font-weight: 700;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .terminal-input {
             flex: 1;
-            min-width: 150px;
+            min-width: 100px;
             background: transparent;
             border: none;
             color: #e0e0e0;
@@ -135,11 +136,17 @@
         .terminal-input:focus { outline: none; }
         .terminal-input::placeholder { color: #2a2a2a; }
 
-        .controls-group { display: flex; gap: 5px; margin-left: auto; }
+        .controls-group { 
+            display: flex; 
+            gap: 5px; 
+            margin-left: auto;
+            flex-shrink: 0;
+            align-items: center;
+        }
 
         .btn {
             border: none;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
@@ -147,7 +154,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 36px;
+            min-width: 32px;
+            height: 32px;
             transition: all 0.15s;
         }
 
@@ -155,6 +163,7 @@
             background: linear-gradient(135deg, #00cc88, #00aa77);
             color: #000;
             font-weight: 700;
+            font-size: 16px;
             box-shadow: 0 0 10px rgba(0,204,136,0.25);
         }
         .execute-btn:hover { box-shadow: 0 0 18px rgba(0,255,170,0.45); transform: translateY(-1px); }
@@ -181,9 +190,11 @@
 
         @media (max-width: 600px) {
             .header h1 { font-size: 13px; }
-            .terminal-container { padding: 8px; }
-            .controls-group { width: 100%; justify-content: flex-end; margin-top: 5px; }
-            .terminal-input { min-width: 100px; }
+            .terminal-container { padding: 6px; gap: 6px; }
+            .terminal-input-container { padding: 4px 8px; gap: 4px; }
+            .controls-group { margin-left: 0; width: auto; }
+            .terminal-input { min-width: 50px; font-size: 14px; }
+            .btn { min-width: 30px; height: 30px; padding: 4px 8px; }
         }
     </style>
 </head>
@@ -212,7 +223,7 @@
             <div class="controls-group">
                 <button id="history-up-btn" class="btn nav-btn" title="Previous Command">↑</button>
                 <button id="history-down-btn" class="btn nav-btn" title="Next Command">↓</button>
-                <button id="execute-btn" class="btn execute-btn">Execute</button>
+                <button id="execute-btn" class="btn execute-btn" title="Execute">▲</button>
                 <button id="delete-btn" class="btn delete-btn" style="display: none;">Delete</button>
             </div>
         </div>
