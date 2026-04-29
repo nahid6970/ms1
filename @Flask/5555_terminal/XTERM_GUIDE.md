@@ -51,8 +51,16 @@ const path = require('path');
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
-const server = app.listen(5556, () => {
-  console.log('PTY Terminal running at http://localhost:5556');
+const server = app.listen(5556, '0.0.0.0', () => {
+  const { networkInterfaces } = require('os');
+  const nets = networkInterfaces();
+  let localIP = 'localhost';
+  for (const iface of Object.values(nets).flat()) {
+    if (iface.family === 'IPv4' && !iface.internal) { localIP = iface.address; break; }
+  }
+  console.log(`PTY Terminal running at:`);
+  console.log(`  Local:   http://localhost:5556`);
+  console.log(`  Network: http://${localIP}:5556`);
 });
 
 const wss = new WebSocketServer({ server });
@@ -300,7 +308,18 @@ wss.on('connection', (ws) => {
 node server.js
 ```
 
-Open `http://localhost:5556` — full interactive PowerShell in the browser. Type `kiro-cli`, `gemini`, or any interactive tool and it works natively.
+It will print both your `localhost` and network IP, e.g.:
+```
+PTY Terminal running at:
+  Local:   http://localhost:5556
+  Network: http://192.168.1.10:5556
+```
+
+Open the **Network** URL on your mobile (must be on the same Wi-Fi). If it doesn't connect, allow port 5556 through Windows Firewall:
+
+```
+netsh advfirewall firewall add rule name="PTY Terminal" dir=in action=allow protocol=TCP localport=5556
+```
 
 ---
 
