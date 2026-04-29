@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=3.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, user-scalable=yes, minimum-scale=0.5, maximum-scale=3.0">
     <title>PowerShell Web Terminal</title>
     <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,7 @@
             height: 100dvh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             background-image:
                 radial-gradient(ellipse at 15% 50%, rgba(0,255,170,0.04) 0%, transparent 55%),
                 radial-gradient(ellipse at 85% 20%, rgba(0,180,255,0.04) 0%, transparent 55%);
@@ -362,9 +363,21 @@
         // Scroll into view on focus for mobile
         commandInput.addEventListener('focus', () => {
             setTimeout(() => {
-                commandInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                commandInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 300);
         });
+
+        // Keep layout fitted to visual viewport (handles mobile keyboard show/hide)
+        if (window.visualViewport) {
+            const container = document.querySelector('.terminal-container');
+            const onViewportChange = () => {
+                container.style.height = window.visualViewport.height + 'px';
+                window.scrollTo(0, 0);
+            };
+            window.visualViewport.addEventListener('resize', onViewportChange);
+            window.visualViewport.addEventListener('scroll', onViewportChange);
+            onViewportChange();
+        }
     </script>
 </body>
 </html>
