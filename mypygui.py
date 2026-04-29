@@ -100,7 +100,8 @@ def open_edit_gui(item_cfg, category, index=None):
             background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
         }}
         QLineEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
-        QComboBox::drop-down {{ border: none; }}
+        QComboBox::drop-down {{ width: 20px; border-left: 1px solid #3a3a3a; }}
+        QComboBox::down-arrow {{ width: 10px; height: 10px; }}
         QComboBox QAbstractItemView {{ background: {CP_PANEL}; color: {CP_CYAN}; selection-background-color: {CP_CYAN}; selection-color: {CP_BG}; }}
         QPushButton {{
             background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
@@ -193,7 +194,6 @@ def open_edit_gui(item_cfg, category, index=None):
     font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp",
                      "Arial", "Consolas", "Courier New", "Segoe UI", "Tahoma", "Verdana"]
     font_family_cb = QComboBox()
-    font_family_cb.setEditable(True)
     font_family_cb.addItems(font_families)
     font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
 
