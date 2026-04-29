@@ -34,6 +34,14 @@
             position: relative;
         }
 
+        .output-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         .terminal-output {
             flex: 1;
             background: #05050a;
@@ -46,6 +54,28 @@
             box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
             min-height: 0;
         }
+
+        .refresh-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #0d1117;
+            border: 1px solid #ffffff1a;
+            border-radius: 5px;
+            color: #555;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            z-index: 5;
+            padding: 0;
+        }
+        .refresh-btn:hover { border-color: #00ffaa44; color: #00ffaa; background: #0d1a14; }
+        .refresh-btn.spinning svg { animation: spin 0.6s linear; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .terminal-input-container {
             display: flex;
@@ -146,7 +176,15 @@
 </head>
 <body>
     <div class="terminal-container">
-        <div id="terminal-output" class="terminal-output"></div>
+        <div class="output-wrapper">
+            <div id="terminal-output" class="terminal-output"></div>
+            <button class="refresh-btn" id="refresh-btn" title="Refresh page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </button>
+        </div>
         
         <div class="terminal-input-container">
             <span class="prompt">PS></span>
@@ -172,6 +210,7 @@
         const deleteBtn = document.getElementById('delete-btn');
         const historyUpBtn = document.getElementById('history-up-btn');
         const historyDownBtn = document.getElementById('history-down-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
         
         let commandHistory = [];
         let searchHistory = [];
@@ -287,6 +326,11 @@
             }
         }
 
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.classList.add('spinning');
+            setTimeout(() => location.reload(), 600);
+        });
+
         executeBtn.addEventListener('click', executeCommand);
         deleteBtn.addEventListener('click', deleteCommand);
         historyUpBtn.addEventListener('click', () => navigateHistory('up'));
@@ -309,10 +353,7 @@
                 navigateHistory('down');
             } else if (event.ctrlKey && event.key === 'l') {
                 event.preventDefault();
-                outputDiv.innerHTML = `
-                    <div class="output-text">Terminal cleared</div>
-        
-                `;
+                outputDiv.innerHTML = `<div class="output-text">Terminal cleared</div>`;
             }
         });
         
