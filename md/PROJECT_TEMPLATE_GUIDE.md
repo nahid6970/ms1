@@ -5,56 +5,13 @@ This is a **reusable template** for setting up proper documentation and developm
 ---
 
 
-
-## 🚀 Git Commit Workflow Template
-
-### Commit Rules
-- **⛔ CRITICAL: NEVER COMMIT WITHOUT EXPLICIT INSTRUCTION**
-  - Some AI models have a bad habit of auto-committing. **THIS IS STRICTLY FORBIDDEN.**
-  - You must receive a clear command (e.g., "commit this", "save changes to git") before running `git commit`.
-  - Updating documentation does NOT authorize a git commit of code or docs unless requested.
-- **Update documentation FIRST** before Git operations
-- **One-line commit messages** with emojis
-- **Complete sequence:** add → commit → push
-
-### Pre-Commit Documentation Updates
-1. **md/RECENT.md** - Current session details
-2. **md/PROBLEMS_AND_FIXES.md** - Any bugs fixed
-3. **md/FEATURES.md** - New features added
-4. **DEVELOPER_GUIDE.md** - Architecture changes
-5. **Other relevant docs** - As needed
-
-### Commit Message Emojis
-- ✅ Bug fixes and issue resolution
-- ⚠️ Known issues or warnings  
-- 🎯 New features and implementations
-- 📝 Documentation updates
-- 🔧 Code improvements and refactoring
-- 🧹 Code cleanup and removal
-- 🚀 Performance improvements
-- 🎨 UI/UX improvements
-- 🔒 Security fixes
-- 📦 Dependencies and packages
-- 🌐 Internationalization
-- ♿ Accessibility improvements
-
-### Git Workflow Commands
-```bash
-git add .
-git commit -m "emoji one-line description"
-git push
-```
-
----
-
 ## 📋 Development Best Practices
 
 ### Documentation Rules
-1. **Always update docs before committing**
-2. **Keep RECENT.md to 5 sessions max**
-3. **Archive older sessions, don't delete**
-4. **Document every bug fix in PROBLEMS_AND_FIXES.md**
-5. **Use file references:** `#[[file:path/to/file.md]]`
+1. **Keep RECENT.md to 5 sessions max**
+2. **Archive older sessions, don't delete**
+3. **Document every bug fix in PROBLEMS_AND_FIXES.md**
+4. **Use file references:** `#[[file:path/to/file.md]]`
 
 ### Session Management
 1. **Start each session** by reading RECENT.md
@@ -103,9 +60,6 @@ git push
 
 ### Team Collaboration
 - **Add CONTRIBUTING.md** for team guidelines
-- **Create issue templates** for GitHub
-- **Document code review** process
-- **Establish branch naming** conventions
 - **Define testing requirements**
 
 ---
@@ -135,38 +89,6 @@ How to use the project
 See DEVELOPER_GUIDE.md for development workflow.
 ```
 
-### .gitignore Template
-```
-# Dependencies
-node_modules/
-__pycache__/
-*.pyc
-
-# Environment
-.env
-.venv/
-venv/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Build
-dist/
-build/
-*.min.js
-*.min.css
-```
 
 ---
 
@@ -175,9 +97,8 @@ build/
 1. **Copy this file** to your new project root
 2. **Rename to DEVELOPER_GUIDE.md** and customize
 3. **Create the md/ folder** and required files
-4. **Set up Git repository** with proper .gitignore
-5. **Create initial RECENT.md entry** for project setup
-6. **Start following the workflow** from day one
+4. **Create initial RECENT.md entry** for project setup
+5. **Start following the workflow** from day one
 
 **Remember:** Good documentation from the start saves hours of confusion later!
 
@@ -187,20 +108,10 @@ build/
 *Customize it for your specific needs and technology stack.*
 
 
-
-
-
-
-
-
-
 # Always run a python script when u finished ur conversation. bcz it will notify me that u finished ur task and i will get a notification if the window was minimised or on another workspace
 
 # When creating any script always use path so if i launch them from different directory the script will load data files properly
 
-# Commit
-- When i explicitly say to "commit" then u will comiit the changes with 1 line message. Also use emoji etc to make the message look better
-- also when there are already md files related to the project and i say commit then see if we already updated the md files if not first update them and then commit
 
 # md Files
 - when creating any projects make a dev.md files about the project and /md folder for other md Files
