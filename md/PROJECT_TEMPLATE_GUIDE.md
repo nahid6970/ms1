@@ -29,7 +29,7 @@ Main guide for the project. Document architecture, setup, and link to other md f
 ```
 # Recent Development Log
 All sessions recorded here — no archiving, full history in one place.
-When giving AI context, reference only the last 5 sessions to avoid overloading context.
+Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
 ## [YYYY-MM-DD HH:MM] - Session Title
 **What We Accomplished:**
@@ -81,7 +81,7 @@ When giving AI context, reference only the last 5 sessions to avoid overloading 
 
 ### Documentation Rules
 1. **Record all changes in RECENT.md** — full history, no archiving
-2. **When giving AI context from RECENT.md**, only reference the last 5 sessions to keep context lean
+2. **When giving AI context from RECENT.md**, only read it when relevant to the current task — reference the last 5 sessions max
 3. **Document every bug fix in PROBLEMS_AND_FIXES.md**
 4. **Use file references:** `#[[file:path/to/file.md]]`
 
