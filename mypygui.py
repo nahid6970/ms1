@@ -1184,9 +1184,6 @@ add_new_bt.bind("<Button-1>", lambda e: open_edit_gui({"text": "NEW", "fg": "#ff
 
 
 
-cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
-cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
-
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
 Download_lb.bind("<Button-1>", lambda event: subprocess.Popen(["sniffnet"], shell=True))
@@ -1199,6 +1196,8 @@ LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_CPU.bind( "<Button-1>", lambda event=None: subprocess.Popen([sys.executable, r'C:\@delta\ms1\scripts\process\process_viewer.py']))
 LB_CPU.bind("<Control-Button-1>",lambda event=None: subprocess.Popen(['code', r'C:\@delta\ms1\scripts\process\process_viewer.py']))
+cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
+cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 # LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\@delta\ms1\scripts\pk.ps1"], shell=True))
 # LB_CPU.bind("<Button-3>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\@delta\ms1\scripts\pk2.ps1"], shell=True))
 # LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\@delta\\ms1\\scripts\\pk.ps1"], shell=True))
