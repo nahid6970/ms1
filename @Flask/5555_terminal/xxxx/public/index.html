@@ -108,6 +108,17 @@
     <div class="status-bar">
       <div class="status-dot" id="status-dot"></div>
       <span id="status-text">Connecting...</span>
+      <button class="btn" id="esc-btn" title="Escape">ESC</button>
+      <button class="btn" id="up-btn" title="Up Arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+      <button class="btn" id="down-btn" title="Down Arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
       <button class="btn" id="reconnect-btn" title="Reconnect">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"></polyline>
@@ -192,6 +203,21 @@
       if (ws) ws.close();
       term.clear();
       connect();
+    });
+
+    document.getElementById('esc-btn').addEventListener('click', () => {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'input', data: '\x1b' }));
+      term.focus();
+    });
+
+    document.getElementById('up-btn').addEventListener('click', () => {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'input', data: '\x1b[A' }));
+      term.focus();
+    });
+
+    document.getElementById('down-btn').addEventListener('click', () => {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'input', data: '\x1b[B' }));
+      term.focus();
     });
 
     connect();
