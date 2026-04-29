@@ -185,6 +185,19 @@
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                 </svg>
             </button>
+            <button class="refresh-btn" id="keyboard-btn" title="Hide keyboard" style="top: 44px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="12" rx="2"></rect>
+                    <line x1="6" y1="8" x2="6" y2="8"></line>
+                    <line x1="10" y1="8" x2="10" y2="8"></line>
+                    <line x1="14" y1="8" x2="14" y2="8"></line>
+                    <line x1="18" y1="8" x2="18" y2="8"></line>
+                    <line x1="6" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="18" y2="12"></line>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <polyline points="8 20 12 24 16 20"></polyline>
+                </svg>
+            </button>
         </div>
         
         <div class="terminal-input-container">
@@ -212,6 +225,7 @@
         const historyUpBtn = document.getElementById('history-up-btn');
         const historyDownBtn = document.getElementById('history-down-btn');
         const refreshBtn = document.getElementById('refresh-btn');
+        const keyboardBtn = document.getElementById('keyboard-btn');
         
         let commandHistory = [];
         let searchHistory = [];
@@ -278,6 +292,7 @@
                 executeBtn.disabled = false;
                 executeBtn.textContent = '▲';
                 commandInput.focus();
+                outputDiv.scrollTop = outputDiv.scrollHeight;
             }
         }
 
@@ -327,6 +342,17 @@
             }
         }
 
+        // Prevent execute/delete buttons from stealing focus (keeps keyboard open)
+        [executeBtn, deleteBtn].forEach(btn => {
+            btn.addEventListener('mousedown', e => e.preventDefault());
+        });
+        // On mobile use touchend for execute so keyboard stays open
+        if ('ontouchstart' in window) {
+            executeBtn.addEventListener('touchend', e => { e.preventDefault(); executeCommand(); });
+        }
+
+        keyboardBtn.addEventListener('click', () => commandInput.blur());
+
         refreshBtn.addEventListener('click', () => {
             refreshBtn.classList.add('spinning');
             setTimeout(() => location.reload(), 600);
@@ -336,6 +362,11 @@
         deleteBtn.addEventListener('click', deleteCommand);
         historyUpBtn.addEventListener('click', () => navigateHistory('up'));
         historyDownBtn.addEventListener('click', () => navigateHistory('down'));
+        // On mobile, use touchend for nav buttons so they fire before input re-focus resets state
+        if ('ontouchstart' in window) {
+            historyUpBtn.addEventListener('touchend', e => { e.preventDefault(); navigateHistory('up'); });
+            historyDownBtn.addEventListener('touchend', e => { e.preventDefault(); navigateHistory('down'); });
+        }
         
         commandInput.addEventListener('input', () => {
             historyIndex = -1;
