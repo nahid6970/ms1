@@ -1043,6 +1043,14 @@ def ctrl_right_click(event, cfg):
         handle_action(action)
 
 # Periodically check using rclone
+rclone_status = {}  # key -> color
+
+def update_toggle_bt_color():
+    if not rclone_status: return
+    agg = "#06de22" if all(c == "#06de22" for c in rclone_status.values()) else "red"
+    try: ROOT.after(0, lambda c=agg: rclone_toggle_bt.config(fg=c))
+    except Exception: pass
+
 def check_and_update(label, cfg):
     def run_check():
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
@@ -1051,6 +1059,8 @@ def check_and_update(label, cfg):
         with open(cfg["log"], "r") as f:
             content = f.read()
         color = "#06de22" if "ERROR" not in content else "red"
+        rclone_status[cfg["id"]] = color
+        update_toggle_bt_color()
         try:
             ROOT.after(0, lambda c=color: label.config(text=cfg["label"], fg=c))
             ROOT.after(600000, lambda: threading.Thread(target=run_check, daemon=True).start())
@@ -1085,7 +1095,9 @@ def toggle_rclone_popup(event=None):
         lbl.bind("<Control-Button-1>", lambda e, c=cfg: ctrl_left_click(e, c))
         lbl.bind("<Control-Button-3>", lambda e, c=cfg: ctrl_right_click(e, c))
         lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands"))
-        check_and_update(lbl, cfg)
+        # show cached status color if available
+        cached = rclone_status.get(cfg.get("id", key))
+        if cached: lbl.config(fg=cached)
 
     rclone_popup.update_idletasks()
     pw = rclone_popup.winfo_reqwidth()
@@ -1100,6 +1112,12 @@ rclone_toggle_bt = tk.Label(ROOT1, text="\uef2c", bg="#1d2027", fg="#fcfcfc",
                              font=("JetBrainsMono NFP", 20, "bold"), cursor="hand2")
 rclone_toggle_bt.pack(side="left", padx=(5, 5))
 rclone_toggle_bt.bind("<Button-1>", toggle_rclone_popup)
+
+# Start background rclone status checks using dummy labels
+for _key, _cfg in commands.items():
+    if "id" not in _cfg: _cfg["id"] = _key
+    _lbl = tk.Label(ROOT, text="")  # hidden dummy label
+    check_and_update(_lbl, _cfg)
 
 # Add a permanent "ADD NEW" button to ROOT1
 add_new_bt = tk.Label(ROOT1, text="\uf415", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
