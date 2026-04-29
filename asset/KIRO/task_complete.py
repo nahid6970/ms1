@@ -55,7 +55,7 @@ class TaskCompletePopup(QWidget):
         self.container = QWidget()
         self.container.setObjectName("Container")
         c_layout = QVBoxLayout(self.container)
-        c_layout.setContentsMargins(30, 30, 30, 30)
+        c_layout.setContentsMargins(40, 30, 40, 30)
         layout.addWidget(self.container)
 
         self.update_gradient_style()
@@ -110,6 +110,12 @@ class TaskCompletePopup(QWidget):
         b = int(c1.blue() + (c2.blue() - c1.blue()) * t)
         return f"#{r:02x}{g:02x}{b:02x}"
 
+    def get_text_color(self, bg_color):
+        """Get contrasting text color based on background brightness"""
+        color = QColor(bg_color)
+        brightness = (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114)
+        return "black" if brightness > 128 else "white"
+
     def update_gradient_style(self):
         current_colors = GRADIENT_COLORS[self.gradient_index]
         prev_index = (self.gradient_index - 1) % len(GRADIENT_COLORS)
@@ -118,22 +124,27 @@ class TaskCompletePopup(QWidget):
         # Interpolate between previous and current gradient
         color1 = self.interpolate_color(prev_colors[0], current_colors[0], self._transition_progress)
         color2 = self.interpolate_color(prev_colors[1], current_colors[1], self._transition_progress)
+        
+        # Calculate text color based on average brightness of gradient
+        avg_color = self.interpolate_color(color1, color2, 0.5)
+        text_color = self.get_text_color(avg_color)
         self.setStyleSheet(f"""
             QWidget#Container {{
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
                     stop:0 {color1}, stop:1 {color2});
                 border: 1px solid {BORDER_COLOR};
                 border-radius: 8px;
+                min-width: 400px;
             }}
             QLabel#title {{
-                color: white;
+                color: {text_color};
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 11pt;
                 font-weight: 700;
                 letter-spacing: 1px;
             }}
             QLabel#msg {{
-                color: white;
+                color: {text_color};
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 13pt;
             }}
