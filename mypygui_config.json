@@ -82,18 +82,26 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
-                    "cmd": "cmd /c start windows.py",
-                    "cwd": "C:\\@delta\\ms1\\@@init\\"
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "cmd /c start windows.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c start C:\\@delta\\ms1\\@@init\\windows.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\@@init\\windows.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "Update",
@@ -136,13 +144,20 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\tools.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 5,
+            "padx_right": 1
         },
         {
             "id": "Startup_bt",
@@ -169,8 +184,8 @@
                 }
             },
             "bg": "",
-            "padx_left": 1,
-            "padx_right": 1
+            "padx_left": 5,
+            "padx_right": 5
         },
         {
             "id": "AppManagement_bt",
