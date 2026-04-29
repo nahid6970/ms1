@@ -21,7 +21,7 @@ const server = app.listen(5556, '0.0.0.0', () => {
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
-  const shell = pty.spawn('powershell.exe', [], {
+  const shell = pty.spawn('powershell.exe', ['-NoLogo'], {
     name: 'xterm-256color',
     cols: 120,
     rows: 30,
