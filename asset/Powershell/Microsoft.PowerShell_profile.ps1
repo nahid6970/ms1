@@ -734,9 +734,14 @@ function gitter {
     git add .
     if ($LASTEXITCODE -ne 0) { Write-Host "Error during 'git add'. Window will remain open." -ForegroundColor Red; return }
 
-    # Commit with the generated message
-    git commit -m $CommitMessage
-    if ($LASTEXITCODE -ne 0) { Write-Host "Error during 'git commit' (or nothing to commit). Window will remain open." -ForegroundColor Red; return }
+    # Commit with retry loop
+    while ($true) {
+        git commit -m $CommitMessage
+        if ($LASTEXITCODE -eq 0) { break }
+        Write-Host "Commit failed. Press Enter to retry or type a new message:" -ForegroundColor Yellow
+        $Retry = Read-Host "[$CommitMessage]"
+        if (-not [string]::IsNullOrWhiteSpace($Retry)) { $CommitMessage = $Retry }
+    }
 
     # Push to the remote repository
     git push
