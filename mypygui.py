@@ -1058,30 +1058,48 @@ def check_and_update(label, cfg):
             pass
     threading.Thread(target=run_check, daemon=True).start()
 
-# GUI setup
-def create_rclone_gui():
+# Rclone popup panel
+rclone_popup = None
+
+def toggle_rclone_popup(event=None):
+    global rclone_popup
+    if rclone_popup and tk.Toplevel.winfo_exists(rclone_popup):
+        rclone_popup.destroy()
+        rclone_popup = None
+        return
+
+    rclone_popup = tk.Toplevel(ROOT)
+    rclone_popup.overrideredirect(True)
+    rclone_popup.configure(bg="#1d2027")
+    rclone_popup.attributes("-topmost", True)
+
+    frame = tk.Frame(rclone_popup, bg="#1d2027", highlightthickness=1, highlightbackground="red")
+    frame.pack(fill="both", expand=True)
+
     for key, cfg in commands.items():
         if "id" not in cfg: cfg["id"] = key
-        lbl = tk.Label(
-            ROOT1,
-            width=0,
-            bg="#1d2027",
-            text=cfg["label"],
-            font=("JetBrainsMono NFP", 16, "bold"),
-            cursor="hand2"
-        )
-        lbl.pack(side="left", padx=(5, 5))
-
-        # Event bindings
-        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))           # left click
-        lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
-        lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
-        lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands")) # Shift+Click edit
-
+        lbl = tk.Label(frame, width=0, bg="#1d2027", text=cfg["label"],
+                       font=("JetBrainsMono NFP", 16, "bold"), cursor="hand2")
+        lbl.pack(side="left", padx=(5, 5), pady=(2, 2))
+        lbl.bind("<Button-1>", lambda e, c=cfg: on_label_click(e, c))
+        lbl.bind("<Control-Button-1>", lambda e, c=cfg: ctrl_left_click(e, c))
+        lbl.bind("<Control-Button-3>", lambda e, c=cfg: ctrl_right_click(e, c))
+        lbl.bind("<Shift-Button-1>", lambda e, c=cfg: open_edit_gui(c, "rclone_commands"))
         check_and_update(lbl, cfg)
 
-# Call GUI init
-create_rclone_gui()
+    rclone_popup.update_idletasks()
+    pw = rclone_popup.winfo_reqwidth()
+    ph = rclone_popup.winfo_reqheight()
+    bx = rclone_toggle_bt.winfo_rootx()
+    by = ROOT.winfo_rooty()
+    rclone_popup.geometry(f"{pw}x{ph}+{bx}+{by - ph}")
+
+    rclone_popup.bind("<FocusOut>", lambda e: rclone_popup.destroy() if rclone_popup else None)
+
+rclone_toggle_bt = tk.Label(ROOT1, text="\uef2c", bg="#1d2027", fg="#fcfcfc",
+                             font=("JetBrainsMono NFP", 20, "bold"), cursor="hand2")
+rclone_toggle_bt.pack(side="left", padx=(5, 5))
+rclone_toggle_bt.bind("<Button-1>", toggle_rclone_popup)
 
 # Add a permanent "ADD NEW" button to ROOT1
 add_new_bt = tk.Label(ROOT1, text="\uf415", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
