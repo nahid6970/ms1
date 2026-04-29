@@ -106,6 +106,36 @@ def open_edit_gui(item_cfg, category, index=None):
         ent.grid(row=i, column=1, padx=10, pady=5, sticky="w")
         entries[field] = ent
 
+    # Font settings
+    cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    font_row = len(fields)
+
+    tk.Label(scroll_frame, text="FONT FAMILY", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row, column=0, padx=10, pady=5, sticky="w")
+    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp", "Arial", "Consolas", "Courier New", "Segoe UI", "Tahoma", "Verdana"]
+    font_family_var = tk.StringVar(value=cur_font[0] if cur_font else "JetBrainsMono NFP")
+    font_family_combo = ttk.Combobox(scroll_frame, textvariable=font_family_var, values=font_families, width=30)
+    font_family_combo.grid(row=font_row, column=1, padx=10, pady=5, sticky="w")
+
+    tk.Label(scroll_frame, text="FONT SIZE", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+1, column=0, padx=10, pady=5, sticky="w")
+    font_size_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
+    font_size_ent.insert(0, str(cur_font[1]) if len(cur_font) > 1 else "16")
+    font_size_ent.grid(row=font_row+1, column=1, padx=10, pady=5, sticky="w")
+
+    tk.Label(scroll_frame, text="FONT WEIGHT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+2, column=0, padx=10, pady=5, sticky="w")
+    font_weight_var = tk.StringVar(value=cur_font[2] if len(cur_font) > 2 else "bold")
+    font_weight_combo = ttk.Combobox(scroll_frame, textvariable=font_weight_var, values=["bold", "normal"], state="readonly", width=10)
+    font_weight_combo.grid(row=font_row+2, column=1, padx=10, pady=5, sticky="w")
+
+    tk.Label(scroll_frame, text="PADX LEFT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+3, column=0, padx=10, pady=5, sticky="w")
+    padx_left_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
+    padx_left_ent.insert(0, str(item_cfg.get("padx_left", 1)))
+    padx_left_ent.grid(row=font_row+3, column=1, padx=10, pady=5, sticky="w")
+
+    tk.Label(scroll_frame, text="PADX RIGHT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+4, column=0, padx=10, pady=5, sticky="w")
+    padx_right_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
+    padx_right_ent.insert(0, str(item_cfg.get("padx_right", 1)))
+    padx_right_ent.grid(row=font_row+4, column=1, padx=10, pady=5, sticky="w")
+
     # Bindings Sections
     click_types = [
         ("Left Click", "Button-1"),
@@ -115,7 +145,7 @@ def open_edit_gui(item_cfg, category, index=None):
     ]
     
     binding_inputs = {}
-    current_row = len(fields)
+    current_row = len(fields) + 5  # +5 for font/padx rows
 
     for label, key in click_types:
         frame = tk.LabelFrame(scroll_frame, text=label, fg="#61afef", bg="#282c34", font=("Arial", 11, "bold"), padx=10, pady=10)
@@ -156,6 +186,14 @@ def open_edit_gui(item_cfg, category, index=None):
     def save():
         for field in fields:
             item_cfg[field] = entries[field].get()
+        try:
+            item_cfg["font"] = [font_family_var.get(), int(font_size_ent.get()), font_weight_var.get()]
+        except ValueError:
+            pass
+        try: item_cfg["padx_left"] = int(padx_left_ent.get())
+        except ValueError: pass
+        try: item_cfg["padx_right"] = int(padx_right_ent.get())
+        except ValueError: pass
         
         new_bindings = {}
         for key, inputs in binding_inputs.items():
@@ -229,7 +267,9 @@ def create_dynamic_button(parent, btn_cfg, category, index=None):
     else:
         lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=btn_cfg.get("bg", "#1d2027"), fg=btn_cfg.get("fg", "white"), font=font, relief="flat")
     
-    lbl.pack(side="left", padx=(1, 1))
+    px_l = int(btn_cfg.get("padx_left", 1))
+    px_r = int(btn_cfg.get("padx_right", 1))
+    lbl.pack(side="left", padx=(px_l, px_r))
     
     bindings = btn_cfg.get("bindings", {})
     for event, action in bindings.items():
