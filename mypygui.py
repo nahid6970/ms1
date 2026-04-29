@@ -1193,7 +1193,7 @@ def check_and_update(label, cfg):
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
         with open(cfg["log"], "w") as f:
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-        with open(cfg["log"], "r") as f:
+        with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
         color = "#06de22" if "ERROR" not in content else "red"
         rclone_status[cfg["id"]] = color
