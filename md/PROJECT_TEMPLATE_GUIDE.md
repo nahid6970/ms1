@@ -8,10 +8,9 @@ This is a **reusable template** for setting up proper documentation and developm
 ## 📋 Development Best Practices
 
 ### Documentation Rules
-1. **Keep RECENT.md to 5 sessions max**
-2. **Archive older sessions, don't delete**
-3. **Document every bug fix in PROBLEMS_AND_FIXES.md**
-4. **Use file references:** `#[[file:path/to/file.md]]`
+1. **Record all changes in RECENT.md** - no session limit, all history stays here
+2. **Document every bug fix in PROBLEMS_AND_FIXES.md**
+3. **Use file references:** `#[[file:path/to/file.md]]`
 
 ### Session Management
 1. **Start each session** by reading RECENT.md
@@ -89,6 +88,38 @@ How to use the project
 See DEVELOPER_GUIDE.md for development workflow.
 ```
 
+### .gitignore Template
+```
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build
+dist/
+build/
+*.min.js
+*.min.css
+```
 
 ---
 
@@ -118,22 +149,21 @@ See DEVELOPER_GUIDE.md for development workflow.
 project-root/
 ├── dev.md          # Main development guide (customize this template)
 ├── md/                         # Documentation folder
-│   ├── RECENT.md              # Last 5 development sessions
-│   ├── ARCHIVE_RECENT.md      # Older sessions archive
+│   ├── RECENT.md              # All development sessions (full history, no archiving)
 │   ├── PROBLEMS_AND_FIXES.md  # Bug tracking and solutions
 │   ├── FEATURES.md            # Feature specifications
+│   ├── UI_UX.md               # UI/UX design decisions and guidelines
 │   ├── KEYBOARD_SHORTCUTS.md  # If applicable
 │   └── [FEATURE_NAME].md      # Individual feature docs
 
 ## 2. **md/RECENT.md** (Session Tracking)
 # Recent Development Log
-**KEEP ONLY LAST 5 SESSIONS** - Move older to ARCHIVE_RECENT.md
+**ALL SESSIONS ARE KEPT HERE** - no archiving, full history in one place
 ## [YYYY-MM-DD HH:MM] - Session Title
 **What We Accomplished:**
 - Feature/fix descriptions with timestamps
 **Files Modified:**
 - List of changed files with descriptions
-- Known issues
 **Known Issues:**
 - List current problems
 *Next session: [What to work on next]*
@@ -157,6 +187,12 @@ Track all bugs, issues, and solutions for AI context and debugging.
 **Usage:** How to use the feature
 **Dependencies:** Required components
 
-## 5. **md/ARCHIVE_RECENT.md** (Session Archive)
-# Archived Development Sessions
-Older sessions moved from RECENT.md to maintain focus.
+## 5. **md/UI_UX.md** (UI/UX Documentation)
+# UI/UX Design & Guidelines
+## Component/Screen Name
+**Layout:** Description of layout and structure
+**Colors & Theme:** Color palette and theming decisions
+**Typography:** Fonts, sizes, hierarchy
+**Interactions:** Animations, transitions, user flows
+**Accessibility:** A11y considerations
+**Notes:** Design decisions and rationale
