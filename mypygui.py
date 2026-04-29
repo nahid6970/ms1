@@ -24,6 +24,10 @@ import tkinter as tk
 import win32gui
 import json
 import win32process
+from PyQt6.QtWidgets import (QApplication, QDialog, QWidget, QHBoxLayout, QVBoxLayout,
+    QLabel, QLineEdit, QPushButton, QComboBox, QCheckBox, QGroupBox, QFormLayout, QScrollArea, QMessageBox)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
@@ -78,194 +82,286 @@ def handle_action(action_cfg):
         elif func_name == "force_restart": force_restart(None)
 
 def open_edit_gui(item_cfg, category, index=None):
-    edit_win = tk.Toplevel(ROOT)
-    edit_win.title(f"Edit {item_cfg.get('id', 'Item')}")
-    edit_win.geometry("700x850")
-    edit_win.configure(bg="#282c34")
-    edit_win.attributes("-topmost", True)
+    import sys as _sys
+    _qt_app = QApplication.instance() or QApplication(_sys.argv)
 
-    # Scrollable frame for many options
-    canvas = tk.Canvas(edit_win, bg="#282c34", highlightthickness=0)
-    scrollbar = ttk.Scrollbar(edit_win, orient="vertical", command=canvas.yview)
-    scroll_frame = tk.Frame(canvas, bg="#282c34")
+    CP_BG     = "#050505"
+    CP_PANEL  = "#111111"
+    CP_YELLOW = "#FCEE0A"
+    CP_CYAN   = "#00F0FF"
+    CP_RED    = "#FF003C"
+    CP_GREEN  = "#00ff21"
+    CP_DIM    = "#3a3a3a"
+    CP_TEXT   = "#E0E0E0"
 
-    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
+    QSS = f"""
+        QDialog, QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; font-size: 10pt; }}
+        QLineEdit, QComboBox, QSpinBox {{
+            background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+        }}
+        QLineEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
+        QComboBox::drop-down {{ border: none; }}
+        QComboBox QAbstractItemView {{ background: {CP_PANEL}; color: {CP_CYAN}; selection-background-color: {CP_CYAN}; selection-color: {CP_BG}; }}
+        QPushButton {{
+            background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
+        }}
+        QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
+        QPushButton#btn_save {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
+        QPushButton#btn_save:hover {{ background-color: {CP_GREEN}; color: black; }}
+        QPushButton#btn_delete {{ border-color: {CP_RED}; color: {CP_RED}; }}
+        QPushButton#btn_delete:hover {{ background-color: {CP_RED}; color: white; }}
+        QGroupBox {{
+            border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 8px; font-weight: bold; color: {CP_YELLOW};
+        }}
+        QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+        QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
+        QCheckBox::indicator {{ width: 13px; height: 13px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+        QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+        QScrollArea {{ background: transparent; border: none; }}
+        QScrollBar:vertical {{ background: {CP_BG}; width: 8px; margin: 0; }}
+        QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 4px; }}
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; background: none; }}
+        QLabel#section_label {{ color: {CP_YELLOW}; font-weight: bold; font-size: 9pt; }}
+    """
 
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
+    dlg = QDialog()
+    dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
+    dlg.resize(1000, 620)
+    dlg.setStyleSheet(QSS)
+    dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
 
-    # Basic Info
-    fields = ["text", "fg", "bg", "id"]
+    root_layout = QVBoxLayout(dlg)
+    root_layout.setContentsMargins(10, 10, 10, 10)
+    root_layout.setSpacing(8)
+
+    # Title bar
+    title = QLabel(f"// EDIT :: {item_cfg.get('id', 'ITEM').upper()}")
+    title.setStyleSheet(f"color: {CP_CYAN}; font-size: 13pt; font-weight: bold; padding: 4px 0;")
+    root_layout.addWidget(title)
+
+    # Two-panel area
+    panels = QHBoxLayout()
+    panels.setSpacing(10)
+    root_layout.addLayout(panels)
+
+    # ── LEFT PANEL ──────────────────────────────────────────────
+    left_scroll = QScrollArea()
+    left_scroll.setWidgetResizable(True)
+    left_w = QWidget()
+    left_layout = QVBoxLayout(left_w)
+    left_layout.setSpacing(6)
+    left_layout.setContentsMargins(6, 6, 6, 6)
+    left_scroll.setWidget(left_w)
+    panels.addWidget(left_scroll, 1)
+
+    def section(text):
+        lbl = QLabel(text)
+        lbl.setObjectName("section_label")
+        return lbl
+
+    def field_row(label_text, widget):
+        row = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setFixedWidth(90)
+        lbl.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+        row.addWidget(lbl)
+        row.addWidget(widget)
+        return row
+
+    # Appearance group
+    grp_appear = QGroupBox("APPEARANCE")
+    form_appear = QFormLayout()
+    form_appear.setSpacing(6)
+    grp_appear.setLayout(form_appear)
+
     entries = {}
-    for i, field in enumerate(fields):
-        tk.Label(scroll_frame, text=field.upper(), fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=i, column=0, padx=10, pady=5, sticky="w")
-        ent = tk.Entry(scroll_frame, width=50, bg="#1d2027", fg="white", insertbackground="white")
-        ent.insert(0, str(item_cfg.get(field, "")))
-        ent.grid(row=i, column=1, padx=10, pady=5, sticky="w")
+    for field in ["text", "fg", "bg", "id"]:
+        ent = QLineEdit(str(item_cfg.get(field, "")))
+        form_appear.addRow(field.upper(), ent)
         entries[field] = ent
 
-    # Font settings
+    left_layout.addWidget(grp_appear)
+
+    # Font group
+    grp_font = QGroupBox("FONT")
+    form_font = QFormLayout()
+    form_font.setSpacing(6)
+    grp_font.setLayout(form_font)
+
     cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
-    font_row = len(fields)
+    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp",
+                     "Arial", "Consolas", "Courier New", "Segoe UI", "Tahoma", "Verdana"]
+    font_family_cb = QComboBox()
+    font_family_cb.setEditable(True)
+    font_family_cb.addItems(font_families)
+    font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
 
-    tk.Label(scroll_frame, text="FONT FAMILY", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row, column=0, padx=10, pady=5, sticky="w")
-    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp", "Arial", "Consolas", "Courier New", "Segoe UI", "Tahoma", "Verdana"]
-    font_family_var = tk.StringVar(value=cur_font[0] if cur_font else "JetBrainsMono NFP")
-    font_family_combo = ttk.Combobox(scroll_frame, textvariable=font_family_var, values=font_families, width=30)
-    font_family_combo.grid(row=font_row, column=1, padx=10, pady=5, sticky="w")
+    font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16")
+    font_size_le.setFixedWidth(60)
 
-    tk.Label(scroll_frame, text="FONT SIZE", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+1, column=0, padx=10, pady=5, sticky="w")
-    font_size_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
-    font_size_ent.insert(0, str(cur_font[1]) if len(cur_font) > 1 else "16")
-    font_size_ent.grid(row=font_row+1, column=1, padx=10, pady=5, sticky="w")
+    font_weight_cb = QComboBox()
+    font_weight_cb.addItems(["bold", "normal"])
+    font_weight_cb.setCurrentText(cur_font[2] if len(cur_font) > 2 else "bold")
 
-    tk.Label(scroll_frame, text="FONT WEIGHT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+2, column=0, padx=10, pady=5, sticky="w")
-    font_weight_var = tk.StringVar(value=cur_font[2] if len(cur_font) > 2 else "bold")
-    font_weight_combo = ttk.Combobox(scroll_frame, textvariable=font_weight_var, values=["bold", "normal"], state="readonly", width=10)
-    font_weight_combo.grid(row=font_row+2, column=1, padx=10, pady=5, sticky="w")
+    form_font.addRow("FAMILY", font_family_cb)
+    form_font.addRow("SIZE", font_size_le)
+    form_font.addRow("WEIGHT", font_weight_cb)
+    left_layout.addWidget(grp_font)
 
-    tk.Label(scroll_frame, text="PADX LEFT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+3, column=0, padx=10, pady=5, sticky="w")
-    padx_left_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
-    padx_left_ent.insert(0, str(item_cfg.get("padx_left", 1)))
-    padx_left_ent.grid(row=font_row+3, column=1, padx=10, pady=5, sticky="w")
+    # Padding group
+    grp_pad = QGroupBox("PADDING")
+    form_pad = QFormLayout()
+    form_pad.setSpacing(6)
+    grp_pad.setLayout(form_pad)
 
-    tk.Label(scroll_frame, text="PADX RIGHT", fg="#abb2bf", bg="#282c34", font=("Arial", 10, "bold")).grid(row=font_row+4, column=0, padx=10, pady=5, sticky="w")
-    padx_right_ent = tk.Entry(scroll_frame, width=10, bg="#1d2027", fg="white", insertbackground="white")
-    padx_right_ent.insert(0, str(item_cfg.get("padx_right", 1)))
-    padx_right_ent.grid(row=font_row+4, column=1, padx=10, pady=5, sticky="w")
+    padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1)))
+    padx_right_le = QLineEdit(str(item_cfg.get("padx_right", 1)))
+    padx_left_le.setFixedWidth(60)
+    padx_right_le.setFixedWidth(60)
+    form_pad.addRow("PADX LEFT",  padx_left_le)
+    form_pad.addRow("PADX RIGHT", padx_right_le)
+    left_layout.addWidget(grp_pad)
+    left_layout.addStretch()
 
-    # Bindings Sections
+    # ── RIGHT PANEL ─────────────────────────────────────────────
+    right_scroll = QScrollArea()
+    right_scroll.setWidgetResizable(True)
+    right_w = QWidget()
+    right_layout = QVBoxLayout(right_w)
+    right_layout.setSpacing(6)
+    right_layout.setContentsMargins(6, 6, 6, 6)
+    right_scroll.setWidget(right_w)
+    panels.addWidget(right_scroll, 2)
+
     click_types = [
-        ("Left Click", "Button-1"),
-        ("Right Click", "Button-3"),
-        ("Ctrl + Left Click", "Control-Button-1"),
-        ("Ctrl + Right Click", "Control-Button-3")
+        ("LEFT CLICK",       "Button-1"),
+        ("RIGHT CLICK",      "Button-3"),
+        ("CTRL + LEFT",      "Control-Button-1"),
+        ("CTRL + RIGHT",     "Control-Button-3"),
     ]
-    
     binding_inputs = {}
-    current_row = len(fields) + 5  # +5 for font/padx rows
 
-    for label, key in click_types:
-        frame = tk.LabelFrame(scroll_frame, text=label, fg="#61afef", bg="#282c34", font=("Arial", 11, "bold"), padx=10, pady=10)
-        frame.grid(row=current_row, column=0, columnspan=2, padx=10, pady=15, sticky="nsew")
-        current_row += 1
-        
-        cfg = item_cfg.get("bindings", {}).get(key, {})
-        
-        # Command
-        tk.Label(frame, text="Command:", fg="white", bg="#282c34").grid(row=0, column=0, sticky="w")
-        cmd_ent = tk.Entry(frame, width=60, bg="#1d2027", fg="white", insertbackground="white")
-        cmd_ent.insert(0, cfg.get("cmd", cfg.get("func", "")))
-        cmd_ent.grid(row=0, column=1, padx=5, pady=2)
-        
-        # Type Dropdown
-        tk.Label(frame, text="Type:", fg="white", bg="#282c34").grid(row=1, column=0, sticky="w")
-        type_var = tk.StringVar(value=cfg.get("type", "subprocess"))
-        type_combo = ttk.Combobox(frame, textvariable=type_var, values=["subprocess", "run_command", "python", "function"], state="readonly", width=20)
-        type_combo.grid(row=1, column=1, padx=5, pady=2, sticky="w")
-        
-        # Options
-        opt_frame = tk.Frame(frame, bg="#282c34")
-        opt_frame.grid(row=2, column=1, sticky="w")
-        
-        hide_var = tk.BooleanVar(value=cfg.get("hide", False))
-        tk.Checkbutton(opt_frame, text="Hide Terminal", variable=hide_var, fg="white", bg="#282c34", selectcolor="#1d2027", activebackground="#282c34", activeforeground="white").pack(side="left")
-        
-        admin_var = tk.BooleanVar(value=cfg.get("admin", False))
-        tk.Checkbutton(opt_frame, text="Run as Admin", variable=admin_var, fg="white", bg="#282c34", selectcolor="#1d2027", activebackground="#282c34", activeforeground="white").pack(side="left", padx=20)
-        
-        binding_inputs[key] = {
-            "cmd": cmd_ent,
-            "type": type_var,
-            "hide": hide_var,
-            "admin": admin_var
-        }
+    for label_text, bkey in click_types:
+        grp = QGroupBox(label_text)
+        form = QFormLayout()
+        form.setSpacing(4)
+        grp.setLayout(form)
+
+        bcfg = item_cfg.get("bindings", {}).get(bkey, {})
+
+        cmd_le = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
+        type_cb = QComboBox()
+        type_cb.addItems(["subprocess", "run_command", "python", "function"])
+        type_cb.setCurrentText(bcfg.get("type", "subprocess"))
+
+        hide_chk  = QCheckBox("Hide Terminal")
+        hide_chk.setChecked(bcfg.get("hide", False))
+        admin_chk = QCheckBox("Run as Admin")
+        admin_chk.setChecked(bcfg.get("admin", False))
+
+        chk_row = QWidget()
+        chk_layout = QHBoxLayout(chk_row)
+        chk_layout.setContentsMargins(0, 0, 0, 0)
+        chk_layout.addWidget(hide_chk)
+        chk_layout.addWidget(admin_chk)
+        chk_layout.addStretch()
+
+        form.addRow("CMD",  cmd_le)
+        form.addRow("TYPE", type_cb)
+        form.addRow("",     chk_row)
+
+        right_layout.addWidget(grp)
+        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
+
+    right_layout.addStretch()
+
+    # ── BOTTOM BUTTONS ───────────────────────────────────────────
+    btn_row = QHBoxLayout()
+    btn_save   = QPushButton("SAVE")
+    btn_delete = QPushButton("DELETE")
+    btn_save.setObjectName("btn_save")
+    btn_delete.setObjectName("btn_delete")
+    btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+    btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
+    btn_row.addWidget(btn_save)
+    btn_row.addWidget(btn_delete)
+    root_layout.addLayout(btn_row)
 
     def save():
-        for field in fields:
-            item_cfg[field] = entries[field].get()
+        for field in ["text", "fg", "bg", "id"]:
+            item_cfg[field] = entries[field].text()
         try:
-            item_cfg["font"] = [font_family_var.get(), int(font_size_ent.get()), font_weight_var.get()]
+            item_cfg["font"] = [font_family_cb.currentText(), int(font_size_le.text()), font_weight_cb.currentText()]
         except ValueError:
             pass
-        try: item_cfg["padx_left"] = int(padx_left_ent.get())
+        try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
-        try: item_cfg["padx_right"] = int(padx_right_ent.get())
+        try: item_cfg["padx_right"] = int(padx_right_le.text())
         except ValueError: pass
-        
+
         new_bindings = {}
-        for key, inputs in binding_inputs.items():
-            cmd = inputs["cmd"].get()
+        for bkey, inputs in binding_inputs.items():
+            cmd = inputs["cmd"].text()
             if not cmd: continue
-            
-            b_type = inputs["type"].get()
-            new_bindings[key] = {
-                "type": b_type,
-                "hide": inputs["hide"].get(),
-                "admin": inputs["admin"].get()
-            }
-            if b_type == "function":
-                new_bindings[key]["func"] = cmd
-            else:
-                new_bindings[key]["cmd"] = cmd
-        
+            b_type = inputs["type"].currentText()
+            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
+            if b_type == "function": new_bindings[bkey]["func"] = cmd
+            else:                    new_bindings[bkey]["cmd"]  = cmd
         item_cfg["bindings"] = new_bindings
-        
+
         config = load_config()
         if category in config:
             if index is not None:
                 config[category][index] = item_cfg
-            else: 
+            else:
                 config[category][item_cfg["id"]] = item_cfg
-        
         save_config(config)
-        edit_win.destroy()
-        if messagebox.askyesno("Restart", "Settings saved. Restart GUI to apply?"):
+        dlg.accept()
+        reply = QMessageBox.question(None, "Restart", "Settings saved. Restart GUI to apply?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
             restart()
 
     def delete():
-        if not messagebox.askyesno("Delete", f"Are you sure you want to delete '{item_cfg.get('id', 'this item')}'?"):
-            return
-        
+        reply = QMessageBox.question(None, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply != QMessageBox.StandardButton.Yes: return
         config = load_config()
         if category in config:
             if isinstance(config[category], list):
-                # It's a list (buttons_left, buttons_right)
                 if index is not None and 0 <= index < len(config[category]):
                     config[category].pop(index)
                 else:
-                    # Try to find by id if index is not reliable
                     item_id = item_cfg.get("id")
-                    config[category] = [item for item in config[category] if item.get("id") != item_id]
+                    config[category] = [i for i in config[category] if i.get("id") != item_id]
             else:
-                # It's a dict (rclone_commands)
                 item_id = item_cfg.get("id")
                 if item_id in config[category]:
                     del config[category][item_id]
-        
         save_config(config)
-        edit_win.destroy()
-        if messagebox.askyesno("Restart", "Item deleted. Restart GUI to apply?"):
+        dlg.accept()
+        reply = QMessageBox.question(None, "Restart", "Item deleted. Restart GUI to apply?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
             restart()
 
-    btn_frame = tk.Frame(scroll_frame, bg="#282c34")
-    btn_frame.grid(row=current_row, column=0, columnspan=2, pady=30, sticky="nsew")
-    
-    tk.Button(btn_frame, text="SAVE CONFIGURATION", command=save, bg="#98c379", fg="black", font=("Arial", 12, "bold"), pady=10).pack(side="left", fill="x", expand=True, padx=(0, 5))
-    tk.Button(btn_frame, text="DELETE ITEM", command=delete, bg="#e06c75", fg="black", font=("Arial", 12, "bold"), pady=10).pack(side="left", fill="x", expand=True, padx=(5, 0))
+    btn_save.clicked.connect(save)
+    btn_delete.clicked.connect(delete)
+    dlg.exec()
 
 def create_dynamic_button(parent, btn_cfg, category, index=None):
     widget_type = btn_cfg.get("widget_type", "Label")
     font = tuple(btn_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"]))
+    _fg = btn_cfg.get("fg", "") or "white"
+    _bg = btn_cfg.get("bg", "") or "#1d2027"
     
     if widget_type == "CTkLabel":
-        lbl = CTkLabel(parent, text=btn_cfg.get("text", ""), text_color=btn_cfg.get("fg", "white"), font=font)
+        lbl = CTkLabel(parent, text=btn_cfg.get("text", ""), text_color=_fg, font=font)
     elif widget_type == "CTkButton":
-        lbl = CTkButton(parent, text=btn_cfg.get("text", ""), text_color=btn_cfg.get("fg", "white"), fg_color=btn_cfg.get("bg", "#1d2027"), font=font, width=0, height=10)
+        lbl = CTkButton(parent, text=btn_cfg.get("text", ""), text_color=_fg, fg_color=_bg, font=font, width=0, height=10)
     else:
-        lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=btn_cfg.get("bg", "#1d2027"), fg=btn_cfg.get("fg", "white"), font=font, relief="flat")
+        lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=_bg, fg=_fg, font=font, relief="flat")
     
     px_l = int(btn_cfg.get("padx_left", 1))
     px_r = int(btn_cfg.get("padx_right", 1))
