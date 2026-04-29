@@ -28,7 +28,7 @@ class TaskCompletePopup(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.gradient_index = 0
-        self._transition_progress = 0.0
+        self._transition_progress = 1.0
         self.setup_ui()
         self.setup_gradient_timer()
         self.setup_animation()
@@ -161,6 +161,12 @@ class TaskCompletePopup(QWidget):
             QPushButton:hover {{ background-color: rgba(255, 255, 255, 1); }}
             QPushButton:pressed {{ background-color: rgba(255, 255, 255, 0.8); }}
         """)
+
+    def closeEvent(self, event):
+        self.timer.stop()
+        self.animation.stop()
+        QApplication.instance().quit()
+        event.accept()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
