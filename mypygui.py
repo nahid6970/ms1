@@ -1092,7 +1092,7 @@ def toggle_rclone_popup(event=None):
     ph = rclone_popup.winfo_reqheight()
     bx = rclone_toggle_bt.winfo_rootx() + rclone_toggle_bt.winfo_width() // 2 - pw // 2
     by = ROOT.winfo_rooty()
-    rclone_popup.geometry(f"{pw}x{ph}+{bx}+{by - ph}")
+    rclone_popup.geometry(f"{pw}x{ph}+{bx}+{by - ph - 1}")
 
     rclone_popup.bind("<FocusOut>", lambda e: rclone_popup.destroy() if rclone_popup else None)
 
