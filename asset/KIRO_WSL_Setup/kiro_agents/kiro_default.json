@@ -1,0 +1,11 @@
+{
+  "name": "kiro_default",
+  "description": "Default Kiro agent with task completion notification",
+  "hooks": {
+    "stop": [
+      {
+        "command": "python3.exe 'C:\\@delta\\ms1\\asset\\kiro\\task_complete.py'"
+      }
+    ]
+  }
+}
