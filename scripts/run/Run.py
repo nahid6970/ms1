@@ -370,7 +370,10 @@ def show_fzf_menu():
             #! Open all folder locations
             elif selection.startswith(''):
                 for file_path in file_paths:
-                    subprocess.run(['explorer.exe', '/select,', file_path])
+                    if os.path.isdir(file_path):
+                        subprocess.run(['explorer.exe', file_path])
+                    else:
+                        subprocess.run(['explorer.exe', '/select,', file_path])
             #! Run all files
             elif selection.startswith(''):
                 for file_path in file_paths:
@@ -659,7 +662,7 @@ if __name__ == "__main__":
             "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
             f"--bind=enter:execute({batch_file} {{+2}})",
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
-            "--bind=ctrl-o:execute-silent(explorer.exe /select,{2})",
+            f"--bind=ctrl-o:execute-silent(python \"{script_path}\" --open-item {{2}})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
@@ -763,6 +766,13 @@ if __name__ == "__main__":
         elif sys.argv[1] == "--move-bookmark" and len(sys.argv) > 3:
             direction = -1 if sys.argv[2] == "up" else 1
             move_bookmark(sys.argv[3], direction)
+            sys.exit(0)
+        elif sys.argv[1] == "--open-item" and len(sys.argv) > 2:
+            path = sys.argv[2]
+            if os.path.isdir(path):
+                subprocess.run(['explorer.exe', path])
+            else:
+                subprocess.run(['explorer.exe', '/select,', path])
             sys.exit(0)
     
     search_directories_and_files()
