@@ -69,5 +69,21 @@
             }
         ],
         "copy_mode": false
+    },
+    {
+        "name": "Kiro",
+        "items": [
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\KIRO\\KIRO.md",
+                "fake": "C:\\Users\\nahid\\.kiro\\steering\\KIRO.md"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\KIRO\\task_complete.py",
+                "fake": "C:\\Users\\nahid\\.kiro\\steering\\task_complete.py"
+            }
+        ],
+        "copy_mode": false
     }
 ]
