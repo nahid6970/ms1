@@ -23,73 +23,11 @@
                 radial-gradient(ellipse at 85% 20%, rgba(0,180,255,0.04) 0%, transparent 55%);
         }
 
-        .header {
-            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #00ffaa22;
-            box-shadow: 0 2px 20px rgba(0,255,170,0.06);
-            flex-shrink: 0;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header h1 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #00ffaa;
-            text-shadow: 0 0 12px rgba(0,255,170,0.5);
-            letter-spacing: 1px;
-        }
-
-        .header-left > span {
-            color: #444;
-            font-size: 11px;
-        }
-
-        .profile-status {
-            font-size: 11px;
-            color: #666;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .profile-indicator {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            margin-right: 4px;
-        }
-
-        .profile-loaded { background: #00ffaa; box-shadow: 0 0 6px #00ffaa; }
-        .profile-not-loaded { background: #ff4466; box-shadow: 0 0 6px #ff4466; }
-
-        .reload-btn {
-            background: transparent;
-            border: 1px solid #00ffaa33;
-            color: #00ffaa;
-            padding: 2px 7px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-        .reload-btn:hover { background: rgba(0,255,170,0.1); border-color: #00ffaa88; }
-        .reload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
         .terminal-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 14px;
+            padding: 10px;
             overflow: hidden;
             gap: 10px;
             min-height: 0;
@@ -198,7 +136,6 @@
         ::-webkit-scrollbar-thumb:hover { background: #00ffaa55; }
 
         @media (max-width: 600px) {
-            .header h1 { font-size: 13px; }
             .terminal-container { padding: 6px; gap: 6px; }
             .terminal-input-container { padding: 4px 8px; gap: 4px; }
             .controls-group { margin-left: 0; width: auto; }
@@ -208,23 +145,8 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-left">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/PowerShell_Core_6.0_icon.png" alt="PowerShell Icon" style="width: 18px; height: 18px;">
-            <h1>PowerShell Web Terminal</h1>
-            <span>Local Session · Port 5555</span>
-        </div>
-        <div class="profile-status" id="profile-status">
-            <span class="profile-indicator profile-not-loaded"></span>
-            <span>Profile: Loading...</span>
-            <button id="reload-profile-btn" class="reload-btn" title="Reload PowerShell Profile">🔄</button>
-            <button id="zoom-out-btn" class="reload-btn" title="Zoom Out">－</button>
-            <button id="zoom-in-btn" class="reload-btn" title="Zoom In">＋</button>        </div>
-    </div>
-    
     <div class="terminal-container">
-        <div id="terminal-output" class="terminal-output">
-            <div id="profile-info" class="output-text"></div></div>
+        <div id="terminal-output" class="terminal-output"></div>
         
         <div class="terminal-input-container">
             <span class="prompt">PS></span>
@@ -248,77 +170,12 @@
         const commandInput = document.getElementById('command-input');
         const executeBtn = document.getElementById('execute-btn');
         const deleteBtn = document.getElementById('delete-btn');
-        const profileStatus = document.getElementById('profile-status');
-        const profileInfo = document.getElementById('profile-info');
-        const reloadProfileBtn = document.getElementById('reload-profile-btn');
         const historyUpBtn = document.getElementById('history-up-btn');
         const historyDownBtn = document.getElementById('history-down-btn');
         
         let commandHistory = [];
         let searchHistory = [];
         let historyIndex = -1;
-        
-        async function loadProfileStatus() {
-            try {
-                const response = await fetch('/profile-status');
-                const status = await response.json();
-                updateProfileDisplay(status);
-            } catch (error) {
-                const indicator = profileStatus.querySelector('.profile-indicator');
-                const text = profileStatus.querySelector('span:last-child');
-                indicator.className = 'profile-indicator profile-not-loaded';
-                text.textContent = 'Profile: Error';
-            }
-        }
-        
-        function updateProfileDisplay(status) {
-            const indicator = profileStatus.querySelector('.profile-indicator');
-            const text = profileStatus.querySelector('span:nth-child(2)');
-            
-            if (status.profile_loaded) {
-                indicator.className = 'profile-indicator profile-loaded';
-                text.textContent = 'Profile: Loaded';
-                profileInfo.innerHTML = `✓ PowerShell profile loaded successfully<br>📁 ${status.profile_path}`;
-                profileInfo.className = 'success-text';
-            } else if (status.profile_exists && status.profile_error) {
-                indicator.className = 'profile-indicator profile-not-loaded';
-                text.textContent = 'Profile: Error';
-                profileInfo.innerHTML = `✗ PowerShell profile has syntax errors:<br>📁 ${status.profile_path}<br>🔴 ${status.profile_error}<br><br>💡 Fix the syntax error and click the reload button (🔄) to try again.`;
-                profileInfo.className = 'error-text';
-            } else if (status.profile_exists) {
-                indicator.className = 'profile-indicator profile-not-loaded';
-                text.textContent = 'Profile: Error';
-                profileInfo.innerHTML = `⚠ PowerShell profile found but failed to load<br>📁 ${status.profile_path}`;
-                profileInfo.className = 'error-text';
-            } else {
-                indicator.className = 'profile-indicator profile-not-loaded';
-                text.textContent = 'Profile: Not Found';
-                profileInfo.innerHTML = `ℹ No PowerShell profile found<br>📁 Expected at: ${status.profile_path}`;
-                profileInfo.className = 'output-text';
-            }
-        }
-        
-        async function reloadProfile() {
-            reloadProfileBtn.disabled = true;
-            reloadProfileBtn.textContent = '⏳';
-            try {
-                const response = await fetch('/reload-profile', { method: 'POST' });
-                const status = await response.json();
-                updateProfileDisplay(status);
-                if (status.profile_loaded) {
-                    addToOutput('✓ PowerShell profile reloaded successfully', 'success-text');
-                } else if (status.profile_error) {
-                    addToOutput(`✗ Failed to reload profile: ${status.profile_error}`, 'error-text');
-                } else {
-                    addToOutput('⚠ Profile reload attempted but still not loaded', 'error-text');
-                }
-            } catch (error) {
-                addToOutput(`Error reloading profile: ${error.message}`, 'error-text');
-            } finally {
-                reloadProfileBtn.disabled = false;
-                reloadProfileBtn.textContent = '🔄';
-            }
-        }
         
         async function loadHistory() {
             try {
@@ -432,7 +289,6 @@
 
         executeBtn.addEventListener('click', executeCommand);
         deleteBtn.addEventListener('click', deleteCommand);
-        reloadProfileBtn.addEventListener('click', reloadProfile);
         historyUpBtn.addEventListener('click', () => navigateHistory('up'));
         historyDownBtn.addEventListener('click', () => navigateHistory('down'));
         
@@ -460,20 +316,14 @@
             }
         });
         
-        loadHistory().then(loadProfileStatus).then(() => commandInput.focus());
+        loadHistory().then(() => commandInput.focus());
 
-        // Zoom controls
-        let fontSize = 13;
-        const termOutput = document.getElementById('terminal-output');
-        document.getElementById('zoom-in-btn').addEventListener('click', () => {
-            fontSize = Math.min(fontSize + 1, 22);
-            termOutput.style.fontSize = fontSize + 'px';
-            commandInput.style.fontSize = fontSize + 'px';
+        // Scroll into view on focus for mobile
+        commandInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                commandInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
         });
-        document.getElementById('zoom-out-btn').addEventListener('click', () => {
-            fontSize = Math.max(fontSize - 1, 5);
-            termOutput.style.fontSize = fontSize + 'px';
-            commandInput.style.fontSize = fontSize + 'px';
-        });    </script>
+    </script>
 </body>
 </html>
