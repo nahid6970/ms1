@@ -1120,7 +1120,7 @@ for _key, _cfg in commands.items():
     check_and_update(_lbl, _cfg)
 
 # Add a permanent "ADD NEW" button to ROOT1
-add_new_bt = tk.Label(ROOT1, text="\uf415", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
+add_new_bt = tk.Label(ROOT1, text="+", bg="#1d2027", fg="#98c379", font=("JetBrainsMono NFP", 18, "bold"), cursor="hand2")
 add_new_bt.pack(side="left", padx=(10, 5))
 add_new_bt.bind("<Button-1>", lambda e: open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": "#1d2027", "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left"))
 
