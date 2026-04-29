@@ -320,13 +320,13 @@ def open_edit_gui(item_cfg, category, index=None):
                 config[category][item_cfg["id"]] = item_cfg
         save_config(config)
         dlg.accept()
-        reply = QMessageBox.question(None, "Restart", "Settings saved. Restart GUI to apply?",
+        reply = QMessageBox.question(dlg, "Restart", "Settings saved. Restart GUI to apply?",
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             restart()
 
     def delete():
-        reply = QMessageBox.question(None, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
+        reply = QMessageBox.question(dlg, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes: return
         config = load_config()
@@ -343,7 +343,7 @@ def open_edit_gui(item_cfg, category, index=None):
                     del config[category][item_id]
         save_config(config)
         dlg.accept()
-        reply = QMessageBox.question(None, "Restart", "Item deleted. Restart GUI to apply?",
+        reply = QMessageBox.question(dlg, "Restart", "Item deleted. Restart GUI to apply?",
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             restart()

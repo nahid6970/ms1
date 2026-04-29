@@ -457,20 +457,6 @@
                     "cmd": "explorer D:\\Downloads\\@Radarr"
                 }
             }
-        },
-        {
-            "text": "NEWasdadasd",
-            "fg": "#ffffff",
-            "bg": "#1d2027",
-            "id": "btn_1777497311",
-            "bindings": {},
-            "font": [
-                "JetBrainsMono NFP",
-                16,
-                "bold"
-            ],
-            "padx_left": 1,
-            "padx_right": 1
         }
     ],
     "buttons_right": [
