@@ -21,6 +21,212 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
 
+// --- GLOBAL CONFIGURATION & HELPERS ---
+const GLOBAL_COLOR_MAP = {
+    'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
+    'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
+    'K': '#000000', 'GR': '#808080'
+};
+
+/**
+ * Shared helper to expand 3-digit hex to 6-digit.
+ */
+function expandHexColor(hex) {
+    if (!hex || !hex.startsWith('#')) return hex;
+    const color = hex.substring(1);
+    if (color.length === 3) {
+        return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+    }
+    return hex;
+}
+
+/**
+ * Shared helper for markdown regex patterns that are repeated across multiple functions.
+ * Adheres to the "Rule of 6" by providing a single source for patterns used in script.js.
+ */
+function applySharedMarkdownRegex(formatted) {
+    // Links: {link:url}text{/} -> <a href="url">text</a>
+    formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    });
+
+    // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
+    formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    });
+
+    // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
+    formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
+        const styleObj = {};
+        const parts = styles.split(';').filter(p => p.trim());
+        let hasBg = false;
+        parts.forEach(part => {
+            const [key, value] = part.split(':').map(s => s.trim());
+            if (key === 'fg') styleObj.color = value;
+            if (key === 'bg') {
+                styleObj.backgroundColor = value;
+                hasBg = true;
+            }
+        });
+        if (hasBg) {
+            styleObj.padding = '2px 8px';
+            styleObj.borderRadius = '4px';
+        }
+        styleObj.display = 'inline';
+        styleObj.verticalAlign = 'baseline';
+        styleObj.lineHeight = '1.3';
+        styleObj.wordBreak = 'normal';
+        styleObj.overflowWrap = 'break-word';
+        styleObj.boxDecorationBreak = 'clone';
+        styleObj.WebkitBoxDecorationBreak = 'clone';
+        const styleStr = Object.entries(styleObj).map(([k, v]) => {
+            const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
+            return `${cssKey}: ${v}`;
+        }).join('; ');
+        return `<span style="${styleStr}">${text}</span>`;
+    });
+
+    // Border box: #R#text#/# -> colored border
+    formatted = formatted.replace(/#([A-Z]+)#(.+?)#\/#/g, (match, colorCode, text) => {
+        if (GLOBAL_COLOR_MAP[colorCode]) {
+            return `<span style="outline: 2px solid ${GLOBAL_COLOR_MAP[colorCode]}; outline-offset: 4px; padding: 0; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; line-height: 1.5;">${text}</span>`;
+        }
+        return match;
+    });
+
+    // Variable font size heading: #2#text#/#
+    formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
+        return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
+    });
+
+    // Heading: ##text##
+    formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
+
+    // Wavy underline: _.text._
+    formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
+
+    // Colored horizontal separator
+    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, (match, prefixColor, suffixColor) => {
+        let separatorStyle = '';
+        if (prefixColor && GLOBAL_COLOR_MAP[prefixColor]) {
+            separatorStyle = ` style="background: ${GLOBAL_COLOR_MAP[prefixColor]} !important;"`;
+        }
+        let result = `<div class="md-separator"${separatorStyle}></div>`;
+        if (suffixColor) {
+            let bgColor = '';
+            let textColor = '';
+            if (suffixColor.startsWith('#')) {
+                const hexParts = suffixColor.split('-');
+                bgColor = expandHexColor(hexParts[0]);
+                textColor = hexParts[1] ? expandHexColor(hexParts[1]) : '';
+            } else if (suffixColor.includes('-')) {
+                const [bgCode, textCode] = suffixColor.split('-');
+                bgColor = GLOBAL_COLOR_MAP[bgCode] || '';
+                textColor = GLOBAL_COLOR_MAP[textCode] || '';
+            } else if (GLOBAL_COLOR_MAP[suffixColor]) {
+                bgColor = GLOBAL_COLOR_MAP[suffixColor];
+            }
+            if (bgColor) {
+                result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
+            }
+        }
+        return result;
+    });
+
+    return formatted;
+}
+
+/**
+ * Shared helper to get current text selection and parse it into blocks.
+ */
+function getQuickFormatterSelectionBlocks() {
+    if (!quickFormatterTarget) return null;
+    const input = quickFormatterTarget;
+    let selectedText = '';
+    let start = 0;
+    let end = 0;
+
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        start = quickFormatterSelection.start;
+        end = quickFormatterSelection.end;
+        selectedText = input.value.substring(start, end);
+    }
+
+    if (!selectedText) return null;
+
+    const lines = selectedText.split('\n');
+    const blocks = [];
+    let currentBlock = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        const isDoubleDash = trimmed.startsWith('-- ');
+        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+        let isChildLine = false;
+
+        if (isDoubleDash) {
+            isChildLine = true;
+        } else if (isSingleDash) {
+            if (currentBlock && currentBlock.children.length === 0) {
+                isChildLine = !currentBlock.parent.trim().startsWith('- ');
+            } else if (currentBlock && currentBlock.children.length > 0) {
+                isChildLine = !currentBlock.children[currentBlock.children.length - 1].trim().startsWith('-- ');
+            } else {
+                isChildLine = false;
+            }
+        }
+
+        if (isChildLine) {
+            if (currentBlock) {
+                currentBlock.children.push(line);
+            } else {
+                blocks.push({ parent: line, children: [], isOrphan: true });
+            }
+        } else {
+            if (currentBlock) blocks.push(currentBlock);
+            currentBlock = { parent: line, children: [] };
+        }
+    }
+    if (currentBlock) blocks.push(currentBlock);
+
+    return { blocks, start, end, selectedText, input };
+}
+
+/**
+ * Shared helper to apply sorted text back to the document.
+ */
+function applySortedText(sortedText, start, end, input) {
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(sortedText);
+        range.insertNode(textNode);
+        const cell = quickFormatterTarget.closest('td');
+        if (cell) {
+            const inputElement = cell.querySelector('input, textarea');
+            if (inputElement) {
+                inputElement.value = extractRawText(quickFormatterTarget);
+                inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    } else {
+        input.value = input.value.substring(0, start) + sortedText + input.value.substring(end);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        const newCursorPos = start + sortedText.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+    }
+}
+
 /**
  * MULTI-CELL OPERATION PATTERN:
  * When adding new context menu operations, use this pattern to support multiple cells:
@@ -3222,129 +3428,8 @@ function parseMarkdownInline(text, cellStyle = {}) {
         return `<img src="${url}" alt="${altText}" ${width}${height}>`;
     });
 
-    // Links: {link:url}text{/} -> <a href="url">text</a>
-    formatted = formatted.replace(/\{link:([^}]+)\}(.+?)\{\/\}/g, (match, url, text) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-    });
-
-    // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
-    formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-    });
-
-    // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
-    formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
-        const styleObj = {};
-        const parts = styles.split(';').filter(p => p.trim());
-        let hasBg = false;
-        parts.forEach(part => {
-            const [key, value] = part.split(':').map(s => s.trim());
-            if (key === 'fg') styleObj.color = value;
-            if (key === 'bg') {
-                styleObj.backgroundColor = value;
-                hasBg = true;
-            }
-        });
-        // Only add padding and border-radius if there's a background
-        if (hasBg) {
-            styleObj.padding = '2px 8px';
-            styleObj.borderRadius = '4px';
-        }
-        styleObj.display = 'inline';
-        styleObj.verticalAlign = 'baseline';
-        styleObj.lineHeight = '1.3';
-        styleObj.wordBreak = 'normal';
-        styleObj.overflowWrap = 'break-word';
-        styleObj.boxDecorationBreak = 'clone';
-        styleObj.WebkitBoxDecorationBreak = 'clone';
-        const styleStr = Object.entries(styleObj).map(([k, v]) => {
-            const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
-            return `${cssKey}: ${v}`;
-        }).join('; ');
-        return `<span style="${styleStr}">${text}</span>`;
-    });
-
-    // Border box: #R#text#/# -> colored border (letters only)
-    formatted = formatted.replace(/#([A-Z]+)#(.+?)#\/#/g, (match, colorCode, text) => {
-        const colorMap = {
-            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
-            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
-            'K': '#000000', 'GR': '#808080'
-        };
-        if (colorMap[colorCode]) {
-            return `<span style="outline: 2px solid ${colorMap[colorCode]}; outline-offset: 4px; padding: 0; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; line-height: 1.5;">${text}</span>`;
-        }
-        return match; // Not a valid color, leave unchanged
-    });
-
-    // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
-    formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
-        return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
-    });
-
-    // Heading: ##text## -> larger text
-    formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
-
-
-    // Wavy underline: _.text._ -> wavy underline
-    formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
-
-    // Colored horizontal separator with optional background/text color for content below
-    // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
-    // Examples: R----- (red line), -----G (green bg), R-----G (red line + green bg)
-    //           R-----K (red line + black bg), -----R-W (red bg + white text)
-    //           -----#ff0000-#000000 (6-digit hex), -----#f00-#000 (3-digit hex)
-    formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, (match, prefixColor, suffixColor) => {
-        const colorMap = {
-            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
-            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
-            'K': '#000000', 'GR': '#808080'
-        };
-
-        // Helper to expand 3-digit hex to 6-digit
-        const expandHex = (hex) => {
-            if (!hex || !hex.startsWith('#')) return hex;
-            const color = hex.substring(1);
-            if (color.length === 3) {
-                return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
-            }
-            return hex;
-        };
-
-        let separatorStyle = '';
-        if (prefixColor && colorMap[prefixColor]) {
-            separatorStyle = ` style="background: ${colorMap[prefixColor]} !important;"`;
-        }
-
-        let result = `<div class="md-separator"${separatorStyle}></div>`;
-
-        // Parse suffix color (can be color code or hex with optional text color)
-        if (suffixColor) {
-            let bgColor = '';
-            let textColor = '';
-
-            if (suffixColor.startsWith('#')) {
-                // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
-                const hexParts = suffixColor.split('-');
-                bgColor = expandHex(hexParts[0]);
-                textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
-            } else if (suffixColor.includes('-')) {
-                // Color code with text color: R-W, G-K, etc.
-                const [bgCode, textCode] = suffixColor.split('-');
-                bgColor = colorMap[bgCode] || '';
-                textColor = colorMap[textCode] || '';
-            } else if (colorMap[suffixColor]) {
-                // Single color code format: R, G, B, etc.
-                bgColor = colorMap[suffixColor];
-            }
-
-            if (bgColor) {
-                result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
-            }
-        }
-
-        return result;
-    });
+    // Apply centralized regex patterns shared with oldParseMarkdownBody
+    formatted = applySharedMarkdownRegex(formatted);
 
     // Text Stroke: ŝŝthickness:textŝŝ or ŝŝtextŝŝ (default 2px)
     formatted = formatted.replace(/ŝŝ([\d.]+):(.+?)ŝŝ/g, (match, thickness, text) => {
@@ -3371,13 +3456,8 @@ function parseMarkdownInline(text, cellStyle = {}) {
 
     // Colored underline: _R_text__ -> colored underline (must come before regular underline)
     formatted = formatted.replace(/_([A-Z]+)_(.+?)__/g, (match, colorCode, text) => {
-        const colorMap = {
-            'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
-            'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
-            'K': '#000000', 'GR': '#808080'
-        };
-        if (colorMap[colorCode]) {
-            return `<u style="text-decoration-color: ${colorMap[colorCode]}; text-decoration-thickness: 2px;">${text}</u>`;
+        if (GLOBAL_COLOR_MAP[colorCode]) {
+            return `<u style="text-decoration-color: ${GLOBAL_COLOR_MAP[colorCode]}; text-decoration-thickness: 2px;">${text}</u>`;
         }
         return match; // Not a valid color, leave unchanged
     });
@@ -3983,116 +4063,8 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
         });
 
-        // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
-        formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
-            const styleObj = {};
-            const parts = styles.split(';').filter(p => p.trim());
-            let hasBg = false;
-            parts.forEach(part => {
-                const [key, value] = part.split(':').map(s => s.trim());
-                if (key === 'fg') styleObj.color = value;
-                if (key === 'bg') {
-                    styleObj.backgroundColor = value;
-                    hasBg = true;
-                }
-            });
-            // Only add padding and border-radius if there's a background
-            if (hasBg) {
-                styleObj.padding = '2px 8px';
-                styleObj.borderRadius = '4px';
-            }
-            styleObj.display = 'inline';
-            styleObj.verticalAlign = 'baseline';
-            styleObj.lineHeight = '1.3';
-            styleObj.wordBreak = 'normal';
-            styleObj.overflowWrap = 'break-word';
-            styleObj.boxDecorationBreak = 'clone';
-            styleObj.WebkitBoxDecorationBreak = 'clone';
-            const styleStr = Object.entries(styleObj).map(([k, v]) => {
-                const cssKey = k.replace(/([A-Z])/g, '-$1').toLowerCase();
-                return `${cssKey}: ${v}`;
-            }).join('; ');
-            return `<span style="${styleStr}">${text}</span>`;
-        });
-
-        // Border box: #R#text#/# -> colored border (letters only)
-        formatted = formatted.replace(/#([A-Z]+)#(.+?)#\/#/g, (match, colorCode, text) => {
-            const colorMap = {
-                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
-                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
-                'K': '#000000', 'GR': '#808080'
-            };
-            if (colorMap[colorCode]) {
-                return `<span style="outline: 2px solid ${colorMap[colorCode]}; outline-offset: 4px; padding: 0; display: inline; box-decoration-break: slice; -webkit-box-decoration-break: slice; word-break: break-word; overflow-wrap: break-word; white-space: pre-wrap; line-height: 1.5;">${text}</span>`;
-            }
-            return match; // Not a valid color, leave unchanged
-        });
-
-        // Variable font size heading: #2#text#/# -> custom size (2em, 1.5em, etc.)
-        formatted = formatted.replace(/#([\d.]+)#(.+?)#\/#/g, (match, size, text) => {
-            return `<span style="font-size: ${size}em; font-weight: 600;">${text}</span>`;
-        });
-
-        // Heading: ##text## -> larger text
-        formatted = formatted.replace(/##(.+?)##/g, '<span style="font-size: 1.3em; font-weight: 600;">$1</span>');
-
-
-        // Wavy underline: _.text._ -> wavy underline
-        formatted = formatted.replace(/_\.(.+?)\._/g, '<span style="text-decoration: underline wavy;">$1</span>');
-
-        // Colored horizontal separator with optional background/text color for content below
-        // Pattern: [COLOR1]-----[COLOR2] or [COLOR1]-----[COLOR2-COLOR3] or -----#HEX-#HEX
-        formatted = formatted.replace(/^([A-Z]+)?-{5,}((?:[A-Z]+(?:-[A-Z]+)?)|(?:#[0-9a-fA-F]{3,6}(?:-#[0-9a-fA-F]{3,6})?))?$/gm, (match, prefixColor, suffixColor) => {
-            const colorMap = {
-                'R': '#ff0000', 'G': '#00ff00', 'B': '#0000ff', 'Y': '#ffff00',
-                'O': '#ff8800', 'P': '#ff00ff', 'C': '#00ffff', 'W': '#ffffff',
-                'K': '#000000', 'GR': '#808080'
-            };
-
-            // Helper to expand 3-digit hex to 6-digit
-            const expandHex = (hex) => {
-                if (!hex || !hex.startsWith('#')) return hex;
-                const color = hex.substring(1);
-                if (color.length === 3) {
-                    return '#' + color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
-                }
-                return hex;
-            };
-
-            let separatorStyle = '';
-            if (prefixColor && colorMap[prefixColor]) {
-                separatorStyle = ` style="background: ${colorMap[prefixColor]} !important;"`;
-            }
-
-            let result = `<div class="md-separator"${separatorStyle}></div>`;
-
-            // Parse suffix color (can be color code or hex with optional text color)
-            if (suffixColor) {
-                let bgColor = '';
-                let textColor = '';
-
-                if (suffixColor.startsWith('#')) {
-                    // Hex color format: #RRGGBB or #RGB or #RRGGBB-#RRGGBB or #RGB-#RGB
-                    const hexParts = suffixColor.split('-');
-                    bgColor = expandHex(hexParts[0]);
-                    textColor = hexParts[1] ? expandHex(hexParts[1]) : '';
-                } else if (suffixColor.includes('-')) {
-                    // Color code with text color: R-W, G-K, etc.
-                    const [bgCode, textCode] = suffixColor.split('-');
-                    bgColor = colorMap[bgCode] || '';
-                    textColor = colorMap[textCode] || '';
-                } else if (colorMap[suffixColor]) {
-                    // Single color code format: R, G, B, etc.
-                    bgColor = colorMap[suffixColor];
-                }
-
-                if (bgColor) {
-                    result += `<div class="md-bg-section" data-bg-color="${bgColor}" data-text-color="${textColor}">`;
-                }
-            }
-
-            return result;
-        });
+        // Apply centralized regex patterns shared with parseMarkdownInline
+        formatted = applySharedMarkdownRegex(formatted);
 
         // NOTE: Bold and Italic are now processed BEFORE KaTeX (see above)
         // to prevent KaTeX HTML output from breaking the ** and @@ regex
@@ -15111,90 +15083,13 @@ function generatePlaceholderText(event) {
 }
 
 function sortLines(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    let selectedText = '';
-    let start = 0;
-    let end = 0;
-
-    // Handle contenteditable (WYSIWYG mode)
-    if (quickFormatterSelection.isContentEditable) {
-        selectedText = quickFormatterSelection.text || '';
-    } else {
-        // Handle input/textarea (legacy mode)
-        start = quickFormatterSelection.start;
-        end = quickFormatterSelection.end;
-        selectedText = input.value.substring(start, end);
-    }
-
-    if (!selectedText) {
+    const selectionData = getQuickFormatterSelectionBlocks();
+    if (!selectionData) {
         showToast('No text selected', 'warning');
         return;
     }
 
-    // Parse lines into blocks (parent + children)
-    const lines = selectedText.split('\n');
-    const blocks = [];
-    let currentBlock = null;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-
-        // Check dash patterns
-        const isDoubleDash = trimmed.startsWith('-- ');
-        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
-
-        // Determine if this is a child line
-        let isChildLine = false;
-
-        if (isDoubleDash) {
-            isChildLine = true;
-        } else if (isSingleDash) {
-            if (currentBlock && currentBlock.children.length === 0) {
-                const prevParentTrimmed = currentBlock.parent.trim();
-                if (prevParentTrimmed.startsWith('- ')) {
-                    isChildLine = false;
-                } else {
-                    isChildLine = true;
-                }
-            } else if (currentBlock && currentBlock.children.length > 0) {
-                const lastChild = currentBlock.children[currentBlock.children.length - 1];
-                if (lastChild.trim().startsWith('-- ')) {
-                    isChildLine = false;
-                } else {
-                    isChildLine = true;
-                }
-            } else {
-                isChildLine = false;
-            }
-        }
-
-        if (isChildLine) {
-            if (currentBlock) {
-                currentBlock.children.push(line);
-            } else {
-                blocks.push({
-                    parent: line,
-                    children: [],
-                    isOrphan: true
-                });
-            }
-        } else {
-            if (currentBlock) {
-                blocks.push(currentBlock);
-            }
-            currentBlock = {
-                parent: line,
-                children: []
-            };
-        }
-    }
-
-    if (currentBlock) {
-        blocks.push(currentBlock);
-    }
+    const { blocks, start, end, input } = selectionData;
 
     // Sort blocks by parent content
     const sortedBlocks = blocks.sort((a, b) => {
@@ -15216,46 +15111,9 @@ function sortLines(event) {
         return contentA.toLowerCase().localeCompare(contentB.toLowerCase());
     });
 
-    // Reconstruct the sorted text
-    const sortedLines = [];
-    for (const block of sortedBlocks) {
-        sortedLines.push(block.parent);
-        sortedLines.push(...block.children);
-    }
-
-    const sortedText = sortedLines.join('\n');
-
-    // Apply the sorted text
-    if (quickFormatterSelection.isContentEditable) {
-        const range = quickFormatterSelection.range;
-        range.deleteContents();
-        const textNode = document.createTextNode(sortedText);
-        range.insertNode(textNode);
-
-        const cell = input.closest('td');
-        if (cell) {
-            const inputElement = cell.querySelector('input, textarea');
-            if (inputElement) {
-                inputElement.value = extractRawText(input);
-                const changeEvent = new Event('input', { bubbles: true });
-                inputElement.dispatchEvent(changeEvent);
-            }
-        }
-
-        const newRange = document.createRange();
-        newRange.setStartAfter(textNode);
-        newRange.collapse(true);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(newRange);
-    } else {
-        const newText = input.value.substring(0, start) +
-            sortedText +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        const changeEvent = new Event('input', { bubbles: true });
+    const sortedText = sortedBlocks.map(b => [b.parent, ...b.children].join('\n')).join('\n');
+    applySortedText(sortedText, start, end, input);
+}
         input.dispatchEvent(changeEvent);
 
         const newCursorPos = start + sortedText.length;
@@ -15269,90 +15127,13 @@ function sortLines(event) {
 
 // Sort Lines by Bangla Date Function
 function sortLinesBanglaDate(event) {
-    if (!quickFormatterTarget) return;
-
-    const input = quickFormatterTarget;
-    let selectedText = '';
-    let start = 0;
-    let end = 0;
-
-    // Handle contenteditable (WYSIWYG mode)
-    if (quickFormatterSelection.isContentEditable) {
-        selectedText = quickFormatterSelection.text || '';
-    } else {
-        // Handle input/textarea (legacy mode)
-        start = quickFormatterSelection.start;
-        end = quickFormatterSelection.end;
-        selectedText = input.value.substring(start, end);
-    }
-
-    if (!selectedText) {
+    const selectionData = getQuickFormatterSelectionBlocks();
+    if (!selectionData) {
         showToast('No text selected', 'warning');
         return;
     }
 
-    // Parse lines into blocks (parent + children)
-    const lines = selectedText.split('\n');
-    const blocks = [];
-    let currentBlock = null;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-
-        // Check dash patterns
-        const isDoubleDash = trimmed.startsWith('-- ');
-        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
-
-        // Determine if this is a child line
-        let isChildLine = false;
-
-        if (isDoubleDash) {
-            isChildLine = true;
-        } else if (isSingleDash) {
-            if (currentBlock && currentBlock.children.length === 0) {
-                const prevParentTrimmed = currentBlock.parent.trim();
-                if (prevParentTrimmed.startsWith('- ')) {
-                    isChildLine = false;
-                } else {
-                    isChildLine = true;
-                }
-            } else if (currentBlock && currentBlock.children.length > 0) {
-                const lastChild = currentBlock.children[currentBlock.children.length - 1];
-                if (lastChild.trim().startsWith('-- ')) {
-                    isChildLine = false;
-                } else {
-                    isChildLine = true;
-                }
-            } else {
-                isChildLine = false;
-            }
-        }
-
-        if (isChildLine) {
-            if (currentBlock) {
-                currentBlock.children.push(line);
-            } else {
-                blocks.push({
-                    parent: line,
-                    children: [],
-                    isOrphan: true
-                });
-            }
-        } else {
-            if (currentBlock) {
-                blocks.push(currentBlock);
-            }
-            currentBlock = {
-                parent: line,
-                children: []
-            };
-        }
-    }
-
-    if (currentBlock) {
-        blocks.push(currentBlock);
-    }
+    const { blocks, start, end, input } = selectionData;
 
     // Helper to parse Bangla date
     const parseBanglaDateLocal = (text) => {
@@ -15426,52 +15207,8 @@ function sortLinesBanglaDate(event) {
         return a.parent.localeCompare(b.parent);
     });
 
-    // Reconstruct the sorted text
-    const sortedLines = [];
-    for (const block of sortedBlocks) {
-        sortedLines.push(block.parent);
-        sortedLines.push(...block.children);
-    }
-
-    const sortedText = sortedLines.join('\n');
-
-    // Apply the sorted text
-    if (quickFormatterSelection.isContentEditable) {
-        const range = quickFormatterSelection.range;
-        range.deleteContents();
-        const textNode = document.createTextNode(sortedText);
-        range.insertNode(textNode);
-
-        const cell = quickFormatterTarget.closest('td');
-        if (cell) {
-            const inputElement = cell.querySelector('input, textarea');
-            if (inputElement) {
-                inputElement.value = extractRawText(quickFormatterTarget);
-                const changeEvent = new Event('input', { bubbles: true });
-                inputElement.dispatchEvent(changeEvent);
-            }
-        }
-
-        const newRange = document.createRange();
-        newRange.setStartAfter(textNode);
-        newRange.collapse(true);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(newRange);
-    } else {
-        const newText = input.value.substring(0, start) +
-            sortedText +
-            input.value.substring(end);
-
-        input.value = newText;
-
-        const changeEvent = new Event('input', { bubbles: true });
-        input.dispatchEvent(changeEvent);
-
-        const newCursorPos = start + sortedText.length;
-        input.setSelectionRange(newCursorPos, newCursorPos);
-        input.focus();
-    }
+    const sortedText = sortedBlocks.map(b => [b.parent, ...b.children].join('\n')).join('\n');
+    applySortedText(sortedText, start, end, input);
 
     closeQuickFormatter();
     showToast('Lines sorted by Bangla date', 'success');
