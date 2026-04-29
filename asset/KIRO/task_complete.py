@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect)
-from PyQt6.QtCore import Qt, QPoint, QTimer
+from PyQt6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
 from PyQt6.QtGui import QColor, QLinearGradient
 
 BG_COLOR = "#1E1E2E"
@@ -28,8 +28,24 @@ class TaskCompletePopup(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.gradient_index = 0
+        self._transition_progress = 0.0
         self.setup_ui()
         self.setup_gradient_timer()
+        self.setup_animation()
+
+    @pyqtProperty(float)
+    def transition_progress(self):
+        return self._transition_progress
+
+    @transition_progress.setter
+    def transition_progress(self, value):
+        self._transition_progress = value
+        self.update_gradient_style()
+
+    def setup_animation(self):
+        self.animation = QPropertyAnimation(self, b"transition_progress")
+        self.animation.setDuration(1200)  # 1.2 second transition
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
     def setup_ui(self):
         layout = QVBoxLayout()
@@ -76,15 +92,32 @@ class TaskCompletePopup(QWidget):
 
     def setup_gradient_timer(self):
         self.timer = QTimer()
-        self.timer.timeout.connect(self.change_gradient)
-        self.timer.start(1500)  # Change every 1.5 seconds
+        self.timer.timeout.connect(self.start_transition)
+        self.timer.start(2500)  # Start new transition every 2.5 seconds
 
-    def change_gradient(self):
+    def start_transition(self):
         self.gradient_index = (self.gradient_index + 1) % len(GRADIENT_COLORS)
-        self.update_gradient_style()
+        self.animation.setStartValue(0.0)
+        self.animation.setEndValue(1.0)
+        self.animation.start()
+
+    def interpolate_color(self, color1, color2, t):
+        """Interpolate between two hex colors"""
+        c1 = QColor(color1)
+        c2 = QColor(color2)
+        r = int(c1.red() + (c2.red() - c1.red()) * t)
+        g = int(c1.green() + (c2.green() - c1.green()) * t)
+        b = int(c1.blue() + (c2.blue() - c1.blue()) * t)
+        return f"#{r:02x}{g:02x}{b:02x}"
 
     def update_gradient_style(self):
-        color1, color2 = GRADIENT_COLORS[self.gradient_index]
+        current_colors = GRADIENT_COLORS[self.gradient_index]
+        prev_index = (self.gradient_index - 1) % len(GRADIENT_COLORS)
+        prev_colors = GRADIENT_COLORS[prev_index]
+        
+        # Interpolate between previous and current gradient
+        color1 = self.interpolate_color(prev_colors[0], current_colors[0], self._transition_progress)
+        color2 = self.interpolate_color(prev_colors[1], current_colors[1], self._transition_progress)
         self.setStyleSheet(f"""
             QWidget#Container {{
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
