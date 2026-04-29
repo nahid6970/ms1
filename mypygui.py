@@ -314,6 +314,8 @@ def open_edit_gui(item_cfg, category, index=None):
         if category in config:
             if index is not None:
                 config[category][index] = item_cfg
+            elif isinstance(config[category], list):
+                config[category].append(item_cfg)
             else:
                 config[category][item_cfg["id"]] = item_cfg
         save_config(config)
