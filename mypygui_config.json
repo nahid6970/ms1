@@ -449,6 +449,28 @@
     ],
     "buttons_right": [
         {
+            "id": "Shut_Reboot",
+            "text": "\udb82\udc20",
+            "fg": "#fa0000",
+            "bg": "#1d2027",
+            "font": [
+                "JetBrainsMono NFP",
+                25,
+                "bold"
+            ],
+            "widget_type": "CTkButton",
+            "bindings": {
+                "Button-1": {
+                    "type": "function",
+                    "func": "force_shutdown"
+                },
+                "Button-3": {
+                    "type": "function",
+                    "func": "force_restart"
+                }
+            }
+        },
+        {
             "id": "LB_R",
             "text": "\uf2f1",
             "fg": "#26b2f3",

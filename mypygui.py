@@ -74,6 +74,8 @@ def handle_action(action_cfg):
         if func_name == "restart": restart()
         elif func_name == "close_window": close_window()
         elif func_name == "clear_screen": clear_screen()
+        elif func_name == "force_shutdown": force_shutdown(None)
+        elif func_name == "force_restart": force_restart(None)
 
 def open_edit_gui(item_cfg, category, index=None):
     edit_win = tk.Toplevel(ROOT)
