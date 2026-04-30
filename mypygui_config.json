@@ -136,7 +136,7 @@
             "text": "\uf4cc",
             "fg": "#10b153",
             "font": [
-                "Consolas",
+                "JetBrainsMono NFP",
                 25,
                 "bold"
             ],
@@ -165,7 +165,7 @@
             "fg": "#26b2f3",
             "font": [
                 "JetBrainsMono NFP",
-                25,
+                15,
                 "bold"
             ],
             "widget_type": "CTkLabel",

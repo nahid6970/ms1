@@ -173,11 +173,15 @@ def open_edit_gui(item_cfg, category, index=None):
     grp_appear.setLayout(form_appear)
 
     entries = {}
-    for field in ["text", "fg", "bg", "id"]:
+    for field in ["text", "fg", "bg", "id", "border_color"]:
         ent = QLineEdit(str(item_cfg.get(field, "")))
         form_appear.addRow(field.upper(), ent)
         entries[field] = ent
 
+    # Border thickness (separate since it's numeric)
+    border_le = QLineEdit(str(item_cfg.get("border", 0)))
+    border_le.setFixedWidth(50)
+    form_appear.addRow("BORDER PX", border_le)
     left_layout.addWidget(grp_appear)
 
     # Font group
@@ -316,6 +320,8 @@ def open_edit_gui(item_cfg, category, index=None):
             item_cfg["font"] = [font_family_cb.currentText(), int(font_size_le.text()), font_weight_cb.currentText()]
         except ValueError:
             pass
+        try: item_cfg["border"] = int(border_le.text())
+        except ValueError: pass
         try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
@@ -386,7 +392,11 @@ def open_edit_gui(item_cfg, category, index=None):
 
     btn_save.clicked.connect(save)
     btn_delete.clicked.connect(delete)
-    dlg.exec()
+    dlg.setWindowModality(Qt.WindowModality.NonModal)
+    dlg.show()
+    while dlg.isVisible():
+        _qt_app.processEvents()
+        import time as _t; _t.sleep(0.01)
 
 def create_dynamic_button(parent, btn_cfg, category, index=None):
     widget_type = btn_cfg.get("widget_type", "Label")
@@ -399,7 +409,10 @@ def create_dynamic_button(parent, btn_cfg, category, index=None):
     elif widget_type == "CTkButton":
         lbl = CTkButton(parent, text=btn_cfg.get("text", ""), text_color=_fg, fg_color=_bg, font=font, width=0, height=10)
     else:
-        lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=_bg, fg=_fg, font=font, relief="flat")
+        _border_color = btn_cfg.get("border_color", "")
+        _border_thick = int(btn_cfg.get("border", 0))
+        lbl = tk.Label(parent, text=btn_cfg.get("text", ""), bg=_bg, fg=_fg, font=font, relief="flat",
+                       bd=0, highlightthickness=_border_thick, highlightbackground=_border_color or _bg)
     
     px_l = int(btn_cfg.get("padx_left", 1))
     px_r = int(btn_cfg.get("padx_right", 1))
@@ -1475,7 +1488,11 @@ def open_rclone_settings():
         dlg.accept()
 
     btn_save.clicked.connect(save)
-    dlg.exec()
+    dlg.setWindowModality(Qt.WindowModality.NonModal)
+    dlg.show()
+    while dlg.isVisible():
+        _qt_app.processEvents()
+        import time as _t; _t.sleep(0.01)
 
 rclone_settings_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#808080",
                                font=("JetBrainsMono NFP", 14, "bold"), cursor="hand2")
