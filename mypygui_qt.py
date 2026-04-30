@@ -1103,10 +1103,14 @@ class StatusBar(QMainWindow):
         self._bl_render()
 
         # 6. Add new button
-        add_bt = QLabel("+")
-        add_bt.setStyleSheet(
-            f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"
-        )
+        _add_st_cfg = load_config().get("static_bindings", {}).get("add_button", {})
+        add_bt = IconLabel(_add_st_cfg.get("text", "+"), _add_st_cfg)
+        if _add_st_cfg:
+            _apply_static_style(add_bt, "add_button")
+        else:
+            add_bt.setStyleSheet(
+                f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"
+            )
         add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         _add_cfg = {"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}
         def _add_click(e, cfg=_add_cfg):
