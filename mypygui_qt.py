@@ -129,6 +129,7 @@ class SvgInputDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("PASTE SVG CODE")
         self.resize(600, 580)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         self.svg_code = current_svg
         self.hover_map = hover_map or {}
         self.setStyleSheet(f"""
