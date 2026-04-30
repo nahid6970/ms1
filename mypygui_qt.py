@@ -278,13 +278,19 @@ def open_edit_gui(item_cfg, category, index=None):
     form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", font_size_le); form_font.addRow("WEIGHT", font_weight_cb)
     left_layout.addWidget(grp_font)
 
-    grp_pad = QGroupBox("PADDING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
+    grp_pad = QGroupBox("SPACING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
     padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1)));  padx_left_le.setFixedWidth(60)
     padx_right_le = QLineEdit(str(item_cfg.get("padx_right", 1))); padx_right_le.setFixedWidth(60)
     margin_left_le  = QLineEdit(str(item_cfg.get("margin_left", 0)));  margin_left_le.setFixedWidth(60)
     margin_right_le = QLineEdit(str(item_cfg.get("margin_right", 0))); margin_right_le.setFixedWidth(60)
-    form_pad.addRow("PADX LEFT", padx_left_le); form_pad.addRow("PADX RIGHT", padx_right_le)
-    form_pad.addRow("MARGIN LEFT", margin_left_le); form_pad.addRow("MARGIN RIGHT", margin_right_le)
+
+    l_row = QWidget(); l_lay = QHBoxLayout(l_row); l_lay.setContentsMargins(0,0,0,0); l_lay.setSpacing(10)
+    l_lay.addWidget(padx_left_le); l_lay.addWidget(QLabel("MARGIN L")); l_lay.addWidget(margin_left_le); l_lay.addStretch()
+    form_pad.addRow("PADX LEFT", l_row)
+
+    r_row = QWidget(); r_lay = QHBoxLayout(r_row); r_lay.setContentsMargins(0,0,0,0); r_lay.setSpacing(10)
+    r_lay.addWidget(padx_right_le); r_lay.addWidget(QLabel("MARGIN R")); r_lay.addWidget(margin_right_le); r_lay.addStretch()
+    form_pad.addRow("PADX RIGHT", r_row)
     left_layout.addWidget(grp_pad)
 
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
