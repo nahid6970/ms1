@@ -78,6 +78,8 @@ QPushButton:pressed {{
 QLabel {{
     background: transparent;
     color: {CP_TEXT};
+    margin: 0px;
+    padding: 0px;
 }}
 """
 
@@ -245,6 +247,8 @@ def open_edit_gui(item_cfg, category, index=None):
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+    screen = QApplication.primaryScreen().geometry()
+    dlg.move(screen.center().x() - 500, screen.center().y() - 310)
 
     root_layout = QVBoxLayout(dlg)
     root_layout.setContentsMargins(10, 10, 10, 10)
@@ -750,8 +754,8 @@ class StatusBar(QMainWindow):
         self._left_widget = QWidget()
         self._left_widget.setStyleSheet(f"background: {CP_BG};")
         self._left_layout = QHBoxLayout(self._left_widget)
-        self._left_layout.setContentsMargins(2, 0, 2, 0)
-        self._left_layout.setSpacing(2)
+        self._left_layout.setContentsMargins(0, 0, 0, 0)
+        self._left_layout.setSpacing(0)
         self._left_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         main_layout.addWidget(self._left_widget, 1)
 
@@ -759,8 +763,8 @@ class StatusBar(QMainWindow):
         self._right_widget = QWidget()
         self._right_widget.setStyleSheet(f"background: {CP_BG};")
         self._right_layout = QHBoxLayout(self._right_widget)
-        self._right_layout.setContentsMargins(2, 0, 2, 0)
-        self._right_layout.setSpacing(2)
+        self._right_layout.setContentsMargins(0, 0, 0, 0)
+        self._right_layout.setSpacing(0)
         self._right_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         main_layout.addWidget(self._right_widget)
 
@@ -816,7 +820,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(next_bt)
         self._bl_next_bt = next_bt
 
-        gear_bt = QPushButton("\uf013")
+        gear_bt = QPushButton("⚙")
         gear_bt.setStyleSheet(
             "background: white; color: black; font-family: 'JetBrainsMono NFP'; border-radius: 4px; padding: 1px 4px;"
         )
@@ -840,7 +844,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(self._rclone_toggle)
 
         # 5. Rclone settings gear
-        rclone_gear = QLabel("\uf013")
+        rclone_gear = QLabel("⚙")
         rclone_gear.setStyleSheet(
             f"color: #808080; font-family: 'JetBrainsMono NFP'; font-size: 14pt;"
         )
@@ -859,7 +863,6 @@ class StatusBar(QMainWindow):
             "buttons_left"
         )
         ll.addWidget(add_bt)
-        ll.addStretch()
 
     def _bl_render(self):
         # Clear old widgets
