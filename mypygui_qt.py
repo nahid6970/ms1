@@ -971,7 +971,7 @@ class StatusBar(QMainWindow):
 
         commands = load_config().get("rclone_commands", {})
         popup = QFrame(self, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
-        popup.setStyleSheet(f"background: #1d2027; border: 1px solid {CP_RED};")
+        popup.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {CP_RED}; }} QLabel {{ border: none; background: transparent; }}")
         row = QHBoxLayout(popup)
         row.setContentsMargins(4, 2, 4, 2)
         row.setSpacing(4)
@@ -980,7 +980,8 @@ class StatusBar(QMainWindow):
             if "id" not in cfg:
                 cfg["id"] = key
             lbl = QLabel(cfg["label"])
-            cached = rclone_status.get(cfg.get("id", key))
+            _rid = cfg.get("id", cfg.get("label", key))
+            cached = rclone_status.get(_rid)
             color  = cached if cached else "white"
             lbl.setStyleSheet(
                 f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
@@ -1016,7 +1017,8 @@ class StatusBar(QMainWindow):
 
         popup.adjustSize()
         gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft())
-        popup.move(gpos.x(), gpos.y() - popup.height() - 2)
+        cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
+        popup.move(cx, gpos.y() - popup.height() - 2)
         popup.show()
         self._rclone_popup = popup
 

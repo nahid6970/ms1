@@ -531,6 +531,29 @@
             "padx_right": 100
         },
         {
+            "id": "uptime",
+            "text": "uptime",
+            "fg": "",
+            "bg": "",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "timedate.cpl"
+                }
+            },
+            "font": [
+                "Consolas",
+                16,
+                "bold"
+            ],
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
+        },
+        {
             "id": "Radarr_bt",
             "text": "Radarr",
             "fg": "#ffdb75",
@@ -560,7 +583,7 @@
             "bg": "#1d2027",
             "font": [
                 "JetBrainsMono NFP",
-                25,
+                20,
                 "bold"
             ],
             "widget_type": "CTkButton",
@@ -579,7 +602,9 @@
                 }
             },
             "padx_left": 5,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 0,
+            "border_color": ""
         },
         {
             "id": "LB_R",
