@@ -884,7 +884,10 @@ class StatusBar(QMainWindow):
             cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
             save_config(cfg)
             dlg.accept(); self._bl_render()
-        btn.clicked.connect(_save); dlg.show()
+        btn.clicked.connect(_save)
+        screen = QApplication.primaryScreen().geometry()
+        dlg.move(screen.center().x() - 190, screen.center().y() - 140)
+        dlg.show()
 
     def _bl_render(self):
         # Clear entire layout (widgets + spacers)
