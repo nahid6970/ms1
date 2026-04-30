@@ -1108,10 +1108,13 @@ class StatusBar(QMainWindow):
             f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"
         )
         add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        add_bt.mousePressEvent = lambda e: open_edit_gui(
-            {"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}},
-            "buttons_left"
-        )
+        _add_cfg = {"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}
+        def _add_click(e, cfg=_add_cfg):
+            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                _open_static_edit("add_button")
+            else:
+                open_edit_gui(cfg, "buttons_left")
+        add_bt.mousePressEvent = _add_click
         ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
