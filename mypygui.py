@@ -939,8 +939,8 @@ def _bl_render():
     for idx in range(start, end):
         w = create_dynamic_button(_bl_container, items[idx], "buttons_left", idx)
         _bl_widgets.append(w)
-    _bl_prev_bt.config(fg="#009fff" if _bl_offset[0] > 0 else "#3a3a3a")
-    _bl_next_bt.config(fg="#009fff" if end < len(items) else "#3a3a3a")
+    _bl_prev_bt.configure(fg_color="#ffffff" if _bl_offset[0] > 0 else "#555555")
+    _bl_next_bt.configure(fg_color="#ffffff" if end < len(items) else "#555555")
 
 def _bl_prev(e=None):
     if _bl_offset[0] > 0:
@@ -986,24 +986,21 @@ def _bl_settings(e=None):
         dlg.accept(); _bl_render()
     btn.clicked.connect(_save); dlg.exec()
 
-_bl_prev_bt = tk.Label(ROOT1, text="«", bg="#1d2027", fg="#3a3a3a",
-                        font=("JetBrainsMono NFP", 11, "bold"), cursor="hand2")
+_bl_prev_bt = CTkButton(ROOT1, text="«", fg_color="#ffffff", text_color="#000000", hover_color="#cccccc",
+                         font=("JetBrainsMono NFP", 11, "bold"), width=22, height=20, corner_radius=5, command=_bl_prev)
 _bl_prev_bt.pack(side="left", padx=(2,0))
-_bl_prev_bt.bind("<Button-1>", _bl_prev)
 
 _bl_container.pack_forget()  # repack after arrows
 _bl_container = tk.Frame(ROOT1, bg="#1d2027")
 _bl_container.pack(side="left")
 
-_bl_next_bt = tk.Label(ROOT1, text="»", bg="#1d2027", fg="#3a3a3a",
-                        font=("JetBrainsMono NFP", 11, "bold"), cursor="hand2")
+_bl_next_bt = CTkButton(ROOT1, text="»", fg_color="#ffffff", text_color="#000000", hover_color="#cccccc",
+                         font=("JetBrainsMono NFP", 11, "bold"), width=22, height=20, corner_radius=5, command=_bl_next)
 _bl_next_bt.pack(side="left", padx=(0,2))
-_bl_next_bt.bind("<Button-1>", _bl_next)
 
-_bl_settings_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#555555",
-                             font=("JetBrainsMono NFP", 12, "bold"), cursor="hand2")
+_bl_settings_bt = CTkButton(ROOT1, text="", fg_color="#ffffff", text_color="#000000", hover_color="#cccccc",
+                              font=("JetBrainsMono NFP", 12, "bold"), width=22, height=20, corner_radius=5, command=_bl_settings)
 _bl_settings_bt.pack(side="left", padx=(0,4))
-_bl_settings_bt.bind("<Button-1>", _bl_settings)
 
 _bl_render()
 

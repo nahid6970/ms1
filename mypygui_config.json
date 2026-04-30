@@ -441,20 +441,24 @@
         },
         {
             "id": "Sonarr_bt",
-            "text": "\udb81\udff4",
+            "text": "Sonarr",
             "fg": "#ffdb75",
             "bg": "#000000",
             "font": [
                 "JetBrainsMono NFP",
-                20,
+                15,
                 "bold"
             ],
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "explorer D:\\Downloads\\@Sonarr"
                 }
-            }
+            },
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "Radarr_bt",
