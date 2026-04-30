@@ -137,7 +137,7 @@
             "fg": "#10b153",
             "font": [
                 "JetBrainsMono NFP",
-                25,
+                20,
                 "bold"
             ],
             "widget_type": "CTkLabel",
@@ -157,7 +157,9 @@
             },
             "bg": "",
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 0,
+            "border_color": ""
         },
         {
             "id": "AppManagement_bt",
@@ -199,7 +201,7 @@
             "padx_left": 5,
             "padx_right": 5,
             "border": 1,
-            "border_color": "green"
+            "border_color": "yellow"
         },
         {
             "id": "Rclone_bt",

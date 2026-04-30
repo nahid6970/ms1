@@ -729,20 +729,7 @@ class StatusBar(QMainWindow):
 
         self._bl_render()
 
-        # 3. Git section
-        self._build_git(ll)
-
-        # 4. Rclone toggle
-        self._rclone_popup = None
-        self._rclone_toggle = QLabel("\uef2c")
-        self._rclone_toggle.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
-        )
-        self._rclone_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._rclone_toggle.mousePressEvent = lambda e: self._toggle_rclone_popup()
-        ll.addWidget(self._rclone_toggle)
-
-        # 5. Rclone settings gear
+        # 3. Rclone settings gear
 
 
         # 6. Add new button
@@ -948,6 +935,19 @@ class StatusBar(QMainWindow):
     # ── Right panel ───────────────────────────────────────────────────────────
     def _build_right(self):
         rl = self._right_layout
+
+        # Rclone toggle
+        self._rclone_popup = None
+        self._rclone_toggle = QLabel("\uef2c")
+        self._rclone_toggle.setStyleSheet(
+            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
+        )
+        self._rclone_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._rclone_toggle.mousePressEvent = lambda e: self._toggle_rclone_popup()
+        rl.addWidget(self._rclone_toggle)
+
+        # Git section
+        self._build_git(rl)
 
         # Download / Upload
         self.download_lb = QLabel("")
