@@ -486,7 +486,9 @@
             },
             "bg": "",
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 0,
+            "border_color": ""
         },
         {
             "id": "Sonarr_bt",
@@ -692,11 +694,11 @@
                 15,
                 "bold"
             ],
-            "bindings": {},
             "border": 2,
             "border_color": "green",
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "bindings": {}
         },
         "rclone_toggle": {
             "id": "rclone_toggle",

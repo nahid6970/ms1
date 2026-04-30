@@ -232,12 +232,12 @@ def format_uptime():
 def open_edit_gui(item_cfg, category, index=None):
     dlg = QDialog(_main_window if "_main_window" in globals() else None)
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
-    dlg.resize(1000, 620)
+    dlg.resize(1000, 700)
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
     screen = QApplication.primaryScreen().geometry()
-    dlg.move(screen.center().x() - 500, screen.center().y() - 310)
+    dlg.move(screen.center().x() - 500, screen.center().y() - 350)
 
     root_layout = QVBoxLayout(dlg)
     root_layout.setContentsMargins(10, 10, 10, 10)
