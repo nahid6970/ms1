@@ -282,7 +282,7 @@ class IconLabel(QLabel):
         f = QFont(font_cfg[0], font_cfg[1])
         if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
         doc.setDefaultFont(f)
-        doc.setHtml(f"<div style='color: {fg};'>{text}</div>")
+        doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
         
         text_w = doc.idealWidth()
         text_h = doc.size().height()
