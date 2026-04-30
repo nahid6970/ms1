@@ -935,7 +935,7 @@ def _git_status_loop(repos, q):
     while True:
         for repo in repos:
             check_git_status(repo, q)
-        time.sleep(30)
+        time.sleep(5)
 
 def git_backup(repos):
     commands = " ; ".join([
@@ -1437,7 +1437,7 @@ class StatusBar(QMainWindow):
         # Git queue drain
         self._git_timer = QTimer(self)
         self._git_timer.timeout.connect(self._drain_git_queue)
-        self._git_timer.start(200)
+        self._git_timer.start(100)
         _repos = self._config.get("git_repos", [])
         if _repos:
             threading.Thread(target=_git_status_loop, args=(_repos, _git_queue), daemon=True).start()
