@@ -496,6 +496,24 @@ def _open_static_edit(key):
             "bindings": entry.get("bindings", {})}
     open_edit_gui(item, "static_bindings")
 
+def _apply_static_style(widget, key):
+    cfg = load_config().get("static_bindings", {}).get(key, {})
+    if not cfg: return
+    fg = cfg.get("fg", "") or "white"
+    bg = cfg.get("bg", "") or "transparent"
+    font = cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    border_px = int(cfg.get("border", 0))
+    border_col = cfg.get("border_color", "") or bg
+    border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
+    px_l = int(cfg.get("padx_left", 0))
+    px_r = int(cfg.get("padx_right", 0))
+    fw = font[2] if len(font) > 2 else "bold"
+    widget.setStyleSheet(
+        f"color: {fg}; background: {bg}; font-family: '{font[0]}'; "
+        f"font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; "
+        f"{border_css} padding-left: {px_l}px; padding-right: {px_r}px;"
+    )
+
 def _bind_static(lbl, key, default_cmd):
     """Attach config-driven click handlers to a QLabel."""
     cfg = load_config().get("static_bindings", {}).get(
@@ -941,9 +959,9 @@ class StatusBar(QMainWindow):
         # Rclone toggle
         self._rclone_popup = None
         self._rclone_toggle = QLabel("\uef2c")
-        self._rclone_toggle.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
-        )
+        _apply_static_style(self._rclone_toggle, "rclone_toggle")
+        if not load_config().get("static_bindings", {}).get("rclone_toggle"):
+            self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
         self._rclone_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         def _rclone_click(e):
             if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("rclone_toggle")
@@ -1032,7 +1050,9 @@ class StatusBar(QMainWindow):
 
         # Unified settings button
         settings_bt = QLabel("⚙")
-        settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
+        _apply_static_style(settings_bt, "settings")
+        if not load_config().get("static_bindings", {}).get("settings"):
+            settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
         settings_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         def _settings_click(e):
             if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("settings")

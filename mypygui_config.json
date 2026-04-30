@@ -404,7 +404,7 @@
             "font": [
                 "JetBrainsMono NFP",
                 16,
-                "bold"
+                "normal"
             ],
             "bindings": {
                 "Button-1": {
@@ -422,7 +422,9 @@
             },
             "bg": "",
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 0,
+            "border_color": ""
         },
         {
             "id": "KomoBT",
@@ -431,7 +433,7 @@
             "font": [
                 "Consolas",
                 16,
-                "bold"
+                "normal"
             ],
             "bindings": {
                 "Button-1": {
@@ -619,7 +621,7 @@
             "border": 0,
             "border_color": "",
             "padx_left": 1,
-            "padx_right": 100
+            "padx_right": 1
         },
         "download": {
             "Button-1": {
@@ -684,15 +686,15 @@
             "id": "settings",
             "text": "settings",
             "fg": "",
-            "bg": "red",
+            "bg": "",
             "font": [
                 "JetBrainsMono NFP",
-                16,
+                15,
                 "bold"
             ],
             "bindings": {},
-            "border": 0,
-            "border_color": "",
+            "border": 2,
+            "border_color": "green",
             "padx_left": 1,
             "padx_right": 1
         },
@@ -700,15 +702,15 @@
             "id": "rclone_toggle",
             "text": "rclone_toggle",
             "fg": "",
-            "bg": "red",
+            "bg": "",
             "font": [
                 "JetBrainsMono NFP",
-                16,
-                "bold"
+                20,
+                "normal"
             ],
             "bindings": {},
-            "border": 0,
-            "border_color": "",
+            "border": 2,
+            "border_color": "red",
             "padx_left": 1,
             "padx_right": 1
         }
