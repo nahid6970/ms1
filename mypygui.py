@@ -922,9 +922,90 @@ uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  tex
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 _bind_static(uptime_label, "uptime", "timedate.cpl")
 
-# Load dynamic buttons for ROOT1
-for idx, btn_cfg in enumerate(CONFIG.get("buttons_left", [])):
-    create_dynamic_button(ROOT1, btn_cfg, "buttons_left", idx)
+# Paginated buttons_left
+_bl_page_size = CONFIG.get("buttons_left_page_size", 10)
+_bl_offset = [0]  # mutable so nested functions can modify
+_bl_widgets = []  # currently rendered button widgets
+_bl_container = tk.Frame(ROOT1, bg="#1d2027")
+_bl_container.pack(side="left")
+
+def _bl_render():
+    for w in _bl_widgets:
+        w.destroy()
+    _bl_widgets.clear()
+    items = load_config().get("buttons_left", [])
+    start = _bl_offset[0]
+    end = min(start + _bl_page_size, len(items))
+    for idx in range(start, end):
+        w = create_dynamic_button(_bl_container, items[idx], "buttons_left", idx)
+        _bl_widgets.append(w)
+    _bl_prev_bt.config(fg="#009fff" if _bl_offset[0] > 0 else "#3a3a3a")
+    _bl_next_bt.config(fg="#009fff" if end < len(items) else "#3a3a3a")
+
+def _bl_prev(e=None):
+    if _bl_offset[0] > 0:
+        _bl_offset[0] = max(0, _bl_offset[0] - _bl_page_size)
+        _bl_render()
+
+def _bl_next(e=None):
+    items = load_config().get("buttons_left", [])
+    if _bl_offset[0] + _bl_page_size < len(items):
+        _bl_offset[0] += _bl_page_size
+        _bl_render()
+
+def _bl_settings(e=None):
+    global _bl_page_size
+    import sys as _s
+    _qt = QApplication.instance() or QApplication(_s.argv)
+    CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"; CP_DIM="#3a3a3a"; CP_TEXT="#E0E0E0"; CP_GREEN="#00ff21"
+    QSS = f"""
+        QDialog,QWidget{{background:{CP_BG};color:{CP_TEXT};font-family:Consolas;font-size:10pt;}}
+        QLineEdit{{background:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:4px;}}
+        QLineEdit:focus{{border:1px solid {CP_CYAN};}}
+        QPushButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:6px 14px;font-weight:bold;}}
+        QPushButton:hover{{background:#2a2a2a;border:1px solid {CP_YELLOW};color:{CP_YELLOW};}}
+        QPushButton#btn_save{{border-color:{CP_GREEN};color:{CP_GREEN};}}
+        QPushButton#btn_save:hover{{background:{CP_GREEN};color:black;}}
+        QGroupBox{{border:1px solid {CP_DIM};margin-top:10px;padding-top:8px;font-weight:bold;color:{CP_YELLOW};}}
+        QGroupBox::title{{subcontrol-origin:margin;subcontrol-position:top left;padding:0 5px;}}
+    """
+    from PyQt6.QtWidgets import QDialog, QVBoxLayout, QGroupBox, QFormLayout, QLineEdit, QPushButton, QLabel
+    from PyQt6.QtCore import Qt
+    dlg = QDialog(); dlg.setWindowTitle("Button Bar Settings"); dlg.resize(320, 160)
+    dlg.setStyleSheet(QSS); dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+    lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12)
+    title = QLabel("// BUTTON BAR"); title.setStyleSheet(f"color:{CP_CYAN};font-size:12pt;font-weight:bold;"); lay.addWidget(title)
+    grp = QGroupBox("PAGE SIZE"); form = QFormLayout(); grp.setLayout(form)
+    size_le = QLineEdit(str(_bl_page_size)); size_le.setFixedWidth(60); form.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp)
+    btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
+    def _save():
+        global _bl_page_size
+        try: _bl_page_size = int(size_le.text())
+        except ValueError: pass
+        cfg = load_config(); cfg["buttons_left_page_size"] = _bl_page_size; save_config(cfg)
+        dlg.accept(); _bl_render()
+    btn.clicked.connect(_save); dlg.exec()
+
+_bl_prev_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#3a3a3a",
+                        font=("JetBrainsMono NFP", 16, "bold"), cursor="hand2")
+_bl_prev_bt.pack(side="left", padx=(2,0))
+_bl_prev_bt.bind("<Button-1>", _bl_prev)
+
+_bl_container.pack_forget()  # repack after arrows
+_bl_container = tk.Frame(ROOT1, bg="#1d2027")
+_bl_container.pack(side="left")
+
+_bl_next_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#3a3a3a",
+                        font=("JetBrainsMono NFP", 16, "bold"), cursor="hand2")
+_bl_next_bt.pack(side="left", padx=(0,2))
+_bl_next_bt.bind("<Button-1>", _bl_next)
+
+_bl_settings_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#555555",
+                             font=("JetBrainsMono NFP", 12, "bold"), cursor="hand2")
+_bl_settings_bt.pack(side="left", padx=(0,4))
+_bl_settings_bt.bind("<Button-1>", _bl_settings)
+
+_bl_render()
 
 
 
