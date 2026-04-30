@@ -682,7 +682,7 @@
             "id": "btn_1777560741",
             "bindings": {
                 "Button-1": {
-                    "type": "subprocess",
+                    "type": "url",
                     "hide": false,
                     "admin": false,
                     "cmd": "https://nahid6970.github.io/db/@Convex/myhome-convex/index"

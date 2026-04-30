@@ -349,6 +349,8 @@ def handle_action(action_cfg):
             print(f"Admin launch failed: {e}")
         return
     flags = subprocess.CREATE_NO_WINDOW if hide else 0
+    if atype == "url":
+        import webbrowser; webbrowser.open(cmd); return
     if atype == "subprocess":
         subprocess.Popen(cmd, cwd=cwd, shell=True, creationflags=flags)
     elif atype == "run_command":
@@ -583,7 +585,7 @@ def open_edit_gui(item_cfg, category, index=None):
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
         cmd_le   = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
-        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function"])
+        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url"])
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
