@@ -268,6 +268,10 @@ def open_edit_gui(item_cfg, category, index=None):
     entries = {}
     for field in ["text", "fg", "bg", "id"]:
         ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
+    border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
+    border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
+    form_appear.addRow("BORDER PX", border_px_le)
+    form_appear.addRow("BORDER COLOR", border_color_le)
     left_layout.addWidget(grp_appear)
 
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
@@ -449,10 +453,13 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     font_size   = font_cfg[1] if len(font_cfg) > 1 else 16
     font_weight = font_cfg[2] if len(font_cfg) > 2 else "bold"
     bold = "bold" if font_weight == "bold" else "normal"
+    _border_px = int(btn_cfg.get("border", 0))
+    _border_col = btn_cfg.get("border_color", "") or _bg
+    _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
         f"font-size: {font_size}pt; font-weight: {bold}; "
-        f"padding-left: {px_l}px; padding-right: {px_r}px;"
+        f"padding-left: {px_l}px; padding-right: {px_r}px; {_border_css}"
     )
 
     bindings = btn_cfg.get("bindings", {})
@@ -726,9 +733,15 @@ class StatusBar(QMainWindow):
 
         self._config = load_config()
 
-        central = QWidget()
-        self.setCentralWidget(central)
-        central.setStyleSheet(f"background: {CP_BG};")
+        border_frame = QFrame()
+        border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
+        self.setCentralWidget(border_frame)
+        inner = QWidget(border_frame)
+        inner.setStyleSheet(f"background: {CP_BG}; border: none;")
+        border_layout = QVBoxLayout(border_frame)
+        border_layout.setContentsMargins(1, 1, 1, 1)
+        border_layout.addWidget(inner)
+        central = inner
         main_layout = QHBoxLayout(central)
         main_layout.setContentsMargins(2, 1, 2, 1)
         main_layout.setSpacing(0)
