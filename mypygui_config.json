@@ -544,64 +544,6 @@
             "icon_position": "center"
         },
         {
-            "id": "path_replace",
-            "text": "PathR",
-            "fg": "#86ff45",
-            "font": [
-                "JetBrainsMono NFP",
-                16,
-                "normal"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c C:\\@delta\\ms1\\path_tracker.py"
-                },
-                "Control-Button-1": {
-                    "type": "run_command",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "code C:\\@delta\\ms1\\path_tracker.py"
-                }
-            },
-            "bg": "",
-            "border": 0,
-            "border_color": "",
-            "padx_left": 1,
-            "padx_right": 1
-        },
-        {
-            "id": "Automation",
-            "text": "AutoM",
-            "fg": "#ffab2d",
-            "font": [
-                "JetBrainsMono NFP",
-                16,
-                "normal"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c game_automation_tool.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "code game_automation_tool.py"
-                }
-            },
-            "bg": "",
-            "padx_left": 1,
-            "padx_right": 1,
-            "border": 0,
-            "border_color": ""
-        },
-        {
             "id": "KomoBT",
             "text": "ko",
             "fg": "#8319f5",
