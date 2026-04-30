@@ -917,6 +917,7 @@ class StatusBar(QMainWindow):
         for repo in repos:
             lbl = QLabel(repo["label"])
             lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 12pt; font-weight: bold;")
+            lbl.setContentsMargins(2, 0, 2, 0)
             lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             p = repo["path"]
             def _make_click(path):

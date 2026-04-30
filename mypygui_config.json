@@ -290,21 +290,34 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\color\\color_picker.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_picker.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_picker.py"
                 },
                 "Control-Button-3": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
                 }
-            }
+            },
+            "bg": "",
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "Info_lb",
