@@ -1067,10 +1067,16 @@ class StatusBar(QMainWindow):
         self._bl_offset    = 0
         self._bl_widgets   = []
 
-        prev_bt = QLabel("«")
-        prev_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold; background: transparent;")
-        prev_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        prev_bt.mousePressEvent = lambda e: self._bl_prev()
+        # PREV Button
+        _prev_cfg = load_config().get("static_bindings", {}).get("pagination_prev", {"text": "«"})
+        prev_bt = IconLabel(_prev_cfg.get("text", "«"), _prev_cfg)
+        _apply_static_style(prev_bt, "pagination_prev")
+        def _prev_click(event):
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                _open_static_edit("pagination_prev")
+            else:
+                self._bl_prev()
+        prev_bt.mousePressEvent = _prev_click
         ll.addWidget(prev_bt)
         self._bl_prev_bt = prev_bt
 
@@ -1081,10 +1087,16 @@ class StatusBar(QMainWindow):
         self._bl_container_layout.setSpacing(0)
         ll.addWidget(self._bl_container)
 
-        next_bt = QLabel("»")
-        next_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold; background: transparent;")
-        next_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        next_bt.mousePressEvent = lambda e: self._bl_next()
+        # NEXT Button
+        _next_cfg = load_config().get("static_bindings", {}).get("pagination_next", {"text": "»"})
+        next_bt = IconLabel(_next_cfg.get("text", "»"), _next_cfg)
+        _apply_static_style(next_bt, "pagination_next")
+        def _next_click(event):
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                _open_static_edit("pagination_next")
+            else:
+                self._bl_next()
+        next_bt.mousePressEvent = _next_click
         ll.addWidget(next_bt)
         self._bl_next_bt = next_bt
 
@@ -1161,15 +1173,24 @@ class StatusBar(QMainWindow):
             if item.widget():
                 item.widget().setParent(None)
         self._bl_widgets.clear()
-        items = load_config().get("buttons_left", [])
+        
+        config = load_config()
+        items = config.get("buttons_left", [])
         start = self._bl_offset
         end   = min(start + self._bl_page_size, len(items))
         for idx in range(start, end):
             w = create_dynamic_button(self._bl_container_layout, items[idx], "buttons_left", idx)
             self._bl_widgets.append(w)
-        # Update arrow colors
-        self._bl_prev_bt.setStyleSheet(f"color: {CP_CYAN if self._bl_offset > 0 else CP_DIM}; font-size: 15pt; font-weight: bold; background: transparent;")
-        self._bl_next_bt.setStyleSheet(f"color: {CP_CYAN if end < len(items) else CP_DIM}; font-size: 15pt; font-weight: bold; background: transparent;")
+            
+        # Update arrow states and custom styles
+        _apply_static_style(self._bl_prev_bt, "pagination_prev")
+        _apply_static_style(self._bl_next_bt, "pagination_next")
+        
+        # Dimming logic (overrides the color from static style if at bounds)
+        if self._bl_offset <= 0:
+            self._bl_prev_bt.setStyleSheet(self._bl_prev_bt.styleSheet() + f" color: {CP_DIM};")
+        if end >= len(items):
+            self._bl_next_bt.setStyleSheet(self._bl_next_bt.styleSheet() + f" color: {CP_DIM};")
 
     def _bl_prev(self):
         if self._bl_offset > 0:
