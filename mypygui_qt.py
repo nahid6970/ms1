@@ -278,9 +278,11 @@ class IconLabel(QLabel):
         text = self.text()
         
         doc = QTextDocument()
-        font_cfg = cfg.get("font", ["JetBrainsMono NFP", 10, "bold"])
-        f = QFont(font_cfg[0], font_cfg[1])
-        if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+        f = self.font()
+        if "font" in cfg:
+            font_cfg = cfg["font"]
+            f = QFont(font_cfg[0], font_cfg[1])
+            if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
         doc.setDefaultFont(f)
         doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
         
@@ -708,7 +710,7 @@ def open_rclone_settings():
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     layout = QVBoxLayout(dlg); layout.setContentsMargins(14, 14, 14, 14); layout.setSpacing(10)
     title = QLabel("// RCLONE SETTINGS")
-    title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold;")
+    title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;")
     layout.addWidget(title)
     grp = QGroupBox("CHECK BEHAVIOUR"); form = QFormLayout(); form.setSpacing(8); grp.setLayout(form)
     cfg_now = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
@@ -1061,7 +1063,7 @@ class StatusBar(QMainWindow):
         self._bl_widgets   = []
 
         prev_bt = QLabel("«")
-        prev_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold; background: transparent;")
+        prev_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold; background: transparent;")
         prev_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         prev_bt.mousePressEvent = lambda e: self._bl_prev()
         ll.addWidget(prev_bt)
@@ -1075,7 +1077,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(self._bl_container)
 
         next_bt = QLabel("»")
-        next_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold; background: transparent;")
+        next_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold; background: transparent;")
         next_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         next_bt.mousePressEvent = lambda e: self._bl_next()
         ll.addWidget(next_bt)
@@ -1102,7 +1104,7 @@ class StatusBar(QMainWindow):
         dlg.setStyleSheet(DIALOG_QSS)
         dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10)
-        title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold;"); lay.addWidget(title)
+        title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
 
         grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1)
         size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60)
@@ -1144,8 +1146,8 @@ class StatusBar(QMainWindow):
             w = create_dynamic_button(self._bl_container_layout, items[idx], "buttons_left", idx)
             self._bl_widgets.append(w)
         # Update arrow colors
-        self._bl_prev_bt.setStyleSheet(f"color: {CP_CYAN if self._bl_offset > 0 else CP_DIM}; font-size: 12pt; font-weight: bold; background: transparent;")
-        self._bl_next_bt.setStyleSheet(f"color: {CP_CYAN if end < len(items) else CP_DIM}; font-size: 12pt; font-weight: bold; background: transparent;")
+        self._bl_prev_bt.setStyleSheet(f"color: {CP_CYAN if self._bl_offset > 0 else CP_DIM}; font-size: 15pt; font-weight: bold; background: transparent;")
+        self._bl_next_bt.setStyleSheet(f"color: {CP_CYAN if end < len(items) else CP_DIM}; font-size: 15pt; font-weight: bold; background: transparent;")
 
     def _bl_prev(self):
         if self._bl_offset > 0:
@@ -1180,7 +1182,7 @@ class StatusBar(QMainWindow):
 
         for repo in repos:
             lbl = IconLabel(repo["label"], repo)
-            lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 12pt; font-weight: bold;")
+            lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;")
             lbl.setContentsMargins(2, 0, 2, 0)
             p = repo["path"]
             def _make_click(path):
@@ -1501,7 +1503,7 @@ class StatusBar(QMainWindow):
                 if name in self._git_labels:
                     self._git_labels[name].setText(text)
                     self._git_labels[name].setStyleSheet(
-                        f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 12pt; font-weight: bold;"
+                        f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;"
                     )
         except Empty:
             pass

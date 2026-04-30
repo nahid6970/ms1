@@ -878,7 +878,7 @@
             ],
             "border": 2,
             "border_color": "green",
-            "border_radius": 15,
+            "border_radius": 0,
             "width": 0,
             "height": 0,
             "padx_left": 1,
