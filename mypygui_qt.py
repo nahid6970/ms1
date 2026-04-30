@@ -813,9 +813,13 @@ class StatusBar(QMainWindow):
         repos = self._config.get("git_repos", [])
         self._git_labels = {}
 
-        sep_l = QLabel("[")
-        sep_l.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
-        ll.addWidget(sep_l)
+        git_frame = QFrame()
+        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid {CP_DIM}; border-radius: 3px; background: transparent; }} QLabel {{ border: none; }}")
+        git_row = QHBoxLayout(git_frame)
+        git_row.setContentsMargins(4, 0, 4, 0)
+        git_row.setSpacing(2)
+        ll.addWidget(git_frame)
+        ll = git_row  # redirect subsequent addWidget calls into the frame
 
         bkup = QLabel("\udb80\udea2")
         bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
@@ -862,9 +866,7 @@ class StatusBar(QMainWindow):
         del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos)
         ll.addWidget(del_lbl)
 
-        sep_r = QLabel("]")
-        sep_r.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
-        ll.addWidget(sep_r)
+        # end of git frame
 
         # Start git status thread
         if repos:
@@ -1057,6 +1059,9 @@ class StatusBar(QMainWindow):
         self._git_timer = QTimer(self)
         self._git_timer.timeout.connect(self._drain_git_queue)
         self._git_timer.start(200)
+        _repos = self._config.get("git_repos", [])
+        if _repos:
+            threading.Thread(target=_git_status_loop, args=(_repos, _git_queue), daemon=True).start()
 
         # Countdown label poll
 

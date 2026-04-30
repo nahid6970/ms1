@@ -431,6 +431,12 @@
                     "admin": false,
                     "cmd": "cmd /c komorebi_gui_custom.py"
                 },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "taskmgr"
+                },
                 "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
@@ -440,7 +446,9 @@
             },
             "bg": "",
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 0,
+            "border_color": ""
         },
         {
             "id": "AHKPY_BT",
@@ -617,14 +625,27 @@
             }
         },
         "cpu": {
-            "Button-1": {
-                "type": "python",
-                "cmd": "C:\\@delta\\ms1\\scripts\\process\\process_viewer.py"
+            "id": "cpu",
+            "text": "cpu",
+            "fg": "",
+            "bg": "",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "taskmgr"
+                }
             },
-            "Control-Button-1": {
-                "type": "subprocess",
-                "cmd": "code C:\\@delta\\ms1\\scripts\\process\\process_viewer.py"
-            }
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         "gpu": {
             "Button-1": {
