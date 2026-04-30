@@ -1205,7 +1205,7 @@ class StatusBar(QMainWindow):
             inner = cf.layout().itemAt(0).widget() if cf.layout() and cf.layout().count() else None
             if inner:
                 inner.setStyleSheet(f"background: {bg}; border: none;")
-        for w in [self._left_widget, self._right_widget]:
+        for w in [self._left_widget, self._right_widget, self._bl_container]:
             w.setStyleSheet(f"background: {bg};")
 
     def _apply_statusbar_style(self):

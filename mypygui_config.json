@@ -1155,8 +1155,8 @@
     "status_bar_border_color": "blue",
     "status_bar_border_width": 1,
     "statusbar": {
-        "bg": "#0B1601",
-        "border_color": "#FF003C",
+        "bg": "#1D1D1D",
+        "border_color": "#AAFF00",
         "border_px": 1
     }
 }
