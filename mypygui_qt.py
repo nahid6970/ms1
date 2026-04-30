@@ -7,6 +7,8 @@ import subprocess
 import sys
 import threading
 import time
+import re
+from functools import partial
 from datetime import datetime
 from queue import Queue, Empty
 
@@ -24,10 +26,11 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
-    QFrame, QSizePolicy,
+    QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument
+from PyQt6.QtSvg import QSvgRenderer
 
 
 start_time = time.time()
@@ -119,6 +122,190 @@ def save_config(config):
             json.dump(config, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving config: {e}")
+
+# ─── SVG / Icon Widgets ────────────────────────────────────────────────────────
+class SvgInputDialog(QDialog):
+    def __init__(self, current_svg="", hover_map=None, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("PASTE SVG CODE")
+        self.resize(600, 580)
+        self.svg_code = current_svg
+        self.hover_map = hover_map or {}
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
+            QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_TEXT}; font-family: 'Consolas'; border: 1px solid {CP_DIM}; }}
+            QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; border: 1px solid {CP_DIM}; }}
+            QPushButton:hover {{ border: 1px solid {CP_CYAN}; }}
+            QLabel {{ color: {CP_YELLOW}; font-family: 'Consolas'; font-weight: bold; font-size: 9pt; }}
+            QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+        """)
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("SVG CODE:"))
+        self.txt_input = QPlainTextEdit()
+        self.txt_input.setPlaceholderText("<svg>...</svg>")
+        self.txt_input.setPlainText(self.svg_code)
+        layout.addWidget(self.txt_input, stretch=2)
+        layout.addWidget(QLabel("BASE COLORS (CLICK TO REPLACE IN CODE):"))
+        self.color_scroll = QScrollArea(); self.color_scroll.setWidgetResizable(True); self.color_scroll.setFixedHeight(60)
+        self.color_widget = QWidget(); self.color_layout = QHBoxLayout(self.color_widget); self.color_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.color_scroll.setWidget(self.color_widget); layout.addWidget(self.color_scroll)
+        layout.addWidget(QLabel("HOVER OVERRIDES (CLICK TO SET HOVER COLOR):"))
+        self.hover_scroll = QScrollArea(); self.hover_scroll.setWidgetResizable(True); self.hover_scroll.setFixedHeight(60)
+        self.hover_widget = QWidget(); self.hover_layout = QHBoxLayout(self.hover_widget); self.hover_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.hover_scroll.setWidget(self.hover_widget); layout.addWidget(self.hover_scroll)
+        self.color_timer = QTimer(); self.color_timer.setSingleShot(True); self.color_timer.timeout.connect(self.update_color_panel)
+        self.txt_input.textChanged.connect(lambda: self.color_timer.start(500))
+        btn_box = QHBoxLayout()
+        btn_save = QPushButton("SAVE SVG"); btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold;"); btn_save.clicked.connect(self.save_and_close)
+        btn_clear = QPushButton("CLEAR"); btn_clear.clicked.connect(lambda: self.txt_input.clear())
+        btn_cancel = QPushButton("CANCEL"); btn_cancel.clicked.connect(self.reject)
+        btn_box.addWidget(btn_save); btn_box.addWidget(btn_clear); btn_box.addWidget(btn_cancel)
+        layout.addLayout(btn_box)
+        self.update_color_panel()
+
+    def update_color_panel(self):
+        for lay in [self.color_layout, self.hover_layout]:
+            while lay.count():
+                item = lay.takeAt(0)
+                if item.widget(): item.widget().deleteLater()
+        svg = self.txt_input.toPlainText()
+        colors = sorted(list(set(re.findall(r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}', svg))), key=len, reverse=True)
+        if not colors:
+            for lay in [self.color_layout, self.hover_layout]:
+                lay.addWidget(QLabel("None"))
+        else:
+            for c in colors:
+                btn = QPushButton(); btn.setFixedSize(30, 30); btn.setStyleSheet(f"background-color: {c}; border: 1px solid {CP_DIM}; border-radius: 4px;")
+                btn.clicked.connect(partial(self.pick_replacement_color, c)); self.color_layout.addWidget(btn)
+                h_btn = QPushButton(); h_btn.setFixedSize(30, 30); hover_c = self.hover_map.get(c, c)
+                h_btn.setStyleSheet(f"background-color: {hover_c}; border: 2px solid {CP_YELLOW if c in self.hover_map else CP_DIM}; border-radius: 4px;")
+                h_btn.clicked.connect(partial(self.pick_hover_color, c)); self.hover_layout.addWidget(h_btn)
+        self.color_layout.addStretch(); self.hover_layout.addStretch()
+
+    def pick_hover_color(self, base_color):
+        curr = self.hover_map.get(base_color, base_color)
+        c = QColorDialog.getColor(QColor(curr), self, f"Select Hover Color for {base_color}")
+        if c.isValid():
+            self.hover_map[base_color] = c.name().upper(); self.update_color_panel()
+
+    def pick_replacement_color(self, old_color):
+        c = QColorDialog.getColor(QColor(old_color), self, "Select New Color")
+        if c.isValid():
+            new_color = c.name().upper()
+            if old_color in self.hover_map: self.hover_map[new_color] = self.hover_map.pop(old_color)
+            svg = self.txt_input.toPlainText(); pattern = re.compile(re.escape(old_color), re.IGNORECASE)
+            self.txt_input.setPlainText(pattern.sub(new_color, svg)); self.update_color_panel()
+
+    def save_and_close(self):
+        self.svg_code = self.txt_input.toPlainText(); self.accept()
+
+class IconLabel(QLabel):
+    def __init__(self, text, btn_cfg, parent=None):
+        super().__init__(text, parent)
+        self.btn_cfg = btn_cfg or {}
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover)
+        self._is_hovered = False
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def enterEvent(self, event):
+        self._is_hovered = True; self.update(); super().enterEvent(event)
+    def leaveEvent(self, event):
+        self._is_hovered = False; self.update(); super().leaveEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Determine colors
+        cfg = self.btn_cfg
+        bg = cfg.get("bg", CP_BG)
+        fg = cfg.get("fg", "white")
+        if self._is_hovered:
+            # We use QSS for background/border usually, but if we want manual control:
+            # For now, let's respect the parent stylesheet if possible, or draw bg here.
+            pass
+
+        # Check for icon
+        icon_path = cfg.get("icon_path", "")
+        svg_content = cfg.get("svg_content", "")
+        nf_char = cfg.get("nf_char", "")
+        
+        icon_pixmap = None
+        icon_w, icon_h = 0, 0
+        
+        try:
+            if icon_path and os.path.exists(icon_path):
+                icon_pixmap = QPixmap(icon_path)
+            elif svg_content and svg_content.strip():
+                gen_w = cfg.get("icon_width", 0) or 32
+                gen_h = cfg.get("icon_height", 0) or 32
+                icon_pixmap = QPixmap(gen_w, gen_h)
+                icon_pixmap.fill(Qt.GlobalColor.transparent)
+                actual_svg = svg_content
+                if self._is_hovered:
+                    hmap = cfg.get("svg_hover_map", {})
+                    for base_c, hover_c in hmap.items():
+                        pattern = re.compile(re.escape(base_c), re.IGNORECASE)
+                        actual_svg = pattern.sub(hover_c, actual_svg)
+                p_svg = QPainter(icon_pixmap)
+                renderer = QSvgRenderer(QByteArray(actual_svg.encode('utf-8')))
+                renderer.render(p_svg); p_svg.end()
+            elif nf_char:
+                gen_w = cfg.get("icon_width", 0) or 32
+                gen_h = cfg.get("icon_height", 0) or 32
+                icon_pixmap = QPixmap(gen_w, gen_h); icon_pixmap.fill(Qt.GlobalColor.transparent)
+                p = QPainter(icon_pixmap); p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+                f = QFont(cfg.get("font", ["JetBrainsMono NFP"])[0]); f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
+                p.setFont(f); p.setPen(QColor(fg)); p.drawText(icon_pixmap.rect(), Qt.AlignmentFlag.AlignCenter, nf_char); p.end()
+
+            if icon_pixmap and not icon_pixmap.isNull():
+                custom_w = cfg.get("icon_width", 0)
+                custom_h = cfg.get("icon_height", 0)
+                if custom_w > 0 and custom_h > 0:
+                    icon_pixmap = icon_pixmap.scaled(custom_w, custom_h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                elif custom_w > 0: icon_pixmap = icon_pixmap.scaledToWidth(custom_w, Qt.TransformationMode.SmoothTransformation)
+                elif custom_h > 0: icon_pixmap = icon_pixmap.scaledToHeight(custom_h, Qt.TransformationMode.SmoothTransformation)
+                else:
+                    max_h = min(24, self.height() - 4 if self.height() > 4 else 24)
+                    icon_pixmap = icon_pixmap.scaledToHeight(max_h, Qt.TransformationMode.SmoothTransformation)
+                icon_w, icon_h = icon_pixmap.width(), icon_pixmap.height()
+        except: pass
+
+        icon_pos = cfg.get("icon_position", "left")
+        spacing = cfg.get("icon_gap", 4) if icon_pixmap else 0
+        text = self.text()
+        
+        doc = QTextDocument()
+        font_cfg = cfg.get("font", ["JetBrainsMono NFP", 10, "bold"])
+        f = QFont(font_cfg[0], font_cfg[1])
+        if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+        doc.setDefaultFont(f)
+        doc.setHtml(f"<div style='color: {fg};'>{text}</div>")
+        
+        text_w = doc.idealWidth()
+        text_h = doc.size().height()
+        
+        if icon_pos == "center" and icon_pixmap:
+            painter.drawPixmap(int((self.width()-icon_w)/2), int((self.height()-icon_h)/2), icon_pixmap)
+        elif icon_pos in ["top", "bottom"]:
+            total_h = icon_h + spacing + text_h
+            y_start = (self.height() - total_h) / 2
+            if icon_pos == "top":
+                if icon_pixmap: painter.drawPixmap(int((self.width()-icon_w)/2), int(y_start), icon_pixmap); y_start += icon_h + spacing
+                painter.translate((self.width()-text_w)/2, y_start); doc.drawContents(painter)
+            else:
+                painter.translate((self.width()-text_w)/2, y_start); doc.drawContents(painter)
+                if icon_pixmap: painter.drawPixmap(int((self.width()-icon_w)/2), int(y_start + text_h + spacing), icon_pixmap)
+        else: # left / right
+            total_w = icon_w + spacing + text_w
+            x_start = (self.width() - total_w) / 2
+            if icon_pos == "left":
+                if icon_pixmap: painter.drawPixmap(int(x_start), int((self.height()-icon_h)/2), icon_pixmap); x_start += icon_w + spacing
+                painter.translate(x_start, (self.height()-text_h)/2); doc.drawContents(painter)
+            else:
+                painter.translate(x_start, (self.height()-text_h)/2); doc.drawContents(painter)
+                if icon_pixmap: painter.drawPixmap(int(x_start + text_w + spacing), int((self.height()-icon_h)/2), icon_pixmap)
+
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def run_command(command, admin=False, hide=False, no_exit=True):
@@ -271,6 +458,14 @@ def open_edit_gui(item_cfg, category, index=None):
     
     form_appear.addRow("BORDER PX", b_row)
     form_appear.addRow("BORDER COLOR", border_color_le)
+
+    # Button dimensions
+    width_le  = QLineEdit(str(item_cfg.get("width", 0)));  width_le.setFixedWidth(50)
+    height_le = QLineEdit(str(item_cfg.get("height", 0))); height_le.setFixedWidth(50)
+    dim_btn_row = QWidget(); dim_btn_lay = QHBoxLayout(dim_btn_row); dim_btn_lay.setContentsMargins(0,0,0,0); dim_btn_lay.setSpacing(10)
+    dim_btn_lay.addWidget(width_le); dim_btn_lay.addWidget(QLabel("HEIGHT")); dim_btn_lay.addWidget(height_le); dim_btn_lay.addStretch()
+    form_appear.addRow("WIDTH", dim_btn_row)
+
     left_layout.addWidget(grp_appear)
 
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
@@ -287,6 +482,51 @@ def open_edit_gui(item_cfg, category, index=None):
 
     form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
     left_layout.addWidget(grp_font)
+
+    grp_icon = QGroupBox("ICON / SVG"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
+    icon_path_le = QLineEdit(str(item_cfg.get("icon_path", "")))
+    nf_char_le   = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(60)
+    
+    svg_btn = QPushButton("EDIT SVG")
+    svg_preview = QLabel(); svg_preview.setFixedSize(24, 24); svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
+    svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    
+    def _update_svg_preview(code):
+        if not code: svg_preview.clear(); return
+        try:
+            pix = QPixmap(20, 20); pix.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
+            renderer.render(painter); painter.end(); svg_preview.setPixmap(pix)
+        except: svg_preview.setText("ERR")
+    _update_svg_preview(item_cfg.get("svg_content", ""))
+
+    def _open_svg_dlg():
+        dlg_svg = SvgInputDialog(item_cfg.get("svg_content", ""), item_cfg.get("svg_hover_map", {}))
+        if dlg_svg.exec():
+            item_cfg["svg_content"] = dlg_svg.svg_code
+            item_cfg["svg_hover_map"] = dlg_svg.hover_map
+            _update_svg_preview(dlg_svg.svg_code)
+    svg_btn.clicked.connect(_open_svg_dlg)
+
+    svg_row = QWidget(); svg_lay = QHBoxLayout(svg_row); svg_lay.setContentsMargins(0,0,0,0); svg_lay.setSpacing(10)
+    svg_lay.addWidget(svg_btn); svg_lay.addWidget(svg_preview); svg_lay.addWidget(QLabel("NF")); svg_lay.addWidget(nf_char_le); svg_lay.addStretch()
+    
+    form_icon.addRow("PATH", icon_path_le)
+    form_icon.addRow("SVG / NF", svg_row)
+    
+    dim_row = QWidget(); dim_lay = QHBoxLayout(dim_row); dim_lay.setContentsMargins(0,0,0,0); dim_lay.setSpacing(10)
+    icon_w_le = QLineEdit(str(item_cfg.get("icon_width", 0))); icon_w_le.setFixedWidth(40)
+    icon_h_le = QLineEdit(str(item_cfg.get("icon_height", 0))); icon_h_le.setFixedWidth(40)
+    icon_gap_le = QLineEdit(str(item_cfg.get("icon_gap", 4))); icon_gap_le.setFixedWidth(40)
+    dim_lay.addWidget(QLabel("W")); dim_lay.addWidget(icon_w_le)
+    dim_lay.addWidget(QLabel("H")); dim_lay.addWidget(icon_h_le)
+    dim_lay.addWidget(QLabel("GAP")); dim_lay.addWidget(icon_gap_le); dim_lay.addStretch()
+    form_icon.addRow("DIM / GAP", dim_row)
+    
+    icon_pos_cb = QComboBox(); icon_pos_cb.addItems(["left", "right", "top", "bottom", "center"])
+    icon_pos_cb.setCurrentText(item_cfg.get("icon_position", "left"))
+    form_icon.addRow("POSITION", icon_pos_cb)
+    left_layout.addWidget(grp_icon)
 
     grp_pad = QGroupBox("SPACING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
     padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1)));  padx_left_le.setFixedWidth(60)
@@ -365,6 +605,10 @@ def open_edit_gui(item_cfg, category, index=None):
         item_cfg["border_color"] = border_color_le.text()
         try: item_cfg["border_radius"] = int(border_radius_le.text())
         except ValueError: pass
+        try: item_cfg["width"]  = int(width_le.text())
+        except ValueError: pass
+        try: item_cfg["height"] = int(height_le.text())
+        except ValueError: pass
         try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
@@ -373,6 +617,17 @@ def open_edit_gui(item_cfg, category, index=None):
         except ValueError: pass
         try: item_cfg["margin_right"] = int(margin_right_le.text())
         except ValueError: pass
+        
+        item_cfg["icon_path"] = icon_path_le.text()
+        item_cfg["nf_char"]   = nf_char_le.text()
+        try: item_cfg["icon_width"]  = int(icon_w_le.text())
+        except ValueError: pass
+        try: item_cfg["icon_height"] = int(icon_h_le.text())
+        except ValueError: pass
+        try: item_cfg["icon_gap"]    = int(icon_gap_le.text())
+        except ValueError: pass
+        item_cfg["icon_position"] = icon_pos_cb.currentText()
+
         new_bindings = {}
         for bkey, inputs in binding_inputs.items():
             cmd = inputs["cmd"].text()
@@ -473,7 +728,7 @@ def open_rclone_settings():
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
 def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
-    """Creates a QLabel-based button and adds it to parent_layout (QHBoxLayout)."""
+    """Creates an IconLabel-based button and adds it to parent_layout (QHBoxLayout)."""
     _fg   = btn_cfg.get("fg", "") or "white"
     _bg   = btn_cfg.get("bg", "") or CP_BG
     text  = btn_cfg.get("text", "")
@@ -483,8 +738,12 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     m_l   = int(btn_cfg.get("margin_left", 0))
     m_r   = int(btn_cfg.get("margin_right", 0))
 
-    lbl = QLabel(text)
-    lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+    lbl = IconLabel(text, btn_cfg)
+    bw = btn_cfg.get("width", 0)
+    bh = btn_cfg.get("height", 0)
+    if bw > 0: lbl.setFixedWidth(bw)
+    if bh > 0: lbl.setFixedHeight(bh)
+    
     font_size   = font_cfg[1] if len(font_cfg) > 1 else 16
     font_weight = font_cfg[2] if len(font_cfg) > 2 else "bold"
     bold = "bold" if font_weight == "bold" else "normal"
@@ -492,6 +751,9 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _border_col = btn_cfg.get("border_color", "") or _bg
     _border_radius = int(btn_cfg.get("border_radius", 0))
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
+    
+    # We still use stylesheet for the container properties (bg, border)
+    # IconLabel.paintEvent will handle drawing the content (text + icon)
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
         f"font-size: {font_size}pt; font-weight: {bold}; {_border_css} "
@@ -538,16 +800,29 @@ def _open_static_edit(key):
             "border": entry.get("border", 0),
             "border_color": entry.get("border_color", ""),
             "border_radius": entry.get("border_radius", 0),
+            "width": entry.get("width", 0),
+            "height": entry.get("height", 0),
             "padx_left": entry.get("padx_left", 0),
             "padx_right": entry.get("padx_right", 0),
             "margin_left": entry.get("margin_left", 0),
             "margin_right": entry.get("margin_right", 0),
+            "icon_path": entry.get("icon_path", ""),
+            "nf_char": entry.get("nf_char", ""),
+            "svg_content": entry.get("svg_content", ""),
+            "svg_hover_map": entry.get("svg_hover_map", {}),
+            "icon_width": entry.get("icon_width", 0),
+            "icon_height": entry.get("icon_height", 0),
+            "icon_gap": entry.get("icon_gap", 4),
+            "icon_position": entry.get("icon_position", "left"),
             "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
 def _apply_static_style(widget, key):
     cfg = load_config().get("static_bindings", {}).get(key, {})
     if not cfg: return
+    if isinstance(widget, IconLabel):
+        widget.btn_cfg = cfg
+    
     fg = cfg.get("fg", "") or "white"
     bg = cfg.get("bg", "") or "transparent"
     font = cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
@@ -559,6 +834,12 @@ def _apply_static_style(widget, key):
     px_r = int(cfg.get("padx_right", 0))
     m_l  = int(cfg.get("margin_left", 0))
     m_r  = int(cfg.get("margin_right", 0))
+    
+    bw = cfg.get("width", 0)
+    bh = cfg.get("height", 0)
+    if bw > 0: widget.setFixedWidth(bw)
+    if bh > 0: widget.setFixedHeight(bh)
+
     fw = font[2] if len(font) > 2 else "bold"
     widget.setStyleSheet(
         f"color: {fg}; background: {bg}; font-family: '{font[0]}'; "
@@ -754,16 +1035,15 @@ class StatusBar(QMainWindow):
 
         # 1. Uptime label
         _uc = load_config().get("static_bindings", {}).get("uptime", {})
+        self.uptime_label = IconLabel(format_uptime(), _uc)
         _ufg = _uc.get("fg", "") or "#6bc0f8"
         _ufont_list = _uc.get("font", ["JetBrainsMono NFP", 16, "bold"])
         _ufont = _ufont_list[0] if _ufont_list else "JetBrainsMono NFP"
         _usize = _ufont_list[1] if len(_ufont_list) > 1 else 16
         _ubold = _ufont_list[2] if len(_ufont_list) > 2 else "bold"
-        self.uptime_label = QLabel(format_uptime())
         self.uptime_label.setStyleSheet(
             f"color: {_ufg}; font-family: '{_ufont}'; font-size: {_usize}pt; font-weight: {_ubold};"
         )
-        self.uptime_label.setCursor(Qt.CursorShape.PointingHandCursor)
         def _uptime_click(event):
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
                 _open_static_edit("uptime")
@@ -798,12 +1078,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(next_bt)
         self._bl_next_bt = next_bt
 
-
-
         self._bl_render()
-
-        # 3. Rclone settings gear
-
 
         # 6. Add new button
         add_bt = QLabel("+")
@@ -901,10 +1176,9 @@ class StatusBar(QMainWindow):
         ll.addWidget(bkup)
 
         for repo in repos:
-            lbl = QLabel(repo["label"])
+            lbl = IconLabel(repo["label"], repo)
             lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 12pt; font-weight: bold;")
             lbl.setContentsMargins(2, 0, 2, 0)
-            lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             p = repo["path"]
             def _make_click(path):
                 def click(event):
@@ -963,14 +1237,13 @@ class StatusBar(QMainWindow):
         for key, cfg in commands.items():
             if "id" not in cfg:
                 cfg["id"] = key
-            lbl = QLabel(cfg["label"])
+            lbl = IconLabel(cfg["label"], cfg)
             _rid = cfg.get("id", cfg.get("label", key))
             cached = rclone_status.get(_rid)
             color  = cached if cached else "white"
             lbl.setStyleSheet(
                 f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
             )
-            lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             def _make_rclone_click(c):
                 def click(event):
                     mods = event.modifiers()
@@ -1013,11 +1286,11 @@ class StatusBar(QMainWindow):
 
         # Rclone toggle
         self._rclone_popup = None
-        self._rclone_toggle = QLabel("\uef2c")
+        _rc_cfg = load_config().get("static_bindings", {}).get("rclone_toggle", {})
+        self._rclone_toggle = IconLabel("\uef2c", _rc_cfg)
         _apply_static_style(self._rclone_toggle, "rclone_toggle")
-        if not load_config().get("static_bindings", {}).get("rclone_toggle"):
+        if not _rc_cfg:
             self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
-        self._rclone_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         def _rclone_click(e):
             if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("rclone_toggle")
             else: self._toggle_rclone_popup()
@@ -1028,14 +1301,14 @@ class StatusBar(QMainWindow):
         self._build_git(rl)
 
         # Download / Upload
-        self.download_lb = QLabel("")
+        self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {}))
         self.download_lb.setStyleSheet(
             f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
         )
         _bind_static(self.download_lb, "download", "sniffnet")
         rl.addWidget(self.download_lb)
 
-        self.upload_lb = QLabel("")
+        self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {}))
         self.upload_lb.setStyleSheet(
             f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
         )
@@ -1043,7 +1316,7 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.upload_lb)
 
         # CPU label
-        self.lb_cpu = QLabel("")
+        self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {}))
         self.lb_cpu.setFixedWidth(55)
         self.lb_cpu.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lb_cpu.setStyleSheet(
@@ -1058,7 +1331,7 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.cpu_core_frame)
 
         # GPU label
-        self.lb_gpu = QLabel("")
+        self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {}))
         self.lb_gpu.setFixedWidth(55)
         self.lb_gpu.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lb_gpu.setStyleSheet(
@@ -1069,7 +1342,7 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.lb_gpu)
 
         # RAM label
-        self.lb_ram = QLabel("")
+        self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {}))
         self.lb_ram.setFixedWidth(55)
         self.lb_ram.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lb_ram.setStyleSheet(
@@ -1080,7 +1353,7 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.lb_ram)
 
         # Drive C
-        self.lb_duc = QLabel("")
+        self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {}))
         self.lb_duc.setFixedWidth(80)
         self.lb_duc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lb_duc.setStyleSheet(
@@ -1091,7 +1364,7 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.lb_duc)
 
         # Drive D
-        self.lb_dud = QLabel("")
+        self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {}))
         self.lb_dud.setFixedWidth(80)
         self.lb_dud.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lb_dud.setStyleSheet(
@@ -1101,14 +1374,12 @@ class StatusBar(QMainWindow):
         _bind_static(self.lb_dud, "drive_d", "explorer D:\\")
         rl.addWidget(self.lb_dud)
 
-
-
         # Unified settings button
-        settings_bt = QLabel("⚙")
+        _st_cfg = load_config().get("static_bindings", {}).get("settings", {})
+        settings_bt = IconLabel("⚙", _st_cfg)
         _apply_static_style(settings_bt, "settings")
-        if not load_config().get("static_bindings", {}).get("settings"):
+        if not _st_cfg:
             settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
-        settings_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         def _settings_click(e):
             if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("settings")
             else: self._open_unified_settings()
