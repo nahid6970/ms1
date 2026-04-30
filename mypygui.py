@@ -82,9 +82,6 @@ def handle_action(action_cfg):
         elif func_name == "force_restart": force_restart(None)
 
 def open_edit_gui(item_cfg, category, index=None):
-    import sys as _sys
-    _qt_app = QApplication.instance() or QApplication(_sys.argv)
-
     CP_BG     = "#050505"
     CP_PANEL  = "#111111"
     CP_YELLOW = "#FCEE0A"
@@ -239,7 +236,7 @@ def open_edit_gui(item_cfg, category, index=None):
     index_le.setFixedWidth(60)
 
     def _on_group_changed(text):
-        lst = load_config().get(text, [])
+        lst = config_now.get(text, [])
         index_le.setText(str(max(len(lst) - 1, 0)))
     group_cb.currentTextChanged.connect(_on_group_changed)
 
@@ -524,6 +521,7 @@ long_running_function()
 set_console_title("🔥")
 # Create main window
 ROOT = tk.Tk()
+import sys as _sys; _qt_app = QApplication.instance() or QApplication(_sys.argv)
 ROOT.title("Python GUI")
 # ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
@@ -1313,9 +1311,6 @@ def _start_rclone_checks():
 _start_rclone_checks()
 
 def open_rclone_settings():
-    import sys as _sys
-    _qt_app = QApplication.instance() or QApplication(_sys.argv)
-
     CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"
     CP_RED="#FF003C"; CP_GREEN="#00ff21"; CP_DIM="#3a3a3a"; CP_TEXT="#E0E0E0"
 

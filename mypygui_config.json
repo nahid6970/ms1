@@ -459,9 +459,13 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "explorer D:\\Downloads\\@Radarr"
                 }
-            }
+            },
+            "padx_left": 1,
+            "padx_right": 1
         }
     ],
     "buttons_right": [
