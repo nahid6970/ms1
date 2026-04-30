@@ -559,16 +559,16 @@ def _countdown_thread(minutes, ctype, label_ref):
     countdown_time = minutes * 60
     while countdown_time > 0:
         if not countdown.active:
-            countdown._time_text = "\udb86\udee1"
+            countdown._time_text = "⏱"
             return
         m = int(countdown_time) // 60
         s = int(countdown_time) % 60
-        countdown._time_text = f"\udb86\udee1:{m:02}:{s:02}"
+        countdown._time_text = f"⏱ {m:02}:{s:02}"
         time.sleep(1)
         countdown_time -= 1
     if countdown.active:
         countdown.active = False
-        countdown._time_text = "\udb86\udee1"
+        countdown._time_text = "⏱"
         if ctype == 1:
             _show_alarm_signal.emit()
         else:
@@ -1102,23 +1102,21 @@ class StatusBar(QMainWindow):
         rl.addWidget(self.lb_dud)
 
         # Countdown timer label
-        self.time_left_label = QLabel("\udb86\udee1")
+        self.time_left_label = QLabel("⏱")
         self.time_left_label.setStyleSheet(
             f"color: {CP_ORANGE}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
         )
         self.time_left_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.time_left_label.mousePressEvent = lambda e: start_countdown_option(self.time_left_label)
+        def _timer_click(e):
+            if e.button() == Qt.MouseButton.RightButton:
+                run_last_countdown(self.time_left_label)
+            else:
+                start_countdown_option(self.time_left_label)
+        self.time_left_label.mousePressEvent = _timer_click
         rl.addWidget(self.time_left_label)
 
         # Run last countdown button
-        run_last_bt = QPushButton("\udb86\udee5")
-        run_last_bt.setStyleSheet(
-            f"color: {CP_GREEN}; background: {CP_BG}; font-family: 'JetBrainsMono NFP'; "
-            f"font-size: 16pt; border: none; padding: 0px;"
-        )
-        run_last_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        run_last_bt.clicked.connect(lambda: run_last_countdown(self.time_left_label))
-        rl.addWidget(run_last_bt)
+
 
         # Dynamic buttons_right
         for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])):
