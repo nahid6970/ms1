@@ -493,6 +493,10 @@ def _open_static_edit(key):
             "fg": entry.get("fg", ""),
             "bg": entry.get("bg", ""),
             "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]),
+            "border": entry.get("border", 0),
+            "border_color": entry.get("border_color", ""),
+            "padx_left": entry.get("padx_left", 0),
+            "padx_right": entry.get("padx_right", 0),
             "bindings": entry.get("bindings", {})}
     open_edit_gui(item, "static_bindings")
 
