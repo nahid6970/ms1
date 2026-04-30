@@ -999,15 +999,19 @@ class StatusBar(QMainWindow):
         self.setFixedSize(1920, 39)
         screen_w = QApplication.primaryScreen().geometry().width()
         self.move(screen_w // 2 - 960, 993)
-        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: 1px solid {CP_RED}; }}")
 
         self._config = load_config()
+        s_bg = self._config.get("status_bar_bg", CP_BG)
+        s_bc = self._config.get("status_bar_border_color", CP_RED)
+        s_bw = self._config.get("status_bar_border_width", 1)
+
+        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {s_bw}px solid {s_bc}; background: {s_bg}; }}")
 
         border_frame = QFrame()
-        border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
+        border_frame.setStyleSheet(f"QFrame {{ background: {s_bg}; border: {s_bw}px solid {s_bc}; }}")
         self.setCentralWidget(border_frame)
         inner = QWidget(border_frame)
-        inner.setStyleSheet(f"background: {CP_BG}; border: none;")
+        inner.setStyleSheet(f"background: {s_bg}; border: none;")
         border_layout = QVBoxLayout(border_frame)
         border_layout.setContentsMargins(1, 1, 1, 1)
         border_layout.addWidget(inner)
@@ -1135,6 +1139,18 @@ class StatusBar(QMainWindow):
         form_edit.addRow("HEIGHT", eh_le)
         lay.addWidget(grp_edit)
 
+        grp_bar = QGroupBox("STATUS BAR STYLE"); form_bar = QFormLayout(); grp_bar.setLayout(form_bar)
+        s_bg = self._config.get("status_bar_bg", CP_BG)
+        s_bc = self._config.get("status_bar_border_color", CP_RED)
+        s_bw = self._config.get("status_bar_border_width", 1)
+        s_bg_le = QLineEdit(s_bg); s_bg_le.setFixedWidth(100)
+        s_bc_le = QLineEdit(s_bc); s_bc_le.setFixedWidth(100)
+        s_bw_le = QLineEdit(str(s_bw)); s_bw_le.setFixedWidth(60)
+        form_bar.addRow("BG COLOR", s_bg_le)
+        form_bar.addRow("BORDER COLOR", s_bc_le)
+        form_bar.addRow("BORDER PX", s_bw_le)
+        lay.addWidget(grp_bar)
+
         grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
         rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
         interval_le = QLineEdit(str(rc.get("interval_min", 10))); interval_le.setFixedWidth(60)
@@ -1152,17 +1168,23 @@ class StatusBar(QMainWindow):
                 new_ew, new_eh = 1000, 700
             try: mins = int(interval_le.text())
             except ValueError: mins = 10
+            
             cfg = load_config()
             cfg["buttons_left_page_size"] = self._bl_page_size
             cfg["edit_panel_width"] = new_ew
             cfg["edit_panel_height"] = new_eh
+            cfg["status_bar_bg"] = s_bg_le.text()
+            cfg["status_bar_border_color"] = s_bc_le.text()
+            try: cfg["status_bar_border_width"] = int(s_bw_le.text())
+            except ValueError: pass
             cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
+            
             save_config(cfg)
             self._config = cfg 
             dlg.accept(); self._bl_render()
         btn.clicked.connect(_save)
-        screen = QApplication.primaryScreen().geometry()
-        dlg.move(screen.center().x() - 190, screen.center().y() - 140)
+        screen = QApplication.primaryScreen().availableGeometry()
+        dlg.move(screen.center().x() - dlg.width() // 2, screen.center().y() - dlg.height() // 2)
         dlg.show()
 
     def _bl_render(self):

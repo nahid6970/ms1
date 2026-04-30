@@ -1180,5 +1180,8 @@
     },
     "buttons_left_page_size": 20,
     "edit_panel_width": 1000,
-    "edit_panel_height": 850
+    "edit_panel_height": 850,
+    "status_bar_bg": "red",
+    "status_bar_border_color": "green",
+    "status_bar_border_width": 1
 }
