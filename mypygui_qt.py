@@ -814,7 +814,7 @@ class StatusBar(QMainWindow):
         self._git_labels = {}
 
         git_frame = QFrame()
-        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 3px; background: transparent; }} QLabel {{ border: none; }}")
+        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame)
         git_row.setContentsMargins(4, 0, 4, 0)
         git_row.setSpacing(2)
@@ -1094,8 +1094,8 @@ class StatusBar(QMainWindow):
         self.lb_cpu.setText(f"{cpu}%")
         self.lb_ram.setText(f"{ram}%")
         self.lb_gpu.setText(f"{gpu}%")
-        self.lb_duc.setText(f"\uf0a0 {dc}%")
-        self.lb_dud.setText(f"\uf0a0 {dd}%")
+        self.lb_duc.setText(f"\uf0a0  {dc}%")
+        self.lb_dud.setText(f"\uf0a0  {dd}%")
         self.upload_lb.setText(f" ▲ {up} ")
         self.download_lb.setText(f" ▼ {down} ")
 
