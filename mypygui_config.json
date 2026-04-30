@@ -196,8 +196,8 @@
                 }
             },
             "bg": "",
-            "padx_left": 1,
-            "padx_right": 1
+            "padx_left": 5,
+            "padx_right": 5
         },
         {
             "id": "Rclone_bt",
@@ -336,13 +336,20 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\2nd_Monitor.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\2nd_Monitor.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "path_replace",

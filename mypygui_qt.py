@@ -462,9 +462,9 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
-        f"font-size: {font_size}pt; font-weight: {bold}; "
-        f"padding-left: {px_l}px; padding-right: {px_r}px; {_border_css}"
+        f"font-size: {font_size}pt; font-weight: {bold}; {_border_css}"
     )
+    lbl.setContentsMargins(px_l, 0, px_r, 0)
 
     bindings = btn_cfg.get("bindings", {})
 
