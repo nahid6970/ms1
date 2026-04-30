@@ -999,19 +999,15 @@ class StatusBar(QMainWindow):
         self.setFixedSize(1920, 39)
         screen_w = QApplication.primaryScreen().geometry().width()
         self.move(screen_w // 2 - 960, 993)
+        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: 1px solid {CP_RED}; }}")
 
         self._config = load_config()
-        s_bg = self._config.get("status_bar_bg", CP_BG)
-        s_bc = self._config.get("status_bar_border_color", CP_RED)
-        s_bw = self._config.get("status_bar_border_width", 1)
-
-        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {s_bw}px solid {s_bc}; background: {s_bg}; }}")
 
         border_frame = QFrame()
-        border_frame.setStyleSheet(f"QFrame {{ background: {s_bg}; border: {s_bw}px solid {s_bc}; }}")
+        border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
         self.setCentralWidget(border_frame)
         inner = QWidget(border_frame)
-        inner.setStyleSheet(f"background: {s_bg}; border: none;")
+        inner.setStyleSheet(f"background: {CP_BG}; border: none;")
         border_layout = QVBoxLayout(border_frame)
         border_layout.setContentsMargins(1, 1, 1, 1)
         border_layout.addWidget(inner)
@@ -1040,6 +1036,7 @@ class StatusBar(QMainWindow):
 
         self._build_left()
         self._build_right()
+        self._apply_statusbar_style()
         self._start_timers()
 
     # ── Left panel ────────────────────────────────────────────────────────────
@@ -1120,7 +1117,7 @@ class StatusBar(QMainWindow):
     def _open_unified_settings(self):
         dlg = QDialog(self)
         dlg.setWindowTitle("Settings")
-        dlg.resize(380, 280)
+        dlg.resize(380, 420)
         dlg.setStyleSheet(DIALOG_QSS)
         dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10)
@@ -1139,53 +1136,92 @@ class StatusBar(QMainWindow):
         form_edit.addRow("HEIGHT", eh_le)
         lay.addWidget(grp_edit)
 
-        grp_bar = QGroupBox("STATUS BAR STYLE"); form_bar = QFormLayout(); grp_bar.setLayout(form_bar)
-        s_bg = self._config.get("status_bar_bg", CP_BG)
-        s_bc = self._config.get("status_bar_border_color", CP_RED)
-        s_bw = self._config.get("status_bar_border_width", 1)
-        s_bg_le = QLineEdit(s_bg); s_bg_le.setFixedWidth(100)
-        s_bc_le = QLineEdit(s_bc); s_bc_le.setFixedWidth(100)
-        s_bw_le = QLineEdit(str(s_bw)); s_bw_le.setFixedWidth(60)
-        form_bar.addRow("BG COLOR", s_bg_le)
-        form_bar.addRow("BORDER COLOR", s_bc_le)
-        form_bar.addRow("BORDER PX", s_bw_le)
-        lay.addWidget(grp_bar)
-
         grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
         rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
         interval_le = QLineEdit(str(rc.get("interval_min", 10))); interval_le.setFixedWidth(60)
         simul_chk = QCheckBox("Run simultaneously"); simul_chk.setChecked(bool(rc.get("simultaneous", True)))
         form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
 
+        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb)
+        _sb_cfg = self._config.get("statusbar", {})
+        sb_bg_le     = QLineEdit(_sb_cfg.get("bg", CP_BG));           sb_bg_le.setFixedWidth(90)
+        sb_border_le = QLineEdit(_sb_cfg.get("border_color", CP_RED)); sb_border_le.setFixedWidth(90)
+        sb_bpx_le    = QLineEdit(str(_sb_cfg.get("border_px", 1)));    sb_bpx_le.setFixedWidth(40)
+        def _pick_color(le):
+            c = QColorDialog.getColor(QColor(le.text() or "#000000"), dlg)
+            if c.isValid(): le.setText(c.name().upper())
+        bg_row = QWidget(); bg_lay = QHBoxLayout(bg_row); bg_lay.setContentsMargins(0,0,0,0); bg_lay.setSpacing(6)
+        bg_pick = QPushButton("⬛"); bg_pick.setFixedWidth(28); bg_pick.clicked.connect(lambda: _pick_color(sb_bg_le))
+        bg_lay.addWidget(sb_bg_le); bg_lay.addWidget(bg_pick); bg_lay.addStretch()
+        bc_row = QWidget(); bc_lay = QHBoxLayout(bc_row); bc_lay.setContentsMargins(0,0,0,0); bc_lay.setSpacing(6)
+        bc_pick = QPushButton("⬛"); bc_pick.setFixedWidth(28); bc_pick.clicked.connect(lambda: _pick_color(sb_border_le))
+        bc_lay.addWidget(sb_border_le); bc_lay.addWidget(bc_pick); bc_lay.addStretch()
+        form_sb.addRow("BG COLOR", bg_row)
+        form_sb.addRow("BORDER COLOR", bc_row)
+        form_sb.addRow("BORDER PX", sb_bpx_le)
+        lay.addWidget(grp_sb)
+
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
         def _save():
             try: self._bl_page_size = int(size_le.text())
             except ValueError: pass
-            try: 
+            try:
                 new_ew = int(ew_le.text())
                 new_eh = int(eh_le.text())
-            except ValueError: 
+            except ValueError:
                 new_ew, new_eh = 1000, 700
             try: mins = int(interval_le.text())
             except ValueError: mins = 10
-            
+            try: new_bpx = int(sb_bpx_le.text())
+            except ValueError: new_bpx = 1
             cfg = load_config()
             cfg["buttons_left_page_size"] = self._bl_page_size
             cfg["edit_panel_width"] = new_ew
             cfg["edit_panel_height"] = new_eh
-            cfg["status_bar_bg"] = s_bg_le.text()
-            cfg["status_bar_border_color"] = s_bc_le.text()
-            try: cfg["status_bar_border_width"] = int(s_bw_le.text())
-            except ValueError: pass
             cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
-            
+            cfg["statusbar"] = {
+                "bg": sb_bg_le.text() or CP_BG,
+                "border_color": sb_border_le.text() or CP_RED,
+                "border_px": new_bpx,
+            }
             save_config(cfg)
-            self._config = cfg 
+            self._config = cfg
+            self._apply_statusbar_style()
             dlg.accept(); self._bl_render()
         btn.clicked.connect(_save)
-        screen = QApplication.primaryScreen().availableGeometry()
-        dlg.move(screen.center().x() - dlg.width() // 2, screen.center().y() - dlg.height() // 2)
+        screen = QApplication.primaryScreen().geometry()
+        dlg.move(screen.center().x() - 190, screen.center().y() - 210)
         dlg.show()
+
+    def _apply_statusbar_style(self):
+        sb = self._config.get("statusbar", {})
+        bg = sb.get("bg", CP_BG) or CP_BG
+        border_color = sb.get("border_color", CP_RED) or CP_RED
+        border_px = int(sb.get("border_px", 1))
+        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {border_px}px solid {border_color}; }}")
+        cf = self.centralWidget()
+        if cf:
+            cf.setStyleSheet(f"QFrame {{ background: {bg}; border: {border_px}px solid {border_color}; }}")
+            inner = cf.layout().itemAt(0).widget() if cf.layout() and cf.layout().count() else None
+            if inner:
+                inner.setStyleSheet(f"background: {bg}; border: none;")
+        for w in [self._left_widget, self._right_widget]:
+            w.setStyleSheet(f"background: {bg};")
+
+    def _apply_statusbar_style(self):
+        sb = self._config.get("statusbar", {})
+        bg = sb.get("bg", CP_BG) or CP_BG
+        border_color = sb.get("border_color", CP_RED) or CP_RED
+        border_px = int(sb.get("border_px", 1))
+        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {border_px}px solid {border_color}; }}")
+        cf = self.centralWidget()
+        if cf:
+            cf.setStyleSheet(f"QFrame {{ background: {bg}; border: {border_px}px solid {border_color}; }}")
+            inner = cf.layout().itemAt(0).widget() if cf.layout() and cf.layout().count() else None
+            if inner:
+                inner.setStyleSheet(f"background: {bg}; border: none;")
+        for w in [self._left_widget, self._right_widget]:
+            w.setStyleSheet(f"background: {bg};")
 
     def _bl_render(self):
         # Clear entire layout (widgets + spacers)
