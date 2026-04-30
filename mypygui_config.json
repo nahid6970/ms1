@@ -626,8 +626,23 @@
             "padx_right": 1
         },
         "download": {
+            "id": "download",
+            "text": "download",
+            "fg": "#ffffff",
+            "bg": "",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ],
+            "border": 0,
+            "border_color": "",
+            "padx_left": 0,
+            "padx_right": 0,
             "Button-1": {
                 "type": "subprocess",
+                "hide": false,
+                "admin": false,
                 "cmd": "sniffnet"
             }
         },
@@ -635,7 +650,13 @@
             "Button-1": {
                 "type": "subprocess",
                 "cmd": "sniffnet"
-            }
+            },
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ]
         },
         "cpu": {
             "id": "cpu",
@@ -647,42 +668,80 @@
                 16,
                 "bold"
             ],
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1,
             "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "taskmgr"
+                },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
                     "cmd": "taskmgr"
                 }
-            },
-            "border": 0,
-            "border_color": "",
-            "padx_left": 1,
-            "padx_right": 1
+            }
         },
         "gpu": {
             "Button-1": {
                 "type": "subprocess",
                 "cmd": "start ms-settings:display"
-            }
+            },
+            "fg": "#00ff21",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ],
+            "border": 1,
+            "border_color": "#00ff21"
         },
         "ram": {
             "Button-1": {
                 "type": "subprocess",
                 "cmd": "taskmgr"
-            }
+            },
+            "fg": "#f08d0c",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ],
+            "border": 1,
+            "border_color": "#f08d0c"
         },
         "drive_c": {
             "Button-1": {
                 "type": "subprocess",
                 "cmd": "explorer C:\\"
-            }
+            },
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ],
+            "border": 1,
+            "border_color": "#1b8af1"
         },
         "drive_d": {
             "Button-1": {
                 "type": "subprocess",
                 "cmd": "explorer D:\\"
-            }
+            },
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                10,
+                "bold"
+            ],
+            "border": 1,
+            "border_color": "#1b8af1"
         },
         "settings": {
             "id": "settings",

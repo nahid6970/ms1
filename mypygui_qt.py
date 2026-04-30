@@ -370,7 +370,13 @@ def open_edit_gui(item_cfg, category, index=None):
                 target.append(item_cfg)
             config[new_category] = target
         else:
-            config[new_category][item_cfg["id"]] = item_cfg
+            if new_category == "static_bindings":
+                # Store flat: style fields + bindings merged at top level
+                flat = {k: v for k, v in item_cfg.items() if k != "bindings"}
+                flat.update(item_cfg.get("bindings", {}))
+                config[new_category][item_cfg["id"]] = flat
+            else:
+                config[new_category][item_cfg["id"]] = item_cfg
         save_config(config)
         dlg.accept()
         r = QMessageBox.question(None, "Restart", "Settings saved. Restart GUI to apply?",
@@ -489,6 +495,8 @@ def _open_static_edit(key):
     cfg = load_config()
     sb = cfg.get("static_bindings", {})
     entry = sb.get(key, {})
+    # Extract flat bindings (Button-1, Control-Button-1, etc.) from entry
+    _binding_keys = {k: v for k, v in entry.items() if "Button" in k}
     item = {"id": key, "text": key,
             "fg": entry.get("fg", ""),
             "bg": entry.get("bg", ""),
@@ -497,7 +505,7 @@ def _open_static_edit(key):
             "border_color": entry.get("border_color", ""),
             "padx_left": entry.get("padx_left", 0),
             "padx_right": entry.get("padx_right", 0),
-            "bindings": entry.get("bindings", {})}
+            "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
 def _apply_static_style(widget, key):
@@ -538,6 +546,7 @@ def _bind_static(lbl, key, default_cmd):
             handle_action(_cfg[bkey])
     lbl.mousePressEvent = mousePressEvent
     lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+    _apply_static_style(lbl, key)  # apply style from config if set
 
 
 # ─── CPU core bar widget ──────────────────────────────────────────────────────
