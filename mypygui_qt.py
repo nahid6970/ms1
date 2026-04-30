@@ -263,8 +263,10 @@ def open_edit_gui(item_cfg, category, index=None):
         ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
     border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
     border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
+    border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(50)
     form_appear.addRow("BORDER PX", border_px_le)
     form_appear.addRow("BORDER COLOR", border_color_le)
+    form_appear.addRow("BORDER RADIUS", border_radius_le)
     left_layout.addWidget(grp_appear)
 
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
@@ -349,6 +351,8 @@ def open_edit_gui(item_cfg, category, index=None):
         try: item_cfg["border"] = int(border_px_le.text())
         except ValueError: pass
         item_cfg["border_color"] = border_color_le.text()
+        try: item_cfg["border_radius"] = int(border_radius_le.text())
+        except ValueError: pass
         try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
@@ -474,10 +478,12 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     bold = "bold" if font_weight == "bold" else "normal"
     _border_px = int(btn_cfg.get("border", 0))
     _border_col = btn_cfg.get("border_color", "") or _bg
+    _border_radius = int(btn_cfg.get("border_radius", 0))
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
         f"font-size: {font_size}pt; font-weight: {bold}; {_border_css} "
+        f"border-radius: {_border_radius}px; "
         f"margin-left: {m_l}px; margin-right: {m_r}px;"
     )
     lbl.setContentsMargins(px_l, 0, px_r, 0)

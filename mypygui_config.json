@@ -517,7 +517,8 @@
             "border": 1,
             "border_color": "white",
             "margin_left": 0,
-            "margin_right": 2
+            "margin_right": 2,
+            "border_radius": 0
         },
         {
             "id": "Radarr_bt",
