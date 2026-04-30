@@ -907,6 +907,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
+uptime_label.bind("<Button-1>", lambda e: subprocess.Popen("timedate.cpl", shell=True))
 
 # Load dynamic buttons for ROOT1
 for idx, btn_cfg in enumerate(CONFIG.get("buttons_left", [])):
@@ -1512,19 +1513,19 @@ cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_GPU.bind("<Button-1>",None)
+LB_GPU.bind("<Button-1>", lambda e: subprocess.Popen("start ms-settings:display", shell=True))
 
 LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#f08d0c",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_RAM.bind("<Button-1>",None)
+LB_RAM.bind("<Button-1>", lambda e: subprocess.Popen("taskmgr", shell=True))
 
 LB_DUC=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUC.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_DUC.bind("<Button-1>",None)
+LB_DUC.bind("<Button-1>", lambda e: subprocess.Popen("explorer C:\\", shell=True))
 
 LB_DUD=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_DUD.bind("<Button-1>",None)
+LB_DUD.bind("<Button-1>", lambda e: subprocess.Popen("explorer D:\\", shell=True))
 
 # Topmost_lb=tk.Label(ROOT2,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 # Topmost_lb.pack(side="left",padx=(3,0),pady=(0,0))

@@ -397,15 +397,20 @@
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
-                    "cmd": "cmd /c komorebi_gui_custom.py",
-                    "cwd": "C:\\@delta\\ms1\\asset\\komorebi"
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "cmd /c komorebi_gui_custom.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
-                    "cmd": "code komorebi_gui_custom.py",
-                    "cwd": "C:\\@delta\\ms1\\asset\\komorebi"
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "code komorebi_gui_custom.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "AHKPY_BT",
@@ -419,15 +424,20 @@
             "bindings": {
                 "Button-1": {
                     "type": "python",
-                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
-                    "cwd": "C:\\@delta\\ms1\\@AutoHotKey"
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
-                    "cmd": "code C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
-                    "cwd": "C:\\@delta\\ms1\\@AutoHotKey"
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "code C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
                 }
-            }
+            },
+            "bg": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "Sonarr_bt",
