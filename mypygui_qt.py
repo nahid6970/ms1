@@ -421,14 +421,17 @@ def format_uptime():
 
 # ─── Edit GUI dialog ──────────────────────────────────────────────────────────
 def open_edit_gui(item_cfg, category, index=None):
+    config_now = load_config()
     dlg = QDialog(_main_window if "_main_window" in globals() else None)
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
-    dlg.resize(1000, 700)
+    ew = config_now.get("edit_panel_width", 1000)
+    eh = config_now.get("edit_panel_height", 700)
+    dlg.resize(ew, eh)
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
     screen = QApplication.primaryScreen().geometry()
-    dlg.move(screen.center().x() - 500, screen.center().y() - 350)
+    dlg.move(screen.center().x() - ew // 2, screen.center().y() - eh // 2)
 
     root_layout = QVBoxLayout(dlg)
     root_layout.setContentsMargins(10, 10, 10, 10)
@@ -1110,6 +1113,15 @@ class StatusBar(QMainWindow):
         size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60)
         form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
 
+        grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit)
+        ew = self._config.get("edit_panel_width", 1000)
+        eh = self._config.get("edit_panel_height", 700)
+        ew_le = QLineEdit(str(ew)); ew_le.setFixedWidth(60)
+        eh_le = QLineEdit(str(eh)); eh_le.setFixedWidth(60)
+        form_edit.addRow("WIDTH", ew_le)
+        form_edit.addRow("HEIGHT", eh_le)
+        lay.addWidget(grp_edit)
+
         grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
         rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
         interval_le = QLineEdit(str(rc.get("interval_min", 10))); interval_le.setFixedWidth(60)
@@ -1120,12 +1132,20 @@ class StatusBar(QMainWindow):
         def _save():
             try: self._bl_page_size = int(size_le.text())
             except ValueError: pass
+            try: 
+                new_ew = int(ew_le.text())
+                new_eh = int(eh_le.text())
+            except ValueError: 
+                new_ew, new_eh = 1000, 700
             try: mins = int(interval_le.text())
             except ValueError: mins = 10
             cfg = load_config()
             cfg["buttons_left_page_size"] = self._bl_page_size
+            cfg["edit_panel_width"] = new_ew
+            cfg["edit_panel_height"] = new_eh
             cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
             save_config(cfg)
+            self._config = cfg 
             dlg.accept(); self._bl_render()
         btn.clicked.connect(_save)
         screen = QApplication.primaryScreen().geometry()
