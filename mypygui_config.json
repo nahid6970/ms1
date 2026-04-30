@@ -672,19 +672,11 @@
             "border_color": "",
             "padx_left": 1,
             "padx_right": 1,
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "taskmgr"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "taskmgr"
-                }
+            "Button-1": {
+                "type": "subprocess",
+                "hide": false,
+                "admin": false,
+                "cmd": "C:\\@delta\\ms1\\scripts\\process\\process_viewer.py"
             }
         },
         "gpu": {
