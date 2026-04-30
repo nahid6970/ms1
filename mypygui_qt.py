@@ -223,26 +223,30 @@ class IconLabel(QLabel):
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
         
-        # Determine foreground color (respect palette/stylesheet)
+        # Area inside padding (respects padx_left/padx_right)
+        rect = self.contentsRect()
+        if rect.isEmpty(): return
+
+        # Determine foreground color
         fg = self.palette().windowText().color().name()
 
-        # Check for icon
         cfg = self.btn_cfg
+        icon_pixmap = None
+        draw_mode = 'text'
+
+        # Priority Check: Path > SVG > NF > Text
         icon_path = cfg.get("icon_path", "")
         svg_content = cfg.get("svg_content", "")
         nf_char = cfg.get("nf_char", "")
-        
-        icon_pixmap = None
-        icon_w, icon_h = 0, 0
-        
+
         try:
             if icon_path and os.path.exists(icon_path):
                 icon_pixmap = QPixmap(icon_path)
+                draw_mode = 'icon'
             elif svg_content and svg_content.strip():
-                gen_w = cfg.get("icon_width", 0) or 32
-                gen_h = cfg.get("icon_height", 0) or 32
-                icon_pixmap = QPixmap(gen_w, gen_h)
-                icon_pixmap.fill(Qt.GlobalColor.transparent)
+                gen_w = cfg.get("icon_width", 0) or 64
+                gen_h = cfg.get("icon_height", 0) or 64
+                icon_pixmap = QPixmap(gen_w, gen_h); icon_pixmap.fill(Qt.GlobalColor.transparent)
                 actual_svg = svg_content
                 if self._is_hovered:
                     hmap = cfg.get("svg_hover_map", {})
@@ -252,14 +256,20 @@ class IconLabel(QLabel):
                 p_svg = QPainter(icon_pixmap)
                 renderer = QSvgRenderer(QByteArray(actual_svg.encode('utf-8')))
                 renderer.render(p_svg); p_svg.end()
+                draw_mode = 'icon'
             elif nf_char:
-                gen_w = cfg.get("icon_width", 0) or 32
-                gen_h = cfg.get("icon_height", 0) or 32
+                gen_w = cfg.get("icon_width", 0) or 64
+                gen_h = cfg.get("icon_height", 0) or 64
                 icon_pixmap = QPixmap(gen_w, gen_h); icon_pixmap.fill(Qt.GlobalColor.transparent)
                 p = QPainter(icon_pixmap); p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-                f = QFont(cfg.get("font", ["JetBrainsMono NFP"])[0]); f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
+                f = self.font()
+                f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
                 p.setFont(f); p.setPen(QColor(fg)); p.drawText(icon_pixmap.rect(), Qt.AlignmentFlag.AlignCenter, nf_char); p.end()
+                draw_mode = 'icon'
+            else:
+                draw_mode = 'text'
 
+            # Scaling if icon
             if icon_pixmap and not icon_pixmap.isNull():
                 custom_w = cfg.get("icon_width", 0)
                 custom_h = cfg.get("icon_height", 0)
@@ -268,47 +278,36 @@ class IconLabel(QLabel):
                 elif custom_w > 0: icon_pixmap = icon_pixmap.scaledToWidth(custom_w, Qt.TransformationMode.SmoothTransformation)
                 elif custom_h > 0: icon_pixmap = icon_pixmap.scaledToHeight(custom_h, Qt.TransformationMode.SmoothTransformation)
                 else:
-                    max_h = min(24, self.height() - 4 if self.height() > 4 else 24)
-                    icon_pixmap = icon_pixmap.scaledToHeight(max_h, Qt.TransformationMode.SmoothTransformation)
-                icon_w, icon_h = icon_pixmap.width(), icon_pixmap.height()
+                    max_h = rect.height() - 4
+                    if max_h > 0:
+                        icon_pixmap = icon_pixmap.scaledToHeight(max_h, Qt.TransformationMode.SmoothTransformation)
         except: pass
 
-        icon_pos = cfg.get("icon_position", "left")
-        spacing = cfg.get("icon_gap", 4) if icon_pixmap else 0
-        text = self.text()
-        
-        doc = QTextDocument()
-        f = self.font()
-        if "font" in cfg:
-            font_cfg = cfg["font"]
-            f = QFont(font_cfg[0], font_cfg[1])
-            if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
-        doc.setDefaultFont(f)
-        doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
-        
-        text_w = doc.idealWidth()
-        text_h = doc.size().height()
-        
-        if icon_pos == "center" and icon_pixmap:
-            painter.drawPixmap(int((self.width()-icon_w)/2), int((self.height()-icon_h)/2), icon_pixmap)
-        elif icon_pos in ["top", "bottom"]:
-            total_h = icon_h + spacing + text_h
-            y_start = (self.height() - total_h) / 2
-            if icon_pos == "top":
-                if icon_pixmap: painter.drawPixmap(int((self.width()-icon_w)/2), int(y_start), icon_pixmap); y_start += icon_h + spacing
-                painter.translate((self.width()-text_w)/2, y_start); doc.drawContents(painter)
-            else:
-                painter.translate((self.width()-text_w)/2, y_start); doc.drawContents(painter)
-                if icon_pixmap: painter.drawPixmap(int((self.width()-icon_w)/2), int(y_start + text_h + spacing), icon_pixmap)
-        else: # left / right
-            total_w = icon_w + spacing + text_w
-            x_start = (self.width() - total_w) / 2
-            if icon_pos == "left":
-                if icon_pixmap: painter.drawPixmap(int(x_start), int((self.height()-icon_h)/2), icon_pixmap); x_start += icon_w + spacing
-                painter.translate(x_start, (self.height()-text_h)/2); doc.drawContents(painter)
-            else:
-                painter.translate(x_start, (self.height()-text_h)/2); doc.drawContents(painter)
-                if icon_pixmap: painter.drawPixmap(int(x_start + text_w + spacing), int((self.height()-icon_h)/2), icon_pixmap)
+        if draw_mode == 'icon' and icon_pixmap:
+            # Draw icon centered in contentsRect (respects padding)
+            x = rect.x() + (rect.width() - icon_pixmap.width()) // 2
+            y = rect.y() + (rect.height() - icon_pixmap.height()) // 2
+            painter.drawPixmap(x, y, icon_pixmap)
+        else:
+            # Draw text centered in contentsRect
+            text = self.text()
+            if not text: return
+            doc = QTextDocument()
+            f = self.font()
+            if "font" in cfg:
+                font_cfg = cfg["font"]
+                f = QFont(font_cfg[0], font_cfg[1])
+                if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+            doc.setDefaultFont(f)
+            doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
+            
+            text_w = doc.idealWidth()
+            text_h = doc.size().height()
+            
+            x = rect.x() + (rect.width() - text_w) / 2
+            y = rect.y() + (rect.height() - text_h) / 2
+            painter.translate(x, y)
+            doc.drawContents(painter)
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
