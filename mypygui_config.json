@@ -136,7 +136,7 @@
             "text": "\uf4cc",
             "fg": "#10b153",
             "font": [
-                "JetBrainsMono NFP",
+                "Consolas",
                 25,
                 "bold"
             ],
@@ -390,7 +390,7 @@
             "text": "KOMO",
             "fg": "#8319f5",
             "font": [
-                "JetBrainsMono NFP",
+                "Consolas",
                 16,
                 "bold"
             ],
@@ -417,7 +417,7 @@
             "text": "AHK",
             "fg": "#84ff8e",
             "font": [
-                "JetBrainsMono NFP",
+                "Consolas",
                 16,
                 "bold"
             ],
@@ -445,7 +445,7 @@
             "fg": "#ffdb75",
             "bg": "#000000",
             "font": [
-                "JetBrainsMono NFP",
+                "Consolas",
                 15,
                 "bold"
             ],
