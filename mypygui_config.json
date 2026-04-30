@@ -22,7 +22,7 @@
             "src": "C:/@delta/msBackups",
             "dst": "gu:/msBackups",
             "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
-            "label": "\udb85\ude32",
+            "label": "󱘲",
             "id": "msBackups",
             "text": "",
             "fg": "",
@@ -35,14 +35,14 @@
             "src": "D:/software",
             "dst": "gu:/software",
             "log": "C:/Users/nahid/script_output/rclone/software_check.log",
-            "label": "\uf40e"
+            "label": ""
         },
         "song": {
             "cmd": "rclone check src dst --fast-list --size-only",
             "src": "D:/song",
             "dst": "gu:/song",
             "log": "C:/Users/nahid/script_output/rclone/song_check.log",
-            "label": "\uec1b"
+            "label": ""
         },
         "ms1": {
             "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
@@ -58,7 +58,7 @@
             "src": "C:/Users/nahid/Pictures/",
             "dst": "gu:/Pictures/",
             "log": "C:/Users/nahid/script_output/rclone/Pictures_check.log",
-            "label": "\uf03e",
+            "label": "",
             "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
             "right_click_cmd": "rclone sync dst src -P --fast-list",
             "id": "Photos",
@@ -105,7 +105,7 @@
         },
         {
             "id": "Tools_bt",
-            "text": "\ueb51",
+            "text": "",
             "fg": "#ffffff",
             "font": [
                 "JetBrainsMono NFP",
@@ -133,7 +133,7 @@
         },
         {
             "id": "Startup_bt",
-            "text": "\uf4cc",
+            "text": "",
             "fg": "#10b153",
             "font": [
                 "JetBrainsMono NFP",
@@ -161,7 +161,7 @@
         },
         {
             "id": "AppManagement_bt",
-            "text": "\uf40e",
+            "text": "",
             "fg": "#26b2f3",
             "font": [
                 "Arial",
@@ -203,7 +203,7 @@
         },
         {
             "id": "Rclone_bt",
-            "text": "\uef2c",
+            "text": "",
             "fg": "#fcfcfc",
             "font": [
                 "JetBrainsMono NFP",
@@ -231,7 +231,7 @@
         },
         {
             "id": "Folder_bt",
-            "text": "\ueaf7",
+            "text": "",
             "fg": "#ffd900",
             "font": [
                 "JetBrainsMono NFP",
@@ -252,7 +252,7 @@
         },
         {
             "id": "PositionXY_CrossHair_bt",
-            "text": "\uf05b",
+            "text": "",
             "fg": "#ffffff",
             "font": [
                 "JetBrainsMono NFP",
@@ -280,7 +280,7 @@
         },
         {
             "id": "ColorTool_bt",
-            "text": "\ue22b",
+            "text": "",
             "fg": "#c588fd",
             "font": [
                 "JetBrainsMono NFP",
@@ -321,7 +321,7 @@
         },
         {
             "id": "Info_lb",
-            "text": "\udb80\udefc",
+            "text": "󰋼",
             "fg": "#ffffff",
             "font": [
                 "JetBrainsMono NFP",
@@ -489,71 +489,6 @@
             "padx_right": 1
         },
         {
-            "id": "drive_d",
-            "text": "drive_d",
-            "fg": "",
-            "bg": "",
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "explorer D:\\"
-                }
-            },
-            "font": [
-                "JetBrainsMono NFP",
-                16,
-                "bold"
-            ],
-            "padx_left": 1,
-            "padx_right": 5
-        },
-        {
-            "id": "drive_d",
-            "text": "drive_d",
-            "fg": "",
-            "bg": "",
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "explorer D:\\"
-                }
-            },
-            "font": [
-                "JetBrainsMono NFP",
-                16,
-                "bold"
-            ],
-            "padx_left": 1,
-            "padx_right": 100
-        },
-        {
-            "id": "uptime",
-            "text": "uptime",
-            "fg": "",
-            "bg": "",
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "timedate.cpl"
-                }
-            },
-            "font": [
-                "Consolas",
-                16,
-                "bold"
-            ],
-            "border": 0,
-            "border_color": "",
-            "padx_left": 1,
-            "padx_right": 1
-        },
-        {
             "id": "Radarr_bt",
             "text": "Radarr",
             "fg": "#ffdb75",
@@ -578,7 +513,7 @@
     "buttons_right": [
         {
             "id": "Shut_Reboot",
-            "text": "\udb82\udc20",
+            "text": "󰠠",
             "fg": "#fa0000",
             "bg": "#1d2027",
             "font": [
@@ -608,7 +543,7 @@
         },
         {
             "id": "LB_R",
-            "text": "\uf2f1",
+            "text": "",
             "fg": "#26b2f3",
             "font": [
                 "JetBrainsMono NFP",
@@ -624,7 +559,7 @@
         },
         {
             "id": "LB_XXX",
-            "text": "\uf2d3",
+            "text": "",
             "fg": "#ff0000",
             "font": [
                 "JetBrainsMono NFP",
@@ -645,10 +580,20 @@
     },
     "static_bindings": {
         "uptime": {
-            "Button-1": {
-                "type": "subprocess",
-                "cmd": "timedate.cpl"
-            }
+            "id": "uptime",
+            "text": "uptime",
+            "fg": "",
+            "bg": "",
+            "font": [
+                "Arial",
+                15,
+                "bold"
+            ],
+            "bindings": {},
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 100
         },
         "download": {
             "Button-1": {

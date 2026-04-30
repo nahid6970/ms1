@@ -107,7 +107,7 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_
 
 def load_config():
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         print(f"Error loading config: {e}")
@@ -115,8 +115,8 @@ def load_config():
 
 def save_config(config):
     try:
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(config, f, indent=4)
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving config: {e}")
 
@@ -295,7 +295,9 @@ def open_edit_gui(item_cfg, category, index=None):
         index_le.setText(str(max(len(lst) - 1, 0)))
     group_cb.currentTextChanged.connect(_on_group_changed)
     form_place.addRow("GROUP", group_cb); form_place.addRow("INDEX", index_le)
-    left_layout.addWidget(grp_place); left_layout.addStretch()
+    if category in ["buttons_left", "buttons_right"]:
+        left_layout.addWidget(grp_place)
+    left_layout.addStretch()
 
     # Right panel
     right_scroll = QScrollArea(); right_scroll.setWidgetResizable(True)
@@ -351,8 +353,8 @@ def open_edit_gui(item_cfg, category, index=None):
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
         item_cfg["bindings"] = new_bindings
-        new_category = group_cb.currentText()
-        try: new_index = int(index_le.text())
+        new_category = group_cb.currentText() if category in ["buttons_left", "buttons_right"] else category
+        try: new_index = int(index_le.text()) if category in ["buttons_left", "buttons_right"] else None
         except ValueError: new_index = None
         config = load_config()
         if category != new_category and category in config and isinstance(config[category], list) and index is not None:
@@ -484,8 +486,14 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
 
 # ─── Static binding helpers ───────────────────────────────────────────────────
 def _open_static_edit(key):
-    sb   = load_config().get("static_bindings", {})
-    item = {"id": key, "text": key, "fg": "", "bg": "", "bindings": sb.get(key, {})}
+    cfg = load_config()
+    sb = cfg.get("static_bindings", {})
+    entry = sb.get(key, {})
+    item = {"id": key, "text": key,
+            "fg": entry.get("fg", ""),
+            "bg": entry.get("bg", ""),
+            "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]),
+            "bindings": entry.get("bindings", {})}
     open_edit_gui(item, "static_bindings")
 
 def _bind_static(lbl, key, default_cmd):
@@ -769,9 +777,15 @@ class StatusBar(QMainWindow):
         ll = self._left_layout
 
         # 1. Uptime label
+        _uc = load_config().get("static_bindings", {}).get("uptime", {})
+        _ufg = _uc.get("fg", "") or "#6bc0f8"
+        _ufont_list = _uc.get("font", ["JetBrainsMono NFP", 16, "bold"])
+        _ufont = _ufont_list[0] if _ufont_list else "JetBrainsMono NFP"
+        _usize = _ufont_list[1] if len(_ufont_list) > 1 else 16
+        _ubold = _ufont_list[2] if len(_ufont_list) > 2 else "bold"
         self.uptime_label = QLabel(format_uptime())
         self.uptime_label.setStyleSheet(
-            f"color: #6bc0f8; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
+            f"color: {_ufg}; font-family: '{_ufont}'; font-size: {_usize}pt; font-weight: {_ubold};"
         )
         self.uptime_label.setCursor(Qt.CursorShape.PointingHandCursor)
         def _uptime_click(event):
@@ -851,9 +865,11 @@ class StatusBar(QMainWindow):
         ll.addWidget(add_bt)
 
     def _bl_render(self):
-        # Clear old widgets
-        for w in self._bl_widgets:
-            w.setParent(None)
+        # Clear entire layout (widgets + spacers)
+        while self._bl_container_layout.count():
+            item = self._bl_container_layout.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
         self._bl_widgets.clear()
         items = load_config().get("buttons_left", [])
         start = self._bl_offset
