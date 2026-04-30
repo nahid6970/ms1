@@ -335,6 +335,9 @@ def open_edit_gui(item_cfg, category, index=None):
         try:
             item_cfg["font"] = [font_family_cb.currentText(), int(font_size_le.text()), font_weight_cb.currentText()]
         except ValueError: pass
+        try: item_cfg["border"] = int(border_px_le.text())
+        except ValueError: pass
+        item_cfg["border_color"] = border_color_le.text()
         try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
@@ -784,12 +787,10 @@ class StatusBar(QMainWindow):
         self._bl_offset    = 0
         self._bl_widgets   = []
 
-        prev_bt = QPushButton("«")
-        prev_bt.setStyleSheet(
-            "background: white; color: black; font-weight: bold; border-radius: 4px; padding: 1px 4px;"
-        )
-        prev_bt.setFixedSize(22, 20)
-        prev_bt.clicked.connect(self._bl_prev)
+        prev_bt = QLabel("«")
+        prev_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold; background: transparent;")
+        prev_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        prev_bt.mousePressEvent = lambda e: self._bl_prev()
         ll.addWidget(prev_bt)
         self._bl_prev_bt = prev_bt
 
@@ -800,21 +801,17 @@ class StatusBar(QMainWindow):
         self._bl_container_layout.setSpacing(0)
         ll.addWidget(self._bl_container)
 
-        next_bt = QPushButton("»")
-        next_bt.setStyleSheet(
-            "background: white; color: black; font-weight: bold; border-radius: 4px; padding: 1px 4px;"
-        )
-        next_bt.setFixedSize(22, 20)
-        next_bt.clicked.connect(self._bl_next)
+        next_bt = QLabel("»")
+        next_bt.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold; background: transparent;")
+        next_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        next_bt.mousePressEvent = lambda e: self._bl_next()
         ll.addWidget(next_bt)
         self._bl_next_bt = next_bt
 
-        gear_bt = QPushButton("⚙")
-        gear_bt.setStyleSheet(
-            "background: white; color: black; font-family: 'JetBrainsMono NFP'; border-radius: 4px; padding: 1px 4px;"
-        )
-        gear_bt.setFixedSize(22, 20)
-        gear_bt.clicked.connect(self._bl_settings)
+        gear_bt = QLabel("⚙")
+        gear_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 11pt; background: transparent;")
+        gear_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        gear_bt.mousePressEvent = lambda e: self._bl_settings()
         ll.addWidget(gear_bt)
 
         self._bl_render()
@@ -865,10 +862,8 @@ class StatusBar(QMainWindow):
             w = create_dynamic_button(self._bl_container_layout, items[idx], "buttons_left", idx)
             self._bl_widgets.append(w)
         # Update arrow colors
-        dim = f"background: #555555; color: black; font-weight: bold; border-radius: 4px; padding: 1px 4px;"
-        act = f"background: white;   color: black; font-weight: bold; border-radius: 4px; padding: 1px 4px;"
-        self._bl_prev_bt.setStyleSheet(act if self._bl_offset > 0 else dim)
-        self._bl_next_bt.setStyleSheet(act if end < len(items) else dim)
+        self._bl_prev_bt.setStyleSheet(f"color: {CP_CYAN if self._bl_offset > 0 else CP_DIM}; font-size: 12pt; font-weight: bold; background: transparent;")
+        self._bl_next_bt.setStyleSheet(f"color: {CP_CYAN if end < len(items) else CP_DIM}; font-size: 12pt; font-weight: bold; background: transparent;")
 
     def _bl_prev(self):
         if self._bl_offset > 0:

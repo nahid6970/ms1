@@ -197,7 +197,9 @@
             },
             "bg": "",
             "padx_left": 5,
-            "padx_right": 5
+            "padx_right": 5,
+            "border": 1,
+            "border_color": "green"
         },
         {
             "id": "Rclone_bt",
@@ -474,6 +476,48 @@
             "padx_right": 1
         },
         {
+            "id": "drive_d",
+            "text": "drive_d",
+            "fg": "",
+            "bg": "",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer D:\\"
+                }
+            },
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "padx_left": 1,
+            "padx_right": 5
+        },
+        {
+            "id": "drive_d",
+            "text": "drive_d",
+            "fg": "",
+            "bg": "",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer D:\\"
+                }
+            },
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "padx_left": 1,
+            "padx_right": 100
+        },
+        {
             "id": "Radarr_bt",
             "text": "Radarr",
             "fg": "#ffdb75",
@@ -510,13 +554,19 @@
             "bindings": {
                 "Button-1": {
                     "type": "function",
+                    "hide": false,
+                    "admin": false,
                     "func": "force_shutdown"
                 },
                 "Button-3": {
                     "type": "function",
+                    "hide": false,
+                    "admin": false,
                     "func": "force_restart"
                 }
-            }
+            },
+            "padx_left": 5,
+            "padx_right": 1
         },
         {
             "id": "LB_R",
