@@ -221,6 +221,31 @@ def open_edit_gui(item_cfg, category, index=None):
     form_pad.addRow("PADX LEFT",  padx_left_le)
     form_pad.addRow("PADX RIGHT", padx_right_le)
     left_layout.addWidget(grp_pad)
+
+    # Placement group
+    grp_place = QGroupBox("PLACEMENT")
+    form_place = QFormLayout()
+    form_place.setSpacing(6)
+    grp_place.setLayout(form_place)
+
+    group_cb = QComboBox()
+    group_cb.addItems(["buttons_left", "buttons_right"])
+    group_cb.setCurrentText(category if category in ["buttons_left", "buttons_right"] else "buttons_left")
+
+    config_now = load_config()
+    cur_list = config_now.get(group_cb.currentText(), [])
+    max_idx = max(len(cur_list) - 1, 0)
+    index_le = QLineEdit(str(index if index is not None else max_idx))
+    index_le.setFixedWidth(60)
+
+    def _on_group_changed(text):
+        lst = load_config().get(text, [])
+        index_le.setText(str(max(len(lst) - 1, 0)))
+    group_cb.currentTextChanged.connect(_on_group_changed)
+
+    form_place.addRow("GROUP", group_cb)
+    form_place.addRow("INDEX", index_le)
+    left_layout.addWidget(grp_place)
     left_layout.addStretch()
 
     # ── RIGHT PANEL ─────────────────────────────────────────────
@@ -309,14 +334,29 @@ def open_edit_gui(item_cfg, category, index=None):
             else:                    new_bindings[bkey]["cmd"]  = cmd
         item_cfg["bindings"] = new_bindings
 
+        new_category = group_cb.currentText()
+        try: new_index = int(index_le.text())
+        except ValueError: new_index = None
+
         config = load_config()
-        if category in config:
-            if index is not None:
-                config[category][index] = item_cfg
-            elif isinstance(config[category], list):
-                config[category].append(item_cfg)
+
+        # Remove from old location first (if editing existing item in a list)
+        if category != new_category and category in config and isinstance(config[category], list) and index is not None:
+            if 0 <= index < len(config[category]):
+                config[category].pop(index)
+
+        target = config.get(new_category, [])
+        if isinstance(target, list):
+            if category == new_category and index is not None and 0 <= index < len(target):
+                target.pop(index)
+            if new_index is not None and 0 <= new_index <= len(target):
+                target.insert(new_index, item_cfg)
             else:
-                config[category][item_cfg["id"]] = item_cfg
+                target.append(item_cfg)
+            config[new_category] = target
+        else:
+            config[new_category][item_cfg["id"]] = item_cfg
+
         save_config(config)
         dlg.accept()
         reply = QMessageBox.question(dlg, "Restart", "Settings saved. Restart GUI to apply?",
