@@ -513,7 +513,11 @@
                 }
             },
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 1,
+            "border_color": "white",
+            "margin_left": 0,
+            "margin_right": 2
         },
         {
             "id": "Radarr_bt",
@@ -534,7 +538,9 @@
                 }
             },
             "padx_left": 1,
-            "padx_right": 1
+            "padx_right": 1,
+            "border": 1,
+            "border_color": "white"
         }
     ],
     "buttons_right": [

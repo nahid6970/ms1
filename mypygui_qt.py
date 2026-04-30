@@ -281,7 +281,10 @@ def open_edit_gui(item_cfg, category, index=None):
     grp_pad = QGroupBox("PADDING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
     padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1)));  padx_left_le.setFixedWidth(60)
     padx_right_le = QLineEdit(str(item_cfg.get("padx_right", 1))); padx_right_le.setFixedWidth(60)
+    margin_left_le  = QLineEdit(str(item_cfg.get("margin_left", 0)));  margin_left_le.setFixedWidth(60)
+    margin_right_le = QLineEdit(str(item_cfg.get("margin_right", 0))); margin_right_le.setFixedWidth(60)
     form_pad.addRow("PADX LEFT", padx_left_le); form_pad.addRow("PADX RIGHT", padx_right_le)
+    form_pad.addRow("MARGIN LEFT", margin_left_le); form_pad.addRow("MARGIN RIGHT", margin_right_le)
     left_layout.addWidget(grp_pad)
 
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
@@ -343,6 +346,10 @@ def open_edit_gui(item_cfg, category, index=None):
         try: item_cfg["padx_left"]  = int(padx_left_le.text())
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
+        except ValueError: pass
+        try: item_cfg["margin_left"]  = int(margin_left_le.text())
+        except ValueError: pass
+        try: item_cfg["margin_right"] = int(margin_right_le.text())
         except ValueError: pass
         new_bindings = {}
         for bkey, inputs in binding_inputs.items():
@@ -451,6 +458,8 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     font_cfg = btn_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
     px_l  = int(btn_cfg.get("padx_left", 1))
     px_r  = int(btn_cfg.get("padx_right", 1))
+    m_l   = int(btn_cfg.get("margin_left", 0))
+    m_r   = int(btn_cfg.get("margin_right", 0))
 
     lbl = QLabel(text)
     lbl.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -462,7 +471,8 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
-        f"font-size: {font_size}pt; font-weight: {bold}; {_border_css}"
+        f"font-size: {font_size}pt; font-weight: {bold}; {_border_css} "
+        f"margin-left: {m_l}px; margin-right: {m_r}px;"
     )
     lbl.setContentsMargins(px_l, 0, px_r, 0)
 
@@ -505,6 +515,8 @@ def _open_static_edit(key):
             "border_color": entry.get("border_color", ""),
             "padx_left": entry.get("padx_left", 0),
             "padx_right": entry.get("padx_right", 0),
+            "margin_left": entry.get("margin_left", 0),
+            "margin_right": entry.get("margin_right", 0),
             "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
@@ -519,11 +531,14 @@ def _apply_static_style(widget, key):
     border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
     px_l = int(cfg.get("padx_left", 0))
     px_r = int(cfg.get("padx_right", 0))
+    m_l  = int(cfg.get("margin_left", 0))
+    m_r  = int(cfg.get("margin_right", 0))
     fw = font[2] if len(font) > 2 else "bold"
     widget.setStyleSheet(
         f"color: {fg}; background: {bg}; font-family: '{font[0]}'; "
         f"font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; "
-        f"{border_css} padding-left: {px_l}px; padding-right: {px_r}px;"
+        f"{border_css} padding-left: {px_l}px; padding-right: {px_r}px; "
+        f"margin-left: {m_l}px; margin-right: {m_r}px;"
     )
 
 def _bind_static(lbl, key, default_cmd):
