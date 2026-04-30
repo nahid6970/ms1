@@ -127,10 +127,9 @@ def save_config(config):
 # ─── SVG / Icon Widgets ────────────────────────────────────────────────────────
 class SvgInputDialog(QDialog):
     def __init__(self, current_svg="", hover_map=None, parent=None):
-        super().__init__(parent)
+        super().__init__(None)
         self.setWindowTitle("PASTE SVG CODE")
         self.resize(600, 580)
-        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         self.svg_code = current_svg
         self.hover_map = hover_map or {}
         self.setStyleSheet(f"""
@@ -423,13 +422,12 @@ def format_uptime():
 # ─── Edit GUI dialog ──────────────────────────────────────────────────────────
 def open_edit_gui(item_cfg, category, index=None):
     config_now = load_config()
-    dlg = QDialog(_main_window if "_main_window" in globals() else None)
+    dlg = QDialog()
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
     ew = config_now.get("edit_panel_width", 1000)
     eh = config_now.get("edit_panel_height", 700)
     dlg.setFixedSize(ew, eh) # Use fixed size for reliable centering
     dlg.setStyleSheet(DIALOG_QSS)
-    dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
     
     # Precise screen centering
@@ -714,7 +712,6 @@ def open_rclone_settings():
     dlg.setWindowTitle("Rclone Settings")
     dlg.resize(380, 200)
     dlg.setStyleSheet(DIALOG_QSS)
-    dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     layout = QVBoxLayout(dlg); layout.setContentsMargins(14, 14, 14, 14); layout.setSpacing(10)
     title = QLabel("// RCLONE SETTINGS")
     title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;")
@@ -1122,7 +1119,6 @@ class StatusBar(QMainWindow):
         dlg.setWindowTitle("Settings")
         dlg.resize(380, 420)
         dlg.setStyleSheet(DIALOG_QSS)
-        dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10)
         title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
 
