@@ -986,8 +986,8 @@ def _bl_settings(e=None):
         dlg.accept(); _bl_render()
     btn.clicked.connect(_save); dlg.exec()
 
-_bl_prev_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#3a3a3a",
-                        font=("JetBrainsMono NFP", 16, "bold"), cursor="hand2")
+_bl_prev_bt = tk.Label(ROOT1, text="«", bg="#1d2027", fg="#3a3a3a",
+                        font=("JetBrainsMono NFP", 11, "bold"), cursor="hand2")
 _bl_prev_bt.pack(side="left", padx=(2,0))
 _bl_prev_bt.bind("<Button-1>", _bl_prev)
 
@@ -995,8 +995,8 @@ _bl_container.pack_forget()  # repack after arrows
 _bl_container = tk.Frame(ROOT1, bg="#1d2027")
 _bl_container.pack(side="left")
 
-_bl_next_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#3a3a3a",
-                        font=("JetBrainsMono NFP", 16, "bold"), cursor="hand2")
+_bl_next_bt = tk.Label(ROOT1, text="»", bg="#1d2027", fg="#3a3a3a",
+                        font=("JetBrainsMono NFP", 11, "bold"), cursor="hand2")
 _bl_next_bt.pack(side="left", padx=(0,2))
 _bl_next_bt.bind("<Button-1>", _bl_next)
 
