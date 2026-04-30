@@ -1147,14 +1147,22 @@ class StatusBar(QMainWindow):
         sb_bg_le     = QLineEdit(_sb_cfg.get("bg", CP_BG));           sb_bg_le.setFixedWidth(90)
         sb_border_le = QLineEdit(_sb_cfg.get("border_color", CP_RED)); sb_border_le.setFixedWidth(90)
         sb_bpx_le    = QLineEdit(str(_sb_cfg.get("border_px", 1)));    sb_bpx_le.setFixedWidth(40)
-        def _pick_color(le):
+        def _set_btn_color(btn, color):
+            btn.setStyleSheet(f"background: {color}; border: 1px solid #555;")
+        def _pick_color(le, btn):
             c = QColorDialog.getColor(QColor(le.text() or "#000000"), dlg)
-            if c.isValid(): le.setText(c.name().upper())
+            if c.isValid():
+                le.setText(c.name().upper())
+                _set_btn_color(btn, c.name())
         bg_row = QWidget(); bg_lay = QHBoxLayout(bg_row); bg_lay.setContentsMargins(0,0,0,0); bg_lay.setSpacing(6)
-        bg_pick = QPushButton("⬛"); bg_pick.setFixedWidth(28); bg_pick.clicked.connect(lambda: _pick_color(sb_bg_le))
+        bg_pick = QPushButton(); bg_pick.setFixedSize(28, 22); _set_btn_color(bg_pick, sb_bg_le.text() or CP_BG)
+        bg_pick.clicked.connect(lambda: _pick_color(sb_bg_le, bg_pick))
+        sb_bg_le.textChanged.connect(lambda t: _set_btn_color(bg_pick, t or CP_BG))
         bg_lay.addWidget(sb_bg_le); bg_lay.addWidget(bg_pick); bg_lay.addStretch()
         bc_row = QWidget(); bc_lay = QHBoxLayout(bc_row); bc_lay.setContentsMargins(0,0,0,0); bc_lay.setSpacing(6)
-        bc_pick = QPushButton("⬛"); bc_pick.setFixedWidth(28); bc_pick.clicked.connect(lambda: _pick_color(sb_border_le))
+        bc_pick = QPushButton(); bc_pick.setFixedSize(28, 22); _set_btn_color(bc_pick, sb_border_le.text() or CP_RED)
+        bc_pick.clicked.connect(lambda: _pick_color(sb_border_le, bc_pick))
+        sb_border_le.textChanged.connect(lambda t: _set_btn_color(bc_pick, t or CP_RED))
         bc_lay.addWidget(sb_border_le); bc_lay.addWidget(bc_pick); bc_lay.addStretch()
         form_sb.addRow("BG COLOR", bg_row)
         form_sb.addRow("BORDER COLOR", bc_row)
