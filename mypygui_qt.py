@@ -998,7 +998,7 @@ class StatusBar(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
         self.setFixedSize(1920, 39)
         screen_w = QApplication.primaryScreen().geometry().width()
-        self.move(screen_w // 2 - 960, 993)
+        self.move(screen_w // 2 - 960, 990)
         self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: 1px solid {CP_RED}; }}")
 
         self._config = load_config()
