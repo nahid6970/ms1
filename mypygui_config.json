@@ -647,20 +647,29 @@
                 "type": "subprocess",
                 "hide": false,
                 "admin": false,
-                "cmd": "sniffnet"
+                "cmd": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py"
             }
         },
         "upload": {
-            "Button-1": {
-                "type": "subprocess",
-                "cmd": "sniffnet"
-            },
+            "id": "upload",
+            "text": "upload",
             "fg": "#ffffff",
+            "bg": "",
             "font": [
                 "JetBrainsMono NFP",
                 10,
                 "bold"
-            ]
+            ],
+            "border": 0,
+            "border_color": "",
+            "padx_left": 0,
+            "padx_right": 0,
+            "Button-1": {
+                "type": "subprocess",
+                "hide": false,
+                "admin": false,
+                "cmd": "sniffnet"
+            }
         },
         "cpu": {
             "id": "cpu",
@@ -765,12 +774,11 @@
                 20,
                 "normal"
             ],
-            "bindings": {},
-            "border": 2,
+            "border": 1,
             "border_color": "red",
             "padx_left": 1,
             "padx_right": 1
         }
     },
-    "buttons_left_page_size": 14
+    "buttons_left_page_size": 20
 }
