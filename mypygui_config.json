@@ -462,12 +462,12 @@
         },
         {
             "id": "Radarr_bt",
-            "text": "\udb83\udfce",
+            "text": "Radarr",
             "fg": "#ffdb75",
             "bg": "#000000",
             "font": [
-                "JetBrainsMono NFP",
-                20,
+                "Consolas",
+                15,
                 "bold"
             ],
             "bindings": {
@@ -596,5 +596,5 @@
             }
         }
     },
-    "buttons_left_page_size": 15
+    "buttons_left_page_size": 14
 }
