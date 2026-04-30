@@ -905,9 +905,22 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 #! ███████╗███████╗██║        ██║
 #! ╚══════╝╚══════╝╚═╝        ╚═╝
 
+# Static widget bindings from config
+_SB = CONFIG.get("static_bindings", {})
+def _bind_static(widget, key, default_cmd):
+    cfg = _SB.get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})
+    for event, action in cfg.items():
+        widget.bind(f"<{event}>", lambda e, a=action: handle_action(a))
+    widget.bind("<Shift-Button-1>", lambda e, k=key: _open_static_edit(k))
+
+def _open_static_edit(key):
+    sb = load_config().get("static_bindings", {})
+    item = {"id": key, "text": key, "fg": "", "bg": "", "bindings": sb.get(key, {})}
+    open_edit_gui(item, "static_bindings")
+
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
-uptime_label.bind("<Button-1>", lambda e: subprocess.Popen("timedate.cpl", shell=True))
+_bind_static(uptime_label, "uptime", "timedate.cpl")
 
 # Load dynamic buttons for ROOT1
 for idx, btn_cfg in enumerate(CONFIG.get("buttons_left", [])):
@@ -1494,16 +1507,15 @@ add_new_bt.bind("<Button-1>", lambda e: open_edit_gui({"text": "NEW", "fg": "#ff
 
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
-Download_lb.bind("<Button-1>", lambda event: subprocess.Popen(["sniffnet"], shell=True))
+_bind_static(Download_lb, "download", "sniffnet")
 
 Upload_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Upload_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
-Upload_lb.bind("<Button-1>", lambda event: subprocess.Popen(["sniffnet"], shell=True))
+_bind_static(Upload_lb, "upload", "sniffnet")
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind( "<Button-1>", lambda event=None: subprocess.Popen([sys.executable, r'C:\@delta\ms1\scripts\process\process_viewer.py']))
-LB_CPU.bind("<Control-Button-1>",lambda event=None: subprocess.Popen(['code', r'C:\@delta\ms1\scripts\process\process_viewer.py']))
+_bind_static(LB_CPU, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py")
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 # LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\@delta\ms1\scripts\pk.ps1"], shell=True))
@@ -1513,19 +1525,19 @@ cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_GPU.bind("<Button-1>", lambda e: subprocess.Popen("start ms-settings:display", shell=True))
+_bind_static(LB_GPU, "gpu", "start ms-settings:display")
 
 LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#f08d0c",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_RAM.bind("<Button-1>", lambda e: subprocess.Popen("taskmgr", shell=True))
+_bind_static(LB_RAM, "ram", "taskmgr")
 
 LB_DUC=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUC.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_DUC.bind("<Button-1>", lambda e: subprocess.Popen("explorer C:\\", shell=True))
+_bind_static(LB_DUC, "drive_c", "explorer C:\\")
 
 LB_DUD=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_DUD.bind("<Button-1>", lambda e: subprocess.Popen("explorer D:\\", shell=True))
+_bind_static(LB_DUD, "drive_d", "explorer D:\\")
 
 # Topmost_lb=tk.Label(ROOT2,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 # Topmost_lb.pack(side="left",padx=(3,0),pady=(0,0))

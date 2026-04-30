@@ -538,4 +538,16 @@
         "interval_min": 5,
         "simultaneous": false
     }
+,
+    "static_bindings": {
+        "uptime":  {"Button-1": {"type": "subprocess", "cmd": "timedate.cpl"}},
+        "download":{"Button-1": {"type": "subprocess", "cmd": "sniffnet"}},
+        "upload":  {"Button-1": {"type": "subprocess", "cmd": "sniffnet"}},
+        "cpu":     {"Button-1": {"type": "python",     "cmd": "C:\\@delta\\ms1\\scripts\\process\\process_viewer.py"},
+                    "Control-Button-1": {"type": "subprocess", "cmd": "code C:\\@delta\\ms1\\scripts\\process\\process_viewer.py"}},
+        "gpu":     {"Button-1": {"type": "subprocess", "cmd": "start ms-settings:display"}},
+        "ram":     {"Button-1": {"type": "subprocess", "cmd": "taskmgr"}},
+        "drive_c": {"Button-1": {"type": "subprocess", "cmd": "explorer C:\\"}},
+        "drive_d": {"Button-1": {"type": "subprocess", "cmd": "explorer D:\\"}}
+    }
 }
