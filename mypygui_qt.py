@@ -554,103 +554,6 @@ class CpuCoreFrame(QWidget):
             )
 
 
-# ─── Countdown ────────────────────────────────────────────────────────────────
-class CountdownState:
-    active       = False
-    last_type    = None   # 1=alarm, 2=shutdown
-    last_minutes = None
-    _time_text   = "\udb86\udee1"  # shared across threads
-
-countdown = CountdownState()
-
-def _countdown_thread(minutes, ctype, label_ref):
-    countdown_time = minutes * 60
-    while countdown_time > 0:
-        if not countdown.active:
-            countdown._time_text = "⏱"
-            return
-        m = int(countdown_time) // 60
-        s = int(countdown_time) % 60
-        countdown._time_text = f"⏱ {m:02}:{s:02}"
-        time.sleep(1)
-        countdown_time -= 1
-    if countdown.active:
-        countdown.active = False
-        countdown._time_text = "⏱"
-        if ctype == 1:
-            _show_alarm_signal.emit()
-        else:
-            os.system("shutdown /s /f /t 1")
-
-class _AlarmSignalEmitter(QObject):
-    alarm = pyqtSignal()
-    def emit(self):
-        self.alarm.emit()
-
-_show_alarm_signal = _AlarmSignalEmitter()
-
-def show_big_alarm():
-    dlg = QDialog()
-    dlg.setWindowTitle("ALARM!")
-    dlg.resize(600, 300)
-    dlg.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
-    dlg.setStyleSheet(f"background: #1d2027;")
-    layout = QVBoxLayout(dlg)
-    lbl = QLabel("ALARM! Time's up!")
-    lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    lbl.setStyleSheet("color: #ff0000; font-size: 36pt; font-weight: bold; font-family: 'JetBrainsMono NFP';")
-    layout.addWidget(lbl)
-    _blink = [True]
-    timer = QTimer(dlg)
-    def blink():
-        lbl.setStyleSheet(
-            f"color: {'#ff0000' if _blink[0] else '#00aaff'}; font-size: 36pt; font-weight: bold; font-family: 'JetBrainsMono NFP';"
-        )
-        _blink[0] = not _blink[0]
-    timer.timeout.connect(blink)
-    timer.start(500)
-    dlg.mousePressEvent = lambda e: dlg.accept()
-    # center
-    screen = QApplication.primaryScreen().geometry()
-    dlg.move(screen.center() - dlg.rect().center())
-    dlg.exec()
-
-_show_alarm_signal.alarm.connect(show_big_alarm)
-
-def start_countdown_option(label_ref):
-    choice, ok = QInputDialog.getInt(
-        None, "Select Timer Type",
-        "Choose an option:\n1 - Countdown Alarm\n2 - Countdown Shutdown",
-        1, 1, 2
-    )
-    if not ok:
-        return
-    if countdown.active:
-        countdown.active = False
-        return
-    minutes, ok2 = QInputDialog.getDouble(None, "Countdown", "Enter minutes:", 5, 0.1, 9999, 1)
-    if not ok2 or minutes <= 0:
-        return
-    countdown.active       = True
-    countdown.last_type    = choice
-    countdown.last_minutes = minutes
-    t = threading.Thread(target=_countdown_thread, args=(minutes, choice, label_ref), daemon=True)
-    t.start()
-
-def run_last_countdown(label_ref):
-    if countdown.last_type is None or countdown.last_minutes is None:
-        return
-    if countdown.active:
-        countdown.active = False
-        return
-    countdown.active = True
-    t = threading.Thread(
-        target=_countdown_thread,
-        args=(countdown.last_minutes, countdown.last_type, label_ref),
-        daemon=True
-    )
-    t.start()
-
 
 # ─── Git status ───────────────────────────────────────────────────────────────
 _git_queue = Queue()
@@ -1120,21 +1023,6 @@ class StatusBar(QMainWindow):
         _bind_static(self.lb_dud, "drive_d", "explorer D:\\")
         rl.addWidget(self.lb_dud)
 
-        # Countdown timer label
-        self.time_left_label = QLabel("⏱")
-        self.time_left_label.setStyleSheet(
-            f"color: {CP_ORANGE}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
-        )
-        self.time_left_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        def _timer_click(e):
-            if e.button() == Qt.MouseButton.RightButton:
-                run_last_countdown(self.time_left_label)
-            else:
-                start_countdown_option(self.time_left_label)
-        self.time_left_label.mousePressEvent = _timer_click
-        rl.addWidget(self.time_left_label)
-
-        # Run last countdown button
 
 
         # Unified settings button
@@ -1171,9 +1059,6 @@ class StatusBar(QMainWindow):
         self._git_timer.start(200)
 
         # Countdown label poll
-        self._countdown_timer = QTimer(self)
-        self._countdown_timer.timeout.connect(self._update_countdown_label)
-        self._countdown_timer.start(500)
 
         # Start rclone checks
         commands = self._config.get("rclone_commands", {})
@@ -1261,8 +1146,6 @@ class StatusBar(QMainWindow):
         except Empty:
             pass
 
-    def _update_countdown_label(self):
-        self.time_left_label.setText(countdown._time_text)
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
