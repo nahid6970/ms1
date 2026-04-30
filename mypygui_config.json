@@ -769,7 +769,9 @@
             "border_color": "green",
             "padx_left": 1,
             "padx_right": 1,
-            "bindings": {}
+            "margin_left": 0,
+            "margin_right": 0,
+            "border_radius": 15
         },
         "rclone_toggle": {
             "id": "rclone_toggle",

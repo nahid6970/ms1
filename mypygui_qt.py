@@ -525,6 +525,7 @@ def _open_static_edit(key):
             "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]),
             "border": entry.get("border", 0),
             "border_color": entry.get("border_color", ""),
+            "border_radius": entry.get("border_radius", 0),
             "padx_left": entry.get("padx_left", 0),
             "padx_right": entry.get("padx_right", 0),
             "margin_left": entry.get("margin_left", 0),
@@ -540,6 +541,7 @@ def _apply_static_style(widget, key):
     font = cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
     border_px = int(cfg.get("border", 0))
     border_col = cfg.get("border_color", "") or bg
+    border_radius = int(cfg.get("border_radius", 0))
     border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
     px_l = int(cfg.get("padx_left", 0))
     px_r = int(cfg.get("padx_right", 0))
@@ -549,7 +551,8 @@ def _apply_static_style(widget, key):
     widget.setStyleSheet(
         f"color: {fg}; background: {bg}; font-family: '{font[0]}'; "
         f"font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; "
-        f"{border_css} padding-left: {px_l}px; padding-right: {px_r}px; "
+        f"{border_css} border-radius: {border_radius}px; "
+        f"padding-left: {px_l}px; padding-right: {px_r}px; "
         f"margin-left: {m_l}px; margin-right: {m_r}px;"
     )
 
