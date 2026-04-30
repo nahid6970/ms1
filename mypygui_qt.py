@@ -64,7 +64,7 @@ QMainWindow, QWidget {{
 QPushButton {{
     background-color: {CP_DIM};
     color: {CP_TEXT};
-    border: 1px solid {CP_DIM};
+    border: none;
     padding: 2px 6px;
 }}
 QPushButton:hover {{
@@ -239,11 +239,12 @@ def format_uptime():
 
 # ─── Edit GUI dialog ──────────────────────────────────────────────────────────
 def open_edit_gui(item_cfg, category, index=None):
-    dlg = QDialog()
+    dlg = QDialog(_main_window if "_main_window" in globals() else None)
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
     dlg.resize(1000, 620)
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+    dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
 
     root_layout = QVBoxLayout(dlg)
     root_layout.setContentsMargins(10, 10, 10, 10)
@@ -400,7 +401,7 @@ def open_edit_gui(item_cfg, category, index=None):
 
     btn_save.clicked.connect(save)
     btn_delete.clicked.connect(delete)
-    dlg.exec()
+    dlg.show()
 
 
 # ─── Rclone settings dialog ───────────────────────────────────────────────────
@@ -430,7 +431,7 @@ def open_rclone_settings():
         save_config(config)
         dlg.accept()
     btn_save.clicked.connect(save)
-    dlg.exec()
+    dlg.show()
 
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
@@ -727,7 +728,7 @@ class StatusBar(QMainWindow):
 
         central = QWidget()
         self.setCentralWidget(central)
-        central.setStyleSheet(f"background: {CP_BG}; border: 1px solid {CP_RED};")
+        central.setStyleSheet(f"background: {CP_BG};")
         main_layout = QHBoxLayout(central)
         main_layout.setContentsMargins(2, 1, 2, 1)
         main_layout.setSpacing(0)
@@ -895,7 +896,7 @@ class StatusBar(QMainWindow):
             except ValueError: pass
             cfg = load_config(); cfg["buttons_left_page_size"] = self._bl_page_size; save_config(cfg)
             dlg.accept(); self._bl_render()
-        btn.clicked.connect(_save); dlg.exec()
+        btn.clicked.connect(_save); dlg.show()
 
     # ── Git section ───────────────────────────────────────────────────────────
     def _build_git(self, ll):
@@ -1238,10 +1239,13 @@ class StatusBar(QMainWindow):
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
+_main_window = None
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     app.setStyleSheet(GLOBAL_QSS)
     window = StatusBar()
+    _main_window = window
     window.show()
     calculate_time_to_appear(start_time)
     sys.exit(app.exec())

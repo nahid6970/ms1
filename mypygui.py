@@ -392,11 +392,7 @@ def open_edit_gui(item_cfg, category, index=None):
 
     btn_save.clicked.connect(save)
     btn_delete.clicked.connect(delete)
-    dlg.setWindowModality(Qt.WindowModality.NonModal)
     dlg.show()
-    while dlg.isVisible():
-        _qt_app.processEvents()
-        import time as _t; _t.sleep(0.01)
 
 def create_dynamic_button(parent, btn_cfg, category, index=None):
     widget_type = btn_cfg.get("widget_type", "Label")
@@ -562,6 +558,8 @@ BORDER_FRAME = create_custom_border(ROOT)
 
 default_font = ("Jetbrainsmono nfp", 10)
 ROOT.option_add("*Font", default_font)
+ROOT.option_add("*highlightThickness", 0)
+ROOT.option_add("*borderWidth", 0)
 
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
@@ -1488,11 +1486,7 @@ def open_rclone_settings():
         dlg.accept()
 
     btn_save.clicked.connect(save)
-    dlg.setWindowModality(Qt.WindowModality.NonModal)
     dlg.show()
-    while dlg.isVisible():
-        _qt_app.processEvents()
-        import time as _t; _t.sleep(0.01)
 
 rclone_settings_bt = tk.Label(ROOT1, text="", bg="#1d2027", fg="#808080",
                                font=("JetBrainsMono NFP", 14, "bold"), cursor="hand2")
@@ -1919,4 +1913,8 @@ update_info_labels()
 # Lockbox_update_label(LockBox_lb)
 calculate_time_to_appear(start_time)
 
+def _pump_qt():
+    _qt_app.processEvents()
+    ROOT.after(16, _pump_qt)
+_pump_qt()
 ROOT.mainloop()
