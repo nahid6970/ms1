@@ -577,6 +577,7 @@ def open_edit_gui(item_cfg, category, index=None):
     right_w = QWidget(); right_layout = QVBoxLayout(right_w)
     right_layout.setSpacing(6); right_layout.setContentsMargins(6, 6, 6, 6)
     right_scroll.setWidget(right_w); panels.addWidget(right_scroll, 2)
+    _ctrl_lbl = QLabel("CONTROLS"); _ctrl_lbl.setObjectName("section_label"); right_layout.addWidget(_ctrl_lbl)
 
     click_types = [("LEFT CLICK", "Button-1"), ("RIGHT CLICK", "Button-3"),
                    ("CTRL + LEFT", "Control-Button-1"), ("CTRL + RIGHT", "Control-Button-3")]
