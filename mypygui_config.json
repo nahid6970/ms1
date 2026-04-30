@@ -497,8 +497,8 @@
         {
             "id": "Sonarr_bt",
             "text": "Sonarr",
-            "fg": "#ffdb75",
-            "bg": "#000000",
+            "fg": "",
+            "bg": "red",
             "font": [
                 "Consolas",
                 15,
@@ -518,7 +518,7 @@
             "border_color": "white",
             "margin_left": 0,
             "margin_right": 2,
-            "border_radius": 0
+            "border_radius": 15
         },
         {
             "id": "Radarr_bt",

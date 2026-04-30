@@ -261,12 +261,16 @@ def open_edit_gui(item_cfg, category, index=None):
     entries = {}
     for field in ["text", "fg", "bg", "id"]:
         ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
+    
     border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
     border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
     border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(50)
-    form_appear.addRow("BORDER PX", border_px_le)
+    
+    b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
+    b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le); b_lay.addStretch()
+    
+    form_appear.addRow("BORDER PX", b_row)
     form_appear.addRow("BORDER COLOR", border_color_le)
-    form_appear.addRow("BORDER RADIUS", border_radius_le)
     left_layout.addWidget(grp_appear)
 
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
@@ -277,7 +281,11 @@ def open_edit_gui(item_cfg, category, index=None):
     font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16"); font_size_le.setFixedWidth(60)
     font_weight_cb = QComboBox(); font_weight_cb.addItems(["bold", "normal"])
     font_weight_cb.setCurrentText(cur_font[2] if len(cur_font) > 2 else "bold")
-    form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", font_size_le); form_font.addRow("WEIGHT", font_weight_cb)
+
+    f_row = QWidget(); f_lay = QHBoxLayout(f_row); f_lay.setContentsMargins(0,0,0,0); f_lay.setSpacing(10)
+    f_lay.addWidget(font_size_le); f_lay.addWidget(QLabel("WEIGHT")); f_lay.addWidget(font_weight_cb); f_lay.addStretch()
+
+    form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
     left_layout.addWidget(grp_font)
 
     grp_pad = QGroupBox("SPACING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
@@ -305,7 +313,11 @@ def open_edit_gui(item_cfg, category, index=None):
         lst = config_now.get(text, [])
         index_le.setText(str(max(len(lst) - 1, 0)))
     group_cb.currentTextChanged.connect(_on_group_changed)
-    form_place.addRow("GROUP", group_cb); form_place.addRow("INDEX", index_le)
+
+    p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
+    p_lay.addWidget(group_cb); p_lay.addWidget(QLabel("INDEX")); p_lay.addWidget(index_le); p_lay.addStretch()
+
+    form_place.addRow("GROUP", p_row)
     if category in ["buttons_left", "buttons_right"]:
         left_layout.addWidget(grp_place)
     left_layout.addStretch()
