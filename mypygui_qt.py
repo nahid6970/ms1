@@ -822,11 +822,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(next_bt)
         self._bl_next_bt = next_bt
 
-        gear_bt = QLabel("⚙")
-        gear_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 11pt; background: transparent;")
-        gear_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        gear_bt.mousePressEvent = lambda e: self._bl_settings()
-        ll.addWidget(gear_bt)
+
 
         self._bl_render()
 
@@ -844,13 +840,7 @@ class StatusBar(QMainWindow):
         ll.addWidget(self._rclone_toggle)
 
         # 5. Rclone settings gear
-        rclone_gear = QLabel("⚙")
-        rclone_gear.setStyleSheet(
-            f"color: #808080; font-family: 'JetBrainsMono NFP'; font-size: 14pt;"
-        )
-        rclone_gear.setCursor(Qt.CursorShape.PointingHandCursor)
-        rclone_gear.mousePressEvent = lambda e: open_rclone_settings()
-        ll.addWidget(rclone_gear)
+
 
         # 6. Add new button
         add_bt = QLabel("+")
@@ -863,6 +853,38 @@ class StatusBar(QMainWindow):
             "buttons_left"
         )
         ll.addWidget(add_bt)
+
+    def _open_unified_settings(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Settings")
+        dlg.resize(380, 280)
+        dlg.setStyleSheet(DIALOG_QSS)
+        dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+        lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10)
+        title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold;"); lay.addWidget(title)
+
+        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1)
+        size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60)
+        form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
+
+        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
+        rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
+        interval_le = QLineEdit(str(rc.get("interval_min", 10))); interval_le.setFixedWidth(60)
+        simul_chk = QCheckBox("Run simultaneously"); simul_chk.setChecked(bool(rc.get("simultaneous", True)))
+        form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
+
+        btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
+        def _save():
+            try: self._bl_page_size = int(size_le.text())
+            except ValueError: pass
+            try: mins = int(interval_le.text())
+            except ValueError: mins = 10
+            cfg = load_config()
+            cfg["buttons_left_page_size"] = self._bl_page_size
+            cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
+            save_config(cfg)
+            dlg.accept(); self._bl_render()
+        btn.clicked.connect(_save); dlg.show()
 
     def _bl_render(self):
         # Clear entire layout (widgets + spacers)
@@ -891,28 +913,6 @@ class StatusBar(QMainWindow):
         if self._bl_offset + self._bl_page_size < len(items):
             self._bl_offset += self._bl_page_size
             self._bl_render()
-
-    def _bl_settings(self):
-        dlg = QDialog(self)
-        dlg.setWindowTitle("Button Bar Settings")
-        dlg.resize(320, 160)
-        dlg.setStyleSheet(DIALOG_QSS)
-        dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
-        lay = QVBoxLayout(dlg); lay.setContentsMargins(12, 12, 12, 12)
-        title = QLabel("// BUTTON BAR")
-        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 12pt; font-weight: bold;")
-        lay.addWidget(title)
-        grp = QGroupBox("PAGE SIZE"); form = QFormLayout(); grp.setLayout(form)
-        size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60)
-        form.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp)
-        btn = QPushButton("SAVE"); btn.setObjectName("btn_save")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
-        def _save():
-            try: self._bl_page_size = int(size_le.text())
-            except ValueError: pass
-            cfg = load_config(); cfg["buttons_left_page_size"] = self._bl_page_size; save_config(cfg)
-            dlg.accept(); self._bl_render()
-        btn.clicked.connect(_save); dlg.show()
 
     # ── Git section ───────────────────────────────────────────────────────────
     def _build_git(self, ll):
@@ -1133,6 +1133,13 @@ class StatusBar(QMainWindow):
 
         # Run last countdown button
 
+
+        # Unified settings button
+        settings_bt = QLabel("⚙")
+        settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
+        settings_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        settings_bt.mousePressEvent = lambda e: self._open_unified_settings()
+        rl.addWidget(settings_bt)
 
         # Dynamic buttons_right
         for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])):
