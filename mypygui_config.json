@@ -528,7 +528,7 @@
             "bg": "#1d2027",
             "font": [
                 "JetBrainsMono NFP",
-                20,
+                18,
                 "bold"
             ],
             "widget_type": "CTkButton",

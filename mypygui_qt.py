@@ -814,7 +814,7 @@ class StatusBar(QMainWindow):
         self._git_labels = {}
 
         git_frame = QFrame()
-        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid {CP_DIM}; border-radius: 3px; background: transparent; }} QLabel {{ border: none; }}")
+        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #606060; border-radius: 3px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame)
         git_row.setContentsMargins(4, 0, 4, 0)
         git_row.setSpacing(2)
