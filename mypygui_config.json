@@ -674,6 +674,40 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "center"
+        },
+        {
+            "text": "NEW",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "btn_1777560741",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://nahid6970.github.io/db/@Convex/myhome-convex/index"
+                }
+            },
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "buttons_right": [

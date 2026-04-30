@@ -556,10 +556,10 @@ def open_edit_gui(item_cfg, category, index=None):
     group_cb.setCurrentText(category if category in ["buttons_left", "buttons_right"] else "buttons_left")
     config_now = load_config()
     cur_list = config_now.get(group_cb.currentText(), [])
-    index_le = QLineEdit(str(index if index is not None else max(len(cur_list) - 1, 0))); index_le.setFixedWidth(60)
+    index_le = QLineEdit(str(index if index is not None else len(cur_list))); index_le.setFixedWidth(60)
     def _on_group_changed(text):
         lst = config_now.get(text, [])
-        index_le.setText(str(max(len(lst) - 1, 0)))
+        index_le.setText(str(len(lst)))
     group_cb.currentTextChanged.connect(_on_group_changed)
 
     p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
