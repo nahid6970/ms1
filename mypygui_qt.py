@@ -945,7 +945,10 @@ class StatusBar(QMainWindow):
             f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
         )
         self._rclone_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._rclone_toggle.mousePressEvent = lambda e: self._toggle_rclone_popup()
+        def _rclone_click(e):
+            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("rclone_toggle")
+            else: self._toggle_rclone_popup()
+        self._rclone_toggle.mousePressEvent = _rclone_click
         rl.addWidget(self._rclone_toggle)
 
         # Git section
@@ -1031,7 +1034,10 @@ class StatusBar(QMainWindow):
         settings_bt = QLabel("⚙")
         settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
         settings_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        settings_bt.mousePressEvent = lambda e: self._open_unified_settings()
+        def _settings_click(e):
+            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("settings")
+            else: self._open_unified_settings()
+        settings_bt.mousePressEvent = _settings_click
         rl.addWidget(settings_bt)
 
         # Dynamic buttons_right

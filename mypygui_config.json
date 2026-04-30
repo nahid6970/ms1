@@ -375,18 +375,27 @@
             "font": [
                 "JetBrainsMono NFP",
                 16,
-                "bold"
+                "normal"
             ],
             "bindings": {
                 "Button-1": {
                     "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "cmd /c C:\\@delta\\ms1\\path_tracker.py"
                 },
                 "Control-Button-1": {
                     "type": "run_command",
+                    "hide": false,
+                    "admin": false,
                     "cmd": "code C:\\@delta\\ms1\\path_tracker.py"
                 }
-            }
+            },
+            "bg": "",
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
         },
         {
             "id": "Automation",
@@ -670,6 +679,38 @@
                 "type": "subprocess",
                 "cmd": "explorer D:\\"
             }
+        },
+        "settings": {
+            "id": "settings",
+            "text": "settings",
+            "fg": "",
+            "bg": "red",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {},
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
+        },
+        "rclone_toggle": {
+            "id": "rclone_toggle",
+            "text": "rclone_toggle",
+            "fg": "",
+            "bg": "red",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "bindings": {},
+            "border": 0,
+            "border_color": "",
+            "padx_left": 1,
+            "padx_right": 1
         }
     },
     "buttons_left_page_size": 14
