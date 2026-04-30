@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
+    QStyle, QStyleOption,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument
@@ -217,16 +218,16 @@ class IconLabel(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # Determine colors
-        cfg = self.btn_cfg
-        bg = cfg.get("bg", CP_BG)
-        fg = cfg.get("fg", "white")
-        if self._is_hovered:
-            # We use QSS for background/border usually, but if we want manual control:
-            # For now, let's respect the parent stylesheet if possible, or draw bg here.
-            pass
+        # Draw stylesheet background/border
+        opt = QStyleOption()
+        opt.initFrom(self)
+        self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
+        
+        # Determine foreground color (respect palette/stylesheet)
+        fg = self.palette().windowText().color().name()
 
         # Check for icon
+        cfg = self.btn_cfg
         icon_path = cfg.get("icon_path", "")
         svg_content = cfg.get("svg_content", "")
         nf_char = cfg.get("nf_char", "")
@@ -664,13 +665,13 @@ def open_edit_gui(item_cfg, category, index=None):
                 config[new_category][item_cfg["id"]] = item_cfg
         save_config(config)
         dlg.accept()
-        r = QMessageBox.question(None, "Restart", "Settings saved. Restart GUI to apply?",
+        r = QMessageBox.question(dlg, "Restart", "Settings saved. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if r == QMessageBox.StandardButton.Yes:
             _app_restart()
 
     def delete():
-        r = QMessageBox.question(None, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
+        r = QMessageBox.question(dlg, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if r != QMessageBox.StandardButton.Yes: return
         config = load_config()
@@ -687,7 +688,8 @@ def open_edit_gui(item_cfg, category, index=None):
                     del config[category][item_id]
         save_config(config)
         dlg.accept()
-        r = QMessageBox.question(None, "Restart", "Item deleted. Restart GUI to apply?",
+        r = QMessageBox.question(_main_window if "_main_window" in globals() else None, 
+                                 "Restart", "Item deleted. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if r == QMessageBox.StandardButton.Yes:
             _app_restart()
