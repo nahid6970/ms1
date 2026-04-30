@@ -426,12 +426,14 @@ def open_edit_gui(item_cfg, category, index=None):
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
     ew = config_now.get("edit_panel_width", 1000)
     eh = config_now.get("edit_panel_height", 700)
-    dlg.resize(ew, eh)
+    dlg.setFixedSize(ew, eh) # Use fixed size for reliable centering
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
-    screen = QApplication.primaryScreen().geometry()
-    dlg.move(screen.center().x() - ew // 2, screen.center().y() - eh // 2)
+    
+    # Precise screen centering
+    screen_geo = QApplication.primaryScreen().availableGeometry()
+    dlg.move(screen_geo.center().x() - ew // 2, screen_geo.center().y() - eh // 2)
 
     root_layout = QVBoxLayout(dlg)
     root_layout.setContentsMargins(10, 10, 10, 10)
