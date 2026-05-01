@@ -568,22 +568,13 @@ def open_edit_gui(item_cfg, category, index=None):
     left_layout.addWidget(grp_pad)
 
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
-    group_cb = QComboBox(); group_cb.addItems(["buttons_left", "buttons_right"])
-    group_cb.setCurrentText(category if category in ["buttons_left", "buttons_right"] else "buttons_left")
-    config_now = load_config()
-    cur_list = config_now.get(group_cb.currentText(), [])
-    index_le = QLineEdit(str(index if index is not None else len(cur_list))); index_le.setFixedWidth(60)
-    def _on_group_changed(text):
-        lst = config_now.get(text, [])
-        index_le.setText(str(len(lst)))
-    group_cb.currentTextChanged.connect(_on_group_changed)
-
+    group_le = QLineEdit(category or "buttons_left")
+    index_le = QLineEdit(str(index if index is not None else 0)); index_le.setFixedWidth(60)
+    
     p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
-    p_lay.addWidget(group_cb); p_lay.addWidget(QLabel("INDEX")); p_lay.addWidget(index_le); p_lay.addStretch()
-
-    form_place.addRow("GROUP", p_row)
-    if category in ["buttons_left", "buttons_right"]:
-        left_layout.addWidget(grp_place)
+    p_lay.addWidget(group_le); p_lay.addWidget(QLabel("INDEX")); p_lay.addWidget(index_le); p_lay.addStretch()
+    form_place.addRow("GROUP/CATEGORY", p_row)
+    left_layout.addWidget(grp_place)
     left_layout.addStretch()
 
     # Right panel
@@ -600,7 +591,7 @@ def open_edit_gui(item_cfg, category, index=None):
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
         cmd_le   = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
-        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url"])
+        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url", "popup"])
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
@@ -662,14 +653,19 @@ def open_edit_gui(item_cfg, category, index=None):
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
         item_cfg["bindings"] = new_bindings
-        new_category = group_cb.currentText() if category in ["buttons_left", "buttons_right"] else category
-        try: new_index = int(index_le.text()) if category in ["buttons_left", "buttons_right"] else None
+        new_category = group_le.text()
+        try: new_index = int(index_le.text())
         except ValueError: new_index = None
         config = load_config()
         if category != new_category and category in config and isinstance(config[category], list) and index is not None:
             if 0 <= index < len(config[category]):
                 config[category].pop(index)
         target = config.get(new_category, [])
+        if not isinstance(target, list) and new_category not in ["static_bindings"]:
+             # If target exists but is not a list, and not static_bindings, we might be overwriting a dict?
+             # For popup bars, we expect them to be lists of buttons.
+             target = []
+        
         if isinstance(target, list):
             if category == new_category and index is not None and 0 <= index < len(target):
                 target.pop(index)
@@ -751,6 +747,44 @@ def open_rclone_settings():
     dlg.show()
 
 
+# ─── Generic Popup Bar ────────────────────────────────────────────────────────
+class GenericPopup(QFrame):
+    def __init__(self, parent, category, anchor_widget):
+        super().__init__(parent, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
+        self.category = category
+        self.anchor_widget = anchor_widget
+        self.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {CP_RED}; }} QLabel {{ border: none; background: transparent; }}")
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(4, 2, 4, 2)
+        self.layout.setSpacing(4)
+        self.render_items()
+
+    def render_items(self):
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        
+        config = load_config()
+        items = config.get(self.category, [])
+        for idx, cfg in enumerate(items):
+            create_dynamic_button(self.layout, cfg, self.category, idx)
+        
+        # Add '+' button like the main statusbar
+        add_bt = QLabel("+")
+        add_bt.setStyleSheet(f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; padding: 0 5px;")
+        add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
+        _new_cfg = {"text": "SUB", "fg": "#ffffff", "bg": CP_BG, "id": f"sub_{int(time.time())}", "bindings": {}}
+        add_bt.mousePressEvent = lambda e: open_edit_gui(_new_cfg, self.category)
+        self.layout.addWidget(add_bt)
+        self.adjustSize()
+
+def open_popup_bar(category, anchor_widget):
+    popup = GenericPopup(anchor_widget.window(), category, anchor_widget)
+    gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
+    cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
+    popup.move(cx, gpos.y() - popup.height() - 2)
+    popup.show()
+
 # ─── Dynamic button factory ───────────────────────────────────────────────────
 def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     """Creates an IconLabel-based button and adds it to parent_layout (QHBoxLayout)."""
@@ -777,8 +811,6 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _border_radius = int(btn_cfg.get("border_radius", 0))
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
     
-    # We still use stylesheet for the container properties (bg, border)
-    # IconLabel.paintEvent will handle drawing the content (text + icon)
     lbl.setStyleSheet(
         f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
         f"font-size: {font_size}pt; font-weight: {bold}; {_border_css} "
@@ -789,22 +821,25 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
 
     bindings = btn_cfg.get("bindings", {})
 
-    def _make_handler(action):
-        return lambda e: handle_action(action)
-
-    def mousePressEvent(event, _bindings=bindings, _cfg=btn_cfg, _cat=category, _idx=index):
+    def mousePressEvent(event, _bindings=bindings, _cfg=btn_cfg, _cat=category, _idx=index, _lbl=lbl):
         mods = event.modifiers()
         btn  = event.button()
         if mods & Qt.KeyboardModifier.ShiftModifier:
             open_edit_gui(_cfg, _cat, _idx)
             return
-        key = None
+        
+        bkey = None
         if btn == Qt.MouseButton.LeftButton:
-            key = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
+            bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
         elif btn == Qt.MouseButton.RightButton:
-            key = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
-        if key and key in _bindings:
-            handle_action(_bindings[key])
+            bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
+        
+        if bkey and bkey in _bindings:
+            action = _bindings[bkey]
+            if action.get("type") == "popup":
+                open_popup_bar(action.get("cmd", "popup_bar"), _lbl)
+            else:
+                handle_action(action)
 
     lbl.mousePressEvent = mousePressEvent
     parent_layout.addWidget(lbl)
