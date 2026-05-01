@@ -725,7 +725,8 @@
                     "admin": false,
                     "cmd": "arr",
                     "row_limit": 10,
-                    "border_color": "",
+                    "bg_color": "",
+                    "border_color": "red",
                     "border_px": 1
                 }
             },
