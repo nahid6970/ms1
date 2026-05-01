@@ -50,7 +50,7 @@
             "dst": "o0:/ms1/",
             "log": "C:/Users/nahid/script_output/rclone/ms1_check.log",
             "label": "ms1",
-            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
+            "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"  --log-level INFO",
             "right_click_cmd": "rclone sync dst src -P --fast-list"
         },
         "Photos": {

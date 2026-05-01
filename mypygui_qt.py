@@ -36,6 +36,10 @@ from PyQt6.QtSvg import QSvgRenderer
 
 start_time = time.time()
 
+class _RcloneSignal(QObject):
+    update = pyqtSignal(object, str)  # (toggle_lbl, color)
+_rclone_sig = None  # initialized after QApplication exists
+
 # ─── Theme ────────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
 CP_PANEL  = "#111111"
@@ -966,9 +970,18 @@ def _update_toggle_color_cb(toggle_lbl):
     if not rclone_status:
         return
     agg = CP_GREEN if all(c == CP_GREEN for c in rclone_status.values()) else CP_RED
-    toggle_lbl.setStyleSheet(
-        f"color: {agg}; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
-    )
+    # Replace only the color value in the existing stylesheet to preserve other properties
+    import re as _re
+    ss = toggle_lbl.styleSheet()
+    if ss:
+        new_ss = _re.sub(r'color\s*:[^;]+;', f'color: {agg};', ss)
+        if new_ss == ss:  # no color property found, append it
+            new_ss = ss.rstrip(';') + f'; color: {agg};'
+        toggle_lbl.setStyleSheet(new_ss)
+    else:
+        toggle_lbl.setStyleSheet(
+            f"color: {agg}; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
+        )
 
 def check_and_update_rclone(cfg, toggle_lbl):
     def run():
@@ -979,8 +992,9 @@ def check_and_update_rclone(cfg, toggle_lbl):
             content = f.read()
         color = CP_GREEN if "ERROR" not in content else CP_RED
         rclone_status[cfg.get("id", cfg["label"])] = color
-        # schedule UI update on main thread via QTimer.singleShot
-        QTimer.singleShot(0, lambda: _update_toggle_color_cb(toggle_lbl))
+        # emit signal to update UI safely from main thread
+        if _rclone_sig:
+            _rclone_sig.update.emit(toggle_lbl, "")
         interval_ms = int(load_config().get("rclone_settings", {}).get("interval_min", 10)) * 60000
         QTimer.singleShot(interval_ms, lambda: check_and_update_rclone(cfg, toggle_lbl))
     threading.Thread(target=run, daemon=True).start()
@@ -1629,6 +1643,8 @@ _main_window = None
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    _rclone_sig = _RcloneSignal()
+    _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl))
     app.setStyleSheet(GLOBAL_QSS)
     window = StatusBar()
     _main_window = window
