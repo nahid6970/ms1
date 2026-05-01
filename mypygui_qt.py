@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import (
     QStyle, QStyleOption, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon
 from PyQt6.QtSvg import QSvgRenderer
 
 
@@ -471,26 +471,24 @@ def open_edit_gui(item_cfg, category, index=None):
     # 1. CORE SECTION (Top Section)
     grp_core = QGroupBox("CORE SETTINGS"); form_core = QVBoxLayout(); grp_core.setLayout(form_core)
     
-    # Row 1: Text & Path
+    # Row 1: Text, Path, NF, SVG
     row1 = QWidget(); lay1 = QHBoxLayout(row1); lay1.setContentsMargins(0,0,0,0); lay1.setSpacing(10)
     text_le = QLineEdit(str(item_cfg.get("text", ""))); lay1.addWidget(QLabel("TEXT")); lay1.addWidget(text_le, 2)
     icon_path_le = QLineEdit(str(item_cfg.get("icon_path", ""))); lay1.addWidget(QLabel("PATH")); lay1.addWidget(icon_path_le, 3)
-    form_core.addWidget(row1)
+    nf_char_le = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(40)
+    lay1.addWidget(QLabel("NF")); lay1.addWidget(nf_char_le)
 
-    # Row 2: SVG, NF, W, H, GAP
-    row2 = QWidget(); lay2 = QHBoxLayout(row2); lay2.setContentsMargins(0,0,0,0); lay2.setSpacing(10)
-    
-    svg_btn = QPushButton("SVG")
-    svg_preview = QLabel(); svg_preview.setFixedSize(24, 24); svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
-    svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    
+    svg_btn = QPushButton("SVG"); svg_btn.setFixedSize(34, 26)
     def _update_svg_preview(code):
-        if not code: svg_preview.clear(); return
+        if not code:
+            svg_btn.setText("SVG"); svg_btn.setIcon(QIcon())
+            return
         try:
-            pix = QPixmap(20, 20); pix.fill(Qt.GlobalColor.transparent)
-            painter = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
-            renderer.render(painter); painter.end(); svg_preview.setPixmap(pix)
-        except: svg_preview.setText("ERR")
+            pix = QPixmap(24, 24); pix.fill(Qt.GlobalColor.transparent)
+            p = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
+            renderer.render(p); p.end()
+            svg_btn.setText(""); svg_btn.setIcon(QIcon(pix)); svg_btn.setIconSize(QSize(20, 20))
+        except: svg_btn.setText("ERR")
     _update_svg_preview(item_cfg.get("svg_content", ""))
 
     def _open_svg_dlg():
@@ -500,15 +498,16 @@ def open_edit_gui(item_cfg, category, index=None):
             item_cfg["svg_hover_map"] = dlg_svg.hover_map
             _update_svg_preview(dlg_svg.svg_code)
     svg_btn.clicked.connect(_open_svg_dlg)
-    
-    nf_char_le = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(40)
+    lay1.addWidget(svg_btn)
+    form_core.addWidget(row1)
+
+    # Row 2: W, H, GAP
+    row2 = QWidget(); lay2 = QHBoxLayout(row2); lay2.setContentsMargins(0,0,0,0); lay2.setSpacing(10)
     icon_w_le = QLineEdit(str(item_cfg.get("icon_width", 0))); icon_w_le.setFixedWidth(40)
     icon_h_le = QLineEdit(str(item_cfg.get("icon_height", 0))); icon_h_le.setFixedWidth(40)
     icon_gap_le = QLineEdit(str(item_cfg.get("icon_gap", 4))); icon_gap_le.setFixedWidth(40)
 
-    lay2.addWidget(svg_btn); lay2.addWidget(svg_preview)
-    lay2.addWidget(QLabel("NF")); lay2.addWidget(nf_char_le)
-    lay2.addWidget(QLabel("W"));  lay2.addWidget(icon_w_le)
+    lay2.addWidget(QLabel("ICON SCALING:  W"));  lay2.addWidget(icon_w_le)
     lay2.addWidget(QLabel("H"));  lay2.addWidget(icon_h_le)
     lay2.addWidget(QLabel("GAP")); lay2.addWidget(icon_gap_le); lay2.addStretch()
     form_core.addWidget(row2)
