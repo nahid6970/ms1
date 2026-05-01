@@ -720,16 +720,13 @@
             ],
             "bindings": {
                 "Button-1": {
-                    "type": "subprocess",
+                    "type": "popup",
                     "hide": false,
                     "admin": false,
-                    "cmd": "explorer D:\\Downloads\\@Sonarr"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "explorer D:\\Downloads\\@Radarr"
+                    "cmd": "arr",
+                    "row_limit": 10,
+                    "border_color": "",
+                    "border_px": 1
                 }
             },
             "padx_left": 1,
@@ -1294,7 +1291,291 @@
             "svg_hover_map": {}
         }
     ],
-    "popup_y_offset": 4,
+    "popup_y_offset": 10,
     "edit_left_weight": 1,
-    "edit_right_weight": 1
+    "edit_right_weight": 1,
+    "arr": [
+        {
+            "text": "Sonarr",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633261",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "sonarr",
+                    "row_limit": 10,
+                    "border_color": "",
+                    "border_px": 1
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "Radarr",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633383",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "radarr",
+                    "row_limit": 10,
+                    "border_color": "",
+                    "border_px": 1
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
+    ],
+    "sonarr": [
+        {
+            "text": "Folder",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633429",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer D:\\Downloads\\@Sonarr"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "WEB",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633550",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "http://192.168.0.101:8989/calendar"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "myTV",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633748",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "http://192.168.0.101:5011"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
+    ],
+    "radarr": [
+        {
+            "text": "Folder",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777633989",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer D:\\Downloads\\@Radarr"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "WEB",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777634018",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "http://192.168.0.101:7878/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "myMovie",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777634048",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "http://192.168.0.101:5013"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
+    ]
 }
