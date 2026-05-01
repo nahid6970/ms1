@@ -520,15 +520,15 @@ def open_edit_gui(item_cfg, category, index=None):
     for field in ["fg", "bg", "id"]:
         ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
     
-    border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
-    border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
-    border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(50)
+    border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(40)
+    border_color_le = QLineEdit(str(item_cfg.get("border_color", ""))); border_color_le.setFixedWidth(80)
+    border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(40)
     
     b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
-    b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le); b_lay.addStretch()
+    b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le)
+    b_lay.addWidget(QLabel("COLOR")); b_lay.addWidget(border_color_le); b_lay.addStretch()
     
     form_appear.addRow("BORDER PX", b_row)
-    form_appear.addRow("BORDER COLOR", border_color_le)
 
     # Button dimensions
     width_le  = QLineEdit(str(item_cfg.get("width", 0)));  width_le.setFixedWidth(50)
