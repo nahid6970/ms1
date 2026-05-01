@@ -468,49 +468,14 @@ def open_edit_gui(item_cfg, category, index=None):
     left_layout.setSpacing(6); left_layout.setContentsMargins(6, 6, 6, 6)
     left_scroll.setWidget(left_w); panels.addWidget(left_scroll, 1)
 
-    grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
-    entries = {}
-    for field in ["text", "fg", "bg", "id"]:
-        ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
+    # 1. CORE SECTION (Top Row)
+    grp_core = QGroupBox("CORE SETTINGS"); form_core = QVBoxLayout(); grp_core.setLayout(form_core)
     
-    border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
-    border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
-    border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(50)
+    row1 = QWidget(); lay1 = QHBoxLayout(row1); lay1.setContentsMargins(0,0,0,0); lay1.setSpacing(10)
+    text_le = QLineEdit(str(item_cfg.get("text", ""))); lay1.addWidget(QLabel("TEXT")); lay1.addWidget(text_le, 2)
+    icon_path_le = QLineEdit(str(item_cfg.get("icon_path", ""))); lay1.addWidget(QLabel("PATH")); lay1.addWidget(icon_path_le, 3)
     
-    b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
-    b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le); b_lay.addStretch()
-    
-    form_appear.addRow("BORDER PX", b_row)
-    form_appear.addRow("BORDER COLOR", border_color_le)
-
-    # Button dimensions
-    width_le  = QLineEdit(str(item_cfg.get("width", 0)));  width_le.setFixedWidth(50)
-    height_le = QLineEdit(str(item_cfg.get("height", 0))); height_le.setFixedWidth(50)
-    dim_btn_row = QWidget(); dim_btn_lay = QHBoxLayout(dim_btn_row); dim_btn_lay.setContentsMargins(0,0,0,0); dim_btn_lay.setSpacing(10)
-    dim_btn_lay.addWidget(width_le); dim_btn_lay.addWidget(QLabel("HEIGHT")); dim_btn_lay.addWidget(height_le); dim_btn_lay.addStretch()
-    form_appear.addRow("WIDTH", dim_btn_row)
-
-    left_layout.addWidget(grp_appear)
-
-    grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
-    cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
-    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp", "Arial", "Consolas", "Courier New", "Segoe UI"]
-    font_family_cb = QComboBox(); font_family_cb.addItems(font_families)
-    font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
-    font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16"); font_size_le.setFixedWidth(60)
-    font_weight_cb = QComboBox(); font_weight_cb.addItems(["bold", "normal"])
-    font_weight_cb.setCurrentText(cur_font[2] if len(cur_font) > 2 else "bold")
-
-    f_row = QWidget(); f_lay = QHBoxLayout(f_row); f_lay.setContentsMargins(0,0,0,0); f_lay.setSpacing(10)
-    f_lay.addWidget(font_size_le); f_lay.addWidget(QLabel("WEIGHT")); f_lay.addWidget(font_weight_cb); f_lay.addStretch()
-
-    form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
-    left_layout.addWidget(grp_font)
-
-    grp_icon = QGroupBox("ICON / SVG"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
-    icon_path_le = QLineEdit(str(item_cfg.get("icon_path", "")))
-    nf_char_le   = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(60)
-    
+    # SVG / NF
     svg_btn = QPushButton("SVG")
     svg_preview = QLabel(); svg_preview.setFixedSize(24, 24); svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
     svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -532,11 +497,57 @@ def open_edit_gui(item_cfg, category, index=None):
             _update_svg_preview(dlg_svg.svg_code)
     svg_btn.clicked.connect(_open_svg_dlg)
 
-    svg_row = QWidget(); svg_lay = QHBoxLayout(svg_row); svg_lay.setContentsMargins(0,0,0,0); svg_lay.setSpacing(10)
-    svg_lay.addWidget(svg_btn); svg_lay.addWidget(svg_preview); svg_lay.addWidget(QLabel("NF")); svg_lay.addWidget(nf_char_le); svg_lay.addStretch()
+    nf_char_le = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(40)
     
-    form_icon.addRow("PATH", icon_path_le)
-    form_icon.addRow("SVG / NF", svg_row)
+    lay1.addWidget(svg_btn); lay1.addWidget(svg_preview)
+    lay1.addWidget(QLabel("NF")); lay1.addWidget(nf_char_le)
+    
+    form_core.addWidget(row1)
+    left_layout.addWidget(grp_core)
+
+    # 2. APPEARANCE (Colors & Borders)
+    grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
+    entries = {"text": text_le} # used for save function
+    for field in ["fg", "bg", "id"]:
+        ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
+    
+    border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(50)
+    border_color_le = QLineEdit(str(item_cfg.get("border_color", "")))
+    border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(50)
+    
+    b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
+    b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le); b_lay.addStretch()
+    
+    form_appear.addRow("BORDER PX", b_row)
+    form_appear.addRow("BORDER COLOR", border_color_le)
+
+    # Button dimensions
+    width_le  = QLineEdit(str(item_cfg.get("width", 0)));  width_le.setFixedWidth(50)
+    height_le = QLineEdit(str(item_cfg.get("height", 0))); height_le.setFixedWidth(50)
+    dim_btn_row = QWidget(); dim_btn_lay = QHBoxLayout(dim_btn_row); dim_btn_lay.setContentsMargins(0,0,0,0); dim_btn_lay.setSpacing(10)
+    dim_btn_lay.addWidget(width_le); dim_btn_lay.addWidget(QLabel("HEIGHT")); dim_btn_lay.addWidget(height_le); dim_btn_lay.addStretch()
+    form_appear.addRow("WIDTH", dim_btn_row)
+
+    left_layout.addWidget(grp_appear)
+
+    # 3. FONT
+    grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
+    cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp", "Arial", "Consolas", "Courier New", "Segoe UI"]
+    font_family_cb = QComboBox(); font_family_cb.addItems(font_families)
+    font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
+    font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16"); font_size_le.setFixedWidth(60)
+    font_weight_cb = QComboBox(); font_weight_cb.addItems(["bold", "normal"])
+    font_weight_cb.setCurrentText(cur_font[2] if len(cur_font) > 2 else "bold")
+
+    f_row = QWidget(); f_lay = QHBoxLayout(f_row); f_lay.setContentsMargins(0,0,0,0); f_lay.setSpacing(10)
+    f_lay.addWidget(font_size_le); f_lay.addWidget(QLabel("WEIGHT")); f_lay.addWidget(font_weight_cb); f_lay.addStretch()
+
+    form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
+    left_layout.addWidget(grp_font)
+
+    # 4. ICON DETAILS
+    grp_icon = QGroupBox("ICON SCALING / POS"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
     
     dim_row = QWidget(); dim_lay = QHBoxLayout(dim_row); dim_lay.setContentsMargins(0,0,0,0); dim_lay.setSpacing(10)
     icon_w_le = QLineEdit(str(item_cfg.get("icon_width", 0))); icon_w_le.setFixedWidth(40)
