@@ -1294,5 +1294,7 @@
             "svg_hover_map": {}
         }
     ],
-    "popup_y_offset": 4
+    "popup_y_offset": 4,
+    "edit_left_weight": 3,
+    "edit_right_weight": 3
 }
