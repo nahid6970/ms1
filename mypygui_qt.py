@@ -468,14 +468,18 @@ def open_edit_gui(item_cfg, category, index=None):
     left_layout.setSpacing(6); left_layout.setContentsMargins(6, 6, 6, 6)
     left_scroll.setWidget(left_w); panels.addWidget(left_scroll, 1)
 
-    # 1. CORE SECTION (Top Row)
+    # 1. CORE SECTION (Top Section)
     grp_core = QGroupBox("CORE SETTINGS"); form_core = QVBoxLayout(); grp_core.setLayout(form_core)
     
+    # Row 1: Text & Path
     row1 = QWidget(); lay1 = QHBoxLayout(row1); lay1.setContentsMargins(0,0,0,0); lay1.setSpacing(10)
     text_le = QLineEdit(str(item_cfg.get("text", ""))); lay1.addWidget(QLabel("TEXT")); lay1.addWidget(text_le, 2)
     icon_path_le = QLineEdit(str(item_cfg.get("icon_path", ""))); lay1.addWidget(QLabel("PATH")); lay1.addWidget(icon_path_le, 3)
+    form_core.addWidget(row1)
+
+    # Row 2: SVG, NF, W, H, GAP
+    row2 = QWidget(); lay2 = QHBoxLayout(row2); lay2.setContentsMargins(0,0,0,0); lay2.setSpacing(10)
     
-    # SVG / NF
     svg_btn = QPushButton("SVG")
     svg_preview = QLabel(); svg_preview.setFixedSize(24, 24); svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
     svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -496,13 +500,19 @@ def open_edit_gui(item_cfg, category, index=None):
             item_cfg["svg_hover_map"] = dlg_svg.hover_map
             _update_svg_preview(dlg_svg.svg_code)
     svg_btn.clicked.connect(_open_svg_dlg)
-
+    
     nf_char_le = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(40)
-    
-    lay1.addWidget(svg_btn); lay1.addWidget(svg_preview)
-    lay1.addWidget(QLabel("NF")); lay1.addWidget(nf_char_le)
-    
-    form_core.addWidget(row1)
+    icon_w_le = QLineEdit(str(item_cfg.get("icon_width", 0))); icon_w_le.setFixedWidth(40)
+    icon_h_le = QLineEdit(str(item_cfg.get("icon_height", 0))); icon_h_le.setFixedWidth(40)
+    icon_gap_le = QLineEdit(str(item_cfg.get("icon_gap", 4))); icon_gap_le.setFixedWidth(40)
+
+    lay2.addWidget(svg_btn); lay2.addWidget(svg_preview)
+    lay2.addWidget(QLabel("NF")); lay2.addWidget(nf_char_le)
+    lay2.addWidget(QLabel("W"));  lay2.addWidget(icon_w_le)
+    lay2.addWidget(QLabel("H"));  lay2.addWidget(icon_h_le)
+    lay2.addWidget(QLabel("GAP")); lay2.addWidget(icon_gap_le); lay2.addStretch()
+    form_core.addWidget(row2)
+
     left_layout.addWidget(grp_core)
 
     # 2. APPEARANCE (Colors & Borders)
@@ -546,18 +556,8 @@ def open_edit_gui(item_cfg, category, index=None):
     form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
     left_layout.addWidget(grp_font)
 
-    # 4. ICON DETAILS
-    grp_icon = QGroupBox("ICON SCALING / POS"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
-    
-    dim_row = QWidget(); dim_lay = QHBoxLayout(dim_row); dim_lay.setContentsMargins(0,0,0,0); dim_lay.setSpacing(10)
-    icon_w_le = QLineEdit(str(item_cfg.get("icon_width", 0))); icon_w_le.setFixedWidth(40)
-    icon_h_le = QLineEdit(str(item_cfg.get("icon_height", 0))); icon_h_le.setFixedWidth(40)
-    icon_gap_le = QLineEdit(str(item_cfg.get("icon_gap", 4))); icon_gap_le.setFixedWidth(40)
-    dim_lay.addWidget(QLabel("W")); dim_lay.addWidget(icon_w_le)
-    dim_lay.addWidget(QLabel("H")); dim_lay.addWidget(icon_h_le)
-    dim_lay.addWidget(QLabel("GAP")); dim_lay.addWidget(icon_gap_le); dim_lay.addStretch()
-    form_icon.addRow("DIM / GAP", dim_row)
-    
+    # 4. ICON POSITION
+    grp_icon = QGroupBox("ICON POSITION"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
     icon_pos_cb = QComboBox(); icon_pos_cb.addItems(["left", "right", "top", "bottom", "center"])
     icon_pos_cb.setCurrentText(item_cfg.get("icon_position", "left"))
     form_icon.addRow("POSITION", icon_pos_cb)
