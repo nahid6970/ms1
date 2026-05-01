@@ -27,7 +27,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
-    QStyle, QStyleOption,
+    QStyle, QStyleOption, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument
@@ -907,7 +907,7 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
                 handle_action(action)
 
     lbl.mousePressEvent = mousePressEvent
-    if parent_layout:
+    if parent_layout is not None:
         parent_layout.addWidget(lbl)
     return lbl
 
@@ -1354,22 +1354,8 @@ class StatusBar(QMainWindow):
             if inner:
                 inner.setStyleSheet(f"background: {bg}; border: none;")
         for w in [self._left_widget, self._right_widget, self._bl_container]:
-            w.setStyleSheet(f"background: {bg};")
-
-    def _apply_statusbar_style(self):
-        sb = self._config.get("statusbar", {})
-        bg = sb.get("bg", CP_BG) or CP_BG
-        border_color = sb.get("border_color", CP_RED) or CP_RED
-        border_px = int(sb.get("border_px", 1))
-        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {border_px}px solid {border_color}; }}")
-        cf = self.centralWidget()
-        if cf:
-            cf.setStyleSheet(f"QFrame {{ background: {bg}; border: {border_px}px solid {border_color}; }}")
-            inner = cf.layout().itemAt(0).widget() if cf.layout() and cf.layout().count() else None
-            if inner:
-                inner.setStyleSheet(f"background: {bg}; border: none;")
-        for w in [self._left_widget, self._right_widget]:
-            w.setStyleSheet(f"background: {bg};")
+            if hasattr(w, "setStyleSheet"):
+                w.setStyleSheet(f"background: {bg};")
 
     def _bl_render(self):
         # Clear entire layout (widgets + spacers)
