@@ -511,7 +511,7 @@ def open_edit_gui(item_cfg, category, index=None):
     icon_path_le = QLineEdit(str(item_cfg.get("icon_path", "")))
     nf_char_le   = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(60)
     
-    svg_btn = QPushButton("EDIT SVG")
+    svg_btn = QPushButton("SVG")
     svg_preview = QLabel(); svg_preview.setFixedSize(24, 24); svg_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
     svg_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
@@ -613,11 +613,29 @@ def open_edit_gui(item_cfg, category, index=None):
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
+        
+        row_limit_le = QLineEdit(str(bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(40)
+        pop_border_le = QLineEdit(str(bcfg.get("border_color", ""))); pop_border_le.setFixedWidth(80)
+        
+        def _update_popup_fields(text, _rl=row_limit_le, _pb=pop_border_le):
+            is_pop = (text == "popup")
+            _rl.setEnabled(is_pop); _pb.setEnabled(is_pop)
+        type_cb.currentTextChanged.connect(_update_popup_fields)
+        _update_popup_fields(type_cb.currentText())
+
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
         chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addStretch()
+        
+        pop_row = QWidget(); pop_lay = QHBoxLayout(pop_row); pop_lay.setContentsMargins(0,0,0,0)
+        pop_lay.addWidget(QLabel("ROW LIMIT")); pop_lay.addWidget(row_limit_le)
+        pop_lay.addWidget(QLabel("BORDER")); pop_lay.addWidget(pop_border_le); pop_lay.addStretch()
+
         form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
+        form.addRow("POPUP OPTS", pop_row)
+        
         right_layout.addWidget(grp)
-        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
+        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, 
+                                "row_limit": row_limit_le, "border_color": pop_border_le}
     right_layout.addStretch()
 
     btn_row = QHBoxLayout()
@@ -670,6 +688,12 @@ def open_edit_gui(item_cfg, category, index=None):
             new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
+            
+            if b_type == "popup":
+                try: new_bindings[bkey]["row_limit"] = int(inputs["row_limit"].text())
+                except: new_bindings[bkey]["row_limit"] = 10
+                new_bindings[bkey]["border_color"] = inputs["border_color"].text()
+
         item_cfg["bindings"] = new_bindings
         new_category = group_le.text()
         try: new_index = int(index_le.text())
@@ -766,12 +790,14 @@ def open_rclone_settings():
 
 # ─── Generic Popup Bar ────────────────────────────────────────────────────────
 class GenericPopup(QFrame):
-    def __init__(self, parent, category, anchor_widget):
+    def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None):
         super().__init__(parent, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         self.category = category
         self.anchor_widget = anchor_widget
-        self.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {CP_RED}; }} QLabel {{ border: none; background: transparent; }}")
-        self.layout = QHBoxLayout(self)
+        self.row_limit = max(1, row_limit)
+        bc = border_color or CP_RED
+        self.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {bc}; }} QLabel {{ border: none; background: transparent; }}")
+        self.layout = QGridLayout(self)
         self.layout.setContentsMargins(4, 2, 4, 2)
         self.layout.setSpacing(4)
         self.render_items()
@@ -783,8 +809,15 @@ class GenericPopup(QFrame):
         
         config = load_config()
         items = config.get(self.category, [])
+        
+        row, col = 0, 0
         for idx, cfg in enumerate(items):
-            create_dynamic_button(self.layout, cfg, self.category, idx)
+            w = create_dynamic_button(None, cfg, self.category, idx)
+            self.layout.addWidget(w, row, col)
+            col += 1
+            if col >= self.row_limit:
+                col = 0
+                row += 1
         
         # Add '+' button like the main statusbar
         _add_st_cfg = config.get("static_bindings", {}).get("add_button", {})
@@ -803,13 +836,13 @@ class GenericPopup(QFrame):
             else:
                 open_edit_gui(cfg, cat)
         add_bt.mousePressEvent = _add_click
-        self.layout.addWidget(add_bt)
+        self.layout.addWidget(add_bt, row, col)
         self.adjustSize()
 
-def open_popup_bar(category, anchor_widget):
+def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None):
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
-    popup = GenericPopup(anchor_widget.window(), category, anchor_widget)
+    popup = GenericPopup(anchor_widget.window(), category, anchor_widget, row_limit, border_color)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
     popup.move(cx, gpos.y() - popup.height() - offset)
@@ -817,7 +850,7 @@ def open_popup_bar(category, anchor_widget):
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
 def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
-    """Creates an IconLabel-based button and adds it to parent_layout (QHBoxLayout)."""
+    """Creates an IconLabel-based button and adds it to parent_layout (QHBoxLayout or QGridLayout or None)."""
     _fg   = btn_cfg.get("fg", "") or "white"
     _bg   = btn_cfg.get("bg", "") or CP_BG
     text  = btn_cfg.get("text", "")
@@ -867,12 +900,15 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
         if bkey and bkey in _bindings:
             action = _bindings[bkey]
             if action.get("type") == "popup":
-                open_popup_bar(action.get("cmd", "popup_bar"), _lbl)
+                rl = action.get("row_limit", 10)
+                bc = action.get("border_color")
+                open_popup_bar(action.get("cmd", "popup_bar"), _lbl, rl, bc)
             else:
                 handle_action(action)
 
     lbl.mousePressEvent = mousePressEvent
-    parent_layout.addWidget(lbl)
+    if parent_layout:
+        parent_layout.addWidget(lbl)
     return lbl
 
 
