@@ -788,11 +788,22 @@ class GenericPopup(QFrame):
             create_dynamic_button(self.layout, cfg, self.category, idx)
         
         # Add '+' button like the main statusbar
-        add_bt = QLabel("+")
-        add_bt.setStyleSheet(f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; padding: 0 5px;")
+        _add_st_cfg = config.get("static_bindings", {}).get("add_button", {})
+        add_bt = IconLabel(_add_st_cfg.get("text", "+"), _add_st_cfg)
+        if _add_st_cfg:
+            _apply_static_style(add_bt, "add_button")
+        else:
+            add_bt.setStyleSheet(f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; padding: 0 5px;")
+        
         add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         _new_cfg = {"text": "SUB", "fg": "#ffffff", "bg": CP_BG, "id": f"sub_{int(time.time())}", "bindings": {}}
-        add_bt.mousePressEvent = lambda e: open_edit_gui(_new_cfg, self.category)
+        
+        def _add_click(e, cat=self.category, cfg=_new_cfg):
+            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                _open_static_edit("add_button")
+            else:
+                open_edit_gui(cfg, cat)
+        add_bt.mousePressEvent = _add_click
         self.layout.addWidget(add_bt)
         self.adjustSize()
 
