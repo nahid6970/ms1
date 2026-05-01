@@ -45,7 +45,7 @@
             "label": ""
         },
         "ms1": {
-            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\"",
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"",
             "src": "C:/@delta/ms1/",
             "dst": "o0:/ms1/",
             "log": "C:/Users/nahid/script_output/rclone/ms1_check.log",
