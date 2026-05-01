@@ -760,6 +760,7 @@
                     "admin": false,
                     "cmd": "fav_apps",
                     "row_limit": 10,
+                    "bg_color": "",
                     "border_color": "yellow",
                     "border_px": 1
                 }
@@ -1323,7 +1324,7 @@
                     "admin": false,
                     "cmd": "ai_sites",
                     "row_limit": 10,
-                    "bg_color": "",
+                    "bg_color": "white",
                     "border_color": "",
                     "border_px": 1
                 }
@@ -1641,7 +1642,7 @@
         {
             "text": "aistudio",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777660799",
             "bindings": {
                 "Button-1": {
@@ -1665,7 +1666,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_322.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1675,7 +1676,7 @@
         {
             "text": "gemini",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777660880",
             "bindings": {
                 "Button-1": {
@@ -1699,7 +1700,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_324.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1708,8 +1709,8 @@
         },
         {
             "text": "chatgpt",
-            "fg": "#ffffff",
-            "bg": "#050505",
+            "fg": "",
+            "bg": "transparent",
             "id": "sub_1777665404",
             "bindings": {
                 "Button-1": {
@@ -1733,7 +1734,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_323.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1743,7 +1744,7 @@
         {
             "text": "kimi",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777660948",
             "bindings": {
                 "Button-1": {
@@ -1767,7 +1768,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_325.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1777,7 +1778,7 @@
         {
             "text": "qwen",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777664297",
             "bindings": {
                 "Button-1": {
@@ -1801,7 +1802,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_326.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1811,7 +1812,7 @@
         {
             "text": "deepseek",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777664891",
             "bindings": {
                 "Button-1": {
@@ -1835,7 +1836,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_327.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1845,7 +1846,7 @@
         {
             "text": "claude",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777664974",
             "bindings": {
                 "Button-1": {
@@ -1869,7 +1870,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_328.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1879,7 +1880,7 @@
         {
             "text": "notebooklm",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777665005",
             "bindings": {
                 "Button-1": {
@@ -1903,7 +1904,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_329.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
@@ -1913,7 +1914,7 @@
         {
             "text": "huggingface",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777665074",
             "bindings": {
                 "Button-1": {
@@ -1937,7 +1938,7 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "",
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_330.png",
             "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
