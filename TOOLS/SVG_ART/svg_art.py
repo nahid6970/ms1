@@ -378,6 +378,61 @@ class ArtView(QGraphicsView):
             self.save_to_undo(batch, "add_batch")
             self.app.statusBar().showMessage(f"Generated {len(batch)} shader items across {len(sorted_colors)} colors.")
 
+
+    def scan_image_to_paths(self, density=100, tolerance=30):
+        """TRACE scan: tile rects merged by color tolerance — one SymPath per color group."""
+        if not self.image_item:
+            QMessageBox.warning(self.app, "No Image", "Load a background image first.")
+            return
+        pixmap = self.image_item.pixmap()
+        image = pixmap.toImage()
+        w, h = image.width(), image.height()
+        step_x = max(1, w // density)
+        step_y = max(1, h // density)
+
+        # Sample pixels and merge by tolerance
+        groups = []  # list of [r, g, b, [(x,y)...]]
+        for y in range(0, h, step_y):
+            for x in range(0, w, step_x):
+                c = image.pixelColor(x, y)
+                if c.alpha() < 50:
+                    continue
+                r, g, b = c.red(), c.green(), c.blue()
+                best = None
+                best_dist = tolerance
+                for grp in groups:
+                    d = ((grp[0]-r)**2 + (grp[1]-g)**2 + (grp[2]-b)**2) ** 0.5
+                    if d <= best_dist:
+                        best_dist = d
+                        best = grp
+                if best is None:
+                    groups.append([r, g, b, [(x, y)]])
+                else:
+                    n = len(best[3])
+                    best[0] = (best[0]*n + r) // (n+1)
+                    best[1] = (best[1]*n + g) // (n+1)
+                    best[2] = (best[2]*n + b) // (n+1)
+                    best[3].append((x, y))
+
+        img_pos = self.image_item.pos()
+        batch = []
+        for grp in groups:
+            hex_c = QColor(grp[0], grp[1], grp[2]).name()
+            compound = QPainterPath()
+            compound.setFillRule(Qt.FillRule.WindingFill)
+            for px, py in grp[3]:
+                compound.addRect(float(px), float(py), float(step_x), float(step_y))
+            item = SymPath(compound)
+            item.setPos(img_pos)
+            item.setPen(QPen(Qt.PenStyle.NoPen))
+            item.setBrush(QBrush(QColor(hex_c)))
+            item.is_art_item = True
+            item._shader_group = hex_c
+            self.scene().addItem(item)
+            batch.append(item)
+        if batch:
+            self.save_to_undo(batch, "add_batch")
+            self.app.statusBar().showMessage(f"TRACE: {len(batch)} path(s). Use FILL tool to recolor.")
     def remove_background_image(self):
         if self.image_item:
             self.scene().removeItem(self.image_item)
@@ -1172,6 +1227,10 @@ class SVGArtApp(QMainWindow):
         self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
         self.tb_shader.addWidget(QLabel(" SHP: ")); self.shader_shape_combo = QComboBox(); self.update_shader_shape_list(); self.tb_shader.addWidget(self.shader_shape_combo)
 
+        self.tb_trace = QToolBar("Trace"); self.tb_trace.setObjectName("TraceToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_trace)
+        self.add_tool_action(self.tb_trace, "TRACE", "trace_scan_img", CP_GREEN, SVGS["SCAN"])
+        self.tb_trace.addWidget(QLabel(" DEN: ")); self.trace_density_spin = QSpinBox(); self.trace_density_spin.setRange(10, 1000); self.trace_density_spin.setValue(100); self.tb_trace.addWidget(self.trace_density_spin)
+        self.tb_trace.addWidget(QLabel(" TOL: ")); self.trace_tol_spin = QSpinBox(); self.trace_tol_spin.setRange(0, 255); self.trace_tol_spin.setValue(30); self.trace_tol_spin.setToolTip("Color merge tolerance (0=exact, 255=all one group)"); self.tb_trace.addWidget(self.trace_tol_spin)
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
 
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
@@ -1292,6 +1351,12 @@ class SVGArtApp(QMainWindow):
                 self.shader_noise_spin.value(),
                 auto_clr=self.chk_auto_clr.isChecked(),
                 shape_type=self.shader_shape_combo.currentText()
+            )
+            return
+        if tool == "trace_scan_img":
+            self.view.scan_image_to_paths(
+                self.trace_density_spin.value(),
+                self.trace_tol_spin.value()
             )
             return
         
