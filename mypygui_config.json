@@ -958,12 +958,12 @@
             "font": [
                 "JetBrainsMono Nerd Font Mono",
                 10,
-                "bold"
+                "normal"
             ],
             "border": 0,
             "border_color": "",
             "border_radius": 0,
-            "width": 0,
+            "width": 50,
             "height": 0,
             "padx_left": 1,
             "padx_right": 1,
@@ -990,14 +990,14 @@
             "fg": "#00ff21",
             "bg": "",
             "font": [
-                "JetBrainsMono NFP",
+                "JetBrainsMono Nerd Font Mono",
                 10,
-                "bold"
+                "normal"
             ],
             "border": 1,
             "border_color": "#00ff21",
             "border_radius": 0,
-            "width": 0,
+            "width": 50,
             "height": 0,
             "padx_left": 0,
             "padx_right": 0,
