@@ -315,22 +315,30 @@ class IconLabel(QLabel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def run_command(command, admin=False, hide=False, no_exit=True):
+    executable = "pwsh"
     if admin:
         try:
-            executable = "pwsh"
             args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
             ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
         except Exception as e:
             print(f"Admin run_command failed: {e}")
         return
+
+    cmd_args = [executable]
+    if no_exit:
+        cmd_args.append("-NoExit")
+    cmd_args.extend(["-Command", command])
+
+    flags = 0
     if hide:
-        subprocess.Popen(["pwsh", "-Command", command], creationflags=subprocess.CREATE_NO_WINDOW)
+        flags |= subprocess.CREATE_NO_WINDOW
     else:
-        cmd_list = ["start", "pwsh"]
-        if no_exit:
-            cmd_list.append("-NoExit")
-        cmd_list.extend(["-Command", command])
-        subprocess.Popen(" ".join(cmd_list), shell=True)
+        flags |= subprocess.CREATE_NEW_CONSOLE
+
+    try:
+        subprocess.Popen(cmd_args, creationflags=flags)
+    except Exception as e:
+        print(f"run_command failed: {e}")
 
 def handle_action(action_cfg):
     if not action_cfg:
@@ -340,7 +348,10 @@ def handle_action(action_cfg):
     cwd    = action_cfg.get("cwd")
     admin  = action_cfg.get("admin", False)
     hide   = action_cfg.get("hide", False)
-    if admin:
+    
+    # If admin and not already handled by run_command, handle here
+    # But run_command handles its own admin, so we only need this for other types
+    if admin and atype not in ["run_command"]:
         try:
             ctypes.windll.shell32.ShellExecuteW(
                 None, "runas",
@@ -351,13 +362,14 @@ def handle_action(action_cfg):
         except Exception as e:
             print(f"Admin launch failed: {e}")
         return
+
     flags = subprocess.CREATE_NO_WINDOW if hide else 0
     if atype == "url":
         import webbrowser; webbrowser.open(cmd); return
     if atype == "subprocess":
         subprocess.Popen(cmd, cwd=cwd, shell=True, creationflags=flags)
     elif atype == "run_command":
-        run_command(cmd)
+        run_command(cmd, admin=admin, hide=hide)
     elif atype == "python":
         subprocess.Popen([sys.executable, cmd], cwd=cwd, creationflags=flags)
     elif atype == "function":
@@ -1386,12 +1398,20 @@ class StatusBar(QMainWindow):
                         if event.button() == Qt.MouseButton.LeftButton:
                             action = c.get("bindings", {}).get("Control-Button-1", {
                                 "type": "run_command", "cmd": c.get("left_click_cmd", "")
-                            })
+                            }).copy()
+                            if "cmd" in action:
+                                src_p = f'"{c.get("src", "")}"'
+                                dst_p = f'"{c.get("dst", "")}"'
+                                action["cmd"] = action["cmd"].replace("src", src_p).replace("dst", dst_p)
                             handle_action(action)
                         elif event.button() == Qt.MouseButton.RightButton:
                             action = c.get("bindings", {}).get("Control-Button-3", {
                                 "type": "run_command", "cmd": c.get("right_click_cmd", "")
-                            })
+                            }).copy()
+                            if "cmd" in action:
+                                src_p = f'"{c.get("src", "")}"'
+                                dst_p = f'"{c.get("dst", "")}"'
+                                action["cmd"] = action["cmd"].replace("src", src_p).replace("dst", dst_p)
                             handle_action(action)
                     else:
                         try:
