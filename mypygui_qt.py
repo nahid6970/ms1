@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import (
     QStyle, QStyleOption, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase
 from PyQt6.QtSvg import QSvgRenderer
 
 
@@ -542,8 +542,7 @@ def open_edit_gui(item_cfg, category, index=None):
     # 3. FONT
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
     cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
-    font_families = ["JetBrainsMono NFP", "JetBrainsMono NF", "Jetbrainsmono nfp", "Arial", "Consolas", "Courier New", "Segoe UI"]
-    font_family_cb = QComboBox(); font_family_cb.addItems(font_families)
+    font_family_cb = QComboBox(); font_family_cb.addItems(QFontDatabase.families())
     font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
     font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16"); font_size_le.setFixedWidth(60)
     font_weight_cb = QComboBox(); font_weight_cb.addItems(["bold", "normal"])
