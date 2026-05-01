@@ -145,6 +145,16 @@ class SvgInputDialog(QDialog):
             QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
         """)
         layout = QVBoxLayout(self)
+        
+        # Live Preview section at top
+        layout.addWidget(QLabel("LIVE PREVIEW:"))
+        self.preview_label = QLabel()
+        self.preview_label.setFixedSize(64, 64)
+        self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_label.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
+        p_box = QHBoxLayout(); p_box.addStretch(); p_box.addWidget(self.preview_label); p_box.addStretch()
+        layout.addLayout(p_box)
+
         layout.addWidget(QLabel("SVG CODE:"))
         self.txt_input = QPlainTextEdit()
         self.txt_input.setPlaceholderText("<svg>...</svg>")
@@ -158,7 +168,11 @@ class SvgInputDialog(QDialog):
         self.hover_scroll = QScrollArea(); self.hover_scroll.setWidgetResizable(True); self.hover_scroll.setFixedHeight(60)
         self.hover_widget = QWidget(); self.hover_layout = QHBoxLayout(self.hover_widget); self.hover_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.hover_scroll.setWidget(self.hover_widget); layout.addWidget(self.hover_scroll)
-        self.color_timer = QTimer(); self.color_timer.setSingleShot(True); self.color_timer.timeout.connect(self.update_color_panel)
+        
+        self.color_timer = QTimer(); self.color_timer.setSingleShot(True)
+        self.color_timer.timeout.connect(self.update_color_panel)
+        self.color_timer.timeout.connect(self.update_preview)
+        
         self.txt_input.textChanged.connect(lambda: self.color_timer.start(500))
         btn_box = QHBoxLayout()
         btn_save = QPushButton("SAVE SVG"); btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold;"); btn_save.clicked.connect(self.save_and_close)
@@ -167,6 +181,20 @@ class SvgInputDialog(QDialog):
         btn_box.addWidget(btn_save); btn_box.addWidget(btn_clear); btn_box.addWidget(btn_cancel)
         layout.addLayout(btn_box)
         self.update_color_panel()
+        self.update_preview()
+
+    def update_preview(self):
+        code = self.txt_input.toPlainText().strip()
+        if not code:
+            self.preview_label.clear()
+            return
+        try:
+            pix = QPixmap(64, 64); pix.fill(Qt.GlobalColor.transparent)
+            p = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
+            renderer.render(p); p.end()
+            self.preview_label.setPixmap(pix)
+        except:
+            self.preview_label.setText("ERR")
 
     def update_color_panel(self):
         for lay in [self.color_layout, self.hover_layout]:
