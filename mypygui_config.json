@@ -751,7 +751,7 @@
             "icon_position": "center"
         },
         {
-            "text": "wb",
+            "text": "web",
             "fg": "#ffffff",
             "bg": "#050505",
             "id": "btn_1777614207",
@@ -767,7 +767,7 @@
                 }
             },
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 16,
                 "bold"
             ],
@@ -1271,7 +1271,7 @@
                 }
             },
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 16,
                 "bold"
             ],
@@ -1295,6 +1295,6 @@
         }
     ],
     "popup_y_offset": 4,
-    "edit_left_weight": 3,
-    "edit_right_weight": 3
+    "edit_left_weight": 1,
+    "edit_right_weight": 1
 }

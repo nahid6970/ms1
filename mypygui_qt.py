@@ -206,11 +206,45 @@ class SvgInputDialog(QDialog):
 
 class IconLabel(QLabel):
     def __init__(self, text, btn_cfg, parent=None):
-        super().__init__(text, parent)
+        super().__init__(None, parent)
         self.btn_cfg = btn_cfg or {}
+        self._original_text = text
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
         self._is_hovered = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def text(self):
+        return self._original_text
+
+    def setText(self, t):
+        self._original_text = t
+        self.update()
+
+    def sizeHint(self):
+        cfg = self.btn_cfg
+        has_icon = cfg.get("icon_path") and os.path.exists(cfg.get("icon_path"))
+        has_svg = bool(cfg.get("svg_content", "").strip())
+        has_nf = bool(cfg.get("nf_char", ""))
+        
+        if has_icon or has_svg or has_nf:
+            w = cfg.get("icon_width", 0) or 24
+            h = cfg.get("icon_height", 0) or 24
+            m = self.contentsMargins()
+            return QSize(w + m.left() + m.right(), h + m.top() + m.bottom())
+        
+        doc = QTextDocument()
+        f = self.font()
+        if "font" in cfg:
+            font_cfg = cfg["font"]
+            f = QFont(font_cfg[0], font_cfg[1])
+            if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+        doc.setDefaultFont(f)
+        doc.setHtml(f"<div style='white-space: pre;'>{self._original_text}</div>")
+        m = self.contentsMargins()
+        return QSize(int(doc.idealWidth()) + m.left() + m.right(), int(doc.size().height()) + m.top() + m.bottom())
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
 
     def enterEvent(self, event):
         self._is_hovered = True; self.update(); super().enterEvent(event)
@@ -221,23 +255,19 @@ class IconLabel(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # Draw stylesheet background/border
         opt = QStyleOption()
         opt.initFrom(self)
         self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
         
-        # Area inside padding (respects padx_left/padx_right)
         rect = self.contentsRect()
         if rect.isEmpty(): return
 
-        # Determine foreground color
         fg = self.palette().windowText().color().name()
 
         cfg = self.btn_cfg
         icon_pixmap = None
         draw_mode = 'text'
 
-        # Priority Check: Path > SVG > NF > Text
         icon_path = cfg.get("icon_path", "")
         svg_content = cfg.get("svg_content", "")
         nf_char = cfg.get("nf_char", "")
@@ -272,7 +302,6 @@ class IconLabel(QLabel):
             else:
                 draw_mode = 'text'
 
-            # Scaling if icon
             if icon_pixmap and not icon_pixmap.isNull():
                 custom_w = cfg.get("icon_width", 0)
                 custom_h = cfg.get("icon_height", 0)
@@ -287,13 +316,11 @@ class IconLabel(QLabel):
         except: pass
 
         if draw_mode == 'icon' and icon_pixmap:
-            # Draw icon centered in contentsRect (respects padding)
             x = rect.x() + (rect.width() - icon_pixmap.width()) // 2
             y = rect.y() + (rect.height() - icon_pixmap.height()) // 2
             painter.drawPixmap(x, y, icon_pixmap)
         else:
-            # Draw text centered in contentsRect
-            text = self.text()
+            text = self._original_text
             if not text: return
             doc = QTextDocument()
             f = self.font()
