@@ -1773,6 +1773,142 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "left"
+        },
+        {
+            "text": "deepseek",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777664891",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://chat.deepseek.com/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "claude",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777664974",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://claude.ai/new"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "notebooklm",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777665005",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://notebooklm.google.com/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "huggingface",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777665074",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://huggingface.co/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "default_font": [
