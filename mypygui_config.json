@@ -1056,7 +1056,7 @@
             "fg": "#ffffff",
             "bg": "",
             "font": [
-                "JetBrainsMono NFP",
+                "JetBrainsMono Nerd Font Propo",
                 10,
                 "bold"
             ],
@@ -1085,18 +1085,38 @@
             }
         },
         "drive_d": {
-            "Button-1": {
-                "type": "subprocess",
-                "cmd": "explorer D:\\"
-            },
+            "id": "drive_d",
+            "text": "drive_d",
             "fg": "#ffffff",
+            "bg": "",
             "font": [
-                "JetBrainsMono NFP",
+                "JetBrainsMono Nerd Font Propo",
                 10,
                 "bold"
             ],
             "border": 1,
-            "border_color": "#1b8af1"
+            "border_color": "#1b8af1",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 0,
+            "padx_right": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "svg_content": "",
+            "svg_hover_map": {},
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left",
+            "Button-1": {
+                "type": "subprocess",
+                "hide": false,
+                "admin": false,
+                "cmd": "explorer D:\\"
+            }
         },
         "settings": {
             "id": "settings",
