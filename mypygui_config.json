@@ -685,7 +685,9 @@
                     "type": "popup",
                     "hide": false,
                     "admin": false,
-                    "cmd": "fav_apps"
+                    "cmd": "fav_apps",
+                    "row_limit": 10,
+                    "border_color": ""
                 }
             },
             "font": [

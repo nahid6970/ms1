@@ -605,6 +605,16 @@ def open_edit_gui(item_cfg, category, index=None):
     click_types = [("LEFT CLICK", "Button-1"), ("RIGHT CLICK", "Button-3"),
                    ("CTRL + LEFT", "Control-Button-1"), ("CTRL + RIGHT", "Control-Button-3")]
     binding_inputs = {}
+    
+    # Track popup settings globally for the item
+    # We take from the first popup binding we find, or use defaults
+    first_bcfg = {}
+    for _, bkey in click_types:
+        bc = item_cfg.get("bindings", {}).get(bkey, {})
+        if bc.get("type") == "popup":
+            first_bcfg = bc
+            break
+
     for label_text, bkey in click_types:
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
@@ -614,28 +624,32 @@ def open_edit_gui(item_cfg, category, index=None):
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
         
-        row_limit_le = QLineEdit(str(bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(40)
-        pop_border_le = QLineEdit(str(bcfg.get("border_color", ""))); pop_border_le.setFixedWidth(80)
-        
-        def _update_popup_fields(text, _rl=row_limit_le, _pb=pop_border_le):
-            is_pop = (text == "popup")
-            _rl.setEnabled(is_pop); _pb.setEnabled(is_pop)
-        type_cb.currentTextChanged.connect(_update_popup_fields)
-        _update_popup_fields(type_cb.currentText())
-
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
         chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addStretch()
         
-        pop_row = QWidget(); pop_lay = QHBoxLayout(pop_row); pop_lay.setContentsMargins(0,0,0,0)
-        pop_lay.addWidget(QLabel("ROW LIMIT")); pop_lay.addWidget(row_limit_le)
-        pop_lay.addWidget(QLabel("BORDER")); pop_lay.addWidget(pop_border_le); pop_lay.addStretch()
-
         form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
-        form.addRow("POPUP OPTS", pop_row)
-        
         right_layout.addWidget(grp)
-        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, 
-                                "row_limit": row_limit_le, "border_color": pop_border_le}
+        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
+
+    # Dedicated POPUP SETTINGS section
+    grp_pop = QGroupBox("POPUP SETTINGS"); form_pop = QFormLayout(); form_pop.setSpacing(6); grp_pop.setLayout(form_pop)
+    row_limit_le = QLineEdit(str(first_bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(50)
+    pop_border_le = QLineEdit(str(first_bcfg.get("border_color", "")))
+    form_pop.addRow("ROW LIMIT", row_limit_le)
+    form_pop.addRow("BORDER COLOR", pop_border_le)
+    right_layout.addWidget(grp_pop)
+
+    def _check_popup_visibility():
+        any_popup = False
+        for bkey in binding_inputs:
+            if binding_inputs[bkey]["type"].currentText() == "popup":
+                any_popup = True; break
+        grp_pop.setEnabled(any_popup)
+
+    for bkey in binding_inputs:
+        binding_inputs[bkey]["type"].currentTextChanged.connect(_check_popup_visibility)
+    _check_popup_visibility()
+
     right_layout.addStretch()
 
     btn_row = QHBoxLayout()
@@ -690,9 +704,9 @@ def open_edit_gui(item_cfg, category, index=None):
             else:                    new_bindings[bkey]["cmd"]  = cmd
             
             if b_type == "popup":
-                try: new_bindings[bkey]["row_limit"] = int(inputs["row_limit"].text())
+                try: new_bindings[bkey]["row_limit"] = int(row_limit_le.text())
                 except: new_bindings[bkey]["row_limit"] = 10
-                new_bindings[bkey]["border_color"] = inputs["border_color"].text()
+                new_bindings[bkey]["border_color"] = pop_border_le.text()
 
         item_cfg["bindings"] = new_bindings
         new_category = group_le.text()
