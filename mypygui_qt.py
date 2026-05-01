@@ -110,6 +110,8 @@ DIALOG_QSS = f"""
     QLabel#section_label {{ color: {CP_YELLOW}; font-weight: bold; font-size: 9pt; }}
 """
 
+DEFAULT_FONT_FALLBACK = ["JetBrainsMono NFP", 16, "bold"]
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
@@ -127,6 +129,9 @@ def save_config(config):
             json.dump(config, f, indent=4, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving config: {e}")
+
+def get_default_font():
+    return load_config().get("default_font", DEFAULT_FONT_FALLBACK)
 
 # ─── SVG / Icon Widgets ────────────────────────────────────────────────────────
 class SvgInputDialog(QDialog):
@@ -533,7 +538,8 @@ def open_edit_gui(item_cfg, category, index=None):
     nf_char_le = QLineEdit(str(item_cfg.get("nf_char", ""))); nf_char_le.setFixedWidth(40)
     lay1.addWidget(QLabel("NF")); lay1.addWidget(nf_char_le)
 
-    svg_btn = QPushButton("SVG"); svg_btn.setFixedSize(34, 26)
+    svg_btn = QPushButton("SVG"); svg_btn.setFixedSize(50, 26)
+    svg_btn.setStyleSheet("QPushButton { padding: 0px; }") # Remove large padding for this small button
     def _update_svg_preview(code):
         if not code:
             svg_btn.setText("SVG"); svg_btn.setIcon(QIcon())
@@ -595,7 +601,11 @@ def open_edit_gui(item_cfg, category, index=None):
 
     # 3. FONT
     grp_font = QGroupBox("FONT"); form_font = QFormLayout(); form_font.setSpacing(6); grp_font.setLayout(form_font)
-    cur_font = item_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    
+    # Load defaults from config if font not in item_cfg
+    def_font = config_now.get("default_font", ["JetBrainsMono NFP", 16, "bold"])
+    cur_font = item_cfg.get("font", def_font)
+    
     font_family_cb = QComboBox(); font_family_cb.addItems(QFontDatabase.families())
     font_family_cb.setCurrentText(cur_font[0] if cur_font else "JetBrainsMono NFP")
     font_size_le = QLineEdit(str(cur_font[1]) if len(cur_font) > 1 else "16"); font_size_le.setFixedWidth(60)
@@ -904,7 +914,7 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _fg   = btn_cfg.get("fg", "") or "white"
     _bg   = btn_cfg.get("bg", "") or CP_BG
     text  = btn_cfg.get("text", "")
-    font_cfg = btn_cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    font_cfg = btn_cfg.get("font", get_default_font())
     px_l  = int(btn_cfg.get("padx_left", 1))
     px_r  = int(btn_cfg.get("padx_right", 1))
     m_l   = int(btn_cfg.get("margin_left", 0))
@@ -949,7 +959,7 @@ def _open_static_edit(key):
     sb = cfg.get("static_bindings", {})
     entry = sb.get(key, {})
     _binding_keys = {k: v for k, v in entry.items() if "Button" in k}
-    item = {"id": key, "text": key, "fg": entry.get("fg", ""), "bg": entry.get("bg", ""), "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]), "border": entry.get("border", 0), "border_color": entry.get("border_color", ""), "border_radius": entry.get("border_radius", 0), "width": entry.get("width", 0), "height": entry.get("height", 0), "padx_left": entry.get("padx_left", 0), "padx_right": entry.get("padx_right", 0), "margin_left": entry.get("margin_left", 0), "margin_right": entry.get("margin_right", 0), "icon_path": entry.get("icon_path", ""), "nf_char": entry.get("nf_char", ""), "svg_content": entry.get("svg_content", ""), "svg_hover_map": entry.get("svg_hover_map", {}), "icon_width": entry.get("icon_width", 0), "icon_height": entry.get("icon_height", 0), "icon_gap": entry.get("icon_gap", 4), "icon_position": entry.get("icon_position", "left"), "bindings": _binding_keys}
+    item = {"id": key, "text": key, "fg": entry.get("fg", ""), "bg": entry.get("bg", ""), "font": entry.get("font", get_default_font()), "border": entry.get("border", 0), "border_color": entry.get("border_color", ""), "border_radius": entry.get("border_radius", 0), "width": entry.get("width", 0), "height": entry.get("height", 0), "padx_left": entry.get("padx_left", 0), "padx_right": entry.get("padx_right", 0), "margin_left": entry.get("margin_left", 0), "margin_right": entry.get("margin_right", 0), "icon_path": entry.get("icon_path", ""), "nf_char": entry.get("nf_char", ""), "svg_content": entry.get("svg_content", ""), "svg_hover_map": entry.get("svg_hover_map", {}), "icon_width": entry.get("icon_width", 0), "icon_height": entry.get("icon_height", 0), "icon_gap": entry.get("icon_gap", 4), "icon_position": entry.get("icon_position", "left"), "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
 def _apply_static_style(widget, key):
@@ -957,7 +967,7 @@ def _apply_static_style(widget, key):
     if not cfg: return
     if isinstance(widget, IconLabel): widget.btn_cfg = cfg
     fg, bg = cfg.get("fg", "") or "white", cfg.get("bg", "") or "transparent"
-    font = cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
+    font = cfg.get("font", get_default_font())
     border_px, border_radius = int(cfg.get("border", 0)), int(cfg.get("border_radius", 0))
     border_col = cfg.get("border_color", "") or bg
     border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
@@ -1036,7 +1046,7 @@ def delete_git_lock_files(repos):
 
 def apply_git_style(lbl, cfg):
     fg, bg = cfg.get("fg", "") or "white", cfg.get("bg", "") or "transparent"
-    font = cfg.get("font", ["JetBrainsMono NFP", 15, "bold"])
+    font = cfg.get("font", get_default_font())
     bw, bh = cfg.get("width", 0), cfg.get("height", 0)
     if bw > 0: lbl.setFixedWidth(bw)
     if bh > 0: lbl.setFixedHeight(bh)
@@ -1094,7 +1104,7 @@ class StatusBar(QMainWindow):
         ll = self._left_layout
         _uc = load_config().get("static_bindings", {}).get("uptime", {})
         self.uptime_label = IconLabel(format_uptime(), _uc)
-        _ufg, _ufont_list = _uc.get("fg", "") or "#6bc0f8", _uc.get("font", ["JetBrainsMono NFP", 16, "bold"])
+        _ufg, _ufont_list = _uc.get("fg", "") or "#6bc0f8", _uc.get("font", get_default_font())
         self.uptime_label.setStyleSheet(f"color: {_ufg}; font-family: '{_ufont_list[0]}'; font-size: {_ufont_list[1]}pt; font-weight: {_ufont_list[2]};")
         self.uptime_label.mousePressEvent = lambda e: (_open_static_edit("uptime") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else subprocess.Popen("timedate.cpl", shell=True))
         ll.addWidget(self.uptime_label)
@@ -1106,9 +1116,15 @@ class StatusBar(QMainWindow):
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
-        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(380, 520); dlg.setStyleSheet(DIALOG_QSS)
+        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(400, 600); dlg.setStyleSheet(DIALOG_QSS)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10); title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
-        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
+        
+        # Scroll area for settings as it grows
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("QScrollArea { border: none; }")
+        scroll_w = QWidget(); scroll_lay = QVBoxLayout(scroll_w); scroll_lay.setContentsMargins(0,0,0,0); scroll_lay.setSpacing(10)
+        scroll.setWidget(scroll_w); lay.addWidget(scroll)
+
+        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); scroll_lay.addWidget(grp1)
         
         grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit)
         ew, eh = self._config.get("edit_panel_width", 1000), self._config.get("edit_panel_height", 700)
@@ -1123,23 +1139,39 @@ class StatusBar(QMainWindow):
         lw_le.setFixedWidth(40); rw_le.setFixedWidth(40)
         form_edit.addRow("LEFT WEIGHT", lw_le)
         form_edit.addRow("RIGHT WEIGHT", rw_le)
-        lay.addWidget(grp_edit)
+        scroll_lay.addWidget(grp_edit)
+
+        # NEW: Default Font Section
+        grp_def = QGroupBox("NEW ITEM DEFAULTS"); form_def = QFormLayout(); grp_def.setLayout(form_def)
+        dfont = self._config.get("default_font", ["JetBrainsMono NFP", 16, "bold"])
+        df_family = QComboBox(); df_family.addItems(QFontDatabase.families()); df_family.setCurrentText(dfont[0])
+        df_size = QLineEdit(str(dfont[1])); df_size.setFixedWidth(40)
+        df_weight = QComboBox(); df_weight.addItems(["bold", "normal"]); df_weight.setCurrentText(dfont[2])
+        form_def.addRow("FONT FAMILY", df_family)
+        df_row = QWidget(); df_lay = QHBoxLayout(df_row); df_lay.setContentsMargins(0,0,0,0)
+        df_lay.addWidget(df_size); df_lay.addWidget(QLabel("WT")); df_lay.addWidget(df_weight); df_lay.addStretch()
+        form_def.addRow("SIZE / WT", df_row)
+        scroll_lay.addWidget(grp_def)
         
-        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
-        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); lay.addWidget(grp_sb)
+        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); scroll_lay.addWidget(grp2)
+        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); scroll_lay.addWidget(grp_sb)
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
         
         def _save():
-            cfg = load_config()
-            cfg["buttons_left_page_size"] = int(size_le.text())
-            cfg["edit_panel_width"] = int(ew_le.text())
-            cfg["edit_panel_height"] = int(eh_le.text())
-            cfg["edit_left_weight"] = int(lw_le.text())
-            cfg["edit_right_weight"] = int(rw_le.text())
-            cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
-            cfg["popup_y_offset"] = int(popup_y_le.text())
-            cfg["statusbar"] = {"bg": sb_bg_le.text() or CP_BG, "border_color": sb_border_le.text() or CP_RED, "border_px": int(sb_bpx_le.text())}
-            save_config(cfg); self._config = cfg; self._apply_statusbar_style(); dlg.accept(); self._bl_render()
+            try:
+                cfg = load_config()
+                cfg["buttons_left_page_size"] = int(size_le.text())
+                cfg["edit_panel_width"] = int(ew_le.text())
+                cfg["edit_panel_height"] = int(eh_le.text())
+                cfg["edit_left_weight"] = int(lw_le.text())
+                cfg["edit_right_weight"] = int(rw_le.text())
+                cfg["default_font"] = [df_family.currentText(), int(df_size.text()), df_weight.currentText()]
+                cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
+                cfg["popup_y_offset"] = int(popup_y_le.text())
+                cfg["statusbar"] = {"bg": sb_bg_le.text() or CP_BG, "border_color": sb_border_le.text() or CP_RED, "border_px": int(sb_bpx_le.text())}
+                save_config(cfg); self._config = cfg; self._apply_statusbar_style(); dlg.accept(); self._bl_render()
+            except ValueError as e:
+                QMessageBox.warning(dlg, "Error", f"Invalid input: {e}")
         
         btn.clicked.connect(_save)
         
@@ -1287,7 +1319,10 @@ class StatusBar(QMainWindow):
         try:
             while True:
                 name, text, color = _git_queue.get_nowait()
-                if name in self._git_labels: self._git_labels[name].setText(text); self._git_labels[name].setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;")
+                if name in self._git_labels:
+                    self._git_labels[name].setText(text)
+                    font = get_default_font()
+                    self._git_labels[name].setStyleSheet(f"color: {color}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
         except Empty: pass
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
