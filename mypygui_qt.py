@@ -633,10 +633,16 @@ def open_edit_gui(item_cfg, category, index=None):
 
     # Dedicated POPUP SETTINGS section
     grp_pop = QGroupBox("POPUP SETTINGS"); form_pop = QFormLayout(); form_pop.setSpacing(6); grp_pop.setLayout(form_pop)
-    row_limit_le = QLineEdit(str(first_bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(50)
-    pop_border_le = QLineEdit(str(first_bcfg.get("border_color", "")))
-    form_pop.addRow("ROW LIMIT", row_limit_le)
-    form_pop.addRow("BORDER COLOR", pop_border_le)
+    row_limit_le = QLineEdit(str(first_bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(40)
+    pop_border_le = QLineEdit(str(first_bcfg.get("border_color", ""))); pop_border_le.setFixedWidth(80)
+    pop_border_px_le = QLineEdit(str(first_bcfg.get("border_px", 1))); pop_border_px_le.setFixedWidth(40)
+    
+    pop_set_row = QWidget(); pop_set_lay = QHBoxLayout(pop_set_row); pop_set_lay.setContentsMargins(0,0,0,0); pop_set_lay.setSpacing(10)
+    pop_set_lay.addWidget(QLabel("ROW")); pop_set_lay.addWidget(row_limit_le)
+    pop_set_lay.addWidget(QLabel("COLOR")); pop_set_lay.addWidget(pop_border_le)
+    pop_set_lay.addWidget(QLabel("PX")); pop_set_lay.addWidget(pop_border_px_le); pop_set_lay.addStretch()
+    
+    form_pop.addRow("", pop_set_row)
     right_layout.addWidget(grp_pop)
 
     def _check_popup_visibility():
@@ -707,6 +713,8 @@ def open_edit_gui(item_cfg, category, index=None):
                 try: new_bindings[bkey]["row_limit"] = int(row_limit_le.text())
                 except: new_bindings[bkey]["row_limit"] = 10
                 new_bindings[bkey]["border_color"] = pop_border_le.text()
+                try: new_bindings[bkey]["border_px"] = int(pop_border_px_le.text())
+                except: new_bindings[bkey]["border_px"] = 1
 
         item_cfg["bindings"] = new_bindings
         new_category = group_le.text()

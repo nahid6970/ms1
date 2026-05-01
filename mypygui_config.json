@@ -687,7 +687,8 @@
                     "admin": false,
                     "cmd": "fav_apps",
                     "row_limit": 10,
-                    "border_color": ""
+                    "border_color": "yellow",
+                    "border_px": 0
                 }
             },
             "font": [
