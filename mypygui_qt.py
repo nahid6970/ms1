@@ -569,7 +569,25 @@ def open_edit_gui(item_cfg, category, index=None):
 
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
     group_le = QLineEdit(category or "buttons_left")
-    index_le = QLineEdit(str(index if index is not None else 0)); index_le.setFixedWidth(60)
+    
+    # Calculate initial index: if editing existing, use its index. If new, use len(list)
+    config_now = load_config()
+    initial_idx = index
+    if initial_idx is None:
+        initial_idx = len(config_now.get(group_le.text(), []))
+    
+    index_le = QLineEdit(str(initial_idx)); index_le.setFixedWidth(60)
+    
+    def _on_group_txt_changed(text):
+        # Only auto-update index if we are creating a NEW item (original index was None)
+        if index is None:
+            c = load_config()
+            lst = c.get(text, [])
+            if isinstance(lst, list):
+                index_le.setText(str(len(lst)))
+            else:
+                index_le.setText("0")
+    group_le.textChanged.connect(_on_group_txt_changed)
     
     p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
     p_lay.addWidget(group_le); p_lay.addWidget(QLabel("INDEX")); p_lay.addWidget(index_le); p_lay.addStretch()
