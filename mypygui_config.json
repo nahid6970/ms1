@@ -1325,6 +1325,7 @@
                     "cmd": "ai_sites",
                     "row_limit": 10,
                     "bg_color": "white",
+                    "transparent_bg": true,
                     "border_color": "",
                     "border_px": 1
                 }
