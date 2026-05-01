@@ -1116,16 +1116,37 @@ class StatusBar(QMainWindow):
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
-        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(400, 600); dlg.setStyleSheet(DIALOG_QSS)
+        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(750, 500); dlg.setStyleSheet(DIALOG_QSS)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10); title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
         
-        # Scroll area for settings as it grows
+        # Scroll area for settings
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("QScrollArea { border: none; }")
         scroll_w = QWidget(); scroll_lay = QVBoxLayout(scroll_w); scroll_lay.setContentsMargins(0,0,0,0); scroll_lay.setSpacing(10)
         scroll.setWidget(scroll_w); lay.addWidget(scroll)
 
-        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); scroll_lay.addWidget(grp1)
+        # Dual Panel Layout
+        panels = QHBoxLayout(); panels.setSpacing(15); scroll_lay.addLayout(panels)
+        left_col = QVBoxLayout(); left_col.setSpacing(10); panels.addLayout(left_col, 1)
+        right_col = QVBoxLayout(); right_col.setSpacing(10); panels.addLayout(right_col, 1)
+
+        # --- LEFT COLUMN ---
+        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); left_col.addWidget(grp1)
+
+        grp_def = QGroupBox("NEW ITEM DEFAULTS"); form_def = QFormLayout(); grp_def.setLayout(form_def)
+        dfont = self._config.get("default_font", ["JetBrainsMono NFP", 16, "bold"])
+        df_family = QComboBox(); df_family.addItems(QFontDatabase.families()); df_family.setCurrentText(dfont[0])
+        df_size = QLineEdit(str(dfont[1])); df_size.setFixedWidth(40)
+        df_weight = QComboBox(); df_weight.addItems(["bold", "normal"]); df_weight.setCurrentText(dfont[2])
+        form_def.addRow("FONT FAMILY", df_family)
+        df_row = QWidget(); df_lay = QHBoxLayout(df_row); df_lay.setContentsMargins(0,0,0,0)
+        df_lay.addWidget(df_size); df_lay.addWidget(QLabel("WT")); df_lay.addWidget(df_weight); df_lay.addStretch()
+        form_def.addRow("SIZE / WT", df_row)
+        left_col.addWidget(grp_def)
         
+        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); left_col.addWidget(grp2)
+        left_col.addStretch()
+
+        # --- RIGHT COLUMN ---
         grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit)
         ew, eh = self._config.get("edit_panel_width", 1000), self._config.get("edit_panel_height", 700)
         ew_le, eh_le = QLineEdit(str(ew)), QLineEdit(str(eh))
@@ -1139,22 +1160,11 @@ class StatusBar(QMainWindow):
         lw_le.setFixedWidth(40); rw_le.setFixedWidth(40)
         form_edit.addRow("LEFT WEIGHT", lw_le)
         form_edit.addRow("RIGHT WEIGHT", rw_le)
-        scroll_lay.addWidget(grp_edit)
+        right_col.addWidget(grp_edit)
 
-        # NEW: Default Font Section
-        grp_def = QGroupBox("NEW ITEM DEFAULTS"); form_def = QFormLayout(); grp_def.setLayout(form_def)
-        dfont = self._config.get("default_font", ["JetBrainsMono NFP", 16, "bold"])
-        df_family = QComboBox(); df_family.addItems(QFontDatabase.families()); df_family.setCurrentText(dfont[0])
-        df_size = QLineEdit(str(dfont[1])); df_size.setFixedWidth(40)
-        df_weight = QComboBox(); df_weight.addItems(["bold", "normal"]); df_weight.setCurrentText(dfont[2])
-        form_def.addRow("FONT FAMILY", df_family)
-        df_row = QWidget(); df_lay = QHBoxLayout(df_row); df_lay.setContentsMargins(0,0,0,0)
-        df_lay.addWidget(df_size); df_lay.addWidget(QLabel("WT")); df_lay.addWidget(df_weight); df_lay.addStretch()
-        form_def.addRow("SIZE / WT", df_row)
-        scroll_lay.addWidget(grp_def)
-        
-        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); scroll_lay.addWidget(grp2)
-        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); scroll_lay.addWidget(grp_sb)
+        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); right_col.addWidget(grp_sb)
+        right_col.addStretch()
+
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
         
         def _save():
