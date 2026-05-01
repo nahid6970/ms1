@@ -666,8 +666,8 @@ def open_edit_gui(item_cfg, category, index=None):
 
     pop_set_row = QWidget(); pop_set_lay = QHBoxLayout(pop_set_row); pop_set_lay.setContentsMargins(0,0,0,0); pop_set_lay.setSpacing(10)
     pop_set_lay.addWidget(QLabel("ROW")); pop_set_lay.addWidget(row_limit_le)
-    pop_set_lay.addWidget(QLabel("BG"));  pop_set_lay.addWidget(pop_bg_le)
-    pop_set_lay.addWidget(QLabel("B-COL")); pop_set_lay.addWidget(pop_border_le)
+    pop_set_lay.addWidget(QLabel("BG COLOR"));  pop_set_lay.addWidget(pop_bg_le)
+    pop_set_lay.addWidget(QLabel("BORDER COLOR")); pop_set_lay.addWidget(pop_border_le)
     pop_set_lay.addWidget(QLabel("PX")); pop_set_lay.addWidget(pop_border_px_le); pop_set_lay.addStretch()
 
     form_pop.addRow("", pop_set_row)
