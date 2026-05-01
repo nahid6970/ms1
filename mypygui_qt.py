@@ -701,9 +701,9 @@ def open_edit_gui(item_cfg, category, index=None):
             else:
                 config[new_category][item_cfg["id"]] = item_cfg
         save_config(config)
-        dlg.accept()
         r = QMessageBox.question(dlg, "Restart", "Settings saved. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        dlg.accept()
         if r == QMessageBox.StandardButton.Yes:
             _app_restart()
 
@@ -724,10 +724,9 @@ def open_edit_gui(item_cfg, category, index=None):
                 if item_id in config[category]:
                     del config[category][item_id]
         save_config(config)
-        dlg.accept()
-        r = QMessageBox.question(_main_window if "_main_window" in globals() else None, 
-                                 "Restart", "Item deleted. Restart GUI to apply?",
+        r = QMessageBox.question(dlg, "Restart", "Item deleted. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        dlg.accept()
         if r == QMessageBox.StandardButton.Yes:
             _app_restart()
 
