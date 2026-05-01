@@ -350,7 +350,6 @@ def handle_action(action_cfg):
     hide   = action_cfg.get("hide", False)
     
     # If admin and not already handled by run_command, handle here
-    # But run_command handles its own admin, so we only need this for other types
     if admin and atype not in ["run_command"]:
         try:
             ctypes.windll.shell32.ShellExecuteW(
@@ -442,11 +441,10 @@ def open_edit_gui(item_cfg, category, index=None):
     dlg.setWindowTitle(f"Edit — {item_cfg.get('id', 'Item')}")
     ew = config_now.get("edit_panel_width", 1000)
     eh = config_now.get("edit_panel_height", 700)
-    dlg.setFixedSize(ew, eh) # Use fixed size for reliable centering
+    dlg.setFixedSize(ew, eh)
     dlg.setStyleSheet(DIALOG_QSS)
     dlg.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
     
-    # Precise screen centering
     screen_geo = QApplication.primaryScreen().availableGeometry()
     dlg.move(screen_geo.center().x() - ew // 2, screen_geo.center().y() - eh // 2)
 
@@ -516,7 +514,7 @@ def open_edit_gui(item_cfg, category, index=None):
 
     # 2. APPEARANCE (Colors & Borders)
     grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
-    entries = {"text": text_le} # used for save function
+    entries = {"text": text_le}
     for field in ["fg", "bg", "id"]:
         ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
     
@@ -530,7 +528,6 @@ def open_edit_gui(item_cfg, category, index=None):
     
     form_appear.addRow("BORDER PX", b_row)
 
-    # Button dimensions
     width_le  = QLineEdit(str(item_cfg.get("width", 0)));  width_le.setFixedWidth(50)
     height_le = QLineEdit(str(item_cfg.get("height", 0))); height_le.setFixedWidth(50)
     dim_btn_row = QWidget(); dim_btn_lay = QHBoxLayout(dim_btn_row); dim_btn_lay.setContentsMargins(0,0,0,0); dim_btn_lay.setSpacing(10)
@@ -579,23 +576,17 @@ def open_edit_gui(item_cfg, category, index=None):
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
     group_le = QLineEdit(category or "buttons_left")
     
-    # Calculate initial index: if editing existing, use its index. If new, use len(list)
-    config_now = load_config()
     initial_idx = index
     if initial_idx is None:
         initial_idx = len(config_now.get(group_le.text(), []))
-    
     index_le = QLineEdit(str(initial_idx)); index_le.setFixedWidth(60)
     
     def _on_group_txt_changed(text):
-        # Only auto-update index if we are creating a NEW item (original index was None)
         if index is None:
             c = load_config()
             lst = c.get(text, [])
-            if isinstance(lst, list):
-                index_le.setText(str(len(lst)))
-            else:
-                index_le.setText("0")
+            if isinstance(lst, list): index_le.setText(str(len(lst)))
+            else: index_le.setText("0")
     group_le.textChanged.connect(_on_group_txt_changed)
     
     p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
@@ -615,14 +606,11 @@ def open_edit_gui(item_cfg, category, index=None):
                    ("CTRL + LEFT", "Control-Button-1"), ("CTRL + RIGHT", "Control-Button-3")]
     binding_inputs = {}
     
-    # Track popup settings globally for the item
-    # We take from the first popup binding we find, or use defaults
     first_bcfg = {}
     for _, bkey in click_types:
         bc = item_cfg.get("bindings", {}).get(bkey, {})
         if bc.get("type") == "popup":
-            first_bcfg = bc
-            break
+            first_bcfg = bc; break
 
     for label_text, bkey in click_types:
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
@@ -632,10 +620,8 @@ def open_edit_gui(item_cfg, category, index=None):
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
-        
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
         chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addStretch()
-        
         form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
         right_layout.addWidget(grp)
         binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
@@ -650,7 +636,6 @@ def open_edit_gui(item_cfg, category, index=None):
     pop_set_lay.addWidget(QLabel("ROW")); pop_set_lay.addWidget(row_limit_le)
     pop_set_lay.addWidget(QLabel("COLOR")); pop_set_lay.addWidget(pop_border_le)
     pop_set_lay.addWidget(QLabel("PX")); pop_set_lay.addWidget(pop_border_px_le); pop_set_lay.addStretch()
-    
     form_pop.addRow("", pop_set_row)
     right_layout.addWidget(grp_pop)
 
@@ -664,11 +649,10 @@ def open_edit_gui(item_cfg, category, index=None):
     for bkey in binding_inputs:
         binding_inputs[bkey]["type"].currentTextChanged.connect(_check_popup_visibility)
     _check_popup_visibility()
-
     right_layout.addStretch()
 
     btn_row = QHBoxLayout()
-    btn_save   = QPushButton("SAVE");   btn_save.setObjectName("btn_save")
+    btn_save = QPushButton("SAVE"); btn_save.setObjectName("btn_save")
     btn_delete = QPushButton("DELETE"); btn_delete.setObjectName("btn_delete")
     btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
     btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -676,8 +660,9 @@ def open_edit_gui(item_cfg, category, index=None):
     root_layout.addLayout(btn_row)
 
     def save():
-        for field in ["text", "fg", "bg", "id"]:
+        for field in ["fg", "bg", "id"]:
             item_cfg[field] = entries[field].text()
+        item_cfg["text"] = text_le.text()
         try:
             item_cfg["font"] = [font_family_cb.currentText(), int(font_size_le.text()), font_weight_cb.currentText()]
         except ValueError: pass
@@ -717,50 +702,37 @@ def open_edit_gui(item_cfg, category, index=None):
             new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
-            
             if b_type == "popup":
                 try: new_bindings[bkey]["row_limit"] = int(row_limit_le.text())
                 except: new_bindings[bkey]["row_limit"] = 10
                 new_bindings[bkey]["border_color"] = pop_border_le.text()
                 try: new_bindings[bkey]["border_px"] = int(pop_border_px_le.text())
                 except: new_bindings[bkey]["border_px"] = 1
-
         item_cfg["bindings"] = new_bindings
         new_category = group_le.text()
         try: new_index = int(index_le.text())
         except ValueError: new_index = None
         config = load_config()
         if category != new_category and category in config and isinstance(config[category], list) and index is not None:
-            if 0 <= index < len(config[category]):
-                config[category].pop(index)
+            if 0 <= index < len(config[category]): config[category].pop(index)
         target = config.get(new_category, [])
-        if not isinstance(target, list) and new_category not in ["static_bindings"]:
-             # If target exists but is not a list, and not static_bindings, we might be overwriting a dict?
-             # For popup bars, we expect them to be lists of buttons.
-             target = []
-        
+        if not isinstance(target, list) and new_category not in ["static_bindings"]: target = []
         if isinstance(target, list):
-            if category == new_category and index is not None and 0 <= index < len(target):
-                target.pop(index)
-            if new_index is not None and 0 <= new_index <= len(target):
-                target.insert(new_index, item_cfg)
-            else:
-                target.append(item_cfg)
+            if category == new_category and index is not None and 0 <= index < len(target): target.pop(index)
+            if new_index is not None and 0 <= new_index <= len(target): target.insert(new_index, item_cfg)
+            else: target.append(item_cfg)
             config[new_category] = target
         else:
             if new_category == "static_bindings":
-                # Store flat: style fields + bindings merged at top level
                 flat = {k: v for k, v in item_cfg.items() if k != "bindings"}
                 flat.update(item_cfg.get("bindings", {}))
                 config[new_category][item_cfg["id"]] = flat
-            else:
-                config[new_category][item_cfg["id"]] = item_cfg
+            else: config[new_category][item_cfg["id"]] = item_cfg
         save_config(config)
         r = QMessageBox.question(dlg, "Restart", "Settings saved. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         dlg.accept()
-        if r == QMessageBox.StandardButton.Yes:
-            _app_restart()
+        if r == QMessageBox.StandardButton.Yes: _app_restart()
 
     def delete():
         r = QMessageBox.question(dlg, "Delete", f"Delete '{item_cfg.get('id', 'this item')}'?",
@@ -769,25 +741,20 @@ def open_edit_gui(item_cfg, category, index=None):
         config = load_config()
         if category in config:
             if isinstance(config[category], list):
-                if index is not None and 0 <= index < len(config[category]):
-                    config[category].pop(index)
+                if index is not None and 0 <= index < len(config[category]): config[category].pop(index)
                 else:
                     item_id = item_cfg.get("id")
                     config[category] = [i for i in config[category] if i.get("id") != item_id]
             else:
                 item_id = item_cfg.get("id")
-                if item_id in config[category]:
-                    del config[category][item_id]
+                if item_id in config[category]: del config[category][item_id]
         save_config(config)
         r = QMessageBox.question(dlg, "Restart", "Item deleted. Restart GUI to apply?",
                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         dlg.accept()
-        if r == QMessageBox.StandardButton.Yes:
-            _app_restart()
+        if r == QMessageBox.StandardButton.Yes: _app_restart()
 
-    btn_save.clicked.connect(save)
-    btn_delete.clicked.connect(delete)
-    dlg.show()
+    btn_save.clicked.connect(save); btn_delete.clicked.connect(delete); dlg.show()
 
 
 # ─── Rclone settings dialog ───────────────────────────────────────────────────
@@ -803,7 +770,7 @@ def open_rclone_settings():
     grp = QGroupBox("CHECK BEHAVIOUR"); form = QFormLayout(); form.setSpacing(8); grp.setLayout(form)
     cfg_now = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
     interval_le = QLineEdit(str(cfg_now.get("interval_min", 10)))
-    simul_chk   = QCheckBox("Run simultaneously"); simul_chk.setChecked(bool(cfg_now.get("simultaneous", True)))
+    simul_chk = QCheckBox("Run simultaneously"); simul_chk.setChecked(bool(cfg_now.get("simultaneous", True)))
     form.addRow("INTERVAL (min)", interval_le); form.addRow("", simul_chk)
     layout.addWidget(grp)
     btn_save = QPushButton("SAVE"); btn_save.setObjectName("btn_save")
@@ -815,8 +782,7 @@ def open_rclone_settings():
         config["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
         save_config(config)
         dlg.accept()
-    btn_save.clicked.connect(save)
-    dlg.show()
+    btn_save.clicked.connect(save); dlg.show()
 
 
 # ─── Generic Popup Bar ────────────────────────────────────────────────────────
@@ -838,35 +804,23 @@ class GenericPopup(QFrame):
         while self.layout.count():
             item = self.layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
-        
         config = load_config()
         items = config.get(self.category, [])
-        
         row, col = 0, 0
         for idx, cfg in enumerate(items):
             w = create_dynamic_button(None, cfg, self.category, idx)
             self.layout.addWidget(w, row, col)
             col += 1
-            if col >= self.row_limit:
-                col = 0
-                row += 1
-        
-        # Add '+' button like the main statusbar
+            if col >= self.row_limit: col = 0; row += 1
         _add_st_cfg = config.get("static_bindings", {}).get("add_button", {})
         add_bt = IconLabel(_add_st_cfg.get("text", "+"), _add_st_cfg)
-        if _add_st_cfg:
-            _apply_static_style(add_bt, "add_button")
-        else:
-            add_bt.setStyleSheet(f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; padding: 0 5px;")
-        
+        if _add_st_cfg: _apply_static_style(add_bt, "add_button")
+        else: add_bt.setStyleSheet(f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; padding: 0 5px;")
         add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
         _new_cfg = {"text": "SUB", "fg": "#ffffff", "bg": CP_BG, "id": f"sub_{int(time.time())}", "bindings": {}}
-        
         def _add_click(e, cat=self.category, cfg=_new_cfg):
-            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                _open_static_edit("add_button")
-            else:
-                open_edit_gui(cfg, cat)
+            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("add_button")
+            else: open_edit_gui(cfg, cat)
         add_bt.mousePressEvent = _add_click
         self.layout.addWidget(add_bt, row, col)
         self.adjustSize()
@@ -882,7 +836,6 @@ def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, bor
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
 def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
-    """Creates an IconLabel-based button and adds it to parent_layout (QHBoxLayout or QGridLayout or None)."""
     _fg   = btn_cfg.get("fg", "") or "white"
     _bg   = btn_cfg.get("bg", "") or CP_BG
     text  = btn_cfg.get("text", "")
@@ -891,57 +844,30 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     px_r  = int(btn_cfg.get("padx_right", 1))
     m_l   = int(btn_cfg.get("margin_left", 0))
     m_r   = int(btn_cfg.get("margin_right", 0))
-
     lbl = IconLabel(text, btn_cfg)
-    bw = btn_cfg.get("width", 0)
-    bh = btn_cfg.get("height", 0)
+    bw, bh = btn_cfg.get("width", 0), btn_cfg.get("height", 0)
     if bw > 0: lbl.setFixedWidth(bw)
     if bh > 0: lbl.setFixedHeight(bh)
-    
-    font_size   = font_cfg[1] if len(font_cfg) > 1 else 16
-    font_weight = font_cfg[2] if len(font_cfg) > 2 else "bold"
-    bold = "bold" if font_weight == "bold" else "normal"
+    fsize, fweight = font_cfg[1] if len(font_cfg) > 1 else 16, font_cfg[2] if len(font_cfg) > 2 else "bold"
     _border_px = int(btn_cfg.get("border", 0))
     _border_col = btn_cfg.get("border_color", "") or _bg
     _border_radius = int(btn_cfg.get("border_radius", 0))
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
-    
-    lbl.setStyleSheet(
-        f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; "
-        f"font-size: {font_size}pt; font-weight: {bold}; {_border_css} "
-        f"border-radius: {_border_radius}px; "
-        f"margin-left: {m_l}px; margin-right: {m_r}px;"
-    )
+    lbl.setStyleSheet(f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; font-size: {fsize}pt; font-weight: {fweight}; {_border_css} border-radius: {_border_radius}px; margin-left: {m_l}px; margin-right: {m_r}px;")
     lbl.setContentsMargins(px_l, 0, px_r, 0)
-
     bindings = btn_cfg.get("bindings", {})
-
     def mousePressEvent(event, _bindings=bindings, _cfg=btn_cfg, _cat=category, _idx=index, _lbl=lbl):
-        mods = event.modifiers()
-        btn  = event.button()
-        if mods & Qt.KeyboardModifier.ShiftModifier:
-            open_edit_gui(_cfg, _cat, _idx)
-            return
-        
+        mods, btn = event.modifiers(), event.button()
+        if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, _cat, _idx); return
         bkey = None
-        if btn == Qt.MouseButton.LeftButton:
-            bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
-        elif btn == Qt.MouseButton.RightButton:
-            bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
-        
+        if btn == Qt.MouseButton.LeftButton: bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
+        elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
         if bkey and bkey in _bindings:
             action = _bindings[bkey]
-            if action.get("type") == "popup":
-                rl = action.get("row_limit", 10)
-                bc = action.get("border_color")
-                bp = action.get("border_px", 1)
-                open_popup_bar(action.get("cmd", "popup_bar"), _lbl, rl, bc, bp)
-            else:
-                handle_action(action)
-
+            if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1))
+            else: handle_action(action)
     lbl.mousePressEvent = mousePressEvent
-    if parent_layout is not None:
-        parent_layout.addWidget(lbl)
+    if parent_layout is not None: parent_layout.addWidget(lbl)
     return lbl
 
 
@@ -950,91 +876,41 @@ def _open_static_edit(key):
     cfg = load_config()
     sb = cfg.get("static_bindings", {})
     entry = sb.get(key, {})
-    # Extract flat bindings (Button-1, Control-Button-1, etc.) from entry
     _binding_keys = {k: v for k, v in entry.items() if "Button" in k}
-    item = {"id": key, "text": key,
-            "fg": entry.get("fg", ""),
-            "bg": entry.get("bg", ""),
-            "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]),
-            "border": entry.get("border", 0),
-            "border_color": entry.get("border_color", ""),
-            "border_radius": entry.get("border_radius", 0),
-            "width": entry.get("width", 0),
-            "height": entry.get("height", 0),
-            "padx_left": entry.get("padx_left", 0),
-            "padx_right": entry.get("padx_right", 0),
-            "margin_left": entry.get("margin_left", 0),
-            "margin_right": entry.get("margin_right", 0),
-            "icon_path": entry.get("icon_path", ""),
-            "nf_char": entry.get("nf_char", ""),
-            "svg_content": entry.get("svg_content", ""),
-            "svg_hover_map": entry.get("svg_hover_map", {}),
-            "icon_width": entry.get("icon_width", 0),
-            "icon_height": entry.get("icon_height", 0),
-            "icon_gap": entry.get("icon_gap", 4),
-            "icon_position": entry.get("icon_position", "left"),
-            "bindings": _binding_keys}
+    item = {"id": key, "text": key, "fg": entry.get("fg", ""), "bg": entry.get("bg", ""), "font": entry.get("font", ["JetBrainsMono NFP", 16, "bold"]), "border": entry.get("border", 0), "border_color": entry.get("border_color", ""), "border_radius": entry.get("border_radius", 0), "width": entry.get("width", 0), "height": entry.get("height", 0), "padx_left": entry.get("padx_left", 0), "padx_right": entry.get("padx_right", 0), "margin_left": entry.get("margin_left", 0), "margin_right": entry.get("margin_right", 0), "icon_path": entry.get("icon_path", ""), "nf_char": entry.get("nf_char", ""), "svg_content": entry.get("svg_content", ""), "svg_hover_map": entry.get("svg_hover_map", {}), "icon_width": entry.get("icon_width", 0), "icon_height": entry.get("icon_height", 0), "icon_gap": entry.get("icon_gap", 4), "icon_position": entry.get("icon_position", "left"), "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
 def _apply_static_style(widget, key):
     cfg = load_config().get("static_bindings", {}).get(key, {})
     if not cfg: return
-    if isinstance(widget, IconLabel):
-        widget.btn_cfg = cfg
-    
-    fg = cfg.get("fg", "") or "white"
-    bg = cfg.get("bg", "") or "transparent"
+    if isinstance(widget, IconLabel): widget.btn_cfg = cfg
+    fg, bg = cfg.get("fg", "") or "white", cfg.get("bg", "") or "transparent"
     font = cfg.get("font", ["JetBrainsMono NFP", 16, "bold"])
-    border_px = int(cfg.get("border", 0))
+    border_px, border_radius = int(cfg.get("border", 0)), int(cfg.get("border_radius", 0))
     border_col = cfg.get("border_color", "") or bg
-    border_radius = int(cfg.get("border_radius", 0))
     border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
-    px_l = int(cfg.get("padx_left", 0))
-    px_r = int(cfg.get("padx_right", 0))
-    m_l  = int(cfg.get("margin_left", 0))
-    m_r  = int(cfg.get("margin_right", 0))
-    
-    bw = cfg.get("width", 0)
-    bh = cfg.get("height", 0)
+    px_l, px_r = int(cfg.get("padx_left", 0)), int(cfg.get("padx_right", 0))
+    m_l, m_r = int(cfg.get("margin_left", 0)), int(cfg.get("margin_right", 0))
+    bw, bh = cfg.get("width", 0), cfg.get("height", 0)
     if bw > 0: widget.setFixedWidth(bw)
     if bh > 0: widget.setFixedHeight(bh)
-
     fw = font[2] if len(font) > 2 else "bold"
-    widget.setStyleSheet(
-        f"color: {fg}; background: {bg}; font-family: '{font[0]}'; "
-        f"font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; "
-        f"{border_css} border-radius: {border_radius}px; "
-        f"padding-left: {px_l}px; padding-right: {px_r}px; "
-        f"margin-left: {m_l}px; margin-right: {m_r}px;"
-    )
+    widget.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; {border_css} border-radius: {border_radius}px; padding-left: {px_l}px; padding-right: {px_r}px; margin-left: {m_l}px; margin-right: {m_r}px;")
 
 def _bind_static(lbl, key, default_cmd):
-    """Attach config-driven click handlers to a QLabel."""
-    cfg = load_config().get("static_bindings", {}).get(
-        key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}}
-    )
+    cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})
     def mousePressEvent(event, _cfg=cfg, _key=key):
-        mods = event.modifiers()
-        btn  = event.button()
-        if mods & Qt.KeyboardModifier.ShiftModifier:
-            _open_static_edit(_key)
-            return
+        mods, btn = event.modifiers(), event.button()
+        if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit(_key); return
         bkey = None
-        if btn == Qt.MouseButton.LeftButton:
-            bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
-        elif btn == Qt.MouseButton.RightButton:
-            bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
-        if bkey and bkey in _cfg:
-            handle_action(_cfg[bkey])
-    lbl.mousePressEvent = mousePressEvent
-    lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-    _apply_static_style(lbl, key)  # apply style from config if set
+        if btn == Qt.MouseButton.LeftButton: bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
+        elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
+        if bkey and bkey in _cfg: handle_action(_cfg[bkey])
+    lbl.mousePressEvent = mousePressEvent; lbl.setCursor(Qt.CursorShape.PointingHandCursor); _apply_static_style(lbl, key)
 
 
 # ─── CPU core bar widget ──────────────────────────────────────────────────────
-BAR_WIDTH  = 8
-BAR_HEIGHT = 25
-
+BAR_WIDTH, BAR_HEIGHT = 8, 25
 def _determine_bar_color(usage):
     if usage >= 90: return QColor("#8B0000")
     if usage >= 80: return QColor("#f12c2f")
@@ -1045,102 +921,70 @@ class CpuCoreFrame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._usages = psutil.cpu_percent(percpu=True)
-        n = len(self._usages)
-        self.setFixedSize(n * (BAR_WIDTH + 2) + 4, BAR_HEIGHT + 4)
-
-    def update_usages(self, usages):
-        self._usages = usages
-        self.update()
-
+        self.setFixedSize(len(self._usages) * (BAR_WIDTH + 2) + 4, BAR_HEIGHT + 4)
+    def update_usages(self, usages): self._usages = usages; self.update()
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.fillRect(self.rect(), QColor("#333333"))
+        painter = QPainter(self); painter.fillRect(self.rect(), QColor("#333333"))
         for i, usage in enumerate(self._usages):
-            bar_h = int((usage / 100) * (BAR_HEIGHT / 2))
-            color = _determine_bar_color(usage)
-            painter.fillRect(
-                2 + i * (BAR_WIDTH + 2),
-                2 + (BAR_HEIGHT // 2) - bar_h,
-                BAR_WIDTH,
-                bar_h * 2,
-                color
-            )
-
+            bar_h, color = int((usage / 100) * (BAR_HEIGHT / 2)), _determine_bar_color(usage)
+            painter.fillRect(2 + i * (BAR_WIDTH + 2), 2 + (BAR_HEIGHT // 2) - bar_h, BAR_WIDTH, bar_h * 2, color)
 
 
 # ─── Git status ───────────────────────────────────────────────────────────────
 _git_queue = Queue()
-
 def check_git_status(repo, q):
-    git_path = repo["path"]
-    if not os.path.exists(git_path):
-        q.put((repo["name"], repo["label"], "#000000"))
-        return
-    result = subprocess.run(["git", "status"], capture_output=True, text=True, cwd=git_path)
+    if not os.path.exists(repo["path"]): q.put((repo["name"], repo["label"], "#000000")); return
+    result = subprocess.run(["git", "status"], capture_output=True, text=True, cwd=repo["path"])
     color = "#00ff21" if "nothing to commit, working tree clean" in result.stdout else "#fe1616"
     q.put((repo["name"], repo["label"], color))
 
 def _git_status_loop(repos, q):
     while True:
-        for repo in repos:
-            check_git_status(repo, q)
+        for repo in repos: check_git_status(repo, q)
         time.sleep(5)
 
 def git_backup(repos):
-    commands = " ; ".join([
-        f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos
-    ])
-    subprocess.Popen([
-        "Start", "pwsh", "-NoExit", "-Command",
-        f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"
-    ], shell=True)
+    commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
+    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"], shell=True)
 
 def delete_git_lock_files(repos):
     for repo in repos:
         lock_file = os.path.join(repo["path"], ".git", "index.lock")
         try:
-            if os.path.exists(lock_file):
-                os.remove(lock_file)
-                print(f"Deleted: {lock_file}")
-        except Exception as e:
-            print(f"Error deleting {lock_file}: {e}")
+            if os.path.exists(lock_file): os.remove(lock_file); print(f"Deleted: {lock_file}")
+        except Exception as e: print(f"Error deleting {lock_file}: {e}")
+
+def apply_git_style(lbl, cfg):
+    fg, bg = cfg.get("fg", "") or "white", cfg.get("bg", "") or "transparent"
+    font = cfg.get("font", ["JetBrainsMono NFP", 15, "bold"])
+    bw, bh = cfg.get("width", 0), cfg.get("height", 0)
+    if bw > 0: lbl.setFixedWidth(bw)
+    if bh > 0: lbl.setFixedHeight(bh)
+    fw = font[2] if len(font) > 2 else "bold"
+    lbl.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 15}pt; font-weight: {fw}; border: none; background: transparent;")
 
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
 os.makedirs(LOG_DIR, exist_ok=True)
-
-rclone_status = {}  # id -> color
-
+rclone_status = {}
 def _update_toggle_color_cb(toggle_lbl):
-    if not rclone_status:
-        return
+    if not rclone_status: return
     agg = CP_GREEN if all(c == CP_GREEN for c in rclone_status.values()) else CP_RED
-    # Replace only the color value in the existing stylesheet to preserve other properties
-    import re as _re
     ss = toggle_lbl.styleSheet()
     if ss:
-        new_ss = _re.sub(r'color\s*:[^;]+;', f'color: {agg};', ss)
-        if new_ss == ss:  # no color property found, append it
-            new_ss = ss.rstrip(';') + f'; color: {agg};'
+        new_ss = re.sub(r'color\s*:[^;]+;', f'color: {agg};', ss)
+        if new_ss == ss: new_ss = ss.rstrip(';') + f'; color: {agg};'
         toggle_lbl.setStyleSheet(new_ss)
-    else:
-        toggle_lbl.setStyleSheet(
-            f"color: {agg}; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;"
-        )
+    else: toggle_lbl.setStyleSheet(f"color: {agg}; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
 
 def check_and_update_rclone(cfg, toggle_lbl):
     def run():
         actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        with open(cfg["log"], "w") as f:
-            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-        with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f:
-            content = f.read()
-        color = CP_GREEN if "ERROR" not in content else CP_RED
-        rclone_status[cfg.get("id", cfg["label"])] = color
-        # emit signal to update UI safely from main thread
-        if _rclone_sig:
-            _rclone_sig.update.emit(toggle_lbl, "")
+        with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+        with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f: content = f.read()
+        rclone_status[cfg.get("id", cfg["label"])] = CP_GREEN if "ERROR" not in content else CP_RED
+        if _rclone_sig: _rclone_sig.update.emit(toggle_lbl, "")
         interval_ms = int(load_config().get("rclone_settings", {}).get("interval_min", 10)) * 60000
         QTimer.singleShot(interval_ms, lambda: check_and_update_rclone(cfg, toggle_lbl))
     threading.Thread(target=run, daemon=True).start()
@@ -1150,652 +994,196 @@ def check_and_update_rclone(cfg, toggle_lbl):
 class StatusBar(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
-        )
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setFixedSize(1920, 39)
         screen_w = QApplication.primaryScreen().geometry().width()
         self.move(screen_w // 2 - 960, 990)
-        self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: 1px solid {CP_RED}; }}")
-
         self._config = load_config()
-
-        border_frame = QFrame()
-        border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
+        border_frame = QFrame(); border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
         self.setCentralWidget(border_frame)
-        inner = QWidget(border_frame)
-        inner.setStyleSheet(f"background: {CP_BG}; border: none;")
-        border_layout = QVBoxLayout(border_frame)
-        border_layout.setContentsMargins(1, 1, 1, 1)
-        border_layout.addWidget(inner)
-        central = inner
-        main_layout = QHBoxLayout(central)
-        main_layout.setContentsMargins(2, 1, 2, 1)
-        main_layout.setSpacing(0)
-
-        # Left widget (stretches)
-        self._left_widget = QWidget()
-        self._left_widget.setStyleSheet(f"background: {CP_BG};")
-        self._left_layout = QHBoxLayout(self._left_widget)
-        self._left_layout.setContentsMargins(0, 0, 0, 0)
-        self._left_layout.setSpacing(0)
-        self._left_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        inner = QWidget(border_frame); inner.setStyleSheet(f"background: {CP_BG}; border: none;")
+        border_layout = QVBoxLayout(border_frame); border_layout.setContentsMargins(1, 1, 1, 1); border_layout.addWidget(inner)
+        main_layout = QHBoxLayout(inner); main_layout.setContentsMargins(2, 1, 2, 1); main_layout.setSpacing(0)
+        self._left_widget = QWidget(); self._left_layout = QHBoxLayout(self._left_widget); self._left_layout.setContentsMargins(0, 0, 0, 0); self._left_layout.setSpacing(0); self._left_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         main_layout.addWidget(self._left_widget, 1)
-
-        # Right widget (fixed right)
-        self._right_widget = QWidget()
-        self._right_widget.setStyleSheet(f"background: {CP_BG};")
-        self._right_layout = QHBoxLayout(self._right_widget)
-        self._right_layout.setContentsMargins(0, 0, 0, 0)
-        self._right_layout.setSpacing(2)
-        self._right_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self._right_widget = QWidget(); self._right_layout = QHBoxLayout(self._right_widget); self._right_layout.setContentsMargins(0, 0, 0, 0); self._right_layout.setSpacing(2); self._right_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         main_layout.addWidget(self._right_widget)
+        self._build_left(); self._build_right(); self._apply_statusbar_style(); self._start_timers()
 
-        self._build_left()
-        self._build_right()
-        self._apply_statusbar_style()
-        self._start_timers()
-
-    # ── Left panel ────────────────────────────────────────────────────────────
     def _build_left(self):
         ll = self._left_layout
-
-        # 1. Uptime label
         _uc = load_config().get("static_bindings", {}).get("uptime", {})
         self.uptime_label = IconLabel(format_uptime(), _uc)
-        _ufg = _uc.get("fg", "") or "#6bc0f8"
-        _ufont_list = _uc.get("font", ["JetBrainsMono NFP", 16, "bold"])
-        _ufont = _ufont_list[0] if _ufont_list else "JetBrainsMono NFP"
-        _usize = _ufont_list[1] if len(_ufont_list) > 1 else 16
-        _ubold = _ufont_list[2] if len(_ufont_list) > 2 else "bold"
-        self.uptime_label.setStyleSheet(
-            f"color: {_ufg}; font-family: '{_ufont}'; font-size: {_usize}pt; font-weight: {_ubold};"
-        )
-        def _uptime_click(event):
-            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                _open_static_edit("uptime")
-            else:
-                subprocess.Popen("timedate.cpl", shell=True)
-        self.uptime_label.mousePressEvent = _uptime_click
+        _ufg, _ufont_list = _uc.get("fg", "") or "#6bc0f8", _uc.get("font", ["JetBrainsMono NFP", 16, "bold"])
+        self.uptime_label.setStyleSheet(f"color: {_ufg}; font-family: '{_ufont_list[0]}'; font-size: {_ufont_list[1]}pt; font-weight: {_ufont_list[2]};")
+        self.uptime_label.mousePressEvent = lambda e: (_open_static_edit("uptime") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else subprocess.Popen("timedate.cpl", shell=True))
         ll.addWidget(self.uptime_label)
-
-        # 2. Paginated buttons_left
-        self._bl_page_size = self._config.get("buttons_left_page_size", 10)
-        self._bl_offset    = 0
-        self._bl_widgets   = []
-
-        # PREV Button
-        _prev_cfg = load_config().get("static_bindings", {}).get("pagination_prev", {"text": "«"})
-        prev_bt = IconLabel(_prev_cfg.get("text", "«"), _prev_cfg)
-        _apply_static_style(prev_bt, "pagination_prev")
-        def _prev_click(event):
-            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                _open_static_edit("pagination_prev")
-            else:
-                self._bl_prev()
-        prev_bt.mousePressEvent = _prev_click
-        ll.addWidget(prev_bt)
-        self._bl_prev_bt = prev_bt
-
-        self._bl_container = QWidget()
-        self._bl_container.setStyleSheet(f"background: {CP_BG};")
-        self._bl_container_layout = QHBoxLayout(self._bl_container)
-        self._bl_container_layout.setContentsMargins(0, 0, 0, 0)
-        self._bl_container_layout.setSpacing(0)
-        ll.addWidget(self._bl_container)
-
-        # NEXT Button
-        _next_cfg = load_config().get("static_bindings", {}).get("pagination_next", {"text": "»"})
-        next_bt = IconLabel(_next_cfg.get("text", "»"), _next_cfg)
-        _apply_static_style(next_bt, "pagination_next")
-        def _next_click(event):
-            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                _open_static_edit("pagination_next")
-            else:
-                self._bl_next()
-        next_bt.mousePressEvent = _next_click
-        ll.addWidget(next_bt)
-        self._bl_next_bt = next_bt
-
+        self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
+        prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
+        self._bl_container = QWidget(); self._bl_container_layout = QHBoxLayout(self._bl_container); self._bl_container_layout.setContentsMargins(0, 0, 0, 0); self._bl_container_layout.setSpacing(0); ll.addWidget(self._bl_container)
+        next_bt = IconLabel("»", {}); _apply_static_style(next_bt, "pagination_next"); next_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_next") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_next()); ll.addWidget(next_bt); self._bl_next_bt = next_bt
         self._bl_render()
-
-        # 6. Add new button
-        _add_st_cfg = load_config().get("static_bindings", {}).get("add_button", {})
-        add_bt = IconLabel(_add_st_cfg.get("text", "+"), _add_st_cfg)
-        if _add_st_cfg:
-            _apply_static_style(add_bt, "add_button")
-        else:
-            add_bt.setStyleSheet(
-                f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"
-            )
-        add_bt.setCursor(Qt.CursorShape.PointingHandCursor)
-        _add_cfg = {"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}
-        def _add_click(e, cfg=_add_cfg):
-            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                _open_static_edit("add_button")
-            else:
-                open_edit_gui(cfg, "buttons_left")
-        add_bt.mousePressEvent = _add_click
-        ll.addWidget(add_bt)
+        add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
-        dlg = QDialog(self)
-        dlg.setWindowTitle("Settings")
-        dlg.resize(380, 420)
-        dlg.setStyleSheet(DIALOG_QSS)
-        lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10)
-        title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
-
-        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1)
-        size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60)
-        form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
-
-        grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit)
-        ew = self._config.get("edit_panel_width", 1000)
-        eh = self._config.get("edit_panel_height", 700)
-        ew_le = QLineEdit(str(ew)); ew_le.setFixedWidth(60)
-        eh_le = QLineEdit(str(eh)); eh_le.setFixedWidth(60)
-        form_edit.addRow("WIDTH", ew_le)
-        form_edit.addRow("HEIGHT", eh_le)
-        lay.addWidget(grp_edit)
-
-        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
-        rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True})
-        interval_le = QLineEdit(str(rc.get("interval_min", 10))); interval_le.setFixedWidth(60)
-        simul_chk = QCheckBox("Run simultaneously"); simul_chk.setChecked(bool(rc.get("simultaneous", True)))
-        form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
-
-        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb)
-        _sb_cfg = self._config.get("statusbar", {})
-        sb_bg_le     = QLineEdit(_sb_cfg.get("bg", CP_BG));           sb_bg_le.setFixedWidth(90)
-        sb_border_le = QLineEdit(_sb_cfg.get("border_color", CP_RED)); sb_border_le.setFixedWidth(90)
-        sb_bpx_le    = QLineEdit(str(_sb_cfg.get("border_px", 1)));    sb_bpx_le.setFixedWidth(40)
-        
-        popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2))); popup_y_le.setFixedWidth(40)
-        
-        def _set_btn_color(btn, color):
-            btn.setStyleSheet(f"background: {color}; border: 1px solid #555;")
-        def _pick_color(le, btn):
-            c = QColorDialog.getColor(QColor(le.text() or "#000000"), dlg)
-            if c.isValid():
-                le.setText(c.name().upper())
-                _set_btn_color(btn, c.name())
-        bg_row = QWidget(); bg_lay = QHBoxLayout(bg_row); bg_lay.setContentsMargins(0,0,0,0); bg_lay.setSpacing(6)
-        bg_pick = QPushButton(); bg_pick.setFixedSize(28, 22); _set_btn_color(bg_pick, sb_bg_le.text() or CP_BG)
-        bg_pick.clicked.connect(lambda: _pick_color(sb_bg_le, bg_pick))
-        sb_bg_le.textChanged.connect(lambda t: _set_btn_color(bg_pick, t or CP_BG))
-        bg_lay.addWidget(sb_bg_le); bg_lay.addWidget(bg_pick); bg_lay.addStretch()
-        bc_row = QWidget(); bc_lay = QHBoxLayout(bc_row); bc_lay.setContentsMargins(0,0,0,0); bc_lay.setSpacing(6)
-        bc_pick = QPushButton(); bc_pick.setFixedSize(28, 22); _set_btn_color(bc_pick, sb_border_le.text() or CP_RED)
-        bc_pick.clicked.connect(lambda: _pick_color(sb_border_le, bc_pick))
-        sb_border_le.textChanged.connect(lambda t: _set_btn_color(bc_pick, t or CP_RED))
-        bc_lay.addWidget(sb_border_le); bc_lay.addWidget(bc_pick); bc_lay.addStretch()
-        form_sb.addRow("BG COLOR", bg_row)
-        form_sb.addRow("BORDER COLOR", bc_row)
-        form_sb.addRow("BORDER PX", sb_bpx_le)
-        form_sb.addRow("POPUP Y OFFSET", popup_y_le)
-        lay.addWidget(grp_sb)
-
+        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(380, 420); dlg.setStyleSheet(DIALOG_QSS)
+        lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10); title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
+        grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
+        grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit); ew, eh = self._config.get("edit_panel_width", 1000), self._config.get("edit_panel_height", 700); ew_le, eh_le = QLineEdit(str(ew)), QLineEdit(str(eh)); ew_le.setFixedWidth(60); eh_le.setFixedWidth(60); form_edit.addRow("WIDTH", ew_le); form_edit.addRow("HEIGHT", eh_le); lay.addWidget(grp_edit)
+        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
+        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); lay.addWidget(grp_sb)
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
         def _save():
-            try: self._bl_page_size = int(size_le.text())
-            except ValueError: pass
-            try:
-                new_ew = int(ew_le.text())
-                new_eh = int(eh_le.text())
-            except ValueError:
-                new_ew, new_eh = 1000, 700
-            try: mins = int(interval_le.text())
-            except ValueError: mins = 10
-            try: new_bpx = int(sb_bpx_le.text())
-            except ValueError: new_bpx = 1
-            try: new_offset = int(popup_y_le.text())
-            except ValueError: new_offset = 2
-            cfg = load_config()
-            cfg["buttons_left_page_size"] = self._bl_page_size
-            cfg["edit_panel_width"] = new_ew
-            cfg["edit_panel_height"] = new_eh
-            cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
-            cfg["popup_y_offset"] = new_offset
-            cfg["statusbar"] = {
-                "bg": sb_bg_le.text() or CP_BG,
-                "border_color": sb_border_le.text() or CP_RED,
-                "border_px": new_bpx,
-            }
-            save_config(cfg)
-            self._config = cfg
-            self._apply_statusbar_style()
-            dlg.accept(); self._bl_render()
-        btn.clicked.connect(_save)
-        screen = QApplication.primaryScreen().geometry()
-        dlg.move(screen.center().x() - 190, screen.center().y() - 210)
-        dlg.show()
+            cfg = load_config(); cfg["buttons_left_page_size"], cfg["edit_panel_width"], cfg["edit_panel_height"] = int(size_le.text()), int(ew_le.text()), int(eh_le.text())
+            cfg["rclone_settings"], cfg["popup_y_offset"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}, int(popup_y_le.text())
+            cfg["statusbar"] = {"bg": sb_bg_le.text() or CP_BG, "border_color": sb_border_le.text() or CP_RED, "border_px": int(sb_bpx_le.text())}
+            save_config(cfg); self._config = cfg; self._apply_statusbar_style(); dlg.accept(); self._bl_render()
+        btn.clicked.connect(_save); dlg.show()
 
     def _apply_statusbar_style(self):
-        sb = self._config.get("statusbar", {})
-        bg = sb.get("bg", CP_BG) or CP_BG
-        border_color = sb.get("border_color", CP_RED) or CP_RED
-        border_px = int(sb.get("border_px", 1))
+        sb = self._config.get("statusbar", {}); bg, border_color, border_px = sb.get("bg", CP_BG) or CP_BG, sb.get("border_color", CP_RED) or CP_RED, int(sb.get("border_px", 1))
         self.setStyleSheet(GLOBAL_QSS + f"QMainWindow {{ border: {border_px}px solid {border_color}; }}")
         cf = self.centralWidget()
         if cf:
             cf.setStyleSheet(f"QFrame {{ background: {bg}; border: {border_px}px solid {border_color}; }}")
             inner = cf.layout().itemAt(0).widget() if cf.layout() and cf.layout().count() else None
-            if inner:
-                inner.setStyleSheet(f"background: {bg}; border: none;")
+            if inner: inner.setStyleSheet(f"background: {bg}; border: none;")
         for w in [self._left_widget, self._right_widget, self._bl_container]:
-            if hasattr(w, "setStyleSheet"):
-                w.setStyleSheet(f"background: {bg};")
+            if hasattr(w, "setStyleSheet"): w.setStyleSheet(f"background: {bg};")
 
     def _bl_render(self):
-        # Clear entire layout (widgets + spacers)
         while self._bl_container_layout.count():
             item = self._bl_container_layout.takeAt(0)
-            if item.widget():
-                item.widget().setParent(None)
+            if item.widget(): item.widget().setParent(None)
         self._bl_widgets.clear()
-        
-        config = load_config()
-        items = config.get("buttons_left", [])
-        start = self._bl_offset
-        end   = min(start + self._bl_page_size, len(items))
+        config, items = load_config(), load_config().get("buttons_left", [])
+        start, end = self._bl_offset, min(self._bl_offset + self._bl_page_size, len(items))
         for idx in range(start, end):
             w = create_dynamic_button(self._bl_container_layout, items[idx], "buttons_left", idx)
-            self._bl_widgets.append(w)
-            
-        # Update arrow states and custom styles
-        _apply_static_style(self._bl_prev_bt, "pagination_prev")
-        _apply_static_style(self._bl_next_bt, "pagination_next")
-        
-        # Dimming logic (overrides the color from static style if at bounds)
-        if self._bl_offset <= 0:
-            self._bl_prev_bt.setStyleSheet(self._bl_prev_bt.styleSheet() + f" color: {CP_DIM};")
-        if end >= len(items):
-            self._bl_next_bt.setStyleSheet(self._bl_next_bt.styleSheet() + f" color: {CP_DIM};")
+            w.setParent(self._bl_container); self._bl_widgets.append(w)
+        _apply_static_style(self._bl_prev_bt, "pagination_prev"); _apply_static_style(self._bl_next_bt, "pagination_next")
+        if self._bl_offset <= 0: self._bl_prev_bt.setStyleSheet(self._bl_prev_bt.styleSheet() + f" color: {CP_DIM};")
+        if end >= len(items): self._bl_next_bt.setStyleSheet(self._bl_next_bt.styleSheet() + f" color: {CP_DIM};")
 
     def _bl_prev(self):
-        if self._bl_offset > 0:
-            self._bl_offset = max(0, self._bl_offset - self._bl_page_size)
-            self._bl_render()
-
+        if self._bl_offset > 0: self._bl_offset = max(0, self._bl_offset - self._bl_page_size); self._bl_render()
     def _bl_next(self):
-        items = load_config().get("buttons_left", [])
-        if self._bl_offset + self._bl_page_size < len(items):
-            self._bl_offset += self._bl_page_size
-            self._bl_render()
+        if self._bl_offset + self._bl_page_size < len(load_config().get("buttons_left", [])): self._bl_offset += self._bl_page_size; self._bl_render()
 
-    # ── Git section ───────────────────────────────────────────────────────────
     def _build_git(self, ll):
-        self._config = load_config()
-        repos = self._config.get("git_repos", [])
-        self._git_labels = {}
-
-        git_frame = QFrame()
-        git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
-        git_row = QHBoxLayout(git_frame)
-        git_row.setContentsMargins(4, 0, 4, 0)
-        git_row.setSpacing(2)
-        ll.addWidget(git_frame)
-        ll = git_row  # redirect subsequent addWidget calls into the frame
-
-        bkup = QLabel("\udb80\udea2")
-        bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
-        bkup.setCursor(Qt.CursorShape.PointingHandCursor)
-        bkup.mousePressEvent = lambda e: git_backup(repos)
-        ll.addWidget(bkup)
-
-        for repo in repos:
-            lbl = IconLabel(repo["label"], repo)
-            lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;")
-            lbl.setContentsMargins(2, 0, 2, 0)
-            p = repo["path"]
-            def _make_click(path):
+        self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
+        git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
+        git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
+        bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); bkup.setCursor(Qt.CursorShape.PointingHandCursor); bkup.mousePressEvent = lambda e: git_backup(repos); git_row.addWidget(bkup)
+        for idx, repo in enumerate(repos):
+            lbl = IconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); p = repo["path"]
+            def _make_click(path, _cfg, _idx):
                 def click(event):
-                    mods = event.modifiers()
-                    btn  = event.button()
+                    mods, btn = event.modifiers(), event.button()
+                    if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
                     if btn == Qt.MouseButton.LeftButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier:
-                            subprocess.Popen(f'explorer "{path}"', shell=True)
-                        else:
-                            subprocess.Popen(
-                                ["Start", "pwsh", "-NoExit", "-Command",
-                                 f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd '{path}' ; gitter}}"],
-                                shell=True
-                            )
+                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(f'explorer "{path}"', shell=True)
+                        else: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd '{path}' ; gitter}}"], shell=True)
                     elif btn == Qt.MouseButton.RightButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier:
-                            subprocess.Popen(
-                                ["Start", "pwsh", "-NoExit", "-Command",
-                                 f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"],
-                                shell=True
-                            )
-                        else:
-                            subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
+                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
+                        else: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
                 return click
-            lbl.mousePressEvent = _make_click(p)
-            ll.addWidget(lbl)
-            self._git_labels[repo["name"]] = lbl
+            lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
+        del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
+        if repos: threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
 
-        del_lbl = QLabel("\udb82\udde7")
-        del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
-        del_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-        del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos)
-        ll.addWidget(del_lbl)
-
-        # end of git frame
-
-        # Start git status thread
-        if repos:
-            t = threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True)
-            t.start()
-
-    # ── Rclone popup ──────────────────────────────────────────────────────────
     def _toggle_rclone_popup(self):
-        if self._rclone_popup and self._rclone_popup.isVisible():
-            self._rclone_popup.hide()
-            self._rclone_popup = None
-            return
-
-        commands = load_config().get("rclone_commands", {})
-        popup = QFrame(self, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
+        if self._rclone_popup and self._rclone_popup.isVisible(): self._rclone_popup.hide(); self._rclone_popup = None; return
+        commands, popup = load_config().get("rclone_commands", {}), QFrame(self, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         popup.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {CP_RED}; }} QLabel {{ border: none; background: transparent; }}")
-        row = QHBoxLayout(popup)
-        row.setContentsMargins(4, 2, 4, 2)
-        row.setSpacing(4)
-
+        row = QHBoxLayout(popup); row.setContentsMargins(4, 2, 4, 2); row.setSpacing(4)
         for key, cfg in commands.items():
-            if "id" not in cfg:
-                cfg["id"] = key
-            lbl = IconLabel(cfg["label"], cfg)
-            _rid = cfg.get("id", cfg.get("label", key))
-            cached = rclone_status.get(_rid)
-            color  = cached if cached else "white"
-            lbl.setStyleSheet(
-                f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;"
-            )
+            if "id" not in cfg: cfg["id"] = key
+            lbl = IconLabel(cfg["label"], cfg); _rid = cfg.get("id", cfg.get("label", key))
+            cached = rclone_status.get(_rid); color = cached if cached else "white"
+            lbl.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 16pt; font-weight: bold;")
             def _make_rclone_click(c):
                 def click(event):
                     mods = event.modifiers()
-                    if mods & Qt.KeyboardModifier.ShiftModifier:
-                        open_edit_gui(c, "rclone_commands")
+                    if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(c, "rclone_commands")
                     elif mods & Qt.KeyboardModifier.ControlModifier:
                         if event.button() == Qt.MouseButton.LeftButton:
-                            action = c.get("bindings", {}).get("Control-Button-1", {
-                                "type": "run_command", "cmd": c.get("left_click_cmd", "")
-                            }).copy()
-                            if "cmd" in action:
-                                src_p = f'"{c.get("src", "")}"'
-                                dst_p = f'"{c.get("dst", "")}"'
-                                action["cmd"] = action["cmd"].replace("src", src_p).replace("dst", dst_p)
+                            action = c.get("bindings", {}).get("Control-Button-1", {"type": "run_command", "cmd": c.get("left_click_cmd", "")}).copy()
+                            if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
                             handle_action(action)
                         elif event.button() == Qt.MouseButton.RightButton:
-                            action = c.get("bindings", {}).get("Control-Button-3", {
-                                "type": "run_command", "cmd": c.get("right_click_cmd", "")
-                            }).copy()
-                            if "cmd" in action:
-                                src_p = f'"{c.get("src", "")}"'
-                                dst_p = f'"{c.get("dst", "")}"'
-                                action["cmd"] = action["cmd"].replace("src", src_p).replace("dst", dst_p)
+                            action = c.get("bindings", {}).get("Control-Button-3", {"type": "run_command", "cmd": c.get("right_click_cmd", "")}).copy()
+                            if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
                             handle_action(action)
                     else:
-                        try:
-                            subprocess.Popen(
-                                ["powershell", "-NoExit", "-Command", f'edit "{c["log"]}"'],
-                                creationflags=subprocess.CREATE_NEW_CONSOLE
-                            )
-                        except Exception as ex:
-                            print(f"Error opening log: {ex}")
+                        try: subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{c["log"]}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                        except Exception as ex: print(f"Error opening log: {ex}")
                 return click
-            lbl.mousePressEvent = _make_rclone_click(cfg)
-            row.addWidget(lbl)
+            lbl.mousePressEvent = _make_rclone_click(cfg); row.addWidget(lbl)
+        popup.adjustSize(); gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft()); cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
+        offset = int(load_config().get("popup_y_offset", 2)); popup.move(cx, gpos.y() - popup.height() - offset); popup.show(); self._rclone_popup = popup
 
-        popup.adjustSize()
-        gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft())
-        cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
-        offset = int(load_config().get("popup_y_offset", 2))
-        popup.move(cx, gpos.y() - popup.height() - offset)
-        popup.show()
-        self._rclone_popup = popup
-
-
-    # ── Right panel ───────────────────────────────────────────────────────────
     def _build_right(self):
         rl = self._right_layout
+        self._rclone_popup = None; _rc_cfg = load_config().get("static_bindings", {}).get("rclone_toggle", {})
+        self._rclone_toggle = IconLabel("\uef2c", _rc_cfg); _apply_static_style(self._rclone_toggle, "rclone_toggle")
+        if not _rc_cfg: self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
+        self._rclone_toggle.mousePressEvent = lambda e: (self._toggle_rclone_popup() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("rclone_toggle"))
+        rl.addWidget(self._rclone_toggle); self._build_git(rl)
+        self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {})); _bind_static(self.download_lb, "download", "sniffnet"); rl.addWidget(self.download_lb)
+        self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {})); _bind_static(self.upload_lb, "upload", "sniffnet"); rl.addWidget(self.upload_lb)
+        self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {})); _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py"); rl.addWidget(self.lb_cpu)
+        self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
+        self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
+        self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {})); _bind_static(self.lb_ram, "ram", "taskmgr"); rl.addWidget(self.lb_ram)
+        self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_static(self.lb_duc, "drive_c", "explorer C:\\"); rl.addWidget(self.lb_duc)
+        self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_static(self.lb_dud, "drive_d", "explorer D:\\"); rl.addWidget(self.lb_dud)
+        _st_cfg = load_config().get("static_bindings", {}).get("settings", {}); settings_bt = IconLabel("⚙", _st_cfg); _apply_static_style(settings_bt, "settings")
+        if not _st_cfg: settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
+        settings_bt.mousePressEvent = lambda e: (self._open_unified_settings() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("settings")); rl.addWidget(settings_bt)
+        for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])): create_dynamic_button(rl, btn_cfg, "buttons_right", idx)
 
-        # Rclone toggle
-        self._rclone_popup = None
-        _rc_cfg = load_config().get("static_bindings", {}).get("rclone_toggle", {})
-        self._rclone_toggle = IconLabel("\uef2c", _rc_cfg)
-        _apply_static_style(self._rclone_toggle, "rclone_toggle")
-        if not _rc_cfg:
-            self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
-        def _rclone_click(e):
-            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("rclone_toggle")
-            else: self._toggle_rclone_popup()
-        self._rclone_toggle.mousePressEvent = _rclone_click
-        rl.addWidget(self._rclone_toggle)
-
-        # Git section
-        self._build_git(rl)
-
-        # Download / Upload
-        self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {}))
-        self.download_lb.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-        )
-        _bind_static(self.download_lb, "download", "sniffnet")
-        rl.addWidget(self.download_lb)
-
-        self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {}))
-        self.upload_lb.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-        )
-        _bind_static(self.upload_lb, "upload", "sniffnet")
-        rl.addWidget(self.upload_lb)
-
-        # CPU label
-        self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {}))
-        self.lb_cpu.setFixedWidth(55)
-        self.lb_cpu.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lb_cpu.setStyleSheet(
-            f"color: #1b8af1; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-            f"border: 1px solid #1b8af1;"
-        )
-        _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py")
-        rl.addWidget(self.lb_cpu)
-
-        # CPU core bars
-        self.cpu_core_frame = CpuCoreFrame()
-        rl.addWidget(self.cpu_core_frame)
-
-        # GPU label
-        self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {}))
-        self.lb_gpu.setFixedWidth(55)
-        self.lb_gpu.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lb_gpu.setStyleSheet(
-            f"color: {CP_GREEN}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-            f"border: 1px solid {CP_GREEN};"
-        )
-        _bind_static(self.lb_gpu, "gpu", "start ms-settings:display")
-        rl.addWidget(self.lb_gpu)
-
-        # RAM label
-        self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {}))
-        self.lb_ram.setFixedWidth(55)
-        self.lb_ram.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lb_ram.setStyleSheet(
-            f"color: #f08d0c; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-            f"border: 1px solid #f08d0c;"
-        )
-        _bind_static(self.lb_ram, "ram", "taskmgr")
-        rl.addWidget(self.lb_ram)
-
-        # Drive C
-        self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {}))
-        self.lb_duc.setFixedWidth(80)
-        self.lb_duc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lb_duc.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-            f"border: 1px solid #1b8af1;"
-        )
-        _bind_static(self.lb_duc, "drive_c", "explorer C:\\")
-        rl.addWidget(self.lb_duc)
-
-        # Drive D
-        self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {}))
-        self.lb_dud.setFixedWidth(80)
-        self.lb_dud.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lb_dud.setStyleSheet(
-            f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-            f"border: 1px solid #1b8af1;"
-        )
-        _bind_static(self.lb_dud, "drive_d", "explorer D:\\")
-        rl.addWidget(self.lb_dud)
-
-        # Unified settings button
-        _st_cfg = load_config().get("static_bindings", {}).get("settings", {})
-        settings_bt = IconLabel("⚙", _st_cfg)
-        _apply_static_style(settings_bt, "settings")
-        if not _st_cfg:
-            settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
-        def _settings_click(e):
-            if e.modifiers() & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("settings")
-            else: self._open_unified_settings()
-        settings_bt.mousePressEvent = _settings_click
-        rl.addWidget(settings_bt)
-
-        # Dynamic buttons_right
-        for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])):
-            create_dynamic_button(rl, btn_cfg, "buttons_right", idx)
-
-    # ── Timers ────────────────────────────────────────────────────────────────
     def _start_timers(self):
-        # Uptime
-        self._uptime_timer = QTimer(self)
-        self._uptime_timer.timeout.connect(self._update_uptime)
-        self._uptime_timer.start(1000)
-
-        # System info (cpu/gpu/ram/disk/net)
-        self._info_timer = QTimer(self)
-        self._info_timer.timeout.connect(self._update_info)
-        self._info_timer.start(1000)
-
-        # CPU core bars
-        self._core_timer = QTimer(self)
-        self._core_timer.timeout.connect(self._update_cores)
-        self._core_timer.start(1000)
-
-        # Git queue drain
-        self._git_timer = QTimer(self)
-        self._git_timer.timeout.connect(self._drain_git_queue)
-        self._git_timer.start(100)
-        _repos = self._config.get("git_repos", [])
-        if _repos:
-            threading.Thread(target=_git_status_loop, args=(_repos, _git_queue), daemon=True).start()
-
-        # Countdown label poll
-
-        # Start rclone checks
-        commands = self._config.get("rclone_commands", {})
-        rclone_cfg = self._config.get("rclone_settings", {"simultaneous": True})
-        items = list(commands.items())
+        self._uptime_timer = QTimer(self); self._uptime_timer.timeout.connect(self._update_uptime); self._uptime_timer.start(1000)
+        self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
+        self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
+        self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
+        commands, rclone_cfg = self._config.get("rclone_commands", {}), self._config.get("rclone_settings", {"simultaneous": True})
         if rclone_cfg.get("simultaneous", True):
-            for key, cfg in items:
+            for key, cfg in commands.items():
                 if "id" not in cfg: cfg["id"] = key
                 check_and_update_rclone(cfg, self._rclone_toggle)
         else:
-            def _seq(remaining):
-                if not remaining: return
-                key, cfg = remaining[0]
-                if "id" not in cfg: cfg["id"] = key
-                check_and_update_rclone(cfg, self._rclone_toggle)
-                QTimer.singleShot(100, lambda: _seq(remaining[1:]))
-            _seq(items)
+            def _seq(rem):
+                if not rem: return
+                k, c = rem[0]
+                if "id" not in c: c["id"] = k
+                check_and_update_rclone(c, self._rclone_toggle); QTimer.singleShot(100, lambda: _seq(rem[1:]))
+            _seq(list(commands.items()))
 
-    def _update_uptime(self):
-        self.uptime_label.setText(format_uptime())
-
+    def _update_uptime(self): self.uptime_label.setText(format_uptime())
     def _update_info(self):
-        cpu, ram = get_cpu_ram_info()
-        gpu       = get_gpu_usage()
-        dc, dd    = get_disk_info()
-        up, down  = get_net_speed()
-
-        self.lb_cpu.setText(f"{cpu}%")
-        self.lb_ram.setText(f"{ram}%")
-        self.lb_gpu.setText(f"{gpu}%")
-        self.lb_duc.setText(f"\uf0a0  {dc}%")
-        self.lb_dud.setText(f"\uf0a0  {dd}%")
-        self.upload_lb.setText(f" ▲ {up} ")
-        self.download_lb.setText(f" ▼ {down} ")
-
-        # Dynamic colors
-        cpu_f = float(cpu)
-        ram_f = float(ram)
-        dc_f  = float(dc)
-        dd_f  = float(dd)
-        up_f  = float(up)
-        dn_f  = float(down)
-
-        self.lb_cpu.setStyleSheet(
-            f"color: {'black' if cpu_f > 80 else '#1b8af1'}; "
-            f"background: {'#14bcff' if cpu_f > 80 else CP_BG}; "
-            f"font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;"
-        )
-        self.lb_ram.setStyleSheet(
-            f"color: {'black' if ram_f > 80 else '#f08d0c'}; "
-            f"background: {'#ff934b' if ram_f > 80 else CP_BG}; "
-            f"font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #f08d0c;"
-        )
-        self.lb_duc.setStyleSheet(
-            f"color: white; background: {'#f12c2f' if dc_f > 90 else '#044568'}; "
-            f"font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;"
-        )
-        self.lb_dud.setStyleSheet(
-            f"color: white; background: {'#f12c2f' if dd_f > 90 else '#044568'}; "
-            f"font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;"
-        )
-
-        def _net_style(val):
-            if val < 0.1:   return f"color: white; background: black;"
-            if val < 0.5:   return f"color: black; background: #A8E4A8;"
-            if val < 1.0:   return f"color: black; background: #67D567;"
-            return              f"color: black; background: #32AB32;"
+        cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
+        self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.setText(f"{gpu}%"); self.lb_duc.setText(f"\uf0a0  {dc}%"); self.lb_dud.setText(f"\uf0a0  {dd}%"); self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
+        cpu_f, ram_f, dc_f, dd_f, up_f, dn_f = float(cpu), float(ram), float(dc), float(dd), float(up), float(down)
+        self.lb_cpu.setStyleSheet(f"color: {'black' if cpu_f > 80 else '#1b8af1'}; background: {'#14bcff' if cpu_f > 80 else CP_BG}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;")
+        self.lb_ram.setStyleSheet(f"color: {'black' if ram_f > 80 else '#f08d0c'}; background: {'#ff934b' if ram_f > 80 else CP_BG}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #f08d0c;")
+        self.lb_duc.setStyleSheet(f"color: white; background: {'#f12c2f' if dc_f > 90 else '#044568'}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;")
+        self.lb_dud.setStyleSheet(f"color: white; background: {'#f12c2f' if dd_f > 90 else '#044568'}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;")
+        def _ns(v): return f"color: {'black' if v>=0.1 else 'white'}; background: {'#32AB32' if v>=1.0 else ('#67D567' if v>=0.5 else ('#A8E4A8' if v>=0.1 else 'black'))};"
         base = "font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
-        self.upload_lb.setStyleSheet(_net_style(up_f) + base)
-        self.download_lb.setStyleSheet(_net_style(dn_f) + base)
+        self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
 
-    def _update_cores(self):
-        usages = psutil.cpu_percent(percpu=True)
-        self.cpu_core_frame.update_usages(usages)
-
+    def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
     def _drain_git_queue(self):
         try:
             while True:
                 name, text, color = _git_queue.get_nowait()
-                if name in self._git_labels:
-                    self._git_labels[name].setText(text)
-                    self._git_labels[name].setStyleSheet(
-                        f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;"
-                    )
-        except Empty:
-            pass
-
-
+                if name in self._git_labels: self._git_labels[name].setText(text); self._git_labels[name].setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 15pt; font-weight: bold;")
+        except Empty: pass
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
 _main_window = None
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
-    _rclone_sig = _RcloneSignal()
-    _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl))
-    app.setStyleSheet(GLOBAL_QSS)
-    window = StatusBar()
-    _main_window = window
-    window.show()
-    calculate_time_to_appear(start_time)
-    sys.exit(app.exec())
+    app = QApplication(sys.argv); app.setQuitOnLastWindowClosed(False); _rclone_sig = _RcloneSignal(); _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl)); app.setStyleSheet(GLOBAL_QSS)
+    window = StatusBar(); _main_window = window; window.show(); calculate_time_to_appear(start_time); sys.exit(app.exec())
