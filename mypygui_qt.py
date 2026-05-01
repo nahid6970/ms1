@@ -808,10 +808,12 @@ class GenericPopup(QFrame):
         self.adjustSize()
 
 def open_popup_bar(category, anchor_widget):
+    config = load_config()
+    offset = int(config.get("popup_y_offset", 2))
     popup = GenericPopup(anchor_widget.window(), category, anchor_widget)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
-    popup.move(cx, gpos.y() - popup.height() - 2)
+    popup.move(cx, gpos.y() - popup.height() - offset)
     popup.show()
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
@@ -1243,6 +1245,9 @@ class StatusBar(QMainWindow):
         sb_bg_le     = QLineEdit(_sb_cfg.get("bg", CP_BG));           sb_bg_le.setFixedWidth(90)
         sb_border_le = QLineEdit(_sb_cfg.get("border_color", CP_RED)); sb_border_le.setFixedWidth(90)
         sb_bpx_le    = QLineEdit(str(_sb_cfg.get("border_px", 1)));    sb_bpx_le.setFixedWidth(40)
+        
+        popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2))); popup_y_le.setFixedWidth(40)
+        
         def _set_btn_color(btn, color):
             btn.setStyleSheet(f"background: {color}; border: 1px solid #555;")
         def _pick_color(le, btn):
@@ -1263,6 +1268,7 @@ class StatusBar(QMainWindow):
         form_sb.addRow("BG COLOR", bg_row)
         form_sb.addRow("BORDER COLOR", bc_row)
         form_sb.addRow("BORDER PX", sb_bpx_le)
+        form_sb.addRow("POPUP Y OFFSET", popup_y_le)
         lay.addWidget(grp_sb)
 
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
@@ -1278,11 +1284,14 @@ class StatusBar(QMainWindow):
             except ValueError: mins = 10
             try: new_bpx = int(sb_bpx_le.text())
             except ValueError: new_bpx = 1
+            try: new_offset = int(popup_y_le.text())
+            except ValueError: new_offset = 2
             cfg = load_config()
             cfg["buttons_left_page_size"] = self._bl_page_size
             cfg["edit_panel_width"] = new_ew
             cfg["edit_panel_height"] = new_eh
             cfg["rclone_settings"] = {"interval_min": mins, "simultaneous": simul_chk.isChecked()}
+            cfg["popup_y_offset"] = new_offset
             cfg["statusbar"] = {
                 "bg": sb_bg_le.text() or CP_BG,
                 "border_color": sb_border_le.text() or CP_RED,
@@ -1492,7 +1501,8 @@ class StatusBar(QMainWindow):
         popup.adjustSize()
         gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft())
         cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
-        popup.move(cx, gpos.y() - popup.height() - 2)
+        offset = int(load_config().get("popup_y_offset", 2))
+        popup.move(cx, gpos.y() - popup.height() - offset)
         popup.show()
         self._rclone_popup = popup
 
