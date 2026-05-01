@@ -464,7 +464,9 @@ def open_edit_gui(item_cfg, category, index=None):
     left_scroll = QScrollArea(); left_scroll.setWidgetResizable(True)
     left_w = QWidget(); left_layout = QVBoxLayout(left_w)
     left_layout.setSpacing(6); left_layout.setContentsMargins(6, 6, 6, 6)
-    left_scroll.setWidget(left_w); panels.addWidget(left_scroll, 1)
+    left_scroll.setWidget(left_w)
+    l_weight = config_now.get("edit_left_weight", 1)
+    panels.addWidget(left_scroll, l_weight)
 
     # 1. CORE SECTION (Top Section)
     grp_core = QGroupBox("CORE SETTINGS"); form_core = QVBoxLayout(); grp_core.setLayout(form_core)
@@ -599,7 +601,9 @@ def open_edit_gui(item_cfg, category, index=None):
     right_scroll = QScrollArea(); right_scroll.setWidgetResizable(True)
     right_w = QWidget(); right_layout = QVBoxLayout(right_w)
     right_layout.setSpacing(6); right_layout.setContentsMargins(6, 6, 6, 6)
-    right_scroll.setWidget(right_w); panels.addWidget(right_scroll, 2)
+    right_scroll.setWidget(right_w)
+    r_weight = config_now.get("edit_right_weight", 2)
+    panels.addWidget(right_scroll, r_weight)
     _ctrl_lbl = QLabel("CONTROLS"); _ctrl_lbl.setObjectName("section_label"); right_layout.addWidget(_ctrl_lbl)
 
     click_types = [("LEFT CLICK", "Button-1"), ("RIGHT CLICK", "Button-3"),
@@ -1026,19 +1030,47 @@ class StatusBar(QMainWindow):
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
-        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(380, 420); dlg.setStyleSheet(DIALOG_QSS)
+        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(380, 520); dlg.setStyleSheet(DIALOG_QSS)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10); title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
         grp1 = QGroupBox("BUTTON BAR"); form1 = QFormLayout(); grp1.setLayout(form1); size_le = QLineEdit(str(self._bl_page_size)); size_le.setFixedWidth(60); form1.addRow("VISIBLE BUTTONS", size_le); lay.addWidget(grp1)
-        grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit); ew, eh = self._config.get("edit_panel_width", 1000), self._config.get("edit_panel_height", 700); ew_le, eh_le = QLineEdit(str(ew)), QLineEdit(str(eh)); ew_le.setFixedWidth(60); eh_le.setFixedWidth(60); form_edit.addRow("WIDTH", ew_le); form_edit.addRow("HEIGHT", eh_le); lay.addWidget(grp_edit)
+        
+        grp_edit = QGroupBox("EDIT PANEL SIZE"); form_edit = QFormLayout(); grp_edit.setLayout(form_edit)
+        ew, eh = self._config.get("edit_panel_width", 1000), self._config.get("edit_panel_height", 700)
+        ew_le, eh_le = QLineEdit(str(ew)), QLineEdit(str(eh))
+        ew_le.setFixedWidth(60); eh_le.setFixedWidth(60)
+        form_edit.addRow("WIDTH", ew_le)
+        form_edit.addRow("HEIGHT", eh_le)
+        
+        lw = self._config.get("edit_left_weight", 1)
+        rw = self._config.get("edit_right_weight", 2)
+        lw_le, rw_le = QLineEdit(str(lw)), QLineEdit(str(rw))
+        lw_le.setFixedWidth(40); rw_le.setFixedWidth(40)
+        form_edit.addRow("LEFT WEIGHT", lw_le)
+        form_edit.addRow("RIGHT WEIGHT", rw_le)
+        lay.addWidget(grp_edit)
+        
         grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); lay.addWidget(grp2)
         grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); lay.addWidget(grp_sb)
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
+        
         def _save():
-            cfg = load_config(); cfg["buttons_left_page_size"], cfg["edit_panel_width"], cfg["edit_panel_height"] = int(size_le.text()), int(ew_le.text()), int(eh_le.text())
-            cfg["rclone_settings"], cfg["popup_y_offset"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}, int(popup_y_le.text())
+            cfg = load_config()
+            cfg["buttons_left_page_size"] = int(size_le.text())
+            cfg["edit_panel_width"] = int(ew_le.text())
+            cfg["edit_panel_height"] = int(eh_le.text())
+            cfg["edit_left_weight"] = int(lw_le.text())
+            cfg["edit_right_weight"] = int(rw_le.text())
+            cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
+            cfg["popup_y_offset"] = int(popup_y_le.text())
             cfg["statusbar"] = {"bg": sb_bg_le.text() or CP_BG, "border_color": sb_border_le.text() or CP_RED, "border_px": int(sb_bpx_le.text())}
             save_config(cfg); self._config = cfg; self._apply_statusbar_style(); dlg.accept(); self._bl_render()
-        btn.clicked.connect(_save); dlg.show()
+        
+        btn.clicked.connect(_save)
+        
+        # Center on screen
+        screen_geo = QApplication.primaryScreen().availableGeometry()
+        dlg.move(screen_geo.center().x() - dlg.width() // 2, screen_geo.center().y() - dlg.height() // 2)
+        dlg.show()
 
     def _apply_statusbar_style(self):
         sb = self._config.get("statusbar", {}); bg, border_color, border_px = sb.get("bg", CP_BG) or CP_BG, sb.get("border_color", CP_RED) or CP_RED, int(sb.get("border_px", 1))

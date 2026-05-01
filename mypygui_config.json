@@ -345,7 +345,7 @@
             "text": "rc",
             "fg": "#fcfcfc",
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 20,
                 "bold"
             ],
@@ -1218,11 +1218,11 @@
         },
         "add_button": {
             "id": "add_button",
-            "text": "",
+            "text": "ad",
             "fg": "",
             "bg": "",
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 16,
                 "bold"
             ],
@@ -1231,8 +1231,8 @@
             "border_radius": 0,
             "width": 0,
             "height": 0,
-            "padx_left": 5,
-            "padx_right": 5,
+            "padx_left": 1,
+            "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
             "icon_path": "",
