@@ -859,7 +859,7 @@ class GenericPopup(QFrame):
 def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1):
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
-    popup = GenericPopup(anchor_widget.window(), category, anchor_widget, row_limit, border_color, border_px)
+    popup = GenericPopup(_main_window, category, anchor_widget, row_limit, border_color, border_px)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
     popup.move(cx, gpos.y() - popup.height() - offset)
@@ -887,7 +887,12 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     lbl.setStyleSheet(f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; font-size: {fsize}pt; font-weight: {fweight}; {_border_css} border-radius: {_border_radius}px; margin-left: {m_l}px; margin-right: {m_r}px;")
     lbl.setContentsMargins(px_l, 0, px_r, 0)
     bindings = btn_cfg.get("bindings", {})
-    def mousePressEvent(event, _bindings=bindings, _cfg=btn_cfg, _cat=category, _idx=index, _lbl=lbl):
+    
+    def mousePressEvent(event):
+        event.accept()
+
+    def mouseReleaseEvent(event, _bindings=bindings, _cfg=btn_cfg, _cat=category, _idx=index, _lbl=lbl):
+        if not _lbl.rect().contains(event.pos()): return
         mods, btn = event.modifiers(), event.button()
         if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, _cat, _idx); return
         bkey = None
@@ -897,7 +902,9 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
             action = _bindings[bkey]
             if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1))
             else: handle_action(action)
+    
     lbl.mousePressEvent = mousePressEvent
+    lbl.mouseReleaseEvent = mouseReleaseEvent
     if parent_layout is not None: parent_layout.addWidget(lbl)
     return lbl
 
@@ -930,14 +937,22 @@ def _apply_static_style(widget, key):
 
 def _bind_static(lbl, key, default_cmd):
     cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})
-    def mousePressEvent(event, _cfg=cfg, _key=key):
+    
+    def mousePressEvent(event):
+        event.accept()
+
+    def mouseReleaseEvent(event, _cfg=cfg, _key=key, _lbl=lbl):
+        if not _lbl.rect().contains(event.pos()): return
         mods, btn = event.modifiers(), event.button()
         if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit(_key); return
         bkey = None
         if btn == Qt.MouseButton.LeftButton: bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
         elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
         if bkey and bkey in _cfg: handle_action(_cfg[bkey])
-    lbl.mousePressEvent = mousePressEvent; lbl.setCursor(Qt.CursorShape.PointingHandCursor); _apply_static_style(lbl, key)
+    
+    lbl.mousePressEvent = mousePressEvent
+    lbl.mouseReleaseEvent = mouseReleaseEvent
+    lbl.setCursor(Qt.CursorShape.PointingHandCursor); _apply_static_style(lbl, key)
 
 
 # ─── CPU core bar widget ──────────────────────────────────────────────────────
