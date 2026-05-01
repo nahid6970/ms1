@@ -812,13 +812,14 @@ def open_rclone_settings():
 
 # ─── Generic Popup Bar ────────────────────────────────────────────────────────
 class GenericPopup(QFrame):
-    def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None):
+    def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1):
         super().__init__(parent, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         self.category = category
         self.anchor_widget = anchor_widget
         self.row_limit = max(1, row_limit)
         bc = border_color or CP_RED
-        self.setStyleSheet(f"QFrame {{ background: #1d2027; border: 1px solid {bc}; }} QLabel {{ border: none; background: transparent; }}")
+        bpx = int(border_px)
+        self.setStyleSheet(f"QFrame {{ background: #1d2027; border: {bpx}px solid {bc}; }} QLabel {{ border: none; background: transparent; }}")
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(4, 2, 4, 2)
         self.layout.setSpacing(4)
@@ -861,10 +862,10 @@ class GenericPopup(QFrame):
         self.layout.addWidget(add_bt, row, col)
         self.adjustSize()
 
-def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None):
+def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1):
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
-    popup = GenericPopup(anchor_widget.window(), category, anchor_widget, row_limit, border_color)
+    popup = GenericPopup(anchor_widget.window(), category, anchor_widget, row_limit, border_color, border_px)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
     popup.move(cx, gpos.y() - popup.height() - offset)
@@ -924,7 +925,8 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
             if action.get("type") == "popup":
                 rl = action.get("row_limit", 10)
                 bc = action.get("border_color")
-                open_popup_bar(action.get("cmd", "popup_bar"), _lbl, rl, bc)
+                bp = action.get("border_px", 1)
+                open_popup_bar(action.get("cmd", "popup_bar"), _lbl, rl, bc, bp)
             else:
                 handle_action(action)
 

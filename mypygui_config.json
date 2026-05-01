@@ -688,7 +688,7 @@
                     "cmd": "fav_apps",
                     "row_limit": 10,
                     "border_color": "yellow",
-                    "border_px": 0
+                    "border_px": 1
                 }
             },
             "font": [
