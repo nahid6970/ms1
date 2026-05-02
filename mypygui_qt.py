@@ -1140,6 +1140,28 @@ def check_and_update_rclone(cfg, toggle_lbl):
 
 
 # ─── Alarm / Timer ────────────────────────────────────────────────────────────
+class TimerInputDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setStyleSheet(DIALOG_QSS)
+        self.setFixedWidth(200)
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(8,8,8,8)
+        lbl = QLabel("// SET MINUTES")
+        lbl.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+        lay.addWidget(lbl)
+        self.le = QLineEdit("1")
+        self.le.setFocus()
+        lay.addWidget(self.le)
+        btn = QPushButton("START")
+        btn.clicked.connect(self.accept)
+        lay.addWidget(btn)
+        self.le.returnPressed.connect(self.accept)
+
+    def value(self):
+        try: return float(self.le.text())
+        except: return 0
+
 class AlarmNotification(QDialog):
     def __init__(self, message="ALARM! TIME'S UP!"):
         super().__init__(None, Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
@@ -1523,10 +1545,16 @@ class StatusBar(QMainWindow):
         settings_bt.mousePressEvent = lambda e: (self._open_unified_settings() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("settings")); rl.addWidget(settings_bt)
         for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])): create_dynamic_button(rl, btn_cfg, "buttons_right", idx)
 
+    def _apply_uptime_style(self, color=None):
+        _uc = load_config().get("static_bindings", {}).get("uptime", {})
+        _ufg = color if color else (_uc.get("fg", "") or "#6bc0f8")
+        _ufont_list = _uc.get("font", get_default_font())
+        self.uptime_label.setStyleSheet(f"color: {_ufg}; font-family: '{_ufont_list[0]}'; font-size: {_ufont_list[1]}pt; font-weight: {_ufont_list[2]};")
+
     def _show_timer_menu(self):
         if self._timer_active:
             self._timer_active = False; self._countdown_timer.stop()
-            self.uptime_label.setText(format_uptime()); return
+            self.uptime_label.setText(format_uptime()); self._apply_uptime_style(); return
             
         menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
         a1 = menu.addAction("Countdown Alarm"); a2 = menu.addAction("Countdown Shutdown")
@@ -1541,8 +1569,13 @@ class StatusBar(QMainWindow):
         if action == a3:
             self._start_countdown(self._last_timer_type, self._last_timer_mins)
         else:
-            mins, ok = QInputDialog.getDouble(self, "Timer", "Enter minutes:", 1, 0.1, 1440, 1)
-            if ok: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
+            dlg = TimerInputDialog(self)
+            gpos = self.uptime_label.mapToGlobal(self.uptime_label.rect().topLeft())
+            offset = int(load_config().get("popup_y_offset", 2))
+            dlg.move(gpos.x() + self.uptime_label.width() // 2 - 100, gpos.y() - 100 - offset)
+            if dlg.exec():
+                mins = dlg.value()
+                if mins > 0: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
 
     def _start_countdown(self, ttype, mins):
         self._timer_active = True; self._last_timer_type = ttype; self._last_timer_mins = mins
@@ -1553,12 +1586,14 @@ class StatusBar(QMainWindow):
         if not self._timer_active: return
         if self._timer_seconds <= 0:
             self._timer_active = False; self._countdown_timer.stop()
-            self.uptime_label.setText(format_uptime())
+            self.uptime_label.setText(format_uptime()); self._apply_uptime_style()
             if self._last_timer_type == "alarm": AlarmNotification().exec()
             else: os.system("shutdown /s /f /t 1")
             return
         m, s = divmod(self._timer_seconds, 60)
         self.uptime_label.setText(f"\udb86\udee1 {m:02}:{s:02}")
+        color = CP_YELLOW if self._last_timer_type == "alarm" else CP_RED
+        self._apply_uptime_style(color)
         self._timer_seconds -= 1
 
     def _start_timers(self):
@@ -1579,7 +1614,8 @@ class StatusBar(QMainWindow):
                 check_and_update_rclone(c, self._rclone_toggle); QTimer.singleShot(100, lambda: _seq(rem[1:]))
             _seq(list(commands.items()))
 
-    def _update_uptime(self): self.uptime_label.setText(format_uptime())
+    def _update_uptime(self):
+        if not self._timer_active: self.uptime_label.setText(format_uptime())
     def _update_info(self):
         cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
         self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.setText(f"{gpu}%"); self.lb_duc.setText(f"\uf0a0  {dc}%"); self.lb_dud.setText(f"\uf0a0  {dd}%"); self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
