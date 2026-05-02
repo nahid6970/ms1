@@ -1999,6 +1999,45 @@
             "icon_height": 50,
             "icon_gap": 4,
             "icon_position": "left"
+        },
+        {
+            "text": "LM_Studio",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777717164",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "lm_studio",
+                    "row_limit": 10,
+                    "bg_color": "",
+                    "transparent_bg": false,
+                    "border_color": "",
+                    "border_px": 1
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "default_font": [
@@ -2077,5 +2116,75 @@
         }
     ],
     "settings_panel_width": 750,
-    "settings_panel_height": 550
+    "settings_panel_height": 550,
+    "lm_studio": [
+        {
+            "text": "shell-command-runner",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777717209",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://lmstudio.ai/lmbimmerboye/shell-command-runner"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "filesystem-access",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777718235",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://lmstudio.ai/taderich73/filesystem-access"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
+    ]
 }
