@@ -36,17 +36,25 @@ function Load-Packages {
             foreach ($item in @($data)) {
                 if (-not ($item.Name -and $item.ID)) { continue }
                 if ($item.Sources) {
-                    $srcs = @($item.Sources | ForEach-Object { @{Source=[string]$_.Source; ID=[string]$_.ID} })
+                    # Already multi-source: sort winget first
+                    $srcs = @($item.Sources | ForEach-Object { @{Source=[string]$_.Source; ID=[string]$_.ID} } | Sort-Object { if ($_.Source -eq "winget") { 0 } else { 1 } })
                     $global:allPackages.Add((New-PackageObject -Name $item.Name -ID $srcs[0].ID -Source $srcs[0].Source -Category $item.Category -Sources $srcs))
                     continue
                 }
-                $baseName = $item.Name -replace '\s*\[(S|W)\]$', ''
-                if (-not $groups.ContainsKey($baseName)) { $groups[$baseName] = @{Cat=$item.Category; Srcs=@()} }
-                $groups[$baseName].Srcs += @{Source=[string]$item.Source; ID=[string]$item.ID}
+                # Only merge items that explicitly have [S] or [W] suffix
+                if ($item.Name -match '\[(S|W)\]$') {
+                    $baseName = $item.Name -replace '\s*\[(S|W)\]$', ''
+                    if (-not $groups.ContainsKey($baseName)) { $groups[$baseName] = @{Cat=$item.Category; Srcs=@()} }
+                    $groups[$baseName].Srcs += @{Source=[string]$item.Source; ID=[string]$item.ID}
+                } else {
+                    # Plain single-source item: add directly
+                    $global:allPackages.Add((New-PackageObject -Name $item.Name -ID $item.ID -Source $item.Source -Category $item.Category))
+                }
             }
             foreach ($baseName in $groups.Keys) {
                 $g = $groups[$baseName]
-                $srcs = $g.Srcs
+                # Sort winget first
+                $srcs = @($g.Srcs | Sort-Object { if ($_.Source -eq "winget") { 0 } else { 1 } })
                 $global:allPackages.Add((New-PackageObject -Name $baseName -ID $srcs[0].ID -Source $srcs[0].Source -Category $g.Cat -Sources $srcs))
             }
         } catch { }
