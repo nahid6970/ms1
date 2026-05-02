@@ -295,7 +295,7 @@ $btnCheckStatus.Add_Click({
             if ($src.Source -eq "scoop") { if ($scoopNames -contains $src.ID) { $found = $true; break } }
             else { if ($wingetList -like "*$($src.ID)*") { $found = $true; break } }
         }
-        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " ✔️" }
+        if ($found) { $pkg.RowBackground = $installedColor; $pkg.Checkmark = " [OK]" }
         else { $pkg.RowBackground = [System.Windows.Media.Brushes]::Transparent; $pkg.Checkmark = "" }
     }
     Update-List; $window.Cursor = [System.Windows.Input.Cursors]::Arrow; $statusText.Text = "Scan complete."
@@ -366,3 +366,4 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
 
 $window.Add_Closing({ Save-Packages })
 $window.ShowDialog() | Out-Null
+
