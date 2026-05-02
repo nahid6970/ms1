@@ -306,11 +306,6 @@
         },
         {
             "kind": "Exe",
-            "id": "explorer.exe",
-            "matching_strategy": "Legacy"
-        },
-        {
-            "kind": "Exe",
             "id": "ABDownloadManager.exe",
             "matching_strategy": "Legacy"
         },
@@ -378,17 +373,17 @@
         },
         {
             "kind": "Exe",
-            "id": "explorer.exe",
-            "matching_strategy": "Legacy"
-        },
-        {
-            "kind": "Exe",
             "id": "ABDownloadManager.exe",
             "matching_strategy": "Legacy"
         },
         {
             "kind": "Exe",
             "id": "JDownloader2.exe",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "explorer.exe",
             "matching_strategy": "Legacy"
         }
     ],
