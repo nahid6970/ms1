@@ -682,6 +682,12 @@
                     "admin": false,
                     "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
                 },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
+                },
                 "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
@@ -1305,8 +1311,8 @@
             "margin_right": 0,
             "icon_path": "",
             "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
+            "icon_width": 50,
+            "icon_height": 50,
             "icon_gap": 4,
             "icon_position": "left",
             "svg_content": "",
@@ -1325,9 +1331,48 @@
                     "cmd": "ai_sites",
                     "row_limit": 10,
                     "bg_color": "white",
-                    "transparent_bg": true,
+                    "transparent_bg": false,
+                    "border_color": "black",
+                    "border_px": 1
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "JOB",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777694706",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "job_bar",
+                    "row_limit": 10,
+                    "bg_color": "",
+                    "transparent_bg": false,
                     "border_color": "",
-                    "border_px": 0
+                    "border_px": 1
                 }
             },
             "font": [
@@ -1368,6 +1413,8 @@
                     "admin": false,
                     "cmd": "sonarr",
                     "row_limit": 10,
+                    "bg_color": "",
+                    "transparent_bg": false,
                     "border_color": "",
                     "border_px": 1
                 }
@@ -1391,7 +1438,9 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "svg_content": "",
+            "svg_hover_map": {}
         },
         {
             "text": "Radarr",
@@ -1951,5 +2000,75 @@
         "JetBrainsMono Nerd Font Propo",
         15,
         "normal"
+    ],
+    "job_bar": [
+        {
+            "text": "bdgovtjob",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777694733",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://bdgovtjob.net/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\job\\image_331.png",
+            "nf_char": "",
+            "icon_width": 50,
+            "icon_height": 50,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "erecruitment",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777694966",
+            "bindings": {
+                "Button-1": {
+                    "type": "url",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "https://erecruitment.bb.org.bd/"
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\job\\image_332.png",
+            "nf_char": "",
+            "icon_width": 50,
+            "icon_height": 50,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
     ]
 }
