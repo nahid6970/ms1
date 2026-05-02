@@ -40,6 +40,53 @@ class _RcloneSignal(QObject):
     update = pyqtSignal(object, str)  # (toggle_lbl, color)
 _rclone_sig = None  # initialized after QApplication exists
 
+from ctypes import wintypes
+
+# AppBar Constants
+ABM_NEW = 0x00000000
+ABM_REMOVE = 0x00000001
+ABM_QUERYPOS = 0x00000002
+ABM_SETPOS = 0x00000003
+ABE_TOP = 1
+WM_USER = 0x0400
+
+class APPBARDATA(ctypes.Structure):
+    _fields_ = [
+        ("cbSize", wintypes.DWORD),
+        ("hWnd", wintypes.HWND),
+        ("uCallbackMessage", wintypes.UINT),
+        ("uEdge", wintypes.UINT),
+        ("rc", wintypes.RECT),
+        ("lParam", wintypes.LPARAM),
+    ]
+
+def register_appbar(hwnd):
+    abd = APPBARDATA()
+    abd.cbSize = ctypes.sizeof(APPBARDATA)
+    abd.hWnd = hwnd
+    abd.uCallbackMessage = WM_USER + 42
+    ctypes.windll.shell32.SHAppBarMessage(ABM_NEW, ctypes.byref(abd))
+
+def unregister_appbar(hwnd):
+    abd = APPBARDATA()
+    abd.cbSize = ctypes.sizeof(APPBARDATA)
+    abd.hWnd = hwnd
+    ctypes.windll.shell32.SHAppBarMessage(ABM_REMOVE, ctypes.byref(abd))
+
+def set_appbar_position(hwnd, width, height):
+    screen_geo = QApplication.primaryScreen().geometry()
+    sw, sh = screen_geo.width(), screen_geo.height()
+    abd = APPBARDATA()
+    abd.cbSize = ctypes.sizeof(APPBARDATA)
+    abd.hWnd = hwnd
+    abd.uEdge = ABE_TOP
+    abd.rc.top = 0
+    abd.rc.left = 0
+    abd.rc.right = sw
+    abd.rc.bottom = height
+    ctypes.windll.shell32.SHAppBarMessage(ABM_QUERYPOS, ctypes.byref(abd))
+    ctypes.windll.shell32.SHAppBarMessage(ABM_SETPOS, ctypes.byref(abd))
+
 # ─── Theme ────────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
 CP_PANEL  = "#111111"
@@ -1112,18 +1159,32 @@ class StatusBar(QMainWindow):
 
     def _apply_geometry(self):
         sb = self._config.get("statusbar", {})
-        w, h = int(sb.get("width", 1920)), int(sb.get("height", 39))
-        self.setFixedSize(w, h)
+        is_docked = sb.get("docked", False)
+        hwnd = int(self.winId())
         
         screen_geo = QApplication.primaryScreen().geometry()
         sw = screen_geo.width()
         
-        x = sb.get("x", "center")
-        if str(x).lower() == "center": x = (sw - w) // 2
-        else: x = int(x)
-        
-        y = int(sb.get("y", 990))
-        self.move(x, y)
+        if is_docked:
+            # AppBar docking (forced to top for stability)
+            w, h = sw, int(sb.get("height", 39))
+            self.setFixedSize(w, h)
+            self.move(0, 0)
+            register_appbar(hwnd)
+            set_appbar_position(hwnd, w, h)
+        else:
+            unregister_appbar(hwnd)
+            w, h = int(sb.get("width", 1920)), int(sb.get("height", 39))
+            self.setFixedSize(w, h)
+            x = sb.get("x", "center")
+            if str(x).lower() == "center": x = (sw - w) // 2
+            else: x = int(x)
+            y = int(sb.get("y", 990))
+            self.move(x, y)
+
+    def closeEvent(self, event):
+        unregister_appbar(int(self.winId()))
+        super().closeEvent(event)
 
     def _build_left(self):
         ll = self._left_layout
@@ -1193,6 +1254,7 @@ class StatusBar(QMainWindow):
         sb_w_le, sb_h_le = QLineEdit(str(_sb_cfg.get("width", 1920))), QLineEdit(str(_sb_cfg.get("height", 39)))
         sb_x_le, sb_y_le = QLineEdit(str(_sb_cfg.get("x", "center"))), QLineEdit(str(_sb_cfg.get("y", 990)))
         popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2)))
+        dock_chk = QCheckBox("DOCK (APPBAR)"); dock_chk.setChecked(_sb_cfg.get("docked", False))
         
         for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
         for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(70)
@@ -1212,6 +1274,7 @@ class StatusBar(QMainWindow):
         form_sb.addRow("POSITION", pos_row)
         
         form_sb.addRow("POPUP Y OFFSET", popup_y_le)
+        form_sb.addRow("", dock_chk)
         right_col.addWidget(grp_sb)
         right_col.addStretch()
 
@@ -1242,7 +1305,8 @@ class StatusBar(QMainWindow):
                     "width": int(sb_w_le.text()),
                     "height": int(sb_h_le.text()),
                     "x": x_val,
-                    "y": int(sb_y_le.text())
+                    "y": int(sb_y_le.text()),
+                    "docked": dock_chk.isChecked()
                 }
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
             except ValueError as e:
