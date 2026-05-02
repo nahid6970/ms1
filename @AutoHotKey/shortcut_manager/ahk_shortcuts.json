@@ -657,6 +657,17 @@
             "window_class": "",
             "action": "{\n        Send \"^w\"\n}",
             "enabled": true
+        },
+        {
+            "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm-ss\"))",
+            "category": "Terminal",
+            "description": "Save current kiro chat session",
+            "enabled": true,
+            "hotkey": "^s",
+            "name": "kiro Save Chat",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "kiro"
         }
     ],
     "app_font_family": "Consolas",
