@@ -1195,7 +1195,7 @@ class StatusBar(QMainWindow):
         popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2)))
         
         for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
-        for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(50)
+        for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(70)
 
         form_sb.addRow("BG COLOR", sb_bg_le)
         form_sb.addRow("BORDER COLOR", sb_border_le)
