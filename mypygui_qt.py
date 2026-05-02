@@ -27,9 +27,9 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
-    QStyle, QStyleOption, QGridLayout,
+    QStyle, QStyleOption, QGridLayout, QMenu,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -1139,10 +1139,43 @@ def check_and_update_rclone(cfg, toggle_lbl):
     threading.Thread(target=run, daemon=True).start()
 
 
+# ─── Alarm / Timer ────────────────────────────────────────────────────────────
+class AlarmNotification(QDialog):
+    def __init__(self, message="ALARM! TIME'S UP!"):
+        super().__init__(None, Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setStyleSheet(f"background-color: {CP_BG}; border: 5px solid {CP_RED};")
+        self.resize(600, 300)
+        layout = QVBoxLayout(self)
+        self.lbl = QLabel(message)
+        self.lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl.setStyleSheet(f"color: {CP_RED}; font-size: 36pt; font-weight: bold; border: none;")
+        layout.addWidget(self.lbl)
+        
+        self.blink_timer = QTimer(self); self.blink_timer.timeout.connect(self._blink); self.blink_timer.start(500)
+        self.state = True
+        
+        # Center on screen
+        geo = QApplication.primaryScreen().geometry()
+        self.move((geo.width() - 600) // 2, (geo.height() - 300) // 2)
+
+    def _blink(self):
+        self.state = not self.state
+        color = CP_RED if self.state else CP_CYAN
+        self.lbl.setStyleSheet(f"color: {color}; font-size: 36pt; font-weight: bold; border: none;")
+        self.setStyleSheet(f"background-color: {CP_BG}; border: 5px solid {color};")
+
+    def mousePressEvent(self, event):
+        self.accept()
+
 # ─── Main window ──────────────────────────────────────────────────────────────
 class StatusBar(QMainWindow):
     def __init__(self):
         super().__init__()
+        self._timer_active = False
+        self._timer_seconds = 0
+        self._last_timer_type = None # "alarm" or "shutdown"
+        self._last_timer_mins = 0
+        
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self._config = load_config()
         self._apply_geometry()
@@ -1192,14 +1225,68 @@ class StatusBar(QMainWindow):
         self.uptime_label = IconLabel(format_uptime(), _uc)
         _ufg, _ufont_list = _uc.get("fg", "") or "#6bc0f8", _uc.get("font", get_default_font())
         self.uptime_label.setStyleSheet(f"color: {_ufg}; font-family: '{_ufont_list[0]}'; font-size: {_ufont_list[1]}pt; font-weight: {_ufont_list[2]};")
-        self.uptime_label.mousePressEvent = lambda e: (_open_static_edit("uptime") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else subprocess.Popen("timedate.cpl", shell=True))
+        
+        def _uptime_release(event):
+            if not self.uptime_label.rect().contains(event.pos()): return
+            mods, btn = event.modifiers(), event.button()
+            if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("uptime"); return
+            
+            if btn == Qt.MouseButton.LeftButton:
+                subprocess.Popen("timedate.cpl", shell=True)
+            elif btn == Qt.MouseButton.RightButton:
+                self._show_timer_menu()
+                
+        self.uptime_label.mousePressEvent = lambda e: e.accept()
+        self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
+        
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
         self._bl_container = QWidget(); self._bl_container_layout = QHBoxLayout(self._bl_container); self._bl_container_layout.setContentsMargins(0, 0, 0, 0); self._bl_container_layout.setSpacing(0); ll.addWidget(self._bl_container)
         next_bt = IconLabel("»", {}); _apply_static_style(next_bt, "pagination_next"); next_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_next") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_next()); ll.addWidget(next_bt); self._bl_next_bt = next_bt
         self._bl_render()
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
+        
+        self._countdown_timer = QTimer(self); self._countdown_timer.timeout.connect(self._timer_tick)
+
+    def _show_timer_menu(self):
+        if self._timer_active:
+            self._timer_active = False; self._countdown_timer.stop()
+            self.uptime_label.setText(format_uptime()); return
+            
+        menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
+        a1 = menu.addAction("Countdown Alarm"); a2 = menu.addAction("Countdown Shutdown")
+        if self._last_timer_type and self._last_timer_mins > 0:
+            menu.addSeparator()
+            a3 = menu.addAction(f"Rerun Last ({self._last_timer_mins}m {self._last_timer_type})")
+        else: a3 = None
+        
+        action = menu.exec(self.uptime_label.mapToGlobal(QPoint(0, -menu.sizeHint().height())))
+        if not action: return
+        
+        if action == a3:
+            self._start_countdown(self._last_timer_type, self._last_timer_mins)
+        else:
+            mins, ok = QInputDialog.getDouble(self, "Timer", "Enter minutes:", 1, 0.1, 1440, 1)
+            if ok: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
+
+    def _start_countdown(self, ttype, mins):
+        self._timer_active = True; self._last_timer_type = ttype; self._last_timer_mins = mins
+        self._timer_seconds = int(mins * 60)
+        self._countdown_timer.start(1000); self._timer_tick()
+
+    def _timer_tick(self):
+        if not self._timer_active: return
+        if self._timer_seconds <= 0:
+            self._timer_active = False; self._countdown_timer.stop()
+            self.uptime_label.setText(format_uptime())
+            if self._last_timer_type == "alarm": AlarmNotification().exec()
+            else: os.system("shutdown /s /f /t 1")
+            return
+        m, s = divmod(self._timer_seconds, 60)
+        # Using the same icon or a simple [T] prefix for the countdown
+        self.uptime_label.setText(f"\udb86\udee1 {m:02}:{s:02}")
+        self._timer_seconds -= 1
 
     def _open_unified_settings(self):
         dlg = QDialog(self); dlg.setWindowTitle("Settings")
@@ -1422,6 +1509,7 @@ class StatusBar(QMainWindow):
         if not _rc_cfg: self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
         self._rclone_toggle.mousePressEvent = lambda e: (self._toggle_rclone_popup() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("rclone_toggle"))
         rl.addWidget(self._rclone_toggle); self._build_git(rl)
+        
         self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {})); _bind_static(self.download_lb, "download", "sniffnet"); rl.addWidget(self.download_lb)
         self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {})); _bind_static(self.upload_lb, "upload", "sniffnet"); rl.addWidget(self.upload_lb)
         self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {})); _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py"); rl.addWidget(self.lb_cpu)
@@ -1434,6 +1522,44 @@ class StatusBar(QMainWindow):
         if not _st_cfg: settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
         settings_bt.mousePressEvent = lambda e: (self._open_unified_settings() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("settings")); rl.addWidget(settings_bt)
         for idx, btn_cfg in enumerate(self._config.get("buttons_right", [])): create_dynamic_button(rl, btn_cfg, "buttons_right", idx)
+
+    def _show_timer_menu(self):
+        if self._timer_active:
+            self._timer_active = False; self._countdown_timer.stop()
+            self.uptime_label.setText(format_uptime()); return
+            
+        menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
+        a1 = menu.addAction("Countdown Alarm"); a2 = menu.addAction("Countdown Shutdown")
+        if self._last_timer_type and self._last_timer_mins > 0:
+            menu.addSeparator()
+            a3 = menu.addAction(f"Rerun Last ({self._last_timer_mins}m {self._last_timer_type})")
+        else: a3 = None
+        
+        action = menu.exec(self.uptime_label.mapToGlobal(QPoint(0, -menu.sizeHint().height())))
+        if not action: return
+        
+        if action == a3:
+            self._start_countdown(self._last_timer_type, self._last_timer_mins)
+        else:
+            mins, ok = QInputDialog.getDouble(self, "Timer", "Enter minutes:", 1, 0.1, 1440, 1)
+            if ok: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
+
+    def _start_countdown(self, ttype, mins):
+        self._timer_active = True; self._last_timer_type = ttype; self._last_timer_mins = mins
+        self._timer_seconds = int(mins * 60)
+        self._countdown_timer.start(1000); self._timer_tick()
+
+    def _timer_tick(self):
+        if not self._timer_active: return
+        if self._timer_seconds <= 0:
+            self._timer_active = False; self._countdown_timer.stop()
+            self.uptime_label.setText(format_uptime())
+            if self._last_timer_type == "alarm": AlarmNotification().exec()
+            else: os.system("shutdown /s /f /t 1")
+            return
+        m, s = divmod(self._timer_seconds, 60)
+        self.uptime_label.setText(f"\udb86\udee1 {m:02}:{s:02}")
+        self._timer_seconds -= 1
 
     def _start_timers(self):
         self._uptime_timer = QTimer(self); self._uptime_timer.timeout.connect(self._update_uptime); self._uptime_timer.start(1000)
