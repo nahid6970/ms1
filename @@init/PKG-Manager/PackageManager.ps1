@@ -251,4 +251,4 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
 })
 
 $window.Add_Closing({ Save-Packages })
-$window.ShowDialog() | Out-NullOut-NullullOut-Null
+$window.ShowDialog() | Out-Null
