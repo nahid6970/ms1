@@ -1233,6 +1233,14 @@ class StatusBar(QMainWindow):
         left_col.addWidget(grp_def)
         
         grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); left_col.addWidget(grp2)
+
+        grp_sw = QGroupBox("SETTINGS PANEL SIZE"); form_sw = QFormLayout(); grp_sw.setLayout(form_sw)
+        sw_le, sh_le = QLineEdit(str(sw)), QLineEdit(str(sh))
+        sw_le.setFixedWidth(60); sh_le.setFixedWidth(60)
+        form_sw.addRow("WIDTH", sw_le)
+        form_sw.addRow("HEIGHT", sh_le)
+        left_col.addWidget(grp_sw)
+        
         left_col.addStretch()
 
         # --- RIGHT COLUMN ---
@@ -1250,13 +1258,6 @@ class StatusBar(QMainWindow):
         form_edit.addRow("LEFT WEIGHT", lw_le)
         form_edit.addRow("RIGHT WEIGHT", rw_le)
         right_col.addWidget(grp_edit)
-
-        grp_sw = QGroupBox("SETTINGS PANEL SIZE"); form_sw = QFormLayout(); grp_sw.setLayout(form_sw)
-        sw_le, sh_le = QLineEdit(str(sw)), QLineEdit(str(sh))
-        sw_le.setFixedWidth(60); sh_le.setFixedWidth(60)
-        form_sw.addRow("WIDTH", sw_le)
-        form_sw.addRow("HEIGHT", sh_le)
-        right_col.addWidget(grp_sw)
 
         grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb)
         _sb_cfg = self._config.get("statusbar", {})

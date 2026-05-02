@@ -1280,7 +1280,7 @@
         "bg": "#1D1D1D",
         "border_color": "#AAFF00",
         "border_px": 1,
-        "width": 1650,
+        "width": 1800,
         "height": 39,
         "x": "center",
         "y": 990,
@@ -2075,5 +2075,7 @@
             "icon_gap": 4,
             "icon_position": "left"
         }
-    ]
+    ],
+    "settings_panel_width": 750,
+    "settings_panel_height": 550
 }
