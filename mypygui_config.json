@@ -1279,7 +1279,11 @@
     "statusbar": {
         "bg": "#1D1D1D",
         "border_color": "#AAFF00",
-        "border_px": 1
+        "border_px": 1,
+        "width": 1650,
+        "height": 39,
+        "x": "center",
+        "y": 990
     },
     "fav_apps": [
         {

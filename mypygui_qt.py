@@ -1097,10 +1097,8 @@ class StatusBar(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
-        self.setFixedSize(1920, 39)
-        screen_w = QApplication.primaryScreen().geometry().width()
-        self.move(screen_w // 2 - 960, 990)
         self._config = load_config()
+        self._apply_geometry()
         border_frame = QFrame(); border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
         self.setCentralWidget(border_frame)
         inner = QWidget(border_frame); inner.setStyleSheet(f"background: {CP_BG}; border: none;")
@@ -1111,6 +1109,21 @@ class StatusBar(QMainWindow):
         self._right_widget = QWidget(); self._right_layout = QHBoxLayout(self._right_widget); self._right_layout.setContentsMargins(0, 0, 0, 0); self._right_layout.setSpacing(2); self._right_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         main_layout.addWidget(self._right_widget)
         self._build_left(); self._build_right(); self._apply_statusbar_style(); self._start_timers()
+
+    def _apply_geometry(self):
+        sb = self._config.get("statusbar", {})
+        w, h = int(sb.get("width", 1920)), int(sb.get("height", 39))
+        self.setFixedSize(w, h)
+        
+        screen_geo = QApplication.primaryScreen().geometry()
+        sw = screen_geo.width()
+        
+        x = sb.get("x", "center")
+        if str(x).lower() == "center": x = (sw - w) // 2
+        else: x = int(x)
+        
+        y = int(sb.get("y", 990))
+        self.move(x, y)
 
     def _build_left(self):
         ll = self._left_layout
@@ -1174,7 +1187,32 @@ class StatusBar(QMainWindow):
         form_edit.addRow("RIGHT WEIGHT", rw_le)
         right_col.addWidget(grp_edit)
 
-        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb); _sb_cfg = self._config.get("statusbar", {}); sb_bg_le, sb_border_le, sb_bpx_le, popup_y_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1))), QLineEdit(str(self._config.get("popup_y_offset", 2))); sb_bg_le.setFixedWidth(90); sb_border_le.setFixedWidth(90); sb_bpx_le.setFixedWidth(40); popup_y_le.setFixedWidth(40); form_sb.addRow("BG COLOR", sb_bg_le); form_sb.addRow("BORDER COLOR", sb_border_le); form_sb.addRow("BORDER PX", sb_bpx_le); form_sb.addRow("POPUP Y OFFSET", popup_y_le); right_col.addWidget(grp_sb)
+        grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb)
+        _sb_cfg = self._config.get("statusbar", {})
+        sb_bg_le, sb_border_le, sb_bpx_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1)))
+        sb_w_le, sb_h_le = QLineEdit(str(_sb_cfg.get("width", 1920))), QLineEdit(str(_sb_cfg.get("height", 39)))
+        sb_x_le, sb_y_le = QLineEdit(str(_sb_cfg.get("x", "center"))), QLineEdit(str(_sb_cfg.get("y", 990)))
+        popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2)))
+        
+        for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
+        for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(50)
+
+        form_sb.addRow("BG COLOR", sb_bg_le)
+        form_sb.addRow("BORDER COLOR", sb_border_le)
+        form_sb.addRow("BORDER PX", sb_bpx_le)
+        
+        geo_row = QWidget(); geo_lay = QHBoxLayout(geo_row); geo_lay.setContentsMargins(0,0,0,0)
+        geo_lay.addWidget(QLabel("W")); geo_lay.addWidget(sb_w_le)
+        geo_lay.addWidget(QLabel("H")); geo_lay.addWidget(sb_h_le); geo_lay.addStretch()
+        form_sb.addRow("SIZE", geo_row)
+
+        pos_row = QWidget(); pos_lay = QHBoxLayout(pos_row); pos_lay.setContentsMargins(0,0,0,0)
+        pos_lay.addWidget(QLabel("X")); pos_lay.addWidget(sb_x_le)
+        pos_lay.addWidget(QLabel("Y")); pos_lay.addWidget(sb_y_le); pos_lay.addStretch()
+        form_sb.addRow("POSITION", pos_row)
+        
+        form_sb.addRow("POPUP Y OFFSET", popup_y_le)
+        right_col.addWidget(grp_sb)
         right_col.addStretch()
 
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
@@ -1190,8 +1228,23 @@ class StatusBar(QMainWindow):
                 cfg["default_font"] = [df_family.currentText(), int(df_size.text()), df_weight.currentText()]
                 cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
                 cfg["popup_y_offset"] = int(popup_y_le.text())
-                cfg["statusbar"] = {"bg": sb_bg_le.text() or CP_BG, "border_color": sb_border_le.text() or CP_RED, "border_px": int(sb_bpx_le.text())}
-                save_config(cfg); self._config = cfg; self._apply_statusbar_style(); dlg.accept(); self._bl_render()
+                
+                # Statusbar Geo
+                x_val = sb_x_le.text().strip()
+                if x_val.lower() != "center":
+                    try: x_val = int(x_val)
+                    except: x_val = "center"
+                
+                cfg["statusbar"] = {
+                    "bg": sb_bg_le.text() or CP_BG,
+                    "border_color": sb_border_le.text() or CP_RED,
+                    "border_px": int(sb_bpx_le.text()),
+                    "width": int(sb_w_le.text()),
+                    "height": int(sb_h_le.text()),
+                    "x": x_val,
+                    "y": int(sb_y_le.text())
+                }
+                save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
             except ValueError as e:
                 QMessageBox.warning(dlg, "Error", f"Invalid input: {e}")
         
