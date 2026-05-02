@@ -11,7 +11,7 @@ $global:lastHoveredItem = $null
 function New-PackageObject {
     param($Name, $ID, $Source, $Category = "General", $Sources = $null)
     $srcs = if ($Sources) { $Sources } else { @(@{Source=$Source; ID=$ID}) }
-    $badge = ($srcs | ForEach-Object { if ($_.Source -eq "scoop") { "[S]" } else { "[W]" } }) -join "+"
+    $badge = ($srcs | ForEach-Object { $_.Source }) -join " + "
     return [PSCustomObject]@{
         Name          = [string]$Name
         ID            = [string]($srcs[0].ID)
@@ -32,17 +32,14 @@ function Load-Packages {
             if ([string]::IsNullOrWhiteSpace($content)) { return }
             $data = $content | ConvertFrom-Json
             $global:allPackages.Clear()
-            # Group by base name (strip [S]/[W] suffix) to merge duplicates
             $groups = @{}
             foreach ($item in @($data)) {
                 if (-not ($item.Name -and $item.ID)) { continue }
-                # If item already has Sources array, use it directly
                 if ($item.Sources) {
                     $srcs = @($item.Sources | ForEach-Object { @{Source=[string]$_.Source; ID=[string]$_.ID} })
                     $global:allPackages.Add((New-PackageObject -Name $item.Name -ID $srcs[0].ID -Source $srcs[0].Source -Category $item.Category -Sources $srcs))
                     continue
                 }
-                # Legacy: detect [S]/[W] suffix and group by base name
                 $baseName = $item.Name -replace '\s*\[(S|W)\]$', ''
                 if (-not $groups.ContainsKey($baseName)) { $groups[$baseName] = @{Cat=$item.Category; Srcs=@()} }
                 $groups[$baseName].Srcs += @{Source=[string]$item.Source; ID=[string]$item.ID}
@@ -105,7 +102,6 @@ function Set-RowButtonsVisibility {
     }
 }
 
-# Prompt user to pick a source when package has multiple sources
 function Select-Source {
     param($pkg)
     if ($pkg.Sources.Count -le 1) { return $pkg.Sources[0] }
@@ -152,7 +148,6 @@ function Show-PackageDialog {
     if ($ExistingPkg) { $txtName.Text = $ExistingPkg.Name }
     Add-Row 0 "Display Name:" $txtName
 
-    # Primary source row
     $spSrc1 = New-Object System.Windows.Controls.StackPanel; $spSrc1.Orientation = "Horizontal"
     $cmbSrc1 = New-Object System.Windows.Controls.ComboBox; $cmbSrc1.Width = 80; [void]$cmbSrc1.Items.Add("winget"); [void]$cmbSrc1.Items.Add("scoop")
     $cmbSrc1.SelectedItem = if ($ExistingPkg -and $ExistingPkg.Sources) { $ExistingPkg.Sources[0].Source } else { "winget" }
@@ -161,7 +156,6 @@ function Show-PackageDialog {
     [void]$spSrc1.Children.Add($cmbSrc1); [void]$spSrc1.Children.Add($txtID1)
     Add-Row 1 "Source 1 / ID:" $spSrc1
 
-    # Secondary source row
     $spSrc2 = New-Object System.Windows.Controls.StackPanel; $spSrc2.Orientation = "Horizontal"
     $cmbSrc2 = New-Object System.Windows.Controls.ComboBox; $cmbSrc2.Width = 80; [void]$cmbSrc2.Items.Add("(none)"); [void]$cmbSrc2.Items.Add("winget"); [void]$cmbSrc2.Items.Add("scoop")
     $txtID2 = New-Object System.Windows.Controls.TextBox; $txtID2.Padding = "5"; $txtID2.Width = 200; $txtID2.Margin = "8,0,0,0"
@@ -237,11 +231,7 @@ $gridFactory.SetValue([System.Windows.Controls.Grid]::WidthProperty, 510.0)
 $c1 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c1.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(35))); $gridFactory.AppendChild($c1)
 $c2 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c2.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star))); $gridFactory.AppendChild($c2)
 $c3 = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.ColumnDefinition]); $c3.SetValue([System.Windows.Controls.ColumnDefinition]::WidthProperty, (New-Object System.Windows.GridLength(150))); $gridFactory.AppendChild($c3)
-
-$cb = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.CheckBox])
-$cb.SetBinding([System.Windows.Controls.CheckBox]::IsCheckedProperty, (New-Object System.Windows.Data.Binding "IsSelected"))
-$cb.SetValue([System.Windows.Controls.CheckBox]::VerticalAlignmentProperty, [System.Windows.VerticalAlignment]::Center)
-$gridFactory.AppendChild($cb)
+$cb = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.CheckBox]); $cb.SetBinding([System.Windows.Controls.CheckBox]::IsCheckedProperty, (New-Object System.Windows.Data.Binding "IsSelected")); $cb.SetValue([System.Windows.Controls.CheckBox]::VerticalAlignmentProperty, [System.Windows.VerticalAlignment]::Center); $gridFactory.AppendChild($cb)
 
 $spInfo = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spInfo.SetValue([System.Windows.Controls.Grid]::ColumnProperty, 1)
 $spName = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spName.SetValue([System.Windows.Controls.StackPanel]::OrientationProperty, [System.Windows.Controls.Orientation]::Horizontal)
@@ -250,7 +240,7 @@ $tfCheck = New-Object System.Windows.FrameworkElementFactory([System.Windows.Con
 $spInfo.AppendChild($spName)
 $tfID = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $tfID.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "ID")); $tfID.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 11.0); $tfID.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::Gray); $spInfo.AppendChild($tfID)
 
-# Sub-line: SourceBadge • Category
+# Sub-line: SourceBadge (e.g. "winget", "scoop", "winget + scoop") and Category
 $spSub = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.StackPanel]); $spSub.SetValue([System.Windows.Controls.StackPanel]::OrientationProperty, [System.Windows.Controls.Orientation]::Horizontal)
 $tfBadge = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $tfBadge.SetBinding([System.Windows.Controls.TextBlock]::TextProperty, (New-Object System.Windows.Data.Binding "SourceBadge")); $tfBadge.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 10.0); $tfBadge.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::DodgerBlue); $tfBadge.SetValue([System.Windows.Controls.TextBlock]::FontWeightProperty, [System.Windows.FontWeights]::Bold); $spSub.AppendChild($tfBadge)
 $tfSep = New-Object System.Windows.FrameworkElementFactory([System.Windows.Controls.TextBlock]); $tfSep.SetValue([System.Windows.Controls.TextBlock]::TextProperty, " • "); $tfSep.SetValue([System.Windows.Controls.TextBlock]::FontSizeProperty, 10.0); $tfSep.SetValue([System.Windows.Controls.TextBlock]::ForegroundProperty, [System.Windows.Media.Brushes]::Silver); $spSub.AppendChild($tfSep)
@@ -366,4 +356,3 @@ $packageListUI.Add_PreviewMouseLeftButtonUp({
 
 $window.Add_Closing({ Save-Packages })
 $window.ShowDialog() | Out-Null
-
