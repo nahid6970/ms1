@@ -880,6 +880,13 @@ class GenericPopup(QFrame):
         self.layout.setSpacing(4)
         self.render_items()
 
+    def paintEvent(self, event):
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
+        super().paintEvent(event)
+
     def render_items(self):
         while self.layout.count():
             item = self.layout.takeAt(0)

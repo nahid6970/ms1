@@ -1326,8 +1326,8 @@
                     "row_limit": 10,
                     "bg_color": "white",
                     "transparent_bg": true,
-                    "border_color": "red",
-                    "border_px": 1
+                    "border_color": "",
+                    "border_px": 0
                 }
             },
             "font": [
@@ -1658,8 +1658,8 @@
                 15,
                 "normal"
             ],
-            "border": 5,
-            "border_color": "red",
+            "border": 0,
+            "border_color": "",
             "border_radius": 0,
             "width": 0,
             "height": 0,
