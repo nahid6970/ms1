@@ -1283,6 +1283,84 @@
     },
     "fav_apps": [
         {
+            "text": "JOB",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777694706",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "job_bar",
+                    "row_limit": 10,
+                    "bg_color": "white",
+                    "transparent_bg": false,
+                    "border_color": "",
+                    "border_px": 1
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "AI",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777656177",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "ai_sites",
+                    "row_limit": 10,
+                    "bg_color": "white",
+                    "transparent_bg": false,
+                    "border_color": "black",
+                    "border_px": 3
+                }
+            },
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
             "text": "SVG",
             "fg": "#ffffff",
             "bg": "#050505",
@@ -1317,84 +1395,6 @@
             "icon_position": "left",
             "svg_content": "",
             "svg_hover_map": {}
-        },
-        {
-            "text": "AI",
-            "fg": "#ffffff",
-            "bg": "#050505",
-            "id": "sub_1777656177",
-            "bindings": {
-                "Button-1": {
-                    "type": "popup",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "ai_sites",
-                    "row_limit": 10,
-                    "bg_color": "white",
-                    "transparent_bg": false,
-                    "border_color": "black",
-                    "border_px": 1
-                }
-            },
-            "font": [
-                "JetBrainsMono Nerd Font Propo",
-                15,
-                "normal"
-            ],
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "padx_left": 1,
-            "padx_right": 1,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "left"
-        },
-        {
-            "text": "JOB",
-            "fg": "#ffffff",
-            "bg": "#050505",
-            "id": "sub_1777694706",
-            "bindings": {
-                "Button-1": {
-                    "type": "popup",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "job_bar",
-                    "row_limit": 10,
-                    "bg_color": "",
-                    "transparent_bg": false,
-                    "border_color": "",
-                    "border_px": 1
-                }
-            },
-            "font": [
-                "JetBrainsMono Nerd Font Propo",
-                15,
-                "normal"
-            ],
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "padx_left": 1,
-            "padx_right": 1,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "left"
         }
     ],
     "popup_y_offset": 10,
@@ -2005,7 +2005,7 @@
         {
             "text": "bdgovtjob",
             "fg": "#ffffff",
-            "bg": "#050505",
+            "bg": "transparent",
             "id": "sub_1777694733",
             "bindings": {
                 "Button-1": {
@@ -2038,8 +2038,8 @@
         },
         {
             "text": "erecruitment",
-            "fg": "#ffffff",
-            "bg": "#050505",
+            "fg": "",
+            "bg": "transparent",
             "id": "sub_1777694966",
             "bindings": {
                 "Button-1": {
