@@ -1202,7 +1202,10 @@ class StatusBar(QMainWindow):
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
 
     def _open_unified_settings(self):
-        dlg = QDialog(self); dlg.setWindowTitle("Settings"); dlg.resize(750, 500); dlg.setStyleSheet(DIALOG_QSS)
+        dlg = QDialog(self); dlg.setWindowTitle("Settings")
+        sw, sh = self._config.get("settings_panel_width", 750), self._config.get("settings_panel_height", 500)
+        dlg.resize(sw, sh)
+        dlg.setStyleSheet(DIALOG_QSS)
         lay = QVBoxLayout(dlg); lay.setContentsMargins(12,12,12,12); lay.setSpacing(10); title = QLabel("// SETTINGS"); title.setStyleSheet(f"color: {CP_CYAN}; font-size: 15pt; font-weight: bold;"); lay.addWidget(title)
         
         # Scroll area for settings
@@ -1248,6 +1251,13 @@ class StatusBar(QMainWindow):
         form_edit.addRow("RIGHT WEIGHT", rw_le)
         right_col.addWidget(grp_edit)
 
+        grp_sw = QGroupBox("SETTINGS PANEL SIZE"); form_sw = QFormLayout(); grp_sw.setLayout(form_sw)
+        sw_le, sh_le = QLineEdit(str(sw)), QLineEdit(str(sh))
+        sw_le.setFixedWidth(60); sh_le.setFixedWidth(60)
+        form_sw.addRow("WIDTH", sw_le)
+        form_sw.addRow("HEIGHT", sh_le)
+        right_col.addWidget(grp_sw)
+
         grp_sb = QGroupBox("STATUSBAR"); form_sb = QFormLayout(); grp_sb.setLayout(form_sb)
         _sb_cfg = self._config.get("statusbar", {})
         sb_bg_le, sb_border_le, sb_bpx_le = QLineEdit(_sb_cfg.get("bg", CP_BG)), QLineEdit(_sb_cfg.get("border_color", CP_RED)), QLineEdit(str(_sb_cfg.get("border_px", 1)))
@@ -1288,6 +1298,8 @@ class StatusBar(QMainWindow):
                 cfg["edit_panel_height"] = int(eh_le.text())
                 cfg["edit_left_weight"] = int(lw_le.text())
                 cfg["edit_right_weight"] = int(rw_le.text())
+                cfg["settings_panel_width"] = int(sw_le.text())
+                cfg["settings_panel_height"] = int(sh_le.text())
                 cfg["default_font"] = [df_family.currentText(), int(df_size.text()), df_weight.currentText()]
                 cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
                 cfg["popup_y_offset"] = int(popup_y_le.text())
