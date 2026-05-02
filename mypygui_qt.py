@@ -909,10 +909,23 @@ def open_rclone_settings():
 
 
 # ─── Generic Popup Bar ────────────────────────────────────────────────────────
+_active_popups = []
+
+def close_all_popups():
+    global _active_popups
+    while _active_popups:
+        p = _active_popups.pop()
+        try:
+            p.setParent(None)
+            p.close()
+        except: pass
+
 class GenericPopup(QFrame):
     def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
-        super().__init__(parent, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
+        # Use Tool window instead of Popup to solve the "two-click" issue
+        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         if transparent_bg:
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.category = category
@@ -925,6 +938,7 @@ class GenericPopup(QFrame):
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(4, 2, 4, 2)
         self.layout.setSpacing(4)
+        _active_popups.append(self)
         self.render_items()
 
     def paintEvent(self, event):
@@ -933,6 +947,27 @@ class GenericPopup(QFrame):
         painter = QPainter(self)
         self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
         super().paintEvent(event)
+
+    def focusOutEvent(self, event):
+        # Short delay to see if focus moved to another part of the popup chain
+        QTimer.singleShot(150, self._check_focus)
+        super().focusOutEvent(event)
+
+    def _check_focus(self):
+        active_w = QApplication.focusWidget()
+        if not active_w: # App lost focus
+            close_all_popups(); return
+        # Keep open if focus moved to another popup or its descendant
+        curr = active_w
+        while curr:
+            if isinstance(curr, GenericPopup): return
+            curr = curr.parent()
+        close_all_popups()
+
+    def closeEvent(self, event):
+        if self in _active_popups:
+            _active_popups.remove(self)
+        super().closeEvent(event)
 
     def render_items(self):
         while self.layout.count():
@@ -960,6 +995,16 @@ class GenericPopup(QFrame):
         self.adjustSize()
 
 def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
+    # Check if we are nesting (opening from an existing popup)
+    is_nested = False
+    curr = anchor_widget.parent()
+    while curr:
+        if isinstance(curr, GenericPopup): is_nested = True; break
+        curr = curr.parent()
+    
+    if not is_nested:
+        close_all_popups() # Fresh start from StatusBar
+
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
     popup = GenericPopup(_main_window, category, anchor_widget, row_limit, border_color, border_px, bg_color, transparent_bg)
@@ -967,6 +1012,7 @@ def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, bor
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
     popup.move(cx, gpos.y() - popup.height() - offset)
     popup.show()
+    popup.setFocus()
 
 # ─── Dynamic button factory ───────────────────────────────────────────────────
 def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
