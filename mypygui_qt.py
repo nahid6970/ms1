@@ -1034,13 +1034,15 @@ class AppEventFilter(QObject):
         if event.type() == QEvent.Type.MouseButtonPress:
             if _active_popups:
                 pos = event.globalPosition().toPoint()
-                # 1. If click is inside any active popup, keep them open
+                # 1. If click is inside any active popup window, keep them open
                 in_popup = any(p.isVisible() and p.geometry().contains(pos) for p in _active_popups)
                 if not in_popup:
-                    # 2. Check if click is anywhere on our status bar or existing popups
+                    # 2. Check if click is on any specific button that opened any popup in the chain
+                    all_anchors = [p.anchor_widget for p in _active_popups]
                     w = QApplication.widgetAt(pos)
-                    # We look for ANY widget that belongs to our UI system
-                    if not (w and (w.window() == _main_window or isinstance(w.window(), GenericPopup))):
+                    # If click is NOT on any trigger button in the chain, close everything
+                    # (This includes: Desktop, other apps, statusbar background, non-trigger buttons)
+                    if w not in all_anchors:
                         close_all_popups()
         elif event.type() == QEvent.Type.ApplicationDeactivate:
             close_all_popups()
