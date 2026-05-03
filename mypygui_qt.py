@@ -1140,7 +1140,16 @@ def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, bor
     popup = GenericPopup(_main_window, category, anchor_widget, row_limit, border_color, border_px, bg_color, transparent_bg)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
-    popup.move(cx, gpos.y() - popup.height() - offset)
+    
+    # Check if we are docked at the top
+    is_docked = config.get("statusbar", {}).get("docked", False)
+    if is_docked:
+        # Move BELOW status bar
+        popup.move(cx, gpos.y() + anchor_widget.height() + offset)
+    else:
+        # Move ABOVE status bar
+        popup.move(cx, gpos.y() - popup.height() - offset)
+        
     popup.show()
     popup.setFocus()
 
