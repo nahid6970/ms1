@@ -43,7 +43,9 @@ KOMOREBI_JSON_PATH = os.path.join(SCRIPT_PATH, CONFIG_FILENAME)
 SVGS = {
     "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',        
     "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',   
-    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+    "DISK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
+    "CROSS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -518,17 +520,16 @@ class KomorebiApp(QMainWindow):
         self.preset_combo.currentTextChanged.connect(self.load_work_area_preset)
         preset_layout.addWidget(self.preset_combo, 2)
         
-        self.save_preset_btn = QPushButton("SAVE")
+        self.save_preset_btn = CyberButton("", color=CP_CYAN, is_outlined=True, svg_data=SVGS["DISK"])
         self.save_preset_btn.setToolTip("Save current offsets as a new preset")
         self.save_preset_btn.clicked.connect(self.save_work_area_preset)
-        self.save_preset_btn.setFixedHeight(30)
+        self.save_preset_btn.setFixedWidth(40)
         preset_layout.addWidget(self.save_preset_btn)
         
-        self.del_preset_btn = QPushButton("DEL")
+        self.del_preset_btn = CyberButton("", color=CP_RED, is_outlined=True, svg_data=SVGS["CROSS"])
         self.del_preset_btn.setToolTip("Delete selected preset")
         self.del_preset_btn.clicked.connect(self.delete_work_area_preset)
-        self.del_preset_btn.setFixedHeight(30)
-        self.del_preset_btn.setStyleSheet(f"color: {CP_RED};")
+        self.del_preset_btn.setFixedWidth(40)
         preset_layout.addWidget(self.del_preset_btn)
         
         settings_layout.addLayout(preset_layout)
