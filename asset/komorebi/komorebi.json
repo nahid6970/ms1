@@ -396,6 +396,12 @@
                 "top": -15,
                 "right": -30,
                 "bottom": -30
+            },
+            "Bottom Bar": {
+                "left": -15,
+                "top": -15,
+                "right": -30,
+                "bottom": 10
             }
         }
     }
