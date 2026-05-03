@@ -617,7 +617,11 @@ def open_edit_gui(item_cfg, category, index=None):
 
     lay2.addWidget(QLabel("ICON SCALING:  W"));  lay2.addWidget(icon_w_le)
     lay2.addWidget(QLabel("H"));  lay2.addWidget(icon_h_le)
-    lay2.addWidget(QLabel("GAP")); lay2.addWidget(icon_gap_le); lay2.addStretch()
+    lay2.addWidget(QLabel("GAP")); lay2.addWidget(icon_gap_le)
+    
+    icon_pos_cb = QComboBox(); icon_pos_cb.addItems(["left", "right", "top", "bottom", "center"])
+    icon_pos_cb.setCurrentText(item_cfg.get("icon_position", "left"))
+    lay2.addWidget(QLabel(" POS")); lay2.addWidget(icon_pos_cb); lay2.addStretch()
     form_core.addWidget(row2)
 
     left_layout.addWidget(grp_core)
