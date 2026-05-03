@@ -1,39 +1,29 @@
 """
 explorer_tabs.py
 Monitors for new File Explorer windows and merges them as tabs
-into an existing Explorer window instead of opening separately.
-Run in background: pythonw explorer_tabs.py
+into an existing Explorer window using Windows API (no keyboard simulation).
+
+Uses:
+  - WM_COMMAND 0xA21B  → opens a new tab in an existing Explorer window
+  - IWebBrowser2.Navigate2 via Shell.Application COM → navigates the new tab
+  - IShellBrowser.BrowseObject (via Shell COM) → closes the new window
+
+Run silently: pythonw explorer_tabs.py
 """
 
 import time
+import ctypes
 import urllib.parse
 import win32gui
 import win32con
-import win32api
 import comtypes.client
+import comtypes.automation
 
-POLL_INTERVAL = 0.4   # seconds between checks
-NEW_WIN_WAIT  = 0.6   # wait for new window to fully load
+POLL_INTERVAL = 0.4
+NEW_WIN_WAIT  = 0.7
 
-
-def get_explorer_windows():
-    """Return {hwnd: set_of_paths} for all visible CabinetWClass windows."""
-    result = {}
-    try:
-        shell = comtypes.client.CreateObject('Shell.Application')
-        for w in shell.Windows():
-            try:
-                hwnd = w.HWND
-                url  = w.LocationURL
-                if not url:
-                    continue
-                path = urllib.parse.unquote(url.replace('file:///', '').replace('/', '\\'))
-                result.setdefault(hwnd, set()).add(path)
-            except Exception:
-                pass
-    except Exception:
-        pass
-    return result
+WM_COMMAND    = 0x0111
+NEW_TAB_CMD   = 0xA21B
 
 
 def get_cabinet_hwnds():
@@ -45,100 +35,151 @@ def get_cabinet_hwnds():
     return hwnds
 
 
-def open_path_as_tab(target_hwnd, path):
+def get_shell_windows():
+    """Return list of IWebBrowser2 dispatch objects from Shell.Application."""
+    try:
+        shell = comtypes.client.CreateObject('Shell.Application')
+        return list(shell.Windows())
+    except Exception:
+        return []
+
+
+def get_hwnd_paths(hwnd):
+    """Return set of URL strings for all tabs in a given CabinetWClass hwnd."""
+    paths = set()
+    for w in get_shell_windows():
+        try:
+            if w.HWND == hwnd and w.LocationURL:
+                paths.add(w.LocationURL)
+        except Exception:
+            pass
+    return paths
+
+
+def get_first_tab_hwnd(cabinet_hwnd):
+    """Return the first ShellTabWindowClass child of a CabinetWClass window."""
+    result = []
+    def cb(hwnd, _):
+        if win32gui.GetClassName(hwnd) == 'ShellTabWindowClass':
+            result.append(hwnd)
+            return False
+    try:
+        win32gui.EnumChildWindows(cabinet_hwnd, cb, None)
+    except Exception:
+        pass
+    return result[0] if result else None
+
+
+def open_as_tab(target_cabinet_hwnd, path):
     """
-    Focus target_hwnd, open a new tab with Ctrl+T,
-    then type the path into the address bar and navigate.
+    Open `path` as a new tab in `target_cabinet_hwnd`.
+    1. Send WM_COMMAND 0xA21B to ShellTabWindowClass → creates blank tab
+    2. Find the blank tab via Shell.Application
+    3. Navigate2 to path
     """
-    # Bring window to front
-    win32gui.ShowWindow(target_hwnd, win32con.SW_RESTORE)
-    win32gui.SetForegroundWindow(target_hwnd)
-    time.sleep(0.15)
+    tab_hwnd = get_first_tab_hwnd(target_cabinet_hwnd)
+    if not tab_hwnd:
+        return False
 
-    # Ctrl+T → new tab
-    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-    win32api.keybd_event(ord('T'), 0, 0, 0)
-    win32api.keybd_event(ord('T'), 0, win32con.KEYEVENTF_KEYUP, 0)
-    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.3)
+    # Snapshot existing shell window objects before opening new tab
+    before = {id(w) for w in get_shell_windows()}
 
-    # Alt+D → focus address bar
-    win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)
-    win32api.keybd_event(ord('D'), 0, 0, 0)
-    win32api.keybd_event(ord('D'), 0, win32con.KEYEVENTF_KEYUP, 0)
-    win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.2)
+    ctypes.windll.user32.SendMessageW(tab_hwnd, WM_COMMAND, NEW_TAB_CMD, 0)
+    time.sleep(0.5)
 
-    # Type path and press Enter
-    import win32clipboard
-    win32clipboard.OpenClipboard()
-    win32clipboard.EmptyClipboard()
-    win32clipboard.SetClipboardText(path)
-    win32clipboard.CloseClipboard()
+    # Find the new blank tab (LocationURL == '')
+    blank = None
+    for w in get_shell_windows():
+        try:
+            if w.HWND == target_cabinet_hwnd and w.LocationURL == '':
+                blank = w
+                break
+        except Exception:
+            pass
 
-    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-    win32api.keybd_event(ord('V'), 0, 0, 0)
-    win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)
-    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.1)
+    if not blank:
+        # Fallback: find any new entry not in before snapshot
+        for w in get_shell_windows():
+            try:
+                if id(w) not in before and w.HWND == target_cabinet_hwnd:
+                    blank = w
+                    break
+            except Exception:
+                pass
 
-    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.4)
+    if not blank:
+        return False
+
+    v = comtypes.automation.VARIANT()
+    v.vt = comtypes.automation.VT_BSTR
+    v.value = path
+    try:
+        blank.Navigate2(v)
+    except Exception:
+        return False
+
+    return True
 
 
-def close_window(hwnd):
+def close_shell_window(hwnd):
+    """Close all shell windows (tabs) belonging to a CabinetWClass hwnd."""
+    for w in get_shell_windows():
+        try:
+            if w.HWND == hwnd:
+                w.Quit()
+                return
+        except Exception:
+            pass
+    # Fallback: WM_CLOSE
     win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
 
 
 def main():
     known_hwnds = get_cabinet_hwnds()
-    print(f"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Press Ctrl+C to stop.")
+    print(f"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Ctrl+C to stop.")
 
     while True:
         time.sleep(POLL_INTERVAL)
+
         current = get_cabinet_hwnds()
         new_hwnds = current - known_hwnds
 
         for new_hwnd in new_hwnds:
-            # Wait for the window to finish loading
             time.sleep(NEW_WIN_WAIT)
 
-            # Re-check it still exists
             if not win32gui.IsWindow(new_hwnd):
                 continue
 
-            # Find an existing Explorer window to merge into
-            existing = current - new_hwnds - {new_hwnd}
-            # Also re-check known_hwnds for still-alive windows
-            for h in list(known_hwnds):
-                if win32gui.IsWindow(h):
-                    existing.add(h)
+            # Existing windows (excluding the new one)
+            existing = {h for h in (known_hwnds | current) - {new_hwnd} if win32gui.IsWindow(h)}
 
             if not existing:
-                # No existing window — let this one become the main window
-                print(f"[explorer_tabs] First window {new_hwnd}, keeping as-is.")
+                print(f"[explorer_tabs] First window {new_hwnd}, keeping.")
                 known_hwnds.add(new_hwnd)
                 continue
 
-            # Get the path of the new window
-            win_paths = get_explorer_windows()
-            paths = win_paths.get(new_hwnd, set())
-
+            # Get path of new window
+            paths = get_hwnd_paths(new_hwnd)
             if not paths:
-                print(f"[explorer_tabs] Could not get path for {new_hwnd}, skipping.")
+                print(f"[explorer_tabs] No path for {new_hwnd}, skipping.")
                 known_hwnds.add(new_hwnd)
                 continue
 
             path = next(iter(paths))
+            # Decode file:/// URL to a plain path
+            plain_path = urllib.parse.unquote(path.replace('file:///', '').replace('/', '\\'))
             target = next(iter(existing))
 
-            print(f"[explorer_tabs] Merging {new_hwnd} ({path!r}) into {target}")
-            open_path_as_tab(target, path)
-            time.sleep(0.3)
-            close_window(new_hwnd)
+            print(f"[explorer_tabs] Merging {new_hwnd} ({plain_path!r}) → {target}")
 
-        # Update known set (remove closed windows, add new ones we decided to keep)
+            if open_as_tab(target, plain_path):
+                time.sleep(0.3)
+                close_shell_window(new_hwnd)
+            else:
+                print(f"[explorer_tabs] Failed to open tab, leaving window as-is.")
+                known_hwnds.add(new_hwnd)
+                continue
+
         known_hwnds = {h for h in (known_hwnds | current) if win32gui.IsWindow(h)}
 
 
