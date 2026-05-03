@@ -44,6 +44,7 @@ class Program
     [StructLayout(LayoutKind.Sequential)]
     struct MSG { public IntPtr hwnd; public uint message; public IntPtr wParam; public IntPtr lParam; public uint time; public int x, y; }
 
+    const uint EVENT_OBJECT_CREATE   = 0x8000;
     const uint EVENT_OBJECT_SHOW     = 0x8002;
     const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     const int  SW_HIDE    = 0;
@@ -171,8 +172,6 @@ class Program
 
     static void HandleNewWindow(IntPtr hwnd)
     {
-        ShowWindow(hwnd, SW_HIDE);
-
         // Retry until Shell COM registers the new window (up to 2s)
         string? path = null;
         for (int i = 0; i < 8; i++)
@@ -222,13 +221,16 @@ class Program
             lock (_lock) isNew = _knownHwnds.Add(hwnd);
             if (isNew)
             {
+                // Hide immediately in the callback (message pump thread) before Explorer paints it
+                ShowWindow(hwnd, SW_HIDE);
                 var t = new Thread(() => HandleNewWindow(hwnd));
                 t.SetApartmentState(ApartmentState.STA);
                 t.Start();
             }
         };
 
-        var hook = SetWinEventHook(EVENT_OBJECT_SHOW, EVENT_OBJECT_SHOW,
+        // Hook both CREATE and SHOW to catch the window as early as possible
+        var hook1 = SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_SHOW,
             IntPtr.Zero, callback, 0, 0, WINEVENT_OUTOFCONTEXT);
 
         while (GetMessage(out MSG msg, IntPtr.Zero, 0, 0) > 0)
@@ -237,6 +239,6 @@ class Program
             DispatchMessage(ref msg);
         }
 
-        UnhookWinEvent(hook);
+        UnhookWinEvent(hook1);
     }
 }
