@@ -913,6 +913,7 @@ _active_popups = []
 
 def close_all_popups():
     global _active_popups
+    # Close in reverse order (children first)
     while _active_popups:
         p = _active_popups.pop()
         try:
@@ -920,9 +921,21 @@ def close_all_popups():
             p.close()
         except: pass
 
+def _on_global_focus_changed(old, new):
+    if not new: # Entire app lost focus
+        close_all_popups(); return
+    # Keep open if focus moved to another popup or its descendant
+    curr = new
+    while curr:
+        if isinstance(curr, GenericPopup): return
+        curr = curr.parent()
+    # Focus moved to something that is not a popup (like the StatusBar itself or a dialog)
+    # We only close if it's not the StatusBar (so clicks on buttons can handle their own logic)
+    if not isinstance(new.window(), StatusBar):
+        close_all_popups()
+
 class GenericPopup(QFrame):
     def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
-        # Use Tool window instead of Popup to solve the "two-click" issue
         super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
@@ -947,22 +960,6 @@ class GenericPopup(QFrame):
         painter = QPainter(self)
         self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
         super().paintEvent(event)
-
-    def focusOutEvent(self, event):
-        # Short delay to see if focus moved to another part of the popup chain
-        QTimer.singleShot(150, self._check_focus)
-        super().focusOutEvent(event)
-
-    def _check_focus(self):
-        active_w = QApplication.focusWidget()
-        if not active_w: # App lost focus
-            close_all_popups(); return
-        # Keep open if focus moved to another popup or its descendant
-        curr = active_w
-        while curr:
-            if isinstance(curr, GenericPopup): return
-            curr = curr.parent()
-        close_all_popups()
 
     def closeEvent(self, event):
         if self in _active_popups:
@@ -995,6 +992,12 @@ class GenericPopup(QFrame):
         self.adjustSize()
 
 def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
+    # Toggle behavior: If this exact popup is already open, close it (and its children) and return
+    for p in _active_popups:
+        if p.category == category and p.anchor_widget == anchor_widget:
+            close_all_popups()
+            return
+
     # Check if we are nesting (opening from an existing popup)
     is_nested = False
     curr = anchor_widget.parent()
@@ -1689,4 +1692,5 @@ class StatusBar(QMainWindow):
 _main_window = None
 if __name__ == "__main__":
     app = QApplication(sys.argv); app.setQuitOnLastWindowClosed(False); _rclone_sig = _RcloneSignal(); _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl)); app.setStyleSheet(GLOBAL_QSS)
+    app.focusChanged.connect(_on_global_focus_changed)
     window = StatusBar(); _main_window = window; window.show(); calculate_time_to_appear(start_time); sys.exit(app.exec())
