@@ -771,14 +771,15 @@ def open_edit_gui(item_cfg, category, index=None):
     initial_idx = index
     if initial_idx is None:
         initial_idx = len(config_now.get(group_le.text(), []))
-    index_le = QLineEdit(str(initial_idx)); index_le.setFixedWidth(60)
+    # Show 1-based index to user
+    index_le = QLineEdit(str(initial_idx + 1)); index_le.setFixedWidth(60)
     
     def _on_group_txt_changed(text):
         if index is None:
             c = load_config()
             lst = c.get(text, [])
-            if isinstance(lst, list): index_le.setText(str(len(lst)))
-            else: index_le.setText("0")
+            if isinstance(lst, list): index_le.setText(str(len(lst) + 1))
+            else: index_le.setText("1")
     group_le.textChanged.connect(_on_group_txt_changed)
     
     p_row = QWidget(); p_lay = QHBoxLayout(p_row); p_lay.setContentsMargins(0,0,0,0); p_lay.setSpacing(10)
