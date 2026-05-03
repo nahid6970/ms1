@@ -408,7 +408,7 @@
                     "admin": false,
                     "cmd": "folder_list",
                     "row_limit": 1,
-                    "bg_color": "",
+                    "bg_color": "#FFFF00",
                     "transparent_bg": false,
                     "border_color": "",
                     "border_px": 1
@@ -443,7 +443,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center"
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "id": "PositionXY_CrossHair_bt",
@@ -2223,7 +2227,7 @@
     "folder_list": [
         {
             "text": "usr",
-            "fg": "#ffffff",
+            "fg": "#000000",
             "bg": "transparent",
             "id": "sub_1777785572",
             "bindings": {
@@ -2253,11 +2257,15 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "PC",
-            "fg": "#ffffff",
+            "fg": "#000000",
             "bg": "transparent",
             "id": "sub_1777785719",
             "bindings": {
@@ -2287,7 +2295,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         }
     ]
 }

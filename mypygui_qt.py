@@ -1275,8 +1275,18 @@ class CpuCoreFrame(QWidget):
 _git_queue = Queue()
 def check_git_status(repo, q):
     if not os.path.exists(repo["path"]): q.put((repo["name"], repo["label"], "#000000")); return
-    result = subprocess.run(["git", "status"], capture_output=True, text=True, cwd=repo["path"])
-    color = "#00ff21" if "nothing to commit, working tree clean" in result.stdout else "#fe1616"
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo["path"])
+    lines = result.stdout.strip().splitlines()
+    if not lines:
+        color = "#00ff21" # Clean
+    else:
+        only_json = True
+        for line in lines:
+            # Porcelain format: status(2 chars) space file_path
+            # Handles renames "R  old -> new" as well
+            if not line[3:].strip().lower().endswith(".json"):
+                only_json = False; break
+        color = "#ff55ff" if only_json else "#fe1616"
     q.put((repo["name"], repo["label"], color))
 
 def _git_status_loop(repos, q):
