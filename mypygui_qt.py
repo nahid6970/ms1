@@ -675,16 +675,30 @@ def open_edit_gui(item_cfg, category, index=None):
     grp_pad = QGroupBox("SPACING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
     padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1)));  padx_left_le.setFixedWidth(60)
     padx_right_le = QLineEdit(str(item_cfg.get("padx_right", 1))); padx_right_le.setFixedWidth(60)
+    pady_top_le  = QLineEdit(str(item_cfg.get("pady_top", 0)));  pady_top_le.setFixedWidth(60)
+    pady_bottom_le = QLineEdit(str(item_cfg.get("pady_bottom", 0))); pady_bottom_le.setFixedWidth(60)
+    
     margin_left_le  = QLineEdit(str(item_cfg.get("margin_left", 0)));  margin_left_le.setFixedWidth(60)
     margin_right_le = QLineEdit(str(item_cfg.get("margin_right", 0))); margin_right_le.setFixedWidth(60)
+    margin_top_le  = QLineEdit(str(item_cfg.get("margin_top", 0)));  margin_top_le.setFixedWidth(60)
+    margin_bottom_le = QLineEdit(str(item_cfg.get("margin_bottom", 0))); margin_bottom_le.setFixedWidth(60)
 
     l_row = QWidget(); l_lay = QHBoxLayout(l_row); l_lay.setContentsMargins(0,0,0,0); l_lay.setSpacing(10)
-    l_lay.addWidget(padx_left_le); l_lay.addWidget(QLabel("MARGIN L")); l_lay.addWidget(margin_left_le); l_lay.addStretch()
-    form_pad.addRow("PADX LEFT", l_row)
+    l_lay.addWidget(padx_left_le); l_lay.addWidget(QLabel("PAD T")); l_lay.addWidget(pady_top_le); l_lay.addStretch()
+    form_pad.addRow("PAD L", l_row)
 
     r_row = QWidget(); r_lay = QHBoxLayout(r_row); r_lay.setContentsMargins(0,0,0,0); r_lay.setSpacing(10)
-    r_lay.addWidget(padx_right_le); r_lay.addWidget(QLabel("MARGIN R")); r_lay.addWidget(margin_right_le); r_lay.addStretch()
-    form_pad.addRow("PADX RIGHT", r_row)
+    r_lay.addWidget(padx_right_le); r_lay.addWidget(QLabel("PAD B")); r_lay.addWidget(pady_bottom_le); r_lay.addStretch()
+    form_pad.addRow("PAD R", r_row)
+
+    ml_row = QWidget(); ml_lay = QHBoxLayout(ml_row); ml_lay.setContentsMargins(0,0,0,0); ml_lay.setSpacing(10)
+    ml_lay.addWidget(margin_left_le); ml_lay.addWidget(QLabel("MAR T")); ml_lay.addWidget(margin_top_le); ml_lay.addStretch()
+    form_pad.addRow("MAR L", ml_row)
+
+    mr_row = QWidget(); mr_lay = QHBoxLayout(mr_row); mr_lay.setContentsMargins(0,0,0,0); mr_lay.setSpacing(10)
+    mr_lay.addWidget(margin_right_le); mr_lay.addWidget(QLabel("MAR B")); mr_lay.addWidget(margin_bottom_le); mr_lay.addStretch()
+    form_pad.addRow("MAR R", mr_row)
+    
     left_layout.addWidget(grp_pad)
 
     grp_place = QGroupBox("PLACEMENT"); form_place = QFormLayout(); form_place.setSpacing(6); grp_place.setLayout(form_place)
@@ -800,9 +814,17 @@ def open_edit_gui(item_cfg, category, index=None):
         except ValueError: pass
         try: item_cfg["padx_right"] = int(padx_right_le.text())
         except ValueError: pass
+        try: item_cfg["pady_top"]  = int(pady_top_le.text())
+        except ValueError: pass
+        try: item_cfg["pady_bottom"] = int(pady_bottom_le.text())
+        except ValueError: pass
         try: item_cfg["margin_left"]  = int(margin_left_le.text())
         except ValueError: pass
         try: item_cfg["margin_right"] = int(margin_right_le.text())
+        except ValueError: pass
+        try: item_cfg["margin_top"]  = int(margin_top_le.text())
+        except ValueError: pass
+        try: item_cfg["margin_bottom"] = int(margin_bottom_le.text())
         except ValueError: pass
 
         item_cfg["icon_path"] = icon_path_le.text()
@@ -1042,8 +1064,13 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     font_cfg = btn_cfg.get("font", get_default_font())
     px_l  = int(btn_cfg.get("padx_left", 1))
     px_r  = int(btn_cfg.get("padx_right", 1))
+    py_t  = int(btn_cfg.get("pady_top", 0))
+    py_b  = int(btn_cfg.get("pady_bottom", 0))
     m_l   = int(btn_cfg.get("margin_left", 0))
     m_r   = int(btn_cfg.get("margin_right", 0))
+    m_t   = int(btn_cfg.get("margin_top", 0))
+    m_b   = int(btn_cfg.get("margin_bottom", 0))
+    
     lbl = IconLabel(text, btn_cfg)
     bw, bh = btn_cfg.get("width", 0), btn_cfg.get("height", 0)
     if bw > 0: lbl.setFixedWidth(bw)
@@ -1053,8 +1080,8 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
     _border_col = btn_cfg.get("border_color", "") or _bg
     _border_radius = int(btn_cfg.get("border_radius", 0))
     _border_css = f"border: {_border_px}px solid {_border_col};" if _border_px else "border: none;"
-    lbl.setStyleSheet(f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; font-size: {fsize}pt; font-weight: {fweight}; {_border_css} border-radius: {_border_radius}px; margin-left: {m_l}px; margin-right: {m_r}px;")
-    lbl.setContentsMargins(px_l, 0, px_r, 0)
+    lbl.setStyleSheet(f"color: {_fg}; background: {_bg}; font-family: '{font_cfg[0]}'; font-size: {fsize}pt; font-weight: {fweight}; {_border_css} border-radius: {_border_radius}px; margin-left: {m_l}px; margin-right: {m_r}px; margin-top: {m_t}px; margin-bottom: {m_b}px;")
+    lbl.setContentsMargins(px_l, py_t, px_r, py_b)
     bindings = btn_cfg.get("bindings", {})
     
     def mousePressEvent(event):
@@ -1084,7 +1111,7 @@ def _open_static_edit(key):
     sb = cfg.get("static_bindings", {})
     entry = sb.get(key, {})
     _binding_keys = {k: v for k, v in entry.items() if "Button" in k}
-    item = {"id": key, "text": key, "fg": entry.get("fg", ""), "bg": entry.get("bg", ""), "font": entry.get("font", get_default_font()), "border": entry.get("border", 0), "border_color": entry.get("border_color", ""), "border_radius": entry.get("border_radius", 0), "width": entry.get("width", 0), "height": entry.get("height", 0), "padx_left": entry.get("padx_left", 0), "padx_right": entry.get("padx_right", 0), "margin_left": entry.get("margin_left", 0), "margin_right": entry.get("margin_right", 0), "icon_path": entry.get("icon_path", ""), "nf_char": entry.get("nf_char", ""), "svg_content": entry.get("svg_content", ""), "svg_hover_map": entry.get("svg_hover_map", {}), "icon_width": entry.get("icon_width", 0), "icon_height": entry.get("icon_height", 0), "icon_gap": entry.get("icon_gap", 4), "icon_position": entry.get("icon_position", "left"), "bindings": _binding_keys}
+    item = {"id": key, "text": key, "fg": entry.get("fg", ""), "bg": entry.get("bg", ""), "font": entry.get("font", get_default_font()), "border": entry.get("border", 0), "border_color": entry.get("border_color", ""), "border_radius": entry.get("border_radius", 0), "width": entry.get("width", 0), "height": entry.get("height", 0), "padx_left": entry.get("padx_left", 0), "padx_right": entry.get("padx_right", 0), "pady_top": entry.get("pady_top", 0), "pady_bottom": entry.get("pady_bottom", 0), "margin_left": entry.get("margin_left", 0), "margin_right": entry.get("margin_right", 0), "margin_top": entry.get("margin_top", 0), "margin_bottom": entry.get("margin_bottom", 0), "icon_path": entry.get("icon_path", ""), "nf_char": entry.get("nf_char", ""), "svg_content": entry.get("svg_content", ""), "svg_hover_map": entry.get("svg_hover_map", {}), "icon_width": entry.get("icon_width", 0), "icon_height": entry.get("icon_height", 0), "icon_gap": entry.get("icon_gap", 4), "icon_position": entry.get("icon_position", "left"), "bindings": _binding_keys}
     open_edit_gui(item, "static_bindings")
 
 def _apply_static_style(widget, key):
@@ -1097,12 +1124,14 @@ def _apply_static_style(widget, key):
     border_col = cfg.get("border_color", "") or bg
     border_css = f"border: {border_px}px solid {border_col};" if border_px else "border: none;"
     px_l, px_r = int(cfg.get("padx_left", 0)), int(cfg.get("padx_right", 0))
+    py_t, py_b = int(cfg.get("pady_top", 0)), int(cfg.get("pady_bottom", 0))
     m_l, m_r = int(cfg.get("margin_left", 0)), int(cfg.get("margin_right", 0))
+    m_t, m_b = int(cfg.get("margin_top", 0)), int(cfg.get("margin_bottom", 0))
     bw, bh = cfg.get("width", 0), cfg.get("height", 0)
     if bw > 0: widget.setFixedWidth(bw)
     if bh > 0: widget.setFixedHeight(bh)
     fw = font[2] if len(font) > 2 else "bold"
-    widget.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; {border_css} border-radius: {border_radius}px; padding-left: {px_l}px; padding-right: {px_r}px; margin-left: {m_l}px; margin-right: {m_r}px;")
+    widget.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; {border_css} border-radius: {border_radius}px; padding-left: {px_l}px; padding-right: {px_r}px; padding-top: {py_t}px; padding-bottom: {py_b}px; margin-left: {m_l}px; margin-right: {m_r}px; margin-top: {m_t}px; margin-bottom: {m_b}px;")
 
 def _bind_static(lbl, key, default_cmd):
     cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})

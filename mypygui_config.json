@@ -388,13 +388,24 @@
             "text": "fd",
             "fg": "#ffd900",
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 25,
                 "bold"
             ],
             "widget_type": "CTkLabel",
             "bindings": {
                 "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "folder_list",
+                    "row_limit": 1,
+                    "bg_color": "",
+                    "transparent_bg": false,
+                    "border_color": "",
+                    "border_px": 1
+                },
+                "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
@@ -1377,7 +1388,7 @@
                     "hide": false,
                     "admin": false,
                     "cmd": "ai_sites",
-                    "row_limit": 10,
+                    "row_limit": 5,
                     "bg_color": "white",
                     "transparent_bg": false,
                     "border_color": "black",
@@ -2168,6 +2179,76 @@
             },
             "font": [
                 "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        }
+    ],
+    "folder_list": [
+        {
+            "text": "usr",
+            "fg": "#ffffff",
+            "bg": "transparent",
+            "id": "sub_1777785572",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer C:\\Users\\nahid"
+                }
+            },
+            "font": [
+                "Consolas",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "PC",
+            "fg": "#ffffff",
+            "bg": "transparent",
+            "id": "sub_1777785719",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer"
+                }
+            },
+            "font": [
+                "Consolas",
                 15,
                 "normal"
             ],
