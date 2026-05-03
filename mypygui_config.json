@@ -2152,8 +2152,8 @@
             "icon_position": "left"
         }
     ],
-    "settings_panel_width": 750,
-    "settings_panel_height": 550,
+    "settings_panel_width": 790,
+    "settings_panel_height": 600,
     "lm_studio": [
         {
             "text": "shell-command-runner",
@@ -2301,5 +2301,9 @@
             "margin_top": 0,
             "margin_bottom": 0
         }
-    ]
+    ],
+    "git_status_colors": {
+        "rules": ".json:#ff55ff, .md:#cdebd7",
+        "default": "#fe1616"
+    }
 }

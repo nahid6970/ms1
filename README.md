@@ -2,8 +2,6 @@
 + Nahid-NA6970 +
 ```
 
-   
-
 
 
 <table>
