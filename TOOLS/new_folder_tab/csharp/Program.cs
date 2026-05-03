@@ -39,6 +39,9 @@ class Program
     [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProc lpEnumFunc, IntPtr lParam);
     [DllImport("user32.dll")] static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
     [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+    [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    [DllImport("user32.dll")] static extern bool SetLayeredWindowAttributes(IntPtr hWnd, uint crKey, byte bAlpha, uint dwFlags);
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -49,11 +52,22 @@ class Program
     const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     const int  SW_HIDE    = 0;
     const int  SW_RESTORE = 9;
+    const int  GWL_EXSTYLE    = -20;
+    const int  WS_EX_LAYERED  = 0x80000;
+    const uint LWA_ALPHA      = 0x2;
     const uint WM_COMMAND = 0x0111;
     const int  NEW_TAB_CMD = 0xA21B;
 
     static readonly HashSet<IntPtr> _knownHwnds = [];
     static readonly object _lock = new();
+
+    // Make window fully transparent (invisible but still exists for COM)
+    static void MakeInvisible(IntPtr hwnd)
+    {
+        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+        SetLayeredWindowAttributes(hwnd, 0, 0, LWA_ALPHA);
+    }
 
     static string GetClass(IntPtr hwnd)
     {
@@ -188,6 +202,9 @@ class Program
 
         if (existing.Count == 0 || path == null)
         {
+            // Restore visibility: remove layered style then show
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
             ShowWindow(hwnd, SW_RESTORE);
             lock (_lock) _knownHwnds.Add(hwnd);
             return;
@@ -204,6 +221,8 @@ class Program
         }
         else
         {
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
             ShowWindow(hwnd, SW_RESTORE);
             lock (_lock) _knownHwnds.Add(hwnd);
         }
@@ -221,8 +240,8 @@ class Program
             lock (_lock) isNew = _knownHwnds.Add(hwnd);
             if (isNew)
             {
-                // Hide immediately in the callback (message pump thread) before Explorer paints it
-                ShowWindow(hwnd, SW_HIDE);
+                // Make fully transparent immediately in the callback before Explorer paints it
+                MakeInvisible(hwnd);
                 var t = new Thread(() => HandleNewWindow(hwnd));
                 t.SetApartmentState(ApartmentState.STA);
                 t.Start();
