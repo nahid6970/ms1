@@ -19,8 +19,8 @@ import win32con
 import comtypes.client
 import comtypes.automation
 
-POLL_INTERVAL = 0.4
-NEW_WIN_WAIT  = 0.7
+POLL_INTERVAL = 0.3
+NEW_WIN_WAIT  = 0.5
 
 WM_COMMAND    = 0x0111
 NEW_TAB_CMD   = 0xA21B
@@ -145,6 +145,8 @@ def main():
         new_hwnds = current - known_hwnds
 
         for new_hwnd in new_hwnds:
+            # Hide immediately to eliminate the visible flash
+            win32gui.ShowWindow(new_hwnd, win32con.SW_HIDE)
             time.sleep(NEW_WIN_WAIT)
 
             if not win32gui.IsWindow(new_hwnd):
