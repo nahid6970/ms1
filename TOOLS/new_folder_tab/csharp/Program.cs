@@ -42,6 +42,7 @@ class Program
     [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr hWnd, int nIndex);
     [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
     [DllImport("user32.dll")] static extern bool SetLayeredWindowAttributes(IntPtr hWnd, uint crKey, byte bAlpha, uint dwFlags);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowTextW(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -67,6 +68,30 @@ class Program
         int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
         SetLayeredWindowAttributes(hwnd, 0, 0, LWA_ALPHA);
+    }
+
+    static string GetWindowText(IntPtr hwnd)
+    {
+        var sb = new System.Text.StringBuilder(512);
+        GetWindowTextW(hwnd, sb, sb.Capacity);
+        return sb.ToString();
+    }
+
+    // Wait until ShellTabWindowClass child has a real title (folder loaded)
+    static bool WaitForTabTitle(IntPtr hwnd, int timeoutMs = 2000)
+    {
+        int elapsed = 0;
+        while (elapsed < timeoutMs)
+        {
+            Thread.Sleep(50);
+            elapsed += 50;
+            if (!IsWindow(hwnd)) return false;
+            IntPtr tabHwnd = FindFirstChild(hwnd, "ShellTabWindowClass");
+            if (tabHwnd == IntPtr.Zero) continue;
+            string title = GetWindowText(tabHwnd);
+            if (!string.IsNullOrEmpty(title) && title != "File Explorer") return true;
+        }
+        return false;
     }
 
     static string GetClass(IntPtr hwnd)
@@ -186,15 +211,11 @@ class Program
 
     static void HandleNewWindow(IntPtr hwnd)
     {
-        // Retry until Shell COM registers the new window (up to 2s)
-        string? path = null;
-        for (int i = 0; i < 8; i++)
-        {
-            Thread.Sleep(250);
-            if (!IsWindow(hwnd)) return;
-            path = GetPathForHwnd(hwnd);
-            if (path != null) break;
-        }
+        // Wait for folder to load (tab title changes from "File Explorer" to folder name)
+        if (!WaitForTabTitle(hwnd)) return;
+        if (!IsWindow(hwnd)) return;
+
+        string? path = GetPathForHwnd(hwnd);
 
         var existing = GetCabinetHwnds();
         existing.Remove(hwnd);
