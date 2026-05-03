@@ -13,7 +13,7 @@
         "left": -15,
         "right": -30,
         "top": -15,
-        "bottom": -30
+        "bottom": 10
     },
     "theme": {
         "palette": "Base16",
@@ -389,6 +389,14 @@
     ],
     "gui_settings": {
         "capture_timeout": 3,
-        "capture_strategy": "Hover (Mouse)"
+        "capture_strategy": "Hover (Mouse)",
+        "work_area_presets": {
+            "Top Bar": {
+                "left": -15,
+                "top": -15,
+                "right": -30,
+                "bottom": -30
+            }
+        }
     }
 }

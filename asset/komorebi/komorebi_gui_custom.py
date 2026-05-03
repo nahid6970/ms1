@@ -400,6 +400,7 @@ class KomorebiApp(QMainWindow):
         
         self.init_ui()
         self.apply_theme()
+        self.sync_settings_to_ui()
         self.refresh_list()
 
     def init_ui(self):
@@ -507,6 +508,30 @@ class KomorebiApp(QMainWindow):
         offset_form.addRow("Bottom:", self.offset_bottom)
         
         settings_layout.addLayout(offset_form)
+        
+        settings_layout.addSpacing(10)
+        settings_layout.addWidget(QLabel("WORK AREA PRESETS:"))
+        
+        preset_layout = QHBoxLayout()
+        self.preset_combo = QComboBox()
+        self.preset_combo.setPlaceholderText("Select Preset...")
+        self.preset_combo.currentTextChanged.connect(self.load_work_area_preset)
+        preset_layout.addWidget(self.preset_combo, 2)
+        
+        self.save_preset_btn = QPushButton("SAVE")
+        self.save_preset_btn.setToolTip("Save current offsets as a new preset")
+        self.save_preset_btn.clicked.connect(self.save_work_area_preset)
+        self.save_preset_btn.setFixedHeight(30)
+        preset_layout.addWidget(self.save_preset_btn)
+        
+        self.del_preset_btn = QPushButton("DEL")
+        self.del_preset_btn.setToolTip("Delete selected preset")
+        self.del_preset_btn.clicked.connect(self.delete_work_area_preset)
+        self.del_preset_btn.setFixedHeight(30)
+        self.del_preset_btn.setStyleSheet(f"color: {CP_RED};")
+        preset_layout.addWidget(self.del_preset_btn)
+        
+        settings_layout.addLayout(preset_layout)
         
         settings_layout.addStretch()
         self.content_stack.addWidget(self.settings_panel)
@@ -622,6 +647,43 @@ class KomorebiApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
 
+    def load_work_area_preset(self, name):
+        if not name: return
+        presets = self.config_data.get("gui_settings", {}).get("work_area_presets", {})
+        if name in presets:
+            p = presets[name]
+            self.offset_left.setValue(p.get("left", 0))
+            self.offset_top.setValue(p.get("top", 0))
+            self.offset_right.setValue(p.get("right", 0))
+            self.offset_bottom.setValue(p.get("bottom", 0))
+
+    def save_work_area_preset(self):
+        from PyQt6.QtWidgets import QInputDialog
+        name, ok = QInputDialog.getText(self, "SAVE PRESET", "Enter preset name:", QLineEdit.EchoMode.Normal)
+        if ok and name.strip():
+            if "gui_settings" not in self.config_data:
+                self.config_data["gui_settings"] = {}
+            if "work_area_presets" not in self.config_data["gui_settings"]:
+                self.config_data["gui_settings"]["work_area_presets"] = {}
+            
+            self.config_data["gui_settings"]["work_area_presets"][name.strip()] = {
+                "left": self.offset_left.value(),
+                "top": self.offset_top.value(),
+                "right": self.offset_right.value(),
+                "bottom": self.offset_bottom.value()
+            }
+            self.sync_settings_to_ui()
+            self.preset_combo.setCurrentText(name.strip())
+
+    def delete_work_area_preset(self):
+        name = self.preset_combo.currentText()
+        if not name: return
+        
+        presets = self.config_data.get("gui_settings", {}).get("work_area_presets", {})
+        if name in presets:
+            del presets[name]
+            self.sync_settings_to_ui()
+
     def sync_settings_to_ui(self):
         gui = self.config_data.get("gui_settings", {})
         if hasattr(self, "timeout_spin"):
@@ -640,6 +702,18 @@ class KomorebiApp(QMainWindow):
                 spin.blockSignals(True)
                 spin.setValue(offsets.get(attr, 0))
                 spin.blockSignals(False)
+
+        if hasattr(self, "preset_combo"):
+            self.preset_combo.blockSignals(True)
+            current = self.preset_combo.currentText()
+            self.preset_combo.clear()
+            presets = gui.get("work_area_presets", {})
+            self.preset_combo.addItems(sorted(presets.keys()))
+            if current in presets:
+                self.preset_combo.setCurrentText(current)
+            else:
+                self.preset_combo.setCurrentIndex(-1)
+            self.preset_combo.blockSignals(False)
 
     def apply_theme(self):
         self.setStyleSheet(f"""
