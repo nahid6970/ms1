@@ -669,13 +669,6 @@ def open_edit_gui(item_cfg, category, index=None):
     form_font.addRow("FAMILY", font_family_cb); form_font.addRow("SIZE", f_row)
     left_layout.addWidget(grp_font)
 
-    # 4. ICON POSITION
-    grp_icon = QGroupBox("ICON POSITION"); form_icon = QFormLayout(); form_icon.setSpacing(6); grp_icon.setLayout(form_icon)
-    icon_pos_cb = QComboBox(); icon_pos_cb.addItems(["left", "right", "top", "bottom", "center"])
-    icon_pos_cb.setCurrentText(item_cfg.get("icon_position", "left"))
-    form_icon.addRow("POSITION", icon_pos_cb)
-    left_layout.addWidget(grp_icon)
-
     grp_pad = QGroupBox("SPACING"); form_pad = QFormLayout(); form_pad.setSpacing(6); grp_pad.setLayout(form_pad)
     padx_left_le  = QLineEdit(str(item_cfg.get("padx_left", 1))); padx_left_le.setFixedWidth(40)
     padx_right_le = QLineEdit(str(item_cfg.get("padx_right", 1))); padx_right_le.setFixedWidth(40)
