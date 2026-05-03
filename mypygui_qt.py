@@ -1277,16 +1277,39 @@ def check_git_status(repo, q):
     if not os.path.exists(repo["path"]): q.put((repo["name"], repo["label"], "#000000")); return
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo["path"])
     lines = result.stdout.strip().splitlines()
+    
+    config = load_config()
+    git_cfg = config.get("git_status_colors", {"rules": ".json:#ff55ff", "default": "#fe1616"})
+    default_color = git_cfg.get("default", "#fe1616")
+    
+    # Parse rules string: ".ext:color, .ext2:color"
+    rules = {}
+    for rule in git_cfg.get("rules", "").split(","):
+        if ":" in rule:
+            ext, col = rule.strip().split(":", 1)
+            rules[ext.lower().strip()] = col.strip()
+
     if not lines:
         color = "#00ff21" # Clean
     else:
-        only_json = True
+        # Get all changed extensions
+        changed_exts = set()
         for line in lines:
-            # Porcelain format: status(2 chars) space file_path
-            # Handles renames "R  old -> new" as well
-            if not line[3:].strip().lower().endswith(".json"):
-                only_json = False; break
-        color = "#ff55ff" if only_json else "#fe1616"
+            fname = line[3:].strip().lower()
+            _, ext = os.path.splitext(fname)
+            changed_exts.add(ext)
+        
+        # If ALL changed files match a single rule, use that rule's color
+        if len(changed_exts) == 1:
+            ext = list(changed_exts)[0]
+            color = rules.get(ext, default_color)
+        elif changed_exts.issubset(rules.keys()):
+            # If all files match SOME rules, but there are multiple types, 
+            # we still use the default to show it's a "mixed" dirty state
+            color = default_color
+        else:
+            color = default_color
+            
     q.put((repo["name"], repo["label"], color))
 
 def _git_status_loop(repos, q):
@@ -1551,6 +1574,28 @@ class StatusBar(QMainWindow):
         form_sw.addRow("WIDTH", sw_le)
         form_sw.addRow("HEIGHT", sh_le)
         left_col.addWidget(grp_sw)
+
+        grp_git = QGroupBox("GIT STATUS COLORS"); form_git = QFormLayout(); grp_git.setLayout(form_git)
+        git_cfg = self._config.get("git_status_colors", {"rules": ".json:#ff55ff", "default": "#fe1616"})
+        git_def_btn = QPushButton("OTHER"); git_def_btn.setFixedWidth(80)
+        
+        # Temp state for the color picker button
+        self._temp_git_def = git_cfg.get("default", "#fe1616")
+        def _set_git_btn(col):
+            qcol = QColor(col); lc = qcol.lightness()
+            git_def_btn.setStyleSheet(f"background: {col}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; font-weight: bold;")
+        _set_git_btn(self._temp_git_def)
+        
+        def _pick_git_def():
+            c = QColorDialog.getColor(QColor(self._temp_git_def), dlg)
+            if c.isValid(): self._temp_git_def = c.name().upper(); _set_git_btn(self._temp_git_def)
+        git_def_btn.clicked.connect(_pick_git_def)
+        
+        git_rules_le = QLineEdit(git_cfg.get("rules", ".json:#ff55ff"))
+        form_git.addRow("DEFAULT", git_def_btn)
+        form_git.addRow("RULES", git_rules_le)
+        git_rules_le.setToolTip("Format: .ext:color, .ext2:color (e.g. .json:#ff55ff, .md:#00ffff)")
+        left_col.addWidget(grp_git)
         
         left_col.addStretch()
 
@@ -1632,6 +1677,12 @@ class StatusBar(QMainWindow):
                     "y": int(sb_y_le.text()),
                     "docked": dock_chk.isChecked()
                 }
+                
+                cfg["git_status_colors"] = {
+                    "rules": git_rules_le.text(),
+                    "default": self._temp_git_def
+                }
+                
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
             except ValueError as e:
                 QMessageBox.warning(dlg, "Error", f"Invalid input: {e}")
