@@ -644,23 +644,40 @@ def open_edit_gui(item_cfg, category, index=None):
     }
 
     def _set_color_btn(btn, col):
-        if not col:
+        if not col or col.lower() == "transparent":
             btn.setStyleSheet(f"background: transparent; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
             return
         try:
             qcol = QColor(col)
-            lc = qcol.lightness()
-            btn.setStyleSheet(f"background: {col}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; font-weight: bold;")
+            if qcol.alpha() == 0:
+                btn.setStyleSheet(f"background: transparent; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
+            else:
+                lc = qcol.lightness()
+                btn.setStyleSheet(f"background: {col}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; font-weight: bold;")
         except:
             btn.setStyleSheet(f"background: transparent; color: {CP_RED}; border: 1px solid {CP_RED};")
 
     def _pick_color(btn, temp_key):
         curr = _temp_colors[temp_key] or "#000000"
-        c = QColorDialog.getColor(QColor(curr), dlg)
+        qcurr = QColor(curr) if curr and curr != "transparent" else QColor(0,0,0,0)
+        c = QColorDialog.getColor(qcurr, dlg, "Select Color", QColorDialog.ColorDialogOption.ShowAlphaChannel)
         if c.isValid():
-            hex_val = c.name().upper()
+            # Use HexArgb if it has transparency, else standard Hex
+            hex_val = c.name(QColor.NameFormat.HexArgb).upper() if c.alpha() < 255 else c.name().upper()
+            if c.alpha() == 0: hex_val = "transparent"
             _temp_colors[temp_key] = hex_val
             _set_color_btn(btn, hex_val)
+
+    def _add_color_context(btn, temp_key):
+        def show_menu(pos):
+            menu = QMenu(); menu.setStyleSheet(DIALOG_QSS)
+            act = menu.addAction("SET TRANSPARENT")
+            if menu.exec(btn.mapToGlobal(pos)):
+                _temp_colors[temp_key] = "transparent"
+                _set_color_btn(btn, "transparent")
+        btn.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        btn.customContextMenuRequested.connect(show_menu)
+        btn.setToolTip("Left Click: Pick Color | Right Click: Set Transparent")
 
     # 2. APPEARANCE (Colors & Borders)
     grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
@@ -669,9 +686,10 @@ def open_edit_gui(item_cfg, category, index=None):
     form_appear.addRow("TEXT", text_le)
     
     fg_btn = QPushButton("FG"); fg_btn.setFixedWidth(60); _set_color_btn(fg_btn, _temp_colors["fg"])
-    fg_btn.clicked.connect(lambda: _pick_color(fg_btn, "fg"))
+    fg_btn.clicked.connect(lambda: _pick_color(fg_btn, "fg")); _add_color_context(fg_btn, "fg")
+    
     bg_btn = QPushButton("BG"); bg_btn.setFixedWidth(60); _set_color_btn(bg_btn, _temp_colors["bg"])
-    bg_btn.clicked.connect(lambda: _pick_color(bg_btn, "bg"))
+    bg_btn.clicked.connect(lambda: _pick_color(bg_btn, "bg")); _add_color_context(bg_btn, "bg")
     
     col_row = QWidget(); col_lay = QHBoxLayout(col_row); col_lay.setContentsMargins(0,0,0,0); col_lay.setSpacing(10)
     col_lay.addWidget(fg_btn)
@@ -683,8 +701,9 @@ def open_edit_gui(item_cfg, category, index=None):
     
     border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(40)
     border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(40)
+    
     border_color_btn = QPushButton("BRD"); border_color_btn.setFixedWidth(60); _set_color_btn(border_color_btn, _temp_colors["border_color"])
-    border_color_btn.clicked.connect(lambda: _pick_color(border_color_btn, "border_color"))
+    border_color_btn.clicked.connect(lambda: _pick_color(border_color_btn, "border_color")); _add_color_context(border_color_btn, "border_color")
     
     b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
     b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le)
