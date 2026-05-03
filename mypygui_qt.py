@@ -759,14 +759,17 @@ def open_edit_gui(item_cfg, category, index=None):
     pop_border_px_le = QLineEdit(str(first_bcfg.get("border_px", 1))); pop_border_px_le.setFixedWidth(40)
     pop_trans_chk = QCheckBox("TRANS"); pop_trans_chk.setChecked(first_bcfg.get("transparent_bg", False))
 
-    pop_set_row = QWidget(); pop_set_lay = QHBoxLayout(pop_set_row); pop_set_lay.setContentsMargins(0,0,0,0); pop_set_lay.setSpacing(10)
-    pop_set_lay.addWidget(QLabel("ROW")); pop_set_lay.addWidget(row_limit_le)
-    pop_set_lay.addWidget(QLabel("BG COLOR"));  pop_set_lay.addWidget(pop_bg_le)
-    pop_set_lay.addWidget(pop_trans_chk)
-    pop_set_lay.addWidget(QLabel("BORDER COLOR")); pop_set_lay.addWidget(pop_border_le)
-    pop_set_lay.addWidget(QLabel("PX")); pop_set_lay.addWidget(pop_border_px_le); pop_set_lay.addStretch()
+    row_a = QWidget(); lay_a = QHBoxLayout(row_a); lay_a.setContentsMargins(0,0,0,0); lay_a.setSpacing(10)
+    lay_a.addWidget(QLabel("LIMIT")); lay_a.addWidget(row_limit_le)
+    lay_a.addWidget(QLabel("BG"));    lay_a.addWidget(pop_bg_le)
+    lay_a.addWidget(pop_trans_chk);   lay_a.addStretch()
+    form_pop.addRow("APPEARANCE", row_a)
 
-    form_pop.addRow("", pop_set_row)
+    row_b = QWidget(); lay_b = QHBoxLayout(row_b); lay_b.setContentsMargins(0,0,0,0); lay_b.setSpacing(10)
+    lay_b.addWidget(QLabel("COLOR")); lay_b.addWidget(pop_border_le)
+    lay_b.addWidget(QLabel("PX"));    lay_b.addWidget(pop_border_px_le); lay_b.addStretch()
+    form_pop.addRow("BORDER", row_b)
+
     right_layout.addWidget(grp_pop)
 
     def _check_popup_visibility():
