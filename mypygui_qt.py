@@ -626,19 +626,69 @@ def open_edit_gui(item_cfg, category, index=None):
 
     left_layout.addWidget(grp_core)
 
+    click_types = [("LEFT CLICK", "Button-1"), ("RIGHT CLICK", "Button-3"),
+                   ("CTRL + LEFT", "Control-Button-1"), ("CTRL + RIGHT", "Control-Button-3")]
+    
+    first_bcfg = {}
+    for _, bkey in click_types:
+        bc = item_cfg.get("bindings", {}).get(bkey, {})
+        if bc.get("type") == "popup":
+            first_bcfg = bc; break
+
+    _temp_colors = {
+        "fg": item_cfg.get("fg", ""),
+        "bg": item_cfg.get("bg", ""),
+        "border_color": item_cfg.get("border_color", ""),
+        "pop_bg": first_bcfg.get("bg_color", ""),
+        "pop_border": first_bcfg.get("border_color", "")
+    }
+
+    def _set_color_btn(btn, col):
+        if not col:
+            btn.setStyleSheet(f"background: transparent; color: {CP_TEXT}; border: 1px solid {CP_DIM};")
+            return
+        try:
+            qcol = QColor(col)
+            lc = qcol.lightness()
+            btn.setStyleSheet(f"background: {col}; color: {'black' if lc > 128 else 'white'}; border: 1px solid {CP_DIM}; font-weight: bold;")
+        except:
+            btn.setStyleSheet(f"background: transparent; color: {CP_RED}; border: 1px solid {CP_RED};")
+
+    def _pick_color(btn, temp_key):
+        curr = _temp_colors[temp_key] or "#000000"
+        c = QColorDialog.getColor(QColor(curr), dlg)
+        if c.isValid():
+            hex_val = c.name().upper()
+            _temp_colors[temp_key] = hex_val
+            _set_color_btn(btn, hex_val)
+
     # 2. APPEARANCE (Colors & Borders)
     grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
-    entries = {"text": text_le}
-    for field in ["fg", "bg", "id"]:
-        ent = QLineEdit(str(item_cfg.get(field, ""))); form_appear.addRow(field.upper(), ent); entries[field] = ent
+    
+    text_le = QLineEdit(str(item_cfg.get("text", "")))
+    form_appear.addRow("TEXT", text_le)
+    
+    fg_btn = QPushButton("FG"); fg_btn.setFixedWidth(60); _set_color_btn(fg_btn, _temp_colors["fg"])
+    fg_btn.clicked.connect(lambda: _pick_color(fg_btn, "fg"))
+    bg_btn = QPushButton("BG"); bg_btn.setFixedWidth(60); _set_color_btn(bg_btn, _temp_colors["bg"])
+    bg_btn.clicked.connect(lambda: _pick_color(bg_btn, "bg"))
+    
+    col_row = QWidget(); col_lay = QHBoxLayout(col_row); col_lay.setContentsMargins(0,0,0,0); col_lay.setSpacing(10)
+    col_lay.addWidget(fg_btn)
+    col_lay.addWidget(bg_btn); col_lay.addStretch()
+    form_appear.addRow("COLORS", col_row)
+
+    id_le = QLineEdit(str(item_cfg.get("id", "")))
+    form_appear.addRow("ID", id_le)
     
     border_px_le = QLineEdit(str(item_cfg.get("border", 0))); border_px_le.setFixedWidth(40)
-    border_color_le = QLineEdit(str(item_cfg.get("border_color", ""))); border_color_le.setFixedWidth(80)
     border_radius_le = QLineEdit(str(item_cfg.get("border_radius", 0))); border_radius_le.setFixedWidth(40)
+    border_color_btn = QPushButton("BRD"); border_color_btn.setFixedWidth(60); _set_color_btn(border_color_btn, _temp_colors["border_color"])
+    border_color_btn.clicked.connect(lambda: _pick_color(border_color_btn, "border_color"))
     
     b_row = QWidget(); b_lay = QHBoxLayout(b_row); b_lay.setContentsMargins(0,0,0,0); b_lay.setSpacing(10)
     b_lay.addWidget(border_px_le); b_lay.addWidget(QLabel("RADIUS")); b_lay.addWidget(border_radius_le)
-    b_lay.addWidget(QLabel("COLOR")); b_lay.addWidget(border_color_le); b_lay.addStretch()
+    b_lay.addWidget(QLabel("COLOR")); b_lay.addWidget(border_color_btn); b_lay.addStretch()
     
     form_appear.addRow("BORDER PX", b_row)
 
@@ -752,25 +802,27 @@ def open_edit_gui(item_cfg, category, index=None):
         binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
 
     # Dedicated POPUP SETTINGS section
-    grp_pop = QGroupBox("POPUP SETTINGS"); form_pop = QFormLayout(); form_pop.setSpacing(6); grp_pop.setLayout(form_pop)
+    grp_pop = QGroupBox("POPUP SETTINGS"); pop_lay = QVBoxLayout(); pop_lay.setSpacing(8); grp_pop.setLayout(pop_lay)
     row_limit_le = QLineEdit(str(first_bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(40)
-    pop_bg_le = QLineEdit(str(first_bcfg.get("bg_color", ""))); pop_bg_le.setFixedWidth(80)
-    pop_border_le = QLineEdit(str(first_bcfg.get("border_color", ""))); pop_border_le.setFixedWidth(80)
+
+    pop_bg_btn = QPushButton("BG"); pop_bg_btn.setFixedWidth(60); _set_color_btn(pop_bg_btn, _temp_colors["pop_bg"])
+    pop_bg_btn.clicked.connect(lambda: _pick_color(pop_bg_btn, "pop_bg"))
+
+    pop_border_btn = QPushButton("BRD"); pop_border_btn.setFixedWidth(60); _set_color_btn(pop_border_btn, _temp_colors["pop_border"])
+    pop_border_btn.clicked.connect(lambda: _pick_color(pop_border_btn, "pop_border"))
+
     pop_border_px_le = QLineEdit(str(first_bcfg.get("border_px", 1))); pop_border_px_le.setFixedWidth(40)
     pop_trans_chk = QCheckBox("TRANS"); pop_trans_chk.setChecked(first_bcfg.get("transparent_bg", False))
 
-    row_a = QWidget(); lay_a = QHBoxLayout(row_a); lay_a.setContentsMargins(0,0,0,0); lay_a.setSpacing(10)
-    lay_a.addWidget(QLabel("LIMIT")); lay_a.addWidget(row_limit_le)
-    lay_a.addWidget(QLabel("BG"));    lay_a.addWidget(pop_bg_le)
-    lay_a.addWidget(pop_trans_chk);   lay_a.addStretch()
-    form_pop.addRow("APPEARANCE", row_a)
-
-    row_b = QWidget(); lay_b = QHBoxLayout(row_b); lay_b.setContentsMargins(0,0,0,0); lay_b.setSpacing(10)
-    lay_b.addWidget(QLabel("COLOR")); lay_b.addWidget(pop_border_le)
-    lay_b.addWidget(QLabel("PX"));    lay_b.addWidget(pop_border_px_le); lay_b.addStretch()
-    form_pop.addRow("BORDER", row_b)
+    row_pop = QWidget(); lay_p = QHBoxLayout(row_pop); lay_p.setContentsMargins(0,0,0,0); lay_p.setSpacing(10)
+    lay_p.addWidget(QLabel("LIMIT")); lay_p.addWidget(row_limit_le)
+    lay_p.addWidget(pop_bg_btn); lay_p.addWidget(pop_border_btn)
+    lay_p.addWidget(QLabel("PX")); lay_p.addWidget(pop_border_px_le)
+    lay_p.addWidget(pop_trans_chk); lay_p.addStretch()
+    pop_lay.addWidget(row_pop)
 
     right_layout.addWidget(grp_pop)
+
 
     def _check_popup_visibility():
         any_popup = False
@@ -793,15 +845,16 @@ def open_edit_gui(item_cfg, category, index=None):
     root_layout.addLayout(btn_row)
 
     def save():
-        for field in ["fg", "bg", "id"]:
-            item_cfg[field] = entries[field].text()
+        item_cfg["id"] = id_le.text()
+        item_cfg["fg"] = _temp_colors["fg"]
+        item_cfg["bg"] = _temp_colors["bg"]
+        item_cfg["border_color"] = _temp_colors["border_color"]
         item_cfg["text"] = text_le.text()
         try:
             item_cfg["font"] = [font_family_cb.currentText(), int(font_size_le.text()), font_weight_cb.currentText()]
         except ValueError: pass
         try: item_cfg["border"] = int(border_px_le.text())
         except ValueError: pass
-        item_cfg["border_color"] = border_color_le.text()
         try: item_cfg["border_radius"] = int(border_radius_le.text())
         except ValueError: pass
         try: item_cfg["width"]  = int(width_le.text())
@@ -846,9 +899,9 @@ def open_edit_gui(item_cfg, category, index=None):
             if b_type == "popup":
                 try: new_bindings[bkey]["row_limit"] = int(row_limit_le.text())
                 except: new_bindings[bkey]["row_limit"] = 10
-                new_bindings[bkey]["bg_color"] = pop_bg_le.text()
+                new_bindings[bkey]["bg_color"] = _temp_colors["pop_bg"]
                 new_bindings[bkey]["transparent_bg"] = pop_trans_chk.isChecked()
-                new_bindings[bkey]["border_color"] = pop_border_le.text()
+                new_bindings[bkey]["border_color"] = _temp_colors["pop_border"]
                 try: new_bindings[bkey]["border_px"] = int(pop_border_px_le.text())
                 except: new_bindings[bkey]["border_px"] = 1
         item_cfg["bindings"] = new_bindings
