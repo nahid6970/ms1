@@ -926,12 +926,13 @@ class AppEventFilter(QObject):
         if event.type() == QEvent.Type.MouseButtonPress:
             if _active_popups:
                 pos = event.globalPosition().toPoint()
-                # Check if click is inside any active popup
+                # 1. If click is inside any active popup, keep them open
                 in_popup = any(p.isVisible() and p.geometry().contains(pos) for p in _active_popups)
                 if not in_popup:
-                    # Check if click is on the status bar (StatusBar or its children)
+                    # 2. Check if click is anywhere on our status bar or existing popups
                     w = QApplication.widgetAt(pos)
-                    if not (w and w.window() == _main_window):
+                    # We look for ANY widget that belongs to our UI system
+                    if not (w and (w.window() == _main_window or isinstance(w.window(), GenericPopup))):
                         close_all_popups()
         elif event.type() == QEvent.Type.ApplicationDeactivate:
             close_all_popups()
@@ -995,21 +996,34 @@ class GenericPopup(QFrame):
         self.adjustSize()
 
 def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
-    # Toggle behavior: If this exact popup is already open, close it (and its children) and return
-    for p in _active_popups:
-        if p.category == category and p.anchor_widget == anchor_widget:
-            close_all_popups()
-            return
-
-    # Check if we are nesting (opening from an existing popup)
-    is_nested = False
+    # Identify which popup this button belongs to
+    parent_popup = None
     curr = anchor_widget.parent()
     while curr:
-        if isinstance(curr, GenericPopup): is_nested = True; break
+        if isinstance(curr, GenericPopup):
+            parent_popup = curr; break
         curr = curr.parent()
-    
-    if not is_nested:
-        close_all_popups() # Fresh start from StatusBar
+
+    # Toggle Check: If this exact popup is already active in the chain
+    for i, p in enumerate(_active_popups):
+        if p.category == category and p.anchor_widget == anchor_widget:
+            # Close this popup and all its children
+            while len(_active_popups) > i:
+                _active_popups.pop().close()
+            return
+
+    # Sibling switching / Hierarchy management
+    if not parent_popup:
+        close_all_popups() # Fresh start from StatusBar trigger
+    else:
+        # Close everything opened AFTER the popup that contains this button
+        # This ensures that clicking "Radarr" closes "Sonarr" if they share the same parent
+        try:
+            idx = _active_popups.index(parent_popup)
+            while len(_active_popups) > idx + 1:
+                _active_popups.pop().close()
+        except ValueError:
+            close_all_popups()
 
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
