@@ -926,17 +926,32 @@ def open_edit_gui(item_cfg, category, index=None):
                 except: new_bindings[bkey]["border_px"] = 1
         item_cfg["bindings"] = new_bindings
         new_category = group_le.text()
-        try: new_index = int(index_le.text())
-        except ValueError: new_index = None
+        try:
+            # Convert 1-based GUI index back to 0-based list index
+            new_index = max(0, int(index_le.text()) - 1)
+        except ValueError:
+            new_index = None
+        
         config = load_config()
+        # 1. Remove from old category/position first
         if category != new_category and category in config and isinstance(config[category], list) and index is not None:
             if 0 <= index < len(config[category]): config[category].pop(index)
+        
         target = config.get(new_category, [])
         if not isinstance(target, list) and new_category not in ["static_bindings"]: target = []
+        
         if isinstance(target, list):
-            if category == new_category and index is not None and 0 <= index < len(target): target.pop(index)
-            if new_index is not None and 0 <= new_index <= len(target): target.insert(new_index, item_cfg)
-            else: target.append(item_cfg)
+            # 2. If moving within same category, remove old position first
+            if category == new_category and index is not None and 0 <= index < len(target):
+                target.pop(index)
+            
+            # 3. Insert at new 0-based position
+            if new_index is not None:
+                # Clamp to list bounds
+                insert_pos = min(new_index, len(target))
+                target.insert(insert_pos, item_cfg)
+            else:
+                target.append(item_cfg)
             config[new_category] = target
         else:
             if new_category == "static_bindings":

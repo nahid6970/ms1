@@ -150,7 +150,7 @@
             "text": "OS",
             "fg": "#59e3a7",
             "font": [
-                "JetBrainsMono NFP",
+                "0xProto Nerd Font",
                 16,
                 "bold"
             ],
@@ -193,7 +193,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center"
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "id": "Tools_bt",
@@ -238,7 +242,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center"
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "id": "Startup_bt",
