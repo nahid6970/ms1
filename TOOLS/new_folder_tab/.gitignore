@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+
+# C# build output
+csharp/bin/
+csharp/obj/
+csharp/debug.log
+
+# Session/chat exports
+*.json

@@ -177,6 +177,9 @@ def main():
             if open_as_tab(target, plain_path):
                 time.sleep(0.3)
                 close_shell_window(new_hwnd)
+                # Bring the target window to the foreground
+                win32gui.ShowWindow(target, win32con.SW_RESTORE)
+                win32gui.SetForegroundWindow(target)
             else:
                 print(f"[explorer_tabs] Failed to open tab, leaving window as-is.")
                 known_hwnds.add(new_hwnd)
