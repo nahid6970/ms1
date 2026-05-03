@@ -475,6 +475,39 @@ class KomorebiApp(QMainWindow):
         self.strategy_combo.currentTextChanged.connect(self.update_gui_settings)
         settings_layout.addWidget(self.strategy_combo)
         
+        settings_layout.addSpacing(20)
+        settings_layout.addWidget(QLabel("WORK AREA OFFSET:"))
+        
+        offset_form = QFormLayout()
+        offsets = self.config_data.get("global_work_area_offset", {"left": 0, "top": 0, "right": 0, "bottom": 0})
+        
+        self.offset_left = QSpinBox()
+        self.offset_left.setRange(-500, 500)
+        self.offset_left.setValue(offsets.get("left", 0))
+        self.offset_left.valueChanged.connect(self.update_gui_settings)
+        
+        self.offset_top = QSpinBox()
+        self.offset_top.setRange(-500, 500)
+        self.offset_top.setValue(offsets.get("top", 0))
+        self.offset_top.valueChanged.connect(self.update_gui_settings)
+        
+        self.offset_right = QSpinBox()
+        self.offset_right.setRange(-500, 500)
+        self.offset_right.setValue(offsets.get("right", 0))
+        self.offset_right.valueChanged.connect(self.update_gui_settings)
+        
+        self.offset_bottom = QSpinBox()
+        self.offset_bottom.setRange(-500, 500)
+        self.offset_bottom.setValue(offsets.get("bottom", 0))
+        self.offset_bottom.valueChanged.connect(self.update_gui_settings)
+        
+        offset_form.addRow("Left:", self.offset_left)
+        offset_form.addRow("Top:", self.offset_top)
+        offset_form.addRow("Right:", self.offset_right)
+        offset_form.addRow("Bottom:", self.offset_bottom)
+        
+        settings_layout.addLayout(offset_form)
+        
         settings_layout.addStretch()
         self.content_stack.addWidget(self.settings_panel)
         
@@ -584,9 +617,29 @@ class KomorebiApp(QMainWindow):
                     with open(KOMOREBI_JSON_PATH, 'w') as f:
                         json.dump(self.config_data, f, indent=4)
                     self.refresh_list()
+                    self.sync_settings_to_ui()
                     QMessageBox.information(self, "RESTORE", "Restored successfully.")
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
+
+    def sync_settings_to_ui(self):
+        gui = self.config_data.get("gui_settings", {})
+        if hasattr(self, "timeout_spin"):
+            self.timeout_spin.blockSignals(True)
+            self.timeout_spin.setValue(gui.get("capture_timeout", 3))
+            self.timeout_spin.blockSignals(False)
+        if hasattr(self, "strategy_combo"):
+            self.strategy_combo.blockSignals(True)
+            self.strategy_combo.setCurrentText(gui.get("capture_strategy", "Hover (Mouse)"))
+            self.strategy_combo.blockSignals(False)
+            
+        offsets = self.config_data.get("global_work_area_offset", {"left": 0, "top": 0, "right": 0, "bottom": 0})
+        if hasattr(self, "offset_left"):
+            for attr, spin in [("left", self.offset_left), ("top", self.offset_top), 
+                               ("right", self.offset_right), ("bottom", self.offset_bottom)]:
+                spin.blockSignals(True)
+                spin.setValue(offsets.get(attr, 0))
+                spin.blockSignals(False)
 
     def apply_theme(self):
         self.setStyleSheet(f"""
@@ -638,6 +691,13 @@ class KomorebiApp(QMainWindow):
             self.config_data["gui_settings"] = {}
         self.config_data["gui_settings"]["capture_timeout"] = self.timeout_spin.value()
         self.config_data["gui_settings"]["capture_strategy"] = self.strategy_combo.currentText()
+
+        if "global_work_area_offset" not in self.config_data:
+            self.config_data["global_work_area_offset"] = {}
+        self.config_data["global_work_area_offset"]["left"] = self.offset_left.value()
+        self.config_data["global_work_area_offset"]["top"] = self.offset_top.value()
+        self.config_data["global_work_area_offset"]["right"] = self.offset_right.value()
+        self.config_data["global_work_area_offset"]["bottom"] = self.offset_bottom.value()
 
     def refresh_list(self):
         # Clear list

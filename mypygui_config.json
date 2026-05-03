@@ -2303,7 +2303,7 @@
         }
     ],
     "git_status_colors": {
-        "rules": ".json:#ff55ff, .md:#cdebd7",
+        "rules": ".json:#ff55ff, .md:#fcbfa2",
         "default": "#fe1616"
     }
 }
