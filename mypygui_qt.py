@@ -29,7 +29,7 @@ from PyQt6.QtWidgets import (
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
     QStyle, QStyleOption, QGridLayout, QMenu,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -921,18 +921,21 @@ def close_all_popups():
             p.close()
         except: pass
 
-def _on_global_focus_changed(old, new):
-    if not new: # Entire app lost focus
-        close_all_popups(); return
-    # Keep open if focus moved to another popup or its descendant
-    curr = new
-    while curr:
-        if isinstance(curr, GenericPopup): return
-        curr = curr.parent()
-    # Focus moved to something that is not a popup (like the StatusBar itself or a dialog)
-    # We only close if it's not the StatusBar (so clicks on buttons can handle their own logic)
-    if not isinstance(new.window(), StatusBar):
-        close_all_popups()
+class AppEventFilter(QObject):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.MouseButtonPress:
+            if _active_popups:
+                pos = event.globalPosition().toPoint()
+                # Check if click is inside any active popup
+                in_popup = any(p.isVisible() and p.geometry().contains(pos) for p in _active_popups)
+                if not in_popup:
+                    # Check if click is on the status bar (StatusBar or its children)
+                    w = QApplication.widgetAt(pos)
+                    if not (w and w.window() == _main_window):
+                        close_all_popups()
+        elif event.type() == QEvent.Type.ApplicationDeactivate:
+            close_all_popups()
+        return False
 
 class GenericPopup(QFrame):
     def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
@@ -1692,5 +1695,5 @@ class StatusBar(QMainWindow):
 _main_window = None
 if __name__ == "__main__":
     app = QApplication(sys.argv); app.setQuitOnLastWindowClosed(False); _rclone_sig = _RcloneSignal(); _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl)); app.setStyleSheet(GLOBAL_QSS)
-    app.focusChanged.connect(_on_global_focus_changed)
+    _filter = AppEventFilter(); app.installEventFilter(_filter)
     window = StatusBar(); _main_window = window; window.show(); calculate_time_to_appear(start_time); sys.exit(app.exec())
