@@ -55,7 +55,8 @@ SVGS = {
     "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H17c2.8 0 5-2.2 5-5 0-5.5-4.5-10-10-10z"></path></svg>',
     "GLITCH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>',
     "MOVE_ALL": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"></path></svg>',
-    "REMOVE_IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>'
+    "REMOVE_IMAGE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>',
+    "FILL_IMG": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"></rect><path d="M7 12h10M12 7v10"></path><circle cx="17.5" cy="17.5" r="3" fill="currentColor" stroke="none"></circle></svg>'
 }
 
 class ConvexButton(QPushButton):
@@ -378,61 +379,6 @@ class ArtView(QGraphicsView):
             self.save_to_undo(batch, "add_batch")
             self.app.statusBar().showMessage(f"Generated {len(batch)} shader items across {len(sorted_colors)} colors.")
 
-
-    def scan_image_to_paths(self, density=100, tolerance=30):
-        """TRACE scan: tile rects merged by color tolerance — one SymPath per color group."""
-        if not self.image_item:
-            QMessageBox.warning(self.app, "No Image", "Load a background image first.")
-            return
-        pixmap = self.image_item.pixmap()
-        image = pixmap.toImage()
-        w, h = image.width(), image.height()
-        step_x = max(1, w // density)
-        step_y = max(1, h // density)
-
-        # Sample pixels and merge by tolerance
-        groups = []  # list of [r, g, b, [(x,y)...]]
-        for y in range(0, h, step_y):
-            for x in range(0, w, step_x):
-                c = image.pixelColor(x, y)
-                if c.alpha() < 50:
-                    continue
-                r, g, b = c.red(), c.green(), c.blue()
-                best = None
-                best_dist = tolerance
-                for grp in groups:
-                    d = ((grp[0]-r)**2 + (grp[1]-g)**2 + (grp[2]-b)**2) ** 0.5
-                    if d <= best_dist:
-                        best_dist = d
-                        best = grp
-                if best is None:
-                    groups.append([r, g, b, [(x, y)]])
-                else:
-                    n = len(best[3])
-                    best[0] = (best[0]*n + r) // (n+1)
-                    best[1] = (best[1]*n + g) // (n+1)
-                    best[2] = (best[2]*n + b) // (n+1)
-                    best[3].append((x, y))
-
-        img_pos = self.image_item.pos()
-        batch = []
-        for grp in groups:
-            hex_c = QColor(grp[0], grp[1], grp[2]).name()
-            compound = QPainterPath()
-            compound.setFillRule(Qt.FillRule.WindingFill)
-            for px, py in grp[3]:
-                compound.addRect(float(px), float(py), float(step_x), float(step_y))
-            item = SymPath(compound)
-            item.setPos(img_pos)
-            item.setPen(QPen(Qt.PenStyle.NoPen))
-            item.setBrush(QBrush(QColor(hex_c)))
-            item.is_art_item = True
-            item._shader_group = hex_c
-            self.scene().addItem(item)
-            batch.append(item)
-        if batch:
-            self.save_to_undo(batch, "add_batch")
-            self.app.statusBar().showMessage(f"TRACE: {len(batch)} path(s). Use FILL tool to recolor.")
     def remove_background_image(self):
         if self.image_item:
             self.scene().removeItem(self.image_item)
@@ -523,6 +469,7 @@ class ArtView(QGraphicsView):
                     self.current_item._custom_base = self.custom_shapes.get(self.tool[7:], [])
                 self.current_item.setPos(scene_pos); self.current_item.setPen(p); self.scene().addItem(self.current_item); self.create_symmetry_clones(self.current_item)
             elif self.tool == "fill": self.apply_fill(scene_pos)
+            elif self.tool == "img_fill": self.apply_image_fill(scene_pos)
             elif self.tool == "picker": self.pick_color(scene_pos)
             elif self.tool == "eraser": self.drawing = True; self.erase_at(scene_pos)
             elif self.tool in ["move_image", "move_svg", "move_sym", "move_all"]: self.drawing = True
@@ -847,6 +794,69 @@ class ArtView(QGraphicsView):
         if item and getattr(item, 'is_art_item', False):
             old = item.brush(); item.setBrush(QBrush(self.pen_color))
             [c.setBrush(QBrush(self.pen_color)) for c in getattr(item, 'symmetry_clones', [])]; self.undo_stack.append(("fill", item, old))
+
+    def apply_image_fill(self, scene_pos):
+        if not self.image_item:
+            return
+        # Map scene pos to image pixel coords
+        img_pos = self.image_item.pos()
+        scale = self.image_item.scale()
+        px = int((scene_pos.x() - img_pos.x()) / scale)
+        py = int((scene_pos.y() - img_pos.y()) / scale)
+        pixmap = self.image_item.pixmap()
+        image = pixmap.toImage()
+        w, h = image.width(), image.height()
+        if px < 0 or py < 0 or px >= w or py >= h:
+            return
+        tol = self.app.imgfill_tol_spin.value() if self.app else 30
+        target = image.pixelColor(px, py)
+        tr, tg, tb = target.red(), target.green(), target.blue()
+
+        # BFS flood fill to find bounding box
+        visited = set()
+        queue = [(px, py)]
+        min_x, min_y, max_x, max_y = px, py, px, py
+        while queue:
+            cx, cy = queue.pop()
+            if (cx, cy) in visited or cx < 0 or cy < 0 or cx >= w or cy >= h:
+                continue
+            c = image.pixelColor(cx, cy)
+            if abs(c.red()-tr) + abs(c.green()-tg) + abs(c.blue()-tb) > tol * 3:
+                continue
+            visited.add((cx, cy))
+            if cx < min_x: min_x = cx
+            if cy < min_y: min_y = cy
+            if cx > max_x: max_x = cx
+            if cy > max_y: max_y = cy
+            queue.extend([(cx+1,cy),(cx-1,cy),(cx,cy+1),(cx,cy-1)])
+
+        if not visited:
+            return
+
+        # Convert image bbox to scene coords
+        sx = img_pos.x() + min_x * scale
+        sy = img_pos.y() + min_y * scale
+        sw = (max_x - min_x + 1) * scale
+        sh = (max_y - min_y + 1) * scale
+
+        shape_type = self.app.imgfill_shape_combo.currentText() if self.app else "Rect"
+        color = self.pen_color
+
+        if shape_type == "Rect":
+            item = SymRect(0, 0, sw, sh)
+        elif shape_type == "Ellipse":
+            item = SymEllipse(0, 0, sw, sh)
+        else:  # Poly - convex hull approximation using 8 points
+            path = QPainterPath()
+            path.addEllipse(0, 0, sw, sh)
+            item = SymPath(path)
+
+        item.setPos(QPointF(sx, sy))
+        item.setPen(QPen(Qt.PenStyle.NoPen))
+        item.setBrush(QBrush(color))
+        item.is_art_item = True
+        self.scene().addItem(item)
+        self.save_to_undo(item)
 
     def pick_color(self, pos):
         item = self.scene().itemAt(pos, QTransform())
@@ -1227,10 +1237,14 @@ class SVGArtApp(QMainWindow):
         self.tb_shader.addWidget(QLabel(" NSE: ")); self.shader_noise_spin = QSpinBox(); self.shader_noise_spin.setRange(0, 100); self.shader_noise_spin.setValue(0); self.tb_shader.addWidget(self.shader_noise_spin)
         self.tb_shader.addWidget(QLabel(" SHP: ")); self.shader_shape_combo = QComboBox(); self.update_shader_shape_list(); self.tb_shader.addWidget(self.shader_shape_combo)
 
-        self.tb_trace = QToolBar("Trace"); self.tb_trace.setObjectName("TraceToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_trace)
-        self.add_tool_action(self.tb_trace, "TRACE", "trace_scan_img", CP_GREEN, SVGS["SCAN"])
-        self.tb_trace.addWidget(QLabel(" DEN: ")); self.trace_density_spin = QSpinBox(); self.trace_density_spin.setRange(10, 1000); self.trace_density_spin.setValue(100); self.tb_trace.addWidget(self.trace_density_spin)
-        self.tb_trace.addWidget(QLabel(" TOL: ")); self.trace_tol_spin = QSpinBox(); self.trace_tol_spin.setRange(0, 255); self.trace_tol_spin.setValue(30); self.trace_tol_spin.setToolTip("Color merge tolerance (0=exact, 255=all one group)"); self.tb_trace.addWidget(self.trace_tol_spin)
+        
+        self.tb_imgfill = QToolBar("ImgFill"); self.tb_imgfill.setObjectName("ImgFillToolbar"); self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.tb_imgfill)
+        self.btn_imgfill = ConvexButton(parent=self, color=CP_GREEN, svg_data=SVGS["FILL_IMG"])
+        self.btn_imgfill.setToolTip("Image Fill: click image region to place SVG shape"); self.btn_imgfill.setCheckable(True)
+        self.btn_imgfill.clicked.connect(lambda: self.set_tool("img_fill")); self.tb_imgfill.addWidget(self.btn_imgfill)
+        self.tb_imgfill.addWidget(QLabel(" TOL: ")); self.imgfill_tol_spin = QSpinBox(); self.imgfill_tol_spin.setRange(0, 255); self.imgfill_tol_spin.setValue(30); self.imgfill_tol_spin.setToolTip("Color tolerance for flood fill"); self.tb_imgfill.addWidget(self.imgfill_tol_spin)
+        self.tb_imgfill.addWidget(QLabel(" SHAPE: ")); self.imgfill_shape_combo = QComboBox(); self.imgfill_shape_combo.addItems(["Rect", "Ellipse", "Poly"]); self.tb_imgfill.addWidget(self.imgfill_shape_combo)
+
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
 
         self.tb_sym.addWidget(QLabel(" SYMMETRY ")); self.sym_combo = QComboBox(); self.sym_combo.addItems(["None", "Radial", "Reflect (H)", "Reflect (V)", "Reflect (B)"]); self.sym_combo.currentTextChanged.connect(self.set_symmetry_mode); self.tb_sym.addWidget(self.sym_combo)
@@ -1353,11 +1367,10 @@ class SVGArtApp(QMainWindow):
                 shape_type=self.shader_shape_combo.currentText()
             )
             return
-        if tool == "trace_scan_img":
-            self.view.scan_image_to_paths(
-                self.trace_density_spin.value(),
-                self.trace_tol_spin.value()
-            )
+        if tool == "img_fill":
+            self.btn_imgfill.setChecked(True)
+            self.view.tool = "img_fill"
+            self.statusBar().showMessage("IMG FILL: Click on image region to fill with SVG shape")
             return
         
         # Reset Move dropdown if a standard tool is picked
