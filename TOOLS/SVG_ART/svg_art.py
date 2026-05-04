@@ -790,8 +790,7 @@ class ArtView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def apply_fill(self, pos):
-        # Raster flood-fill on the rendered art layer
-        # Compute bounding rect of all art items
+        # Render scene to image, sample clicked pixel color, recolor all matching items
         bounds = QRectF()
         for it in self.scene().items():
             if getattr(it, 'is_art_item', False) and it.isVisible():
@@ -799,100 +798,84 @@ class ArtView(QGraphicsView):
         if bounds.isEmpty():
             return
 
-        # Render art layer to image (hide background image temporarily)
         RES = 1024
         aspect = bounds.width() / bounds.height() if bounds.height() else 1
         iw = RES if aspect >= 1 else max(1, int(RES * aspect))
         ih = RES if aspect < 1 else max(1, int(RES / aspect))
 
-        img = QPixmap(iw, ih)
-        img.fill(Qt.GlobalColor.black)
+        img = QPixmap(iw, ih); img.fill(Qt.GlobalColor.black)
         painter = QPainter(img)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
-        # Hide image item during render
-        hidden = []
-        for it in self.scene().items():
-            if not getattr(it, 'is_art_item', False) and it.isVisible():
-                it.hide(); hidden.append(it)
+        hidden = [it for it in self.scene().items() if not getattr(it, 'is_art_item', False) and it.isVisible()]
+        for it in hidden: it.hide()
         old_bg = self.scene().backgroundBrush()
         self.scene().setBackgroundBrush(QBrush(Qt.GlobalColor.black))
         self.scene().render(painter, QRectF(0, 0, iw, ih), bounds)
         painter.end()
         self.scene().setBackgroundBrush(old_bg)
-        for it in hidden:
-            it.show()
+        for it in hidden: it.show()
 
         qimg = img.toImage()
-
-        # Map click pos to image coords
-        sx = (pos.x() - bounds.x()) / bounds.width() * iw
-        sy = (pos.y() - bounds.y()) / bounds.height() * ih
-        cx, cy = int(sx), int(sy)
+        cx = int((pos.x() - bounds.x()) / bounds.width() * iw)
+        cy = int((pos.y() - bounds.y()) / bounds.height() * ih)
         if cx < 0 or cy < 0 or cx >= iw or cy >= ih:
             return
 
-        seed_color = qimg.pixel(cx, cy)
-        # If clicked on a drawn stroke (non-black), don't fill
-        sr = (seed_color >> 16) & 0xff
-        sg = (seed_color >> 8) & 0xff
-        sb = seed_color & 0xff
-        if sr + sg + sb > 30:
-            return  # clicked on a stroke, not interior
+        p = qimg.pixel(cx, cy)
+        sr, sg, sb = (p >> 16) & 0xff, (p >> 8) & 0xff, p & 0xff
 
-        # BFS flood fill on black pixels (interior)
-        filled = [[False]*iw for _ in range(ih)]
-        queue = [(cx, cy)]
-        filled[cy][cx] = True
-        while queue:
-            x, y = queue.pop()
-            for dx, dy in ((1,0),(-1,0),(0,1),(0,-1)):
-                nx, ny = x+dx, y+dy
-                if 0 <= nx < iw and 0 <= ny < ih and not filled[ny][nx]:
-                    p = qimg.pixel(nx, ny)
-                    r = (p >> 16) & 0xff; g = (p >> 8) & 0xff; b = p & 0xff
-                    if r + g + b <= 30:  # black = interior
-                        filled[ny][nx] = True
-                        queue.append((nx, ny))
-
-        # Build QPainterPath from filled pixels using row spans
-        # Scale factors back to scene coords
-        sx_scale = bounds.width() / iw
-        sy_scale = bounds.height() / ih
-
-        path = QPainterPath()
-        path.setFillRule(Qt.FillRule.WindingFill)
-        for y in range(ih):
-            run_start = None
-            for x in range(iw):
-                if filled[y][x]:
-                    if run_start is None:
-                        run_start = x
-                else:
-                    if run_start is not None:
-                        rx = bounds.x() + run_start * sx_scale
-                        ry = bounds.y() + y * sy_scale
-                        rw = (x - run_start) * sx_scale
-                        rh = sy_scale
-                        path.addRect(rx, ry, rw, rh)
-                        run_start = None
-            if run_start is not None:
-                rx = bounds.x() + run_start * sx_scale
-                ry = bounds.y() + y * sy_scale
-                rw = (iw - run_start) * sx_scale
-                rh = sy_scale
-                path.addRect(rx, ry, rw, rh)
-
-        if path.isEmpty():
+        # If clicked on black (empty interior) → flood-fill that region
+        if sr + sg + sb <= 30:
+            TOL = 30
+            filled = [[False]*iw for _ in range(ih)]
+            queue = [(cx, cy)]; filled[cy][cx] = True
+            while queue:
+                x, y = queue.pop()
+                for dx, dy in ((1,0),(-1,0),(0,1),(0,-1)):
+                    nx, ny = x+dx, y+dy
+                    if 0 <= nx < iw and 0 <= ny < ih and not filled[ny][nx]:
+                        pp = qimg.pixel(nx, ny)
+                        r2=(pp>>16)&0xff; g2=(pp>>8)&0xff; b2=pp&0xff
+                        if r2+g2+b2 <= 30:
+                            filled[ny][nx] = True; queue.append((nx, ny))
+            sx_scale = bounds.width() / iw; sy_scale = bounds.height() / ih
+            path = QPainterPath(); path.setFillRule(Qt.FillRule.WindingFill)
+            for y in range(ih):
+                run_start = None
+                for x in range(iw):
+                    if filled[y][x]:
+                        if run_start is None: run_start = x
+                    else:
+                        if run_start is not None:
+                            path.addRect(bounds.x()+run_start*sx_scale, bounds.y()+y*sy_scale, (x-run_start)*sx_scale, sy_scale)
+                            run_start = None
+                if run_start is not None:
+                    path.addRect(bounds.x()+run_start*sx_scale, bounds.y()+y*sy_scale, (iw-run_start)*sx_scale, sy_scale)
+            if not path.isEmpty():
+                fill_item = SymPath(path); fill_item.setPos(QPointF(0,0))
+                fill_item.setPen(QPen(Qt.PenStyle.NoPen)); fill_item.setBrush(QBrush(self.pen_color))
+                fill_item.is_art_item = True; fill_item.setZValue(-0.5)
+                self.scene().addItem(fill_item); self.save_to_undo(fill_item)
             return
 
-        fill_item = SymPath(path)
-        fill_item.setPos(QPointF(0, 0))
-        fill_item.setPen(QPen(Qt.PenStyle.NoPen))
-        fill_item.setBrush(QBrush(self.pen_color))
-        fill_item.is_art_item = True
-        fill_item.setZValue(-0.5)  # place behind strokes
-        self.scene().addItem(fill_item)
-        self.save_to_undo(fill_item)
+        # Clicked on a colored pixel → recolor all matching items
+        TOL = 25
+        batch = []
+        for it in self.scene().items():
+            if not getattr(it, 'is_art_item', False): continue
+            pen_c = it.pen().color() if it.pen().style() != Qt.PenStyle.NoPen else None
+            brush_c = it.brush().color() if it.brush().style() != Qt.BrushStyle.NoBrush else None
+            pen_match = pen_c and abs(pen_c.red()-sr)+abs(pen_c.green()-sg)+abs(pen_c.blue()-sb) <= TOL*3
+            brush_match = brush_c and abs(brush_c.red()-sr)+abs(brush_c.green()-sg)+abs(brush_c.blue()-sb) <= TOL*3
+            if pen_match or brush_match:
+                batch.append((it, it.pen(), it.brush()))
+                if pen_match:
+                    np = QPen(it.pen()); np.setColor(self.pen_color); it.setPen(np)
+                if brush_match:
+                    it.setBrush(QBrush(self.pen_color))
+        if batch:
+            self.undo_stack.append(("color_replace", batch))
+            self.redo_stack.clear()
+            if self.app: self.app.statusBar().showMessage(f"Recolored {len(batch)} items")
 
     def apply_image_fill(self, scene_pos):
         if not self.image_item:
@@ -985,7 +968,14 @@ class ArtView(QGraphicsView):
         elif a == "remove":
             self.scene().addItem(i); [self.scene().addItem(c) for c in getattr(i, 'symmetry_clones', [])]
         elif a == "fill":
-            old = i[2]; i.setBrush(old); [c.setBrush(old) for c in getattr(i, 'symmetry_clones', [])]
+            item, old = i; item.setBrush(old); [c.setBrush(old) for c in getattr(item, 'symmetry_clones', [])]
+        elif a == "pen_recolor":
+            item, old_pen = i; item.setPen(old_pen)
+            for c in getattr(item, 'symmetry_clones', []):
+                cp = QPen(c.pen()); cp.setColor(old_pen.color()); c.setPen(cp)
+        elif a == "color_replace":
+            for it, old_pen, old_brush in i:
+                it.setPen(old_pen); it.setBrush(old_brush)
         self.redo_stack.append((a, i))
 
     def redo(self):
