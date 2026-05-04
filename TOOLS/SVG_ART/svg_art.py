@@ -790,10 +790,109 @@ class ArtView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def apply_fill(self, pos):
-        item = self.scene().itemAt(pos, QTransform())
-        if item and getattr(item, 'is_art_item', False):
-            old = item.brush(); item.setBrush(QBrush(self.pen_color))
-            [c.setBrush(QBrush(self.pen_color)) for c in getattr(item, 'symmetry_clones', [])]; self.undo_stack.append(("fill", item, old))
+        # Raster flood-fill on the rendered art layer
+        # Compute bounding rect of all art items
+        bounds = QRectF()
+        for it in self.scene().items():
+            if getattr(it, 'is_art_item', False) and it.isVisible():
+                bounds = bounds.united(it.sceneBoundingRect())
+        if bounds.isEmpty():
+            return
+
+        # Render art layer to image (hide background image temporarily)
+        RES = 1024
+        aspect = bounds.width() / bounds.height() if bounds.height() else 1
+        iw = RES if aspect >= 1 else max(1, int(RES * aspect))
+        ih = RES if aspect < 1 else max(1, int(RES / aspect))
+
+        img = QPixmap(iw, ih)
+        img.fill(Qt.GlobalColor.black)
+        painter = QPainter(img)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        # Hide image item during render
+        hidden = []
+        for it in self.scene().items():
+            if not getattr(it, 'is_art_item', False) and it.isVisible():
+                it.hide(); hidden.append(it)
+        old_bg = self.scene().backgroundBrush()
+        self.scene().setBackgroundBrush(QBrush(Qt.GlobalColor.black))
+        self.scene().render(painter, QRectF(0, 0, iw, ih), bounds)
+        painter.end()
+        self.scene().setBackgroundBrush(old_bg)
+        for it in hidden:
+            it.show()
+
+        qimg = img.toImage()
+
+        # Map click pos to image coords
+        sx = (pos.x() - bounds.x()) / bounds.width() * iw
+        sy = (pos.y() - bounds.y()) / bounds.height() * ih
+        cx, cy = int(sx), int(sy)
+        if cx < 0 or cy < 0 or cx >= iw or cy >= ih:
+            return
+
+        seed_color = qimg.pixel(cx, cy)
+        # If clicked on a drawn stroke (non-black), don't fill
+        sr = (seed_color >> 16) & 0xff
+        sg = (seed_color >> 8) & 0xff
+        sb = seed_color & 0xff
+        if sr + sg + sb > 30:
+            return  # clicked on a stroke, not interior
+
+        # BFS flood fill on black pixels (interior)
+        filled = [[False]*iw for _ in range(ih)]
+        queue = [(cx, cy)]
+        filled[cy][cx] = True
+        while queue:
+            x, y = queue.pop()
+            for dx, dy in ((1,0),(-1,0),(0,1),(0,-1)):
+                nx, ny = x+dx, y+dy
+                if 0 <= nx < iw and 0 <= ny < ih and not filled[ny][nx]:
+                    p = qimg.pixel(nx, ny)
+                    r = (p >> 16) & 0xff; g = (p >> 8) & 0xff; b = p & 0xff
+                    if r + g + b <= 30:  # black = interior
+                        filled[ny][nx] = True
+                        queue.append((nx, ny))
+
+        # Build QPainterPath from filled pixels using row spans
+        # Scale factors back to scene coords
+        sx_scale = bounds.width() / iw
+        sy_scale = bounds.height() / ih
+
+        path = QPainterPath()
+        path.setFillRule(Qt.FillRule.WindingFill)
+        for y in range(ih):
+            run_start = None
+            for x in range(iw):
+                if filled[y][x]:
+                    if run_start is None:
+                        run_start = x
+                else:
+                    if run_start is not None:
+                        rx = bounds.x() + run_start * sx_scale
+                        ry = bounds.y() + y * sy_scale
+                        rw = (x - run_start) * sx_scale
+                        rh = sy_scale
+                        path.addRect(rx, ry, rw, rh)
+                        run_start = None
+            if run_start is not None:
+                rx = bounds.x() + run_start * sx_scale
+                ry = bounds.y() + y * sy_scale
+                rw = (iw - run_start) * sx_scale
+                rh = sy_scale
+                path.addRect(rx, ry, rw, rh)
+
+        if path.isEmpty():
+            return
+
+        fill_item = SymPath(path)
+        fill_item.setPos(QPointF(0, 0))
+        fill_item.setPen(QPen(Qt.PenStyle.NoPen))
+        fill_item.setBrush(QBrush(self.pen_color))
+        fill_item.is_art_item = True
+        fill_item.setZValue(-0.5)  # place behind strokes
+        self.scene().addItem(fill_item)
+        self.save_to_undo(fill_item)
 
     def apply_image_fill(self, scene_pos):
         if not self.image_item:
@@ -812,27 +911,58 @@ class ArtView(QGraphicsView):
         target = image.pixelColor(px, py)
         tr, tg, tb = target.red(), target.green(), target.blue()
 
-        # Find all pixels globally matching the clicked color within tolerance
-        # Use density from shader bar if available, else 1 (every pixel)
-        density = self.app.shader_density_spin.value() if self.app else 50
-        step = max(1, min(w, h) // density)
+        def matches(x, y):
+            c = image.pixelColor(x, y)
+            return abs(c.red()-tr) + abs(c.green()-tg) + abs(c.blue()-tb) <= tol * 3
+
+        # Build run-length spans per row, then merge vertically into rectangles
+        # row_spans[y] = list of (x_start, x_end) inclusive
+        row_spans = {}
+        for y in range(h):
+            spans = []
+            run_start = None
+            for x in range(w):
+                if matches(x, y):
+                    if run_start is None:
+                        run_start = x
+                else:
+                    if run_start is not None:
+                        spans.append((run_start, x - 1))
+                        run_start = None
+            if run_start is not None:
+                spans.append((run_start, w - 1))
+            if spans:
+                row_spans[y] = spans
+
+        # Merge spans vertically: collect rectangles (x0, y0, x1, y1)
+        rects = []
+        active = {}  # (x0, x1) -> y_start
+        for y in range(h):
+            cur = set(row_spans.get(y, []))
+            prev_keys = set(active.keys())
+            # Close spans that don't continue
+            for span in prev_keys - cur:
+                rects.append((span[0], active.pop(span), span[1], y - 1))
+            # Open new spans
+            for span in cur - prev_keys:
+                active[span] = y
+        for span, y0 in active.items():
+            rects.append((span[0], y0, span[1], h - 1))
 
         batch = []
         color = self.pen_color
-        for y in range(0, h, step):
-            for x in range(0, w, step):
-                c = image.pixelColor(x, y)
-                if abs(c.red()-tr) + abs(c.green()-tg) + abs(c.blue()-tb) <= tol * 3:
-                    sx = img_pos.x() + x * scale
-                    sy = img_pos.y() + y * scale
-                    sz = step * scale
-                    item = SymRect(0, 0, sz, sz)
-                    item.setPos(QPointF(sx, sy))
-                    item.setPen(QPen(Qt.PenStyle.NoPen))
-                    item.setBrush(QBrush(color))
-                    item.is_art_item = True
-                    self.scene().addItem(item)
-                    batch.append(item)
+        for (x0, y0, x1, y1) in rects:
+            sx = img_pos.x() + x0 * scale
+            sy = img_pos.y() + y0 * scale
+            sw = (x1 - x0 + 1) * scale
+            sh = (y1 - y0 + 1) * scale
+            item = SymRect(0, 0, sw, sh)
+            item.setPos(QPointF(sx, sy))
+            item.setPen(QPen(Qt.PenStyle.NoPen))
+            item.setBrush(QBrush(color))
+            item.is_art_item = True
+            self.scene().addItem(item)
+            batch.append(item)
 
         if batch:
             self.save_to_undo(batch, "add_batch")
