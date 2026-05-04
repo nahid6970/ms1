@@ -682,8 +682,6 @@ def open_edit_gui(item_cfg, category, index=None):
     # 2. APPEARANCE (Colors & Borders)
     grp_appear = QGroupBox("APPEARANCE"); form_appear = QFormLayout(); form_appear.setSpacing(6); grp_appear.setLayout(form_appear)
     
-    text_le = QLineEdit(str(item_cfg.get("text", "")))
-    form_appear.addRow("TEXT", text_le)
     
     fg_btn = QPushButton("FG"); fg_btn.setFixedWidth(60); _set_color_btn(fg_btn, _temp_colors["fg"])
     fg_btn.clicked.connect(lambda: _pick_color(fg_btn, "fg")); _add_color_context(fg_btn, "fg")
