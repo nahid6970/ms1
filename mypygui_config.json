@@ -394,7 +394,7 @@
         {
             "id": "Folder_bt",
             "text": "fd",
-            "fg": "#ffd900",
+            "fg": "#000000",
             "font": [
                 "0xProto Nerd Font",
                 25,
@@ -407,8 +407,8 @@
                     "hide": false,
                     "admin": false,
                     "cmd": "folder_list",
-                    "row_limit": 1,
-                    "bg_color": "#FFFF00",
+                    "row_limit": 10,
+                    "bg_color": "#000000",
                     "transparent_bg": false,
                     "border_color": "",
                     "border_px": 1
@@ -1474,7 +1474,7 @@
             "svg_hover_map": {}
         }
     ],
-    "popup_y_offset": 10,
+    "popup_y_offset": 5,
     "edit_left_weight": 1,
     "edit_right_weight": 1,
     "arr": [
@@ -2227,7 +2227,7 @@
     "folder_list": [
         {
             "text": "usr",
-            "fg": "#000000",
+            "fg": "#FFFFFF",
             "bg": "transparent",
             "id": "sub_1777785572",
             "bindings": {
@@ -2239,7 +2239,7 @@
                 }
             },
             "font": [
-                "Consolas",
+                "JetBrainsMono Nerd Font Propo",
                 15,
                 "normal"
             ],
@@ -2265,7 +2265,7 @@
         },
         {
             "text": "PC",
-            "fg": "#000000",
+            "fg": "#FFFFFF",
             "bg": "transparent",
             "id": "sub_1777785719",
             "bindings": {
@@ -2277,7 +2277,7 @@
                 }
             },
             "font": [
-                "Consolas",
+                "JetBrainsMono Nerd Font Propo",
                 15,
                 "normal"
             ],
@@ -2300,6 +2300,158 @@
             "pady_bottom": 0,
             "margin_top": 0,
             "margin_bottom": 0
+        },
+        {
+            "text": "ms1",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777876730",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer C:\\@delta\\ms1"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "db",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777876906",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer C:\\@delta\\db"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "@JOB",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777876970",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer C:\\@delta\\msBackups\\@JOB"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "msBackups",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "sub_1777877043",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "explorer C:\\@delta\\msBackups"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "JetBrainsMono Nerd Font Propo",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "git_status_colors": {
