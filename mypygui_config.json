@@ -1346,8 +1346,8 @@
     "status_bar_border_width": 1,
     "statusbar": {
         "bg": "#1D1D1D",
-        "border_color": "#AAFF00",
-        "border_px": 1,
+        "border_color": "lightgreen",
+        "border_px": 2,
         "width": 1800,
         "height": 39,
         "x": "center",

@@ -1774,8 +1774,21 @@ class StatusBar(QMainWindow):
                         except Exception as ex: print(f"Error opening log: {ex}")
                 return click
             lbl.mousePressEvent = _make_rclone_click(cfg); row.addWidget(lbl)
-        popup.adjustSize(); gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft()); cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
-        offset = int(load_config().get("popup_y_offset", 2)); popup.move(cx, gpos.y() - popup.height() - offset); popup.show(); self._rclone_popup = popup
+        
+        popup.adjustSize()
+        gpos = self._rclone_toggle.mapToGlobal(self._rclone_toggle.rect().topLeft())
+        cx = gpos.x() + self._rclone_toggle.width() // 2 - popup.width() // 2
+        
+        config = load_config()
+        offset = int(config.get("popup_y_offset", 2))
+        is_docked = config.get("statusbar", {}).get("docked", False)
+        
+        if is_docked:
+            popup.move(cx, gpos.y() + self._rclone_toggle.height() + offset)
+        else:
+            popup.move(cx, gpos.y() - popup.height() - offset)
+            
+        popup.show(); self._rclone_popup = popup
 
     def _build_right(self):
         rl = self._right_layout
