@@ -798,7 +798,6 @@ class ArtView(QGraphicsView):
     def apply_image_fill(self, scene_pos):
         if not self.image_item:
             return
-        # Map scene pos to image pixel coords
         img_pos = self.image_item.pos()
         scale = self.image_item.scale()
         px = int((scene_pos.x() - img_pos.x()) / scale)
@@ -808,55 +807,37 @@ class ArtView(QGraphicsView):
         w, h = image.width(), image.height()
         if px < 0 or py < 0 or px >= w or py >= h:
             return
+
         tol = self.app.imgfill_tol_spin.value() if self.app else 30
         target = image.pixelColor(px, py)
         tr, tg, tb = target.red(), target.green(), target.blue()
 
-        # BFS flood fill to find bounding box
-        visited = set()
-        queue = [(px, py)]
-        min_x, min_y, max_x, max_y = px, py, px, py
-        while queue:
-            cx, cy = queue.pop()
-            if (cx, cy) in visited or cx < 0 or cy < 0 or cx >= w or cy >= h:
-                continue
-            c = image.pixelColor(cx, cy)
-            if abs(c.red()-tr) + abs(c.green()-tg) + abs(c.blue()-tb) > tol * 3:
-                continue
-            visited.add((cx, cy))
-            if cx < min_x: min_x = cx
-            if cy < min_y: min_y = cy
-            if cx > max_x: max_x = cx
-            if cy > max_y: max_y = cy
-            queue.extend([(cx+1,cy),(cx-1,cy),(cx,cy+1),(cx,cy-1)])
+        # Find all pixels globally matching the clicked color within tolerance
+        # Use density from shader bar if available, else 1 (every pixel)
+        density = self.app.shader_density_spin.value() if self.app else 50
+        step = max(1, min(w, h) // density)
 
-        if not visited:
-            return
-
-        # Convert image bbox to scene coords
-        sx = img_pos.x() + min_x * scale
-        sy = img_pos.y() + min_y * scale
-        sw = (max_x - min_x + 1) * scale
-        sh = (max_y - min_y + 1) * scale
-
-        shape_type = self.app.imgfill_shape_combo.currentText() if self.app else "Rect"
+        batch = []
         color = self.pen_color
+        for y in range(0, h, step):
+            for x in range(0, w, step):
+                c = image.pixelColor(x, y)
+                if abs(c.red()-tr) + abs(c.green()-tg) + abs(c.blue()-tb) <= tol * 3:
+                    sx = img_pos.x() + x * scale
+                    sy = img_pos.y() + y * scale
+                    sz = step * scale
+                    item = SymRect(0, 0, sz, sz)
+                    item.setPos(QPointF(sx, sy))
+                    item.setPen(QPen(Qt.PenStyle.NoPen))
+                    item.setBrush(QBrush(color))
+                    item.is_art_item = True
+                    self.scene().addItem(item)
+                    batch.append(item)
 
-        if shape_type == "Rect":
-            item = SymRect(0, 0, sw, sh)
-        elif shape_type == "Ellipse":
-            item = SymEllipse(0, 0, sw, sh)
-        else:  # Poly - convex hull approximation using 8 points
-            path = QPainterPath()
-            path.addEllipse(0, 0, sw, sh)
-            item = SymPath(path)
-
-        item.setPos(QPointF(sx, sy))
-        item.setPen(QPen(Qt.PenStyle.NoPen))
-        item.setBrush(QBrush(color))
-        item.is_art_item = True
-        self.scene().addItem(item)
-        self.save_to_undo(item)
+        if batch:
+            self.save_to_undo(batch, "add_batch")
+            if self.app:
+                self.app.statusBar().showMessage(f"IMG FILL: placed {len(batch)} shapes matching color")
 
     def pick_color(self, pos):
         item = self.scene().itemAt(pos, QTransform())
@@ -1243,7 +1224,6 @@ class SVGArtApp(QMainWindow):
         self.btn_imgfill.setToolTip("Image Fill: click image region to place SVG shape"); self.btn_imgfill.setCheckable(True)
         self.btn_imgfill.clicked.connect(lambda: self.set_tool("img_fill")); self.tb_imgfill.addWidget(self.btn_imgfill)
         self.tb_imgfill.addWidget(QLabel(" TOL: ")); self.imgfill_tol_spin = QSpinBox(); self.imgfill_tol_spin.setRange(0, 255); self.imgfill_tol_spin.setValue(30); self.imgfill_tol_spin.setToolTip("Color tolerance for flood fill"); self.tb_imgfill.addWidget(self.imgfill_tol_spin)
-        self.tb_imgfill.addWidget(QLabel(" SHAPE: ")); self.imgfill_shape_combo = QComboBox(); self.imgfill_shape_combo.addItems(["Rect", "Ellipse", "Poly"]); self.tb_imgfill.addWidget(self.imgfill_shape_combo)
 
         self.tb_sym = QToolBar("Symmetry"); self.tb_sym.setObjectName("SymmetryToolbar"); self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.tb_sym)
 
