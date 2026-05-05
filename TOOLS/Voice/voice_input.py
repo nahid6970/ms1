@@ -253,7 +253,7 @@ class VoiceApp(QMainWindow):
                 self._finish_space_recording()
             else:
                 self.voice_thread.stop()
-                self.record_btn.setText("🎤 REC")
+                self._reset_record_btn()
                 self.status_label.setText("●")
                 self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 14pt;")
         else:
@@ -270,21 +270,26 @@ class VoiceApp(QMainWindow):
             self.record_btn.setText("⏹️ STOP")
             self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
 
+        self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
         self.voice_thread.result.connect(self.on_result)
         self.voice_thread.error.connect(self.on_error)
         self.voice_thread.start()
 
+    def _reset_record_btn(self):
+        self.record_btn.setText("🎤 REC")
+        self.record_btn.setStyleSheet("")
+
     def _finish_space_recording(self):
         if isinstance(self.voice_thread, SpaceStopThread):
             self.voice_thread.stop()
-        self.record_btn.setText("🎤 REC")
+        self._reset_record_btn()
         self.status_label.setText("●")
         self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 14pt;")
 
     def on_result(self, text):
         self.status_label.setText("●")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
-        self.record_btn.setText("🎤 REC")
+        self._reset_record_btn()
         pyperclip.copy(text)
         import time; time.sleep(0.1)
         import pyautogui; pyautogui.hotkey('ctrl', 'v')
@@ -292,7 +297,7 @@ class VoiceApp(QMainWindow):
     def on_error(self, error):
         self.status_label.setText("✕")
         self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold; font-size: 14pt;")
-        self.record_btn.setText("🎤 REC")
+        self._reset_record_btn()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
