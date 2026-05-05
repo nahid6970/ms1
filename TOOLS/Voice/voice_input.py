@@ -3,7 +3,7 @@ import os
 import json
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QComboBox, QCheckBox)
+                             QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 import pyperclip
@@ -84,6 +84,7 @@ class VoiceApp(QMainWindow):
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
             QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 8px; }}
             QPushButton#lang:checked {{ border: 2px solid {CP_GREEN}; color: {CP_GREEN}; }}
+            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -123,11 +124,14 @@ class VoiceApp(QMainWindow):
         layout.addWidget(self.record_btn)
         
         help_btn = QPushButton("?")
+        help_btn.setObjectName("help")
         help_btn.setFixedWidth(24)
-        help_btn.setToolTip("Shortcut: Alt+H")
-        help_btn.clicked.connect(lambda: __import__('PyQt6.QtWidgets', fromlist=['QMessageBox']).QMessageBox.information(self, "Shortcut", "Global Hotkey: Alt + H"))
+        help_btn.clicked.connect(self.show_help)
         layout.addWidget(help_btn)
     
+    def show_help(self):
+        QMessageBox.information(self, "Shortcut", "Global Hotkey: Alt + H")
+
     def setup_global_hotkey(self):
         def on_activate():
             self.toggle_record()
