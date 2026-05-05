@@ -14,6 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastTranscript = '';
     let textOnlyMode = false;
 
+    const WS_URL = 'ws://localhost:9876';
+    let ws = null;
+
+    function connectWS() {
+        ws = new WebSocket(WS_URL);
+        ws.onclose = () => setTimeout(connectWS, 2000); // auto-reconnect
+        ws.onerror = () => ws.close();
+    }
+    connectWS();
+
     // Initialize logic
     chrome.storage.local.get(['speech_lang', 'text_only_mode'], (result) => {
         if (result.speech_lang) {
@@ -116,6 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (finalTranscript.length > 0) {
                     lastTranscript = finalTranscript;
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(finalTranscript);
+                    }
                     if (textOnlyMode) {
                         statusEl.textContent = finalTranscript;
                     } else {

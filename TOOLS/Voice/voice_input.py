@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import threading
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox, QDialog, QSpinBox, QFormLayout, QDialogButtonBox)
@@ -17,6 +18,30 @@ CP_RED = "#FF003C"
 CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
+
+WS_PORT = 9876
+
+def paste_text(text):
+    pyperclip.copy(text)
+    import time; time.sleep(0.1)
+    import pyautogui; pyautogui.hotkey('ctrl', 'v')
+
+def start_ws_server():
+    """Run a simple WebSocket server that receives transcripts and pastes them."""
+    import asyncio
+    import websockets
+
+    async def handler(ws):
+        async for message in ws:
+            paste_text(message)
+
+    async def serve():
+        async with websockets.serve(handler, "localhost", WS_PORT):
+            await asyncio.Future()  # run forever
+
+    asyncio.run(serve())
+
+threading.Thread(target=start_ws_server, daemon=True).start()
 
 class VoiceThread(QThread):
     result = pyqtSignal(str)
@@ -290,9 +315,7 @@ class VoiceApp(QMainWindow):
         self.status_label.setText("●")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
         self._reset_record_btn()
-        pyperclip.copy(text)
-        import time; time.sleep(0.1)
-        import pyautogui; pyautogui.hotkey('ctrl', 'v')
+        paste_text(text)
 
     def on_error(self, error):
         self.status_label.setText("✕")
