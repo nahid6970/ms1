@@ -138,11 +138,12 @@ class VoiceApp(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         layout = QHBoxLayout(central)
-        layout.setSpacing(6)
+        layout.setSpacing(4)
         layout.setContentsMargins(8, 5, 8, 5)
 
         self.status_label = QLabel("●")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
+        self.status_label.setFixedWidth(16)
         layout.addWidget(self.status_label)
 
         self.en_btn = QPushButton("EN")
