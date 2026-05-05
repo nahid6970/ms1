@@ -150,6 +150,7 @@ class VoiceApp(QMainWindow):
         self.en_btn.setObjectName("lang")
         self.en_btn.setCheckable(True)
         self.en_btn.setChecked(self.config["language"] == "en-US")
+        self.en_btn.setFixedWidth(32)
         self.en_btn.clicked.connect(lambda: self.change_language("en-US"))
         layout.addWidget(self.en_btn)
 
@@ -157,6 +158,7 @@ class VoiceApp(QMainWindow):
         self.bd_btn.setObjectName("lang")
         self.bd_btn.setCheckable(True)
         self.bd_btn.setChecked(self.config["language"] == "bn-BD")
+        self.bd_btn.setFixedWidth(32)
         self.bd_btn.clicked.connect(lambda: self.change_language("bn-BD"))
         layout.addWidget(self.bd_btn)
 
