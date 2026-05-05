@@ -277,7 +277,7 @@ class VoiceApp(QMainWindow):
 
     def _reset_record_btn(self):
         self.record_btn.setText("🎤 REC")
-        self.record_btn.setStyleSheet("")
+        self.record_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;")
 
     def _finish_space_recording(self):
         if isinstance(self.voice_thread, SpaceStopThread):
