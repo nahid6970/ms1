@@ -3,7 +3,7 @@ import os
 import json
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox)
+                             QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox, QDialog, QSpinBox, QFormLayout, QDialogButtonBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 import pyperclip
@@ -22,9 +22,10 @@ class VoiceThread(QThread):
     result = pyqtSignal(str)
     error = pyqtSignal(str)
     
-    def __init__(self, lang):
+    def __init__(self, lang, phrase_time_limit):
         super().__init__()
         self.lang = lang
+        self.phrase_time_limit = phrase_time_limit
         self.running = False
         
     def run(self):
@@ -33,7 +34,7 @@ class VoiceThread(QThread):
             recognizer = sr.Recognizer()
             with sr.Microphone() as source:
                 self.running = True
-                audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
+                audio = recognizer.listen(source, timeout=5, phrase_time_limit=self.phrase_time_limit)
                 self.running = False
                 text = recognizer.recognize_google(audio, language=self.lang)
                 self.result.emit(text)
@@ -68,7 +69,7 @@ class VoiceApp(QMainWindow):
     
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(275, 50)
+        self.setFixedSize(305, 50)
         
         if self.config.get("always_on_top", False):
             self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
@@ -128,9 +129,33 @@ class VoiceApp(QMainWindow):
         help_btn.setFixedWidth(24)
         help_btn.clicked.connect(self.show_help)
         layout.addWidget(help_btn)
+
+        settings_btn = QPushButton("⚙")
+        settings_btn.setObjectName("help")
+        settings_btn.setFixedWidth(24)
+        settings_btn.clicked.connect(self.show_settings)
+        layout.addWidget(settings_btn)
     
     def show_help(self):
         QMessageBox.information(self, "Shortcut", "Global Hotkey: Alt + H")
+
+    def show_settings(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Settings")
+        dialog.setStyleSheet(self.styleSheet())
+        layout = QFormLayout(dialog)
+        spin = QSpinBox()
+        spin.setRange(1, 300)
+        spin.setValue(self.config.get("phrase_time_limit", 10))
+        spin.setSuffix(" sec")
+        layout.addRow("Max speak time:", spin)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addRow(buttons)
+        if dialog.exec():
+            self.config["phrase_time_limit"] = spin.value()
+            self.save_config()
 
     def setup_global_hotkey(self):
         def on_activate():
@@ -172,7 +197,7 @@ class VoiceApp(QMainWindow):
         self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold; font-size: 14pt;")
         self.record_btn.setText("⏹️ STOP")
         
-        self.voice_thread = VoiceThread(self.config["language"])
+        self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
         self.voice_thread.result.connect(self.on_result)
         self.voice_thread.error.connect(self.on_error)
         self.voice_thread.start()
