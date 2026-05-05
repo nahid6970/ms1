@@ -68,7 +68,7 @@ class VoiceApp(QMainWindow):
     
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(240, 50)
+        self.setFixedSize(275, 50)
         
         if self.config.get("always_on_top", False):
             self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
@@ -121,6 +121,12 @@ class VoiceApp(QMainWindow):
         self.record_btn = QPushButton("🎤 REC")
         self.record_btn.clicked.connect(self.toggle_record)
         layout.addWidget(self.record_btn)
+        
+        help_btn = QPushButton("?")
+        help_btn.setFixedWidth(24)
+        help_btn.setToolTip("Shortcut: Alt+H")
+        help_btn.clicked.connect(lambda: __import__('PyQt6.QtWidgets', fromlist=['QMessageBox']).QMessageBox.information(self, "Shortcut", "Global Hotkey: Alt + H"))
+        layout.addWidget(help_btn)
     
     def setup_global_hotkey(self):
         def on_activate():
