@@ -3,5 +3,5 @@
   "always_on_top": true,
   "auto_paste": false,
   "phrase_time_limit": 10,
-  "stop_mode": "auto"
+  "stop_mode": "space"
 }
