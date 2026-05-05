@@ -3,5 +3,6 @@
   "always_on_top": true,
   "auto_paste": false,
   "phrase_time_limit": 10,
-  "stop_mode": "space"
+  "stop_mode": "space",
+  "engine": "local"
 }

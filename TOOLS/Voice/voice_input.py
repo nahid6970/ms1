@@ -94,13 +94,15 @@ class SpaceStopThread(QThread):
             frames = []
             while not self._stop:
                 frames.append(stream.read(CHUNK, exception_on_overflow=False))
-            stream.stop_stream(); stream.close(); p.terminate()
+            stream.stop_stream(); stream.close()
+            sample_width = p.get_sample_size(FORMAT)
+            p.terminate()
             self.running = False
 
             buf = io.BytesIO()
             with wave.open(buf, 'wb') as wf:
                 wf.setnchannels(CHANNELS)
-                wf.setsampwidth(p.get_sample_size(FORMAT))
+                wf.setsampwidth(sample_width)
                 wf.setframerate(RATE)
                 wf.writeframes(b''.join(frames))
             buf.seek(0)
@@ -226,6 +228,11 @@ class VoiceApp(QMainWindow):
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
         layout.addRow("Stop on Space (SPC mode):", spc_check)
 
+        engine_combo = QComboBox()
+        engine_combo.addItems(["Local (speech_recognition)", "Chrome Extension (WebSocket)"])
+        engine_combo.setCurrentIndex(0 if self.config.get("engine", "local") == "local" else 1)
+        layout.addRow("Recognition engine:", engine_combo)
+
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
@@ -244,6 +251,7 @@ class VoiceApp(QMainWindow):
                 self.show()
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
+            self.config["engine"] = "local" if engine_combo.currentIndex() == 0 else "chrome"
             self.save_config()
 
     def setup_global_hotkey(self):
@@ -260,8 +268,13 @@ class VoiceApp(QMainWindow):
             return lambda k: f(listener.canonical(k))
 
         hotkey = pynput_keyboard.HotKey(pynput_keyboard.HotKey.parse('<alt>+h'), on_activate)
+
+        def combined_on_press(k):
+            for_canonical(hotkey.press)(k)
+            on_press(k)
+
         listener = pynput_keyboard.Listener(
-            on_press=lambda k: (for_canonical(hotkey.press)(k), on_press(k)),
+            on_press=combined_on_press,
             on_release=for_canonical(hotkey.release)
         )
         listener.start()
@@ -287,6 +300,12 @@ class VoiceApp(QMainWindow):
     def start_recording(self):
         self.status_label.setText("●")
         self.status_label.setStyleSheet(f"color: {CP_RED}; font-weight: bold; font-size: 14pt;")
+
+        if self.config.get("engine", "local") == "chrome":
+            self.record_btn.setText("⏹️ EXT")
+            self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
+            self.voice_thread = None
+            return
 
         if self.config.get("stop_mode", "auto") == "space":
             self.record_btn.setText("⏹️ SPC")
