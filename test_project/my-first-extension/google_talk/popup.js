@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function connectWS() {
         ws = new WebSocket(WS_URL);
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.cmd === 'stop' && isListening && recognition) {
+                    recognition.stop();
+                }
+            } catch (e) {}
+        };
         ws.onclose = () => setTimeout(connectWS, 2000); // auto-reconnect
         ws.onerror = () => ws.close();
     }

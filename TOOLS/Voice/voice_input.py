@@ -20,26 +20,46 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
 WS_PORT = 9876
+ws_clients = set()
+_ws_loop = None
 
 def paste_text(text):
     pyperclip.copy(text)
     import time; time.sleep(0.1)
     import pyautogui; pyautogui.hotkey('ctrl', 'v')
 
+def send_ws_stop():
+    if not _ws_loop:
+        return
+    import asyncio
+    async def _send():
+        for ws in list(ws_clients):
+            try:
+                await ws.send('{"cmd":"stop"}')
+            except Exception:
+                pass
+    asyncio.run_coroutine_threadsafe(_send(), _ws_loop)
+
 def start_ws_server():
-    """Run a simple WebSocket server that receives transcripts and pastes them."""
     import asyncio
     import websockets
+    global _ws_loop
+    _ws_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(_ws_loop)
 
     async def handler(ws):
-        async for message in ws:
-            paste_text(message)
+        ws_clients.add(ws)
+        try:
+            async for message in ws:
+                paste_text(message)
+        finally:
+            ws_clients.discard(ws)
 
     async def serve():
         async with websockets.serve(handler, "localhost", WS_PORT):
-            await asyncio.Future()  # run forever
+            await asyncio.Future()
 
-    asyncio.run(serve())
+    _ws_loop.run_until_complete(serve())
 
 threading.Thread(target=start_ws_server, daemon=True).start()
 
@@ -274,10 +294,15 @@ class VoiceApp(QMainWindow):
             self.toggle_record()
 
         def on_press(key):
-            if (self.config.get("stop_mode", "auto") == "space"
-                    and self.voice_thread and self.voice_thread.running
-                    and key == pynput_keyboard.Key.space):
+            if key != pynput_keyboard.Key.space:
+                return
+            if isinstance(self.voice_thread, SpaceStopThread) and self.voice_thread.isRunning():
                 self._finish_space_recording()
+            elif (self.config.get("stop_mode", "auto") == "space"
+                  and self.config.get("engine", "local") == "chrome"):
+                send_ws_stop()
+                self.status_label.setText("●")
+                self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
 
         def for_canonical(f):
             return lambda k: f(listener.canonical(k))
