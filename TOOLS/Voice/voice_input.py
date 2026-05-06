@@ -205,6 +205,10 @@ class VoiceApp(QMainWindow):
         settings_btn.clicked.connect(self.show_settings)
         layout.addWidget(settings_btn)
 
+        if self.config.get("hide_record_btn", False):
+            self.record_btn.setVisible(False)
+            self.setFixedSize(185, 50)
+
     def show_help(self):
         QMessageBox.information(self, "Shortcut", "Global Hotkey: Alt + H\nSPC mode: press Space to stop recording")
 
@@ -233,6 +237,10 @@ class VoiceApp(QMainWindow):
         engine_combo.setCurrentIndex(0 if self.config.get("engine", "local") == "local" else 1)
         layout.addRow("Recognition engine:", engine_combo)
 
+        hide_rec_check = QCheckBox()
+        hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
+        layout.addRow("Hide record button:", hide_rec_check)
+
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
@@ -252,6 +260,13 @@ class VoiceApp(QMainWindow):
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = "local" if engine_combo.currentIndex() == 0 else "chrome"
+
+            new_hide = hide_rec_check.isChecked()
+            if new_hide != self.config.get("hide_record_btn", False):
+                self.config["hide_record_btn"] = new_hide
+                self.record_btn.setVisible(not new_hide)
+                self.setFixedSize(185 if new_hide else 275, 50)
+
             self.save_config()
 
     def setup_global_hotkey(self):
