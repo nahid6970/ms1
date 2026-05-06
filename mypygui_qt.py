@@ -1252,7 +1252,9 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
         elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
         if bkey and bkey in _bindings:
             action = _bindings[bkey]
-            if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1), action.get("bg_color"), action.get("transparent_bg", False))
+            if action.get("type") == "popup": 
+                border_color = action.get("border_color") or CP_RED
+                open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), border_color, action.get("border_px", 1), action.get("bg_color"), action.get("transparent_bg", False))
             else: handle_action(action)
     
     lbl.mousePressEvent = mousePressEvent

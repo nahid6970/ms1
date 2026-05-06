@@ -797,7 +797,7 @@
                     "bg_color": "",
                     "transparent_bg": false,
                     "border_color": "red",
-                    "border_px": 1
+                    "border_px": 2
                 }
             },
             "padx_left": 1,
@@ -837,7 +837,7 @@
                     "bg_color": "",
                     "transparent_bg": false,
                     "border_color": "yellow",
-                    "border_px": 1
+                    "border_px": 20
                 }
             },
             "font": [
