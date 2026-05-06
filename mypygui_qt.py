@@ -183,11 +183,13 @@ def get_default_font():
 # ─── SVG / Icon Widgets ────────────────────────────────────────────────────────
 class SvgInputDialog(QDialog):
     def __init__(self, current_svg="", hover_map=None, parent=None):
-        super().__init__(None)
+        super().__init__(parent)
         self.setWindowTitle("PASTE SVG CODE")
         self.resize(600, 580)
         self.svg_code = current_svg
         self.hover_map = hover_map or {}
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.setModal(True)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
             QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_TEXT}; font-family: 'Consolas'; border: 1px solid {CP_DIM}; }}
@@ -241,48 +243,83 @@ class SvgInputDialog(QDialog):
             self.preview_label.clear()
             return
         try:
-            pix = QPixmap(64, 64); pix.fill(Qt.GlobalColor.transparent)
-            p = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
-            renderer.render(p); p.end()
+            pix = QPixmap(64, 64)
+            pix.fill(Qt.GlobalColor.transparent)
+            p = QPainter(pix)
+            renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
+            if renderer.isValid():
+                renderer.render(p)
+            p.end()
             self.preview_label.setPixmap(pix)
-        except:
+        except Exception as e:
+            print(f"SVG preview error: {e}")
             self.preview_label.setText("ERR")
 
     def update_color_panel(self):
-        for lay in [self.color_layout, self.hover_layout]:
-            while lay.count():
-                item = lay.takeAt(0)
-                if item.widget(): item.widget().deleteLater()
-        svg = self.txt_input.toPlainText()
-        colors = sorted(list(set(re.findall(r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}', svg))), key=len, reverse=True)
-        if not colors:
+        try:
             for lay in [self.color_layout, self.hover_layout]:
-                lay.addWidget(QLabel("None"))
-        else:
-            for c in colors:
-                btn = QPushButton(); btn.setFixedSize(30, 30); btn.setStyleSheet(f"background-color: {c}; border: 1px solid {CP_DIM}; border-radius: 4px;")
-                btn.clicked.connect(partial(self.pick_replacement_color, c)); self.color_layout.addWidget(btn)
-                h_btn = QPushButton(); h_btn.setFixedSize(30, 30); hover_c = self.hover_map.get(c, c)
-                h_btn.setStyleSheet(f"background-color: {hover_c}; border: 2px solid {CP_YELLOW if c in self.hover_map else CP_DIM}; border-radius: 4px;")
-                h_btn.clicked.connect(partial(self.pick_hover_color, c)); self.hover_layout.addWidget(h_btn)
-        self.color_layout.addStretch(); self.hover_layout.addStretch()
+                while lay.count():
+                    item = lay.takeAt(0)
+                    if item.widget(): 
+                        item.widget().deleteLater()
+            
+            svg = self.txt_input.toPlainText()
+            colors = sorted(list(set(re.findall(r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}', svg))), key=len, reverse=True)
+            
+            if not colors:
+                for lay in [self.color_layout, self.hover_layout]:
+                    lay.addWidget(QLabel("None"))
+            else:
+                for c in colors:
+                    btn = QPushButton()
+                    btn.setFixedSize(30, 30)
+                    btn.setStyleSheet(f"background-color: {c}; border: 1px solid {CP_DIM}; border-radius: 4px;")
+                    btn.clicked.connect(partial(self.pick_replacement_color, c))
+                    self.color_layout.addWidget(btn)
+                    
+                    h_btn = QPushButton()
+                    h_btn.setFixedSize(30, 30)
+                    hover_c = self.hover_map.get(c, c)
+                    h_btn.setStyleSheet(f"background-color: {hover_c}; border: 2px solid {CP_YELLOW if c in self.hover_map else CP_DIM}; border-radius: 4px;")
+                    h_btn.clicked.connect(partial(self.pick_hover_color, c))
+                    self.hover_layout.addWidget(h_btn)
+            
+            self.color_layout.addStretch()
+            self.hover_layout.addStretch()
+        except Exception as e:
+            print(f"Color panel update error: {e}")
 
     def pick_hover_color(self, base_color):
-        curr = self.hover_map.get(base_color, base_color)
-        c = QColorDialog.getColor(QColor(curr), self, f"Select Hover Color for {base_color}")
-        if c.isValid():
-            self.hover_map[base_color] = c.name().upper(); self.update_color_panel()
+        try:
+            curr = self.hover_map.get(base_color, base_color)
+            c = QColorDialog.getColor(QColor(curr), self, f"Select Hover Color for {base_color}")
+            if c.isValid():
+                self.hover_map[base_color] = c.name().upper()
+                self.update_color_panel()
+        except Exception as e:
+            print(f"Hover color picker error: {e}")
 
     def pick_replacement_color(self, old_color):
-        c = QColorDialog.getColor(QColor(old_color), self, "Select New Color")
-        if c.isValid():
-            new_color = c.name().upper()
-            if old_color in self.hover_map: self.hover_map[new_color] = self.hover_map.pop(old_color)
-            svg = self.txt_input.toPlainText(); pattern = re.compile(re.escape(old_color), re.IGNORECASE)
-            self.txt_input.setPlainText(pattern.sub(new_color, svg)); self.update_color_panel()
+        try:
+            c = QColorDialog.getColor(QColor(old_color), self, "Select New Color")
+            if c.isValid():
+                new_color = c.name().upper()
+                if old_color in self.hover_map:
+                    self.hover_map[new_color] = self.hover_map.pop(old_color)
+                svg = self.txt_input.toPlainText()
+                pattern = re.compile(re.escape(old_color), re.IGNORECASE)
+                self.txt_input.setPlainText(pattern.sub(new_color, svg))
+                self.update_color_panel()
+        except Exception as e:
+            print(f"Replacement color picker error: {e}")
 
     def save_and_close(self):
-        self.svg_code = self.txt_input.toPlainText(); self.accept()
+        try:
+            self.svg_code = self.txt_input.toPlainText()
+            self.accept()
+        except Exception as e:
+            print(f"SVG save error: {e}")
+            self.reject()
 
 class IconLabel(QLabel):
     def __init__(self, text, btn_cfg, parent=None):
@@ -359,7 +396,8 @@ class IconLabel(QLabel):
             elif svg_content and svg_content.strip():
                 gen_w = cfg.get("icon_width", 0) or 64
                 gen_h = cfg.get("icon_height", 0) or 64
-                icon_pixmap = QPixmap(gen_w, gen_h); icon_pixmap.fill(Qt.GlobalColor.transparent)
+                icon_pixmap = QPixmap(gen_w, gen_h)
+                icon_pixmap.fill(Qt.GlobalColor.transparent)
                 actual_svg = svg_content
                 if self._is_hovered:
                     hmap = cfg.get("svg_hover_map", {})
@@ -367,9 +405,16 @@ class IconLabel(QLabel):
                         pattern = re.compile(re.escape(base_c), re.IGNORECASE)
                         actual_svg = pattern.sub(hover_c, actual_svg)
                 p_svg = QPainter(icon_pixmap)
-                renderer = QSvgRenderer(QByteArray(actual_svg.encode('utf-8')))
-                renderer.render(p_svg); p_svg.end()
-                draw_mode = 'icon'
+                try:
+                    renderer = QSvgRenderer(QByteArray(actual_svg.encode('utf-8')))
+                    if renderer.isValid():
+                        renderer.render(p_svg)
+                    draw_mode = 'icon'
+                except Exception as e:
+                    print(f"SVG render error: {e}")
+                    draw_mode = 'text'
+                finally:
+                    p_svg.end()
             elif nf_char:
                 gen_w = cfg.get("icon_width", 0) or 64
                 gen_h = cfg.get("icon_height", 0) or 64
@@ -589,22 +634,38 @@ def open_edit_gui(item_cfg, category, index=None):
     svg_btn.setStyleSheet("QPushButton { padding: 0px; }") # Remove large padding for this small button
     def _update_svg_preview(code):
         if not code:
-            svg_btn.setText("SVG"); svg_btn.setIcon(QIcon())
+            svg_btn.setText("SVG")
+            svg_btn.setIcon(QIcon())
             return
         try:
-            pix = QPixmap(24, 24); pix.fill(Qt.GlobalColor.transparent)
-            p = QPainter(pix); renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
-            renderer.render(p); p.end()
-            svg_btn.setText(""); svg_btn.setIcon(QIcon(pix)); svg_btn.setIconSize(QSize(20, 20))
-        except: svg_btn.setText("ERR")
+            pix = QPixmap(24, 24)
+            pix.fill(Qt.GlobalColor.transparent)
+            p = QPainter(pix)
+            renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
+            if renderer.isValid():
+                renderer.render(p)
+                svg_btn.setText("")
+                svg_btn.setIcon(QIcon(pix))
+                svg_btn.setIconSize(QSize(20, 20))
+            else:
+                svg_btn.setText("ERR")
+                svg_btn.setIcon(QIcon())
+            p.end()
+        except Exception as e:
+            print(f"SVG preview update error: {e}")
+            svg_btn.setText("ERR")
+            svg_btn.setIcon(QIcon())
     _update_svg_preview(item_cfg.get("svg_content", ""))
 
     def _open_svg_dlg():
-        dlg_svg = SvgInputDialog(item_cfg.get("svg_content", ""), item_cfg.get("svg_hover_map", {}))
-        if dlg_svg.exec():
-            item_cfg["svg_content"] = dlg_svg.svg_code
-            item_cfg["svg_hover_map"] = dlg_svg.hover_map
-            _update_svg_preview(dlg_svg.svg_code)
+        try:
+            dlg_svg = SvgInputDialog(item_cfg.get("svg_content", ""), item_cfg.get("svg_hover_map", {}), dlg)
+            if dlg_svg.exec():
+                item_cfg["svg_content"] = dlg_svg.svg_code
+                item_cfg["svg_hover_map"] = dlg_svg.hover_map
+                _update_svg_preview(dlg_svg.svg_code)
+        except Exception as e:
+            print(f"SVG dialog error: {e}")
     svg_btn.clicked.connect(_open_svg_dlg)
     lay1.addWidget(svg_btn)
     form_core.addWidget(row1)
