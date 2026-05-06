@@ -821,7 +821,8 @@ class MainWindow(QMainWindow):
         self.path_input = QLineEdit()
         self.path_input.setPlaceholderText("Select Git Directory...")
         
-        last_path = self.last_directory
+        argv_path = sys.argv[1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]) else None
+        last_path = argv_path or self.last_directory
         self.path_input.setText(last_path if last_path and os.path.isdir(last_path) else os.getcwd())
             
         self.path_input.returnPressed.connect(self.load_commits)

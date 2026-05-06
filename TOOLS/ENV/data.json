@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-04-29T15:23:09.218607",
+    "timestamp": "2026-05-06T12:11:28.688084",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -21,11 +21,11 @@
         "C_INCLUDE_PATH": "C:\\Users\\nahid\\scoop\\apps\\gcc\\current\\include",
         "GOOGLE_CLOUD_PROJECT": "123",
         "GIT_INSTALL_ROOT": "C:\\Users\\nahid\\scoop\\apps\\git\\current",
-        "POSH_THEMES_PATH": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\themes",
+        "JD2_HOME": "C:\\Users\\nahid\\AppData\\Local\\JDownloader 2",
         "BUN_INSTALL": "C:\\Users\\nahid\\scoop\\persist\\bun",
         "BUN_INSTALL_BIN": "C:\\Users\\nahid\\scoop\\persist\\bun\\bin",
         "BUN_INSTALL_GLOBAL_DIR": "C:\\Users\\nahid\\scoop\\persist\\bun\\install\\global",
-        "JD2_HOME": "C:\\Users\\nahid\\AppData\\Local\\JDownloader 2"
+        "POSH_THEMES_PATH": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\themes"
     },
     "system_env": {
         "ComSpec": "%SystemRoot%\\system32\\cmd.exe",
@@ -127,6 +127,10 @@
                         "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\nahid\\.env_manager\\scripts\\vid_dim.ps1\" \"%V\""
                     }
                 }
+            },
+            "Git UI": {
+                "MUIVerb": "Git UI",
+                "command": "\"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" \"C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.py\" \"%V\""
             },
             "Rclone NCDU": {
                 "MUIVerb": "Disk Usage [GDU]",
