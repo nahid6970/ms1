@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-05-06T12:11:28.688084",
+    "timestamp": "2026-05-06T12:20:16.154197",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -129,7 +129,8 @@
                 }
             },
             "Git UI": {
-                "MUIVerb": "Git UI",
+                "MUIVerb": "Github Manager",
+                "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\github\\icon40.png",
                 "command": "\"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" \"C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.py\" \"%V\""
             },
             "Rclone NCDU": {
