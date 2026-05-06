@@ -3,6 +3,14 @@ import os
 import subprocess
 import json
 import re
+
+# Hide console windows spawned by git subprocesses when running via pythonw
+_orig_popen_init = subprocess.Popen.__init__
+def _popen_no_window(self, *args, **kwargs):
+    kwargs.setdefault('creationflags', 0)
+    kwargs['creationflags'] |= subprocess.CREATE_NO_WINDOW
+    _orig_popen_init(self, *args, **kwargs)
+subprocess.Popen.__init__ = _popen_no_window
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
