@@ -843,7 +843,7 @@
             "font": [
                 "0xProto Nerd Font",
                 16,
-                "bold"
+                "normal"
             ],
             "border": 0,
             "border_color": "",
@@ -1551,7 +1551,7 @@
             "font": [
                 "JetBrainsMono Nerd Font Propo",
                 15,
-                "normal"
+                "bold"
             ],
             "border": 0,
             "border_radius": 0,
@@ -1566,11 +1566,13 @@
             "margin_top": 0,
             "margin_bottom": 0,
             "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
+            "nf_char": "",
+            "icon_width": 25,
+            "icon_height": 25,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "svg_content": "<svg viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"#FFFFFF\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <g id=\"font-square-3\" transform=\"translate(-2 -2)\"> <rect id=\"secondary\" fill=\"#000000\" width=\"18\" height=\"18\" rx=\"1\" transform=\"translate(3 3)\"></rect> <path id=\"primary\" d=\"M16,17,12.5,7h-1L8,17\" fill=\"none\" stroke=\"#FFFFFF\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path> <path id=\"primary-2\" data-name=\"primary\" d=\"M9.52,14h5M3,4V20a1,1,0,0,0,1,1H20a1,1,0,0,0,1-1V4a1,1,0,0,0-1-1H4A1,1,0,0,0,3,4Z\" fill=\"none\" stroke=\"#FFFFFF\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path> </g> </g></svg>",
+            "svg_hover_map": {}
         }
     ],
     "popup_y_offset": 5,
