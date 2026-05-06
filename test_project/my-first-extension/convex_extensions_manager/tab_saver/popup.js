@@ -211,6 +211,11 @@ document.getElementById('saveCurrentTab').addEventListener('click', (e) => {
       chrome.storage.local.set({ savedTabs: [...savedTabs, newTab] }, () => {
         showButtonFeedback(button, true, 'Saved!');
         loadTabs();
+        // Open deadline modal for the newly saved tab
+        currentRightClickedTabId = newTab.id;
+        editDeadlineDays.value = '';
+        editDeadlineDate.value = '';
+        deadlineModal.classList.add('show');
       });
     });
   });
