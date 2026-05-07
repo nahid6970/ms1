@@ -6790,13 +6790,39 @@ function renderSubSheetDropdown() {
     const dropdown = document.getElementById('subSheetDropdown');
     if (!dropdown) return;
     
-    dropdown.innerHTML = '';
+    dropdown.innerHTML = `
+        <div class="subsheet-search-wrapper">
+            <input type="text" id="subsheetSearchInput" placeholder="Search subsheets..." autocomplete="off">
+        </div>
+        <div id="subsheetItemsContainer" class="subsheet-items-container"></div>
+    `;
+
+    const searchInput = document.getElementById('subsheetSearchInput');
+    
+    // Focus search input after a short delay to ensure it's visible
+    setTimeout(() => {
+        searchInput.focus();
+    }, 50);
+
+    searchInput.addEventListener('input', (e) => {
+        renderSubSheetList(e.target.value);
+    });
+
+    renderSubSheetList('');
+}
+
+function renderSubSheetList(filterText = '') {
+    const container = document.getElementById('subsheetItemsContainer');
+    if (!container) return;
+    container.innerHTML = '';
     
     const currentSheetData = tableData.sheets[currentSheet];
     const parentIndex = currentSheetData?.parentSheet !== undefined ? currentSheetData.parentSheet : currentSheet;
     const parentSheet = tableData.sheets[parentIndex];
     
     if (!parentSheet) return;
+    
+    const filter = filterText.toLowerCase();
     
     const applyColors = (item, sheet, sheetIdx) => {
         const bgColor = sheet.bgColor;
@@ -6807,49 +6833,63 @@ function renderSubSheetDropdown() {
         if (fgColor) item.style.color = fgColor;
     };
     
-    const parentItem = document.createElement('div');
-    parentItem.className = `subsheet-dropdown-item is-parent ${currentSheet === parentIndex ? 'active' : ''}`;
-    parentItem.innerHTML = `<span>📂</span> <span>${parentSheet.name}</span>`;
-    applyColors(parentItem, parentSheet, parentIndex);
-    
-    parentItem.onclick = (e) => {
-        if (e.button === 0) {
-            switchSheet(parentIndex);
-            dropdown.style.display = 'none';
-        }
-    };
-    
-    parentItem.oncontextmenu = (e) => {
-        e.preventDefault();
-        showSubSheetContextMenu(e, parentIndex);
-        dropdown.style.display = 'none';
-    };
-    
-    dropdown.appendChild(parentItem);
+    // Show parent if it matches filter
+    if (parentSheet.name.toLowerCase().includes(filter)) {
+        const parentItem = document.createElement('div');
+        parentItem.className = `subsheet-dropdown-item is-parent ${currentSheet === parentIndex ? 'active' : ''}`;
+        parentItem.innerHTML = `<span>📂</span> <span>${parentSheet.name}</span>`;
+        applyColors(parentItem, parentSheet, parentIndex);
+        
+        parentItem.onclick = (e) => {
+            if (e.button === 0) {
+                switchSheet(parentIndex);
+                document.getElementById('subSheetDropdown').style.display = 'none';
+            }
+        };
+        
+        parentItem.oncontextmenu = (e) => {
+            e.preventDefault();
+            showSubSheetContextMenu(e, parentIndex);
+            document.getElementById('subSheetDropdown').style.display = 'none';
+        };
+        
+        container.appendChild(parentItem);
+    }
     
     tableData.sheets.forEach((sheet, index) => {
         if (sheet.parentSheet === parentIndex) {
-            const item = document.createElement('div');
-            item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
-            item.innerHTML = `<span>📄</span> <span>${sheet.name}</span>`;
-            applyColors(item, sheet, index);
-            
-            item.onclick = (e) => {
-                if (e.button === 0) {
-                    switchSheet(index);
-                    dropdown.style.display = 'none';
-                }
-            };
-            
-            item.oncontextmenu = (e) => {
-                e.preventDefault();
-                showSubSheetContextMenu(e, index);
-                dropdown.style.display = 'none';
-            };
-            
-            dropdown.appendChild(item);
+            if (sheet.name.toLowerCase().includes(filter)) {
+                const item = document.createElement('div');
+                item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
+                item.innerHTML = `<span>📄</span> <span>${sheet.name}</span>`;
+                applyColors(item, sheet, index);
+                
+                item.onclick = (e) => {
+                    if (e.button === 0) {
+                        switchSheet(index);
+                        document.getElementById('subSheetDropdown').style.display = 'none';
+                    }
+                };
+                
+                item.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    showSubSheetContextMenu(e, index);
+                    document.getElementById('subSheetDropdown').style.display = 'none';
+                };
+                
+                container.appendChild(item);
+            }
         }
     });
+
+    if (container.children.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'subsheet-dropdown-item';
+        noResults.style.opacity = '0.5';
+        noResults.style.fontStyle = 'italic';
+        noResults.textContent = 'No matching subsheets';
+        container.appendChild(noResults);
+    }
 }
 
 document.addEventListener('click', (e) => {

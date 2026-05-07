@@ -763,10 +763,35 @@ def generate_static_html(data, custom_syntaxes):
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             min-width: 250px;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow-y: hidden;
             z-index: 1000;
             margin-top: 5px;
             display: none;
+            flex-direction: column;
+        }
+
+        .subsheet-search-wrapper {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #subsheetSearchInput {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #subsheetSearchInput:focus {
+            border-color: #007bff;
+        }
+
+        .subsheet-items-container {
+            overflow-y: auto;
+            flex: 1;
         }
 
         .subsheet-dropdown-item {
@@ -1592,7 +1617,30 @@ def generate_static_html(data, custom_syntaxes):
             const dropdown = document.getElementById('subSheetDropdown');
             if (!dropdown) return;
             
-            dropdown.innerHTML = '';
+            dropdown.innerHTML = `
+                <div class="subsheet-search-wrapper">
+                    <input type="text" id="subsheetSearchInput" placeholder="Search subsheets..." autocomplete="off">
+                </div>
+                <div id="subsheetItemsContainer" class="subsheet-items-container"></div>
+            `;
+
+            const searchInput = document.getElementById('subsheetSearchInput');
+            
+            setTimeout(() => {
+                searchInput.focus();
+            }, 50);
+
+            searchInput.oninput = (e) => {
+                renderSubSheetList(e.target.value);
+            };
+
+            renderSubSheetList('');
+        }
+
+        function renderSubSheetList(filterText = '') {
+            const container = document.getElementById('subsheetItemsContainer');
+            if (!container) return;
+            container.innerHTML = '';
             
             const currentSheetData = tableData.sheets[currentSheet];
             const parentIndex = (currentSheetData && currentSheetData.parentSheet !== undefined) ? currentSheetData.parentSheet : currentSheet;
@@ -1600,31 +1648,47 @@ def generate_static_html(data, custom_syntaxes):
             
             if (!parentSheet) return;
             
-            const parentItem = document.createElement('div');
-            parentItem.className = `subsheet-dropdown-item ${currentSheet === parentIndex ? 'active' : ''}`;
-            parentItem.textContent = parentSheet.name;
+            const filter = filterText.toLowerCase();
             
-            parentItem.onclick = () => {
-                switchSheet(parentIndex);
-                dropdown.style.display = 'none';
-            };
-            
-            dropdown.appendChild(parentItem);
+            // Show parent if matches filter
+            if (parentSheet.name.toLowerCase().includes(filter)) {
+                const parentItem = document.createElement('div');
+                parentItem.className = `subsheet-dropdown-item ${currentSheet === parentIndex ? 'active' : ''}`;
+                parentItem.textContent = '📂 ' + parentSheet.name;
+                
+                parentItem.onclick = () => {
+                    switchSheet(parentIndex);
+                    document.getElementById('subSheetDropdown').style.display = 'none';
+                };
+                
+                container.appendChild(parentItem);
+            }
             
             tableData.sheets.forEach((sheet, index) => {
                 if (sheet.parentSheet === parentIndex) {
-                    const item = document.createElement('div');
-                    item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
-                    item.textContent = '  ' + sheet.name;
-                    
-                    item.onclick = () => {
-                        switchSheet(index);
-                        dropdown.style.display = 'none';
-                    };
-                    
-                    dropdown.appendChild(item);
+                    if (sheet.name.toLowerCase().includes(filter)) {
+                        const item = document.createElement('div');
+                        item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
+                        item.textContent = '📄 ' + sheet.name;
+                        
+                        item.onclick = () => {
+                            switchSheet(index);
+                            document.getElementById('subSheetDropdown').style.display = 'none';
+                        };
+                        
+                        container.appendChild(item);
+                    }
                 }
             });
+
+            if (container.children.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'subsheet-dropdown-item';
+                noResults.style.opacity = '0.5';
+                noResults.style.fontStyle = 'italic';
+                noResults.textContent = 'No results';
+                container.appendChild(noResults);
+            }
         }
 
         function renderTable() {

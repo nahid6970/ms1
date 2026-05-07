@@ -1,5 +1,39 @@
 # Recent Development Log
 
+## [2026-05-07 11:15] - Sub-Sheet Search Bar & Filtering
+
+**Session Duration:** 0.4 hours
+
+**What We Accomplished:**
+
+### 🔍 Sub-Sheet Search
+- **Search Bar**: Added a search input at the top of the sub-sheet dropdown menu.
+- **Real-time Filtering**: Sub-sheets are filtered dynamically as the user types, matching against the sheet name.
+- **Auto-Focus**: The search input automatically receives focus when the dropdown is opened for immediate searching.
+- **Visual Feedback**: Added a "No results" message when no sub-sheets match the filter.
+- **Static Export Parity**: Fully implemented the search functionality in the `export_static.py` script to ensure standalone files have the same capabilities.
+
+### 🎨 UI/UX Refinement
+- **Cyberpunk Styling**: Styled the search bar to match the dark green/black cyberpunk aesthetic of the F1 and F2 menus.
+- **Layout Adjustments**: Reorganized the dropdown to use a flex-column layout with a scrollable items container below the fixed search bar.
+
+**Files Modified:**
+- `static/script.js` — Refactored `renderSubSheetDropdown` and added `renderSubSheetList` with filtering logic.
+- `static/style.css` — Added styles for `.subsheet-search-wrapper`, `#subsheetSearchInput`, and `.subsheet-items-container`.
+- `export_static.py` — Synchronized search logic and styling for static exports.
+- `md/UX_NAVIGATION.md` — Updated documentation to include the Search Bar feature.
+- `md/RECENT.md` — Added this log.
+
+**Current Status:**
+- ✅ Sub-sheets can be quickly found via search.
+- ✅ Search works in both main app and static exports.
+- ✅ Flexible height remains functional with the new search bar.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-05-07 10:45] - Flexible Sub-Sheet Window Height
 
 **Session Duration:** 0.3 hours

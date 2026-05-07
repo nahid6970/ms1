@@ -5,6 +5,22 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-05-07 11:15] - Sub-Sheet Navigation Efficiency
+
+**Problem:** Navigating sub-sheets was difficult when many children existed under a single parent, as users had to visually scan a potentially long list.
+
+**Solution:** Added a real-time search/filter bar to the top of the sub-sheet dropdown.
+- **Filtering**: Filters both the parent sheet (if matching) and all child sub-sheets.
+- **Accessibility**: Automatic focus on the search input ensures users can start typing immediately after clicking the menu button.
+- **Portability**: Ensured the feature is baked into the static export for offline use.
+
+**Files Modified:**
+- `static/script.js`
+- `static/style.css`
+- `export_static.py`
+
+---
+
 ## [2026-05-07 10:45] - Sub-Sheet Window Restricted Height
 
 **Problem:** The sub-sheet dropdown window (and overflow dropdown) was restricted to a fixed height of `400px`. Users with many sub-sheets had to scroll within a small window, and the window did not utilize available screen space.
