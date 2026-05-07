@@ -1,4 +1,7 @@
 import sys
+import time
+import pygetwindow as gw
+import pyautogui
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect)
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QColor
@@ -10,6 +13,35 @@ PRIMARY_COLOR = "#0078D4"  # Enterprise Blue
 TEXT_COLOR = "#201F1E"
 SECONDARY_TEXT = "#605E5C"
 BTN_HOVER = "#005A9E"
+
+def focus_terminal_and_esc():
+    """Attempts to find the Gemini terminal window, focus it, and send ESC."""
+    try:
+        # Give a small delay for the window to settle
+        time.sleep(0.5)
+        titles = gw.getAllTitles()
+        target_window = None
+        
+        # Priority 1: Window with 'Gemini' in title
+        for title in titles:
+            if "Gemini" in title and "File Explorer" not in title:
+                target_window = gw.getWindowsWithTitle(title)[0]
+                break
+        
+        # Priority 2: Common terminal titles
+        if not target_window:
+            for title in titles:
+                if any(term in title for term in ["Windows PowerShell", "Command Prompt", "Terminal"]):
+                    target_window = gw.getWindowsWithTitle(title)[0]
+                    break
+        
+        if target_window:
+            target_window.activate()
+            # Wait for focus to be established
+            time.sleep(0.2)
+            pyautogui.press('esc')
+    except Exception:
+        pass # Silently fail if window manipulation fails
 
 class TaskCompletePopup(QWidget):
     def __init__(self):
@@ -92,6 +124,11 @@ class TaskCompletePopup(QWidget):
         cp = self.screen().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # When the window shows, trigger the terminal focus and ESC
+        focus_terminal_and_esc()
 
     # Allow dragging the frameless window
     def mousePressEvent(self, event):
