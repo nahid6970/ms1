@@ -89,7 +89,7 @@ body {
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: none;
+    border: 1px solid rgba(0, 0, 0, 0.15); /* Added border */
     padding: 0;
     width: 20px;
     height: 20px;
@@ -104,6 +104,7 @@ body {
 
 .sheet-action-btn:hover {
     background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.3); /* Darker border on hover */
     color: #000;
 }
 
@@ -129,12 +130,14 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Added border */
     color: #666;
     font-weight: bold;
 }
 
 .subsheet-dots:hover, .subsheet-quick-add:hover {
     background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2); /* Darker border on hover */
     color: #000;
 }
 

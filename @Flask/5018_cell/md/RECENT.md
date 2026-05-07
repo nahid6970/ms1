@@ -14,6 +14,7 @@
 - **Static Export Parity**: Fully implemented the search functionality in the `export_static.py` script to ensure standalone files have the same capabilities.
 
 ### 🎨 UI/UX Refinement
+- **Improved Visibility**: Added subtle borders to the sub-sheet "Add" (+) and "Dropdown" (⋮) buttons in both the header and sub-sheet bar. This ensures they are clearly distinguishable from the background.
 - **Cyberpunk Styling**: Styled the search bar to match the dark green/black cyberpunk aesthetic of the F1 and F2 menus.
 - **Layout Adjustments**: Reorganized the dropdown to use a flex-column layout with a scrollable items container below the fixed search bar.
 
