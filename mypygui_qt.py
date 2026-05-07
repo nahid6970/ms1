@@ -8,12 +8,13 @@ import sys
 import threading
 import time
 import re
+import logging
 from functools import partial
 from datetime import datetime
 from queue import Queue, Empty
 
 import psutil
-import win32gui
+# ... rest of imports unchanged ...
 import win32process
 
 try:
@@ -21,6 +22,39 @@ try:
     _HAS_ADL = True
 except Exception:
     _HAS_ADL = False
+
+# ─── Logging Setup ────────────────────────────────────────────────────────────
+LOG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output", "mypygui", "mypygui_log.log"))
+os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding='utf-8'),
+        logging.StreamHandler(sys.__stdout__)
+    ]
+)
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logging.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
+
+class StreamToLogger:
+    def __init__(self, log_level):
+        self.log_level = log_level
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            logging.log(self.log_level, line.rstrip())
+    def flush(self):
+        pass
+
+sys.stdout = StreamToLogger(logging.INFO)
+sys.stderr = StreamToLogger(logging.ERROR)
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
