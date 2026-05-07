@@ -6773,7 +6773,13 @@ function toggleSubSheetDropdown(event) {
         
         const rect = target.getBoundingClientRect();
         dropdown.style.left = rect.left + 'px';
-        dropdown.style.top = rect.bottom + 5 + 'px';
+        const topPos = rect.bottom + 5;
+        dropdown.style.top = topPos + 'px';
+        
+        // Make height flexible: calculate remaining space to bottom of window
+        const windowHeight = window.innerHeight;
+        const availableHeight = windowHeight - topPos - 20; // 20px buffer at bottom
+        dropdown.style.maxHeight = availableHeight + 'px';
         
         renderSubSheetDropdown();
         dropdown.style.display = 'block';

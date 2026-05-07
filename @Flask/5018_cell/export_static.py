@@ -762,7 +762,7 @@ def generate_static_html(data, custom_syntaxes):
             border: 1px solid #ddd;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             min-width: 250px;
-            max-height: 400px;
+            max-height: 90vh;
             overflow-y: auto;
             z-index: 1000;
             margin-top: 5px;
@@ -1569,13 +1569,20 @@ def generate_static_html(data, custom_syntaxes):
             }, 0);
         }
 
-        function toggleSubSheetDropdown() {
+        function toggleSubSheetDropdown(event) {
             const dropdown = document.getElementById('subSheetDropdown');
             const isVisible = dropdown.style.display === 'block';
             
             if (isVisible) {
                 dropdown.style.display = 'none';
             } else {
+                // Calculate flexible height
+                const rect = dropdown.parentElement.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const topPos = rect.bottom;
+                const availableHeight = windowHeight - topPos - 20;
+                dropdown.style.maxHeight = availableHeight + 'px';
+                
                 renderSubSheetDropdown();
                 dropdown.style.display = 'block';
             }
