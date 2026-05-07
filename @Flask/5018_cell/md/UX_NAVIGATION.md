@@ -80,6 +80,7 @@
   - **Menu Button (⋮)**: Opens a compact dropdown showing the parent and all sibling sub-sheets. Automatically hides if no sub-sheets exist.
   - **Quick Add (+)**: Instant creation of a new sub-sheet under the current parent.
 - **Compact Dropdown**: A cyberpunk-themed (dark green/black) menu matching the F2 aesthetic. Supports right-click management (Rename, Delete, Colors) directly from the list.
+- **Flexible Height**: The dropdown dynamically adjusts its height based on the available space to the bottom of the window, automatically showing a scrollbar when content exceeds the viewable area.
 - **Inheritance**: Sub-sheets inherit custom background/text colors from their **Parent Sheet** (if set). They no longer inherit from the Parent Category to avoid UI clutter in the header.
 - **Navigation Bar**: Horizontal sub-sheet bar remains available below the toolbar for tabbed navigation.
 - Deletion cascade (Parent -> Children).

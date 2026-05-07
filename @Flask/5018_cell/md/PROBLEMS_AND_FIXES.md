@@ -5,6 +5,24 @@ This document tracks historical bugs, issues, and their solutions. Use this to:
 - Check if old fixes might conflict with new features
 - Debug similar issues by referencing past solutions
 
+## [2026-05-07 10:45] - Sub-Sheet Window Restricted Height
+
+**Problem:** The sub-sheet dropdown window (and overflow dropdown) was restricted to a fixed height of `400px`. Users with many sub-sheets had to scroll within a small window, and the window did not utilize available screen space.
+
+**Root Cause:** The CSS for `.subsheet-dropdown-menu` and `.subsheet-more-dropdown` had a hardcoded `max-height: 400px`.
+
+**Solution:** 
+1. **Dynamic JS Calculation**: Updated `toggleSubSheetDropdown` in `static/script.js` to calculate the distance from the dropdown trigger to the bottom of the window and set that as the `max-height` (with a `20px` buffer).
+2. **CSS Update**: Replaced fixed `400px` in `static/style.css` with flexible `vh` units (`90vh` and `80vh` respectively) as fallback defaults.
+3. **Static Export Parity**: Applied the same logic and CSS updates to `export_static.py` to ensure consistent behavior in generated standalone files.
+
+**Files Modified:**
+- `static/script.js`
+- `static/style.css`
+- `export_static.py`
+
+---
+
 ## [2026-04-18 23:49] - Image Regex Over-Escaped in Static Export
 
 **Problem:** Images (`![alt](url)`) rendered as blank in static export HTML.

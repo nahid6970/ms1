@@ -1,5 +1,34 @@
 # Recent Development Log
 
+## [2026-05-07 10:45] - Flexible Sub-Sheet Window Height
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### ↔️ Flexible Sub-Sheet Window
+- **Dynamic Sizing**: The sub-sheet dropdown menu (both in-app and static export) now dynamically calculates available window height.
+- **Scrollbar Implementation**: Removed fixed `400px` height constraint. The window now expands to the bottom of the viewport and displays a scrollbar only when content overflows.
+- **Improved UX**: Users with many sub-sheets can now view more items simultaneously without being restricted by a small fixed window size.
+- **Consistency**: Applied the same logic to the `subsheet-more-dropdown` (overflow tabs) to ensure consistent behavior across all sub-sheet navigation elements.
+
+**Files Modified:**
+- `static/script.js` — Updated `toggleSubSheetDropdown` to calculate `maxHeight` dynamically.
+- `static/style.css` — Removed fixed `400px` height and replaced with flexible `vh` units for `.subsheet-dropdown-menu` and `.subsheet-more-dropdown`.
+- `export_static.py` — Synchronized dynamic height logic and CSS updates for the static export version.
+- `md/UX_NAVIGATION.md` — Updated documentation to reflect flexible height behavior.
+- `md/RECENT.md` — Added this log.
+
+**Current Status:**
+- ✅ Sub-sheet dropdown adapts to window height.
+- ✅ Scrollbars appear correctly when content overflows.
+- ✅ Static export maintains functional parity with the main app.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-04-28 13:47] - Move Subsheet to Main Sheet via Context Menu
 
 **Session Duration:** 0.1 hours
