@@ -72,6 +72,7 @@ start_time = time.time()
 
 class _RcloneSignal(QObject):
     update = pyqtSignal(object, str)  # (toggle_lbl, color)
+    run_next = pyqtSignal(dict, object) # (cfg, toggle_lbl)
 _rclone_sig = None  # initialized after QApplication exists
 
 from ctypes import wintypes
@@ -372,27 +373,31 @@ class IconLabel(QLabel):
         self.update()
 
     def sizeHint(self):
-        cfg = self.btn_cfg
-        has_icon = cfg.get("icon_path") and os.path.exists(cfg.get("icon_path"))
-        has_svg = bool(cfg.get("svg_content", "").strip())
-        has_nf = bool(cfg.get("nf_char", ""))
-        
-        if has_icon or has_svg or has_nf:
-            w = cfg.get("icon_width", 0) or 24
-            h = cfg.get("icon_height", 0) or 24
+        try:
+            cfg = self.btn_cfg
+            has_icon = cfg.get("icon_path") and os.path.exists(cfg.get("icon_path"))
+            has_svg = bool(cfg.get("svg_content", "").strip())
+            has_nf = bool(cfg.get("nf_char", ""))
+            
+            if has_icon or has_svg or has_nf:
+                w = cfg.get("icon_width", 0) or 24
+                h = cfg.get("icon_height", 0) or 24
+                m = self.contentsMargins()
+                return QSize(w + m.left() + m.right(), h + m.top() + m.bottom())
+            
+            doc = QTextDocument()
+            f = self.font()
+            if "font" in cfg:
+                font_cfg = cfg["font"]
+                f = QFont(font_cfg[0], font_cfg[1])
+                if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+            doc.setDefaultFont(f)
+            doc.setHtml(f"<div style='white-space: pre;'>{self._original_text}</div>")
             m = self.contentsMargins()
-            return QSize(w + m.left() + m.right(), h + m.top() + m.bottom())
-        
-        doc = QTextDocument()
-        f = self.font()
-        if "font" in cfg:
-            font_cfg = cfg["font"]
-            f = QFont(font_cfg[0], font_cfg[1])
-            if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
-        doc.setDefaultFont(f)
-        doc.setHtml(f"<div style='white-space: pre;'>{self._original_text}</div>")
-        m = self.contentsMargins()
-        return QSize(int(doc.idealWidth()) + m.left() + m.right(), int(doc.size().height()) + m.top() + m.bottom())
+            return QSize(int(doc.idealWidth()) + m.left() + m.right(), int(doc.size().height()) + m.top() + m.bottom())
+        except Exception as e:
+            logging.error(f"sizeHint error: {e}")
+            return QSize(24, 24)
 
     def minimumSizeHint(self):
         return self.sizeHint()
@@ -403,27 +408,27 @@ class IconLabel(QLabel):
         self._is_hovered = False; self.update(); super().leaveEvent(event)
 
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        opt = QStyleOption()
-        opt.initFrom(self)
-        self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
-        
-        rect = self.contentsRect()
-        if rect.isEmpty(): return
-
-        fg = self.palette().windowText().color().name()
-
-        cfg = self.btn_cfg
-        icon_pixmap = None
-        draw_mode = 'text'
-
-        icon_path = cfg.get("icon_path", "")
-        svg_content = cfg.get("svg_content", "")
-        nf_char = cfg.get("nf_char", "")
-
         try:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            
+            opt = QStyleOption()
+            opt.initFrom(self)
+            self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
+            
+            rect = self.contentsRect()
+            if rect.isEmpty(): return
+
+            fg = self.palette().windowText().color().name()
+
+            cfg = self.btn_cfg
+            icon_pixmap = None
+            draw_mode = 'text'
+
+            icon_path = cfg.get("icon_path", "")
+            svg_content = cfg.get("svg_content", "")
+            nf_char = cfg.get("nf_char", "")
+
             if icon_path and os.path.exists(icon_path):
                 icon_pixmap = QPixmap(icon_path)
                 draw_mode = 'icon'
@@ -445,7 +450,7 @@ class IconLabel(QLabel):
                         renderer.render(p_svg)
                     draw_mode = 'icon'
                 except Exception as e:
-                    print(f"SVG render error: {e}")
+                    logging.error(f"SVG render error: {e}")
                     draw_mode = 'text'
                 finally:
                     p_svg.end()
@@ -458,10 +463,8 @@ class IconLabel(QLabel):
                 f.setPixelSize(int(min(gen_w, gen_h) * 0.8))
                 p.setFont(f); p.setPen(QColor(fg)); p.drawText(icon_pixmap.rect(), Qt.AlignmentFlag.AlignCenter, nf_char); p.end()
                 draw_mode = 'icon'
-            else:
-                draw_mode = 'text'
 
-            if icon_pixmap and not icon_pixmap.isNull():
+            if draw_mode == 'icon' and icon_pixmap and not icon_pixmap.isNull():
                 custom_w = cfg.get("icon_width", 0)
                 custom_h = cfg.get("icon_height", 0)
                 if custom_w > 0 and custom_h > 0:
@@ -472,31 +475,32 @@ class IconLabel(QLabel):
                     max_h = rect.height() - 4
                     if max_h > 0:
                         icon_pixmap = icon_pixmap.scaledToHeight(max_h, Qt.TransformationMode.SmoothTransformation)
-        except: pass
-
-        if draw_mode == 'icon' and icon_pixmap:
-            x = rect.x() + (rect.width() - icon_pixmap.width()) // 2
-            y = rect.y() + (rect.height() - icon_pixmap.height()) // 2
-            painter.drawPixmap(x, y, icon_pixmap)
-        else:
-            text = self._original_text
-            if not text: return
-            doc = QTextDocument()
-            f = self.font()
-            if "font" in cfg:
-                font_cfg = cfg["font"]
-                f = QFont(font_cfg[0], font_cfg[1])
-                if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
-            doc.setDefaultFont(f)
-            doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
-            
-            text_w = doc.idealWidth()
-            text_h = doc.size().height()
-            
-            x = rect.x() + (rect.width() - text_w) / 2
-            y = rect.y() + (rect.height() - text_h) / 2
-            painter.translate(x, y)
-            doc.drawContents(painter)
+                
+                x = rect.x() + (rect.width() - icon_pixmap.width()) // 2
+                y = rect.y() + (rect.height() - icon_pixmap.height()) // 2
+                painter.drawPixmap(x, y, icon_pixmap)
+            else:
+                text = self._original_text
+                if not text: return
+                doc = QTextDocument()
+                f = self.font()
+                if "font" in cfg:
+                    font_cfg = cfg["font"]
+                    f = QFont(font_cfg[0], font_cfg[1])
+                    if len(font_cfg) > 2 and font_cfg[2] == "bold": f.setBold(True)
+                doc.setDefaultFont(f)
+                doc.setHtml(f"<div style='color: {fg}; white-space: pre;'>{text}</div>")
+                
+                text_w = doc.idealWidth()
+                text_h = doc.size().height()
+                
+                x = rect.x() + (rect.width() - text_w) / 2
+                y = rect.y() + (rect.height() - text_h) / 2
+                painter.translate(x, y)
+                doc.drawContents(painter)
+            painter.end()
+        except Exception as e:
+            logging.error(f"IconLabel paintEvent error: {e}")
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1114,31 +1118,33 @@ _active_popups = []
 
 def close_all_popups():
     global _active_popups
-    # Close in reverse order (children first)
     while _active_popups:
         p = _active_popups.pop()
         try:
-            p.setParent(None)
-            p.close()
+            p.hide()
+            p.deleteLater()
         except: pass
 
 class AppEventFilter(QObject):
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.Type.MouseButtonPress:
-            if _active_popups:
-                pos = event.globalPosition().toPoint()
-                # 1. If click is inside any active popup window, keep them open
-                in_popup = any(p.isVisible() and p.geometry().contains(pos) for p in _active_popups)
-                if not in_popup:
-                    # 2. Check if click is on any specific button that opened any popup in the chain
-                    all_anchors = [p.anchor_widget for p in _active_popups]
-                    w = QApplication.widgetAt(pos)
-                    # If click is NOT on any trigger button in the chain, close everything
-                    # (This includes: Desktop, other apps, statusbar background, non-trigger buttons)
-                    if w not in all_anchors:
-                        close_all_popups()
-        elif event.type() == QEvent.Type.ApplicationDeactivate:
-            close_all_popups()
+        try:
+            if event.type() == QEvent.Type.MouseButtonPress:
+                if _active_popups:
+                    pos = event.globalPosition().toPoint()
+                    # 1. If click is inside any active popup window, keep them open
+                    in_popup = any(p.isVisible() and p.frameGeometry().contains(pos) for p in _active_popups)
+                    if not in_popup:
+                        # 2. Check if click is on any specific button that opened any popup in the chain
+                        all_anchors = [p.anchor_widget for p in _active_popups]
+                        w = QApplication.widgetAt(pos)
+                        # If click is NOT on any trigger button in the chain, close everything
+                        if w not in all_anchors:
+                            close_all_popups()
+            elif event.type() == QEvent.Type.ApplicationDeactivate:
+                # Use QTimer to defer closing to avoid race conditions during focus loss
+                QTimer.singleShot(100, close_all_popups)
+        except Exception as e:
+            logging.error(f"EventFilter error: {e}")
         return False
 
 class GenericPopup(QFrame):
@@ -1447,14 +1453,21 @@ def _update_toggle_color_cb(toggle_lbl):
 
 def check_and_update_rclone(cfg, toggle_lbl):
     def run():
-        actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-        with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f: content = f.read()
-        rclone_status[cfg.get("id", cfg["label"])] = CP_GREEN if "ERROR" not in content else CP_RED
-        if _rclone_sig: _rclone_sig.update.emit(toggle_lbl, "")
-        interval_ms = int(load_config().get("rclone_settings", {}).get("interval_min", 10)) * 60000
-        QTimer.singleShot(interval_ms, lambda: check_and_update_rclone(cfg, toggle_lbl))
+        try:
+            actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+            with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+            with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f: content = f.read()
+            rclone_status[cfg.get("id", cfg["label"])] = CP_GREEN if "ERROR" not in content else CP_RED
+            if _rclone_sig: 
+                _rclone_sig.update.emit(toggle_lbl, "")
+                _rclone_sig.run_next.emit(cfg, toggle_lbl)
+        except Exception as e:
+            logging.error(f"Rclone check thread error: {e}")
     threading.Thread(target=run, daemon=True).start()
+
+def _schedule_rclone_check(cfg, toggle_lbl):
+    interval_ms = int(load_config().get("rclone_settings", {}).get("interval_min", 10)) * 60000
+    QTimer.singleShot(interval_ms, lambda: check_and_update_rclone(cfg, toggle_lbl))
 
 
 # ─── Alarm / Timer ────────────────────────────────────────────────────────────
@@ -2001,6 +2014,9 @@ class StatusBar(QMainWindow):
 # ─── Entry point ──────────────────────────────────────────────────────────────
 _main_window = None
 if __name__ == "__main__":
-    app = QApplication(sys.argv); app.setQuitOnLastWindowClosed(False); _rclone_sig = _RcloneSignal(); _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl)); app.setStyleSheet(GLOBAL_QSS)
+    app = QApplication(sys.argv); app.setQuitOnLastWindowClosed(False); _rclone_sig = _RcloneSignal()
+    _rclone_sig.update.connect(lambda lbl, _: _update_toggle_color_cb(lbl))
+    _rclone_sig.run_next.connect(_schedule_rclone_check)
+    app.setStyleSheet(GLOBAL_QSS)
     _filter = AppEventFilter(); app.installEventFilter(_filter)
     window = StatusBar(); _main_window = window; window.show(); calculate_time_to_appear(start_time); sys.exit(app.exec())
