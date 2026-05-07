@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'tab_manager': 'Tab Manager - Enhanced tab management',
       'image_lazy_loader': 'Image Lazy Loader - Optimize image loading',
       'notification_blocker': 'Notification Blocker - Block unwanted notifications',
-      'theme_switcher': 'Theme Switcher - Quick theme changes'
+      'theme_switcher': 'Theme Switcher - Quick theme changes',
+      'open_links_in_new_tab': 'Open Links in New Tab - Forced new tab on left-click'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];

@@ -794,7 +794,7 @@
                     "admin": false,
                     "cmd": "arr",
                     "row_limit": 10,
-                    "bg_color": "",
+                    "bg_color": "#55AA7F",
                     "transparent_bg": false,
                     "border_color": "red",
                     "border_px": 2
@@ -813,10 +813,10 @@
             "height": 0,
             "icon_path": "",
             "nf_char": "",
-            "icon_width": 100,
-            "icon_height": 100,
+            "icon_width": 25,
+            "icon_height": 25,
             "icon_gap": 4,
-            "icon_position": "center",
+            "icon_position": "left",
             "pady_top": 0,
             "pady_bottom": 0,
             "margin_top": 0,
@@ -1636,7 +1636,7 @@
                     "admin": false,
                     "cmd": "radarr",
                     "row_limit": 10,
-                    "bg_color": "#FFAA7F",
+                    "bg_color": "#55AA7F",
                     "transparent_bg": false,
                     "border_color": "#FF0000",
                     "border_px": 2
@@ -1851,7 +1851,7 @@
         },
         {
             "text": "WEB",
-            "fg": "#ffffff",
+            "fg": "#FFFFFF",
             "bg": "#050505",
             "id": "sub_1777634018",
             "bindings": {
@@ -1881,7 +1881,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "myMovie",
