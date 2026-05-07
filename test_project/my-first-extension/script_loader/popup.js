@@ -101,9 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
+    const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
+    
     const modeLabels = {
       local: 'LOCAL',
       site: 'SITE',
@@ -125,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div class="script-actions">
-          ${isFallbackScript ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
+          ${(isFallbackScript || isWhitelistScript) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
           ${isFallbackScript ? `<button class="mode-btn ${fallbackSettings.mode}" data-script="${scriptPath}">${modeLabel}</button>` : ''}
           <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
             ${isEnabled ? 'ON' : 'OFF'}
@@ -145,6 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="settings-hint">Mode LOCAL = try server first. Mode SITE = always open site URL. Mode CHROME = use Chrome's default new tab page.</div>
       `;
       scriptItem.appendChild(fallbackSettingsDiv);
+    } else if (isWhitelistScript) {
+      const whitelistSettingsDiv = document.createElement('div');
+      whitelistSettingsDiv.className = 'fallback-settings hidden';
+      whitelistSettingsDiv.innerHTML = `
+        <label class="settings-label" for="domainWhitelist">Whitelisted Domains (comma separated)</label>
+        <input id="domainWhitelist" class="settings-input" type="text" value="${whitelistSettings || ''}" placeholder="example.com, google.com">
+        <div class="settings-hint">Leave empty to work on all sites.</div>
+      `;
+      scriptItem.appendChild(whitelistSettingsDiv);
     }
 
     return scriptItem;
@@ -176,6 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function saveWhitelistSettings(whitelist) {
+    chrome.storage.local.set({ domainWhitelist: whitelist }, () => {
+      console.log('Whitelist settings saved:', whitelist);
+    });
+  }
+
   function toggleFallbackMode(currentSettings) {
     const modeOrder = ['local', 'site', 'chrome'];
     const currentIndex = modeOrder.indexOf(currentSettings.mode);
@@ -187,9 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadScriptList();
   }
 
-  function attachFallbackSettingsHandlers(scriptItem, fallbackSettings) {
+  function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings) {
     const localServerInput = scriptItem.querySelector('#localServerUrl');
     const siteUrlInput = scriptItem.querySelector('#siteUrl');
+    const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
     const modeButton = scriptItem.querySelector('.mode-btn');
     const settingsButton = scriptItem.querySelector('.settings-btn');
     const settingsPanel = scriptItem.querySelector('.fallback-settings');
@@ -220,6 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    if (domainWhitelistInput) {
+      domainWhitelistInput.addEventListener('change', () => {
+        saveWhitelistSettings(domainWhitelistInput.value);
+      });
+    }
+
     if (modeButton) {
       modeButton.addEventListener('click', () => {
         toggleFallbackMode(fallbackSettings);
@@ -240,9 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
+        const domainWhitelist = result.domainWhitelist || '';
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -250,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist);
           
           // Add click handler to toggle button
           const toggleBtn = scriptItem.querySelector('.toggle-btn');
@@ -258,9 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleScript(scriptPath, isEnabled);
           });
 
-          if (scriptPath === fallbackScriptPath) {
-            attachFallbackSettingsHandlers(scriptItem, fallbackSettings);
-          }
+          attachSettingsHandlers(scriptItem, fallbackSettings, domainWhitelist);
           
           scriptListDiv.appendChild(scriptItem);
         });
