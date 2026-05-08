@@ -13,7 +13,7 @@
         "left": -15,
         "right": -30,
         "top": -15,
-        "bottom": -30
+        "bottom": 10
     },
     "theme": {
         "palette": "Base16",
