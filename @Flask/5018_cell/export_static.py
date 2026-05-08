@@ -771,16 +771,16 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         .subsheet-search-wrapper {
-            padding: 8px;
+            padding: 4px 8px;
             border-bottom: 1px solid #eee;
         }
 
         #subsheetSearchInput {
             width: 100%;
-            padding: 6px 10px;
+            padding: 4px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             box-sizing: border-box;
         }
@@ -793,19 +793,22 @@ def generate_static_html(data, custom_syntaxes):
             overflow-y: auto;
             overflow-x: hidden;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .subsheet-dropdown-item {
-            padding: 10px 15px;
+            padding: 6px 12px;
             margin-right: 5px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             border: 1px solid #f0f0f0;
             transition: all 0.2s;
             color: #333;
-            font-size: 14px;
+            font-size: 13px;
             box-sizing: border-box;
         }
 
