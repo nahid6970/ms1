@@ -791,6 +791,7 @@ def generate_static_html(data, custom_syntaxes):
 
         .subsheet-items-container {
             overflow-y: auto;
+            overflow-x: hidden;
             flex: 1;
         }
 
@@ -801,13 +802,15 @@ def generate_static_html(data, custom_syntaxes):
             align-items: center;
             gap: 10px;
             border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
+            transition: all 0.2s;
             color: #333;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         .subsheet-dropdown-item:hover {
             background: #f8f9fa;
+            transform: translateX(2px);
         }
 
         .subsheet-dropdown-item.active {

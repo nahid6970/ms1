@@ -29,9 +29,13 @@
 - ✅ Sub-sheets can be quickly found via search.
 - ✅ Search works in both main app and static exports.
 - ✅ Flexible height remains functional with the new search bar.
+- ✅ Horizontal scrollbar issue on hover fixed.
 
 **Known Issues:**
 - None
+
+### 🐛 Bug Fixes
+- **Layout Fix**: Fixed an issue where a horizontal scrollbar would appear in the sub-sheet dropdown when hovering over items. This was caused by the hover "nudge" effect (`translateX`) pushing content beyond the container's width. Added `overflow-x: hidden` and `box-sizing: border-box` to prevent this.
 
 ---
 

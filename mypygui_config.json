@@ -393,7 +393,7 @@
         },
         {
             "id": "Folder_bt",
-            "text": "fd",
+            "text": "folders",
             "fg": "#000000",
             "font": [
                 "0xProto Nerd Font",
@@ -407,7 +407,7 @@
                     "hide": false,
                     "admin": false,
                     "cmd": "folder_list",
-                    "row_limit": 10,
+                    "row_limit": 1,
                     "bg_color": "#000000",
                     "transparent_bg": false,
                     "border_color": "",
@@ -443,7 +443,7 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center",
+            "icon_position": "left",
             "pady_top": 0,
             "pady_bottom": 0,
             "margin_top": 0,

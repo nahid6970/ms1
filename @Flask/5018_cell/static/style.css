@@ -192,6 +192,7 @@ body {
 
 .subsheet-items-container {
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scrollbar on hover transform */
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -212,12 +213,13 @@ body {
     color: #e0e0e0;
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
+    box-sizing: border-box; /* Ensure padding/border don't exceed width */
 }
 
 .subsheet-dropdown-item:hover {
     background: rgba(0, 255, 157, 0.15);
     border-color: #00ff9d;
-    transform: translateX(4px);
+    transform: translateX(2px); /* Reduced shift slightly */
 }
 
 .subsheet-dropdown-item.active {
