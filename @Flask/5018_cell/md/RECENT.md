@@ -35,7 +35,8 @@
 - None
 
 ### 🐛 Bug Fixes
-- **Layout Fix**: Fixed an issue where a horizontal scrollbar would appear in the sub-sheet dropdown when hovering over items. This was caused by the hover "nudge" effect (`translateX`) pushing content beyond the container's width. Added `overflow-x: hidden` and `box-sizing: border-box` to prevent this.
+- **Layout Fix**: Fixed an issue where a horizontal scrollbar would appear in the sub-sheet dropdown when hovering over items. This was caused by the hover "nudge" effect (`translateX`) pushing content beyond the container's width.
+- **Border Visibility**: Fixed clipping of the right border on hover by adding a small `margin-right` to the items, providing enough buffer for the `translateX` animation within the hidden-overflow container.
 
 ---
 

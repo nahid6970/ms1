@@ -797,11 +797,12 @@ def generate_static_html(data, custom_syntaxes):
 
         .subsheet-dropdown-item {
             padding: 10px 15px;
+            margin-right: 5px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid #f0f0f0;
+            border: 1px solid #f0f0f0;
             transition: all 0.2s;
             color: #333;
             font-size: 14px;
