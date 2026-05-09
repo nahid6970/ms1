@@ -8704,9 +8704,11 @@ function renderTable(preserveScroll = true) {
                 `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}">🛠️</button>` +
                 `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}">📑</button>` +
                 `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}">📂</button>` +
+                `<span class="header-toggle-group">` +
                 `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}>⬅️</button>` +
                 `<button onclick="toggleSingleRowMode()" id="btnSingleRowMode" title="Toggle Single Row View" class="btn-header-toggle ${singleRowActive ? 'active' : ''}">📖</button>` +
-                `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}>➡️</button>`;
+                `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}>➡️</button>` +
+                `</span>`;
             headerCell.appendChild(toggleSpan);
         }
 

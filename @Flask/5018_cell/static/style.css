@@ -1054,6 +1054,15 @@ th {
     box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
 }
 
+.header-toggle-group {
+    display: flex;
+    gap: 2px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    padding: 1px;
+    margin-left: 3px;
+}
+
 .header-cell {
     display: flex;
     justify-content: space-between;
