@@ -8303,14 +8303,14 @@ function toggleSingleRowMode() {
     const nextBtn = document.getElementById('btnNextRow');
 
     if (singleRowMode) {
-        btn.classList.add('active');
-        prevBtn.disabled = false;
-        nextBtn.disabled = false;
+        if (btn) btn.classList.add('active');
+        if (prevBtn) prevBtn.disabled = false;
+        if (nextBtn) nextBtn.disabled = false;
         showToast('Single Row Mode Enabled', 'info');
     } else {
-        btn.classList.remove('active');
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
+        if (btn) btn.classList.remove('active');
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
         showToast('Single Row Mode Disabled', 'info');
     }
 
@@ -8372,13 +8372,13 @@ function updateSingleRowButtons() {
     const nextBtn = document.getElementById('btnNextRow');
 
     if (!singleRowMode) {
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
         return;
     }
 
-    prevBtn.disabled = singleRowIndex <= 0;
-    nextBtn.disabled = singleRowIndex >= sheet.rows.length - 1;
+    if (prevBtn) prevBtn.disabled = singleRowIndex <= 0;
+    if (nextBtn) nextBtn.disabled = singleRowIndex >= sheet.rows.length - 1;
 }
 
 function toggleRowNumbers() {
@@ -8697,10 +8697,16 @@ function renderTable(preserveScroll = true) {
             const tabsVisible = document.querySelector('.sheet-tabs')?.style.display !== 'none';
             const subsheetsVisible = document.querySelector('.subsheet-bar')?.style.display !== 'none';
 
+            const singleRowActive = singleRowMode;
+            const prevDisabled = !singleRowMode;
+            const nextDisabled = !singleRowMode;
             toggleSpan.innerHTML =
                 `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}">🛠️</button>` +
                 `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}">📑</button>` +
-                `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}">📂</button>`;
+                `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}">📂</button>` +
+                `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}>⬅️</button>` +
+                `<button onclick="toggleSingleRowMode()" id="btnSingleRowMode" title="Toggle Single Row View" class="btn-header-toggle ${singleRowActive ? 'active' : ''}">📖</button>` +
+                `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}>➡️</button>`;
             headerCell.appendChild(toggleSpan);
         }
 
