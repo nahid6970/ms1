@@ -146,38 +146,6 @@ function initializeApp() {
 
 
 
-    // Set up color picker sync for background color
-    const colorInput = document.getElementById('columnColor');
-    const colorText = document.getElementById('columnColorText');
-
-    colorInput.addEventListener('input', (e) => {
-        colorText.value = e.target.value.toUpperCase();
-    });
-
-    // Set up color picker sync for text color
-    const textColorInput = document.getElementById('columnTextColor');
-    const textColorText = document.getElementById('columnTextColorText');
-
-    textColorInput.addEventListener('input', (e) => {
-        textColorText.value = e.target.value.toUpperCase();
-    });
-
-    // Set up color picker sync for header background color
-    const headerBgInput = document.getElementById('headerBgColor');
-    const headerBgText = document.getElementById('headerBgColorText');
-
-    headerBgInput.addEventListener('input', (e) => {
-        headerBgText.value = e.target.value.toUpperCase();
-    });
-
-    // Set up color picker sync for header text color
-    const headerTextInput = document.getElementById('headerTextColor');
-    const headerTextText = document.getElementById('headerTextColorText');
-
-    headerTextInput.addEventListener('input', (e) => {
-        headerTextText.value = e.target.value.toUpperCase();
-    });
-
     // Set up grid line color picker (will be initialized when settings modal opens)
     // Apply saved grid line color on page load
     const savedGridColor = localStorage.getItem('gridLineColor') || '#dddddd';
@@ -1171,15 +1139,11 @@ function addColumn() {
     document.getElementById('columnSubmitBtn').textContent = 'Add Column';
     document.getElementById('columnForm').reset();
     document.getElementById('columnColor').value = '#ffffff';
-    document.getElementById('columnColorText').value = '#FFFFFF';
     document.getElementById('columnTextColor').value = '#000000';
-    document.getElementById('columnTextColorText').value = '#000000';
     document.getElementById('columnFont').value = 'JetBrains Mono';
     document.getElementById('columnFontSize').value = '20';
     document.getElementById('headerBgColor').value = '#f8f9fa';
-    document.getElementById('headerBgColorText').value = '#F8F9FA';
     document.getElementById('headerTextColor').value = '#333333';
-    document.getElementById('headerTextColorText').value = '#333333';
     document.getElementById('headerBold').checked = true;
     document.getElementById('headerItalic').checked = false;
     document.getElementById('headerCenter').checked = false;
@@ -1197,17 +1161,13 @@ function editColumn(index) {
     document.getElementById('columnType').value = col.type;
     document.getElementById('columnWidth').value = col.width;
     document.getElementById('columnColor').value = col.color;
-    document.getElementById('columnColorText').value = col.color.toUpperCase();
     document.getElementById('columnTextColor').value = col.textColor || '#000000';
-    document.getElementById('columnTextColorText').value = (col.textColor || '#000000').toUpperCase();
     document.getElementById('columnFont').value = col.font || 'JetBrains Mono';
     document.getElementById('columnFontSize').value = col.fontSize || '20';
 
     // Load header styling
     document.getElementById('headerBgColor').value = col.headerBgColor || '#f8f9fa';
-    document.getElementById('headerBgColorText').value = (col.headerBgColor || '#f8f9fa').toUpperCase();
     document.getElementById('headerTextColor').value = col.headerTextColor || '#333333';
-    document.getElementById('headerTextColorText').value = (col.headerTextColor || '#333333').toUpperCase();
     document.getElementById('headerBold').checked = col.headerBold !== false; // Default true
     document.getElementById('headerItalic').checked = col.headerItalic || false;
     document.getElementById('headerCenter').checked = col.headerCenter || false;

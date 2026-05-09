@@ -245,10 +245,16 @@
             <form id="columnForm">
                 <input type="hidden" id="editingColumnIndex" value="-1">
 
-                <div class="form-group">
-                    <label for="columnName">Column Name</label>
-                    <input type="text" id="columnName" class="form-input"
-                        placeholder="Leave empty for auto (A, B, C...)" autofocus>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="columnName">Column Name</label>
+                        <input type="text" id="columnName" class="form-input"
+                            placeholder="Auto (A, B, C...)" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="columnWidth">Width (px)</label>
+                        <input type="number" id="columnWidth" class="form-input" value="150" min="1">
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -261,29 +267,6 @@
                             <option value="email">Email</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="columnWidth">Width (px)</label>
-                        <input type="number" id="columnWidth" class="form-input" value="150" min="1">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="columnFont">Font</label>
-                        <select id="columnFont" class="form-input">
-                            <option value="">Default</option>
-                            <option value="JetBrains Mono">JetBrains Mono</option>
-                            <option value="Arial">Arial</option>
-                            <option value="Courier New">Courier New</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Times New Roman">Times New Roman</option>
-                            <option value="Verdana">Verdana</option>
-                            <option value="Agency FB">Agency FB</option>
-                            <option value="Comic Sans MS">Comic Sans MS</option>
-                        </select>
-                    </div>
-
                     <div class="form-group">
                         <label for="columnFontSize">Font Size (px)</label>
                         <input type="number" id="columnFontSize" class="form-input" value="20" min="8" max="72">
@@ -291,19 +274,28 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="columnColor">Background Color</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="columnColor" class="color-input" value="#ffffff">
-                        <input type="text" id="columnColorText" class="form-input color-text" value="#FFFFFF" readonly>
-                    </div>
+                    <label for="columnFont">Font</label>
+                    <select id="columnFont" class="form-input">
+                        <option value="">Default</option>
+                        <option value="JetBrains Mono">JetBrains Mono</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Agency FB">Agency FB</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                    </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="columnTextColor">Text Color</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="columnTextColor" class="color-input" value="#000000">
-                        <input type="text" id="columnTextColorText" class="form-input color-text" value="#000000"
-                            readonly>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="columnColor">Cell Background</label>
+                        <input type="color" id="columnColor" class="color-input-compact" value="#ffffff">
+                    </div>
+                    <div class="form-group">
+                        <label for="columnTextColor">Cell Text</label>
+                        <input type="color" id="columnTextColor" class="color-input-compact" value="#000000">
                     </div>
                 </div>
 
@@ -312,21 +304,14 @@
                     <h3>Header Styling</h3>
                 </div>
 
-                <div class="form-group">
-                    <label for="headerBgColor">Header Background Color</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="headerBgColor" class="color-input" value="#f8f9fa">
-                        <input type="text" id="headerBgColorText" class="form-input color-text" value="#F8F9FA"
-                            readonly>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="headerBgColor">Header Background</label>
+                        <input type="color" id="headerBgColor" class="color-input-compact" value="#f8f9fa">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="headerTextColor">Header Text Color</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="headerTextColor" class="color-input" value="#333333">
-                        <input type="text" id="headerTextColorText" class="form-input color-text" value="#333333"
-                            readonly>
+                    <div class="form-group">
+                        <label for="headerTextColor">Header Text</label>
+                        <input type="color" id="headerTextColor" class="color-input-compact" value="#333333">
                     </div>
                 </div>
 

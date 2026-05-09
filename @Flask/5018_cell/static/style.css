@@ -1648,7 +1648,7 @@ td input::-moz-selection {
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .form-group label {
@@ -2150,6 +2150,16 @@ td input::-moz-selection {
     background: white;
 }
 
+.color-input-compact {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+}
+
 .color-input::-webkit-color-swatch-wrapper {
     padding: 2px;
 }
@@ -2171,9 +2181,9 @@ td input::-moz-selection {
 }
 
 .form-section-header {
-    margin-top: 24px;
-    margin-bottom: 16px;
-    padding-top: 20px;
+    margin-top: 12px;
+    margin-bottom: 10px;
+    padding-top: 12px;
     border-top: 2px solid #e9ecef;
 }
 
