@@ -3,6 +3,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusDiv = document.getElementById('status');
   const copyBtn = document.getElementById('copy');
   const sendBtn = document.getElementById('send');
+  const promptSelect = document.getElementById('promptSelect');
+  const settingsLink = document.getElementById('settingsLink');
+
+  let currentPrompts = [];
+
+  // Load prompts and settings
+  chrome.storage.sync.get({
+    prompts: [],
+    lastSelectedPrompt: ''
+  }, (settings) => {
+    currentPrompts = settings.prompts || [];
+    
+    // Populate dropdown
+    currentPrompts.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      promptSelect.appendChild(opt);
+    });
+    
+    if (settings.lastSelectedPrompt) {
+      promptSelect.value = settings.lastSelectedPrompt;
+    }
+  });
+
+  // Save selection change
+  promptSelect.addEventListener('change', () => {
+    chrome.storage.sync.set({ lastSelectedPrompt: promptSelect.value });
+  });
 
   function update() {
     chrome.storage.local.get(['interceptedSubtitles', 'lastInterceptTime'], (data) => {
@@ -20,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   update();
-  setInterval(update, 1000);
+  setInterval(update, 2000);
 
   copyBtn.addEventListener('click', () => {
     const text = contentDiv.textContent;
@@ -32,9 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   sendBtn.addEventListener('click', () => {
+    const selectedPromptName = promptSelect.value;
+    const promptObj = currentPrompts.find(p => p.name === selectedPromptName);
+    const promptText = promptObj ? promptObj.text : '';
+
     chrome.runtime.sendMessage({
       action: 'injectToAIStudio',
+      prompt: promptText,
       subtitles: contentDiv.textContent
     });
+  });
+
+  settingsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
   });
 });

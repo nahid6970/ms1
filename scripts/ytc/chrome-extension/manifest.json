@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YTC Subtitle Interceptor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Intercepts and extracts subtitles directly from the YouTube player",
   "permissions": [
     "storage",
@@ -9,7 +9,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*.youtube.com/api/timedtext*"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"
@@ -21,6 +21,7 @@
       "run_at": "document_start"
     }
   ],
+  "options_page": "options.html",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

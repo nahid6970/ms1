@@ -32,11 +32,24 @@
 </head>
 <body>
   <h2>Subtitle Interceptor</h2>
+  
+  <div style="margin-bottom: 10px;">
+    <label for="promptSelect" style="font-size: 12px; display: block; margin-bottom: 3px;">Select Prompt:</label>
+    <select id="promptSelect" style="width: 100%; padding: 5px; font-size: 12px;">
+      <option value="">-- No Prompt --</option>
+    </select>
+  </div>
+
   <div id="status">Waiting for YouTube subtitles...</div>
   <div id="content">Play a YouTube video with subtitles turned on.</div>
+  
   <div class="btn-row">
     <button id="copy">Copy to Clipboard</button>
     <button id="send">Send to AI Studio</button>
+  </div>
+
+  <div style="margin-top: 10px; text-align: right;">
+    <a href="#" id="settingsLink" style="font-size: 12px; color: #007bff; text-decoration: none;">Manage Prompts</a>
   </div>
 
   <script src="popup.js"></script>
