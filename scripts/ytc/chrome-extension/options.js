@@ -1,19 +1,11 @@
 // Load settings on page load
 document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.sync.get({
-    saveDir: '',
-    authMethod: 'none',
-    browser: 'chrome',
-    cookieFile: '',
-    prompts: []
+    prompts: [],
+    showViewer: true
   }, (settings) => {
-    document.getElementById('saveDir').value = settings.saveDir;
-    document.getElementById('authMethod').value = settings.authMethod;
-    document.getElementById('browser').value = settings.browser;
-    document.getElementById('cookieFile').value = settings.cookieFile;
-    
+    document.getElementById('showViewer').checked = settings.showViewer;
     renderPrompts(settings.prompts);
-    toggleAuthSections();
   });
 });
 
@@ -24,6 +16,11 @@ function renderPrompts(prompts) {
   const list = document.getElementById('promptsList');
   list.innerHTML = '';
   
+  if (currentPrompts.length === 0) {
+    list.innerHTML = '<p style="text-align: center; color: #999; font-style: italic;">No prompts added yet.</p>';
+    return;
+  }
+
   currentPrompts.forEach((p, index) => {
     const item = document.createElement('div');
     item.className = 'prompt-item';
@@ -40,7 +37,7 @@ function renderPrompts(prompts) {
   // Add delete listeners
   document.querySelectorAll('.delete-prompt').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const index = parseInt(e.target.dataset.index);
+      const index = parseInt(e.currentTarget.dataset.index);
       currentPrompts.splice(index, 1);
       renderPrompts(currentPrompts);
     });
@@ -59,43 +56,21 @@ document.getElementById('addPrompt').addEventListener('click', () => {
     nameInput.value = '';
     textInput.value = '';
   } else {
-    alert('Please enter both name and prompt text.');
+    alert('Please enter both a name and the prompt text.');
   }
-});
-
-// Auth method change handler
-document.getElementById('authMethod').addEventListener('change', toggleAuthSections);
-
-function toggleAuthSections() {
-  const method = document.getElementById('authMethod').value;
-  document.getElementById('browserSection').style.display = method === 'browser' ? 'block' : 'none';
-  document.getElementById('cookieFileSection').style.display = method === 'file' ? 'block' : 'none';
-}
-
-// Browse buttons (Note: Chrome extensions can't directly browse filesystem)
-// These would need to be handled by the native host
-document.getElementById('browseSaveDir').addEventListener('click', () => {
-  alert('Please manually enter the full path to your save directory.\n\nExample: C:\\Downloads\\Subtitles');
-});
-
-document.getElementById('browseCookieFile').addEventListener('click', () => {
-  alert('Please manually enter the full path to your cookie file.\n\nExample: C:\\path\\to\\cookies.txt');
 });
 
 // Save settings
 document.getElementById('save').addEventListener('click', () => {
   const settings = {
-    saveDir: document.getElementById('saveDir').value,
-    authMethod: document.getElementById('authMethod').value,
-    browser: document.getElementById('browser').value,
-    cookieFile: document.getElementById('cookieFile').value,
-    prompts: currentPrompts
+    prompts: currentPrompts,
+    showViewer: document.getElementById('showViewer').checked
   };
   
   chrome.storage.sync.set(settings, () => {
     const status = document.getElementById('status');
-    status.textContent = 'SETTINGS SAVED!';
-    status.style.color = '#00ff9f';
+    status.textContent = 'SETTINGS SAVED SUCCESSFULLY!';
+    status.style.color = '#28a745';
     
     setTimeout(() => {
       status.textContent = '';

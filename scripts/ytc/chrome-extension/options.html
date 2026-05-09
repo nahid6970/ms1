@@ -2,74 +2,42 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>YTC Settings</title>
+  <title>YTC Subtitle Hub - Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <div class="container">
-    <h1 class="header">YTC SETTINGS</h1>
+    <h1>YTC INTERCEPTOR SETTINGS</h1>
     
-    <div class="section">
-      <label class="section-title">SAVE DIRECTORY:</label>
-      <div class="input-group">
-        <input type="text" id="saveDir" class="text-input" placeholder="C:\Downloads\Subtitles">
-        <button id="browseSaveDir" class="browse-btn">BROWSE</button>
-      </div>
-      <p class="hint">Directory where subtitles will be saved</p>
-    </div>
-
-    <div class="section">
-      <label class="section-title">AUTHENTICATION:</label>
-      <select id="authMethod" class="select">
-        <option value="none">None</option>
-        <option value="browser">Browser Cookies</option>
-        <option value="file">Cookie File</option>
-      </select>
-    </div>
-
-    <div class="section" id="browserSection" style="display: none;">
-      <label class="section-title">BROWSER:</label>
-      <select id="browser" class="select">
-        <option value="chrome">Chrome</option>
-        <option value="firefox">Firefox</option>
-        <option value="edge">Edge</option>
-        <option value="opera">Opera</option>
-        <option value="brave">Brave</option>
-      </select>
-    </div>
-
-    <div class="section" id="cookieFileSection" style="display: none;">
-      <label class="section-title">COOKIE FILE:</label>
-      <div class="input-group">
-        <input type="text" id="cookieFile" class="text-input" placeholder="C:\path\to\cookies.txt">
-        <button id="browseCookieFile" class="browse-btn">BROWSE</button>
-      </div>
-    </div>
-
     <div class="section">
       <label class="section-title">AI STUDIO PROMPTS:</label>
-      <div id="promptsList" class="prompts-list">
+      <p style="font-size: 13px; color: #777; margin-bottom: 15px;">
+        These prompts will appear in your popup dropdown for quick access when sending subtitles to AI Studio.
+      </p>
+      
+      <div id="promptsList">
         <!-- Prompts will be added here dynamically -->
       </div>
+
       <div class="add-prompt-section">
-        <input type="text" id="newPromptName" class="text-input" placeholder="Prompt Name (e.g., Summary)">
-        <textarea id="newPromptText" class="prompt-input" style="height: 80px;" placeholder="Prompt text..."></textarea>
-        <button id="addPrompt" class="browse-btn" style="margin-top: 10px; width: 100%;">+ ADD NEW PROMPT</button>
+        <label class="section-title" style="font-size: 12px;">Add New Prompt</label>
+        <input type="text" id="newPromptName" class="text-input" placeholder="Prompt Name (e.g., Summarize)">
+        <textarea id="newPromptText" class="prompt-input" style="height: 100px; margin-top: 10px;" placeholder="Instructions for AI..."></textarea>
+        <button id="addPrompt" class="add-btn">+ ADD TO LIST</button>
       </div>
     </div>
 
-    <button id="save" class="save-btn">[ SAVE SETTINGS ]</button>
+    <div class="section">
+      <label class="section-title">GENERAL PREFERENCES:</label>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="showViewer" style="width: 20px; height: 20px;">
+        <label for="showViewer" style="font-size: 14px;">Show preview window after capture</label>
+      </div>
+    </div>
+
+    <button id="save" class="save-btn">SAVE ALL SETTINGS</button>
     
     <div id="status" class="status"></div>
-
-    <div class="info-section">
-      <h3>REQUIREMENTS:</h3>
-      <ul>
-        <li>yt-dlp must be installed and in PATH</li>
-        <li>Native messaging host must be installed</li>
-        <li>Run install_host.py to set up native messaging</li>
-      </ul>
-    </div>
   </div>
 
   <script src="options.js"></script>
