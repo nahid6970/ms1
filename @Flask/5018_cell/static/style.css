@@ -1017,6 +1017,7 @@ th {
     top: 50%;
     transform: translateY(-50%);
     display: flex;
+    align-items: center;
     gap: 2px;
     z-index: 10;
     background: rgba(248, 249, 250, 0.8);
@@ -1075,6 +1076,7 @@ th {
 
 .header-toggle-group {
     display: flex;
+    align-items: center;
     gap: 2px;
     border: 1px solid #bbb;
     border-radius: 4px;
