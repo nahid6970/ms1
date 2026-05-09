@@ -12,31 +12,10 @@
       border: 1px solid #333;
     }
     
-    .btn-main { 
-      width: 100%;
-      padding: 15px; 
-      cursor: pointer; 
-      background: #10161d; 
-      color: #00ff9f; 
-      border: 2px solid #00ff9f; 
-      border-radius: 0; 
-      font-weight: bold;
-      font-family: inherit;
-      font-size: 14px;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-      text-shadow: 0 0 5px #00ff9f;
-    }
-    .btn-main:hover:not(:disabled) { 
-      background: #00ff9f; 
-      color: #050a0e; 
-      box-shadow: 0 0 20px #00ff9f;
-    }
-    
+
     #content { 
       width: 100%; 
-      height: 220px; 
+      height: 280px; 
       font-size: 12px; 
       margin-bottom: 20px; 
       white-space: pre-wrap;
@@ -99,8 +78,6 @@
   </style>
 </head>
 <body>
-  <button id="fetchBtn" class="btn-main">[ FETCH CURRENT VIDEO SIGNAL ]</button>
-
   <div id="content">NO DATA DETECTED.</div>
   
   <div class="prompt-section">
@@ -111,8 +88,9 @@
   </div>
 
   <div class="btn-row">
+    <button id="fetchBtn">[ FETCH ]</button>
     <button id="copyBtn" disabled>[ COPY ]</button>
-    <button id="sendBtn" disabled>[ INJECT TO AI ]</button>
+    <button id="sendBtn" disabled>[ AI ]</button>
   </div>
 
   <script src="popup.js"></script>

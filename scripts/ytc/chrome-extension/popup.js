@@ -35,15 +35,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     fetchBtn.disabled = true;
-    fetchBtn.textContent = '[ FETCHING SIGNAL... ]';
-    contentDiv.textContent = 'CONNECTING TO DATA STREAM...';
+    fetchBtn.textContent = '[ ... ]';
+    contentDiv.textContent = 'FETCHING...';
 
     chrome.runtime.sendMessage({
       action: 'fetchSubtitles',
       url: tab.url
     }, (response) => {
       fetchBtn.disabled = false;
-      fetchBtn.textContent = '[ FETCH CURRENT VIDEO SIGNAL ]';
+      fetchBtn.textContent = '[ FETCH ]';
       
       if (response && response.success) {
         contentDiv.textContent = response.content;
