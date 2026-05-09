@@ -37,7 +37,8 @@ function parseSubtitles(text) {
       const data = JSON.parse(text);
       return data.events
         ?.filter(e => e.segs)
-        .map(e => e.segs.map(s => s.utf8).join(''))
+        .map(e => e.segs.map(s => s.utf8).join('').trim())
+        .filter(l => l)
         .join('\n') || '';
     } catch (e) {}
   }

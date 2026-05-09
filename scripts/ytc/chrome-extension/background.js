@@ -34,15 +34,15 @@ async function fetchDirectAPI(url) {
   // Clear any previously intercepted subtitles so we can detect a fresh capture
   await chrome.storage.local.remove('interceptedSubtitles');
 
-  // Trigger CC reload by simulating 'c' keypress (toggle off then on),
-  // forcing the YouTube player to make a fresh timedtext network request
-  // that inject.js will intercept automatically
+  // Trigger CC reload by simulating 'c' keypress in the page's main world
+  // (MAIN world required so YouTube's player event listeners actually receive it)
   await chrome.scripting.executeScript({
     target: { tabId },
+    world: 'MAIN',
     func: () => {
       const fire = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', keyCode: 67, bubbles: true, cancelable: true }));
-      fire(); // toggle off
-      setTimeout(fire, 500); // toggle back on → triggers fresh timedtext fetch
+      fire();
+      setTimeout(fire, 600);
     }
   });
 
