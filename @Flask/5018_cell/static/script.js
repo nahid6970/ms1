@@ -9202,6 +9202,12 @@ function closeAllColumnMenus() {
     });
 }
 
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.column-menu-wrapper')) {
+        closeAllColumnMenus();
+    }
+});
+
 // Normalize Bengali characters to be treated as the same in search:
 // ি (U+09BF) = ী (U+09C0), ু (U+09C1) = ূ (U+09C2)
 // শ (U+09B6) = ষ (U+09B7) = স (U+09B8)
