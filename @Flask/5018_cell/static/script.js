@@ -8698,8 +8698,9 @@ function renderTable(preserveScroll = true) {
             const subsheetsVisible = document.querySelector('.subsheet-bar')?.style.display !== 'none';
 
             const singleRowActive = singleRowMode;
-            const prevDisabled = !singleRowMode;
-            const nextDisabled = !singleRowMode;
+            const sheet = tableData.sheets[currentSheet];
+            const prevDisabled = !singleRowMode || singleRowIndex <= 0;
+            const nextDisabled = !singleRowMode || singleRowIndex >= (sheet?.rows?.length ?? 1) - 1;
             toggleSpan.innerHTML =
                 `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="5" width="14" height="9" rx="1"/><path d="M1 5h4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` +
                 `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2.5" rx="0.5"/><rect x="1" y="7" width="14" height="2.5" rx="0.5"/><rect x="1" y="11" width="14" height="2.5" rx="0.5"/></svg></button>` +
