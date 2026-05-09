@@ -1094,6 +1094,31 @@ th {
     stroke: #2266aa;
 }
 
+#btnPrevRow, #btnNextRow {
+    background: #1a56db;
+    border-color: #1044b0;
+    opacity: 0.85;
+}
+
+#btnPrevRow svg, #btnNextRow svg {
+    stroke: #ffffff;
+}
+
+#btnPrevRow:hover, #btnNextRow:hover {
+    background: #1044b0;
+    opacity: 1;
+}
+
+#btnPrevRow:disabled, #btnNextRow:disabled {
+    background: #c8d8f0;
+    border-color: #aac4dd;
+    opacity: 0.5;
+}
+
+#btnPrevRow:disabled svg, #btnNextRow:disabled svg {
+    stroke: #7a9abf;
+}
+
 .header-toggle-group .btn-header-toggle:hover {
     background: #bbddff;
 }
