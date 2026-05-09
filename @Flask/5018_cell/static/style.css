@@ -2151,14 +2151,18 @@ td input::-moz-selection {
 }
 
 .color-input-compact {
-    width: 100%;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border: 1px solid #ced4da;
     border-radius: 6px;
     cursor: pointer;
     padding: 2px;
     background: white;
 }
+
+.color-input-compact::-webkit-color-swatch-wrapper { padding: 2px; }
+.color-input-compact::-webkit-color-swatch { border: none; border-radius: 3px; }
+.color-input-compact::-moz-color-swatch { border: none; border-radius: 3px; }
 
 .color-input::-webkit-color-swatch-wrapper {
     padding: 2px;
