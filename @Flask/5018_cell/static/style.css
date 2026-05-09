@@ -1041,9 +1041,20 @@ th {
     padding: 0;
 }
 
+.btn-header-toggle svg {
+    width: 12px;
+    height: 12px;
+    stroke: #444;
+    flex-shrink: 0;
+}
+
 .btn-header-toggle:hover {
     background: #e0e0e0;
     opacity: 1;
+}
+
+.btn-header-toggle:hover svg {
+    stroke: #111;
 }
 
 .btn-header-toggle.active {
@@ -1052,6 +1063,14 @@ th {
     opacity: 1;
     filter: grayscale(0);
     box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
+}
+
+.btn-header-toggle.active svg {
+    stroke: #006644;
+}
+
+.btn-header-toggle:disabled svg {
+    stroke: #bbb;
 }
 
 .header-toggle-group {
