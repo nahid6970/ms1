@@ -1,10 +1,19 @@
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'extractSubtitles') {
-    extractSubtitles(request.data)
-      .then((response) => sendResponse({ success: true, data: response }))
-      .catch((error) => sendResponse({ success: false, error: error.message }));
-    return true; // Keep channel open for async response
+  if (request.action === 'fetchSubtitles') {
+    fetchDirectAPI(request.url)
+      .then((content) => {
+        chrome.storage.local.set({ 
+          interceptedSubtitles: content,
+          lastInterceptTime: Date.now()
+        });
+        sendResponse({ success: true, content });
+      })
+      .catch((error) => {
+        console.error('DEBUG: fetchSubtitles error:', error);
+        sendResponse({ success: false, error: error.message || 'Unknown error during fetch' });
+      });
+    return true;
   }
   
   if (request.action === 'injectToAIStudio') {
@@ -13,15 +22,115 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+async function fetchDirectAPI(url) {
+  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (!match) throw new Error('Not a valid YouTube URL');
+  const videoId = match[1];
+
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tabId = (tabs[0] && tabs[0].url.includes(videoId)) ? tabs[0].id : null;
+
+  if (!tabId) throw new Error('Please keep the YouTube video tab active.');
+
+  // 1. Try to get tracks from tab memory using multiple potential paths
+  const results = await chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    func: () => {
+      try {
+        // Path 1: Standard player response
+        let tracks = window.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+        
+        // Path 2: ytplayer config (older/different versions)
+        if (!tracks) {
+          const cfg = window.ytplayer?.config?.args?.player_response;
+          if (cfg) {
+            const parsed = JSON.parse(cfg);
+            tracks = parsed.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+          }
+        }
+        
+        // Path 3: Try to find any object containing captionTracks in window
+        if (!tracks) {
+          // This is a bit heavy but can be a last resort
+          for (const key in window) {
+            if (key.startsWith('yt') && window[key]?.captions?.playerCaptionsTracklistRenderer?.captionTracks) {
+              tracks = window[key].captions.playerCaptionsTracklistRenderer.captionTracks;
+              break;
+            }
+          }
+        }
+
+        return tracks || [];
+      } catch (e) { return null; }
+    }
+  });
+
+  let tracks = results?.[0]?.result || [];
+  let baseUrl = '';
+
+  if (tracks.length > 0) {
+    // Pick English or first available
+    const track = tracks.find(t => t.languageCode === 'en') || tracks[0];
+    baseUrl = track.baseUrl;
+  }
+
+  // 2. Fallback to background HTML fetch
+  if (!baseUrl) {
+    try {
+      const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
+      const html = await res.text();
+      const jsonMatch = html.match(/"captionTracks":(\[.*?\])/);
+      if (jsonMatch) {
+        const captions = JSON.parse(jsonMatch[1]);
+        baseUrl = captions[0]?.baseUrl;
+      }
+    } catch (e) {
+      console.warn('DEBUG: Background HTML fetch failed:', e);
+    }
+  }
+
+  if (!baseUrl) throw new Error('No subtitle tracks detected. Try turning CC on in the player first.');
+
+  // 3. Fetch content via tab context
+  const subUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'fmt=vtt';
+  const fetchResult = await chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    args: [subUrl],
+    func: async (url) => {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return null;
+        return await r.text();
+      } catch (e) { return null; }
+    }
+  });
+
+  const vttText = fetchResult?.[0]?.result;
+  if (!vttText || vttText.length < 100) throw new Error('Empty or invalid subtitle response from YouTube.');
+
+  // 4. Clean text
+  const lines = [];
+  const rawLines = vttText.split('\n');
+  for (const line of rawLines) {
+    const t = line.trim();
+    if (!t || t.startsWith('WEBVTT') || t.includes('-->') || /^\d+$/.test(t) || t.startsWith('Kind:') || t.startsWith('Language:')) continue;
+    const clean = t.replace(/<[^>]+>/g, '').trim();
+    if (clean && lines[lines.length - 1] !== clean) lines.push(clean);
+  }
+  
+  const finalContent = lines.join('\n');
+  if (!finalContent) throw new Error('Could not extract any readable text from subtitles.');
+  
+  return finalContent;
+}
+
 async function injectToAIStudio(prompt, subtitles) {
   const tab = await chrome.tabs.create({ url: 'https://aistudio.google.com/prompts/new_chat' });
 
-  // Wait for tab to load
   chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
     if (tabId === tab.id && info.status === 'complete') {
       chrome.tabs.onUpdated.removeListener(listener);
 
-      // Inject script to find and fill the textarea + simulate file drop
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         args: [prompt, subtitles],
@@ -33,7 +142,6 @@ async function injectToAIStudio(prompt, subtitles) {
                            document.querySelector('ms-prompt-input');
 
             if (editor) {
-              // 1. Inject the prompt text
               editor.focus();
               if (editor.getAttribute('contenteditable') === 'true') {
                 document.execCommand('insertText', false, promptText || '');
@@ -42,7 +150,6 @@ async function injectToAIStudio(prompt, subtitles) {
                 editor.dispatchEvent(new Event('input', { bubbles: true }));
               }
 
-              // 2. Simulate dropping the subtitles as a file
               const blob = new Blob([subtitleText], { type: 'text/plain' });
               const file = new File([blob], 'subtitles.txt', { type: 'text/plain' });
               const dataTransfer = new DataTransfer();
@@ -54,108 +161,19 @@ async function injectToAIStudio(prompt, subtitles) {
                 dataTransfer: dataTransfer
               });
 
-              // Dispatch drop on the editor or the body
               editor.dispatchEvent(dropEvent);
-
               return true;
             }
             return false;
           };
 
-          // Try several times as the UI loads dynamically
           let attempts = 0;
           const interval = setInterval(() => {
-            if (tryInject() || attempts > 30) {
-              clearInterval(interval);
-            }
+            if (tryInject() || attempts > 30) clearInterval(interval);
             attempts++;
           }, 800);
         }
       });
     }
   });
-}
-
-async function extractSubtitles(data) {
-  const { url, language, format, autoSub, copyToClipboard, useTimeline, startTime, endTime, saveDir } = data;   
-
-  // Get authentication settings
-  const settings = await chrome.storage.sync.get({
-    authMethod: 'none',
-    browser: 'chrome',
-    cookieFile: ''
-  });
-
-  // Build yt-dlp command
-  const cmd = ['yt-dlp', '--skip-download', '--write-subs', '--no-playlist'];
-
-  // Add authentication
-  if (settings.authMethod === 'browser') {
-    cmd.push('--cookies-from-browser', settings.browser);
-  } else if (settings.authMethod === 'file' && settings.cookieFile) {
-    cmd.push('--cookies', settings.cookieFile);
-  }
-
-  // Auto-generated subtitles
-  if (autoSub) {
-    cmd.push('--write-auto-subs');
-  }
-
-  // Format conversion
-  if (format === 'txt') {
-    cmd.push('--convert-subs', 'srt'); // Download as SRT first, convert later
-  } else {
-    cmd.push('--convert-subs', format);
-  }
-
-  // Language selection
-  if (language === 'bn') {
-    cmd.push('--sub-langs', 'bn');
-  } else if (language === 'hi') {
-    cmd.push('--sub-langs', 'hi');
-  } else if (language === 'all') {
-    cmd.push('--sub-langs', 'all');
-  } else {
-    cmd.push('--sub-langs', 'en.*');
-  }
-
-  // Output path
-  cmd.push('-o', `${saveDir}/%(title)s.%(ext)s`);
-
-  // Add URL
-  cmd.push(url);
-
-  // Send to native host
-  const response = await chrome.runtime.sendNativeMessage(
-    'com.ytc.subtitle_extractor',
-    {
-      command: cmd,
-      format: format,
-      copyToClipboard: copyToClipboard && format === 'txt',
-      useTimeline: useTimeline,
-      startTime: startTime,
-      endTime: endTime,
-      saveDir: saveDir
-    }
-  );
-
-  if (!response.success) {
-    throw new Error(response.error || 'Unknown error');
-  }
-
-  if (response.content) {
-    const settings = await chrome.storage.sync.get({ showViewer: true });
-    if (settings.showViewer) {
-      chrome.storage.local.set({ subtitleContent: response.content }, () => {
-        chrome.windows.create({
-          url: 'viewer.html',
-          type: 'popup',
-          width: 800,
-          height: 600
-        });
-      });
-    }
-  }
-
-  return response;
 }

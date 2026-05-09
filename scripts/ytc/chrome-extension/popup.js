@@ -1,10 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const contentDiv = document.getElementById('content');
-  const statusDiv = document.getElementById('status');
+  const fetchBtn = document.getElementById('fetchBtn');
   const copyBtn = document.getElementById('copyBtn');
   const sendBtn = document.getElementById('sendBtn');
   const promptSelect = document.getElementById('promptSelect');
-  const settingsLink = document.getElementById('settingsLink');
 
   let currentPrompts = [];
 
@@ -27,29 +26,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function update() {
-    chrome.storage.local.get(['interceptedSubtitles', 'lastInterceptTime'], (data) => {
-      if (data.interceptedSubtitles) {
-        contentDiv.textContent = data.interceptedSubtitles;
-        const time = new Date(data.lastInterceptTime).toLocaleTimeString();
-        statusDiv.textContent = `Captured at ${time}`;
-        statusDiv.style.color = '#28a745';
+  // Mode 1: Proactive Fetch
+  fetchBtn.addEventListener('click', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.url.includes('youtube.com/watch')) {
+      alert('PLEASE OPEN A YOUTUBE VIDEO TAB.');
+      return;
+    }
+
+    fetchBtn.disabled = true;
+    fetchBtn.textContent = '[ FETCHING SIGNAL... ]';
+    contentDiv.textContent = 'CONNECTING TO DATA STREAM...';
+
+    chrome.runtime.sendMessage({
+      action: 'fetchSubtitles',
+      url: tab.url
+    }, (response) => {
+      fetchBtn.disabled = false;
+      fetchBtn.textContent = '[ FETCH CURRENT VIDEO SIGNAL ]';
+      
+      if (response && response.success) {
+        contentDiv.textContent = response.content;
         copyBtn.disabled = false;
         sendBtn.disabled = false;
       } else {
-        copyBtn.disabled = true;
-        sendBtn.disabled = true;
+        contentDiv.textContent = 'FETCH FAILED: ' + (response?.error || 'UNKNOWN ERROR');
+        alert('SIGNAL LOST: ' + (response?.error || 'UNKNOWN ERROR'));
+      }
+    });
+  });
+
+  // Mode 2: Live Interceptor (Background Update)
+  function updateFromStorage() {
+    chrome.storage.local.get(['interceptedSubtitles'], (data) => {
+      if (data.interceptedSubtitles && !fetchBtn.disabled) {
+        contentDiv.textContent = data.interceptedSubtitles;
+        copyBtn.disabled = false;
+        sendBtn.disabled = false;
       }
     });
   }
 
-  update();
-  setInterval(update, 1000);
+  setInterval(updateFromStorage, 2000);
 
+  // Buttons
   copyBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(contentDiv.textContent).then(() => {
       const oldText = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
+      copyBtn.textContent = '[ COPIED! ]';
       setTimeout(() => copyBtn.textContent = oldText, 2000);
     });
   });
@@ -68,10 +92,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   promptSelect.addEventListener('change', () => {
     chrome.storage.sync.set({ lastSelectedPrompt: promptSelect.value });
-  });
-
-  settingsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    chrome.runtime.openOptionsPage();
   });
 });

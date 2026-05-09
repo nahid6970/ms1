@@ -12,31 +12,31 @@
       border: 1px solid #333;
     }
     
-    h2 { 
-      text-align: center; 
-      color: #00ff9f; 
-      font-size: 18px; 
-      font-weight: bold; 
-      margin-top: 0;
-      margin-bottom: 20px; 
-      text-shadow: 0 0 10px #00ff9f;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    
-    .status-box { 
+    .btn-main { 
+      width: 100%;
+      padding: 15px; 
+      cursor: pointer; 
       background: #10161d; 
-      padding: 12px; 
-      border: 1px solid #333;
+      color: #00ff9f; 
+      border: 2px solid #00ff9f; 
       border-radius: 4px; 
+      font-weight: bold;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s;
+      text-transform: uppercase;
       margin-bottom: 20px;
-      text-align: center;
+      text-shadow: 0 0 5px #00ff9f;
     }
-    #status { font-size: 13px; font-weight: bold; color: #00f0ff; }
+    .btn-main:hover:not(:disabled) { 
+      background: #00ff9f; 
+      color: #050a0e; 
+      box-shadow: 0 0 20px #00ff9f;
+    }
     
     #content { 
       width: 100%; 
-      height: 200px; 
+      height: 220px; 
       font-size: 12px; 
       margin-bottom: 20px; 
       white-space: pre-wrap;
@@ -70,8 +70,8 @@
       padding: 12px; 
       cursor: pointer; 
       background: #10161d; 
-      color: #00ff9f; 
-      border: 2px solid #00ff9f; 
+      color: #00f0ff; 
+      border: 2px solid #00f0ff; 
       border-radius: 4px; 
       font-weight: bold;
       font-family: inherit;
@@ -80,21 +80,15 @@
       text-transform: uppercase;
     }
     button:hover:not(:disabled) { 
-      background: #00ff9f; 
+      background: #00f0ff; 
       color: #050a0e; 
-      box-shadow: 0 0 15px #00ff9f;
+      box-shadow: 0 0 15px #00f0ff;
     }
     button:disabled { 
       border-color: #333; 
       color: #555; 
       cursor: not-allowed; 
-    }
-    
-    #sendBtn { border-color: #00f0ff; color: #00f0ff; }
-    #sendBtn:hover:not(:disabled) { 
-      background: #00f0ff; 
-      color: #050a0e; 
-      box-shadow: 0 0 15px #00f0ff;
+      text-shadow: none;
     }
 
     /* Custom Scrollbar */
@@ -105,12 +99,7 @@
   </style>
 </head>
 <body>
-  <h2>[ SUBTITLE CAPTOR ]</h2>
-
-  <div class="status-box">
-    <div id="status">SCANNING FOR SIGNAL...</div>
-    <div style="font-size: 9px; color: #666; margin-top: 5px; font-style: italic;">ACTIVATE CC IN PLAYER TO START INTERCEPTION</div>
-  </div>
+  <button id="fetchBtn" class="btn-main">[ FETCH CURRENT VIDEO SIGNAL ]</button>
 
   <div id="content">NO DATA DETECTED.</div>
   
