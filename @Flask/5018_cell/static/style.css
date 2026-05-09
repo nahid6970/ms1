@@ -1078,10 +1078,38 @@ th {
     display: flex;
     align-items: center;
     gap: 2px;
-    border: 1px solid #bbb;
+    border: 1px solid #7ab3e0;
     border-radius: 4px;
     padding: 1px;
     margin-left: 3px;
+    background: rgba(100, 170, 230, 0.08);
+}
+
+.header-toggle-group .btn-header-toggle {
+    background: #ddeeff;
+    border-color: #7ab3e0;
+}
+
+.header-toggle-group .btn-header-toggle svg {
+    stroke: #2266aa;
+}
+
+.header-toggle-group .btn-header-toggle:hover {
+    background: #bbddff;
+}
+
+.header-toggle-group .btn-header-toggle:disabled svg {
+    stroke: #aac4dd;
+}
+
+.header-toggle-group .btn-header-toggle.active {
+    background: #00ff9d;
+    border-color: #00cc7a;
+    box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
+}
+
+.header-toggle-group .btn-header-toggle.active svg {
+    stroke: #006644;
 }
 
 .header-cell {
