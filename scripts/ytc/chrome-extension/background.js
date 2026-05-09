@@ -1,4 +1,12 @@
+// Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'extractSubtitles') {
+    extractSubtitles(request.data)
+      .then((response) => sendResponse({ success: true, data: response }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true; // Keep channel open for async response
+  }
+  
   if (request.action === 'injectToAIStudio') {
     injectToAIStudio(request.prompt, request.subtitles);
     sendResponse({ success: true });
@@ -6,29 +14,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function injectToAIStudio(prompt, subtitles) {
-  console.log('DEBUG: Opening AI Studio...');
   const tab = await chrome.tabs.create({ url: 'https://aistudio.google.com/prompts/new_chat' });
-  
+
+  // Wait for tab to load
   chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
     if (tabId === tab.id && info.status === 'complete') {
       chrome.tabs.onUpdated.removeListener(listener);
-      
-      console.log('DEBUG: Tab loaded, injecting script...');
+
+      // Inject script to find and fill the textarea + simulate file drop
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         args: [prompt, subtitles],
         func: (promptText, subtitleText) => {
           const tryInject = () => {
-            console.log('DEBUG [Tab]: Attempting injection...');
-            
-            // Find prompt input
-            const editor = document.querySelector('div[contenteditable="true"]') || 
+            const editor = document.querySelector('div[contenteditable="true"]') ||
                            document.querySelector('textarea') ||
                            document.querySelector('.prompt-textarea') ||
                            document.querySelector('ms-prompt-input');
-            
+
             if (editor) {
-              console.log('DEBUG [Tab]: Found editor, inserting prompt...');
               // 1. Inject the prompt text
               editor.focus();
               if (editor.getAttribute('contenteditable') === 'true') {
@@ -39,38 +43,119 @@ async function injectToAIStudio(prompt, subtitles) {
               }
 
               // 2. Simulate dropping the subtitles as a file
-              console.log('DEBUG [Tab]: Simulating file drop...');
               const blob = new Blob([subtitleText], { type: 'text/plain' });
               const file = new File([blob], 'subtitles.txt', { type: 'text/plain' });
               const dataTransfer = new DataTransfer();
               dataTransfer.items.add(file);
-              
+
               const dropEvent = new DragEvent('drop', {
                 bubbles: true,
                 cancelable: true,
                 dataTransfer: dataTransfer
               });
-              
-              // Dispatch drop on both the editor and the document to be sure
+
+              // Dispatch drop on the editor or the body
               editor.dispatchEvent(dropEvent);
-              document.dispatchEvent(dropEvent);
-              
-              console.log('DEBUG [Tab]: Injection complete.');
+
               return true;
             }
             return false;
           };
 
+          // Try several times as the UI loads dynamically
           let attempts = 0;
           const interval = setInterval(() => {
             if (tryInject() || attempts > 30) {
               clearInterval(interval);
-              console.log('DEBUG [Tab]: Stopped attempts after', attempts, 'tries');
             }
             attempts++;
-          }, 1000);
+          }, 800);
         }
-      }).catch(err => console.error('DEBUG: executeScript error:', err));
+      });
     }
   });
+}
+
+async function extractSubtitles(data) {
+  const { url, language, format, autoSub, copyToClipboard, useTimeline, startTime, endTime, saveDir } = data;   
+
+  // Get authentication settings
+  const settings = await chrome.storage.sync.get({
+    authMethod: 'none',
+    browser: 'chrome',
+    cookieFile: ''
+  });
+
+  // Build yt-dlp command
+  const cmd = ['yt-dlp', '--skip-download', '--write-subs', '--no-playlist'];
+
+  // Add authentication
+  if (settings.authMethod === 'browser') {
+    cmd.push('--cookies-from-browser', settings.browser);
+  } else if (settings.authMethod === 'file' && settings.cookieFile) {
+    cmd.push('--cookies', settings.cookieFile);
+  }
+
+  // Auto-generated subtitles
+  if (autoSub) {
+    cmd.push('--write-auto-subs');
+  }
+
+  // Format conversion
+  if (format === 'txt') {
+    cmd.push('--convert-subs', 'srt'); // Download as SRT first, convert later
+  } else {
+    cmd.push('--convert-subs', format);
+  }
+
+  // Language selection
+  if (language === 'bn') {
+    cmd.push('--sub-langs', 'bn');
+  } else if (language === 'hi') {
+    cmd.push('--sub-langs', 'hi');
+  } else if (language === 'all') {
+    cmd.push('--sub-langs', 'all');
+  } else {
+    cmd.push('--sub-langs', 'en.*');
+  }
+
+  // Output path
+  cmd.push('-o', `${saveDir}/%(title)s.%(ext)s`);
+
+  // Add URL
+  cmd.push(url);
+
+  // Send to native host
+  const response = await chrome.runtime.sendNativeMessage(
+    'com.ytc.subtitle_extractor',
+    {
+      command: cmd,
+      format: format,
+      copyToClipboard: copyToClipboard && format === 'txt',
+      useTimeline: useTimeline,
+      startTime: startTime,
+      endTime: endTime,
+      saveDir: saveDir
+    }
+  );
+
+  if (!response.success) {
+    throw new Error(response.error || 'Unknown error');
+  }
+
+  if (response.content) {
+    const settings = await chrome.storage.sync.get({ showViewer: true });
+    if (settings.showViewer) {
+      chrome.storage.local.set({ subtitleContent: response.content }, () => {
+        chrome.windows.create({
+          url: 'viewer.html',
+          type: 'popup',
+          width: 800,
+          height: 600
+        });
+      });
+    }
+  }
+
+  return response;
 }

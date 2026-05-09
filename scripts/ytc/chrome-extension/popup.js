@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const contentDiv = document.getElementById('content');
   const statusDiv = document.getElementById('status');
-  const copyBtn = document.getElementById('copy');
-  const sendBtn = document.getElementById('send');
+  const copyBtn = document.getElementById('copyBtn');
+  const sendBtn = document.getElementById('sendBtn');
   const promptSelect = document.getElementById('promptSelect');
   const settingsLink = document.getElementById('settingsLink');
 
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }, (settings) => {
     currentPrompts = settings.prompts || [];
     
-    // Populate dropdown
     currentPrompts.forEach(p => {
       const opt = document.createElement('option');
       opt.value = p.name;
@@ -28,17 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Save selection change
-  promptSelect.addEventListener('change', () => {
-    chrome.storage.sync.set({ lastSelectedPrompt: promptSelect.value });
-  });
-
   function update() {
     chrome.storage.local.get(['interceptedSubtitles', 'lastInterceptTime'], (data) => {
       if (data.interceptedSubtitles) {
         contentDiv.textContent = data.interceptedSubtitles;
         const time = new Date(data.lastInterceptTime).toLocaleTimeString();
-        statusDiv.textContent = `Last intercepted at ${time}`;
+        statusDiv.textContent = `Captured at ${time}`;
+        statusDiv.style.color = '#28a745';
         copyBtn.disabled = false;
         sendBtn.disabled = false;
       } else {
@@ -49,14 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   update();
-  setInterval(update, 2000);
+  setInterval(update, 1000);
 
   copyBtn.addEventListener('click', () => {
-    const text = contentDiv.textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const originalText = copyBtn.textContent;
+    navigator.clipboard.writeText(contentDiv.textContent).then(() => {
+      const oldText = copyBtn.textContent;
       copyBtn.textContent = 'Copied!';
-      setTimeout(() => copyBtn.textContent = originalText, 2000);
+      setTimeout(() => copyBtn.textContent = oldText, 2000);
     });
   });
 
@@ -70,6 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
       prompt: promptText,
       subtitles: contentDiv.textContent
     });
+  });
+
+  promptSelect.addEventListener('change', () => {
+    chrome.storage.sync.set({ lastSelectedPrompt: promptSelect.value });
   });
 
   settingsLink.addEventListener('click', (e) => {

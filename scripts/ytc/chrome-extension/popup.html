@@ -2,54 +2,84 @@
 <html>
 <head>
   <style>
-    body { width: 350px; font-family: sans-serif; padding: 15px; }
-    h2 { font-size: 16px; margin-top: 0; }
-    #status { font-size: 12px; color: #666; margin-bottom: 10px; }
+    body { width: 350px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background: #f9f9f9; }
+    h2 { font-size: 18px; margin-top: 0; color: #cc0000; text-align: center; margin-bottom: 15px; }
+    
+    .status-box { 
+      background: white; 
+      padding: 10px; 
+      border-radius: 8px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    #status { font-size: 13px; font-weight: 600; color: #555; }
+    
     #content { 
       width: 100%; 
-      height: 250px; 
+      height: 200px; 
       font-size: 12px; 
-      margin-bottom: 10px; 
+      margin-bottom: 15px; 
       white-space: pre-wrap;
       overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 5px;
-      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: #fff;
+      color: #333;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
-    .btn-row { display: flex; gap: 5px; }
+    
+    .prompt-section { margin-bottom: 15px; }
+    label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
+    select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; font-size: 13px; }
+    
+    .btn-row { display: flex; gap: 10px; }
     button { 
       flex: 1; 
-      padding: 8px; 
+      padding: 10px; 
       cursor: pointer; 
-      background: #007bff; 
+      background: #4A90E2; 
       color: white; 
       border: none; 
       border-radius: 4px; 
+      font-weight: 600;
+      font-size: 13px;
     }
-    button:hover { background: #0056b3; }
-    button:disabled { background: #ccc; }
+    button:hover { background: #357ABD; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #sendBtn { background: #28a745; }
+    #sendBtn:hover { background: #218838; }
+
+    .footer { margin-top: 15px; display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 10px; }
+    .footer a { font-size: 12px; color: #4A90E2; text-decoration: none; }
   </style>
 </head>
 <body>
   <h2>Subtitle Interceptor</h2>
+
+  <div class="status-box">
+    <div id="status">Waiting for subtitles...</div>
+    <div style="font-size: 10px; color: #999; margin-top: 4px;">Open a YouTube video and turn CC on</div>
+  </div>
+
+  <div id="content">No subtitles captured yet.</div>
   
-  <div style="margin-bottom: 10px;">
-    <label for="promptSelect" style="font-size: 12px; display: block; margin-bottom: 3px;">Select Prompt:</label>
-    <select id="promptSelect" style="width: 100%; padding: 5px; font-size: 12px;">
+  <div class="prompt-section">
+    <label for="promptSelect">Select AI Studio Prompt:</label>
+    <select id="promptSelect">
       <option value="">-- No Prompt --</option>
     </select>
   </div>
 
-  <div id="status">Waiting for YouTube subtitles...</div>
-  <div id="content">Play a YouTube video with subtitles turned on.</div>
-  
   <div class="btn-row">
-    <button id="copy">Copy to Clipboard</button>
-    <button id="send">Send to AI Studio</button>
+    <button id="copyBtn" disabled>Copy Text</button>
+    <button id="sendBtn" disabled>Send to AI Studio</button>
   </div>
 
-  <div style="margin-top: 10px; text-align: right;">
-    <a href="#" id="settingsLink" style="font-size: 12px; color: #007bff; text-decoration: none;">Manage Prompts</a>
+  <div class="footer">
+    <span style="font-size: 10px; color: #ccc;">v1.0.3</span>
+    <a href="#" id="settingsLink">Settings & Prompts</a>
   </div>
 
   <script src="popup.js"></script>
