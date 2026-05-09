@@ -8701,8 +8701,8 @@ function renderTable(preserveScroll = true) {
             const prevDisabled = !singleRowMode;
             const nextDisabled = !singleRowMode;
             toggleSpan.innerHTML =
-                `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2.5" rx="0.5"/><rect x="1" y="7" width="14" height="2.5" rx="0.5"/><rect x="1" y="11" width="14" height="2.5" rx="0.5"/></svg></button>` +
                 `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="5" width="14" height="9" rx="1"/><path d="M1 5h4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` +
+                `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2.5" rx="0.5"/><rect x="1" y="7" width="14" height="2.5" rx="0.5"/><rect x="1" y="11" width="14" height="2.5" rx="0.5"/></svg></button>` +
                 `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h5l1.5 2H15v8H1z"/></svg></button>` +
                 `<span class="header-toggle-group">` +
                 `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg></button>` +
