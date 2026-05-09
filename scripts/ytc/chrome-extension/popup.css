@@ -43,7 +43,7 @@ body {
   border: 1px solid #00f0ff;
   padding: 8px;
   color: #00f0ff;
-  border-radius: 4px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 9pt;
 }
@@ -55,7 +55,7 @@ body {
   border: 1px solid #ff003c;
   padding: 8px;
   color: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 9pt;
   resize: vertical;
@@ -72,7 +72,7 @@ body {
   border: 1px solid #ff003c;
   padding: 8px;
   color: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 0;
   font-family: inherit;
   cursor: pointer;
 }
@@ -90,7 +90,7 @@ body {
 .ai-studio-group {
   padding: 10px;
   background-color: #10161d;
-  border-radius: 4px;
+  border-radius: 0;
   border: 1px solid #333;
 }
 
@@ -113,7 +113,7 @@ body {
 .timeline-section {
   background-color: #10161d;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 0;
   border: 1px solid #333;
 }
 
@@ -140,7 +140,7 @@ body {
   border: 1px solid #00f0ff;
   padding: 5px;
   color: #00f0ff;
-  border-radius: 3px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 9pt;
 }
@@ -155,7 +155,7 @@ body {
   font-family: inherit;
   font-size: 11pt;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.3s;
   margin-top: 10px;
 }
@@ -179,7 +179,7 @@ body {
   margin-top: 15px;
   padding: 8px;
   background-color: #10161d;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 10pt;
   min-height: 30px;
   display: flex;
