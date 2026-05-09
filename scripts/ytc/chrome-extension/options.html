@@ -2,17 +2,17 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>YTC Subtitle Hub - Settings</title>
+  <title>YTC INTERCEPTOR - SETTINGS</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <div class="container">
-    <h1>YTC INTERCEPTOR SETTINGS</h1>
+    <h1>[ SYSTEM SETTINGS ]</h1>
     
     <div class="section">
       <label class="section-title">AI STUDIO PROMPTS:</label>
-      <p style="font-size: 13px; color: #777; margin-bottom: 15px;">
-        These prompts will appear in your popup dropdown for quick access when sending subtitles to AI Studio.
+      <p style="font-size: 11px; color: #666; margin-bottom: 20px; font-style: italic;">
+        CONFIGURE CUSTOM INSTRUCTIONS FOR AI ANALYSIS. THESE WILL BE AVAILABLE IN THE POPUP DROPDOWN.
       </p>
       
       <div id="promptsList">
@@ -20,22 +20,22 @@
       </div>
 
       <div class="add-prompt-section">
-        <label class="section-title" style="font-size: 12px;">Add New Prompt</label>
-        <input type="text" id="newPromptName" class="text-input" placeholder="Prompt Name (e.g., Summarize)">
-        <textarea id="newPromptText" class="prompt-input" style="height: 100px; margin-top: 10px;" placeholder="Instructions for AI..."></textarea>
-        <button id="addPrompt" class="add-btn">+ ADD TO LIST</button>
+        <label class="section-title" style="font-size: 11px;">ADD NEW PROMPT_</label>
+        <input type="text" id="newPromptName" class="text-input" placeholder="PROMPT_NAME (E.G. SUMMARIZE)">
+        <textarea id="newPromptText" class="prompt-input" style="height: 120px; margin-top: 15px;" placeholder="ENTER SYSTEM INSTRUCTIONS..."></textarea>
+        <button id="addPrompt" class="add-btn">[ + ADD_TO_DATABASE ]</button>
       </div>
     </div>
 
     <div class="section">
-      <label class="section-title">GENERAL PREFERENCES:</label>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" id="showViewer" style="width: 20px; height: 20px;">
-        <label for="showViewer" style="font-size: 14px;">Show preview window after capture</label>
-      </div>
+      <label class="section-title">PREFERENCES:</label>
+      <label class="checkbox-container">
+        <input type="checkbox" id="showViewer">
+        <span style="font-size: 14px; color: #e0e0e0;">ACTIVATE PREVIEW WINDOW AFTER SIGNAL CAPTURE</span>
+      </label>
     </div>
 
-    <button id="save" class="save-btn">SAVE ALL SETTINGS</button>
+    <button id="save" class="save-btn">[ SAVE_CONFIGURATION ]</button>
     
     <div id="status" class="status"></div>
   </div>

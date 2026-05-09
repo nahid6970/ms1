@@ -1,64 +1,72 @@
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
-  margin: 0;
+  background-color: #050a0e;
+  color: #e0e0e0;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 11pt;
   padding: 20px;
-  color: #333;
 }
 
 .container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
-  background: #fff;
   padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: #10161d;
+  border: 1px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 h1 {
-  font-size: 24px;
-  color: #cc0000;
   text-align: center;
+  color: #00ff9f;
+  font-size: 20pt;
+  font-weight: bold;
   margin-top: 0;
   margin-bottom: 30px;
-  border-bottom: 2px solid #f0f2f5;
+  text-shadow: 0 0 10px #00ff9f;
+  text-transform: uppercase;
+  border-bottom: 1px solid #333;
   padding-bottom: 15px;
 }
 
 .section {
   margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1a222c;
 }
 
 .section-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #555;
   display: block;
+  color: #ff003c;
+  font-weight: bold;
   margin-bottom: 10px;
+  font-size: 10pt;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .text-input, .select, .prompt-input {
   width: 100%;
+  background-color: #050a0e;
+  border: 1px solid #00f0ff;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
+  color: #00f0ff;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10pt;
   box-sizing: border-box;
-  transition: border-color 0.2s;
 }
 
 .text-input:focus, .select:focus, .prompt-input:focus {
-  border-color: #4A90E2;
   outline: none;
+  border-color: #00ff9f;
+  box-shadow: 0 0 5px rgba(0,255,159,0.3);
 }
 
 .prompt-item {
-  background: #f9f9f9;
-  border: 1px solid #eee;
+  background: #0d1218;
+  border: 1px solid #1a222c;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-bottom: 15px;
   position: relative;
 }
@@ -67,84 +75,117 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .prompt-name {
   font-weight: bold;
-  font-size: 15px;
-  color: #333;
+  font-size: 14px;
+  color: #00ff9f;
 }
 
 .prompt-text-preview {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #888;
   white-space: pre-wrap;
-  max-height: 100px;
+  max-height: 120px;
   overflow-y: auto;
-  background: #fff;
-  padding: 8px;
+  background: #050a0e;
+  padding: 10px;
   border-radius: 4px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #1a222c;
 }
 
 .delete-prompt {
-  background: #ff4d4d;
-  color: white;
-  border: none;
+  background: transparent;
+  color: #ff003c;
+  border: 1px solid #ff003c;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  transition: background 0.2s;
+  transition: all 0.3s;
 }
 
 .delete-prompt:hover {
-  background: #cc0000;
+  background: #ff003c;
+  color: #fff;
+  box-shadow: 0 0 10px #ff003c;
 }
 
 .add-prompt-section {
-  background: #fff;
-  border: 2px dashed #ddd;
+  background: #0d1218;
+  border: 1px dashed #333;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-top: 20px;
 }
 
 .save-btn, .add-btn {
   width: 100%;
-  padding: 14px;
-  background-color: #4A90E2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 15px;
+  background-color: #10161d;
+  color: #00ff9f;
+  border: 2px solid #00ff9f;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s;
+  text-transform: uppercase;
   margin-top: 10px;
 }
 
 .save-btn {
-  background-color: #28a745;
+  background-color: #10161d;
+  border-color: #00f0ff;
+  color: #00f0ff;
   margin-top: 30px;
 }
 
 .save-btn:hover {
-  background-color: #218838;
+  background-color: #00f0ff;
+  color: #050a0e;
+  box-shadow: 0 0 15px #00f0ff;
 }
 
 .add-btn:hover {
-  background-color: #357ABD;
+  background-color: #00ff9f;
+  color: #050a0e;
+  box-shadow: 0 0 15px #00ff9f;
 }
 
 .status {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 20px;
   font-weight: bold;
-  height: 20px;
+  color: #00ff9f;
+  min-height: 20px;
+  text-transform: uppercase;
+  font-size: 12px;
 }
+
+/* Custom Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-container input {
+  width: 18px;
+  height: 18px;
+  accent-color: #00ff9f;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #050a0e; }
+::-webkit-scrollbar-thumb { background: #1a222c; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
