@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
       .catch((error) => {
         console.error('DEBUG: fetchSubtitles error:', error);
-        sendResponse({ success: false, error: error.message || 'Unknown error during fetch' });
+        sendResponse({ success: false, error: error.message || 'Unknown error' });
       });
     return true;
   }
@@ -29,108 +29,40 @@ async function fetchDirectAPI(url) {
 
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const tabId = (tabs[0] && tabs[0].url.includes(videoId)) ? tabs[0].id : null;
+  if (!tabId) throw new Error('Keep the YouTube tab active.');
 
-  if (!tabId) throw new Error('Please keep the YouTube video tab active.');
+  // Clear any previously intercepted subtitles so we can detect a fresh capture
+  await chrome.storage.local.remove('interceptedSubtitles');
 
-  // 1. Try to get tracks from tab memory using multiple potential paths
-  const results = await chrome.scripting.executeScript({
-    target: { tabId: tabId },
+  // Trigger CC reload by simulating 'c' keypress (toggle off then on),
+  // forcing the YouTube player to make a fresh timedtext network request
+  // that inject.js will intercept automatically
+  await chrome.scripting.executeScript({
+    target: { tabId },
     func: () => {
-      try {
-        // Path 1: Standard player response
-        let tracks = window.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-        
-        // Path 2: ytplayer config (older/different versions)
-        if (!tracks) {
-          const cfg = window.ytplayer?.config?.args?.player_response;
-          if (cfg) {
-            const parsed = JSON.parse(cfg);
-            tracks = parsed.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-          }
-        }
-        
-        // Path 3: Try to find any object containing captionTracks in window
-        if (!tracks) {
-          // This is a bit heavy but can be a last resort
-          for (const key in window) {
-            if (key.startsWith('yt') && window[key]?.captions?.playerCaptionsTracklistRenderer?.captionTracks) {
-              tracks = window[key].captions.playerCaptionsTracklistRenderer.captionTracks;
-              break;
-            }
-          }
-        }
-
-        return tracks || [];
-      } catch (e) { return null; }
+      const fire = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', keyCode: 67, bubbles: true, cancelable: true }));
+      fire(); // toggle off
+      setTimeout(fire, 500); // toggle back on → triggers fresh timedtext fetch
     }
   });
 
-  let tracks = results?.[0]?.result || [];
-  let baseUrl = '';
-
-  if (tracks.length > 0) {
-    // Pick English or first available
-    const track = tracks.find(t => t.languageCode === 'en') || tracks[0];
-    baseUrl = track.baseUrl;
-  }
-
-  // 2. Fallback to background HTML fetch
-  if (!baseUrl) {
-    try {
-      const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
-      const html = await res.text();
-      const jsonMatch = html.match(/"captionTracks":(\[.*?\])/);
-      if (jsonMatch) {
-        const captions = JSON.parse(jsonMatch[1]);
-        baseUrl = captions[0]?.baseUrl;
-      }
-    } catch (e) {
-      console.warn('DEBUG: Background HTML fetch failed:', e);
+  // Poll storage for up to 8 seconds waiting for inject.js to capture the subtitles
+  for (let i = 0; i < 16; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    const data = await chrome.storage.local.get('interceptedSubtitles');
+    if (data.interceptedSubtitles && data.interceptedSubtitles.trim().length > 50) {
+      return data.interceptedSubtitles;
     }
   }
 
-  if (!baseUrl) throw new Error('No subtitle tracks detected. Try turning CC on in the player first.');
-
-  // 3. Fetch content via tab context
-  const subUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'fmt=vtt';
-  const fetchResult = await chrome.scripting.executeScript({
-    target: { tabId: tabId },
-    args: [subUrl],
-    func: async (url) => {
-      try {
-        const r = await fetch(url);
-        if (!r.ok) return null;
-        return await r.text();
-      } catch (e) { return null; }
-    }
-  });
-
-  const vttText = fetchResult?.[0]?.result;
-  if (!vttText || vttText.length < 100) throw new Error('Empty or invalid subtitle response from YouTube.');
-
-  // 4. Clean text
-  const lines = [];
-  const rawLines = vttText.split('\n');
-  for (const line of rawLines) {
-    const t = line.trim();
-    if (!t || t.startsWith('WEBVTT') || t.includes('-->') || /^\d+$/.test(t) || t.startsWith('Kind:') || t.startsWith('Language:')) continue;
-    const clean = t.replace(/<[^>]+>/g, '').trim();
-    if (clean && lines[lines.length - 1] !== clean) lines.push(clean);
-  }
-  
-  const finalContent = lines.join('\n');
-  if (!finalContent) throw new Error('Could not extract any readable text from subtitles.');
-  
-  return finalContent;
+  throw new Error('No subtitles captured. Make sure CC is ON for this video, then try again.');
 }
 
 async function injectToAIStudio(prompt, subtitles) {
   const tab = await chrome.tabs.create({ url: 'https://aistudio.google.com/prompts/new_chat' });
-
   chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
     if (tabId === tab.id && info.status === 'complete') {
       chrome.tabs.onUpdated.removeListener(listener);
-
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         args: [prompt, subtitles],
@@ -140,7 +72,6 @@ async function injectToAIStudio(prompt, subtitles) {
                            document.querySelector('textarea') ||
                            document.querySelector('.prompt-textarea') ||
                            document.querySelector('ms-prompt-input');
-
             if (editor) {
               editor.focus();
               if (editor.getAttribute('contenteditable') === 'true') {
@@ -149,24 +80,16 @@ async function injectToAIStudio(prompt, subtitles) {
                 editor.value = promptText || '';
                 editor.dispatchEvent(new Event('input', { bubbles: true }));
               }
-
               const blob = new Blob([subtitleText], { type: 'text/plain' });
               const file = new File([blob], 'subtitles.txt', { type: 'text/plain' });
               const dataTransfer = new DataTransfer();
               dataTransfer.items.add(file);
-
-              const dropEvent = new DragEvent('drop', {
-                bubbles: true,
-                cancelable: true,
-                dataTransfer: dataTransfer
-              });
-
+              const dropEvent = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer });
               editor.dispatchEvent(dropEvent);
               return true;
             }
             return false;
           };
-
           let attempts = 0;
           const interval = setInterval(() => {
             if (tryInject() || attempts > 30) clearInterval(interval);

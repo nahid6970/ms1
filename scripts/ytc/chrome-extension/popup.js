@@ -56,10 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Mode 2: Live Interceptor (Background Update)
+  // Mode 2: Live Interceptor — only show subtitles captured AFTER popup opened
+  const popupOpenTime = Date.now();
   function updateFromStorage() {
-    chrome.storage.local.get(['interceptedSubtitles'], (data) => {
-      if (data.interceptedSubtitles && !fetchBtn.disabled) {
+    chrome.storage.local.get(['interceptedSubtitles', 'lastInterceptTime'], (data) => {
+      if (data.interceptedSubtitles && data.lastInterceptTime > popupOpenTime && !fetchBtn.disabled) {
         contentDiv.textContent = data.interceptedSubtitles;
         copyBtn.disabled = false;
         sendBtn.disabled = false;
