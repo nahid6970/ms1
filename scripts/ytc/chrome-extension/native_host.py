@@ -12,6 +12,15 @@ import os
 import re
 import time
 
+# Ensure Scoop paths are available (Chrome launches with a minimal environment)
+_scoop_paths = [
+    r"C:\Users\nahid\scoop\apps\python312\current\Scripts",
+    r"C:\Users\nahid\scoop\apps\python312\current",
+    r"C:\Users\nahid\scoop\apps\nodejs-lts\current",
+    r"C:\Users\nahid\scoop\shims",
+]
+os.environ["PATH"] = os.pathsep.join(_scoop_paths) + os.pathsep + os.environ.get("PATH", "")
+
 
 def send_message(message):
     """Send a message to the Chrome extension"""
@@ -269,4 +278,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        with open(r"C:\@delta\ms1\scripts\ytc\chrome-extension\native_host_error.log", "w") as f:
+            f.write(traceback.format_exc())
+        raise

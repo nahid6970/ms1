@@ -1,196 +1,40 @@
-// Load settings and current URL
-document.addEventListener('DOMContentLoaded', async () => {
-  // Get current tab URL
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  document.getElementById('url').value = tab.url;
-  
-  // Extract timestamp from URL if present
-  const timeMatch = tab.url.match(/[?&]t=(\d+)/);
-  if (timeMatch) {
-    document.getElementById('startTime').value = timeMatch[1];
-    document.getElementById('useTimeline').checked = true;
-    toggleTimelineInputs();
-  }
-  
-  // Load saved settings
-  chrome.storage.sync.get({
-    language: 'en',
-    format: 'srt',
-    autoSub: false,
-    copyToClipboard: false,
-    useTimeline: false,
-    startTime: '',
-    endTime: '',
-    saveDir: '',
-    sendToAIStudio: false,
-    showViewer: true,
-    lastSelectedPrompt: '',
-    prompts: []
-  }, (settings) => {
-    document.getElementById('language').value = settings.language;
-    document.getElementById('format').value = settings.format;
-    document.getElementById('autoSub').checked = settings.autoSub;
-    document.getElementById('copyToClipboard').checked = settings.copyToClipboard;
-    document.getElementById('sendToAIStudio').checked = settings.sendToAIStudio || false;
-    document.getElementById('showViewer').checked = settings.showViewer !== undefined ? settings.showViewer : true;
-    
-    // Populate prompts dropdown
-    const promptSelect = document.getElementById('promptSelect');
-    if (settings.prompts && settings.prompts.length > 0) {
-      settings.prompts.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = p.name;
-        promptSelect.appendChild(opt);
-      });
-      
-      if (settings.lastSelectedPrompt) {
-        promptSelect.value = settings.lastSelectedPrompt;
+document.addEventListener('DOMContentLoaded', () => {
+  const contentDiv = document.getElementById('content');
+  const statusDiv = document.getElementById('status');
+  const copyBtn = document.getElementById('copy');
+  const sendBtn = document.getElementById('send');
+
+  function update() {
+    chrome.storage.local.get(['interceptedSubtitles', 'lastInterceptTime'], (data) => {
+      if (data.interceptedSubtitles) {
+        contentDiv.textContent = data.interceptedSubtitles;
+        const time = new Date(data.lastInterceptTime).toLocaleTimeString();
+        statusDiv.textContent = `Last intercepted at ${time}`;
+        copyBtn.disabled = false;
+        sendBtn.disabled = false;
+      } else {
+        copyBtn.disabled = true;
+        sendBtn.disabled = true;
       }
-    }
-    
-    // Only override timeline if no URL timestamp was found
-    if (!timeMatch) {
-      document.getElementById('useTimeline').checked = settings.useTimeline;
-      document.getElementById('startTime').value = settings.startTime;
-      document.getElementById('endTime').value = settings.endTime;
-    }
-    
-    toggleTimelineInputs();
-    toggleClipboardOption();
+    });
+  }
+
+  update();
+  setInterval(update, 1000);
+
+  copyBtn.addEventListener('click', () => {
+    const text = contentDiv.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => copyBtn.textContent = originalText, 2000);
+    });
+  });
+
+  sendBtn.addEventListener('click', () => {
+    chrome.runtime.sendMessage({
+      action: 'injectToAIStudio',
+      subtitles: contentDiv.textContent
+    });
   });
 });
-
-// Toggle timeline inputs
-document.getElementById('useTimeline').addEventListener('change', toggleTimelineInputs);
-
-function toggleTimelineInputs() {
-  const checked = document.getElementById('useTimeline').checked;
-  document.getElementById('timelineInputs').style.display = checked ? 'block' : 'none';
-}
-
-// Toggle clipboard option based on format
-document.getElementById('format').addEventListener('change', toggleClipboardOption);
-
-function toggleClipboardOption() {
-  const format = document.getElementById('format').value;
-  const clipboardCheckbox = document.getElementById('copyToClipboard');
-  const clipboardLabel = clipboardCheckbox.parentElement;
-  
-  if (format === 'txt') {
-    clipboardLabel.style.opacity = '1';
-    clipboardCheckbox.disabled = false;
-  } else {
-    clipboardLabel.style.opacity = '0.5';
-    clipboardCheckbox.disabled = true;
-    clipboardCheckbox.checked = false;
-  }
-}
-
-// Extract button handler
-document.getElementById('extract').addEventListener('click', async () => {
-  const url = document.getElementById('url').value;
-  const language = document.getElementById('language').value;
-  const format = document.getElementById('format').value;
-  const autoSub = document.getElementById('autoSub').checked;
-  const copyToClipboard = document.getElementById('copyToClipboard').checked;
-  const useTimeline = document.getElementById('useTimeline').checked;
-  const startTime = document.getElementById('startTime').value;
-  const endTime = document.getElementById('endTime').value;
-  const sendToAIStudio = document.getElementById('sendToAIStudio').checked;
-  const showViewer = document.getElementById('showViewer').checked;
-  const lastSelectedPrompt = document.getElementById('promptSelect').value;
-  
-  // Save current settings
-  chrome.storage.sync.set({
-    language,
-    format,
-    autoSub,
-    copyToClipboard,
-    useTimeline,
-    startTime,
-    endTime,
-    sendToAIStudio,
-    showViewer,
-    lastSelectedPrompt
-  });
-  
-  // Get save directory and prompts from settings
-  const settings = await chrome.storage.sync.get({ saveDir: '', prompts: [] });
-  
-  if (!settings.saveDir) {
-    setStatus('ERROR: Set save directory in settings first!');
-    return;
-  }
-  
-  // Find selected prompt text
-  let selectedPromptText = '';
-  if (sendToAIStudio) {
-    if (!lastSelectedPrompt) {
-      setStatus('ERROR: Select a prompt first!');
-      return;
-    }
-    const promptObj = settings.prompts.find(p => p.name === lastSelectedPrompt);
-    selectedPromptText = promptObj ? promptObj.text : '';
-  }
-  
-  // Disable button and show progress
-  const extractBtn = document.getElementById('extract');
-  extractBtn.disabled = true;
-  setStatus('EXTRACTING...');
-  
-  // Send message to background script
-  chrome.runtime.sendMessage({
-    action: 'extractSubtitles',
-    data: {
-      url,
-      language,
-      format,
-      autoSub,
-      copyToClipboard,
-      useTimeline,
-      startTime,
-      endTime,
-      saveDir: settings.saveDir
-    }
-  }, (response) => {
-    extractBtn.disabled = false;
-    
-    if (response.success) {
-      let statusMsg = 'EXTRACTION COMPLETE!';
-      const content = response.data?.content || response.content;
-      
-      // Handle Google AI Studio integration
-      if (sendToAIStudio && content) {
-        setStatus('INJECTING TO AI STUDIO...');
-        chrome.runtime.sendMessage({
-          action: 'injectToAIStudio',
-          prompt: selectedPromptText,
-          subtitles: content
-        });
-        
-        setTimeout(() => setStatus('READY'), 3000);
-        return;
-      }
-
-      if (response.clipboardCopied || response.data?.clipboardCopied) {
-        statusMsg = 'COMPLETE! TEXT COPIED TO CLIPBOARD';
-      }
-      
-      setStatus(statusMsg);
-      setTimeout(() => setStatus('READY'), 3000);
-    } else {
-      setStatus(`ERROR: ${response.error}`);
-    }
-  });
-});
-
-// Settings link
-document.getElementById('settingsLink').addEventListener('click', (e) => {
-  e.preventDefault();
-  chrome.runtime.openOptionsPage();
-});
-
-function setStatus(message) {
-  document.getElementById('status').textContent = message;
-}

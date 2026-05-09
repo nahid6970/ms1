@@ -1,33 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "YTC Subtitle Extractor",
+  "name": "YTC Subtitle Interceptor",
   "version": "1.0.0",
-  "description": "Extract subtitles from any video site using yt-dlp",
+  "description": "Intercepts and extracts subtitles directly from the YouTube player",
   "permissions": [
-    "activeTab",
     "storage",
-    "nativeMessaging",
-    "tabs",
+    "activeTab",
     "scripting"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "*://*.youtube.com/api/timedtext*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/watch*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
   ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
-  "background": {
-    "service_worker": "background.js"
-  },
-  "options_page": "options.html",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": ["*://*.youtube.com/*"]
+    }
+  ]
 }

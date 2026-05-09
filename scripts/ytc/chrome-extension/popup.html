@@ -1,94 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>YTC Subtitle Extractor</title>
-  <link rel="stylesheet" href="popup.css">
+  <style>
+    body { width: 350px; font-family: sans-serif; padding: 15px; }
+    h2 { font-size: 16px; margin-top: 0; }
+    #status { font-size: 12px; color: #666; margin-bottom: 10px; }
+    #content { 
+      width: 100%; 
+      height: 250px; 
+      font-size: 12px; 
+      margin-bottom: 10px; 
+      white-space: pre-wrap;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 5px;
+      background: #f9f9f9;
+    }
+    .btn-row { display: flex; gap: 5px; }
+    button { 
+      flex: 1; 
+      padding: 8px; 
+      cursor: pointer; 
+      background: #007bff; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+    }
+    button:hover { background: #0056b3; }
+    button:disabled { background: #ccc; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="header">YTC SUBTITLE EXTRACTOR</h1>
-    
-    <div class="section">
-      <label class="section-title">CURRENT URL:</label>
-      <input type="text" id="url" class="url-input" readonly>
-    </div>
-
-    <div class="section">
-      <label class="section-title">LANGUAGE:</label>
-      <select id="language" class="select">
-        <option value="en">English</option>
-        <option value="bn">Bengali</option>
-        <option value="hi">Hindi</option>
-        <option value="all">All</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label class="section-title">FORMAT:</label>
-      <select id="format" class="select">
-        <option value="srt">SRT</option>
-        <option value="vtt">VTT</option>
-        <option value="txt">TXT (Raw)</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label class="checkbox-label">
-        <input type="checkbox" id="autoSub">
-        INCLUDE AUTO-GENERATED
-      </label>
-    </div>
-
-    <div class="section">
-      <label class="checkbox-label">
-        <input type="checkbox" id="copyToClipboard">
-        COPY TO CLIPBOARD (TXT only)
-      </label>
-    </div>
-
-    <div class="section">
-      <label class="checkbox-label">
-        <input type="checkbox" id="useTimeline">
-        TIMELINE RANGE
-      </label>
-    </div>
-
-    <div class="section timeline-section" id="timelineInputs" style="display: none;">
-      <div class="time-input-group">
-        <label>START:</label>
-        <input type="text" id="startTime" placeholder="0:00 or 3062" class="time-input">
-      </div>
-      <div class="time-input-group">
-        <label>END:</label>
-        <input type="text" id="endTime" placeholder="5:30 or 3428" class="time-input">
-      </div>
-    </div>
-
-    <div class="section">
-      <label class="checkbox-label">
-        <input type="checkbox" id="showViewer">
-        SHOW SUBTITLE VIEWER WINDOW
-      </label>
-    </div>
-
-    <div class="section ai-studio-group">
-      <label class="checkbox-label">
-        <input type="checkbox" id="sendToAIStudio">
-        SEND TO GOOGLE AI STUDIO
-      </label>
-      <select id="promptSelect" class="select prompt-select" style="margin-top: 5px;">
-        <option value="">(Select Prompt)</option>
-      </select>
-    </div>
-
-    <button id="extract" class="extract-btn">[ EXTRACT SUBTITLES ]</button>
-    
-    <div id="status" class="status">READY</div>
-    
-    <div class="footer">
-      <a href="#" id="settingsLink">⚙️ Settings</a>
-    </div>
+  <h2>Subtitle Interceptor</h2>
+  <div id="status">Waiting for YouTube subtitles...</div>
+  <div id="content">Play a YouTube video with subtitles turned on.</div>
+  <div class="btn-row">
+    <button id="copy">Copy to Clipboard</button>
+    <button id="send">Send to AI Studio</button>
   </div>
 
   <script src="popup.js"></script>
