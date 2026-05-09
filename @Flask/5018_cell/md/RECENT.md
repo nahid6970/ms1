@@ -1,5 +1,37 @@
 # Recent Development Log
 
+## [2026-05-09 23:23] - Move Single Row Controls to TH Header Toggle Container
+
+**Session Duration:** 0.4 hours
+
+**What We Accomplished:**
+
+### 🎨 Header Toggle Container Refactor
+- **Moved Single Row Controls**: Removed `prevSingleRow`, `toggleSingleRowMode`, and `nextSingleRow` buttons from the toolbar in `index.html` and added them into the `header-toggle-container` span rendered inside the first `<th>` column header in `script.js`.
+- **Grouped with Border**: Wrapped the three single-row buttons in a `<span class="header-toggle-group">` with a visible blue border to visually separate them from the toolbar/tabs/subsheet toggles.
+- **SVG Icons**: Replaced all emoji buttons in the header toggle container with clean SVG icons (hamburger, tab, folder, chevron-left, row-focus, chevron-right).
+- **Reordered**: Moved Sheet Tabs toggle to first position in the container.
+- **Vertical Alignment**: Added `align-items: center` to both `.header-toggle-container` and `.header-toggle-group`.
+- **Arrow Disabled State Fix**: Fixed `prevDisabled`/`nextDisabled` in `renderTable()` to use actual `singleRowIndex` position (first/last row) instead of just `!singleRowMode`, so arrows correctly disable on refresh.
+- **Null Guard Fix**: Added null checks in `updateSingleRowButtons()` and `toggleSingleRowMode()` to prevent crash before `renderTable()` creates the header buttons.
+- **Arrow Color**: Gave `#btnPrevRow` and `#btnNextRow` a solid blue background with white SVG strokes, distinct from the center toggle button's light blue style.
+
+**Files Modified:**
+- `static/script.js` — Moved single row buttons into `header-toggle-container`, added SVG icons, fixed disabled state logic, added null guards.
+- `static/style.css` — Added `.header-toggle-group`, `.btn-header-toggle svg`, arrow button color rules, `align-items: center` fixes.
+- `templates/index.html` — Removed single row buttons and separator from toolbar.
+
+**Current Status:**
+- ✅ Single row controls live in the TH header alongside toolbar/tabs/subsheet toggles.
+- ✅ Arrow buttons correctly disabled at first/last row on refresh.
+- ✅ All buttons use clean SVG icons.
+- ✅ Arrow buttons visually distinct with solid blue bg + white icon.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-05-07 11:15] - Sub-Sheet Search Bar & Filtering
 
 **Session Duration:** 0.4 hours
