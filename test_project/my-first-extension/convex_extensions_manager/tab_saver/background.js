@@ -133,6 +133,24 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                 <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Pick a date</label>
                 <input type="date" id="deadlineDate" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; cursor: pointer; width: 100%; color-scheme: dark;" onfocus="this.style.borderColor='#00f3ff'" onblur="this.style.borderColor='#333'">
               </div>
+
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Tag</label>
+                <div style="display: flex; gap: 10px;">
+                  <select id="deadlineTag" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1; cursor: pointer;">
+                    <option value="">No Tag</option>
+                  </select>
+                  <button id="addTagBtn" style="background: #1a1a24; border: 1px solid #00f3ff; color: #00f3ff; padding: 0 15px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                </div>
+              </div>
+
+              <div id="newTagContainer" style="display: none; flex-direction: column; gap: 8px;">
+                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name</label>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="newTagName" placeholder="Enter tag name..." style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1;">
+                  <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; font-weight: 800; cursor: pointer;">Add</button>
+                </div>
+              </div>
               
               <div style="display: flex; gap: 10px; margin-top: 5px;">
                 <button id="cancelBtn" style="flex: 1; padding: 12px; border: 1px solid #333; background: transparent; color: #999; font-weight: 700; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">Cancel</button>
@@ -146,8 +164,49 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           const daysInput = modal.querySelector('#deadlineDays');
           const dateInput = modal.querySelector('#deadlineDate');
+          const tagSelect = modal.querySelector('#deadlineTag');
+          const addTagBtn = modal.querySelector('#addTagBtn');
+          const newTagContainer = modal.querySelector('#newTagContainer');
+          const newTagName = modal.querySelector('#newTagName');
+          const saveNewTagBtn = modal.querySelector('#saveNewTagBtn');
           const cancelBtn = modal.querySelector('#cancelBtn');
           const saveBtn = modal.querySelector('#saveBtn');
+
+          // Load tags
+          chrome.storage.local.get(['availableTags'], (result) => {
+            const tags = result.availableTags || ['applied', 'paid'];
+            tags.forEach(tag => {
+              const option = document.createElement('option');
+              option.value = tag;
+              option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+              tagSelect.appendChild(option);
+            });
+          });
+
+          addTagBtn.onclick = () => {
+            newTagContainer.style.display = newTagContainer.style.display === 'none' ? 'flex' : 'none';
+          };
+
+          saveNewTagBtn.onclick = () => {
+            const tagName = newTagName.value.trim().toLowerCase();
+            if (tagName) {
+              chrome.storage.local.get(['availableTags'], (result) => {
+                const tags = result.availableTags || ['applied', 'paid'];
+                if (!tags.includes(tagName)) {
+                  tags.push(tagName);
+                  chrome.storage.local.set({ availableTags: tags }, () => {
+                    const option = document.createElement('option');
+                    option.value = tagName;
+                    option.textContent = tagName.charAt(0).toUpperCase() + tagName.slice(1);
+                    tagSelect.appendChild(option);
+                    tagSelect.value = tagName;
+                    newTagName.value = '';
+                    newTagContainer.style.display = 'none';
+                  });
+                }
+              });
+            }
+          };
 
           daysInput.focus();
 
@@ -164,8 +223,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             document.body.removeChild(overlay);
           };
 
-          const finish = (deadline) => {
-            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline });
+          const finish = (deadline, tag) => {
+            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline, tag: tag });
             removeUI();
           };
           
@@ -176,17 +235,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             e.stopPropagation();
             const days = daysInput.value;
             const date = dateInput.value;
+            const tag = tagSelect.value;
             if (date) {
               const d = new Date(date);
               d.setHours(23, 59, 59, 999);
-              finish(d.getTime());
+              finish(d.getTime(), tag);
             } else if (days) {
               const d = new Date();
               d.setDate(d.getDate() + parseInt(days));
               d.setHours(23, 59, 59, 999);
-              finish(d.getTime());
+              finish(d.getTime(), tag);
             } else {
-              finish(null);
+              finish(null, tag);
             }
           };
 
@@ -203,13 +263,13 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       }
     }).catch((err) => {
       console.error('Failed to inject script:', err);
-      handleTabSaving(tab, null);
+      handleTabSaving(tab, null, null);
     });
   }
 });
 
 // Main function to handle tab saving logic
-function handleTabSaving(tab, deadline) {
+function handleTabSaving(tab, deadline, tag) {
   chrome.storage.local.get(['savedTabs'], (result) => {
     const savedTabs = result.savedTabs || [];
     let favicon = tab.favIconUrl || '';
@@ -227,18 +287,18 @@ function handleTabSaving(tab, deadline) {
         }
       }).then((results) => {
         const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
-        saveTab(savedTabs, tab, favicon, channelIcon, deadline);
+        saveTab(savedTabs, tab, favicon, channelIcon, deadline, tag);
       }).catch(() => {
-        saveTab(savedTabs, tab, favicon, null, deadline);
+        saveTab(savedTabs, tab, favicon, null, deadline, tag);
       });
     } else {
-      saveTab(savedTabs, tab, favicon, null, deadline);
+      saveTab(savedTabs, tab, favicon, null, deadline, tag);
     }
   });
 }
 
 // Helper function to save tab
-function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null) {
+function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null, tag = null) {
   const newTab = {
     id: Date.now(),
     title: tab.title,
@@ -246,7 +306,8 @@ function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null) {
     favicon: favicon,
     channelIcon: channelIcon,
     savedAt: new Date().toISOString(),
-    deadline: deadline
+    deadline: deadline,
+    tag: tag
   };
   
   savedTabs.unshift(newTab);
@@ -259,7 +320,7 @@ function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null) {
 // Handle messages from injected scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'deadlineSelected') {
-    handleTabSaving(sender.tab, message.deadline);
+    handleTabSaving(sender.tab, message.deadline, message.tag);
   }
   
   if (message.action === 'saveToConvex') {
