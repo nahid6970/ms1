@@ -195,11 +195,21 @@ document.getElementById('menuSetDeadline').onclick = () => {
   editDeadlineDays.value = '';
   editDeadlineDate.value = '';
   
-  // Set current tag
+  // Set current tag and deadline
   chrome.storage.local.get(['savedTabs'], (result) => {
     const savedTabs = result.savedTabs || [];
     const tab = savedTabs.find(t => t.id === currentRightClickedTabId);
-    editTag.value = (tab && tab.tag) ? tab.tag : '';
+    if (tab) {
+      editTag.value = tab.tag || '';
+      if (tab.deadline) {
+        const date = new Date(tab.deadline);
+        // Format to YYYY-MM-DD for the date input
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        editDeadlineDate.value = `${yyyy}-${mm}-${dd}`;
+      }
+    }
   });
   
   newTagInputContainer.style.display = 'none';
