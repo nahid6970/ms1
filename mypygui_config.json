@@ -1472,8 +1472,8 @@
                     "hide": false,
                     "admin": false,
                     "cmd": "ai_sites",
-                    "row_limit": 5,
-                    "bg_color": "#FFFFFF",
+                    "row_limit": 1,
+                    "bg_color": "#000000",
                     "transparent_bg": false,
                     "border_color": "#000000",
                     "border_px": 2
@@ -1962,12 +1962,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_322.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "gemini",
@@ -1996,12 +2000,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_324.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "chatgpt",
@@ -2030,12 +2038,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_323.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "kimi",
@@ -2064,12 +2076,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_325.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "qwen",
@@ -2098,12 +2114,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_326.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "deepseek",
@@ -2132,12 +2152,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_327.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "claude",
@@ -2166,15 +2190,19 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_328.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
-            "text": "notebooklm",
+            "text": "notebookllm",
             "fg": "#ffffff",
             "bg": "transparent",
             "id": "sub_1777665005",
@@ -2200,12 +2228,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_329.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "text": "huggingface",
@@ -2234,12 +2266,16 @@
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
-            "icon_path": "C:\\@delta\\msBackups\\icon\\mypygui\\ai\\image_330.png",
+            "icon_path": "",
             "nf_char": "",
             "icon_width": 50,
             "icon_height": 50,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         }
     ],
     "default_font": [
