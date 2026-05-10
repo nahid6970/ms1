@@ -322,7 +322,7 @@ body {
 
 .settings-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
   margin-top: 12px;
   padding-top: 12px;
@@ -330,10 +330,10 @@ body {
 }
 
 .settings-actions .btn {
-  width: 100%;
+  flex: 1;
   margin: 0;
   padding: 8px;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 /* Modal Styles */
@@ -357,11 +357,14 @@ body {
 .modal-content {
   background: white;
   border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
+  width: 95%;
+  max-width: 420px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.3s ease;
   overflow: hidden;
+  max-height: 96vh;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideIn {
@@ -381,6 +384,7 @@ body {
   align-items: center;
   padding: 12px 15px;
   border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -411,8 +415,8 @@ body {
 
 .modal-body {
   padding: 12px 15px;
-  max-height: 400px;
   overflow-y: auto;
+  flex: 1;
 }
 
 .setting-group {
