@@ -17,23 +17,26 @@ const addTagBtn = document.getElementById('addTagBtn');
 const newTagInputContainer = document.getElementById('newTagInputContainer');
 const newTagName = document.getElementById('newTagName');
 const newTagColor = document.getElementById('newTagColor');
+const newTagBorderColor = document.getElementById('newTagBorderColor');
 const saveNewTagBtn = document.getElementById('saveNewTagBtn');
 const manageTagsList = document.getElementById('manageTagsList');
 
 // Tags management
 let availableTags = [
-  { name: 'applied', color: '#e3f2fd' },
-  { name: 'paid', color: '#c8e6c9' }
+  { name: 'applied', color: '#e3f2fd', borderColor: '#bbdefb' },
+  { name: 'paid', color: '#c8e6c9', borderColor: '#a5d6a7' }
 ];
 
 function loadTags() {
   chrome.storage.local.get(['availableTags'], (result) => {
     if (result.availableTags) {
       availableTags = result.availableTags;
-      // Handle legacy format if needed
-      if (availableTags.length > 0 && typeof availableTags[0] === 'string') {
-        availableTags = availableTags.map(name => ({ name, color: '#e3f2fd' }));
-      }
+      // Handle legacy format (strings or objects without borderColor)
+      availableTags = availableTags.map(tag => {
+        if (typeof tag === 'string') return { name: tag, color: '#e3f2fd', borderColor: '#bbdefb' };
+        if (!tag.borderColor) return { ...tag, borderColor: tag.color }; // Default border to BG color if missing
+        return tag;
+      });
     }
     populateTagDropdown();
     renderManageTags();
@@ -49,7 +52,6 @@ function populateTagDropdown() {
     option.textContent = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
     editTag.appendChild(option);
   });
-  // Check if current value still exists
   if (availableTags.some(t => t.name === currentValue)) {
     editTag.value = currentValue;
   }
@@ -60,20 +62,30 @@ function renderManageTags() {
   manageTagsList.innerHTML = '';
   availableTags.forEach((tag, index) => {
     const tagItem = document.createElement('div');
-    tagItem.style = 'display: flex; align-items: center; gap: 8px; padding: 4px; border-bottom: 1px solid #333;';
+    tagItem.style = 'display: flex; align-items: center; gap: 8px; padding: 6px; border-bottom: 1px solid #333;';
     
     const nameLabel = document.createElement('span');
     nameLabel.textContent = tag.name;
     nameLabel.style = 'flex: 1; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
     
-    const colorPicker = document.createElement('input');
-    colorPicker.type = 'color';
-    colorPicker.value = tag.color;
-    colorPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0; flex-shrink: 0;';
-    colorPicker.oninput = (e) => {
-      availableTags[index].color = e.target.value;
-      saveTagsAndRefresh();
-    };
+    const colorInputs = document.createElement('div');
+    colorInputs.style = 'display: flex; gap: 4px; flex-shrink: 0;';
+
+    const bgPicker = document.createElement('input');
+    bgPicker.type = 'color';
+    bgPicker.value = tag.color;
+    bgPicker.title = 'Background Color';
+    bgPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    bgPicker.oninput = (e) => { availableTags[index].color = e.target.value; };
+    bgPicker.onchange = () => { saveTagsAndRefresh(); };
+    
+    const borderPicker = document.createElement('input');
+    borderPicker.type = 'color';
+    borderPicker.value = tag.borderColor || tag.color;
+    borderPicker.title = 'Border Color';
+    borderPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    borderPicker.oninput = (e) => { availableTags[index].borderColor = e.target.value; };
+    borderPicker.onchange = () => { saveTagsAndRefresh(); };
     
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '×';
@@ -85,8 +97,10 @@ function renderManageTags() {
       }
     };
     
+    colorInputs.appendChild(bgPicker);
+    colorInputs.appendChild(borderPicker);
     tagItem.appendChild(nameLabel);
-    tagItem.appendChild(colorPicker);
+    tagItem.appendChild(colorInputs);
     tagItem.appendChild(deleteBtn);
     manageTagsList.appendChild(tagItem);
   });
@@ -95,7 +109,7 @@ function renderManageTags() {
 function saveTagsAndRefresh() {
   chrome.storage.local.set({ availableTags }, () => {
     populateTagDropdown();
-    renderManageTags();
+    // We don't call renderManageTags() here on purpose to avoid destroying the color picker while open
     loadTabs(); // Refresh list to show new colors
   });
 }
@@ -110,8 +124,9 @@ addTagBtn.onclick = () => {
 saveNewTagBtn.onclick = () => {
   const tagName = newTagName.value.trim().toLowerCase();
   const color = newTagColor.value;
+  const borderColor = newTagBorderColor.value;
   if (tagName && !availableTags.some(t => t.name === tagName)) {
-    availableTags.push({ name: tagName, color: color });
+    availableTags.push({ name: tagName, color: color, borderColor: borderColor });
     chrome.storage.local.set({ availableTags }, () => {
       populateTagDropdown();
       renderManageTags();
@@ -194,6 +209,7 @@ function displayTabs(tabs) {
     if (tab.tag) {
       const tagInfo = availableTags.find(t => t.name === tab.tag);
       const color = tagInfo ? tagInfo.color : '#e3f2fd';
+      const bColor = tagInfo ? (tagInfo.borderColor || tagInfo.color) : '#bbdefb';
       
       // Calculate a readable text color based on background
       const getContrastYIQ = (hexcolor) => {
@@ -206,7 +222,7 @@ function displayTabs(tabs) {
       };
       const textColor = getContrastYIQ(color);
       
-      tagHTML = `<div class="tab-tag" style="background-color: ${color} !important; color: ${textColor} !important; border-color: ${color} !important; margin-left: auto; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${tab.tag}</div>`;
+      tagHTML = `<div class="tab-tag" style="background-color: ${color} !important; color: ${textColor} !important; border: 1.5px solid ${bColor} !important; margin-left: auto; padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${tab.tag}</div>`;
     }
 
     // Calculate days left for deadline

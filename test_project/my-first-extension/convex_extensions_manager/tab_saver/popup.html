@@ -110,11 +110,14 @@
           </div>
         </div>
         <div id="newTagInputContainer" style="display: none; flex-direction: column; gap: 8px;">
-          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name & Color</label>
+          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name & Colors (BG / Border)</label>
           <div style="display: flex; gap: 10px; align-items: center;">
             <input type="text" id="newTagName" placeholder="Enter tag name..." style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1;">
-            <input type="color" id="newTagColor" value="#e3f2fd" style="width: 40px; height: 40px; border: 1px solid #333; background: none; padding: 0; cursor: pointer;">
-            <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; height: 40px; font-weight: 800; cursor: pointer;">Add</button>
+            <div style="display: flex; gap: 4px;">
+              <input type="color" id="newTagColor" value="#e3f2fd" title="Background Color" style="width: 32px; height: 32px; border: 1px solid #333; background: none; padding: 0; cursor: pointer;">
+              <input type="color" id="newTagBorderColor" value="#bbdefb" title="Border Color" style="width: 32px; height: 32px; border: 1px solid #333; background: none; padding: 0; cursor: pointer;">
+            </div>
+            <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; height: 32px; font-weight: 800; cursor: pointer;">Add</button>
           </div>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 5px;">
