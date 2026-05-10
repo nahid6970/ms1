@@ -93,7 +93,7 @@
     ],
     "rclone_commands": {
         "msBackups": {
-            "cmd": "rclone check src dst --fast-list --size-only",
+            "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"",
             "src": "C:/@delta/msBackups",
             "dst": "gu:/msBackups",
             "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
