@@ -119,7 +119,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           
           modal.innerHTML = `
             <div style="background: #00f3ff; color: #000; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;">Set Deadline</span>
+              <span style="font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;">Edit</span>
               <button id="closeBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #000; font-weight: bold; line-height: 1; padding: 0;">&times;</button>
             </div>
             
