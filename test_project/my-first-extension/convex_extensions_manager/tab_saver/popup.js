@@ -12,6 +12,57 @@ const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
 const editDeadlineDate = document.getElementById('editDeadlineDate');
+const editTag = document.getElementById('editTag');
+const addTagBtn = document.getElementById('addTagBtn');
+const newTagInputContainer = document.getElementById('newTagInputContainer');
+const newTagName = document.getElementById('newTagName');
+const saveNewTagBtn = document.getElementById('saveNewTagBtn');
+
+// Tags management
+let availableTags = ['applied', 'paid'];
+
+function loadTags() {
+  chrome.storage.local.get(['availableTags'], (result) => {
+    if (result.availableTags) {
+      availableTags = result.availableTags;
+    }
+    populateTagDropdown();
+  });
+}
+
+function populateTagDropdown() {
+  const currentValue = editTag.value;
+  editTag.innerHTML = '<option value="">No Tag</option>';
+  availableTags.forEach(tag => {
+    const option = document.createElement('option');
+    option.value = tag;
+    option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+    editTag.appendChild(option);
+  });
+  if (availableTags.includes(currentValue)) {
+    editTag.value = currentValue;
+  }
+}
+
+addTagBtn.onclick = () => {
+  newTagInputContainer.style.display = newTagInputContainer.style.display === 'none' ? 'flex' : 'none';
+  if (newTagInputContainer.style.display === 'flex') {
+    newTagName.focus();
+  }
+};
+
+saveNewTagBtn.onclick = () => {
+  const tagName = newTagName.value.trim().toLowerCase();
+  if (tagName && !availableTags.includes(tagName)) {
+    availableTags.push(tagName);
+    chrome.storage.local.set({ availableTags }, () => {
+      populateTagDropdown();
+      editTag.value = tagName;
+      newTagName.value = '';
+      newTagInputContainer.style.display = 'none';
+    });
+  }
+};
 
 // Display tabs in the popup
 function displayTabs(tabs) {
@@ -79,6 +130,12 @@ function displayTabs(tabs) {
       faviconHTML = `<img src="${favicon}" class="tab-favicon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>'">`;
     }
     
+    // Tag HTML
+    let tagHTML = '';
+    if (tab.tag) {
+      tagHTML = `<div class="tab-tag">${tab.tag}</div>`;
+    }
+
     // Calculate days left for deadline
     let deadlineHTML = '';
     if (tab.deadline) {
@@ -113,6 +170,7 @@ function displayTabs(tabs) {
         <div class="tab-title">${tab.title}</div>
         <div class="tab-url">${tab.url}</div>
       </div>
+      ${tagHTML}
       ${deadlineHTML}
       <button class="tab-remove" data-id="${tab.id}">×</button>
     `;
@@ -136,13 +194,23 @@ function displayTabs(tabs) {
 document.getElementById('menuSetDeadline').onclick = () => {
   editDeadlineDays.value = '';
   editDeadlineDate.value = '';
+  
+  // Set current tag
+  chrome.storage.local.get(['savedTabs'], (result) => {
+    const savedTabs = result.savedTabs || [];
+    const tab = savedTabs.find(t => t.id === currentRightClickedTabId);
+    editTag.value = (tab && tab.tag) ? tab.tag : '';
+  });
+  
+  newTagInputContainer.style.display = 'none';
   deadlineModal.classList.add('show');
 };
 
-// Handle deadline update
+// Handle deadline and tag update
 document.getElementById('saveDeadlineBtn').onclick = () => {
   const days = editDeadlineDays.value;
   const date = editDeadlineDate.value;
+  const tag = editTag.value;
   let deadline = null;
   
   if (date) {
@@ -160,7 +228,9 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
     const savedTabs = result.savedTabs || [];
     const updatedTabs = savedTabs.map(tab => {
       if (tab.id === currentRightClickedTabId) {
-        return { ...tab, deadline: deadline };
+        // Keep existing deadline if no new one provided
+        const finalDeadline = (deadline !== null) ? deadline : tab.deadline;
+        return { ...tab, deadline: finalDeadline, tag: tag };
       }
       return tab;
     });
@@ -215,6 +285,8 @@ document.getElementById('saveCurrentTab').addEventListener('click', (e) => {
         currentRightClickedTabId = newTab.id;
         editDeadlineDays.value = '';
         editDeadlineDate.value = '';
+        editTag.value = '';
+        newTagInputContainer.style.display = 'none';
         deadlineModal.classList.add('show');
       });
     });
@@ -442,3 +514,4 @@ resetSettings.addEventListener('click', () => {
 // Initial load
 loadTabs();
 loadSettings();
+loadTags();

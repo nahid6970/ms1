@@ -93,6 +93,22 @@
           <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Pick a date</label>
           <input type="date" id="editDeadlineDate" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; cursor: pointer; width: 100%; color-scheme: dark; box-sizing: border-box;">
         </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Tag</label>
+          <div style="display: flex; gap: 10px;">
+            <select id="editTag" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1; cursor: pointer;">
+              <option value="">No Tag</option>
+            </select>
+            <button id="addTagBtn" style="background: #1a1a24; border: 1px solid #00f3ff; color: #00f3ff; padding: 0 15px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 0;">+</button>
+          </div>
+        </div>
+        <div id="newTagInputContainer" style="display: none; flex-direction: column; gap: 8px;">
+          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="newTagName" placeholder="Enter tag name..." style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1;">
+            <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; font-weight: 800; cursor: pointer;">Add</button>
+          </div>
+        </div>
         <div style="display: flex; gap: 10px; margin-top: 5px;">
           <button id="cancelDeadlineBtn" class="btn btn-secondary" style="background: transparent; border: 1px solid #333; color: #999; border-radius: 0;">Cancel</button>
           <button id="saveDeadlineBtn" class="btn btn-primary" style="background: #00f3ff; color: #000; border-radius: 0; font-weight: 800; border: none;">Apply</button>
