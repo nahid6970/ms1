@@ -16,17 +16,27 @@ const editTag = document.getElementById('editTag');
 const addTagBtn = document.getElementById('addTagBtn');
 const newTagInputContainer = document.getElementById('newTagInputContainer');
 const newTagName = document.getElementById('newTagName');
+const newTagColor = document.getElementById('newTagColor');
 const saveNewTagBtn = document.getElementById('saveNewTagBtn');
+const manageTagsList = document.getElementById('manageTagsList');
 
 // Tags management
-let availableTags = ['applied', 'paid'];
+let availableTags = [
+  { name: 'applied', color: '#e3f2fd' },
+  { name: 'paid', color: '#c8e6c9' }
+];
 
 function loadTags() {
   chrome.storage.local.get(['availableTags'], (result) => {
     if (result.availableTags) {
       availableTags = result.availableTags;
+      // Handle legacy format if needed
+      if (availableTags.length > 0 && typeof availableTags[0] === 'string') {
+        availableTags = availableTags.map(name => ({ name, color: '#e3f2fd' }));
+      }
     }
     populateTagDropdown();
+    renderManageTags();
   });
 }
 
@@ -35,13 +45,59 @@ function populateTagDropdown() {
   editTag.innerHTML = '<option value="">No Tag</option>';
   availableTags.forEach(tag => {
     const option = document.createElement('option');
-    option.value = tag;
-    option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+    option.value = tag.name;
+    option.textContent = tag.name.charAt(0).toUpperCase() + tag.name.slice(1);
     editTag.appendChild(option);
   });
-  if (availableTags.includes(currentValue)) {
+  // Check if current value still exists
+  if (availableTags.some(t => t.name === currentValue)) {
     editTag.value = currentValue;
   }
+}
+
+function renderManageTags() {
+  if (!manageTagsList) return;
+  manageTagsList.innerHTML = '';
+  availableTags.forEach((tag, index) => {
+    const tagItem = document.createElement('div');
+    tagItem.style = 'display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333;';
+    
+    const nameLabel = document.createElement('span');
+    nameLabel.textContent = tag.name;
+    nameLabel.style = 'flex: 1; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px;';
+    
+    const colorPicker = document.createElement('input');
+    colorPicker.type = 'color';
+    colorPicker.value = tag.color;
+    colorPicker.style = 'width: 24px; height: 24px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    colorPicker.oninput = (e) => {
+      availableTags[index].color = e.target.value;
+      saveTagsAndRefresh();
+    };
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '×';
+    deleteBtn.style = 'background: #ff4757; color: white; border: none; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold;';
+    deleteBtn.onclick = () => {
+      if (confirm(`Delete tag "${tag.name}"?`)) {
+        availableTags.splice(index, 1);
+        saveTagsAndRefresh();
+      }
+    };
+    
+    tagItem.appendChild(nameLabel);
+    tagItem.appendChild(colorPicker);
+    tagItem.appendChild(deleteBtn);
+    manageTagsList.appendChild(tagItem);
+  });
+}
+
+function saveTagsAndRefresh() {
+  chrome.storage.local.set({ availableTags }, () => {
+    populateTagDropdown();
+    renderManageTags();
+    loadTabs(); // Refresh list to show new colors
+  });
 }
 
 addTagBtn.onclick = () => {
@@ -53,13 +109,16 @@ addTagBtn.onclick = () => {
 
 saveNewTagBtn.onclick = () => {
   const tagName = newTagName.value.trim().toLowerCase();
-  if (tagName && !availableTags.includes(tagName)) {
-    availableTags.push(tagName);
+  const color = newTagColor.value;
+  if (tagName && !availableTags.some(t => t.name === tagName)) {
+    availableTags.push({ name: tagName, color: color });
     chrome.storage.local.set({ availableTags }, () => {
       populateTagDropdown();
+      renderManageTags();
       editTag.value = tagName;
       newTagName.value = '';
       newTagInputContainer.style.display = 'none';
+      loadTabs();
     });
   }
 };
@@ -133,7 +192,21 @@ function displayTabs(tabs) {
     // Tag HTML
     let tagHTML = '';
     if (tab.tag) {
-      tagHTML = `<div class="tab-tag">${tab.tag}</div>`;
+      const tagInfo = availableTags.find(t => t.name === tab.tag);
+      const color = tagInfo ? tagInfo.color : '#e3f2fd';
+      
+      // Calculate a readable text color based on background
+      const getContrastYIQ = (hexcolor) => {
+        hexcolor = hexcolor.replace("#", "");
+        const r = parseInt(hexcolor.substr(0, 2), 16);
+        const g = parseInt(hexcolor.substr(2, 2), 16);
+        const b = parseInt(hexcolor.substr(4, 2), 16);
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return (yiq >= 128) ? '#1a1a24' : '#ffffff';
+      };
+      const textColor = getContrastYIQ(color);
+      
+      tagHTML = `<div class="tab-tag" style="background-color: ${color} !important; color: ${textColor} !important; border-color: ${color} !important; margin-left: auto; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${tab.tag}</div>`;
     }
 
     // Calculate days left for deadline
@@ -161,7 +234,7 @@ function displayTabs(tabs) {
         else badgeClass += ' safe';
       }
       
-      deadlineHTML = `<div class="${badgeClass}">${text}</div>`;
+      deadlineHTML = `<div class="${badgeClass}" style="margin-left: 8px;">${text}</div>`;
     }
     
     tabItem.innerHTML = `

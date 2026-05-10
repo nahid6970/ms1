@@ -174,11 +174,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           // Load tags
           chrome.storage.local.get(['availableTags'], (result) => {
-            const tags = result.availableTags || ['applied', 'paid'];
+            const tags = result.availableTags || [{ name: 'applied', color: '#e3f2fd' }, { name: 'paid', color: '#c8e6c9' }];
             tags.forEach(tag => {
+              const name = typeof tag === 'string' ? tag : tag.name;
               const option = document.createElement('option');
-              option.value = tag;
-              option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+              option.value = name;
+              option.textContent = name.charAt(0).toUpperCase() + name.slice(1);
               tagSelect.appendChild(option);
             });
           });
@@ -191,9 +192,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             const tagName = newTagName.value.trim().toLowerCase();
             if (tagName) {
               chrome.storage.local.get(['availableTags'], (result) => {
-                const tags = result.availableTags || ['applied', 'paid'];
-                if (!tags.includes(tagName)) {
-                  tags.push(tagName);
+                const tags = result.availableTags || [{ name: 'applied', color: '#e3f2fd' }, { name: 'paid', color: '#c8e6c9' }];
+                // Check if tag already exists (handling both strings and objects)
+                const exists = tags.some(t => (typeof t === 'string' ? t : t.name) === tagName);
+                if (!exists) {
+                  tags.push({ name: tagName, color: '#e3f2fd' });
                   chrome.storage.local.set({ availableTags: tags }, () => {
                     const option = document.createElement('option');
                     option.value = tagName;
