@@ -60,16 +60,16 @@ function renderManageTags() {
   manageTagsList.innerHTML = '';
   availableTags.forEach((tag, index) => {
     const tagItem = document.createElement('div');
-    tagItem.style = 'display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333;';
+    tagItem.style = 'display: flex; align-items: center; gap: 8px; padding: 4px; border-bottom: 1px solid #333;';
     
     const nameLabel = document.createElement('span');
     nameLabel.textContent = tag.name;
-    nameLabel.style = 'flex: 1; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px;';
+    nameLabel.style = 'flex: 1; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
     
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.value = tag.color;
-    colorPicker.style = 'width: 24px; height: 24px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    colorPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0; flex-shrink: 0;';
     colorPicker.oninput = (e) => {
       availableTags[index].color = e.target.value;
       saveTagsAndRefresh();
@@ -77,7 +77,7 @@ function renderManageTags() {
     
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '×';
-    deleteBtn.style = 'background: #ff4757; color: white; border: none; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold;';
+    deleteBtn.style = 'background: #ff4757; color: white; border: none; border-radius: 4px; width: 18px; height: 18px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;';
     deleteBtn.onclick = () => {
       if (confirm(`Delete tag "${tag.name}"?`)) {
         availableTags.splice(index, 1);
