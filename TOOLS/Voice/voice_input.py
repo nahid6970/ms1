@@ -144,7 +144,12 @@ class VoiceApp(QMainWindow):
             with open(self.config_file) as f:
                 self.config = json.load(f)
         else:
-            self.config = {"language": "en-US", "always_on_top": False}
+            self.config = {
+                "language": "en-US", 
+                "always_on_top": False,
+                "x": 100,
+                "y": 100
+            }
             self.save_config()
 
     def save_config(self):
@@ -154,6 +159,10 @@ class VoiceApp(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Voice Input")
         self.setFixedSize(275, 50)
+        
+        # Set window position
+        self.move(self.config.get("x", 100), self.config.get("y", 100))
+        
         if self.config.get("always_on_top"):
             self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
 
@@ -230,6 +239,16 @@ class VoiceApp(QMainWindow):
         spin.setValue(self.config.get("phrase_time_limit", 10)); spin.setSuffix(" sec")
         layout.addRow("Max speak time:", spin)
 
+        # X Position
+        x_spin = QSpinBox(); x_spin.setRange(0, 10000)
+        x_spin.setValue(self.config.get("x", 100))
+        layout.addRow("Window X:", x_spin)
+
+        # Y Position
+        y_spin = QSpinBox(); y_spin.setRange(0, 10000)
+        y_spin.setValue(self.config.get("y", 100))
+        layout.addRow("Window Y:", y_spin)
+
         pin_check = QCheckBox()
         pin_check.setChecked(self.config.get("always_on_top", False))
         layout.addRow("Always on top:", pin_check)
@@ -254,6 +273,12 @@ class VoiceApp(QMainWindow):
 
         if dialog.exec():
             self.config["phrase_time_limit"] = spin.value()
+            
+            # Update Position
+            self.config["x"] = x_spin.value()
+            self.config["y"] = y_spin.value()
+            self.move(self.config["x"], self.config["y"])
+
             new_pin = pin_check.isChecked()
             if new_pin != self.config.get("always_on_top", False):
                 self.config["always_on_top"] = new_pin
