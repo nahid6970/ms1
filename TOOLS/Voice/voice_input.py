@@ -159,7 +159,7 @@ class VoiceApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(270, 46)
+        self.setFixedSize(280, 46)
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
@@ -177,10 +177,12 @@ class VoiceApp(QMainWindow):
         layout.setSpacing(4)
         layout.setContentsMargins(8, 2, 8, 2)
 
-        self.status_label = QLabel("●")
-        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
-        self.status_label.setFixedWidth(16)
-        layout.addWidget(self.status_label)
+        self.status_btn = QPushButton("●")
+        self.status_btn.setObjectName("help")
+        self.status_btn.setFixedWidth(24)
+        self.status_btn.setEnabled(False) # Visual only
+        self.status_btn.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 12pt; padding: 0;")
+        layout.addWidget(self.status_btn)
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
@@ -210,7 +212,7 @@ class VoiceApp(QMainWindow):
 
         if self.config.get("hide_record_btn"):
             self.record_btn.setVisible(False)
-            self.setFixedSize(180, 46)
+            self.setFixedSize(190, 46)
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -328,7 +330,7 @@ class VoiceApp(QMainWindow):
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
                 self.record_btn.setVisible(not new_hide)
-                self.setFixedSize(180 if new_hide else 270, 46)
+                self.setFixedSize(190 if new_hide else 280, 46)
             self.save_config()
 
     def setup_global_hotkey(self):
@@ -431,8 +433,8 @@ class VoiceApp(QMainWindow):
         self.record_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;")
 
     def _set_status(self, color):
-        self.status_label.setText("●")
-        self.status_label.setStyleSheet(f"color: {color}; font-weight: bold; font-size: 14pt;")
+        self.status_btn.setText("●")
+        self.status_btn.setStyleSheet(f"color: {color}; font-weight: bold; font-size: 12pt; padding: 0;")
 
     def _finish_space_recording(self):
         if isinstance(self.voice_thread, SpaceStopThread):
@@ -450,7 +452,7 @@ class VoiceApp(QMainWindow):
             self._reset_record_btn()
 
     def on_error(self, error):
-        self.status_label.setText("✕")
+        self.status_btn.setText("✕")
         self._set_status(CP_RED)
         self._reset_record_btn()
         self._live_recording = False
