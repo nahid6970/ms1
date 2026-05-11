@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
-                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox)
+                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 import pyperclip
 from pynput import keyboard as pynput_keyboard
@@ -148,7 +148,8 @@ class VoiceApp(QMainWindow):
                 "language": "en-US", 
                 "always_on_top": False,
                 "x": 100,
-                "y": 100
+                "y": 100,
+                "border_color": CP_RED
             }
             self.save_config()
 
@@ -163,22 +164,12 @@ class VoiceApp(QMainWindow):
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
         
+        flags = Qt.WindowType.FramelessWindowHint
         if self.config.get("always_on_top"):
-            self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+            flags |= Qt.WindowType.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
 
-        self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
-            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
-            QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 8px; }}
-            QPushButton#lang:checked {{ border: 2px solid {CP_GREEN}; color: {CP_GREEN}; }}
-            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
-            QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
-            QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
-            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
-        """)
+        self.update_style()
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -223,6 +214,44 @@ class VoiceApp(QMainWindow):
             self.record_btn.setVisible(False)
             self.setFixedSize(185, 50)
 
+    def update_style(self):
+        border_color = self.config.get("border_color", CP_RED)
+        self.setStyleSheet(f"""
+            QMainWindow {{ 
+                background-color: {CP_BG}; 
+                border: 2px solid {border_color};
+            }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+            QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 8px; }}
+            QPushButton#lang:checked {{ border: 2px solid {CP_GREEN}; color: {CP_GREEN}; }}
+            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
+            QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
+            QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            QLineEdit {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px; }}
+        """)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.drag_pos)
+            event.accept()
+            # Update config with new position but don't save yet to avoid heavy disk IO
+            self.config["x"] = self.x()
+            self.config["y"] = self.y()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.save_config()
+            event.accept()
+
     def show_help(self):
         QMessageBox.information(self, "Shortcut",
             "Global Hotkey: Alt + H\n"
@@ -248,6 +277,11 @@ class VoiceApp(QMainWindow):
         y_spin = QSpinBox(); y_spin.setRange(0, 10000)
         y_spin.setValue(self.config.get("y", 100))
         layout.addRow("Window Y:", y_spin)
+
+        # Border Color
+        color_edit = QLineEdit()
+        color_edit.setText(self.config.get("border_color", CP_RED))
+        layout.addRow("Border Color (Hex):", color_edit)
 
         pin_check = QCheckBox()
         pin_check.setChecked(self.config.get("always_on_top", False))
@@ -279,13 +313,18 @@ class VoiceApp(QMainWindow):
             self.config["y"] = y_spin.value()
             self.move(self.config["x"], self.config["y"])
 
+            # Update Border Color
+            self.config["border_color"] = color_edit.text()
+            self.update_style()
+
             new_pin = pin_check.isChecked()
             if new_pin != self.config.get("always_on_top", False):
                 self.config["always_on_top"] = new_pin
-                flag = Qt.WindowType.WindowStaysOnTopHint
-                if new_pin: self.setWindowFlags(self.windowFlags() | flag)
-                else:       self.setWindowFlags(self.windowFlags() & ~flag)
+                flags = Qt.WindowType.FramelessWindowHint
+                if new_pin: flags |= Qt.WindowType.WindowStaysOnTopHint
+                self.setWindowFlags(flags)
                 self.show()
+
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             new_hide = hide_rec_check.isChecked()
