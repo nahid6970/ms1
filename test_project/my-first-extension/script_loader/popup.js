@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scriptListDiv = document.getElementById('scriptList');
   const statusText = document.getElementById('statusText');
   const fallbackScriptPath = 'user_scripts/local_server_fallback.js';
+  const localFileBridgeKey = '__local_file_bridge__';
   const defaultFallbackSettings = {
     localServerUrl: 'http://192.168.0.101:5000/',
     siteUrl: 'https://nahid6970.github.io/db/5000_myhome/myhome',
@@ -161,6 +162,32 @@ document.addEventListener('DOMContentLoaded', () => {
     return scriptItem;
   }
 
+  function createLocalFileBridgeItem(isEnabled) {
+    const scriptItem = document.createElement('div');
+    scriptItem.className = `script-item ${isEnabled ? 'enabled' : 'disabled'}`;
+    scriptItem.dataset.scriptPath = localFileBridgeKey;
+    scriptItem.innerHTML = `
+      <div class="script-main">
+        <div class="script-info">
+          <div class="script-icon">${isEnabled ? '✓' : '○'}</div>
+          <div class="script-details">
+            <div class="script-name">Local File Bridge</div>
+            <div class="script-path">Lets web pages ask the extension to open file:/// links in Chrome.</div>
+          </div>
+        </div>
+        <div class="script-actions">
+          <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${localFileBridgeKey}">
+            ${isEnabled ? 'ON' : 'OFF'}
+          </button>
+        </div>
+      </div>
+      <div class="fallback-settings">
+        <div class="settings-hint">Enable this for your GitHub Pages app if you want local file links to open through the extension.</div>
+      </div>
+    `;
+    return scriptItem;
+  }
+
   function updateStatus(enabledScripts, totalScripts) {
     const enabledCount = Object.values(enabledScripts).filter(Boolean).length;
     statusText.textContent = `${enabledCount}/${totalScripts} script${totalScripts !== 1 ? 's' : ''} enabled`;
@@ -190,6 +217,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveWhitelistSettings(whitelist) {
     chrome.storage.local.set({ domainWhitelist: whitelist }, () => {
       console.log('Whitelist settings saved:', whitelist);
+    });
+  }
+
+  function toggleLocalFileBridge(currentState) {
+    chrome.storage.local.set({ localFileBridgeEnabled: !currentState }, () => {
+      console.log(`Local file bridge ${!currentState ? 'enabled' : 'disabled'}`);
+      loadScriptList();
     });
   }
 
@@ -264,13 +298,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'localFileBridgeEnabled'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
+        const localFileBridgeEnabled = result.localFileBridgeEnabled !== false;
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
+
+        const bridgeItem = createLocalFileBridgeItem(localFileBridgeEnabled);
+        bridgeItem.querySelector('.toggle-btn').addEventListener('click', () => {
+          toggleLocalFileBridge(localFileBridgeEnabled);
+        });
+        scriptListDiv.appendChild(bridgeItem);
         
         // Create script items
         availableScripts.forEach(scriptPath => {
@@ -289,7 +330,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Update status
-        updateStatus(enabledScripts, availableScripts.length);
+        updateStatus(
+          { ...enabledScripts, [localFileBridgeKey]: localFileBridgeEnabled },
+          availableScripts.length + 1
+        );
       });
     } catch (error) {
       console.error('Error loading scripts:', error);

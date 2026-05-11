@@ -19,20 +19,34 @@ window.addEventListener('message', (event) => {
     return;
   }
 
-  chrome.runtime.sendMessage(
-    {
-      type: 'OPEN_LOCAL_FILE',
-      url: data.url
-    },
-    (response) => {
-      const lastError = chrome.runtime.lastError;
+  chrome.storage.local.get(['localFileBridgeEnabled'], (result) => {
+    const bridgeEnabled = result.localFileBridgeEnabled !== false;
+    if (!bridgeEnabled) {
       window.postMessage({
         source: 'myhome-extension-bridge',
         type: 'OPEN_LOCAL_FILE_RESULT',
         requestId: data.requestId,
-        ok: Boolean(response?.ok) && !lastError,
-        error: lastError?.message || response?.error || null
+        ok: false,
+        error: 'Local file bridge is disabled in the extension popup.'
       }, '*');
+      return;
     }
-  );
+
+    chrome.runtime.sendMessage(
+      {
+        type: 'OPEN_LOCAL_FILE',
+        url: data.url
+      },
+      (response) => {
+        const lastError = chrome.runtime.lastError;
+        window.postMessage({
+          source: 'myhome-extension-bridge',
+          type: 'OPEN_LOCAL_FILE_RESULT',
+          requestId: data.requestId,
+          ok: Boolean(response?.ok) && !lastError,
+          error: lastError?.message || response?.error || null
+        }, '*');
+      }
+    );
+  });
 });
