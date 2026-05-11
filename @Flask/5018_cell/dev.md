@@ -233,8 +233,9 @@ The state is managed in a central object synced with persistence files:
 
 ### Cell & Formatting Features
 - **[Cell-Specific Features](md/CELL_FEATURES.md):** Checkmarks, Sort Rank, Color History, Single Row View, Raw Mode.
-- **[Cell Justify Alignment](md/CELL_JUSTIFY_ALIGN.md):** Justify text alignment via context menu (like Microsoft Word).
-- **[Hidden Content](md/HIDDEN_CONTENT.md):** Collapsible `{{}}` and MCQ `[[]]` logic.
+- [Cell Justify Alignment](md/CELL_JUSTIFY_ALIGN.md): Justify text alignment via context menu (like Microsoft Word).
+- [Text Stroke Feature](md/TEXT_STROKE.md): Add outline/border around text via `ŝŝ` syntax.
+- [Hidden Content](md/HIDDEN_CONTENT.md): Collapsible `{{}}` and MCQ `[[]]` logic.
 - **[Special Markdown](md/MARKDOWN_SPECIAL.md):** Lists, Small text, custom headings, border boxes, underlines.
 - **[Highlight Shortcuts](md/COLOR_HIGHLIGHT_SHORTCUTS.md):** `==`, `!!`, `??` syntaxes.
 - **[Custom Color Syntaxes](md/CUSTOM_SYNTAX.md):** Dynamic user-defined highlighting.
