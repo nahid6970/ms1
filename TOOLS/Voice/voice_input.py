@@ -159,7 +159,7 @@ class VoiceApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(270, 50)
+        self.setFixedSize(270, 46)
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
@@ -175,7 +175,7 @@ class VoiceApp(QMainWindow):
         self.setCentralWidget(central)
         layout = QHBoxLayout(central)
         layout.setSpacing(4)
-        layout.setContentsMargins(8, 5, 8, 5)
+        layout.setContentsMargins(8, 2, 8, 2)
 
         self.status_label = QLabel("●")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; font-size: 14pt;")
@@ -210,7 +210,7 @@ class VoiceApp(QMainWindow):
 
         if self.config.get("hide_record_btn"):
             self.record_btn.setVisible(False)
-            self.setFixedSize(180, 50)
+            self.setFixedSize(180, 46)
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -328,7 +328,7 @@ class VoiceApp(QMainWindow):
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
                 self.record_btn.setVisible(not new_hide)
-                self.setFixedSize(180 if new_hide else 270, 50)
+                self.setFixedSize(180 if new_hide else 270, 46)
             self.save_config()
 
     def setup_global_hotkey(self):
