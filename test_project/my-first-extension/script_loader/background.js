@@ -149,6 +149,30 @@ chrome.tabs.onCreated.addListener((tab) => {
   handleNewTabRedirect(tab);
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== 'OPEN_LOCAL_FILE') {
+    return;
+  }
+
+  const url = typeof message.url === 'string' ? message.url.trim() : '';
+  if (!url.startsWith('file:///')) {
+    sendResponse({ ok: false, error: 'Only file:/// URLs are supported.' });
+    return;
+  }
+
+  chrome.tabs.create({ url }, () => {
+    const error = chrome.runtime.lastError;
+    if (error) {
+      sendResponse({ ok: false, error: error.message });
+      return;
+    }
+
+    sendResponse({ ok: true });
+  });
+
+  return true;
+});
+
 // Optional: Listen for storage changes to debug
 chrome.storage.onChanged.addListener((changes, namespace) => {
   console.log('Storage changed:', changes);
