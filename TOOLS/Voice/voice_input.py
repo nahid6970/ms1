@@ -159,7 +159,7 @@ class VoiceApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(305, 50)
+        self.setFixedSize(270, 50)
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
@@ -182,19 +182,12 @@ class VoiceApp(QMainWindow):
         self.status_label.setFixedWidth(16)
         layout.addWidget(self.status_label)
 
-        self.en_btn = QPushButton("EN")
-        self.en_btn.setObjectName("lang"); self.en_btn.setCheckable(True)
-        self.en_btn.setChecked(self.config["language"] == "en-US")
-        self.en_btn.setFixedWidth(32)
-        self.en_btn.clicked.connect(lambda: self.change_language("en-US"))
-        layout.addWidget(self.en_btn)
-
-        self.bd_btn = QPushButton("BD")
-        self.bd_btn.setObjectName("lang"); self.bd_btn.setCheckable(True)
-        self.bd_btn.setChecked(self.config["language"] == "bn-BD")
-        self.bd_btn.setFixedWidth(32)
-        self.bd_btn.clicked.connect(lambda: self.change_language("bn-BD"))
-        layout.addWidget(self.bd_btn)
+        self.lang_btn = QPushButton()
+        self.lang_btn.setObjectName("lang")
+        self.lang_btn.setFixedWidth(36)
+        self.lang_btn.clicked.connect(self.toggle_language)
+        self._update_lang_btn()
+        layout.addWidget(self.lang_btn)
 
         self.record_btn = QPushButton("🎤 REC")
         self.record_btn.clicked.connect(self.toggle_record)
@@ -217,7 +210,7 @@ class VoiceApp(QMainWindow):
 
         if self.config.get("hide_record_btn"):
             self.record_btn.setVisible(False)
-            self.setFixedSize(215, 50)
+            self.setFixedSize(180, 50)
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -230,8 +223,7 @@ class VoiceApp(QMainWindow):
             QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 8px; }}
-            QPushButton#lang:checked {{ border: 2px solid {CP_GREEN}; color: {CP_GREEN}; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 4px; }}
             QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
@@ -336,7 +328,7 @@ class VoiceApp(QMainWindow):
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
                 self.record_btn.setVisible(not new_hide)
-                self.setFixedSize(215 if new_hide else 305, 50)
+                self.setFixedSize(180 if new_hide else 270, 50)
             self.save_config()
 
     def setup_global_hotkey(self):
@@ -365,11 +357,20 @@ class VoiceApp(QMainWindow):
             on_release=for_canonical(hotkey.release))
         listener.start()
 
+    def toggle_language(self):
+        new_lang = "bn-BD" if self.config["language"] == "en-US" else "en-US"
+        self.change_language(new_lang)
+
     def change_language(self, lang):
         self.config["language"] = lang
         self.save_config()
-        self.en_btn.setChecked(lang == "en-US")
-        self.bd_btn.setChecked(lang == "bn-BD")
+        self._update_lang_btn()
+
+    def _update_lang_btn(self):
+        is_en = self.config["language"] == "en-US"
+        self.lang_btn.setText("EN" if is_en else "BN")
+        color = CP_RED if is_en else CP_GREEN
+        self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold;")
 
     def toggle_record(self):
         if self.config.get("engine", "local") == "browser":
