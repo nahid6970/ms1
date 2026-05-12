@@ -64,75 +64,137 @@ class DownloaderThread(QThread):
             
             # Check if we are on a photo page or a post page
             if "/photo" not in driver.current_url:
-                self.log_signal.emit("Post detected. Attempting to find the first image...")
+                self.log_signal.emit("Post detected. Attempting to enter gallery mode...")
                 # Try to find the first image to click
                 try:
                     # Look for links that contain /photo/
+                    # We look for the one that likely leads to the main gallery
                     photo_links = driver.find_elements(By.XPATH, "//a[contains(@href, '/photo')]")
                     if photo_links:
-                        photo_links[0].click()
-                        time.sleep(3)
+                        self.log_signal.emit("Found photo link. Entering...")
+                        driver.execute_script("arguments[0].click();", photo_links[0])
+                        time.sleep(5) # Wait longer for gallery to load
                     else:
-                        self.log_signal.emit("Could not find photo links in the post. Trying to extract images directly.")
+                        self.log_signal.emit("Could not find photo links in the post. Falling back to scroll mode.")
                 except Exception as e:
-                    self.log_signal.emit(f"Error clicking first image: {e}")
+                    self.log_signal.emit(f"Error entering gallery: {e}")
 
             downloaded_urls = set()
+            retry_count = 0
             
             while count < self.max_images and self.is_running:
                 try:
-                    # Wait for image to load
-                    # Facebook images are often in an <img> tag with a specific class or role
-                    # We look for the main image in the theater mode
-                    img_elements = driver.find_elements(By.XPATH, "//img[@data-visualcompletion='media-vc-image']")
-                    if not img_elements:
-                        # Fallback for other image types
-                        img_elements = driver.find_elements(By.XPATH, "//div[@role='main']//img")
+                    # Check for login/signup popups and close them
+                    try:
+                        # FB often uses a close button with aria-label "Close" or "Dismiss"
+                        popups = driver.find_elements(By.XPATH, "//div[@aria-label='Close' or @aria-label='close' or @aria-label='Dismiss']")
+                        for p in popups:
+                            if p.is_displayed():
+                                driver.execute_script("arguments[0].click();", p)
+                                self.log_signal.emit("Closed a blocking popup.")
+                                time.sleep(1)
+                    except:
+                        pass
+
+                    # Try to find the main image in theater mode
+                    # Theatre mode images often have data-visualcompletion="media-vc-image"
+                    # Or are the only large image in a role="dialog"
+                    selectors = [
+                        "//div[@role='dialog']//img[@data-visualcompletion='media-vc-image']",
+                        "//img[@data-visualcompletion='media-vc-image']",
+                        "//div[@role='dialog']//img",
+                        "//div[@role='main']//img",
+                        "//img[contains(@class, 'xz74otr')]", 
+                    ]
                     
                     current_img_src = None
-                    for img in img_elements:
-                        src = img.get_attribute("src")
-                        if src and "scontent" in src and src not in downloaded_urls:
-                            current_img_src = src
+                    found_any_src = False
+                    for selector in selectors:
+                        img_elements = driver.find_elements(By.XPATH, selector)
+                        for img in img_elements:
+                            try:
+                                src = img.get_attribute("src")
+                                if src and "scontent" in src:
+                                    found_any_src = True
+                                    if src not in downloaded_urls:
+                                        current_img_src = src
+                                        break
+                            except:
+                                continue
+                        if current_img_src:
                             break
                     
                     if current_img_src:
                         count += 1
                         downloaded_urls.add(current_img_src)
+                        retry_count = 0 # Reset retry on success
                         self.log_signal.emit(f"[{count}] Found image: {current_img_src[:60]}...")
                         
                         # Download image
-                        filename = f"fb_image_{count}_{int(time.time())}.jpg"
-                        filepath = os.path.join(self.output_dir, filename)
-                        
-                        img_data = requests.get(current_img_src).content
-                        with open(filepath, 'wb') as f:
-                            f.write(img_data)
-                        
-                        self.progress_signal.emit(int((count / self.max_images) * 100))
-                    else:
-                        self.log_signal.emit("No new image found on this page.")
-
-                    # Find "Next" button
-                    # Facebook's "Next" button usually has aria-label="Next photo" or similar
-                    try:
-                        next_buttons = driver.find_elements(By.XPATH, "//div[@aria-label='Next photo'] | //div[@aria-label='Next Photo']")
-                        if not next_buttons:
-                            # Try finding by class if label fails (less reliable)
-                            next_buttons = driver.find_elements(By.XPATH, "//a[contains(@class, 'next')]")
+                        try:
+                            filename = f"fb_image_{count:03d}_{int(time.time())}.jpg"
+                            filepath = os.path.join(self.output_dir, filename)
                             
-                        if next_buttons:
-                            next_buttons[0].click()
-                            time.sleep(2)
+                            img_data = requests.get(current_img_src, timeout=15).content
+                            with open(filepath, 'wb') as f:
+                                f.write(img_data)
+                            
+                            self.progress_signal.emit(int((count / self.max_images) * 100))
+                        except Exception as e:
+                            self.log_signal.emit(f"Download failed for image {count}: {e}")
+                    else:
+                        if found_any_src:
+                            self.log_signal.emit("Image already downloaded. Navigating next...")
                         else:
-                            self.log_signal.emit("No 'Next' button found. End of gallery?")
+                            self.log_signal.emit("Waiting for image content...")
+                            time.sleep(2)
+                            retry_count += 1
+                            if retry_count > 5:
+                                self.log_signal.emit("Stuck? Attempting forced navigation...")
+
+                    # Find "Next" button - prioritize gallery navigation
+                    next_found = False
+                    next_selectors = [
+                        "//div[@aria-label='Next photo']",
+                        "//div[@aria-label='Next Photo']",
+                        "//div[@aria-label='Next photo']//i", # Sometimes the icon inside
+                        "//a[@aria-label='Next photo']",
+                        "//div[contains(@aria-label, 'Next')]",
+                        "//div[@role='button' and contains(@style, 'right')]",
+                        "//div[contains(@class, 'next')]",
+                    ]
+                    
+                    for selector in next_selectors:
+                        next_btns = driver.find_elements(By.XPATH, selector)
+                        for btn in next_btns:
+                            try:
+                                if btn.is_displayed():
+                                    # Click using JS to bypass potential overlays
+                                    driver.execute_script("arguments[0].click();", btn)
+                                    next_found = True
+                                    # self.log_signal.emit("Navigating to next image...")
+                                    time.sleep(2) # Wait for transition
+                                    break
+                            except:
+                                continue
+                        if next_found:
                             break
-                    except Exception as e:
-                        self.log_signal.emit(f"Finished gallery or error: {e}")
-                        break
+                    
+                    if not next_found:
+                        if "/photo" in driver.current_url:
+                            self.log_signal.emit("End of gallery detected.")
+                            break
+                        else:
+                            # If we are NOT in gallery mode, scroll the feed
+                            self.log_signal.emit("Scrolling feed...")
+                            driver.execute_script("window.scrollBy(0, 1000);")
+                            time.sleep(2)
+                            if retry_count > 3:
+                                self.log_signal.emit("No more images in feed.")
+                                break
 
                 except Exception as e:
-                    self.log_signal.emit(f"Error during extraction: {e}")
+                    self.log_signal.emit(f"Navigation error: {e}")
                     break
             
             driver.quit()
@@ -300,13 +362,19 @@ class FacebookDownloaderApp(QMainWindow):
         self.start_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
         self.start_btn.clicked.connect(self.start_download)
         
+        self.stop_btn = QPushButton("■ STOP")
+        self.stop_btn.setEnabled(False)
+        self.stop_btn.setStyleSheet(f"background-color: {CP_RED}; color: white;")
+        self.stop_btn.clicked.connect(self.stop_download)
+        
         self.restart_btn = QPushButton("↺ RESTART")
         self.restart_btn.clicked.connect(self.restart_app)
         
         self.settings_btn = QPushButton("⚙ SETTINGS")
         self.settings_btn.clicked.connect(self.show_settings)
 
-        ctrl_layout.addWidget(self.start_btn, 3)
+        ctrl_layout.addWidget(self.start_btn, 2)
+        ctrl_layout.addWidget(self.stop_btn, 1)
         ctrl_layout.addWidget(self.restart_btn, 1)
         ctrl_layout.addWidget(self.settings_btn, 1)
         main_layout.addLayout(ctrl_layout)
@@ -350,6 +418,7 @@ class FacebookDownloaderApp(QMainWindow):
             return
 
         self.start_btn.setEnabled(False)
+        self.stop_btn.setEnabled(True)
         self.start_btn.setText("⏳ RUNNING...")
         self.progress_bar.setValue(0)
         self.log("Initializing extraction process...")
@@ -365,8 +434,15 @@ class FacebookDownloaderApp(QMainWindow):
         self.thread.finished_signal.connect(self.download_finished)
         self.thread.start()
 
+    def stop_download(self):
+        if hasattr(self, 'thread') and self.thread.isRunning():
+            self.log("Stopping extraction process...")
+            self.thread.stop()
+            self.stop_btn.setEnabled(False)
+
     def download_finished(self, count):
         self.start_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
         self.start_btn.setText("▶ START DOWNLOAD")
         self.log(f"Process ended. {count} images saved to {self.output_dir}")
         QMessageBox.information(self, "Finished", f"Successfully downloaded {count} images.")
