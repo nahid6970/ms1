@@ -8,7 +8,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QGroupBox, QFormLayout, QPlainTextEdit, QFileDialog, 
-                             QProgressBar, QSpinBox, QCheckBox, QDialog, QMessageBox)
+                             QProgressBar, QSpinBox, QCheckBox, QDialog, QMessageBox, QInputDialog)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -406,8 +406,11 @@ class FacebookDownloaderApp(QMainWindow):
         self.dir_input.textChanged.connect(self.on_dir_changed)
         self.browse_btn = QPushButton("BROWSE")
         self.browse_btn.clicked.connect(self.browse_folder)
+        self.open_btn = QPushButton("OPEN")
+        self.open_btn.clicked.connect(self.open_folder)
         dir_layout.addWidget(self.dir_input)
         dir_layout.addWidget(self.browse_btn)
+        dir_layout.addWidget(self.open_btn)
 
         self.max_images_spin = QSpinBox()
         self.max_images_spin.setRange(1, 5000)
@@ -474,6 +477,12 @@ class FacebookDownloaderApp(QMainWindow):
             self.dir_input.setText(folder)
             self.save_settings()
 
+    def open_folder(self):
+        if os.path.exists(self.output_dir):
+            os.startfile(self.output_dir)
+        else:
+            self.log(f"Directory does not exist: {self.output_dir}")
+
     def log(self, message):
         timestamp = time.strftime("%H:%M:%S")
         self.log_output.appendPlainText(f"[{timestamp}] {message}")
@@ -493,6 +502,15 @@ class FacebookDownloaderApp(QMainWindow):
         if not url:
             QMessageBox.critical(self, "Error", "Target URL is required.")
             return
+
+        # Prompt for Max Images
+        val, ok = QInputDialog.getInt(self, "DOWNLOAD LIMIT", "Enter max images to download:", 
+                                     value=self.max_images_spin.value(), min=1, max=5000)
+        if not ok:
+            return
+        
+        self.max_images_spin.setValue(val)
+        self.save_settings()
 
         if not os.path.exists(self.output_dir):
             try:
