@@ -252,12 +252,50 @@ class FacebookDownloaderApp(QMainWindow):
         super().__init__()
         self.setWindowTitle("CYBER_FB_EXTRACTOR v1.0")
         self.resize(900, 700)
-        self.output_dir = os.path.join(os.getcwd(), "downloads")
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+        
+        self.settings_file = os.path.join(os.path.dirname(__file__), 'settings.json')
+        self.load_settings()
 
         self.apply_styles()
         self.init_ui()
+
+    def load_settings(self):
+        """Load settings from JSON or set defaults."""
+        defaults = {
+            "target_url": "https://www.facebook.com/share/p/1QoccunqqZ/",
+            "output_dir": os.path.join(os.getcwd(), "downloads"),
+            "max_images": 100,
+            "headless": False
+        }
+        try:
+            if os.path.exists(self.settings_file):
+                with open(self.settings_file, 'r') as f:
+                    self.settings = json.load(f)
+            else:
+                self.settings = defaults
+        except:
+            self.settings = defaults
+        
+        # Ensure output dir exists
+        self.output_dir = self.settings.get("output_dir", defaults["output_dir"])
+        if not os.path.exists(self.output_dir):
+            try:
+                os.makedirs(self.output_dir)
+            except:
+                self.output_dir = defaults["output_dir"]
+
+    def save_settings(self):
+        """Collect current UI values and save to JSON."""
+        try:
+            self.settings["target_url"] = self.url_input.text().strip()
+            self.settings["output_dir"] = self.output_dir
+            self.settings["max_images"] = self.max_images_spin.value()
+            self.settings["headless"] = self.headless_cb.isChecked()
+            
+            with open(self.settings_file, 'w') as f:
+                json.dump(self.settings, f, indent=4)
+        except Exception as e:
+            print(f"Failed to save settings: {e}")
 
     def apply_styles(self):
         self.setStyleSheet(f"""
@@ -359,7 +397,8 @@ class FacebookDownloaderApp(QMainWindow):
         
         self.url_input = QLineEdit()
         self.url_input.setPlaceholderText("https://www.facebook.com/share/p/...")
-        self.url_input.setText("https://www.facebook.com/share/p/1QoccunqqZ/")
+        self.url_input.setText(self.settings.get("target_url", ""))
+        self.url_input.textChanged.connect(self.save_settings)
         
         dir_layout = QHBoxLayout()
         self.dir_label = QLineEdit(self.output_dir)
@@ -370,11 +409,13 @@ class FacebookDownloaderApp(QMainWindow):
         dir_layout.addWidget(self.browse_btn)
 
         self.max_images_spin = QSpinBox()
-        self.max_images_spin.setRange(1, 1000)
-        self.max_images_spin.setValue(100)
+        self.max_images_spin.setRange(1, 5000)
+        self.max_images_spin.setValue(self.settings.get("max_images", 100))
+        self.max_images_spin.valueChanged.connect(self.save_settings)
         
         self.headless_cb = QCheckBox("Headless Mode (Background)")
-        self.headless_cb.setChecked(False)
+        self.headless_cb.setChecked(self.settings.get("headless", False))
+        self.headless_cb.toggled.connect(self.save_settings)
 
         input_layout.addRow("TARGET URL:", self.url_input)
         input_layout.addRow("OUTPUT DIR:", dir_layout)
@@ -432,6 +473,7 @@ class FacebookDownloaderApp(QMainWindow):
         if folder:
             self.output_dir = folder
             self.dir_label.setText(folder)
+            self.save_settings()
 
     def log(self, message):
         timestamp = time.strftime("%H:%M:%S")
