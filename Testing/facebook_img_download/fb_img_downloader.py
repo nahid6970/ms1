@@ -401,11 +401,11 @@ class FacebookDownloaderApp(QMainWindow):
         self.url_input.textChanged.connect(self.save_settings)
         
         dir_layout = QHBoxLayout()
-        self.dir_label = QLineEdit(self.output_dir)
-        self.dir_label.setReadOnly(True)
+        self.dir_input = QLineEdit(self.output_dir)
+        self.dir_input.textChanged.connect(self.on_dir_changed)
         self.browse_btn = QPushButton("BROWSE")
         self.browse_btn.clicked.connect(self.browse_folder)
-        dir_layout.addWidget(self.dir_label)
+        dir_layout.addWidget(self.dir_input)
         dir_layout.addWidget(self.browse_btn)
 
         self.max_images_spin = QSpinBox()
@@ -426,14 +426,9 @@ class FacebookDownloaderApp(QMainWindow):
 
         # Controls
         ctrl_layout = QHBoxLayout()
-        self.start_btn = QPushButton("▶ START DOWNLOAD")
-        self.start_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
-        self.start_btn.clicked.connect(self.start_download)
-        
-        self.stop_btn = QPushButton("■ STOP")
-        self.stop_btn.setEnabled(False)
-        self.stop_btn.setStyleSheet(f"background-color: {CP_RED}; color: white;")
-        self.stop_btn.clicked.connect(self.stop_download)
+        self.action_btn = QPushButton("▶ START DOWNLOAD")
+        self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
+        self.action_btn.clicked.connect(self.toggle_action)
         
         self.restart_btn = QPushButton("↺ RESTART")
         self.restart_btn.clicked.connect(self.restart_app)
@@ -441,8 +436,7 @@ class FacebookDownloaderApp(QMainWindow):
         self.settings_btn = QPushButton("⚙ SETTINGS")
         self.settings_btn.clicked.connect(self.show_settings)
 
-        ctrl_layout.addWidget(self.start_btn, 2)
-        ctrl_layout.addWidget(self.stop_btn, 1)
+        ctrl_layout.addWidget(self.action_btn, 3)
         ctrl_layout.addWidget(self.restart_btn, 1)
         ctrl_layout.addWidget(self.settings_btn, 1)
         main_layout.addLayout(ctrl_layout)
@@ -468,11 +462,15 @@ class FacebookDownloaderApp(QMainWindow):
         self.footer = footer
         main_layout.addWidget(footer)
 
+    def on_dir_changed(self, text):
+        self.output_dir = text
+        self.save_settings()
+
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Output Directory", self.output_dir)
         if folder:
             self.output_dir = folder
-            self.dir_label.setText(folder)
+            self.dir_input.setText(folder)
             self.save_settings()
 
     def log(self, message):
@@ -480,15 +478,30 @@ class FacebookDownloaderApp(QMainWindow):
         self.log_output.appendPlainText(f"[{timestamp}] {message}")
         self.log_output.verticalScrollBar().setValue(self.log_output.verticalScrollBar().maximum())
 
+    def toggle_action(self):
+        if hasattr(self, 'thread') and self.thread.isRunning():
+            self.log("Stopping extraction process...")
+            self.thread.stop()
+            self.action_btn.setEnabled(False)
+            self.action_btn.setText("⏳ STOPPING...")
+        else:
+            self.start_download()
+
     def start_download(self):
         url = self.url_input.text().strip()
         if not url:
             QMessageBox.critical(self, "Error", "Target URL is required.")
             return
 
-        self.start_btn.setEnabled(False)
-        self.stop_btn.setEnabled(True)
-        self.start_btn.setText("⏳ RUNNING...")
+        if not os.path.exists(self.output_dir):
+            try:
+                os.makedirs(self.output_dir)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Could not create directory: {e}")
+                return
+
+        self.action_btn.setText("■ STOP DOWNLOAD")
+        self.action_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-size: 11pt;")
         self.progress_bar.setValue(0)
         self.log("Initializing extraction process...")
 
@@ -503,16 +516,10 @@ class FacebookDownloaderApp(QMainWindow):
         self.thread.finished_signal.connect(self.download_finished)
         self.thread.start()
 
-    def stop_download(self):
-        if hasattr(self, 'thread') and self.thread.isRunning():
-            self.log("Stopping extraction process...")
-            self.thread.stop()
-            self.stop_btn.setEnabled(False)
-
     def download_finished(self, count):
-        self.start_btn.setEnabled(True)
-        self.stop_btn.setEnabled(False)
-        self.start_btn.setText("▶ START DOWNLOAD")
+        self.action_btn.setEnabled(True)
+        self.action_btn.setText("▶ START DOWNLOAD")
+        self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
         self.log(f"Process ended. {count} images saved to {self.output_dir}")
         QMessageBox.information(self, "Finished", f"Successfully downloaded {count} images.")
 
