@@ -795,13 +795,13 @@
                     "cmd": "C:\\@delta\\ms1\\Testing\\facebook_img_download\\fb_img_downloader.py"
                 }
             },
-            "border_color": "",
+            "border_color": "#00AAFF",
             "font": [
                 "Consolas",
                 15,
                 "bold"
             ],
-            "border": 0,
+            "border": 1,
             "border_radius": 0,
             "width": 0,
             "height": 0,
@@ -848,7 +848,7 @@
             "border_radius": 0,
             "width": 0,
             "height": 0,
-            "padx_left": 1,
+            "padx_left": 5,
             "padx_right": 1,
             "margin_left": 0,
             "margin_right": 0,
