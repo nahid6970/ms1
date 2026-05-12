@@ -480,9 +480,9 @@ class FacebookDownloaderApp(QMainWindow):
         self.log_output.verticalScrollBar().setValue(self.log_output.verticalScrollBar().maximum())
 
     def toggle_action(self):
-        if hasattr(self, 'thread') and self.thread.isRunning():
+        if hasattr(self, 'dl_thread') and self.dl_thread.isRunning():
             self.log("Stopping extraction process...")
-            self.thread.stop()
+            self.dl_thread.stop()
             self.action_btn.setEnabled(False)
             self.action_btn.setText("⏳ STOPPING...")
         else:
@@ -506,16 +506,16 @@ class FacebookDownloaderApp(QMainWindow):
         self.progress_bar.setValue(0)
         self.log("Initializing extraction process...")
 
-        self.thread = DownloaderThread(
+        self.dl_thread = DownloaderThread(
             url, 
             self.output_dir, 
             self.max_images_spin.value(),
             self.headless_cb.isChecked()
         )
-        self.thread.log_signal.connect(self.log)
-        self.thread.progress_signal.connect(self.progress_bar.setValue)
-        self.thread.finished_signal.connect(self.download_finished)
-        self.thread.start()
+        self.dl_thread.log_signal.connect(self.log)
+        self.dl_thread.progress_signal.connect(self.progress_bar.setValue)
+        self.dl_thread.finished_signal.connect(self.download_finished)
+        self.dl_thread.start()
 
     def download_finished(self, count):
         self.action_btn.setEnabled(True)
