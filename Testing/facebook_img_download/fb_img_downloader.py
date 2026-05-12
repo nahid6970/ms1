@@ -43,20 +43,6 @@ class DownloaderThread(QThread):
         self.headless = headless
         self.is_running = True
 
-    def _upgrade_url_quality(self, url):
-        """Strip FB size-limiting params and request the highest quality version."""
-        # FB full-res URLs use _n.jpg or no suffix; compressed use _s, _b, _t, etc.
-        # Replace size suffix before extension
-        url = re.sub(r'_(s|b|t|q|p|o|n)\.(jpg|jpeg|png|webp)', r'_n.\2', url, flags=re.IGNORECASE)
-        # Remove width/height query params that cap resolution
-        parsed = urlparse(url)
-        params = parse_qs(parsed.query, keep_blank_values=True)
-        for key in ['_nc_cat', 'ccb', 'efg', '_nc_sid', '_nc_ohc', '_nc_oc',
-                    '_nc_zt', '_nc_ht', 'oh', 'oe', '_nc_fb', 'tp']:
-            params.pop(key, None)
-        new_query = urlencode({k: v[0] for k, v in params.items()})
-        return urlunparse(parsed._replace(query=new_query))
-
     def _get_current_image(self, driver):
         """Extract the highest-quality scontent image URL from the current view."""
         selectors = [
@@ -65,19 +51,48 @@ class DownloaderThread(QThread):
             "//div[@role='dialog']//img[contains(@src,'scontent')]",
             "//div[@role='main']//img[contains(@src,'scontent')]",
         ]
-        best = (0, None)
+        
         for selector in selectors:
-            for img in driver.find_elements(By.XPATH, selector):
+            elements = driver.find_elements(By.XPATH, selector)
+            for img in elements:
                 try:
-                    src = img.get_attribute("src") or ""
-                    if "scontent" not in src:
-                        continue
-                    w = int(img.get_attribute("naturalWidth") or 0)
-                    if w > best[0]:
-                        best = (w, src)
+                    # Try srcset first as it contains all available resolutions
+                    srcset = img.get_attribute("srcset")
+                    if srcset:
+                        # srcset format: "url1 w1, url2 w2, ..."
+                        parts = srcset.split(",")
+                        best_url = None
+                        max_w = 0
+                        for part in parts:
+                            m = re.search(r'(https://\S+)\s+(\d+)w', part)
+                            if m:
+                                url, w = m.group(1), int(m.group(2))
+                                if w > max_w:
+                                    max_w = w
+                                    best_url = url
+                        if best_url:
+                            return best_url
+
+                    # Fallback to src
+                    src = img.get_attribute("src")
+                    if src and "scontent" in src:
+                        return src
                 except:
                     continue
-        return best[1]
+        return None
+
+    def _upgrade_url_quality(self, url):
+        """Attempt to upgrade URL to full size if not already, while keeping auth params."""
+        if not url: return url
+        # If it's already a high-res _n.jpg or similar, just return it
+        if "_n." in url or "_o." in url:
+            return url
+            
+        # Try to replace size suffixes like _s.jpg, _t.jpg with _n.jpg
+        upgraded = re.sub(r'_(s|b|t|q|p|o)\.(jpg|jpeg|png|webp)', r'_n.\2', url, flags=re.IGNORECASE)
+        
+        # DO NOT strip query parameters like oh and oe, they are signatures!
+        return upgraded
 
     def _download_with_cookies(self, url, driver, filepath):
         """Download using the browser's session cookies to bypass 403."""
