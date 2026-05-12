@@ -1,8 +1,9 @@
 import sys
 import os
+import re
 import time
 import requests
-import json
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QGroupBox, QFormLayout, QPlainTextEdit, QFileDialog, 
@@ -13,6 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -41,168 +43,178 @@ class DownloaderThread(QThread):
         self.headless = headless
         self.is_running = True
 
+    def _upgrade_url_quality(self, url):
+        """Strip FB size-limiting params and request the highest quality version."""
+        # FB full-res URLs use _n.jpg or no suffix; compressed use _s, _b, _t, etc.
+        # Replace size suffix before extension
+        url = re.sub(r'_(s|b|t|q|p|o|n)\.(jpg|jpeg|png|webp)', r'_n.\2', url, flags=re.IGNORECASE)
+        # Remove width/height query params that cap resolution
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query, keep_blank_values=True)
+        for key in ['_nc_cat', 'ccb', 'efg', '_nc_sid', '_nc_ohc', '_nc_oc',
+                    '_nc_zt', '_nc_ht', 'oh', 'oe', '_nc_fb', 'tp']:
+            params.pop(key, None)
+        new_query = urlencode({k: v[0] for k, v in params.items()})
+        return urlunparse(parsed._replace(query=new_query))
+
+    def _get_current_image(self, driver):
+        """Extract the highest-quality scontent image URL from the current view."""
+        selectors = [
+            "//div[@role='dialog']//img[@data-visualcompletion='media-vc-image']",
+            "//img[@data-visualcompletion='media-vc-image']",
+            "//div[@role='dialog']//img[contains(@src,'scontent')]",
+            "//div[@role='main']//img[contains(@src,'scontent')]",
+        ]
+        best = (0, None)
+        for selector in selectors:
+            for img in driver.find_elements(By.XPATH, selector):
+                try:
+                    src = img.get_attribute("src") or ""
+                    if "scontent" not in src:
+                        continue
+                    w = int(img.get_attribute("naturalWidth") or 0)
+                    if w > best[0]:
+                        best = (w, src)
+                except:
+                    continue
+        return best[1]
+
+    def _download_with_cookies(self, url, driver, filepath):
+        """Download using the browser's session cookies to bypass 403."""
+        session = requests.Session()
+        for cookie in driver.get_cookies():
+            session.cookies.set(cookie['name'], cookie['value'], domain=cookie.get('domain', ''))
+        headers = {
+            "User-Agent": driver.execute_script("return navigator.userAgent;"),
+            "Referer": "https://www.facebook.com/",
+        }
+        resp = session.get(url, headers=headers, timeout=20)
+        resp.raise_for_status()
+        with open(filepath, 'wb') as f:
+            f.write(resp.content)
+        return resp.headers.get("content-type", "image/jpeg")
+
     def run(self):
         count = 0
         try:
             options = Options()
             if self.headless:
-                options.add_argument("--headless")
+                options.add_argument("--headless=new")
             options.add_argument("--disable-gpu")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            
+            options.add_argument("--window-size=1920,1080")
+            options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+
             self.log_signal.emit("Initializing WebDriver...")
             driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-            
+
             self.log_signal.emit(f"Opening URL: {self.url}")
             driver.get(self.url)
-            
-            # If it's a share link, it might redirect to a post. 
-            # If it's a post link, we might need to click on an image to start the gallery.
             time.sleep(5)
-            
-            # Check if we are on a photo page or a post page
-            if "/photo" not in driver.current_url:
-                self.log_signal.emit("Post detected. Attempting to enter gallery mode...")
-                # Try to find the first image to click
-                try:
-                    # Look for links that contain /photo/
-                    # We look for the one that likely leads to the main gallery
-                    photo_links = driver.find_elements(By.XPATH, "//a[contains(@href, '/photo')]")
-                    if photo_links:
-                        self.log_signal.emit("Found photo link. Entering...")
-                        driver.execute_script("arguments[0].click();", photo_links[0])
-                        time.sleep(5) # Wait longer for gallery to load
-                    else:
-                        self.log_signal.emit("Could not find photo links in the post. Falling back to scroll mode.")
-                except Exception as e:
-                    self.log_signal.emit(f"Error entering gallery: {e}")
 
-            downloaded_urls = set()
-            retry_count = 0
-            
-            while count < self.max_images and self.is_running:
-                try:
-                    # Check for login/signup popups and close them
+            # Dismiss any login/cookie popups
+            for label in ["Close", "close", "Dismiss", "Not now", "Decline optional cookies"]:
+                for el in driver.find_elements(By.XPATH, f"//div[@aria-label='{label}'] | //button[@aria-label='{label}']"):
                     try:
-                        # FB often uses a close button with aria-label "Close" or "Dismiss"
-                        popups = driver.find_elements(By.XPATH, "//div[@aria-label='Close' or @aria-label='close' or @aria-label='Dismiss']")
-                        for p in popups:
-                            if p.is_displayed():
-                                driver.execute_script("arguments[0].click();", p)
-                                self.log_signal.emit("Closed a blocking popup.")
-                                time.sleep(1)
+                        if el.is_displayed():
+                            driver.execute_script("arguments[0].click();", el)
+                            time.sleep(0.5)
                     except:
                         pass
 
-                    # Try to find the main image in theater mode
-                    # Theatre mode images often have data-visualcompletion="media-vc-image"
-                    # Or are the only large image in a role="dialog"
-                    selectors = [
-                        "//div[@role='dialog']//img[@data-visualcompletion='media-vc-image']",
-                        "//img[@data-visualcompletion='media-vc-image']",
-                        "//div[@role='dialog']//img",
-                        "//div[@role='main']//img",
-                        "//img[contains(@class, 'xz74otr')]", 
-                    ]
-                    
-                    current_img_src = None
-                    found_any_src = False
-                    for selector in selectors:
-                        img_elements = driver.find_elements(By.XPATH, selector)
-                        for img in img_elements:
-                            try:
-                                src = img.get_attribute("src")
-                                if src and "scontent" in src:
-                                    found_any_src = True
-                                    if src not in downloaded_urls:
-                                        current_img_src = src
-                                        break
-                            except:
-                                continue
-                        if current_img_src:
-                            break
-                    
-                    if current_img_src:
+            # Enter gallery mode if we're on a post page
+            if "/photo" not in driver.current_url:
+                self.log_signal.emit("Post detected. Entering gallery mode...")
+                try:
+                    photo_links = driver.find_elements(By.XPATH, "//a[contains(@href, '/photo')]")
+                    if photo_links:
+                        driver.execute_script("arguments[0].click();", photo_links[0])
+                        time.sleep(4)
+                    else:
+                        self.log_signal.emit("No photo links found.")
+                except Exception as e:
+                    self.log_signal.emit(f"Gallery entry error: {e}")
+
+            downloaded_urls = set()
+            no_new_streak = 0  # consecutive cycles with no new image
+
+            while count < self.max_images and self.is_running:
+                try:
+                    src = self._get_current_image(driver)
+
+                    if src and src not in downloaded_urls:
+                        full_url = self._upgrade_url_quality(src)
+                        downloaded_urls.add(src)
+                        no_new_streak = 0
                         count += 1
-                        downloaded_urls.add(current_img_src)
-                        retry_count = 0 # Reset retry on success
-                        self.log_signal.emit(f"[{count}] Found image: {current_img_src[:60]}...")
-                        
-                        # Download image
+                        self.log_signal.emit(f"[{count}] Downloading full-quality image...")
+
                         try:
                             filename = f"fb_image_{count:03d}_{int(time.time())}.jpg"
                             filepath = os.path.join(self.output_dir, filename)
-                            
-                            img_data = requests.get(current_img_src, timeout=15).content
-                            with open(filepath, 'wb') as f:
-                                f.write(img_data)
-                            
+                            ct = self._download_with_cookies(full_url, driver, filepath)
+                            # Rename with correct extension if needed
+                            if "png" in ct:
+                                os.rename(filepath, filepath.replace(".jpg", ".png"))
+                            elif "webp" in ct:
+                                os.rename(filepath, filepath.replace(".jpg", ".webp"))
                             self.progress_signal.emit(int((count / self.max_images) * 100))
                         except Exception as e:
-                            self.log_signal.emit(f"Download failed for image {count}: {e}")
+                            self.log_signal.emit(f"Download error: {e}")
                     else:
-                        if found_any_src:
-                            self.log_signal.emit("Image already downloaded. Navigating next...")
-                        else:
-                            self.log_signal.emit("Waiting for image content...")
-                            time.sleep(2)
-                            retry_count += 1
-                            if retry_count > 5:
-                                self.log_signal.emit("Stuck? Attempting forced navigation...")
+                        no_new_streak += 1
+                        if no_new_streak > 8:
+                            self.log_signal.emit("No new images after multiple attempts. End of gallery.")
+                            break
 
-                    # Find "Next" button - prioritize gallery navigation
-                    next_found = False
-                    next_selectors = [
-                        "//div[@aria-label='Next photo']",
-                        "//div[@aria-label='Next Photo']",
-                        "//div[@aria-label='Next photo']//i", # Sometimes the icon inside
-                        "//a[@aria-label='Next photo']",
-                        "//div[contains(@aria-label, 'Next')]",
-                        "//div[@role='button' and contains(@style, 'right')]",
-                        "//div[contains(@class, 'next')]",
-                    ]
-                    
-                    for selector in next_selectors:
-                        next_btns = driver.find_elements(By.XPATH, selector)
-                        for btn in next_btns:
+                    # Navigate to next image — prefer keyboard Right arrow (most reliable)
+                    navigated = False
+
+                    # 1. Try clicking the Next button
+                    for label in ["Next photo", "Next Photo", "Next"]:
+                        btns = driver.find_elements(By.XPATH,
+                            f"//div[@aria-label='{label}'] | //a[@aria-label='{label}'] | //button[@aria-label='{label}']")
+                        for btn in btns:
                             try:
                                 if btn.is_displayed():
-                                    # Click using JS to bypass potential overlays
                                     driver.execute_script("arguments[0].click();", btn)
-                                    next_found = True
-                                    # self.log_signal.emit("Navigating to next image...")
-                                    time.sleep(2) # Wait for transition
+                                    navigated = True
                                     break
                             except:
                                 continue
-                        if next_found:
+                        if navigated:
                             break
-                    
-                    if not next_found:
-                        if "/photo" in driver.current_url:
-                            self.log_signal.emit("End of gallery detected.")
-                            break
-                        else:
-                            # If we are NOT in gallery mode, scroll the feed
-                            self.log_signal.emit("Scrolling feed...")
-                            driver.execute_script("window.scrollBy(0, 1000);")
-                            time.sleep(2)
-                            if retry_count > 3:
-                                self.log_signal.emit("No more images in feed.")
-                                break
+
+                    # 2. Fallback: send Right arrow key to the active element / body
+                    if not navigated:
+                        try:
+                            active = driver.switch_to.active_element
+                            active.send_keys(Keys.ARROW_RIGHT)
+                            navigated = True
+                        except:
+                            try:
+                                driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ARROW_RIGHT)
+                                navigated = True
+                            except:
+                                pass
+
+                    if not navigated:
+                        self.log_signal.emit("Cannot navigate further. End of gallery.")
+                        break
+
+                    time.sleep(1.8)  # wait for image transition
 
                 except Exception as e:
                     self.log_signal.emit(f"Navigation error: {e}")
                     break
-            
+
             driver.quit()
             self.log_signal.emit(f"Task completed. Total images downloaded: {count}")
-            
+
         except Exception as e:
             self.log_signal.emit(f"CRITICAL ERROR: {e}")
-        
+
         self.finished_signal.emit(count)
 
     def stop(self):
