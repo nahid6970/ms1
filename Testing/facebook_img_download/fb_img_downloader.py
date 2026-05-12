@@ -3,6 +3,7 @@ import os
 import re
 import time
 import requests
+import json
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
