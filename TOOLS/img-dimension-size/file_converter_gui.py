@@ -94,9 +94,21 @@ class ConvertThread(QThread):
                 return
 
             if os.path.getsize(self.output_file) > target_bytes:
+                # Phase 1: reduce quality
                 while os.path.getsize(self.output_file) > target_bytes and quality > 10:
                     quality -= 5
                     subprocess.run(self._build_cmd(quality), capture_output=True)
+                # Phase 2: if still too large, progressively scale down dimensions
+                if os.path.getsize(self.output_file) > target_bytes:
+                    w, h = (int(x) for x in self.dim.split('x'))
+                    scale = 0.9
+                    while os.path.getsize(self.output_file) > target_bytes and scale > 0.05:
+                        nw, nh = max(1, int(w * scale)), max(1, int(h * scale))
+                        cmd = self._build_cmd(10)
+                        # replace the dim in the command
+                        cmd[cmd.index('-resize') + 1] = f"{nw}x{nh}"
+                        subprocess.run(cmd, capture_output=True)
+                        scale -= 0.1
 
             elif os.path.getsize(self.output_file) < target_bytes and not is_pdf:
                 subprocess.run(self._build_cmd(100), capture_output=True)
