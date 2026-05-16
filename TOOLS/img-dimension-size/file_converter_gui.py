@@ -194,12 +194,11 @@ class App(QMainWindow):
         self.max_size = QSpinBox()
         self.max_size.setRange(1, 102400)
         self.max_size.setValue(400)
-        self.max_size.setSuffix(" KB")
         self.max_size.setKeyboardTracking(False)
 
         form_settings.addRow("Width:", self.width_input)
         form_settings.addRow("Height:", self.height_input)
-        form_settings.addRow("Target Size:", self.max_size)
+        form_settings.addRow("Target Size (KB):", self.max_size)
         grp_settings.setLayout(form_settings)
 
         # Buttons
