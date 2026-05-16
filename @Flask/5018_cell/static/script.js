@@ -16016,7 +16016,7 @@ function showSyntaxReplacer(event) {
         const findPattern = newFindInput.value;
         const replacePattern = newReplaceInput.value;
         
-        if (findPattern && replacePattern) {
+        if (findPattern) {
             const preview = generateSyntaxReplacePreview(cellContent, findPattern, replacePattern);
             const previewDiv = document.getElementById('syntaxReplacePreview');
             const previewContent = document.getElementById('syntaxReplacePreviewContent');
@@ -16174,7 +16174,7 @@ function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern) 
     const firstMatch = matches[0];
     const capturedContent = firstMatch[1];
     const before = firstMatch[0];
-    const after = replacePattern.replace(/text/gi, capturedContent);
+    const after = replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
 
     return {
         count: matches.length,
@@ -16188,8 +16188,8 @@ function applySyntaxReplace() {
     const findPattern = document.getElementById('findSyntaxInput').value;
     const replacePattern = document.getElementById('replaceSyntaxInput').value;
 
-    if (!findPattern || !replacePattern) {
-        showToast('Please enter both find and replace patterns', 'warning');
+    if (!findPattern) {
+        showToast('Please enter a find pattern', 'warning');
         return;
     }
 
@@ -16223,7 +16223,7 @@ function applySyntaxReplace() {
     let count = 0;
     const newContent = cellContent.replace(regex, (match, capturedContent) => {
         count++;
-        return replacePattern.replace(/text/gi, capturedContent);
+        return replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
     });
 
     if (count === 0) {
