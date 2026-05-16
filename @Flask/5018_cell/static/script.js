@@ -16003,6 +16003,9 @@ function showSyntaxReplacer(event) {
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
 
+    // Load history
+    loadSyntaxReplaceHistory();
+
     // Remove old listeners to prevent duplicates
     const findInput = document.getElementById('findSyntaxInput');
     const replaceInput = document.getElementById('replaceSyntaxInput');
@@ -16047,6 +16050,82 @@ function updateSyntaxReplacePreviewFromUI() {
         const event = new Event('input', { bubbles: true });
         findInput.dispatchEvent(event);
     }
+}
+
+// Load and display syntax replacement history
+function loadSyntaxReplaceHistory() {
+    const historyContainer = document.getElementById('syntaxReplaceHistory');
+    const historySection = document.getElementById('syntaxHistorySection');
+    if (!historyContainer) return;
+
+    const history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]');
+    
+    if (history.length === 0) {
+        historySection.style.display = 'none';
+        return;
+    }
+
+    historySection.style.display = 'block';
+    historyContainer.innerHTML = '';
+
+    history.forEach((item, index) => {
+        const historyBtn = document.createElement('button');
+        historyBtn.style.cssText = 'padding: 4px 8px; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 11px; text-align: left; display: flex; justify-content: space-between; align-items: center;';
+        
+        const replaceLabel = item.replace || '(remove)';
+        const sideLabel = item.side !== 'both' ? ` [${item.side}]` : '';
+        
+        historyBtn.innerHTML = `<span style="color: #d00;">${escapeHtml(item.find)}</span> <span style="color: #666; margin: 0 5px;">→</span> <span style="color: #0a0;">${escapeHtml(replaceLabel)}</span><span style="color: #999; font-size: 9px; margin-left: auto;">${sideLabel}</span>`;
+        
+        historyBtn.onclick = () => useSyntaxHistoryItem(item);
+        
+        // Add delete button
+        const deleteBtn = document.createElement('span');
+        deleteBtn.innerHTML = ' ×';
+        deleteBtn.style.cssText = 'margin-left: 8px; color: #ccc; font-weight: bold; padding: 0 4px;';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSyntaxHistoryItem(index);
+        };
+        
+        historyBtn.appendChild(deleteBtn);
+        historyContainer.appendChild(historyBtn);
+    });
+}
+
+function useSyntaxHistoryItem(item) {
+    document.getElementById('findSyntaxInput').value = item.find;
+    document.getElementById('replaceSyntaxInput').value = item.replace || '';
+    
+    const sideRadios = document.querySelectorAll('input[name="syntaxReplaceSide"]');
+    sideRadios.forEach(radio => {
+        radio.checked = radio.value === (item.side || 'both');
+    });
+
+    updateSyntaxReplacePreviewFromUI();
+}
+
+function saveSyntaxToHistory(find, replace, side) {
+    let history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]');
+    
+    // Remove if already exists
+    history = history.filter(item => !(item.find === find && item.replace === replace && item.side === side));
+    
+    // Add to front
+    history.unshift({ find, replace, side });
+    
+    // Keep last 5
+    if (history.length > 5) history.pop();
+    
+    localStorage.setItem('syntaxReplaceHistory', JSON.stringify(history));
+    loadSyntaxReplaceHistory();
+}
+
+function deleteSyntaxHistoryItem(index) {
+    let history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]');
+    history.splice(index, 1);
+    localStorage.setItem('syntaxReplaceHistory', JSON.stringify(history));
+    loadSyntaxReplaceHistory();
 }
 
 function findAllSyntaxesInCell(cellContent) {
@@ -16280,6 +16359,9 @@ function applySyntaxReplace() {
         const changeEvent = new Event('input', { bubbles: true });
         input.dispatchEvent(changeEvent);
     }
+
+    // Save to history
+    saveSyntaxToHistory(findPattern, replacePattern, side);
 
     closeSyntaxReplacerModal();
     showToast(`Replaced ${count} occurrence(s)`, 'success');
