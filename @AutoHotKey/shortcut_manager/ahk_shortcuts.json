@@ -571,6 +571,22 @@
             "trigger": "##",
             "replacement": "##text##",
             "enabled": true
+        },
+        {
+            "name": "third bracket",
+            "category": "General",
+            "description": "",
+            "trigger": "[[",
+            "replacement": "[text]",
+            "enabled": true
+        },
+        {
+            "name": "first bracket",
+            "category": "General",
+            "description": "",
+            "trigger": "((",
+            "replacement": "(text)",
+            "enabled": true
         }
     ],
     "file_shortcuts": [
