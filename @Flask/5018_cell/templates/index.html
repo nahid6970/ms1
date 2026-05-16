@@ -1283,11 +1283,11 @@
             <div style="padding: 20px;">
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Find Syntax:</label>
-                    <select id="findSyntaxDropdown" onchange="selectFoundSyntax()" 
+                    <select id="findSyntaxDropdown" onchange="selectFoundSyntax()"
                         style="width: 100%; padding: 8px; font-family: monospace; font-size: 13px; margin-bottom: 8px;">
                         <option value="">-- Select found syntax --</option>
                     </select>
-                    <input type="text" id="findSyntaxInput" placeholder="Or type custom pattern" 
+                    <input type="text" id="findSyntaxInput" placeholder="Or type pattern (e.g. text1 -> text2)"
                         style="width: 100%; padding: 8px; font-family: monospace; font-size: 13px;">
                 </div>
                 <div style="margin-bottom: 15px;">
@@ -1302,10 +1302,9 @@
                         <button onclick="setReplaceSyntax('__text__')" style="padding: 4px 12px; background: #ddd; border: none; border-radius: 3px; cursor: pointer; font-size: 11px; text-decoration: underline;">Underline</button>
                         <!-- Custom syntax buttons will be inserted here -->
                     </div>
-                    <input type="text" id="replaceSyntaxInput" placeholder="Or type custom pattern (empty to remove syntax)"
+                    <input type="text" id="replaceSyntaxInput" placeholder="Template (e.g. [LOG] text1 => text2 [END])"
                         style="width: 100%; padding: 8px; font-family: monospace; font-size: 13px;">
-                </div>
-                <div style="margin-bottom: 15px;">
+                </div>                <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Replace Side:</label>
                     <div style="display: flex; gap: 15px; font-size: 13px;">
                         <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">

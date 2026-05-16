@@ -10,148 +10,104 @@ Replace syntax patterns across an entire cell with a different syntax pattern wh
 
 The Find & Replace Syntax feature allows you to convert one markdown/formatting syntax to another throughout an entire cell. This is useful when you want to change the styling of multiple text segments at once.
 
-**Example Use Case:**
-- Convert all red colored text `{fg:#ff0000}text{/}` to black highlight `==text==`
-- Change all bold text `**text**` to italic `@@text@@`
-- Replace custom syntax markers with standard ones
+**Key Capabilities:**
+- **Standard Conversion:** Change `**bold**` to `@@italic@@`.
+- **Side-Specific Replacement:** Change only the left or right side of a syntax.
+- **Syntax Removal:** Strip markers while keeping the text (e.g., `[text]` → `text`).
+- **Smart History:** Quickly re-use your last 5 successful replacements.
 
 ---
 
 ## How to Use
 
-1. **Select any text** in a cell and press **F3** to open Quick Formatter
-2. Click the **🔄 Find & Replace Syntax** button
-3. **Select or type** the syntax pattern to find
-4. **Click a button or type** the replacement syntax
-5. **Preview** the changes before applying
-6. Click **Replace All** to apply changes
+1. **Select any text** in a cell and press **F3** to open Quick Formatter.
+2. Click the **🔄 Find & Replace Syntax** button.
+3. **Select or type** the syntax pattern to find (must use `text` as placeholder).
+4. **Choose Replacement:**
+   - Type a custom pattern in the "Replace With" box.
+   - Click a **Quick Button** (Bold, Italic, Red, etc.).
+   - Click **Remove Syntax** or leave the box empty to strip the markers.
+5. **Select Replace Side:**
+   - **Both:** Standard replacement for both delimiters.
+   - **Left:** Replaces/Removes only the left side (e.g., `[fff]` → `->fff`).
+   - **Right:** Replaces/Removes only the right side.
+6. **Preview** the changes in the live preview window.
+7. Click **Replace All** to apply.
 
 ---
 
 ## Interface Components
 
 ### Find Syntax Section
-
-**Dropdown Menu:**
-- Automatically scans the entire cell content
-- Lists all detected syntax patterns with:
-  - Syntax name (e.g., "Bold", "Color: fg:#ff0000")
-  - Occurrence count (e.g., "3x")
-  - Example preview of first match
-- Click to auto-fill the find pattern
-
-**Manual Input:**
-- Type custom patterns if not in dropdown
-- Use `text` as placeholder for content
-- Example: `{fg:#ff0000}**text**{/}`
+- **Dropdown Menu:** Automatically scans the cell and lists detected syntaxes.
+- **Manual Input:** Type custom patterns using the `text` placeholder.
 
 ### Replace With Section
+- **Remove Syntax Button:** Sets replacement to empty for stripping markers.
+- **Quick Buttons:** Presets for common highlights and standard syntaxes.
+- **Recent History:** Lists the last 5 successful replacements. Click any to re-apply all settings (Find, Replace, and Side).
 
-**Quick Buttons:**
-- **Black** - `==text==` (black highlight)
-- **Red** - `!!text!!` (red highlight)
-- **Blue** - `??text??` (blue highlight)
-- **Bold** - `**text**`
-- **Italic** - `@@text@@`
-- **Underline** - `__text__`
-- **Custom Syntaxes** - Your manually added syntax markers
-
-**Manual Input:**
-- Type custom replacement patterns
-- Use `text` as placeholder for content
-- Example: `==text==`
+### Replace Side Toggle
+- **Both (Default):** Replaces the entire syntax.
+- **Left:** Targets only the left delimiter. Useful for converting `[text]` to `->text`.
+- **Right:** Targets only the right delimiter.
 
 ### Live Preview
-
 Shows:
-- Number of occurrences found
-- Before/after example of first match
-- Updates as you type
+- Number of occurrences found.
+- Before/after example of the first match.
+- Updates in real-time as you change patterns or toggles.
 
 ---
 
-## Detected Syntax Types
+## Smart Features
 
-The feature automatically detects:
+### Content Preservation
+The system ensures your text is never lost, even if you forget the `text` placeholder in your replacement:
+- In **Left/Both** modes: A replacement like `->` is automatically treated as a prefix (`->text`).
+- In **Right** mode: A replacement like `<-` is treated as a suffix (`text<-`).
 
-### Standard Syntaxes
-- Bold (`**text**`)
-- Italic (`@@text@@`)
-- Underline (`__text__`)
-- Strikethrough (`~~text~~`)
-- Heading (`##text##`)
-- Small text (`..text..`)
-- Wavy underline (`_.text._`)
-- Code (`` `text` ``)
-
-### Highlights
-- Black highlight (`==text==`)
-- Red highlight (`!!text!!`)
-- Blue highlight (`??text??`)
-
-### Advanced Syntaxes
-- Custom colors - Grouped by exact color values
-  - `{fg:#ff0000}text{/}` detected separately from
-  - `{fg:#ffffff;bg:#000000}text{/}`
-- Border boxes (`#R#text#/#`)
-- Font sizes (`#2#text#/#`)
-- Title text (`:::text:::`)
-
-### Custom Syntaxes
-- All user-defined syntax markers
-- Displayed as "Custom: marker"
-- Example: `%%text%%`, `$$text$$`
+### History Management
+- Stores the last **5 unique replacements**.
+- Includes the specific side toggle used.
+- Click the **×** on a history item to remove it.
 
 ---
 
 ## Examples
 
-### Example 1: Color to Highlight
-**Find:** `{fg:#ff0000}text{/}`  
-**Replace:** `==text==`  
-**Result:** All red colored text becomes black highlighted text
+### Example 1: Brackets to Arrow (Left Only)
+- **Find:** `[text]`
+- **Replace:** `->`
+- **Side:** `Left`
+- **Result:** `[fff]` becomes `->fff`
 
-### Example 2: Bold to Italic
-**Find:** `**text**`  
-**Replace:** `@@text@@`  
-**Result:** All bold text becomes italic text
+### Example 2: Remove Specific Marker
+- **Find:** `**text**`
+- **Replace:** (Empty)
+- **Side:** `Both`
+- **Result:** `**Hello**` becomes `Hello`
 
-### Example 3: Custom Syntax to Standard
-**Find:** `%%text%%`  
-**Replace:** `!!text!!`  
-**Result:** All custom %% markers become red highlights
-
-### Example 4: Nested Syntax
-**Find:** `{fg:#ff0000}**text**{/}`  
-**Replace:** `==text==`  
-**Result:** Red colored bold text becomes black highlight (removes both syntaxes)
+### Example 3: Change Color but Keep Bold
+- **Find:** `{fg:#ff0000}**text**{/}`
+- **Replace:** `==text==`
+- **Result:** Red bold text becomes black highlighted text (removes both original markers).
 
 ---
 
 ## Important Notes
 
-1. **Whole Cell Scope:** Operates on entire cell content, not just selection
-2. **Pattern Matching:** Uses `text` as placeholder - must be present in both find and replace patterns
-3. **Case Sensitive:** Exact pattern matching
-4. **Preserves Content:** Only syntax markers are changed, content remains intact
-5. **No Undo:** Changes are applied immediately - use with caution
-6. **Regex-based:** Special characters in patterns are escaped automatically
-
----
-
-## Tips
-
-- **Preview First:** Always check the preview before clicking Replace All
-- **Specific Colors:** Different color values are detected separately
-- **Custom Syntaxes:** Your custom markers appear automatically in both dropdown and buttons
-- **Complex Patterns:** For nested syntaxes, the entire pattern must match exactly
-- **Test Small:** Try on a test cell first if unsure about the pattern
+1. **Whole Cell Scope:** Operates on entire cell content, not just selection.
+2. **Placeholder Logic:** The `find` pattern **must** contain `text`. The `replace` pattern is optional.
+3. **Exclusive Sides:** Selecting "Left" or "Right" results in a single-sided syntax in the output.
+4. **Preserves Content:** Content remains intact regardless of marker changes.
+5. **Undo:** Changes are applied immediately to the cell - use preview to verify.
 
 ---
 
 ## Related Features
 
-- **F3 Quick Formatter:** Main formatting interface
-- **🔧 Syntax Inspector:** Reorder nested syntaxes
-- **🎯 Select All Matching:** Multi-cursor editing for occurrences
-- **Custom Syntax Manager:** Add/edit custom syntax markers
+- **F3 Quick Formatter:** Main formatting interface.
+- **🔍➡️ Find & Replace Text:** Literal text replacement tool.
+- **🔧 Syntax Inspector:** Reorder nested syntaxes.
+- **Custom Syntax Manager:** Add/edit custom syntax markers.

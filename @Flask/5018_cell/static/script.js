@@ -16240,28 +16240,46 @@ function closeSyntaxReplacerModal() {
     quickFormatterSelection = null;
 }
 
-function getSyntaxReplaceResult(replacePattern, capturedContent, side) {
-    if (!replacePattern) return capturedContent;
+function getSyntaxReplaceResult(replacePattern, capturedContent, side, allGroups = []) {
+    if (!replacePattern) {
+        if (side === 'left') return capturedContent;
+        if (side === 'right') return capturedContent;
+        return allGroups.length > 0 ? allGroups.join('') : capturedContent;
+    }
     
+    let result = replacePattern;
     const hasPlaceholder = /text/i.test(replacePattern);
-    const parts = replacePattern.split(/text/i);
-    const left = parts[0] || '';
-    const right = parts[1] || '';
     
-    if (side === 'left') {
-        // Use left part of pattern + content. Removes right marker of original syntax.
-        return (hasPlaceholder ? left : replacePattern) + capturedContent;
-    } else if (side === 'right') {
-        // Use content + right part of pattern. Removes left marker of original syntax.
-        return capturedContent + (hasPlaceholder ? right : replacePattern);
-    } else { // both
-        if (hasPlaceholder) {
-            return left + capturedContent + right;
-        } else {
-            // Default to prefix if no placeholder provided in Both mode
-            return replacePattern + capturedContent;
+    // Support numbered placeholders text1...text9
+    if (allGroups.length > 0) {
+        for (let i = 0; i < allGroups.length; i++) {
+            const num = i + 1;
+            const regex = new RegExp(`text${num}`, 'gi');
+            result = result.replace(regex, allGroups[i]);
         }
     }
+    
+    // Support plain 'text' (matches first group)
+    result = result.replace(/text/gi, capturedContent);
+    
+    // Side-specific logic (only for single group for now to avoid template ambiguity)
+    if (allGroups.length <= 1) {
+        const parts = replacePattern.split(/text/i);
+        const left = parts[0] || '';
+        const right = parts[1] || '';
+        
+        if (side === 'left') {
+            return (hasPlaceholder ? left : replacePattern) + capturedContent;
+        } else if (side === 'right') {
+            return capturedContent + (hasPlaceholder ? right : replacePattern);
+        } else { // both
+            if (!hasPlaceholder) {
+                return replacePattern + capturedContent;
+            }
+        }
+    }
+    
+    return result;
 }
 
 function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, side = 'both') {
@@ -16271,10 +16289,10 @@ function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, 
         return { count: 0, example: { before: '', after: '' } };
     }
 
-    // Build regex from find pattern
+    // Build regex from find pattern - support text1, text2 etc.
     const escapedPattern = findPattern
         .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/text/gi, '(.+?)');
+        .replace(/text\d?/gi, '(.*?)');
     
     const regex = new RegExp(escapedPattern, 'g');
     const matches = [...cellContent.matchAll(regex)];
@@ -16285,10 +16303,11 @@ function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, 
 
     // Get first match for preview
     const firstMatch = matches[0];
-    const capturedContent = firstMatch[1];
+    const groups = firstMatch.slice(1);
+    const capturedContent = groups[0] || '';
     const before = firstMatch[0];
 
-    const after = getSyntaxReplaceResult(replacePattern, capturedContent, side);
+    const after = getSyntaxReplaceResult(replacePattern, capturedContent, side, groups);
 
     return {
         count: matches.length,
@@ -16330,15 +16349,17 @@ function applySyntaxReplace() {
 
     const escapedPattern = findPattern
         .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/text/gi, '(.+?)');
+        .replace(/text\d?/gi, '(.*?)');
     
     const regex = new RegExp(escapedPattern, 'g');
     
     // Replace all occurrences
     let count = 0;
-    const newContent = cellContent.replace(regex, (match, capturedContent) => {
+    const newContent = cellContent.replace(regex, (match, ...args) => {
         count++;
-        return getSyntaxReplaceResult(replacePattern, capturedContent, side);
+        // args = [p1, p2, ..., offset, string]
+        const groups = args.slice(0, -2);
+        return getSyntaxReplaceResult(replacePattern, groups[0], side, groups);
     });
 
     if (count === 0) {

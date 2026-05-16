@@ -1,5 +1,40 @@
 # Recent Development Log
 
+## [2026-05-17 10:30] - Enhanced Syntax Replacer: Sides, Removal & History
+
+**Session Duration:** 1.5 hours
+
+**What We Accomplished:**
+
+### 🔄 Advanced Syntax Replacement Logic
+- **Side-Specific Toggles**: Added "Both", "Left", and "Right" modes to the Syntax Replacer.
+  - **Left/Right Modes**: Selecting a single side now performs an "exclusive" replacement, removing the other side's marker entirely (e.g., `[text]` + `->` + `Left` = `->text`).
+- **Syntax Removal**: Enabled removal of syntax markers by leaving the replacement field empty or using the new "Remove Syntax" button.
+- **Smart Content Safety**: Implemented `getSyntaxReplaceResult` to ensure text is never lost even if the `text` placeholder is missing from the replacement pattern (automatically treats as prefix/suffix).
+- **Recent History**: Added a "Recent Patterns" section that remembers the last 5 successful replacements (Find, Replace, and Side state) using `localStorage`.
+
+### 🎨 UI/UX Improvements
+- **Modal Updates**: Added radio buttons for side selection and a dedicated "Remove Syntax" button.
+- **Dynamic History List**: History items are rendered as clickable buttons with a delete option (×).
+- **Live Preview Sync**: Updated the preview logic to reflect side selection and empty-replacement states in real-time.
+- **Improved Placeholders**: Updated input field placeholders to guide users on the new removal and pattern capabilities.
+
+**Files Modified:**
+- `static/script.js` — Implemented `getSyntaxReplaceResult`, `saveSyntaxToHistory`, `loadSyntaxReplaceHistory`, and updated `applySyntaxReplace`/`generateSyntaxReplacePreview`.
+- `templates/index.html` — Added side toggle UI, history container, and "Remove Syntax" button.
+- `md/FIND_REPLACE_SYNTAX.md` — Updated feature documentation with new modes and examples.
+
+**Current Status:**
+- ✅ Side-specific replacement working as expected.
+- ✅ Syntax removal is easy and discoverable.
+- ✅ History feature allows rapid re-use of complex patterns.
+- ✅ Content preservation ensures no accidental text loss.
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-05-09 23:23] - Move Single Row Controls to TH Header Toggle Container
 
 **Session Duration:** 0.4 hours
