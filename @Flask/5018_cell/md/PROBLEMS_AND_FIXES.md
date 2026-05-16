@@ -1,9 +1,17 @@
 # Problems & Fixes Log
 
-This document tracks historical bugs, issues, and their solutions. Use this to:
-- Understand past problems and how they were resolved
-- Check if old fixes might conflict with new features
-- Debug similar issues by referencing past solutions
+## [2026-05-17 11:15] - Nested List Sorting Breakage (Beyond List 2)
+
+**Problem:** When sorting lines alphabetically or by date, sub-items in nested lists beyond level 2 (those starting with `---`, `----`, etc.) would jump to the top of the cell instead of staying under their parent item.
+
+**Root Cause:** The sorting logic specifically checked for single dashes (`- `) and double dashes (`-- `). Any line starting with three or more dashes was not recognized as a "child" line. Consequently, the parser treated these as independent parent blocks, which were then sorted to the top because they lacked the expected date or alphabetical priority of the actual parents.
+
+**Solution:** Updated the child line detection logic in both `sortLines` and `sortLinesBanglaDate` to use a regular expression: `/^--+\s/`. This allows any number of dashes (2 or more) followed by a space to be correctly identified as a child line, preserving the hierarchical structure regardless of nesting depth.
+
+**Files Modified:**
+- `static/script.js`
+
+---
 
 ## [2026-05-07 11:15] - Sub-Sheet Navigation Efficiency
 

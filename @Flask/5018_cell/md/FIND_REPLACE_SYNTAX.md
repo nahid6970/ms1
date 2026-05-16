@@ -8,13 +8,14 @@ Replace syntax patterns across an entire cell with a different syntax pattern wh
 
 ## Overview
 
-The Find & Replace Syntax feature allows you to convert one markdown/formatting syntax to another throughout an entire cell. This is useful when you want to change the styling of multiple text segments at once.
+The Find & Replace Syntax feature allows you to convert one markdown/formatting syntax to another throughout an entire cell. This has been enhanced into a powerful **Template Engine** that supports multiple capture groups.
 
 **Key Capabilities:**
-- **Standard Conversion:** Change `**bold**` to `@@italic@@`.
+- **Numbered Placeholders (Templates):** Capture multiple parts of a line using `text1`, `text2`, etc.
 - **Side-Specific Replacement:** Change only the left or right side of a syntax.
 - **Syntax Removal:** Strip markers while keeping the text (e.g., `[text]` → `text`).
 - **Smart History:** Quickly re-use your last 5 successful replacements.
+- **Greedy End-Matching:** Placeholders at the end of a pattern automatically capture the remainder of the line.
 
 ---
 
@@ -22,41 +23,33 @@ The Find & Replace Syntax feature allows you to convert one markdown/formatting 
 
 1. **Select any text** in a cell and press **F3** to open Quick Formatter.
 2. Click the **🔄 Find & Replace Syntax** button.
-3. **Select or type** the syntax pattern to find (must use `text` as placeholder).
-4. **Choose Replacement:**
-   - Type a custom pattern in the "Replace With" box.
+3. **Select or type** the syntax pattern to find.
+   - Use `text` or `text1` for a single capture.
+   - Use `text1`, `text2`, etc., for multiple parts (e.g., `text1 -> text2`).
+4. **Choose Replacement (Template):**
+   - Type a custom template using the placeholders (e.g. `text1 (text2)`).
    - Click a **Quick Button** (Bold, Italic, Red, etc.).
    - Click **Remove Syntax** or leave the box empty to strip the markers.
 5. **Select Replace Side:**
    - **Both:** Standard replacement for both delimiters.
-   - **Left:** Replaces/Removes only the left side (e.g., `[fff]` → `->fff`).
-   - **Right:** Replaces/Removes only the right side.
+   - **Left:** Exclusive replacement of the left side (removes original right side).
+   - **Right:** Exclusive replacement of the right side (removes original left side).
 6. **Preview** the changes in the live preview window.
 7. Click **Replace All** to apply.
 
 ---
 
-## Interface Components
+## Template Engine Logic
 
-### Find Syntax Section
-- **Dropdown Menu:** Automatically scans the cell and lists detected syntaxes.
-- **Manual Input:** Type custom patterns using the `text` placeholder.
+### Numbered Placeholders
+You can use up to 9 numbered placeholders (`text1` through `text9`) in your search pattern.
+- **Search Pattern:** `id: text1 | name: text2`
+- **Replace Template:** `User #text1 is text2`
+- **Result:** `id: 123 | name: John` becomes `User #123 is John`.
 
-### Replace With Section
-- **Remove Syntax Button:** Sets replacement to empty for stripping markers.
-- **Quick Buttons:** Presets for common highlights and standard syntaxes.
-- **Recent History:** Lists the last 5 successful replacements. Click any to re-apply all settings (Find, Replace, and Side).
-
-### Replace Side Toggle
-- **Both (Default):** Replaces the entire syntax.
-- **Left:** Targets only the left delimiter. Useful for converting `[text]` to `->text`.
-- **Right:** Targets only the right delimiter.
-
-### Live Preview
-Shows:
-- Number of occurrences found.
-- Before/after example of the first match.
-- Updates in real-time as you change patterns or toggles.
+### Greedy vs. Non-Greedy
+- **Middle Placeholders:** Are "non-greedy" (`(.*?)`). They stop at the first occurrence of the next part of your pattern.
+- **End Placeholders:** If a placeholder is at the very end of your "Find" pattern, it becomes "greedy" (`(.*)`). This ensures it captures everything until the end of the line (crucial for translations and trailing text).
 
 ---
 
@@ -76,38 +69,22 @@ The system ensures your text is never lost, even if you forget the `text` placeh
 
 ## Examples
 
-### Example 1: Brackets to Arrow (Left Only)
+### Example 1: Translation Formatting (Greedy End)
+- **Original:** `To Genuflect -> সম্মান প্রদর্শন`
+- **Find:** `text1 -> text2`
+- **Replace:** `text1 (text2)`
+- **Result:** `To Genuflect (সম্মান প্রদর্শন)`
+
+### Example 2: Brackets to Arrow (Left Only)
 - **Find:** `[text]`
 - **Replace:** `->`
 - **Side:** `Left`
-- **Result:** `[fff]` becomes `->fff`
-
-### Example 2: Remove Specific Marker
-- **Find:** `**text**`
-- **Replace:** (Empty)
-- **Side:** `Both`
-- **Result:** `**Hello**` becomes `Hello`
-
-### Example 3: Change Color but Keep Bold
-- **Find:** `{fg:#ff0000}**text**{/}`
-- **Replace:** `==text==`
-- **Result:** Red bold text becomes black highlighted text (removes both original markers).
+*Result: `[fff]` becomes `->fff` (the right bracket is removed because "Left" mode is exclusive).*
 
 ---
 
 ## Important Notes
 
-1. **Whole Cell Scope:** Operates on entire cell content, not just selection.
-2. **Placeholder Logic:** The `find` pattern **must** contain `text`. The `replace` pattern is optional.
-3. **Exclusive Sides:** Selecting "Left" or "Right" results in a single-sided syntax in the output.
-4. **Preserves Content:** Content remains intact regardless of marker changes.
-5. **Undo:** Changes are applied immediately to the cell - use preview to verify.
-
----
-
-## Related Features
-
-- **F3 Quick Formatter:** Main formatting interface.
-- **🔍➡️ Find & Replace Text:** Literal text replacement tool.
-- **🔧 Syntax Inspector:** Reorder nested syntaxes.
-- **Custom Syntax Manager:** Add/edit custom syntax markers.
+1. **Whole Cell Scope:** Operates on entire cell content.
+2. **Exclusive Sides:** Selecting "Left" or "Right" results in a single-sided syntax.
+3. **Regex Escaping:** The system automatically escapes special characters in your patterns, so you can search for things like `[`, `(`, or `$` without manually escaping them.

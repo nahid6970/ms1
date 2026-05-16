@@ -1,37 +1,39 @@
 # Recent Development Log
 
-## [2026-05-17 10:30] - Enhanced Syntax Replacer: Sides, Removal & History
+## [2026-05-17 11:15] - Syntax Template Engine & Multi-Level List Sorting
 
-**Session Duration:** 1.5 hours
+**Session Duration:** 2.5 hours
 
 **What We Accomplished:**
 
-### 🔄 Advanced Syntax Replacement Logic
-- **Side-Specific Toggles**: Added "Both", "Left", and "Right" modes to the Syntax Replacer.
-  - **Left/Right Modes**: Selecting a single side now performs an "exclusive" replacement, removing the other side's marker entirely (e.g., `[text]` + `->` + `Left` = `->text`).
-- **Syntax Removal**: Enabled removal of syntax markers by leaving the replacement field empty or using the new "Remove Syntax" button.
-- **Smart Content Safety**: Implemented `getSyntaxReplaceResult` to ensure text is never lost even if the `text` placeholder is missing from the replacement pattern (automatically treats as prefix/suffix).
-- **Recent History**: Added a "Recent Patterns" section that remembers the last 5 successful replacements (Find, Replace, and Side state) using `localStorage`.
+### 🚀 Syntax Template Engine Upgrade
+- **Numbered Placeholders**: Upgraded Syntax Replacer to support up to 9 capture groups (`text1`...`text9`).
+- **Template Replacement**: Users can now define complex transformation templates (e.g., `text1 -> text2` converted to `text1 (text2)`).
+- **Smart Regex Generation**: 
+  - Implemented **Greedy matching** (`(.*)`) for placeholders at the end of a find pattern to ensure full line capture.
+  - Retained **Non-greedy matching** (`(.*?)`) for middle placeholders to ensure precise delimiter detection.
+- **Side-Specific Toggles**: Added "Both", "Left", and "Right" modes with exclusive side removal.
+- **Recent History**: Persistent storage for the last 5 successful templates with quick re-apply functionality.
 
-### 🎨 UI/UX Improvements
-- **Modal Updates**: Added radio buttons for side selection and a dedicated "Remove Syntax" button.
-- **Dynamic History List**: History items are rendered as clickable buttons with a delete option (×).
-- **Live Preview Sync**: Updated the preview logic to reflect side selection and empty-replacement states in real-time.
-- **Improved Placeholders**: Updated input field placeholders to guide users on the new removal and pattern capabilities.
+### 🔢 Multi-Level List Sorting Fix
+- **Deep Nesting Support**: Updated `sortLines` and `sortLinesBanglaDate` to recognize nested lists beyond 2 levels.
+- **Regex Detection**: Replaced explicit double-dash checks with a regex (`/^--+\s/`) that handles `---`, `----`, and deeper levels.
+- **Structural Integrity**: Ensured that deep-nested sub-items correctly "stick" to their parent items during sorting rather than jumping to the top of the cell.
+
+### 🎨 UI/UX and Documentation
+- **UI Placeholders**: Updated Syntax Replacer modal with examples for template usage and numbered placeholders.
+- **Feature Docs**: Fully updated `md/FIND_REPLACE_SYNTAX.md` with template engine logic, examples, and side-specific rules.
 
 **Files Modified:**
-- `static/script.js` — Implemented `getSyntaxReplaceResult`, `saveSyntaxToHistory`, `loadSyntaxReplaceHistory`, and updated `applySyntaxReplace`/`generateSyntaxReplacePreview`.
-- `templates/index.html` — Added side toggle UI, history container, and "Remove Syntax" button.
-- `md/FIND_REPLACE_SYNTAX.md` — Updated feature documentation with new modes and examples.
+- `static/script.js` — Core logic for Template Engine, Greedy matching, and Multi-dash sorting.
+- `templates/index.html` — UI for history, side toggles, and template instructions.
+- `md/FIND_REPLACE_SYNTAX.md` — Comprehensive feature update.
+- `md/RECENT.md` — Development logging.
 
 **Current Status:**
-- ✅ Side-specific replacement working as expected.
-- ✅ Syntax removal is easy and discoverable.
-- ✅ History feature allows rapid re-use of complex patterns.
-- ✅ Content preservation ensures no accidental text loss.
-
-**Known Issues:**
-- None
+- ✅ Template Engine is robust and handles trailing text correctly.
+- ✅ Complex list structures (3+ dashes) now sort correctly.
+- ✅ History and UI provide a smooth workflow for repetitive tasks.
 
 ---
 
