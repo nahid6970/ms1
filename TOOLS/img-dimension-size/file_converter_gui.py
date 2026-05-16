@@ -20,46 +20,86 @@ class ConvertThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
     
-    def __init__(self, input_file, output_file, dim, max_kb):
+    def __init__(self, input_file, output_file, dim, target_kb):
         super().__init__()
         self.input_file = input_file
         self.output_file = output_file
         self.dim = dim
-        self.max_kb = max_kb
+        self.target_kb = target_kb
     
+    def _build_cmd(self, quality, density=None):
+        is_pdf = self.input_file.lower().endswith('.pdf')
+        if is_pdf:
+            return ['magick', '-density', str(density or 150), self.input_file + '[0]',
+                    '-resize', self.dim, '-quality', str(quality),
+                    '-background', 'white', '-alpha', 'remove', self.output_file]
+        return ['magick', self.input_file, '-resize', self.dim, '-quality', str(quality), self.output_file]
+
     def run(self):
         try:
+            is_pdf = self.input_file.lower().endswith('.pdf')
+            target_bytes = self.target_kb * 1024
             quality = 95
-            is_pdf_input = self.input_file.lower().endswith('.pdf')
-            
+
             # Initial conversion
-            if is_pdf_input:
-                cmd = ['magick', '-density', '150', self.input_file + '[0]', '-resize', self.dim, 
-                       '-quality', str(quality), '-background', 'white', '-alpha', 'remove', self.output_file]
-            else:
-                cmd = ['magick', self.input_file, '-resize', self.dim, '-quality', str(quality), self.output_file]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(self._build_cmd(quality), capture_output=True, text=True)
             if result.returncode != 0:
-                if 'ghostscript' in result.stderr.lower() or 'gswin' in result.stderr.lower():
+                err = result.stderr
+                if 'ghostscript' in err.lower() or 'gswin' in err.lower():
                     self.error.emit("Ghostscript not found. Install from: https://ghostscript.com/releases/gsdnld.html")
                 else:
-                    self.error.emit(f"Conversion failed: {result.stderr.split('magick:')[-1].strip()[:200]}")
+                    self.error.emit(f"Conversion failed: {err.split('magick:')[-1].strip()[:200]}")
                 return
-            
-            # Reduce quality if needed
-            max_bytes = self.max_kb * 1024
-            while os.path.getsize(self.output_file) > max_bytes and quality > 50:
-                quality -= 5
-                if is_pdf_input:
-                    cmd = ['magick', '-density', '150', self.input_file + '[0]', '-resize', self.dim,
-                           '-quality', str(quality), '-background', 'white', '-alpha', 'remove', self.output_file]
-                else:
-                    cmd = ['magick', self.input_file, '-resize', self.dim, '-quality', str(quality), self.output_file]
-                subprocess.run(cmd, capture_output=True)
-            
-            size_kb = os.path.getsize(self.output_file) // 1024
-            self.finished.emit(f"Created: {Path(self.output_file).name} ({self.dim}, {size_kb}KB)")
+
+            current_size = os.path.getsize(self.output_file)
+
+            if current_size > target_bytes:
+                # Shrink: reduce quality
+                while os.path.getsize(self.output_file) > target_bytes and quality > 10:
+                    quality -= 5
+                    subprocess.run(self._build_cmd(quality), capture_output=True)
+
+            elif current_size < target_bytes and not is_pdf:
+                # Inflate: increase quality then pad with a comment chunk
+                # First push quality to 100
+                subprocess.run(self._build_cmd(100), capture_output=True)
+                current_size = os.path.getsize(self.output_file)
+
+                # If still under target, pad the file with a harmless JPEG comment
+                if current_size < target_bytes:
+                    pad_needed = target_bytes - current_size
+                    ext = Path(self.output_file).suffix.lower()
+                    if ext in ('.jpg', '.jpeg'):
+                        # Append JPEG comment marker (0xFFFE) with padding
+                        with open(self.output_file, 'ab') as f:
+                            # JPEG comment: FF FE + 2-byte length (length includes the 2 length bytes)
+                            chunk_size = min(pad_needed, 65533)  # max JPEG comment payload
+                            written = 0
+                            while written < pad_needed:
+                                payload = min(65533, pad_needed - written)
+                                f.write(b'\xff\xfe')
+                                f.write((payload + 2).to_bytes(2, 'big'))
+                                f.write(b'\x00' * payload)
+                                written += payload
+                    elif ext == '.png':
+                        # Append a PNG tEXt chunk with padding data
+                        with open(self.output_file, 'ab') as f:
+                            import struct, zlib
+                            remaining = pad_needed
+                            while remaining > 0:
+                                payload_size = min(remaining - 12, 65000)
+                                if payload_size <= 0:
+                                    break
+                                data = b'Comment\x00' + b'\x00' * (payload_size - 8)
+                                crc = zlib.crc32(b'tEXt' + data) & 0xffffffff
+                                f.write(struct.pack('>I', len(data)))
+                                f.write(b'tEXt')
+                                f.write(data)
+                                f.write(struct.pack('>I', crc))
+                                remaining -= (len(data) + 12)
+
+            size_kb = os.path.getsize(self.output_file) / 1024
+            self.finished.emit(f"Created: {Path(self.output_file).name} ({self.dim}, {size_kb:.1f}KB)")
         except Exception as e:
             self.error.emit(str(e))
 
@@ -133,25 +173,21 @@ class App(QMainWindow):
         grp_settings = QGroupBox("CONVERSION SETTINGS")
         form_settings = QFormLayout()
         
-        self.width_input = QSpinBox()
-        self.width_input.setRange(100, 10000)
-        self.width_input.setValue(800)
-        self.width_input.setKeyboardTracking(False)
+        self.width_input = QLineEdit("800")
+        self.width_input.setPlaceholderText("e.g. 1920")
         
-        self.height_input = QSpinBox()
-        self.height_input.setRange(100, 10000)
-        self.height_input.setValue(800)
-        self.height_input.setKeyboardTracking(False)
+        self.height_input = QLineEdit("800")
+        self.height_input.setPlaceholderText("e.g. 1080")
         
         self.max_size = QSpinBox()
-        self.max_size.setRange(50, 50000)
+        self.max_size.setRange(1, 102400)
         self.max_size.setValue(400)
         self.max_size.setSuffix(" KB")
         self.max_size.setKeyboardTracking(False)
         
         form_settings.addRow("Width:", self.width_input)
         form_settings.addRow("Height:", self.height_input)
-        form_settings.addRow("Max Size:", self.max_size)
+        form_settings.addRow("Target Size:", self.max_size)
         grp_settings.setLayout(form_settings)
         
         # Action Buttons
@@ -210,7 +246,7 @@ class App(QMainWindow):
             self.status.setStyleSheet(f"color: {CP_RED}; padding: 10px;")
             return
         
-        dim = f"{self.width_input.value()}x{self.height_input.value()}"
+        dim = f"{self.width_input.text()}x{self.height_input.text()}"
         max_kb = self.max_size.value()
         
         self.status.setText("CONVERTING...")
