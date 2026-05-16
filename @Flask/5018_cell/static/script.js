@@ -15164,13 +15164,13 @@ function sortLines(event) {
         const trimmed = line.trim();
 
         // Check dash patterns
-        const isDoubleDash = trimmed.startsWith('-- ');
-        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+        const isMultiDash = /^--+\s/.test(trimmed);
+        const isSingleDash = trimmed.startsWith('- ') && !isMultiDash;
 
         // Determine if this is a child line
         let isChildLine = false;
 
-        if (isDoubleDash) {
+        if (isMultiDash) {
             isChildLine = true;
         } else if (isSingleDash) {
             if (currentBlock && currentBlock.children.length === 0) {
@@ -15182,7 +15182,7 @@ function sortLines(event) {
                 }
             } else if (currentBlock && currentBlock.children.length > 0) {
                 const lastChild = currentBlock.children[currentBlock.children.length - 1];
-                if (lastChild.trim().startsWith('-- ')) {
+                if (/^--+\s/.test(lastChild.trim())) {
                     isChildLine = false;
                 } else {
                     isChildLine = true;
@@ -15322,13 +15322,13 @@ function sortLinesBanglaDate(event) {
         const trimmed = line.trim();
 
         // Check dash patterns
-        const isDoubleDash = trimmed.startsWith('-- ');
-        const isSingleDash = trimmed.startsWith('- ') && !trimmed.startsWith('-- ');
+        const isMultiDash = /^--+\s/.test(trimmed);
+        const isSingleDash = trimmed.startsWith('- ') && !isMultiDash;
 
         // Determine if this is a child line
         let isChildLine = false;
 
-        if (isDoubleDash) {
+        if (isMultiDash) {
             isChildLine = true;
         } else if (isSingleDash) {
             if (currentBlock && currentBlock.children.length === 0) {
@@ -15340,7 +15340,7 @@ function sortLinesBanglaDate(event) {
                 }
             } else if (currentBlock && currentBlock.children.length > 0) {
                 const lastChild = currentBlock.children[currentBlock.children.length - 1];
-                if (lastChild.trim().startsWith('-- ')) {
+                if (/^--+\s/.test(lastChild.trim())) {
                     isChildLine = false;
                 } else {
                     isChildLine = true;
