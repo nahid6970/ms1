@@ -16015,9 +16015,10 @@ function showSyntaxReplacer(event) {
     const updatePreview = () => {
         const findPattern = newFindInput.value;
         const replacePattern = newReplaceInput.value;
+        const side = document.querySelector('input[name="syntaxReplaceSide"]:checked')?.value || 'both';
         
         if (findPattern) {
-            const preview = generateSyntaxReplacePreview(cellContent, findPattern, replacePattern);
+            const preview = generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, side);
             const previewDiv = document.getElementById('syntaxReplacePreview');
             const previewContent = document.getElementById('syntaxReplacePreviewContent');
             
@@ -16037,6 +16038,15 @@ function showSyntaxReplacer(event) {
     
     newFindInput.addEventListener('input', updatePreview);
     newReplaceInput.addEventListener('input', updatePreview);
+}
+
+function updateSyntaxReplacePreviewFromUI() {
+    const findInput = document.getElementById('findSyntaxInput');
+    if (findInput) {
+        // Trigger preview update
+        const event = new Event('input', { bubbles: true });
+        findInput.dispatchEvent(event);
+    }
 }
 
 function findAllSyntaxesInCell(cellContent) {
@@ -16151,7 +16161,7 @@ function closeSyntaxReplacerModal() {
     quickFormatterSelection = null;
 }
 
-function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern) {
+function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, side = 'both') {
     // Extract the content placeholder from find pattern
     const contentMatch = findPattern.match(/text/i);
     if (!contentMatch) {
@@ -16174,7 +16184,24 @@ function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern) 
     const firstMatch = matches[0];
     const capturedContent = firstMatch[1];
     const before = firstMatch[0];
-    const after = replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
+
+    // Side-specific logic
+    let after;
+    const findParts = findPattern.split(/text/i);
+    const findLeft = findParts[0] || '';
+    const findRight = findParts[1] || '';
+    
+    const replaceParts = replacePattern ? replacePattern.split(/text/i) : ['', ''];
+    const replaceLeft = replaceParts[0] || '';
+    const replaceRight = replaceParts[1] || '';
+
+    if (side === 'both') {
+        after = replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
+    } else if (side === 'left') {
+        after = replaceLeft + capturedContent + findRight;
+    } else if (side === 'right') {
+        after = findLeft + capturedContent + replaceRight;
+    }
 
     return {
         count: matches.length,
@@ -16187,6 +16214,7 @@ function applySyntaxReplace() {
 
     const findPattern = document.getElementById('findSyntaxInput').value;
     const replacePattern = document.getElementById('replaceSyntaxInput').value;
+    const side = document.querySelector('input[name="syntaxReplaceSide"]:checked')?.value || 'both';
 
     if (!findPattern) {
         showToast('Please enter a find pattern', 'warning');
@@ -16219,11 +16247,25 @@ function applySyntaxReplace() {
     
     const regex = new RegExp(escapedPattern, 'g');
     
+    const findParts = findPattern.split(/text/i);
+    const findLeft = findParts[0] || '';
+    const findRight = findParts[1] || '';
+    
+    const replaceParts = replacePattern ? replacePattern.split(/text/i) : ['', ''];
+    const replaceLeft = replaceParts[0] || '';
+    const replaceRight = replaceParts[1] || '';
+
     // Replace all occurrences
     let count = 0;
     const newContent = cellContent.replace(regex, (match, capturedContent) => {
         count++;
-        return replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
+        if (side === 'both') {
+            return replacePattern ? replacePattern.replace(/text/gi, capturedContent) : capturedContent;
+        } else if (side === 'left') {
+            return replaceLeft + capturedContent + findRight;
+        } else if (side === 'right') {
+            return findLeft + capturedContent + replaceRight;
+        }
     });
 
     if (count === 0) {
