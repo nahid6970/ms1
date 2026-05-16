@@ -16283,18 +16283,31 @@ function getSyntaxReplaceResult(replacePattern, capturedContent, side, allGroups
 }
 
 function generateSyntaxReplacePreview(cellContent, findPattern, replacePattern, side = 'both') {
-    // Extract the content placeholder from find pattern
-    const contentMatch = findPattern.match(/text/i);
-    if (!contentMatch) {
+    // Build regex from find pattern - support text1, text2 etc.
+    const placeholderRegex = /text\d?/gi;
+    const placeholders = [];
+    let m;
+    while ((m = placeholderRegex.exec(findPattern)) !== null) {
+        placeholders.push({ name: m[0], index: m.index, length: m[0].length });
+    }
+    
+    if (placeholders.length === 0) {
         return { count: 0, example: { before: '', after: '' } };
     }
 
-    // Build regex from find pattern - support text1, text2 etc.
-    const escapedPattern = findPattern
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/text\d?/gi, '(.*?)');
+    let finalRegexStr = "";
+    let lastPos = 0;
+    for (let i = 0; i < placeholders.length; i++) {
+        const p = placeholders[i];
+        finalRegexStr += findPattern.substring(lastPos, p.index).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const isLast = (i === placeholders.length - 1);
+        const atEnd = (p.index + p.length === findPattern.length);
+        finalRegexStr += (isLast && atEnd) ? '(.*)' : '(.*?)';
+        lastPos = p.index + p.length;
+    }
+    finalRegexStr += findPattern.substring(lastPos).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
-    const regex = new RegExp(escapedPattern, 'g');
+    const regex = new RegExp(finalRegexStr, 'g');
     const matches = [...cellContent.matchAll(regex)];
     
     if (matches.length === 0) {
@@ -16341,17 +16354,31 @@ function applySyntaxReplace() {
     }
 
     // Build regex from find pattern
-    const contentMatch = findPattern.match(/text/i);
-    if (!contentMatch) {
+    const placeholderRegex = /text\d?/gi;
+    const placeholders = [];
+    let m;
+    while ((m = placeholderRegex.exec(findPattern)) !== null) {
+        placeholders.push({ name: m[0], index: m.index, length: m[0].length });
+    }
+    
+    if (placeholders.length === 0) {
         showToast('Find pattern must contain "text" as placeholder', 'warning');
         return;
     }
 
-    const escapedPattern = findPattern
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/text\d?/gi, '(.*?)');
+    let finalRegexStr = "";
+    let lastPos = 0;
+    for (let i = 0; i < placeholders.length; i++) {
+        const p = placeholders[i];
+        finalRegexStr += findPattern.substring(lastPos, p.index).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const isLast = (i === placeholders.length - 1);
+        const atEnd = (p.index + p.length === findPattern.length);
+        finalRegexStr += (isLast && atEnd) ? '(.*)' : '(.*?)';
+        lastPos = p.index + p.length;
+    }
+    finalRegexStr += findPattern.substring(lastPos).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
-    const regex = new RegExp(escapedPattern, 'g');
+    const regex = new RegExp(finalRegexStr, 'g');
     
     // Replace all occurrences
     let count = 0;
