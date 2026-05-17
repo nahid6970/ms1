@@ -587,6 +587,14 @@
             "trigger": "((",
             "replacement": "(text)",
             "enabled": true
+        },
+        {
+            "name": "Menmotics create with novels etc",
+            "category": "General",
+            "description": "",
+            "trigger": ";trick",
+            "replacement": "> \"I will provide a list of novels. I want you to act as a memory coach. Create a short, catchy **mnemonic story** or a few connected sentences using only the **key parts of the novel names** so I can memorize them easily. \n>\n> **Rules:**\n> 1. Do **not** include the authors' names in the story.\n> 2. Use the novel titles (or shortened versions) as characters, places, or actions in the story.\n> 3. Keep the sentences simple and logical so they are easy to visualize.\n> 4. If the list is long, break it into 2-3 small paragraphs.",
+            "enabled": true
         }
     ],
     "file_shortcuts": [
