@@ -593,7 +593,7 @@
             "category": "General",
             "description": "",
             "trigger": ";trick",
-            "replacement": "> \"I will provide a list of novels. I want you to act as a memory coach. Create a short, catchy **mnemonic story** or a few connected sentences using only the **key parts of the novel names** so I can memorize them easily. \n>\n> **Rules:**\n> 1. Do **not** include the authors' names in the story.\n> 2. Use the novel titles (or shortened versions) as characters, places, or actions in the story.\n> 3. Keep the sentences simple and logical so they are easy to visualize.\n> 4. If the list is long, break it into 2-3 small paragraphs.",
+            "replacement": "I will provide a list of titles. Act as a memory coach and create a short, natural mnemonic story in the **same language** as the input list.\n\n**Rules for the Story:**\n1. **Topic Integration:** Naturally incorporate the **category or topic** of the list (e.g., documentary/প্রামাণ্যচিত্র, novel/উপন্যাস, movie/চলচ্চিত্র) into the narrative so I remember what the list represents.\n2. **Aggressive Shortening:** Do NOT feel forced to use full titles. Strip away prefixes, suffixes, or secondary words to make the sentence flow perfectly (e.g., use 'Genocide' instead of 'Stop Genocide', or 'আগুনের' instead of 'আগুনের পরশমণি'). Use only the most punchy keywords.\n3. **Natural Narrative:** The priority is a logical, easy-to-visualize scene rather than a forced string of names.\n4. **No Authors:** Do not include author names.\n5. **Mapping Index:** Below the story, provide a numbered list mapping the keywords used in the story back to the full original titles.",
             "enabled": true
         }
     ],
