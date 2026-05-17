@@ -138,12 +138,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Listen for extension installation
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Script Manager Extension installed');
-  chrome.storage.local.get(['fallbackSettings', 'localFileBridgeEnabled'], (result) => {
+  chrome.storage.local.get(['fallbackSettings'], (result) => {
     if (!result.fallbackSettings) {
       chrome.storage.local.set({ fallbackSettings: DEFAULT_FALLBACK_SETTINGS });
-    }
-    if (typeof result.localFileBridgeEnabled !== 'boolean') {
-      chrome.storage.local.set({ localFileBridgeEnabled: true });
     }
   });
 });
