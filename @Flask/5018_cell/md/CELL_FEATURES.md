@@ -24,11 +24,15 @@
 **Function:** `trackCellColorUsage(bg, fg)`.
 
 ## Single Row View Mode
-**Purpose:** Focus on one row at a time.
-**Controls:** 📖 Toggle, ⬅️ Previous, ➡️ Next buttons.
+**Purpose:** Focus on one row at a time via a distraction-free interface.
+**Controls:** 
+- **Icons:** ⬅️ Previous, ➡️ Next buttons.
+- **Counter:** A clickable number pad (e.g., `6/29`) appears between the navigation buttons.
 **Logic:** 
 - `renderTable()` filters for only one row index when active.
-- **Per-Sheet Persistence**: Each sheet remembers its own "Single Row Mode" state (On/Off) and the last viewed row index. This allows you to browse one sheet row-by-row while keeping another in full table view.
+- **Interactivity:** Click the **Row Counter** directly to exit Single Row Mode and return to the full table.
+- **Streamlined UI:** The primary "📖 Toggle" icon is automatically hidden while the mode is active to reduce header clutter.
+- **Per-Sheet Persistence**: Each sheet remembers its own "Single Row Mode" state (On/Off) and the last viewed row index.
 - **State Management**: Saved to `localStorage` under `sheetSingleRowStates`.
 
 ## Smart Textareas

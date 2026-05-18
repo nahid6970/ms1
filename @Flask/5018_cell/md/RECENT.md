@@ -805,3 +805,4 @@
 - **Styling**: Added hover effects and pointer cursor to the counter.
 
 $content
+$content
