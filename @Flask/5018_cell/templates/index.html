@@ -759,13 +759,13 @@
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
-                                [[S:Sheet Name]]</td>
-                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">Sheet Name</a></td>
+                                [[S:Name:Label]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff;">Label</a></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
-                                [[I:0]]</td>
-                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">First Sheet</a></td>
+                                [[I:0:Label]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff;">Label</a></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
@@ -780,10 +780,11 @@
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Use <code>[[S:name]]</code> to link to any sheet by its exact name.<br>
-                        Use <code>[[I:index]]</code> to link by sheet order (starting from 0).<br>
-                        Use <code>[[TOC]]</code> to generate a complete list of all sheets and sub-sheets.<br>
-                        <strong>Tip:</strong> Right-click any cell and select <strong>"Copy Sheet Index"</strong> to quickly get the index for <code>[[I:index]]</code>.
+                        Use <code>[[S:name]]</code> or <code>[[S:name:label]]</code> to link by name.<br>
+                        Use <code>[[I:index]]</code> or <code>[[I:index:label]]</code> to link by index.<br>
+                        Use <code>[[TOC]]</code> to generate a complete list of all sheets.<br>
+                        <strong>Tip:</strong> Right-click any cell and select <strong>"Copy Sheet Index"</strong> to quickly get the index.<br>
+                        <strong>Note:</strong> Sheet links have no underline by default - use your own underline syntax if needed.
                     </p>
                 </div>
 

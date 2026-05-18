@@ -1024,6 +1024,20 @@ def generate_static_html(data, custom_syntaxes):
             text-decoration: none;
         }
 
+        /* Internal Sheet Links */
+        .sheet-link {
+            text-decoration: none !important;
+            color: inherit !important;
+            cursor: pointer;
+            border-bottom: 1px dashed rgba(0, 123, 255, 0.4); /* Subtle indicator instead of underline */
+        }
+
+        .sheet-link:hover {
+            border-bottom-style: solid;
+            color: #007bff !important;
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
         /* Markdown Grid Table Styles (CSS Grid - no <table> elements) */
         .md-grid {
             display: grid;
@@ -2424,16 +2438,18 @@ def generate_static_html(data, custom_syntaxes):
             // Highlight: ==text== -> <mark>text</mark>
             formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
-            // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
-            formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
-                return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+            // Internal Sheet Links: [[S:Sheet Name]] or [[S:Sheet Name:Display Name]]
+            formatted = formatted.replace(/\[\[S:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, name, display) => {
+                const displayName = display ? display.trim() : name.trim();
+                return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
             });
 
-            // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
-            formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+            // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
+            formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
                 const idx = parseInt(index);
                 const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-                return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+                const displayName = display ? display.trim() : name;
+                return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
             });
 
             // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
@@ -2830,16 +2846,18 @@ def generate_static_html(data, custom_syntaxes):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
-                // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
-                formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
-                    return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+                // Internal Sheet Links: [[S:Sheet Name]] or [[S:Sheet Name:Display Name]]
+                formatted = formatted.replace(/\[\[S:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, name, display) => {
+                    const displayName = display ? display.trim() : name.trim();
+                    return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
                 });
 
-                // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
-                formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+                // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
+                formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
                     const idx = parseInt(index);
                     const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-                    return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+                    const displayName = display ? display.trim() : name;
+                    return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
                 });
 
                 // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
@@ -4009,13 +4027,13 @@ def generate_static_html(data, custom_syntaxes):
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
-                                [[S:Sheet Name]]</td>
-                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">Sheet Name</a></td>
+                                [[S:Name:Label]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff;">Label</a></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
-                                [[I:0]]</td>
-                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">First Sheet</a></td>
+                                [[I:0:Label]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff;">Label</a></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #ddd;">
                             <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
@@ -4030,10 +4048,11 @@ def generate_static_html(data, custom_syntaxes):
                         </tr>
                     </table>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Use <code>[[S:name]]</code> to link to any sheet by its exact name.<br>
-                        Use <code>[[I:index]]</code> to link by sheet order (starting from 0).<br>
-                        Use <code>[[TOC]]</code> to generate a complete list of all sheets and sub-sheets.<br>
-                        <strong>Note:</strong> Navigation works seamlessly in this exported file too.
+                        Use <code>[[S:name]]</code> or <code>[[S:name:label]]</code> to link by name.<br>
+                        Use <code>[[I:index]]</code> or <code>[[I:index:label]]</code> to link by index.<br>
+                        Use <code>[[TOC]]</code> to generate a complete list of all sheets.<br>
+                        <strong>Note:</strong> Navigation works seamlessly in this exported file too.<br>
+                        <strong>Tip:</strong> Sheet links have no underline by default - use your own underline syntax if needed.
                     </p>
                 </div>
                 

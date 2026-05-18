@@ -1364,6 +1364,20 @@ code {
     text-decoration: none;
 }
 
+/* Internal Sheet Links */
+.sheet-link {
+    text-decoration: none !important;
+    color: inherit !important;
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(0, 123, 255, 0.4); /* Subtle indicator instead of underline */
+}
+
+.sheet-link:hover {
+    border-bottom-style: solid;
+    color: #007bff !important;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
 /* Show preview when input is not focused */
 .has-markdown:not(:focus)~.markdown-preview {
     display: block;

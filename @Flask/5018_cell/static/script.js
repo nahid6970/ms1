@@ -3391,16 +3391,18 @@ function parseMarkdownInline(text, cellStyle = {}) {
     // Highlight: ==text== -> <mark>text</mark>
     formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
-    // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
-    formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
-        return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+    // Internal Sheet Links: [[S:Sheet Name]] or [[S:Sheet Name:Display Name]]
+    formatted = formatted.replace(/\[\[S:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, name, display) => {
+        const displayName = display ? display.trim() : name.trim();
+        return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
     });
 
-    // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
-    formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+    // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
+    formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
         const idx = parseInt(index);
         const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-        return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+        const displayName = display ? display.trim() : name;
+        return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
     });
 
     // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
@@ -4197,16 +4199,18 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         // Blue highlight: ??text?? -> blue background with white text
         formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
-        // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
-        formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
-            return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+        // Internal Sheet Links: [[S:Sheet Name]] or [[S:Sheet Name:Display Name]]
+        formatted = formatted.replace(/\[\[S:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, name, display) => {
+            const displayName = display ? display.trim() : name.trim();
+            return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
         });
 
-        // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
-        formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+        // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
+        formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
             const idx = parseInt(index);
             const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+            const displayName = display ? display.trim() : name;
+            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
         });
 
         // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
