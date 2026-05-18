@@ -804,3 +804,4 @@
 - **Interactivity**: The counter is now clickable to quickly disable Single Row Mode.
 - **Styling**: Added hover effects and pointer cursor to the counter.
 
+$content
