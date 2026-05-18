@@ -9719,9 +9719,48 @@ function filterF2Sheets() {
     });
 }
 
+function togglePinSheet(sheetIndex, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    let pinnedSheets = [];
+    const savedPinned = localStorage.getItem('pinnedSheets');
+    if (savedPinned) {
+        try {
+            pinnedSheets = JSON.parse(savedPinned);
+        } catch (e) {
+            pinnedSheets = [];
+        }
+    }
+    
+    if (pinnedSheets.includes(sheetIndex)) {
+        pinnedSheets = pinnedSheets.filter(idx => idx !== sheetIndex);
+        showToast('Sheet unpinned', 'info');
+    } else {
+        pinnedSheets.push(sheetIndex);
+        showToast('Sheet pinned to top', 'success');
+    }
+    
+    localStorage.setItem('pinnedSheets', JSON.stringify(pinnedSheets));
+    populateF2RecentSheets();
+}
+
 function populateF2RecentSheets() {
     const container = document.getElementById('f2SheetsList');
     container.innerHTML = '';
+
+    // Get pinned sheets
+    let pinnedSheets = [];
+    const savedPinned = localStorage.getItem('pinnedSheets');
+    if (savedPinned) {
+        try {
+            pinnedSheets = JSON.parse(savedPinned).filter(idx => idx >= 0 && idx < tableData.sheets.length);
+        } catch (e) {
+            pinnedSheets = [];
+        }
+    }
 
     // Get recent sheets from history (stored by Alt+M toggle)
     const savedHistory = localStorage.getItem('sheetHistory');
@@ -9762,8 +9801,27 @@ function populateF2RecentSheets() {
         recentSheets = [currentSheet, ...allSheetIndices.filter(idx => idx !== currentSheet)];
     }
 
-    // Display all sheets ordered by recency
-    recentSheets.forEach((sheetIndex, index) => {
+    // Re-order based on pinned status
+    // Pinned sheets first (preserving their internal relative order if they are also in recent)
+    // Then the rest of recentSheets
+    const finalOrder = [];
+    
+    // First, add all pinned sheets that exist
+    pinnedSheets.forEach(idx => {
+        if (allSheetIndices.includes(idx)) {
+            finalOrder.push(idx);
+        }
+    });
+    
+    // Then add the rest from recentSheets
+    recentSheets.forEach(idx => {
+        if (!finalOrder.includes(idx)) {
+            finalOrder.push(idx);
+        }
+    });
+
+    // Display all sheets
+    finalOrder.forEach((sheetIndex, index) => {
         const sheet = tableData.sheets[sheetIndex];
         if (!sheet) return;
 
@@ -9778,7 +9836,12 @@ function populateF2RecentSheets() {
 
         const number = document.createElement('div');
         number.className = 'f2-sheet-number';
-        number.textContent = `#${index + 1}`;
+        const isPinned = pinnedSheets.includes(sheetIndex);
+        number.textContent = isPinned ? '📌' : `#${index + 1}`;
+        if (isPinned) {
+            number.style.fontSize = '10px';
+            number.style.padding = '4px 6px';
+        }
 
         const name = document.createElement('div');
         name.className = 'f2-sheet-name';
@@ -9795,10 +9858,18 @@ function populateF2RecentSheets() {
             name.textContent = sheet.name;
         }
 
+        const pinBtn = document.createElement('div');
+        pinBtn.className = 'f2-pin-btn' + (isPinned ? ' pinned' : '');
+        pinBtn.innerHTML = '📌';
+        pinBtn.title = isPinned ? 'Unpin sheet' : 'Pin to top';
+        pinBtn.onclick = (e) => togglePinSheet(sheetIndex, e);
+
         item.appendChild(number);
         item.appendChild(name);
+        item.appendChild(pinBtn);
 
-        item.onclick = () => {
+        item.onclick = (e) => {
+            if (e.target.classList.contains('f2-pin-btn')) return;
             switchSheet(sheetIndex);
             closeF2Popup();
         };

@@ -13,12 +13,13 @@
 ## Recent Sheets Popup (F2)
 **Purpose:** Quick navigation to recently viewed sheets.
 **Features:**
-- Recency-based sorting.
+- **Pinning:** Click the 📌 icon next to any sheet to pin it to the top of the list. Pinned sheets stay at the top regardless of recency.
+- **Recency Sorting:** Unpinned sheets are sorted by how recently they were visited.
 - Filter by **Sheet Name** or **Nickname**.
 - Current sheet highlight.
 - Sub-sheet indicators: `Sheet Name [Parent Name]`.
 - Cyberpunk styling (matching F1).
-- **Functions:** `openF2Popup()`, `populateF2RecentSheets()`, `filterF2Sheets()`.
+- **Functions:** `openF2Popup()`, `populateF2RecentSheets()`, `togglePinSheet()`.
 
 ## Quick Formatter (F3)
 **Purpose:** Instant text formatting for selected text in cells.

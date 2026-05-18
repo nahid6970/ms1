@@ -4234,6 +4234,30 @@ Markdown Table Styles */
     font-family: 'JetBrains Mono', monospace;
 }
 
+.f2-pin-btn {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 2px;
+    transition: all 0.2s;
+    opacity: 0.4;
+    user-select: none;
+}
+
+.f2-pin-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+.f2-pin-btn.pinned {
+    opacity: 1;
+    color: #ff9900; /* Distinct color for pinned */
+}
+
+.f2-sheet-item.active .f2-pin-btn.pinned {
+    color: #000;
+}
+
 .f2-parent-name {
     font-size: 11px;
     color: #5dade2;
