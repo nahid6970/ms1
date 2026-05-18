@@ -11,14 +11,14 @@
 - **CSS:** `.f1-popup`, `.f1-search-mode-toggle`, `.f1-category-title`.
 
 ## Recent Sheets Popup (F2)
-**Purpose:** Quick navigation to recently viewed sheets.
+**Purpose:** Quick navigation to recently viewed sheets via a compact, minimalist interface.
 **Features:**
 - **Pinning:** Click the 📌 icon next to any sheet to pin it to the top of the list. Pinned sheets stay at the top regardless of recency.
 - **Recency Sorting:** Unpinned sheets are sorted by how recently they were visited.
+- **Compact UI:** Removed unnecessary headers and reduced padding for a streamlined, cyberpunk-themed look.
 - Filter by **Sheet Name** or **Nickname**.
 - Current sheet highlight.
 - Sub-sheet indicators: `Sheet Name [Parent Name]`.
-- Cyberpunk styling (matching F1).
 - **Functions:** `openF2Popup()`, `populateF2RecentSheets()`, `togglePinSheet()`.
 
 ## Quick Formatter (F3)
