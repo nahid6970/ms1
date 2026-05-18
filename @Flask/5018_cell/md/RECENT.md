@@ -778,9 +778,29 @@
 - Verify export HTML renders correctly
 
 **Time Spent:** 0.5 hours
-$content
-$content
-$content
-$content
-$content
-$content
+
+---
+
+## [2026-05-18 09:00] - Internal Navigation & Sheet TOC
+- **Feature**: Added internal sheet navigation using markdown syntax.
+- **Syntaxes**:
+  - `[[S:Sheet Name:Label]]`: Link by name with optional custom label.
+  - `[[I:Index:Label]]`: Link by index with optional custom label.
+  - `[[TOC]]`: Automatically generates a clickable Table of Contents.
+- **Context Menu**: 
+  - Added **"Copy Sheet Index"** to the cell context menu.
+- **Styling**: Removed default underline from sheet links and added color inheritance.
+
+---
+
+## [2026-05-18 11:15] - F2 Popup Pinning & UI Refinement
+- **Feature**: Added sheet pinning to F2 popup and compacted the UI.
+- **Implementation**: Pinned sheets stay at the top; removed unnecessary "Recent Sheets" header; reduced padding/font sizes.
+
+---
+
+## [2026-05-18 13:45] - Single Row View Counter
+- **Feature**: Added a row counter (e.g., "6/29") to Single Row View.
+- **Interactivity**: The counter is now clickable to quickly disable Single Row Mode.
+- **Styling**: Added hover effects and pointer cursor to the counter.
+

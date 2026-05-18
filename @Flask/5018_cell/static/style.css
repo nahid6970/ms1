@@ -1155,6 +1155,13 @@ th {
     justify-content: center;
     height: 22px;
     vertical-align: middle;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.single-row-counter:hover {
+    background: rgba(26, 86, 219, 0.1);
+    border-color: #1a56db;
 }
 
 .header-cell {
