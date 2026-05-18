@@ -148,6 +148,35 @@ def generate_static_html(data, custom_syntaxes):
             margin: 0 4px;
         }
 
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 10000;
+            font-size: 14px;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .toast.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
+        .toast.info { background-color: #17a2b8; }
+        .toast.warning { background-color: #ffc107; color: #333; }
+
         .header-info-wrapper {
             display: flex;
             align-items: baseline;
@@ -407,13 +436,167 @@ def generate_static_html(data, custom_syntaxes):
 
         .header-cell {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            gap: 5px;
+            gap: 2px;
             overflow: visible;
             position: relative;
-            padding-right: 25px;
+            padding: 0 4px;
             min-width: 0;
+            height: 100%;
+        }
+
+        .header-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            z-index: 10;
+            background: rgba(248, 249, 250, 0.8);
+            padding: 2px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .btn-header-toggle {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.6;
+            filter: grayscale(1);
+            padding: 0;
+        }
+
+        .btn-header-toggle svg {
+            width: 12px;
+            height: 12px;
+            stroke: #444;
+            flex-shrink: 0;
+        }
+
+        .btn-header-toggle:hover {
+            background: #e0e0e0;
+            opacity: 1;
+        }
+
+        .btn-header-toggle:hover svg {
+            stroke: #111;
+        }
+
+        .btn-header-toggle.active {
+            background: #00ff9d;
+            border-color: #00cc7a;
+            opacity: 1;
+            filter: grayscale(0);
+            box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
+        }
+
+        .btn-header-toggle.active svg {
+            stroke: #006644;
+        }
+
+        .btn-header-toggle:disabled {
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+
+        .btn-header-toggle:disabled svg {
+            stroke: #bbb;
+        }
+
+        .header-toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            border: 1px solid #7ab3e0;
+            border-radius: 4px;
+            padding: 1px;
+            margin-left: 3px;
+            background: rgba(100, 170, 230, 0.08);
+        }
+
+        .header-toggle-group .btn-header-toggle {
+            background: #ddeeff;
+            border-color: #7ab3e0;
+        }
+
+        .header-toggle-group .btn-header-toggle svg {
+            stroke: #2266aa;
+        }
+
+        #btnPrevRow, #btnNextRow {
+            background: #1a56db;
+            border-color: #1044b0;
+            opacity: 0.85;
+        }
+
+        #btnPrevRow svg, #btnNextRow svg {
+            stroke: #ffffff;
+        }
+
+        #btnPrevRow:hover, #btnNextRow:hover {
+            background: #1044b0;
+            opacity: 1;
+        }
+
+        #btnPrevRow:disabled, #btnNextRow:disabled {
+            background: #c8d8f0;
+            border-color: #aac4dd;
+            opacity: 0.5;
+        }
+
+        #btnPrevRow:disabled svg, #btnNextRow:disabled svg {
+            stroke: #7a9abf;
+        }
+
+        .header-toggle-group .btn-header-toggle:hover {
+            background: #bbddff;
+        }
+
+        .header-toggle-group .btn-header-toggle:disabled svg {
+            stroke: #aac4dd;
+        }
+
+        .header-toggle-group .btn-header-toggle.active {
+            background: #00ff9d;
+            border-color: #00cc7a;
+            box-shadow: 0 0 4px rgba(0, 255, 157, 0.4);
+        }
+
+        .header-toggle-group .btn-header-toggle.active svg {
+            stroke: #006644;
+        }
+
+        .single-row-counter {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #1a56db;
+            background: rgba(26, 86, 219, 0.05);
+            border: 1px solid rgba(26, 86, 219, 0.2);
+            padding: 1px 6px;
+            border-radius: 2px;
+            min-width: 45px;
+            text-align: center;
+            font-weight: 600;
+            margin: 0 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .single-row-counter:hover {
+            background: rgba(26, 86, 219, 0.1);
+            border-color: #1a56db;
         }
 
         .column-name {
@@ -1490,6 +1673,80 @@ def generate_static_html(data, custom_syntaxes):
         // Set currentCategory to match the active sheet's category
         let currentCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
 
+        // Toggle States
+        let singleRowMode = localStorage.getItem('staticSingleRowMode') === 'true';
+        let singleRowIndex = parseInt(localStorage.getItem(`staticSingleRowIndex_${currentSheet}`)) || 0;
+        let tabsVisible = localStorage.getItem('staticTabsVisible') !== 'false';
+        let toolbarVisible = localStorage.getItem('staticToolbarVisible') !== 'false';
+        let subsheetsVisible = localStorage.getItem('staticSubsheetsVisible') !== 'false';
+
+        function toggleSheetTabs() {
+            tabsVisible = !tabsVisible;
+            localStorage.setItem('staticTabsVisible', tabsVisible);
+            const tabs = document.querySelector('.sheet-tabs');
+            if (tabs) tabs.style.display = tabsVisible ? 'flex' : 'none';
+        }
+
+        function toggleToolbar() {
+            toolbarVisible = !toolbarVisible;
+            localStorage.setItem('staticToolbarVisible', toolbarVisible);
+            const toolbar = document.getElementById('toolbar');
+            if (toolbar) toolbar.style.display = toolbarVisible ? 'flex' : 'none';
+        }
+
+        function toggleSubsheetBar() {
+            subsheetsVisible = !subsheetsVisible;
+            localStorage.setItem('staticSubsheetsVisible', subsheetsVisible);
+            const subbar = document.querySelector('.subsheet-bar');
+            if (subbar) subbar.style.display = subsheetsVisible ? 'flex' : 'none';
+        }
+
+        function toggleSingleRowMode() {
+            singleRowMode = !singleRowMode;
+            localStorage.setItem('staticSingleRowMode', singleRowMode);
+            renderTable();
+            showToast(singleRowMode ? 'Single row view enabled' : 'Full table view enabled', 'info');
+        }
+
+        function prevSingleRow() {
+            if (singleRowIndex > 0) {
+                singleRowIndex--;
+                localStorage.setItem(`staticSingleRowIndex_${currentSheet}`, singleRowIndex);
+                renderTable();
+            }
+        }
+
+        function nextSingleRow() {
+            const sheet = tableData.sheets[currentSheet];
+            if (singleRowIndex < sheet.rows.length - 1) {
+                singleRowIndex++;
+                localStorage.setItem(`staticSingleRowIndex_${currentSheet}`, singleRowIndex);
+                renderTable();
+            }
+        }
+
+        function updateSingleRowButtons() {
+            const sheet = tableData.sheets[currentSheet];
+            const prevBtn = document.getElementById('btnPrevRow');
+            const nextBtn = document.getElementById('btnNextRow');
+            const counter = document.getElementById('singleRowCounter');
+
+            if (!singleRowMode) {
+                if (prevBtn) prevBtn.disabled = true;
+                if (nextBtn) nextBtn.disabled = true;
+                if (counter) counter.style.display = 'none';
+                return;
+            }
+
+            if (prevBtn) prevBtn.disabled = singleRowIndex <= 0;
+            if (nextBtn) nextBtn.disabled = singleRowIndex >= sheet.rows.length - 1;
+            
+            if (counter) {
+                counter.style.display = 'inline-flex';
+                counter.textContent = `${singleRowIndex + 1}/${sheet.rows.length}`;
+            }
+        }
+
         function initializeCategories() {
             if (!tableData.categories) {
                 tableData.categories = [];
@@ -1752,12 +2009,48 @@ def generate_static_html(data, custom_syntaxes):
                 }
 
                 headerCell.appendChild(columnName);
+
+                // Add toggle buttons to the first column
+                if (index === 0) {
+                    const toggleSpan = document.createElement('span');
+                    toggleSpan.className = 'header-toggle-container';
+
+                    const singleRowActive = singleRowMode;
+                    const prevDisabled = !singleRowMode || singleRowIndex <= 0;
+                    const nextDisabled = !singleRowMode || singleRowIndex >= (sheet?.rows?.length ?? 1) - 1;
+                    
+                    toggleSpan.innerHTML =
+                        `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="5" width="14" height="9" rx="1"/><path d="M1 5h4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` +
+                        `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2.5" rx="0.5"/><rect x="1" y="7" width="14" height="2.5" rx="0.5"/><rect x="1" y="11" width="14" height="2.5" rx="0.5"/></svg></button>` +
+                        `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h5l1.5 2H15v8H1z"/></svg></button>` +
+                        `<span class="header-toggle-group">` +
+                        `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg></button>` +
+                        `<button onclick="toggleSingleRowMode()" id="btnSingleRowMode" title="Toggle Single Row View" class="btn-header-toggle ${singleRowActive ? 'active' : ''}" style="display: ${singleRowActive ? 'none' : 'inline-flex'};"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="14" height="4" rx="1"/><line x1="1" y1="3" x2="15" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg></button>` +
+                        `<span id="singleRowCounter" class="single-row-counter" onclick="toggleSingleRowMode()" style="display: ${singleRowActive ? 'inline-flex' : 'none'};" title="Click to exit Single Row View">${singleRowIndex + 1}/${sheet?.rows?.length ?? 0}</span>` +
+                        `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l5 5-5 5"/></svg></button>` +
+                        `</span>`;
+                    headerCell.appendChild(toggleSpan);
+                }
+
                 th.appendChild(headerCell);
                 headerRow.appendChild(th);
             });
 
+            // Filter rows based on single row mode
+            let rowsToRender = sheet.rows;
+            let startRowIndex = 0;
+            
+            if (singleRowMode) {
+                if (singleRowIndex < 0) singleRowIndex = 0;
+                if (singleRowIndex >= sheet.rows.length) singleRowIndex = sheet.rows.length - 1;
+                
+                rowsToRender = [sheet.rows[singleRowIndex]];
+                startRowIndex = singleRowIndex;
+            }
+
             // Render rows
-            sheet.rows.forEach((row, rowIndex) => {
+            rowsToRender.forEach((row, relativeIndex) => {
+                const rowIndex = startRowIndex + relativeIndex;
                 const tr = document.createElement('tr');
 
                 // Row number
@@ -3866,12 +4159,40 @@ def generate_static_html(data, custom_syntaxes):
         }
 
         // Initialize on load
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
         window.onload = function() {
             loadCustomColorSyntaxes();
             // Apply saved grid line color
             const savedGridColor = localStorage.getItem('gridLineColor') || '#dddddd';
             document.documentElement.style.setProperty('--grid-line-color', savedGridColor);
             
+            // Apply visibility states
+            const tabs = document.querySelector('.sheet-tabs');
+            if (tabs) tabs.style.display = tabsVisible ? 'flex' : 'none';
+
+            const toolbar = document.getElementById('toolbar');
+            if (toolbar) toolbar.style.display = toolbarVisible ? 'flex' : 'none';
+            
+            const subbar = document.querySelector('.subsheet-bar');
+            if (subbar) subbar.style.display = subsheetsVisible ? 'flex' : 'none';
+
             initializeCategories();
             renderSidebar();
             renderTable();
@@ -3946,7 +4267,7 @@ def generate_static_html(data, custom_syntaxes):
                 <button onclick="clearSearch()" class="btn-clear-search" title="Clear search">×</button>
             </div>
 
-            <div class="button-group">
+            <div class="button-group" id="toolbar">
                 <label class="btn-icon-toggle" title="Enable text wrapping - Press Enter for new lines">
                     <input type="checkbox" id="wrapToggle" onchange="toggleRowWrap()">
                     <span>↩️</span>
