@@ -8438,15 +8438,22 @@ function updateSingleRowButtons() {
     const sheet = tableData.sheets[currentSheet];
     const prevBtn = document.getElementById('btnPrevRow');
     const nextBtn = document.getElementById('btnNextRow');
+    const counter = document.getElementById('singleRowCounter');
 
     if (!singleRowMode) {
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
+        if (counter) counter.style.display = 'none';
         return;
     }
 
     if (prevBtn) prevBtn.disabled = singleRowIndex <= 0;
     if (nextBtn) nextBtn.disabled = singleRowIndex >= sheet.rows.length - 1;
+    
+    if (counter) {
+        counter.style.display = 'inline-flex';
+        counter.textContent = `${singleRowIndex + 1}/${sheet.rows.length}`;
+    }
 }
 
 function toggleRowNumbers() {
@@ -8776,6 +8783,7 @@ function renderTable(preserveScroll = true) {
                 `<span class="header-toggle-group">` +
                 `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg></button>` +
                 `<button onclick="toggleSingleRowMode()" id="btnSingleRowMode" title="Toggle Single Row View" class="btn-header-toggle ${singleRowActive ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="14" height="4" rx="1"/><line x1="1" y1="3" x2="15" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg></button>` +
+                `<span id="singleRowCounter" class="single-row-counter" style="display: ${singleRowActive ? 'inline-flex' : 'none'};">${singleRowIndex + 1}/${sheet?.rows?.length ?? 0}</span>` +
                 `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l5 5-5 5"/></svg></button>` +
                 `</span>`;
             headerCell.appendChild(toggleSpan);
