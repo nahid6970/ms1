@@ -1545,6 +1545,9 @@ function checkHasMarkdown(value) {
         str.includes('{bg:') ||
         str.includes('{link:') ||
         str.includes('![') ||
+        str.includes('[[S:') || // Sheet link syntax
+        str.includes('[[I:') || // Sheet index syntax
+        str.includes('[[TOC]]') || // Table of Contents syntax
         (str.includes('http') && str.includes('[')) ||
         str.includes('{{') ||
         str.includes('$') ||  // LaTeX math syntax
@@ -2432,8 +2435,34 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 e.stopPropagation();
                 e.stopImmediatePropagation();
 
-                // Open link
-                window.open(link.href, '_blank', 'noopener,noreferrer');
+                // Handle internal sheet navigation
+                if (link.classList.contains('sheet-link')) {
+                    const sheetName = link.dataset.sheetName;
+                    const sheetIndex = link.dataset.sheetIndex;
+                    
+                    if (sheetIndex !== undefined) {
+                        const idx = parseInt(sheetIndex);
+                        if (!isNaN(idx) && tableData.sheets[idx]) {
+                            switchSheet(idx);
+                            showToast(`Navigated to: ${tableData.sheets[idx].name}`, 'info');
+                            return false;
+                        }
+                    } else if (sheetName) {
+                        const idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
+                        if (idx !== -1) {
+                            switchSheet(idx);
+                            showToast(`Navigated to: ${sheetName}`, 'info');
+                            return false;
+                        } else {
+                            showToast(`Sheet not found: ${sheetName}`, 'error');
+                        }
+                    }
+                }
+
+                // Open external link
+                if (link.href && link.href !== '#' && !link.href.startsWith('javascript:')) {
+                    window.open(link.href, '_blank', 'noopener,noreferrer');
+                }
                 return false;
             }
         }, true); // Use capture phase to catch event before it bubbles
@@ -3362,6 +3391,38 @@ function parseMarkdownInline(text, cellStyle = {}) {
     // Highlight: ==text== -> <mark>text</mark>
     formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+    // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
+    formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
+        return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+    });
+
+    // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
+    formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+        const idx = parseInt(index);
+        const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+        return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+    });
+
+    // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
+    formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
+        if (!tableData.sheets || tableData.sheets.length === 0) return '';
+        let tocHtml = '<div class="md-toc" style="background: rgba(0,0,0,0.05); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">';
+        tocHtml += '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #007bff;">Table of Contents</div>';
+        tocHtml += '<ul style="list-style: none; padding: 0; margin: 0;">';
+        
+        tableData.sheets.forEach((sheet, idx) => {
+            // Indent sub-sheets
+            const isSubSheet = sheet.parentSheet !== undefined && sheet.parentSheet !== null;
+            const style = isSubSheet ? 'margin-left: 20px; opacity: 0.8;' : 'font-weight: 500; margin-top: 5px;';
+            const icon = isSubSheet ? '↳ ' : '📄 ';
+            
+            tocHtml += `<li style="${style}"><a href="#" class="sheet-link" data-sheet-index="${idx}" style="text-decoration: none; color: inherit; display: block; padding: 3px 0;">${icon}${sheet.name}</a></li>`;
+        });
+        
+        tocHtml += '</ul></div>';
+        return tocHtml;
+    });
+
     // Red highlight: !!text!! -> red background with white text
     formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
@@ -4135,6 +4196,36 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
 
         // Blue highlight: ??text?? -> blue background with white text
         formatted = formatted.replace(/\?\?(.+?)\?\?/g, '<span style="background: #0000ff; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
+
+        // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
+        formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
+            return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+        });
+
+        // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
+        formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+            const idx = parseInt(index);
+            const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+        });
+
+        // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
+        formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
+            if (!tableData.sheets || tableData.sheets.length === 0) return '';
+            let tocHtml = '<div class="md-toc" style="background: rgba(0,0,0,0.05); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">';
+            tocHtml += '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #007bff;">Table of Contents</div>';
+            tocHtml += '<ul style="list-style: none; padding: 0; margin: 0;">';
+            
+            tableData.sheets.forEach((sheet, idx) => {
+                const isSubSheet = sheet.parentSheet !== undefined && sheet.parentSheet !== null;
+                const style = isSubSheet ? 'margin-left: 20px; opacity: 0.8;' : 'font-weight: 500; margin-top: 5px;';
+                const icon = isSubSheet ? '↳ ' : '📄 ';
+                tocHtml += `<li style="${style}"><a href="#" class="sheet-link" data-sheet-index="${idx}" style="text-decoration: none; color: inherit; display: block; padding: 3px 0;">${icon}${sheet.name}</a></li>`;
+            });
+            
+            tocHtml += '</ul></div>';
+            return tocHtml;
+        });
 
         // Collapsible text: {{text}} -> hidden text with toggle button
         formatted = formatted.replace(/\{\{(.+?)\}\}/g, (match, content) => {
@@ -9256,6 +9347,17 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove Math markers: \( ... \) -> ...
     stripped = stripped.replace(/\\\((.*?)\\\)/g, '$1');
+
+    // Remove internal sheet links: [[S:Sheet Name]] -> Sheet Name
+    stripped = stripped.replace(/\[\[S:(.+?)\]\]/g, '$1');
+
+    // Remove internal index links: [[I:Index]] -> (empty) or could be Sheet Name if we had tableData here
+    // but usually search should match the label, which is what [[I:..]] represents in raw.
+    // For now, remove markers but keep the index as it's part of search.
+    stripped = stripped.replace(/\[\[I:(\d+)\]\]/g, '$1');
+
+    // Remove TOC marker
+    stripped = stripped.replace(/\[\[TOC\]\]/g, '');
 
     // Remove superscript markers: ^text^ -> text
     stripped = stripped.replace(/\^(.+?)\^/g, '$1');

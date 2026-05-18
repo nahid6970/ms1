@@ -2424,6 +2424,35 @@ def generate_static_html(data, custom_syntaxes):
             // Highlight: ==text== -> <mark>text</mark>
             formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+            // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
+            formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
+                return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+            });
+
+            // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
+            formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+                const idx = parseInt(index);
+                const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+                return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+            });
+
+            // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
+            formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
+                if (!tableData.sheets || tableData.sheets.length === 0) return '';
+                let tocHtml = '<div class="md-toc" style="background: rgba(0,0,0,0.05); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">';
+                tocHtml += '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #007bff;">Table of Contents</div>';
+                tocHtml += '<ul style="list-style: none; padding: 0; margin: 0;">';
+
+                tableData.sheets.forEach((sheet, idx) => {
+                    const isSubSheet = sheet.parentSheet !== undefined && sheet.parentSheet !== null;
+                    const style = isSubSheet ? 'margin-left: 20px; opacity: 0.8;' : 'font-weight: 500; margin-top: 5px;';
+                    const icon = isSubSheet ? '↳ ' : '📄 ';
+                    tocHtml += `<li style="${style}"><a href="#" class="sheet-link" data-sheet-index="${idx}" style="text-decoration: none; color: inherit; display: block; padding: 3px 0;">${icon}${sheet.name}</a></li>`;
+                });
+
+                tocHtml += '</ul></div>';
+                return tocHtml;
+            });
             // Red highlight: !!text!! -> red background with white text
             formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;">$1</span>');
 
@@ -2801,6 +2830,35 @@ def generate_static_html(data, custom_syntaxes):
                 // Highlight: ==text== -> <mark>text</mark>
                 formatted = formatted.replace(/==(.+?)==/g, '<mark>$1</mark>');
 
+                // Internal Sheet Links: [[S:Sheet Name]] -> <a class="sheet-link">Sheet Name</a>
+                formatted = formatted.replace(/\[\[S:(.+?)\]\]/g, (match, name) => {
+                    return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${name.trim()}</a>`;
+                });
+
+                // Internal Index Links: [[I:Index]] -> <a class="sheet-link">Sheet Index</a>
+                formatted = formatted.replace(/\[\[I:(\d+)\]\]/g, (match, index) => {
+                    const idx = parseInt(index);
+                    const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+                    return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${name}</a>`;
+                });
+
+                // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
+                formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
+                    if (!tableData.sheets || tableData.sheets.length === 0) return '';
+                    let tocHtml = '<div class="md-toc" style="background: rgba(0,0,0,0.05); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">';
+                    tocHtml += '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #007bff;">Table of Contents</div>';
+                    tocHtml += '<ul style="list-style: none; padding: 0; margin: 0;">';
+
+                    tableData.sheets.forEach((sheet, idx) => {
+                        const isSubSheet = sheet.parentSheet !== undefined && sheet.parentSheet !== null;
+                        const style = isSubSheet ? 'margin-left: 20px; opacity: 0.8;' : 'font-weight: 500; margin-top: 5px;';
+                        const icon = isSubSheet ? '↳ ' : '📄 ';
+                        tocHtml += `<li style="${style}"><a href="#" class="sheet-link" data-sheet-index="${idx}" style="text-decoration: none; color: inherit; display: block; padding: 3px 0;">${icon}${sheet.name}</a></li>`;
+                    });
+
+                    tocHtml += '</ul></div>';
+                    return tocHtml;
+                });
                 // Red highlight: !!text!! -> red background with white text
                 formatted = formatted.replace(/!!(.+?)!!/g, '<span style="background: #ff0000; color: #ffffff; padding: 2px 6px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone; word-break: normal; overflow-wrap: break-word;">$1</span>');
 
