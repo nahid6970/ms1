@@ -85,10 +85,11 @@
 
 ## Internal Navigation
 **Syntax:**
-- `[[S:Sheet Name]]` → Link to a sheet by name.
-- `[[I:0]]` → Link to a sheet by its index (0, 1, 2...).
+- `[[S:Sheet Name]]` or `[[S:Sheet Name:Custom Label]]`
+- `[[I:0]]` or `[[I:0:Custom Label]]` (0-based index)
 - `[[TOC]]` → Automatically generates a clickable Table of Contents of all sheets.
 **Function:** Enables seamless navigation between different sheets within the same project.
+**Styling:** Sheet links have no underline by default and inherit text color from parent tags.
 
 ## Custom Color Syntax
 **Syntax:** User-defined (e.g., `++text++`, `%%text%%`)

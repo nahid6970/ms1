@@ -99,10 +99,12 @@ The application employs a professional square-edge design. All components includ
 ## Internal Sheet Linking (Interactive TOC)
 **Purpose:** Create clickable links between sheets directly within cell content.
 **Syntax:**
-- **By Name:** `[[S:Sheet Name]]` - Links to a sheet by its exact name.
-- **By Index:** `[[I:Index]]` - Links to a sheet by its numerical position (0-based).
+- **By Name:** `[[S:Sheet Name]]` or `[[S:Sheet Name:Custom Label]]`
+- **By Index:** `[[I:Index]]` or `[[I:Index:Custom Label]]` (0-based indexing)
 - **Auto-TOC:** `[[TOC]]` - Generates a complete, indented list of all sheets and sub-sheets.
 **Features:**
+- **Custom Labels:** Use a colon (`:`) after the sheet name or index to specify a display label.
+- **Styling:** Links have **no underline** by default. They use `color: inherit`, allowing you to wrap them in custom color syntax (e.g., `{fg:red}[[S:Sheet]]{/}`) to style the link text.
 - **Context Menu:** Right-click any cell and select **"Copy Sheet Index"** to quickly get the current sheet's index for use with `[[I:index]]`.
 - **Interactivity:** Links work in both the main application and static HTML exports.
 - **Cleanup:** Strips markers automatically during search, copy, and plaintext export.
