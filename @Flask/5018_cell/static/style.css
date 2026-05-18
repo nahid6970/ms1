@@ -4168,8 +4168,8 @@ Markdown Table Styles */
 .f2-sheets-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 16px;
+    gap: 4px;
+    padding: 8px;
     max-height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -4179,8 +4179,8 @@ Markdown Table Styles */
 .f2-sheet-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 8px;
+    padding: 6px 12px;
     background: rgba(0, 255, 157, 0.05);
     border: 1px solid #1a4d36;
     border-left: 3px solid #00ff9d;
@@ -4194,12 +4194,12 @@ Markdown Table Styles */
 .f2-sheet-item:hover {
     background: rgba(0, 255, 157, 0.1);
     border-color: #00ff9d;
-    transform: translateX(4px);
+    transform: translateX(3px);
 }
 
 .f2-sheet-item:focus {
     border-color: #00ff9d;
-    box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
 }
 
 .f2-sheet-item.active {
@@ -4210,13 +4210,13 @@ Markdown Table Styles */
 }
 
 .f2-sheet-number {
-    font-size: 12px;
+    font-size: 11px;
     color: #00ff9d;
     background: rgba(0, 255, 157, 0.1);
     border: 1px solid #00ff9d;
-    padding: 4px 8px;
+    padding: 2px 6px;
     border-radius: 2px;
-    min-width: 30px;
+    min-width: 26px;
     text-align: center;
     font-weight: 600;
     font-family: 'JetBrains Mono', monospace;
@@ -4230,7 +4230,7 @@ Markdown Table Styles */
 
 .f2-sheet-name {
     flex: 1;
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'JetBrains Mono', monospace;
 }
 

@@ -9,7 +9,7 @@ Complete guide to all keyboard shortcuts available in the application.
 | Shortcut | Description |
 |----------|-------------|
 | **F1** | Open Quick Navigation popup (Categories & Sheets) |
-| **F2** | Open Recent Sheets popup |
+| **F2** | Open Recent Sheets popup (with pinning support) |
 | **F4** | Toggle top ribbons (hide/show header controls) |
 | **Alt+M** | Toggle between current and previous sheet |
 | **Alt+N** | Add new row to current sheet |
@@ -26,7 +26,6 @@ Complete guide to all keyboard shortcuts available in the application.
 | **F3** | Open Quick Markdown Formatter (with text selected) |
 | **F8** | Search word under cursor/selection and copy to clipboard |
 | **F9** | Swap two words separated by space/comma (with text selected) |
-| **F2** | Recent sheets popup |
 | **Ctrl+S** | Save data (manual save) |
 | **Alt+N** | Quick add row |
 
@@ -151,6 +150,7 @@ When text is selected, press F3 to open the formatter with these options:
 - Set text color
 - Set font size
 - Set sort rank
+- **Copy Sheet Index** (📋) - Copy the active sheet's index for internal linking
 - Clear formatting
 - Export cell to PDF
 
@@ -175,6 +175,8 @@ When text is selected, press F3 to open the formatter with these options:
 5. **Raw mode for advanced editing:** Switch to raw mode (📄) for multi-cursor features and direct syntax editing.
 
 6. **Link clicking:** In markdown preview mode, click links to open them without entering edit mode.
+
+7. **F2 Pinned Sheets:** Click the 📌 icon in the F2 popup to keep your favorite sheets at the top of the list forever.
 
 ---
 
