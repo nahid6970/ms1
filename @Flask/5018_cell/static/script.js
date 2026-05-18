@@ -4754,6 +4754,19 @@ function closeCellContextMenu() {
     contextMenuCell = null;
 }
 
+function copySheetIndex() {
+    const sheetIndex = tableData.activeSheet;
+    
+    navigator.clipboard.writeText(sheetIndex.toString()).then(() => {
+        showToast(`Copied sheet index: ${sheetIndex}`, 'info');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showToast('Failed to copy sheet index', 'error');
+    });
+    
+    closeCellContextMenu();
+}
+
 function closeCellContextMenuOnClickOutside(event) {
     const menu = document.getElementById('cellContextMenu');
     if (menu && menu.classList.contains('show')) {
