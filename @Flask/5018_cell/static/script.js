@@ -14767,6 +14767,7 @@ function toggleVrindaFont(enabled) {
 
 
 function showMarkdownGuide() {
+    closeSettingsModal();
     const modal = document.getElementById('markdownGuideModal');
     if (modal) {
         modal.style.display = 'block';

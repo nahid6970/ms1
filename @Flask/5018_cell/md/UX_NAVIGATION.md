@@ -96,6 +96,17 @@ The application employs a professional square-edge design. All components includ
 - Saves in `switchSheet()` before switch.
 - Restores in `switchSheet()` after render (with `setTimeout`).
 
+## Internal Sheet Linking (Interactive TOC)
+**Purpose:** Create clickable links between sheets directly within cell content.
+**Syntax:**
+- **By Name:** `[[S:Sheet Name]]` - Links to a sheet by its exact name.
+- **By Index:** `[[I:Index]]` - Links to a sheet by its numerical position (0-based).
+- **Auto-TOC:** `[[TOC]]` - Generates a complete, indented list of all sheets and sub-sheets.
+**Features:**
+- **Context Menu:** Right-click any cell and select **"Copy Sheet Index"** to quickly get the current sheet's index for use with `[[I:index]]`.
+- **Interactivity:** Links work in both the main application and static HTML exports.
+- **Cleanup:** Strips markers automatically during search, copy, and plaintext export.
+
 ## Navigation & Sidebar
 - **Tree View Sidebar:** Collapsible category folders with CSS-based tree lines.
 - **Toggle:** Hamburger button (☰) in top-left.

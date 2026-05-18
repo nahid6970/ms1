@@ -83,6 +83,13 @@
 **Syntax:** `https://url[Link Text]`
 **Function:** Shorter than `{link:url}...` and supports nested markdown.
 
+## Internal Navigation
+**Syntax:**
+- `[[S:Sheet Name]]` → Link to a sheet by name.
+- `[[I:0]]` → Link to a sheet by its index (0, 1, 2...).
+- `[[TOC]]` → Automatically generates a clickable Table of Contents of all sheets.
+**Function:** Enables seamless navigation between different sheets within the same project.
+
 ## Custom Color Syntax
 **Syntax:** User-defined (e.g., `++text++`, `%%text%%`)
 **Function:** Apply custom colors and formatting defined in Settings.

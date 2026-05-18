@@ -3536,6 +3536,21 @@ def generate_static_html(data, custom_syntaxes):
             modal.style.display = 'none';
         }
 
+        function showMarkdownGuide() {
+            closeSettings();
+            const modal = document.getElementById('markdownGuideModal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeMarkdownGuide() {
+            const modal = document.getElementById('markdownGuideModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         function syncGridLineColor(value) {
             // Handle input with or without # prefix
             let colorValue = value;
@@ -3968,8 +3983,106 @@ def generate_static_html(data, custom_syntaxes):
                 <span class="close" onclick="closeSettings()">&times;</span>
             </div>
             <div class="settings-content">
+        <div class="settings-section">
+                    <h3 class="settings-section-title">📚 Help & Documentation</h3>
+                    <button class="btn-reset" style="width: 100%; padding: 10px; font-size: 14px; margin-top: 5px;" onclick="showMarkdownGuide()">
+                        📝 View Markdown Guide
+                    </button>
+                </div>
+
                 <div class="settings-section">
                     <h3 class="settings-section-title">🎨 Appearance</h3>
+'''
+
+    # Add the Markdown Guide Modal HTML
+    html_content += '''
+    <!-- Markdown Guide Modal -->
+    <div id="markdownGuideModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Markdown Formatting Guide</h2>
+                <span class="close" onclick="closeMarkdownGuide()">&times;</span>
+            </div>
+            <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Internal Navigation</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                [[S:Sheet Name]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">Sheet Name</a></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                [[I:0]]</td>
+                            <td style="padding: 8px;"><a href="#" class="sheet-link" style="color: #007bff; text-decoration: underline;">First Sheet</a></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                [[TOC]]</td>
+                            <td style="padding: 8px;">
+                                <div style="font-size: 0.85em; border-left: 3px solid #007bff; padding: 5px 10px; background: #f0f7ff;">
+                                    <strong>Table of Contents</strong><br>
+                                    📄 Sheet 1<br>
+                                    📄 Sheet 2
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        Use <code>[[S:name]]</code> to link to any sheet by its exact name.<br>
+                        Use <code>[[I:index]]</code> to link by sheet order (starting from 0).<br>
+                        Use <code>[[TOC]]</code> to generate a complete list of all sheets and sub-sheets.<br>
+                        <strong>Note:</strong> Navigation works seamlessly in this exported file too.
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Text Formatting</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">**bold text**</td>
+                            <td style="padding: 8px;"><strong>bold text</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">@@italic text@@</td>
+                            <td style="padding: 8px;"><em>italic text</em></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">__underline__</td>
+                            <td style="padding: 8px;"><u>underline</u></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">==highlight==</td>
+                            <td style="padding: 8px;"><mark>highlight</mark></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa;">~~strikethrough~~</td>
+                            <td style="padding: 8px;"><del>strikethrough</del></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #007bff; margin-bottom: 10px;">Images</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 8px; font-family: monospace; background: #f8f9fa; font-size: 11px;">
+                                ![alt text](url)</td>
+                            <td style="padding: 8px;">Displays image with alt text</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-header" style="justify-content: center; padding: 10px; border-top: 1px solid #ddd; border-bottom: none;">
+                <button class="btn-reset" onclick="closeMarkdownGuide()">Close</button>
+            </div>
+        </div>
+    </div>
+'''
+
+    # Continue building HTML
+    html_content += '''
                     <div class="settings-item">
                         <div class="settings-item-header">
                             <label for="gridLineColor" class="settings-label">Grid Line Color</label>
