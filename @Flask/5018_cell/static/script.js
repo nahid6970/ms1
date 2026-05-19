@@ -4797,6 +4797,8 @@ async function setSheetCustomIndex(sheetIdx) {
 }
 
 async function setAndCopySheetIndex() {
+    const existing = tableData.sheets[currentSheet]?.customIndex;
+    if (existing && !confirm(`Index already set to ${existing}.\nOverwrite with a new one?`)) return;
     await setSheetCustomIndex(currentSheet);
     const idx = tableData.sheets[currentSheet]?.customIndex;
     if (idx) navigator.clipboard.writeText(idx).catch(() => {});
