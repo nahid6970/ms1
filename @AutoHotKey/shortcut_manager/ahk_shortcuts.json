@@ -577,7 +577,7 @@
             "category": "General",
             "description": "",
             "trigger": "[[",
-            "replacement": "[text]",
+            "replacement": "[[I:]]",
             "enabled": true
         },
         {
