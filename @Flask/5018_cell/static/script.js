@@ -6651,6 +6651,22 @@ function renderSubSheetBar() {
         addBtn.style.setProperty('border-color', parentFg, 'important');
     }
 
+    // Add 🔑 button to set & copy custom index
+    const indexBtn = document.createElement('button');
+    indexBtn.className = 'subsheet-add-btn';
+    indexBtn.innerHTML = '🔑';
+    indexBtn.title = 'Set & copy sheet index';
+    if (parentFg) {
+        indexBtn.style.setProperty('color', parentFg, 'important');
+        indexBtn.style.setProperty('border-color', parentFg, 'important');
+    }
+    indexBtn.onclick = async () => {
+        await setSheetCustomIndex(parentIndex);
+        const idx = tableData.sheets[parentIndex]?.customIndex;
+        if (idx) navigator.clipboard.writeText(idx).catch(() => {});
+    };
+    subsheetTabs.appendChild(indexBtn);
+
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
 
