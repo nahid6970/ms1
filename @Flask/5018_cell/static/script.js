@@ -13278,10 +13278,11 @@ function handleF1DragOver(e) {
 
     if (canDrop) {
         e.dataTransfer.dropEffect = 'move';
-        // Add visual indicator
         if (this !== draggedF1Item && this.classList.contains('f1-sheet-item')) {
-            this.style.borderColor = '#007bff';
-            this.style.borderWidth = '3px';
+            document.querySelectorAll('.f1-sheet-item').forEach(el => el.classList.remove('drop-before', 'drop-after'));
+            const rect = this.getBoundingClientRect();
+            const insertBefore = e.clientY < rect.top + rect.height / 2;
+            this.classList.add(insertBefore ? 'drop-before' : 'drop-after');
         }
     } else {
         e.dataTransfer.dropEffect = 'none';
@@ -13294,6 +13295,7 @@ function handleF1Drop(e) {
     if (e.stopPropagation) {
         e.stopPropagation();
     }
+    document.querySelectorAll('.f1-sheet-item').forEach(el => el.classList.remove('drop-before', 'drop-after'));
 
     if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
@@ -13407,12 +13409,12 @@ function handleF1Drop(e) {
 
 function handleF1DragEnd(e) {
     this.classList.remove('dragging');
-
-    // Remove all drag indicators
     document.querySelectorAll('.f1-sheet-item').forEach(item => {
         item.style.borderColor = '';
         item.style.borderWidth = '';
+        item.classList.remove('drop-before', 'drop-after');
     });
+    document.querySelectorAll('.f1-drop-indicator').forEach(el => el.remove());
 }
 
 function addSeparatorAboveSheet(sheetIndex) {
