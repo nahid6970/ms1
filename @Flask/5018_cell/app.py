@@ -187,6 +187,15 @@ def rename_sheet(index):
         save_data(data)
     return jsonify({'success': True})
 
+@app.route('/api/sheets/<int:index>/set-custom-index', methods=['POST'])
+def set_sheet_custom_index(index):
+    data = load_data()
+    custom_index = request.json.get('customIndex')
+    if 0 <= index < len(data['sheets']):
+        data['sheets'][index]['customIndex'] = custom_index
+        save_data(data)
+    return jsonify({'success': True})
+
 @app.route('/api/columns', methods=['POST'])
 def add_column():
     data = load_data()

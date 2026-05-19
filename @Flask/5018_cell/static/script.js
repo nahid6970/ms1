@@ -3398,12 +3398,14 @@ function parseMarkdownInline(text, cellStyle = {}) {
     });
 
     // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-    formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-        const idx = parseInt(index);
-        const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-        const displayName = display ? display.trim() : name;
-        return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
-    });
+    formatted = formatted.replace(/\[\[I:(\w+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
+            // Try customIndex lookup first, then fall back to array position
+            let idx = tableData.sheets ? tableData.sheets.findIndex(s => s.customIndex === index) : -1;
+            if (idx === -1) idx = parseInt(index);
+            const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+            const displayName = display ? display.trim() : name;
+            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
+        });
 
     // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
     formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
@@ -4206,12 +4208,14 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         });
 
         // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-        formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-            const idx = parseInt(index);
-            const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
-            const displayName = display ? display.trim() : name;
-            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
-        });
+        formatted = formatted.replace(/\[\[I:(\w+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
+                // Try customIndex lookup first, then fall back to array position
+                let idx = tableData.sheets ? tableData.sheets.findIndex(s => s.customIndex === index) : -1;
+                if (idx === -1) idx = parseInt(index);
+                const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+                const displayName = display ? display.trim() : name;
+                return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
+            });
 
         // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
         formatted = formatted.replace(/\[\[TOC\]\]/g, (match) => {
@@ -4759,16 +4763,37 @@ function closeCellContextMenu() {
 }
 
 function copySheetIndex() {
-    const sheetIndex = tableData.activeSheet;
+    const sheetIdx = tableData.activeSheet;
+    const sheet = tableData.sheets[sheetIdx];
+    const indexToCopy = (sheet && sheet.customIndex) ? sheet.customIndex : sheetIdx.toString();
     
-    navigator.clipboard.writeText(sheetIndex.toString()).then(() => {
-        showToast(`Copied sheet index: ${sheetIndex}`, 'info');
+    navigator.clipboard.writeText(indexToCopy).then(() => {
+        showToast(`Copied sheet index: ${indexToCopy}`, 'info');
     }).catch(err => {
         console.error('Failed to copy: ', err);
         showToast('Failed to copy sheet index', 'error');
     });
     
     closeCellContextMenu();
+}
+
+async function setSheetCustomIndex(sheetIdx) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const customIndex = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    try {
+        const response = await fetch(`/api/sheets/${sheetIdx}/set-custom-index`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customIndex })
+        });
+        if (response.ok) {
+            tableData.sheets[sheetIdx].customIndex = customIndex;
+            showToast(`Index set: ${customIndex}`, 'info');
+        }
+    } catch (err) {
+        console.error('Failed to set custom index:', err);
+    }
 }
 
 function closeCellContextMenuOnClickOutside(event) {
@@ -6781,6 +6806,15 @@ function showSubSheetContextMenu(event, sheetIndex) {
         menu.remove();
     };
 
+    // Set Index option
+    const indexItem = document.createElement('div');
+    indexItem.className = 'context-menu-item';
+    indexItem.innerHTML = '<span>🔑</span><span>Set Index</span>';
+    indexItem.onclick = () => {
+        setSheetCustomIndex(sheetIndex);
+        menu.remove();
+    };
+
     // Delete option
     const deleteItem = document.createElement('div');
     deleteItem.className = 'context-menu-item';
@@ -6792,6 +6826,7 @@ function showSubSheetContextMenu(event, sheetIndex) {
 
     menu.appendChild(renameItem);
     menu.appendChild(colorItem);
+    menu.appendChild(indexItem);
 
     // "Move to Main Sheet" only for sub-sheets (those with a parentSheet)
     const sheet = tableData.sheets[sheetIndex];
@@ -12741,7 +12776,7 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
     const sheet = tableData.sheets[sheetIndex];
 
     if (isSubSheet) {
-        // Sub-sheet menu: Rename, Colors, Delete
+        // Sub-sheet menu: Rename, Colors, Set Index, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
@@ -12750,6 +12785,10 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>🎨</span>
                 <span>Set Colors</span>
+            </div>
+            <div class="context-menu-item" onclick="setSheetCustomIndex(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🔑</span>
+                <span>Set Index</span>
             </div>
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
@@ -12758,7 +12797,7 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             </div>
         `;
     } else {
-        // Parent sheet menu: Rename, Colors, Move to Category, Delete
+        // Parent sheet menu: Rename, Colors, Set Index, Move to Category, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
@@ -12767,6 +12806,10 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>🎨</span>
                 <span>Set Colors</span>
+            </div>
+            <div class="context-menu-item" onclick="setSheetCustomIndex(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>🔑</span>
+                <span>Set Index</span>
             </div>
             <div class="context-menu-item" onclick="moveF1SheetToCategory(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>📁</span>
@@ -14128,6 +14171,9 @@ function showTreeContextMenu(e, type, id) {
         menu.innerHTML = `
             <div class="context-menu-item" onclick="showRenameModal(${id})">
                 <span>✏️</span> Rename
+            </div>
+            <div class="context-menu-item" onclick="setSheetCustomIndex(${id})">
+                <span>🔑</span> Set Index
             </div>
             <div class="context-menu-item" onclick="showMoveToCategoryModal(${id})">
                 <span>📁</span> Move to Category
