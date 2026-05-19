@@ -12662,9 +12662,7 @@ function populateF1Categories() {
         showF1CategoryContextMenu(e, 'Uncategorized');
     });
 
-    categoryList.appendChild(uncategorizedItem);
-
-    // Add other categories
+    // Add other categories first, then Uncategorized at bottom
     tableData.categories.forEach(category => {
         const categorySheets = tableData.sheets.filter((sheet, index) => {
             const sheetCategory = tableData.sheetCategories[index] || tableData.sheetCategories[String(index)];
@@ -12707,6 +12705,9 @@ function populateF1Categories() {
 
         categoryList.appendChild(item);
     });
+
+    // Uncategorized at the bottom
+    categoryList.appendChild(uncategorizedItem);
 }
 
 // F1 Category Context Menu
