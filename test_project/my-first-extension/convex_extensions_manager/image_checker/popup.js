@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const sizeValue = document.getElementById('sizeValue');
     const checkmarkColor = document.getElementById('checkmarkColor');
     const textColor = document.getElementById('textColor');
+    const hideCheckmarks = document.getElementById('hideCheckmarks');
     const enableBorder = document.getElementById('enableBorder');
     const borderColor = document.getElementById('borderColor');
     const borderWidth = document.getElementById('borderWidth');
@@ -230,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
             checkmarkSize: parseInt(checkmarkSize.value),
             checkmarkColor: checkmarkColor.value,
             textColor: textColor.value,
+            hideCheckmarks: hideCheckmarks.checked,
             enableBorder: enableBorder.checked,
             borderColor: borderColor.value,
             borderWidth: parseInt(borderWidth.value)
@@ -260,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
             checkmarkSize: 15,
             checkmarkColor: '#4CAF50',
             textColor: '#ffffff',
+            hideCheckmarks: false,
             enableBorder: false,
             borderColor: '#4CAF50',
             borderWidth: 3
@@ -271,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
         sizeValue.textContent = settings.checkmarkSize + '%';
         checkmarkColor.value = settings.checkmarkColor;
         textColor.value = settings.textColor;
+        hideCheckmarks.checked = settings.hideCheckmarks || false;
         enableBorder.checked = settings.enableBorder;
         borderColor.value = settings.borderColor;
         borderWidth.value = settings.borderWidth;

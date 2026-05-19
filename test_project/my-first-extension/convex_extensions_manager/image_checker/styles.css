@@ -83,3 +83,13 @@ body[data-checking-mode="true"] video:hover {
     outline-offset: -4px;
     cursor: help;
 }
+
+/* Hide checkmarks temporarily */
+body.ic-hide-checkmarks .ic-checkmark {
+    display: none !important;
+}
+
+body.ic-hide-checkmarks [data-ic-has-border="true"] {
+    border-color: transparent !important;
+    border-width: 0 !important;
+}

@@ -45,6 +45,7 @@ function runExtension() {
         checkmarkSize: 15,
         checkmarkColor: '#4CAF50',
         textColor: '#ffffff',
+        hideCheckmarks: false,
         enableBorder: false,
         borderColor: '#4CAF50',
         borderWidth: 3
@@ -59,20 +60,21 @@ function runExtension() {
     }
 
     function init() {
-        loadSettings();
-        loadSeenItems().then(() => {
-            // Initial scan
-            scanPage();
+        loadSettings().then(() => {
+            loadSeenItems().then(() => {
+                // Initial scan
+                scanPage();
 
-            // Watch for changes (YouTube/SPA navigation + Infinite Scroll)
-            setupObservers();
+                // Watch for changes (YouTube/SPA navigation + Infinite Scroll)
+                setupObservers();
 
-            // Check if mode should be active
-            const tabId = getTabId();
-            chrome.storage.local.get([`checkingMode_${tabId}`], function (result) {
-                if (result[`checkingMode_${tabId}`]) {
-                    toggleMode(true);
-                }
+                // Check if mode should be active
+                const tabId = getTabId();
+                chrome.storage.local.get([`checkingMode_${tabId}`], function (result) {
+                    if (result[`checkingMode_${tabId}`]) {
+                        toggleMode(true);
+                    }
+                });
             });
         });
 
@@ -289,12 +291,19 @@ function runExtension() {
     }
 
     function refreshAllCheckmarks() {
+        if (currentSettings.hideCheckmarks) {
+            document.body.classList.add('ic-hide-checkmarks');
+        } else {
+            document.body.classList.remove('ic-hide-checkmarks');
+        }
+
         document.querySelectorAll('.ic-checkmark').forEach(c => {
             const container = c.parentNode;
             if (container && container.dataset.originalBorder !== undefined) {
                 container.style.border = container.dataset.originalBorder;
                 delete container.dataset.originalBorder;
             }
+            if (container) delete container.dataset.icHasBorder;
             c.remove();
         });
         document.querySelectorAll('[data-ic-processed="true"]').forEach(el => {
@@ -412,6 +421,7 @@ function runExtension() {
         if (s.enableBorder) {
             container.dataset.originalBorder = container.style.border || '';
             container.style.border = `${s.borderWidth}px solid ${s.borderColor}`;
+            container.dataset.icHasBorder = 'true';
         }
     }
 
@@ -539,8 +549,16 @@ function runExtension() {
     function getTabId() { return 'global'; }
 
     function loadSettings() {
-        chrome.storage.local.get(['imageCheckerSettings'], function (result) {
-            if (result.imageCheckerSettings) currentSettings = result.imageCheckerSettings;
+        return new Promise((resolve) => {
+            chrome.storage.local.get(['imageCheckerSettings'], function (result) {
+                if (result.imageCheckerSettings) {
+                    currentSettings = result.imageCheckerSettings;
+                    if (currentSettings.hideCheckmarks) {
+                        document.body.classList.add('ic-hide-checkmarks');
+                    }
+                }
+                resolve();
+            });
         });
     }
 
