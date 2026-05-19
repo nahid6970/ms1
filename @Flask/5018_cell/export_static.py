@@ -2738,8 +2738,9 @@ def generate_static_html(data, custom_syntaxes):
             });
 
             // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-            formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-                const idx = parseInt(index);
+            formatted = formatted.replace(/\[\[I:(\w+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
+                let idx = tableData.sheets ? tableData.sheets.findIndex(s => s.customIndex === index) : -1;
+                if (idx === -1) idx = parseInt(index);
                 const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
                 const displayName = display ? display.trim() : name;
                 return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
@@ -3146,8 +3147,9 @@ def generate_static_html(data, custom_syntaxes):
                 });
 
                 // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-                formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-                    const idx = parseInt(index);
+                formatted = formatted.replace(/\[\[I:(\w+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
+                    let idx = tableData.sheets ? tableData.sheets.findIndex(s => s.customIndex === index) : -1;
+                    if (idx === -1) idx = parseInt(index);
                     const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
                     const displayName = display ? display.trim() : name;
                     return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
@@ -3664,6 +3666,22 @@ def generate_static_html(data, custom_syntaxes):
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
+            // Handle internal sheet navigation links
+            const link = event.target.closest('a.sheet-link');
+            if (link) {
+                event.preventDefault();
+                const sheetIndex = link.dataset.sheetIndex;
+                const sheetName = link.dataset.sheetName;
+                if (sheetIndex !== undefined) {
+                    const idx = parseInt(sheetIndex);
+                    if (!isNaN(idx)) switchSheet(idx);
+                } else if (sheetName) {
+                    const idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
+                    if (idx !== -1) switchSheet(idx);
+                }
+                return;
+            }
+
             // Close dropdowns when clicking outside
             if (event.target && event.target.closest) {
                 const sheetInfo = event.target.closest('.current-sheet-info');
