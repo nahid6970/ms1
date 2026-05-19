@@ -6396,6 +6396,20 @@ async function deleteSheet(index) {
             renderSidebar();
             renderTable();
             autoSaveActiveSheet();
+
+            // Reindex localStorage sheet indices (pinned, history)
+            ['pinnedSheets', 'sheetHistory'].forEach(key => {
+                const saved = localStorage.getItem(key);
+                if (!saved) return;
+                try {
+                    const indices = JSON.parse(saved);
+                    const updated = indices
+                        .filter(idx => !sheetsToDelete.includes(idx))
+                        .map(idx => idx - sheetsToDelete.filter(d => d < idx).length);
+                    localStorage.setItem(key, JSON.stringify(updated));
+                } catch (e) {}
+            });
+
             showToast('Sheet deleted', 'success');
         }
     } catch (error) {
