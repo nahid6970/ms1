@@ -1,5 +1,31 @@
 # Recent Development Log
 
+## [2026-05-19 23:33] - Datetime-Based Custom Sheet Index
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🎯 Custom Sheet Index Feature
+- **`#` Button**: Added a `#` button to the header action pill (beside `⋮` and `+`) that sets a datetime-based custom index on the current sheet and copies it to clipboard.
+- **Index Format**: `YYYYMMDDHHmmss` (e.g. `20260519232412`) — unique per second, no duplication possible.
+- **No Overwrite**: If an index is already set, clicking `#` shows a red toast and does nothing.
+- **`[[I:Index]]` Links**: Updated both parsing locations to resolve `customIndex` first (by scanning `sheet.customIndex`), then fall back to array position. Regex updated from `\d+` to `\w+` to support the longer timestamp format.
+- **Copy Sheet Index**: `copySheetIndex()` now copies `customIndex` if set, otherwise falls back to array position.
+- **Context Menus**: "Set Index" was added then removed from all right-click menus (F1, subsheet bar, tree) — only the `#` header button remains.
+
+**Files Modified:**
+- `app.py` — Added `POST /api/sheets/<index>/set-custom-index` endpoint.
+- `static/script.js` — Added `setSheetCustomIndex()`, `setAndCopySheetIndex()`, updated `[[I:Index]]` parsing (×2), updated `copySheetIndex()`.
+- `templates/index.html` — Added `#` button to header action pill.
+
+**Current Status:**
+- ✅ `#` button sets and copies a unique datetime index in one click.
+- ✅ Index is permanent — cannot be overwritten accidentally.
+- ✅ `[[I:20260519232412]]` links resolve correctly.
+
+---
+
 ## [2026-05-17 11:15] - Syntax Template Engine & Multi-Level List Sorting
 
 **Session Duration:** 2.5 hours
