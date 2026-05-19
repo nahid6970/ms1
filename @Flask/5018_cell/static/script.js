@@ -1000,6 +1000,18 @@ async function loadData() {
         currentSheet = tableData.activeSheet || 0;
         loadSingleRowState(currentSheet);
 
+        // Ensure all sheets have a uniqueId for stable linking
+        let needsSave = false;
+        if (tableData.sheets) {
+            tableData.sheets.forEach(sheet => {
+                if (!sheet.uniqueId) {
+                    sheet.uniqueId = 's' + Date.now() + Math.floor(Math.random() * 1000);
+                    needsSave = true;
+                }
+            });
+        }
+        if (needsSave) saveData();
+
         // Set currentCategory to match the active sheet's category
         const sheetCategory = tableData.sheetCategories[currentSheet] || tableData.sheetCategories[String(currentSheet)] || null;
         currentCategory = sheetCategory;
@@ -3397,12 +3409,24 @@ function parseMarkdownInline(text, cellStyle = {}) {
         return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
     });
 
-    // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-    formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-        const idx = parseInt(index);
-        const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+    // Internal Index Links: [[I:ID]] or [[I:ID:Display Name]]
+    formatted = formatted.replace(/\[\[I:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, id, display) => {
+        // Try to find sheet by uniqueId first, then by index if ID is numeric and no match found
+        let targetIdx = tableData.sheets.findIndex(s => s.uniqueId === id);
+        
+        // Fallback for old numeric indices if no uniqueId matches
+        if (targetIdx === -1 && /^\d+$/.test(id)) {
+            targetIdx = parseInt(id);
+        }
+
+        const sheet = (tableData.sheets && tableData.sheets[targetIdx]) ? tableData.sheets[targetIdx] : null;
+        const name = sheet ? sheet.name : `Sheet ${id}`;
         const displayName = display ? display.trim() : name;
-        return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
+        
+        if (targetIdx !== -1 && tableData.sheets[targetIdx]) {
+            return `<a href="#" class="sheet-link" data-sheet-index="${targetIdx}">${displayName}</a>`;
+        }
+        return displayName;
     });
 
     // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
@@ -4205,12 +4229,24 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
             return `<a href="#" class="sheet-link" data-sheet-name="${name.trim()}">${displayName}</a>`;
         });
 
-        // Internal Index Links: [[I:Index]] or [[I:Index:Display Name]]
-        formatted = formatted.replace(/\[\[I:(\d+)(?::([^\]]+))?\]\]/g, (match, index, display) => {
-            const idx = parseInt(index);
-            const name = (tableData.sheets && tableData.sheets[idx]) ? tableData.sheets[idx].name : `Sheet ${idx}`;
+        // Internal Index Links: [[I:ID]] or [[I:ID:Display Name]]
+        formatted = formatted.replace(/\[\[I:([^\]:]+)(?::([^\]]+))?\]\]/g, (match, id, display) => {
+            // Try to find sheet by uniqueId first, then by index if ID is numeric and no match found
+            let targetIdx = tableData.sheets.findIndex(s => s.uniqueId === id);
+            
+            // Fallback for old numeric indices if no uniqueId matches
+            if (targetIdx === -1 && /^\d+$/.test(id)) {
+                targetIdx = parseInt(id);
+            }
+
+            const sheet = (tableData.sheets && tableData.sheets[targetIdx]) ? tableData.sheets[targetIdx] : null;
+            const name = sheet ? sheet.name : `Sheet ${id}`;
             const displayName = display ? display.trim() : name;
-            return `<a href="#" class="sheet-link" data-sheet-index="${idx}">${displayName}</a>`;
+            
+            if (targetIdx !== -1 && tableData.sheets[targetIdx]) {
+                return `<a href="#" class="sheet-link" data-sheet-index="${targetIdx}">${displayName}</a>`;
+            }
+            return displayName;
         });
 
         // Table of Contents: [[TOC]] -> Auto-generated list of all sheets
@@ -4759,13 +4795,14 @@ function closeCellContextMenu() {
 }
 
 function copySheetIndex() {
-    const sheetIndex = tableData.activeSheet;
+    const sheet = tableData.sheets[tableData.activeSheet];
+    const id = sheet ? sheet.uniqueId : tableData.activeSheet;
     
-    navigator.clipboard.writeText(sheetIndex.toString()).then(() => {
-        showToast(`Copied sheet index: ${sheetIndex}`, 'info');
+    navigator.clipboard.writeText(id.toString()).then(() => {
+        showToast(`Copied sheet ID: ${id}`, 'info');
     }).catch(err => {
         console.error('Failed to copy: ', err);
-        showToast('Failed to copy sheet index', 'error');
+        showToast('Failed to copy sheet ID', 'error');
     });
     
     closeCellContextMenu();
