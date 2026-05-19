@@ -13228,6 +13228,14 @@ function handleF1DragStart(e) {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.dataset.sheetIndex);
     e.dataTransfer.setData('text/html', this.innerHTML);
+
+    // Small drag ghost: just the sheet name, compact
+    const ghost = document.createElement('div');
+    ghost.textContent = tableData.sheets[draggedSheetIndex]?.name || '…';
+    ghost.style.cssText = 'position:fixed;top:-999px;background:#1a1a1a;color:#ff9d00;border:1px solid #ff9d00;padding:3px 8px;font-size:11px;font-family:JetBrains Mono,monospace;border-radius:2px;white-space:nowrap;';
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, 0, 0);
+    setTimeout(() => ghost.remove(), 0);
 }
 
 function handleF1DragOver(e) {
