@@ -2,9 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 
-import time
-import random
-
 app = Flask(__name__)
 
 # Disable caching for development
@@ -158,7 +155,6 @@ def add_sheet():
         'headerCenter': False
     }
     new_sheet = {
-        'uniqueId': f"s{int(time.time() * 1000)}{random.randint(0, 999)}",
         'name': sheet_name, 
         'columns': [default_column], 
         'rows': [['']]
