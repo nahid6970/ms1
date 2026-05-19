@@ -6797,6 +6797,40 @@ async function promoteToMainSheet(sheetIndex) {
     showToast(`"${sheet.name}" moved to main sheet`, 'success');
 }
 
+let demoteSheetIndex = null;
+
+function showMoveToSubSheetModal(sheetIndex) {
+    demoteSheetIndex = sheetIndex;
+    const select = document.getElementById('targetParentSheet');
+    select.innerHTML = '';
+    tableData.sheets.forEach((s, idx) => {
+        // Exclude self and sheets that are already sub-sheets of this sheet
+        if (idx === sheetIndex) return;
+        if (s.parentSheet === sheetIndex) return;
+        // Exclude sheets that are themselves sub-sheets (keep it one level)
+        if (s.parentSheet !== undefined && s.parentSheet !== null) return;
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = s.name;
+        select.appendChild(opt);
+    });
+    document.getElementById('moveToSubSheetModal').style.display = 'block';
+}
+
+function closeMoveToSubSheetModal() {
+    document.getElementById('moveToSubSheetModal').style.display = 'none';
+}
+
+async function demoteToSubSheet(parentIndex) {
+    const sheet = tableData.sheets[demoteSheetIndex];
+    if (!sheet) return;
+    sheet.parentSheet = parentIndex;
+    await saveData();
+    renderSidebar();
+    renderSubSheetBar();
+    showToast(`"${sheet.name}" moved to sub-sheet of "${tableData.sheets[parentIndex].name}"`, 'success');
+}
+
 function showSubSheetContextMenu(event, sheetIndex) {
     // Remove any existing context menu
     const existingMenu = document.getElementById('subsheetContextMenu');
@@ -7261,6 +7295,13 @@ document.getElementById('moveToCategoryForm').onsubmit = async function (e) {
     renderSidebar();
     closeMoveToCategoryModal();
     showToast('Sheet and sub-sheets moved to category', 'success');
+};
+
+document.getElementById('moveToSubSheetForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const parentIndex = parseInt(document.getElementById('targetParentSheet').value);
+    await demoteToSubSheet(parentIndex);
+    closeMoveToSubSheetModal();
 };
 
 function renderCategoryTabs() {
@@ -12819,6 +12860,10 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             <div class="context-menu-item" onclick="moveF1SheetToCategory(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>📁</span>
                 <span>Move to Category</span>
+            </div>
+            <div class="context-menu-item" onclick="showMoveToSubSheetModal(${sheetIndex}); hideF1SheetContextMenu();">
+                <span>⬇️</span>
+                <span>Move to Sub-sheet</span>
             </div>
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">

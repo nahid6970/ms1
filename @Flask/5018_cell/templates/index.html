@@ -439,6 +439,26 @@
         </div>
     </div>
 
+    <!-- Move to Sub-sheet Modal -->
+    <div id="moveToSubSheetModal" class="modal">
+        <div class="modal-content rename-modal">
+            <div class="modal-header">
+                <h2>Move Sheet to Sub-sheet</h2>
+                <span class="close" onclick="closeMoveToSubSheetModal()">&times;</span>
+            </div>
+            <form id="moveToSubSheetForm">
+                <div class="form-group">
+                    <label for="targetParentSheet">Select Parent Sheet</label>
+                    <select id="targetParentSheet" class="form-input"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeMoveToSubSheetModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Move</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content settings-modal">
