@@ -1,5 +1,38 @@
 # Recent Development Log
 
+## [2026-05-20 00:05] - F1 UI Compacting, Drag Indicator & Export Sheet Links
+
+**Session Duration:** 0.4 hours
+
+**What We Accomplished:**
+
+### 🎨 F1 Popup Compacting
+- Removed "Categories" label text; centered action buttons (➕ ⬆️ ⬇️) in the title bar.
+- Reduced category panel width (250→180px), item padding, font sizes, sheet item padding, sheet list gap, separator margins.
+
+### 🎯 F1 Drag & Drop Indicator
+- Replaced blue border highlight on hovered sheets with an orange glowing dot (`#ff9d00`) on the left/right edge of the target sheet.
+- Dragged sheet fades to 30% opacity; custom compact drag ghost shows just the sheet name.
+- Dot uses `drop-before`/`drop-after` CSS classes with padding shift so it doesn't overlap text.
+
+### ✅ Static Export Sheet Link Navigation
+- `[[I:index]]` and `[[S:name]]` links in static export were not navigating — the click handler was missing entirely.
+- Added `sheet-link` click handler to the document click listener in `export_static.py`.
+- Also synced `customIndex` lookup to both `[[I:]]` parse locations in `export_static.py` (regex `\d+` → `\w+`).
+
+**Files Modified:**
+- `static/style.css` — F1 compact styles, drop indicator, dragging opacity.
+- `static/script.js` — Drag indicator logic (classes instead of DOM element), custom drag ghost, clientX axis fix.
+- `templates/index.html` — Removed Categories label, centered buttons.
+- `export_static.py` — Added sheet-link click handler, synced customIndex `[[I:]]` parsing.
+
+**Current Status:**
+- ✅ F1 popup is more compact and readable.
+- ✅ Drag indicator shows correctly as an orange dot.
+- ✅ `[[I:]]` and `[[S:]]` links work in static export.
+
+---
+
 ## [2026-05-19 23:33] - Datetime-Based Custom Sheet Index
 
 **Session Duration:** 0.3 hours
