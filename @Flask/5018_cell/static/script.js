@@ -4796,6 +4796,12 @@ async function setSheetCustomIndex(sheetIdx) {
     }
 }
 
+async function setAndCopySheetIndex() {
+    await setSheetCustomIndex(currentSheet);
+    const idx = tableData.sheets[currentSheet]?.customIndex;
+    if (idx) navigator.clipboard.writeText(idx).catch(() => {});
+}
+
 function closeCellContextMenuOnClickOutside(event) {
     const menu = document.getElementById('cellContextMenu');
     if (menu && menu.classList.contains('show')) {
