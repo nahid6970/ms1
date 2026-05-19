@@ -4778,6 +4778,10 @@ function copySheetIndex() {
 }
 
 async function setSheetCustomIndex(sheetIdx) {
+    if (tableData.sheets[sheetIdx]?.customIndex) {
+        showToast(`Index already set: ${tableData.sheets[sheetIdx].customIndex}`, 'error');
+        return;
+    }
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const customIndex = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
@@ -4797,8 +4801,6 @@ async function setSheetCustomIndex(sheetIdx) {
 }
 
 async function setAndCopySheetIndex() {
-    const existing = tableData.sheets[currentSheet]?.customIndex;
-    if (existing && !confirm(`Index already set to ${existing}.\nOverwrite with a new one?`)) return;
     await setSheetCustomIndex(currentSheet);
     const idx = tableData.sheets[currentSheet]?.customIndex;
     if (idx) navigator.clipboard.writeText(idx).catch(() => {});
@@ -6659,22 +6661,6 @@ function renderSubSheetBar() {
         addBtn.style.setProperty('border-color', parentFg, 'important');
     }
 
-    // Add 🔑 button to set & copy custom index
-    const indexBtn = document.createElement('button');
-    indexBtn.className = 'subsheet-add-btn';
-    indexBtn.innerHTML = '🔑';
-    indexBtn.title = 'Set & copy sheet index';
-    if (parentFg) {
-        indexBtn.style.setProperty('color', parentFg, 'important');
-        indexBtn.style.setProperty('border-color', parentFg, 'important');
-    }
-    indexBtn.onclick = async () => {
-        await setSheetCustomIndex(parentIndex);
-        const idx = tableData.sheets[parentIndex]?.customIndex;
-        if (idx) navigator.clipboard.writeText(idx).catch(() => {});
-    };
-    subsheetTabs.appendChild(indexBtn);
-
     addBtn.onclick = () => addSubSheet(parentIndex);
     subsheetTabs.appendChild(addBtn);
 
@@ -6830,16 +6816,8 @@ function showSubSheetContextMenu(event, sheetIndex) {
         menu.remove();
     };
 
-    // Set Index option
-    const indexItem = document.createElement('div');
-    indexItem.className = 'context-menu-item';
-    indexItem.innerHTML = '<span>🔑</span><span>Set Index</span>';
-    indexItem.onclick = () => {
-        setSheetCustomIndex(sheetIndex);
-        menu.remove();
-    };
-
-    // Delete option
+    menu.appendChild(renameItem);
+    menu.appendChild(colorItem);
     const deleteItem = document.createElement('div');
     deleteItem.className = 'context-menu-item';
     deleteItem.innerHTML = '<span>🗑️</span><span>Delete</span>';
@@ -6847,10 +6825,6 @@ function showSubSheetContextMenu(event, sheetIndex) {
         deleteSheet(sheetIndex);
         menu.remove();
     };
-
-    menu.appendChild(renameItem);
-    menu.appendChild(colorItem);
-    menu.appendChild(indexItem);
 
     // "Move to Main Sheet" only for sub-sheets (those with a parentSheet)
     const sheet = tableData.sheets[sheetIndex];
@@ -12800,7 +12774,7 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
     const sheet = tableData.sheets[sheetIndex];
 
     if (isSubSheet) {
-        // Sub-sheet menu: Rename, Colors, Set Index, Delete
+        // Sub-sheet menu: Rename, Colors, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
@@ -12809,10 +12783,6 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>🎨</span>
                 <span>Set Colors</span>
-            </div>
-            <div class="context-menu-item" onclick="setSheetCustomIndex(${sheetIndex}); hideF1SheetContextMenu();">
-                <span>🔑</span>
-                <span>Set Index</span>
             </div>
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" onclick="deleteF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
@@ -12821,7 +12791,7 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             </div>
         `;
     } else {
-        // Parent sheet menu: Rename, Colors, Set Index, Move to Category, Delete
+        // Parent sheet menu: Rename, Colors, Move to Category, Delete
         menu.innerHTML = `
             <div class="context-menu-item" onclick="renameF1Sheet(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>✏️</span>
@@ -12830,10 +12800,6 @@ function showF1SheetContextMenu(event, sheetIndex, isSubSheet) {
             <div class="context-menu-item" onclick="showSheetColorPicker(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>🎨</span>
                 <span>Set Colors</span>
-            </div>
-            <div class="context-menu-item" onclick="setSheetCustomIndex(${sheetIndex}); hideF1SheetContextMenu();">
-                <span>🔑</span>
-                <span>Set Index</span>
             </div>
             <div class="context-menu-item" onclick="moveF1SheetToCategory(${sheetIndex}); hideF1SheetContextMenu();">
                 <span>📁</span>
@@ -14195,9 +14161,6 @@ function showTreeContextMenu(e, type, id) {
         menu.innerHTML = `
             <div class="context-menu-item" onclick="showRenameModal(${id})">
                 <span>✏️</span> Rename
-            </div>
-            <div class="context-menu-item" onclick="setSheetCustomIndex(${id})">
-                <span>🔑</span> Set Index
             </div>
             <div class="context-menu-item" onclick="showMoveToCategoryModal(${id})">
                 <span>📁</span> Move to Category
