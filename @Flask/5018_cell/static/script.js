@@ -2461,7 +2461,15 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
                 // Open external link
                 if (link.href && link.href !== '#' && !link.href.startsWith('javascript:')) {
-                    window.open(link.href, '_blank', 'noopener,noreferrer');
+                    if (link.href.startsWith('file:')) {
+                        fetch('/api/open-file', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ path: link.href })
+                        });
+                    } else {
+                        window.open(link.href, '_blank', 'noopener,noreferrer');
+                    }
                 }
                 return false;
             }

@@ -282,5 +282,17 @@ def save_settings():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/open-file', methods=['POST'])
+def open_file():
+    import subprocess, os
+    path = request.json.get('path', '')
+    # Strip file:/// prefix
+    if path.startswith('file:///'):
+        path = path[8:].replace('/', os.sep)
+    if os.path.exists(path):
+        os.startfile(path)
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'error': 'File not found'}), 404
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5018)
