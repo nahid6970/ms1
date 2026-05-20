@@ -3217,9 +3217,9 @@ function parseMarkdownInline(text, cellStyle = {}) {
     });
 
     // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
-    formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-    });
+    formatted = formatted.replace(/((?:https?|file):\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
 
     // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
     formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {
@@ -4004,9 +4004,9 @@ function oldParseMarkdownBody(lines, cellStyle = {}) {
         });
 
         // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
-        formatted = formatted.replace(/(https?:\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
-            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-        });
+        formatted = formatted.replace(/((?:https?|file):\/\/[^\s\[]+)\[(.+?)\]/g, (match, url, text) => {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            });
 
         // Custom colors: {fg:color;bg:color}text{/} or {fg:color}text{/} or {bg:color}text{/}
         formatted = formatted.replace(/\{((?:fg:[^;}\s]+)?(?:;)?(?:bg:[^;}\s]+)?)\}(.+?)\{\/\}/g, (match, styles, text) => {

@@ -2200,7 +2200,7 @@ def generate_static_html(data, custom_syntaxes):
                 // Remove old link markers but keep both URL and text: {link:url}text{/} -> url text
                 stripped = stripped.replace(/\\{link:([^\\}]*)\\}(.+?)\\{\\/\\}/g, '$1 $2');
                 // Remove new link markers but keep both URL and text: url[text] -> url text
-                stripped = stripped.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$1 $2');
+                stripped = stripped.replace(/((?:https?|file):\/\/[^\\s\\[]+)\\[(.+?)\\]/g, '$1 $2');
             }
 
             // Remove LaTeX math markers: $$text$$ -> text, $text$ -> text
@@ -2935,7 +2935,7 @@ def generate_static_html(data, custom_syntaxes):
                 });
 
                 // New Links: url[text] -> <a href="url">text</a> (supports nested markdown)
-                formatted = formatted.replace(/(https?:\/\/[^\\s\\[]+)\\[(.+?)\\]/g, (match, url, text) => {
+                formatted = formatted.replace(/((?:https?|file):\/\/[^\\s\\[]+)\\[(.+?)\\]/g, (match, url, text) => {
                     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
                 });
 
