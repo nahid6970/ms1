@@ -72,11 +72,11 @@
     "marker": "\u1d03\u1d03"
   },
   {
-    "marker": "\u2195\u2195",
-    "bgColor": "#FFFFFF",
+    "bgColor": "transparent",
     "fgColor": "#007AE6",
     "isBold": false,
     "isItalic": false,
-    "isUnderline": true
+    "isUnderline": true,
+    "marker": "\u2195\u2195"
   }
 ]
