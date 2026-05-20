@@ -148,6 +148,20 @@ def toggle_seen(movie_id):
         return jsonify({'success': True, 'seen': movie['seen']})
     return jsonify({'success': False}), 404
 
+@app.route('/api/unseen_count')
+def unseen_count():
+    movies = load_data()
+    count = sum(1 for m in movies if not m.get('seen', False))
+    return jsonify({'unseen_count': count})
+
+@app.route('/api/mark_all_seen', methods=['POST'])
+def mark_all_seen():
+    movies = load_data()
+    for m in movies:
+        m['seen'] = True
+    save_data(movies)
+    return jsonify({'success': True})
+
 @app.route('/sync_movies')
 def sync_movies():
     scan_and_add_missing_movies()
