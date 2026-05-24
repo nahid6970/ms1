@@ -304,12 +304,10 @@ function renderLinks() {
     linksList.querySelectorAll('.row-separator').forEach((separator) => separator.remove());
 
     const newLineItems = linksList.querySelectorAll('.link-item.new-line');
-    newLineItems.forEach((item, index) => {
-        if (index === 0) return;
-
+    newLineItems.forEach((item) => {
         const separator = document.createElement('div');
         separator.className = 'row-separator';
-        separator.style.top = `${item.offsetTop - 6}px`;
+        separator.style.top = `${Math.max(0, item.offsetTop - 6)}px`;
         linksList.appendChild(separator);
     });
 }
