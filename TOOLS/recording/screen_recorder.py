@@ -255,60 +255,111 @@ class AreaSelector(QWidget):
             p.drawText(self._rect.bottomRight() + QPoint(6, -4), label)
 
 
-# ── Window Picker Dialog ──────────────────────────────────────────────────────
-class WindowPicker(QDialog):
+# ── Window Picker Overlay ─────────────────────────────────────────────────────
+class WindowPicker(QWidget):
+    """Full-screen overlay: hover highlights windows, click selects one."""
     window_chosen = pyqtSignal(int)   # emits hwnd
+    cancelled = pyqtSignal()
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Pick a Window")
-        self.resize(480, 360)
-        self.setStyleSheet(THEME)
+    def __init__(self):
+        super().__init__()
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setCursor(Qt.CursorShape.CrossCursor)
+        self.setMouseTracking(True)
+        screen = QApplication.primaryScreen().geometry()
+        self.setGeometry(screen)
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Select a window to record:"))
+        self._hovered_hwnd = 0
+        self._hovered_rect = QRect()
+        self._hovered_title = ""
 
-        self.list = QListWidget()
-        layout.addWidget(self.list)
+        # Make overlay transparent to WindowFromPoint so we can see through it
+        self._poll = QTimer(self)
+        self._poll.timeout.connect(self._update_hover)
+        self._poll.start(50)
 
-        btn_row = QHBoxLayout()
-        ok = QPushButton("SELECT")
-        ok.setCursor(Qt.CursorShape.PointingHandCursor)
-        cancel = QPushButton("CANCEL")
-        cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_row.addWidget(ok)
-        btn_row.addWidget(cancel)
-        layout.addLayout(btn_row)
+    def showEvent(self, e):
+        super().showEvent(e)
+        # Apply WS_EX_TRANSPARENT so WindowFromPoint ignores this window
+        import ctypes
+        GWL_EXSTYLE = -20
+        WS_EX_TRANSPARENT = 0x00000020
+        WS_EX_LAYERED = 0x00080000
+        hwnd = int(self.winId())
+        style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_TRANSPARENT | WS_EX_LAYERED)
 
-        ok.clicked.connect(self._pick)
-        cancel.clicked.connect(self.reject)
-        self.list.itemDoubleClicked.connect(lambda _: self._pick())
+    def _update_hover(self):
+        import ctypes, ctypes.wintypes
+        from PyQt6.QtGui import QCursor
+        pos = QCursor.pos()
+        pt = ctypes.wintypes.POINT(pos.x(), pos.y())
+        hwnd = ctypes.windll.user32.WindowFromPoint(pt)
+        hwnd = ctypes.windll.user32.GetAncestor(hwnd, 2)  # GA_ROOT
+        if hwnd and hwnd != self._hovered_hwnd:
+            self._hovered_hwnd = hwnd
+            try:
+                r = win32gui.GetWindowRect(hwnd)
+                self._hovered_rect = QRect(r[0], r[1], r[2]-r[0], r[3]-r[1])
+                self._hovered_title = win32gui.GetWindowText(hwnd)
+            except Exception:
+                self._hovered_rect = QRect()
+                self._hovered_title = ""
+            self.update()
+        # detect left click via GetAsyncKeyState (since overlay is click-through)
+        if ctypes.windll.user32.GetAsyncKeyState(0x01) & 0x8000:
+            if self._hovered_hwnd:
+                self._poll.stop()
+                self.window_chosen.emit(self._hovered_hwnd)
+                self.close()
+        # ESC to cancel
+        if ctypes.windll.user32.GetAsyncKeyState(0x1B) & 0x8000:
+            self._poll.stop()
+            self.cancelled.emit()
+            self.close()
 
-        self._populate()
+    def mousePressEvent(self, e):
+        pass  # won't fire due to WS_EX_TRANSPARENT; handled in poll
 
-    def _populate(self):
-        self._windows = []
-        def cb(hwnd, _):
-            if win32gui.IsWindowVisible(hwnd):
-                title = win32gui.GetWindowText(hwnd)
-                if title and title.strip():
-                    self._windows.append((hwnd, title))
-        win32gui.EnumWindows(cb, None)
-        for hwnd, title in self._windows:
-            self.list.addItem(QListWidgetItem(f"[{hwnd}]  {title}"))
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key.Key_Escape:
+            self._poll.stop()
+            self.cancelled.emit()
+            self.close()
 
-    def _pick(self):
-        row = self.list.currentRow()
-        if row >= 0:
-            hwnd, _ = self._windows[row]
-            self.window_chosen.emit(hwnd)
-            self.accept()
+    def paintEvent(self, e):
+        p = QPainter(self)
+        p.fillRect(self.rect(), QColor(0, 0, 0, 100))
+        if not self._hovered_rect.isNull():
+            r = self._hovered_rect
+            # cut out window area
+            p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear)
+            p.fillRect(r, Qt.GlobalColor.transparent)
+            p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+            # cyan highlight border
+            p.setPen(QPen(QColor(CP_CYAN), 3))
+            p.drawRect(r)
+            # title label
+            p.setPen(QColor(CP_YELLOW))
+            p.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
+            label = f"  {self._hovered_title[:60]}  [{r.width()}×{r.height()}]"
+            p.fillRect(r.x(), r.y(), min(len(label)*8, r.width()), 22, QColor(0, 0, 0, 180))
+            p.drawText(r.x() + 4, r.y() + 15, label)
+        # instruction
+        p.setPen(QColor(CP_SUBTEXT))
+        p.setFont(QFont("Consolas", 10))
+        p.drawText(10, self.height() - 10, "Click to select window  |  ESC to cancel")
 
     @staticmethod
     def get_window_rect(hwnd) -> QRect:
         try:
-            rect = win32gui.GetWindowRect(hwnd)
-            return QRect(rect[0], rect[1], rect[2]-rect[0], rect[3]-rect[1])
+            r = win32gui.GetWindowRect(hwnd)
+            return QRect(r[0], r[1], r[2]-r[0], r[3]-r[1])
         except Exception:
             return QRect()
 
@@ -880,11 +931,17 @@ class MainWindow(QMainWindow):
         self._set_mode("area", rect)
 
     def _pick_window(self):
-        dlg = WindowPicker(self)
-        dlg.window_chosen.connect(self._on_window_chosen)
-        dlg.exec()
+        self.hide()
+        QTimer.singleShot(200, self._launch_window_picker)
+
+    def _launch_window_picker(self):
+        self._win_picker = WindowPicker()
+        self._win_picker.window_chosen.connect(self._on_window_chosen)
+        self._win_picker.cancelled.connect(self.show)
+        self._win_picker.show()
 
     def _on_window_chosen(self, hwnd: int):
+        self.show()
         rect = WindowPicker.get_window_rect(hwnd)
         title = win32gui.GetWindowText(hwnd)
         if rect.isValid():
