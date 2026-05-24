@@ -300,6 +300,18 @@ function renderLinks() {
 
     linksList.innerHTML = '';
     linksList.appendChild(fragment);
+
+    linksList.querySelectorAll('.row-separator').forEach((separator) => separator.remove());
+
+    const newLineItems = linksList.querySelectorAll('.link-item.new-line');
+    newLineItems.forEach((item, index) => {
+        if (index === 0) return;
+
+        const separator = document.createElement('div');
+        separator.className = 'row-separator';
+        separator.style.top = `${item.offsetTop - 6}px`;
+        linksList.appendChild(separator);
+    });
 }
 
 function triggerBrowserModal(editLink = null) {

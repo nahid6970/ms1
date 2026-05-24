@@ -126,6 +126,7 @@ header {
     grid-template-columns: repeat(4, 1fr); /* Default, will be overridden by JS */
     gap: 12px;
     overflow: visible;
+    position: relative;
 }
 
 .link-item {
@@ -268,6 +269,16 @@ header {
 
 .link-item.new-line {
     grid-column-start: 1;
+}
+
+.row-separator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(126, 212, 255, 0.22), rgba(126, 212, 255, 0.95), rgba(126, 212, 255, 0.22), transparent);
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* Loading Spinner */
