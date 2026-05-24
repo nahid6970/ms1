@@ -2,8 +2,8 @@
 import sys, os, json, time, threading, subprocess, tempfile
 import numpy as np
 import mss
-import pyaudio
 import win32gui, win32con
+import win32ui
 from dataclasses import dataclass, asdict, field
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -156,8 +156,8 @@ class Settings:
     fps: int = 30
     resolution: str = "Source"          # "Source" | "1920x1080" | "1280x720" | "854x480"
     video_bitrate: str = "8000k"
-    audio_source: str = "None"          # sounddevice device name
-    mic_source: str = "None"
+    audio_source: str = "None"          # desktop output device name (WASAPI loopback)
+    mic_source: str = "None"            # input device name
     audio_bitrate: str = "192k"
     capture_mode: str = "fullscreen"    # fullscreen | area | window
     show_cursor: bool = True
@@ -365,29 +365,20 @@ class WindowPicker(QWidget):
 
 
 # ── Audio helpers ─────────────────────────────────────────────────────────────
-def list_audio_devices():
-    """Return list of (index, name, is_input) for all pyaudio devices."""
-    pa = pyaudio.PyAudio()
-    devices = []
-    for i in range(pa.get_device_count()):
-        info = pa.get_device_info_by_index(i)
-        devices.append((i, info["name"], info["maxInputChannels"] > 0))
-    pa.terminate()
-    return devices
+def _query_devices():
+    try:
+        import sounddevice as sd
+        return sd.query_devices()
+    except Exception:
+        return []
 
-def get_loopback_devices():
-    """Return output devices that support loopback (WASAPI) for desktop audio."""
-    import sounddevice as sd
-    devs = []
-    for d in sd.query_devices():
-        if d["max_input_channels"] > 0 and "loopback" in d["name"].lower():
-            devs.append(d["name"])
-    return devs
+def get_desktop_audio_devices():
+    """Return output device names that can be captured with WASAPI loopback."""
+    return [d["name"] for d in _query_devices() if d.get("max_output_channels", 0) > 0]
 
 def get_input_devices():
     """Return mic/input device names via sounddevice."""
-    import sounddevice as sd
-    return [d["name"] for d in sd.query_devices() if d["max_input_channels"] > 0]
+    return [d["name"] for d in _query_devices() if d.get("max_input_channels", 0) > 0]
 
 
 # ── Recording Thread ──────────────────────────────────────────────────────────
@@ -396,10 +387,11 @@ class RecordingThread(QThread):
     finished_path = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
-    def __init__(self, settings: Settings, capture_rect: QRect):
+    def __init__(self, settings: Settings, capture_rect: QRect, capture_hwnd: int | None = None):
         super().__init__()
         self.settings = settings
         self.capture_rect = capture_rect   # screen coords
+        self.capture_hwnd = capture_hwnd
         self._stop_event = threading.Event()
         self._pause_event = threading.Event()
         self._pause_event.set()            # not paused initially
@@ -416,6 +408,7 @@ class RecordingThread(QThread):
     def run(self):
         s = self.settings
         r = self.capture_rect
+        mode = s.capture_mode
 
         # ── output path ──
         os.makedirs(s.save_dir, exist_ok=True)
@@ -424,7 +417,11 @@ class RecordingThread(QThread):
 
         # ── resolve output resolution ──
         if s.resolution == "Source":
-            out_w, out_h = r.width(), r.height()
+            if mode == "window" and self.capture_hwnd:
+                source_rect = self._window_rect(self.capture_hwnd) or r
+                out_w, out_h = source_rect.width(), source_rect.height()
+            else:
+                out_w, out_h = r.width(), r.height()
         else:
             out_w, out_h = map(int, s.resolution.split("x"))
         # ffmpeg wants even dimensions — round DOWN to nearest even
@@ -454,6 +451,11 @@ class RecordingThread(QThread):
         if has_audio or has_mic:
             # create a named pipe / temp file for audio PCM
             audio_pipe_r, audio_pipe_w = os.pipe()
+            try:
+                os.set_inheritable(audio_pipe_r, True)
+                os.set_inheritable(audio_pipe_w, True)
+            except AttributeError:
+                pass
             cmd += [
                 "-f", "s16le",
                 "-ar", "44100",
@@ -495,9 +497,15 @@ class RecordingThread(QThread):
                 )
                 audio_thread.start()
 
-            self._capture_loop(proc, r, s.fps, cap_w, cap_h)
+            self._capture_loop(proc, r, s.fps, cap_w, cap_h, mode, self.capture_hwnd)
 
-            proc.stdin.close()
+            self._stop_event.set()
+            if audio_thread:
+                audio_thread.join(timeout=2)
+            try:
+                proc.stdin.close()
+            except Exception:
+                pass
             proc.wait()
             log_file.close()
 
@@ -517,16 +525,19 @@ class RecordingThread(QThread):
         except Exception as ex:
             self.error_occurred.emit(str(ex))
 
-    def _capture_loop(self, proc, r: QRect, fps: int, cap_w: int, cap_h: int):
+    def _capture_loop(self, proc, r: QRect, fps: int, cap_w: int, cap_h: int, mode: str, hwnd: int | None):
         interval = 1.0 / fps
-        mon = {"top": r.y(), "left": r.x(), "width": cap_w, "height": cap_h}
         with mss.mss() as sct:
             while not self._stop_event.is_set():
                 t0 = time.perf_counter()
                 self._pause_event.wait()
                 if self._stop_event.is_set():
                     break
-                frame = np.array(sct.grab(mon))[:, :, :3]  # drop alpha → BGR
+                mon = self._capture_region(r, cap_w, cap_h, mode, hwnd)
+                try:
+                    frame = np.array(sct.grab(mon))[:, :, :3]  # drop alpha → BGR
+                except Exception:
+                    frame = np.zeros((cap_h, cap_w, 3), dtype=np.uint8)
                 try:
                     proc.stdin.write(frame.tobytes())
                 except BrokenPipeError:
@@ -537,58 +548,108 @@ class RecordingThread(QThread):
                     time.sleep(sleep_t)
                 self.status_update.emit(f"REC  {time.strftime('%H:%M:%S')}")
 
+    def _capture_region(self, base_rect: QRect, cap_w: int, cap_h: int, mode: str, hwnd: int | None) -> dict:
+        if mode != "window" or not hwnd:
+            return {"top": base_rect.y(), "left": base_rect.x(), "width": cap_w, "height": cap_h}
+
+        rect = self._window_rect(hwnd)
+        if rect and rect.isValid():
+            return {"top": rect.y(), "left": rect.x(), "width": cap_w, "height": cap_h}
+        return {"top": base_rect.y(), "left": base_rect.x(), "width": cap_w, "height": cap_h}
+
+    @staticmethod
+    def _window_rect(hwnd) -> QRect:
+        try:
+            r = win32gui.GetWindowRect(hwnd)
+            return QRect(r[0], r[1], r[2] - r[0], r[3] - r[1])
+        except Exception:
+            return QRect()
+
     def _audio_worker(self, pipe_w, s: Settings, has_audio: bool, has_mic: bool):
         """Capture desktop/mic audio and write raw PCM to pipe_w."""
         CHUNK = 1024
         RATE  = 44100
-        CHANS = 2
-        pa = pyaudio.PyAudio()
+        import sounddevice as sd
 
-        def find_device(name):
-            for i in range(pa.get_device_count()):
-                info = pa.get_device_info_by_index(i)
-                if info["name"] == name and info["maxInputChannels"] > 0:
-                    return i
-            return None
+        def normalize(block):
+            arr = np.asarray(block, dtype=np.int16)
+            if arr.ndim == 1:
+                arr = arr[:, None]
+            if arr.shape[1] == 1:
+                arr = np.repeat(arr, 2, axis=1)
+            elif arr.shape[1] > 2:
+                arr = arr[:, :2]
+            return arr
+
+        def find_device(name, want_output=False):
+            devices = sd.query_devices()
+            for i, info in enumerate(devices):
+                if info["name"] == name:
+                    if want_output and info.get("max_output_channels", 0) > 0:
+                        return i, info
+                    if not want_output and info.get("max_input_channels", 0) > 0:
+                        return i, info
+            return None, None
 
         streams = []
-        if has_audio:
-            idx = find_device(s.audio_source)
-            if idx is not None:
-                try:
-                    streams.append(pa.open(format=pyaudio.paInt16, channels=CHANS,
-                                           rate=RATE, input=True,
-                                           input_device_index=idx, frames_per_buffer=CHUNK))
-                except Exception: pass
-        if has_mic:
-            idx = find_device(s.mic_source)
-            if idx is not None:
-                try:
-                    streams.append(pa.open(format=pyaudio.paInt16, channels=CHANS,
-                                           rate=RATE, input=True,
-                                           input_device_index=idx, frames_per_buffer=CHUNK))
-                except Exception: pass
-
         try:
+            if has_audio:
+                idx, info = find_device(s.audio_source, want_output=True)
+                if idx is not None:
+                    ch = 2 if info.get("max_output_channels", 0) >= 2 else 1
+                    extra = sd.WasapiSettings(loopback=True)
+                    streams.append(sd.InputStream(
+                        device=idx,
+                        channels=ch,
+                        samplerate=RATE,
+                        blocksize=CHUNK,
+                        dtype="int16",
+                        extra_settings=extra,
+                    ))
+            if has_mic:
+                idx, info = find_device(s.mic_source, want_output=False)
+                if idx is not None:
+                    ch = 2 if info.get("max_input_channels", 0) >= 2 else 1
+                    streams.append(sd.InputStream(
+                        device=idx,
+                        channels=ch,
+                        samplerate=RATE,
+                        blocksize=CHUNK,
+                        dtype="int16",
+                    ))
+
+            for st in streams:
+                st.start()
+
             with open(pipe_w, "wb", closefd=True) as pipe:
                 while not self._stop_event.is_set():
                     self._pause_event.wait()
-                    chunks = []
+                    blocks = []
                     for st in streams:
                         try:
-                            chunks.append(np.frombuffer(st.read(CHUNK, exception_on_overflow=False), dtype=np.int16))
+                            data, _ = st.read(CHUNK)
+                            blocks.append(normalize(data).astype(np.int32))
                         except Exception:
-                            chunks.append(np.zeros(CHUNK * CHANS, dtype=np.int16))
-                    if chunks:
-                        mixed = np.mean(chunks, axis=0).astype(np.int16) if len(chunks) > 1 else chunks[0]
+                            blocks.append(np.zeros((CHUNK, 2), dtype=np.int32))
+                    if not blocks:
+                        blocks = [np.zeros((CHUNK, 2), dtype=np.int32)]
+                    mixed = np.clip(np.mean(blocks, axis=0), -32768, 32767).astype(np.int16)
+                    try:
                         pipe.write(mixed.tobytes())
+                    except BrokenPipeError:
+                        break
         except Exception:
             pass
         finally:
             for st in streams:
-                try: st.stop_stream(); st.close()
-                except Exception: pass
-            pa.terminate()
+                try:
+                    st.stop()
+                except Exception:
+                    pass
+                try:
+                    st.close()
+                except Exception:
+                    pass
 
 
 # ── Settings Dialog ───────────────────────────────────────────────────────────
@@ -690,17 +751,18 @@ class SettingsDialog(QDialog):
     def _tab_audio(self):
         w = QWidget(); f = QFormLayout(w)
 
-        devices = ["None"] + get_input_devices()
+        desktop_devices = ["None"] + get_desktop_audio_devices()
+        mic_devices = ["None"] + get_input_devices()
 
         self.c_audio = QComboBox()
-        self.c_audio.addItems(devices)
-        if self.s.audio_source in devices:
+        self.c_audio.addItems(desktop_devices)
+        if self.s.audio_source in desktop_devices:
             self.c_audio.setCurrentText(self.s.audio_source)
         f.addRow("Desktop audio:", self.c_audio)
 
         self.c_mic = QComboBox()
-        self.c_mic.addItems(devices)
-        if self.s.mic_source in devices:
+        self.c_mic.addItems(mic_devices)
+        if self.s.mic_source in mic_devices:
             self.c_mic.setCurrentText(self.s.mic_source)
         f.addRow("Microphone:", self.c_mic)
 
@@ -711,17 +773,27 @@ class SettingsDialog(QDialog):
 
         refresh = QPushButton("↺  Refresh devices")
         refresh.setCursor(Qt.CursorShape.PointingHandCursor)
-        refresh.clicked.connect(lambda: self._refresh_audio(devices))
+        refresh.clicked.connect(self._refresh_audio)
         f.addRow("", refresh)
 
         return w
 
-    def _refresh_audio(self, _):
-        devices = ["None"] + get_input_devices()
-        for cb in (self.c_audio, self.c_mic):
-            cur = cb.currentText()
-            cb.clear(); cb.addItems(devices)
-            if cur in devices: cb.setCurrentText(cur)
+    def _refresh_audio(self):
+        desktop_devices = ["None"] + get_desktop_audio_devices()
+        mic_devices = ["None"] + get_input_devices()
+
+        cur_audio = self.c_audio.currentText()
+        cur_mic = self.c_mic.currentText()
+
+        self.c_audio.clear()
+        self.c_audio.addItems(desktop_devices)
+        if cur_audio in desktop_devices:
+            self.c_audio.setCurrentText(cur_audio)
+
+        self.c_mic.clear()
+        self.c_mic.addItems(mic_devices)
+        if cur_mic in mic_devices:
+            self.c_mic.setCurrentText(cur_mic)
 
     # ── Capture tab ──
     def _tab_capture(self):
@@ -782,6 +854,7 @@ class MainWindow(QMainWindow):
         self.settings = load_settings()
         self._rec_thread: RecordingThread | None = None
         self._capture_rect: QRect | None = None
+        self._capture_hwnd: int | None = None
         self._elapsed = 0
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
@@ -910,6 +983,7 @@ class MainWindow(QMainWindow):
     # ── Mode helpers ──
     def _set_mode(self, mode: str, rect: QRect = None, label: str = ""):
         self.settings.capture_mode = mode
+        self._capture_hwnd = None
         if rect:
             self._capture_rect = rect
         elif mode == "fullscreen":
@@ -951,15 +1025,21 @@ class MainWindow(QMainWindow):
 
     def _on_window_chosen(self, hwnd: int):
         self.show()
+        self._capture_hwnd = hwnd
         rect = WindowPicker.get_window_rect(hwnd)
         title = win32gui.GetWindowText(hwnd)
         if rect.isValid():
             self._set_mode("window", rect, f"— {title[:40]}")
+            self._capture_hwnd = hwnd
         else:
             self.status.showMessage("Could not get window rect.")
 
     # ── Recording controls ──
     def _start_recording(self):
+        if self.settings.capture_mode == "window" and self._capture_hwnd is None:
+            self.status.showMessage("Pick a window before recording.")
+            return
+
         if self._capture_rect is None:
             screen = QApplication.primaryScreen().geometry()
             self._capture_rect = screen
@@ -979,7 +1059,7 @@ class MainWindow(QMainWindow):
 
     def _do_start(self):
         self._elapsed = 0
-        self._rec_thread = RecordingThread(self.settings, self._capture_rect)
+        self._rec_thread = RecordingThread(self.settings, self._capture_rect, self._capture_hwnd)
         self._rec_thread.status_update.connect(self.status.showMessage)
         self._rec_thread.finished_path.connect(self._on_finished)
         self._rec_thread.error_occurred.connect(self._on_error)
