@@ -464,6 +464,7 @@ class RecordingThread(QThread):
         cmd += [
             "-vf", vf,
             "-vcodec", s.encoder,
+            "-pix_fmt", "yuv420p",
             "-b:v", s.video_bitrate,
             "-preset", s.preset,
         ]
