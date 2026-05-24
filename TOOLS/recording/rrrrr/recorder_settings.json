@@ -1,6 +1,6 @@
 {
   "capture_mode": "window",
-  "selected_window_title": "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe",
+  "selected_window_title": "(21) Gemini Usage Limits Explained : Never Run Out Again - YouTube - Google Chrome",
   "selected_area": {
     "left": 0,
     "top": 0,
@@ -18,9 +18,11 @@
   "codec_preset": "veryfast",
   "countdown_seconds": 0,
   "record_system_audio": true,
-  "system_audio_device": "Speakers (High Definition Audio Device)",
+  "system_audio_device": "Digital Output (High Definition Audio Device)",
+  "system_audio_device_index": 21,
   "record_microphone": false,
-  "microphone_device": "Microsoft Sound Mapper - Input",
+  "microphone_device": "",
+  "microphone_device_index": -1,
   "audio_sample_rate": 48000,
   "audio_track_mode": "separate",
   "audio_bitrate_kbps": 192,

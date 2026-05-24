@@ -17,6 +17,7 @@ from typing import Optional
 
 import mss
 import pygetwindow as gw
+import soundcard as sc
 import sounddevice as sd
 from PyQt6.QtCore import QEvent, QPoint, QRect, QSize, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen
@@ -65,6 +66,8 @@ CP_SUBTEXT = "#808080"
 APP_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = APP_DIR / "recorder_settings.json"
 DEFAULT_OUTPUT_DIR = APP_DIR / "recordings"
+ERROR_LOG_DIR = APP_DIR / "logs"
+LAST_ERROR_PATH = ERROR_LOG_DIR / "last_error.txt"
 
 
 def build_stylesheet() -> str:
@@ -222,8 +225,25 @@ def save_json(path: Path, data: dict) -> None:
         json.dump(data, handle, indent=2)
 
 
+def write_text_file(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def append_text_file(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 def clamp(value: int, minimum: int, maximum: int) -> int:
     return max(minimum, min(maximum, value))
+
+
+def evenize(value: int) -> int:
+    value = max(2, int(value))
+    return value if value % 2 == 0 else value - 1
 
 
 def unique_output_path(folder: Path, prefix: str, extension: str) -> Path:
@@ -236,6 +256,11 @@ def unique_output_path(folder: Path, prefix: str, extension: str) -> Path:
         candidate = folder / f"{base}_{index}.{extension}"
         index += 1
     return candidate
+
+
+def format_exception_report(title: str, message: str) -> str:
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return f"[{stamp}] {title}\n{message}\n\n"
 
 
 def run_hidden(command: list[str]) -> subprocess.Popen:
@@ -275,8 +300,10 @@ class AppConfig:
     countdown_seconds: int = 0
     record_system_audio: bool = True
     system_audio_device: str = ""
+    system_audio_device_index: int = -1
     record_microphone: bool = True
     microphone_device: str = ""
+    microphone_device_index: int = -1
     audio_sample_rate: int = 48000
     audio_track_mode: str = "separate"
     audio_bitrate_kbps: int = 192
@@ -326,12 +353,15 @@ def get_window_by_title(title: str):
 
 def list_sounddevice_entries() -> tuple[list[dict], list[dict]]:
     devices = sd.query_devices()
+    hostapis = sd.query_hostapis()
     inputs = []
     outputs = []
     for index, device in enumerate(devices):
+        hostapi_name = hostapis[int(device["hostapi"])]["name"]
         entry = {
             "index": index,
             "name": device["name"],
+            "hostapi": hostapi_name,
             "max_input_channels": int(device["max_input_channels"]),
             "max_output_channels": int(device["max_output_channels"]),
             "default_samplerate": int(device["default_samplerate"]),
@@ -350,6 +380,15 @@ def find_device_index(devices: list[dict], name: str) -> Optional[int]:
         if entry["name"] == name:
             return entry["index"]
     return None
+
+
+def find_wasapi_output_devices() -> list[dict]:
+    _, outputs = list_sounddevice_entries()
+    return [device for device in outputs if device["hostapi"] == "Windows WASAPI"]
+
+
+def device_label(device: dict) -> str:
+    return f'{device["name"]} [{device["hostapi"]}]'
 
 
 class AreaSelector(QDialog):
@@ -405,16 +444,60 @@ class AreaSelector(QDialog):
             painter.drawRect(rect)
 
 
+class ErrorDialog(QDialog):
+    def __init__(self, title: str, message: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setMinimumSize(780, 460)
+        self._title = title
+        self._message = message.strip()
+
+        layout = QVBoxLayout(self)
+        heading = QLabel(title)
+        heading.setStyleSheet(f"color: {CP_RED}; font-size: 14pt; font-weight: bold;")
+        layout.addWidget(heading)
+
+        self.body = QTextEdit()
+        self.body.setReadOnly(True)
+        self.body.setPlainText(self._message)
+        layout.addWidget(self.body, 1)
+
+        buttons = QHBoxLayout()
+        self.save_button = QPushButton("Save Error")
+        self.save_button.clicked.connect(self.save_error)
+        self.open_log_button = QPushButton("Open Log Folder")
+        self.open_log_button.clicked.connect(self.open_log_folder)
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.accept)
+        buttons.addWidget(self.save_button)
+        buttons.addWidget(self.open_log_button)
+        buttons.addStretch(1)
+        buttons.addWidget(self.close_button)
+        layout.addLayout(buttons)
+
+    def save_error(self) -> None:
+        write_text_file(LAST_ERROR_PATH, f"{self._title}\n\n{self._message}\n")
+
+    def open_log_folder(self) -> None:
+        ERROR_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        try:
+            os.startfile(str(ERROR_LOG_DIR))  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
+
 class AudioCaptureJob:
     def __init__(
         self,
         *,
         device_name: str,
+        device_index: int,
         device_kind: str,
         sample_rate: int,
         output_path: Path,
     ):
         self.device_name = device_name
+        self.device_index = device_index
         self.device_kind = device_kind
         self.sample_rate = sample_rate
         self.output_path = output_path
@@ -426,15 +509,16 @@ class AudioCaptureJob:
         self.error: Optional[str] = None
 
     def start(self) -> None:
-        input_devices, output_devices = list_sounddevice_entries()
-        device_list = output_devices if self.device_kind == "system" else input_devices
-        device_index = find_device_index(device_list, self.device_name)
-        if device_index is None:
-            raise RuntimeError(f"Audio device not found: {self.device_name}")
+        if self.device_kind == "system":
+            self._start_loopback_capture()
+            return
+        self._start_microphone_capture()
 
-        device_info = sd.query_devices(device_index)
-        max_channels = int(device_info["max_output_channels"] if self.device_kind == "system" else device_info["max_input_channels"])
-        channels = 2 if max_channels >= 2 else 1
+    def _start_microphone_capture(self) -> None:
+        device_info = sd.query_devices(self.device_index)
+        if device_info["max_input_channels"] <= 0:
+            raise RuntimeError(f'Selected microphone device is not an input device: {device_info["name"]}')
+        channels = max(1, min(2, int(device_info["max_input_channels"])))
         sample_rate = self.sample_rate or int(device_info["default_samplerate"]) or 48000
 
         self.wave_file = wave.open(str(self.output_path), "wb")
@@ -442,77 +526,87 @@ class AudioCaptureJob:
         self.wave_file.setsampwidth(2)
         self.wave_file.setframerate(sample_rate)
 
-        extra_settings = None
-        if self.device_kind == "system" and os.name == "nt":
-            try:
-                extra_settings = sd.WasapiSettings(loopback=True)
-            except Exception:
-                extra_settings = None
-
-        self.stream = sd.RawInputStream(
-            device=device_index,
+        self.stream = sd.InputStream(
+            device=self.device_index,
             samplerate=sample_rate,
             channels=channels,
             dtype="int16",
             callback=self._callback,
-            extra_settings=extra_settings,
         )
         self.writer_thread = threading.Thread(target=self._writer_loop, daemon=True)
         self.writer_thread.start()
         try:
             self.stream.start()
         except Exception:
+            self._cleanup_stream_error()
+            raise
+
+    def _start_loopback_capture(self) -> None:
+        loopback_mic = None
+        if self.device_name:
             try:
-                if sample_rate != int(device_info["default_samplerate"]):
-                    try:
-                        self.stream.close()
-                    except Exception:
-                        pass
-                    try:
-                        self.wave_file.close()
-                    except Exception:
-                        pass
-                    self.wave_file = wave.open(str(self.output_path), "wb")
-                    self.wave_file.setnchannels(channels)
-                    self.wave_file.setsampwidth(2)
-                    fallback_rate = int(device_info["default_samplerate"]) or 48000
-                    self.wave_file.setframerate(fallback_rate)
-                    self.stream = sd.RawInputStream(
-                        device=device_index,
-                        samplerate=fallback_rate,
-                        channels=channels,
-                        dtype="int16",
-                        callback=self._callback,
-                        extra_settings=extra_settings,
-                    )
-                    self.stream.start()
-                else:
-                    raise
+                loopback_mic = sc.get_microphone(self.device_name, include_loopback=True)
             except Exception:
-                self.stop_event.set()
-                try:
-                    if self.stream:
-                        self.stream.close()
-                except Exception:
-                    pass
-                try:
-                    if self.wave_file:
-                        self.wave_file.close()
-                except Exception:
-                    pass
-                try:
-                    self.queue.put_nowait(None)
-                except Exception:
-                    pass
-                if self.writer_thread:
-                    self.writer_thread.join(timeout=1.0)
-                raise
+                loopback_mic = None
+        if loopback_mic is None:
+            try:
+                loopback_mic = sc.get_microphone(sc.default_speaker().name, include_loopback=True)
+            except Exception:
+                loopback_mic = None
+        if loopback_mic is None:
+            raise RuntimeError(f"Loopback speaker not found: {self.device_name or 'default speaker'}")
+        channels = max(1, min(2, int(getattr(loopback_mic, "channels", 2) or 2)))
+        sample_rate = self.sample_rate or 48000
+
+        self.wave_file = wave.open(str(self.output_path), "wb")
+        self.wave_file.setnchannels(channels)
+        self.wave_file.setsampwidth(2)
+        self.wave_file.setframerate(sample_rate)
+        self.writer_thread = threading.Thread(
+            target=self._loopback_capture_loop,
+            args=(loopback_mic, sample_rate, channels),
+            daemon=True,
+        )
+        self.writer_thread.start()
+
+    def _loopback_capture_loop(self, loopback_mic, sample_rate: int, channels: int) -> None:  # noqa: ANN001
+        blocksize = max(1024, sample_rate // 20)
+        try:
+            with loopback_mic.recorder(samplerate=sample_rate, channels=channels) as recorder:
+                while not self.stop_event.is_set():
+                    data = recorder.record(blocksize)
+                    if data is None:
+                        continue
+                    self.wave_file.writeframes(data.astype("int16", copy=False).tobytes())
+        except Exception as exc:
+            self.error = str(exc)
+        finally:
+            self.stop_event.set()
+
+    def _cleanup_stream_error(self) -> None:
+        self.stop_event.set()
+        try:
+            if self.stream:
+                self.stream.close()
+        except Exception:
+            pass
+        try:
+            if self.wave_file:
+                self.wave_file.close()
+        except Exception:
+            pass
+        try:
+            self.queue.put_nowait(None)
+        except Exception:
+            pass
+        if self.writer_thread:
+            self.writer_thread.join(timeout=1.0)
 
     def _callback(self, indata, frames, time_info, status):  # noqa: ANN001
         if status:
             self.error = str(status)
         try:
-            self.queue.put_nowait(bytes(indata))
+            self.queue.put_nowait(indata.tobytes())
         except queue.Full:
             self.error = self.error or "Audio buffer overflow"
 
@@ -595,9 +689,11 @@ class RecorderThread(QThread):
     def _capture_dimensions(self, rect: QRect) -> tuple[int, int]:
         if self.config.use_source_resolution:
             return rect.width(), rect.height()
-        return max(2, self.config.target_width), max(2, self.config.target_height)
+        return evenize(self.config.target_width), evenize(self.config.target_height)
 
     def _build_video_command(self, source_w: int, source_h: int, output_path: Path) -> list[str]:
+        output_w = evenize(source_w if self.config.use_source_resolution else self.config.target_width)
+        output_h = evenize(source_h if self.config.use_source_resolution else self.config.target_height)
         command = [
             self._ffmpeg_path(),
             "-y",
@@ -614,13 +710,12 @@ class RecorderThread(QThread):
             "-i",
             "pipe:0",
         ]
-        if not self.config.use_source_resolution:
-            command.extend(
-                [
-                    "-vf",
-                    f"scale={self.config.target_width}:{self.config.target_height}:flags=lanczos",
-                ]
-            )
+        command.extend(
+            [
+                "-vf",
+                f"scale={output_w}:{output_h}:flags=lanczos",
+            ]
+        )
         command.extend(
             [
                 "-c:v",
@@ -701,7 +796,6 @@ class RecorderThread(QThread):
         video_proc: Optional[subprocess.Popen] = None
         try:
             rect = self._build_capture_rect()
-            source_w, source_h = self._capture_dimensions(rect)
             if self.config.countdown_seconds > 0:
                 self.status.emit(f"Starting in {self.config.countdown_seconds} seconds...")
                 for remaining in range(self.config.countdown_seconds, 0, -1):
@@ -710,16 +804,12 @@ class RecorderThread(QThread):
                     self.status.emit(f"Starting in {remaining} seconds...")
                     time.sleep(1)
 
-            self.status.emit("Recording...")
-            video_proc = run_hidden(self._build_video_command(source_w, source_h, video_temp))
-            if video_proc.stdin is None:
-                raise RuntimeError("Unable to open ffmpeg video input pipe")
-
             input_devices, output_devices = list_sounddevice_entries()
-            if self.config.record_system_audio and self.config.system_audio_device:
+            if self.config.record_system_audio and self.config.system_audio_device_index >= 0:
                 system_path = self._temp_dir / "system_audio.wav"
                 job = AudioCaptureJob(
                     device_name=self.config.system_audio_device,
+                    device_index=self.config.system_audio_device_index,
                     device_kind="system",
                     sample_rate=self.config.audio_sample_rate,
                     output_path=system_path,
@@ -728,10 +818,11 @@ class RecorderThread(QThread):
                 audio_jobs.append(job)
                 audio_paths.append(system_path)
 
-            if self.config.record_microphone and self.config.microphone_device:
+            if self.config.record_microphone and self.config.microphone_device_index >= 0:
                 mic_path = self._temp_dir / "microphone.wav"
                 job = AudioCaptureJob(
                     device_name=self.config.microphone_device,
+                    device_index=self.config.microphone_device_index,
                     device_kind="microphone",
                     sample_rate=self.config.audio_sample_rate,
                     output_path=mic_path,
@@ -746,14 +837,32 @@ class RecorderThread(QThread):
                 "width": rect.width(),
                 "height": rect.height(),
             }
-            frame_interval = 1.0 / max(1, self.config.fps)
-            next_tick = time.perf_counter()
-            frames = 0
-
             with mss.mss() as sct:
+                first_shot = sct.grab(bbox)
+                source_w, source_h = int(first_shot.width), int(first_shot.height)
+                video_proc = run_hidden(self._build_video_command(source_w, source_h, video_temp))
+                if video_proc.stdin is None:
+                    raise RuntimeError("Unable to open ffmpeg video input pipe")
+                self.status.emit("Recording...")
+                video_proc.stdin.write(first_shot.bgra)
+                frame_interval = 1.0 / max(1, self.config.fps)
+                next_tick = time.perf_counter() + frame_interval
+                frames = 1
                 while not self._stop_requested.is_set():
                     shot = sct.grab(bbox)
-                    video_proc.stdin.write(shot.bgra)
+                    try:
+                        video_proc.stdin.write(shot.bgra)
+                    except BrokenPipeError:
+                        stderr = b""
+                        try:
+                            if video_proc.stderr is not None:
+                                stderr = video_proc.stderr.read() or b""
+                        except Exception:
+                            pass
+                        raise RuntimeError(
+                            "ffmpeg closed the video pipe while recording window capture.\n"
+                            + (stderr.decode("utf-8", errors="ignore").strip() or "No ffmpeg stderr available.")
+                        )
                     frames += 1
                     next_tick += frame_interval
                     sleep_for = next_tick - time.perf_counter()
@@ -762,14 +871,15 @@ class RecorderThread(QThread):
                     else:
                         next_tick = time.perf_counter()
 
-            try:
-                video_proc.stdin.close()
-            except Exception:
-                pass
-            stderr = video_proc.communicate()[1]
-            if video_proc.returncode not in (0, None):
-                err_text = (stderr or b"").decode("utf-8", errors="ignore").strip()
-                raise RuntimeError(err_text or "Video encoder failed")
+            if video_proc is not None and video_proc.stdin is not None:
+                try:
+                    video_proc.stdin.close()
+                except Exception:
+                    pass
+                stderr = video_proc.communicate()[1]
+                if video_proc.returncode not in (0, None):
+                    err_text = (stderr or b"").decode("utf-8", errors="ignore").strip()
+                    raise RuntimeError(err_text or "Video encoder failed")
 
             for job in audio_jobs:
                 job.stop()
@@ -803,6 +913,13 @@ class RecorderThread(QThread):
                         video_proc.kill()
                     except Exception:
                         pass
+                try:
+                    if video_proc.stderr is not None:
+                        err_text = video_proc.stderr.read().decode("utf-8", errors="ignore").strip()
+                        if err_text:
+                            exc = RuntimeError(f"{exc}\n{err_text}")
+                except Exception:
+                    pass
             for job in audio_jobs:
                 try:
                     job.stop()
@@ -953,7 +1070,7 @@ class SettingsDialog(QDialog):
     def _fill_audio_combo(self, combo: QComboBox, entries: list[dict]) -> None:
         combo.clear()
         for device in entries:
-            combo.addItem(device["name"])
+            combo.addItem(device_label(device), device["index"])
 
     def _browse_save_folder(self) -> None:
         folder = QFileDialog.getExistingDirectory(self, "Choose save folder", self.save_folder_edit.text() or str(DEFAULT_OUTPUT_DIR))
@@ -977,16 +1094,24 @@ class SettingsDialog(QDialog):
 
         self.record_system_checkbox.setChecked(self.config.record_system_audio)
         self.record_microphone_checkbox.setChecked(self.config.record_microphone)
-        self._set_combo_text(self.system_device_combo, self.config.system_audio_device)
-        self._set_combo_text(self.microphone_combo, self.config.microphone_device)
+        self._set_combo_value(self.system_device_combo, self.config.system_audio_device_index, self.config.system_audio_device, self.output_devices)
+        self._set_combo_value(self.microphone_combo, self.config.microphone_device_index, self.config.microphone_device, self.input_devices)
         self.audio_mode_combo.setCurrentText(self.config.audio_track_mode)
         self.audio_sample_rate_spin.setValue(self.config.audio_sample_rate)
         self.audio_bitrate_spin.setValue(self.config.audio_bitrate_kbps)
 
-    def _set_combo_text(self, combo: QComboBox, value: str) -> None:
-        index = combo.findText(value)
+    def _set_combo_value(self, combo: QComboBox, index_value: int, legacy_name: str, source_devices: list[dict]) -> None:
+        index = combo.findData(index_value)
         if index >= 0:
             combo.setCurrentIndex(index)
+            return
+        if legacy_name:
+            for device in source_devices:
+                if device["name"] == legacy_name:
+                    combo_index = combo.findData(device["index"])
+                    if combo_index >= 0:
+                        combo.setCurrentIndex(combo_index)
+                        return
 
     def accept(self) -> None:
         self.config.save_folder = self.save_folder_edit.text().strip() or str(DEFAULT_OUTPUT_DIR)
@@ -1003,12 +1128,20 @@ class SettingsDialog(QDialog):
         self.config.codec_preset = self.codec_preset_combo.currentText()
         self.config.record_system_audio = self.record_system_checkbox.isChecked()
         self.config.record_microphone = self.record_microphone_checkbox.isChecked()
-        self.config.system_audio_device = self.system_device_combo.currentText()
-        self.config.microphone_device = self.microphone_combo.currentText()
+        self.config.system_audio_device_index = int(self.system_device_combo.currentData() or -1)
+        self.config.microphone_device_index = int(self.microphone_combo.currentData() or -1)
+        self.config.system_audio_device = self._device_name_by_index(self.output_devices, self.config.system_audio_device_index)
+        self.config.microphone_device = self._device_name_by_index(self.input_devices, self.config.microphone_device_index)
         self.config.audio_track_mode = self.audio_mode_combo.currentText()
         self.config.audio_sample_rate = self.audio_sample_rate_spin.value()
         self.config.audio_bitrate_kbps = self.audio_bitrate_spin.value()
         super().accept()
+
+    def _device_name_by_index(self, devices: list[dict], index_value: int) -> str:
+        for device in devices:
+            if device["index"] == index_value:
+                return device["name"]
+        return ""
 
 
 class MainWindow(QMainWindow):
@@ -1030,6 +1163,7 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._tick_duration)
         self.timer.start(1000)
+        self.last_error_message: str = ""
 
     def _apply_theme(self) -> None:
         self.setStyleSheet(build_stylesheet())
@@ -1150,6 +1284,16 @@ class MainWindow(QMainWindow):
         self._refresh_details()
 
     def _refresh_details(self) -> None:
+        system_label = self._lookup_audio_label(
+            self.config.system_audio_device_index,
+            self.output_devices,
+            self.config.system_audio_device,
+        )
+        mic_label = self._lookup_audio_label(
+            self.config.microphone_device_index,
+            self.input_devices,
+            self.config.microphone_device,
+        )
         lines = [
             f"Mode: {self.config.capture_mode}",
             f"Target: {self.config.selected_window_title or ('Area' if self.config.capture_mode == 'area' else 'Screen')}",
@@ -1157,11 +1301,23 @@ class MainWindow(QMainWindow):
             f"Prefix: {self.config.filename_prefix}",
             f"Video: {self.config.fps} fps, {self.config.video_bitrate_kbps} kbps, {self.config.container_format}, preset={self.config.codec_preset}",
             f"Resolution: {'source' if self.config.use_source_resolution else f'{self.config.target_width}x{self.config.target_height}'}",
-            f"System audio: {'on' if self.config.record_system_audio else 'off'} ({self.config.system_audio_device or 'default'})",
-            f"Microphone: {'on' if self.config.record_microphone else 'off'} ({self.config.microphone_device or 'default'})",
+            f"System audio: {'on' if self.config.record_system_audio else 'off'} ({system_label})",
+            f"Microphone: {'on' if self.config.record_microphone else 'off'} ({mic_label})",
             f"Audio mode: {self.config.audio_track_mode}, {self.config.audio_sample_rate} Hz, {self.config.audio_bitrate_kbps} kbps",
         ]
         self.details_text.setPlainText("\n".join(lines))
+
+    def _lookup_audio_label(self, device_index: int, devices: list[dict], legacy_name: str) -> str:
+        for device in devices:
+            if device["index"] == device_index:
+                return device_label(device)
+        return legacy_name or "default"
+
+    def _lookup_device_name(self, device_index: int, devices: list[dict], legacy_name: str) -> str:
+        for device in devices:
+            if device["index"] == device_index:
+                return device["name"]
+        return legacy_name or ""
 
     def _update_status(self, text: str) -> None:
         self.status_label.setText(text)
@@ -1218,10 +1374,34 @@ class MainWindow(QMainWindow):
     def refresh_devices(self) -> None:
         try:
             self.input_devices, self.output_devices = list_sounddevice_entries()
-            if not self.config.system_audio_device and self.output_devices:
-                self.config.system_audio_device = self.output_devices[0]["name"]
-            if not self.config.microphone_device and self.input_devices:
-                self.config.microphone_device = self.input_devices[0]["name"]
+            self.output_devices = [device for device in self.output_devices if device["hostapi"] == "Windows WASAPI"] or self.output_devices
+
+            if self.config.system_audio_device_index < 0 and self.output_devices:
+                for device in self.output_devices:
+                    if device["name"] == self.config.system_audio_device:
+                        self.config.system_audio_device_index = device["index"]
+                        break
+                if self.config.system_audio_device_index < 0:
+                    self.config.system_audio_device_index = self.output_devices[0]["index"]
+
+            if self.config.microphone_device_index < 0 and self.input_devices:
+                for device in self.input_devices:
+                    if device["name"] == self.config.microphone_device:
+                        self.config.microphone_device_index = device["index"]
+                        break
+                if self.config.microphone_device_index < 0:
+                    self.config.microphone_device_index = self.input_devices[0]["index"]
+
+            if self.config.system_audio_device_index >= 0:
+                for device in self.output_devices:
+                    if device["index"] == self.config.system_audio_device_index:
+                        self.config.system_audio_device = device["name"]
+                        break
+            if self.config.microphone_device_index >= 0:
+                for device in self.input_devices:
+                    if device["index"] == self.config.microphone_device_index:
+                        self.config.microphone_device = device["name"]
+                        break
             self.config.save()
         except Exception as exc:
             QMessageBox.warning(self, "Audio Devices", f"Could not list audio devices:\n{exc}")
@@ -1302,6 +1482,16 @@ class MainWindow(QMainWindow):
             self.config.selected_window_title = self.window_combo.currentText()
             self.config.capture_mode = self.mode_combo.currentText()
             self.config.selected_area = qrect_to_dict(self.capture_rect)
+            self.config.system_audio_device = self._lookup_device_name(
+                self.config.system_audio_device_index,
+                self.output_devices,
+                self.config.system_audio_device,
+            )
+            self.config.microphone_device = self._lookup_device_name(
+                self.config.microphone_device_index,
+                self.input_devices,
+                self.config.microphone_device,
+            )
             self.config.save()
             capture_rect = self._resolve_capture_rect()
         except Exception as exc:
@@ -1339,8 +1529,14 @@ class MainWindow(QMainWindow):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(False)
         self.recorder = None
+        self.last_error_message = message
         self._update_status(f"Error: {message}")
-        QMessageBox.critical(self, "Recording Failed", message)
+        report = format_exception_report("Recording Failed", message)
+        write_text_file(LAST_ERROR_PATH, report)
+        append_text_file(ERROR_LOG_DIR / "history.log", report)
+        dialog = ErrorDialog("Recording Failed", message, self)
+        dialog.save_error()
+        dialog.exec()
 
     def _recording_finished(self, output_path: str) -> None:
         self.recording_started_at = None

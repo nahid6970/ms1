@@ -1,0 +1,12 @@
+Recording Failed
+
+ffmpeg closed the video pipe while recording window capture.
+[libx264 @ 000001c4915d7280] width not divisible by 2 (957x987)
+[vost#0:0/libx264 @ 000001c4915d7000] Error while opening encoder - maybe incorrect parameters such as bit_rate, rate, width or height.
+[vf#0:0 @ 000001c4915d8300] Error sending frames to consumers: Generic error in an external library
+[vf#0:0 @ 000001c4915d8300] Task finished with error code: -542398533 (Generic error in an external library)
+[vf#0:0 @ 000001c4915d8300] Terminating thread with return code -542398533 (Generic error in an external library)
+[vost#0:0/libx264 @ 000001c4915d7000] Could not open encoder before EOF
+[vost#0:0/libx264 @ 000001c4915d7000] Task finished with error code: -22 (Invalid argument)
+[vost#0:0/libx264 @ 000001c4915d7000] Terminating thread with return code -22 (Invalid argument)
+[out#0/matroska @ 000001c4915c4b40] Nothing was written into output file, because at least one of its streams received no packets.
