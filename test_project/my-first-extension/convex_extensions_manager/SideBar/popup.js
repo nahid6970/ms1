@@ -7,6 +7,14 @@ let globalSettings = {
     borderOpacity: 100
 };
 
+const DEFAULT_SETTINGS = {
+    itemsPerRow: 4,
+    extraPadding: 20,
+    iconSize: 28,
+    borderRadius: 8,
+    borderOpacity: 100
+};
+
 const linksList = document.getElementById('links-list');
 const emptyState = document.getElementById('empty-state');
 const linksContainer = document.getElementById('links-container');
@@ -25,31 +33,77 @@ let currentRightClickedLinkId = null;
 
 // Initial Load
 const CACHE_KEYS = ['sidebar_links', 'itemsPerRow', 'extraPadding', 'iconSize', 'borderRadius', 'borderOpacity'];
+let lastRenderedSignature = '';
 
-function applyResult(result) {
-    globalSettings = {
-        itemsPerRow: result.itemsPerRow || 4,
-        extraPadding: result.extraPadding || 20,
-        iconSize: result.iconSize || 28,
-        borderRadius: result.borderRadius !== undefined ? result.borderRadius : 8,
-        borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : 100
+function getStorage(area, keys) {
+    return new Promise((resolve) => {
+        chrome.storage[area].get(keys, (result) => resolve(result || {}));
+    });
+}
+
+function setStorage(area, values) {
+    return new Promise((resolve) => {
+        chrome.storage[area].set(values, () => resolve());
+    });
+}
+
+function normalizeState(result = {}) {
+    return {
+        itemsPerRow: result.itemsPerRow !== undefined ? result.itemsPerRow : DEFAULT_SETTINGS.itemsPerRow,
+        extraPadding: result.extraPadding !== undefined ? result.extraPadding : DEFAULT_SETTINGS.extraPadding,
+        iconSize: result.iconSize !== undefined ? result.iconSize : DEFAULT_SETTINGS.iconSize,
+        borderRadius: result.borderRadius !== undefined ? result.borderRadius : DEFAULT_SETTINGS.borderRadius,
+        borderOpacity: result.borderOpacity !== undefined ? result.borderOpacity : DEFAULT_SETTINGS.borderOpacity,
+        sidebar_links: Array.isArray(result.sidebar_links) ? result.sidebar_links : []
     };
-    if (result.sidebar_links && result.sidebar_links.length > 0) {
-        links = result.sidebar_links;
-        applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
-        renderLinks();
-    } else {
-        showEmptyState(true);
+}
+
+function stateSignature(state) {
+    return JSON.stringify([
+        state.itemsPerRow,
+        state.extraPadding,
+        state.iconSize,
+        state.borderRadius,
+        state.borderOpacity,
+        state.sidebar_links
+    ]);
+}
+
+function applyResult(result, forceRender = false) {
+    const state = normalizeState(result);
+    const signature = stateSignature(state);
+
+    if (!forceRender && signature === lastRenderedSignature) {
+        return;
     }
+
+    lastRenderedSignature = signature;
+    globalSettings = {
+        itemsPerRow: state.itemsPerRow,
+        extraPadding: state.extraPadding,
+        iconSize: state.iconSize,
+        borderRadius: state.borderRadius,
+        borderOpacity: state.borderOpacity
+    };
+    links = state.sidebar_links;
+    applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
+    renderLinks();
 }
 
 function init() {
-    chrome.storage.session.get(CACHE_KEYS, (cached) => {
-        if (cached.sidebar_links) applyResult(cached);
-        chrome.storage.local.get(CACHE_KEYS, (result) => {
-            chrome.storage.session.set(result);
-            if (!cached.sidebar_links) applyResult(result);
-        });
+    const sessionPromise = getStorage('session', CACHE_KEYS);
+    const localPromise = getStorage('local', CACHE_KEYS);
+
+    sessionPromise.then((cached) => {
+        if (Object.keys(cached).length > 0) {
+            applyResult(cached, true);
+        }
+    });
+
+    localPromise.then(async (result) => {
+        const normalized = normalizeState(result);
+        await setStorage('session', normalized);
+        applyResult(normalized);
     });
 
     // Close context menu on any click
@@ -140,6 +194,15 @@ function showEmptyState(show) {
 }
 
 function renderLinks() {
+    lastRenderedSignature = stateSignature({
+        itemsPerRow: globalSettings.itemsPerRow,
+        extraPadding: globalSettings.extraPadding,
+        iconSize: globalSettings.iconSize,
+        borderRadius: globalSettings.borderRadius,
+        borderOpacity: globalSettings.borderOpacity,
+        sidebar_links: links
+    });
+
     if (links.length === 0) {
         showEmptyState(true);
         return;
@@ -267,8 +330,14 @@ function triggerSettingsModal() {
 }
 
 function saveLinks() {
-    chrome.storage.local.set({ sidebar_links: links }, () => {
-        renderLinks();
+    const state = {
+        sidebar_links: links
+    };
+
+    chrome.storage.local.set(state, () => {
+        chrome.storage.session.set(state, () => {
+            // `chrome.storage.onChanged` handles the visible refresh.
+        });
     });
 }
 
@@ -346,6 +415,9 @@ if (loadFromConvexBtn) {
 
                     applyGridLayout(globalSettings.itemsPerRow, globalSettings.extraPadding);
                     renderLinks();
+                    chrome.storage.session.clear(() => {
+                        chrome.storage.session.set(response.data);
+                    });
 
                     setTimeout(() => {
                         loadFromConvexBtn.innerHTML = originalContent;

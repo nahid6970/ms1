@@ -7,6 +7,10 @@ const EXTENSION_NAME = 'QuickSidebarPro';
 
 const client = new ConvexHttpClient(CONVEX_URL);
 
+function syncSessionStorage(values) {
+  chrome.storage.session.set(values, () => void chrome.runtime.lastError);
+}
+
 // Send data to Convex
 async function sendDataToConvex(data) {
   try {
@@ -179,6 +183,7 @@ async function addUrlToSidebar(url, title) {
 
     links.push(newLink);
     chrome.storage.local.set({ sidebar_links: links }, () => {
+      syncSessionStorage({ sidebar_links: links });
       console.log('Added to sidebar:', newLink);
     });
   });

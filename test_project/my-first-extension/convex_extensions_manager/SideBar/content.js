@@ -1,6 +1,10 @@
 (function () {
   if (document.getElementById('qs-modal-overlay')) return;
 
+  const syncSessionStorage = (values) => {
+    chrome.storage.session.set(values, () => void chrome.runtime.lastError);
+  };
+
   const overlay = document.createElement('div');
   overlay.id = 'qs-modal-overlay';
   overlay.innerHTML = `
@@ -175,6 +179,7 @@
       borderOpacity: parseInt(opacitySlider.value)
     };
     chrome.storage.local.set(settings, () => {
+      syncSessionStorage(settings);
       settingsOverlay.classList.remove('visible');
       chrome.runtime.sendMessage({ action: 'settings_updated' });
     });
@@ -215,6 +220,7 @@
       }
 
       chrome.storage.local.set({ sidebar_links: links }, () => {
+        syncSessionStorage({ sidebar_links: links });
         overlay.classList.remove('visible');
       });
     });
