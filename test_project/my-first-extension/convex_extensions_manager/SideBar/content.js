@@ -30,14 +30,14 @@
         </div>
         <div class="qs-style-field">
           <label class="qs-checkbox">
-            <input type="checkbox" id="qs-solid-input">
+            <input type="checkbox" id="qs-solid-input" class="qs-checkbox-input">
             <span class="qs-check-mark"></span>
             Solid
           </label>
         </div>
         <div class="qs-style-field">
           <label class="qs-checkbox">
-            <input type="checkbox" id="qs-newline-input">
+            <input type="checkbox" id="qs-newline-input" class="qs-checkbox-input">
             <span class="qs-check-mark"></span>
             New Line
           </label>

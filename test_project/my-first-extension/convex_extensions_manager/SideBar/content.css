@@ -97,8 +97,21 @@
     margin-top: 18px;
     /* Offset for missing label */
 }
-.qs-checkbox input {
-    display: none;
+
+.qs-checkbox-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    border: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .qs-check-mark {
@@ -110,16 +123,31 @@
     display: inline-block;
     position: relative;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .qs-checkbox input:checked + .qs-check-mark {
     background: #00ff88;
     border-color: #00ff88;
-    box-shadow: inset 0 0 0 2px #111;
+}
+
+.qs-check-mark::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid #111;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -60%) rotate(45deg);
+    transform-origin: center;
+    opacity: 0;
+    transition: opacity 0.12s ease;
 }
 
 .qs-checkbox input:checked + .qs-check-mark::after {
-    content: none;
+    opacity: 1;
 }
 
 .qs-label {
