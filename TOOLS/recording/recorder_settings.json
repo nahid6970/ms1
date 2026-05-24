@@ -1,0 +1,20 @@
+{
+  "save_dir": "C:\\Users\\nahid\\Videos",
+  "format": "mp4",
+  "fps": 30,
+  "resolution": "1280x720",
+  "video_bitrate": "8000k",
+  "audio_source": "None",
+  "mic_source": "None",
+  "audio_bitrate": "192k",
+  "capture_mode": "fullscreen",
+  "show_cursor": true,
+  "highlight_clicks": false,
+  "countdown": 3,
+  "hotkey_start": "F9",
+  "hotkey_stop": "F10",
+  "encoder": "libx264",
+  "crf": 23,
+  "preset": "fast",
+  "filename_template": "recording_%Y%m%d_%H%M%S"
+}
