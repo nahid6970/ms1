@@ -1,5 +1,6 @@
 import sys
 import json
+import webbrowser
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
@@ -149,9 +150,11 @@ class VoiceApp(QMainWindow):
                 "always_on_top": False,
                 "x": 100,
                 "y": 100,
-                "border_color": CP_RED
+                "border_color": CP_RED,
+                "open_google": False
             }
             self.save_config()
+
 
     def save_config(self):
         with open(self.config_file, 'w') as f:
@@ -290,6 +293,10 @@ class VoiceApp(QMainWindow):
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
         layout.addRow("Stop on Space (SPC mode):", spc_check)
 
+        google_check = QCheckBox()
+        google_check.setChecked(self.config.get("open_google", False))
+        layout.addRow("Open in Google Search:", google_check)
+
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
@@ -325,6 +332,7 @@ class VoiceApp(QMainWindow):
                 self.show()
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
+            self.config["open_google"] = google_check.isChecked()
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
@@ -450,6 +458,8 @@ class VoiceApp(QMainWindow):
         else:
             self._set_status(CP_GREEN)
             self._reset_record_btn()
+            if self.config.get("open_google"):
+                webbrowser.open(f"https://www.google.com/search?q={text}")
 
     def on_error(self, error):
         self._set_status(CP_RED)
