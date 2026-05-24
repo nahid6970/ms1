@@ -427,9 +427,11 @@ class RecordingThread(QThread):
             out_w, out_h = r.width(), r.height()
         else:
             out_w, out_h = map(int, s.resolution.split("x"))
-        # ffmpeg wants even dimensions
-        out_w += out_w % 2
-        out_h += out_h % 2
+        # ffmpeg wants even dimensions — round DOWN to nearest even
+        out_w = out_w & ~1
+        out_h = out_h & ~1
+        cap_w = r.width()  & ~1
+        cap_h = r.height() & ~1
 
         # ── build ffmpeg command ──
         vf = f"scale={out_w}:{out_h}"
@@ -438,7 +440,7 @@ class RecordingThread(QThread):
             "-f", "rawvideo",
             "-vcodec", "rawvideo",
             "-pix_fmt", "bgr24",
-            "-s", f"{r.width()}x{r.height()}",
+            "-s", f"{cap_w}x{cap_h}",
             "-r", str(s.fps),
             "-i", "pipe:0",          # video from stdin
         ]
@@ -474,11 +476,13 @@ class RecordingThread(QThread):
         cmd.append(out_path)
 
         try:
-            extra_fds = {audio_pipe_r: audio_pipe_r} if (has_audio or has_mic) else {}
+            log_path = out_path + ".log"
+            log_file = open(log_path, "w")
             proc = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=log_file,
+                stderr=log_file,
                 close_fds=False,
             )
             if has_audio or has_mic:
@@ -490,27 +494,31 @@ class RecordingThread(QThread):
                 )
                 audio_thread.start()
 
-            self._capture_loop(proc, r, s.fps)
+            self._capture_loop(proc, r, s.fps, cap_w, cap_h)
 
             proc.stdin.close()
             proc.wait()
+            log_file.close()
 
             if audio_pipe_w:
                 try: os.close(audio_pipe_w)
                 except OSError: pass
 
             if proc.returncode == 0:
+                try: os.remove(log_path)
+                except OSError: pass
                 self.finished_path.emit(out_path)
             else:
-                err = proc.stderr.read().decode(errors="replace")[-400:]
+                with open(log_path) as lf:
+                    err = lf.read()[-600:]
                 self.error_occurred.emit(f"ffmpeg error:\n{err}")
 
         except Exception as ex:
             self.error_occurred.emit(str(ex))
 
-    def _capture_loop(self, proc, r: QRect, fps: int):
+    def _capture_loop(self, proc, r: QRect, fps: int, cap_w: int, cap_h: int):
         interval = 1.0 / fps
-        mon = {"top": r.y(), "left": r.x(), "width": r.width(), "height": r.height()}
+        mon = {"top": r.y(), "left": r.x(), "width": cap_w, "height": cap_h}
         with mss.mss() as sct:
             while not self._stop_event.is_set():
                 t0 = time.perf_counter()
