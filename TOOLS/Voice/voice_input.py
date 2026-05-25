@@ -65,20 +65,27 @@ class SpaceStopThread(QThread):
         self._stop = False
 
     def run(self):
+        stream = None
+        audio_interface = None
         try:
             import speech_recognition as sr
             import io, wave, pyaudio
-            CHUNK, FORMAT, CHANNELS, RATE = 1024, pyaudio.paInt16, 1, 16000
-            p = pyaudio.PyAudio()
-            stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE,
-                            input=True, frames_per_buffer=CHUNK)
+            CHUNK, FORMAT, CHANNELS, RATE = 256, pyaudio.paInt16, 1, 16000
+            audio_interface = pyaudio.PyAudio()
+            stream = audio_interface.open(
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK,
+            )
             self.running = True
             frames = []
             while not self._stop:
                 frames.append(stream.read(CHUNK, exception_on_overflow=False))
-            stream.stop_stream(); stream.close()
-            sample_width = p.get_sample_size(FORMAT)
-            p.terminate()
+            if stream.is_active():
+                stream.stop_stream()
+            sample_width = audio_interface.get_sample_size(FORMAT)
             self.running = False
             buf = io.BytesIO()
             with wave.open(buf, 'wb') as wf:
@@ -92,6 +99,17 @@ class SpaceStopThread(QThread):
         except Exception as e:
             self.running = False
             self.error.emit(str(e))
+        finally:
+            try:
+                if stream is not None:
+                    stream.close()
+            except Exception:
+                pass
+            try:
+                if audio_interface is not None:
+                    audio_interface.terminate()
+            except Exception:
+                pass
 
     def stop(self):
         self._stop = True
@@ -132,6 +150,9 @@ class ContinuousThread(QThread):
 
 
 class VoiceApp(QMainWindow):
+    toggle_record_requested = pyqtSignal()
+    space_press_requested = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.script_dir  = Path(__file__).parent
@@ -144,6 +165,8 @@ class VoiceApp(QMainWindow):
         self._session_id = 0
         self.load_config()
         self.init_ui()
+        self.toggle_record_requested.connect(self.toggle_record)
+        self.space_press_requested.connect(self._handle_space_press)
         self.setup_global_hotkey()
 
     def load_config(self):
@@ -372,15 +395,12 @@ class VoiceApp(QMainWindow):
 
     def setup_global_hotkey(self):
         def on_activate():
-            self.toggle_record()
+            self.toggle_record_requested.emit()
 
         def on_press(key):
             if key != pynput_keyboard.Key.space:
                 return
-            if self._recording_active and self.config.get("stop_mode", "auto") == "space":
-                self._finish_space_recording()
-            elif self._live_recording:
-                self._stop_continuous()
+            self.space_press_requested.emit()
 
         def for_canonical(f):
             return lambda k: f(listener.canonical(k))
@@ -449,6 +469,12 @@ class VoiceApp(QMainWindow):
                 self._stop_single()
         else:
             self._start_single()
+
+    def _handle_space_press(self):
+        if self._recording_active and self.config.get("stop_mode", "auto") == "space":
+            self._finish_space_recording()
+        elif self._live_recording:
+            self._stop_continuous()
 
     def _start_single(self):
         self._session_id += 1
