@@ -136,6 +136,9 @@ class VoiceApp(QMainWindow):
         self.voice_thread = None
         self._continuous_thread = None
         self._live_recording = False
+        self._recording_active = False
+        self._stop_requested = False
+        self._session_id = 0
         self.load_config()
         self.init_ui()
         self.setup_global_hotkey()
@@ -355,7 +358,7 @@ class VoiceApp(QMainWindow):
         def on_press(key):
             if key != pynput_keyboard.Key.space:
                 return
-            if isinstance(self.voice_thread, SpaceStopThread) and self.voice_thread.isRunning():
+            if self._recording_active and self.config.get("stop_mode", "auto") == "space":
                 self._finish_space_recording()
             elif self._live_recording:
                 self._stop_continuous()
@@ -397,17 +400,19 @@ class VoiceApp(QMainWindow):
                 self._start_continuous()
             return
 
-        if self.voice_thread and self.voice_thread.running:
+        if self._recording_active:
             if self.config.get("stop_mode", "auto") == "space":
                 self._finish_space_recording()
             else:
-                self.voice_thread.stop()
-                self._reset_record_btn()
-                self._set_status(CP_YELLOW)
+                self._stop_single()
         else:
             self._start_single()
 
     def _start_single(self):
+        self._session_id += 1
+        session_id = self._session_id
+        self._recording_active = True
+        self._stop_requested = False
         self._set_status(CP_RED)
         if self.config.get("stop_mode", "auto") == "space":
             self.record_btn.setText("⏹️ SPC")
@@ -416,19 +421,21 @@ class VoiceApp(QMainWindow):
             self.record_btn.setText("⏹️ STOP")
             self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
         self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
-        self.voice_thread.result.connect(self.on_result)
-        self.voice_thread.error.connect(self.on_error)
+        self.voice_thread.result.connect(lambda text, sid=session_id: self.on_result(sid, text))
+        self.voice_thread.error.connect(lambda error, sid=session_id: self.on_error(sid, error))
+        self.voice_thread.finished.connect(lambda sid=session_id: self._on_local_finished(sid))
         self.voice_thread.start()
 
     def _start_continuous(self):
         self._live_recording = True
+        self._stop_requested = False
         self._set_status(CP_RED)
         self.record_btn.setText("⏹️ LIVE")
         self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
         self._continuous_thread = ContinuousThread(
             self.config["language"], self.config.get("phrase_time_limit", 10))
         self._continuous_thread.result.connect(self.on_result)
-        self._continuous_thread.error.connect(self.on_error)
+        self._continuous_thread.error.connect(lambda error, sid=self._session_id: self.on_error(sid, error))
         self._continuous_thread.finished.connect(self._on_continuous_finished)
         self._continuous_thread.start()
 
@@ -443,6 +450,24 @@ class VoiceApp(QMainWindow):
         self._live_recording = False
         self._reset_record_btn()
 
+    def _stop_single(self):
+        if self.voice_thread:
+            self.voice_thread.stop()
+        self._recording_active = False
+        self._stop_requested = True
+        self._set_status(CP_YELLOW)
+        self._reset_record_btn()
+
+    def _on_local_finished(self, session_id):
+        if session_id != self._session_id:
+            return
+        self.voice_thread = None
+        self._recording_active = False
+        if self._stop_requested:
+            self._stop_requested = False
+            self._set_status(CP_YELLOW)
+            self._reset_record_btn()
+
     def _reset_record_btn(self):
         self.record_btn.setText("🎤 REC")
         self.record_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;")
@@ -452,26 +477,44 @@ class VoiceApp(QMainWindow):
         self.status_btn.setStyleSheet(f"background-color: {color}; border: 1px solid {color}; padding: 0;")
 
     def _finish_space_recording(self):
+        if not self._recording_active:
+            return
         if isinstance(self.voice_thread, SpaceStopThread):
             self.voice_thread.stop()
+        self._recording_active = False
+        self._stop_requested = True
         self._reset_record_btn()
         self._set_status(CP_YELLOW)
 
-    def on_result(self, text):
+    def on_result(self, session_id, text):
+        if session_id != self._session_id:
+            return
         paste_text(text)
+        self._stop_requested = False
         if self._live_recording:
             self._set_status(CP_GREEN)
             QTimer.singleShot(400, lambda: self._set_status(CP_RED) if self._live_recording else None)
         else:
             self._set_status(CP_GREEN)
             self._reset_record_btn()
+            self._recording_active = False
             if self.config.get("open_google"):
                 webbrowser.open(f"https://www.google.com/search?q={text}")
 
-    def on_error(self, error):
+    def on_error(self, session_id, error):
+        if session_id != self._session_id:
+            return
+        if self._stop_requested:
+            self._stop_requested = False
+            self._set_status(CP_YELLOW)
+            self._reset_record_btn()
+            self._live_recording = False
+            self._recording_active = False
+            return
         self._set_status(CP_RED)
         self._reset_record_btn()
         self._live_recording = False
+        self._recording_active = False
 
 
 if __name__ == "__main__":
