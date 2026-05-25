@@ -172,7 +172,7 @@ class VoiceApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(280, 46)
+        self.setFixedSize(340, 46)
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
@@ -207,6 +207,22 @@ class VoiceApp(QMainWindow):
         self._update_lang_btn()
         layout.addWidget(self.lang_btn)
 
+        self.google_btn = QPushButton()
+        self.google_btn.setObjectName("toggle")
+        self.google_btn.setFixedWidth(24)
+        self.google_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.google_btn.clicked.connect(self.toggle_google_search)
+        self._update_google_btn()
+        layout.addWidget(self.google_btn)
+
+        self.copy_btn = QPushButton()
+        self.copy_btn.setObjectName("toggle")
+        self.copy_btn.setFixedWidth(24)
+        self.copy_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.copy_btn.clicked.connect(self.toggle_copy_to_clipboard)
+        self._update_copy_btn()
+        layout.addWidget(self.copy_btn)
+
         self.record_btn = QPushButton("🎤 REC")
         self.record_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.record_btn.clicked.connect(self.toggle_record)
@@ -232,7 +248,7 @@ class VoiceApp(QMainWindow):
 
         if self.config.get("hide_record_btn"):
             self.record_btn.setVisible(False)
-            self.setFixedSize(190, 46)
+            self.setFixedSize(250, 46)
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -246,6 +262,7 @@ class VoiceApp(QMainWindow):
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
             QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 4px; }}
+            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0; font-weight: bold; }}
             QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
@@ -310,14 +327,6 @@ class VoiceApp(QMainWindow):
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
         layout.addRow("Stop on Space (SPC mode):", spc_check)
 
-        google_check = QCheckBox()
-        google_check.setChecked(self.config.get("open_google", False))
-        layout.addRow("Open in Google Search:", google_check)
-
-        clipboard_check = QCheckBox()
-        clipboard_check.setChecked(self.config.get("copy_to_clipboard", True))
-        layout.addRow("Copy processed text to clipboard:", clipboard_check)
-
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
@@ -353,14 +362,12 @@ class VoiceApp(QMainWindow):
                 self.show()
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
-            self.config["open_google"] = google_check.isChecked()
-            self.config["copy_to_clipboard"] = clipboard_check.isChecked()
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
                 self.record_btn.setVisible(not new_hide)
-                self.setFixedSize(190 if new_hide else 280, 46)
+                self.setFixedSize(250 if new_hide else 340, 46)
             self.save_config()
 
     def setup_global_hotkey(self):
@@ -403,6 +410,29 @@ class VoiceApp(QMainWindow):
         self.lang_btn.setText("EN" if is_en else "BN")
         color = CP_RED if is_en else CP_GREEN
         self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold;")
+
+    def _set_toggle_btn(self, btn, label, enabled):
+        color = CP_GREEN if enabled else CP_DIM
+        btn.setText(label)
+        btn.setStyleSheet(
+            f"border: 2px solid {color}; color: {color}; font-weight: bold; padding: 0;"
+        )
+
+    def _update_google_btn(self):
+        self._set_toggle_btn(self.google_btn, "G", self.config.get("open_google", False))
+
+    def _update_copy_btn(self):
+        self._set_toggle_btn(self.copy_btn, "C", self.config.get("copy_to_clipboard", True))
+
+    def toggle_google_search(self):
+        self.config["open_google"] = not self.config.get("open_google", False)
+        self.save_config()
+        self._update_google_btn()
+
+    def toggle_copy_to_clipboard(self):
+        self.config["copy_to_clipboard"] = not self.config.get("copy_to_clipboard", True)
+        self.save_config()
+        self._update_copy_btn()
 
     def toggle_record(self):
         if self.config.get("engine", "local") == "browser":
