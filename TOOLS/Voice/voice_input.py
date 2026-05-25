@@ -18,10 +18,13 @@ CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
-def paste_text(text):
+def paste_text(text, preserve_clipboard=False):
+    previous_clipboard = pyperclip.paste() if preserve_clipboard else None
     pyperclip.copy(text)
     import time; time.sleep(0.1)
     import pyautogui; pyautogui.hotkey('ctrl', 'v')
+    if preserve_clipboard and previous_clipboard is not None:
+        pyperclip.copy(previous_clipboard)
 
 
 class VoiceThread(QThread):
@@ -154,8 +157,12 @@ class VoiceApp(QMainWindow):
                 "x": 100,
                 "y": 100,
                 "border_color": CP_RED,
-                "open_google": False
+                "open_google": False,
+                "copy_to_clipboard": True
             }
+            self.save_config()
+        if "copy_to_clipboard" not in self.config:
+            self.config["copy_to_clipboard"] = True
             self.save_config()
 
 
@@ -307,6 +314,10 @@ class VoiceApp(QMainWindow):
         google_check.setChecked(self.config.get("open_google", False))
         layout.addRow("Open in Google Search:", google_check)
 
+        clipboard_check = QCheckBox()
+        clipboard_check.setChecked(self.config.get("copy_to_clipboard", True))
+        layout.addRow("Copy processed text to clipboard:", clipboard_check)
+
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
@@ -343,6 +354,7 @@ class VoiceApp(QMainWindow):
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["open_google"] = google_check.isChecked()
+            self.config["copy_to_clipboard"] = clipboard_check.isChecked()
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
@@ -489,7 +501,7 @@ class VoiceApp(QMainWindow):
     def on_result(self, session_id, text):
         if session_id != self._session_id:
             return
-        paste_text(text)
+        paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
         self._stop_requested = False
         if self._live_recording:
             self._set_status(CP_GREEN)
