@@ -2414,135 +2414,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.textAlign = inputElement.style.textAlign;
         preview.style.backgroundColor = cell.style.backgroundColor;
 
-        const isChromeBrowser = () => {
-            const ua = navigator.userAgent || '';
-            return /Chrome/i.test(ua) &&
-                !/Edg|OPR|Brave|Helium|Firefox|Safari/i.test(ua);
-        };
-
-        const copyTextToClipboard = async (text) => {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            }
-
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.setAttribute('readonly', 'readonly');
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            textarea.remove();
-            return true;
-        };
-
-        const handleFileLink = async (href) => {
-            if (isChromeBrowser()) {
-                fetch('/api/open-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path: href })
-                });
-                return;
-            }
-
-            const manualTab = window.open('about:blank', '_blank');
-
-            if (manualTab && !manualTab.closed) {
-                manualTab.document.open();
-                manualTab.document.write(`
-                    <!doctype html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>File Path</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; }
-                            code, pre { background: #f4f4f4; padding: 8px 12px; display: block; white-space: pre-wrap; word-break: break-all; }
-                        </style>
-                    </head>
-                    <body>
-                        <h3>Copy file path</h3>
-                        <p>Click the button beside the path to copy it.</p>
-                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;">
-                            <code id="filePathText" style="padding:8px 10px;background:#f4f4f4;display:inline-block;max-width:100%;word-break:break-all;">${href
-                            .replace(/&/g, '&amp;')
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\"/g, '&quot;')
-                            .replace(/'/g, '&#39;')}</code>
-                            <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
-                            <button id="openPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Open file</button>
-                        </div>
-                        <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
-                        <script>
-                            const box = document.getElementById('filePathText');
-                            const btn = document.getElementById('copyPathBtn');
-                            const openBtn = document.getElementById('openPathBtn');
-                            const status = document.getElementById('copyStatus');
-
-                            const copyPath = async () => {
-                                const text = box ? box.textContent : '';
-                                try {
-                                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                                        await navigator.clipboard.writeText(text);
-                                    } else if (text) {
-                                        const temp = document.createElement('textarea');
-                                        temp.value = text;
-                                        temp.setAttribute('readonly', 'readonly');
-                                        temp.style.position = 'fixed';
-                                        temp.style.left = '-9999px';
-                                        document.body.appendChild(temp);
-                                        temp.select();
-                                        document.execCommand('copy');
-                                        temp.remove();
-                                    }
-                                    if (status) status.textContent = 'Copied to clipboard.';
-                                } catch (error) {
-                                    if (status) status.textContent = 'Clipboard blocked. Copy the text manually.';
-                                }
-                            };
-
-                            if (btn) {
-                                btn.addEventListener('click', copyPath);
-                            }
-
-                            if (openBtn) {
-                                openBtn.addEventListener('click', () => {
-                                    const text = box ? box.textContent : '';
-                                    if (text) {
-                                        try {
-                                            window.location.href = text;
-                                        } catch (error) {
-                                            if (status) status.textContent = 'Unable to open the file in this window.';
-                                        }
-                                    }
-                                });
-                            }
-
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                manualTab.document.close();
-                showToast('File helper tab opened.', 'info');
-            } else {
-                showToast('Popup blocked. Allow popups for the helper tab.', 'error');
-            }
-        };
-
         // Handle link clicks - prevent editing and open link instead
         preview.addEventListener('mousedown', (e) => {
-            const fileButton = e.target.closest('button.file-link-open-btn');
-            if (fileButton) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                return false;
-            }
-
             const link = e.target.closest('a');
             if (link) {
                 console.log('Link mousedown:', link.href);
@@ -2555,18 +2428,6 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         preview.addEventListener('click', (e) => {
             console.log('Preview clicked, target:', e.target.tagName);
-            const fileButton = e.target.closest('button.file-link-open-btn');
-            if (fileButton) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                const href = decodeURIComponent(fileButton.dataset.fileUrl || '');
-                if (href) {
-                    handleFileLink(href);
-                }
-                return false;
-            }
-
             const link = e.target.closest('a');
             if (link) {
                 console.log('Link clicked:', link.href);
@@ -2601,7 +2462,11 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 // Open external link
                 if (link.href && link.href !== '#' && !link.href.startsWith('javascript:')) {
                     if (link.href.startsWith('file:')) {
-                        handleFileLink(link.href);
+                        fetch('/api/open-file', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ path: link.href })
+                        });
                     } else {
                         window.open(link.href, '_blank', 'noopener,noreferrer');
                     }
@@ -8164,14 +8029,6 @@ function escapeHtml(text) {
 
 function renderMarkdownLink(url, text) {
     const safeUrl = escapeHtml(url);
-    if (/^file:\/\//i.test(url)) {
-        return `
-            <span class="file-link-wrap" contenteditable="false">
-                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" contenteditable="false">${text}</a>
-                <button type="button" class="file-link-open-btn" data-file-url="${encodeURIComponent(url)}" contenteditable="false">Open</button>
-            </span>
-        `;
-    }
     return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 }
 

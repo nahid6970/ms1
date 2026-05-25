@@ -1412,37 +1412,6 @@ code {
     background-color: rgba(0, 123, 255, 0.05);
 }
 
-.file-link-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0 2px;
-    vertical-align: middle;
-}
-
-.file-link-open-btn {
-    appearance: none;
-    border: 1px solid rgba(0, 123, 255, 0.35);
-    background: rgba(0, 123, 255, 0.08);
-    color: #007bff;
-    font: inherit;
-    font-size: 0.82em;
-    line-height: 1;
-    padding: 2px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.file-link-open-btn:hover {
-    background: rgba(0, 123, 255, 0.15);
-    border-color: rgba(0, 123, 255, 0.55);
-}
-
-.file-link-open-btn:active {
-    transform: translateY(1px);
-}
-
 /* Show preview when input is not focused */
 .has-markdown:not(:focus)~.markdown-preview {
     display: block;
