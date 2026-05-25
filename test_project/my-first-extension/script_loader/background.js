@@ -19,6 +19,24 @@ function normalizeUrl(url) {
   return url.trim();
 }
 
+function toFileUrl(input) {
+  const raw = normalizeUrl(input);
+  if (!raw) {
+    return '';
+  }
+
+  if (raw.startsWith('file:///')) {
+    return raw;
+  }
+
+  if (/^[a-zA-Z]:[\\/]/.test(raw)) {
+    const normalizedPath = raw.replace(/\\/g, '/');
+    return `file:///${encodeURI(normalizedPath)}`;
+  }
+
+  return '';
+}
+
 function getFallbackSettings(result) {
   return {
     localServerUrl: normalizeUrl(result.fallbackSettings?.localServerUrl) || DEFAULT_FALLBACK_SETTINGS.localServerUrl,
@@ -154,9 +172,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return;
   }
 
-  const url = typeof message.url === 'string' ? message.url.trim() : '';
-  if (!url.startsWith('file:///')) {
-    sendResponse({ ok: false, error: 'Only file:/// URLs are supported.' });
+  const url = toFileUrl(message.url);
+  if (!url) {
+    sendResponse({ ok: false, error: 'Provide a Windows path like C:\\folder\\file.pdf or a file:/// URL.' });
     return;
   }
 

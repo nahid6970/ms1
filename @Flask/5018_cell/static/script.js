@@ -2474,11 +2474,13 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                             .replace(/\"/g, '&quot;')
                             .replace(/'/g, '&#39;')}</code>
                             <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
+                            <button id="openPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Open file</button>
                         </div>
                         <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
                         <script>
                             const box = document.getElementById('filePathText');
                             const btn = document.getElementById('copyPathBtn');
+                            const openBtn = document.getElementById('openPathBtn');
                             const status = document.getElementById('copyStatus');
 
                             const copyPath = async () => {
@@ -2505,6 +2507,19 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
                             if (btn) {
                                 btn.addEventListener('click', copyPath);
+                            }
+
+                            if (openBtn) {
+                                openBtn.addEventListener('click', () => {
+                                    const text = box ? box.textContent : '';
+                                    if (text) {
+                                        try {
+                                            window.location.href = text;
+                                        } catch (error) {
+                                            if (status) status.textContent = 'Unable to open the file in this window.';
+                                        }
+                                    }
+                                });
                             }
 
                         <\/script>
