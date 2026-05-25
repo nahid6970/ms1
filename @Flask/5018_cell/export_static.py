@@ -3665,6 +3665,73 @@ def generate_static_html(data, custom_syntaxes):
             }
         });
 
+        const copyTextToClipboard = async (text) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+            return true;
+        };
+
+        const openManualFileTab = async (href) => {
+            const manualTab = window.open('about:blank', '_blank');
+
+            try {
+                await copyTextToClipboard(href);
+                showToast('File path copied. Paste it into the new tab/address bar.', 'info');
+            } catch (error) {
+                console.warn('Clipboard copy failed:', error);
+                showToast('Could not copy file path automatically. Copy it manually.', 'error');
+            }
+
+            if (manualTab && !manualTab.closed) {
+                manualTab.document.open();
+                manualTab.document.write(`
+                    <!doctype html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>File Path</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; }
+                            code, pre { background: #f4f4f4; padding: 8px 12px; display: block; white-space: pre-wrap; word-break: break-all; }
+                        </style>
+                    </head>
+                    <body>
+                        <h3>File path copied to clipboard</h3>
+                        <p>Paste it into the address bar or copy it from below if clipboard access is blocked:</p>
+                        <code>${href
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\"/g, '&quot;')
+                            .replace(/'/g, '&#39;')}</code>
+                    </body>
+                    </html>
+                `);
+                manualTab.document.close();
+            }
+        };
+
+        document.addEventListener('mousedown', function(event) {
+            const link = event.target.closest('a');
+            if (link && link.href && link.href.startsWith('file:')) {
+                event.preventDefault();
+                event.stopPropagation();
+                openManualFileTab(link.href);
+            }
+        }, true);
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             // Handle internal sheet navigation links
@@ -3680,6 +3747,13 @@ def generate_static_html(data, custom_syntaxes):
                     const idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
                     if (idx !== -1) switchSheet(idx);
                 }
+                return;
+            }
+
+            const externalLink = event.target.closest('a');
+            if (externalLink && externalLink.href && externalLink.href.startsWith('file:')) {
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
 

@@ -2414,6 +2414,79 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
         preview.style.textAlign = inputElement.style.textAlign;
         preview.style.backgroundColor = cell.style.backgroundColor;
 
+        const isChromeBrowser = () => {
+            const ua = navigator.userAgent || '';
+            return /Chrome/i.test(ua) &&
+                !/Edg|OPR|Brave|Helium|Firefox|Safari/i.test(ua);
+        };
+
+        const copyTextToClipboard = async (text) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+            return true;
+        };
+
+        const handleFileLink = async (href) => {
+            if (isChromeBrowser()) {
+                fetch('/api/open-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: href })
+                });
+                return;
+            }
+
+            const manualTab = window.open('about:blank', '_blank');
+
+            try {
+                await copyTextToClipboard(href);
+                showToast('File path copied. Paste it into the new tab/address bar.', 'info');
+            } catch (error) {
+                console.warn('Clipboard copy failed:', error);
+                showToast('Could not copy file path automatically. Copy it manually.', 'error');
+            }
+
+            if (manualTab && !manualTab.closed) {
+                manualTab.document.open();
+                manualTab.document.write(`
+                    <!doctype html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>File Path</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; }
+                            code, pre { background: #f4f4f4; padding: 8px 12px; display: block; white-space: pre-wrap; word-break: break-all; }
+                        </style>
+                    </head>
+                    <body>
+                        <h3>File path copied to clipboard</h3>
+                        <p>Paste it into the address bar or copy it from below if clipboard access is blocked:</p>
+                        <code>${href
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\"/g, '&quot;')
+                            .replace(/'/g, '&#39;')}</code>
+                    </body>
+                    </html>
+                `);
+                manualTab.document.close();
+            }
+        };
+
         // Handle link clicks - prevent editing and open link instead
         preview.addEventListener('mousedown', (e) => {
             const link = e.target.closest('a');
@@ -2462,11 +2535,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 // Open external link
                 if (link.href && link.href !== '#' && !link.href.startsWith('javascript:')) {
                     if (link.href.startsWith('file:')) {
-                        fetch('/api/open-file', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ path: link.href })
-                        });
+                        handleFileLink(link.href);
                     } else {
                         window.open(link.href, '_blank', 'noopener,noreferrer');
                     }
