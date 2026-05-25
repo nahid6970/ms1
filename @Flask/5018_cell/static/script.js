@@ -2450,14 +2450,6 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
             const manualTab = window.open('about:blank', '_blank');
 
-            try {
-                await copyTextToClipboard(href);
-                showToast('File path copied. Paste it into the new tab/address bar.', 'info');
-            } catch (error) {
-                console.warn('Clipboard copy failed:', error);
-                showToast('Could not copy file path automatically. Copy it manually.', 'error');
-            }
-
             if (manualTab && !manualTab.closed) {
                 manualTab.document.open();
                 manualTab.document.write(`
@@ -2472,23 +2464,68 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                         </style>
                     </head>
                     <body>
-                        <h3>File path copied to clipboard</h3>
-                        <p>Paste it into the address bar or copy it from below if clipboard access is blocked:</p>
-                        <code>${href
+                        <h3>Copy file path</h3>
+                        <p>Click the button below to copy the file path from this tab, or copy it manually from the box.</p>
+                        <textarea id="filePathBox" readonly style="width:100%;min-height:90px;resize:vertical;white-space:pre-wrap;word-break:break-all;">${href
                             .replace(/&/g, '&amp;')
                             .replace(/</g, '&lt;')
                             .replace(/>/g, '&gt;')
                             .replace(/\"/g, '&quot;')
-                            .replace(/'/g, '&#39;')}</code>
+                            .replace(/'/g, '&#39;')}</textarea>
+                        <div style="margin-top: 12px;">
+                            <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
+                        </div>
+                        <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
+                        <script>
+                            const box = document.getElementById('filePathBox');
+                            const btn = document.getElementById('copyPathBtn');
+                            const status = document.getElementById('copyStatus');
+
+                            const copyPath = async () => {
+                                const text = box ? box.value : '';
+                                try {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        await navigator.clipboard.writeText(text);
+                                    } else if (box) {
+                                        box.focus();
+                                        box.select();
+                                        document.execCommand('copy');
+                                    }
+                                    if (status) status.textContent = 'Copied to clipboard.';
+                                } catch (error) {
+                                    if (status) status.textContent = 'Clipboard blocked. Copy the text manually.';
+                                }
+                            };
+
+                            if (btn) {
+                                btn.addEventListener('click', copyPath);
+                            }
+
+                            if (box) {
+                                box.focus();
+                                box.select();
+                            }
+                        <\/script>
                     </body>
                     </html>
                 `);
                 manualTab.document.close();
+                showToast('File helper tab opened.', 'info');
+            } else {
+                showToast('Popup blocked. Allow popups for the helper tab.', 'error');
             }
         };
 
         // Handle link clicks - prevent editing and open link instead
         preview.addEventListener('mousedown', (e) => {
+            const fileButton = e.target.closest('button.file-link-open-btn');
+            if (fileButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+
             const link = e.target.closest('a');
             if (link) {
                 console.log('Link mousedown:', link.href);
@@ -2501,6 +2538,18 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
         preview.addEventListener('click', (e) => {
             console.log('Preview clicked, target:', e.target.tagName);
+            const fileButton = e.target.closest('button.file-link-open-btn');
+            if (fileButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                const href = decodeURIComponent(fileButton.dataset.fileUrl || '');
+                if (href) {
+                    handleFileLink(href);
+                }
+                return false;
+            }
+
             const link = e.target.closest('a');
             if (link) {
                 console.log('Link clicked:', link.href);
@@ -8094,6 +8143,19 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function renderMarkdownLink(url, text) {
+    const safeUrl = escapeHtml(url);
+    if (/^file:\/\//i.test(url)) {
+        return `
+            <span class="file-link-wrap" contenteditable="false">
+                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" contenteditable="false">${text}</a>
+                <button type="button" class="file-link-open-btn" data-file-url="${encodeURIComponent(url)}" contenteditable="false">Open</button>
+            </span>
+        `;
+    }
+    return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 }
 
 // Helper to find actual match length (handles Unicode properly)

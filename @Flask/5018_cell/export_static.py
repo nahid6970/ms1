@@ -1222,6 +1222,37 @@ def generate_static_html(data, custom_syntaxes):
             background-color: rgba(0, 123, 255, 0.05);
         }
 
+        .file-link-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 2px;
+            vertical-align: middle;
+        }
+
+        .file-link-open-btn {
+            appearance: none;
+            border: 1px solid rgba(0, 123, 255, 0.35);
+            background: rgba(0, 123, 255, 0.08);
+            color: #007bff;
+            font: inherit;
+            font-size: 0.82em;
+            line-height: 1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .file-link-open-btn:hover {
+            background: rgba(0, 123, 255, 0.15);
+            border-color: rgba(0, 123, 255, 0.55);
+        }
+
+        .file-link-open-btn:active {
+            transform: translateY(1px);
+        }
+
         /* Markdown Grid Table Styles (CSS Grid - no <table> elements) */
         .md-grid {
             display: grid;
@@ -3659,11 +3690,30 @@ def generate_static_html(data, custom_syntaxes):
                 }
             }
             
-            // Escape to clear search
-            if (e.key === 'Escape' && document.activeElement.id === 'searchInput') {
-                clearSearch();
+        // Escape to clear search
+        if (e.key === 'Escape' && document.activeElement.id === 'searchInput') {
+            clearSearch();
+        }
+    });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderMarkdownLink(url, text) {
+            const safeUrl = escapeHtml(url);
+            if (/^file:\/\//i.test(url)) {
+                return `
+                    <span class="file-link-wrap" contenteditable="false">
+                        <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" contenteditable="false">${text}</a>
+                        <button type="button" class="file-link-open-btn" data-file-url="${encodeURIComponent(url)}" contenteditable="false">Open</button>
+                    </span>
+                `;
             }
-        });
+            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
 
         const copyTextToClipboard = async (text) => {
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -3686,14 +3736,6 @@ def generate_static_html(data, custom_syntaxes):
         const openManualFileTab = async (href) => {
             const manualTab = window.open('about:blank', '_blank');
 
-            try {
-                await copyTextToClipboard(href);
-                showToast('File path copied. Paste it into the new tab/address bar.', 'info');
-            } catch (error) {
-                console.warn('Clipboard copy failed:', error);
-                showToast('Could not copy file path automatically. Copy it manually.', 'error');
-            }
-
             if (manualTab && !manualTab.closed) {
                 manualTab.document.open();
                 manualTab.document.write(`
@@ -3708,24 +3750,67 @@ def generate_static_html(data, custom_syntaxes):
                         </style>
                     </head>
                     <body>
-                        <h3>File path copied to clipboard</h3>
-                        <p>Paste it into the address bar or copy it from below if clipboard access is blocked:</p>
-                        <code>${href
+                        <h3>Copy file path</h3>
+                        <p>Click the button below to copy the file path from this tab, or copy it manually from the box.</p>
+                        <textarea id="filePathBox" readonly style="width:100%;min-height:90px;resize:vertical;white-space:pre-wrap;word-break:break-all;">${href
                             .replace(/&/g, '&amp;')
                             .replace(/</g, '&lt;')
                             .replace(/>/g, '&gt;')
                             .replace(/\"/g, '&quot;')
-                            .replace(/'/g, '&#39;')}</code>
+                            .replace(/'/g, '&#39;')}</textarea>
+                        <div style="margin-top: 12px;">
+                            <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
+                        </div>
+                        <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
+                        <script>
+                            const box = document.getElementById('filePathBox');
+                            const btn = document.getElementById('copyPathBtn');
+                            const status = document.getElementById('copyStatus');
+
+                            const copyPath = async () => {
+                                const text = box ? box.value : '';
+                                try {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        await navigator.clipboard.writeText(text);
+                                    } else if (box) {
+                                        box.focus();
+                                        box.select();
+                                        document.execCommand('copy');
+                                    }
+                                    if (status) status.textContent = 'Copied to clipboard.';
+                                } catch (error) {
+                                    if (status) status.textContent = 'Clipboard blocked. Copy the text manually.';
+                                }
+                            };
+
+                            if (btn) {
+                                btn.addEventListener('click', copyPath);
+                            }
+
+                            if (box) {
+                                box.focus();
+                                box.select();
+                            }
+                        <\/script>
                     </body>
                     </html>
                 `);
                 manualTab.document.close();
+                showToast('File helper tab opened.', 'info');
+            } else {
+                showToast('Popup blocked. Allow popups for the helper tab.', 'error');
             }
         };
 
         document.addEventListener('mousedown', function(event) {
+            const fileButton = event.target.closest('button.file-link-open-btn');
             const link = event.target.closest('a');
-            if (link && link.href && link.href.startsWith('file:')) {
+            if (fileButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                const href = decodeURIComponent(fileButton.dataset.fileUrl || '');
+                if (href) openManualFileTab(href);
+            } else if (link && link.href && link.href.startsWith('file:')) {
                 event.preventDefault();
                 event.stopPropagation();
                 openManualFileTab(link.href);
