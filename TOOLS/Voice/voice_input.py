@@ -471,10 +471,23 @@ class VoiceApp(QMainWindow):
             self._start_single()
 
     def _handle_space_press(self):
+        handled = False
         if self._recording_active and self.config.get("stop_mode", "auto") == "space":
             self._finish_space_recording()
+            handled = True
         elif self._live_recording:
             self._stop_continuous()
+            handled = True
+
+        if handled:
+            QTimer.singleShot(25, self._erase_stop_space)
+
+    def _erase_stop_space(self):
+        try:
+            import pyautogui
+            pyautogui.press("backspace")
+        except Exception:
+            pass
 
     def _start_single(self):
         self._session_id += 1
