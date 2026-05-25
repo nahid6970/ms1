@@ -36,73 +36,6 @@
             font-size: 16px;
         }
 
-        .open-file-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #252526;
-            border: 1px solid #3a3a3a;
-            border-radius: 4px;
-        }
-
-        .open-file-title {
-            font-size: 12px;
-            color: #9cdcfe;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-
-        .open-file-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .open-file-input {
-            flex: 1;
-            min-width: 0;
-            border: 1px solid #444;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            padding: 7px 8px;
-            border-radius: 3px;
-            outline: none;
-        }
-
-        .open-file-input:focus {
-            border-color: #0e639c;
-        }
-
-        .open-file-btn {
-            border: none;
-            border-radius: 3px;
-            padding: 7px 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-            background: #0e639c;
-            color: #ffffff;
-            white-space: nowrap;
-        }
-
-        .open-file-btn:hover {
-            background: #1177bb;
-            transform: translateY(-1px);
-        }
-
-        .open-file-status {
-            font-size: 10px;
-            color: #808080;
-            min-height: 14px;
-            word-break: break-word;
-        }
-        
         .script-item {
             display: flex;
             flex-direction: column;
@@ -408,15 +341,6 @@
         <div class="header-title">Script Manager</div>
     </div>
 
-    <div class="open-file-panel">
-        <div class="open-file-title">Open Local File</div>
-        <div class="open-file-row">
-            <input id="localFilePath" class="open-file-input" type="text" placeholder="C:\\@delta\\msBackups\\@JOB\\pdf\\Bank_Vocabulary_2018-2025.pdf">
-            <button id="openLocalFileBtn" class="open-file-btn" type="button">Open</button>
-        </div>
-        <div id="openLocalFileStatus" class="open-file-status"></div>
-    </div>
-    
     <div id="scriptList">
         <!-- Scripts will be loaded here by popup.js -->
     </div>

@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const scriptListDiv = document.getElementById('scriptList');
   const statusText = document.getElementById('statusText');
-  const localFilePathInput = document.getElementById('localFilePath');
-  const openLocalFileBtn = document.getElementById('openLocalFileBtn');
-  const openLocalFileStatus = document.getElementById('openLocalFileStatus');
   const fallbackScriptPath = 'user_scripts/local_server_fallback.js';
   const defaultFallbackSettings = {
     localServerUrl: 'http://192.168.0.101:5000/',
@@ -18,54 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
       mode: ['local', 'site', 'chrome'].includes(settings.mode) ? settings.mode : defaultFallbackSettings.mode
     };
   }
-
-  function setOpenFileStatus(message, isError = false) {
-    if (!openLocalFileStatus) return;
-    openLocalFileStatus.textContent = message;
-    openLocalFileStatus.style.color = isError ? '#ff8a8a' : '#808080';
-  }
-
-  function normalizeLocalPath(value) {
-    const raw = (value || '').trim();
-    if (!raw) return '';
-    if (raw.startsWith('file:///')) return raw;
-    if (/^[a-zA-Z]:[\\/]/.test(raw)) {
-      return `file:///${raw.replace(/\\/g, '/')}`;
-    }
-    return raw;
-  }
-
-  function openLocalFile() {
-    const normalized = normalizeLocalPath(localFilePathInput?.value || '');
-    if (!normalized) {
-      setOpenFileStatus('Enter a local Windows path or file:/// URL.', true);
-      return;
-    }
-
-    setOpenFileStatus('Opening local file...');
-    chrome.runtime.sendMessage(
-      {
-        type: 'OPEN_LOCAL_FILE',
-        url: normalized
-      },
-      (response) => {
-        const lastError = chrome.runtime.lastError;
-        if (lastError) {
-          setOpenFileStatus(lastError.message, true);
-          return;
-        }
-
-        if (!response?.ok) {
-          setOpenFileStatus(response?.error || 'Failed to open local file.', true);
-          return;
-        }
-
-        setOpenFileStatus('Opened local file.');
-      }
-    );
-  }
-
-
 
   // Get all scripts from user_scripts folder
   async function getAvailableScripts() {
@@ -350,19 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load scripts when popup opens
   loadScriptList();
-
-  if (openLocalFileBtn) {
-    openLocalFileBtn.addEventListener('click', openLocalFile);
-  }
-
-  if (localFilePathInput) {
-    localFilePathInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        openLocalFile();
-      }
-    });
-  }
 
   
 });
