@@ -2465,31 +2465,37 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     </head>
                     <body>
                         <h3>Copy file path</h3>
-                        <p>Click the button below to copy the file path from this tab, or copy it manually from the box.</p>
-                        <textarea id="filePathBox" readonly style="width:100%;min-height:90px;resize:vertical;white-space:pre-wrap;word-break:break-all;">${href
+                        <p>Click the button beside the path to copy it.</p>
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;">
+                            <code id="filePathText" style="padding:8px 10px;background:#f4f4f4;display:inline-block;max-width:100%;word-break:break-all;">${href
                             .replace(/&/g, '&amp;')
                             .replace(/</g, '&lt;')
                             .replace(/>/g, '&gt;')
                             .replace(/\"/g, '&quot;')
-                            .replace(/'/g, '&#39;')}</textarea>
-                        <div style="margin-top: 12px;">
+                            .replace(/'/g, '&#39;')}</code>
                             <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
                         </div>
                         <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
                         <script>
-                            const box = document.getElementById('filePathBox');
+                            const box = document.getElementById('filePathText');
                             const btn = document.getElementById('copyPathBtn');
                             const status = document.getElementById('copyStatus');
 
                             const copyPath = async () => {
-                                const text = box ? box.value : '';
+                                const text = box ? box.textContent : '';
                                 try {
                                     if (navigator.clipboard && navigator.clipboard.writeText) {
                                         await navigator.clipboard.writeText(text);
-                                    } else if (box) {
-                                        box.focus();
-                                        box.select();
+                                    } else if (text) {
+                                        const temp = document.createElement('textarea');
+                                        temp.value = text;
+                                        temp.setAttribute('readonly', 'readonly');
+                                        temp.style.position = 'fixed';
+                                        temp.style.left = '-9999px';
+                                        document.body.appendChild(temp);
+                                        temp.select();
                                         document.execCommand('copy');
+                                        temp.remove();
                                     }
                                     if (status) status.textContent = 'Copied to clipboard.';
                                 } catch (error) {
@@ -2501,10 +2507,6 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                                 btn.addEventListener('click', copyPath);
                             }
 
-                            if (box) {
-                                box.focus();
-                                box.select();
-                            }
                         <\/script>
                     </body>
                     </html>
