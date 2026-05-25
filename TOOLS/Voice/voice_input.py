@@ -183,33 +183,40 @@ class VoiceApp(QMainWindow):
         self.status_btn = QPushButton("")
         self.status_btn.setObjectName("help")
         self.status_btn.setFixedWidth(24)
-        self.status_btn.setEnabled(False) # Visual only
+        self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.status_btn.clicked.connect(self.toggle_record)
+        self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet(f"background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0;")
         layout.addWidget(self.status_btn)
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
         self.lang_btn.setFixedWidth(36)
+        self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.lang_btn.clicked.connect(self.toggle_language)
         self._update_lang_btn()
         layout.addWidget(self.lang_btn)
 
         self.record_btn = QPushButton("🎤 REC")
+        self.record_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.record_btn.clicked.connect(self.toggle_record)
         layout.addWidget(self.record_btn)
 
         help_btn = QPushButton("?")
         help_btn.setObjectName("help"); help_btn.setFixedWidth(24)
+        help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         help_btn.clicked.connect(self.show_help)
         layout.addWidget(help_btn)
 
         settings_btn = QPushButton("⚙")
         settings_btn.setObjectName("help"); settings_btn.setFixedWidth(24)
+        settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         settings_btn.clicked.connect(self.show_settings)
         layout.addWidget(settings_btn)
 
         close_btn = QPushButton("✕")
         close_btn.setObjectName("help"); close_btn.setFixedWidth(24)
+        close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn)
 
