@@ -200,6 +200,7 @@ class VoiceApp(QMainWindow):
             self.config = {
                 "language": "en-US", 
                 "always_on_top": False,
+                "hide_from_taskbar": True,
                 "x": 100,
                 "y": 100,
                 "border_color": CP_RED,
@@ -209,6 +210,9 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "copy_to_clipboard" not in self.config:
             self.config["copy_to_clipboard"] = True
+            self.save_config()
+        if "hide_from_taskbar" not in self.config:
+            self.config["hide_from_taskbar"] = True
             self.save_config()
 
 
@@ -222,11 +226,8 @@ class VoiceApp(QMainWindow):
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
-        
-        flags = Qt.WindowType.FramelessWindowHint
-        if self.config.get("always_on_top"):
-            flags |= Qt.WindowType.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
+
+        self._apply_window_flags()
 
         self.update_style()
 
@@ -369,6 +370,10 @@ class VoiceApp(QMainWindow):
         pin_check.setChecked(self.config.get("always_on_top", False))
         layout.addRow("Always on top:", pin_check)
 
+        taskbar_check = QCheckBox()
+        taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
+        layout.addRow("Hide from taskbar:", taskbar_check)
+
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
         layout.addRow("Stop on Space (SPC mode):", spc_check)
@@ -402,9 +407,13 @@ class VoiceApp(QMainWindow):
             new_pin = pin_check.isChecked()
             if new_pin != self.config.get("always_on_top", False):
                 self.config["always_on_top"] = new_pin
-                flags = Qt.WindowType.FramelessWindowHint
-                if new_pin: flags |= Qt.WindowType.WindowStaysOnTopHint
-                self.setWindowFlags(flags)
+                self._apply_window_flags()
+                self.show()
+
+            new_taskbar = taskbar_check.isChecked()
+            if new_taskbar != self.config.get("hide_from_taskbar", True):
+                self.config["hide_from_taskbar"] = new_taskbar
+                self._apply_window_flags()
                 self.show()
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
@@ -415,6 +424,14 @@ class VoiceApp(QMainWindow):
                 self.record_btn.setVisible(not new_hide)
                 self.setFixedSize(250 if new_hide else 340, 46)
             self.save_config()
+
+    def _apply_window_flags(self):
+        flags = Qt.WindowType.FramelessWindowHint
+        if self.config.get("always_on_top"):
+            flags |= Qt.WindowType.WindowStaysOnTopHint
+        if self.config.get("hide_from_taskbar", True):
+            flags |= Qt.WindowType.Tool
+        self.setWindowFlags(flags)
 
     def setup_global_hotkey(self):
         def on_activate():
