@@ -58,9 +58,9 @@ class SpaceStopThread(QThread):
     result = pyqtSignal(str)
     error  = pyqtSignal(str)
 
-    def __init__(self, lang):
+    def __init__(self, lang_getter):
         super().__init__()
-        self.lang = lang
+        self.lang_getter = lang_getter
         self.running = False
         self._stop = False
 
@@ -80,22 +80,44 @@ class SpaceStopThread(QThread):
                 frames_per_buffer=CHUNK,
             )
             self.running = True
-            frames = []
+            segments = []
+            current_lang = None
+            current_frames = []
             while not self._stop:
-                frames.append(stream.read(CHUNK, exception_on_overflow=False))
+                chunk = stream.read(CHUNK, exception_on_overflow=False)
+                chunk_lang = self.lang_getter()
+                if current_lang is None:
+                    current_lang = chunk_lang
+                elif chunk_lang != current_lang and current_frames:
+                    segments.append((current_lang, current_frames))
+                    current_frames = []
+                    current_lang = chunk_lang
+                current_frames.append(chunk)
             if stream.is_active():
                 stream.stop_stream()
             sample_width = audio_interface.get_sample_size(FORMAT)
             self.running = False
-            buf = io.BytesIO()
-            with wave.open(buf, 'wb') as wf:
-                wf.setnchannels(CHANNELS); wf.setsampwidth(sample_width)
-                wf.setframerate(RATE); wf.writeframes(b''.join(frames))
-            buf.seek(0)
             recognizer = sr.Recognizer()
-            with sr.AudioFile(buf) as source:
-                audio = recognizer.record(source)
-            self.result.emit(recognizer.recognize_google(audio, language=self.lang))
+            if current_frames:
+                segments.append((current_lang or self.lang_getter(), current_frames))
+
+            recognized_parts = []
+            for lang, frames in segments:
+                if not frames:
+                    continue
+                buf = io.BytesIO()
+                with wave.open(buf, 'wb') as wf:
+                    wf.setnchannels(CHANNELS)
+                    wf.setsampwidth(sample_width)
+                    wf.setframerate(RATE)
+                    wf.writeframes(b''.join(frames))
+                buf.seek(0)
+                with sr.AudioFile(buf) as source:
+                    audio = recognizer.record(source)
+                part = recognizer.recognize_google(audio, language=lang)
+                if part:
+                    recognized_parts.append(part)
+            self.result.emit(" ".join(recognized_parts).strip())
         except Exception as e:
             self.running = False
             self.error.emit(str(e))
@@ -120,9 +142,9 @@ class ContinuousThread(QThread):
     result = pyqtSignal(str)
     error  = pyqtSignal(str)
 
-    def __init__(self, lang, phrase_time_limit):
+    def __init__(self, lang_getter, phrase_time_limit):
         super().__init__()
-        self.lang = lang
+        self.lang_getter = lang_getter
         self.phrase_time_limit = phrase_time_limit
         self._stop = False
 
@@ -135,7 +157,7 @@ class ContinuousThread(QThread):
                     audio = recognizer.listen(source, timeout=3, phrase_time_limit=self.phrase_time_limit)
                 if self._stop:
                     break
-                text = recognizer.recognize_google(audio, language=self.lang)
+                text = recognizer.recognize_google(audio, language=self.lang_getter())
                 if text:
                     self.result.emit(text)
             except sr.WaitTimeoutError:
@@ -164,6 +186,7 @@ class VoiceApp(QMainWindow):
         self._stop_requested = False
         self._session_id = 0
         self.load_config()
+        self._active_language = self.config.get("language", "en-US")
         self.init_ui()
         self.toggle_record_requested.connect(self.toggle_record)
         self.space_press_requested.connect(self._handle_space_press)
@@ -422,6 +445,7 @@ class VoiceApp(QMainWindow):
 
     def change_language(self, lang):
         self.config["language"] = lang
+        self._active_language = lang
         self.save_config()
         self._update_lang_btn()
 
@@ -453,6 +477,9 @@ class VoiceApp(QMainWindow):
         self.config["copy_to_clipboard"] = not self.config.get("copy_to_clipboard", True)
         self.save_config()
         self._update_copy_btn()
+
+    def get_active_language(self):
+        return self._active_language
 
     def toggle_record(self):
         if self.config.get("engine", "local") == "browser":
@@ -497,7 +524,7 @@ class VoiceApp(QMainWindow):
         self._set_status(CP_RED)
         if self.config.get("stop_mode", "auto") == "space":
             self.record_btn.setText("⏹️ SPC")
-            self.voice_thread = SpaceStopThread(self.config["language"])
+            self.voice_thread = SpaceStopThread(self.get_active_language)
         else:
             self.record_btn.setText("⏹️ STOP")
             self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
@@ -514,7 +541,7 @@ class VoiceApp(QMainWindow):
         self.record_btn.setText("⏹️ LIVE")
         self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
         self._continuous_thread = ContinuousThread(
-            self.config["language"], self.config.get("phrase_time_limit", 10))
+            self.get_active_language, self.config.get("phrase_time_limit", 10))
         self._continuous_thread.result.connect(self.on_result)
         self._continuous_thread.error.connect(lambda error, sid=self._session_id: self.on_error(sid, error))
         self._continuous_thread.finished.connect(self._on_continuous_finished)
