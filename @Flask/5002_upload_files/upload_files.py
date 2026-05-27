@@ -1,4 +1,5 @@
 import os
+import queue
 import re
 import subprocess
 import threading
@@ -24,6 +25,8 @@ app.config['SHARE_FOLDER'] = SHARE_FOLDER
 
 NOTIFICATION_LOCK = threading.Lock()
 ACTIVE_NOTIFICATION_SLOTS = set()
+NOTIFICATION_QUEUE = queue.Queue()
+NOTIFICATION_MANAGER_STARTED = False
 
 def create_safe_filename(filename):
     """
@@ -88,25 +91,43 @@ def show_upload_notification(filename, file_path):
     if os.name != "nt":
         return
 
-    slot = get_notification_slot()
+    start_notification_manager()
+    NOTIFICATION_QUEUE.put((filename, file_path))
 
-    def notification_worker():
-        released = False
+def start_notification_manager():
+    global NOTIFICATION_MANAGER_STARTED
 
-        def release_slot_once():
-            nonlocal released
-            if not released:
-                release_notification_slot(slot)
-                released = True
+    with NOTIFICATION_LOCK:
+        if NOTIFICATION_MANAGER_STARTED:
+            return
+        NOTIFICATION_MANAGER_STARTED = True
 
-        try:
-            import tkinter as tk
-            from tkinter import font as tkfont
+    threading.Thread(target=notification_manager_worker, daemon=True).start()
 
-            root = tk.Tk()
-            root.withdraw()
-            root.overrideredirect(True)
-            root.attributes("-topmost", True)
+def notification_manager_worker():
+    try:
+        import tkinter as tk
+        from tkinter import font as tkfont
+    except Exception as e:
+        print(f"Notification startup error: {e}")
+        return
+
+    try:
+        root = tk.Tk()
+        root.withdraw()
+
+        body_font = tkfont.Font(family="Segoe UI", size=-16)
+        close_font = tkfont.Font(family="Segoe UI", size=-18)
+
+        def create_notification(filename, file_path):
+            slot = get_notification_slot()
+            released = False
+
+            def release_slot_once():
+                nonlocal released
+                if not released:
+                    release_notification_slot(slot)
+                    released = True
 
             width = 320
             height = 58
@@ -117,18 +138,29 @@ def show_upload_notification(filename, file_path):
             screen_height = root.winfo_screenheight()
             x = screen_width - width - margin_right
             y = screen_height - height - margin_bottom - (slot * (height + gap))
-            root.geometry(f"{width}x{height}+{x}+{y}")
 
             bg = "#111111"
             border = "#0078d4"
             text = "#f3f3f3"
             muted = "#bdbdbd"
 
-            frame = tk.Frame(root, bg=bg, highlightthickness=1, highlightbackground=border)
+            window = tk.Toplevel(root)
+            window.withdraw()
+            window.overrideredirect(True)
+            window.attributes("-topmost", True)
+            window.geometry(f"{width}x{height}+{x}+{y}")
+
+            frame = tk.Frame(window, bg=bg, highlightthickness=1, highlightbackground=border)
             frame.pack(fill="both", expand=True)
 
-            body_font = tkfont.Font(family="Segoe UI", size=-16)
-            close_font = tkfont.Font(family="Segoe UI", size=-18)
+            def close_notification():
+                release_slot_once()
+                if window.winfo_exists():
+                    window.destroy()
+
+            def handle_click(_event=None):
+                open_file_folder(file_path)
+                close_notification()
 
             close_button = tk.Button(
                 frame,
@@ -140,6 +172,7 @@ def show_upload_notification(filename, file_path):
                 relief="flat",
                 bd=0,
                 font=close_font,
+                command=close_notification,
                 cursor="hand2",
             )
             close_button.place(x=282, y=14, width=26, height=26)
@@ -155,25 +188,32 @@ def show_upload_notification(filename, file_path):
             )
             message.place(x=14, y=16, width=262, height=22)
 
-            def handle_click(_event=None):
-                open_file_folder(file_path)
-                root.destroy()
-
-            close_button.configure(command=root.destroy)
-
             for widget in (frame, message):
                 widget.configure(cursor="hand2")
                 widget.bind("<Button-1>", handle_click)
 
-            root.deiconify()
-            root.after(10000, root.destroy)
-            root.mainloop()
-        except Exception as e:
-            print(f"Notification error for '{filename}': {e}")
-        finally:
-            release_slot_once()
+            window.protocol("WM_DELETE_WINDOW", close_notification)
+            window.after(10000, close_notification)
+            window.deiconify()
 
-    threading.Thread(target=notification_worker, daemon=True).start()
+        def poll_notifications():
+            while True:
+                try:
+                    filename, file_path = NOTIFICATION_QUEUE.get_nowait()
+                except queue.Empty:
+                    break
+
+                try:
+                    create_notification(filename, file_path)
+                except Exception as e:
+                    print(f"Notification error for '{filename}': {e}")
+
+            root.after(100, poll_notifications)
+
+        poll_notifications()
+        root.mainloop()
+    except Exception as e:
+        print(f"Notification manager error: {e}")
 
 # HTML template within the Python file (instead of an external index.html)
 html_template = '''
