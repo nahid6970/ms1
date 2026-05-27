@@ -66,7 +66,7 @@ def release_notification_slot(slot):
     with NOTIFICATION_LOCK:
         ACTIVE_NOTIFICATION_SLOTS.discard(slot)
 
-def shorten_notification_filename(filename, max_length=42):
+def shorten_notification_filename(filename, max_length=34):
     file_name = filename.replace("\\", "/").split("/")[-1]
     if len(file_name) <= max_length:
         return file_name
@@ -127,8 +127,8 @@ def show_upload_notification(filename, file_path):
             frame = tk.Frame(root, bg=bg, highlightthickness=1, highlightbackground=border)
             frame.pack(fill="both", expand=True)
 
-            body_font = tkfont.Font(family="Segoe UI", size=9)
-            close_font = tkfont.Font(family="Segoe UI", size=11)
+            body_font = tkfont.Font(family="Segoe UI", size=-16)
+            close_font = tkfont.Font(family="Segoe UI", size=-18)
 
             close_button = tk.Button(
                 frame,
@@ -152,9 +152,8 @@ def show_upload_notification(filename, file_path):
                 font=body_font,
                 anchor="w",
                 justify="left",
-                wraplength=250,
             )
-            message.place(x=14, y=12, width=262, height=32)
+            message.place(x=14, y=16, width=262, height=22)
 
             def handle_click(_event=None):
                 open_file_folder(file_path)
