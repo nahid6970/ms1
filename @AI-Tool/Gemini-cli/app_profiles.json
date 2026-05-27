@@ -130,5 +130,16 @@
         "timer_enabled": false,
         "target_time": null,
         "active": true
+    },
+    {
+        "name": "nahid69703",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\codex\\nahid69703",
+        "target_path": "C:\\Users\\nahid\\.codex",
+        "app_name": "Codex",
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": false
     }
 ]
