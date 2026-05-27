@@ -1,194 +1,257 @@
-# Project Template & Development Guide
+# Image Checker Extension Guide
 
-This is a **reusable template** for setting up proper documentation and development workflow for any new project. Copy this to your project root and customize as needed.
+This document describes the `image_checker` Chrome extension project, its main files, runtime behavior, and the current implementation notes for marking images and Facebook group media thumbnails.
 
----
+## Project Location
 
-## 📁 Project Structure
-
-```
-project-root/
-├── dev.md                      # Main development guide
-├── md/                         # Documentation folder
-│   ├── RECENT.md               # All development sessions (full history, no archiving)
-│   ├── PROBLEMS_AND_FIXES.md   # Bug tracking and solutions
-│   ├── FEATURES.md             # Feature specifications
-│   ├── UI_UX.md                # UI/UX design decisions and guidelines
-│   ├── KEYBOARD_SHORTCUTS.md   # If applicable
-│   └── [FEATURE_NAME].md       # Individual feature docs
+```text
+C:\@delta\ms1\test_project\my-first-extension\convex_extensions_manager\image_checker
 ```
 
----
+## Purpose
 
-## 📋 MD File Templates
+Image Checker is a Manifest V3 Chrome extension that lets the user mark media items with green checkmarks while browsing. It is mainly used to track which images or video thumbnails have already been reviewed.
 
-### dev.md / DEVELOPER_GUIDE.md
-Main guide for the project. Document architecture, setup, and link to other md files using `#[[file:md/RECENT.md]]`.
+The extension supports:
 
-### md/RECENT.md
-```
-# Recent Development Log
-All sessions recorded here — no archiving, full history in one place.
-Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
+- Images (`img`)
+- Videos (`video`)
+- Elements with inline `background-image`
+- YouTube thumbnails and player items
+- Facebook group media/video thumbnails
 
-## [YYYY-MM-DD HH:MM] - Session Title
-**What We Accomplished:**
-- Feature/fix descriptions with timestamps
-**Files Modified:**
-- List of changed files
-**Known Issues:**
-- List current problems
-*Next session: [What to work on next]*
-```
+## Core User Flow
 
-### md/PROBLEMS_AND_FIXES.md
-```
-# Problems & Fixes Log
-## [YYYY-MM-DD HH:MM] - Problem Title
-**Problem:** Description of the issue
-**Root Cause:** What was causing it
-**Solution:** How it was fixed
-**Files Modified:** List of changed files
-```
+1. Load the extension from `chrome://extensions/` with Developer Mode enabled.
+2. Open a supported page, such as a Facebook group Media tab.
+3. Enable checking mode from the popup or with `F2`.
+4. Mark or unmark media items.
+5. Disable checking mode when finished.
+6. Saved checkmarks remain visible on marked thumbnails.
 
-### md/FEATURES.md
-```
-# Feature Specifications
-## Feature Name
-**Status:** ✅ Complete / 🚧 In Progress / 📋 Planned
-**Description:** What this feature does
-**Implementation:** Technical details
-**Files Involved:** List of files
-**Usage:** How to use the feature
-**Dependencies:** Required components
+## Main Files
+
+```text
+image_checker/
+├── manifest.json      # Chrome extension manifest
+├── content.js         # Main page scanning, marking, rendering, persistence sync
+├── styles.css         # Checkmark, notification, and edit button styles
+├── popup.html         # Extension popup UI
+├── popup.js           # Popup toggle/settings behavior
+├── popup.css          # Popup styles
+├── background.js      # Background service worker and Convex sync hooks
+├── README.md          # Basic project README
+├── icons/             # Extension icons
+└── assets/            # Optional assets
 ```
 
-### md/UI_UX.md
-```
-# UI/UX Design & Guidelines
-## Component/Screen Name
-**Layout:** Description of layout and structure
-**Colors & Theme:** Color palette and theming decisions
-**Typography:** Fonts, sizes, hierarchy
-**Interactions:** Animations, transitions, user flows
-**Accessibility:** A11y considerations
-**Notes:** Design decisions and rationale
-```
+## Manifest
 
----
+The extension uses Manifest V3.
 
-## 📋 Development Best Practices
+Important permissions:
 
-### Documentation Rules
-1. **Record all changes in RECENT.md** — full history, no archiving
-2. **When giving AI context from RECENT.md**, only read it when relevant to the current task — reference the last 5 sessions max
-3. **Document every bug fix in PROBLEMS_AND_FIXES.md**
-4. **Use file references:** `#[[file:path/to/file.md]]`
+- `storage`: saves seen items and settings.
+- `scripting`: available for extension scripting needs.
+- `downloads`: used by existing extension features.
+- `tabs`: lets popup messaging reach tabs.
 
-### Session Management
-1. **Start each session** by reading RECENT.md
-2. **Update RECENT.md** at end of each session
-3. **Include timestamps** for all work (HH:MM format)
-4. **Track time spent** on each task
-5. **List next steps** for continuity
+Host permissions:
 
-### Code Organization
-1. **Separate concerns** — UI, logic, data
-2. **Document complex functions** inline
-3. **Use consistent naming** conventions
-4. **Keep files focused** — single responsibility
-5. **Comment non-obvious code** thoroughly
-6. **Use absolute paths** in scripts (resolved relative to the script file) so they work from any directory:
-   `os.path.join(os.path.dirname(__file__), 'data.json')`
+- `<all_urls>` so the content script can run on general sites.
+- `https://*.convex.cloud/*` for Convex-related syncing.
 
----
+The content script injects:
 
-## 🎯 Project Customization
+- `styles.css`
+- `content.js`
 
-### Adapt This Template
-1. **Replace placeholders** with your project specifics
-2. **Add project-specific sections** to dev.md
-3. **Create feature-specific** documentation files
-4. **Customize file structure** for your technology stack
+## Storage Model
 
-### Working with Existing Projects
-- **Respect existing structure:** If a project lacks this MD structure and the user hasn't requested it, DO NOT impose it.
-- **Adapt workflow:** Follow the project's established patterns unless explicitly asked to modernize them.
+The main local storage keys are:
 
-### Technology-Specific Additions
-- **Web Projects:** Add API documentation, component guides. Always check for available ports before starting dev servers — do not hardcode ports.
-- **Desktop Apps:** Add build instructions, deployment guides
-- **Mobile Apps:** Add platform-specific setup, testing guides
-- **Libraries:** Add usage examples, API reference
-- **Scripts:** Add configuration options, usage scenarios
+- `seenItems`: object keyed by content ID, value is timestamp.
+- `imageCheckerSettings`: checkmark color, size, border, text color, hide toggle.
+- `checkingMode_global`: global checking mode state used by popup/F2 flow.
+- `excludedDomains`: domains where the extension should not run.
 
----
+`seenItems` example:
 
-## 📚 File Templates
-
-### README.md
-```markdown
-# Project Name
-
-Brief description of what this project does.
-
-## Setup
-1. Clone the repository
-2. Install dependencies
-3. Run the application
-
-## Usage
-How to use the project
-
-## Contributing
-See dev.md for development workflow.
+```json
+{
+  "media|https://scontent.example.fbcdn.net/v/t15.5256-10/file.jpg": 1779880000000
+}
 ```
 
-### .gitignore
-```
-# Dependencies
-node_modules/
-__pycache__/
-*.pyc
+## Content IDs
 
-# Environment
-.env
-.venv/
-venv/
+`content.js` generates stable IDs for media so saved marks can be restored after reloads.
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+Generic media IDs:
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Build
-dist/
-build/
-*.min.js
-*.min.css
+```text
+media|<normalized-media-url>
 ```
 
----
+YouTube IDs:
 
-## 🎉 Getting Started
+```text
+yt_<video-id>
+```
 
-1. **Copy this file** to your new project root as `dev.md`
-2. **Create the `md/` folder** and required files
-3. **Create initial RECENT.md entry** for project setup
-4. **Start following the workflow** from day one
+Link fallback IDs:
 
-**Remember:** Good documentation from the start saves hours of confusion later!
+```text
+link|<href>|<text-snippet>
+```
 
----
+Facebook CDN handling is important: `fbcdn.net` URLs often rotate query parameters after refresh. The extension normalizes those URLs by keeping only:
 
-*This template is based on proven practices from real project development.*
-*Customize it for your specific needs and technology stack.*
+```text
+origin + pathname
+```
+
+This avoids losing saved checkmarks when Facebook changes tracking/query parameters.
+
+## Checking Mode
+
+Checking mode controls editing, not whether saved checkmarks are visible.
+
+When checking mode is ON:
+
+- The page scans for media.
+- Hover outlines appear.
+- Media can be marked/unmarked.
+- Edit controls may appear where needed, especially for Facebook media grids.
+
+When checking mode is OFF:
+
+- Editing controls are removed.
+- Saved center checkmarks remain visible.
+- Stored marks still sync when the page changes.
+
+## Checkmark Rendering
+
+Saved marks are rendered as fixed-position overlays centered on the target thumbnail. This is necessary for pages like Facebook, where thumbnails often live inside complex wrappers with clipping, stacking contexts, and React-managed click behavior.
+
+Rendering rules:
+
+- Use the media element or target container bounding box.
+- Place the checkmark at the visual center.
+- Use a high `z-index`.
+- Keep `pointer-events: none` so the mark does not block page interactions.
+- Re-render on scroll/resize because fixed overlays depend on viewport coordinates.
+
+## Facebook Media Notes
+
+Facebook group video grids do not behave like simple pages:
+
+- The visible video tile is usually an image thumbnail.
+- Click handlers may be attached to wrapper links, overlays, or React-managed elements.
+- The actual `img` can be detected and processed even when normal click marking fails.
+- `fbcdn.net` URLs include expiring or rotating query params.
+
+The stable approach is:
+
+- Detect and process the thumbnail image.
+- Normalize `fbcdn.net` URL IDs.
+- Render saved checkmarks independently of Facebook's DOM nesting.
+- Keep edit behavior separate from saved mark visibility.
+
+## Popup Behavior
+
+The popup controls:
+
+- Start/stop checking mode.
+- Clear all checkmarks.
+- Save/load data with Convex.
+- Visual settings such as checkmark size/color and border.
+- Temporary hide checkmarks setting.
+- Domain exclusions.
+
+The popup communicates with `content.js` through `chrome.tabs.sendMessage`.
+
+## Development Workflow
+
+After editing `content.js`, run:
+
+```powershell
+node --check content.js
+```
+
+Then reload the unpacked extension:
+
+1. Open `chrome://extensions/`.
+2. Find `Image Checker`.
+3. Click reload.
+4. Refresh the target webpage.
+
+## Manual Test Checklist
+
+Use this after behavior changes:
+
+1. Enable checking mode with `F2`.
+2. Mark a normal image.
+3. Disable checking mode.
+4. Confirm the center checkmark remains visible.
+5. Refresh the page.
+6. Confirm the checkmark returns.
+7. Test Facebook group Media > Videos.
+8. Mark a Facebook video thumbnail.
+9. Disable checking mode.
+10. Confirm the center checkmark remains visible.
+11. Refresh Facebook.
+12. Confirm the mark persists.
+13. Clear all checkmarks from popup.
+14. Confirm all marks disappear.
+
+## Common Issues
+
+### Checkmark Only Shows While F2 Is Enabled
+
+Cause:
+
+Saved mark display was tied too closely to checking mode.
+
+Fix:
+
+Checking mode should only control editing. Saved marks should render independently when `seenItems` contains the media ID.
+
+### Facebook Marks Disappear After Refresh
+
+Cause:
+
+Full `fbcdn.net` URLs include rotating query parameters.
+
+Fix:
+
+Normalize Facebook media URLs to `origin + pathname` before generating the `media|...` ID.
+
+### Checkmark Appears in Wrong Position
+
+Cause:
+
+Fixed-position overlays depend on viewport coordinates.
+
+Fix:
+
+Re-render overlays on scroll and resize.
+
+### Checkmark Hidden Behind Facebook UI
+
+Cause:
+
+Facebook uses nested wrappers, clipping, and stacking contexts.
+
+Fix:
+
+Render checkmarks into `document.body` as fixed overlays with high `z-index`.
+
+## Safe Editing Notes
+
+- Keep edits focused in `content.js` and `styles.css` unless popup UI changes are required.
+- Avoid tying saved mark visibility to checking mode.
+- Do not use raw CSS attribute selectors with full media URLs for matching, because long query strings can break matching logic or become unstable.
+- Prefer comparing `dataset.icContentId` values in JavaScript when matching processed elements.
+- Always test on both a normal image page and Facebook group media/video grids.
+
