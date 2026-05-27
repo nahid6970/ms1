@@ -1,5 +1,7 @@
 import os
 import re
+import subprocess
+import threading
 import time
 from flask import Flask, request, send_from_directory, redirect, url_for, flash, render_template_string
 from werkzeug.utils import secure_filename
@@ -48,6 +50,117 @@ def create_safe_filename(filename):
     # Rejoin with forward slashes (works on both Windows and Unix)
     safe_filename = '/'.join(safe_parts) if safe_parts else 'unnamed_file'
     return safe_filename
+
+def open_file_folder(file_path):
+    """Open Windows Explorer with the uploaded file selected."""
+    if os.name != "nt":
+        return
+
+    normalized_path = os.path.normpath(file_path)
+    if os.path.exists(normalized_path):
+        subprocess.Popen(["explorer", f"/select,{normalized_path}"])
+    else:
+        subprocess.Popen(["explorer", os.path.dirname(normalized_path)])
+
+def show_upload_notification(filename, file_path):
+    """Show a small clickable Windows-style notification above the taskbar."""
+    if os.name != "nt":
+        return
+
+    def notification_worker():
+        try:
+            import tkinter as tk
+            from tkinter import font as tkfont
+
+            root = tk.Tk()
+            root.withdraw()
+            root.overrideredirect(True)
+            root.attributes("-topmost", True)
+
+            width = 360
+            height = 118
+            margin_right = 18
+            margin_bottom = 54
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            x = screen_width - width - margin_right
+            y = screen_height - height - margin_bottom
+            root.geometry(f"{width}x{height}+{x}+{y}")
+
+            bg = "#f7f7f7"
+            border = "#d0d0d0"
+            text = "#1f1f1f"
+            muted = "#5f5f5f"
+
+            frame = tk.Frame(root, bg=bg, highlightthickness=1, highlightbackground=border)
+            frame.pack(fill="both", expand=True)
+
+            title_font = tkfont.Font(family="Segoe UI", size=10, weight="bold")
+            body_font = tkfont.Font(family="Segoe UI", size=9)
+            close_font = tkfont.Font(family="Segoe UI", size=11)
+
+            title = tk.Label(
+                frame,
+                text="File uploaded",
+                bg=bg,
+                fg=text,
+                font=title_font,
+                anchor="w",
+            )
+            title.place(x=16, y=14, width=285, height=22)
+
+            close_button = tk.Button(
+                frame,
+                text="×",
+                bg=bg,
+                fg=muted,
+                activebackground="#e8e8e8",
+                activeforeground=text,
+                relief="flat",
+                bd=0,
+                font=close_font,
+                command=root.destroy,
+                cursor="hand2",
+            )
+            close_button.place(x=320, y=10, width=28, height=28)
+
+            message = tk.Label(
+                frame,
+                text=filename,
+                bg=bg,
+                fg=text,
+                font=body_font,
+                anchor="w",
+                justify="left",
+                wraplength=320,
+            )
+            message.place(x=16, y=42, width=322, height=34)
+
+            hint = tk.Label(
+                frame,
+                text="Click to open the file location",
+                bg=bg,
+                fg=muted,
+                font=body_font,
+                anchor="w",
+            )
+            hint.place(x=16, y=80, width=322, height=20)
+
+            def handle_click(_event=None):
+                open_file_folder(file_path)
+                root.destroy()
+
+            for widget in (frame, title, message, hint):
+                widget.configure(cursor="hand2")
+                widget.bind("<Button-1>", handle_click)
+
+            root.deiconify()
+            root.after(10000, root.destroy)
+            root.mainloop()
+        except Exception as e:
+            print(f"Notification error for '{filename}': {e}")
+
+    threading.Thread(target=notification_worker, daemon=True).start()
 
 # HTML template within the Python file (instead of an external index.html)
 html_template = '''
@@ -510,6 +623,7 @@ def index():
                 speed = file_size / upload_time if upload_time > 0 else 0
                 
                 print(f"✅ Uploaded: {filename} ({file_size} bytes) in {upload_time:.2f}s ({speed/1024:.1f} KB/s)")
+                show_upload_notification(filename, file_path)
                 
                 flash(f"File '{filename}' uploaded successfully.", "success")
                 return '', 200  # Success
