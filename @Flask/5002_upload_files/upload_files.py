@@ -120,48 +120,70 @@ def notification_manager_worker():
         body_font = tkfont.Font(family="Segoe UI", size=-16)
         close_font = tkfont.Font(family="Segoe UI", size=-18)
 
-        def create_notification(filename, file_path):
-            slot = get_notification_slot()
-            released = False
+        active_notifications = []
+        clear_all_window = None
 
-            def release_slot_once():
-                nonlocal released
-                if not released:
-                    release_notification_slot(slot)
-                    released = True
+        width = 320
+        height = 58
+        gap = 10
+        margin_right = 18
+        margin_bottom = 54
+        bg = "#111111"
+        border = "#0078d4"
+        text = "#f3f3f3"
+        muted = "#bdbdbd"
 
-            width = 320
-            height = 58
-            gap = 10
-            margin_right = 18
-            margin_bottom = 54
+        def notification_position(slot):
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
             x = screen_width - width - margin_right
             y = screen_height - height - margin_bottom - (slot * (height + gap))
+            return x, y
 
-            bg = "#111111"
-            border = "#0078d4"
-            text = "#f3f3f3"
-            muted = "#bdbdbd"
+        def move_window(window, slot):
+            if window.winfo_exists():
+                x, y = notification_position(slot)
+                window.geometry(f"{width}x{height}+{x}+{y}")
 
-            window = tk.Toplevel(root)
-            window.withdraw()
-            window.overrideredirect(True)
-            window.attributes("-topmost", True)
-            window.geometry(f"{width}x{height}+{x}+{y}")
+        def refresh_notification_positions():
+            clear_slot_offset = 1 if clear_all_window and clear_all_window.winfo_exists() else 0
+            for index, notification in enumerate(active_notifications):
+                move_window(notification["window"], index + clear_slot_offset)
 
-            frame = tk.Frame(window, bg=bg, highlightthickness=1, highlightbackground=border)
+        def update_clear_all_notification():
+            nonlocal clear_all_window
+
+            if len(active_notifications) <= 1:
+                if clear_all_window and clear_all_window.winfo_exists():
+                    clear_all_window.destroy()
+                clear_all_window = None
+                refresh_notification_positions()
+                return
+
+            if clear_all_window and clear_all_window.winfo_exists():
+                move_window(clear_all_window, 0)
+                refresh_notification_positions()
+                return
+
+            clear_all_window = tk.Toplevel(root)
+            clear_all_window.withdraw()
+            clear_all_window.overrideredirect(True)
+            clear_all_window.attributes("-topmost", True)
+            move_window(clear_all_window, 0)
+
+            frame = tk.Frame(clear_all_window, bg=bg, highlightthickness=1, highlightbackground=border)
             frame.pack(fill="both", expand=True)
 
-            def close_notification():
-                release_slot_once()
-                if window.winfo_exists():
-                    window.destroy()
-
-            def handle_click(_event=None):
-                open_file_folder(file_path)
-                close_notification()
+            label = tk.Label(
+                frame,
+                text="Clear all notifications",
+                bg=bg,
+                fg=text,
+                font=body_font,
+                anchor="w",
+                justify="left",
+            )
+            label.place(x=14, y=16, width=262, height=22)
 
             close_button = tk.Button(
                 frame,
@@ -173,7 +195,66 @@ def notification_manager_worker():
                 relief="flat",
                 bd=0,
                 font=close_font,
-                command=close_notification,
+                command=clear_all_notifications,
+                cursor="hand2",
+            )
+            close_button.place(x=282, y=14, width=26, height=26)
+
+            for widget in (frame, label):
+                widget.configure(cursor="hand2")
+                widget.bind("<Button-1>", clear_all_notifications)
+
+            clear_all_window.deiconify()
+            refresh_notification_positions()
+
+        def remove_notification(notification):
+            if notification in active_notifications:
+                active_notifications.remove(notification)
+            if notification["window"].winfo_exists():
+                notification["window"].destroy()
+            update_clear_all_notification()
+
+        def clear_all_notifications(_event=None):
+            nonlocal clear_all_window
+
+            for notification in active_notifications[:]:
+                if notification["window"].winfo_exists():
+                    notification["window"].destroy()
+            active_notifications.clear()
+
+            if clear_all_window and clear_all_window.winfo_exists():
+                clear_all_window.destroy()
+            clear_all_window = None
+
+        def create_notification(filename, file_path):
+            slot = len(active_notifications) + (1 if clear_all_window and clear_all_window.winfo_exists() else 0)
+
+            window = tk.Toplevel(root)
+            window.withdraw()
+            window.overrideredirect(True)
+            window.attributes("-topmost", True)
+            move_window(window, slot)
+
+            frame = tk.Frame(window, bg=bg, highlightthickness=1, highlightbackground=border)
+            frame.pack(fill="both", expand=True)
+
+            notification = {"window": window}
+
+            def handle_click(_event=None):
+                open_file_folder(file_path)
+                remove_notification(notification)
+
+            close_button = tk.Button(
+                frame,
+                text="×",
+                bg=bg,
+                fg=muted,
+                activebackground="#2a2a2a",
+                activeforeground=text,
+                relief="flat",
+                bd=0,
+                font=close_font,
+                command=lambda: remove_notification(notification),
                 cursor="hand2",
             )
             close_button.place(x=282, y=14, width=26, height=26)
@@ -193,9 +274,10 @@ def notification_manager_worker():
                 widget.configure(cursor="hand2")
                 widget.bind("<Button-1>", handle_click)
 
-            window.protocol("WM_DELETE_WINDOW", close_notification)
-            window.after(10000, close_notification)
+            window.protocol("WM_DELETE_WINDOW", lambda: remove_notification(notification))
+            active_notifications.append(notification)
             window.deiconify()
+            update_clear_all_notification()
 
         def poll_notifications():
             while True:
