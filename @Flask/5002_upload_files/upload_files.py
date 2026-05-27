@@ -76,12 +76,16 @@ def shorten_notification_filename(filename, max_length=34):
     return f"{file_name[:max_length - 3]}..."
 
 def open_file_folder(file_path):
-    """Open Windows Explorer to the uploaded file's folder."""
+    """Open Windows Explorer with the uploaded file selected."""
     if os.name != "nt":
         return
 
-    normalized_path = os.path.normpath(file_path)
+    normalized_path = os.path.abspath(os.path.normpath(file_path))
     folder_path = normalized_path if os.path.isdir(normalized_path) else os.path.dirname(normalized_path)
+    if os.path.isfile(normalized_path):
+        subprocess.Popen(["explorer.exe", "/select,", normalized_path])
+        return
+
     if folder_path and os.path.exists(folder_path):
         os.startfile(folder_path)
     else:
