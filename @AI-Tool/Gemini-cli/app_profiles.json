@@ -99,17 +99,6 @@
         "active": false
     },
     {
-        "name": "nahid69703",
-        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\codex\\nahid69703",
-        "target_path": "C:\\Users\\nahid\\.codex",
-        "app_name": "Codex",
-        "is_locked": true,
-        "password": "1823",
-        "timer_enabled": false,
-        "target_time": null,
-        "active": true
-    },
-    {
         "name": "nahid6970",
         "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\codex\\nahid6970",
         "target_path": "C:\\Users\\nahid\\.codex",
@@ -119,5 +108,27 @@
         "timer_enabled": false,
         "target_time": null,
         "active": false
+    },
+    {
+        "name": "nahid69701",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\codex\\nahid69701",
+        "target_path": "C:\\Users\\nahid\\.codex",
+        "app_name": "Codex",
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": false
+    },
+    {
+        "name": "nahid69702",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\codex\\nahid69702",
+        "target_path": "C:\\Users\\nahid\\.codex",
+        "app_name": "Codex",
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": true
     }
 ]
