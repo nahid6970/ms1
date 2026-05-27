@@ -93,3 +93,8 @@ body.ic-hide-checkmarks [data-ic-has-border="true"] {
     border-color: transparent !important;
     border-width: 0 !important;
 }
+
+.ic-toggle-button {
+    appearance: none !important;
+    font-family: Arial, sans-serif !important;
+}

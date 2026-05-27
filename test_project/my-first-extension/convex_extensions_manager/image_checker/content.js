@@ -41,6 +41,10 @@ chrome.storage.local.get(['excludedDomains'], (result) => {
 function runExtension() {
     let checkingMode = false;
     let seenItems = new Set(); // Local cache of seen IDs
+    let lastPressToggle = {
+        id: null,
+        time: 0
+    };
     let currentSettings = {
         checkmarkSize: 15,
         checkmarkColor: '#4CAF50',
@@ -69,9 +73,9 @@ function runExtension() {
                 setupObservers();
 
                 // Check if mode should be active
-                const tabId = getTabId();
-                chrome.storage.local.get([`checkingMode_${tabId}`], function (result) {
-                    if (result[`checkingMode_${tabId}`]) {
+                const modeKey = getModeStorageKey();
+                chrome.storage.local.get([modeKey], function (result) {
+                    if (result[modeKey]) {
                         toggleMode(true);
                     }
                 });
@@ -106,6 +110,77 @@ function runExtension() {
         });
     }
 
+    function getVisualSource(element) {
+        if (!element || element.nodeType !== 1) return null;
+
+        if (element.tagName === 'IMG') {
+            return element.currentSrc || element.src || null;
+        }
+
+        if (element.tagName === 'VIDEO') {
+            return element.currentSrc || element.src || null;
+        }
+
+        if (element.style && element.style.backgroundImage && element.style.backgroundImage !== 'none') {
+            const bg = element.style.backgroundImage.slice(5, -2).replace(/['"]/g, "");
+            return bg || null;
+        }
+
+        return null;
+    }
+
+    function normalizeMediaUrl(rawUrl) {
+        if (!rawUrl) return null;
+        try {
+            const parsed = new URL(rawUrl, location.href);
+            const host = parsed.hostname.toLowerCase();
+
+            // fbcdn links rotate query params frequently; keep stable identity by origin + path.
+            if (host.includes('fbcdn.net')) {
+                return `${parsed.origin}${parsed.pathname}`;
+            }
+
+            parsed.hash = '';
+            return parsed.toString();
+        } catch {
+            return rawUrl.split('#')[0];
+        }
+    }
+
+    function findVisualMediaElement(element) {
+        if (!element || element.nodeType !== 1) return null;
+
+        const directSource = getVisualSource(element);
+        if (directSource) return element;
+
+        if (!isLikelyInteractiveWrapper(element)) return null;
+
+        const candidates = element.querySelectorAll('img, video, [style*="background-image"]');
+        let bestCandidate = null;
+        let bestArea = 0;
+
+        candidates.forEach(candidate => {
+            const source = getVisualSource(candidate);
+            if (!source) return;
+
+            const area = (candidate.offsetWidth || 0) * (candidate.offsetHeight || 0);
+            if (area > bestArea) {
+                bestArea = area;
+                bestCandidate = candidate;
+            }
+        });
+
+        return bestCandidate;
+    }
+
+    function isLikelyInteractiveWrapper(element) {
+        if (!element || element.nodeType !== 1) return false;
+
+        return element.matches(
+            'a, button, [role="button"], [role="link"], [role="gridcell"], [tabindex], ytd-thumbnail, ytd-playlist-thumbnail, .ytd-thumbnail'
+        );
+    }
+
     function markAsSeen(id) {
         if (!id) return;
         if (seenItems.has(id)) return; // Already seen
@@ -120,6 +195,13 @@ function runExtension() {
 
         // Visually update immediately
         applyCheckmarksToMatching(id);
+    }
+
+    function markElementAsSeen(element, id) {
+        markAsSeen(id);
+        if (element && element.dataset.hasCheckmark !== 'true') {
+            renderCheckmark(element);
+        }
     }
 
     function markAsUnseen(id) {
@@ -166,15 +248,10 @@ function runExtension() {
         // 2. Generic Sites: Strict Decoupling
 
         // Case A: Visual Media (Image/Video/Background)
-        if (element.tagName === 'IMG') {
-            return element.src ? `media|${element.src}` : null;
-        }
-        if (element.tagName === 'VIDEO') {
-            return element.currentSrc || element.src ? `media|${element.currentSrc || element.src}` : null;
-        }
-        if (element.style && element.style.backgroundImage && element.style.backgroundImage !== 'none') {
-            const bg = element.style.backgroundImage.slice(5, -2).replace(/['"]/g, "");
-            return bg ? `media|${bg}` : null;
+        const visualElement = findVisualMediaElement(element);
+        if (visualElement) {
+            const mediaSource = normalizeMediaUrl(getVisualSource(visualElement));
+            if (mediaSource) return `media|${mediaSource}`;
         }
 
         // Case B: Navigation Links
@@ -205,6 +282,26 @@ function runExtension() {
         return element;
     }
 
+    function resolveInteractiveElement(startNode) {
+        let element = startNode && startNode.nodeType === 1 ? startNode : startNode?.parentElement;
+
+        while (element && element !== document.body) {
+            if (getVisualSource(element)) return element;
+
+            if (isLikelyInteractiveWrapper(element) && findVisualMediaElement(element)) {
+                return element;
+            }
+
+            if (element.tagName === 'A' && element.href) {
+                return element;
+            }
+
+            element = element.parentElement;
+        }
+
+        return null;
+    }
+
     function scanPage() {
         const selectors = [
             'ytd-thumbnail',
@@ -220,6 +317,7 @@ function runExtension() {
 
         const elements = document.querySelectorAll(selectors.join(','));
         elements.forEach(processElement);
+        refreshToggleButtons();
     }
 
     function processElement(element) {
@@ -252,9 +350,11 @@ function runExtension() {
         element.dataset.icContentId = id;
         element.dataset.icProcessed = 'true';
 
-        // Add listeners only once
+        // Add direct listeners too; Facebook often targets the media node inside a wrapper.
         if (element.dataset.icListenersAdded !== 'true') {
-            element.addEventListener('click', handleContentClick, true);
+            element.addEventListener('pointerdown', handleInteractivePointerDown, true);
+            element.addEventListener('mousedown', handleInteractivePointerDown, true);
+            element.addEventListener('click', handleInteractiveClick, true);
             element.addEventListener('mouseenter', handleMouseEnter);
             element.addEventListener('mouseleave', handleMouseLeave);
             element.dataset.icListenersAdded = 'true';
@@ -274,6 +374,8 @@ function runExtension() {
         } else if (!isSeen && hasCheck) {
             removeCheckmarksFromElement(element);
         }
+
+        refreshToggleButtons();
     }
 
     function syncAllCheckmarks() {
@@ -298,7 +400,7 @@ function runExtension() {
         }
 
         document.querySelectorAll('.ic-checkmark').forEach(c => {
-            const container = c.parentNode;
+            const container = getCheckmarkOwnerContainer(c);
             if (container && container.dataset.originalBorder !== undefined) {
                 container.style.border = container.dataset.originalBorder;
                 delete container.dataset.originalBorder;
@@ -313,22 +415,69 @@ function runExtension() {
                 renderCheckmark(el);
             }
         });
+        refreshToggleButtons();
     }
 
-    function handleContentClick(event) {
+    function handleInteractivePointerDown(event) {
         if (!checkingMode) return;
+        if (event.button !== undefined && event.button !== 0) return;
+
+        const element = event.currentTarget?.dataset?.icContentId
+            ? event.currentTarget
+            : resolveInteractiveElement(event.target);
+        if (!element) return;
 
         event.preventDefault();
         event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+        }
 
-        const element = event.currentTarget;
+        toggleElementCheckmark(element);
+    }
+
+    function handleInteractiveClick(event) {
+        if (!checkingMode) return;
+        if (event.button !== undefined && event.button !== 0) return;
+
+        const element = event.currentTarget?.dataset?.icContentId
+            ? event.currentTarget
+            : resolveInteractiveElement(event.target);
+        if (!element) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+        }
+
+        if (element.dataset.icContentId === lastPressToggle.id && Date.now() - lastPressToggle.time < 600) {
+            return;
+        }
+
+        toggleElementCheckmark(element);
+    }
+
+    function toggleElementCheckmark(element) {
+        if (element.dataset.icProcessed !== 'true') {
+            processElement(element);
+        }
+
         const id = element.dataset.icContentId;
+        if (!id) return;
+
+        lastPressToggle = {
+            id,
+            time: Date.now()
+        };
 
         if (seenItems.has(id)) {
             markAsUnseen(id);
         } else {
-            markAsSeen(id);
+            markElementAsSeen(element, id);
         }
+
+        refreshToggleButtons();
     }
 
     function handleMouseEnter(event) {
@@ -343,6 +492,16 @@ function runExtension() {
         const element = event.currentTarget;
         element.style.outline = '';
         element.style.cursor = '';
+    }
+
+    function getCheckmarkOwnerContainer(checkmark) {
+        const ownerId = checkmark?.dataset?.ownerId;
+        if (!ownerId) return null;
+
+        const owners = getProcessedElementsById(ownerId);
+        if (!owners.length) return null;
+
+        return getTargetContainer(owners[0]);
     }
 
     // --- Checkmark Rendering ---
@@ -361,17 +520,16 @@ function runExtension() {
 
         const s = currentSettings;
 
-        // Calculate dynamic size
         const rect = container.getBoundingClientRect();
         const baseDimension = Math.min(rect.width, rect.height) || 100;
         const calculatedSize = Math.max(20, baseDimension * (s.checkmarkSize / 100));
-        
+
         Object.assign(checkmark.style, {
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: '2147483640',
+            position: 'fixed',
+            top: `${Math.max(0, rect.top + (rect.height / 2) - (calculatedSize / 2))}px`,
+            left: `${Math.max(0, rect.left + (rect.width / 2) - (calculatedSize / 2))}px`,
+            transform: 'none',
+            zIndex: '2147483647',
             width: `${calculatedSize}px`,
             height: `${calculatedSize}px`,
             backgroundColor: s.checkmarkColor,
@@ -391,30 +549,7 @@ function runExtension() {
             boxSizing: 'border-box'
         });
 
-        const isVoidElement = ['IMG', 'INPUT', 'BR', 'HR'].includes(container.tagName);
-
-        if (isVoidElement) {
-            const parent = container.offsetParent || container.parentNode;
-            const parentStyle = window.getComputedStyle(parent);
-            if (parentStyle.position === 'static') {
-                parent.style.position = 'relative';
-            }
-
-            checkmark.style.top = (container.offsetTop + (container.offsetHeight / 2)) + 'px';
-            checkmark.style.left = (container.offsetLeft + (container.offsetWidth / 2)) + 'px';
-
-            if (container.nextSibling) {
-                parent.insertBefore(checkmark, container.nextSibling);
-            } else {
-                parent.appendChild(checkmark);
-            }
-        } else {
-            const style = window.getComputedStyle(container);
-            if (style.position === 'static') {
-                container.style.position = 'relative';
-            }
-            container.appendChild(checkmark);
-        }
+        document.body.appendChild(checkmark);
 
         element.dataset.hasCheckmark = 'true';
 
@@ -429,30 +564,24 @@ function runExtension() {
         const id = element.dataset.icContentId;
         const container = getTargetContainer(element);
         
-        // Find checkmarks in container or siblings
-        const checks = document.querySelectorAll(`.ic-checkmark[data-for-id="${id}"]`);
+        const checks = getCheckmarksById(id);
         checks.forEach(check => {
-            // Check if this checkmark belongs to this element (near it)
-            // For simple implementation, we check if it's inside the container or a sibling
-            if (check.parentNode === container || check.parentNode === container.parentNode) {
-                // Restore border
-                if (container.dataset.originalBorder !== undefined) {
-                    container.style.border = container.dataset.originalBorder;
-                    delete container.dataset.originalBorder;
-                } else {
-                    container.style.border = '';
-                }
-                check.remove();
+            if (container.dataset.originalBorder !== undefined) {
+                container.style.border = container.dataset.originalBorder;
+                delete container.dataset.originalBorder;
+            } else {
+                container.style.border = '';
             }
+            check.remove();
         });
 
         delete element.dataset.hasCheckmark;
     }
 
     function removeCheckmarksMatching(id) {
-        const checks = document.querySelectorAll(`.ic-checkmark[data-for-id="${id}"]`);
+        const checks = getCheckmarksById(id);
         checks.forEach(check => {
-            const owners = document.querySelectorAll(`[data-ic-content-id="${id}"]`);
+            const owners = getProcessedElementsById(id);
             owners.forEach(owner => {
                 const container = getTargetContainer(owner);
                 if (container.dataset.originalBorder !== undefined) {
@@ -466,10 +595,92 @@ function runExtension() {
     }
 
     function applyCheckmarksToMatching(id) {
-        const elements = document.querySelectorAll(`[data-ic-content-id="${id}"]`);
-        elements.forEach(el => {
-            renderCheckmark(el);
+        getProcessedElementsById(id).forEach(renderCheckmark);
+    }
+
+    function getProcessedElementsById(id) {
+        return Array.from(document.querySelectorAll('[data-ic-content-id]'))
+            .filter(el => el.dataset.icContentId === id);
+    }
+
+    function getCheckmarksById(id) {
+        return Array.from(document.querySelectorAll('.ic-checkmark'))
+            .filter(el => el.dataset.forId === id);
+    }
+
+    function refreshToggleButtons() {
+        document.querySelectorAll('.ic-toggle-button').forEach(button => button.remove());
+
+        if (!checkingMode) return;
+
+        const renderedIds = new Set();
+        getVisibleProcessedElements().forEach(element => {
+            const id = element.dataset.icContentId;
+            if (!id || renderedIds.has(id)) return;
+
+            const rect = getTargetContainer(element).getBoundingClientRect();
+            if (rect.width < 40 || rect.height < 40) return;
+
+            renderedIds.add(id);
+            renderToggleButton(element, id, rect);
         });
+    }
+
+    function getVisibleProcessedElements() {
+        return Array.from(document.querySelectorAll('[data-ic-processed="true"]'))
+            .filter(element => {
+                const rect = getTargetContainer(element).getBoundingClientRect();
+                return rect.bottom > 0 &&
+                    rect.right > 0 &&
+                    rect.top < window.innerHeight &&
+                    rect.left < window.innerWidth;
+            });
+    }
+
+    function renderToggleButton(element, id, rect) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ic-toggle-button';
+        button.textContent = seenItems.has(id) ? '✓' : '';
+        button.title = seenItems.has(id) ? 'Unmark item' : 'Mark item';
+        button.dataset.forId = id;
+
+        Object.assign(button.style, {
+            position: 'fixed',
+            top: `${Math.max(8, rect.top + 8)}px`,
+            left: `${Math.max(8, rect.left + 8)}px`,
+            zIndex: '2147483647',
+            width: '30px',
+            height: '30px',
+            border: `2px solid ${currentSettings.checkmarkColor}`,
+            borderRadius: '6px',
+            background: seenItems.has(id) ? currentSettings.checkmarkColor : 'rgba(0, 0, 0, 0.65)',
+            color: currentSettings.textColor,
+            fontSize: '20px',
+            fontWeight: '700',
+            lineHeight: '24px',
+            padding: '0',
+            margin: '0',
+            cursor: 'pointer',
+            pointerEvents: 'auto',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.55)'
+        });
+
+        ['pointerdown', 'mousedown', 'click'].forEach(type => {
+            button.addEventListener(type, event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (typeof event.stopImmediatePropagation === 'function') {
+                    event.stopImmediatePropagation();
+                }
+
+                if (type === 'click') {
+                    toggleElementCheckmark(element);
+                }
+            }, true);
+        });
+
+        document.body.appendChild(button);
     }
 
     // --- Observers ---
@@ -501,6 +712,12 @@ function runExtension() {
             attributeFilter: ['src', 'href'] 
         });
 
+        document.addEventListener('pointerdown', handleInteractivePointerDown, true);
+        document.addEventListener('mousedown', handleInteractivePointerDown, true);
+        document.addEventListener('click', handleInteractiveClick, true);
+        window.addEventListener('scroll', () => requestAnimationFrame(refreshToggleButtons), true);
+        window.addEventListener('resize', () => requestAnimationFrame(refreshToggleButtons), true);
+
         // YouTube SPA navigation events
         window.addEventListener('yt-navigate-finish', () => {
             if (window.scanTimeout) clearTimeout(window.scanTimeout);
@@ -513,13 +730,16 @@ function runExtension() {
     function toggleMode(enabled) {
         checkingMode = enabled;
         document.body.dataset.checkingMode = enabled; // Sync with CSS
-        const tabId = getTabId();
-        chrome.storage.local.set({ [`checkingMode_${tabId}`]: checkingMode });
+        const modeKey = getModeStorageKey();
+        chrome.storage.local.set({ [modeKey]: checkingMode });
 
         if (enabled) {
             showNotification('Image Checker: ON. Click items to mark/unmark.');
+            scanPage();
+            refreshToggleButtons();
         } else {
             showNotification('Image Checker: OFF.', true);
+            refreshToggleButtons();
         }
     }
 
@@ -546,7 +766,7 @@ function runExtension() {
     });
 
     // Utils
-    function getTabId() { return 'global'; }
+    function getModeStorageKey() { return 'checkingMode_global'; }
 
     function loadSettings() {
         return new Promise((resolve) => {
