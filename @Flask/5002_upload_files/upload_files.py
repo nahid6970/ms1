@@ -76,15 +76,16 @@ def shorten_notification_filename(filename, max_length=34):
     return f"{file_name[:max_length - 3]}..."
 
 def open_file_folder(file_path):
-    """Open Windows Explorer with the uploaded file selected."""
+    """Open Windows Explorer to the uploaded file's folder."""
     if os.name != "nt":
         return
 
     normalized_path = os.path.normpath(file_path)
-    if os.path.exists(normalized_path):
-        subprocess.Popen(["explorer", f"/select,{normalized_path}"])
+    folder_path = normalized_path if os.path.isdir(normalized_path) else os.path.dirname(normalized_path)
+    if folder_path and os.path.exists(folder_path):
+        os.startfile(folder_path)
     else:
-        subprocess.Popen(["explorer", os.path.dirname(normalized_path)])
+        subprocess.Popen(["explorer", app.config["SHARE_FOLDER"]])
 
 def show_upload_notification(filename, file_path):
     """Show a small clickable Windows-style notification above the taskbar."""
