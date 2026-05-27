@@ -16,6 +16,11 @@
     border: 2px solid white;
 }
 
+.ic-toggle-button {
+    appearance: none !important;
+    font-family: Arial, sans-serif !important;
+}
+
 @keyframes checkmarkAppear {
     0% {
         transform: translate(-50%, -50%) scale(0);
@@ -92,9 +97,4 @@ body.ic-hide-checkmarks .ic-checkmark {
 body.ic-hide-checkmarks [data-ic-has-border="true"] {
     border-color: transparent !important;
     border-width: 0 !important;
-}
-
-.ic-toggle-button {
-    appearance: none !important;
-    font-family: Arial, sans-serif !important;
 }

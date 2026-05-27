@@ -41,10 +41,6 @@ chrome.storage.local.get(['excludedDomains'], (result) => {
 function runExtension() {
     let checkingMode = false;
     let seenItems = new Set(); // Local cache of seen IDs
-    let lastPressToggle = {
-        id: null,
-        time: 0
-    };
     let currentSettings = {
         checkmarkSize: 15,
         checkmarkColor: '#4CAF50',
@@ -73,9 +69,9 @@ function runExtension() {
                 setupObservers();
 
                 // Check if mode should be active
-                const modeKey = getModeStorageKey();
-                chrome.storage.local.get([modeKey], function (result) {
-                    if (result[modeKey]) {
+                const tabId = getTabId();
+                chrome.storage.local.get([`checkingMode_${tabId}`], function (result) {
+                    if (result[`checkingMode_${tabId}`]) {
                         toggleMode(true);
                     }
                 });
@@ -110,32 +106,14 @@ function runExtension() {
         });
     }
 
-    function getVisualSource(element) {
-        if (!element || element.nodeType !== 1) return null;
-
-        if (element.tagName === 'IMG') {
-            return element.currentSrc || element.src || null;
-        }
-
-        if (element.tagName === 'VIDEO') {
-            return element.currentSrc || element.src || null;
-        }
-
-        if (element.style && element.style.backgroundImage && element.style.backgroundImage !== 'none') {
-            const bg = element.style.backgroundImage.slice(5, -2).replace(/['"]/g, "");
-            return bg || null;
-        }
-
-        return null;
-    }
-
     function normalizeMediaUrl(rawUrl) {
         if (!rawUrl) return null;
+
         try {
             const parsed = new URL(rawUrl, location.href);
             const host = parsed.hostname.toLowerCase();
 
-            // fbcdn links rotate query params frequently; keep stable identity by origin + path.
+            // Facebook CDN thumbnails rotate query params after refresh.
             if (host.includes('fbcdn.net')) {
                 return `${parsed.origin}${parsed.pathname}`;
             }
@@ -145,40 +123,6 @@ function runExtension() {
         } catch {
             return rawUrl.split('#')[0];
         }
-    }
-
-    function findVisualMediaElement(element) {
-        if (!element || element.nodeType !== 1) return null;
-
-        const directSource = getVisualSource(element);
-        if (directSource) return element;
-
-        if (!isLikelyInteractiveWrapper(element)) return null;
-
-        const candidates = element.querySelectorAll('img, video, [style*="background-image"]');
-        let bestCandidate = null;
-        let bestArea = 0;
-
-        candidates.forEach(candidate => {
-            const source = getVisualSource(candidate);
-            if (!source) return;
-
-            const area = (candidate.offsetWidth || 0) * (candidate.offsetHeight || 0);
-            if (area > bestArea) {
-                bestArea = area;
-                bestCandidate = candidate;
-            }
-        });
-
-        return bestCandidate;
-    }
-
-    function isLikelyInteractiveWrapper(element) {
-        if (!element || element.nodeType !== 1) return false;
-
-        return element.matches(
-            'a, button, [role="button"], [role="link"], [role="gridcell"], [tabindex], ytd-thumbnail, ytd-playlist-thumbnail, .ytd-thumbnail'
-        );
     }
 
     function markAsSeen(id) {
@@ -195,13 +139,6 @@ function runExtension() {
 
         // Visually update immediately
         applyCheckmarksToMatching(id);
-    }
-
-    function markElementAsSeen(element, id) {
-        markAsSeen(id);
-        if (element && element.dataset.hasCheckmark !== 'true') {
-            renderCheckmark(element);
-        }
     }
 
     function markAsUnseen(id) {
@@ -248,10 +185,18 @@ function runExtension() {
         // 2. Generic Sites: Strict Decoupling
 
         // Case A: Visual Media (Image/Video/Background)
-        const visualElement = findVisualMediaElement(element);
-        if (visualElement) {
-            const mediaSource = normalizeMediaUrl(getVisualSource(visualElement));
-            if (mediaSource) return `media|${mediaSource}`;
+        if (element.tagName === 'IMG') {
+            const source = normalizeMediaUrl(element.currentSrc || element.src);
+            return source ? `media|${source}` : null;
+        }
+        if (element.tagName === 'VIDEO') {
+            const source = normalizeMediaUrl(element.currentSrc || element.src);
+            return source ? `media|${source}` : null;
+        }
+        if (element.style && element.style.backgroundImage && element.style.backgroundImage !== 'none') {
+            const bg = element.style.backgroundImage.slice(5, -2).replace(/['"]/g, "");
+            const source = normalizeMediaUrl(bg);
+            return source ? `media|${source}` : null;
         }
 
         // Case B: Navigation Links
@@ -282,26 +227,6 @@ function runExtension() {
         return element;
     }
 
-    function resolveInteractiveElement(startNode) {
-        let element = startNode && startNode.nodeType === 1 ? startNode : startNode?.parentElement;
-
-        while (element && element !== document.body) {
-            if (getVisualSource(element)) return element;
-
-            if (isLikelyInteractiveWrapper(element) && findVisualMediaElement(element)) {
-                return element;
-            }
-
-            if (element.tagName === 'A' && element.href) {
-                return element;
-            }
-
-            element = element.parentElement;
-        }
-
-        return null;
-    }
-
     function scanPage() {
         const selectors = [
             'ytd-thumbnail',
@@ -317,7 +242,7 @@ function runExtension() {
 
         const elements = document.querySelectorAll(selectors.join(','));
         elements.forEach(processElement);
-        refreshToggleButtons();
+        refreshEditButtons();
     }
 
     function processElement(element) {
@@ -350,11 +275,9 @@ function runExtension() {
         element.dataset.icContentId = id;
         element.dataset.icProcessed = 'true';
 
-        // Add direct listeners too; Facebook often targets the media node inside a wrapper.
+        // Add listeners only once
         if (element.dataset.icListenersAdded !== 'true') {
-            element.addEventListener('pointerdown', handleInteractivePointerDown, true);
-            element.addEventListener('mousedown', handleInteractivePointerDown, true);
-            element.addEventListener('click', handleInteractiveClick, true);
+            element.addEventListener('click', handleContentClick, true);
             element.addEventListener('mouseenter', handleMouseEnter);
             element.addEventListener('mouseleave', handleMouseLeave);
             element.dataset.icListenersAdded = 'true';
@@ -374,8 +297,6 @@ function runExtension() {
         } else if (!isSeen && hasCheck) {
             removeCheckmarksFromElement(element);
         }
-
-        refreshToggleButtons();
     }
 
     function syncAllCheckmarks() {
@@ -390,10 +311,11 @@ function runExtension() {
                 syncElementCheckmark(el, id);
             }
         });
+        refreshEditButtons();
     }
 
     function refreshAllCheckmarks() {
-        if (currentSettings.hideCheckmarks) {
+        if (currentSettings.hideCheckmarks && checkingMode) {
             document.body.classList.add('ic-hide-checkmarks');
         } else {
             document.body.classList.remove('ic-hide-checkmarks');
@@ -415,69 +337,28 @@ function runExtension() {
                 renderCheckmark(el);
             }
         });
-        refreshToggleButtons();
+        refreshEditButtons();
     }
 
-    function handleInteractivePointerDown(event) {
+    function handleContentClick(event) {
         if (!checkingMode) return;
-        if (event.button !== undefined && event.button !== 0) return;
-
-        const element = event.currentTarget?.dataset?.icContentId
-            ? event.currentTarget
-            : resolveInteractiveElement(event.target);
-        if (!element) return;
 
         event.preventDefault();
         event.stopPropagation();
-        if (typeof event.stopImmediatePropagation === 'function') {
-            event.stopImmediatePropagation();
-        }
 
-        toggleElementCheckmark(element);
+        toggleElementSeen(event.currentTarget);
     }
 
-    function handleInteractiveClick(event) {
-        if (!checkingMode) return;
-        if (event.button !== undefined && event.button !== 0) return;
-
-        const element = event.currentTarget?.dataset?.icContentId
-            ? event.currentTarget
-            : resolveInteractiveElement(event.target);
-        if (!element) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-        if (typeof event.stopImmediatePropagation === 'function') {
-            event.stopImmediatePropagation();
-        }
-
-        if (element.dataset.icContentId === lastPressToggle.id && Date.now() - lastPressToggle.time < 600) {
-            return;
-        }
-
-        toggleElementCheckmark(element);
-    }
-
-    function toggleElementCheckmark(element) {
-        if (element.dataset.icProcessed !== 'true') {
-            processElement(element);
-        }
-
-        const id = element.dataset.icContentId;
+    function toggleElementSeen(element) {
+        const id = element?.dataset?.icContentId;
         if (!id) return;
-
-        lastPressToggle = {
-            id,
-            time: Date.now()
-        };
 
         if (seenItems.has(id)) {
             markAsUnseen(id);
         } else {
-            markElementAsSeen(element, id);
+            markAsSeen(id);
         }
-
-        refreshToggleButtons();
+        refreshEditButtons();
     }
 
     function handleMouseEnter(event) {
@@ -520,16 +401,26 @@ function runExtension() {
 
         const s = currentSettings;
 
+        // Calculate dynamic size
         const rect = container.getBoundingClientRect();
+        if (rect.width <= 0 ||
+            rect.height <= 0 ||
+            rect.bottom <= 0 ||
+            rect.right <= 0 ||
+            rect.top >= window.innerHeight ||
+            rect.left >= window.innerWidth) {
+            return;
+        }
+
         const baseDimension = Math.min(rect.width, rect.height) || 100;
         const calculatedSize = Math.max(20, baseDimension * (s.checkmarkSize / 100));
-
+        
         Object.assign(checkmark.style, {
             position: 'fixed',
             top: `${Math.max(0, rect.top + (rect.height / 2) - (calculatedSize / 2))}px`,
             left: `${Math.max(0, rect.left + (rect.width / 2) - (calculatedSize / 2))}px`,
             transform: 'none',
-            zIndex: '2147483647',
+            zIndex: '2147483646',
             width: `${calculatedSize}px`,
             height: `${calculatedSize}px`,
             backgroundColor: s.checkmarkColor,
@@ -546,7 +437,8 @@ function runExtension() {
             margin: '0',
             padding: '0',
             lineHeight: '1',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            animation: 'none'
         });
 
         document.body.appendChild(checkmark);
@@ -608,7 +500,7 @@ function runExtension() {
             .filter(el => el.dataset.forId === id);
     }
 
-    function refreshToggleButtons() {
+    function refreshEditButtons() {
         document.querySelectorAll('.ic-toggle-button').forEach(button => button.remove());
 
         if (!checkingMode) return;
@@ -622,7 +514,7 @@ function runExtension() {
             if (rect.width < 40 || rect.height < 40) return;
 
             renderedIds.add(id);
-            renderToggleButton(element, id, rect);
+            renderEditButton(element, id, rect);
         });
     }
 
@@ -637,7 +529,7 @@ function runExtension() {
             });
     }
 
-    function renderToggleButton(element, id, rect) {
+    function renderEditButton(element, id, rect) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'ic-toggle-button';
@@ -675,12 +567,16 @@ function runExtension() {
                 }
 
                 if (type === 'click') {
-                    toggleElementCheckmark(element);
+                    toggleElementSeen(element);
                 }
             }, true);
         });
 
         document.body.appendChild(button);
+    }
+
+    function refreshVisibleOverlays() {
+        refreshAllCheckmarks();
     }
 
     // --- Observers ---
@@ -712,11 +608,8 @@ function runExtension() {
             attributeFilter: ['src', 'href'] 
         });
 
-        document.addEventListener('pointerdown', handleInteractivePointerDown, true);
-        document.addEventListener('mousedown', handleInteractivePointerDown, true);
-        document.addEventListener('click', handleInteractiveClick, true);
-        window.addEventListener('scroll', () => requestAnimationFrame(refreshToggleButtons), true);
-        window.addEventListener('resize', () => requestAnimationFrame(refreshToggleButtons), true);
+        window.addEventListener('scroll', () => requestAnimationFrame(refreshVisibleOverlays), true);
+        window.addEventListener('resize', () => requestAnimationFrame(refreshVisibleOverlays), true);
 
         // YouTube SPA navigation events
         window.addEventListener('yt-navigate-finish', () => {
@@ -730,16 +623,20 @@ function runExtension() {
     function toggleMode(enabled) {
         checkingMode = enabled;
         document.body.dataset.checkingMode = enabled; // Sync with CSS
-        const modeKey = getModeStorageKey();
-        chrome.storage.local.set({ [modeKey]: checkingMode });
+        const tabId = getTabId();
+        chrome.storage.local.set({ [`checkingMode_${tabId}`]: checkingMode });
 
         if (enabled) {
             showNotification('Image Checker: ON. Click items to mark/unmark.');
             scanPage();
-            refreshToggleButtons();
+            syncAllCheckmarks();
+            refreshEditButtons();
         } else {
             showNotification('Image Checker: OFF.', true);
-            refreshToggleButtons();
+            scanPage();
+            syncAllCheckmarks();
+            refreshAllCheckmarks();
+            refreshEditButtons();
         }
     }
 
@@ -766,15 +663,17 @@ function runExtension() {
     });
 
     // Utils
-    function getModeStorageKey() { return 'checkingMode_global'; }
+    function getTabId() { return 'global'; }
 
     function loadSettings() {
         return new Promise((resolve) => {
             chrome.storage.local.get(['imageCheckerSettings'], function (result) {
                 if (result.imageCheckerSettings) {
                     currentSettings = result.imageCheckerSettings;
-                    if (currentSettings.hideCheckmarks) {
+                    if (currentSettings.hideCheckmarks && checkingMode) {
                         document.body.classList.add('ic-hide-checkmarks');
+                    } else {
+                        document.body.classList.remove('ic-hide-checkmarks');
                     }
                 }
                 resolve();
