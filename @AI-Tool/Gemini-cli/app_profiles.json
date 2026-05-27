@@ -129,7 +129,7 @@
         "password": "1823",
         "timer_enabled": false,
         "target_time": null,
-        "active": false
+        "active": true
     },
     {
         "name": "nahid69703",
@@ -140,6 +140,6 @@
         "password": "1823",
         "timer_enabled": false,
         "target_time": null,
-        "active": true
+        "active": false
     }
 ]
