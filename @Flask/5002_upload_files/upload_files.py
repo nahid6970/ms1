@@ -22,6 +22,9 @@ if not os.path.exists(SHARE_FOLDER):
 
 app.config['SHARE_FOLDER'] = SHARE_FOLDER
 
+NOTIFICATION_LOCK = threading.Lock()
+ACTIVE_NOTIFICATION_SLOTS = set()
+
 def create_safe_filename(filename):
     """
     Create a safe filename that preserves spaces and most special characters
@@ -51,6 +54,24 @@ def create_safe_filename(filename):
     safe_filename = '/'.join(safe_parts) if safe_parts else 'unnamed_file'
     return safe_filename
 
+def get_notification_slot():
+    with NOTIFICATION_LOCK:
+        slot = 0
+        while slot in ACTIVE_NOTIFICATION_SLOTS:
+            slot += 1
+        ACTIVE_NOTIFICATION_SLOTS.add(slot)
+        return slot
+
+def release_notification_slot(slot):
+    with NOTIFICATION_LOCK:
+        ACTIVE_NOTIFICATION_SLOTS.discard(slot)
+
+def shorten_notification_filename(filename, max_length=42):
+    file_name = filename.replace("\\", "/").split("/")[-1]
+    if len(file_name) <= max_length:
+        return file_name
+    return f"{file_name[:max_length - 3]}..."
+
 def open_file_folder(file_path):
     """Open Windows Explorer with the uploaded file selected."""
     if os.name != "nt":
@@ -67,7 +88,17 @@ def show_upload_notification(filename, file_path):
     if os.name != "nt":
         return
 
+    slot = get_notification_slot()
+
     def notification_worker():
+        released = False
+
+        def release_slot_once():
+            nonlocal released
+            if not released:
+                release_notification_slot(slot)
+                released = True
+
         try:
             import tkinter as tk
             from tkinter import font as tkfont
@@ -77,80 +108,61 @@ def show_upload_notification(filename, file_path):
             root.overrideredirect(True)
             root.attributes("-topmost", True)
 
-            width = 360
-            height = 118
+            width = 320
+            height = 58
+            gap = 10
             margin_right = 18
             margin_bottom = 54
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
             x = screen_width - width - margin_right
-            y = screen_height - height - margin_bottom
+            y = screen_height - height - margin_bottom - (slot * (height + gap))
             root.geometry(f"{width}x{height}+{x}+{y}")
 
-            bg = "#f7f7f7"
-            border = "#d0d0d0"
-            text = "#1f1f1f"
-            muted = "#5f5f5f"
+            bg = "#111111"
+            border = "#0078d4"
+            text = "#f3f3f3"
+            muted = "#bdbdbd"
 
             frame = tk.Frame(root, bg=bg, highlightthickness=1, highlightbackground=border)
             frame.pack(fill="both", expand=True)
 
-            title_font = tkfont.Font(family="Segoe UI", size=10, weight="bold")
             body_font = tkfont.Font(family="Segoe UI", size=9)
             close_font = tkfont.Font(family="Segoe UI", size=11)
-
-            title = tk.Label(
-                frame,
-                text="File uploaded",
-                bg=bg,
-                fg=text,
-                font=title_font,
-                anchor="w",
-            )
-            title.place(x=16, y=14, width=285, height=22)
 
             close_button = tk.Button(
                 frame,
                 text="×",
                 bg=bg,
                 fg=muted,
-                activebackground="#e8e8e8",
+                activebackground="#2a2a2a",
                 activeforeground=text,
                 relief="flat",
                 bd=0,
                 font=close_font,
-                command=root.destroy,
                 cursor="hand2",
             )
-            close_button.place(x=320, y=10, width=28, height=28)
+            close_button.place(x=282, y=14, width=26, height=26)
 
             message = tk.Label(
                 frame,
-                text=filename,
+                text=shorten_notification_filename(filename),
                 bg=bg,
                 fg=text,
                 font=body_font,
                 anchor="w",
                 justify="left",
-                wraplength=320,
+                wraplength=250,
             )
-            message.place(x=16, y=42, width=322, height=34)
-
-            hint = tk.Label(
-                frame,
-                text="Click to open the file location",
-                bg=bg,
-                fg=muted,
-                font=body_font,
-                anchor="w",
-            )
-            hint.place(x=16, y=80, width=322, height=20)
+            message.place(x=14, y=12, width=262, height=32)
 
             def handle_click(_event=None):
                 open_file_folder(file_path)
                 root.destroy()
 
-            for widget in (frame, title, message, hint):
+            close_button.configure(command=root.destroy)
+
+            for widget in (frame, message):
                 widget.configure(cursor="hand2")
                 widget.bind("<Button-1>", handle_click)
 
@@ -159,6 +171,8 @@ def show_upload_notification(filename, file_path):
             root.mainloop()
         except Exception as e:
             print(f"Notification error for '{filename}': {e}")
+        finally:
+            release_slot_once()
 
     threading.Thread(target=notification_worker, daemon=True).start()
 
