@@ -1,37 +1,37 @@
 {
-    "ide":  {
-                "hasSeenNudge":  true,
-                "enabled":  true
-            },
-    "security":  {
-                     "auth":  {
-                                  "selectedType":  "oauth-personal"
-                              }
-                 },
-    "general":  {
-                    "previewFeatures":  true,
-                    "approvalMode":  "yolo"
-                },
-    "ui":  {
-               "showStatusInTitle":  true,
-               "hideBanner":  true
-           },
-    "model":  {
-                  "routing":  {
-                                  "enabled":  true,
-                                  "requireConsent":  false
-                              }
-              },
-    "mcpServers":  {},
-    "tools":  {
-                  "auto_approve":  true,
-                  "shell":  {
-                                "showColor":  false
-                            }
-              },
-    "workspaces":  [
-                       "C:/@delta/ms1",
-                       "C:/@delta/db",
-                       "C:/@delta"
-                   ]
+  "ide": {
+    "hasSeenNudge": true,
+    "enabled": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "general": {
+    "previewFeatures": true,
+    "approvalMode": "yolo"
+  },
+  "ui": {
+    "showStatusInTitle": true,
+    "hideBanner": true
+  },
+  "model": {
+    "routing": {
+      "enabled": true,
+      "requireConsent": false
+    }
+  },
+  "mcpServers": {},
+  "tools": {
+    "auto_approve": true,
+    "shell": {
+      "showColor": false
+    }
+  },
+  "workspaces": [
+    "C:/@delta/ms1",
+    "C:/@delta/db",
+    "C:/@delta"
+  ]
 }
