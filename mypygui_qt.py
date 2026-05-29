@@ -15,7 +15,6 @@ from queue import Queue, Empty
 
 import psutil
 # ... rest of imports unchanged ...
-import win32process
 
 try:
     from pyadl import ADLManager
