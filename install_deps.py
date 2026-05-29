@@ -162,11 +162,12 @@ def clean_unused_imports(script: str, tree: ast.AST, used_names: set[str]) -> No
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: install_deps.py <script.py> [--clean]")
+        print("Usage: install_deps.py <script.py> [--clean] [--run]")
         sys.exit(1)
 
     script = sys.argv[1]
     clean = "--clean" in sys.argv
+    run = True  # always run the script after
 
     with open(script, encoding="utf-8") as f:
         source = f.read()
@@ -179,28 +180,30 @@ def main():
 
     if clean:
         clean_unused_imports(script, tree, used_names)
-        return
+    else:
+        to_install = []
+        for mod in sorted(third_party):
+            if not is_used(mod, tree, used_names):
+                print(f"  skip (unused): {mod}")
+                continue
+            if is_installed(mod):
+                print(f"  skip (present): {mod}")
+                continue
+            pkg = resolve_pkg(mod)
+            to_install.append(pkg)
 
-    to_install = []
-    for mod in sorted(third_party):
-        if not is_used(mod, tree, used_names):
-            print(f"  skip (unused): {mod}")
-            continue
-        if is_installed(mod):
-            print(f"  skip (present): {mod}")
-            continue
-        pkg = resolve_pkg(mod)
-        to_install.append(pkg)
+        to_install = sorted(set(to_install))
 
-    to_install = sorted(set(to_install))
+        if not to_install:
+            print("Nothing to install.")
+        else:
+            print(f"\nInstalling: {', '.join(to_install)}")
+            subprocess.run(["uv", "pip", "install", "--system"] + to_install, check=True)
+            print("Done.")
 
-    if not to_install:
-        print("Nothing to install.")
-        return
-
-    print(f"\nInstalling: {', '.join(to_install)}")
-    subprocess.run(["uv", "pip", "install", "--system"] + to_install, check=True)
-    print("Done.")
+    if run:
+        print(f"\nRunning {script} ...\n")
+        subprocess.run([sys.executable, script])
 
 
 if __name__ == "__main__":
