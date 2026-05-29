@@ -11,7 +11,7 @@ import subprocess
 import importlib.util
 
 # stdlib modules (won't be installed)
-STDLIB = sys.stdlib_module_names  # Python 3.10+
+STDLIB = sys.stdlib_module_names - ({"curses"} if sys.platform == "win32" else set())  # Python 3.10+
 
 # map import name → pip package name when they differ
 IMPORT_TO_PKG = {
@@ -25,6 +25,7 @@ IMPORT_TO_PKG = {
     "gi": "PyGObject",
     "usb": "pyusb",
     "serial": "pyserial",
+    "curses": "windows-curses",
     "Cryptodome": "pycryptodomex",
     "Crypto": "pycryptodome",
     "pyadl": "pyadl",
