@@ -2,20 +2,15 @@
 
 from customtkinter import *
 from datetime import datetime
-from PIL import Image, ImageTk
 from pyadl import ADLManager
 from queue import Queue
-from time import strftime
 from tkinter import Label, messagebox
 from tkinter import simpledialog
-from tkinter import ttk
 import ctypes
 import filecmp
 import importlib
-import keyboard
 import os
 import psutil
-import pyautogui
 import subprocess
 import sys
 import threading
@@ -27,7 +22,6 @@ import win32process
 from PyQt6.QtWidgets import (QApplication, QDialog, QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QCheckBox, QGroupBox, QFormLayout, QScrollArea, QMessageBox)
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
