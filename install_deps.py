@@ -114,12 +114,60 @@ def is_installed(module: str) -> bool:
         return False
 
 
+def get_unused_import_lines(tree: ast.AST, used_names: set[str], source: str) -> set[int]:
+    """Return 0-indexed line numbers of unused import statements."""
+    unused_lines = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                mod = alias.name.split(".")[0]
+                if mod in STDLIB:
+                    continue
+                # bare import with no alias → always keep
+                if alias.asname is None:
+                    if mod not in used_names:
+                        unused_lines.add(node.lineno - 1)
+                else:
+                    if alias.asname not in used_names:
+                        unused_lines.add(node.lineno - 1)
+        elif isinstance(node, ast.ImportFrom):
+            if not node.module:
+                continue
+            all_unused = all(
+                (alias.asname or alias.name) not in used_names and (alias.asname or alias.name) != "*"
+                for alias in node.names
+            )
+            if all_unused:
+                unused_lines.add(node.lineno - 1)
+    return unused_lines
+
+
+def clean_unused_imports(script: str, tree: ast.AST, used_names: set[str]) -> None:
+    with open(script, encoding="utf-8") as f:
+        lines = f.readlines()
+
+    unused = get_unused_import_lines(tree, used_names, "".join(lines))
+    if not unused:
+        print("No unused imports to remove.")
+        return
+
+    new_lines = [l for i, l in enumerate(lines) if i not in unused]
+    with open(script, "w", encoding="utf-8") as f:
+        f.writelines(new_lines)
+
+    for i in sorted(unused):
+        print(f"  removed line {i+1}: {lines[i].rstrip()}")
+    print(f"Removed {len(unused)} unused import(s).")
+
+
 def main():
     if len(sys.argv) < 2:
-        print("Usage: install_deps.py <script.py>")
+        print("Usage: install_deps.py <script.py> [--clean]")
         sys.exit(1)
 
     script = sys.argv[1]
+    clean = "--clean" in sys.argv
+
     with open(script, encoding="utf-8") as f:
         source = f.read()
 
@@ -127,10 +175,11 @@ def main():
     imported = get_imported_names(tree)
     used_names = get_used_names(tree)
 
-    third_party = {
-        m for m in imported
-        if m not in STDLIB and not is_used.__module__ == m  # keep logic clean
-    }
+    third_party = {m for m in imported if m not in STDLIB}
+
+    if clean:
+        clean_unused_imports(script, tree, used_names)
+        return
 
     to_install = []
     for mod in sorted(third_party):
@@ -143,7 +192,6 @@ def main():
         pkg = resolve_pkg(mod)
         to_install.append(pkg)
 
-    # deduplicate (e.g. multiple win32* → pywin32 once)
     to_install = sorted(set(to_install))
 
     if not to_install:
@@ -151,10 +199,7 @@ def main():
         return
 
     print(f"\nInstalling: {', '.join(to_install)}")
-    subprocess.run(
-        ["uv", "pip", "install", "--system"] + to_install,
-        check=True,
-    )
+    subprocess.run(["uv", "pip", "install", "--system"] + to_install, check=True)
     print("Done.")
 
 
