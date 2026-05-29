@@ -68,13 +68,14 @@ def get_used_names(tree: ast.AST) -> set[str]:
 
 def is_used(module: str, tree: ast.AST, used_names: set[str]) -> bool:
     """Check if a module is actually referenced in the code (not just imported)."""
-    # Walk import nodes to find aliases
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 if alias.name.split(".")[0] == module:
-                    bound = alias.asname or alias.name.split(".")[0]
-                    if bound in used_names:
+                    # bare `import x` with no alias — treat as used (may have side effects)
+                    if alias.asname is None:
+                        return True
+                    if alias.asname in used_names:
                         return True
         elif isinstance(node, ast.ImportFrom):
             if node.module and node.module.split(".")[0] == module:
@@ -89,8 +90,22 @@ def resolve_pkg(module: str) -> str:
     return IMPORT_TO_PKG.get(module, module)
 
 
+# For packages where top-level import succeeds but submodules may be missing,
+# verify a known submodule instead.
+VERIFY_SUBMODULE = {
+    "PyQt6": "PyQt6.QtWidgets",
+    "PyQt5": "PyQt5.QtWidgets",
+}
+
 def is_installed(module: str) -> bool:
-    return importlib.util.find_spec(module) is not None
+    check = VERIFY_SUBMODULE.get(module, module)
+    if importlib.util.find_spec(check) is None:
+        return False
+    try:
+        __import__(check)
+        return True
+    except Exception:
+        return False
 
 
 def main():
