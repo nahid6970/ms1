@@ -95,6 +95,12 @@ def resolve_pkg(module: str) -> str:
 VERIFY_SUBMODULE = {
     "PyQt6": "PyQt6.QtWidgets",
     "PyQt5": "PyQt5.QtWidgets",
+    "PySide6": "PySide6.QtWidgets",
+    "PySide2": "PySide2.QtWidgets",
+    "PIL": "PIL.Image",
+    "sklearn": "sklearn.utils",
+    "scipy": "scipy.linalg",
+    "numpy": "numpy.core",
 }
 
 def is_installed(module: str) -> bool:
