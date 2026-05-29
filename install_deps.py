@@ -25,6 +25,7 @@ IMPORT_TO_PKG = {
     "gi": "PyGObject",
     "usb": "pyusb",
     "serial": "pyserial",
+    "speech_recognition": "SpeechRecognition",
     "curses": "windows-curses",
     "Cryptodome": "pycryptodomex",
     "Crypto": "pycryptodome",
