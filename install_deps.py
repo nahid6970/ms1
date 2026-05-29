@@ -105,9 +105,9 @@ VERIFY_SUBMODULE = {
 
 def is_installed(module: str) -> bool:
     check = VERIFY_SUBMODULE.get(module, module)
-    if importlib.util.find_spec(check) is None:
-        return False
     try:
+        if importlib.util.find_spec(check) is None:
+            return False
         __import__(check)
         return True
     except Exception:
