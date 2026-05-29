@@ -1,7 +1,6 @@
 #? https://pypi.org/project/pretty-errors/
 
 from customtkinter import *
-from time import strftime
 import ctypes
 import os
 import subprocess
