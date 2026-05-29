@@ -25,6 +25,8 @@ IMPORT_TO_PKG = {
     "gi": "PyGObject",
     "usb": "pyusb",
     "serial": "pyserial",
+    "Cryptodome": "pycryptodomex",
+    "Crypto": "pycryptodome",
     "pyadl": "pyadl",
     "win32api": "pywin32",
     "win32con": "pywin32",
