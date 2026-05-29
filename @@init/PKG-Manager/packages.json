@@ -5,12 +5,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Ditto.Ditto"
+        "ID": "Ditto.Ditto",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "ditto"
+        "ID": "ditto",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -21,12 +21,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "LocalSend.LocalSend"
+        "ID": "LocalSend.LocalSend",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "localsend"
+        "ID": "localsend",
+        "Source": "scoop"
       }
     ],
     "Category": "Networking"
@@ -37,12 +37,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Meld.Meld"
+        "ID": "Meld.Meld",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "meld"
+        "ID": "meld",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -53,12 +53,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "alesimula.wsa_pacman"
+        "ID": "alesimula.wsa_pacman",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "wsa-pacman"
+        "ID": "wsa-pacman",
+        "Source": "scoop"
       }
     ],
     "Category": "Virtualization"
@@ -69,12 +69,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "JanDeDobbeleer.OhMyPosh"
+        "ID": "JanDeDobbeleer.OhMyPosh",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "oh-my-posh"
+        "ID": "oh-my-posh",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -85,12 +85,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "OpenJS.NodeJS"
+        "ID": "OpenJS.NodeJS",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "nodejs"
+        "ID": "nodejs",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -101,12 +101,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "yt-dlp.yt-dlp"
+        "ID": "yt-dlp.yt-dlp",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "yt-dlp"
+        "ID": "yt-dlp",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -117,12 +117,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "JesseDuffield.lazygit"
+        "ID": "JesseDuffield.lazygit",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "lazygit"
+        "ID": "lazygit",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -133,12 +133,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Rclone.Rclone"
+        "ID": "Rclone.Rclone",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "rclone"
+        "ID": "rclone",
+        "Source": "scoop"
       }
     ],
     "Category": "Networking"
@@ -149,12 +149,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "BCUninstaller"
+        "ID": "BCUninstaller",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "bulk-crap-uninstaller"
+        "ID": "bulk-crap-uninstaller",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -165,12 +165,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Inkscape.Inkscape"
+        "ID": "Inkscape.Inkscape",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "inkscape"
+        "ID": "inkscape",
+        "Source": "scoop"
       }
     ],
     "Category": "Graphics"
@@ -181,12 +181,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Git.Git"
+        "ID": "Git.Git",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "git"
+        "ID": "git",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -197,12 +197,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "jftuga.less"
+        "ID": "jftuga.less",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "less"
+        "ID": "less",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -213,12 +213,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "eibol.FFmpegBatchAVConverter"
+        "ID": "eibol.FFmpegBatchAVConverter",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "ffmpeg-batch"
+        "ID": "ffmpeg-batch",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -229,12 +229,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Microsoft.PowerToys"
+        "ID": "Microsoft.PowerToys",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "powertoys"
+        "ID": "powertoys",
+        "Source": "scoop"
       }
     ],
     "Category": "Personalization"
@@ -245,12 +245,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "aria2.aria2"
+        "ID": "aria2.aria2",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "aria2"
+        "ID": "aria2",
+        "Source": "scoop"
       }
     ],
     "Category": "Networking"
@@ -261,12 +261,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "qBittorrent.qBittorrent"
+        "ID": "qBittorrent.qBittorrent",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "qbittorrent"
+        "ID": "qbittorrent",
+        "Source": "scoop"
       }
     ],
     "Category": "Networking"
@@ -277,12 +277,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "nilesoft.shell"
+        "ID": "nilesoft.shell",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "nilesoft-shell"
+        "ID": "nilesoft-shell",
+        "Source": "scoop"
       }
     ],
     "Category": "Personalization"
@@ -293,12 +293,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Gyan.FFmpeg"
+        "ID": "Gyan.FFmpeg",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "ffmpeg"
+        "ID": "ffmpeg",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -309,12 +309,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Daum.PotPlayer"
+        "ID": "Daum.PotPlayer",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "potplayer"
+        "ID": "potplayer",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -325,12 +325,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "AdrienAllard.FileConverter"
+        "ID": "AdrienAllard.FileConverter",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "file-converter-np"
+        "ID": "file-converter-np",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -341,12 +341,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "AutoHotkey.AutoHotkey"
+        "ID": "AutoHotkey.AutoHotkey",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "autohotkey"
+        "ID": "autohotkey",
+        "Source": "scoop"
       }
     ],
     "Category": "Automation"
@@ -357,12 +357,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "eza-community.eza"
+        "ID": "eza-community.eza",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "eza"
+        "ID": "eza",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -373,12 +373,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "AntibodySoftware.WizTree"
+        "ID": "AntibodySoftware.WizTree",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "WizTree"
+        "ID": "WizTree",
+        "Source": "scoop"
       }
     ],
     "Category": "System"
@@ -389,12 +389,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "BleachBit.BleachBit"
+        "ID": "BleachBit.BleachBit",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "bleachbit"
+        "ID": "bleachbit",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -405,12 +405,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "tldr-pages.tlrc"
+        "ID": "tldr-pages.tlrc",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "tldr"
+        "ID": "tldr",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -421,12 +421,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Genymobile.scrcpy"
+        "ID": "Genymobile.scrcpy",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "scrcpy"
+        "ID": "scrcpy",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -437,12 +437,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "aristocratos.btop4win"
+        "ID": "aristocratos.btop4win",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "btop"
+        "ID": "btop",
+        "Source": "scoop"
       }
     ],
     "Category": "System"
@@ -453,12 +453,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Highresolution.X-MouseButtonControl"
+        "ID": "Highresolution.X-MouseButtonControl",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "xmousebuttoncontrol"
+        "ID": "xmousebuttoncontrol",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -469,12 +469,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Rufus.Rufus"
+        "ID": "Rufus.Rufus",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "rufus"
+        "ID": "rufus",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -485,12 +485,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Syncthing.Syncthing"
+        "ID": "Syncthing.Syncthing",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "syncthing"
+        "ID": "syncthing",
+        "Source": "scoop"
       }
     ],
     "Category": "Networking"
@@ -501,12 +501,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Bitwarden.Bitwarden"
+        "ID": "Bitwarden.Bitwarden",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "bitwarden"
+        "ID": "bitwarden",
+        "Source": "scoop"
       }
     ],
     "Category": "Security"
@@ -517,12 +517,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "VSCodium"
+        "ID": "VSCodium",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "vscodium"
+        "ID": "vscodium",
+        "Source": "scoop"
       }
     ],
     "Category": "Editor"
@@ -533,12 +533,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "OBSProject.OBSStudio"
+        "ID": "OBSProject.OBSStudio",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "obs-studio"
+        "ID": "obs-studio",
+        "Source": "scoop"
       }
     ],
     "Category": "Media"
@@ -549,12 +549,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "ImageMagick.ImageMagick"
+        "ID": "ImageMagick.ImageMagick",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "imagemagick"
+        "ID": "imagemagick",
+        "Source": "scoop"
       }
     ],
     "Category": "Graphics"
@@ -565,12 +565,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Oracle.VirtualBox"
+        "ID": "Oracle.VirtualBox",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "virtualbox-with-extension-pack-np"
+        "ID": "virtualbox-with-extension-pack-np",
+        "Source": "scoop"
       }
     ],
     "Category": "Virtualization"
@@ -581,12 +581,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "CrystalDewWorld.CrystalDiskInfo"
+        "ID": "CrystalDewWorld.CrystalDiskInfo",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "crystaldiskinfo"
+        "ID": "crystaldiskinfo",
+        "Source": "scoop"
       }
     ],
     "Category": "System"
@@ -597,12 +597,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "9NKSQGP7F2NH"
+        "ID": "9NKSQGP7F2NH",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "whatsapp"
+        "ID": "whatsapp",
+        "Source": "scoop"
       }
     ],
     "Category": "Communication"
@@ -613,12 +613,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Microsoft.DotNet.DesktopRuntime.6"
+        "ID": "Microsoft.DotNet.DesktopRuntime.6",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "ScoopName"
+        "ID": "ScoopName",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -629,12 +629,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "martinrotter.RSSGuard"
+        "ID": "martinrotter.RSSGuard",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "rssguard"
+        "ID": "rssguard",
+        "Source": "scoop"
       }
     ],
     "Category": "Communication"
@@ -645,12 +645,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "CPUID.CPU-Z"
+        "ID": "CPUID.CPU-Z",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "cpu-z"
+        "ID": "cpu-z",
+        "Source": "scoop"
       }
     ],
     "Category": "System"
@@ -661,12 +661,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "BurntSushi.ripgrep.MSVC"
+        "ID": "BurntSushi.ripgrep.MSVC",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "ripgrep"
+        "ID": "ripgrep",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -677,12 +677,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "GitHub.GitHubDesktop"
+        "ID": "GitHub.GitHubDesktop",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "github"
+        "ID": "github",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -693,12 +693,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "StrawberryPerl.StrawberryPerl"
+        "ID": "StrawberryPerl.StrawberryPerl",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "perl"
+        "ID": "perl",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -709,12 +709,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "WinDirStat.WinDirStat"
+        "ID": "WinDirStat.WinDirStat",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "windirstat"
+        "ID": "windirstat",
+        "Source": "scoop"
       }
     ],
     "Category": "System"
@@ -725,12 +725,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "voidtools.Everything"
+        "ID": "voidtools.Everything",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "everything"
+        "ID": "everything",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -741,12 +741,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Notepad++.Notepad++"
+        "ID": "Notepad++.Notepad++",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "notepadplusplus"
+        "ID": "notepadplusplus",
+        "Source": "scoop"
       }
     ],
     "Category": "Editor"
@@ -757,12 +757,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "JohnMacFarlane.Pandoc"
+        "ID": "JohnMacFarlane.Pandoc",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "pandoc"
+        "ID": "pandoc",
+        "Source": "scoop"
       }
     ],
     "Category": "Utility"
@@ -773,12 +773,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "Valve.Steam"
+        "ID": "Valve.Steam",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "steam"
+        "ID": "steam",
+        "Source": "scoop"
       }
     ],
     "Category": "Gaming"
@@ -789,12 +789,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "abbodi1406.vcredist"
+        "ID": "abbodi1406.vcredist",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "vcredist-aio"
+        "ID": "vcredist-aio",
+        "Source": "scoop"
       }
     ],
     "Category": "Development"
@@ -805,12 +805,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "9NQ8Q8J78637"
+        "ID": "9NQ8Q8J78637",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "autohotkey1.1"
+        "ID": "autohotkey1.1",
+        "Source": "scoop"
       }
     ],
     "Category": "Automation"
@@ -821,12 +821,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "chrisant996.Clink"
+        "ID": "chrisant996.Clink",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "clink"
+        "ID": "clink",
+        "Source": "scoop"
       }
     ],
     "Category": "Terminal"
@@ -837,12 +837,12 @@
     "Source": "winget",
     "Sources": [
       {
-        "Source": "winget",
-        "ID": "GlazeWM"
+        "ID": "GlazeWM",
+        "Source": "winget"
       },
       {
-        "Source": "scoop",
-        "ID": "glazewm"
+        "ID": "glazewm",
+        "Source": "scoop"
       }
     ],
     "Category": "Personalization"
