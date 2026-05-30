@@ -53,11 +53,15 @@ class MouseWheelGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.scroll_speed = 3
+        self._suppress_next_scroll = False
         self.init_ui()
         self._start_global_wheel_listener()
 
     def _start_global_wheel_listener(self):
         def on_scroll(x, y, dx, dy):
+            if self._suppress_next_scroll:
+                self._suppress_next_scroll = False
+                return
             QMetaObject.invokeMethod(self, "_move_to_cursor",
                 Qt.ConnectionType.QueuedConnection,
                 Q_ARG(int, x), Q_ARG(int, y))
@@ -75,7 +79,7 @@ class MouseWheelGUI(QMainWindow):
         # Stays on top, frameless option or just a clean floating toolbar?
         # Let's make it tool-window type so it has a thin title bar and stays on top, easy to move around.
         # Use WindowDoesNotAcceptFocus in Qt flags as well
-        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowTitleHint)
         
         # Apply Cyberpunk styling
         self.setStyleSheet(f"""
@@ -86,8 +90,8 @@ class MouseWheelGUI(QMainWindow):
                 border: 1px solid {CP_DIM};
                 color: {CP_CYAN};
                 font-weight: bold;
-                font-size: 14pt;
-                padding: 10px;
+                font-size: 9pt;
+                padding: 4px;
                 border-radius: 2px;
             }}
             QPushButton:hover {{
@@ -134,7 +138,7 @@ class MouseWheelGUI(QMainWindow):
         layout.addWidget(self.btn_down)
         
         # Keep window size minimal
-        self.setFixedSize(60, 110)
+        self.setFixedSize(44, 60)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -165,6 +169,7 @@ class MouseWheelGUI(QMainWindow):
         if direction == "down":
             delta = -delta
             
+        self._suppress_next_scroll = True
         ctypes.windll.user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, delta, 0)
         
         # Show window again
