@@ -684,7 +684,7 @@
             "category": "General",
             "description": "",
             "hotkey": "Numpad0",
-            "window_title": "VCT",
+            "window_title": "VCT, VALORANT",
             "process_name": "chrome.exe",
             "window_class": "",
             "action": "{\n        Send \"^w\"\n}",
