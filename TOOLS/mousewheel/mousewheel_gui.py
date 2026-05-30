@@ -4,7 +4,8 @@ import ctypes
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QPushButton, QMenu, QDialog, QLabel, QSpinBox, 
                              QFormLayout, QHBoxLayout)
-from PyQt6.QtCore import Qt, QPoint, QMetaObject, Q_ARG, pyqtSlot
+from PyQt6.QtCore import Qt, QPoint, QMetaObject, Q_ARG, pyqtSlot, QTimer
+from PyQt6.QtGui import QPainter, QColor, QPen, QConicalGradient
 from pynput import mouse as pmouse
 
 # CYBERPUNK THEME PALETTE
@@ -54,8 +55,13 @@ class MouseWheelGUI(QMainWindow):
         super().__init__()
         self.scroll_speed = 3
         self._suppress_next_scroll = False
+        self.border_offset = 0.0
         self.init_ui()
         self._start_global_wheel_listener()
+        
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_border_animation)
+        self.timer.start(30)
 
     def _start_global_wheel_listener(self):
         def on_scroll(x, y, dx, dy):
@@ -231,6 +237,29 @@ class MouseWheelGUI(QMainWindow):
             
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    def update_border_animation(self):
+        self.border_offset = (self.border_offset + 3) % 360
+        self.update()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        pen_width = 3
+        rect = self.rect().adjusted(1, 1, -2, -2)
+        
+        gradient = QConicalGradient(self.width() / 2.0, self.height() / 2.0, self.border_offset)
+        gradient.setColorAt(0.0, QColor("#00F0FF"))    # Cyan
+        gradient.setColorAt(0.25, QColor("#FF007F"))   # Magenta/Pink
+        gradient.setColorAt(0.5, QColor("#FCEE0A"))    # Yellow
+        gradient.setColorAt(0.75, QColor("#00FF66"))   # Green
+        gradient.setColorAt(1.0, QColor("#00F0FF"))    # Cyan
+        
+        pen = QPen(gradient, pen_width)
+        painter.setPen(pen)
+        painter.drawRect(rect)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
