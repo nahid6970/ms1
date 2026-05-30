@@ -3,9 +3,9 @@ import os
 import ctypes
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QPushButton, QMenu, QDialog, QLabel, QSpinBox, 
-                             QFormLayout, QHBoxLayout)
+                             QFormLayout, QHBoxLayout, QComboBox)
 from PyQt6.QtCore import Qt, QPoint, QMetaObject, Q_ARG, pyqtSlot, QTimer
-from PyQt6.QtGui import QPainter, QColor, QPen, QConicalGradient
+from PyQt6.QtGui import QPainter, QColor, QPen, QConicalGradient, QFontDatabase
 from pynput import mouse as pmouse
 
 # CYBERPUNK THEME PALETTE
@@ -19,14 +19,20 @@ CP_TEXT = "#E0E0E0"
 MOUSEEVENTF_WHEEL = 0x0800
 
 class SettingsDialog(QDialog):
-    def __init__(self, parent=None, current_scroll=3):
+    def __init__(self, parent=None, current_scroll=3, current_font_family="Consolas", current_font_size=10):
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            QSpinBox {{
+            QWidget {{ color: {CP_TEXT}; font-family: '{current_font_family}'; font-size: {current_font_size}pt; }}
+            QSpinBox, QComboBox {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                selection-background-color: {CP_CYAN};
+                selection-color: {CP_BG};
             }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
@@ -36,10 +42,25 @@ class SettingsDialog(QDialog):
             }}
         """)
         layout = QFormLayout(self)
-        self.spin = QSpinBox()
-        self.spin.setRange(1, 20)
-        self.spin.setValue(current_scroll)
-        layout.addRow("Scroll Speed:", self.spin)
+        
+        self.spin_scroll = QSpinBox()
+        self.spin_scroll.setRange(1, 20)
+        self.spin_scroll.setValue(current_scroll)
+        layout.addRow("Scroll Speed:", self.spin_scroll)
+        
+        self.combo_font = QComboBox()
+        font_db = QFontDatabase()
+        families = font_db.families()
+        self.combo_font.addItems(families)
+        idx = self.combo_font.findText(current_font_family, Qt.MatchFlag.MatchExactly)
+        if idx >= 0:
+            self.combo_font.setCurrentIndex(idx)
+        layout.addRow("Font Family:", self.combo_font)
+        
+        self.spin_font_size = QSpinBox()
+        self.spin_font_size.setRange(6, 24)
+        self.spin_font_size.setValue(current_font_size)
+        layout.addRow("Font Size:", self.spin_font_size)
         
         btn_box = QHBoxLayout()
         save = QPushButton("SAVE")
@@ -54,6 +75,8 @@ class MouseWheelGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.scroll_speed = 3
+        self.font_family = "Consolas"
+        self.font_size = 10
         self._suppress_next_scroll = False
         self.border_offset = 0.0
         self.init_ui()
@@ -88,24 +111,16 @@ class MouseWheelGUI(QMainWindow):
     def _move_to_cursor(self, x, y):
         self.move(x - self.width() // 2, y - self.height() // 2)
         
-    def init_ui(self):
-        self.setWindowTitle("Scroll Tool")
-        
-        # Stays on top, frameless option or just a clean floating toolbar?
-        # Let's make it tool-window type so it has a thin title bar and stays on top, easy to move around.
-        # Use WindowDoesNotAcceptFocus in Qt flags as well
-        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.FramelessWindowHint)
-        
-        # Apply Cyberpunk styling
+    def apply_styles(self):
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{self.font_family}'; font-size: {self.font_size}pt; }}
             QPushButton {{
                 background-color: {CP_DIM};
                 border: 1px solid {CP_DIM};
                 color: {CP_CYAN};
                 font-weight: bold;
-                font-size: 9pt;
+                font-size: {self.font_size - 1 if self.font_size > 7 else self.font_size}pt;
                 padding: 4px;
                 border-radius: 2px;
             }}
@@ -119,6 +134,17 @@ class MouseWheelGUI(QMainWindow):
                 color: black;
             }}
         """)
+
+    def init_ui(self):
+        self.setWindowTitle("Scroll Tool")
+        
+        # Stays on top, frameless option or just a clean floating toolbar?
+        # Let's make it tool-window type so it has a thin title bar and stays on top, easy to move around.
+        # Use WindowDoesNotAcceptFocus in Qt flags as well
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.FramelessWindowHint)
+        
+        # Apply Cyberpunk styling
+        self.apply_styles()
         
         central = QWidget()
         self.setCentralWidget(central)
@@ -157,13 +183,20 @@ class MouseWheelGUI(QMainWindow):
         self.btn_down.setAutoRepeatInterval(60)
         self.btn_down.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.btn_down.customContextMenuRequested.connect(self.show_context_menu)
+        
+        # Settings button
+        self.btn_settings = QPushButton("⚙")
+        self.btn_settings.setToolTip("Settings")
+        self.btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_settings.clicked.connect(self.open_settings)
 
         
         layout.addWidget(self.btn_up)
         layout.addWidget(self.btn_down)
+        layout.addWidget(self.btn_settings)
         
         # Keep window size minimal
-        self.setFixedSize(44, 74)
+        self.setFixedSize(44, 104)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -231,9 +264,12 @@ class MouseWheelGUI(QMainWindow):
             QApplication.quit()
             
     def open_settings(self):
-        dialog = SettingsDialog(self, self.scroll_speed)
+        dialog = SettingsDialog(self, self.scroll_speed, self.font_family, self.font_size)
         if dialog.exec():
-            self.scroll_speed = dialog.spin.value()
+            self.scroll_speed = dialog.spin_scroll.value()
+            self.font_family = dialog.combo_font.currentText()
+            self.font_size = dialog.spin_font_size.value()
+            self.apply_styles()
             
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
