@@ -69,6 +69,15 @@ class MouseWheelGUI(QMainWindow):
         listener.daemon = True
         listener.start()
 
+    def _handle_drag_press(self, event):
+        self._drag_pos = event.globalPosition().toPoint()
+
+    def _handle_drag_move(self, event):
+        if self._drag_pos:
+            delta = event.globalPosition().toPoint() - self._drag_pos
+            self.move(self.pos() + delta)
+            self._drag_pos = event.globalPosition().toPoint()
+
     @pyqtSlot(int, int)
     def _move_to_cursor(self, x, y):
         self.move(x - self.width() // 2, y - self.height() // 2)
@@ -79,7 +88,7 @@ class MouseWheelGUI(QMainWindow):
         # Stays on top, frameless option or just a clean floating toolbar?
         # Let's make it tool-window type so it has a thin title bar and stays on top, easy to move around.
         # Use WindowDoesNotAcceptFocus in Qt flags as well
-        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowTitleHint)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.FramelessWindowHint)
         
         # Apply Cyberpunk styling
         self.setStyleSheet(f"""
@@ -110,6 +119,16 @@ class MouseWheelGUI(QMainWindow):
         layout = QVBoxLayout(central)
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(4)
+
+        # Drag handle
+        self._drag_handle = QWidget()
+        self._drag_handle.setFixedHeight(10)
+        self._drag_handle.setCursor(Qt.CursorShape.SizeAllCursor)
+        self._drag_handle.setStyleSheet(f"background-color: {CP_DIM}; border-radius: 2px;")
+        self._drag_pos = None
+        self._drag_handle.mousePressEvent = self._handle_drag_press
+        self._drag_handle.mouseMoveEvent = self._handle_drag_move
+        layout.addWidget(self._drag_handle)
         
         # Up button
         self.btn_up = QPushButton("▲")
@@ -138,7 +157,7 @@ class MouseWheelGUI(QMainWindow):
         layout.addWidget(self.btn_down)
         
         # Keep window size minimal
-        self.setFixedSize(44, 60)
+        self.setFixedSize(44, 74)
 
     def showEvent(self, event):
         super().showEvent(event)
