@@ -97,6 +97,9 @@ class MouseWheelGUI(QMainWindow):
         self.btn_up.setToolTip("Scroll Up (Right-click for options)")
         self.btn_up.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_up.clicked.connect(self.scroll_up)
+        self.btn_up.setAutoRepeat(True)
+        self.btn_up.setAutoRepeatDelay(300)
+        self.btn_up.setAutoRepeatInterval(60)
         self.btn_up.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.btn_up.customContextMenuRequested.connect(self.show_context_menu)
         
@@ -105,8 +108,12 @@ class MouseWheelGUI(QMainWindow):
         self.btn_down.setToolTip("Scroll Down (Right-click for options)")
         self.btn_down.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_down.clicked.connect(self.scroll_down)
+        self.btn_down.setAutoRepeat(True)
+        self.btn_down.setAutoRepeatDelay(300)
+        self.btn_down.setAutoRepeatInterval(60)
         self.btn_down.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.btn_down.customContextMenuRequested.connect(self.show_context_menu)
+
         
         layout.addWidget(self.btn_up)
         layout.addWidget(self.btn_down)
