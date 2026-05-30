@@ -45,6 +45,7 @@ class MouseWheel(QWidget):
         self.btn_down = QPushButton("▼")
         for btn in (self.btn_up, self.btn_down):
             btn.setFixedHeight(24)
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setAutoRepeat(True)
             btn.setAutoRepeatDelay(400)
