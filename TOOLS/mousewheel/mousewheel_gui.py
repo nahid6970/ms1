@@ -1,6 +1,7 @@
 import sys
 import os
 import ctypes
+import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QPushButton, QMenu, QDialog, QLabel, QSpinBox, 
                              QFormLayout, QHBoxLayout, QComboBox)
@@ -17,6 +18,29 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
 MOUSEEVENTF_WHEEL = 0x0800
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+
+def load_settings():
+    defaults = {
+        "scroll_speed": 3,
+        "font_family": "Consolas",
+        "font_size": 10
+    }
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, "r") as f:
+                data = json.load(f)
+                defaults.update(data)
+        except Exception:
+            pass
+    return defaults
+
+def save_settings(settings):
+    try:
+        with open(SETTINGS_FILE, "w") as f:
+            json.dump(settings, f, indent=4)
+    except Exception:
+        pass
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, current_scroll=3, current_font_family="Consolas", current_font_size=10):
@@ -70,9 +94,10 @@ class SettingsDialog(QDialog):
 class MouseWheelGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.scroll_speed = 3
-        self.font_family = "Consolas"
-        self.font_size = 10
+        settings = load_settings()
+        self.scroll_speed = settings.get("scroll_speed", 3)
+        self.font_family = settings.get("font_family", "Consolas")
+        self.font_size = settings.get("font_size", 10)
         self._suppress_next_scroll = False
         self.border_offset = 0.0
         self.init_ui()
@@ -266,6 +291,11 @@ class MouseWheelGUI(QMainWindow):
             self.font_family = dialog.combo_font.currentText()
             self.font_size = dialog.spin_font_size.value()
             self.apply_styles()
+            save_settings({
+                "scroll_speed": self.scroll_speed,
+                "font_family": self.font_family,
+                "font_size": self.font_size
+            })
             
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
