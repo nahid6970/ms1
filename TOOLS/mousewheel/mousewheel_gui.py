@@ -4,7 +4,8 @@ import ctypes
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QPushButton, QMenu, QDialog, QLabel, QSpinBox, 
                              QFormLayout, QHBoxLayout)
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPoint, QMetaObject, Q_ARG, pyqtSlot
+from pynput import mouse as pmouse
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -51,8 +52,22 @@ class SettingsDialog(QDialog):
 class MouseWheelGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.scroll_speed = 3  # Default scroll speed
+        self.scroll_speed = 3
         self.init_ui()
+        self._start_global_wheel_listener()
+
+    def _start_global_wheel_listener(self):
+        def on_scroll(x, y, dx, dy):
+            QMetaObject.invokeMethod(self, "_move_to_cursor",
+                Qt.ConnectionType.QueuedConnection,
+                Q_ARG(int, x), Q_ARG(int, y))
+        listener = pmouse.Listener(on_scroll=on_scroll)
+        listener.daemon = True
+        listener.start()
+
+    @pyqtSlot(int, int)
+    def _move_to_cursor(self, x, y):
+        self.move(x - self.width() // 2, y - self.height() // 2)
         
     def init_ui(self):
         self.setWindowTitle("Scroll Tool")
