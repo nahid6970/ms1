@@ -28,12 +28,6 @@ class SettingsDialog(QDialog):
             QSpinBox, QComboBox {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
             }}
-            QComboBox QAbstractItemView {{
-                background-color: {CP_PANEL};
-                color: {CP_CYAN};
-                selection-background-color: {CP_CYAN};
-                selection-color: {CP_BG};
-            }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
             }}
@@ -49,8 +43,10 @@ class SettingsDialog(QDialog):
         layout.addRow("Scroll Speed:", self.spin_scroll)
         
         self.combo_font = QComboBox()
-        font_db = QFontDatabase()
-        families = font_db.families()
+        # Curated list of clean standard fonts to prevent lag and crash
+        families = ["Consolas", "Arial", "Courier New", "Segoe UI", "Georgia", "Times New Roman", "JetBrains Mono", "Cascadia Code", "Impact", "Verdana"]
+        if current_font_family not in families:
+            families.append(current_font_family)
         self.combo_font.addItems(families)
         idx = self.combo_font.findText(current_font_family, Qt.MatchFlag.MatchExactly)
         if idx >= 0:
