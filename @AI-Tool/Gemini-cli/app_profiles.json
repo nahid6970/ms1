@@ -15,7 +15,7 @@
         "name": "nahid69701",
         "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\nahid69701",
         "target_path": "C:\\Users\\nahid\\.gemini",
-        "active": false,
+        "active": true,
         "is_locked": true,
         "password": "1823",
         "timer_enabled": false,
@@ -96,7 +96,7 @@
         "password": "1823",
         "timer_enabled": false,
         "target_time": null,
-        "active": true
+        "active": false
     },
     {
         "name": "nahid6970",
