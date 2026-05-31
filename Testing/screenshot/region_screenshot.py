@@ -286,9 +286,13 @@ class FolderChooser:
             messagebox.showerror("Error", f"Failed to open browser: {e}")
 
     def google_image_search(self) -> None:
+        import tempfile
+        filepath = os.path.join(tempfile.gettempdir(), "google_img_search.png")
+        self.img.save(filepath)
         send_to_clipboard(self.img)
         subprocess.run("start https://images.google.com", shell=True)
         self.root.destroy()
+        _show_drag_thumbnail(filepath)
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
@@ -426,6 +430,28 @@ def send_to_clipboard(img, text_path=None):
     except Exception as e:
         print(f"Clipboard error: {e}")
         return False
+
+def _show_drag_thumbnail(filepath):
+    """Invisible overlay: left-click anywhere to click+paste the image. ESC to cancel."""
+    import pyautogui, time
+
+    root = tk.Tk()
+    root.attributes('-fullscreen', True)
+    root.attributes('-topmost', True)
+    root.attributes('-alpha', 0.01)
+    root.config(cursor="crosshair", bg="black")
+
+    def on_click(e):
+        root.destroy()
+        time.sleep(0.1)
+        pyautogui.click(e.x_root, e.y_root)
+        time.sleep(0.15)
+        pyautogui.hotkey('ctrl', 'v')
+
+    root.bind("<Button-1>", on_click)
+    root.bind("<Escape>", lambda e: root.destroy())
+    root.mainloop()
+
 
 def main():
     try:
