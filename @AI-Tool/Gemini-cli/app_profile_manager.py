@@ -17,22 +17,22 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
 # ── PROFESSIONAL SLATE / INDIGO PALETTE ──────────────────────────────────────
-BG_DEEP     = "#0D0F14"   # near-black with blue cast
-BG_SURFACE  = "#13161E"   # card / panel background
-BG_RAISED   = "#1C2030"   # elevated elements
-BORDER      = "#252A3A"   # subtle separator
-BORDER_FOCUS= "#4F6EF7"   # indigo focus ring
+BG_DEEP      = "#0D0F14"
+BG_SURFACE   = "#13161E"
+BG_RAISED    = "#1C2030"
+BORDER       = "#252A3A"
+BORDER_FOCUS = "#4F6EF7"
 
-ACCENT      = "#4F6EF7"   # indigo primary
-ACCENT_SOFT = "#3B54C0"   # pressed / hover dark
-ACCENT_GLOW = "#6B88FF"   # lighter highlight
-SUCCESS     = "#34C98E"   # mint green
-WARNING     = "#F5A623"   # amber
-DANGER      = "#E05A5A"   # muted red
+ACCENT       = "#4F6EF7"
+ACCENT_SOFT  = "#3B54C0"
+ACCENT_GLOW  = "#6B88FF"
+SUCCESS      = "#34C98E"
+WARNING      = "#F5A623"
+DANGER       = "#E05A5A"
 
-TEXT_PRIMARY  = "#E8EAF0"
-TEXT_SECONDARY= "#8B91A8"
-TEXT_MUTED    = "#555C73"
+TEXT_PRIMARY   = "#E8EAF0"
+TEXT_SECONDARY = "#8B91A8"
+TEXT_MUTED     = "#555C73"
 
 FONT_MAIN = "Segoe UI"
 FONT_MONO = "Cascadia Code"
@@ -60,7 +60,7 @@ INPUT_STYLE = f"""
     QLineEdit, QDateTimeEdit, QComboBox {{
         background-color: {BG_DEEP};
         border: 1px solid {BORDER};
-        border-radius: 6px;
+        border-radius: 0px;
         padding: 8px 12px;
         color: {TEXT_PRIMARY};
         font-family: '{FONT_MAIN}';
@@ -93,10 +93,10 @@ CHECKBOX_STYLE = f"""
     QCheckBox::indicator, QRadioButton::indicator {{
         width: 16px; height: 16px;
         border: 1px solid {BORDER};
-        border-radius: 4px;
+        border-radius: 0px;
         background: {BG_DEEP};
     }}
-    QRadioButton::indicator {{ border-radius: 8px; }}
+    QRadioButton::indicator {{ border-radius: 0px; }}
     QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
         background: {ACCENT};
         border-color: {ACCENT};
@@ -124,7 +124,7 @@ def make_primary_btn(text, min_width=120):
             background-color: {ACCENT};
             color: #ffffff;
             border: none;
-            border-radius: 7px;
+            border-radius: 0px;
             padding: 9px 20px;
             font-family: '{FONT_MAIN}';
             font-size: 13px;
@@ -145,7 +145,7 @@ def make_secondary_btn(text, min_width=100):
             background-color: {BG_RAISED};
             color: {TEXT_SECONDARY};
             border: 1px solid {BORDER};
-            border-radius: 7px;
+            border-radius: 0px;
             padding: 9px 20px;
             font-family: '{FONT_MAIN}';
             font-size: 13px;
@@ -166,7 +166,7 @@ def make_ghost_btn(text):
             background-color: transparent;
             color: {TEXT_MUTED};
             border: none;
-            border-radius: 6px;
+            border-radius: 0px;
             font-size: 15px;
         }}
         QPushButton:hover {{ background-color: {BG_RAISED}; color: {TEXT_PRIMARY}; }}
@@ -209,7 +209,7 @@ class ProfileDialog(QDialog):
             {INPUT_STYLE}
             {CHECKBOX_STYLE}
             QScrollBar:vertical {{ border: none; background: {BG_DEEP}; width: 6px; margin: 0; }}
-            QScrollBar::handle:vertical {{ background: {BORDER}; border-radius: 3px; min-height: 30px; }}
+            QScrollBar::handle:vertical {{ background: {BORDER}; border-radius: 0px; min-height: 30px; }}
         """)
 
         root = QVBoxLayout(self)
@@ -307,7 +307,7 @@ class ProfileDialog(QDialog):
 
         self.timer_frame = QFrame()
         self.timer_frame.setStyleSheet(f"""
-            QFrame {{ background: {BG_RAISED}; border: 1px solid {BORDER}; border-radius: 8px; }}
+            QFrame {{ background: {BG_RAISED}; border: 1px solid {BORDER}; border-radius: 0px; }}
         """)
         tf_layout = QVBoxLayout(self.timer_frame)
         tf_layout.setContentsMargins(16, 14, 16, 14)
@@ -333,7 +333,7 @@ class ProfileDialog(QDialog):
         self.dt_edit.setCalendarPopup(True)
         self.dt_edit.setStyleSheet(f"""
             QDateTimeEdit {{
-                background: {BG_DEEP}; border: 1px solid {BORDER}; border-radius: 6px;
+                background: {BG_DEEP}; border: 1px solid {BORDER}; border-radius: 0px;
                 padding: 7px 10px; color: {TEXT_PRIMARY}; font-size: 13px;
             }}
             QDateTimeEdit:focus {{ border-color: {BORDER_FOCUS}; }}
@@ -466,7 +466,7 @@ class AppCard(QFrame):
             #appCard {{
                 background-color: {BG_SURFACE};
                 border: 1px solid {BORDER};
-                border-radius: 10px;
+                border-radius: 0px;
             }}
             #appCard:hover {{
                 background-color: {BG_RAISED};
@@ -478,19 +478,13 @@ class AppCard(QFrame):
         layout.setContentsMargins(20, 0, 20, 0)
         layout.setSpacing(14)
 
-        # Icon blob
         icon = QLabel("◈")
-        icon.setStyleSheet(f"""
-            color: {ACCENT};
-            font-size: 22px;
-            background: transparent;
-        """)
+        icon.setStyleSheet(f"color: {ACCENT}; font-size: 22px; background: transparent;")
         layout.addWidget(icon)
 
-        # Text block
         text_col = QVBoxLayout()
         text_col.setSpacing(2)
-        name_lbl = make_label(self.app_name, size=14, color=TEXT_PRIMARY, bold=True)
+        name_lbl  = make_label(self.app_name, size=14, color=TEXT_PRIMARY, bold=True)
         count_lbl = make_label(
             f"{self.profile_count} profile{'s' if self.profile_count != 1 else ''}",
             size=12, color=TEXT_MUTED
@@ -531,7 +525,6 @@ class ProfileCard(QFrame):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
 
-        # ── Main row
         row = QHBoxLayout()
         row.setContentsMargins(18, 14, 14, 14)
         row.setSpacing(12)
@@ -545,36 +538,30 @@ class ProfileCard(QFrame):
         name_row.addWidget(self.name_label)
 
         if self.profile.get("is_locked"):
-            lock_badge = make_label("🔒", size=12)
-            name_row.addWidget(lock_badge)
+            name_row.addWidget(make_label("🔒", size=12))
 
-        self.countdown_label = make_label("", size=12, color=WARNING)
-        self.countdown_label.setStyleSheet(f"""
-            color: {WARNING};
-            background: transparent;
-            font-family: '{FONT_MONO}';
-            font-size: 12px;
-        """)
+        self.countdown_label = QLabel("")
+        self.countdown_label.setStyleSheet(
+            f"color: {WARNING}; background: transparent; font-family: '{FONT_MONO}'; font-size: 12px;"
+        )
         self.countdown_label.setVisible(False)
         name_row.addWidget(self.countdown_label)
         name_row.addStretch()
 
-        self.path_label = make_label(self.profile["path"], size=11, color=TEXT_MUTED)
-        self.path_label.setStyleSheet(f"""
-            color: {TEXT_MUTED};
-            font-family: '{FONT_MONO}';
-            font-size: 11px;
-            background: transparent;
-        """)
+        self.path_label = QLabel(self.profile["path"])
+        self.path_label.setStyleSheet(
+            f"color: {TEXT_MUTED}; font-family: '{FONT_MONO}'; font-size: 11px; background: transparent;"
+        )
 
         info_col.addLayout(name_row)
         info_col.addWidget(self.path_label)
         row.addLayout(info_col, 1)
 
-        # Action area
         if self.profile.get("active", False):
             status = make_label("● ACTIVE", size=11, color=SUCCESS, bold=True)
-            status.setStyleSheet(f"color: {SUCCESS}; font-size: 11px; font-weight: bold; background: transparent; letter-spacing: 1px;")
+            status.setStyleSheet(
+                f"color: {SUCCESS}; font-size: 11px; font-weight: bold; background: transparent; letter-spacing: 1px;"
+            )
             row.addWidget(status)
         else:
             act_btn = make_primary_btn("Activate", min_width=85)
@@ -586,7 +573,6 @@ class ProfileCard(QFrame):
         delete_btn = make_ghost_btn("✕")
         edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
         delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
-
         row.addWidget(edit_btn)
         row.addWidget(delete_btn)
 
@@ -607,7 +593,7 @@ class ProfileCard(QFrame):
             #profileCard {{
                 background-color: {BG_SURFACE};
                 border: 1px solid {border};
-                border-radius: 10px;
+                border-radius: 0px;
             }}
             #profileCard:hover {{
                 background-color: {BG_RAISED};
@@ -620,8 +606,8 @@ class ProfileCard(QFrame):
             self.countdown_label.setVisible(False)
             return
 
-        target_dt  = QDateTime.fromString(target_str, Qt.DateFormat.ISODate)
-        secs_left  = QDateTime.currentDateTime().secsTo(target_dt)
+        target_dt = QDateTime.fromString(target_str, Qt.DateFormat.ISODate)
+        secs_left = QDateTime.currentDateTime().secsTo(target_dt)
 
         if secs_left > 0:
             d = secs_left // 86400
@@ -634,11 +620,15 @@ class ProfileCard(QFrame):
             if m or not parts: parts.append(f"{m}m")
             if not d: parts.append(f"{s:02d}s")
             self.countdown_label.setText(f"⏱ {' '.join(parts)}")
-            self.countdown_label.setStyleSheet(f"color: {WARNING}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;")
+            self.countdown_label.setStyleSheet(
+                f"color: {WARNING}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;"
+            )
             self.countdown_label.setVisible(True)
         else:
             self.countdown_label.setText("⏰ Expired")
-            self.countdown_label.setStyleSheet(f"color: {DANGER}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;")
+            self.countdown_label.setStyleSheet(
+                f"color: {DANGER}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;"
+            )
             self.countdown_label.setVisible(True)
             self._apply_style(expired=True)
             self.timer.stop()
@@ -685,7 +675,6 @@ class AppProfileManager(QMainWindow):
         self.setWindowTitle("Profile Manager")
         self.setMinimumSize(720, 680)
 
-        # ── Global stylesheet
         self.setStyleSheet(f"""
             QMainWindow, QWidget#central {{
                 background-color: {BG_DEEP};
@@ -696,7 +685,7 @@ class AppProfileManager(QMainWindow):
                 border: none; background: {BG_DEEP}; width: 6px; margin: 4px 0;
             }}
             QScrollBar::handle:vertical {{
-                background: {BORDER}; border-radius: 3px; min-height: 30px;
+                background: {BORDER}; border-radius: 0px; min-height: 30px;
             }}
             QScrollBar::handle:vertical:hover {{ background: {TEXT_MUTED}; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
@@ -720,6 +709,7 @@ class AppProfileManager(QMainWindow):
             QFrame {{
                 background: {BG_SURFACE};
                 border-bottom: 1px solid {BORDER};
+                border-radius: 0px;
             }}
         """)
         tb_layout = QHBoxLayout(topbar)
@@ -750,7 +740,7 @@ class AppProfileManager(QMainWindow):
 
         # ── Content area
         content = QWidget()
-        content.setStyleSheet(f"background: {BG_DEEP};")
+        content.setStyleSheet(f"background: {BG_DEEP}; border-radius: 0px;")
         content_layout = QVBoxLayout(content)
         content_layout.setContentsMargins(24, 24, 24, 24)
         content_layout.setSpacing(0)
