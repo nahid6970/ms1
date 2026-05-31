@@ -21,10 +21,15 @@ window.addEventListener('YTC_SUBTITLES_CAPTURED', (event) => {
   // Clean the VTT/XML content to plain text
   const cleanContent = parseSubtitles(content);
   
+  // Extract video ID from timedtext URL
+  const match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  const videoId = match ? match[1] : '';
+
   // Store in local storage for the popup to display
   chrome.storage.local.set({ 
     interceptedSubtitles: cleanContent,
-    lastInterceptTime: Date.now()
+    lastInterceptTime: Date.now(),
+    interceptedVideoId: videoId
   });
 });
 

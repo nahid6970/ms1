@@ -31,8 +31,14 @@ async function fetchDirectAPI(url) {
   const tabId = (tabs[0] && tabs[0].url.includes(videoId)) ? tabs[0].id : null;
   if (!tabId) throw new Error('Keep the YouTube tab active.');
 
+  // Check if we already have the subtitles for this video in storage
+  const existing = await chrome.storage.local.get(['interceptedSubtitles', 'interceptedVideoId']);
+  if (existing.interceptedVideoId === videoId && existing.interceptedSubtitles && existing.interceptedSubtitles.trim().length > 50) {
+    return existing.interceptedSubtitles;
+  }
+
   // Clear any previously intercepted subtitles so we can detect a fresh capture
-  await chrome.storage.local.remove('interceptedSubtitles');
+  await chrome.storage.local.remove(['interceptedSubtitles', 'interceptedVideoId']);
 
   // Trigger CC reload by simulating 'c' keypress in the page's main world
   // (MAIN world required so YouTube's player event listeners actually receive it)
