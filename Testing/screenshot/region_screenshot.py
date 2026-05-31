@@ -181,7 +181,7 @@ class FolderChooser:
         self.list_container.update_idletasks()
         # Increased dimensions for 36pt icons
         width = 820 
-        total_items = len(self.folders) + 4 # CLIPBOARD, CLIP+PATH, CHROME, ADD
+        total_items = len(self.folders) + 5 # CLIPBOARD, CLIP+PATH, CHROME, GOOGLE_IMG, ADD
         rows = (total_items + 4) // 5
         height = 110 + (rows * 135)
         
@@ -200,6 +200,7 @@ class FolderChooser:
         all_items.append(("CLIPBOARD", "#00d4ff", "📋", "CLIPBOARD", -1))
         all_items.append(("CLIP+PATH", "#00ffcc", "🔗", "CLIPBOARD_PATH", -3))
         all_items.append(("CHROME", "#ff9900", "🌏", "BROWSER", -2))
+        all_items.append(("GOOGLE IMG", "#ea4335", "🔍", "GOOGLE_IMG", -4))
         
         for i, f_data in enumerate(self.folders):
             icon = f_data.get("icon", "\ueaf7")
@@ -258,6 +259,8 @@ class FolderChooser:
                     w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD_PATH"))
                 elif card_type == "BROWSER":
                     w.bind("<Button-1>", lambda e: self.open_in_browser())
+                elif card_type == "GOOGLE_IMG":
+                    w.bind("<Button-1>", lambda e: self.google_image_search())
                 else: # FOLDER
                     w.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
                     w.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
@@ -281,6 +284,11 @@ class FolderChooser:
             self.root.destroy()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open browser: {e}")
+
+    def google_image_search(self) -> None:
+        send_to_clipboard(self.img)
+        subprocess.run("start https://images.google.com", shell=True)
+        self.root.destroy()
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
