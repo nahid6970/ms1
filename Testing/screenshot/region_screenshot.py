@@ -200,7 +200,7 @@ class FolderChooser:
         all_items.append(("CLIPBOARD", "#00d4ff", "📋", "CLIPBOARD", -1))
         all_items.append(("CLIP+PATH", "#00ffcc", "🔗", "CLIPBOARD_PATH", -3))
         all_items.append(("CHROME", "#ff9900", "🌏", "BROWSER", -2))
-        all_items.append(("GOOGLE IMG", "#ea4335", "🔍", "GOOGLE_IMG", -4))
+        all_items.append(("GOOGLE IMG", "#4285f4", "🔍", "GOOGLE_IMG", -4))
         
         for i, f_data in enumerate(self.folders):
             icon = f_data.get("icon", "\ueaf7")
