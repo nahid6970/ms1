@@ -52,7 +52,7 @@ When text is selected, press F3 to open the formatter with these options:
 - **Subscript** (`~text~`)
 - **📊 Format pipe table** - Auto-align table columns
 - **🧹 Remove formatting** - Strip all markdown syntax
-- **ABC/abc/Abc** - Change text case (UPPER/lower/Proper)
+- **ABC/abc/Abc/বাং** - Change text case (UPPER/lower/Proper/Bangla Phonetic)
 - **Lines ↔ Comma** - Convert between formats
 - **🔍 Search in Google** - Search selected text
 - **🎯 Select all matching** - Multi-cursor for all occurrences

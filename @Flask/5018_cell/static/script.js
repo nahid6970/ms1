@@ -10820,7 +10820,7 @@ function formatPipeTable(event) {
     }
 }
 
-function changeTextCase(caseType, event) {
+async function changeTextCase(caseType, event) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
@@ -10842,19 +10842,37 @@ function changeTextCase(caseType, event) {
     }
 
     let convertedText;
-    switch (caseType) {
-        case 'upper':
-            convertedText = selectedText.toUpperCase();
-            break;
-        case 'lower':
-            convertedText = selectedText.toLowerCase();
-            break;
-        case 'proper':
-            // Proper case: capitalize first letter of each word
-            convertedText = selectedText.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-            break;
-        default:
+    if (caseType === 'bangla') {
+        showToast('Converting to Bangla...', 'info');
+        try {
+            const response = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(selectedText)}&itc=bn-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=jsapi`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            if (data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1] && data[1][0][1][0]) {
+                convertedText = data[1][0][1][0];
+            } else {
+                throw new Error('Transliteration failed');
+            }
+        } catch (error) {
+            console.error('Error in phonetic translation:', error);
+            showToast('Transliteration failed. Internet connection required.', 'error');
             return;
+        }
+    } else {
+        switch (caseType) {
+            case 'upper':
+                convertedText = selectedText.toUpperCase();
+                break;
+            case 'lower':
+                convertedText = selectedText.toLowerCase();
+                break;
+            case 'proper':
+                // Proper case: capitalize first letter of each word
+                convertedText = selectedText.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+                break;
+            default:
+                return;
+        }
     }
 
     // Handle contentEditable (WYSIWYG mode)
@@ -10903,7 +10921,7 @@ function changeTextCase(caseType, event) {
     }
 
     closeQuickFormatter();
-    const caseNames = { upper: 'UPPERCASE', lower: 'lowercase', proper: 'Proper Case' };
+    const caseNames = { upper: 'UPPERCASE', lower: 'lowercase', proper: 'Proper Case', bangla: 'Bangla Phonetic' };
     showToast(`Converted to ${caseNames[caseType]}`, 'success');
 }
 

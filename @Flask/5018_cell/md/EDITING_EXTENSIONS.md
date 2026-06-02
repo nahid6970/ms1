@@ -37,7 +37,7 @@
 - **Access:** F3 Quick Formatter Utility buttons.
 
 ## Text Case Conversion
-**Available Cases:** UPPERCASE, lowercase, Proper Case.
+**Available Cases:** UPPERCASE, lowercase, Proper Case, Bangla Phonetic.
 **Access:** F3 Quick Formatter Text Case section.
 **Function:** `changeTextCase(caseType, event)`.
 
