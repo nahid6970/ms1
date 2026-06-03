@@ -1,3 +1,48 @@
+import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
+
+const CONVEX_URL = "https://joyous-stingray-672.convex.cloud";
+const EXTENSION_NAME = "ytc_subtitle_interceptor";
+const client = new ConvexHttpClient(CONVEX_URL);
+
+async function sendDataToConvex(data) {
+  try {
+    const result = await client.mutation("functions:save", {
+      extensionName: EXTENSION_NAME,
+      data
+    });
+    return { success: true, result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function loadDataFromConvex() {
+  try {
+    const data = await client.query("functions:get", {
+      extensionName: EXTENSION_NAME
+    });
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'saveToConvex') {
+    sendDataToConvex(request.data)
+      .then(sendResponse)
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (request.action === 'loadFromConvex') {
+    loadDataFromConvex()
+      .then(sendResponse)
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'fetchSubtitles') {
@@ -21,6 +66,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
   }
 });
+
+(async () => {
+  try {
+    await client.query("functions:get", { extensionName: "health_check" });
+    console.log('Convex connection healthy');
+  } catch (e) {
+    console.log('Convex not available or not initialized:', e.message);
+  }
+})();
 
 async function fetchDirectAPI(url) {
   const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);

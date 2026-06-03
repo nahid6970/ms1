@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentPrompts = [];
 let editingIndex = null;
-const backupFileInput = document.getElementById('backupFileInput');
 
 function storageGet(area) {
   return new Promise((resolve) => chrome.storage[area].get(null, resolve));
@@ -37,6 +36,14 @@ function setStatus(message, color = '#00ff9f', clearAfterMs = 3000) {
       }
     }, clearAfterMs);
   }
+}
+
+function sendRuntimeMessage(message) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      resolve(response);
+    });
+  });
 }
 
 function renderPrompts(prompts) {
@@ -141,56 +148,58 @@ document.getElementById('cancelEdit').addEventListener('click', () => {
   clearEditState();
 });
 
-document.getElementById('exportBackup').addEventListener('click', async () => {
+document.getElementById('saveToConvex').addEventListener('click', async () => {
+  const button = document.getElementById('saveToConvex');
+  const originalText = button.textContent;
+
   try {
+    button.disabled = true;
+    button.textContent = '[ SAVING... ]';
+
     const [syncData, localData] = await Promise.all([
       storageGet('sync'),
       storageGet('local')
     ]);
 
-    const backup = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      sync: syncData,
-      local: localData
-    };
+    const response = await sendRuntimeMessage({
+      action: 'saveToConvex',
+      data: {
+        sync: syncData,
+        local: localData
+      }
+    });
 
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ytc-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-    setStatus('BACKUP EXPORTED SUCCESSFULLY!', '#00ff9f');
+    if (response && response.success !== false) {
+      setStatus('BACKUP SAVED TO CONVEX!', '#00ff9f');
+    } else {
+      throw new Error(response?.error || 'Unknown error');
+    }
   } catch (error) {
-    console.error('Backup export failed:', error);
-    setStatus('BACKUP EXPORT FAILED!', '#ff003c', 4000);
+    console.error('Backup to Convex failed:', error);
+    setStatus(`BACKUP FAILED: ${error.message}`, '#ff003c', 5000);
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
   }
 });
 
-document.getElementById('importBackup').addEventListener('click', () => {
-  backupFileInput.value = '';
-  backupFileInput.click();
-});
-
-backupFileInput.addEventListener('change', async () => {
-  const file = backupFileInput.files && backupFileInput.files[0];
-  if (!file) return;
+document.getElementById('loadFromConvex').addEventListener('click', async () => {
+  const button = document.getElementById('loadFromConvex');
+  const originalText = button.textContent;
 
   try {
-    const text = await file.text();
-    const parsed = JSON.parse(text);
+    button.disabled = true;
+    button.textContent = '[ LOADING... ]';
 
-    const syncData = parsed.sync && typeof parsed.sync === 'object' ? parsed.sync : null;
-    const localData = parsed.local && typeof parsed.local === 'object' ? parsed.local : null;
+    const response = await sendRuntimeMessage({ action: 'loadFromConvex' });
+    const data = response && response.success !== false ? response.data : null;
 
-    if (!syncData || !localData) {
-      throw new Error('Invalid backup file format.');
+    if (!data || typeof data !== 'object') {
+      throw new Error(response?.error || 'No backup found in Convex.');
     }
+
+    const syncData = data.sync && typeof data.sync === 'object' ? data.sync : {};
+    const localData = data.local && typeof data.local === 'object' ? data.local : {};
 
     await Promise.all([
       storageClear('sync'),
@@ -207,12 +216,13 @@ backupFileInput.addEventListener('change', async () => {
     document.getElementById('showViewer').checked = syncData.showViewer !== false;
     clearEditState();
 
-    setStatus('BACKUP RESTORED SUCCESSFULLY!', '#00ff9f');
+    setStatus('CONVEX BACKUP RESTORED!', '#00ff9f');
   } catch (error) {
-    console.error('Backup restore failed:', error);
+    console.error('Restore from Convex failed:', error);
     setStatus(`RESTORE FAILED: ${error.message}`, '#ff003c', 5000);
   } finally {
-    backupFileInput.value = '';
+    button.disabled = false;
+    button.textContent = originalText;
   }
 });
 
