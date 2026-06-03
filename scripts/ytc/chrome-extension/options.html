@@ -23,7 +23,10 @@
         <label class="section-title" style="font-size: 11px;">ADD NEW PROMPT_</label>
         <input type="text" id="newPromptName" class="text-input" placeholder="PROMPT_NAME (E.G. SUMMARIZE)">
         <textarea id="newPromptText" class="prompt-input" style="height: 120px; margin-top: 15px;" placeholder="ENTER SYSTEM INSTRUCTIONS..."></textarea>
-        <button id="addPrompt" class="add-btn">[ + ADD_TO_DATABASE ]</button>
+        <div class="prompt-form-actions">
+          <button id="addPrompt" class="add-btn">[ + ADD_TO_DATABASE ]</button>
+          <button id="cancelEdit" class="cancel-btn" hidden>[ CANCEL_EDIT ]</button>
+        </div>
       </div>
     </div>
 

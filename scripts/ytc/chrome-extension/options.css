@@ -76,6 +76,7 @@ h1 {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  gap: 10px;
 }
 
 .prompt-name {
@@ -96,6 +97,12 @@ h1 {
   border: 1px solid #1a222c;
 }
 
+.prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .delete-prompt {
   background: transparent;
   color: #ff003c;
@@ -111,10 +118,62 @@ h1 {
   transition: all 0.3s;
 }
 
+.edit-prompt {
+  background: transparent;
+  color: #00f0ff;
+  border: 1px solid #00f0ff;
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+
+.edit-prompt:hover {
+  background: #00f0ff;
+  color: #050a0e;
+  box-shadow: 0 0 10px #00f0ff;
+}
+
 .delete-prompt:hover {
   background: #ff003c;
   color: #fff;
   box-shadow: 0 0 10px #ff003c;
+}
+
+.prompt-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.prompt-form-actions .add-btn,
+.prompt-form-actions .cancel-btn {
+  margin-top: 0;
+}
+
+.cancel-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #10161d;
+  color: #ff003c;
+  border: 2px solid #ff003c;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.cancel-btn:hover {
+  background-color: #ff003c;
+  color: #050a0e;
+  box-shadow: 0 0 15px #ff003c;
 }
 
 .add-prompt-section {

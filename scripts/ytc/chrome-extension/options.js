@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let currentPrompts = [];
+let editingIndex = null;
 
 function renderPrompts(prompts) {
   currentPrompts = prompts || [];
@@ -27,21 +28,60 @@ function renderPrompts(prompts) {
     item.innerHTML = `
       <div class="prompt-header">
         <span class="prompt-name">${p.name}</span>
-        <button class="delete-prompt" data-index="${index}">×</button>
+        <div class="prompt-actions">
+          <button class="edit-prompt" data-index="${index}" title="Edit prompt">✎</button>
+          <button class="delete-prompt" data-index="${index}" title="Delete prompt">×</button>
+        </div>
       </div>
       <div class="prompt-text-preview">${p.text}</div>
     `;
     list.appendChild(item);
   });
   
+  // Add edit listeners
+  document.querySelectorAll('.edit-prompt').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const index = parseInt(e.currentTarget.dataset.index, 10);
+      startEditingPrompt(index);
+    });
+  });
+
   // Add delete listeners
   document.querySelectorAll('.delete-prompt').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const index = parseInt(e.currentTarget.dataset.index);
+      const index = parseInt(e.currentTarget.dataset.index, 10);
+      if (editingIndex === index) {
+        clearEditState();
+      } else if (editingIndex !== null && index < editingIndex) {
+        editingIndex -= 1;
+      }
       currentPrompts.splice(index, 1);
       renderPrompts(currentPrompts);
     });
   });
+}
+
+function startEditingPrompt(index) {
+  const prompt = currentPrompts[index];
+  if (!prompt) return;
+
+  editingIndex = index;
+  document.getElementById('newPromptName').value = prompt.name;
+  document.getElementById('newPromptText').value = prompt.text;
+
+  const addButton = document.getElementById('addPrompt');
+  const cancelButton = document.getElementById('cancelEdit');
+  addButton.textContent = '[ UPDATE_PROMPT ]';
+  cancelButton.hidden = false;
+  document.querySelector('.add-prompt-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearEditState() {
+  editingIndex = null;
+  document.getElementById('newPromptName').value = '';
+  document.getElementById('newPromptText').value = '';
+  document.getElementById('addPrompt').textContent = '[ + ADD_TO_DATABASE ]';
+  document.getElementById('cancelEdit').hidden = true;
 }
 
 document.getElementById('addPrompt').addEventListener('click', () => {
@@ -51,13 +91,27 @@ document.getElementById('addPrompt').addEventListener('click', () => {
   const text = textInput.value.trim();
   
   if (name && text) {
-    currentPrompts.push({ name, text });
+    const newPrompt = { name, text };
+
+    if (editingIndex === null) {
+      currentPrompts.push(newPrompt);
+    } else {
+      currentPrompts[editingIndex] = newPrompt;
+      editingIndex = null;
+      document.getElementById('addPrompt').textContent = '[ + ADD_TO_DATABASE ]';
+      document.getElementById('cancelEdit').hidden = true;
+    }
+
     renderPrompts(currentPrompts);
     nameInput.value = '';
     textInput.value = '';
   } else {
     alert('Please enter both a name and the prompt text.');
   }
+});
+
+document.getElementById('cancelEdit').addEventListener('click', () => {
+  clearEditState();
 });
 
 // Save settings
