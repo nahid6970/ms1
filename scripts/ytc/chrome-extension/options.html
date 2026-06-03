@@ -38,6 +38,18 @@
       </label>
     </div>
 
+    <div class="section">
+      <label class="section-title">BACKUP / RESTORE:</label>
+      <p style="font-size: 11px; color: #666; margin-bottom: 20px; font-style: italic;">
+        EXPORT OR RESTORE YOUR SAVED PROMPTS, VIEWER SETTING, AND CAPTURED DATA FROM THIS WINDOW.
+      </p>
+      <div class="backup-actions">
+        <button id="exportBackup" class="backup-btn backup-export">[ EXPORT_BACKUP ]</button>
+        <button id="importBackup" class="backup-btn backup-import">[ RESTORE_BACKUP ]</button>
+        <input type="file" id="backupFileInput" accept="application/json" hidden>
+      </div>
+    </div>
+
     <button id="save" class="save-btn">[ SAVE_CONFIGURATION ]</button>
     
     <div id="status" class="status"></div>

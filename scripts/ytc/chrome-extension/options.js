@@ -11,6 +11,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentPrompts = [];
 let editingIndex = null;
+const backupFileInput = document.getElementById('backupFileInput');
+
+function storageGet(area) {
+  return new Promise((resolve) => chrome.storage[area].get(null, resolve));
+}
+
+function storageSet(area, data) {
+  return new Promise((resolve) => chrome.storage[area].set(data, resolve));
+}
+
+function storageClear(area) {
+  return new Promise((resolve) => chrome.storage[area].clear(resolve));
+}
+
+function setStatus(message, color = '#00ff9f', clearAfterMs = 3000) {
+  const status = document.getElementById('status');
+  status.textContent = message;
+  status.style.color = color;
+
+  if (clearAfterMs) {
+    setTimeout(() => {
+      if (status.textContent === message) {
+        status.textContent = '';
+      }
+    }, clearAfterMs);
+  }
+}
 
 function renderPrompts(prompts) {
   currentPrompts = prompts || [];
@@ -114,6 +141,81 @@ document.getElementById('cancelEdit').addEventListener('click', () => {
   clearEditState();
 });
 
+document.getElementById('exportBackup').addEventListener('click', async () => {
+  try {
+    const [syncData, localData] = await Promise.all([
+      storageGet('sync'),
+      storageGet('local')
+    ]);
+
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      sync: syncData,
+      local: localData
+    };
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ytc-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    setStatus('BACKUP EXPORTED SUCCESSFULLY!', '#00ff9f');
+  } catch (error) {
+    console.error('Backup export failed:', error);
+    setStatus('BACKUP EXPORT FAILED!', '#ff003c', 4000);
+  }
+});
+
+document.getElementById('importBackup').addEventListener('click', () => {
+  backupFileInput.value = '';
+  backupFileInput.click();
+});
+
+backupFileInput.addEventListener('change', async () => {
+  const file = backupFileInput.files && backupFileInput.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+
+    const syncData = parsed.sync && typeof parsed.sync === 'object' ? parsed.sync : null;
+    const localData = parsed.local && typeof parsed.local === 'object' ? parsed.local : null;
+
+    if (!syncData || !localData) {
+      throw new Error('Invalid backup file format.');
+    }
+
+    await Promise.all([
+      storageClear('sync'),
+      storageClear('local')
+    ]);
+
+    await Promise.all([
+      storageSet('sync', syncData),
+      storageSet('local', localData)
+    ]);
+
+    const restoredPrompts = Array.isArray(syncData.prompts) ? syncData.prompts : [];
+    renderPrompts(restoredPrompts);
+    document.getElementById('showViewer').checked = syncData.showViewer !== false;
+    clearEditState();
+
+    setStatus('BACKUP RESTORED SUCCESSFULLY!', '#00ff9f');
+  } catch (error) {
+    console.error('Backup restore failed:', error);
+    setStatus(`RESTORE FAILED: ${error.message}`, '#ff003c', 5000);
+  } finally {
+    backupFileInput.value = '';
+  }
+});
+
 // Save settings
 document.getElementById('save').addEventListener('click', () => {
   const settings = {
@@ -122,12 +224,6 @@ document.getElementById('save').addEventListener('click', () => {
   };
   
   chrome.storage.sync.set(settings, () => {
-    const status = document.getElementById('status');
-    status.textContent = 'SETTINGS SAVED SUCCESSFULLY!';
-    status.style.color = '#28a745';
-    
-    setTimeout(() => {
-      status.textContent = '';
-    }, 3000);
+    setStatus('SETTINGS SAVED SUCCESSFULLY!', '#28a745');
   });
 });

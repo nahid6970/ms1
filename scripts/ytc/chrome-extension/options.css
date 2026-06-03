@@ -199,6 +199,48 @@ h1 {
   margin-top: 10px;
 }
 
+.backup-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backup-btn {
+  flex: 1 1 220px;
+  width: 100%;
+  padding: 15px;
+  background-color: #10161d;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.backup-export {
+  color: #00f0ff;
+  border: 2px solid #00f0ff;
+}
+
+.backup-export:hover {
+  background-color: #00f0ff;
+  color: #050a0e;
+  box-shadow: 0 0 15px #00f0ff;
+}
+
+.backup-import {
+  color: #ffb000;
+  border: 2px solid #ffb000;
+}
+
+.backup-import:hover {
+  background-color: #ffb000;
+  color: #050a0e;
+  box-shadow: 0 0 15px #ffb000;
+}
+
 .save-btn {
   background-color: #10161d;
   border-color: #00f0ff;
