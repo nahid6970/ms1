@@ -6,6 +6,10 @@ import json
 from datetime import datetime
 import io
 import subprocess
+import base64
+import socket
+import struct
+import urllib.request
 
 # Config file path
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "folders.json")
@@ -290,9 +294,8 @@ class FolderChooser:
         filepath = os.path.join(tempfile.gettempdir(), "google_img_search.png")
         self.img.save(filepath)
         send_to_clipboard(self.img)
-        subprocess.run("start https://images.google.com", shell=True)
         self.root.destroy()
-        _show_drag_thumbnail(filepath)
+        _open_google_images_and_paste(filepath)
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
@@ -431,26 +434,286 @@ def send_to_clipboard(img, text_path=None):
         print(f"Clipboard error: {e}")
         return False
 
-def _show_drag_thumbnail(filepath):
-    """Invisible overlay: left-click anywhere to click+paste the image. ESC to cancel."""
-    import pyautogui, time
+def _open_google_images_and_paste(filepath):
+    """Open Google Images, click the Lens button, then paste the screenshot."""
+    import tempfile
+    import time
 
-    root = tk.Tk()
-    root.attributes('-fullscreen', True)
-    root.attributes('-topmost', True)
-    root.attributes('-alpha', 0.01)
-    root.config(cursor="crosshair", bg="black")
+    try:
+        import pyautogui
+    except Exception as e:
+        messagebox.showerror("Error", f"pyautogui is required for Google image search automation: {e}")
+        return
 
-    def on_click(e):
-        root.destroy()
-        time.sleep(0.1)
-        pyautogui.click(e.x_root, e.y_root)
-        time.sleep(0.15)
-        pyautogui.hotkey('ctrl', 'v')
+    try:
+        port = _get_free_port()
+        debug_dir = os.path.join(tempfile.gettempdir(), f"google_images_debug_profile_{os.getpid()}_{int(time.time())}")
+        subprocess.Popen([
+            "cmd", "/c", "start", "", "chrome",
+            f"--remote-debugging-port={port}",
+            f"--user-data-dir={debug_dir}",
+            "--new-window", "https://images.google.com/"
+        ])
 
-    root.bind("<Button-1>", on_click)
-    root.bind("<Escape>", lambda e: root.destroy())
-    root.mainloop()
+        tab = _wait_for_chrome_tab(port, "images.google.com", timeout=8)
+        _click_lens_and_upload(tab["webSocketDebuggerUrl"], filepath)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to automate Google image search for {filepath}: {e}")
+
+
+def _click_lens_and_upload(websocket_url, filepath):
+    cdp = _CDPSession(websocket_url)
+    try:
+        ready_result = _cdp_evaluate(cdp, """
+new Promise((resolve) => {
+  const ready = () => document.readyState === 'interactive' || document.readyState === 'complete';
+  if (ready()) {
+    resolve(true);
+    return;
+  }
+  window.addEventListener('DOMContentLoaded', () => resolve(true), { once: true });
+  setTimeout(() => resolve(false), 8000);
+})
+""", await_promise=True)
+        if not ready_result.get("result", {}).get("value"):
+            raise RuntimeError("Google Images did not finish loading in time.")
+
+        click_result = _cdp_evaluate(cdp, """
+new Promise((resolve) => {
+  const lensSelector = 'body > div.L3eUgb > div.o3j99.ikrT4e.KEY6ib > form > div:nth-child(1) > div > div.RNNXgb > div.SDkEP > div.fM33ce.dRYYxd > div.ywK6Rd > div.etxtjc > svg';
+  const fallbackSelectors = [
+    lensSelector,
+    'svg.hWdRGb',
+    'div.ywK6Rd svg',
+    'div[aria-label*="Search by image"]',
+    'div[aria-label*="Lens"]'
+  ];
+  const clickLens = () => {
+    const svg = fallbackSelectors.map((selector) => document.querySelector(selector)).find(Boolean);
+    if (!svg) return false;
+    const target = svg.closest('div[role="button"], button, div') || svg;
+    const rect = target.getBoundingClientRect();
+    const options = {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2
+    };
+    target.dispatchEvent(new MouseEvent('mousedown', options));
+    target.dispatchEvent(new MouseEvent('mouseup', options));
+    target.dispatchEvent(new MouseEvent('click', options));
+    return true;
+  };
+  const startedAt = Date.now();
+  const timer = setInterval(() => {
+    if (clickLens()) {
+      clearInterval(timer);
+      resolve({ clicked: true });
+      return;
+    }
+    if (Date.now() - startedAt > 8000) {
+      clearInterval(timer);
+      resolve({
+        clicked: false,
+        url: location.href,
+        readyState: document.readyState,
+        svgCount: document.querySelectorAll('svg').length
+      });
+    }
+  }, 100);
+})
+""", await_promise=True)
+        click_value = click_result.get("result", {}).get("value", {})
+        if not click_value.get("clicked"):
+            raise RuntimeError(f"Lens icon was not found/clicked: {click_value}")
+
+        input_result = _cdp_evaluate(cdp, """
+new Promise((resolve) => {
+  const startedAt = Date.now();
+  const timer = setInterval(() => {
+    const input = document.querySelector('input[type="file"]');
+    if (input) {
+      clearInterval(timer);
+      resolve({ found: true });
+      return;
+    }
+    if (Date.now() - startedAt > 8000) {
+      clearInterval(timer);
+      resolve({ found: false, bodyText: document.body.innerText.slice(0, 500) });
+    }
+  }, 100);
+})
+""", await_promise=True)
+        input_value = input_result.get("result", {}).get("value", {})
+        if not input_value.get("found"):
+            raise RuntimeError(f"Google Lens file input did not appear: {input_value}")
+        document = cdp.command("DOM.getDocument")
+        input_node = cdp.command("DOM.querySelector", {
+            "nodeId": document["root"]["nodeId"],
+            "selector": "input[type='file']"
+        })
+        node_id = input_node.get("nodeId")
+        if not node_id:
+            raise RuntimeError("Google Lens file input was not found after clicking the Lens icon.")
+        cdp.command("DOM.setFileInputFiles", {
+            "nodeId": node_id,
+            "files": [os.path.abspath(filepath)]
+        })
+    finally:
+        cdp.close()
+
+
+def _cdp_evaluate(cdp, expression, await_promise=False, timeout=8):
+    import time
+
+    deadline = time.time() + timeout
+    last_error = None
+    while time.time() < deadline:
+        try:
+            return cdp.command("Runtime.evaluate", {
+                "expression": expression,
+                "awaitPromise": await_promise,
+                "returnByValue": True
+            })
+        except RuntimeError as e:
+            last_error = e
+            if "Cannot find default execution context" not in str(e):
+                raise
+            time.sleep(0.25)
+    raise RuntimeError(f"Page JavaScript context was not ready: {last_error}")
+
+
+def _wait_for_chrome_tab(port, url_part, timeout=8):
+    import time
+
+    deadline = time.time() + timeout
+    last_error = None
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=1) as response:
+                tabs = json.loads(response.read().decode("utf-8"))
+            for tab in tabs:
+                if url_part in tab.get("url", "") and "webSocketDebuggerUrl" in tab:
+                    return tab
+        except Exception as e:
+            last_error = e
+        time.sleep(0.25)
+    raise RuntimeError(f"Chrome DevTools tab not found: {last_error}")
+
+
+def _get_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def _cdp_command(websocket_url, method, params=None):
+    cdp = _CDPSession(websocket_url)
+    try:
+        return cdp.command(method, params)
+    finally:
+        cdp.close()
+
+
+class _CDPSession:
+    def __init__(self, websocket_url):
+        host, port, path = _parse_websocket_url(websocket_url)
+        self.sock = socket.create_connection((host, port), timeout=20)
+        _websocket_handshake(self.sock, host, port, path)
+        self.next_id = 1
+
+    def command(self, method, params=None):
+        command_id = self.next_id
+        self.next_id += 1
+        payload = json.dumps({
+            "id": command_id,
+            "method": method,
+            "params": params or {}
+        })
+        _websocket_send_text(self.sock, payload)
+        while True:
+            message = json.loads(_websocket_recv_text(self.sock))
+            if message.get("id") == command_id:
+                if "error" in message:
+                    raise RuntimeError(message["error"])
+                return message.get("result")
+
+    def close(self):
+        self.sock.close()
+
+
+def _parse_websocket_url(url):
+    if not url.startswith("ws://"):
+        raise ValueError(f"Unsupported websocket URL: {url}")
+    rest = url[5:]
+    host_port, path = rest.split("/", 1)
+    if ":" in host_port:
+        host, port = host_port.split(":", 1)
+        return host, int(port), "/" + path
+    return host_port, 80, "/" + path
+
+
+def _websocket_handshake(sock, host, port, path):
+    key = base64.b64encode(os.urandom(16)).decode("ascii")
+    request = (
+        f"GET {path} HTTP/1.1\r\n"
+        f"Host: {host}:{port}\r\n"
+        "Upgrade: websocket\r\n"
+        "Connection: Upgrade\r\n"
+        f"Sec-WebSocket-Key: {key}\r\n"
+        "Sec-WebSocket-Version: 13\r\n\r\n"
+    )
+    sock.sendall(request.encode("ascii"))
+    response = sock.recv(4096)
+    if b" 101 " not in response.split(b"\r\n", 1)[0]:
+        raise RuntimeError(f"WebSocket handshake failed: {response[:120]!r}")
+
+
+def _websocket_send_text(sock, text):
+    data = text.encode("utf-8")
+    header = bytearray([0x81])
+    length = len(data)
+    if length < 126:
+        header.append(0x80 | length)
+    elif length < 65536:
+        header.append(0x80 | 126)
+        header.extend(struct.pack(">H", length))
+    else:
+        header.append(0x80 | 127)
+        header.extend(struct.pack(">Q", length))
+    mask = os.urandom(4)
+    header.extend(mask)
+    masked = bytes(byte ^ mask[i % 4] for i, byte in enumerate(data))
+    sock.sendall(header + masked)
+
+
+def _websocket_recv_text(sock):
+    first, second = _recv_exact(sock, 2)
+    opcode = first & 0x0F
+    length = second & 0x7F
+    if length == 126:
+        length = struct.unpack(">H", _recv_exact(sock, 2))[0]
+    elif length == 127:
+        length = struct.unpack(">Q", _recv_exact(sock, 8))[0]
+    if second & 0x80:
+        mask = _recv_exact(sock, 4)
+        payload = bytes(byte ^ mask[i % 4] for i, byte in enumerate(_recv_exact(sock, length)))
+    else:
+        payload = _recv_exact(sock, length)
+    if opcode == 8:
+        raise RuntimeError("WebSocket closed")
+    return payload.decode("utf-8")
+
+
+def _recv_exact(sock, length):
+    chunks = bytearray()
+    while len(chunks) < length:
+        chunk = sock.recv(length - len(chunks))
+        if not chunk:
+            raise RuntimeError("Socket closed")
+        chunks.extend(chunk)
+    return bytes(chunks)
 
 
 def main():
