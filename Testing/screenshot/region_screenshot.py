@@ -295,7 +295,7 @@ class FolderChooser:
         self.img.save(filepath)
         send_to_clipboard(self.img)
         self.root.destroy()
-        _open_google_images_and_paste(filepath)
+        _open_google_images_existing_tab_and_paste(filepath)
 
     def create_add_button(self, row, col):
         # SYNCED SIZE: Must be 128x85 exactly like other cards
@@ -434,8 +434,37 @@ def send_to_clipboard(img, text_path=None):
         print(f"Clipboard error: {e}")
         return False
 
-def _open_google_images_and_paste(filepath):
-    """Open Google Images, click the Lens button, then paste the screenshot."""
+def _open_google_images_existing_tab_and_paste(filepath):
+    """Open Google Images in the existing Chrome window, click Lens, then paste."""
+    import time
+
+    try:
+        import pyautogui
+    except Exception as e:
+        messagebox.showerror("Error", f"pyautogui is required for Google image search automation: {e}")
+        return
+
+    try:
+        subprocess.Popen(["cmd", "/c", "start", "", "chrome", "https://images.google.com/"])
+
+        # Existing Chrome opens a new tab; wait for the Google Images page to render.
+        time.sleep(2.0)
+        pyautogui.hotkey("ctrl", "l")
+        time.sleep(0.1)
+        pyautogui.press("esc")
+        time.sleep(0.2)
+
+        # From the focused search box, the tab order is mic then Lens.
+        pyautogui.press("tab", presses=2, interval=0.05)
+        pyautogui.press("enter")
+        time.sleep(0.8)
+        pyautogui.hotkey("ctrl", "v")
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to automate Google image search for {filepath}: {e}")
+
+
+def _open_google_images_debug_upload(filepath):
+    """Reliable fallback: open an automated Chrome window and upload via DevTools."""
     import tempfile
     import time
 
