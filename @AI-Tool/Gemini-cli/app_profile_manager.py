@@ -59,7 +59,7 @@ def decrypt_file_data(file_path, password):
 INPUT_STYLE = f"""
     QLineEdit, QDateTimeEdit, QComboBox {{
         background-color: {BG_DEEP};
-        border: 1px solid {BORDER};
+        border: 1px solid #3A4158;
         border-radius: 0px;
         padding: 8px 12px;
         color: {TEXT_PRIMARY};
@@ -92,7 +92,7 @@ CHECKBOX_STYLE = f"""
     }}
     QCheckBox::indicator, QRadioButton::indicator {{
         width: 16px; height: 16px;
-        border: 1px solid {BORDER};
+        border: 1px solid #3A4158;
         border-radius: 0px;
         background: {BG_DEEP};
     }}
@@ -208,8 +208,6 @@ class ProfileDialog(QDialog):
             }}
             {INPUT_STYLE}
             {CHECKBOX_STYLE}
-            QScrollBar:vertical {{ border: none; background: {BG_DEEP}; width: 6px; margin: 0; }}
-            QScrollBar::handle:vertical {{ background: {BORDER}; border-radius: 0px; min-height: 30px; }}
         """)
 
         root = QVBoxLayout(self)
@@ -225,10 +223,7 @@ class ProfileDialog(QDialog):
         h_layout.addWidget(h_label)
         root.addWidget(header)
 
-        # ── Scrollable body
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        # ── Body
         body = QWidget()
         body.setStyleSheet(f"background: {BG_SURFACE};")
         layout = QVBoxLayout(body)
@@ -364,8 +359,7 @@ class ProfileDialog(QDialog):
         self.toggle_timer_fields(self.timer_checkbox.isChecked())
         self.update_time_format()
 
-        scroll.setWidget(body)
-        root.addWidget(scroll)
+        root.addWidget(body)
 
         # ── Footer buttons
         footer = QFrame()
