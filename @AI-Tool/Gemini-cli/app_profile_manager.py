@@ -16,23 +16,23 @@ from PyQt6.QtGui import QFont, QColor
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
-# ── CLEAN LIGHT PALETTE ──────────────────────────────────────────────────────
-BG_DEEP      = "#F0F2F5"
-BG_SURFACE   = "#FFFFFF"
-BG_RAISED    = "#F7F8FA"
-BORDER       = "#D1D5DB"
-BORDER_FOCUS = "#3B82F6"
+# ── CATPPUCCIN MOCHA PALETTE ─────────────────────────────────────────────────
+BG_DEEP      = "#1E1E2E"  # base
+BG_SURFACE   = "#181825"  # mantle
+BG_RAISED    = "#313244"  # surface0
+BORDER       = "#45475A"  # surface1
+BORDER_FOCUS = "#89B4FA"  # blue
 
-ACCENT       = "#3B82F6"
-ACCENT_SOFT  = "#2563EB"
-ACCENT_GLOW  = "#60A5FA"
-SUCCESS      = "#10B981"
-WARNING      = "#F59E0B"
-DANGER       = "#EF4444"
+ACCENT       = "#89B4FA"  # blue
+ACCENT_SOFT  = "#74C7EC"  # sapphire
+ACCENT_GLOW  = "#B4BEFE"  # lavender
+SUCCESS      = "#A6E3A1"  # green
+WARNING      = "#F9E2AF"  # yellow
+DANGER       = "#F38BA8"  # red
 
-TEXT_PRIMARY   = "#111827"
-TEXT_SECONDARY = "#6B7280"
-TEXT_MUTED     = "#9CA3AF"
+TEXT_PRIMARY   = "#CDD6F4"  # text
+TEXT_SECONDARY = "#BAC2DE"  # subtext1
+TEXT_MUTED     = "#585B70"  # surface2
 
 FONT_MAIN = "Segoe UI"
 FONT_MONO = "Cascadia Code"
