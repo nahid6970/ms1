@@ -76,18 +76,25 @@ QListWidget::item:selected {{
     color: #000000;
 }}
 QRadioButton {{
-    color: {CP_YELLOW};
+    color: {CP_TEXT};
     spacing: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
+}}
+QRadioButton:checked {{
+    background-color: #1a3a3a;
+    color: {CP_CYAN};
+    border: 1px solid {CP_CYAN};
 }}
 QRadioButton::indicator {{
-    width: 12px; height: 12px;
-    border: 1px solid {CP_DIM};
-    border-radius: 6px;
+    width: 10px; height: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
     background: {CP_PANEL};
 }}
 QRadioButton::indicator:checked {{
-    background: {CP_YELLOW};
-    border-color: {CP_YELLOW};
+    background: {CP_CYAN};
+    border-color: {CP_CYAN};
 }}
 QScrollArea {{ background: transparent; border: none; }}
 QScrollBar:vertical {{
