@@ -267,26 +267,26 @@ class FolderFetcher(QThread):
 
     def run(self):
         try:
-            # Use lsf for spaces. We KEEP the trailing slash for folders
-            # so the dialog knows how to navigate.
             p = subprocess.Popen(
                 ["rclone", "lsf", "--max-depth", "1", "--format", "p", "--drive-acknowledge-abuse", self.path],
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
             )
             self._procs = [p]
-            
             out, _ = p.communicate(timeout=15)
             lines = out.decode("utf-8", errors="replace").splitlines()
-
             items = []
             for line in lines:
                 name = line.strip()
                 if not name: continue
-                # full path with slash if it's a directory
                 items.append(self.path + name)
-
             self.done.emit(items)
         except Exception:
+            import traceback, datetime
+            _log = os.path.join(os.path.dirname(os.path.abspath(__file__)), "crash_report.txt")
+            with open(_log, "a", encoding="utf-8") as f:
+                f.write(f"\n{'='*60}\n")
+                f.write(f"THREAD CRASH @ {datetime.datetime.now()}\n")
+                f.write(traceback.format_exc())
             self.done.emit([])
 
     def stop(self):
@@ -823,6 +823,18 @@ class SettingsDialog(QDialog):
 
 
 if __name__ == "__main__":
+    import traceback, datetime
+
+    CRASH_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "crash_report.txt")
+
+    def _excepthook(exc_type, exc_value, exc_tb):
+        with open(CRASH_LOG, "a", encoding="utf-8") as f:
+            f.write(f"\n{'='*60}\n")
+            f.write(f"CRASH @ {datetime.datetime.now()}\n")
+            f.write("".join(traceback.format_exception(exc_type, exc_value, exc_tb)))
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = _excepthook
     os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
     app = QApplication(sys.argv)
     app.setStyleSheet("QToolTip { background-color: #1a1a1a; color: #00F0FF; border: 1px solid #00F0FF; padding: 4px; font-family: Consolas; }")
