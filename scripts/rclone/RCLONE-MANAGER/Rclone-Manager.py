@@ -79,7 +79,7 @@ QRadioButton {{
     color: {CP_TEXT};
     spacing: 0px;
     padding: 4px 10px;
-    border-radius: 3px;
+    border-radius: 0px;
     border: 1px solid #333;
     background: {CP_PANEL};
 }}
@@ -87,6 +87,7 @@ QRadioButton:checked {{
     background-color: #1a3a3a;
     color: {CP_CYAN};
     border: 1px solid {CP_CYAN};
+    border-radius: 0px;
 }}
 QRadioButton:hover {{
     border: 1px solid #555;
