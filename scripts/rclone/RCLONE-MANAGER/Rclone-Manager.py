@@ -77,24 +77,22 @@ QListWidget::item:selected {{
 }}
 QRadioButton {{
     color: {CP_TEXT};
-    spacing: 6px;
-    padding: 3px 6px;
-    border-radius: 4px;
+    spacing: 0px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid #333;
+    background: {CP_PANEL};
 }}
 QRadioButton:checked {{
     background-color: #1a3a3a;
     color: {CP_CYAN};
     border: 1px solid {CP_CYAN};
 }}
-QRadioButton::indicator {{
-    width: 10px; height: 10px;
+QRadioButton:hover {{
     border: 1px solid #555;
-    border-radius: 5px;
-    background: {CP_PANEL};
 }}
-QRadioButton::indicator:checked {{
-    background: {CP_CYAN};
-    border-color: {CP_CYAN};
+QRadioButton::indicator {{
+    width: 0px; height: 0px; border: none; background: none;
 }}
 QScrollArea {{ background: transparent; border: none; }}
 QScrollBar:vertical {{
@@ -434,7 +432,7 @@ class RcloneApp(QMainWindow):
         # ── Storage ───────────────────────────────────────────────────────────
         stor_group = QGroupBox("STORAGE")
         stor_grid = QGridLayout(stor_group)
-        stor_grid.setSpacing(2)
+        stor_grid.setSpacing(4)
         self.storage_btn_group = QButtonGroup(self)
         storage_radios = [
             ("N/A",  "",      0, 0), ("C:/",  "C:/",  0, 1), ("D:/",  "D:/",  0, 2),
