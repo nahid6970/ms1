@@ -89,6 +89,11 @@ QRadioButton:checked {{
     border: 1px solid {CP_CYAN};
     border-radius: 0px;
 }}
+QRadioButton[danger="true"]:checked {{
+    background-color: #3a0a0a;
+    color: {CP_RED};
+    border: 1px solid {CP_RED};
+}}
 QRadioButton:hover {{
     border: 1px solid #555;
 }}
@@ -422,13 +427,19 @@ class RcloneApp(QMainWindow):
         self.cmd_group_btn = QButtonGroup(self)
         for val in ["ls", "copy", "move", "sync", "tree", "ncdu", "size", "mount", "rcd", "about", "delete", "purge"]:
             rb = QRadioButton(val)
+            if val in ("delete", "purge"):
+                rb.setProperty("danger", "true")
             if val == "ls":
                 rb.setChecked(True)
             self.cmd_group_btn.addButton(rb)
             cmd_layout.addWidget(rb)
         cmd_layout.addStretch()
         left.addWidget(cmd_group)
-        self.cmd_group_btn.buttonClicked.connect(lambda: self._save_toggles())
+        def _refresh_cmd_styles():
+            for btn in self.cmd_group_btn.buttons():
+                btn.style().unpolish(btn)
+                btn.style().polish(btn)
+        self.cmd_group_btn.buttonClicked.connect(lambda: (_refresh_cmd_styles(), self._save_toggles()))
 
         # ── Storage ───────────────────────────────────────────────────────────
         stor_group = QGroupBox("STORAGE")
