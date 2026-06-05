@@ -327,17 +327,18 @@ class PathInput(QLineEdit):
 
 # ── TOGGLE LABEL (flag chip) ──────────────────────────────────────────────────
 class ToggleLabel(QLabel):
-    def __init__(self, text, active=False, on_change=None):
+    def __init__(self, text, active=False, on_change=None, colors=None):
         super().__init__(text)
         self.active = active
         self._on_change = on_change
+        self._colors = colors or ("#90ee90", "#ff9999")  # (on, off)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFixedWidth(190)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self._refresh()
 
     def _refresh(self):
-        bg = "#90ee90" if self.active else "#ff9999"  # light green / light red
+        bg = self._colors[0] if self.active else self._colors[1]
         self.setStyleSheet(f"background:{bg}; color:#000; font-weight:bold; padding:4px; font-family:Consolas;")
 
     def mousePressEvent(self, _):
@@ -454,12 +455,12 @@ class RcloneApp(QMainWindow):
         ft_group = QGroupBox("FROM / TO")
         ft_layout = QGridLayout(ft_group)
         saved_ft = self._load_settings()
-        self.from_chk = ToggleLabel("From", saved_ft.get("from_enabled", True), on_change=self._save_toggles)
+        self.from_chk = ToggleLabel("From", saved_ft.get("from_enabled", True), on_change=self._save_toggles, colors=("#90ee90", "#666666"))
         self.from_chk.setFixedWidth(60)
         self.from_input = PathInput("type storage prefix e.g. gu:/")
         ft_layout.addWidget(self.from_chk,  0, 0)
         ft_layout.addWidget(self.from_input, 0, 1)
-        self.to_chk = ToggleLabel("To", saved_ft.get("to_enabled", True), on_change=self._save_toggles)
+        self.to_chk = ToggleLabel("To", saved_ft.get("to_enabled", True), on_change=self._save_toggles, colors=("#90ee90", "#666666"))
         self.to_chk.setFixedWidth(60)
         self.to_input = PathInput("type storage prefix e.g. o0:/")
         ft_layout.addWidget(self.to_chk,  1, 0)
