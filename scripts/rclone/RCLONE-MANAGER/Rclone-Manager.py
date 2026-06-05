@@ -191,6 +191,7 @@ class BrowserDialog(QDialog):
         self.list_widget.addItem("Loading...")
         
         if hasattr(self, "_fetcher") and self._fetcher.isRunning():
+            self._fetcher.done.disconnect()  # prevent stale signal firing _populate
             self._fetcher.stop()
 
         self._fetcher = FolderFetcher(path)
@@ -243,6 +244,8 @@ class BrowserDialog(QDialog):
 
     def _on_double_click(self, item):
         path = item.data(Qt.ItemDataRole.UserRole)
+        if not path:
+            return
         if path.endswith("/"):
             self._fetch_content(path)
         else:
@@ -290,7 +293,7 @@ class FolderFetcher(QThread):
         for p in self._procs:
             try: p.kill()
             except: pass
-        self.wait(100)
+        self.wait(2000)
 
 
 # ── PATH INPUT WITH TAB-TRIGGERED POPUP ──────────────────────────────────────
