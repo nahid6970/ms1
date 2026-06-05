@@ -375,6 +375,10 @@ class RcloneApp(QMainWindow):
             cfg["from"] = self.from_input.text()
         if hasattr(self, "to_input"):
             cfg["to"] = self.to_input.text()
+        if hasattr(self, "from_chk"):
+            cfg["from_enabled"] = self.from_chk.active
+        if hasattr(self, "to_chk"):
+            cfg["to_enabled"] = self.to_chk.active
         if hasattr(self, "filter_entries"):
             cfg["filter_values"] = [e.text() for e in self.filter_entries]
         with open(self.SETTINGS_FILE, "w") as f:
@@ -449,11 +453,16 @@ class RcloneApp(QMainWindow):
         # ── From / To ─────────────────────────────────────────────────────────
         ft_group = QGroupBox("FROM / TO")
         ft_layout = QGridLayout(ft_group)
-        ft_layout.addWidget(QLabel("From:"), 0, 0)
+        saved_ft = self._load_settings()
+        self.from_chk = ToggleLabel("From", saved_ft.get("from_enabled", True), on_change=self._save_toggles)
+        self.from_chk.setFixedWidth(60)
         self.from_input = PathInput("type storage prefix e.g. gu:/")
+        ft_layout.addWidget(self.from_chk,  0, 0)
         ft_layout.addWidget(self.from_input, 0, 1)
-        ft_layout.addWidget(QLabel("To:"), 1, 0)
+        self.to_chk = ToggleLabel("To", saved_ft.get("to_enabled", True), on_change=self._save_toggles)
+        self.to_chk.setFixedWidth(60)
         self.to_input = PathInput("type storage prefix e.g. o0:/")
+        ft_layout.addWidget(self.to_chk,  1, 0)
         ft_layout.addWidget(self.to_input, 1, 1)
         left.addWidget(ft_group)
         self.from_input.textChanged.connect(lambda: self._save_toggles())
@@ -647,8 +656,8 @@ class RcloneApp(QMainWindow):
     def execute_command(self):
         cmd   = self._selected_command()
         stor  = self._selected_storage()
-        frm   = self.from_input.text().strip()
-        to    = self.to_input.text().strip()
+        frm   = self.from_input.text().strip() if self.from_chk.active else ""
+        to    = self.to_input.text().strip()   if self.to_chk.active   else ""
 
         # Wrap paths in double quotes to handle spaces correctly in the shell
         q_stor = f'"{stor}"' if stor else ""
