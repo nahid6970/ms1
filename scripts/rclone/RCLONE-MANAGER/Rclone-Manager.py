@@ -425,8 +425,23 @@ class RcloneApp(QMainWindow):
         cmd_group = QGroupBox("COMMAND")
         cmd_layout = QHBoxLayout(cmd_group)
         self.cmd_group_btn = QButtonGroup(self)
+        CMD_TIPS = {
+            "ls":     "List files and directories",
+            "copy":   "Copy files from source to destination",
+            "move":   "Move files from source to destination",
+            "sync":   "Sync source to destination (destination matches source)",
+            "tree":   "Show directory tree structure",
+            "ncdu":   "Interactive disk usage browser (ncdu-style)",
+            "size":   "Calculate total size of a path",
+            "mount":  "Mount remote as a local drive",
+            "rcd":    "Start remote control daemon",
+            "about":  "Show quota and usage info for a remote",
+            "delete": "Delete files in a path (respects filters)",
+            "purge":  "Permanently delete entire directory (no filters)",
+        }
         for val in ["ls", "copy", "move", "sync", "tree", "ncdu", "size", "mount", "rcd", "about", "delete", "purge"]:
             rb = QRadioButton(val)
+            rb.setToolTip(CMD_TIPS.get(val, ""))
             if val in ("delete", "purge"):
                 rb.setProperty("danger", "true")
             if val == "ls":
@@ -807,6 +822,7 @@ class SettingsDialog(QDialog):
 if __name__ == "__main__":
     os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
     app = QApplication(sys.argv)
+    app.setStyleSheet("QToolTip { background-color: #1a1a1a; color: #00F0FF; border: 1px solid #00F0FF; padding: 4px; font-family: Consolas; }")
     win = RcloneApp()
     cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
     try:
