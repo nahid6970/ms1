@@ -331,7 +331,7 @@ class ToggleLabel(QLabel):
         super().__init__(text)
         self.active = active
         self._on_change = on_change
-        self._colors = colors or ("#90ee90", "#ff9999")  # (on, off)
+        self._colors = colors or ("#90ee90", "#666666")  # (on, off)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFixedWidth(190)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
