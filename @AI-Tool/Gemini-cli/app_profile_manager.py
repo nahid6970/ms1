@@ -16,23 +16,23 @@ from PyQt6.QtGui import QFont, QColor
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
-# ── PROFESSIONAL SLATE / INDIGO PALETTE ──────────────────────────────────────
-BG_DEEP      = "#0D0F14"
-BG_SURFACE   = "#13161E"
-BG_RAISED    = "#1C2030"
-BORDER       = "#252A3A"
-BORDER_FOCUS = "#4F6EF7"
+# ── CLEAN LIGHT PALETTE ──────────────────────────────────────────────────────
+BG_DEEP      = "#F0F2F5"
+BG_SURFACE   = "#FFFFFF"
+BG_RAISED    = "#F7F8FA"
+BORDER       = "#D1D5DB"
+BORDER_FOCUS = "#3B82F6"
 
-ACCENT       = "#4F6EF7"
-ACCENT_SOFT  = "#3B54C0"
-ACCENT_GLOW  = "#6B88FF"
-SUCCESS      = "#34C98E"
-WARNING      = "#F5A623"
-DANGER       = "#E05A5A"
+ACCENT       = "#3B82F6"
+ACCENT_SOFT  = "#2563EB"
+ACCENT_GLOW  = "#60A5FA"
+SUCCESS      = "#10B981"
+WARNING      = "#F59E0B"
+DANGER       = "#EF4444"
 
-TEXT_PRIMARY   = "#E8EAF0"
-TEXT_SECONDARY = "#8B91A8"
-TEXT_MUTED     = "#555C73"
+TEXT_PRIMARY   = "#111827"
+TEXT_SECONDARY = "#6B7280"
+TEXT_MUTED     = "#9CA3AF"
 
 FONT_MAIN = "Segoe UI"
 FONT_MONO = "Cascadia Code"
@@ -59,7 +59,7 @@ def decrypt_file_data(file_path, password):
 INPUT_STYLE = f"""
     QLineEdit, QDateTimeEdit, QComboBox {{
         background-color: {BG_DEEP};
-        border: 1px solid #3A4158;
+        border: 1px solid {BORDER};
         border-radius: 0px;
         padding: 8px 12px;
         color: {TEXT_PRIMARY};
@@ -92,7 +92,7 @@ CHECKBOX_STYLE = f"""
     }}
     QCheckBox::indicator, QRadioButton::indicator {{
         width: 16px; height: 16px;
-        border: 1px solid #3A4158;
+        border: 1px solid {BORDER};
         border-radius: 0px;
         background: {BG_DEEP};
     }}
