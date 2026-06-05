@@ -250,11 +250,22 @@
         "password": "1823",
         "timer_enabled": false,
         "target_time": null,
-        "active": true
+        "active": false
     },
     {
         "name": "nahid697010",
         "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\kiro-cli\\nahid697010",
+        "target_path": "C:\\Users\\nahid\\AppData\\Local\\Kiro-Cli",
+        "app_name": "Kiro-Cli",
+        "is_locked": true,
+        "password": "1823",
+        "timer_enabled": false,
+        "target_time": null,
+        "active": true
+    },
+    {
+        "name": "nahid697011",
+        "path": "C:\\@delta\\ms1\\@AI-Tool\\Gemini-cli\\kiro-cli\\nahid697011",
         "target_path": "C:\\Users\\nahid\\AppData\\Local\\Kiro-Cli",
         "app_name": "Kiro-Cli",
         "is_locked": true,
