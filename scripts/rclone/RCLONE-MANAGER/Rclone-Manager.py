@@ -272,7 +272,13 @@ class FolderFetcher(QThread):
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
             )
             self._procs = [p]
-            out, _ = p.communicate(timeout=15)
+            try:
+                out, _ = p.communicate(timeout=15)
+            except subprocess.TimeoutExpired:
+                p.kill()
+                p.communicate()
+                self.done.emit([])
+                return
             lines = out.decode("utf-8", errors="replace").splitlines()
             items = []
             for line in lines:
