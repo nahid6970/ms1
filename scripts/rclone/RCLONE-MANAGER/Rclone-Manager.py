@@ -365,6 +365,18 @@ class RcloneApp(QMainWindow):
         cfg["filters"] = [lbl.active for lbl in self.filter_labels]
         if hasattr(self, "tool_labels"):
             cfg["tools"] = [lbl.active for lbl in self.tool_labels]
+        if hasattr(self, "cmd_group_btn"):
+            btn = self.cmd_group_btn.checkedButton()
+            cfg["command"] = btn.text() if btn else "ls"
+        if hasattr(self, "storage_btn_group"):
+            btn = self.storage_btn_group.checkedButton()
+            cfg["storage"] = btn.property("rclone_val") if btn else ""
+        if hasattr(self, "from_input"):
+            cfg["from"] = self.from_input.text()
+        if hasattr(self, "to_input"):
+            cfg["to"] = self.to_input.text()
+        if hasattr(self, "filter_entries"):
+            cfg["filter_values"] = [e.text() for e in self.filter_entries]
         with open(self.SETTINGS_FILE, "w") as f:
             json.dump(cfg, f)
 
@@ -405,6 +417,7 @@ class RcloneApp(QMainWindow):
             cmd_layout.addWidget(rb)
         cmd_layout.addStretch()
         left.addWidget(cmd_group)
+        self.cmd_group_btn.buttonClicked.connect(lambda: self._save_toggles())
 
         # ── Storage ───────────────────────────────────────────────────────────
         stor_group = QGroupBox("STORAGE")
@@ -431,6 +444,7 @@ class RcloneApp(QMainWindow):
             self.storage_btn_group.addButton(rb)
             stor_grid.addWidget(rb, r, c)
         left.addWidget(stor_group)
+        self.storage_btn_group.buttonClicked.connect(lambda: self._save_toggles())
 
         # ── From / To ─────────────────────────────────────────────────────────
         ft_group = QGroupBox("FROM / TO")
@@ -442,6 +456,8 @@ class RcloneApp(QMainWindow):
         self.to_input = PathInput("type storage prefix e.g. o0:/")
         ft_layout.addWidget(self.to_input, 1, 1)
         left.addWidget(ft_group)
+        self.from_input.textChanged.connect(lambda: self._save_toggles())
+        self.to_input.textChanged.connect(lambda: self._save_toggles())
 
         # ── Options ────────────────────────────────────────────────────────────────────────
         options_group = QGroupBox("OPTIONS")
@@ -532,6 +548,8 @@ class RcloneApp(QMainWindow):
             self.filter_entries.append(entry)
             filter_grid.addWidget(lbl,   i, 0)
             filter_grid.addWidget(entry, i, 1)
+        for entry in self.filter_entries:
+            entry.textChanged.connect(lambda: self._save_toggles())
         right.addWidget(filter_group)
 
         # ── Grep ──────────────────────────────────────────────────────────────
@@ -594,6 +612,29 @@ class RcloneApp(QMainWindow):
         btn_row.addWidget(config_btn)
         btn_row.addStretch()
         root.addLayout(btn_row)
+
+        # ── Restore persisted values ──────────────────────────────────────────
+        cfg = self._load_settings()
+        saved_cmd = cfg.get("command")
+        if saved_cmd:
+            for btn in self.cmd_group_btn.buttons():
+                if btn.text() == saved_cmd:
+                    btn.setChecked(True)
+                    break
+        saved_stor = cfg.get("storage")
+        if saved_stor is not None:
+            for btn in self.storage_btn_group.buttons():
+                if btn.property("rclone_val") == saved_stor:
+                    btn.setChecked(True)
+                    break
+        if cfg.get("from"):
+            self.from_input.setText(cfg["from"])
+        if cfg.get("to"):
+            self.to_input.setText(cfg["to"])
+        saved_fv = cfg.get("filter_values", [])
+        for i, val in enumerate(saved_fv):
+            if i < len(self.filter_entries):
+                self.filter_entries[i].setText(val)
 
     def _selected_storage(self):
         btn = self.storage_btn_group.checkedButton()
