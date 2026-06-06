@@ -112,11 +112,15 @@ class FetchWorker(QThread):
                 return
             data = ryd.json()
             self.done.emit({
-                "title":    title,
-                "likes":    data.get("likes", 0),
-                "dislikes": data.get("dislikes", 0),
-                "views":    data.get("viewCount", 0),
-                "rating":   data.get("rating", 0),
+                "title":       title,
+                "likes":       data.get("likes", 0),
+                "dislikes":    data.get("dislikes", 0),
+                "views":       data.get("viewCount", 0),
+                "rating":      data.get("rating", 0),
+                "raw_likes":   data.get("rawLikes", 0),
+                "raw_dislikes":data.get("rawDislikes", 0),
+                "date":        data.get("dateCreated", ""),
+                "deleted":     data.get("deleted", False),
             })
         except Exception as e:
             self.error.emit(str(e))
@@ -219,7 +223,7 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("YT Like/Dislike Analyzer")
-        self.resize(560, 420)
+        self.resize(560, 520)
         self.setStyleSheet(GLOBAL_QSS)
         self._worker = None
         self._settings = load_settings()
@@ -275,6 +279,37 @@ class App(QMainWindow):
         ratio_lay.addWidget(self.ratio_bar)
         ratio_lay.addWidget(self.ratio_lbl)
         root.addWidget(grp_ratio)
+
+        # ── extra info ──
+        grp_extra = QGroupBox("EXTRA INFO")
+        extra_lay = QHBoxLayout(grp_extra)
+        extra_lay.setSpacing(0)
+
+        def _info_cell(label: str, color: str) -> QLabel:
+            lbl = QLabel("—")
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl.setStyleSheet(
+                f"color: {color}; font-size: 9pt; border-right: 1px solid {CP_DIM}; padding: 4px 8px;"
+            )
+            cap = QLabel(label)
+            cap.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cap.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt; border: none; padding: 0;")
+            cell = QWidget()
+            cell.setStyleSheet("border: none;")
+            cl = QVBoxLayout(cell)
+            cl.setContentsMargins(4, 4, 4, 4)
+            cl.setSpacing(2)
+            cl.addWidget(lbl)
+            cl.addWidget(cap)
+            extra_lay.addWidget(cell, 1)
+            return lbl
+
+        self.lbl_engage   = _info_cell("ENGAGEMENT", CP_CYAN)
+        self.lbl_raw_like = _info_cell("RAW LIKES",  CP_GREEN)
+        self.lbl_raw_dis  = _info_cell("RAW DISLIKES", CP_RED)
+        self.lbl_tracked  = _info_cell("TRACKED SINCE", CP_YELLOW)
+        self.lbl_deleted  = _info_cell("STATUS", CP_TEXT)
+        root.addWidget(grp_extra)
 
         # ── status + restart ──
         bot = QHBoxLayout()
@@ -337,6 +372,16 @@ class App(QMainWindow):
 
         self._set_status("✔ Done", CP_GREEN)
         self.fetch_btn.setEnabled(True)
+
+        # extra info
+        views = d["views"]
+        engage = f"{d['raw_likes'] / views * 100:.2f}%" if views else "—"
+        self.lbl_engage.setText(engage)
+        self.lbl_raw_like.setText(fmt(d["raw_likes"]))
+        self.lbl_raw_dis.setText(fmt(d["raw_dislikes"]))
+        date_str = d["date"][:10] if d["date"] else "—"
+        self.lbl_tracked.setText(date_str)
+        self.lbl_deleted.setText("DELETED ⚠" if d["deleted"] else "ACTIVE ✔")
 
     def _on_error(self, msg: str):
         self._set_status(f"✘ {msg}", CP_RED)
