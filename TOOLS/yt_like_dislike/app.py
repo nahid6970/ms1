@@ -1,11 +1,29 @@
 import sys
 import os
 import re
+import json
 import argparse
 import requests
+
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.json')
+
+def load_settings() -> dict:
+    try:
+        with open(SETTINGS_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def save_settings(data: dict):
+    try:
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QLineEdit, QGroupBox, QProgressBar, QFrame
+    QLabel, QPushButton, QLineEdit, QGroupBox, QProgressBar, QFrame,
+    QDialog, QCheckBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
@@ -127,6 +145,37 @@ class StatBox(QFrame):
         self.val_lbl.setText(v)
 
 
+class SettingsDialog(QDialog):
+    def __init__(self, parent: QMainWindow):
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.setFixedWidth(280)
+        self.setStyleSheet(GLOBAL_QSS)
+
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(16, 16, 16, 16)
+
+        title = QLabel("⚙ SETTINGS")
+        title.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
+        lay.addWidget(title)
+
+        self.aot_cb = QCheckBox("Always on Top")
+        self.aot_cb.setChecked(bool(parent.windowFlags() & Qt.WindowType.WindowStaysOnTopHint))
+        self.aot_cb.toggled.connect(self._toggle_aot)
+        lay.addWidget(self.aot_cb)
+
+    def _toggle_aot(self, checked: bool):
+        win = self.parent()
+        flags = win.windowFlags()
+        if checked:
+            win.setWindowFlags(flags | Qt.WindowType.WindowStaysOnTopHint)
+        else:
+            win.setWindowFlags(flags & ~Qt.WindowType.WindowStaysOnTopHint)
+        win._settings['always_on_top'] = checked
+        save_settings(win._settings)
+        win.show()
+
+
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -134,6 +183,9 @@ class App(QMainWindow):
         self.resize(560, 420)
         self.setStyleSheet(GLOBAL_QSS)
         self._worker = None
+        self._settings = load_settings()
+        if self._settings.get('always_on_top'):
+            self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         self._build_ui()
 
     def _build_ui(self):
@@ -198,11 +250,17 @@ class App(QMainWindow):
         bot = QHBoxLayout()
         self.status_lbl = QLabel("Ready.")
         self.status_lbl.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+
+        settings_btn = QPushButton("⚙ SETTINGS")
+        settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        settings_btn.clicked.connect(self._open_settings)
+
         restart_btn = QPushButton("↺ RESTART")
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         restart_btn.clicked.connect(self._restart)
         bot.addWidget(self.status_lbl)
         bot.addStretch()
+        bot.addWidget(settings_btn)
         bot.addWidget(restart_btn)
         root.addLayout(bot)
 
@@ -260,6 +318,10 @@ class App(QMainWindow):
     def _on_error(self, msg: str):
         self._set_status(f"✘ {msg}", CP_RED)
         self.fetch_btn.setEnabled(True)
+
+    def _open_settings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec()
 
     def _restart(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
