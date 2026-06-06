@@ -100,10 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
+    const isYtAnalyzer = scriptPath === 'user_scripts/yt_analyzer.js';
     
     const modeLabels = {
       local: 'LOCAL',
@@ -122,11 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="script-icon">${isEnabled ? '✓' : '○'}</div>
           <div class="script-details">
             <div class="script-name">${scriptInfo.name}</div>
-            <div class="script-path">${scriptInfo.description}</div>
           </div>
         </div>
         <div class="script-actions">
-          ${(isFallbackScript || isWhitelistScript) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
+          ${(isFallbackScript || isWhitelistScript || isYtAnalyzer) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
           ${isFallbackScript ? `<button class="mode-btn ${fallbackSettings.mode}" data-script="${scriptPath}">${modeLabel}</button>` : ''}
           <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
             ${isEnabled ? 'ON' : 'OFF'}
@@ -155,6 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="settings-hint">Leave empty to work on all sites.</div>
       `;
       scriptItem.appendChild(whitelistSettingsDiv);
+    } else if (isYtAnalyzer) {
+      const ytSettingsDiv = document.createElement('div');
+      ytSettingsDiv.className = 'fallback-settings hidden';
+      ytSettingsDiv.innerHTML = `
+        <label class="settings-label" for="ytHotkeyInput">Hotkey (click then press a key)</label>
+        <input id="ytHotkeyInput" class="settings-input" type="text" value="${ytAnalyzerHotkey || 'F9'}" placeholder="F9" readonly>
+        <div class="settings-hint">Click the field and press any key to set the shortcut.</div>
+      `;
+      scriptItem.appendChild(ytSettingsDiv);
     }
 
     return scriptItem;
@@ -207,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const localServerInput = scriptItem.querySelector('#localServerUrl');
     const siteUrlInput = scriptItem.querySelector('#siteUrl');
     const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
+    const ytHotkeyInput = scriptItem.querySelector('#ytHotkeyInput');
     const modeButton = scriptItem.querySelector('.mode-btn');
     const settingsButton = scriptItem.querySelector('.settings-btn');
     const settingsPanel = scriptItem.querySelector('.fallback-settings');
@@ -243,6 +253,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    if (ytHotkeyInput) {
+      ytHotkeyInput.addEventListener('keydown', (e) => {
+        e.preventDefault();
+        const key = e.key;
+        ytHotkeyInput.value = key;
+        chrome.storage.local.set({ ytAnalyzerHotkey: key });
+      });
+    }
+
     if (modeButton) {
       modeButton.addEventListener('click', () => {
         toggleFallbackMode(fallbackSettings);
@@ -263,10 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
+        const ytAnalyzerHotkey = result.ytAnalyzerHotkey || 'F9';
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -274,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey);
           
           // Add click handler to toggle button
           const toggleBtn = scriptItem.querySelector('.toggle-btn');
