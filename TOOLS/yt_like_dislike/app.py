@@ -213,12 +213,6 @@ class App(QMainWindow):
         root.setContentsMargins(18, 18, 18, 18)
         root.setSpacing(12)
 
-        # ── title bar ──
-        title = QLabel("◈ YT LIKE / DISLIKE ANALYZER ◈")
-        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 13pt; font-weight: bold;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        root.addWidget(title)
-
         # ── input ──
         grp_in = QGroupBox("VIDEO URL")
         in_lay = QHBoxLayout(grp_in)
