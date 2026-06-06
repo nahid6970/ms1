@@ -26,7 +26,7 @@ from PyQt6.QtWidgets import (
     QDialog, QCheckBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtSvgWidgets import QSvgWidget
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
@@ -122,6 +122,14 @@ class FetchWorker(QThread):
             self.error.emit(str(e))
 
 
+ICONS = {
+    "LIKES":    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>',
+    "DISLIKES": '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>',
+    "VIEWS":    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>',
+    "RATING":   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+}
+
+
 class StatBox(QFrame):
     """A labeled value box."""
     def __init__(self, label: str, color: str, parent=None):
@@ -134,12 +142,22 @@ class StatBox(QFrame):
         self.val_lbl.setStyleSheet(f"color: {color}; font-size: 20pt; font-weight: bold; border: none;")
         self.val_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        lbl = QLabel(label)
-        lbl.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt; border: none;")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        svg = ICONS[label].replace('currentColor', color)
+        self._icon = QSvgWidget()
+        self._icon.setFixedSize(20, 20)
+        self._icon.load(bytearray(f'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" {svg[4:]}'.encode()))
+        self._icon.setStyleSheet("background: transparent; border: none;")
+
+        icon_wrap = QWidget()
+        icon_wrap.setStyleSheet("background: transparent; border: none;")
+        iw_lay = QHBoxLayout(icon_wrap)
+        iw_lay.setContentsMargins(0, 0, 0, 0)
+        iw_lay.addStretch()
+        iw_lay.addWidget(self._icon)
+        iw_lay.addStretch()
 
         lay.addWidget(self.val_lbl)
-        lay.addWidget(lbl)
+        lay.addWidget(icon_wrap)
 
     def set_value(self, v: str):
         self.val_lbl.setText(v)
