@@ -1,7 +1,7 @@
 import sys
 import os
 import re
-import threading
+import argparse
 import requests
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -266,7 +266,14 @@ class App(QMainWindow):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", default="", help="YouTube URL to pre-fill")
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
     win = App()
+    if args.url:
+        win.url_input.setText(args.url)
+        win._fetch()
     win.show()
     sys.exit(app.exec())

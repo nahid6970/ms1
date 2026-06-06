@@ -168,6 +168,18 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === 'LAUNCH_YT_ANALYZER') {
+    chrome.runtime.sendNativeMessage(
+      'com.delta.yt_analyzer',
+      { url: message.url },
+      (response) => {
+        const err = chrome.runtime.lastError;
+        sendResponse({ ok: !err, error: err?.message });
+      }
+    );
+    return true; // async
+  }
+
   if (message?.type !== 'OPEN_LOCAL_FILE') {
     return;
   }
