@@ -48,7 +48,7 @@ QProgressBar::chunk {{ background-color: {CP_GREEN}; }}
 
 def extract_video_id(url: str) -> str | None:
     patterns = [
-        r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})",
+        r"(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})",
         r"(?:embed/)([A-Za-z0-9_-]{11})",
         r"^([A-Za-z0-9_-]{11})$",
     ]
