@@ -194,6 +194,27 @@ class SettingsDialog(QDialog):
         win.show()
 
 
+class RatioBar(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(18)
+        self._pct = 0  # like percentage 0-100
+
+    def set_pct(self, pct: int):
+        self._pct = pct
+        self.update()
+
+    def paintEvent(self, _):
+        from PyQt6.QtGui import QPainter, QColor
+        p = QPainter(self)
+        w, h = self.width(), self.height()
+        split = int(w * self._pct / 100)
+        if split > 0:
+            p.fillRect(0, 0, split, h, QColor(CP_GREEN))
+        if split < w:
+            p.fillRect(split, 0, w - split, h, QColor(CP_RED))
+
+
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -247,10 +268,7 @@ class App(QMainWindow):
         # ── ratio bar ──
         grp_ratio = QGroupBox("LIKE RATIO")
         ratio_lay = QVBoxLayout(grp_ratio)
-        self.ratio_bar = QProgressBar()
-        self.ratio_bar.setRange(0, 100)
-        self.ratio_bar.setValue(0)
-        self.ratio_bar.setFormat("—")
+        self.ratio_bar = RatioBar()
         self.ratio_lbl = QLabel("")
         self.ratio_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.ratio_lbl.setStyleSheet(f"color: {CP_TEXT}; font-size: 9pt;")
@@ -309,20 +327,13 @@ class App(QMainWindow):
 
         if total > 0:
             pct = int(likes / total * 100)
-            self.ratio_bar.setValue(pct)
-            self.ratio_bar.setFormat(f"{pct}%")
-            # color bar red if mostly disliked
-            bar_color = CP_GREEN if pct >= 50 else CP_RED
-            self.ratio_bar.setStyleSheet(
-                f"QProgressBar::chunk {{ background-color: {bar_color}; }}"
-            )
+            self.ratio_bar.set_pct(pct)
             self.ratio_lbl.setText(
                 f"{fmt(likes)} likes  vs  {fmt(dislikes)} dislikes  ({pct}% positive)"
             )
         else:
-            self.ratio_bar.setValue(0)
-            self.ratio_bar.setFormat("No data")
-            self.ratio_lbl.setText("")
+            self.ratio_bar.set_pct(0)
+            self.ratio_lbl.setText("No data")
 
         self._set_status("✔ Done", CP_GREEN)
         self.fetch_btn.setEnabled(True)
