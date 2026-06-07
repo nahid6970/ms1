@@ -92,11 +92,46 @@ DEFAULT_SETTINGS = {
 
 ## Status Detection Methods
 
-| Script type | How to detect |
-|---|---|
-| `.exe` process | `is_process_running("name.exe")` |
-| Flask / any port | `is_flask_running(PORT)` |
-| Python script (launched by this app) | check `_proc.poll() is None` on the stored `Popen` handle |
+| Script type | How to detect | How to stop |
+|---|---|---|
+| `.exe` process (external) | `is_process_running("name.exe")` via `tasklist` | `taskkill /IM name.exe /F` |
+| Python script launched by Tray Manager | `_proc.poll() is None` on the stored `Popen` handle | `_proc.kill(); _proc.wait()` |
+
+### Rule: always prefer tracking by Popen handle
+
+When Tray Manager launches a script itself, store the `Popen` object and use it for both status and stop. This is simpler and reliable — no port scanning, no process name guessing.
+
+```python
+_my_proc: subprocess.Popen | None = None
+
+def my_status() -> bool:
+    return _my_proc is not None and _my_proc.poll() is None
+
+def my_start():
+    global _my_proc
+    if not my_status():
+        _my_proc = subprocess.Popen(
+            [sys.executable, MY_SCRIPT],
+            creationflags=subprocess.CREATE_NO_WINDOW  # Windows: no console window
+        )
+
+def my_stop():
+    global _my_proc
+    if _my_proc:
+        _my_proc.kill()
+        _my_proc.wait()
+        _my_proc = None
+```
+
+### When to use `is_process_running` (tasklist)
+
+Only use this for **external processes** that Tray Manager does NOT launch itself — e.g. `komorebi.exe` which is started/stopped via `komorebic` CLI, not as a direct subprocess.
+
+```python
+def is_process_running(name: str) -> bool:
+    out = subprocess.check_output(f'tasklist /FI "IMAGENAME eq {name}"', shell=True).decode()
+    return name.lower() in out.lower()
+```
 
 ---
 
