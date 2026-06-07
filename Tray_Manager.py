@@ -44,7 +44,7 @@ QPushButton {{
 QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
 QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
 QGroupBox {{
-    border: 1px solid {CP_DIM}; margin-top: 14px; padding-top: 10px; font-weight: bold;
+    border: 1px solid {CP_DIM}; margin-top: 0px; padding-top: 4px; font-weight: bold;
 }}
 QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }}
 QScrollArea {{ background: transparent; border: none; }}
@@ -112,7 +112,7 @@ class ScriptCard(QGroupBox):
         self._stop_fn    = stop_fn
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(10, 22, 10, 10)
+        root.setContentsMargins(10, 8, 10, 10)
         root.setSpacing(8)
 
         # Header row: big coloured title + icon button
@@ -171,7 +171,7 @@ class ScriptCard(QGroupBox):
         self._running = running
         color = CP_GREEN if running else CP_RED
         self._lbl.setStyleSheet(f"color: {color}; font-size: 16pt; font-weight: bold; font-family: Consolas;")
-        self.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top:14px; padding-top:10px; }}")
+        self.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top:0px; padding-top:4px; }}")
         self._btn.setIcon(self._make_btn_icon(running))
         self._btn.setIconSize(QSize(28, 28))
         self._btn.setToolTip("Stop" if running else "Start")
