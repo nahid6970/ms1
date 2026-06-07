@@ -6,8 +6,9 @@ import cv2
 import numpy as np
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QFileDialog, QMessageBox)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor
+from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize
+from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon
+from PyQt6.QtSvg import QSvgRenderer
 
 # PALETTE
 CP_BG = "#050505"
@@ -347,9 +348,27 @@ class FreeformCropGUI(QMainWindow):
         btn_next.clicked.connect(self.next_image)
         btn_next.setFixedWidth(40)
 
-        btn_rotate = make_btn("⟳", "#FF8C00")
-        btn_rotate.clicked.connect(self.rotate_image)
+        _svg = b'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="#FF8C00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"/>
+          <path d="M21 8A10 10 0 1 0 19 19"/>
+        </svg>'''
+        _renderer = QSvgRenderer(QByteArray(_svg))
+        _pm = QPixmap(22, 22)
+        _pm.fill(Qt.GlobalColor.transparent)
+        _p = QPainter(_pm); _renderer.render(_p); _p.end()
+
+        btn_rotate = QPushButton()
+        btn_rotate.setIcon(QIcon(_pm))
+        btn_rotate.setIconSize(QSize(20, 20))
         btn_rotate.setFixedWidth(40)
+        btn_rotate.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_rotate.setStyleSheet(
+            f"QPushButton {{ background-color: {CP_DIM}; border: 1px solid #FF8C00; padding: 6px; }}"
+            f"QPushButton:hover {{ background-color: #FF8C0022; }}"
+            f"QPushButton:pressed {{ background-color: #FF8C00; }}"
+        )
+        btn_rotate.clicked.connect(self.rotate_image)
 
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
