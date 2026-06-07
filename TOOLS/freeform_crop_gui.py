@@ -347,6 +347,10 @@ class FreeformCropGUI(QMainWindow):
         btn_next.clicked.connect(self.next_image)
         btn_next.setFixedWidth(40)
 
+        btn_rotate = make_btn("⟳", "#FF8C00")
+        btn_rotate.clicked.connect(self.rotate_image)
+        btn_rotate.setFixedWidth(40)
+
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         
@@ -355,12 +359,13 @@ class FreeformCropGUI(QMainWindow):
         controls.addWidget(btn_crop)
         controls.addWidget(btn_overwrite)
         controls.addWidget(btn_restart)
+        controls.addWidget(btn_rotate)
         controls.addWidget(btn_prev)
         controls.addWidget(btn_next)
         controls.addStretch()
-        controls.addWidget(self.info_label)
         
         main_layout.addLayout(controls)
+        main_layout.addWidget(self.info_label)
     
     def _load_image_from_path(self, file_path):
         if self.canvas.load_image(file_path):
@@ -435,6 +440,12 @@ class FreeformCropGUI(QMainWindow):
             QMessageBox.information(self, "Success", f"Overwritten:\n{self.current_image_path}")
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
+
+    def rotate_image(self):
+        if self.canvas.image is None:
+            return
+        self.canvas.image = cv2.rotate(self.canvas.image, cv2.ROTATE_90_CLOCKWISE)
+        self.canvas.reset_points()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
