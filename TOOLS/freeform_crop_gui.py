@@ -284,6 +284,8 @@ class FreeformCropGUI(QMainWindow):
         self.resize(1000, 700)
         self.setAcceptDrops(True)        
         self.current_image_path = None
+        self.folder_images = []
+        self.folder_index = -1
         
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -327,29 +329,70 @@ class FreeformCropGUI(QMainWindow):
         btn_restart = QPushButton("RESTART")
         btn_restart.clicked.connect(self.restart_app)
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
-        
+
+        btn_prev = QPushButton("◀")
+        btn_prev.clicked.connect(self.prev_image)
+        btn_prev.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_prev.setFixedWidth(40)
+
+        btn_next = QPushButton("▶")
+        btn_next.clicked.connect(self.next_image)
+        btn_next.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_next.setFixedWidth(40)
+
+        btn_overwrite = QPushButton("CROP & OVERWRITE")
+        btn_overwrite.clicked.connect(self.crop_and_overwrite)
+        btn_overwrite.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_overwrite.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 16px; font-weight: bold;")
+
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         
         controls.addWidget(btn_load)
         controls.addWidget(btn_reset)
         controls.addWidget(btn_crop)
+        controls.addWidget(btn_overwrite)
         controls.addWidget(btn_restart)
+        controls.addWidget(btn_prev)
+        controls.addWidget(btn_next)
         controls.addStretch()
         controls.addWidget(self.info_label)
         
         main_layout.addLayout(controls)
     
+    def _load_image_from_path(self, file_path):
+        if self.canvas.load_image(file_path):
+            self.current_image_path = file_path
+            idx_str = f"{self.folder_index+1}/{len(self.folder_images)}" if self.folder_images else ""
+            self.info_label.setText(f"{Path(file_path).name}  {idx_str} | Phase 1: Set 4 corners")
+        else:
+            QMessageBox.critical(self, "Error", "Failed to load image")
+
+    def _set_folder(self, file_path):
+        folder = Path(file_path).parent
+        exts = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff'}
+        self.folder_images = sorted([str(p) for p in folder.iterdir() if p.suffix.lower() in exts])
+        self.folder_index = self.folder_images.index(str(Path(file_path))) if str(Path(file_path)) in self.folder_images else 0
+
     def load_image(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Image", "", "Images (*.png *.jpg *.jpeg *.bmp *.tiff)"
         )
         if file_path:
-            if self.canvas.load_image(file_path):
-                self.current_image_path = file_path
-                self.info_label.setText(f"Loaded: {Path(file_path).name} | Phase 1: Set 4 corners")
-            else:
-                QMessageBox.critical(self, "Error", "Failed to load image")
+            self._set_folder(file_path)
+            self._load_image_from_path(file_path)
+
+    def prev_image(self):
+        if not self.folder_images:
+            return
+        self.folder_index = (self.folder_index - 1) % len(self.folder_images)
+        self._load_image_from_path(self.folder_images[self.folder_index])
+
+    def next_image(self):
+        if not self.folder_images:
+            return
+        self.folder_index = (self.folder_index + 1) % len(self.folder_images)
+        self._load_image_from_path(self.folder_images[self.folder_index])
     
     def crop_and_save(self):
         if self.canvas.image is None:
@@ -374,6 +417,23 @@ class FreeformCropGUI(QMainWindow):
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
     
+    def crop_and_overwrite(self):
+        if self.canvas.image is None:
+            QMessageBox.warning(self, "Warning", "No image loaded")
+            return
+        if len(self.canvas.corners) != 4:
+            QMessageBox.warning(self, "Warning", "Need 4 corner points to crop")
+            return
+        result = self.canvas.crop_image()
+        if result is None:
+            QMessageBox.critical(self, "Error", "Crop failed")
+            return
+        if self.current_image_path:
+            cv2.imwrite(self.current_image_path, result)
+            QMessageBox.information(self, "Success", f"Overwritten:\n{self.current_image_path}")
+        else:
+            QMessageBox.warning(self, "Warning", "No source path available")
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -382,11 +442,8 @@ class FreeformCropGUI(QMainWindow):
         urls = event.mimeData().urls()
         if urls:
             file_path = urls[0].toLocalFile()
-            if self.canvas.load_image(file_path):
-                self.current_image_path = file_path
-                self.info_label.setText(f"Loaded: {Path(file_path).name} | Phase 1: Set 4 corners")
-            else:
-                QMessageBox.critical(self, "Error", "Failed to load image")
+            self._set_folder(file_path)
+            self._load_image_from_path(file_path)
     
     def restart_app(self):
         QApplication.quit()
