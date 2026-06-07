@@ -1563,7 +1563,15 @@ class StatusBar(QMainWindow):
     def _apply_geometry(self):
         sb = self._config.get("statusbar", {})
         is_docked = sb.get("docked", False)
+        always_on_top = sb.get("always_on_top", True)
         hwnd = int(self.winId())
+
+        # Apply always-on-top flag
+        flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+        if always_on_top:
+            flags |= Qt.WindowType.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
+        self.show()  # setWindowFlags hides the window; re-show it
         
         screen_geo = QApplication.primaryScreen().geometry()
         sw = screen_geo.width()
@@ -1745,6 +1753,7 @@ class StatusBar(QMainWindow):
         sb_x_le, sb_y_le = QLineEdit(str(_sb_cfg.get("x", "center"))), QLineEdit(str(_sb_cfg.get("y", 990)))
         popup_y_le = QLineEdit(str(self._config.get("popup_y_offset", 2)))
         dock_chk = QCheckBox("DOCK (APPBAR)"); dock_chk.setChecked(_sb_cfg.get("docked", False))
+        aot_chk = QCheckBox("ALWAYS ON TOP"); aot_chk.setChecked(_sb_cfg.get("always_on_top", True))
         
         for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
         for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(70)
@@ -1765,6 +1774,7 @@ class StatusBar(QMainWindow):
         
         form_sb.addRow("POPUP Y OFFSET", popup_y_le)
         form_sb.addRow("", dock_chk)
+        form_sb.addRow("", aot_chk)
         right_col.addWidget(grp_sb)
         right_col.addStretch()
 
@@ -1798,7 +1808,8 @@ class StatusBar(QMainWindow):
                     "height": int(sb_h_le.text()),
                     "x": x_val,
                     "y": int(sb_y_le.text()),
-                    "docked": dock_chk.isChecked()
+                    "docked": dock_chk.isChecked(),
+                    "always_on_top": aot_chk.isChecked()
                 }
                 
                 cfg["git_status_colors"] = {
