@@ -12,7 +12,7 @@ from pystray import MenuItem, Menu
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
-    QScrollArea, QFileDialog, QFrame
+    QScrollArea, QFileDialog
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PyQt6.QtGui import QFont, QColor
@@ -135,12 +135,6 @@ class ScriptCard(QGroupBox):
         hdr.addStretch()
         root.addLayout(hdr)
 
-        # Divider
-        line = QFrame()
-        line.setFrameShape(QFrame.Shape.HLine)
-        line.setStyleSheet(f"color: {CP_DIM};")
-        root.addWidget(line)
-
         # Settings sub-widget (if any)
         if settings_widget:
             root.addWidget(settings_widget)
@@ -177,7 +171,7 @@ class ScriptCard(QGroupBox):
         self._running = running
         color = CP_GREEN if running else CP_RED
         self._lbl.setStyleSheet(f"color: {color}; font-size: 16pt; font-weight: bold; font-family: Consolas;")
-        self.setStyleSheet(f"QGroupBox {{ border: 1px solid {color}; margin-top:14px; padding-top:10px; }}")
+        self.setStyleSheet(f"QGroupBox {{ border: 1px solid {CP_DIM}; margin-top:14px; padding-top:10px; }}")
         self._btn.setIcon(self._make_btn_icon(running))
         self._btn.setIconSize(QSize(28, 28))
         self._btn.setToolTip("Stop" if running else "Start")
