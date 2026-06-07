@@ -80,12 +80,6 @@ def is_process_running(name: str) -> bool:
     except Exception:
         return False
 
-def is_flask_running(port: int = 5002) -> bool:
-    try:
-        out = subprocess.check_output(f'netstat -ano | findstr :{port}', shell=True).decode()
-        return str(port) in out
-    except Exception:
-        return False
 
 # ── Tray icon drawing ────────────────────────────────────────────────────────
 def make_tray_icon() -> Image.Image:
@@ -228,7 +222,7 @@ class UploadSettings(QWidget):
 _upload_proc: subprocess.Popen | None = None
 
 def upload_status():
-    return is_flask_running(5002)
+    return _upload_proc is not None and _upload_proc.poll() is None
 
 def upload_start():
     global _upload_proc
@@ -240,22 +234,10 @@ def upload_start():
 
 def upload_stop():
     global _upload_proc
-    try:
-        out = subprocess.check_output("netstat -ano | findstr 0.0.0.0:5002", shell=True).decode()
-        for line in out.splitlines():
-            parts = line.split()
-            if parts and parts[-1].isdigit():
-                subprocess.run(["taskkill", "/PID", parts[-1], "/F"], shell=True,
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
     if _upload_proc:
-        try:
-            _upload_proc.kill()
-        except Exception:
-            pass
+        _upload_proc.kill()
+        _upload_proc.wait()
         _upload_proc = None
-    time.sleep(1)  # wait for port to be released
 
 # ── Main window ──────────────────────────────────────────────────────────────
 class TrayManagerWindow(QMainWindow):
