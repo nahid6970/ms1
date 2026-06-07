@@ -14,9 +14,20 @@ app.secret_key = 'your_secret_key'  # Required for flashing messages
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
 app.config['UPLOAD_TIMEOUT'] = 300  # 5 minutes timeout
 
-# Folder to store files permanently
+# Folder to store files permanently — reads from Tray Manager settings if available
+import json as _json
+_TRAY_SETTINGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'tray_settings.json')
+_TRAY_SETTINGS = os.path.normpath(_TRAY_SETTINGS)
+
 DESKTOP_PATH = os.path.expanduser('~/Desktop')
-SHARE_FOLDER = os.path.join(DESKTOP_PATH, 'ShareFolder')
+SHARE_FOLDER = os.path.join(DESKTOP_PATH, 'ShareFolder')  # default
+
+if os.path.exists(_TRAY_SETTINGS):
+    try:
+        with open(_TRAY_SETTINGS) as _f:
+            SHARE_FOLDER = _json.load(_f).get('upload_files', {}).get('save_folder', SHARE_FOLDER)
+    except Exception:
+        pass
 
 if not os.path.exists(SHARE_FOLDER):
     os.makedirs(SHARE_FOLDER)
