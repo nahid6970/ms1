@@ -1451,7 +1451,8 @@
         "height": 39,
         "x": "center",
         "y": 990,
-        "docked": false
+        "docked": false,
+        "always_on_top": false
     },
     "fav_apps": [
         {
