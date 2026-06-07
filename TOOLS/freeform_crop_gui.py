@@ -314,35 +314,38 @@ class FreeformCropGUI(QMainWindow):
         
         controls = QHBoxLayout()
         
-        btn_load = QPushButton("LOAD IMAGE")
-        btn_load.clicked.connect(self.load_image)
-        btn_load.setCursor(Qt.CursorShape.PointingHandCursor)
-        
-        btn_reset = QPushButton("RESET POINTS")
-        btn_reset.clicked.connect(self.canvas.reset_points)
-        btn_reset.setCursor(Qt.CursorShape.PointingHandCursor)
-        
-        btn_crop = QPushButton("CROP_SAVE")
-        btn_crop.clicked.connect(self.crop_and_save)
-        btn_crop.setCursor(Qt.CursorShape.PointingHandCursor)
-        
-        btn_restart = QPushButton("RESTART")
-        btn_restart.clicked.connect(self.restart_app)
-        btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
+        def make_btn(label, accent, text_on_press="black"):
+            ss = (f"QPushButton {{ background-color: {CP_DIM}; border: 1px solid {accent}; "
+                  f"color: {accent}; padding: 8px 16px; font-weight: bold; }}"
+                  f"QPushButton:hover {{ background-color: {accent}22; border: 1px solid {accent}; color: {accent}; }}"
+                  f"QPushButton:pressed {{ background-color: {accent}; color: {text_on_press}; }}")
+            b = QPushButton(label)
+            b.setStyleSheet(ss)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            return b
 
-        btn_prev = QPushButton("◀")
+        btn_load     = make_btn("LOAD IMAGE",    CP_CYAN)
+        btn_load.clicked.connect(self.load_image)
+
+        btn_reset    = make_btn("RESET POINTS",  CP_YELLOW, "black")
+        btn_reset.clicked.connect(self.canvas.reset_points)
+
+        btn_crop     = make_btn("CROP_SAVE",     CP_GREEN)
+        btn_crop.clicked.connect(self.crop_and_save)
+
+        btn_overwrite = make_btn("CROP_OVERRIDE", CP_RED)
+        btn_overwrite.clicked.connect(self.crop_and_overwrite)
+
+        btn_restart  = make_btn("RESTART",       "#BB86FC")
+        btn_restart.clicked.connect(self.restart_app)
+
+        btn_prev = make_btn("◀", CP_CYAN)
         btn_prev.clicked.connect(self.prev_image)
-        btn_prev.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_prev.setFixedWidth(40)
 
-        btn_next = QPushButton("▶")
+        btn_next = make_btn("▶", CP_CYAN)
         btn_next.clicked.connect(self.next_image)
-        btn_next.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_next.setFixedWidth(40)
-
-        btn_overwrite = QPushButton("CROP_OVERRIDE")
-        btn_overwrite.clicked.connect(self.crop_and_overwrite)
-        btn_overwrite.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
