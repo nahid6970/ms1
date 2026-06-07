@@ -312,7 +312,7 @@ class TrayManagerWindow(QMainWindow):
         # Refresh timer
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._refresh_all)
-        self._timer.start(2000)
+        self._timer.start(5000)
 
     def _add_card(self, card: ScriptCard):
         self._cards.append(card)
