@@ -876,6 +876,12 @@
                     "hide": false,
                     "admin": false,
                     "cmd": "C:\\@delta\\ms1\\TOOLS\\Voice\\voice_input.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "cmd": "C:\\@delta\\ms1\\TOOLS\\volume_mixer\\volume_mixer.py"
                 }
             },
             "border_color": "",

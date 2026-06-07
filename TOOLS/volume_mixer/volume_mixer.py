@@ -1,8 +1,9 @@
 import sys
+import sys
 import os
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QSlider, QGroupBox
+    QLabel, QSlider, QGroupBox
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
@@ -29,12 +30,6 @@ QGroupBox {{
     font-weight: bold; color: {CP_YELLOW};
 }}
 QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-QPushButton {{
-    background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
-    padding: 4px 10px; font-weight: bold; font-family: 'Consolas';
-}}
-QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
-QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
 QSlider::groove:horizontal {{ height: 3px; background: {CP_DIM}; border-radius: 1px; }}
 QSlider::handle:horizontal {{
     background: {CP_CYAN}; width: 12px; height: 12px;
@@ -115,6 +110,7 @@ class SessionRow(QWidget):
         self._set_name_color(bool(self.vol.GetMute()))
 
 
+
 class VolumeMixer(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -141,20 +137,6 @@ class VolumeMixer(QMainWindow):
         title.setFont(QFont("Consolas", 12, QFont.Weight.Bold))
         title.setStyleSheet(f"color: {CP_YELLOW};")
         hdr.addWidget(title)
-        hdr.addStretch()
-
-        refresh_btn = QPushButton("↻")
-        refresh_btn.setFixedWidth(32)
-        refresh_btn.setToolTip("Refresh")
-        refresh_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        refresh_btn.clicked.connect(self._populate)
-        restart_btn = QPushButton("↺")
-        restart_btn.setFixedWidth(32)
-        restart_btn.setToolTip("Restart")
-        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        restart_btn.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
-        hdr.addWidget(refresh_btn)
-        hdr.addWidget(restart_btn)
         root.addLayout(hdr)
 
         if not PYCAW:
