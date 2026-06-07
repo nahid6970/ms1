@@ -20,6 +20,8 @@ CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
+CONFIG_FILE = Path(__file__).parent / ".freeform_crop_last.txt"
+
 class ImageCanvas(QLabel):
     def __init__(self):
         super().__init__()
@@ -478,6 +480,8 @@ class FreeformCropGUI(QMainWindow):
             self._load_image_from_path(file_path)
     
     def restart_app(self):
+        if self.current_image_path:
+            CONFIG_FILE.write_text(self.current_image_path, encoding="utf-8")
         QApplication.quit()
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
@@ -486,6 +490,12 @@ def main():
     app = QApplication(sys.argv)
     window = FreeformCropGUI()
     window.show()
+    if CONFIG_FILE.exists():
+        last = CONFIG_FILE.read_text(encoding="utf-8").strip()
+        if last and Path(last).exists():
+            window._set_folder(last)
+            window._load_image_from_path(last)
+        CONFIG_FILE.unlink(missing_ok=True)
     sys.exit(app.exec())
 
 
