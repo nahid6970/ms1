@@ -91,9 +91,9 @@ def is_flask_running(port: int = 5002) -> bool:
 def make_tray_icon() -> Image.Image:
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     dc  = ImageDraw.Draw(img)
-    dc.rectangle([4, 4, 60, 60], outline="#00F0FF", width=3)
-    dc.rectangle([14, 14, 50, 50], outline="#FCEE0A", width=3)
-    dc.ellipse([26, 26, 38, 38], fill="#00F0FF")
+    # Green glowing ball
+    dc.ellipse([4, 4, 60, 60], fill="#00ff21", outline="#00cc18", width=2)
+    dc.ellipse([16, 12, 30, 26], fill="#80ff90")  # highlight
     return img
 
 # ── Qt signal bridge (cross-thread) ─────────────────────────────────────────
@@ -112,20 +112,27 @@ class ScriptCard(QGroupBox):
         self._stop_fn    = stop_fn
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(10, 18, 10, 10)
-        root.setSpacing(6)
+        root.setContentsMargins(10, 22, 10, 10)
+        root.setSpacing(8)
 
-        # Header row: coloured title + toggle button
+        # Header row: big coloured title + icon button
         hdr = QHBoxLayout()
+        hdr.setSpacing(10)
         self._lbl = QLabel(title.upper())
-        self._lbl.setFont(QFont("Consolas", 11, QFont.Weight.Bold))
+        self._lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold))
+        self._lbl.setStyleSheet("font-size: 16pt; font-weight: bold; font-family: Consolas;")
         hdr.addWidget(self._lbl)
-        hdr.addStretch()
-        self._btn = QPushButton("◼ STOP")
+
+        self._btn = QPushButton()
         self._btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._btn.setFixedWidth(110)
+        self._btn.setFixedSize(36, 36)
+        self._btn.setStyleSheet(
+            "QPushButton { border: none; background: transparent; padding: 0; }"
+            "QPushButton:hover { background: #1a1a1a; border-radius: 4px; }"
+        )
         self._btn.clicked.connect(self._toggle)
         hdr.addWidget(self._btn)
+        hdr.addStretch()
         root.addLayout(hdr)
 
         # Divider
@@ -138,18 +145,42 @@ class ScriptCard(QGroupBox):
         if settings_widget:
             root.addWidget(settings_widget)
 
-        self._running = None  # force first paint
+        self._running = None  # force first paint on refresh()
         self.refresh()
 
+    @staticmethod
+    def _make_btn_icon(running: bool):
+        from PyQt6.QtGui import QPixmap, QIcon
+        from io import BytesIO
+        from PyQt6.QtCore import QSize
+        size = 28
+        img  = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        dc   = ImageDraw.Draw(img)
+        if running:
+            # Two vertical bars = stop, red
+            dc.rectangle([5, 5, 10, size - 5], fill="#FF003C")
+            dc.rectangle([size - 11, 5, size - 6, size - 5], fill="#FF003C")
+        else:
+            # Triangle = play, green
+            dc.polygon([(5, 4), (5, size - 4), (size - 4, size // 2)], fill="#00ff21")
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        px = QPixmap()
+        px.loadFromData(buf.getvalue())
+        return QIcon(px)
+
     def refresh(self):
+        from PyQt6.QtCore import QSize
         running = self._status_fn()
         if running == self._running:
             return
         self._running = running
         color = CP_GREEN if running else CP_RED
-        self._lbl.setStyleSheet(f"color: {color};")
+        self._lbl.setStyleSheet(f"color: {color}; font-size: 16pt; font-weight: bold; font-family: Consolas;")
         self.setStyleSheet(f"QGroupBox {{ border: 1px solid {color}; margin-top:14px; padding-top:10px; }}")
-        self._btn.setText("◼ STOP" if running else "▶ START")
+        self._btn.setIcon(self._make_btn_icon(running))
+        self._btn.setIconSize(QSize(28, 28))
+        self._btn.setToolTip("Stop" if running else "Start")
 
     def _toggle(self):
         if self._running:
