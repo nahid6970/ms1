@@ -186,6 +186,64 @@ await env.MY_KV.delete("key");
 
 ---
 
+## R2 (Object Storage)
+
+Cloudflare's S3-compatible file/blob storage. Unlike S3, **egress is always free**.
+
+### Free tier limits
+- 10 GB storage/month
+- 1 million Class A operations/month (writes, uploads)
+- 10 million Class B operations/month (reads)
+- Zero egress fees (forever)
+
+### Setup
+
+**1. Create R2 bucket:**
+```
+npx wrangler r2 bucket create my-bucket
+```
+
+**2. Add to wrangler.toml:**
+```toml
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "my-bucket"
+```
+
+### Using R2 in worker
+```js
+// Upload a file
+await env.MY_BUCKET.put("images/photo.jpg", request.body, {
+  httpMetadata: { contentType: "image/jpeg" },
+});
+
+// Download / serve a file
+const object = await env.MY_BUCKET.get("images/photo.jpg");
+if (!object) return new Response("Not found", { status: 404 });
+return new Response(object.body, {
+  headers: { "Content-Type": object.httpMetadata.contentType },
+});
+
+// Delete a file
+await env.MY_BUCKET.delete("images/photo.jpg");
+
+// List files
+const list = await env.MY_BUCKET.list({ prefix: "images/" });
+// list.objects → array of { key, size, uploaded }
+```
+
+### Public access (optional)
+In the Cloudflare dashboard → R2 → your bucket → Settings → enable **Public Access** to get a public URL like `https://pub-xxx.r2.dev/images/photo.jpg`.
+
+### Generate presigned upload URLs (let browser upload directly)
+```js
+// Worker generates a signed URL, browser uploads directly to R2
+const url = await env.MY_BUCKET.createMultipartUpload("images/photo.jpg");
+```
+> For simple direct uploads, use a Worker endpoint as a proxy instead — presigned URLs require R2's S3-compatible API with access keys.
+
+---
+
 ## When to use what
 
 | Use case | Best choice |
@@ -193,6 +251,7 @@ await env.MY_KV.delete("key");
 | Fixed/static data | JSON file (import it) |
 | Simple dynamic data, sessions | KV |
 | Structured data, real app (users, posts) | D1 |
+| Files, images, blobs | R2 |
 
 ---
 
@@ -225,6 +284,10 @@ await env.MY_KV.delete("key");
 | KV storage | 1 GB |
 | KV reads | 100K/day |
 | KV writes | 1K/day |
+| R2 storage | 10 GB/month |
+| R2 Class A ops | 1M/month |
+| R2 Class B ops | 10M/month |
+| R2 egress | Free (always) |
 
 *CPU time = only active JS execution, waiting for DB/API doesn't count.
 
@@ -235,4 +298,5 @@ await env.MY_KV.delete("key");
 - Limits: https://developers.cloudflare.com/workers/platform/limits/
 - D1 docs: https://developers.cloudflare.com/d1/
 - KV docs: https://developers.cloudflare.com/kv/
+- R2 docs: https://developers.cloudflare.com/r2/
 - Dashboard: https://dash.cloudflare.com/
