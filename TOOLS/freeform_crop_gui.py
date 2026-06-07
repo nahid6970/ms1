@@ -322,7 +322,7 @@ class FreeformCropGUI(QMainWindow):
         btn_reset.clicked.connect(self.canvas.reset_points)
         btn_reset.setCursor(Qt.CursorShape.PointingHandCursor)
         
-        btn_crop = QPushButton("CROP & SAVE")
+        btn_crop = QPushButton("CROP_SAVE")
         btn_crop.clicked.connect(self.crop_and_save)
         btn_crop.setCursor(Qt.CursorShape.PointingHandCursor)
         
@@ -340,10 +340,9 @@ class FreeformCropGUI(QMainWindow):
         btn_next.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_next.setFixedWidth(40)
 
-        btn_overwrite = QPushButton("CROP & OVERWRITE")
+        btn_overwrite = QPushButton("CROP_OVERRIDE")
         btn_overwrite.clicked.connect(self.crop_and_overwrite)
         btn_overwrite.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_overwrite.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 16px; font-weight: bold;")
 
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
