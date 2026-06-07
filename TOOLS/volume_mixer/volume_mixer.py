@@ -9,7 +9,6 @@ from PyQt6.QtGui import QFont
 
 try:
     from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
-    from comtypes import CLSCTX_ALL
     PYCAW = True
 except ImportError:
     PYCAW = False
@@ -20,7 +19,6 @@ CP_PANEL  = "#111111"
 CP_YELLOW = "#FCEE0A"
 CP_CYAN   = "#00F0FF"
 CP_RED    = "#FF003C"
-CP_GREEN  = "#00ff21"
 CP_DIM    = "#3a3a3a"
 CP_TEXT   = "#E0E0E0"
 
@@ -37,25 +35,20 @@ QPushButton {{
 }}
 QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
 QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-QPushButton[muted="true"] {{ background-color: {CP_RED}; border: 1px solid {CP_RED}; color: white; }}
-QPushButton[muted="true"]:hover {{ border: 1px solid #ff6680; color: #ff6680; }}
-QSlider::groove:horizontal {{
-    height: 4px; background: {CP_DIM}; border-radius: 2px;
-}}
+QSlider::groove:horizontal {{ height: 3px; background: {CP_DIM}; border-radius: 1px; }}
 QSlider::handle:horizontal {{
-    background: {CP_CYAN}; width: 14px; height: 14px;
-    margin: -5px 0; border-radius: 7px;
+    background: {CP_CYAN}; width: 12px; height: 12px;
+    margin: -5px 0; border-radius: 6px;
 }}
-QSlider::sub-page:horizontal {{ background: {CP_CYAN}; border-radius: 2px; }}
+QSlider::sub-page:horizontal {{ background: {CP_CYAN}; border-radius: 1px; }}
 QScrollArea {{ background: transparent; border: none; }}
-QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
-QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+QScrollBar:vertical {{ background: {CP_BG}; width: 8px; margin: 0px; }}
+QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 4px; }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
 """
 
 
 def get_sessions():
-    """Return list of (name, pid, volume_interface) tuples."""
     if not PYCAW:
         return []
     sessions = []
@@ -71,40 +64,38 @@ class SessionRow(QWidget):
         super().__init__(parent)
         self.vol = vol_iface
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(10)
+        layout.setContentsMargins(4, 2, 4, 2)
+        layout.setSpacing(8)
 
-        # App name
-        lbl = QLabel(name[:28])
-        lbl.setMinimumWidth(180)
-        lbl.setStyleSheet(f"color: {CP_CYAN};")
+        # Clickable name label — click to mute/unmute
+        self.lbl = QLabel(name[:24])
+        self.lbl.setFixedWidth(150)
+        self.lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.lbl.mousePressEvent = lambda _: self._toggle_mute()
+        self._set_name_color(bool(self.vol.GetMute()))
 
-        # Volume label
+        # Volume % label
         self.vol_lbl = QLabel("100%")
-        self.vol_lbl.setMinimumWidth(38)
+        self.vol_lbl.setFixedWidth(34)
         self.vol_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.vol_lbl.setStyleSheet(f"color: {CP_TEXT};")
 
         # Slider
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(0, 100)
+        self.slider.setFixedWidth(140)
         current = int((self.vol.GetMasterVolume() or 0.0) * 100)
         self.slider.setValue(current)
         self.vol_lbl.setText(f"{current}%")
-        self.slider.setMinimumWidth(200)
         self.slider.valueChanged.connect(self._on_volume)
 
-        # Mute button
-        self.mute_btn = QPushButton("MUTE")
-        self.mute_btn.setFixedWidth(56)
-        self.mute_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._sync_mute_btn()
-        self.mute_btn.clicked.connect(self._toggle_mute)
-
-        layout.addWidget(lbl)
+        layout.addWidget(self.lbl)
         layout.addWidget(self.vol_lbl)
-        layout.addWidget(self.slider, 1)
-        layout.addWidget(self.mute_btn)
+        layout.addWidget(self.slider)
+
+    def _set_name_color(self, muted):
+        color = CP_RED if muted else CP_CYAN
+        self.lbl.setStyleSheet(f"color: {color};")
 
     def _on_volume(self, val):
         self.vol.SetMasterVolume(val / 100.0, None)
@@ -112,36 +103,27 @@ class SessionRow(QWidget):
 
     def _toggle_mute(self):
         self.vol.SetMute(not self.vol.GetMute(), None)
-        self._sync_mute_btn()
-
-    def _sync_mute_btn(self):
-        muted = bool(self.vol.GetMute())
-        self.mute_btn.setProperty("muted", str(muted).lower())
-        self.mute_btn.setText("MUTED" if muted else "MUTE")
-        self.mute_btn.style().unpolish(self.mute_btn)
-        self.mute_btn.style().polish(self.mute_btn)
+        self._set_name_color(bool(self.vol.GetMute()))
 
     def refresh(self):
-        """Pull current state from the audio session."""
         vol = int((self.vol.GetMasterVolume() or 0.0) * 100)
         if self.slider.value() != vol:
             self.slider.blockSignals(True)
             self.slider.setValue(vol)
             self.slider.blockSignals(False)
             self.vol_lbl.setText(f"{vol}%")
-        self._sync_mute_btn()
+        self._set_name_color(bool(self.vol.GetMute()))
 
 
 class VolumeMixer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("⚡ VOLUME MIXER")
-        self.resize(620, 400)
+        self.resize(420, 380)
         self.setStyleSheet(STYLESHEET)
         self._rows = {}
         self._build_ui()
         self._populate()
-        # Auto-refresh every 2s
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._refresh)
         self._timer.start(2000)
@@ -153,18 +135,21 @@ class VolumeMixer(QMainWindow):
         root.setContentsMargins(10, 10, 10, 10)
         root.setSpacing(6)
 
-        # Header row
         hdr = QHBoxLayout()
         title = QLabel("⚡ VOLUME MIXER")
-        title.setFont(QFont("Consolas", 13, QFont.Weight.Bold))
+        title.setFont(QFont("Consolas", 12, QFont.Weight.Bold))
         title.setStyleSheet(f"color: {CP_YELLOW};")
         hdr.addWidget(title)
         hdr.addStretch()
 
-        refresh_btn = QPushButton("↻ REFRESH")
+        refresh_btn = QPushButton("↻")
+        refresh_btn.setFixedWidth(32)
+        refresh_btn.setToolTip("Refresh")
         refresh_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         refresh_btn.clicked.connect(self._populate)
-        restart_btn = QPushButton("↺ RESTART")
+        restart_btn = QPushButton("↺")
+        restart_btn.setFixedWidth(32)
+        restart_btn.setToolTip("Restart")
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         restart_btn.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
         hdr.addWidget(refresh_btn)
@@ -172,16 +157,16 @@ class VolumeMixer(QMainWindow):
         root.addLayout(hdr)
 
         if not PYCAW:
-            warn = QLabel("⚠  pycaw not installed — run:  pip install pycaw")
+            from PyQt6.QtWidgets import QLabel as L
+            warn = L("⚠  pip install pycaw")
             warn.setStyleSheet(f"color: {CP_RED}; padding: 20px;")
             warn.setAlignment(Qt.AlignmentFlag.AlignCenter)
             root.addWidget(warn)
             return
 
-        # Scroll area for sessions
         self.grp = QGroupBox("AUDIO SESSIONS")
         self.sessions_layout = QVBoxLayout(self.grp)
-        self.sessions_layout.setSpacing(2)
+        self.sessions_layout.setSpacing(1)
 
         scroll = QScrollArea()
         scroll.setWidget(self.grp)
@@ -191,7 +176,6 @@ class VolumeMixer(QMainWindow):
     def _populate(self):
         if not PYCAW:
             return
-        # Clear existing
         self._rows.clear()
         while self.sessions_layout.count():
             item = self.sessions_layout.takeAt(0)
@@ -200,15 +184,14 @@ class VolumeMixer(QMainWindow):
 
         sessions = get_sessions()
         if not sessions:
-            lbl = QLabel("No active audio sessions found.")
+            lbl = QLabel("No active audio sessions.")
             lbl.setStyleSheet(f"color: {CP_DIM}; padding: 10px;")
             self.sessions_layout.addWidget(lbl)
             return
 
         for name, pid, vol in sessions:
-            key = f"{name}_{pid}"
             row = SessionRow(name, vol)
-            self._rows[key] = row
+            self._rows[f"{name}_{pid}"] = row
             self.sessions_layout.addWidget(row)
         self.sessions_layout.addStretch()
 
