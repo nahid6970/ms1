@@ -219,6 +219,11 @@ class UploadSettings(QWidget):
     def _save(self):
         self._settings["upload_files"]["save_folder"] = self._path.text()
         save_settings(self._settings)
+        # Restart the script so it picks up the new path immediately
+        if upload_status():
+            upload_stop()
+            time.sleep(0.5)
+            upload_start()
 
 _upload_proc: subprocess.Popen | None = None
 
@@ -235,23 +240,22 @@ def upload_start():
 
 def upload_stop():
     global _upload_proc
-    # Kill by port
     try:
-        out = subprocess.check_output("netstat -ano | findstr :5002", shell=True).decode()
+        out = subprocess.check_output("netstat -ano | findstr 0.0.0.0:5002", shell=True).decode()
         for line in out.splitlines():
             parts = line.split()
-            if parts:
-                pid = parts[-1]
-                subprocess.run(["taskkill", "/PID", pid, "/F"], shell=True,
+            if parts and parts[-1].isdigit():
+                subprocess.run(["taskkill", "/PID", parts[-1], "/F"], shell=True,
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception:
         pass
     if _upload_proc:
         try:
-            _upload_proc.terminate()
+            _upload_proc.kill()
         except Exception:
             pass
         _upload_proc = None
+    time.sleep(1)  # wait for port to be released
 
 # ── Main window ──────────────────────────────────────────────────────────────
 class TrayManagerWindow(QMainWindow):
