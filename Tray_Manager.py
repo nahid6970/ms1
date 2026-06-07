@@ -11,8 +11,8 @@ from pystray import MenuItem, Menu
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
-    QScrollArea, QFileDialog
+    QLabel, QPushButton, QLineEdit, QGroupBox,
+    QScrollArea
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PyQt6.QtGui import QFont, QColor
@@ -198,41 +198,27 @@ class UploadSettings(QWidget):
     def __init__(self):
         super().__init__()
         self._settings = load_settings()
-        form = QFormLayout(self)
-        form.setContentsMargins(0, 4, 0, 4)
-        form.setSpacing(6)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(0, 4, 0, 4)
+        row.setSpacing(6)
 
-        row = QHBoxLayout()
+        lbl = QLabel("Save folder:")
+        lbl.setFixedWidth(80)
+        row.addWidget(lbl)
+
         self._path = QLineEdit(self._settings["upload_files"]["save_folder"])
-        self._path.setReadOnly(True)
-        browse = QPushButton("…")
-        browse.setFixedWidth(32)
-        browse.setCursor(Qt.CursorShape.PointingHandCursor)
-        browse.clicked.connect(self._browse)
         row.addWidget(self._path)
-        row.addWidget(browse)
 
-        save_btn = QPushButton("SAVE")
+        save_btn = QPushButton("💾")
+        save_btn.setFixedSize(32, 32)
         save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        save_btn.setToolTip("Save")
         save_btn.clicked.connect(self._save)
-
-        form.addRow(QLabel("Save folder:"), row)
-        form.addRow("", save_btn)
-
-    def _browse(self):
-        d = QFileDialog.getExistingDirectory(self, "Select save folder", self._path.text())
-        if d:
-            self._path.setText(d)
+        row.addWidget(save_btn)
 
     def _save(self):
         self._settings["upload_files"]["save_folder"] = self._path.text()
         save_settings(self._settings)
-        # Patch the running process's SHARE_FOLDER via a sidecar JSON — the
-        # upload_files script will pick it up on restart.
-        label = QLabel(" ✔ Saved")
-        label.setStyleSheet(f"color: {CP_GREEN};")
-        self.layout().addRow("", label)
-        QTimer.singleShot(2000, label.deleteLater)
 
 _upload_proc: subprocess.Popen | None = None
 
