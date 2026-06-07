@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QSlider, QScrollArea, QGroupBox
+    QLabel, QPushButton, QSlider, QGroupBox
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
@@ -119,7 +119,8 @@ class VolumeMixer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("⚡ VOLUME MIXER")
-        self.resize(420, 380)
+        self.setFixedWidth(420)
+        self.setMaximumHeight(800)
         self.setStyleSheet(STYLESHEET)
         self._rows = {}
         self._build_ui()
@@ -167,11 +168,7 @@ class VolumeMixer(QMainWindow):
         self.grp = QGroupBox("AUDIO SESSIONS")
         self.sessions_layout = QVBoxLayout(self.grp)
         self.sessions_layout.setSpacing(1)
-
-        scroll = QScrollArea()
-        scroll.setWidget(self.grp)
-        scroll.setWidgetResizable(True)
-        root.addWidget(scroll)
+        root.addWidget(self.grp)
 
     def _populate(self):
         if not PYCAW:
@@ -194,6 +191,7 @@ class VolumeMixer(QMainWindow):
             self._rows[f"{name}_{pid}"] = row
             self.sessions_layout.addWidget(row)
         self.sessions_layout.addStretch()
+        QTimer.singleShot(0, self.adjustSize)
 
     def _refresh(self):
         for row in self._rows.values():
