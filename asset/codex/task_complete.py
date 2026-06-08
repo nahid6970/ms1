@@ -17,9 +17,11 @@ class TaskCompletePopup(QWidget):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.WindowDoesNotAcceptFocus
             | Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(10, 10, 10, 10)
@@ -85,10 +87,13 @@ class TaskCompletePopup(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.raise_()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TaskCompletePopup()
     window.show()
     sys.exit(app.exec())
-
