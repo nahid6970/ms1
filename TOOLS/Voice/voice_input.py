@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
                              QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt6.QtCore import Qt, QThread, QEvent, pyqtSignal, QTimer
 import pyperclip
 from pynput import keyboard as pynput_keyboard
 
@@ -185,6 +185,7 @@ class VoiceApp(QMainWindow):
         self._recording_active = False
         self._stop_requested = False
         self._session_id = 0
+        self._compact_view = False
         self.load_config()
         self._active_language = self.config.get("language", "en-US")
         self.init_ui()
@@ -222,7 +223,6 @@ class VoiceApp(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Voice Input")
-        self.setFixedSize(340, 46)
         
         # Set window position
         self.move(self.config.get("x", 100), self.config.get("y", 100))
@@ -244,6 +244,7 @@ class VoiceApp(QMainWindow):
         self.status_btn.clicked.connect(self.toggle_record)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet(f"background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0;")
+        self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
 
         self.lang_btn = QPushButton()
@@ -275,27 +276,25 @@ class VoiceApp(QMainWindow):
         self.record_btn.clicked.connect(self.toggle_record)
         layout.addWidget(self.record_btn)
 
-        help_btn = QPushButton("?")
-        help_btn.setObjectName("help"); help_btn.setFixedWidth(24)
-        help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        help_btn.clicked.connect(self.show_help)
-        layout.addWidget(help_btn)
+        self.help_btn = QPushButton("?")
+        self.help_btn.setObjectName("help"); self.help_btn.setFixedWidth(24)
+        self.help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.help_btn.clicked.connect(self.show_help)
+        layout.addWidget(self.help_btn)
 
-        settings_btn = QPushButton("⚙")
-        settings_btn.setObjectName("help"); settings_btn.setFixedWidth(24)
-        settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        settings_btn.clicked.connect(self.show_settings)
-        layout.addWidget(settings_btn)
+        self.settings_btn = QPushButton("⚙")
+        self.settings_btn.setObjectName("help"); self.settings_btn.setFixedWidth(24)
+        self.settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.settings_btn.clicked.connect(self.show_settings)
+        layout.addWidget(self.settings_btn)
 
-        close_btn = QPushButton("✕")
-        close_btn.setObjectName("help"); close_btn.setFixedWidth(24)
-        close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        close_btn.clicked.connect(self.close)
-        layout.addWidget(close_btn)
+        self.close_btn = QPushButton("✕")
+        self.close_btn.setObjectName("help"); self.close_btn.setFixedWidth(24)
+        self.close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.close_btn.clicked.connect(self.close)
+        layout.addWidget(self.close_btn)
 
-        if self.config.get("hide_record_btn"):
-            self.record_btn.setVisible(False)
-            self.setFixedSize(250, 46)
+        self._apply_window_layout()
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -334,6 +333,13 @@ class VoiceApp(QMainWindow):
         if event.button() == Qt.MouseButton.LeftButton:
             self.save_config()
             event.accept()
+
+    def eventFilter(self, obj, event):
+        if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.RightButton:
+                self.toggle_compact_view()
+                return True
+        return super().eventFilter(obj, event)
 
     def show_help(self):
         QMessageBox.information(self, "Shortcut",
@@ -421,8 +427,7 @@ class VoiceApp(QMainWindow):
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
-                self.record_btn.setVisible(not new_hide)
-                self.setFixedSize(250 if new_hide else 340, 46)
+                self._apply_window_layout()
             self.save_config()
 
     def _apply_window_flags(self):
@@ -432,6 +437,23 @@ class VoiceApp(QMainWindow):
         if self.config.get("hide_from_taskbar", True):
             flags |= Qt.WindowType.Tool
         self.setWindowFlags(flags)
+
+    def _base_window_width(self):
+        return 250 if self.config.get("hide_record_btn", False) else 340
+
+    def _compact_window_width(self):
+        return 96
+
+    def _apply_window_layout(self):
+        compact = self._compact_view
+        self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
+        for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
+            btn.setVisible(not compact)
+        self.setFixedSize(self._compact_window_width() if compact else self._base_window_width(), 46)
+
+    def toggle_compact_view(self):
+        self._compact_view = not self._compact_view
+        self._apply_window_layout()
 
     def setup_global_hotkey(self):
         def on_activate():
