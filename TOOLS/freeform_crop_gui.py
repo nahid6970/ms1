@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 from pathlib import Path
 from datetime import datetime
 import cv2
@@ -22,6 +23,7 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
 CONFIG_FILE = Path(__file__).parent / ".freeform_crop_last.txt"
+SETTINGS_FILE = Path(__file__).parent / ".freeform_crop_settings.json"
 
 
 def make_btn(label, accent, text_on_press="black"):
@@ -527,6 +529,7 @@ class FreeformCropGUI(QMainWindow):
         dlg = SettingsDialog(self, self.canvas.settings)
         if dlg.exec() == QDialog.DialogCode.Accepted:
             self.canvas.settings = dlg.get_settings()
+            SETTINGS_FILE.write_text(json.dumps(self.canvas.settings), encoding="utf-8")
             self.canvas.update_display()
 
     # ── Text overlay ──────────────────────────────────────────────────────────
@@ -780,6 +783,7 @@ class FreeformCropGUI(QMainWindow):
     def restart_app(self):
         if self.current_image_path:
             CONFIG_FILE.write_text(self.current_image_path, encoding="utf-8")
+        SETTINGS_FILE.write_text(json.dumps(self.canvas.settings), encoding="utf-8")
         QApplication.quit()
         os.execv(sys.executable, [sys.executable, str(Path(__file__).resolve())])
 
@@ -788,6 +792,11 @@ def main():
     app = QApplication(sys.argv)
     window = FreeformCropGUI()
     window.show()
+    if SETTINGS_FILE.exists():
+        try:
+            window.canvas.settings.update(json.loads(SETTINGS_FILE.read_text(encoding="utf-8")))
+        except Exception:
+            pass
     if CONFIG_FILE.exists():
         last = CONFIG_FILE.read_text(encoding="utf-8").strip()
         if last and Path(last).exists():
