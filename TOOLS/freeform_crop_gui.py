@@ -5,7 +5,7 @@ from datetime import datetime
 import cv2
 import numpy as np
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QLabel, QFileDialog, QMessageBox)
+                             QPushButton, QLabel, QFileDialog, QMessageBox, QSpinBox)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize
 from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon
 from PyQt6.QtSvg import QSvgRenderer
@@ -376,11 +376,21 @@ class FreeformCropGUI(QMainWindow):
         btn_autoscan = make_btn("AUTO SCAN", "#00BFFF")
         btn_autoscan.clicked.connect(self.auto_scan)
 
+        self.spin_subpts = QSpinBox()
+        self.spin_subpts.setRange(1, 20)
+        self.spin_subpts.setValue(4)
+        self.spin_subpts.setFixedWidth(52)
+        self.spin_subpts.setToolTip("Sub-points per side")
+        self.spin_subpts.setStyleSheet(
+            f"QSpinBox {{ background: {CP_DIM}; color: {CP_TEXT}; border: 1px solid #00BFFF; padding: 4px; font-weight: bold; }}"
+        )
+
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         
         controls.addWidget(btn_load)
         controls.addWidget(btn_reset)
         controls.addWidget(btn_autoscan)
+        controls.addWidget(self.spin_subpts)
         controls.addWidget(btn_crop)
         controls.addWidget(btn_overwrite)
         controls.addWidget(btn_rotate)
@@ -530,7 +540,7 @@ class FreeformCropGUI(QMainWindow):
         mask = np.zeros((h, w), dtype=np.uint8)
         cv2.drawContours(mask, [best_cnt], -1, 255, 2)
 
-        NUM_SUB = 4
+        NUM_SUB = self.spin_subpts.value()
 
         def scan_side(p_start, p_end, axis, num=NUM_SUB):
             """
