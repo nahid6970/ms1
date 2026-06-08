@@ -786,23 +786,28 @@ class FreeformCropGUI(QMainWindow):
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blurred, 30, 100)
+        edges = cv2.Canny(blurred, 20, 80)
         edges = cv2.dilate(edges, np.ones((3, 3), np.uint8), iterations=2)
 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         best_cnt = None
+        corners_approx = None
         img_area = w * h
-        for cnt in contours[:10]:
+        for cnt in contours[:15]:
             area = cv2.contourArea(cnt)
-            if area < img_area * 0.10 or area > img_area * 0.98:
+            if area < img_area * 0.05 or area > img_area * 0.9995:
                 continue
             peri = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-            if len(approx) == 4:
-                best_cnt = cnt
-                corners_approx = approx.reshape(4, 2).astype(np.float32)
+            # Try progressively looser epsilon until we get 4 points
+            for eps in [0.01, 0.02, 0.03, 0.05, 0.08]:
+                approx = cv2.approxPolyDP(cnt, eps * peri, True)
+                if len(approx) == 4:
+                    best_cnt = cnt
+                    corners_approx = approx.reshape(4, 2).astype(np.float32)
+                    break
+            if best_cnt is not None:
                 break
 
         if best_cnt is None:
