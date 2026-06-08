@@ -37,6 +37,18 @@ def make_btn(label, accent, text_on_press="black"):
     return b
 
 
+def svg_icon(svg_str, size=20):
+    """Render an SVG string into a QIcon."""
+    ba = QByteArray(svg_str.encode())
+    renderer = QSvgRenderer(ba)
+    pm = QPixmap(size, size)
+    pm.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pm)
+    renderer.render(painter)
+    painter.end()
+    return QIcon(pm)
+
+
 class SettingsDialog(QDialog):
     def __init__(self, parent, settings):
         super().__init__(parent)
@@ -494,13 +506,25 @@ class FreeformCropGUI(QMainWindow):
         btn_reset = make_btn("RESET POINTS", CP_YELLOW, "black")
         btn_reset.clicked.connect(self.canvas.reset_points)
 
-        btn_autoscan = make_btn("AUTO SCAN", "#00BFFF")
+        btn_autoscan = make_btn("", "#00BFFF")
+        btn_autoscan.setIcon(svg_icon('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#00BFFF" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"/><path fill="#00BFFF" d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2z"/></svg>'))
+        btn_autoscan.setIconSize(QSize(22, 22))
+        btn_autoscan.setFixedSize(38, 38)
+        btn_autoscan.setToolTip("Auto Scan")
         btn_autoscan.clicked.connect(self.auto_scan)
 
-        btn_add_text = make_btn("ADD TEXT", "#FF8C00")
+        btn_add_text = make_btn("", "#FF8C00")
+        btn_add_text.setIcon(svg_icon('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#FF8C00" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-5 14H8v-2h6zm3-4H8v-2h9zm0-4H8V7h9z"/></svg>'))
+        btn_add_text.setIconSize(QSize(22, 22))
+        btn_add_text.setFixedSize(38, 38)
+        btn_add_text.setToolTip("Add Text")
         btn_add_text.clicked.connect(self.add_text_overlay)
 
-        btn_settings = make_btn("⚙ SETTINGS", "#9E9E9E", "black")
+        btn_settings = make_btn("", "#9E9E9E", "black")
+        btn_settings.setIcon(svg_icon('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#9E9E9E" d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54a7.4 7.4 0 0 0-1.62.94l-2.39-.96a.47.47 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.36 1.04.67 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54a7.4 7.4 0 0 0 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2"/></svg>'))
+        btn_settings.setIconSize(QSize(22, 22))
+        btn_settings.setFixedSize(38, 38)
+        btn_settings.setToolTip("Settings")
         btn_settings.clicked.connect(self.open_settings)
 
         btn_crop = make_btn("CROP_SAVE", CP_GREEN)
