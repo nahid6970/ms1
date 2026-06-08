@@ -321,11 +321,11 @@
             "enabled": true
         },
         {
-            "action": "replacewith_()\nreplacewith_()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Remove all spaces\n        ClipboardContent := StrReplace(ClipboardContent, A_Space, \"\")\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
+            "action": "replacewith_()\nreplacewith_()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Remove all whitespace, including spaces and line breaks\n        ClipboardContent := RegExReplace(ClipboardContent, \"\\s+\", \"\")\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
             "category": "Text",
             "description": "",
             "hotkey": "RAlt & Space",
-            "name": "Replace Space w Nothing",
+            "name": "Remove Spaces and White spaces",
             "enabled": true
         }
     ],
