@@ -294,7 +294,7 @@ class VoiceApp(QMainWindow):
         self.close_btn.clicked.connect(self.close)
         layout.addWidget(self.close_btn)
 
-        self._apply_window_layout()
+        self._apply_window_layout(preserve_right_edge=False)
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -427,7 +427,7 @@ class VoiceApp(QMainWindow):
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
-                self._apply_window_layout()
+                self._apply_window_layout(preserve_right_edge=True)
             self.save_config()
 
     def _apply_window_flags(self):
@@ -444,16 +444,24 @@ class VoiceApp(QMainWindow):
     def _compact_window_width(self):
         return 96
 
-    def _apply_window_layout(self):
+    def _apply_window_layout(self, preserve_right_edge=True):
         compact = self._compact_view
         self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
         for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
             btn.setVisible(not compact)
-        self.setFixedSize(self._compact_window_width() if compact else self._base_window_width(), 46)
+        new_width = self._compact_window_width() if compact else self._base_window_width()
+        if preserve_right_edge:
+            geo = self.frameGeometry()
+            right_edge = geo.x() + geo.width()
+            y_pos = geo.y()
+            self.setFixedSize(new_width, 46)
+            self.move(right_edge - new_width, y_pos)
+        else:
+            self.setFixedSize(new_width, 46)
 
     def toggle_compact_view(self):
         self._compact_view = not self._compact_view
-        self._apply_window_layout()
+        self._apply_window_layout(preserve_right_edge=True)
 
     def setup_global_hotkey(self):
         def on_activate():
