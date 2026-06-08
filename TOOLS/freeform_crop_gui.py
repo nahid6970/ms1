@@ -476,6 +476,7 @@ class FreeformCropGUI(QMainWindow):
         self.current_image_path = None
         self.folder_images = []
         self.folder_index = -1
+        self._text_serial = 1
 
         self.setStyleSheet(f"""
             QMainWindow {{ background-color: {CP_BG}; }}
@@ -650,8 +651,16 @@ class FreeformCropGUI(QMainWindow):
         if self.canvas.image is None:
             return
         text, ok = QInputDialog.getText(self, "Add Text", "Enter text:")
-        if not ok or not text.strip():
+        if not ok:
             return
+        if not text.strip():
+            text = str(self._text_serial)
+        else:
+            try:
+                self._text_serial = int(text.strip())
+            except ValueError:
+                pass
+        self._text_serial += 1
         cw = self.canvas.width() - self.canvas.offset_x
         ch = self.canvas.height() - self.canvas.offset_y
         scale = self.canvas.scale if self.canvas.scale else 1.0
