@@ -87,6 +87,19 @@ class SettingsDialog(QDialog):
         self.font_spin.valueChanged.connect(self._update_preview)
         layout.addRow("Font size:", self.font_spin)
 
+        _spin_ss = "QSpinBox::up-button, QSpinBox::down-button { width: 0; }"
+        self.canny_low_spin = QSpinBox()
+        self.canny_low_spin.setRange(1, 255)
+        self.canny_low_spin.setValue(self.settings.get("canny_low", 20))
+        self.canny_low_spin.setStyleSheet(_spin_ss)
+        layout.addRow("Canny low (was 30):", self.canny_low_spin)
+
+        self.canny_high_spin = QSpinBox()
+        self.canny_high_spin.setRange(1, 255)
+        self.canny_high_spin.setValue(self.settings.get("canny_high", 80))
+        self.canny_high_spin.setStyleSheet(_spin_ss)
+        layout.addRow("Canny high (was 100):", self.canny_high_spin)
+
         # Preview
         self.preview = QLabel("Sample Text")
         self.preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -132,6 +145,8 @@ class SettingsDialog(QDialog):
             "text_bg": self.settings["text_bg"],
             "text_border": self.settings["text_border"],
             "font_size": self.font_spin.value(),
+            "canny_low": self.canny_low_spin.value(),
+            "canny_high": self.canny_high_spin.value(),
         }
 
 
@@ -178,6 +193,8 @@ class ImageCanvas(QLabel):
             "text_bg": "#ffffff",
             "text_border": "#000000",
             "font_size": 24,
+            "canny_low": 20,
+            "canny_high": 80,
         }
 
         self.setMouseTracking(True)
@@ -786,7 +803,9 @@ class FreeformCropGUI(QMainWindow):
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blurred, 20, 80)
+        canny_low = self.canvas.settings.get("canny_low", 20)
+        canny_high = self.canvas.settings.get("canny_high", 80)
+        edges = cv2.Canny(blurred, canny_low, canny_high)
         edges = cv2.dilate(edges, np.ones((3, 3), np.uint8), iterations=2)
 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
