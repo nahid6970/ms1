@@ -617,14 +617,16 @@ class FreeformCropGUI(QMainWindow):
         qt_img = QImage(rgb.data.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888)
         pixmap = QPixmap.fromImage(qt_img)
         painter = QPainter(pixmap)
-        font_size = self.canvas.settings["font_size"]
+        # Scale text positions from display coords to output image coords
+        display_w = self.canvas.width() - 2 * self.canvas.offset_x
+        display_h = self.canvas.height() - 2 * self.canvas.offset_y
+        scale_x = w / display_w if display_w > 0 else 1
+        scale_y = h / display_h if display_h > 0 else 1
+
+        font_size = max(1, int(self.canvas.settings["font_size"] * scale_x))
         font = QFont("Consolas", font_size)
         painter.setFont(font)
         fm = painter.fontMetrics()
-
-        # Scale text positions from display coords to output image coords
-        scale_x = w / (self.canvas.width() - 2 * self.canvas.offset_x) if self.canvas.scale else 1
-        scale_y = h / (self.canvas.height() - 2 * self.canvas.offset_y) if self.canvas.scale else 1
 
         for ov in self.canvas.text_overlays:
             ox = int(ov.x * scale_x)
@@ -642,7 +644,8 @@ class FreeformCropGUI(QMainWindow):
         result = pixmap.toImage().convertToFormat(QImage.Format.Format_RGB888)
         ptr = result.bits()
         ptr.setsize(result.sizeInBytes())
-        arr = np.frombuffer(ptr, dtype=np.uint8).reshape((h, w, 3))
+        bpl = result.bytesPerLine()
+        arr = np.frombuffer(ptr, dtype=np.uint8).reshape((h, bpl))[:, :w * 3].reshape((h, w, 3))
         return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
     def crop_and_save(self):
