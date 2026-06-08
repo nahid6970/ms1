@@ -14,3 +14,4 @@
 *.sqlite3
 yasb.log
 .aider*
+TOOLS/.freeform_crop_state.json
