@@ -5,8 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "commandWindows": "powershell -NoProfile -WindowStyle Hidden -Command \"Start-Process pythonw -WindowStyle Hidden -ArgumentList 'C:\\@delta\\ms1\\asset\\codex\\task_complete.py'\"",
-            "command": "python \"C:\\@delta\\ms1\\asset\\codex\\task_complete.py\"",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\@delta\\ms1\\asset\\codex\\task_complete.ps1\"",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\@delta\\ms1\\asset\\codex\\task_complete.ps1\"",
             "timeout": 30,
             "statusMessage": "Showing completion notification"
           }
