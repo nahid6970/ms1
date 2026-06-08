@@ -7,7 +7,8 @@ import cv2
 import numpy as np
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QFileDialog, QMessageBox, QSpinBox,
-                             QDialog, QFormLayout, QLineEdit, QColorDialog, QDialogButtonBox)
+                             QDialog, QFormLayout, QLineEdit, QColorDialog, QDialogButtonBox,
+                             QInputDialog)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize, QPoint, QRect
 from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon, QFont
 from PyQt6.QtSvg import QSvgRenderer
@@ -557,12 +558,14 @@ class FreeformCropGUI(QMainWindow):
     def add_text_overlay(self):
         if self.canvas.image is None:
             return
-        # Default position: bottom-right area of canvas image
+        text, ok = QInputDialog.getText(self, "Add Text", "Enter text:")
+        if not ok or not text.strip():
+            return
         cw = self.canvas.width() - self.canvas.offset_x
         ch = self.canvas.height() - self.canvas.offset_y
         x = max(0, cw - 150)
         y = max(0, ch - 60)
-        ov = TextOverlay("Text", x, y, dict(self.canvas.settings))
+        ov = TextOverlay(text.strip(), x, y, dict(self.canvas.settings))
         self.canvas.text_overlays.append(ov)
         self.canvas.update_display()
 
