@@ -826,7 +826,23 @@ class FreeformCropGUI(QMainWindow):
         self.canvas.image = cv2.rotate(self.canvas.image, cv2.ROTATE_90_CLOCKWISE)
         self.canvas.reset_points()
 
+    def _flash_center_overlay(self):
+        lbl = QLabel("✔", self.canvas)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl.setStyleSheet(
+            "background-color: rgba(0,0,0,160); color: #00FF88;"
+            "font-size: 64pt; font-weight: bold; border-radius: 16px; padding: 16px 32px;"
+        )
+        lbl.adjustSize()
+        cx = (self.canvas.width() - lbl.width()) // 2
+        cy = (self.canvas.height() - lbl.height()) // 2
+        lbl.move(cx, cy)
+        lbl.show()
+        QTimer.singleShot(1000, lbl.deleteLater)
+
     def flash_status(self, msg, duration=3000):
+        if msg.startswith("✔"):
+            self._flash_center_overlay()
         self.info_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 9pt;")
         self.info_label.setText(msg)
         QTimer.singleShot(duration, lambda: (
