@@ -531,12 +531,15 @@ class FreeformCropGUI(QMainWindow):
         controls.addWidget(btn_load)
         btn_save_text = make_btn("SAVE TEXT", "#FF8C00")
         btn_save_text.clicked.connect(self.save_with_text)
+        btn_text_override = make_btn("TEXT OVERRIDE", "#c0392b")
+        btn_text_override.clicked.connect(self.text_override)
 
         controls.addWidget(btn_reset)
         controls.addWidget(btn_autoscan)
         controls.addWidget(btn_settings)
         controls.addWidget(btn_add_text)
         controls.addWidget(btn_save_text)
+        controls.addWidget(btn_text_override)
         controls.addWidget(btn_crop)
         controls.addWidget(btn_overwrite)
         controls.addWidget(btn_rotate)
@@ -668,6 +671,13 @@ class FreeformCropGUI(QMainWindow):
             self.flash_status(f"✔ Saved: {save_path.name}")
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
+
+    def text_override(self):
+        if self.canvas.image is None or not self.canvas.text_overlays or not self.current_image_path:
+            return
+        result = self._apply_text_overlays(self.canvas.image.copy())
+        cv2.imwrite(self.current_image_path, result)
+        self.flash_status(f"✔ Override saved: {Path(self.current_image_path).name}")
 
     def crop_and_save(self):
         if self.canvas.image is None:
