@@ -154,16 +154,16 @@ class TextOverlay:
     """Represents a draggable text box on the canvas."""
     def __init__(self, text, x, y, settings):
         self.text = text
-        self.x = x  # display coords
+        self.x = x  # image coords (not display coords)
         self.y = y
         self.settings = settings
 
-    def get_rect(self, painter_fm):
+    def get_rect(self, painter_fm, scale=1.0):
         """Return bounding QRect for this text label in display coords."""
         fm = painter_fm
         tw = fm.horizontalAdvance(self.text) + 12
         th = fm.height() + 8
-        return QRect(self.x, self.y, tw, th)
+        return QRect(int(self.x * scale), int(self.y * scale), tw, th)
 
 
 class ImageCanvas(QLabel):
@@ -263,7 +263,7 @@ class ImageCanvas(QLabel):
             painter.setFont(font)
             fm = painter.fontMetrics()
             for ov in self.text_overlays:
-                rect = ov.get_rect(fm)
+                rect = ov.get_rect(fm, self.scale)
                 rect.translate(self.offset_x, self.offset_y)
                 painter.fillRect(rect, QColor(ov.settings["text_bg"]))
                 painter.setPen(QPen(QColor(ov.settings["text_border"]), 1))
@@ -284,7 +284,7 @@ class ImageCanvas(QLabel):
         fm = p.fontMetrics()
         p.end()
         for i, ov in enumerate(self.text_overlays):
-            rect = ov.get_rect(fm)
+            rect = ov.get_rect(fm, self.scale)
             if rect.contains(x, y):
                 return i
         return -1
@@ -301,7 +301,8 @@ class ImageCanvas(QLabel):
         if idx >= 0:
             self.dragging_text = idx
             ov = self.text_overlays[idx]
-            self.drag_offset = QPoint(x - ov.x, y - ov.y)
+            # x,y are display coords; ov.x/y are image coords
+            self.drag_offset = QPoint(x - int(ov.x * self.scale), y - int(ov.y * self.scale))
             return
 
         # Check if clicking near existing corner
@@ -346,8 +347,9 @@ class ImageCanvas(QLabel):
 
         if self.dragging_text is not None:
             ov = self.text_overlays[self.dragging_text]
-            ov.x = x - self.drag_offset.x()
-            ov.y = y - self.drag_offset.y()
+            # convert display drag pos back to image coords
+            ov.x = int((x - self.drag_offset.x()) / self.scale)
+            ov.y = int((y - self.drag_offset.y()) / self.scale)
             self.update_display()
             return
 
@@ -628,8 +630,9 @@ class FreeformCropGUI(QMainWindow):
             return
         cw = self.canvas.width() - self.canvas.offset_x
         ch = self.canvas.height() - self.canvas.offset_y
-        x = max(0, cw // 2 - 75)
-        y = max(0, ch - 60)
+        scale = self.canvas.scale if self.canvas.scale else 1.0
+        x = max(0, int((cw // 2 - 75) / scale))
+        y = max(0, int((ch - 60) / scale))
         ov = TextOverlay(text.strip(), x, y, dict(self.canvas.settings))
         self.canvas.text_overlays.append(ov)
         self.canvas.update_display()
@@ -682,28 +685,34 @@ class FreeformCropGUI(QMainWindow):
         qt_img = QImage(rgb.data.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888)
         pixmap = QPixmap.fromImage(qt_img)
         painter = QPainter(pixmap)
-        # Scale text positions from display coords to output image coords
-        display_w = self.canvas.width() - 2 * self.canvas.offset_x
-        display_h = self.canvas.height() - 2 * self.canvas.offset_y
-        scale_x = w / display_w if display_w > 0 else 1
-        scale_y = h / display_h if display_h > 0 else 1
+        # overlays stored in image coords; output may be same size or cropped
+        ih, iw = self.canvas.image.shape[:2]
+        sx = w / iw if iw > 0 else 1.0
+        sy = h / ih if ih > 0 else 1.0
+        # font was set at display scale; scale up to output resolution
+        display_scale = self.canvas.scale if self.canvas.scale > 0 else 1.0
+        font_scale = sx / display_scale
 
-        font_size = max(1, int(self.canvas.settings["font_size"] * scale_x))
+        font_size = max(1, int(self.canvas.settings["font_size"] * font_scale))
         font = QFont("Consolas", font_size)
         painter.setFont(font)
         fm = painter.fontMetrics()
+        pad_x = max(1, int(12 * font_scale))
+        pad_y = max(1, int(8 * font_scale))
+        border_w = max(1, int(font_scale))
 
         for ov in self.canvas.text_overlays:
-            ox = int(ov.x * scale_x)
-            oy = int(ov.y * scale_y)
-            tw = fm.horizontalAdvance(ov.text) + 12
-            th = fm.height() + 8
+            ox = int(ov.x * sx)
+            oy = int(ov.y * sy)
+            tw = fm.horizontalAdvance(ov.text) + pad_x
+            th = fm.height() + pad_y
             rect = QRect(ox, oy, tw, th)
             painter.fillRect(rect, QColor(ov.settings["text_bg"]))
-            painter.setPen(QPen(QColor(ov.settings["text_border"]), 1))
+            painter.setPen(QPen(QColor(ov.settings["text_border"]), border_w))
             painter.drawRect(rect)
             painter.setPen(QColor(ov.settings["text_fg"]))
-            painter.drawText(rect.adjusted(6, 4, -6, -4), Qt.AlignmentFlag.AlignCenter, ov.text)
+            painter.drawText(rect.adjusted(pad_x // 2, pad_y // 2, -(pad_x // 2), -(pad_y // 2)),
+                             Qt.AlignmentFlag.AlignCenter, ov.text)
         painter.end()
 
         result = pixmap.toImage().convertToFormat(QImage.Format.Format_RGB888)
