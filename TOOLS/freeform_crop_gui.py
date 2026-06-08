@@ -373,17 +373,21 @@ class FreeformCropGUI(QMainWindow):
         btn_rotate.clicked.connect(self.rotate_image)
 
         self.info_label = QLabel("Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
+        btn_autoscan = make_btn("AUTO SCAN", "#00BFFF")
+        btn_autoscan.clicked.connect(self.auto_scan)
+
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         
         controls.addWidget(btn_load)
         controls.addWidget(btn_reset)
+        controls.addWidget(btn_autoscan)
         controls.addWidget(btn_crop)
         controls.addWidget(btn_overwrite)
-        controls.addWidget(btn_restart)
         controls.addWidget(btn_rotate)
         controls.addWidget(btn_prev)
         controls.addWidget(btn_next)
         controls.addStretch()
+        controls.addWidget(btn_restart)
         
         main_layout.addLayout(controls)
         main_layout.addWidget(self.info_label)
@@ -475,6 +479,64 @@ class FreeformCropGUI(QMainWindow):
             self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;"),
             self.info_label.setText(f"{Path(self.current_image_path).name}" if self.current_image_path else "Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
         ))
+
+    def auto_scan(self):
+        if self.canvas.image is None:
+            return
+
+        img = self.canvas.image
+        h, w = img.shape[:2]
+        scale = self.canvas.scale
+
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        # Try Canny first, fallback to adaptive threshold
+        edges = cv2.Canny(blurred, 30, 100)
+        edges = cv2.dilate(edges, np.ones((3, 3), np.uint8), iterations=2)
+
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+        best = None
+        img_area = w * h
+        for cnt in contours[:10]:
+            area = cv2.contourArea(cnt)
+            # Must be at least 10% and at most 98% of image area
+            if area < img_area * 0.10 or area > img_area * 0.98:
+                continue
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+            if len(approx) == 4:
+                best = approx
+                break
+
+        if best is None:
+            self.flash_status("✘ Auto scan failed — try manual points", duration=3000)
+            return
+
+        # Order points: TL, TR, BR, BL
+        pts = best.reshape(4, 2).astype(np.float32)
+        rect = np.zeros((4, 2), dtype=np.float32)
+        s = pts.sum(axis=1)
+        rect[0] = pts[np.argmin(s)]   # TL
+        rect[2] = pts[np.argmax(s)]   # BR
+        diff = np.diff(pts, axis=1)
+        rect[1] = pts[np.argmin(diff)] # TR
+        rect[3] = pts[np.argmax(diff)] # BL
+
+        # Convert to display scale
+        self.canvas.corners = [[int(p[0] * scale), int(p[1] * scale)] for p in rect]
+        self.canvas.sides = [[], [], [], []]
+        self.canvas.phase = 1
+        self.canvas.update_display()
+        self.flash_status("✔ Auto scan complete — adjust if needed")
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Left:
+            self.prev_image()
+        elif event.key() == Qt.Key.Key_Right:
+            self.next_image()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
