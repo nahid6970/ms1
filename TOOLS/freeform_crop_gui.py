@@ -8,7 +8,7 @@ import numpy as np
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QFileDialog, QMessageBox, QSpinBox,
                              QDialog, QFormLayout, QLineEdit, QColorDialog, QDialogButtonBox,
-                             QInputDialog)
+                             QInputDialog, QMenu)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize, QPoint, QRect
 from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon, QFont
 from PyQt6.QtSvg import QSvgRenderer
@@ -489,7 +489,6 @@ class FreeformCropGUI(QMainWindow):
 
         btn_overwrite = make_btn("CROP_OVERRIDE", CP_RED)
         btn_overwrite.clicked.connect(self.crop_and_overwrite)
-
         # Rotate SVG button
         _svg = b'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
             stroke="#FF8C00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -529,19 +528,45 @@ class FreeformCropGUI(QMainWindow):
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
 
         controls.addWidget(btn_load)
-        btn_save_text = make_btn("SAVE TEXT", "#FF8C00")
-        btn_save_text.clicked.connect(self.save_with_text)
-        btn_text_override = make_btn("TEXT OVERRIDE", "#c0392b")
-        btn_text_override.clicked.connect(self.text_override)
+
+        def show_save_menu():
+            menu = QMenu()
+            menu.setStyleSheet("""
+                QMenu {
+                    background: #1e1e1e;
+                    color: #f0f0f0;
+                    border: 1px solid #555;
+                    padding: 4px;
+                    font-size: 13px;
+                }
+                QMenu::item {
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                }
+                QMenu::item:selected {
+                    background: #3a3a3a;
+                    color: #ffffff;
+                }
+                QMenu::separator { height: 1px; background: #444; margin: 3px 8px; }
+            """)
+            menu.addAction("✂  CROP SAVE",     self.crop_and_save)
+            menu.addAction("✂  CROP OVERRIDE", self.crop_and_overwrite)
+            menu.addSeparator()
+            menu.addAction("T  SAVE TEXT",     self.save_with_text)
+            menu.addAction("T  TEXT OVERRIDE", self.text_override)
+            pos = btn_save.mapToGlobal(btn_save.rect().topLeft())
+            menu.adjustSize()
+            pos.setY(pos.y() - menu.sizeHint().height())
+            menu.exec(pos)
+
+        btn_save = make_btn("SAVE ▾", CP_GREEN)
+        btn_save.clicked.connect(show_save_menu)
 
         controls.addWidget(btn_reset)
         controls.addWidget(btn_autoscan)
         controls.addWidget(btn_settings)
         controls.addWidget(btn_add_text)
-        controls.addWidget(btn_save_text)
-        controls.addWidget(btn_text_override)
-        controls.addWidget(btn_crop)
-        controls.addWidget(btn_overwrite)
+        controls.addWidget(btn_save)
         controls.addWidget(btn_rotate)
         controls.addWidget(btn_prev)
         controls.addWidget(btn_next)
