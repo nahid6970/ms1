@@ -22,8 +22,7 @@ CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 
-CONFIG_FILE = Path(__file__).parent / ".freeform_crop_last.txt"
-SETTINGS_FILE = Path(__file__).parent / ".freeform_crop_settings.json"
+CONFIG_FILE = Path(__file__).parent / ".freeform_crop_state.json"
 
 
 def make_btn(label, accent, text_on_press="black"):
@@ -84,12 +83,31 @@ class SettingsDialog(QDialog):
         self.font_spin.setRange(8, 120)
         self.font_spin.setValue(self.settings.get("font_size", 24))
         self.font_spin.setStyleSheet("QSpinBox::up-button, QSpinBox::down-button { width: 0; }")
+        self.font_spin.valueChanged.connect(self._update_preview)
         layout.addRow("Font size:", self.font_spin)
+
+        # Preview
+        self.preview = QLabel("Sample Text")
+        self.preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview.setFixedHeight(48)
+        self.preview.setContentsMargins(8, 4, 8, 4)
+        layout.addRow("Preview:", self.preview)
+        self._update_preview()
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addRow(buttons)
+
+    def _update_preview(self):
+        fg = self.settings.get("text_fg", "#000000")
+        bg = self.settings.get("text_bg", "#ffffff")
+        border = self.settings.get("text_border", "#000000")
+        fs = self.font_spin.value()
+        self.preview.setStyleSheet(
+            f"color: {fg}; background: {bg}; border: 2px solid {border};"
+            f"font-family: Consolas; font-size: {fs}pt; font-weight: bold;"
+        )
 
     def _color_btn(self, hex_color):
         btn = QPushButton()
@@ -104,6 +122,7 @@ class SettingsDialog(QDialog):
             self.settings[key] = c.name()
             btn.setStyleSheet(f"background: {c.name()}; border: 1px solid #888;")
             btn._color = c.name()
+            self._update_preview()
 
     def get_settings(self):
         return {
@@ -529,7 +548,9 @@ class FreeformCropGUI(QMainWindow):
         dlg = SettingsDialog(self, self.canvas.settings)
         if dlg.exec() == QDialog.DialogCode.Accepted:
             self.canvas.settings = dlg.get_settings()
-            SETTINGS_FILE.write_text(json.dumps(self.canvas.settings), encoding="utf-8")
+            state = json.loads(CONFIG_FILE.read_text(encoding="utf-8")) if CONFIG_FILE.exists() else {}
+            state["settings"] = self.canvas.settings
+            CONFIG_FILE.write_text(json.dumps(state), encoding="utf-8")
             self.canvas.update_display()
 
     # ── Text overlay ──────────────────────────────────────────────────────────
@@ -781,9 +802,10 @@ class FreeformCropGUI(QMainWindow):
             self._load_image_from_path(file_path)
 
     def restart_app(self):
+        state = {"settings": self.canvas.settings}
         if self.current_image_path:
-            CONFIG_FILE.write_text(self.current_image_path, encoding="utf-8")
-        SETTINGS_FILE.write_text(json.dumps(self.canvas.settings), encoding="utf-8")
+            state["last_image"] = self.current_image_path
+        CONFIG_FILE.write_text(json.dumps(state), encoding="utf-8")
         QApplication.quit()
         os.execv(sys.executable, [sys.executable, str(Path(__file__).resolve())])
 
@@ -792,17 +814,17 @@ def main():
     app = QApplication(sys.argv)
     window = FreeformCropGUI()
     window.show()
-    if SETTINGS_FILE.exists():
+    if CONFIG_FILE.exists():
         try:
-            window.canvas.settings.update(json.loads(SETTINGS_FILE.read_text(encoding="utf-8")))
+            state = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+            if "settings" in state:
+                window.canvas.settings.update(state["settings"])
+            last = state.get("last_image", "")
+            if last and Path(last).exists():
+                window._set_folder(last)
+                window._load_image_from_path(last)
         except Exception:
             pass
-    if CONFIG_FILE.exists():
-        last = CONFIG_FILE.read_text(encoding="utf-8").strip()
-        if last and Path(last).exists():
-            window._set_folder(last)
-            window._load_image_from_path(last)
-        CONFIG_FILE.unlink(missing_ok=True)
     sys.exit(app.exec())
 
 
