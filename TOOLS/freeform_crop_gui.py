@@ -490,44 +490,86 @@ class FreeformCropGUI(QMainWindow):
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
-        # Try Canny first, fallback to adaptive threshold
         edges = cv2.Canny(blurred, 30, 100)
         edges = cv2.dilate(edges, np.ones((3, 3), np.uint8), iterations=2)
 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-        best = None
+        best_cnt = None
         img_area = w * h
         for cnt in contours[:10]:
             area = cv2.contourArea(cnt)
-            # Must be at least 10% and at most 98% of image area
             if area < img_area * 0.10 or area > img_area * 0.98:
                 continue
             peri = cv2.arcLength(cnt, True)
             approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
             if len(approx) == 4:
-                best = approx
+                best_cnt = cnt
+                corners_approx = approx.reshape(4, 2).astype(np.float32)
                 break
 
-        if best is None:
+        if best_cnt is None:
             self.flash_status("✘ Auto scan failed — try manual points", duration=3000)
             return
 
-        # Order points: TL, TR, BR, BL
-        pts = best.reshape(4, 2).astype(np.float32)
-        rect = np.zeros((4, 2), dtype=np.float32)
+        # Order corners: TL, TR, BR, BL
+        pts = corners_approx
         s = pts.sum(axis=1)
-        rect[0] = pts[np.argmin(s)]   # TL
-        rect[2] = pts[np.argmax(s)]   # BR
-        diff = np.diff(pts, axis=1)
-        rect[1] = pts[np.argmin(diff)] # TR
-        rect[3] = pts[np.argmax(diff)] # BL
+        diff = np.diff(pts, axis=1).ravel()
+        ordered = np.array([
+            pts[np.argmin(s)],    # TL
+            pts[np.argmin(diff)], # TR
+            pts[np.argmax(s)],    # BR
+            pts[np.argmax(diff)], # BL
+        ]).astype(np.float32)
 
-        # Convert to display scale
-        self.canvas.corners = [[int(p[0] * scale), int(p[1] * scale)] for p in rect]
-        self.canvas.sides = [[], [], [], []]
+        tl, tr, br, bl = ordered
+
+        # Build a mask from the contour to find actual edge pixels per side
+        mask = np.zeros((h, w), dtype=np.uint8)
+        cv2.drawContours(mask, [best_cnt], -1, 255, 2)
+
+        NUM_SUB = 4
+
+        def scan_side(p_start, p_end, axis, num=NUM_SUB):
+            """
+            Sample num interior points along a side by scanning perpendicular slices.
+            axis=0: side is mostly horizontal (scan columns), axis=1: mostly vertical (scan rows).
+            """
+            pts_out = []
+            for i in range(1, num + 1):
+                t = i / (num + 1)
+                mid = (1 - t) * p_start + t * p_end  # interpolated guide point
+
+                if axis == 0:  # horizontal side — scan vertically at this x
+                    x = int(mid[0])
+                    col = mask[:, max(0, x-3):min(w, x+4)].max(axis=1)
+                    ys = np.where(col > 0)[0]
+                    if len(ys) == 0:
+                        pts_out.append([int(mid[0]), int(mid[1])])
+                        continue
+                    # pick y closest to the guide midpoint
+                    best_y = ys[np.argmin(np.abs(ys - mid[1]))]
+                    pts_out.append([x, int(best_y)])
+                else:  # vertical side — scan horizontally at this y
+                    y = int(mid[1])
+                    row = mask[max(0, y-3):min(h, y+4), :].max(axis=0)
+                    xs = np.where(row > 0)[0]
+                    if len(xs) == 0:
+                        pts_out.append([int(mid[0]), int(mid[1])])
+                        continue
+                    best_x = xs[np.argmin(np.abs(xs - mid[0]))]
+                    pts_out.append([int(best_x), y])
+            return [[int(p[0] * scale), int(p[1] * scale)] for p in pts_out]
+
+        self.canvas.corners = [[int(p[0] * scale), int(p[1] * scale)] for p in ordered]
+        self.canvas.sides = [
+            scan_side(tl, tr, axis=0),  # top: horizontal
+            scan_side(tr, br, axis=1),  # right: vertical
+            scan_side(br, bl, axis=0),  # bottom: horizontal
+            scan_side(bl, tl, axis=1),  # left: vertical
+        ]
         self.canvas.phase = 1
         self.canvas.update_display()
         self.flash_status("✔ Auto scan complete — adjust if needed")
