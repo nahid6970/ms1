@@ -529,10 +529,14 @@ class FreeformCropGUI(QMainWindow):
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
 
         controls.addWidget(btn_load)
+        btn_save_text = make_btn("SAVE TEXT", "#FF8C00")
+        btn_save_text.clicked.connect(self.save_with_text)
+
         controls.addWidget(btn_reset)
         controls.addWidget(btn_autoscan)
         controls.addWidget(btn_settings)
         controls.addWidget(btn_add_text)
+        controls.addWidget(btn_save_text)
         controls.addWidget(btn_crop)
         controls.addWidget(btn_overwrite)
         controls.addWidget(btn_rotate)
@@ -647,6 +651,23 @@ class FreeformCropGUI(QMainWindow):
         bpl = result.bytesPerLine()
         arr = np.frombuffer(ptr, dtype=np.uint8).reshape((h, bpl))[:, :w * 3].reshape((h, w, 3))
         return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+
+    def save_with_text(self):
+        if self.canvas.image is None:
+            QMessageBox.warning(self, "Warning", "No image loaded")
+            return
+        if not self.canvas.text_overlays:
+            QMessageBox.warning(self, "Warning", "No text overlays added")
+            return
+        result = self._apply_text_overlays(self.canvas.image.copy())
+        if self.current_image_path:
+            original_path = Path(self.current_image_path)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            save_path = original_path.parent / f"{original_path.stem}_{timestamp}{original_path.suffix}"
+            cv2.imwrite(str(save_path), result)
+            self.flash_status(f"✔ Saved: {save_path.name}")
+        else:
+            QMessageBox.warning(self, "Warning", "No source path available")
 
     def crop_and_save(self):
         if self.canvas.image is None:
