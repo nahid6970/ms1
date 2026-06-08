@@ -381,9 +381,14 @@ class FreeformCropGUI(QMainWindow):
         self.spin_subpts.setValue(4)
         self.spin_subpts.setFixedWidth(52)
         self.spin_subpts.setToolTip("Sub-points per side")
-        self.spin_subpts.setStyleSheet(
-            f"QSpinBox {{ background: {CP_DIM}; color: {CP_TEXT}; border: 1px solid #00BFFF; padding: 4px; font-weight: bold; }}"
-        )
+        self.spin_subpts.setStyleSheet(f"""
+            QSpinBox {{
+                background: {CP_DIM}; color: {CP_TEXT};
+                border: 1px solid #00BFFF; padding: 4px 2px;
+                font-family: Consolas; font-size: 10pt; font-weight: bold;
+            }}
+            QSpinBox::up-button, QSpinBox::down-button {{ width: 0; border: none; }}
+        """)
 
         self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         
@@ -605,7 +610,7 @@ class FreeformCropGUI(QMainWindow):
         if self.current_image_path:
             CONFIG_FILE.write_text(self.current_image_path, encoding="utf-8")
         QApplication.quit()
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        os.execv(sys.executable, [sys.executable, str(Path(__file__).resolve())])
 
 
 def main():
