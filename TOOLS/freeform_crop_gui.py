@@ -611,7 +611,7 @@ class FreeformCropGUI(QMainWindow):
             return
         cw = self.canvas.width() - self.canvas.offset_x
         ch = self.canvas.height() - self.canvas.offset_y
-        x = max(0, cw - 150)
+        x = max(0, cw // 2 - 75)
         y = max(0, ch - 60)
         ov = TextOverlay(text.strip(), x, y, dict(self.canvas.settings))
         self.canvas.text_overlays.append(ov)
