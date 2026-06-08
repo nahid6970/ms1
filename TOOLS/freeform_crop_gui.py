@@ -441,7 +441,7 @@ class FreeformCropGUI(QMainWindow):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             save_path = original_path.parent / f"{original_path.stem}_{timestamp}{original_path.suffix}"
             cv2.imwrite(str(save_path), result)
-            QMessageBox.information(self, "Success", f"Saved to:\n{save_path}")
+            self.flash_status(f"✔ Saved: {save_path.name}")
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
     
@@ -458,7 +458,7 @@ class FreeformCropGUI(QMainWindow):
             return
         if self.current_image_path:
             cv2.imwrite(self.current_image_path, result)
-            QMessageBox.information(self, "Success", f"Overwritten:\n{self.current_image_path}")
+            self.flash_status(f"✔ Overwritten: {Path(self.current_image_path).name}")
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
 
@@ -467,6 +467,14 @@ class FreeformCropGUI(QMainWindow):
             return
         self.canvas.image = cv2.rotate(self.canvas.image, cv2.ROTATE_90_CLOCKWISE)
         self.canvas.reset_points()
+
+    def flash_status(self, msg, duration=3000):
+        self.info_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 9pt;")
+        self.info_label.setText(msg)
+        QTimer.singleShot(duration, lambda: (
+            self.info_label.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;"),
+            self.info_label.setText(f"{Path(self.current_image_path).name}" if self.current_image_path else "Phase 1: Click 4 corners • Phase 2: Click edges to add sub-points")
+        ))
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
