@@ -744,6 +744,7 @@ class FreeformCropGUI(QMainWindow):
             return
         result = self._apply_text_overlays(self.canvas.image.copy())
         cv2.imwrite(self.current_image_path, result)
+        self._load_image_from_path(self.current_image_path)
         self.flash_status(f"✔ Override saved: {Path(self.current_image_path).name}")
 
     def crop_and_save(self):
@@ -781,6 +782,7 @@ class FreeformCropGUI(QMainWindow):
         result = self._apply_text_overlays(result)
         if self.current_image_path:
             cv2.imwrite(self.current_image_path, result)
+            self._load_image_from_path(self.current_image_path)
             self.flash_status(f"✔ Overwritten: {Path(self.current_image_path).name}")
         else:
             QMessageBox.warning(self, "Warning", "No source path available")
