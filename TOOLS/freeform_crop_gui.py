@@ -302,11 +302,25 @@ class ImageCanvas(QLabel):
         return -1
 
     def mousePressEvent(self, event):
-        if self.image is None or event.button() != Qt.MouseButton.LeftButton:
+        if self.image is None:
             return
 
         x = event.pos().x() - self.offset_x
         y = event.pos().y() - self.offset_y
+
+        # Right-click: remove sub-point
+        if event.button() == Qt.MouseButton.RightButton:
+            if self.phase == 1:
+                for side_idx in range(4):
+                    for pt_idx, pt in enumerate(self.sides[side_idx]):
+                        if np.linalg.norm(np.array([x, y]) - np.array(pt)) < 10:
+                            self.sides[side_idx].pop(pt_idx)
+                            self.update_display()
+                            return
+            return
+
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
 
         # Check text overlays first
         idx = self._hit_text(x, y)
