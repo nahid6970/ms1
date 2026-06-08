@@ -8,9 +8,9 @@ import numpy as np
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QFileDialog, QMessageBox, QSpinBox,
                              QDialog, QFormLayout, QLineEdit, QColorDialog, QDialogButtonBox,
-                             QInputDialog, QMenu)
+                             QInputDialog, QMenu, QWidgetAction)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize, QPoint, QRect
-from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon, QFont
+from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QCursor, QIcon, QFont, QAction
 from PyQt6.QtSvg import QSvgRenderer
 
 # PALETTE
@@ -549,11 +549,27 @@ class FreeformCropGUI(QMainWindow):
                 }
                 QMenu::separator { height: 1px; background: #444; margin: 3px 8px; }
             """)
-            menu.addAction("✂  CROP SAVE",     self.crop_and_save)
-            menu.addAction("✂  CROP OVERRIDE", self.crop_and_overwrite)
+
+            def _wa(label, slot, red=False):
+                btn = QPushButton(label)
+                btn.setFlat(True)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                bg = "#4a1a1a" if red else "#1e1e1e"
+                hover = "#6b2020" if red else "#3a3a3a"
+                btn.setStyleSheet(f"QPushButton {{ background:{bg}; color:#f0f0f0; text-align:left;"
+                                  f"padding:8px 20px; border:none; font-size:13px; }}"
+                                  f"QPushButton:hover {{ background:{hover}; }}")
+                wa = QWidgetAction(menu)
+                wa.setDefaultWidget(btn)
+                btn.clicked.connect(lambda: (menu.close(), slot()))
+                return wa
+
+            menu.addAction(QAction("✂  CROP SAVE", menu, triggered=self.crop_and_save))
+            menu.addAction(_wa("✂  CROP OVERRIDE", self.crop_and_overwrite, red=True))
             menu.addSeparator()
-            menu.addAction("T  SAVE TEXT",     self.save_with_text)
-            menu.addAction("T  TEXT OVERRIDE", self.text_override)
+            menu.addAction(QAction("T  SAVE TEXT", menu, triggered=self.save_with_text))
+            menu.addAction(_wa("T  TEXT OVERRIDE", self.text_override, red=True))
+
             pos = btn_save.mapToGlobal(btn_save.rect().topLeft())
             menu.adjustSize()
             pos.setY(pos.y() - menu.sizeHint().height())
