@@ -1,7 +1,7 @@
 # Notification Rules
 - When you have completely finished helping the user, run the notification script EXACTLY ONCE as your final action.
-- Command: `powershell -NoProfile -ExecutionPolicy Bypass -File C:\\@delta\\ms1\\asset\\KIRO\\task_complete.ps1`
-- The notification displays a non-activating Windows balloon notification with the message "Task Completed Successfully"
+- Command: `python3.exe C:\\@delta\\ms1\\asset\\kiro\\task_complete.py`
+- The notification displays a styled popup window with the message "Task Completed Successfully"
 - CRITICAL: After running this script and it exits (when the user clicks Dismiss), DO NOT generate any further responses or continue the conversation.
 - Run it for both complex tasks and simple conversations (hi, hello, thanks, etc.)
 - This must be the absolute last action - no text, no explanations after running the command.

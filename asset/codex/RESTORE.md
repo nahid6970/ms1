@@ -2,7 +2,7 @@
 
 Copy these files after a PC reset:
 
-1. `C:\@delta\ms1\asset\codex\task_complete.ps1`
+1. `C:\@delta\ms1\asset\codex\task_complete.py`
    - Restore to the same path.
 
 2. `C:\@delta\ms1\asset\codex\codex_config.toml`
