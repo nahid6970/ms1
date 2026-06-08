@@ -643,6 +643,7 @@ class FreeformCropGUI(QMainWindow):
             self.canvas.settings = dlg.get_settings()
             state = json.loads(CONFIG_FILE.read_text(encoding="utf-8")) if CONFIG_FILE.exists() else {}
             state["settings"] = self.canvas.settings
+            state["text_serial"] = self._text_serial
             CONFIG_FILE.write_text(json.dumps(state), encoding="utf-8")
             self.canvas.update_display()
 
@@ -661,6 +662,9 @@ class FreeformCropGUI(QMainWindow):
             except ValueError:
                 pass
         self._text_serial += 1
+        state = json.loads(CONFIG_FILE.read_text(encoding="utf-8")) if CONFIG_FILE.exists() else {}
+        state["text_serial"] = self._text_serial
+        CONFIG_FILE.write_text(json.dumps(state), encoding="utf-8")
         cw = self.canvas.width() - self.canvas.offset_x
         ch = self.canvas.height() - self.canvas.offset_y
         scale = self.canvas.scale if self.canvas.scale else 1.0
@@ -964,7 +968,7 @@ class FreeformCropGUI(QMainWindow):
             self._load_image_from_path(file_path)
 
     def restart_app(self):
-        state = {"settings": self.canvas.settings}
+        state = {"settings": self.canvas.settings, "text_serial": self._text_serial}
         if self.current_image_path:
             state["last_image"] = self.current_image_path
         CONFIG_FILE.write_text(json.dumps(state), encoding="utf-8")
@@ -981,6 +985,8 @@ def main():
             state = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
             if "settings" in state:
                 window.canvas.settings.update(state["settings"])
+            if "text_serial" in state:
+                window._text_serial = int(state["text_serial"])
             last = state.get("last_image", "")
             if last and Path(last).exists():
                 window._set_folder(last)
