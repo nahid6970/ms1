@@ -700,9 +700,9 @@
             "category": "General",
             "description": "",
             "hotkey": "Numpad0",
-            "window_title": "VCT, VALORANT",
+            "window_title": "VALORANT",
             "process_name": "chrome.exe",
-            "window_class": "",
+            "window_class": "Chrome_WidgetWin_1",
             "action": "{\n        Send \"^w\"\n}",
             "enabled": true
         },
