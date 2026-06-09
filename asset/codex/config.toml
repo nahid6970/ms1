@@ -12,6 +12,9 @@ trust_level = "trusted"
 [projects.'c:\@delta\db']
 trust_level = "trusted"
 
+[projects.'c:\users\nahid\.codex']
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 
@@ -19,4 +22,10 @@ trust_level = "trusted"
 sandbox = "elevated"
 
 [plugins."convex@openai-curated"]
+enabled = true
+
+[hooks.state]
+
+[hooks.state.'C:\Users\nahid\.codex\hooks.json:stop:0:0']
+trusted_hash = "sha256:f3dfdccf25b36c5eedc86786436752c70501c8d9c1ec5e801cb35c54f2170bc7"
 enabled = true
