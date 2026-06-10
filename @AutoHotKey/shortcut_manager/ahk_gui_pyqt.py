@@ -767,17 +767,14 @@ SendText("Hello World")"""
             action_layout.addWidget(self.action_edit)
             top_layout.addLayout(action_layout)
         elif self.shortcut_type == "exclude":
-            info_layout = QVBoxLayout()
-            info_layout.addWidget(QLabel("No action is needed here."))
-
-            info_text = QLabel(
-                "Create one or more exclusion rules to stop AHK shortcuts from firing inside matching apps."
-            )
-            info_text.setWordWrap(True)
-            info_text.setStyleSheet("color: #c0c0c0; font-size: 12px;")
-            info_layout.addWidget(info_text)
-            info_layout.addStretch(1)
-            top_layout.addLayout(info_layout)
+            excl_layout = QVBoxLayout()
+            excl_layout.addWidget(QLabel("Excluded Hotkeys (one per line, blank = exclude all):"))
+            self.excluded_hotkeys_edit = QTextEdit()
+            self.excluded_hotkeys_edit.setMinimumHeight(300)
+            self.excluded_hotkeys_edit.setMinimumWidth(300)
+            self.excluded_hotkeys_edit.setPlaceholderText("^r\n^s\n!x\n^+t\n; one hotkey per line\n; leave blank to exclude ALL shortcuts")
+            excl_layout.addWidget(self.excluded_hotkeys_edit)
+            top_layout.addLayout(excl_layout)
         else:
             # Replacement
             replacement_layout = QVBoxLayout()
@@ -840,6 +837,8 @@ SendText("Hello World")"""
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
             self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
+            hotkeys = self.shortcut_data.get("excluded_hotkeys", "")
+            self.excluded_hotkeys_edit.setPlainText(hotkeys)
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
         elif self.shortcut_type == "file":
@@ -1200,6 +1199,7 @@ SendText("Hello World")"""
                 "window_title": window_title,
                 "process_name": process_name,
                 "window_class": window_class,
+                "excluded_hotkeys": self.excluded_hotkeys_edit.toPlainText().strip(),
                 "enabled": enabled
             }
         elif self.shortcut_type == "startup":
@@ -2321,10 +2321,23 @@ class AHKShortcutEditor(QMainWindow):
             key_width = 220
         elif shortcut_type == "exclude":
             key = "🚫 Exclusion"
+            process_name = shortcut.get('process_name', '')
             window_title = shortcut.get('window_title', '')
-            if window_title:
-                key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
-            key_width = 220
+            excluded_hotkeys = shortcut.get('excluded_hotkeys', '').strip()
+            label_parts = []
+            if process_name:
+                label_parts.append(process_name.split(',')[0].strip())
+            elif window_title:
+                t = window_title.split(',')[0].strip()
+                label_parts.append(t[:12] + '...' if len(t) > 12 else t)
+            if excluded_hotkeys:
+                hks = [h.strip() for h in excluded_hotkeys.splitlines() if h.strip()]
+                label_parts.append(', '.join(hks[:3]) + ('...' if len(hks) > 3 else ''))
+            else:
+                label_parts.append('all')
+            if label_parts:
+                key = f"🚫 [{' | '.join(label_parts)}]"
+            key_width = 240
         elif shortcut_type == "startup":
             key = "🚀 Startup"
             key_width = 170
@@ -2654,11 +2667,27 @@ class AHKShortcutEditor(QMainWindow):
 
             append_exclusion_checker()
 
+            # Build exclusion map: which hotkeys are excluded (empty set = all)
+            enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
+            exclude_all_hotkeys = any(
+                not s.get('excluded_hotkeys', '').strip() for s in enabled_exclusions
+            )
+            specifically_excluded = set()
+            for s in enabled_exclusions:
+                raw = s.get('excluded_hotkeys', '').strip()
+                if raw:
+                    for line in raw.splitlines():
+                        hk = line.strip()
+                        if hk:
+                            specifically_excluded.add(hk)
+
+            def needs_exclusion_guard(hotkey):
+                return exclude_all_hotkeys or hotkey in specifically_excluded
+
             # Add script shortcuts
             enabled_scripts = [s for s in self.script_shortcuts if s.get('enabled', True)]
             if enabled_scripts:
                 output_lines.append(";! === SCRIPT SHORTCUTS ===")
-                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_scripts:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2666,33 +2695,30 @@ class AHKShortcutEditor(QMainWindow):
 
                     action = shortcut.get('action', '')
                     hotkey = shortcut.get('hotkey', '')
-
-                    # Cleanup: Fix common "Too many parameters" error like Run("...", , , "Hide") 
-                    # by reducing triple commas to double (v2 standard for skipping 1 param)
                     action = action.replace(',,,', ',,')
+
+                    guarded = needs_exclusion_guard(hotkey)
+                    if guarded:
+                        output_lines.append("#HotIf !IsShortcutExcluded()")
 
                     if '\n' in action:
                         output_lines.append(f"{hotkey}:: {{")
-                        
-                        # Smart Function Calling:
-                        # Detect if the action starts with a function definition and call it if missing
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
                         match = re.search(r"^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{", action, re.MULTILINE)
-                        
                         if match and len(lines) > 0:
                             func_name = match.group(1)
-                            # If first line is a definition and NO other line calls it, inject the call
                             if lines[0].startswith(f"{func_name}(") and not any(l.strip() == f"{func_name}()" for l in lines):
                                 output_lines.append(f"    {func_name}()")
-                                
                         for line in action.split('\n'):
                             if line.strip():
                                 output_lines.append(f"    {line}")
                         output_lines.append("}")
                     else:
                         output_lines.append(f"{hotkey}::{action}")
+
+                    if guarded:
+                        output_lines.append("#HotIf")
                     output_lines.append("")
-                output_lines.append("#HotIf")
                 output_lines.append("")
 
             # Add context shortcuts with #HotIf directives
@@ -2711,11 +2737,14 @@ class AHKShortcutEditor(QMainWindow):
                     append_context_checker(shortcut, func_name)
                     
                     # Add #HotIf directive
-                    output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
+                    hotkey = shortcut.get('hotkey', '')
+                    if needs_exclusion_guard(hotkey):
+                        output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
+                    else:
+                        output_lines.append(f"#HotIf {func_name}()")
                     output_lines.append("")
                     
                     action = shortcut.get('action', '')
-                    hotkey = shortcut.get('hotkey', '')
                     action = action.replace(',,,', ',,')
                     
                     if '\n' in action:
@@ -2734,7 +2763,6 @@ class AHKShortcutEditor(QMainWindow):
             enabled_texts = [s for s in self.text_shortcuts if s.get('enabled', True)]
             if enabled_texts:
                 output_lines.append(";! === TEXT SHORTCUTS ===")
-                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_texts:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2765,14 +2793,12 @@ class AHKShortcutEditor(QMainWindow):
                         safe_replacement = replacement.replace("'", "''")
                         output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     output_lines.append("")
-                output_lines.append("#HotIf")
                 output_lines.append("")
 
             # Add enabled file shortcuts
             enabled_files = [s for s in self.file_shortcuts if s.get('enabled', True)]
             if enabled_files:
                 output_lines.append(";! === FILE SHORTCUTS ===")
-                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_files:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2785,7 +2811,6 @@ class AHKShortcutEditor(QMainWindow):
                     safe_path = file_path.replace("'", "''")
                     output_lines.append(f":X:{trigger}::PasteFile('{safe_path}')")
                     output_lines.append("")
-                output_lines.append("#HotIf")
                 output_lines.append("")
 
             output_dir = SCRIPT_DIR

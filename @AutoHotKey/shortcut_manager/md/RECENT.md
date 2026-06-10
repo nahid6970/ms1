@@ -42,6 +42,22 @@ All sessions are recorded here. Do not archive old entries.
 - `md/PROBLEMS_AND_FIXES.md`
 - `md/RECENT.md`
 
+## 2026-06-10 17:42 - Exclusion rule fixes: text shortcuts unwrapped + JSON data corrected
+
+**What We Accomplished:**
+
+- Removed `#HotIf !IsShortcutExcluded()` wrapper from text shortcuts and file shortcuts sections — exclusion only applies to script shortcuts and context shortcuts, not text/file hotstrings.
+- Fixed exclusion rule JSON data: cleared `window_title` ("vlr") from the Chrome rule so the rule now excludes Chrome based on process name alone, regardless of active tab title.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `ahk_shortcuts.json`
+
+**Next Session:**
+
+- Re-run the GUI, click Generate AHK, then test that AHK shortcuts are suppressed in Chrome but text hotstrings still fire.
+
 ## 2026-06-10 17:20 - Exclusion rules variable warning fix & path relocation
 
 **What We Accomplished:**

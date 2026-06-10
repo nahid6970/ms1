@@ -724,8 +724,9 @@
             "category": "General",
             "description": "",
             "window_title": "",
-            "process_name": "WindowsTerminal.exe",
+            "process_name": "chrome.exe",
             "window_class": "",
+            "excluded_hotkeys": "",
             "enabled": true
         }
     ],
