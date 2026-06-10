@@ -42,6 +42,20 @@ All sessions are recorded here. Do not archive old entries.
 - `md/PROBLEMS_AND_FIXES.md`
 - `md/RECENT.md`
 
+## 2026-06-10 18:48 - Per-field enable/disable toggles for context fields
+
+**What We Accomplished:**
+
+- Replaced single "Enable context filter" checkbox with per-field checkboxes for Window Title, Process Name, and Window Class in Context Shortcuts, Exclusion Rules, and Background Scripts dialogs.
+- Each field's checkbox is its label — unchecking grays out the field and the generator ignores that field's value entirely.
+- Data model uses `window_title_enabled`, `process_name_enabled`, `window_class_enabled` booleans (default `true`).
+- Generator masks disabled fields to empty string before passing to `build_condition_clause` / `append_context_checker` / startup context logic.
+- Removed now-redundant `context_filter_enabled` single-toggle field from all code paths.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+
 ## 2026-06-10 18:16 - Background scripts: context mode (active in / inactive in)
 
 **What We Accomplished:**
