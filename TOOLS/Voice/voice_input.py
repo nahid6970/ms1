@@ -210,7 +210,11 @@ class VoiceApp(QMainWindow):
                 "copy_to_clipboard": True,
                 "compact_view": False,
                 "status_btn_width": 8,
-                "status_btn_height": 18
+                "status_btn_height": 18,
+                "compact_left_padding": 0,
+                "compact_right_padding": 0,
+                "expanded_left_padding": 0,
+                "expanded_right_padding": 0
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -227,6 +231,18 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "status_btn_height" not in self.config:
             self.config["status_btn_height"] = 18
+            self.save_config()
+        if "compact_left_padding" not in self.config:
+            self.config["compact_left_padding"] = 0
+            self.save_config()
+        if "compact_right_padding" not in self.config:
+            self.config["compact_right_padding"] = 0
+            self.save_config()
+        if "expanded_left_padding" not in self.config:
+            self.config["expanded_left_padding"] = 0
+            self.save_config()
+        if "expanded_right_padding" not in self.config:
+            self.config["expanded_right_padding"] = 0
             self.save_config()
 
 
@@ -249,6 +265,7 @@ class VoiceApp(QMainWindow):
         layout = QHBoxLayout(central)
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
+        self.toolbar_layout = layout
 
         self.status_btn = QPushButton("")
         self.status_btn.setObjectName("status")
@@ -415,6 +432,26 @@ class VoiceApp(QMainWindow):
         taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
         layout.addRow("Hide from taskbar:", taskbar_check)
 
+        compact_left_pad = QSpinBox()
+        compact_left_pad.setRange(0, 50)
+        compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
+        layout.addRow("Compact left padding:", compact_left_pad)
+
+        compact_right_pad = QSpinBox()
+        compact_right_pad.setRange(0, 50)
+        compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
+        layout.addRow("Compact right padding:", compact_right_pad)
+
+        expanded_left_pad = QSpinBox()
+        expanded_left_pad.setRange(0, 50)
+        expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
+        layout.addRow("Expanded left padding:", expanded_left_pad)
+
+        expanded_right_pad = QSpinBox()
+        expanded_right_pad.setRange(0, 50)
+        expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
+        layout.addRow("Expanded right padding:", expanded_right_pad)
+
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
         layout.addRow("Stop on Space (SPC mode):", spc_check)
@@ -459,10 +496,14 @@ class VoiceApp(QMainWindow):
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
+            self.config["compact_left_padding"] = compact_left_pad.value()
+            self.config["compact_right_padding"] = compact_right_pad.value()
+            self.config["expanded_left_padding"] = expanded_left_pad.value()
+            self.config["expanded_right_padding"] = expanded_right_pad.value()
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
-                self._apply_window_layout(preserve_right_edge=True)
+            self._apply_window_layout(preserve_right_edge=True)
             self.save_config()
 
     def _apply_window_flags(self):
@@ -477,10 +518,26 @@ class VoiceApp(QMainWindow):
         return self._expanded_window_width()
 
     def _compact_window_width(self):
-        return 40
+        return (
+            self.config.get("compact_left_padding", 0)
+            + 8
+            + 26
+            + self.config.get("compact_right_padding", 0)
+        )
 
     def _expanded_window_width(self):
-        width = 8 + 28 + 18 + 18 + 18 + 18 + 18 + 18
+        width = (
+            self.config.get("expanded_left_padding", 0)
+            + 8
+            + 28
+            + 18
+            + 18
+            + 18
+            + 18
+            + 18
+            + 18
+            + self.config.get("expanded_right_padding", 0)
+        )
         if not self.config.get("hide_record_btn", False):
             width += 58
         return width
@@ -509,6 +566,9 @@ class VoiceApp(QMainWindow):
     def _apply_window_layout(self, preserve_right_edge=True):
         compact = self._compact_view
         self._apply_button_geometry()
+        left = self.config.get("compact_left_padding", 0) if compact else self.config.get("expanded_left_padding", 0)
+        right = self.config.get("compact_right_padding", 0) if compact else self.config.get("expanded_right_padding", 0)
+        self.toolbar_layout.setContentsMargins(left, 0, right, 0)
         self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
         for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
             btn.setVisible(not compact)
