@@ -6,7 +6,7 @@ Project-specific development guide for `ahk_gui_pyqt.py`.
 
 This app is a PyQt6 GUI for managing AutoHotkey v2 shortcuts and generating a runnable script at:
 
-`C:\@delta\output\ahk\generated_shortcuts.ahk`
+`C:\@delta\ms1\@AutoHotKey\shortcut_manager\generated_shortcuts.ahk`
 
 It supports:
 

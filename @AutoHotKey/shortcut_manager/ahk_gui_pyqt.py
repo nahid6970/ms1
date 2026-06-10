@@ -1261,8 +1261,11 @@ SendText("Hello World")"""
                 self.parent_window.startup_scripts.append(shortcut_data)
             elif self.shortcut_type == "file":
                 self.parent_window.file_shortcuts.append(shortcut_data)
+            elif self.shortcut_type == "exclude":
+                self.parent_window.exclusion_rules.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
+
 
         self.parent_window.save_shortcuts_json()
         self.parent_window.update_display()
@@ -1922,7 +1925,19 @@ class AHKShortcutEditor(QMainWindow):
                     for s in to_move:
                         self.text_shortcuts.remove(s)
                         self.file_shortcuts.append(s)
-                    if to_move:
+                    
+                    # Fix-up: Move exclusion rules and context shortcuts that were accidentally saved in text_shortcuts
+                    to_move_exclude = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" not in s]
+                    for s in to_move_exclude:
+                        self.text_shortcuts.remove(s)
+                        self.exclusion_rules.append(s)
+                        
+                    to_move_context = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" in s]
+                    for s in to_move_context:
+                        self.text_shortcuts.remove(s)
+                        self.context_shortcuts.append(s)
+
+                    if to_move or to_move_exclude or to_move_context:
                         self.save_shortcuts_json()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load shortcuts JSON: {e}")
@@ -2589,14 +2604,29 @@ class AHKShortcutEditor(QMainWindow):
             def append_exclusion_checker():
                 enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
                 rule_clauses = []
+                has_title = False
+                has_process = False
+                has_class = False
                 for shortcut in enabled_exclusions:
                     clause = build_rule_clause(shortcut)
                     if clause:
                         rule_clauses.append(clause)
+                        if shortcut.get('window_title'):
+                            has_title = True
+                        if shortcut.get('process_name'):
+                            has_process = True
+                        if shortcut.get('window_class'):
+                            has_class = True
 
                 output_lines.append(";! === EXCLUSION RULES ===")
                 output_lines.append("IsShortcutExcluded() {")
                 output_lines.append("    try {")
+                if has_process:
+                    output_lines.append('        processName := WinGetProcessName("A")')
+                if has_title:
+                    output_lines.append('        windowTitle := WinGetTitle("A")')
+                if has_class:
+                    output_lines.append('        windowClass := WinGetClass("A")')
                 if rule_clauses:
                     output_lines.append("        return " + " || ".join(rule_clauses))
                 else:
@@ -2758,8 +2788,7 @@ class AHKShortcutEditor(QMainWindow):
                 output_lines.append("#HotIf")
                 output_lines.append("")
 
-            output_dir = r"C:\@delta\output\ahk"
-            os.makedirs(output_dir, exist_ok=True)
+            output_dir = SCRIPT_DIR
             output_file = os.path.join(output_dir, "generated_shortcuts.ahk")
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
