@@ -2705,7 +2705,8 @@ class AHKShortcutEditor(QMainWindow):
                     has_context = context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
 
                     if has_context:
-                        func_name = f"IsStartup{shortcut.get('name', 'Script').replace(' ', '')}Context"
+                        safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
+                        func_name = f"IsStartup{safe_name}Context"
                         append_context_checker(shortcut, func_name)
                         guard = func_name + "()"
                         if context_mode == 'inactive':

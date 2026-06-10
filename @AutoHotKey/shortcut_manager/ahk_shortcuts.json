@@ -631,9 +631,9 @@
             "description": "Ctrl+R to Record/Stop, Ctrl+E to Playback",
             "enabled": true,
             "name": "Macro Recorder (Vim Style)",
-            "context_mode": "none",
-            "window_title": "PowerShell",
-            "process_name": "WindowsTerminal.exe",
+            "context_mode": "inactive",
+            "window_title": "Powershell",
+            "process_name": "",
             "window_class": ""
         },
         {
