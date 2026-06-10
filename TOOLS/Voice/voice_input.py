@@ -155,7 +155,7 @@ class ContinuousThread(QThread):
         while not self._stop:
             try:
                 with sr.Microphone() as source:
-                    audio = recognizer.listen(source, timeout=3, phrase_time_limit=self.phrase_time_limit)
+                    audio = recognizer.listen(source, timeout=1, phrase_time_limit=self.phrase_time_limit)
                 if self._stop:
                     break
                 text = recognizer.recognize_google(audio, language=self.lang_getter())
@@ -648,6 +648,7 @@ class VoiceApp(QMainWindow):
 
     def _on_continuous_finished(self):
         self._live_recording = False
+        self._set_status(CP_GREEN)
         self._reset_record_btn()
 
     def _stop_single(self):
@@ -665,7 +666,7 @@ class VoiceApp(QMainWindow):
         self._recording_active = False
         if self._stop_requested:
             self._stop_requested = False
-            self._set_status(CP_YELLOW)
+            self._set_status(CP_GREEN)
             self._reset_record_btn()
 
     def _reset_record_btn(self):
@@ -704,6 +705,13 @@ class VoiceApp(QMainWindow):
     def on_result(self, session_id, text):
         if session_id != self._session_id:
             return
+        if not text or not text.strip():
+            self._stop_requested = False
+            self._set_status(CP_GREEN)
+            self._reset_record_btn()
+            self._recording_active = False
+            self._live_recording = False
+            return
         paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
         self._stop_requested = False
         if self._live_recording:
@@ -721,7 +729,7 @@ class VoiceApp(QMainWindow):
             return
         if self._stop_requested:
             self._stop_requested = False
-            self._set_status(CP_YELLOW)
+            self._set_status(CP_GREEN)
             self._reset_record_btn()
             self._live_recording = False
             self._recording_active = False
