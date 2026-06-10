@@ -333,26 +333,50 @@ class ShortcutBuilderPopup(QDialog):
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
         numpad_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 4px;")
-        num_v = QVBoxLayout(numpad_frame); num_v.setSpacing(4); num_v.setContentsMargins(0,0,0,0)
+        num_v = QVBoxLayout(numpad_frame); num_v.setSpacing(4); num_v.setContentsMargins(4,4,4,4)
         lbl_np = QLabel("Numpad"); lbl_np.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_np.setStyleSheet("color:#505070; font-size:10px; margin-bottom:2px;")
         num_v.addWidget(lbl_np)
-        for row in [["NumLock","NumpadDiv","NumpadMult","NumpadSub"],
-                    ["Numpad7","Numpad8","Numpad9","NumpadAdd"],
-                    ["Numpad4","Numpad5","Numpad6",""],
-                    ["Numpad1","Numpad2","Numpad3","NumpadEnter"],
-                    ["Numpad0","","NumpadDot",""]]:
-            rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
-            for k in row:
-                if k == "":
-                    sp = QWidget(); sp.setFixedWidth(38); rl.addWidget(sp)
-                else:
-                    short = k.replace("Numpad","").replace("Num","")
-                    short = {"Div":"/","Mult":"*","Sub":"-","Add":"+","Enter":"↵","Lock":"NmLk","Dot":"."}.get(short, short)
-                    btn = self._key_btn(k, 38)
-                    btn.setText(short)  # display short label, key stored in _key_buttons[k]
-                    rl.addWidget(btn)
-            num_v.addWidget(rw)
+
+        from PyQt6.QtWidgets import QGridLayout
+        grid_w = QWidget()
+        grid = QGridLayout(grid_w); grid.setSpacing(4); grid.setContentsMargins(0,0,0,0)
+
+        def _np(k, display):
+            btn = self._key_btn(k, 38); btn.setText(display); btn.setFixedWidth(38); return btn
+
+        def _np_tall(k, display):
+            btn = self._key_btn(k, 38); btn.setText(display)
+            btn.setFixedWidth(38); btn.setFixedHeight(38*2 + 4); return btn
+
+        def _np_wide(k, display):
+            btn = self._key_btn(k, 38); btn.setText(display)
+            btn.setFixedWidth(38*2 + 4); return btn
+
+        # row 0: NmLk / * -
+        grid.addWidget(_np("NumLock","NmLk"),  0,0)
+        grid.addWidget(_np("NumpadDiv","/"),   0,1)
+        grid.addWidget(_np("NumpadMult","*"),  0,2)
+        grid.addWidget(_np("NumpadSub","-"),   0,3)
+        # row 1: 7 8 9  |+| (tall, spans rows 1-2)
+        grid.addWidget(_np("Numpad7","7"),     1,0)
+        grid.addWidget(_np("Numpad8","8"),     1,1)
+        grid.addWidget(_np("Numpad9","9"),     1,2)
+        grid.addWidget(_np_tall("NumpadAdd","+"), 1,3, 2,1)
+        # row 2: 4 5 6
+        grid.addWidget(_np("Numpad4","4"),     2,0)
+        grid.addWidget(_np("Numpad5","5"),     2,1)
+        grid.addWidget(_np("Numpad6","6"),     2,2)
+        # row 3: 1 2 3  |↵| (tall, spans rows 3-4)
+        grid.addWidget(_np("Numpad1","1"),     3,0)
+        grid.addWidget(_np("Numpad2","2"),     3,1)
+        grid.addWidget(_np("Numpad3","3"),     3,2)
+        grid.addWidget(_np_tall("NumpadEnter","↵"), 3,3, 2,1)
+        # row 4: 0 (wide) .
+        grid.addWidget(_np_wide("Numpad0","0"), 4,0, 1,2)
+        grid.addWidget(_np("NumpadDot","."),   4,2)
+
+        num_v.addWidget(grid_w)
 
         # Keyboard + nav + numpad side by side
         kb_nav = QHBoxLayout(); kb_nav.setSpacing(10)
