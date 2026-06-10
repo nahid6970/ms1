@@ -4,7 +4,8 @@ import webbrowser
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
-                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit)
+                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit,
+                             QSizePolicy)
 from PyQt6.QtCore import Qt, QThread, QEvent, pyqtSignal, QTimer
 import pyperclip
 from pynput import keyboard as pynput_keyboard
@@ -207,7 +208,9 @@ class VoiceApp(QMainWindow):
                 "border_color": CP_RED,
                 "open_google": False,
                 "copy_to_clipboard": True,
-                "compact_view": False
+                "compact_view": False,
+                "status_btn_width": 8,
+                "status_btn_height": 18
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -218,6 +221,12 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "compact_view" not in self.config:
             self.config["compact_view"] = False
+            self.save_config()
+        if "status_btn_width" not in self.config:
+            self.config["status_btn_width"] = 8
+            self.save_config()
+        if "status_btn_height" not in self.config:
+            self.config["status_btn_height"] = 18
             self.save_config()
 
 
@@ -242,12 +251,35 @@ class VoiceApp(QMainWindow):
         layout.setContentsMargins(8, 2, 8, 2)
 
         self.status_btn = QPushButton("")
-        self.status_btn.setObjectName("help")
-        self.status_btn.setFixedWidth(24)
+        self.status_btn.setObjectName("status")
+        self.status_btn.setFixedSize(
+            self.config.get("status_btn_width", 8),
+            self.config.get("status_btn_height", 18),
+        )
+        self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.status_btn.setMinimumSize(self.status_btn.size())
+        self.status_btn.setMaximumSize(self.status_btn.size())
+        self.status_btn.setFlat(True)
+        self.status_btn.setAutoDefault(False)
         self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.status_btn.clicked.connect(self.toggle_record)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.status_btn.setStyleSheet(f"background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0;")
+        self.status_btn.setStyleSheet(f"""
+            QPushButton#status {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+                padding: 0px;
+                margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
+            }}
+            QPushButton#status:hover {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+            }}
+        """)
         self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
 
@@ -642,7 +674,22 @@ class VoiceApp(QMainWindow):
 
     def _set_status(self, color):
         self.status_btn.setText("")
-        self.status_btn.setStyleSheet(f"background-color: {color}; border: 1px solid {color}; padding: 0;")
+        self.status_btn.setStyleSheet(f"""
+            QPushButton#status {{
+                background-color: {color};
+                border: 1px solid {color};
+                padding: 0px;
+                margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
+            }}
+            QPushButton#status:hover {{
+                background-color: {color};
+                border: 1px solid {color};
+            }}
+        """)
 
     def _finish_space_recording(self):
         if not self._recording_active:
