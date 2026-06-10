@@ -113,9 +113,11 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: {bg};
             color: {fg};
-            border: 1px solid {border};
+            border: 2px solid {border};
             border-radius: 0px;
             font-size: 11px;
+            font-weight: normal;
+            padding: 0px;
             min-height: 32px;
             min-width: {w}px;
         }}
@@ -126,7 +128,8 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: #61dafb; color: #1a1a2e;
             border: 2px solid #61dafb; border-radius: 0px;
-            font-size: 11px; font-weight: bold;
+            font-size: 11px; font-weight: normal;
+            padding: 0px;
             min-height: 32px; min-width: {w}px;
         }}
     """
@@ -134,11 +137,12 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: {bg}; color: {fg};
             border: {border}; border-radius: 0px;
-            font-size: 13px; font-weight: {fw};
-            min-height: 36px; padding: 0 6px;
+            font-size: 13px; font-weight: normal;
+            padding: 0px 6px;
+            min-height: 36px;
             min-width: {w}px;
         }}
-        QPushButton:hover {{ background: #3a4a5a; border: 1px solid #61dafb; color: #61dafb; }}
+        QPushButton:hover {{ background: #3a4a5a; border: 2px solid #61dafb; color: #61dafb; }}
     """
 
     def __init__(self, parent=None, initial_value=""):
@@ -198,9 +202,9 @@ class ShortcutBuilderPopup(QDialog):
 
     def _apply_mod_style(self, btn, active):
         if active:
-            btn.setStyleSheet(self.MOD_STYLE.format(bg="#61dafb", fg="#1a1a2e", border="2px solid #61dafb", fw="bold", w=0))
+            btn.setStyleSheet(self.MOD_STYLE.format(bg="#61dafb", fg="#1a1a2e", border="2px solid #61dafb", fw="normal", w=0))
         else:
-            btn.setStyleSheet(self.MOD_STYLE.format(bg="#1e1e38", fg="#8090a8", border="1px solid #55556a", fw="normal", w=0))
+            btn.setStyleSheet(self.MOD_STYLE.format(bg="#1e1e38", fg="#8090a8", border="2px solid #55556a", fw="normal", w=0))
 
     def toggle_mod(self, sym, state):
         self.mods[sym] = state
