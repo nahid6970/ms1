@@ -341,17 +341,23 @@ class ShortcutBuilderPopup(QDialog):
         from PyQt6.QtWidgets import QGridLayout
         grid_w = QWidget()
         grid = QGridLayout(grid_w); grid.setSpacing(4); grid.setContentsMargins(0,0,0,0)
+        for r in range(5): grid.setRowStretch(r, 1)
+        for c in range(4): grid.setColumnStretch(c, 1)
 
         def _np(k, display):
-            btn = self._key_btn(k, 38); btn.setText(display); btn.setFixedWidth(38); return btn
+            btn = self._key_btn(k, 0); btn.setText(display)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            return btn
 
         def _np_tall(k, display):
-            btn = self._key_btn(k, 38); btn.setText(display)
-            btn.setFixedWidth(38); btn.setFixedHeight(38*2 + 4); return btn
+            btn = self._key_btn(k, 0); btn.setText(display)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            return btn
 
         def _np_wide(k, display):
-            btn = self._key_btn(k, 38); btn.setText(display)
-            btn.setFixedWidth(38*2 + 4); return btn
+            btn = self._key_btn(k, 0); btn.setText(display)
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            return btn
 
         # row 0: NmLk / * -
         grid.addWidget(_np("NumLock","NmLk"),  0,0)
@@ -372,9 +378,9 @@ class ShortcutBuilderPopup(QDialog):
         grid.addWidget(_np("Numpad2","2"),     3,1)
         grid.addWidget(_np("Numpad3","3"),     3,2)
         grid.addWidget(_np_tall("NumpadEnter","↵"), 3,3, 2,1)
-        # row 4: 0 (wide) .
-        grid.addWidget(_np_wide("Numpad0","0"), 4,0, 1,2)
-        grid.addWidget(_np("NumpadDot","."),   4,2)
+        # row 4: 0 (wide, 3 cols) .
+        grid.addWidget(_np_wide("Numpad0","0"), 4,0, 1,3)
+        grid.addWidget(_np("NumpadDot","."),   4,3)
 
         num_v.addWidget(grid_w)
 
