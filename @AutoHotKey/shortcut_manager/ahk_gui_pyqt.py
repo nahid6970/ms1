@@ -91,121 +91,236 @@ class CyberButton(QPushButton):
             """)
 
 class ShortcutBuilderPopup(QDialog):
+    # Keyboard layout rows
+    KB_ROWS = [
+        ["Esc", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"],
+        ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "Backspace"],
+        ["Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
+        ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"],
+        ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
+        ["Space"],
+    ]
+    NAV_KEYS = ["Insert", "Home", "PgUp", "Delete", "End", "PgDn", "Up", "Left", "Down", "Right"]
+
+    KEY_STYLE_NORMAL = """
+        QPushButton {{
+            background: {bg};
+            color: {fg};
+            border: 1px solid {border};
+            border-radius: 5px;
+            font-size: 11px;
+            min-height: 32px;
+            min-width: {w}px;
+        }}
+        QPushButton:hover {{ background: #3a4a5a; border-color: #61dafb; color: #61dafb; }}
+        QPushButton:pressed {{ background: #4a90d9; }}
+    """
+    KEY_STYLE_ACTIVE = """
+        QPushButton {{
+            background: #61dafb;
+            color: #1a1a2e;
+            border: 2px solid #61dafb;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            min-height: 32px;
+            min-width: {w}px;
+        }}
+    """
+
     def __init__(self, parent=None, initial_value=""):
         super().__init__(parent)
-        self.setWindowTitle("Shortcut Builder")
+        self.setWindowTitle("⌨  Shortcut Builder")
         self.setModal(True)
-        self.setFixedWidth(400)
-        self.setStyleSheet("background-color: #2b2b2b; color: white;")
-        
-        self.result_hotkey = initial_value
+        self.setStyleSheet("""
+            QDialog { background: #1a1a2e; color: #e0e0e0; }
+            QLabel { color: #a0a0b0; font-size: 12px; }
+        """)
         self.mods = {"^": False, "!": False, "+": False, "#": False}
         self.main_key = ""
-        
+        self._key_buttons = {}  # key_label -> QPushButton
         self.parse_initial(initial_value)
         self.setup_ui()
 
     def parse_initial(self, value):
         if not value: return
-        
-        # Extract modifiers
         for mod in self.mods:
             if mod in value:
                 self.mods[mod] = True
                 value = value.replace(mod, "")
-        
         self.main_key = value
+
+    def _key_btn(self, label, width=34):
+        btn = QPushButton(label)
+        btn.setCheckable(True)
+        btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        is_active = (label.lower() == self.main_key.lower())
+        btn.setChecked(is_active)
+        self._apply_key_style(btn, is_active, width)
+        btn.clicked.connect(lambda _, k=label: self.select_key(k))
+        self._key_buttons[label] = btn
+        return btn
+
+    def _apply_key_style(self, btn, active, width=34):
+        tpl = self.KEY_STYLE_ACTIVE if active else self.KEY_STYLE_NORMAL
+        bg = "#252540" if not active else "#61dafb"
+        fg = "#c8d0e0" if not active else "#1a1a2e"
+        border = "#3a3a5a" if not active else "#61dafb"
+        btn.setStyleSheet(tpl.format(bg=bg, fg=fg, border=border, w=width))
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        
-        # Preview
+        layout.setSpacing(12)
+        layout.setContentsMargins(18, 18, 18, 18)
+
+        # ── Preview bar ──────────────────────────────────────────────
+        preview_frame = QFrame()
+        preview_frame.setStyleSheet("background: #0d0d1a; border-radius: 8px; border: 1px solid #2a2a4a;")
+        pf_layout = QVBoxLayout(preview_frame)
+        pf_layout.setContentsMargins(10, 8, 10, 8)
         self.preview_label = QLabel(self.get_formatted_preview())
-        self.preview_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #61dafb; margin: 10px; qproperty-alignment: AlignCenter;")
-        layout.addWidget(self.preview_label)
-        
-        # Modifiers
-        mod_layout = QHBoxLayout()
+        self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_label.setStyleSheet("font-size: 22px; font-weight: bold; color: #61dafb; letter-spacing: 2px; background: transparent; border: none;")
+        pf_layout.addWidget(self.preview_label)
+        layout.addWidget(preview_frame)
+
+        # ── Modifier row ─────────────────────────────────────────────
+        mod_frame = QFrame()
+        mod_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 4px;")
+        mod_layout = QHBoxLayout(mod_frame)
+        mod_layout.setSpacing(8)
         self.mod_buttons = {}
-        mod_info = [("^", "Ctrl"), ("!", "Alt"), ("+", "Shift"), ("#", "Win")]
+        mod_info = [("^", "Ctrl"), ("!", "Alt"), ("+", "Shift"), ("#", "⊞ Win")]
         for symbol, name in mod_info:
             btn = QPushButton(name)
             btn.setCheckable(True)
             btn.setChecked(self.mods[symbol])
-            btn.setStyleSheet("""
-                QPushButton { background: #3d3d3d; border: 1px solid #555; padding: 10px; border-radius: 5px; }
-                QPushButton:checked { background: #61dafb; color: black; border-color: #61dafb; }
-            """)
-            btn.toggled.connect(lambda checked, s=symbol: self.update_mod(s, checked))
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            self._style_mod_btn(btn, self.mods[symbol])
+            btn.toggled.connect(lambda checked, s=symbol, b=btn: (self.update_mod(s, checked), self._style_mod_btn(b, checked)))
             mod_layout.addWidget(btn)
             self.mod_buttons[symbol] = btn
-        layout.addLayout(mod_layout)
-        
-        # Key Selector
-        layout.addWidget(QLabel("Select Main Key:"))
-        self.key_list = QComboBox()
-        self.key_list.setEditable(True)
-        self.common_keys = [
-            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
-            "Space", "Enter", "Tab", "Esc", "Backspace", "Delete", "Insert", "Home", "End", "PgUp", "PgDn",
-            "Up", "Down", "Left", "Right", "LButton", "RButton", "MButton", "WheelUp", "WheelDown",
-            "[", "]", ";", "'", ",", ".", "/", "\\", "-", "=", "`"
-        ]
-        self.key_list.addItems(self.common_keys)
-        
-        # Search Box
-        self.key_search = QLineEdit()
-        self.key_search.setPlaceholderText("Search keys (e.g. 'space', 'f1', 'x')...")
-        self.key_search.textChanged.connect(self.filter_keys)
-        # Style search box
-        self.key_search.setStyleSheet("padding: 8px; border-radius: 5px; background: #3d3d3d;")
-        layout.addWidget(self.key_search)
-        
-        if self.main_key:
-            self.key_list.setCurrentText(self.main_key)
-        self.key_list.currentTextChanged.connect(self.update_key)
-        layout.addWidget(self.key_list)
-        
-        # Quick access area (Flow layout style)
-        layout.addWidget(QLabel("Quick Keys:"))
-        quick_grid = QWidget()
-        quick_layout = QHBoxLayout(quick_grid)
-        quick_layout.setContentsMargins(0, 0, 0, 0)
-        for k in ["Space", "Enter", "Tab", "Esc", "Up", "Down"]:
-            btn = QPushButton(k)
-            btn.setStyleSheet("padding: 5px; font-size: 12px;")
-            btn.clicked.connect(lambda checked, val=k: self.key_list.setCurrentText(val))
-            quick_layout.addWidget(btn)
-        layout.addWidget(quick_grid)
+        layout.addWidget(mod_frame)
 
-        # OK/Cancel
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        # ── Keyboard ─────────────────────────────────────────────────
+        kb_frame = QFrame()
+        kb_frame.setStyleSheet("background: #12122a; border-radius: 10px; padding: 6px;")
+        kb_layout = QVBoxLayout(kb_frame)
+        kb_layout.setSpacing(4)
+
+        row_configs = [
+            # (keys, widths_override)
+            (self.KB_ROWS[0], {0: 40}),           # Esc + F-keys
+            (self.KB_ROWS[1], {13: 68}),           # numbers row, wide Backspace
+            (self.KB_ROWS[2], {0: 52, 13: 44}),    # Tab, Backslash
+            (self.KB_ROWS[3], {11: 68}),            # Enter wide
+            (self.KB_ROWS[4], {0: 0}),              # Shift implied by mod
+            (self.KB_ROWS[5], {}),                  # Space
+        ]
+
+        for keys, overrides in row_configs:
+            row_w = QWidget()
+            row_l = QHBoxLayout(row_w)
+            row_l.setSpacing(4)
+            row_l.setContentsMargins(0, 0, 0, 0)
+            if keys == ["Space"]:
+                row_l.addStretch(1)
+                btn = self._key_btn("Space", 260)
+                row_l.addWidget(btn)
+                row_l.addStretch(1)
+            else:
+                for i, k in enumerate(keys):
+                    w = overrides.get(i, 34)
+                    if w == 0: w = 34
+                    btn = self._key_btn(k, w)
+                    row_l.addWidget(btn)
+                row_l.addStretch(1)
+            kb_layout.addWidget(row_w)
+
+        # Nav cluster on right side of keyboard (inline below main rows)
+        nav_row1 = ["Insert", "Home", "PgUp"]
+        nav_row2 = ["Delete", "End", "PgDn"]
+        nav_row3 = ["", "Up", ""]
+        nav_row4 = ["Left", "Down", "Right"]
+
+        nav_frame = QFrame()
+        nav_frame.setStyleSheet("background: transparent;")
+        nav_v = QVBoxLayout(nav_frame)
+        nav_v.setSpacing(4)
+        nav_v.setContentsMargins(0, 0, 0, 0)
+        for row in [nav_row1, nav_row2, nav_row3, nav_row4]:
+            rw = QWidget()
+            rl = QHBoxLayout(rw)
+            rl.setSpacing(4)
+            rl.setContentsMargins(0, 0, 0, 0)
+            for k in row:
+                if k == "":
+                    spacer = QWidget(); spacer.setFixedWidth(38)
+                    rl.addWidget(spacer)
+                else:
+                    rl.addWidget(self._key_btn(k, 38))
+            nav_v.addWidget(rw)
+
+        # Put keyboard + nav side by side
+        kb_nav_row = QHBoxLayout()
+        kb_nav_row.setSpacing(10)
+        kb_nav_row.addWidget(kb_frame)
+        kb_nav_row.addWidget(nav_frame)
+        layout.addLayout(kb_nav_row)
+
+        # ── OK / Cancel ───────────────────────────────────────────────
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        ok_btn = QPushButton("  ✓  Apply")
+        ok_btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 6px; padding: 8px 24px; font-weight: bold; font-size: 13px; } QPushButton:hover { background: #4ac8e8; }")
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setStyleSheet("QPushButton { background: #2a2a4a; color: #a0a0b0; border: 1px solid #3a3a5a; border-radius: 6px; padding: 8px 18px; font-size: 13px; } QPushButton:hover { background: #3a3a5a; color: white; }")
+        ok_btn.clicked.connect(self.accept)
+        cancel_btn.clicked.connect(self.reject)
+        btn_row.addWidget(cancel_btn)
+        btn_row.addWidget(ok_btn)
+        layout.addLayout(btn_row)
+
+        self.adjustSize()
+
+    def _style_mod_btn(self, btn, active):
+        if active:
+            btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border: 2px solid #61dafb; border-radius: 6px; padding: 8px 18px; font-weight: bold; font-size: 12px; } QPushButton:hover { background: #4ac8e8; }")
+        else:
+            btn.setStyleSheet("QPushButton { background: #252540; color: #c0c0d0; border: 1px solid #3a3a5a; border-radius: 6px; padding: 8px 18px; font-size: 12px; } QPushButton:hover { background: #3a3a5a; color: white; }")
+
+    def select_key(self, key):
+        # Deactivate old
+        if self.main_key and self.main_key in self._key_buttons:
+            old = self._key_buttons[self.main_key]
+            old.setChecked(False)
+            self._apply_key_style(old, False)
+        # If clicking same key again, deselect
+        if key == self.main_key:
+            self.main_key = ""
+        else:
+            self.main_key = key
+            btn = self._key_buttons.get(key)
+            if btn:
+                btn.setChecked(True)
+                self._apply_key_style(btn, True)
+        self.update_preview()
 
     def update_mod(self, symbol, state):
         self.mods[symbol] = state
-        self.update_preview()
-
-    def update_key(self, key):
-        self.main_key = key
         self.update_preview()
 
     def update_preview(self):
         self.preview_label.setText(self.get_formatted_preview())
 
     def get_formatted_preview(self):
-        res = ""
-        if self.mods["^"]: res += "Ctrl+"
-        if self.mods["!"]: res += "Alt+"
-        if self.mods["+"]: res += "Shift+"
-        if self.mods["#"]: res += "Win+"
-        res += self.main_key if self.main_key else "?"
-        return res
+        parts = []
+        if self.mods["^"]: parts.append("Ctrl")
+        if self.mods["!"]: parts.append("Alt")
+        if self.mods["+"]: parts.append("Shift")
+        if self.mods["#"]: parts.append("Win")
+        parts.append(self.main_key if self.main_key else "?")
+        return "  +  ".join(parts)
 
     def get_final_ahk(self):
         res = ""
@@ -216,19 +331,8 @@ class ShortcutBuilderPopup(QDialog):
         res += self.main_key
         return res
 
-    def filter_keys(self, text):
-        text = text.lower().strip()
-        if not text:
-            # If search is cleared, don't change current selection unless it's empty
-            return
-
-        # Find all matching keys
-        matches = [k for k in self.common_keys if text in k.lower()]
-        
-        if matches:
-            # Automatically pick the best match (starts with text is better than just contains)
-            best_match = next((k for k in matches if k.lower().startswith(text)), matches[0])
-            self.key_list.setCurrentText(best_match)
+    # Keep for compatibility (no-op, was used for combo box search)
+    def filter_keys(self, text): pass
 
 class HotkeyLineEdit(QLineEdit):
     def __init__(self, parent=None):
