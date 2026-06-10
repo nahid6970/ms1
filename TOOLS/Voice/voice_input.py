@@ -185,8 +185,8 @@ class VoiceApp(QMainWindow):
         self._recording_active = False
         self._stop_requested = False
         self._session_id = 0
-        self._compact_view = False
         self.load_config()
+        self._compact_view = self.config.get("compact_view", False)
         self._active_language = self.config.get("language", "en-US")
         self.init_ui()
         self.toggle_record_requested.connect(self.toggle_record)
@@ -206,7 +206,8 @@ class VoiceApp(QMainWindow):
                 "y": 100,
                 "border_color": CP_RED,
                 "open_google": False,
-                "copy_to_clipboard": True
+                "copy_to_clipboard": True,
+                "compact_view": False
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -214,6 +215,9 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "hide_from_taskbar" not in self.config:
             self.config["hide_from_taskbar"] = True
+            self.save_config()
+        if "compact_view" not in self.config:
+            self.config["compact_view"] = False
             self.save_config()
 
 
@@ -461,7 +465,16 @@ class VoiceApp(QMainWindow):
 
     def toggle_compact_view(self):
         self._compact_view = not self._compact_view
+        self.config["compact_view"] = self._compact_view
+        self.save_config()
         self._apply_window_layout(preserve_right_edge=True)
+
+    def closeEvent(self, event):
+        self.config["compact_view"] = self._compact_view
+        self.config["x"] = self.x()
+        self.config["y"] = self.y()
+        self.save_config()
+        super().closeEvent(event)
 
     def setup_global_hotkey(self):
         def on_activate():
