@@ -24,6 +24,7 @@ It supports:
 - `ahk_shortcuts.json`: saved shortcut data and app settings
 - `README.md`: long-form project reference and examples
 - `dev.md`: this document
+- `md/AI_CONTEXT.md`: stable short project brief for AI handoff
 - `md/RECENT.md`: session history
 - `md/FEATURES.md`: feature inventory
 - `md/PROBLEMS_AND_FIXES.md`: bug history and solutions
@@ -94,6 +95,7 @@ Important behavior:
 
 Read these when relevant:
 
+- `md/AI_CONTEXT.md` for a short stable project summary
 - `md/RECENT.md` for the last few sessions
 - `md/PROBLEMS_AND_FIXES.md` when a bug reappears
 - `md/FEATURES.md` when changing shortcut types
@@ -112,7 +114,7 @@ Read these when relevant:
 When resuming work, the most useful sequence is:
 
 1. Read `dev.md`
-2. Read the last 1-5 entries in `md/RECENT.md`
-3. Check `md/PROBLEMS_AND_FIXES.md` for related regressions
-4. Inspect `ahk_gui_pyqt.py`
-
+2. Read `md/AI_CONTEXT.md`
+3. Read the last 1-5 entries in `md/RECENT.md`
+4. Check `md/PROBLEMS_AND_FIXES.md` for related regressions
+5. Inspect `ahk_gui_pyqt.py`
