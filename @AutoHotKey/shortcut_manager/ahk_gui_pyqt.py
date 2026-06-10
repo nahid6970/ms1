@@ -309,14 +309,26 @@ class ShortcutBuilderPopup(QDialog):
         nav_frame = QFrame()
         nav_frame.setStyleSheet("background: transparent;")
         nav_v = QVBoxLayout(nav_frame); nav_v.setSpacing(4); nav_v.setContentsMargins(0,0,0,0)
-        for row in [["PrintScreen","ScrollLock","Pause"], ["Insert","Home","PgUp"], ["Delete","End","PgDn"], ["","Up",""], ["Left","Down","Right"]]:
-            rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
-            for k in row:
-                if k == "":
-                    sp = QWidget(); sp.setFixedWidth(38); rl.addWidget(sp)
-                else:
-                    rl.addWidget(self._key_btn(k, 38))
-            nav_v.addWidget(rw)
+        nav_groups = [
+            [["PrintScreen","ScrollLock","Pause"]],
+            [["Insert","Home","PgUp"], ["Delete","End","PgDn"]],
+            [["","Up",""], ["Left","Down","Right"]],
+        ]
+        for gi, group in enumerate(nav_groups):
+            if gi > 0:
+                nav_v.addSpacing(12)
+            for row in group:
+                rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
+                for k in row:
+                    if k == "":
+                        sp = QWidget(); sp.setFixedWidth(38); rl.addWidget(sp)
+                    else:
+                        nav_labels = {"PrintScreen":"PrtSc","ScrollLock":"ScrLk",
+                                      "Up":"↑","Down":"↓","Left":"←","Right":"→"}
+                        btn = self._key_btn(k, 38)
+                        if k in nav_labels: btn.setText(nav_labels[k])
+                        rl.addWidget(btn)
+                nav_v.addWidget(rw)
 
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
