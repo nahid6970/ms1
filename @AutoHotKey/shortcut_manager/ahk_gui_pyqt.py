@@ -134,8 +134,8 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: {bg}; color: {fg};
             border: {border}; border-radius: 5px;
-            font-size: 10px; font-weight: {fw};
-            min-height: 32px; padding: 0 4px;
+            font-size: 13px; font-weight: {fw};
+            min-height: 36px; padding: 0 6px;
             min-width: {w}px;
         }}
         QPushButton:hover {{ background: #3a4a5a; border: 1px solid #61dafb; color: #61dafb; }}
@@ -295,13 +295,13 @@ class ShortcutBuilderPopup(QDialog):
 
         # Left side: LCtrl, LWin, LAlt
         for sym, label in [("<^","LCtrl"), ("<#","LWin"), ("<!","LAlt")]:
-            sr.addWidget(self._mod_btn(sym, label, 52))
+            sr.addWidget(self._mod_btn(sym, label, 80))
 
-        sr.addWidget(self._key_btn("Space", 180))
+        sr.addWidget(self._key_btn("Space", 120))
 
         # Right side: RAlt, RWin, RCtrl
         for sym, label in [(">!","RAlt"), (">#","RWin"), (">^","RCtrl")]:
-            sr.addWidget(self._mod_btn(sym, label, 52))
+            sr.addWidget(self._mod_btn(sym, label, 80))
 
         kb_layout.addWidget(space_row)
 
