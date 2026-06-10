@@ -10,6 +10,7 @@ This is a **reusable template** for setting up proper documentation and developm
 project-root/
 ├── dev.md                      # Main development guide
 ├── md/                         # Documentation folder
+│   ├── AI_CONTEXT.md           # Stable project brief for AI handoff
 │   ├── RECENT.md               # All development sessions (full history, no archiving)
 │   ├── PROBLEMS_AND_FIXES.md   # Bug tracking and solutions
 │   ├── FEATURES.md             # Feature specifications
@@ -24,6 +25,18 @@ project-root/
 
 ### dev.md / DEVELOPER_GUIDE.md
 Main guide for the project. Document architecture, setup, and link to other md files using `#[[file:md/RECENT.md]]`.
+
+### md/AI_CONTEXT.md or md/PROJECT_BRIEF.md
+Short, stable summary designed for AI handoff. Keep it concise and update it only when the project shape changes.
+
+Suggested contents:
+
+- What the app is
+- Main entry points
+- Critical invariants
+- What not to break
+- Preferred workflow for new features and bug fixes
+- Common gotchas
 
 ### md/RECENT.md
 ```
@@ -84,6 +97,7 @@ Read this file only when relevant to the current task. When reading, reference t
 2. **When giving AI context from RECENT.md**, only read it when relevant to the current task — reference the last 5 sessions max
 3. **Document every bug fix in PROBLEMS_AND_FIXES.md**
 4. **Use file references:** `#[[file:path/to/file.md]]`
+5. **Keep AI_CONTEXT.md short and stable** so it can be supplied to AI without loading long history
 
 ### Session Management
 1. **Start each session** by reading RECENT.md
@@ -114,6 +128,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ### Working with Existing Projects
 - **Respect existing structure:** If a project lacks this MD structure and the user hasn't requested it, DO NOT impose it.
 - **Adapt workflow:** Follow the project's established patterns unless explicitly asked to modernize them.
+- **Do not force archive workflows** for RECENT.md unless the project explicitly wants archiving. Full history is usually easier for AI to reason about than split logs.
 
 ### Technology-Specific Additions
 - **Web Projects:** Add API documentation, component guides. Always check for available ports before starting dev servers — do not hardcode ports.
@@ -183,8 +198,9 @@ build/
 
 1. **Copy this file** to your new project root as `dev.md`
 2. **Create the `md/` folder** and required files
-3. **Create initial RECENT.md entry** for project setup
-4. **Start following the workflow** from day one
+3. **Create initial AI_CONTEXT.md or PROJECT_BRIEF.md** with a stable project summary
+4. **Create initial RECENT.md entry** for project setup
+5. **Start following the workflow** from day one
 
 **Remember:** Good documentation from the start saves hours of confusion later!
 
