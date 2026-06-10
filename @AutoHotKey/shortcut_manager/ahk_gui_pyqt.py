@@ -171,13 +171,17 @@ class ShortcutBuilderPopup(QDialog):
         self.main_key = value
 
     # ── Key button ────────────────────────────────────────────────────
-    def _key_btn(self, label, width=34):
+    def _key_btn(self, label, width=34, expand=False):
         btn = QPushButton(label)
         btn.setCheckable(True)
         btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        if expand:
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        elif width > 0:
+            btn.setFixedWidth(width)
         active = (label.lower() == self.main_key.lower())
         btn.setChecked(active)
-        self._apply_key_style(btn, active, width)
+        self._apply_key_style(btn, active, 0 if (expand or width == 0) else width)
         btn.clicked.connect(lambda _, k=label: self.select_key(k))
         self._key_buttons[label] = btn
         return btn
@@ -279,6 +283,9 @@ class ShortcutBuilderPopup(QDialog):
         kb_layout = QVBoxLayout(kb_frame)
         kb_layout.setSpacing(4)
 
+        # row index -> index of key that should expand to fill remaining space
+        expand_key = {1: 13, 2: 13, 3: 11}  # Backspace, \, Enter
+
         row_widths = [
             {0: 40},           # Esc wider
             {13: 68},          # Backspace wider
@@ -286,11 +293,13 @@ class ShortcutBuilderPopup(QDialog):
             {11: 68},          # Enter
             {},                # bottom letter row
         ]
-        for keys, overrides in zip(self.KB_ROWS, row_widths):
+        for ri, (keys, overrides) in enumerate(zip(self.KB_ROWS, row_widths)):
             rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
             for i, k in enumerate(keys):
-                rl.addWidget(self._key_btn(k, overrides.get(i, 34)))
-            rl.addStretch(1)
+                should_expand = (expand_key.get(ri) == i)
+                rl.addWidget(self._key_btn(k, overrides.get(i, 34), expand=should_expand))
+            if ri not in expand_key:
+                rl.addStretch(1)
             kb_layout.addWidget(rw)
 
         # ── Space bar row with L/R modifiers ─────────────────────────
