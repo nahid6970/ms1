@@ -632,10 +632,10 @@
             "enabled": true,
             "name": "Macro Recorder (Vim Style)",
             "context_mode": "inactive",
-            "window_title": "Powershell",
+            "window_title": "RUNNER",
             "process_name": "WindowsTerminal.exe",
             "window_class": "CASCADIA_HOSTING_WINDOW_CLASS",
-            "window_title_enabled": false,
+            "window_title_enabled": true,
             "process_name_enabled": true,
             "window_class_enabled": false
         },
