@@ -318,9 +318,33 @@ class ShortcutBuilderPopup(QDialog):
                     rl.addWidget(self._key_btn(k, 38))
             nav_v.addWidget(rw)
 
-        # Keyboard + nav side by side
+        # ── Numpad cluster ────────────────────────────────────────────
+        numpad_frame = QFrame()
+        numpad_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 4px;")
+        num_v = QVBoxLayout(numpad_frame); num_v.setSpacing(4); num_v.setContentsMargins(0,0,0,0)
+        lbl_np = QLabel("Numpad"); lbl_np.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_np.setStyleSheet("color:#505070; font-size:10px; margin-bottom:2px;")
+        num_v.addWidget(lbl_np)
+        for row in [["NumLock","NumpadDiv","NumpadMult","NumpadSub"],
+                    ["Numpad7","Numpad8","Numpad9","NumpadAdd"],
+                    ["Numpad4","Numpad5","Numpad6",""],
+                    ["Numpad1","Numpad2","Numpad3","NumpadEnter"],
+                    ["Numpad0","","NumpadDot",""]]:
+            rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
+            for k in row:
+                if k == "":
+                    sp = QWidget(); sp.setFixedWidth(38); rl.addWidget(sp)
+                else:
+                    short = k.replace("Numpad","").replace("Num","")
+                    short = {"Div":"/","Mult":"*","Sub":"-","Add":"+","Enter":"↵","Lock":"NmLk","Dot":"."}.get(short, short)
+                    btn = self._key_btn(k, 38)
+                    btn.setText(short)  # display short label, key stored in _key_buttons[k]
+                    rl.addWidget(btn)
+            num_v.addWidget(rw)
+
+        # Keyboard + nav + numpad side by side
         kb_nav = QHBoxLayout(); kb_nav.setSpacing(10)
-        kb_nav.addWidget(kb_frame); kb_nav.addWidget(nav_frame)
+        kb_nav.addWidget(kb_frame); kb_nav.addWidget(nav_frame); kb_nav.addWidget(numpad_frame)
         layout.addLayout(kb_nav)
 
         # ── Generic modifier strip (Ctrl / Alt / Shift / Win) ────────
