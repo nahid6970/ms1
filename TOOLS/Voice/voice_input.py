@@ -5,6 +5,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
                              QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit,
+                             QGridLayout,
                              QSizePolicy)
 from PyQt6.QtCore import Qt, QThread, QEvent, pyqtSignal, QTimer
 import pyperclip
@@ -424,97 +425,119 @@ class VoiceApp(QMainWindow):
         dialog = QDialog(self)
         dialog.setWindowTitle("Settings")
         dialog.setStyleSheet(self.styleSheet())
-        layout = QFormLayout(dialog)
+        layout = QGridLayout(dialog)
+        layout.setHorizontalSpacing(12)
+        layout.setVerticalSpacing(8)
+        layout.setColumnStretch(0, 1)
+        layout.setColumnStretch(1, 1)
 
         spin = QSpinBox(); spin.setRange(1, 300)
         spin.setValue(self.config.get("phrase_time_limit", 10)); spin.setSuffix(" sec")
-        layout.addRow("Max speak time:", spin)
+        layout.addWidget(QLabel("Max speak time:"), 0, 0)
+        layout.addWidget(spin, 0, 1)
 
         # X Position
         x_spin = QSpinBox(); x_spin.setRange(0, 10000)
         x_spin.setValue(self.config.get("x", 100))
-        layout.addRow("Window X:", x_spin)
+        layout.addWidget(QLabel("Window X:"), 1, 0)
+        layout.addWidget(x_spin, 1, 1)
 
         # Y Position
         y_spin = QSpinBox(); y_spin.setRange(0, 10000)
         y_spin.setValue(self.config.get("y", 100))
-        layout.addRow("Window Y:", y_spin)
+        layout.addWidget(QLabel("Window Y:"), 2, 0)
+        layout.addWidget(y_spin, 2, 1)
 
         # Border Color
         color_edit = QLineEdit()
         color_edit.setText(self.config.get("border_color", CP_RED))
-        layout.addRow("Border Color (Hex):", color_edit)
+        layout.addWidget(QLabel("Border Color (Hex):"), 3, 0)
+        layout.addWidget(color_edit, 3, 1)
 
         pin_check = QCheckBox()
         pin_check.setChecked(self.config.get("always_on_top", False))
-        layout.addRow("Always on top:", pin_check)
+        layout.addWidget(QLabel("Always on top:"), 4, 0)
+        layout.addWidget(pin_check, 4, 1)
 
         taskbar_check = QCheckBox()
         taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
-        layout.addRow("Hide from taskbar:", taskbar_check)
+        layout.addWidget(QLabel("Hide from taskbar:"), 5, 0)
+        layout.addWidget(taskbar_check, 5, 1)
 
         compact_left_pad = QSpinBox()
         compact_left_pad.setRange(0, 50)
         compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
-        layout.addRow("Compact left padding:", compact_left_pad)
+        layout.addWidget(QLabel("Compact left padding:"), 0, 2)
+        layout.addWidget(compact_left_pad, 0, 3)
 
         status_lang_gap = QSpinBox()
         status_lang_gap.setRange(0, 20)
         status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
-        layout.addRow("Status/lang gap:", status_lang_gap)
+        layout.addWidget(QLabel("Status/lang gap:"), 1, 2)
+        layout.addWidget(status_lang_gap, 1, 3)
 
         compact_right_pad = QSpinBox()
         compact_right_pad.setRange(0, 50)
         compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
-        layout.addRow("Compact right padding:", compact_right_pad)
+        layout.addWidget(QLabel("Compact right padding:"), 2, 2)
+        layout.addWidget(compact_right_pad, 2, 3)
 
         compact_top_pad = QSpinBox()
         compact_top_pad.setRange(0, 50)
         compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
-        layout.addRow("Compact top padding:", compact_top_pad)
+        layout.addWidget(QLabel("Compact top padding:"), 3, 2)
+        layout.addWidget(compact_top_pad, 3, 3)
 
         compact_bottom_pad = QSpinBox()
         compact_bottom_pad.setRange(0, 50)
         compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
-        layout.addRow("Compact bottom padding:", compact_bottom_pad)
+        layout.addWidget(QLabel("Compact bottom padding:"), 4, 2)
+        layout.addWidget(compact_bottom_pad, 4, 3)
 
         expanded_left_pad = QSpinBox()
         expanded_left_pad.setRange(0, 50)
         expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
-        layout.addRow("Expanded left padding:", expanded_left_pad)
+        layout.addWidget(QLabel("Expanded left padding:"), 6, 0)
+        layout.addWidget(expanded_left_pad, 6, 1)
 
         expanded_right_pad = QSpinBox()
         expanded_right_pad.setRange(0, 50)
         expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
-        layout.addRow("Expanded right padding:", expanded_right_pad)
+        layout.addWidget(QLabel("Expanded right padding:"), 6, 2)
+        layout.addWidget(expanded_right_pad, 6, 3)
 
         expanded_top_pad = QSpinBox()
         expanded_top_pad.setRange(0, 50)
         expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
-        layout.addRow("Expanded top padding:", expanded_top_pad)
+        layout.addWidget(QLabel("Expanded top padding:"), 7, 0)
+        layout.addWidget(expanded_top_pad, 7, 1)
 
         expanded_bottom_pad = QSpinBox()
         expanded_bottom_pad.setRange(0, 50)
         expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
-        layout.addRow("Expanded bottom padding:", expanded_bottom_pad)
+        layout.addWidget(QLabel("Expanded bottom padding:"), 7, 2)
+        layout.addWidget(expanded_bottom_pad, 7, 3)
 
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
-        layout.addRow("Stop on Space (SPC mode):", spc_check)
+        layout.addWidget(QLabel("Stop on Space (SPC mode):"), 8, 0)
+        layout.addWidget(spc_check, 8, 1)
 
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
         engine_combo.setCurrentIndex(idx)
-        layout.addRow("Mode:", engine_combo)
+        layout.addWidget(QLabel("Mode:"), 8, 2)
+        layout.addWidget(engine_combo, 8, 3)
 
         hide_rec_check = QCheckBox()
         hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
-        layout.addRow("Hide record button:", hide_rec_check)
+        layout.addWidget(QLabel("Hide record button:"), 9, 0)
+        layout.addWidget(hide_rec_check, 9, 1)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
-        layout.addRow(buttons)
+        layout.addWidget(buttons, 10, 0, 1, 4)
 
         if dialog.exec():
             self.config["phrase_time_limit"] = spin.value()
