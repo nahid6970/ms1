@@ -507,15 +507,15 @@ class AddEditShortcutDialog(QDialog):
             self.hotkey_edit = HotkeyLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
             
-            self.record_hotkey_btn = QPushButton("⌨")
+            self.record_hotkey_btn = QPushButton("")
             self.record_hotkey_btn.setCheckable(True)
-            self.record_hotkey_btn.setFixedWidth(40)
+            self.record_hotkey_btn.setFixedSize(26,26)
             self.record_hotkey_btn.setStyleSheet("""
                 QPushButton {
                     font-family: inherit;
-                    background-color: #3d3d3d;
-                    border: 1px solid #555;
-                    border-radius: 0px;
+                    background-color: #cc2222;
+                    border: none;
+                    border-radius: 13px;
                     color: white;
                     font-size: 18px;
                 }
@@ -543,15 +543,15 @@ class AddEditShortcutDialog(QDialog):
             self.hotkey_edit = HotkeyLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., ^s, ^r")
             
-            self.record_hotkey_btn = QPushButton("⌨")
+            self.record_hotkey_btn = QPushButton("")
             self.record_hotkey_btn.setCheckable(True)
-            self.record_hotkey_btn.setFixedWidth(40)
+            self.record_hotkey_btn.setFixedSize(26,26)
             self.record_hotkey_btn.setStyleSheet("""
                 QPushButton {
                     font-family: inherit;
-                    background-color: #3d3d3d;
-                    border: 1px solid #555;
-                    border-radius: 0px;
+                    background-color: #cc2222;
+                    border: none;
+                    border-radius: 13px;
                     color: white;
                     font-size: 18px;
                 }
@@ -1622,9 +1622,9 @@ class AHKShortcutEditor(QMainWindow):
         self.search_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.search_edit.setFixedHeight(34)
         
-        self.record_search_btn = QPushButton("⌨")
+        self.record_search_btn = QPushButton("")
         self.record_search_btn.setCheckable(True)
-        self.record_search_btn.setFixedWidth(40)
+        self.record_search_btn.setFixedSize(26,26)
         self.record_search_btn.setFixedHeight(34)
         self.record_search_btn.setStyleSheet(f"""
             QPushButton {{
