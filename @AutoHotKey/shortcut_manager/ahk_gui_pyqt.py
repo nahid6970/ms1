@@ -309,7 +309,7 @@ class ShortcutBuilderPopup(QDialog):
         nav_frame = QFrame()
         nav_frame.setStyleSheet("background: transparent;")
         nav_v = QVBoxLayout(nav_frame); nav_v.setSpacing(4); nav_v.setContentsMargins(0,0,0,0)
-        for row in [["Insert","Home","PgUp"], ["Delete","End","PgDn"], ["","Up",""], ["Left","Down","Right"]]:
+        for row in [["PrintScreen","ScrollLock","Pause"], ["Insert","Home","PgUp"], ["Delete","End","PgDn"], ["","Up",""], ["Left","Down","Right"]]:
             rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
             for k in row:
                 if k == "":
