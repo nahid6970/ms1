@@ -247,8 +247,8 @@ class VoiceApp(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         layout = QHBoxLayout(central)
-        layout.setSpacing(4)
-        layout.setContentsMargins(8, 2, 8, 2)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.status_btn = QPushButton("")
         self.status_btn.setObjectName("status")
@@ -285,7 +285,6 @@ class VoiceApp(QMainWindow):
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
-        self.lang_btn.setFixedWidth(36)
         self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.lang_btn.clicked.connect(self.toggle_language)
         self._update_lang_btn()
@@ -293,7 +292,6 @@ class VoiceApp(QMainWindow):
 
         self.google_btn = QPushButton()
         self.google_btn.setObjectName("toggle")
-        self.google_btn.setFixedWidth(24)
         self.google_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.google_btn.clicked.connect(self.toggle_google_search)
         self._update_google_btn()
@@ -301,7 +299,6 @@ class VoiceApp(QMainWindow):
 
         self.copy_btn = QPushButton()
         self.copy_btn.setObjectName("toggle")
-        self.copy_btn.setFixedWidth(24)
         self.copy_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.copy_btn.clicked.connect(self.toggle_copy_to_clipboard)
         self._update_copy_btn()
@@ -313,23 +310,24 @@ class VoiceApp(QMainWindow):
         layout.addWidget(self.record_btn)
 
         self.help_btn = QPushButton("?")
-        self.help_btn.setObjectName("help"); self.help_btn.setFixedWidth(24)
+        self.help_btn.setObjectName("help")
         self.help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.help_btn.clicked.connect(self.show_help)
         layout.addWidget(self.help_btn)
 
         self.settings_btn = QPushButton("⚙")
-        self.settings_btn.setObjectName("help"); self.settings_btn.setFixedWidth(24)
+        self.settings_btn.setObjectName("help")
         self.settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.settings_btn.clicked.connect(self.show_settings)
         layout.addWidget(self.settings_btn)
 
         self.close_btn = QPushButton("✕")
-        self.close_btn.setObjectName("help"); self.close_btn.setFixedWidth(24)
+        self.close_btn.setObjectName("help")
         self.close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.close_btn.clicked.connect(self.close)
         layout.addWidget(self.close_btn)
 
+        self._apply_button_geometry()
         self._apply_window_layout(preserve_right_edge=False)
 
     def update_style(self):
@@ -339,13 +337,14 @@ class VoiceApp(QMainWindow):
                 background-color: {CP_BG}; 
                 border: 2px solid {border_color};
             }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
+        QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 0px 4px; margin: 0px; font-weight: bold; min-height: 18px; max-height: 18px; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 4px; }}
-            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0; font-weight: bold; }}
-            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 0px 2px; }}
+            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0px 2px; font-weight: bold; }}
+            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0px 2px; }}
+            QPushButton#status {{ background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0px; margin: 0px; min-width: 8px; max-width: 8px; min-height: 18px; max-height: 18px; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -475,17 +474,45 @@ class VoiceApp(QMainWindow):
         self.setWindowFlags(flags)
 
     def _base_window_width(self):
-        return 250 if self.config.get("hide_record_btn", False) else 340
+        return self._expanded_window_width()
 
     def _compact_window_width(self):
-        return 96
+        return 40
+
+    def _expanded_window_width(self):
+        width = 8 + 28 + 18 + 18 + 18 + 18 + 18 + 18
+        if not self.config.get("hide_record_btn", False):
+            width += 58
+        return width
+
+    def _apply_button_geometry(self):
+        compact = self._compact_view
+        self.status_btn.setFixedSize(8, 18)
+        self.lang_btn.setFixedSize(26 if compact else 28, 18)
+        self.google_btn.setFixedSize(18, 18)
+        self.copy_btn.setFixedSize(18, 18)
+        self.help_btn.setFixedSize(18, 18)
+        self.settings_btn.setFixedSize(18, 18)
+        self.close_btn.setFixedSize(18, 18)
+        if compact:
+            self.record_btn.setFixedSize(0, 0)
+        else:
+            self.record_btn.setFixedSize(58, 18)
+
+    def _visible_toolbar_width(self, compact=None):
+        if compact is None:
+            compact = self._compact_view
+        if compact:
+            return self._compact_window_width()
+        return self._expanded_window_width()
 
     def _apply_window_layout(self, preserve_right_edge=True):
         compact = self._compact_view
+        self._apply_button_geometry()
         self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
         for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
             btn.setVisible(not compact)
-        new_width = self._compact_window_width() if compact else self._base_window_width()
+        new_width = self._visible_toolbar_width(compact)
         if preserve_right_edge:
             geo = self.frameGeometry()
             right_edge = geo.x() + geo.width()
