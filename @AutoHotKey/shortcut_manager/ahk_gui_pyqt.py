@@ -651,8 +651,26 @@ class AddEditShortcutDialog(QDialog):
             file_row.addWidget(self.file_path_edit)
             file_row.addWidget(self.browse_btn)
             form_layout.addLayout(file_row)
-        # Background script type has no hotkey/trigger
-        
+        elif self.shortcut_type == "startup":
+            form_layout.addWidget(QLabel("Context Mode:"))
+            self.startup_context_mode = QComboBox()
+            self.startup_context_mode.addItems(["No context (always run)", "Active in (only these windows)", "Inactive in (exclude these windows)"])
+            form_layout.addWidget(self.startup_context_mode)
+
+            form_layout.addWidget(QLabel("Window Title (contains):"))
+            self.startup_window_title = QLineEdit()
+            self.startup_window_title.setPlaceholderText("e.g., Notepad, Chrome")
+            form_layout.addWidget(self.startup_window_title)
+
+            form_layout.addWidget(QLabel("Process Name:"))
+            self.startup_process_name = QLineEdit()
+            self.startup_process_name.setPlaceholderText("e.g., chrome.exe")
+            form_layout.addWidget(self.startup_process_name)
+
+            form_layout.addWidget(QLabel("Window Class:"))
+            self.startup_window_class = QLineEdit()
+            self.startup_window_class.setPlaceholderText("e.g., CabinetWClass")
+            form_layout.addWidget(self.startup_window_class)
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
@@ -841,6 +859,12 @@ SendText("Hello World")"""
             self.excluded_hotkeys_edit.setPlainText(hotkeys)
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
+            mode = self.shortcut_data.get("context_mode", "none")
+            idx = {"none": 0, "active": 1, "inactive": 2}.get(mode, 0)
+            self.startup_context_mode.setCurrentIndex(idx)
+            self.startup_window_title.setText(self.shortcut_data.get("window_title", ""))
+            self.startup_process_name.setText(self.shortcut_data.get("process_name", ""))
+            self.startup_window_class.setText(self.shortcut_data.get("window_class", ""))
         elif self.shortcut_type == "file":
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.file_path_edit.setText(self.shortcut_data.get("file_path", ""))
@@ -1208,11 +1232,16 @@ SendText("Hello World")"""
                 QMessageBox.warning(self, "Warning", "Action code is required.")
                 return
 
+            mode_map = {0: "none", 1: "active", 2: "inactive"}
             shortcut_data = {
                 "name": name,
                 "category": category,
                 "description": description,
                 "action": action,
+                "context_mode": mode_map.get(self.startup_context_mode.currentIndex(), "none"),
+                "window_title": self.startup_window_title.text().strip(),
+                "process_name": self.startup_process_name.text().strip(),
+                "window_class": self.startup_window_class.text().strip(),
                 "enabled": enabled
             }
         elif self.shortcut_type == "file":
@@ -2340,7 +2369,15 @@ class AHKShortcutEditor(QMainWindow):
             key_width = 240
         elif shortcut_type == "startup":
             key = "🚀 Startup"
-            key_width = 170
+            context_mode = shortcut.get('context_mode', 'none')
+            process_name = shortcut.get('process_name', '')
+            window_title = shortcut.get('window_title', '')
+            if context_mode in ('active', 'inactive') and any([process_name, window_title]):
+                label = (process_name or window_title).split(',')[0].strip()
+                label = label[:12] + '...' if len(label) > 12 else label
+                prefix = '✅' if context_mode == 'active' else '🚫'
+                key = f"🚀 {prefix}[{label}]"
+            key_width = 200
         else: # text
             key = shortcut.get('trigger', '')
             key_width = 220
@@ -2657,12 +2694,28 @@ class AHKShortcutEditor(QMainWindow):
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
                         output_lines.append(f";! {shortcut.get('description')}")
-                    
+
                     action = shortcut.get('action', '')
-                    # Cleanup parameters
                     action = action.replace(',,,', ',,')
-                    
+
+                    context_mode = shortcut.get('context_mode', 'none')
+                    window_title = shortcut.get('window_title', '')
+                    process_name = shortcut.get('process_name', '')
+                    window_class = shortcut.get('window_class', '')
+                    has_context = context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
+
+                    if has_context:
+                        func_name = f"IsStartup{shortcut.get('name', 'Script').replace(' ', '')}Context"
+                        append_context_checker(shortcut, func_name)
+                        guard = func_name + "()"
+                        if context_mode == 'inactive':
+                            guard = "!" + guard
+                        output_lines.append(f"#HotIf {guard}")
+
                     output_lines.append(action)
+
+                    if has_context:
+                        output_lines.append("#HotIf")
                     output_lines.append("")
 
             append_exclusion_checker()

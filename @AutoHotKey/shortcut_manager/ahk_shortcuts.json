@@ -718,18 +718,7 @@
             "window_title": "kiro"
         }
     ],
-    "exclusion_rules": [
-        {
-            "name": "Windows-Terminal Rules",
-            "category": "General",
-            "description": "",
-            "window_title": "vlr",
-            "process_name": "chrome.exe",
-            "window_class": "",
-            "excluded_hotkeys": "!b",
-            "enabled": true
-        }
-    ],
+    "exclusion_rules": [],
     "app_font_family": "Consolas",
     "app_font_size": 16
 }
