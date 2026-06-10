@@ -182,7 +182,7 @@ class ShortcutBuilderPopup(QDialog):
         if active:
             btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=width))
         else:
-            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#3a3a5a", w=width))
+            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=width))
 
     # ── Modifier button ───────────────────────────────────────────────
     def _mod_btn(self, sym, label, width=52):
@@ -200,7 +200,7 @@ class ShortcutBuilderPopup(QDialog):
         if active:
             btn.setStyleSheet(self.MOD_STYLE.format(bg="#61dafb", fg="#1a1a2e", border="2px solid #61dafb", fw="bold", w=0))
         else:
-            btn.setStyleSheet(self.MOD_STYLE.format(bg="#1e1e38", fg="#8090a8", border="1px solid #2e2e52", fw="normal", w=0))
+            btn.setStyleSheet(self.MOD_STYLE.format(bg="#1e1e38", fg="#8090a8", border="1px solid #55556a", fw="normal", w=0))
 
     def toggle_mod(self, sym, state):
         self.mods[sym] = state
@@ -412,7 +412,7 @@ class ShortcutBuilderPopup(QDialog):
         # ── OK / Cancel ───────────────────────────────────────────────
         btn_row = QHBoxLayout(); btn_row.addStretch()
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet("QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #3a3a5a; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #3a3a5a; color: white; }")
+        cancel_btn.setStyleSheet("QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #55556a; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #55556a; color: white; }")
         ok_btn = QPushButton("  ✓  Apply")
         ok_btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #4ac8e8; }")
         ok_btn.clicked.connect(self.accept); cancel_btn.clicked.connect(self.reject)
