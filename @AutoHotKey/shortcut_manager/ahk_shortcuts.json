@@ -700,7 +700,7 @@
             "category": "General",
             "description": "",
             "hotkey": "Numpad0",
-            "window_title": "VALORANT",
+            "window_title": "VALORANT, VLR",
             "process_name": "chrome.exe",
             "window_class": "Chrome_WidgetWin_1",
             "action": "{\n        Send \"^w\"\n}",

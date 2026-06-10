@@ -452,7 +452,16 @@ class AddEditShortcutDialog(QDialog):
         self.shortcut_type = shortcut_type
         self.shortcut_data = shortcut_data
 
-        self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {shortcut_type.capitalize()} Shortcut")
+        title_map = {
+            "script": "Script Shortcut",
+            "context": "Context Shortcut",
+            "startup": "Background Script",
+            "text": "Text Shortcut",
+            "file": "File Shortcut",
+            "exclude": "Exclusion Rule",
+        }
+        pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
+        self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
         self.setModal(True)
         self.resize(500, 400)
         self.setStyleSheet(f"""
@@ -587,6 +596,23 @@ class AddEditShortcutDialog(QDialog):
             form_layout.addWidget(QLabel("Window Class (optional, comma-separated allowed):"))
             self.window_class_edit = QLineEdit()
             self.window_class_edit.setPlaceholderText("e.g., CabinetWClass")
+            form_layout.addWidget(self.window_class_edit)
+        elif self.shortcut_type == "exclude":
+            form_layout.addWidget(QLabel("This rule blocks shortcuts when matched."))
+
+            form_layout.addWidget(QLabel("Window Title (contains, comma-separated allowed):"))
+            self.window_title_edit = QLineEdit()
+            self.window_title_edit.setPlaceholderText("e.g., Discord, Visual Studio Code")
+            form_layout.addWidget(self.window_title_edit)
+
+            form_layout.addWidget(QLabel("Process Name (optional, comma-separated allowed):"))
+            self.process_name_edit = QLineEdit()
+            self.process_name_edit.setPlaceholderText("e.g., Discord.exe, Code.exe")
+            form_layout.addWidget(self.process_name_edit)
+
+            form_layout.addWidget(QLabel("Window Class (optional, comma-separated allowed):"))
+            self.window_class_edit = QLineEdit()
+            self.window_class_edit.setPlaceholderText("e.g., Chrome_WidgetWin_1")
             form_layout.addWidget(self.window_class_edit)
         elif self.shortcut_type == "text":
             # Trigger
@@ -727,6 +753,18 @@ SendText("Hello World")"""
             
             action_layout.addWidget(self.action_edit)
             top_layout.addLayout(action_layout)
+        elif self.shortcut_type == "exclude":
+            info_layout = QVBoxLayout()
+            info_layout.addWidget(QLabel("No action is needed here."))
+
+            info_text = QLabel(
+                "Create one or more exclusion rules to stop AHK shortcuts from firing inside matching apps."
+            )
+            info_text.setWordWrap(True)
+            info_text.setStyleSheet("color: #c0c0c0; font-size: 12px;")
+            info_layout.addWidget(info_text)
+            info_layout.addStretch(1)
+            top_layout.addLayout(info_layout)
         else:
             # Replacement
             replacement_layout = QVBoxLayout()
@@ -749,7 +787,7 @@ SendText("Hello World")"""
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -785,6 +823,10 @@ SendText("Hello World")"""
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
             self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
+        elif self.shortcut_type == "exclude":
+            self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
+            self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
+            self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
         elif self.shortcut_type == "file":
@@ -1129,6 +1171,24 @@ SendText("Hello World")"""
                 "action": action,
                 "enabled": enabled
             }
+        elif self.shortcut_type == "exclude":
+            window_title = self.window_title_edit.text().strip()
+            process_name = self.process_name_edit.text().strip()
+            window_class = self.window_class_edit.text().strip()
+
+            if not any(part.strip() for part in window_title.split(",")) and not any(part.strip() for part in process_name.split(",")) and not any(part.strip() for part in window_class.split(",")):
+                QMessageBox.warning(self, "Warning", "At least one exclusion field must contain a real value.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "window_title": window_title,
+                "process_name": process_name,
+                "window_class": window_class,
+                "enabled": enabled
+            }
         elif self.shortcut_type == "startup":
             action = self.action_edit.toPlainText().strip()
             if not action:
@@ -1376,6 +1436,7 @@ class AHKShortcutEditor(QMainWindow):
         self.file_shortcuts = []
         self.startup_scripts = []
         self.context_shortcuts = []
+        self.exclusion_rules = []
         self.app_font_family = "Consolas" # Default per theme guide
         self.app_font_size = 10
         self.category_colors = {
@@ -1387,6 +1448,7 @@ class AHKShortcutEditor(QMainWindow):
         self.section_states = {
             "script": True,
             "context": True,
+            "exclude": True,
             "startup": True,
             "text": True,
             "file": True
@@ -1578,6 +1640,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
         self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
+        self.add_menu.addAction("Exclusion Rule", lambda: self.open_add_dialog("exclude"))
         self.add_menu.addAction("Background Script", lambda: self.open_add_dialog("startup"))
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
@@ -1760,6 +1823,9 @@ class AHKShortcutEditor(QMainWindow):
             elif shortcut_type == "context" and index < len(self.context_shortcuts):
                 self.selected_shortcut = self.context_shortcuts[index]
                 self.selected_type = "context"
+            elif shortcut_type == "exclude" and index < len(self.exclusion_rules):
+                self.selected_shortcut = self.exclusion_rules[index]
+                self.selected_type = "exclude"
             elif shortcut_type == "startup" and index < len(self.startup_scripts):
                 self.selected_shortcut = self.startup_scripts[index]
                 self.selected_type = "startup"
@@ -1781,6 +1847,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.file_shortcuts[index]["enabled"] = not self.file_shortcuts[index].get("enabled", True)
             elif shortcut_type == "context" and index < len(self.context_shortcuts):
                 self.context_shortcuts[index]["enabled"] = not self.context_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "exclude" and index < len(self.exclusion_rules):
+                self.exclusion_rules[index]["enabled"] = not self.exclusion_rules[index].get("enabled", True)
             elif shortcut_type == "startup" and index < len(self.startup_scripts):
                 self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
 
@@ -1832,6 +1900,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.file_shortcuts = data.get("file_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
                     self.context_shortcuts = data.get("context_shortcuts", [])
+                    self.exclusion_rules = data.get("exclusion_rules", data.get("excluded_contexts", []))
                     self.app_font_family = data.get("app_font_family", "Consolas")
                     self.app_font_size = data.get("app_font_size", 10)
                     
@@ -1870,6 +1939,7 @@ class AHKShortcutEditor(QMainWindow):
                 "file_shortcuts": self.file_shortcuts,
                 "startup_scripts": self.startup_scripts,
                 "context_shortcuts": self.context_shortcuts,
+                "exclusion_rules": self.exclusion_rules,
                 "app_font_family": self.app_font_family,
                 "app_font_size": self.app_font_size
             }
@@ -1901,11 +1971,13 @@ class AHKShortcutEditor(QMainWindow):
         filtered_file = [s for s in self.file_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')} {s.get('file_path', '')}".lower()]
         filtered_context = [s for s in self.context_shortcuts
-                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')}".lower()]
+                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')} {s.get('process_name', '')} {s.get('window_class', '')}".lower()]
+        filtered_exclusions = [s for s in self.exclusion_rules
+                              if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')} {s.get('process_name', '')} {s.get('window_class', '')}".lower()]
         filtered_startup = [s for s in self.startup_scripts
                            if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
-
-        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_startup, group_by_category)
+        
+        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, group_by_category)
         
         # Block signals and updates to prevent flickering/jumping
         v_bar.blockSignals(True)
@@ -1937,7 +2009,7 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(0, backup_restore)
 
-    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, startup_scripts, group_by_category):
+    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, group_by_category):
         def get_toggle_icon(section):
             return "▾" if self.section_states.get(section, True) else "▸"
 
@@ -2082,6 +2154,32 @@ class AHKShortcutEditor(QMainWindow):
                     html += self.generate_shortcut_html(shortcut, "context", original_index, False)
 
         html += f"""
+                    <div class="section-title"><a href="toggle-section://exclude">{get_toggle_icon('exclude')} Exclusion Rules</a></div>
+        """
+
+        if self.section_states.get("exclude", True):
+            if group_by_category:
+                exclusion_categories = {}
+                for shortcut in exclusion_rules:
+                    category = shortcut.get('category', 'General')
+                    if category not in exclusion_categories:
+                        exclusion_categories[category] = []
+                    exclusion_categories[category].append(shortcut)
+
+                for i, category in enumerate(sorted(exclusion_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                    for shortcut in sorted(exclusion_categories[category], key=lambda x: x.get('name', '').lower()):
+                        original_index = self.exclusion_rules.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "exclude", original_index, True)
+            else:
+                for shortcut in sorted(exclusion_rules, key=lambda x: x.get('name', '').lower()):
+                    original_index = self.exclusion_rules.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "exclude", original_index, False)
+
+        html += f"""
                     <div class="section-title"><a href="toggle-section://startup">{get_toggle_icon('startup')} Background Scripts</a></div>
         """
 
@@ -2193,6 +2291,12 @@ class AHKShortcutEditor(QMainWindow):
             if window_title:
                 key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
             key_width = 220
+        elif shortcut_type == "exclude":
+            key = "🚫 Exclusion"
+            window_title = shortcut.get('window_title', '')
+            if window_title:
+                key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
+            key_width = 220
         elif shortcut_type == "startup":
             key = "🚀 Startup"
             key_width = 170
@@ -2278,6 +2382,8 @@ class AHKShortcutEditor(QMainWindow):
             self.script_shortcuts.append(duplicated)
         elif self.selected_type == "context":
             self.context_shortcuts.append(duplicated)
+        elif self.selected_type == "exclude":
+            self.exclusion_rules.append(duplicated)
         elif self.selected_type == "startup":
             self.startup_scripts.append(duplicated)
         elif self.selected_type == "file":
@@ -2294,7 +2400,10 @@ class AHKShortcutEditor(QMainWindow):
         self.update_display()
         
         # Show success message
-        QMessageBox.information(self, "Success", f"Duplicated '{original_name}' as '{duplicated['name']}'.\n\nPlease edit the duplicate to set a unique hotkey/trigger.")
+        follow_up = "Please edit the duplicate to set a unique hotkey/trigger."
+        if self.selected_type == "exclude":
+            follow_up = "Please edit the duplicate to adjust the excluded window/app match."
+        QMessageBox.information(self, "Success", f"Duplicated '{original_name}' as '{duplicated['name']}'.\n\n{follow_up}")
 
     def remove_selected(self):
         if not self.selected_shortcut or not self.selected_type:
@@ -2309,6 +2418,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.script_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "context":
                 self.context_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "exclude":
+                self.exclusion_rules.remove(self.selected_shortcut)
             elif self.selected_type == "startup":
                 self.startup_scripts.remove(self.selected_shortcut)
             elif self.selected_type == "file":
@@ -2395,6 +2506,93 @@ class AHKShortcutEditor(QMainWindow):
                 ""
             ])
 
+            def split_context_values(raw_value):
+                return [part.strip() for part in raw_value.split(",") if part.strip()]
+
+            def build_condition_clause(raw_value, matcher):
+                values = split_context_values(raw_value)
+                if not values:
+                    return None
+                clauses = [matcher(value) for value in values]
+                if len(clauses) == 1:
+                    return clauses[0]
+                return "(" + " || ".join(clauses) + ")"
+
+            def append_context_checker(shortcut, func_name):
+                window_title = shortcut.get('window_title', '')
+                process_name = shortcut.get('process_name', '')
+                window_class = shortcut.get('window_class', '')
+
+                conditions = []
+                process_clause = build_condition_clause(process_name, lambda value: f'processName = "{value}"')
+                title_clause = build_condition_clause(window_title, lambda value: f'InStr(windowTitle, "{value}")')
+                class_clause = build_condition_clause(window_class, lambda value: f'windowClass = "{value}"')
+
+                if process_clause:
+                    conditions.append(process_clause)
+                if title_clause:
+                    conditions.append(title_clause)
+                if class_clause:
+                    conditions.append(class_clause)
+
+                output_lines.append(f"{func_name}() {{")
+                output_lines.append("    try {")
+                if process_name:
+                    output_lines.append('        processName := WinGetProcessName("A")')
+                if window_title:
+                    output_lines.append('        windowTitle := WinGetTitle("A")')
+                if window_class:
+                    output_lines.append('        windowClass := WinGetClass("A")')
+                if conditions:
+                    output_lines.append("        return (" + " && ".join(conditions) + ")")
+                else:
+                    output_lines.append("        return false")
+                output_lines.append("    }")
+                output_lines.append("    return false")
+                output_lines.append("}")
+                output_lines.append("")
+
+            def build_rule_clause(shortcut):
+                window_title = shortcut.get('window_title', '')
+                process_name = shortcut.get('process_name', '')
+                window_class = shortcut.get('window_class', '')
+
+                conditions = []
+                process_clause = build_condition_clause(process_name, lambda value: f'processName = "{value}"')
+                title_clause = build_condition_clause(window_title, lambda value: f'InStr(windowTitle, "{value}")')
+                class_clause = build_condition_clause(window_class, lambda value: f'windowClass = "{value}"')
+
+                if process_clause:
+                    conditions.append(process_clause)
+                if title_clause:
+                    conditions.append(title_clause)
+                if class_clause:
+                    conditions.append(class_clause)
+
+                if not conditions:
+                    return None
+                return "(" + " && ".join(conditions) + ")"
+
+            def append_exclusion_checker():
+                enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
+                rule_clauses = []
+                for shortcut in enabled_exclusions:
+                    clause = build_rule_clause(shortcut)
+                    if clause:
+                        rule_clauses.append(clause)
+
+                output_lines.append(";! === EXCLUSION RULES ===")
+                output_lines.append("IsShortcutExcluded() {")
+                output_lines.append("    try {")
+                if rule_clauses:
+                    output_lines.append("        return " + " || ".join(rule_clauses))
+                else:
+                    output_lines.append("        return false")
+                output_lines.append("    }")
+                output_lines.append("    return false")
+                output_lines.append("}")
+                output_lines.append("")
+
             # Add Background/Startup Scripts at the top (Auto-execute section)
             enabled_startup = [s for s in self.startup_scripts if s.get('enabled', True)]
             if enabled_startup:
@@ -2411,10 +2609,13 @@ class AHKShortcutEditor(QMainWindow):
                     output_lines.append(action)
                     output_lines.append("")
 
+            append_exclusion_checker()
+
             # Add script shortcuts
             enabled_scripts = [s for s in self.script_shortcuts if s.get('enabled', True)]
             if enabled_scripts:
                 output_lines.append(";! === SCRIPT SHORTCUTS ===")
+                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_scripts:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2448,6 +2649,8 @@ class AHKShortcutEditor(QMainWindow):
                     else:
                         output_lines.append(f"{hotkey}::{action}")
                     output_lines.append("")
+                output_lines.append("#HotIf")
+                output_lines.append("")
 
             # Add context shortcuts with #HotIf directives
             enabled_context = [s for s in self.context_shortcuts if s.get('enabled', True)]
@@ -2460,62 +2663,12 @@ class AHKShortcutEditor(QMainWindow):
                     if shortcut.get('description'):
                         output_lines.append(f";! {shortcut.get('description')}")
                     
-                    # Generate context check function
-                    window_title = shortcut.get('window_title', '')
-                    process_name = shortcut.get('process_name', '')
-                    window_class = shortcut.get('window_class', '')
-
-                    def split_context_values(raw_value):
-                        return [part.strip() for part in raw_value.split(",") if part.strip()]
-
-                    def build_or_conditions(values, matcher):
-                        return " || ".join([matcher(value) for value in values])
-                    
-                    # Build condition
-                    conditions = []
-                    process_names = split_context_values(process_name)
-                    window_titles = split_context_values(window_title)
-                    window_classes = split_context_values(window_class)
-
-                    if process_names:
-                        if len(process_names) > 1:
-                            conditions.append("(" + build_or_conditions(process_names, lambda value: f'processName = "{value}"') + ")")
-                        else:
-                            conditions.append(f'processName = "{process_names[0]}"')
-                    if window_titles:
-                        if len(window_titles) > 1:
-                            conditions.append("(" + build_or_conditions(window_titles, lambda value: f'InStr(windowTitle, "{value}")') + ")")
-                        else:
-                            conditions.append(f'InStr(windowTitle, "{window_titles[0]}")')
-                    if window_classes:
-                        if len(window_classes) > 1:
-                            conditions.append("(" + build_or_conditions(window_classes, lambda value: f'windowClass = "{value}"') + ")")
-                        else:
-                            conditions.append(f'windowClass = "{window_classes[0]}"')
-                    
-                    condition_str = " && ".join(conditions)
-                    
                     # Generate unique function name
                     func_name = f"Is{shortcut.get('name', 'Context').replace(' ', '')}Context"
-                    
-                    output_lines.append(f"{func_name}() {{")
-                    output_lines.append("    try {")
-                    if process_name:
-                        output_lines.append('        processName := WinGetProcessName("A")')
-                    if window_title:
-                        output_lines.append('        windowTitle := WinGetTitle("A")')
-                    if window_class:
-                        output_lines.append('        windowClass := WinGetClass("A")')
-                    output_lines.append(f"        if ({condition_str}) {{")
-                    output_lines.append("            return true")
-                    output_lines.append("        }")
-                    output_lines.append("    }")
-                    output_lines.append("    return false")
-                    output_lines.append("}")
-                    output_lines.append("")
+                    append_context_checker(shortcut, func_name)
                     
                     # Add #HotIf directive
-                    output_lines.append(f"#HotIf {func_name}()")
+                    output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
                     output_lines.append("")
                     
                     action = shortcut.get('action', '')
@@ -2538,6 +2691,7 @@ class AHKShortcutEditor(QMainWindow):
             enabled_texts = [s for s in self.text_shortcuts if s.get('enabled', True)]
             if enabled_texts:
                 output_lines.append(";! === TEXT SHORTCUTS ===")
+                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_texts:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2568,11 +2722,14 @@ class AHKShortcutEditor(QMainWindow):
                         safe_replacement = replacement.replace("'", "''")
                         output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     output_lines.append("")
+                output_lines.append("#HotIf")
+                output_lines.append("")
 
             # Add enabled file shortcuts
             enabled_files = [s for s in self.file_shortcuts if s.get('enabled', True)]
             if enabled_files:
                 output_lines.append(";! === FILE SHORTCUTS ===")
+                output_lines.append("#HotIf !IsShortcutExcluded()")
                 for shortcut in enabled_files:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -2585,6 +2742,8 @@ class AHKShortcutEditor(QMainWindow):
                     safe_path = file_path.replace("'", "''")
                     output_lines.append(f":X:{trigger}::PasteFile('{safe_path}')")
                     output_lines.append("")
+                output_lines.append("#HotIf")
+                output_lines.append("")
 
             output_dir = r"C:\@delta\output\ahk"
             os.makedirs(output_dir, exist_ok=True)
