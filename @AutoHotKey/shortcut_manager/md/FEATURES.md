@@ -105,12 +105,20 @@
 
 **Status:** Complete
 
-**Description:** Auto-executed code that runs when the generated AHK script starts.
+**Description:** Auto-executed code that runs when the generated AHK script starts. Supports optional context filtering.
 
 **Implementation:**
 
 - Stored in `startup_scripts`
 - Emitted near the top of the generated file
+- Optional fields: `context_mode` (`none` / `active` / `inactive`), `window_title`, `process_name`, `window_class`
+- When context fields are set, code is wrapped with `#HotIf IsStartup<Name>Context()` (active) or `#HotIf !IsStartup<Name>Context()` (inactive)
+- This allows inline hotkey definitions inside a startup script to be suppressed in specific apps
+
+**Usage:**
+
+- Set "Inactive in" + process name to stop a background script's hotkeys from firing in a conflicting app.
+- Leave context mode as "No context" for scripts with no hotkeys (timers, hooks, globals).
 
 ## Search and Organization
 

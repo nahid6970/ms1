@@ -42,6 +42,22 @@ All sessions are recorded here. Do not archive old entries.
 - `md/PROBLEMS_AND_FIXES.md`
 - `md/RECENT.md`
 
+## 2026-06-10 18:16 - Background scripts: context mode (active in / inactive in)
+
+**What We Accomplished:**
+
+- Added `context_mode`, `window_title`, `process_name`, `window_class` fields to background scripts.
+- Dialog left panel now shows these fields for startup type with a mode combobox: "No context / Active in / Inactive in".
+- Generator wraps startup script code with `#HotIf IsStartup<Name>Context()` (active) or `#HotIf !IsStartup<Name>Context()` (inactive) when fields are filled. Uses same `append_context_checker` as context shortcuts.
+- Function name is sanitized with `re.sub(r'[^a-zA-Z0-9]', '', name)` to avoid invalid AHK identifiers.
+- Display shows `🚀 ✅[proc]` or `🚀 🚫[proc]` in the list when context mode is set.
+- Patched Macro Recorder JSON directly: `context_mode: inactive`, `process_name: chrome.exe` so ^r and ^e don't fire in Chrome.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `ahk_shortcuts.json`
+
 ## 2026-06-10 17:49 - Per-hotkey exclusion: excluded_hotkeys field added to exclusion rules
 
 **What We Accomplished:**
