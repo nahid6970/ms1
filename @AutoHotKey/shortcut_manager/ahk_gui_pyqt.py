@@ -333,6 +333,7 @@ class ShortcutBuilderPopup(QDialog):
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
         numpad_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 4px;")
+        numpad_frame.setMinimumWidth(180)
         num_v = QVBoxLayout(numpad_frame); num_v.setSpacing(4); num_v.setContentsMargins(4,4,4,4)
         lbl_np = QLabel("Numpad"); lbl_np.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_np.setStyleSheet("color:#505070; font-size:10px; margin-bottom:2px;")
@@ -352,6 +353,7 @@ class ShortcutBuilderPopup(QDialog):
         def _np_tall(k, display):
             btn = self._key_btn(k, 0); btn.setText(display)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            btn.setStyleSheet(btn.styleSheet() + " qproperty-alignment: AlignCenter;")
             return btn
 
         def _np_wide(k, display):
@@ -364,23 +366,29 @@ class ShortcutBuilderPopup(QDialog):
         grid.addWidget(_np("NumpadDiv","/"),   0,1)
         grid.addWidget(_np("NumpadMult","*"),  0,2)
         grid.addWidget(_np("NumpadSub","-"),   0,3)
-        # row 1: 7 8 9  |+| (tall, spans rows 1-2)
+        # row 1: 7 8 9  |+| spans rows 1-2
         grid.addWidget(_np("Numpad7","7"),     1,0)
         grid.addWidget(_np("Numpad8","8"),     1,1)
         grid.addWidget(_np("Numpad9","9"),     1,2)
-        grid.addWidget(_np_tall("NumpadAdd","+"), 1,3, 2,1)
+        plus_btn = _np("NumpadAdd","+")
+        plus_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        plus_btn.setStyleSheet(plus_btn.styleSheet().replace("min-height: 32px;", "min-height: 32px; padding: 0px;"))
+        grid.addWidget(plus_btn, 1,3, 2,1)
         # row 2: 4 5 6
         grid.addWidget(_np("Numpad4","4"),     2,0)
         grid.addWidget(_np("Numpad5","5"),     2,1)
         grid.addWidget(_np("Numpad6","6"),     2,2)
-        # row 3: 1 2 3  |↵| (tall, spans rows 3-4)
+        # row 3: 1 2 3  |Ent| spans rows 3-4
         grid.addWidget(_np("Numpad1","1"),     3,0)
         grid.addWidget(_np("Numpad2","2"),     3,1)
         grid.addWidget(_np("Numpad3","3"),     3,2)
-        grid.addWidget(_np_tall("NumpadEnter","↵"), 3,3, 2,1)
-        # row 4: 0 (wide, 3 cols) .
-        grid.addWidget(_np_wide("Numpad0","0"), 4,0, 1,3)
-        grid.addWidget(_np("NumpadDot","."),   4,3)
+        ent_btn = _np("NumpadEnter","Ent")
+        ent_btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        ent_btn.setStyleSheet(ent_btn.styleSheet().replace("min-height: 32px;", "min-height: 32px; padding: 0px;"))
+        grid.addWidget(ent_btn, 3,3, 2,1)
+        # row 4: 0 (wide) .
+        grid.addWidget(_np_wide("Numpad0","0"), 4,0, 1,2)
+        grid.addWidget(_np("NumpadDot","."),   4,2)
 
         num_v.addWidget(grid_w)
 
