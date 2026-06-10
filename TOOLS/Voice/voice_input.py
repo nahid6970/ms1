@@ -211,6 +211,7 @@ class VoiceApp(QMainWindow):
                 "compact_view": False,
                 "status_btn_width": 8,
                 "status_btn_height": 18,
+                "status_lang_gap": 2,
                 "compact_left_padding": 0,
                 "compact_right_padding": 0,
                 "expanded_left_padding": 0,
@@ -235,6 +236,9 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "status_btn_height" not in self.config:
             self.config["status_btn_height"] = 18
+            self.save_config()
+        if "status_lang_gap" not in self.config:
+            self.config["status_lang_gap"] = 2
             self.save_config()
         if "compact_left_padding" not in self.config:
             self.config["compact_left_padding"] = 0
@@ -315,6 +319,7 @@ class VoiceApp(QMainWindow):
         """)
         self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
+        layout.addSpacing(self.config.get("status_lang_gap", 2))
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
@@ -453,6 +458,11 @@ class VoiceApp(QMainWindow):
         compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
         layout.addRow("Compact left padding:", compact_left_pad)
 
+        status_lang_gap = QSpinBox()
+        status_lang_gap.setRange(0, 20)
+        status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
+        layout.addRow("Status/lang gap:", status_lang_gap)
+
         compact_right_pad = QSpinBox()
         compact_right_pad.setRange(0, 50)
         compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
@@ -536,6 +546,7 @@ class VoiceApp(QMainWindow):
             self.config["compact_right_padding"] = compact_right_pad.value()
             self.config["compact_top_padding"] = compact_top_pad.value()
             self.config["compact_bottom_padding"] = compact_bottom_pad.value()
+            self.config["status_lang_gap"] = status_lang_gap.value()
             self.config["expanded_left_padding"] = expanded_left_pad.value()
             self.config["expanded_right_padding"] = expanded_right_pad.value()
             self.config["expanded_top_padding"] = expanded_top_pad.value()
@@ -561,6 +572,7 @@ class VoiceApp(QMainWindow):
         return (
             self.config.get("compact_left_padding", 0)
             + 8
+            + self.config.get("status_lang_gap", 2)
             + 26
             + self.config.get("compact_right_padding", 0)
         )
@@ -572,6 +584,7 @@ class VoiceApp(QMainWindow):
         width = (
             self.config.get("expanded_left_padding", 0)
             + 8
+            + self.config.get("status_lang_gap", 2)
             + 28
             + 18
             + 18
@@ -811,6 +824,12 @@ class VoiceApp(QMainWindow):
 
     def _set_status(self, color):
         self.status_btn.setText("")
+        self.status_btn.setFixedSize(
+            self.config.get("status_btn_width", 8),
+            self.config.get("status_btn_height", 18),
+        )
+        self.status_btn.setMinimumSize(self.status_btn.size())
+        self.status_btn.setMaximumSize(self.status_btn.size())
         self.status_btn.setStyleSheet(f"""
             QPushButton#status {{
                 background-color: {color};
