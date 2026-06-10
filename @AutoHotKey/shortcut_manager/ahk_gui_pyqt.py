@@ -574,17 +574,17 @@ class AddEditShortcutDialog(QDialog):
             form_layout.addLayout(hotkey_row)
             
             # Context fields
-            form_layout.addWidget(QLabel("Window Title (contains):"))
+            form_layout.addWidget(QLabel("Window Title (contains, comma-separated allowed):"))
             self.window_title_edit = QLineEdit()
             self.window_title_edit.setPlaceholderText("e.g., Gemini, Visual Studio Code")
             form_layout.addWidget(self.window_title_edit)
             
-            form_layout.addWidget(QLabel("Process Name (optional):"))
+            form_layout.addWidget(QLabel("Process Name (optional, comma-separated allowed):"))
             self.process_name_edit = QLineEdit()
             self.process_name_edit.setPlaceholderText("e.g., WindowsTerminal.exe, Code.exe")
             form_layout.addWidget(self.process_name_edit)
             
-            form_layout.addWidget(QLabel("Window Class (optional):"))
+            form_layout.addWidget(QLabel("Window Class (optional, comma-separated allowed):"))
             self.window_class_edit = QLineEdit()
             self.window_class_edit.setPlaceholderText("e.g., CabinetWClass")
             form_layout.addWidget(self.window_class_edit)
@@ -1114,8 +1114,8 @@ SendText("Hello World")"""
                 QMessageBox.warning(self, "Warning", "Hotkey and action are required.")
                 return
             
-            if not window_title and not process_name and not window_class:
-                QMessageBox.warning(self, "Warning", "At least one context field (Window Title, Process Name, or Window Class) is required.")
+            if not any(part.strip() for part in window_title.split(",")) and not any(part.strip() for part in process_name.split(",")) and not any(part.strip() for part in window_class.split(",")):
+                QMessageBox.warning(self, "Warning", "At least one context field must contain a real value.")
                 return
 
             shortcut_data = {
@@ -1625,13 +1625,13 @@ class AHKShortcutEditor(QMainWindow):
         self.record_search_btn = QPushButton("")
         self.record_search_btn.setCheckable(True)
         self.record_search_btn.setFixedSize(26,26)
-        self.record_search_btn.setFixedHeight(34)
         self.record_search_btn.setStyleSheet(f"""
             QPushButton {{
-                font-family: 'Segoe UI', sans-serif;
-                background-color: {CP_PANEL};
-                border: 1px solid {CP_DIM};
-                color: {CP_SUBTEXT};
+                font-family: inherit;
+                background-color: #cc2222;
+                border: none;
+                border-radius: 13px;
+                color: white;
                 font-size: 18px;
             }}
             QPushButton:checked {{
@@ -1641,6 +1641,7 @@ class AHKShortcutEditor(QMainWindow):
             }}
             QPushButton:hover {{
                 border-color: {CP_CYAN};
+                background-color: #4d4d4d;
             }}
         """)
         self.record_search_btn.clicked.connect(lambda checked: self.search_edit.set_recording(checked))
@@ -2463,15 +2464,34 @@ class AHKShortcutEditor(QMainWindow):
                     window_title = shortcut.get('window_title', '')
                     process_name = shortcut.get('process_name', '')
                     window_class = shortcut.get('window_class', '')
+
+                    def split_context_values(raw_value):
+                        return [part.strip() for part in raw_value.split(",") if part.strip()]
+
+                    def build_or_conditions(values, matcher):
+                        return " || ".join([matcher(value) for value in values])
                     
                     # Build condition
                     conditions = []
-                    if process_name:
-                        conditions.append(f'processName = "{process_name}"')
-                    if window_title:
-                        conditions.append(f'InStr(windowTitle, "{window_title}")')
-                    if window_class:
-                        conditions.append(f'windowClass = "{window_class}"')
+                    process_names = split_context_values(process_name)
+                    window_titles = split_context_values(window_title)
+                    window_classes = split_context_values(window_class)
+
+                    if process_names:
+                        if len(process_names) > 1:
+                            conditions.append("(" + build_or_conditions(process_names, lambda value: f'processName = "{value}"') + ")")
+                        else:
+                            conditions.append(f'processName = "{process_names[0]}"')
+                    if window_titles:
+                        if len(window_titles) > 1:
+                            conditions.append("(" + build_or_conditions(window_titles, lambda value: f'InStr(windowTitle, "{value}")') + ")")
+                        else:
+                            conditions.append(f'InStr(windowTitle, "{window_titles[0]}")')
+                    if window_classes:
+                        if len(window_classes) > 1:
+                            conditions.append("(" + build_or_conditions(window_classes, lambda value: f'windowClass = "{value}"') + ")")
+                        else:
+                            conditions.append(f'windowClass = "{window_classes[0]}"')
                     
                     condition_str = " && ".join(conditions)
                     
