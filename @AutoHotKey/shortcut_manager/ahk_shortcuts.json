@@ -723,10 +723,10 @@
             "name": "Windows-Terminal Rules",
             "category": "General",
             "description": "",
-            "window_title": "",
+            "window_title": "vlr",
             "process_name": "chrome.exe",
             "window_class": "",
-            "excluded_hotkeys": "",
+            "excluded_hotkeys": "!b",
             "enabled": true
         }
     ],
