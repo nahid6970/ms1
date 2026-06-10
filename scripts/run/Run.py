@@ -3,6 +3,9 @@ import subprocess
 import tempfile
 import sys
 import json
+import ctypes
+
+ctypes.windll.kernel32.SetConsoleTitleW("RUNNER")
 
 BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\bookmarks.json"
 
