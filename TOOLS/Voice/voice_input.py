@@ -214,7 +214,11 @@ class VoiceApp(QMainWindow):
                 "compact_left_padding": 0,
                 "compact_right_padding": 0,
                 "expanded_left_padding": 0,
-                "expanded_right_padding": 0
+                "expanded_right_padding": 0,
+                "compact_top_padding": 0,
+                "compact_bottom_padding": 0,
+                "expanded_top_padding": 0,
+                "expanded_bottom_padding": 0
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -243,6 +247,18 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "expanded_right_padding" not in self.config:
             self.config["expanded_right_padding"] = 0
+            self.save_config()
+        if "compact_top_padding" not in self.config:
+            self.config["compact_top_padding"] = 0
+            self.save_config()
+        if "compact_bottom_padding" not in self.config:
+            self.config["compact_bottom_padding"] = 0
+            self.save_config()
+        if "expanded_top_padding" not in self.config:
+            self.config["expanded_top_padding"] = 0
+            self.save_config()
+        if "expanded_bottom_padding" not in self.config:
+            self.config["expanded_bottom_padding"] = 0
             self.save_config()
 
 
@@ -442,6 +458,16 @@ class VoiceApp(QMainWindow):
         compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
         layout.addRow("Compact right padding:", compact_right_pad)
 
+        compact_top_pad = QSpinBox()
+        compact_top_pad.setRange(0, 50)
+        compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
+        layout.addRow("Compact top padding:", compact_top_pad)
+
+        compact_bottom_pad = QSpinBox()
+        compact_bottom_pad.setRange(0, 50)
+        compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
+        layout.addRow("Compact bottom padding:", compact_bottom_pad)
+
         expanded_left_pad = QSpinBox()
         expanded_left_pad.setRange(0, 50)
         expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
@@ -451,6 +477,16 @@ class VoiceApp(QMainWindow):
         expanded_right_pad.setRange(0, 50)
         expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
         layout.addRow("Expanded right padding:", expanded_right_pad)
+
+        expanded_top_pad = QSpinBox()
+        expanded_top_pad.setRange(0, 50)
+        expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
+        layout.addRow("Expanded top padding:", expanded_top_pad)
+
+        expanded_bottom_pad = QSpinBox()
+        expanded_bottom_pad.setRange(0, 50)
+        expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
+        layout.addRow("Expanded bottom padding:", expanded_bottom_pad)
 
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
@@ -498,8 +534,12 @@ class VoiceApp(QMainWindow):
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             self.config["compact_left_padding"] = compact_left_pad.value()
             self.config["compact_right_padding"] = compact_right_pad.value()
+            self.config["compact_top_padding"] = compact_top_pad.value()
+            self.config["compact_bottom_padding"] = compact_bottom_pad.value()
             self.config["expanded_left_padding"] = expanded_left_pad.value()
             self.config["expanded_right_padding"] = expanded_right_pad.value()
+            self.config["expanded_top_padding"] = expanded_top_pad.value()
+            self.config["expanded_bottom_padding"] = expanded_bottom_pad.value()
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
@@ -525,6 +565,9 @@ class VoiceApp(QMainWindow):
             + self.config.get("compact_right_padding", 0)
         )
 
+    def _compact_window_height(self):
+        return 20 + self.config.get("compact_top_padding", 0) + self.config.get("compact_bottom_padding", 0)
+
     def _expanded_window_width(self):
         width = (
             self.config.get("expanded_left_padding", 0)
@@ -541,6 +584,9 @@ class VoiceApp(QMainWindow):
         if not self.config.get("hide_record_btn", False):
             width += 58
         return width
+
+    def _expanded_window_height(self):
+        return 20 + self.config.get("expanded_top_padding", 0) + self.config.get("expanded_bottom_padding", 0)
 
     def _apply_button_geometry(self):
         compact = self._compact_view
@@ -568,19 +614,22 @@ class VoiceApp(QMainWindow):
         self._apply_button_geometry()
         left = self.config.get("compact_left_padding", 0) if compact else self.config.get("expanded_left_padding", 0)
         right = self.config.get("compact_right_padding", 0) if compact else self.config.get("expanded_right_padding", 0)
-        self.toolbar_layout.setContentsMargins(left, 0, right, 0)
+        top = self.config.get("compact_top_padding", 0) if compact else self.config.get("expanded_top_padding", 0)
+        bottom = self.config.get("compact_bottom_padding", 0) if compact else self.config.get("expanded_bottom_padding", 0)
+        self.toolbar_layout.setContentsMargins(left, top, right, bottom)
         self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
         for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
             btn.setVisible(not compact)
         new_width = self._visible_toolbar_width(compact)
+        new_height = self._compact_window_height() if compact else self._expanded_window_height()
         if preserve_right_edge:
             geo = self.frameGeometry()
             right_edge = geo.x() + geo.width()
             y_pos = geo.y()
-            self.setFixedSize(new_width, 46)
+            self.setFixedSize(new_width, new_height)
             self.move(right_edge - new_width, y_pos)
         else:
-            self.setFixedSize(new_width, 46)
+            self.setFixedSize(new_width, new_height)
 
     def toggle_compact_view(self):
         self._compact_view = not self._compact_view
