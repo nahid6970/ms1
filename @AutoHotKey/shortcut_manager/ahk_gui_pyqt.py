@@ -595,66 +595,65 @@ class AddEditShortcutDialog(QDialog):
             hotkey_row.addWidget(self.record_hotkey_btn)
             form_layout.addLayout(hotkey_row)
             
-            # Context fields
-            self.context_filter_enabled = QCheckBox("Enable context filter")
-            self.context_filter_enabled.setChecked(True)
-            form_layout.addWidget(self.context_filter_enabled)
+            # Context fields — each with its own enable toggle
+            def make_field_row(label_text, edit_widget, attr_toggle):
+                row = QHBoxLayout()
+                toggle = QCheckBox(label_text)
+                toggle.setChecked(True)
+                toggle.toggled.connect(edit_widget.setEnabled)
+                setattr(self, attr_toggle, toggle)
+                row.addWidget(toggle)
+                return row
 
-            self.window_title_label = QLabel("Window Title (contains, comma-separated allowed):")
-            form_layout.addWidget(self.window_title_label)
+            self.window_title_toggle = QCheckBox("Window Title (contains, comma-separated):")
+            self.window_title_toggle.setChecked(True)
+            form_layout.addWidget(self.window_title_toggle)
             self.window_title_edit = QLineEdit()
             self.window_title_edit.setPlaceholderText("e.g., Gemini, Visual Studio Code")
+            self.window_title_toggle.toggled.connect(self.window_title_edit.setEnabled)
             form_layout.addWidget(self.window_title_edit)
-            
-            self.process_name_label = QLabel("Process Name (optional, comma-separated allowed):")
-            form_layout.addWidget(self.process_name_label)
+
+            self.process_name_toggle = QCheckBox("Process Name (comma-separated):")
+            self.process_name_toggle.setChecked(True)
+            form_layout.addWidget(self.process_name_toggle)
             self.process_name_edit = QLineEdit()
             self.process_name_edit.setPlaceholderText("e.g., WindowsTerminal.exe, Code.exe")
+            self.process_name_toggle.toggled.connect(self.process_name_edit.setEnabled)
             form_layout.addWidget(self.process_name_edit)
-            
-            self.window_class_label = QLabel("Window Class (optional, comma-separated allowed):")
-            form_layout.addWidget(self.window_class_label)
+
+            self.window_class_toggle = QCheckBox("Window Class (comma-separated):")
+            self.window_class_toggle.setChecked(True)
+            form_layout.addWidget(self.window_class_toggle)
             self.window_class_edit = QLineEdit()
             self.window_class_edit.setPlaceholderText("e.g., CabinetWClass")
+            self.window_class_toggle.toggled.connect(self.window_class_edit.setEnabled)
             form_layout.addWidget(self.window_class_edit)
-
-            def _toggle_context_fields(checked):
-                for w in [self.window_title_label, self.window_title_edit,
-                          self.process_name_label, self.process_name_edit,
-                          self.window_class_label, self.window_class_edit]:
-                    w.setEnabled(checked)
-            self.context_filter_enabled.toggled.connect(_toggle_context_fields)
         elif self.shortcut_type == "exclude":
             form_layout.addWidget(QLabel("This rule blocks shortcuts when matched."))
 
-            self.context_filter_enabled = QCheckBox("Enable context filter")
-            self.context_filter_enabled.setChecked(True)
-            form_layout.addWidget(self.context_filter_enabled)
-
-            self.window_title_label = QLabel("Window Title (contains, comma-separated allowed):")
-            form_layout.addWidget(self.window_title_label)
+            self.window_title_toggle = QCheckBox("Window Title (contains, comma-separated):")
+            self.window_title_toggle.setChecked(True)
+            form_layout.addWidget(self.window_title_toggle)
             self.window_title_edit = QLineEdit()
             self.window_title_edit.setPlaceholderText("e.g., Discord, Visual Studio Code")
+            self.window_title_toggle.toggled.connect(self.window_title_edit.setEnabled)
             form_layout.addWidget(self.window_title_edit)
 
-            self.process_name_label = QLabel("Process Name (optional, comma-separated allowed):")
-            form_layout.addWidget(self.process_name_label)
+            self.process_name_toggle = QCheckBox("Process Name (comma-separated):")
+            self.process_name_toggle.setChecked(True)
+            form_layout.addWidget(self.process_name_toggle)
             self.process_name_edit = QLineEdit()
             self.process_name_edit.setPlaceholderText("e.g., Discord.exe, Code.exe")
+            self.process_name_toggle.toggled.connect(self.process_name_edit.setEnabled)
             form_layout.addWidget(self.process_name_edit)
 
-            self.window_class_label = QLabel("Window Class (optional, comma-separated allowed):")
-            form_layout.addWidget(self.window_class_label)
+            self.window_class_toggle = QCheckBox("Window Class (comma-separated):")
+            self.window_class_toggle.setChecked(True)
+            form_layout.addWidget(self.window_class_toggle)
             self.window_class_edit = QLineEdit()
             self.window_class_edit.setPlaceholderText("e.g., Chrome_WidgetWin_1")
+            self.window_class_toggle.toggled.connect(self.window_class_edit.setEnabled)
             form_layout.addWidget(self.window_class_edit)
-
-            def _toggle_excl_fields(checked):
-                for w in [self.window_title_label, self.window_title_edit,
-                          self.process_name_label, self.process_name_edit,
-                          self.window_class_label, self.window_class_edit]:
-                    w.setEnabled(checked)
-            self.context_filter_enabled.toggled.connect(_toggle_excl_fields)
         elif self.shortcut_type == "text":
             # Trigger
             form_layout.addWidget(QLabel("Trigger (without ::):"))
@@ -685,34 +684,29 @@ class AddEditShortcutDialog(QDialog):
             self.startup_context_mode.addItems(["No context (always run)", "Active in (only these windows)", "Inactive in (exclude these windows)"])
             form_layout.addWidget(self.startup_context_mode)
 
-            self.context_filter_enabled = QCheckBox("Enable context filter")
-            self.context_filter_enabled.setChecked(True)
-            form_layout.addWidget(self.context_filter_enabled)
-
-            self.window_title_label = QLabel("Window Title (contains):")
-            form_layout.addWidget(self.window_title_label)
+            self.window_title_toggle = QCheckBox("Window Title (contains, comma-separated):")
+            self.window_title_toggle.setChecked(True)
+            form_layout.addWidget(self.window_title_toggle)
             self.startup_window_title = QLineEdit()
             self.startup_window_title.setPlaceholderText("e.g., Notepad, Chrome")
+            self.window_title_toggle.toggled.connect(self.startup_window_title.setEnabled)
             form_layout.addWidget(self.startup_window_title)
 
-            self.process_name_label = QLabel("Process Name:")
-            form_layout.addWidget(self.process_name_label)
+            self.process_name_toggle = QCheckBox("Process Name (comma-separated):")
+            self.process_name_toggle.setChecked(True)
+            form_layout.addWidget(self.process_name_toggle)
             self.startup_process_name = QLineEdit()
             self.startup_process_name.setPlaceholderText("e.g., chrome.exe")
+            self.process_name_toggle.toggled.connect(self.startup_process_name.setEnabled)
             form_layout.addWidget(self.startup_process_name)
 
-            self.window_class_label = QLabel("Window Class:")
-            form_layout.addWidget(self.window_class_label)
+            self.window_class_toggle = QCheckBox("Window Class (comma-separated):")
+            self.window_class_toggle.setChecked(True)
+            form_layout.addWidget(self.window_class_toggle)
             self.startup_window_class = QLineEdit()
             self.startup_window_class.setPlaceholderText("e.g., CabinetWClass")
+            self.window_class_toggle.toggled.connect(self.startup_window_class.setEnabled)
             form_layout.addWidget(self.startup_window_class)
-
-            def _toggle_startup_fields(checked):
-                for w in [self.window_title_label, self.startup_window_title,
-                          self.process_name_label, self.startup_process_name,
-                          self.window_class_label, self.startup_window_class]:
-                    w.setEnabled(checked)
-            self.context_filter_enabled.toggled.connect(_toggle_startup_fields)
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
@@ -893,38 +887,36 @@ SendText("Hello World")"""
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
             self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
-            enabled_filter = self.shortcut_data.get("context_filter_enabled", True)
-            self.context_filter_enabled.setChecked(enabled_filter)
-            for w in [self.window_title_label, self.window_title_edit,
-                      self.process_name_label, self.process_name_edit,
-                      self.window_class_label, self.window_class_edit]:
-                w.setEnabled(enabled_filter)
+            wt_on = self.shortcut_data.get("window_title_enabled", True)
+            pn_on = self.shortcut_data.get("process_name_enabled", True)
+            wc_on = self.shortcut_data.get("window_class_enabled", True)
+            self.window_title_toggle.setChecked(wt_on); self.window_title_edit.setEnabled(wt_on)
+            self.process_name_toggle.setChecked(pn_on); self.process_name_edit.setEnabled(pn_on)
+            self.window_class_toggle.setChecked(wc_on); self.window_class_edit.setEnabled(wc_on)
         elif self.shortcut_type == "exclude":
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
             self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
-            hotkeys = self.shortcut_data.get("excluded_hotkeys", "")
-            self.excluded_hotkeys_edit.setPlainText(hotkeys)
-            enabled_filter = self.shortcut_data.get("context_filter_enabled", True)
-            self.context_filter_enabled.setChecked(enabled_filter)
-            for w in [self.window_title_label, self.window_title_edit,
-                      self.process_name_label, self.process_name_edit,
-                      self.window_class_label, self.window_class_edit]:
-                w.setEnabled(enabled_filter)
+            self.excluded_hotkeys_edit.setPlainText(self.shortcut_data.get("excluded_hotkeys", ""))
+            wt_on = self.shortcut_data.get("window_title_enabled", True)
+            pn_on = self.shortcut_data.get("process_name_enabled", True)
+            wc_on = self.shortcut_data.get("window_class_enabled", True)
+            self.window_title_toggle.setChecked(wt_on); self.window_title_edit.setEnabled(wt_on)
+            self.process_name_toggle.setChecked(pn_on); self.process_name_edit.setEnabled(pn_on)
+            self.window_class_toggle.setChecked(wc_on); self.window_class_edit.setEnabled(wc_on)
         elif self.shortcut_type == "startup":
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
             mode = self.shortcut_data.get("context_mode", "none")
-            idx = {"none": 0, "active": 1, "inactive": 2}.get(mode, 0)
-            self.startup_context_mode.setCurrentIndex(idx)
+            self.startup_context_mode.setCurrentIndex({"none": 0, "active": 1, "inactive": 2}.get(mode, 0))
             self.startup_window_title.setText(self.shortcut_data.get("window_title", ""))
             self.startup_process_name.setText(self.shortcut_data.get("process_name", ""))
             self.startup_window_class.setText(self.shortcut_data.get("window_class", ""))
-            enabled_filter = self.shortcut_data.get("context_filter_enabled", True)
-            self.context_filter_enabled.setChecked(enabled_filter)
-            for w in [self.window_title_label, self.startup_window_title,
-                      self.process_name_label, self.startup_process_name,
-                      self.window_class_label, self.startup_window_class]:
-                w.setEnabled(enabled_filter)
+            wt_on = self.shortcut_data.get("window_title_enabled", True)
+            pn_on = self.shortcut_data.get("process_name_enabled", True)
+            wc_on = self.shortcut_data.get("window_class_enabled", True)
+            self.window_title_toggle.setChecked(wt_on); self.startup_window_title.setEnabled(wt_on)
+            self.process_name_toggle.setChecked(pn_on); self.startup_process_name.setEnabled(pn_on)
+            self.window_class_toggle.setChecked(wc_on); self.startup_window_class.setEnabled(wc_on)
         elif self.shortcut_type == "file":
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.file_path_edit.setText(self.shortcut_data.get("file_path", ""))
@@ -1264,7 +1256,9 @@ SendText("Hello World")"""
                 "window_title": window_title,
                 "process_name": process_name,
                 "window_class": window_class,
-                "context_filter_enabled": self.context_filter_enabled.isChecked(),
+                "window_title_enabled": self.window_title_toggle.isChecked(),
+                "process_name_enabled": self.process_name_toggle.isChecked(),
+                "window_class_enabled": self.window_class_toggle.isChecked(),
                 "action": action,
                 "enabled": enabled
             }
@@ -1284,7 +1278,9 @@ SendText("Hello World")"""
                 "window_title": window_title,
                 "process_name": process_name,
                 "window_class": window_class,
-                "context_filter_enabled": self.context_filter_enabled.isChecked(),
+                "window_title_enabled": self.window_title_toggle.isChecked(),
+                "process_name_enabled": self.process_name_toggle.isChecked(),
+                "window_class_enabled": self.window_class_toggle.isChecked(),
                 "excluded_hotkeys": self.excluded_hotkeys_edit.toPlainText().strip(),
                 "enabled": enabled
             }
@@ -1301,10 +1297,12 @@ SendText("Hello World")"""
                 "description": description,
                 "action": action,
                 "context_mode": mode_map.get(self.startup_context_mode.currentIndex(), "none"),
-                "context_filter_enabled": self.context_filter_enabled.isChecked(),
                 "window_title": self.startup_window_title.text().strip(),
                 "process_name": self.startup_process_name.text().strip(),
                 "window_class": self.startup_window_class.text().strip(),
+                "window_title_enabled": self.window_title_toggle.isChecked(),
+                "process_name_enabled": self.process_name_toggle.isChecked(),
+                "window_class_enabled": self.window_class_toggle.isChecked(),
                 "enabled": enabled
             }
         elif self.shortcut_type == "file":
@@ -2660,9 +2658,9 @@ class AHKShortcutEditor(QMainWindow):
                 return "(" + " || ".join(clauses) + ")"
 
             def append_context_checker(shortcut, func_name):
-                window_title = shortcut.get('window_title', '')
-                process_name = shortcut.get('process_name', '')
-                window_class = shortcut.get('window_class', '')
+                window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
+                process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
+                window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
 
                 conditions = []
                 process_clause = build_condition_clause(process_name, lambda value: f'processName = "{value}"')
@@ -2694,9 +2692,9 @@ class AHKShortcutEditor(QMainWindow):
                 output_lines.append("")
 
             def build_rule_clause(shortcut):
-                window_title = shortcut.get('window_title', '')
-                process_name = shortcut.get('process_name', '')
-                window_class = shortcut.get('window_class', '')
+                window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
+                process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
+                window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
 
                 conditions = []
                 process_clause = build_condition_clause(process_name, lambda value: f'processName = "{value}"')
@@ -2721,8 +2719,6 @@ class AHKShortcutEditor(QMainWindow):
                 has_process = False
                 has_class = False
                 for shortcut in enabled_exclusions:
-                    if not shortcut.get('context_filter_enabled', True):
-                        continue
                     clause = build_rule_clause(shortcut)
                     if clause:
                         rule_clauses.append(clause)
@@ -2764,11 +2760,10 @@ class AHKShortcutEditor(QMainWindow):
                     action = action.replace(',,,', ',,')
 
                     context_mode = shortcut.get('context_mode', 'none')
-                    window_title = shortcut.get('window_title', '')
-                    process_name = shortcut.get('process_name', '')
-                    window_class = shortcut.get('window_class', '')
-                    filter_enabled = shortcut.get('context_filter_enabled', True)
-                    has_context = filter_enabled and context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
+                    window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
+                    process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
+                    window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
+                    has_context = context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
 
                     if has_context:
                         safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
@@ -2788,7 +2783,7 @@ class AHKShortcutEditor(QMainWindow):
             append_exclusion_checker()
 
             # Build exclusion map: which hotkeys are excluded (empty set = all)
-            enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True) and s.get('context_filter_enabled', True)]
+            enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
             exclude_all_hotkeys = any(
                 not s.get('excluded_hotkeys', '').strip() for s in enabled_exclusions
             )
@@ -2854,20 +2849,25 @@ class AHKShortcutEditor(QMainWindow):
                     
                     # Generate unique function name
                     func_name = f"Is{re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Context'))}Context"
-                    filter_enabled = shortcut.get('context_filter_enabled', True)
-                    if filter_enabled:
+                    # Context is active if at least one field is enabled and non-empty
+                    has_context_fields = any([
+                        shortcut.get('window_title_enabled', True) and shortcut.get('window_title', ''),
+                        shortcut.get('process_name_enabled', True) and shortcut.get('process_name', ''),
+                        shortcut.get('window_class_enabled', True) and shortcut.get('window_class', ''),
+                    ])
+                    if has_context_fields:
                         append_context_checker(shortcut, func_name)
 
                     # Add #HotIf directive
                     hotkey = shortcut.get('hotkey', '')
-                    if filter_enabled:
+                    if has_context_fields:
                         if needs_exclusion_guard(hotkey):
                             output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
                         else:
                             output_lines.append(f"#HotIf {func_name}()")
                     elif needs_exclusion_guard(hotkey):
                         output_lines.append(f"#HotIf !IsShortcutExcluded()")
-                    hotif_opened = filter_enabled or needs_exclusion_guard(hotkey)
+                    hotif_opened = has_context_fields or needs_exclusion_guard(hotkey)
                     output_lines.append("")
                     
                     action = shortcut.get('action', '')
