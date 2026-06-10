@@ -630,7 +630,11 @@
             "category": "System",
             "description": "Ctrl+R to Record/Stop, Ctrl+E to Playback",
             "enabled": true,
-            "name": "Macro Recorder (Vim Style)"
+            "name": "Macro Recorder (Vim Style)",
+            "context_mode": "none",
+            "window_title": "PowerShell",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": ""
         },
         {
             "action": "~;:: {\n    static en_to_bn := Map(\n        \"0\", \"০\", \"1\", \"১\", \"2\", \"২\", \"3\", \"৩\", \"4\", \"৪\",\n        \"5\", \"৫\", \"6\", \"৬\", \"7\", \"৭\", \"8\", \"৮\", \"9\", \"৯\"\n    )\n    \n    ih := InputHook(\"V\", \"{Space}{Enter}{Tab}{Esc}\")\n    \n    ; Nested function for character validation\n    ih.OnChar := OnCharHandler\n    OnCharHandler(h, char) {\n        if !(char ~= \"^\\d$\")\n            h.Stop()\n    }\n    \n    ih.Start()\n    ih.Wait()\n    \n    if (ih.EndReason == \"EndKey\" && ih.Input != \"\") {\n        en_digits := ih.Input\n        bn_digits := \"\"\n        Loop Parse, en_digits\n            bn_digits .= en_to_bn[A_LoopField]\n        \n        bs_count := StrLen(en_digits) + 2\n        \n        if (ih.EndKey == \"Enter\") {\n            Send \"{BackSpace}{BackSpace \" . (bs_count - 1) . \"}\"\n            SendInput bn_digits\n            Send \"{Enter}\"\n        } else {\n            Send \"{BackSpace \" . bs_count . \"}\"\n            SendInput bn_digits\n            Send \"{\" . ih.EndKey . \"}\"\n        }\n    }\n}",
