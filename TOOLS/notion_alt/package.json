@@ -1,0 +1,54 @@
+{
+  "name": "notion-alt",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npx convex dev\" \"vite\"",
+    "dev:app": "vite",
+    "dev:convex": "npx convex dev",
+    "build": "tsc -b && vite build",
+    "electron:build": "tsc -b && vite build && electron-builder",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^10.0.3",
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.2",
+    "tailwindcss": "^4.3.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12",
+    "vite-plugin-electron": "^1.0.4",
+    "vite-plugin-electron-renderer": "^1.0.0"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "convex": "^1.41.0",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^1.17.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "build": {
+    "appId": "com.notion.alt",
+    "productName": "Notion Alt",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist",
+      "dist-electron"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
