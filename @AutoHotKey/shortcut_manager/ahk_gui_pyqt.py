@@ -114,7 +114,7 @@ class ShortcutBuilderPopup(QDialog):
             background: {bg};
             color: {fg};
             border: 1px solid {border};
-            border-radius: 5px;
+            border-radius: 0px;
             font-size: 11px;
             min-height: 32px;
             min-width: {w}px;
@@ -125,7 +125,7 @@ class ShortcutBuilderPopup(QDialog):
     KEY_STYLE_ACTIVE = """
         QPushButton {{
             background: #61dafb; color: #1a1a2e;
-            border: 2px solid #61dafb; border-radius: 5px;
+            border: 2px solid #61dafb; border-radius: 0px;
             font-size: 11px; font-weight: bold;
             min-height: 32px; min-width: {w}px;
         }}
@@ -133,7 +133,7 @@ class ShortcutBuilderPopup(QDialog):
     MOD_STYLE = """
         QPushButton {{
             background: {bg}; color: {fg};
-            border: {border}; border-radius: 5px;
+            border: {border}; border-radius: 0px;
             font-size: 13px; font-weight: {fw};
             min-height: 36px; padding: 0 6px;
             min-width: {w}px;
@@ -412,9 +412,9 @@ class ShortcutBuilderPopup(QDialog):
         # ── OK / Cancel ───────────────────────────────────────────────
         btn_row = QHBoxLayout(); btn_row.addStretch()
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet("QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #3a3a5a; border-radius: 6px; padding: 8px 18px; } QPushButton:hover { background: #3a3a5a; color: white; }")
+        cancel_btn.setStyleSheet("QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #3a3a5a; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #3a3a5a; color: white; }")
         ok_btn = QPushButton("  ✓  Apply")
-        ok_btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 6px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #4ac8e8; }")
+        ok_btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #4ac8e8; }")
         ok_btn.clicked.connect(self.accept); cancel_btn.clicked.connect(self.reject)
         btn_row.addWidget(cancel_btn); btn_row.addWidget(ok_btn)
         layout.addLayout(btn_row)
@@ -458,7 +458,7 @@ class AddEditShortcutDialog(QDialog):
         self.setStyleSheet(f"""
             QDialog {{ background-color: #1e1e1e; color: white; }}
             QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
-            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 0px; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
         """)
 
@@ -515,7 +515,7 @@ class AddEditShortcutDialog(QDialog):
                     font-family: inherit;
                     background-color: #3d3d3d;
                     border: 1px solid #555;
-                    border-radius: 5px;
+                    border-radius: 0px;
                     color: white;
                     font-size: 18px;
                 }
@@ -551,7 +551,7 @@ class AddEditShortcutDialog(QDialog):
                     font-family: inherit;
                     background-color: #3d3d3d;
                     border: 1px solid #555;
-                    border-radius: 5px;
+                    border-radius: 0px;
                     color: white;
                     font-size: 18px;
                 }
@@ -716,7 +716,7 @@ SendText("Hello World")"""
                     color: white;
                     border: 1px solid #5a32a3;
                     padding: 5px 10px;
-                    border-radius: 5px;
+                    border-radius: 0px;
                 }
                 QPushButton:hover {
                     background-color: #8250df;
@@ -817,7 +817,7 @@ SendText("Hello World")"""
         search_input.setStyleSheet(f"""
             QLineEdit {{
                 padding: 10px;
-                border-radius: 5px;
+                border-radius: 0px;
                 background: #2d2d2d;
                 border: 1px solid #444;
                 color: white;
@@ -833,7 +833,7 @@ SendText("Hello World")"""
                 background-color: #3d3d3d;
                 border: 1px solid #555;
                 padding: 8px 15px;
-                border-radius: 5px;
+                border-radius: 0px;
                 font-family: '{app_font}';
             }}
             QPushButton:hover {{
@@ -918,7 +918,7 @@ SendText("Hello World")"""
         toc_scroll.setStyleSheet(f"""
             QScrollArea {{ background:#1a1a1a; border:1px solid #444; border-radius:5px; }}
             QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
-            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 0px; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
         """)
         toc_widget = QWidget()
@@ -1063,7 +1063,7 @@ SendText("Hello World")"""
             QPushButton {{
                 background-color: #444;
                 padding: 10px;
-                border-radius: 5px;
+                border-radius: 0px;
                 font-family: '{app_font}';
             }}
             QPushButton:hover {{
@@ -1520,7 +1520,7 @@ class AHKShortcutEditor(QMainWindow):
             QScrollBar::handle:vertical {{
                 background: {CP_CYAN};
                 min-height: 20px;
-                border-radius: 5px;
+                border-radius: 0px;
             }}
 
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -1537,7 +1537,7 @@ class AHKShortcutEditor(QMainWindow):
             QScrollBar::handle:horizontal {{
                 background: {CP_CYAN};
                 min-width: 20px;
-                border-radius: 5px;
+                border-radius: 0px;
             }}
 
             QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -1972,7 +1972,7 @@ class AHKShortcutEditor(QMainWindow):
                     font-weight: bold;
                     margin: 12px 0 3px 0;
                     padding: 3px 10px;
-                    border-radius: 2px;
+                    border-radius: 0px;
                     background: {CP_PANEL};
                     border-bottom: 1px solid {CP_DIM};
                 }}
@@ -2217,7 +2217,7 @@ class AHKShortcutEditor(QMainWindow):
 
         return f'''
         <div class="shortcut-item {indent_class}">
-            <table width="100%" cellpadding="3" cellspacing="0" style="background-color: {bg_color}; border-radius: 5px; border-collapse: separate;">
+            <table width="100%" cellpadding="3" cellspacing="0" style="background-color: {bg_color}; border-radius: 0px; border-collapse: separate;">
                 <tr>
                     <td width="40" valign="middle">
                         <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;">
