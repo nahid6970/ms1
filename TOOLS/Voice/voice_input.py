@@ -220,7 +220,8 @@ class VoiceApp(QMainWindow):
                 "compact_top_padding": 0,
                 "compact_bottom_padding": 0,
                 "expanded_top_padding": 0,
-                "expanded_bottom_padding": 0
+                "expanded_bottom_padding": 0,
+                "hotkey": "RightAlt+Space"
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -264,6 +265,9 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "expanded_bottom_padding" not in self.config:
             self.config["expanded_bottom_padding"] = 0
+            self.save_config()
+        if "hotkey" not in self.config:
+            self.config["hotkey"] = "RightAlt+Space"
             self.save_config()
 
 
@@ -416,8 +420,9 @@ class VoiceApp(QMainWindow):
         return super().eventFilter(obj, event)
 
     def show_help(self):
+        hotkey = self.config.get("hotkey", "RightAlt+Space")
         QMessageBox.information(self, "Shortcut",
-            "Global Hotkey: Alt + H\n"
+            f"Global Hotkey: {hotkey}\n"
             "SPC mode: Space stops recording\n"
             "Live mode: keeps recording until stopped")
 
@@ -535,6 +540,12 @@ class VoiceApp(QMainWindow):
         layout.addWidget(QLabel("Hide record button:"), 9, 0)
         layout.addWidget(hide_rec_check, 9, 1)
 
+        hotkey_combo = QComboBox()
+        hotkey_combo.addItems(list(self.HOTKEY_OPTIONS.keys()))
+        hotkey_combo.setCurrentText(self.config.get("hotkey", "RightAlt+Space"))
+        layout.addWidget(QLabel("Global hotkey:"), 9, 2)
+        layout.addWidget(hotkey_combo, 9, 3)
+
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
         layout.addWidget(buttons, 10, 0, 1, 4)
@@ -577,6 +588,10 @@ class VoiceApp(QMainWindow):
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
+            new_hotkey = hotkey_combo.currentText()
+            if new_hotkey != self.config.get("hotkey", "RightAlt+Space"):
+                self.config["hotkey"] = new_hotkey
+                self.restart_hotkey_listener()
             self._apply_window_layout(preserve_right_edge=True)
             self.save_config()
 
@@ -680,28 +695,50 @@ class VoiceApp(QMainWindow):
         self.save_config()
         super().closeEvent(event)
 
+    # Map display names to (modifier vk, trigger vk or char)
+    HOTKEY_OPTIONS = {
+        "RightAlt+Space": (165, 32),   # VK_RMENU, VK_SPACE
+        "RightAlt+H":     (165, ord('h')),
+        "RightCtrl+Space":(163, 32),   # VK_RCONTROL, VK_SPACE
+        "RightCtrl+H":    (163, ord('h')),
+        "Alt+H":          (None, ord('h')),  # any alt + h via HotKey.parse
+    }
+
     def setup_global_hotkey(self):
-        def on_activate():
-            self.toggle_record_requested.emit()
+        hotkey_name = self.config.get("hotkey", "RightAlt+Space")
+        mod_vk, trig_vk = self.HOTKEY_OPTIONS.get(hotkey_name, self.HOTKEY_OPTIONS["RightAlt+Space"])
+        self._hotkey_mod_pressed = False
+
+        def _vk(key):
+            try:
+                return key.vk
+            except AttributeError:
+                try:
+                    return key.value.vk
+                except AttributeError:
+                    return None
 
         def on_press(key):
-            if key != pynput_keyboard.Key.space:
-                return
-            self.space_press_requested.emit()
+            kv = _vk(key)
+            if mod_vk is not None and kv == mod_vk:
+                self._hotkey_mod_pressed = True
+            elif self._hotkey_mod_pressed and kv == trig_vk:
+                self.toggle_record_requested.emit()
+            elif kv == 32:  # space for SPC mode
+                self.space_press_requested.emit()
 
-        def for_canonical(f):
-            return lambda k: f(listener.canonical(k))
+        def on_release(key):
+            if mod_vk is not None and _vk(key) == mod_vk:
+                self._hotkey_mod_pressed = False
 
-        hotkey = pynput_keyboard.HotKey(pynput_keyboard.HotKey.parse('<alt>+h'), on_activate)
-
-        def combined_on_press(k):
-            for_canonical(hotkey.press)(k)
-            on_press(k)
-
-        listener = pynput_keyboard.Listener(
-            on_press=combined_on_press,
-            on_release=for_canonical(hotkey.release))
+        listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
         listener.start()
+        self._hotkey_listener = listener
+
+    def restart_hotkey_listener(self):
+        if hasattr(self, '_hotkey_listener'):
+            self._hotkey_listener.stop()
+        self.setup_global_hotkey()
 
     def toggle_language(self):
         new_lang = "bn-BD" if self.config["language"] == "en-US" else "en-US"

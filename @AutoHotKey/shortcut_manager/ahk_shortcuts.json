@@ -326,7 +326,7 @@
             "description": "",
             "hotkey": "RAlt & Space",
             "name": "Remove Spaces and White spaces",
-            "enabled": true
+            "enabled": false
         }
     ],
     "text_shortcuts": [
