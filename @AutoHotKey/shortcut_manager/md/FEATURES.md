@@ -62,18 +62,20 @@
 
 **Status:** Complete
 
-**Description:** Global app/window exclusions that prevent shortcuts from firing in conflicting applications.
+**Description:** Prevents AHK shortcuts from firing in specific apps/windows.
 
 **Implementation:**
 
 - Stored in `exclusion_rules`
-- Generates `IsShortcutExcluded()`
-- Applied to script, context, text, and file shortcuts
+- Generates `IsShortcutExcluded()` function using `WinGetProcessName`, `WinGetTitle`, `WinGetClass`
+- `excluded_hotkeys` field (one per line): if filled, only those hotkeys are guarded; if blank, all script/context shortcuts are guarded
+- Applied only to script shortcuts and context shortcuts — text and file hotstrings are never excluded
+- Each script shortcut gets its own `#HotIf !IsShortcutExcluded()` / `#HotIf` pair only when needed
 
 **Usage:**
 
-- Add an exclusion rule for an app with built-in shortcuts.
-- Match by title, process, or class.
+- Add an exclusion rule, set process/title/class to match the app.
+- Optionally enter specific hotkeys to exclude (e.g. `^r`). Leave blank to exclude all.
 - Regenerate the script.
 
 ## Text Shortcuts

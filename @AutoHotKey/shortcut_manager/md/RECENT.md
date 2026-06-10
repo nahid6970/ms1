@@ -42,6 +42,22 @@ All sessions are recorded here. Do not archive old entries.
 - `md/PROBLEMS_AND_FIXES.md`
 - `md/RECENT.md`
 
+## 2026-06-10 17:49 - Per-hotkey exclusion: excluded_hotkeys field added to exclusion rules
+
+**What We Accomplished:**
+
+- Added `excluded_hotkeys` field to exclusion rules (one hotkey per line, e.g. `^r`, `^s`). Leave blank to exclude ALL shortcuts in matching app.
+- Updated exclusion rule dialog: right panel now shows a text area for entering excluded hotkeys instead of a static info label.
+- Rewrote script shortcuts generator: each shortcut only gets `#HotIf !IsShortcutExcluded()` guard if it matches an exclusion rule's hotkey list (or if any rule has blank hotkeys = exclude all).
+- Updated context shortcuts generator same way: `#HotIf` drops `&& !IsShortcutExcluded()` unless the hotkey needs it.
+- Updated exclusion rule display to show `🚫 [process | hotkeys]` in the list.
+- Fixed existing Chrome exclusion rule JSON: cleared `window_title` ("vlr"), added `excluded_hotkeys: ""` so all shortcuts are excluded in Chrome.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `ahk_shortcuts.json`
+
 ## 2026-06-10 17:42 - Exclusion rule fixes: text shortcuts unwrapped + JSON data corrected
 
 **What We Accomplished:**
