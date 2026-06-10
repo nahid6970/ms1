@@ -1433,21 +1433,6 @@ class SettingsDialog(QDialog):
                 padding: 4px;
                 min-height: 24px;
             }}
-            QComboBox::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 20px;
-                border-left-width: 1px;
-                border-left-color: {CP_DIM};
-                border-left-style: solid;
-            }}
-            QComboBox::down-arrow {{
-                image: none;
-                border-top: 5px solid {CP_CYAN};
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                margin-top: 2px;
-            }}
             QComboBox QAbstractItemView {{
                 background-color: {CP_PANEL};
                 color: {CP_TEXT};
@@ -1576,7 +1561,7 @@ class AHKShortcutEditor(QMainWindow):
                 selection-color: #000000;
             }}
 
-            QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QComboBox:focus {{
+            QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus {{
                 border: 1px solid {CP_CYAN};
             }}
 
@@ -1686,22 +1671,6 @@ class AHKShortcutEditor(QMainWindow):
                 background: none;
             }}
 
-            /* Specialized ComboBox dropdown styling */
-            QComboBox::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 20px;
-                border-left-width: 1px;
-                border-left-color: {CP_DIM};
-                border-left-style: solid;
-            }}
-            QComboBox::down-arrow {{
-                image: none;
-                border-top: 5px solid {CP_CYAN};
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                margin-top: 2px;
-            }}
             QComboBox QAbstractItemView {{
                 background-color: {CP_PANEL};
                 color: {CP_TEXT};
