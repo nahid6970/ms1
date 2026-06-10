@@ -598,9 +598,9 @@ class AddEditShortcutDialog(QDialog):
             # Context fields — checkbox + input on same row
             def _ctx_row(toggle_attr, edit_attr, label, placeholder):
                 row = QHBoxLayout()
-                toggle = QCheckBox(label)
+                toggle = QCheckBox()
                 toggle.setChecked(True)
-                toggle.setFixedWidth(160)
+                toggle.setFixedWidth(24)
                 edit = QLineEdit()
                 edit.setPlaceholderText(placeholder)
                 toggle.toggled.connect(edit.setEnabled)
@@ -618,9 +618,9 @@ class AddEditShortcutDialog(QDialog):
 
             def _excl_row(toggle_attr, edit_attr, label, placeholder):
                 row = QHBoxLayout()
-                toggle = QCheckBox(label)
+                toggle = QCheckBox()
                 toggle.setChecked(True)
-                toggle.setFixedWidth(160)
+                toggle.setFixedWidth(24)
                 edit = QLineEdit()
                 edit.setPlaceholderText(placeholder)
                 toggle.toggled.connect(edit.setEnabled)
@@ -665,9 +665,9 @@ class AddEditShortcutDialog(QDialog):
 
             def _startup_row(toggle_attr, edit_attr, label, placeholder):
                 row = QHBoxLayout()
-                toggle = QCheckBox(label)
+                toggle = QCheckBox()
                 toggle.setChecked(True)
-                toggle.setFixedWidth(160)
+                toggle.setFixedWidth(24)
                 edit = QLineEdit()
                 edit.setPlaceholderText(placeholder)
                 toggle.toggled.connect(edit.setEnabled)
