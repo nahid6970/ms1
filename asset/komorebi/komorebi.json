@@ -380,11 +380,6 @@
             "kind": "Exe",
             "id": "JDownloader2.exe",
             "matching_strategy": "Legacy"
-        },
-        {
-            "kind": "Exe",
-            "id": "explorer.exe",
-            "matching_strategy": "Legacy"
         }
     ],
     "gui_settings": {
