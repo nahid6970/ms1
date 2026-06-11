@@ -244,7 +244,7 @@ function renderLinks() {
 
         item.innerHTML = `
             <div class="favicon-box" style="${iconBoxStyle}">
-                <img src="${link.icon || ''}" style="${imgStyle}" onerror="this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'">
+                <img src="${link.icon || ''}" style="${imgStyle}" onerror="this.onerror=null; this.src='https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${link.url}&size=64'; this.onerror=() => { this.onerror=null; this.src='icons/icon48.png'; };">
             </div>
         `;
 

@@ -81,15 +81,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Initial health check replaced by connection check
-(async () => {
-    try {
-        await convexFetch("query", "functions:get", { extensionName: "health_check" });
-        console.log('Convex connection healthy');
-    } catch (e) {
-        console.log('Convex not available or not initialized:', e.message);
-    }
-})();
+
 
 chrome.runtime.onInstalled.addListener(() => {
     console.log("Highlighter Extension Installed");
