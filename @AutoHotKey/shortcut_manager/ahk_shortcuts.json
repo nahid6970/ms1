@@ -723,6 +723,20 @@
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
             "window_title": "kiro"
+        },
+        {
+            "action": "SendText(\"/usage\")\nSend(\"{Enter}\")",
+            "category": "Terminal",
+            "description": "Resume previous Gemini chat session",
+            "enabled": true,
+            "hotkey": "^z",
+            "name": "Kiro Usage",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "kiro",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true
         }
     ],
     "exclusion_rules": [],
