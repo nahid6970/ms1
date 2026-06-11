@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog, colorchooser
-from PIL import ImageGrab, Image
+from PIL import ImageGrab, Image, ImageTk
 import os
 import json
 from datetime import datetime
@@ -38,14 +38,16 @@ def save_folders(folders):
 
 class RegionSelector:
     def __init__(self):
+        self.screen_img = self._capture_screen()
         self.root = tk.Tk()
-        self.root.attributes('-alpha', 0.5) 
         self.root.attributes('-fullscreen', True)
         self.root.attributes('-topmost', True)
         self.root.config(cursor="cross")
 
-        self.canvas = tk.Canvas(self.root, cursor="cross", bg="black", highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, cursor="cross", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
+        self._photo = ImageTk.PhotoImage(self.screen_img)
+        self.canvas.create_image(0, 0, image=self._photo, anchor="nw")
 
         self.start_x = None
         self.start_y = None
@@ -60,6 +62,13 @@ class RegionSelector:
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas.bind("<Motion>", self.on_mouse_move)
         self.root.bind("<Escape>", lambda e: self.root.destroy())
+
+    def _capture_screen(self):
+        try:
+            return ImageGrab.grab(all_screens=True, include_layered_windows=True)
+        except TypeError:
+            # Older Pillow versions do not support include_layered_windows.
+            return ImageGrab.grab(all_screens=True)
 
     def on_mouse_move(self, event):
         w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
@@ -752,9 +761,7 @@ def main():
         selection = selector.get_selection()
         if not selection: return
 
-        import time
-        time.sleep(0.1)
-        img = ImageGrab.grab(bbox=selection, all_screens=True)
+        img = selector.screen_img.crop(selection)
 
         chooser = FolderChooser(folders, img)
         folder = chooser.get_choice()
