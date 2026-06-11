@@ -40,15 +40,36 @@ This project uses **Convex** as a hosted backend for persistent storage and easy
 ### 2. Add to `background.js`
 
 ```javascript
-import { ConvexHttpClient } from "https://esm.sh/convex@1.16.0/browser";
-
 const CONVEX_URL = "YOUR_CONVEX_URL_HERE";
 const EXTENSION_NAME = 'your_extension_unique_name'; // must be unique per extension
-const client = new ConvexHttpClient(CONVEX_URL);
+
+async function convexFetch(type, path, args) {
+  const url = `${CONVEX_URL}/api/${type}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      path,
+      args,
+      format: "json"
+    })
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Convex HTTP error (${response.status}): ${text}`);
+  }
+  const result = await response.json();
+  if (result && (result.status === "error" || result.errorMessage !== undefined)) {
+    throw new Error(result.errorMessage || "Convex error");
+  }
+  return result.value;
+}
 
 async function sendDataToConvex(data) {
   try {
-    const result = await client.mutation("functions:save", { extensionName: EXTENSION_NAME, data });
+    const result = await convexFetch("mutation", "functions:save", { extensionName: EXTENSION_NAME, data });
     return { success: true, result };
   } catch (error) {
     return { success: false, error: error.message };
@@ -57,7 +78,7 @@ async function sendDataToConvex(data) {
 
 async function loadDataFromConvex() {
   try {
-    const data = await client.query("functions:get", { extensionName: EXTENSION_NAME });
+    const data = await convexFetch("query", "functions:get", { extensionName: EXTENSION_NAME });
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error.message };
