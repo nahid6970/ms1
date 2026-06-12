@@ -255,6 +255,7 @@ The state is managed in a central object synced with persistence files:
     *   **[Click-to-Edit Cursor Positioning](md/CLICK_TO_EDIT_CURSOR_POSITIONING.md):** Cursor mapping between preview and edit mode (RESOLVED).
 
 ### Backend & Core Systems
+- **[AI API](AI_API.md):** REST endpoints for AI agents to read/write sheets and cells (`/ai/*`).
 - **[Core Systems](md/CORE_SYSTEMS.md):** Font system, Load timing, Height adjustment, Cursors.
 - **[PDF & Static Export](md/CELL_PDF_EXPORT_FEATURE.md):** Visual capture and standalone generation.
 - **[Clipboard Tools](md/COPY_SHEET_CONTENT.md):** Sheet content copying logic.

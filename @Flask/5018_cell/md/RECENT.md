@@ -1,5 +1,33 @@
 # Recent Development Log
 
+## [2026-06-12 18:10] - AI API Endpoints for Sheet/Cell Access
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🎯 AI-Accessible REST API (`/ai/*`)
+- Added 6 new endpoints to `app.py` so any AI agent can read and modify sheet/cell data over HTTP.
+- `GET /ai/schema` — returns all sheets with arrayIndex, customIndex, name, category, colCount, rowCount.
+- `GET /ai/sheet/<id>` — returns full sheet (all rows, columns, cellStyles).
+- `GET /ai/cell/<id>/<row>/<col>` — reads a single cell value + style.
+- `POST /ai/cell/<id>/<row>/<col>` — updates a single cell `{"value": "..."}`.
+- `POST /ai/cells` — batch update multiple cells across any sheets.
+- `GET /ai/find?sheet=<id>&q=<text>` — case-insensitive cell search, returns row/col indexes.
+- `<id>` accepts both **arrayIndex** (integer) and **customIndex** (14-digit timestamp string).
+- Added `AI_API.md` to project root as a reference doc for AI agents.
+
+**Files Modified:**
+- `app.py` — Added `resolve_sheet()` helper and all 6 `/ai/*` endpoints.
+- `AI_API.md` — New file at project root with full usage guide and examples.
+
+**Current Status:**
+- ✅ All AI endpoints live and functional after Flask restart.
+- ✅ customIndex lookup works alongside arrayIndex.
+- ✅ Writes save to disk and auto-export static HTML.
+
+---
+
 ## [2026-05-20 00:05] - F1 UI Compacting, Drag Indicator & Export Sheet Links
 
 **Session Duration:** 0.4 hours
