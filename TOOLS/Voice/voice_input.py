@@ -4,9 +4,7 @@ import webbrowser
 from pathlib import Path
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
                              QLabel, QPushButton, QComboBox, QCheckBox, QMessageBox,
-                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit,
-                             QGridLayout,
-                             QSizePolicy)
+                             QDialog, QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit)
 from PyQt6.QtCore import Qt, QThread, QEvent, pyqtSignal, QTimer
 import pyperclip
 from pynput import keyboard as pynput_keyboard
@@ -156,7 +154,7 @@ class ContinuousThread(QThread):
         while not self._stop:
             try:
                 with sr.Microphone() as source:
-                    audio = recognizer.listen(source, timeout=1, phrase_time_limit=self.phrase_time_limit)
+                    audio = recognizer.listen(source, timeout=3, phrase_time_limit=self.phrase_time_limit)
                 if self._stop:
                     break
                 text = recognizer.recognize_google(audio, language=self.lang_getter())
@@ -209,19 +207,7 @@ class VoiceApp(QMainWindow):
                 "border_color": CP_RED,
                 "open_google": False,
                 "copy_to_clipboard": True,
-                "compact_view": False,
-                "status_btn_width": 8,
-                "status_btn_height": 18,
-                "status_lang_gap": 2,
-                "compact_left_padding": 0,
-                "compact_right_padding": 0,
-                "expanded_left_padding": 0,
-                "expanded_right_padding": 0,
-                "compact_top_padding": 0,
-                "compact_bottom_padding": 0,
-                "expanded_top_padding": 0,
-                "expanded_bottom_padding": 0,
-                "hotkey": "RightAlt+Space"
+                "compact_view": False
             }
             self.save_config()
         if "copy_to_clipboard" not in self.config:
@@ -232,42 +218,6 @@ class VoiceApp(QMainWindow):
             self.save_config()
         if "compact_view" not in self.config:
             self.config["compact_view"] = False
-            self.save_config()
-        if "status_btn_width" not in self.config:
-            self.config["status_btn_width"] = 8
-            self.save_config()
-        if "status_btn_height" not in self.config:
-            self.config["status_btn_height"] = 18
-            self.save_config()
-        if "status_lang_gap" not in self.config:
-            self.config["status_lang_gap"] = 2
-            self.save_config()
-        if "compact_left_padding" not in self.config:
-            self.config["compact_left_padding"] = 0
-            self.save_config()
-        if "compact_right_padding" not in self.config:
-            self.config["compact_right_padding"] = 0
-            self.save_config()
-        if "expanded_left_padding" not in self.config:
-            self.config["expanded_left_padding"] = 0
-            self.save_config()
-        if "expanded_right_padding" not in self.config:
-            self.config["expanded_right_padding"] = 0
-            self.save_config()
-        if "compact_top_padding" not in self.config:
-            self.config["compact_top_padding"] = 0
-            self.save_config()
-        if "compact_bottom_padding" not in self.config:
-            self.config["compact_bottom_padding"] = 0
-            self.save_config()
-        if "expanded_top_padding" not in self.config:
-            self.config["expanded_top_padding"] = 0
-            self.save_config()
-        if "expanded_bottom_padding" not in self.config:
-            self.config["expanded_bottom_padding"] = 0
-            self.save_config()
-        if "hotkey" not in self.config:
-            self.config["hotkey"] = "RightAlt+Space"
             self.save_config()
 
 
@@ -288,46 +238,22 @@ class VoiceApp(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         layout = QHBoxLayout(central)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.toolbar_layout = layout
+        layout.setSpacing(4)
+        layout.setContentsMargins(8, 2, 8, 2)
 
         self.status_btn = QPushButton("")
-        self.status_btn.setObjectName("status")
-        self.status_btn.setFixedSize(
-            self.config.get("status_btn_width", 8),
-            self.config.get("status_btn_height", 18),
-        )
-        self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.status_btn.setMinimumSize(self.status_btn.size())
-        self.status_btn.setMaximumSize(self.status_btn.size())
-        self.status_btn.setFlat(True)
-        self.status_btn.setAutoDefault(False)
+        self.status_btn.setObjectName("help")
+        self.status_btn.setFixedWidth(24)
         self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.status_btn.clicked.connect(self.toggle_record)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.status_btn.setStyleSheet(f"""
-            QPushButton#status {{
-                background-color: {CP_GREEN};
-                border: 1px solid {CP_GREEN};
-                padding: 0px;
-                margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
-            }}
-            QPushButton#status:hover {{
-                background-color: {CP_GREEN};
-                border: 1px solid {CP_GREEN};
-            }}
-        """)
+        self.status_btn.setStyleSheet(f"background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0;")
         self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
-        layout.addSpacing(self.config.get("status_lang_gap", 2))
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
+        self.lang_btn.setFixedWidth(36)
         self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.lang_btn.clicked.connect(self.toggle_language)
         self._update_lang_btn()
@@ -335,6 +261,7 @@ class VoiceApp(QMainWindow):
 
         self.google_btn = QPushButton()
         self.google_btn.setObjectName("toggle")
+        self.google_btn.setFixedWidth(24)
         self.google_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.google_btn.clicked.connect(self.toggle_google_search)
         self._update_google_btn()
@@ -342,6 +269,7 @@ class VoiceApp(QMainWindow):
 
         self.copy_btn = QPushButton()
         self.copy_btn.setObjectName("toggle")
+        self.copy_btn.setFixedWidth(24)
         self.copy_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.copy_btn.clicked.connect(self.toggle_copy_to_clipboard)
         self._update_copy_btn()
@@ -353,24 +281,23 @@ class VoiceApp(QMainWindow):
         layout.addWidget(self.record_btn)
 
         self.help_btn = QPushButton("?")
-        self.help_btn.setObjectName("help")
+        self.help_btn.setObjectName("help"); self.help_btn.setFixedWidth(24)
         self.help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.help_btn.clicked.connect(self.show_help)
         layout.addWidget(self.help_btn)
 
         self.settings_btn = QPushButton("⚙")
-        self.settings_btn.setObjectName("help")
+        self.settings_btn.setObjectName("help"); self.settings_btn.setFixedWidth(24)
         self.settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.settings_btn.clicked.connect(self.show_settings)
         layout.addWidget(self.settings_btn)
 
         self.close_btn = QPushButton("✕")
-        self.close_btn.setObjectName("help")
+        self.close_btn.setObjectName("help"); self.close_btn.setFixedWidth(24)
         self.close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.close_btn.clicked.connect(self.close)
         layout.addWidget(self.close_btn)
 
-        self._apply_button_geometry()
         self._apply_window_layout(preserve_right_edge=False)
 
     def update_style(self):
@@ -380,14 +307,13 @@ class VoiceApp(QMainWindow):
                 background-color: {CP_BG}; 
                 border: 2px solid {border_color};
             }}
-        QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 0px 4px; margin: 0px; font-weight: bold; min-height: 18px; max-height: 18px; }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 0px 2px; }}
-            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0px 2px; font-weight: bold; }}
-            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0px 2px; }}
-            QPushButton#status {{ background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0px; margin: 0px; min-width: 8px; max-width: 8px; min-height: 18px; max-height: 18px; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px 4px; }}
+            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0; font-weight: bold; }}
+            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0; max-height: 24px; }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -420,9 +346,8 @@ class VoiceApp(QMainWindow):
         return super().eventFilter(obj, event)
 
     def show_help(self):
-        hotkey = self.config.get("hotkey", "RightAlt+Space")
         QMessageBox.information(self, "Shortcut",
-            f"Global Hotkey: {hotkey}\n"
+            "Global Hotkey: Alt + H\n"
             "SPC mode: Space stops recording\n"
             "Live mode: keeps recording until stopped")
 
@@ -430,125 +355,52 @@ class VoiceApp(QMainWindow):
         dialog = QDialog(self)
         dialog.setWindowTitle("Settings")
         dialog.setStyleSheet(self.styleSheet())
-        layout = QGridLayout(dialog)
-        layout.setHorizontalSpacing(12)
-        layout.setVerticalSpacing(8)
-        layout.setColumnStretch(0, 1)
-        layout.setColumnStretch(1, 1)
+        layout = QFormLayout(dialog)
 
         spin = QSpinBox(); spin.setRange(1, 300)
         spin.setValue(self.config.get("phrase_time_limit", 10)); spin.setSuffix(" sec")
-        layout.addWidget(QLabel("Max speak time:"), 0, 0)
-        layout.addWidget(spin, 0, 1)
+        layout.addRow("Max speak time:", spin)
 
         # X Position
         x_spin = QSpinBox(); x_spin.setRange(0, 10000)
         x_spin.setValue(self.config.get("x", 100))
-        layout.addWidget(QLabel("Window X:"), 1, 0)
-        layout.addWidget(x_spin, 1, 1)
+        layout.addRow("Window X:", x_spin)
 
         # Y Position
         y_spin = QSpinBox(); y_spin.setRange(0, 10000)
         y_spin.setValue(self.config.get("y", 100))
-        layout.addWidget(QLabel("Window Y:"), 2, 0)
-        layout.addWidget(y_spin, 2, 1)
+        layout.addRow("Window Y:", y_spin)
 
         # Border Color
         color_edit = QLineEdit()
         color_edit.setText(self.config.get("border_color", CP_RED))
-        layout.addWidget(QLabel("Border Color (Hex):"), 3, 0)
-        layout.addWidget(color_edit, 3, 1)
+        layout.addRow("Border Color (Hex):", color_edit)
 
         pin_check = QCheckBox()
         pin_check.setChecked(self.config.get("always_on_top", False))
-        layout.addWidget(QLabel("Always on top:"), 4, 0)
-        layout.addWidget(pin_check, 4, 1)
+        layout.addRow("Always on top:", pin_check)
 
         taskbar_check = QCheckBox()
         taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
-        layout.addWidget(QLabel("Hide from taskbar:"), 5, 0)
-        layout.addWidget(taskbar_check, 5, 1)
-
-        compact_left_pad = QSpinBox()
-        compact_left_pad.setRange(0, 50)
-        compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
-        layout.addWidget(QLabel("Compact left padding:"), 0, 2)
-        layout.addWidget(compact_left_pad, 0, 3)
-
-        status_lang_gap = QSpinBox()
-        status_lang_gap.setRange(0, 20)
-        status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
-        layout.addWidget(QLabel("Status/lang gap:"), 1, 2)
-        layout.addWidget(status_lang_gap, 1, 3)
-
-        compact_right_pad = QSpinBox()
-        compact_right_pad.setRange(0, 50)
-        compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
-        layout.addWidget(QLabel("Compact right padding:"), 2, 2)
-        layout.addWidget(compact_right_pad, 2, 3)
-
-        compact_top_pad = QSpinBox()
-        compact_top_pad.setRange(0, 50)
-        compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
-        layout.addWidget(QLabel("Compact top padding:"), 3, 2)
-        layout.addWidget(compact_top_pad, 3, 3)
-
-        compact_bottom_pad = QSpinBox()
-        compact_bottom_pad.setRange(0, 50)
-        compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
-        layout.addWidget(QLabel("Compact bottom padding:"), 4, 2)
-        layout.addWidget(compact_bottom_pad, 4, 3)
-
-        expanded_left_pad = QSpinBox()
-        expanded_left_pad.setRange(0, 50)
-        expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
-        layout.addWidget(QLabel("Expanded left padding:"), 6, 0)
-        layout.addWidget(expanded_left_pad, 6, 1)
-
-        expanded_right_pad = QSpinBox()
-        expanded_right_pad.setRange(0, 50)
-        expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
-        layout.addWidget(QLabel("Expanded right padding:"), 6, 2)
-        layout.addWidget(expanded_right_pad, 6, 3)
-
-        expanded_top_pad = QSpinBox()
-        expanded_top_pad.setRange(0, 50)
-        expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
-        layout.addWidget(QLabel("Expanded top padding:"), 7, 0)
-        layout.addWidget(expanded_top_pad, 7, 1)
-
-        expanded_bottom_pad = QSpinBox()
-        expanded_bottom_pad.setRange(0, 50)
-        expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
-        layout.addWidget(QLabel("Expanded bottom padding:"), 7, 2)
-        layout.addWidget(expanded_bottom_pad, 7, 3)
+        layout.addRow("Hide from taskbar:", taskbar_check)
 
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
-        layout.addWidget(QLabel("Stop on Space (SPC mode):"), 8, 0)
-        layout.addWidget(spc_check, 8, 1)
+        layout.addRow("Stop on Space (SPC mode):", spc_check)
 
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
         engine_combo.setCurrentIndex(idx)
-        layout.addWidget(QLabel("Mode:"), 8, 2)
-        layout.addWidget(engine_combo, 8, 3)
+        layout.addRow("Mode:", engine_combo)
 
         hide_rec_check = QCheckBox()
         hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
-        layout.addWidget(QLabel("Hide record button:"), 9, 0)
-        layout.addWidget(hide_rec_check, 9, 1)
-
-        hotkey_combo = QComboBox()
-        hotkey_combo.addItems(list(self.HOTKEY_OPTIONS.keys()))
-        hotkey_combo.setCurrentText(self.config.get("hotkey", "RightAlt+Space"))
-        layout.addWidget(QLabel("Global hotkey:"), 9, 2)
-        layout.addWidget(hotkey_combo, 9, 3)
+        layout.addRow("Hide record button:", hide_rec_check)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
-        layout.addWidget(buttons, 10, 0, 1, 4)
+        layout.addRow(buttons)
 
         if dialog.exec():
             self.config["phrase_time_limit"] = spin.value()
@@ -576,23 +428,10 @@ class VoiceApp(QMainWindow):
 
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
-            self.config["compact_left_padding"] = compact_left_pad.value()
-            self.config["compact_right_padding"] = compact_right_pad.value()
-            self.config["compact_top_padding"] = compact_top_pad.value()
-            self.config["compact_bottom_padding"] = compact_bottom_pad.value()
-            self.config["status_lang_gap"] = status_lang_gap.value()
-            self.config["expanded_left_padding"] = expanded_left_pad.value()
-            self.config["expanded_right_padding"] = expanded_right_pad.value()
-            self.config["expanded_top_padding"] = expanded_top_pad.value()
-            self.config["expanded_bottom_padding"] = expanded_bottom_pad.value()
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
-            new_hotkey = hotkey_combo.currentText()
-            if new_hotkey != self.config.get("hotkey", "RightAlt+Space"):
-                self.config["hotkey"] = new_hotkey
-                self.restart_hotkey_listener()
-            self._apply_window_layout(preserve_right_edge=True)
+                self._apply_window_layout(preserve_right_edge=True)
             self.save_config()
 
     def _apply_window_flags(self):
@@ -604,83 +443,25 @@ class VoiceApp(QMainWindow):
         self.setWindowFlags(flags)
 
     def _base_window_width(self):
-        return self._expanded_window_width()
+        return 250 if self.config.get("hide_record_btn", False) else 340
 
     def _compact_window_width(self):
-        return (
-            self.config.get("compact_left_padding", 0)
-            + 8
-            + self.config.get("status_lang_gap", 2)
-            + 26
-            + self.config.get("compact_right_padding", 0)
-        )
-
-    def _compact_window_height(self):
-        return 20 + self.config.get("compact_top_padding", 0) + self.config.get("compact_bottom_padding", 0)
-
-    def _expanded_window_width(self):
-        width = (
-            self.config.get("expanded_left_padding", 0)
-            + 8
-            + self.config.get("status_lang_gap", 2)
-            + 28
-            + 18
-            + 18
-            + 18
-            + 18
-            + 18
-            + 18
-            + self.config.get("expanded_right_padding", 0)
-        )
-        if not self.config.get("hide_record_btn", False):
-            width += 58
-        return width
-
-    def _expanded_window_height(self):
-        return 20 + self.config.get("expanded_top_padding", 0) + self.config.get("expanded_bottom_padding", 0)
-
-    def _apply_button_geometry(self):
-        compact = self._compact_view
-        self.status_btn.setFixedSize(8, 18)
-        self.lang_btn.setFixedSize(26 if compact else 28, 18)
-        self.google_btn.setFixedSize(18, 18)
-        self.copy_btn.setFixedSize(18, 18)
-        self.help_btn.setFixedSize(18, 18)
-        self.settings_btn.setFixedSize(18, 18)
-        self.close_btn.setFixedSize(18, 18)
-        if compact:
-            self.record_btn.setFixedSize(0, 0)
-        else:
-            self.record_btn.setFixedSize(58, 18)
-
-    def _visible_toolbar_width(self, compact=None):
-        if compact is None:
-            compact = self._compact_view
-        if compact:
-            return self._compact_window_width()
-        return self._expanded_window_width()
+        return 96
 
     def _apply_window_layout(self, preserve_right_edge=True):
         compact = self._compact_view
-        self._apply_button_geometry()
-        left = self.config.get("compact_left_padding", 0) if compact else self.config.get("expanded_left_padding", 0)
-        right = self.config.get("compact_right_padding", 0) if compact else self.config.get("expanded_right_padding", 0)
-        top = self.config.get("compact_top_padding", 0) if compact else self.config.get("expanded_top_padding", 0)
-        bottom = self.config.get("compact_bottom_padding", 0) if compact else self.config.get("expanded_bottom_padding", 0)
-        self.toolbar_layout.setContentsMargins(left, top, right, bottom)
         self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
         for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
             btn.setVisible(not compact)
-        new_width = self._visible_toolbar_width(compact)
-        new_height = self._compact_window_height() if compact else self._expanded_window_height()
+        new_width = self._compact_window_width() if compact else self._base_window_width()
         if preserve_right_edge:
             geo = self.frameGeometry()
             right_edge = geo.x() + geo.width()
             y_pos = geo.y()
-            self.setFixedSize(new_width, new_height)
+            self.setFixedSize(new_width, 46)
             self.move(right_edge - new_width, y_pos)
         else:
-            self.setFixedSize(new_width, new_height)
+            self.setFixedSize(new_width, 46)
 
     def toggle_compact_view(self):
         self._compact_view = not self._compact_view
@@ -695,50 +476,28 @@ class VoiceApp(QMainWindow):
         self.save_config()
         super().closeEvent(event)
 
-    # Map display names to (modifier vk, trigger vk or char)
-    HOTKEY_OPTIONS = {
-        "RightAlt+Space": (165, 32),   # VK_RMENU, VK_SPACE
-        "RightAlt+H":     (165, ord('h')),
-        "RightCtrl+Space":(163, 32),   # VK_RCONTROL, VK_SPACE
-        "RightCtrl+H":    (163, ord('h')),
-        "Alt+H":          (None, ord('h')),  # any alt + h via HotKey.parse
-    }
-
     def setup_global_hotkey(self):
-        hotkey_name = self.config.get("hotkey", "RightAlt+Space")
-        mod_vk, trig_vk = self.HOTKEY_OPTIONS.get(hotkey_name, self.HOTKEY_OPTIONS["RightAlt+Space"])
-        self._hotkey_mod_pressed = False
-
-        def _vk(key):
-            try:
-                return key.vk
-            except AttributeError:
-                try:
-                    return key.value.vk
-                except AttributeError:
-                    return None
+        def on_activate():
+            self.toggle_record_requested.emit()
 
         def on_press(key):
-            kv = _vk(key)
-            if mod_vk is not None and kv == mod_vk:
-                self._hotkey_mod_pressed = True
-            elif self._hotkey_mod_pressed and kv == trig_vk:
-                self.toggle_record_requested.emit()
-            elif kv == 32:  # space for SPC mode
-                self.space_press_requested.emit()
+            if key != pynput_keyboard.Key.space:
+                return
+            self.space_press_requested.emit()
 
-        def on_release(key):
-            if mod_vk is not None and _vk(key) == mod_vk:
-                self._hotkey_mod_pressed = False
+        def for_canonical(f):
+            return lambda k: f(listener.canonical(k))
 
-        listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
+        hotkey = pynput_keyboard.HotKey(pynput_keyboard.HotKey.parse('<alt>+h'), on_activate)
+
+        def combined_on_press(k):
+            for_canonical(hotkey.press)(k)
+            on_press(k)
+
+        listener = pynput_keyboard.Listener(
+            on_press=combined_on_press,
+            on_release=for_canonical(hotkey.release))
         listener.start()
-        self._hotkey_listener = listener
-
-    def restart_hotkey_listener(self):
-        if hasattr(self, '_hotkey_listener'):
-            self._hotkey_listener.stop()
-        self.setup_global_hotkey()
 
     def toggle_language(self):
         new_lang = "bn-BD" if self.config["language"] == "en-US" else "en-US"
@@ -857,7 +616,6 @@ class VoiceApp(QMainWindow):
 
     def _on_continuous_finished(self):
         self._live_recording = False
-        self._set_status(CP_GREEN)
         self._reset_record_btn()
 
     def _stop_single(self):
@@ -875,7 +633,7 @@ class VoiceApp(QMainWindow):
         self._recording_active = False
         if self._stop_requested:
             self._stop_requested = False
-            self._set_status(CP_GREEN)
+            self._set_status(CP_YELLOW)
             self._reset_record_btn()
 
     def _reset_record_btn(self):
@@ -884,28 +642,7 @@ class VoiceApp(QMainWindow):
 
     def _set_status(self, color):
         self.status_btn.setText("")
-        self.status_btn.setFixedSize(
-            self.config.get("status_btn_width", 8),
-            self.config.get("status_btn_height", 18),
-        )
-        self.status_btn.setMinimumSize(self.status_btn.size())
-        self.status_btn.setMaximumSize(self.status_btn.size())
-        self.status_btn.setStyleSheet(f"""
-            QPushButton#status {{
-                background-color: {color};
-                border: 1px solid {color};
-                padding: 0px;
-                margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
-            }}
-            QPushButton#status:hover {{
-                background-color: {color};
-                border: 1px solid {color};
-            }}
-        """)
+        self.status_btn.setStyleSheet(f"background-color: {color}; border: 1px solid {color}; padding: 0;")
 
     def _finish_space_recording(self):
         if not self._recording_active:
@@ -919,13 +656,6 @@ class VoiceApp(QMainWindow):
 
     def on_result(self, session_id, text):
         if session_id != self._session_id:
-            return
-        if not text or not text.strip():
-            self._stop_requested = False
-            self._set_status(CP_GREEN)
-            self._reset_record_btn()
-            self._recording_active = False
-            self._live_recording = False
             return
         paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
         self._stop_requested = False
@@ -944,7 +674,7 @@ class VoiceApp(QMainWindow):
             return
         if self._stop_requested:
             self._stop_requested = False
-            self._set_status(CP_GREEN)
+            self._set_status(CP_YELLOW)
             self._reset_record_btn()
             self._live_recording = False
             self._recording_active = False
