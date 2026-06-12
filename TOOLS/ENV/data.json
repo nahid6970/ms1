@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-06-09T00:26:38.696086",
+    "timestamp": "2026-06-12T15:15:06.838600",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -71,10 +71,11 @@
                     },
                     "Codex": {
                         "MUIVerb": "Codex",
-                        "command": "cmd /k cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox"
+                        "command": "wt.exe --title \"Codex\" --suppressApplicationTitle cmd /k \"cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox\""
                     },
                     "Codex Resume": {
-                        "command": "\u263acmd /k cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox resume"
+                        "MUIVerb": "Codex Resume",
+                        "command": "wt.exe --title \"Codex\" --suppressApplicationTitle cmd /k \"cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox resume\""
                     },
                     "Gemini CLI": {
                         "MUIVerb": "Gemini CLI",
