@@ -294,5 +294,137 @@ def open_file():
         return jsonify({'success': True})
     return jsonify({'success': False, 'error': 'File not found'}), 404
 
+# ─────────────────────────────────────────────
+# AI-accessible endpoints  (/ai/*)
+# Sheets can be addressed by arrayIndex (int) or customIndex (14-digit string)
+# ─────────────────────────────────────────────
+
+def resolve_sheet(data, sheet_id):
+    """Return (sheet_obj, array_index) or (None, None) if not found."""
+    sheets = data.get('sheets', [])
+    sid = str(sheet_id)
+    # customIndex is always a 14-digit timestamp string
+    if len(sid) == 14 and sid.isdigit():
+        for i, s in enumerate(sheets):
+            if str(s.get('customIndex', '')) == sid:
+                return s, i
+        return None, None
+    # fall back to numeric array index
+    try:
+        idx = int(sid)
+        if 0 <= idx < len(sheets):
+            return sheets[idx], idx
+    except (ValueError, TypeError):
+        pass
+    return None, None
+
+@app.route('/ai/schema', methods=['GET'])
+def ai_schema():
+    data = load_data()
+    sheets = data.get('sheets', [])
+    cats = data.get('sheetCategories', {})
+    result = []
+    for i, s in enumerate(sheets):
+        result.append({
+            'arrayIndex': i,
+            'customIndex': s.get('customIndex'),
+            'name': s.get('name', ''),
+            'nickname': s.get('nickname', ''),
+            'category': cats.get(str(i)),
+            'parentSheet': s.get('parentSheet'),
+            'colCount': len(s.get('columns', [])),
+            'rowCount': len(s.get('rows', [])),
+            'columns': [c.get('name') for c in s.get('columns', [])],
+        })
+    return jsonify({'sheets': result, 'categories': data.get('categories', [])})
+
+@app.route('/ai/sheet/<sheet_id>', methods=['GET'])
+def ai_get_sheet(sheet_id):
+    data = load_data()
+    sheet, idx = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    return jsonify({
+        'arrayIndex': idx,
+        'customIndex': sheet.get('customIndex'),
+        'name': sheet.get('name', ''),
+        'columns': [c.get('name') for c in sheet.get('columns', [])],
+        'rows': sheet.get('rows', []),
+        'cellStyles': sheet.get('cellStyles', {}),
+    })
+
+@app.route('/ai/cell/<sheet_id>/<int:row>/<int:col>', methods=['GET'])
+def ai_get_cell(sheet_id, row, col):
+    data = load_data()
+    sheet, idx = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    rows = sheet.get('rows', [])
+    if row >= len(rows) or col >= len(rows[row]):
+        return jsonify({'error': 'Cell out of range'}), 404
+    return jsonify({
+        'sheetIndex': idx,
+        'customIndex': sheet.get('customIndex'),
+        'row': row, 'col': col,
+        'value': rows[row][col],
+        'style': sheet.get('cellStyles', {}).get(f'{row}-{col}'),
+    })
+
+@app.route('/ai/cell/<sheet_id>/<int:row>/<int:col>', methods=['POST'])
+def ai_set_cell(sheet_id, row, col):
+    data = load_data()
+    sheet, _ = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    rows = sheet.get('rows', [])
+    if row >= len(rows) or col >= len(rows[row]):
+        return jsonify({'error': 'Cell out of range'}), 404
+    value = request.json.get('value', '')
+    rows[row][col] = value
+    save_data(data)
+    return jsonify({'success': True, 'row': row, 'col': col, 'value': value})
+
+@app.route('/ai/cells', methods=['POST'])
+def ai_set_cells():
+    """Batch update. Body: [{"sheet": id, "row": r, "col": c, "value": v}, ...]"""
+    data = load_data()
+    updates = request.json
+    if not isinstance(updates, list):
+        return jsonify({'error': 'Expected a list of updates'}), 400
+    results = []
+    for u in updates:
+        sheet, _ = resolve_sheet(data, u.get('sheet'))
+        if sheet is None:
+            results.append({'error': 'Sheet not found', 'update': u})
+            continue
+        r, c, v = u.get('row'), u.get('col'), u.get('value', '')
+        rows = sheet.get('rows', [])
+        if r is None or c is None or r >= len(rows) or c >= len(rows[r]):
+            results.append({'error': 'Cell out of range', 'update': u})
+            continue
+        rows[r][c] = v
+        results.append({'success': True, 'row': r, 'col': c})
+    save_data(data)
+    return jsonify(results)
+
+@app.route('/ai/find', methods=['GET'])
+def ai_find():
+    """GET /ai/find?sheet=<id>&q=<text>  — case-insensitive substring match."""
+    sheet_id = request.args.get('sheet')
+    query = request.args.get('q', '').lower()
+    if not sheet_id or not query:
+        return jsonify({'error': 'sheet and q params required'}), 400
+    data = load_data()
+    sheet, idx = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    matches = []
+    for r, row in enumerate(sheet.get('rows', [])):
+        for c, cell in enumerate(row):
+            if query in str(cell).lower():
+                matches.append({'row': r, 'col': c, 'value': cell})
+    return jsonify({'sheetIndex': idx, 'query': query, 'matches': matches})
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5018)
