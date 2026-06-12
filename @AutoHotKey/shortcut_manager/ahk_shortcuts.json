@@ -737,6 +737,20 @@
             "window_title_enabled": true,
             "process_name_enabled": true,
             "window_class_enabled": true
+        },
+        {
+            "action": "SendText(\"/status\")\nsleep(500)\nSend(\"{Enter}\")",
+            "category": "Terminal",
+            "description": "Resume previous Gemini chat session",
+            "enabled": true,
+            "hotkey": "^z",
+            "name": "Codex Usage",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title": "Codex",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true
         }
     ],
     "exclusion_rules": [],
