@@ -983,11 +983,19 @@ async function loadData() {
     }
 }
 
-async function saveData() {
+async function saveData(options = {}) {
     try {
         tableData.activeSheet = currentSheet;
+
+        if (options.beacon && navigator.sendBeacon) {
+            const payload = new Blob([JSON.stringify(tableData)], { type: 'application/json' });
+            navigator.sendBeacon('/api/data', payload);
+            return;
+        }
+
         const response = await fetch('/api/data', {
             method: 'POST',
+            keepalive: !!options.keepalive,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tableData)
         });
@@ -12334,7 +12342,7 @@ function syncMultiCursorValue(target, newText) {
     if (isVisualEditableTarget(target)) {
         const cell = target.closest('td');
         const inputElement = cell ? cell.querySelector('input, textarea') : null;
-        const rowIndex = cell ? parseInt(cell.parentElement.dataset.row) : NaN;
+        const rowIndex = cell ? parseInt(cell.dataset.row) : NaN;
         const colIndex = cell ? parseInt(cell.dataset.col) : NaN;
 
         target.innerHTML = highlightSyntax(newText);
@@ -12361,8 +12369,7 @@ function syncMultiCursorValue(target, newText) {
             });
         }
 
-        clearTimeout(window.autoSaveTimeout);
-        window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+        saveData({ beacon: true });
         return;
     }
 

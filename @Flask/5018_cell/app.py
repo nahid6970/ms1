@@ -129,7 +129,18 @@ def save_active_sheet():
 
 @app.route('/api/data', methods=['POST'])
 def save_table_data():
-    data = request.json
+    data = request.get_json(silent=True)
+    if data is None:
+        raw_body = request.get_data(as_text=True)
+        if raw_body:
+            try:
+                data = json.loads(raw_body)
+            except json.JSONDecodeError:
+                data = None
+
+    if data is None:
+        return jsonify({'success': False, 'error': 'Invalid JSON payload'}), 400
+
     save_data(data)
     return jsonify({'success': True})
 
