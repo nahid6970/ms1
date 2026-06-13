@@ -1,4 +1,10 @@
-# Ctrl+Alt Visual Mode Issue Handoff
+# Ctrl+Alt Visual Mode Issue — RESOLVED ✅
+
+**Fixed:** `Ctrl+Alt+Up/Down` edits now persist after refresh in Visual Mode.
+
+**Root Cause:** `syncMultiCursorValue` read `cell.parentElement.dataset.row` (`<tr>`) instead of `cell.dataset.row` (`<td>`), making `rowIndex` always `NaN` and skipping the `tableData` update entirely.
+
+**Fix:** One-line change in `static/script.js` — `cell.parentElement.dataset.row` → `cell.dataset.row`.
 
 ## Summary
 

@@ -1,5 +1,24 @@
 # Recent Development Log
 
+## [2026-06-13 15:11] - Fix Ctrl+Alt+Up/Down Not Persisting in Visual Mode
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎯 Ctrl+Alt Multi-Cursor Persistence in Visual Mode
+- Fixed `Ctrl+Alt+Up` / `Ctrl+Alt+Down` edits resetting after page refresh in Visual Mode.
+- Root cause: `syncMultiCursorValue` was reading `cell.parentElement.dataset.row` (the `<tr>`) to get the row index, but `data-row` is set on the `<td>` itself. This made `rowIndex` always `NaN`, so the `tableData` in-memory update was skipped and `saveData()` saved stale data.
+- Fix: one-line change — `cell.parentElement.dataset.row` → `cell.dataset.row`.
+
+**Files Modified:**
+- `static/script.js` — Fixed `rowIndex` lookup in `syncMultiCursorValue`.
+
+**Current Status:**
+- ✅ `Ctrl+Alt+Up/Down` edits now persist after refresh in Visual Mode.
+
+---
+
 ## [2026-06-13 00:10] - Visual Mode Ctrl+Alt Cursor Support
 
 **Session Duration:** 0.0 hours

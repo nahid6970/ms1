@@ -1,5 +1,18 @@
 # Problems & Fixes Log
 
+## [2026-06-13 15:11] - Ctrl+Alt Multi-Cursor Edits Not Persisting in Visual Mode
+
+**Problem:** Typing with `Ctrl+Alt+Up/Down` multi-cursor in Visual Mode appeared to work visually but all changes were lost after page refresh.
+
+**Root Cause:** In `syncMultiCursorValue`, the row index was read from `cell.parentElement.dataset.row` (the `<tr>` element), but `data-row` is only set on the `<td>` element. This made `rowIndex` always `NaN`, causing the guard `!isNaN(rowIndex)` to fail, so `tableData` was never updated in memory. The `saveData({ beacon: true })` call then serialized the old, unmodified data to the server.
+
+**Solution:** Changed `cell.parentElement.dataset.row` to `cell.dataset.row` in `syncMultiCursorValue` — matching the same pattern already used for `colIndex`.
+
+**Files Modified:**
+- `static/script.js` — one-line fix in `syncMultiCursorValue`
+
+---
+
 ## [2026-06-13 00:10] - Visual Mode Ctrl+Alt Arrows Were Textarea-Only
 
 **Problem:** `Ctrl+Alt+Up` and `Ctrl+Alt+Down` did not work properly in Visual Mode. The shortcuts either fell back to Raw Mode or simply stopped at the visual editor boundary.
