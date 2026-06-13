@@ -45,7 +45,7 @@ async function sendDataToConvex(data) {
 async function loadDataFromConvex() {
   try {
     const data = await convexFetch("query", "functions:get", { extensionName: EXTENSION_NAME });
-    console.log('Data loaded from Convex:', data);
+    console.log('Raw data loaded from Convex:', JSON.stringify(data));
     return { success: true, data };
   } catch (error) {
     console.error('Failed to load data from Convex:', error);
@@ -54,15 +54,17 @@ async function loadDataFromConvex() {
 }
 
 
-// Auto-save on storage changes
+// Auto-save on storage changes (debounced to avoid rapid-fire Convex requests)
+let autoSaveTimer = null;
 chrome.storage.local.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local') {
-    chrome.storage.local.get(null, (items) => {
-      sendDataToConvex(items);
-    });
-    
-    // Update badge when storage changes
     updateBadge();
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      chrome.storage.local.get(null, (items) => {
+        sendDataToConvex(items);
+      });
+    }, 1500);
   }
 });
 

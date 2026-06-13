@@ -190,18 +190,20 @@ function displayTabs(tabs) {
     };
     
     const isYouTube = tab.url.includes('youtube.com/watch');
-    const favicon = tab.favicon || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>';
-    
+    const fallbackGlobe = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>";
+    const fallbackYT = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>▶️</text></svg>";
+    const favicon = tab.favicon || fallbackGlobe;
+
     let faviconHTML;
     if (isYouTube && tab.channelIcon) {
       faviconHTML = `
         <div class="tab-favicon-container">
-          <img src="${favicon}" class="tab-favicon-yt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>▶️</text></svg>'">
-          <img src="${tab.channelIcon}" class="tab-favicon-channel" onerror="this.style.display='none'">
+          <img src="${favicon}" class="tab-favicon-yt" loading="lazy" decoding="async" onerror="this.src='${fallbackYT}'">
+          <img src="${tab.channelIcon}" class="tab-favicon-channel" loading="lazy" decoding="async" onerror="this.style.display='none'">
         </div>
       `;
     } else {
-      faviconHTML = `<img src="${favicon}" class="tab-favicon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🌐</text></svg>'">`;
+      faviconHTML = `<img src="${favicon}" class="tab-favicon" loading="lazy" decoding="async" onerror="this.src='${fallbackGlobe}'">`;
     }
     
     // Tag HTML
@@ -470,16 +472,25 @@ document.getElementById('saveToConvex').addEventListener('click', (e) => {
 // Load from Convex
 document.getElementById('loadFromConvex').addEventListener('click', (e) => {
   const button = e.target;
-  chrome.runtime.sendMessage({
-    action: 'loadFromConvex'
-  }, (response) => {
+  chrome.runtime.sendMessage({ action: 'loadFromConvex' }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error('loadFromConvex runtime error:', chrome.runtime.lastError.message);
+      showButtonFeedback(button, false, 'Error');
+      return;
+    }
+    console.log('loadFromConvex response:', response);
     if (response && response.success && response.data) {
-      chrome.storage.local.set(response.data, () => {
+      // response.data may be the full storage object or just { savedTabs: [...] }
+      const dataToSet = (typeof response.data === 'object' && !Array.isArray(response.data))
+        ? response.data
+        : { savedTabs: response.data };
+      chrome.storage.local.set(dataToSet, () => {
         showButtonFeedback(button, true, 'Loaded!');
         loadTabs();
       });
     } else {
-      showButtonFeedback(button, false, 'Failed');
+      console.error('loadFromConvex failed:', response);
+      showButtonFeedback(button, false, response?.error || 'Failed');
     }
   });
 });
