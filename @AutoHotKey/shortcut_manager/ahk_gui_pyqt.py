@@ -2830,15 +2830,21 @@ class AHKShortcutEditor(QMainWindow):
                     action = action.replace(',,,', ',,')
 
                     if match_foreground and has_context_fields:
+                        # Strip outer braces if action is wrapped in them
+                        stripped = action.strip()
+                        if stripped.startswith('{') and stripped.endswith('}'):
+                            action_lines = stripped[1:-1].strip().splitlines()
+                        else:
+                            action_lines = action.splitlines()
                         # Global hotkey: find matching window, activate it, then run action
                         output_lines.append(f"{hotkey}:: {{")
                         output_lines.append(f"    hwnd := {func_name}()")
                         output_lines.append("    if hwnd {")
                         output_lines.append("        WinActivate(hwnd)")
-                        output_lines.append("        WinWaitActive(hwnd, , 1)")
-                        for line in action.split('\n'):
+                        output_lines.append("        Sleep(100)")
+                        for line in action_lines:
                             if line.strip():
-                                output_lines.append(f"        {line}")
+                                output_lines.append(f"        {line.strip()}")
                         output_lines.append("    }")
                         output_lines.append("}")
                     else:
