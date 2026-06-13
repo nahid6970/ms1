@@ -704,7 +704,7 @@ function handleKeyboardShortcuts(e) {
 
         // This feature only works in INPUT/TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            const switched = enableRawMode();
+            const switched = ensureRawMode();
             if (switched) {
                 showToast('Switched to Raw Mode for Select Next Occurrence', 'info');
                 // After switching, focus the input in the same cell
@@ -736,41 +736,13 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
-    // Ctrl+Alt+Down to add cursor below (multi-line cursor) - textarea only
+    // Ctrl+Alt+Down to add cursor below (multi-line cursor)
     if (e.ctrlKey && e.altKey && e.key === 'ArrowDown') {
         e.preventDefault();
         const activeElement = document.activeElement;
 
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            const selection = window.getSelection();
-            let rawOffset = 0;
-            if (selection && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const cell = activeElement.closest('td');
-                const inputElement = cell ? cell.querySelector('input, textarea') : null;
-                const rawInput = inputElement ? inputElement.value : '';
-                const visibleOffset = extractRawTextBeforeCaret(activeElement, range).length;
-                const visibleToRawMap = calculateVisibleToRawMap(rawInput);
-                rawOffset = visibleToRawMap[visibleOffset];
-                if (rawOffset === undefined) rawOffset = rawInput.length;
-            }
-
-            const switched = enableRawMode();
-            if (switched) {
-                showToast('Switched to Raw Mode for Multi-Cursor', 'info');
-                // After switching, focus the textarea in the same cell
-                setTimeout(() => {
-                    const cell = activeElement.closest('td');
-                    if (cell) {
-                        const textarea = cell.querySelector('textarea');
-                        if (textarea) {
-                            textarea.focus();
-                            textarea.setSelectionRange(rawOffset, rawOffset);
-                            addCursorBelow(textarea);
-                        }
-                    }
-                }, 100);
-            }
+            addCursorBelow(activeElement);
             return;
         }
 
@@ -779,41 +751,13 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
-    // Ctrl+Alt+Up to add cursor above (multi-line cursor) - textarea only
+    // Ctrl+Alt+Up to add cursor above (multi-line cursor)
     if (e.ctrlKey && e.altKey && e.key === 'ArrowUp') {
         e.preventDefault();
         const activeElement = document.activeElement;
 
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
-            const selection = window.getSelection();
-            let rawOffset = 0;
-            if (selection && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const cell = activeElement.closest('td');
-                const inputElement = cell ? cell.querySelector('input, textarea') : null;
-                const rawInput = inputElement ? inputElement.value : '';
-                const visibleOffset = extractRawTextBeforeCaret(activeElement, range).length;
-                const visibleToRawMap = calculateVisibleToRawMap(rawInput);
-                rawOffset = visibleToRawMap[visibleOffset];
-                if (rawOffset === undefined) rawOffset = rawInput.length;
-            }
-
-            const switched = enableRawMode();
-            if (switched) {
-                showToast('Switched to Raw Mode for Multi-Cursor', 'info');
-                // After switching, focus the textarea in the same cell
-                setTimeout(() => {
-                    const cell = activeElement.closest('td');
-                    if (cell) {
-                        const textarea = cell.querySelector('textarea');
-                        if (textarea) {
-                            textarea.focus();
-                            textarea.setSelectionRange(rawOffset, rawOffset);
-                            addCursorAbove(textarea);
-                        }
-                    }
-                }, 100);
-            }
+            addCursorAbove(activeElement);
             return;
         }
 
@@ -8660,6 +8604,15 @@ function cycleVisualMode() {
     }
 }
 
+function ensureRawMode() {
+    const currentMode = parseInt(localStorage.getItem('markdownPreviewMode') || '1');
+    if (currentMode === 0) return false;
+
+    setMode(0);
+    showToast('Raw Mode Enabled', 'info');
+    return true;
+}
+
 function toggleCollapsible(id) {
     const element = document.getElementById(id);
     if (element) {
@@ -11555,7 +11508,7 @@ let multiSelectionData = null;
 function selectAllMatchingOccurrences(input) {
     // Handle contentEditable mode - automatically switch to raw mode
     if (input.isContentEditable) {
-        const switched = enableRawMode();
+        const switched = ensureRawMode();
         if (switched) {
             showToast('Switched to Raw Mode for Select All Matching', 'info');
             // After switching, the cell will be re-rendered, so we need to wait and retry
@@ -12254,10 +12207,10 @@ function showSelectionMarkers(input, selections) {
     cell.appendChild(overlay);
 }
 
-function showCursorMarkers(textarea, cursors) {
+function showCursorMarkers(target, cursors) {
     clearVisualMarkers();
 
-    const cell = textarea.closest('td');
+    const cell = target.closest('td');
     if (!cell) return;
 
     // Create overlay container
@@ -12265,18 +12218,18 @@ function showCursorMarkers(textarea, cursors) {
     overlay.className = 'multi-cursor-overlay';
     overlay.id = 'multiCursorOverlay';
 
-    // Copy textarea styles
-    const computedStyle = window.getComputedStyle(textarea);
-    const textareaRect = textarea.getBoundingClientRect();
+    // Copy editor styles
+    const computedStyle = window.getComputedStyle(target);
+    const targetRect = target.getBoundingClientRect();
     const cellRect = cell.getBoundingClientRect();
 
     overlay.style.position = 'absolute';
-    overlay.style.top = (textareaRect.top - cellRect.top) + 'px';
-    overlay.style.left = (textareaRect.left - cellRect.left) + 'px';
-    overlay.style.width = textarea.offsetWidth + 'px';
-    overlay.style.height = textarea.offsetHeight + 'px';
+    overlay.style.top = (targetRect.top - cellRect.top) + 'px';
+    overlay.style.left = (targetRect.left - cellRect.left) + 'px';
+    overlay.style.width = target.offsetWidth + 'px';
+    overlay.style.height = target.offsetHeight + 'px';
 
-    const text = textarea.value;
+    const text = getMultiCursorText(target);
     const lines = text.split('\n');
     const lineHeight = parseFloat(computedStyle.lineHeight) || 20;
     const paddingLeft = parseFloat(computedStyle.paddingLeft) || 4;
@@ -12345,12 +12298,84 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function isVisualEditableTarget(target) {
+    return !!target && target.isContentEditable && target.classList && target.classList.contains('markdown-preview');
+}
+
+function getMultiCursorText(target) {
+    if (!target) return '';
+    return isVisualEditableTarget(target) ? extractRawText(target) : (target.value || '');
+}
+
+function getMultiCursorSelectionOffset(target) {
+    if (isVisualEditableTarget(target)) {
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return 0;
+        const range = selection.getRangeAt(0);
+        return extractRawTextBeforeCaret(target, range).length;
+    }
+    return target.selectionStart || 0;
+}
+
+function setMultiCursorSelection(target, start, end = start) {
+    if (isVisualEditableTarget(target)) {
+        if (end > start) {
+            selectTextAtPosition(target, start, end);
+        } else {
+            setCaretPosition(target, start);
+        }
+        return;
+    }
+
+    target.setSelectionRange(start, end);
+}
+
+function syncMultiCursorValue(target, newText) {
+    if (isVisualEditableTarget(target)) {
+        const cell = target.closest('td');
+        const inputElement = cell ? cell.querySelector('input, textarea') : null;
+        const rowIndex = cell ? parseInt(cell.parentElement.dataset.row) : NaN;
+        const colIndex = cell ? parseInt(cell.dataset.col) : NaN;
+
+        target.innerHTML = highlightSyntax(newText);
+
+        if (inputElement) {
+            inputElement.value = newText;
+        }
+
+        if (tableData.sheets[currentSheet] &&
+            !isNaN(rowIndex) &&
+            !isNaN(colIndex) &&
+            tableData.sheets[currentSheet].rows[rowIndex] &&
+            tableData.sheets[currentSheet].rows[rowIndex][colIndex] !== undefined) {
+            tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newText;
+        }
+
+        if (cell) {
+            adjustCellHeightForMarkdown(cell);
+        }
+
+        if (typeof drawWordConnectors === 'function') {
+            requestAnimationFrame(() => {
+                drawWordConnectors(target);
+            });
+        }
+
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+        return;
+    }
+
+    target.value = newText;
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 // Multi-Line Cursor (Ctrl+Alt+Down/Up)
 let multiLineCursorData = null;
 
-function addCursorBelow(textarea) {
-    const text = textarea.value;
-    const cursorPos = textarea.selectionStart;
+function addCursorBelow(target) {
+    const text = getMultiCursorText(target);
+    const cursorPos = getMultiCursorSelectionOffset(target);
 
     // Find current line
     const beforeCursor = text.substring(0, cursorPos);
@@ -12363,9 +12388,10 @@ function addCursorBelow(textarea) {
     const columnPos = cursorPos - currentLineStart;
 
     // Initialize or add to multi-cursor
-    if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) {
+    if (!multiLineCursorData || multiLineCursorData.target !== target) {
         multiLineCursorData = {
-            textarea: textarea,
+            target: target,
+            textarea: target,
             cursors: [{ line: getCurrentLineNumber(text, cursorPos), column: columnPos, pos: cursorPos }]
         };
     }
@@ -12383,17 +12409,17 @@ function addCursorBelow(textarea) {
         });
 
         // Move cursor to new position
-        textarea.setSelectionRange(nextCursorPos, nextCursorPos);
+        setMultiCursorSelection(target, nextCursorPos, nextCursorPos);
 
-        showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        showCursorMarkers(textarea, multiLineCursorData.cursors);
-        setupMultiLineCursorListener(textarea);
+        showMultiCursorIndicator(target, multiLineCursorData.cursors.length);
+        showCursorMarkers(target, multiLineCursorData.cursors);
+        setupMultiLineCursorListener(target);
     }
 }
 
-function addCursorAbove(textarea) {
-    const text = textarea.value;
-    const cursorPos = textarea.selectionStart;
+function addCursorAbove(target) {
+    const text = getMultiCursorText(target);
+    const cursorPos = getMultiCursorSelectionOffset(target);
 
     // Find current line
     const beforeCursor = text.substring(0, cursorPos);
@@ -12403,9 +12429,10 @@ function addCursorAbove(textarea) {
     const columnPos = cursorPos - currentLineStart;
 
     // Initialize or add to multi-cursor
-    if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) {
+    if (!multiLineCursorData || multiLineCursorData.target !== target) {
         multiLineCursorData = {
-            textarea: textarea,
+            target: target,
+            textarea: target,
             cursors: [{ line: getCurrentLineNumber(text, cursorPos), column: columnPos, pos: cursorPos }]
         };
     }
@@ -12425,11 +12452,11 @@ function addCursorAbove(textarea) {
         });
 
         // Move cursor to new position
-        textarea.setSelectionRange(prevCursorPos, prevCursorPos);
+        setMultiCursorSelection(target, prevCursorPos, prevCursorPos);
 
-        showMultiCursorIndicator(textarea, multiLineCursorData.cursors.length);
-        showCursorMarkers(textarea, multiLineCursorData.cursors);
-        setupMultiLineCursorListener(textarea);
+        showMultiCursorIndicator(target, multiLineCursorData.cursors.length);
+        showCursorMarkers(target, multiLineCursorData.cursors);
+        setupMultiLineCursorListener(target);
     }
 }
 
@@ -12437,7 +12464,7 @@ function getCurrentLineNumber(text, pos) {
     return text.substring(0, pos).split('\n').length;
 }
 
-function showMultiCursorIndicator(textarea, count) {
+function showMultiCursorIndicator(target, count) {
     let indicator = document.getElementById('multiCursorIndicator');
     if (!indicator) {
         indicator = document.createElement('div');
@@ -12449,50 +12476,50 @@ function showMultiCursorIndicator(textarea, count) {
     indicator.textContent = `${count} cursors`;
     indicator.style.display = 'block';
 
-    // Position near the textarea
-    const rect = textarea.getBoundingClientRect();
+    // Position near the active editor
+    const rect = target.getBoundingClientRect();
     indicator.style.left = rect.right + 10 + 'px';
     indicator.style.top = rect.top + 'px';
 }
 
-function setupMultiLineCursorListener(textarea) {
+function setupMultiLineCursorListener(target) {
     // Store original text for comparison
     if (!multiLineCursorData.originalText) {
-        multiLineCursorData.originalText = textarea.value;
+        multiLineCursorData.originalText = getMultiCursorText(target);
     }
 
     // Remove old listener if exists
-    if (textarea.multiLineCursorListener) {
-        textarea.removeEventListener('input', textarea.multiLineCursorListener);
+    if (target.multiLineCursorListener) {
+        target.removeEventListener('input', target.multiLineCursorListener);
     }
 
     // Remove old keydown listener if exists
-    if (textarea.multiLineCursorKeyListener) {
-        textarea.removeEventListener('keydown', textarea.multiLineCursorKeyListener);
+    if (target.multiLineCursorKeyListener) {
+        target.removeEventListener('keydown', target.multiLineCursorKeyListener);
     }
 
     // Keydown listener to capture what will be typed/deleted
-    textarea.multiLineCursorKeyListener = function (e) {
-        if (!multiLineCursorData || multiLineCursorData.textarea !== textarea) return;
+    target.multiLineCursorKeyListener = function (e) {
+        if (!multiLineCursorData || multiLineCursorData.target !== target) return;
 
         // Handle Shift+arrow keys for selection
         if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
             e.preventDefault();
-            handleMultiLineCursorMove(textarea, e.key, true); // true = extend selection
+            handleMultiLineCursorMove(target, e.key, true); // true = extend selection
             return;
         }
 
         // Handle Ctrl+Space to move to next word boundary
         if (e.ctrlKey && e.key === ' ') {
             e.preventDefault();
-            handleMultiLineCursorMove(textarea, 'NextWord', false);
+            handleMultiLineCursorMove(target, 'NextWord', false);
             return;
         }
 
         // Handle arrow keys to move cursors
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
             e.preventDefault();
-            handleMultiLineCursorMove(textarea, e.key, false);
+            handleMultiLineCursorMove(target, e.key, false);
             return;
         }
 
@@ -12507,7 +12534,7 @@ function setupMultiLineCursorListener(textarea) {
             e.preventDefault();
 
             const cursors = multiLineCursorData.cursors;
-            let newText = textarea.value;
+            let newText = getMultiCursorText(target);
 
             // Sort cursors by position (descending) to avoid position shifts
             const sortedCursors = [...cursors].sort((a, b) => {
@@ -12563,12 +12590,7 @@ function setupMultiLineCursorListener(textarea) {
                 }
             });
 
-            // Update textarea
-            textarea.value = newText;
-
-            // Trigger change event
-            const changeEvent = new Event('input', { bubbles: true });
-            textarea.dispatchEvent(changeEvent);
+            syncMultiCursorValue(target, newText);
 
             // Move cursor to last position (in original order)
             const lastCursor = cursors[cursors.length - 1];
@@ -12576,25 +12598,25 @@ function setupMultiLineCursorListener(textarea) {
             if (lastCursor.line - 1 < lines.length) {
                 const lineStart = lines.slice(0, lastCursor.line - 1).join('\n').length + (lastCursor.line > 1 ? 1 : 0);
                 const newCursorPos = lineStart + lastCursor.column;
-                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                setMultiCursorSelection(target, newCursorPos, newCursorPos);
             }
 
             // Update visual markers
-            showCursorMarkers(textarea, cursors);
+            showCursorMarkers(target, cursors);
         }
     };
 
-    textarea.addEventListener('keydown', textarea.multiLineCursorKeyListener);
+    target.addEventListener('keydown', target.multiLineCursorKeyListener);
 
     // Clear on blur or escape
     const clearOnBlur = function () {
         setTimeout(() => {
             clearMultiLineCursor();
-            textarea.removeEventListener('keydown', textarea.multiLineCursorKeyListener);
+            target.removeEventListener('keydown', target.multiLineCursorKeyListener);
         }, 100);
     };
 
-    textarea.addEventListener('blur', clearOnBlur, { once: true });
+    target.addEventListener('blur', clearOnBlur, { once: true });
 }
 
 function clearMultiLineCursor() {
@@ -12606,10 +12628,10 @@ function clearMultiLineCursor() {
     clearVisualMarkers();
 }
 
-function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
+function handleMultiLineCursorMove(target, key, extendSelection = false) {
     if (!multiLineCursorData) return;
 
-    const text = textarea.value;
+    const text = getMultiCursorText(target);
     const lines = text.split('\n');
 
     multiLineCursorData.cursors.forEach(cursor => {
@@ -12679,7 +12701,7 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
     });
 
     // Update visual markers
-    showCursorMarkers(textarea, multiLineCursorData.cursors);
+    showCursorMarkers(target, multiLineCursorData.cursors);
 
     // Move native cursor to last position
     const lastCursor = multiLineCursorData.cursors[multiLineCursorData.cursors.length - 1];
@@ -12689,11 +12711,11 @@ function handleMultiLineCursorMove(textarea, key, extendSelection = false) {
         // Show selection
         const selStart = lineStart + lastCursor.selectionStart;
         const selEnd = lineStart + lastCursor.selectionEnd;
-        textarea.setSelectionRange(selStart, selEnd);
+        setMultiCursorSelection(target, selStart, selEnd);
     } else {
         // Show cursor
         const newCursorPos = lineStart + lastCursor.column;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        setMultiCursorSelection(target, newCursorPos, newCursorPos);
     }
 }
 

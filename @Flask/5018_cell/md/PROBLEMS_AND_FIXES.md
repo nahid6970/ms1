@@ -1,5 +1,53 @@
 # Problems & Fixes Log
 
+## [2026-06-13 00:10] - Visual Mode Ctrl+Alt Arrows Were Textarea-Only
+
+**Problem:** `Ctrl+Alt+Up` and `Ctrl+Alt+Down` did not work properly in Visual Mode. The shortcuts either fell back to Raw Mode or simply stopped at the visual editor boundary.
+
+**Root Cause:** The multi-line cursor implementation was textarea-only. Visual Mode used `contentEditable`, but the Ctrl+Alt shortcut path had no contentEditable-aware cursor state, selection sync, or edit handler.
+
+**Solution:** Generalized the multi-line cursor engine to support contentEditable previews directly, using the same raw-text line/column model and writing changes back through the visual editor.
+
+**Files Modified:**
+- `static/script.js`
+
+**Related Issues:**
+- This fix complements the line-move persistence patch.
+
+---
+
+## [2026-06-13 00:10] - Missing Raw-Mode Helper Broke Other Visual-Mode Shortcut Handoffs
+
+**Problem:** `Ctrl+Shift+D` and `Select All Matching` still failed when invoked from Visual Mode.
+
+**Root Cause:** Those handlers were calling `enableRawMode()`, but the codebase only defines `toggleRawMode()` and `setMode()`. The shortcut path failed before the mode switch could complete.
+
+**Solution:** Added a real `ensureRawMode()` helper that switches to raw mode only when needed, then updated the remaining visual-mode shortcut handoff paths to use it.
+
+**Files Modified:**
+- `static/script.js`
+
+**Related Issues:**
+- This is a separate follow-up from the Ctrl+Alt visual-mode fix above.
+
+---
+
+## [2026-06-13 00:00] - Visual Mode Line-Move Shortcuts Not Persisting
+
+**Problem:** `Alt+Up` / `Alt+Down` appeared to move selected lines in Visual Mode, but the order reverted after refresh.
+
+**Root Cause:** The visual-mode line-move path was only updating the live `contentEditable` preview, while the underlying cell source value was not being committed through the normal input sync path. The Ctrl+Alt arrow handlers also switched to Raw Mode without continuing the multi-cursor action.
+
+**Solution:** Reworked the line-move shortcut handling so Visual Mode and Raw Mode share the same line-reorder logic, then dispatch the normal `input` sync after updating the preview.
+
+**Files Modified:**
+- `static/script.js`
+
+**Related Issues:**
+- Visual mode now follows the same persistence flow as raw mode for line moves.
+
+---
+
 ## [2026-05-17 11:15] - Nested List Sorting Breakage (Beyond List 2)
 
 **Problem:** When sorting lines alphabetically or by date, sub-items in nested lists beyond level 2 (those starting with `---`, `----`, etc.) would jump to the top of the cell instead of staying under their parent item.

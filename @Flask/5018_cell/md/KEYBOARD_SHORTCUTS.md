@@ -78,7 +78,7 @@ When text is selected, press F3 to open the formatter with these options:
 | **Escape** | Exit multi-cursor mode |
 
 ### Multi-Line Cursors (Ctrl+Alt+Arrows)
-**Mode:** Raw mode only (📄 button), Textarea cells only
+**Mode:** Raw mode and Visual mode
 
 | Shortcut | Description |
 |----------|-------------|
@@ -101,8 +101,8 @@ When text is selected, press F3 to open the formatter with these options:
 
 | Shortcut | Description |
 |----------|-------------|
-| **Alt+Up** | Move selected lines up |
-| **Alt+Down** | Move selected lines down |
+| **Alt+Up** | Move selected lines up in Raw Mode or Visual Mode |
+| **Alt+Down** | Move selected lines down in Raw Mode or Visual Mode |
 | **Ctrl+D** | Duplicate current line |
 | **Ctrl+Shift+K** | Delete current line |
 
@@ -139,7 +139,9 @@ When text is selected, press F3 to open the formatter with these options:
 - Links are clickable (don't enter edit mode)
 - F3 formatter works
 - F9 word swap works
-- Multi-cursor features show message to switch to raw mode
+- Alt+Up/Down line moves work and persist after refresh
+- Ctrl+Alt+arrows work directly in Visual Mode
+- Ctrl+Shift+D and Select All Matching also auto-switch to Raw Mode when needed
 
 ---
 
@@ -189,4 +191,4 @@ These shortcuts are intercepted to prevent browser defaults:
 
 ---
 
-*Last updated: 2026-01-16*
+*Last updated: 2026-06-13*

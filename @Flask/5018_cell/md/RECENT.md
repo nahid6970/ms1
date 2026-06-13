@@ -1,5 +1,43 @@
 # Recent Development Log
 
+## [2026-06-13 00:10] - Visual Mode Ctrl+Alt Cursor Support
+
+**Session Duration:** 0.0 hours
+
+**What We Accomplished:**
+
+### 🎯 Visual Mode Multi-Cursor Support
+- Added contentEditable-aware multi-line cursor handling so `Ctrl+Alt+Up` / `Ctrl+Alt+Down` now work directly in Visual Mode.
+- The visual editor now uses the same line/column cursor model as raw mode, but writes back through the preview instead of forcing a mode switch.
+- Raw-mode helper fallback remains only for the other shortcut paths that still need it.
+
+**Files Modified:**
+- `static/script.js` — Added contentEditable-aware multi-line cursor handling and sync helpers.
+
+**Current Status:**
+- ✅ `Ctrl+Alt+Up/Down` now work in Visual Mode.
+
+---
+
+## [2026-06-13 00:00] - Visual Mode Line-Move Shortcut Persistence Fix
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎯 Visual Mode Shortcut Persistence
+- Fixed `Alt+Up` / `Alt+Down` so moving selected lines in Visual Mode now updates the underlying cell value, not just the rendered editor DOM.
+- Consolidated line-move logic so raw mode and visual mode share the same line reordering math.
+
+**Files Modified:**
+- `static/script.js` — Visual-mode line move persistence and Ctrl+Alt arrow behavior.
+
+**Current Status:**
+- ✅ Alt-based line moves persist after refresh in Visual Mode.
+- ✅ Ctrl+Alt arrow shortcuts now work from Visual Mode by switching into Raw Mode correctly.
+
+---
+
 ## [2026-06-12 18:10] - AI API Endpoints for Sheet/Cell Access
 
 **Session Duration:** 0.2 hours
