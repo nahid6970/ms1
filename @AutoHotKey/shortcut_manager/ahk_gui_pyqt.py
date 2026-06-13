@@ -2628,7 +2628,7 @@ class AHKShortcutEditor(QMainWindow):
                 output_lines.append(f"{func_name}() {{")
                 output_lines.append("    try {")
                 if match_foreground:
-                    # Loop over all visible windows and check if any match
+                    # Return the hwnd of the first matching window (0 if none)
                     output_lines.append("        for hwnd in WinGetList() {")
                     if process_name:
                         output_lines.append('            processName := WinGetProcessName(hwnd)')
@@ -2638,9 +2638,9 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append('            windowClass := WinGetClass(hwnd)')
                     if conditions:
                         output_lines.append("            if (" + " && ".join(conditions) + ")")
-                        output_lines.append("                return true")
+                        output_lines.append("                return hwnd")
                     output_lines.append("        }")
-                    output_lines.append("        return false")
+                    output_lines.append("        return 0")
                 else:
                     if process_name:
                         output_lines.append('        processName := WinGetProcessName("A")')
@@ -2653,7 +2653,7 @@ class AHKShortcutEditor(QMainWindow):
                     else:
                         output_lines.append("        return false")
                 output_lines.append("    }")
-                output_lines.append("    return false")
+                output_lines.append("    return " + ("0" if match_foreground else "false"))
                 output_lines.append("}")
                 output_lines.append("")
 
@@ -2815,6 +2815,7 @@ class AHKShortcutEditor(QMainWindow):
                     
                     # Generate unique function name
                     func_name = f"Is{re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Context'))}Context"
+                    match_foreground = shortcut.get('match_foreground', False)
                     # Context is active if at least one field is enabled and non-empty
                     has_context_fields = any([
                         shortcut.get('window_title_enabled', True) and shortcut.get('window_title', ''),
@@ -2824,32 +2825,45 @@ class AHKShortcutEditor(QMainWindow):
                     if has_context_fields:
                         append_context_checker(shortcut, func_name)
 
-                    # Add #HotIf directive
                     hotkey = shortcut.get('hotkey', '')
-                    if has_context_fields:
-                        if needs_exclusion_guard(hotkey):
-                            output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
-                        else:
-                            output_lines.append(f"#HotIf {func_name}()")
-                    elif needs_exclusion_guard(hotkey):
-                        output_lines.append(f"#HotIf !IsShortcutExcluded()")
-                    hotif_opened = has_context_fields or needs_exclusion_guard(hotkey)
-                    output_lines.append("")
-                    
                     action = shortcut.get('action', '')
                     action = action.replace(',,,', ',,')
-                    
-                    if '\n' in action:
+
+                    if match_foreground and has_context_fields:
+                        # Global hotkey: find matching window, activate it, then run action
                         output_lines.append(f"{hotkey}:: {{")
+                        output_lines.append(f"    hwnd := {func_name}()")
+                        output_lines.append("    if hwnd {")
+                        output_lines.append("        WinActivate(hwnd)")
+                        output_lines.append("        WinWaitActive(hwnd, , 1)")
                         for line in action.split('\n'):
                             if line.strip():
-                                output_lines.append(f"    {line}")
+                                output_lines.append(f"        {line}")
+                        output_lines.append("    }")
                         output_lines.append("}")
                     else:
-                        output_lines.append(f"{hotkey}::{action}")
-                    output_lines.append("")
-                    if hotif_opened:
-                        output_lines.append("#HotIf")
+                        # Normal #HotIf approach
+                        if has_context_fields:
+                            if needs_exclusion_guard(hotkey):
+                                output_lines.append(f"#HotIf {func_name}() && !IsShortcutExcluded()")
+                            else:
+                                output_lines.append(f"#HotIf {func_name}()")
+                        elif needs_exclusion_guard(hotkey):
+                            output_lines.append(f"#HotIf !IsShortcutExcluded()")
+                        hotif_opened = has_context_fields or needs_exclusion_guard(hotkey)
+                        output_lines.append("")
+
+                        if '\n' in action:
+                            output_lines.append(f"{hotkey}:: {{")
+                            for line in action.split('\n'):
+                                if line.strip():
+                                    output_lines.append(f"    {line}")
+                            output_lines.append("}")
+                        else:
+                            output_lines.append(f"{hotkey}::{action}")
+                        output_lines.append("")
+                        if hotif_opened:
+                            output_lines.append("#HotIf")
                     output_lines.append("")
 
             # Add enabled text shortcuts
