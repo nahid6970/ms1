@@ -43,19 +43,21 @@
 
 **Status:** Complete
 
-**Description:** Hotkeys that only activate in matching windows.
+**Description:** Hotkeys that only activate in matching windows, with an optional mode to find and focus any open matching window.
 
 **Implementation:**
 
 - Stored in `context_shortcuts`
 - Matches by window title, process name, and window class
 - Supports comma-separated values for each field
-- Generates `#HotIf` functions
+- `match_foreground` (bool, default `false`):
+  - `false`: generates `#HotIf Is<Name>Context()` guard that checks the active window `"A"` — shortcut only fires when the matching window is already focused.
+  - `true`: emits a global hotkey (no `#HotIf`). The generated `Is<Name>Context()` function iterates `WinGetList()` and returns the first matching `hwnd`. The hotkey body activates that window (`WinActivate(hwnd)` + `Sleep(100)`) then runs the action.
 
 **Usage:**
 
-- Add a context shortcut.
-- Fill in one or more context fields.
+- Add a context shortcut and fill in one or more context fields.
+- Enable "Match any foreground window" to have the shortcut find and focus the window even if it is not currently active.
 - Generate the script and run it under AutoHotkey v2.
 
 ## Exclusion Rules

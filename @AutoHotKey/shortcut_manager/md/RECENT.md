@@ -2,6 +2,19 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-06-13 20:19 - match_foreground toggle for context shortcuts
+
+**What We Accomplished:**
+
+- Added "Match any foreground window (not just focused)" checkbox to the context shortcut edit dialog, shown below the Enabled toggle.
+- New field `match_foreground` (bool, default `false`) stored in `context_shortcuts` JSON entries.
+- When disabled (default): behaviour unchanged — `#HotIf` guard checks active window `"A"`.
+- When enabled: no `#HotIf` guard is emitted. Instead a finder function `Is<Name>Context()` loops `WinGetList()` and returns the first matching `hwnd` (or `0`). The hotkey body calls the finder, runs `WinActivate(hwnd)` + `Sleep(100)`, then executes the action. Outer `{…}` braces are stripped from the action before inlining so no double-block is generated.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+
 ## 2026-06-10 12:00 - Documentation bootstrap
 
 **What We Accomplished:**
