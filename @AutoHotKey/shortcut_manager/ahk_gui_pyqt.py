@@ -523,7 +523,13 @@ class AddEditShortcutDialog(QDialog):
         self.enabled_checkbox = QCheckBox("Enabled (include in generated script)")
         self.enabled_checkbox.setChecked(True)
         form_layout.addWidget(self.enabled_checkbox)
-        
+
+        # Match foreground checkbox (context shortcuts only)
+        self.match_foreground_checkbox = QCheckBox("Match any foreground window (not just focused)")
+        self.match_foreground_checkbox.setChecked(False)
+        if self.shortcut_type == "context":
+            form_layout.addWidget(self.match_foreground_checkbox)
+
         if self.shortcut_type == "script":
             hotkey_row = QHBoxLayout()
             self.hotkey_edit = HotkeyLineEdit()
@@ -866,6 +872,7 @@ SendText("Hello World")"""
             self.window_title_toggle.setChecked(wt_on); self.window_title_edit.setEnabled(wt_on)
             self.process_name_toggle.setChecked(pn_on); self.process_name_edit.setEnabled(pn_on)
             self.window_class_toggle.setChecked(wc_on); self.window_class_edit.setEnabled(wc_on)
+            self.match_foreground_checkbox.setChecked(self.shortcut_data.get("match_foreground", False))
         elif self.shortcut_type == "exclude":
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
@@ -1232,6 +1239,7 @@ SendText("Hello World")"""
                 "window_title_enabled": self.window_title_toggle.isChecked(),
                 "process_name_enabled": self.process_name_toggle.isChecked(),
                 "window_class_enabled": self.window_class_toggle.isChecked(),
+                "match_foreground": self.match_foreground_checkbox.isChecked(),
                 "action": action,
                 "enabled": enabled
             }
@@ -2603,6 +2611,7 @@ class AHKShortcutEditor(QMainWindow):
                 window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
                 process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
                 window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
+                match_foreground = shortcut.get('match_foreground', False)
 
                 conditions = []
                 process_clause = build_condition_clause(process_name, lambda value: f'processName = "{value}"')
@@ -2618,16 +2627,31 @@ class AHKShortcutEditor(QMainWindow):
 
                 output_lines.append(f"{func_name}() {{")
                 output_lines.append("    try {")
-                if process_name:
-                    output_lines.append('        processName := WinGetProcessName("A")')
-                if window_title:
-                    output_lines.append('        windowTitle := WinGetTitle("A")')
-                if window_class:
-                    output_lines.append('        windowClass := WinGetClass("A")')
-                if conditions:
-                    output_lines.append("        return (" + " && ".join(conditions) + ")")
-                else:
+                if match_foreground:
+                    # Loop over all visible windows and check if any match
+                    output_lines.append("        for hwnd in WinGetList() {")
+                    if process_name:
+                        output_lines.append('            processName := WinGetProcessName(hwnd)')
+                    if window_title:
+                        output_lines.append('            windowTitle := WinGetTitle(hwnd)')
+                    if window_class:
+                        output_lines.append('            windowClass := WinGetClass(hwnd)')
+                    if conditions:
+                        output_lines.append("            if (" + " && ".join(conditions) + ")")
+                        output_lines.append("                return true")
+                    output_lines.append("        }")
                     output_lines.append("        return false")
+                else:
+                    if process_name:
+                        output_lines.append('        processName := WinGetProcessName("A")')
+                    if window_title:
+                        output_lines.append('        windowTitle := WinGetTitle("A")')
+                    if window_class:
+                        output_lines.append('        windowClass := WinGetClass("A")')
+                    if conditions:
+                        output_lines.append("        return (" + " && ".join(conditions) + ")")
+                    else:
+                        output_lines.append("        return false")
                 output_lines.append("    }")
                 output_lines.append("    return false")
                 output_lines.append("}")

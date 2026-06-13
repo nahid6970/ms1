@@ -696,11 +696,14 @@
             "category": "Terminal",
             "description": "Save current Gemini chat session",
             "enabled": true,
-            "hotkey": "^/",
+            "hotkey": "^z",
             "name": "Gemini Session",
             "process_name": "WindowsTerminal.exe",
             "window_class": "",
-            "window_title": "Ready"
+            "window_title": "Ready",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true
         },
         {
             "name": "Chrome close window vct",
@@ -711,7 +714,11 @@
             "process_name": "chrome.exe",
             "window_class": "Chrome_WidgetWin_1",
             "action": "{\n        Send \"^w\"\n}",
-            "enabled": true
+            "enabled": true,
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "match_foreground": true
         },
         {
             "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm-ss\"))",
