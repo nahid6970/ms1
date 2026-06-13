@@ -741,8 +741,20 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         const activeElement = document.activeElement;
 
-        // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
+            const selection = window.getSelection();
+            let rawOffset = 0;
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const cell = activeElement.closest('td');
+                const inputElement = cell ? cell.querySelector('input, textarea') : null;
+                const rawInput = inputElement ? inputElement.value : '';
+                const visibleOffset = extractRawTextBeforeCaret(activeElement, range).length;
+                const visibleToRawMap = calculateVisibleToRawMap(rawInput);
+                rawOffset = visibleToRawMap[visibleOffset];
+                if (rawOffset === undefined) rawOffset = rawInput.length;
+            }
+
             const switched = enableRawMode();
             if (switched) {
                 showToast('Switched to Raw Mode for Multi-Cursor', 'info');
@@ -753,6 +765,8 @@ function handleKeyboardShortcuts(e) {
                         const textarea = cell.querySelector('textarea');
                         if (textarea) {
                             textarea.focus();
+                            textarea.setSelectionRange(rawOffset, rawOffset);
+                            addCursorBelow(textarea);
                         }
                     }
                 }, 100);
@@ -770,8 +784,20 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         const activeElement = document.activeElement;
 
-        // This feature only works in TEXTAREA, not contentEditable
         if (activeElement.classList && activeElement.classList.contains('markdown-preview')) {
+            const selection = window.getSelection();
+            let rawOffset = 0;
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const cell = activeElement.closest('td');
+                const inputElement = cell ? cell.querySelector('input, textarea') : null;
+                const rawInput = inputElement ? inputElement.value : '';
+                const visibleOffset = extractRawTextBeforeCaret(activeElement, range).length;
+                const visibleToRawMap = calculateVisibleToRawMap(rawInput);
+                rawOffset = visibleToRawMap[visibleOffset];
+                if (rawOffset === undefined) rawOffset = rawInput.length;
+            }
+
             const switched = enableRawMode();
             if (switched) {
                 showToast('Switched to Raw Mode for Multi-Cursor', 'info');
@@ -782,6 +808,8 @@ function handleKeyboardShortcuts(e) {
                         const textarea = cell.querySelector('textarea');
                         if (textarea) {
                             textarea.focus();
+                            textarea.setSelectionRange(rawOffset, rawOffset);
+                            addCursorAbove(textarea);
                         }
                     }
                 }, 100);
@@ -849,6 +877,55 @@ function handleKeyboardShortcuts(e) {
     }
 }
 
+function moveSelectedLines(value, start, end, direction) {
+    const lines = value.split('\n');
+
+    // Find affected lines
+    const startLineIndex = value.substring(0, start).split('\n').length - 1;
+    let endLineIndex = value.substring(0, end).split('\n').length - 1;
+
+    // If selection ends at a newline, exclude that line unless it's just a cursor
+    if (end > start && value[end - 1] === '\n') {
+        endLineIndex--;
+    }
+
+    // Boundary checks
+    if (direction === -1 && startLineIndex === 0) return null;
+    if (direction === 1 && endLineIndex === lines.length - 1) return null;
+
+    // Extract the lines to be moved
+    const movedLines = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
+
+    // Re-insert at new position
+    if (direction === -1) {
+        lines.splice(startLineIndex - 1, 0, ...movedLines);
+    } else {
+        lines.splice(startLineIndex + 1, 0, ...movedLines);
+    }
+
+    const newValue = lines.join('\n');
+    const targetLineIndex = startLineIndex + direction;
+
+    let newStart = 0;
+    for (let i = 0; i < targetLineIndex; i++) {
+        newStart += lines[i].length + 1;
+    }
+
+    const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
+    const offsetInStartLine = start - startOfSourceLine;
+    newStart += offsetInStartLine;
+
+    let newEnd = 0;
+    for (let i = 0; i < targetLineIndex; i++) {
+        newEnd += lines[i].length + 1;
+    }
+
+    const offsetFromSelectionStart = end - start;
+    newEnd += offsetInStartLine + offsetFromSelectionStart;
+
+    return { newValue, newStart, newEnd };
+}
+
 function moveLines(activeElement, direction) {
     // Handle contentEditable (WYSIWYG mode)
     if (activeElement.isContentEditable) {
@@ -863,70 +940,33 @@ function moveLines(activeElement, direction) {
         const start = textBefore.length;
         const end = start + (selection.toString().length || 0);
 
-        const lines = value.split('\n');
-
-        // Find affected lines
-        const startLineIndex = value.substring(0, start).split('\n').length - 1;
-        let endLineIndex = value.substring(0, end).split('\n').length - 1;
-
-        // If selection ends at a newline, exclude that line unless it's just a cursor
-        if (end > start && value[end - 1] === '\n') {
-            endLineIndex--;
-        }
-
-        // Boundary checks
-        if (direction === -1 && startLineIndex === 0) return;
-        if (direction === 1 && endLineIndex === lines.length - 1) return;
-
-        // Extract the lines to be moved
-        const movedLines = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
-
-        // Re-insert at new position
-        if (direction === -1) {
-            lines.splice(startLineIndex - 1, 0, ...movedLines);
-        } else {
-            lines.splice(startLineIndex + 1, 0, ...movedLines);
-        }
-
-        const newValue = lines.join('\n');
+        const moveResult = moveSelectedLines(value, start, end, direction);
+        if (!moveResult) return;
+        const { newValue, newStart, newEnd } = moveResult;
 
         // Update the contentEditable element with highlighted syntax
         activeElement.innerHTML = highlightSyntax(newValue);
 
-        // Update underlying input element directly without triggering input event
+        // Keep the underlying source-of-truth input in sync
         const cell = activeElement.closest('td');
         if (cell) {
             const inputElement = cell.querySelector('input, textarea');
             if (inputElement) {
-                // Get current data
-                const rowIndex = parseInt(cell.parentElement.dataset.row);
-                const colIndex = parseInt(cell.dataset.col);
-
-                // Update data directly
-                if (tableData.sheets[currentSheet] &&
-                    tableData.sheets[currentSheet].rows[rowIndex] &&
-                    tableData.sheets[currentSheet].rows[rowIndex][colIndex] !== undefined) {
-                    tableData.sheets[currentSheet].rows[rowIndex][colIndex] = newValue;
-                }
-
-                // Update input value without triggering events
                 inputElement.value = newValue;
-
-                // Trigger save in background
-                saveData();
             }
         }
 
-        // Restore cursor position
-        let newStart = 0;
-        for (let i = 0; i < (startLineIndex + direction); i++) {
-            newStart += lines[i].length + 1;
-        }
-        const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
-        const offsetInStartLine = start - startOfSourceLine;
-        newStart += offsetInStartLine;
+        // Reuse the normal input sync path so the change persists after refresh
+        activeElement.dispatchEvent(new Event('input', { bubbles: true }));
 
-        setCaretPosition(activeElement, newStart);
+        // Restore caret or selection after the DOM update settles
+        requestAnimationFrame(() => {
+            if (newEnd > newStart) {
+                selectTextAtPosition(activeElement, newStart, newEnd);
+            } else {
+                setCaretPosition(activeElement, newStart);
+            }
+        });
         return;
     }
 
@@ -935,50 +975,10 @@ function moveLines(activeElement, direction) {
     const start = activeElement.selectionStart;
     const end = activeElement.selectionEnd;
 
-    const lines = value.split('\n');
-
-    // Find affected lines
-    const startLineIndex = value.substring(0, start).split('\n').length - 1;
-    let endLineIndex = value.substring(0, end).split('\n').length - 1;
-
-    // If selection ends at a newline, exclude that line unless it's just a cursor
-    if (end > start && value[end - 1] === '\n') {
-        endLineIndex--;
-    }
-
-    // Boundary checks
-    if (direction === -1 && startLineIndex === 0) return;
-    if (direction === 1 && endLineIndex === lines.length - 1) return;
-
-    // Extract the lines to be moved
-    const movedLines = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
-
-    // Re-insert at new position
-    if (direction === -1) {
-        lines.splice(startLineIndex - 1, 0, ...movedLines);
-    } else {
-        lines.splice(startLineIndex + 1, 0, ...movedLines);
-    }
-
-    const newValue = lines.join('\n');
+    const moveResult = moveSelectedLines(value, start, end, direction);
+    if (!moveResult) return;
+    const { newValue, newStart, newEnd } = moveResult;
     activeElement.value = newValue;
-
-    // Restore selection
-    let newStart = 0;
-    for (let i = 0; i < (startLineIndex + direction); i++) {
-        newStart += lines[i].length + 1;
-    }
-    // Add offset within the line
-    const startOfSourceLine = value.lastIndexOf('\n', start - 1) + 1;
-    const offsetInStartLine = start - startOfSourceLine;
-    newStart += offsetInStartLine;
-
-    let newEnd = 0;
-    for (let i = 0; i < (startLineIndex + direction); i++) {
-        newEnd += lines[i].length + 1;
-    }
-    const offsetFromSelectionStart = end - start;
-    newEnd += offsetInStartLine + offsetFromSelectionStart;
 
     activeElement.selectionStart = newStart;
     activeElement.selectionEnd = newEnd;
