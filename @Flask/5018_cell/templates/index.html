@@ -473,6 +473,9 @@
                     <button class="btn btn-primary btn-full-width" onclick="showMarkdownGuide()">
                         📝 View Markdown Guide
                     </button>
+                    <button class="btn btn-primary btn-full-width" style="margin-top: 8px;" onclick="showKeyboardShortcuts()">
+                        ⌨️ View Keyboard Shortcuts
+                    </button>
                 </div>
 
                 <div class="settings-section">
@@ -1011,6 +1014,57 @@
                         <li>Use wrap mode for multi-line content</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="keyboardShortcutsModal" class="modal">
+        <div class="modal-content" style="max-width: 750px;">
+            <div class="modal-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <span class="close" onclick="closeKeyboardShortcuts()">&times;</span>
+            </div>
+            <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+
+                <h3 style="color: #007bff; margin: 0 0 10px;">🎯 Navigation</h3>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;width:200px;">F1</td><td style="padding:6px 8px;">Quick Navigation (Categories &amp; Sheets)</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F2</td><td style="padding:6px 8px;">Recent Sheets popup</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F4</td><td style="padding:6px 8px;">Toggle top ribbons</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Alt+M</td><td style="padding:6px 8px;">Toggle between current and previous sheet</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Tab / Shift+Tab</td><td style="padding:6px 8px;">Next / previous cell</td></tr>
+                </table>
+
+                <h3 style="color: #007bff; margin: 0 0 10px;">✏️ Editing</h3>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;width:200px;">Ctrl+S</td><td style="padding:6px 8px;">Save</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Alt+N</td><td style="padding:6px 8px;">Add new row</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+D</td><td style="padding:6px 8px;">Duplicate current line</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+Shift+K</td><td style="padding:6px 8px;">Delete current line</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Alt+Up / Alt+Down</td><td style="padding:6px 8px;">Move selected lines up / down</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F3</td><td style="padding:6px 8px;">Quick Markdown Formatter (with selection)</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F8</td><td style="padding:6px 8px;">Search word under cursor &amp; copy</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F9</td><td style="padding:6px 8px;">Swap two words (with selection)</td></tr>
+                </table>
+
+                <h3 style="color: #007bff; margin: 0 0 10px;">🎨 Multi-Cursor</h3>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;width:200px;">Ctrl+Alt+Down</td><td style="padding:6px 8px;">Add cursor on line below</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+Alt+Up</td><td style="padding:6px 8px;">Add cursor on line above</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+Shift+D</td><td style="padding:6px 8px;">Select next occurrence (multi-cursor)</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+Space</td><td style="padding:6px 8px;">Jump to next word boundary (multi-cursor)</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Shift+Arrow / Home / End</td><td style="padding:6px 8px;">Extend selection on all cursors</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Escape</td><td style="padding:6px 8px;">Exit multi-cursor mode</td></tr>
+                </table>
+
+                <h3 style="color: #007bff; margin: 0 0 10px;">🔍 Search</h3>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;width:200px;">Ctrl+F</td><td style="padding:6px 8px;">Focus search box</td></tr>
+                    <tr style="border-bottom:1px solid #ddd;"><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">F8</td><td style="padding:6px 8px;">Search word under cursor</td></tr>
+                    <tr><td style="padding:6px 8px;font-family:monospace;background:#f8f9fa;">Ctrl+Shift+D</td><td style="padding:6px 8px;">Select next occurrence</td></tr>
+                </table>
+
             </div>
         </div>
     </div>

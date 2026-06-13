@@ -9632,6 +9632,10 @@ window.onclick = function (event) {
     if (event.target === markdownModal) {
         closeMarkdownGuide();
     }
+    const shortcutsModal = document.getElementById('keyboardShortcutsModal');
+    if (event.target === shortcutsModal) {
+        closeKeyboardShortcuts();
+    }
 
     // Close sheet list when clicking outside
     if (!event.target.closest('.sheet-selector')) {
@@ -15025,6 +15029,17 @@ function closeMarkdownGuide() {
     if (modal) {
         modal.style.display = 'none';
     }
+}
+
+function showKeyboardShortcuts() {
+    closeSettingsModal();
+    const modal = document.getElementById('keyboardShortcutsModal');
+    if (modal) modal.style.display = 'block';
+}
+
+function closeKeyboardShortcuts() {
+    const modal = document.getElementById('keyboardShortcutsModal');
+    if (modal) modal.style.display = 'none';
 }
 
 // Close modals when clicking outside
