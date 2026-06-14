@@ -714,7 +714,7 @@
             "process_name": "chrome.exe",
             "window_class": "Chrome_WidgetWin_1",
             "action": "{\n        Send \"^w\"\n}",
-            "enabled": true,
+            "enabled": false,
             "window_title_enabled": true,
             "process_name_enabled": true,
             "window_class_enabled": true,

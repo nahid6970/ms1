@@ -293,10 +293,7 @@ class VoiceApp(QMainWindow):
 
         self.status_btn = QPushButton("")
         self.status_btn.setObjectName("status")
-        self.status_btn.setFixedSize(
-            self.config.get("status_btn_width", 8),
-            self.config.get("status_btn_height", 18),
-        )
+        self.status_btn.setFixedSize(8, 18)
         self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.status_btn.setMinimumSize(self.status_btn.size())
         self.status_btn.setMaximumSize(self.status_btn.size())
@@ -311,10 +308,6 @@ class VoiceApp(QMainWindow):
                 border: 1px solid {CP_GREEN};
                 padding: 0px;
                 margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
             }}
             QPushButton#status:hover {{
                 background-color: {CP_GREEN};
@@ -894,28 +887,21 @@ class VoiceApp(QMainWindow):
 
     def _set_status(self, color):
         self.status_btn.setText("")
-        self.status_btn.setFixedSize(
-            self.config.get("status_btn_width", 8),
-            self.config.get("status_btn_height", 18),
-        )
-        self.status_btn.setMinimumSize(self.status_btn.size())
-        self.status_btn.setMaximumSize(self.status_btn.size())
         self.status_btn.setStyleSheet(f"""
             QPushButton#status {{
                 background-color: {color};
                 border: 1px solid {color};
                 padding: 0px;
                 margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
             }}
             QPushButton#status:hover {{
                 background-color: {color};
                 border: 1px solid {color};
             }}
         """)
+        w = 8
+        h = 18
+        self.status_btn.setFixedSize(w, h)
 
     def _finish_space_recording(self):
         if not self._recording_active:
