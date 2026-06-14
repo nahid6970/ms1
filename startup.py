@@ -350,26 +350,14 @@ class ItemDialog(QDialog):
         self.ps1_input = CyberInput("Complete PowerShell command line...")
         layout.addWidget(self.ps1_input)
 
-        # Checkboxes row
-        checks_layout = QHBoxLayout()
-
+        # Run as Admin
         self.admin_check = QCheckBox("RUN AS ADMIN")
         self.admin_check.setStyleSheet(f"""
             QCheckBox {{ color: {CP_RED}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
             QCheckBox::indicator:checked {{ background: {CP_RED}; border: 1px solid {CP_RED}; }}
         """)
-        checks_layout.addWidget(self.admin_check)
-
-        self.terminal_check = QCheckBox("SHOW TERMINAL")
-        self.terminal_check.setStyleSheet(f"""
-            QCheckBox {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
-            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
-            QCheckBox::indicator:checked {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; }}
-        """)
-        checks_layout.addWidget(self.terminal_check)
-        checks_layout.addStretch()
-        layout.addLayout(checks_layout)
+        layout.addWidget(self.admin_check)
 
         layout.addStretch()
 
@@ -407,7 +395,6 @@ class ItemDialog(QDialog):
         self.ps1_input.setText(self.item.get("ps1_command", ""))
         self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
         self.admin_check.setChecked(self.item.get("run_as_admin", False))
-        self.terminal_check.setChecked(self.item.get("show_terminal", False))
 
     def save_item(self):
         if not self.name_input.text():
@@ -430,7 +417,6 @@ class ItemDialog(QDialog):
             "ps1_command": ps_cmd,
             "ExecutableType": self.exec_type_combo.currentText(),
             "run_as_admin": self.admin_check.isChecked(),
-            "show_terminal": self.terminal_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
@@ -1310,7 +1296,7 @@ class MainWindow(QMainWindow):
 
     VBS_DIR = r"C:\@delta\output\startup\vbs"
 
-    def _make_vbs(self, item, window_style=1):
+    def _make_vbs(self, item):
         os.makedirs(self.VBS_DIR, exist_ok=True)
         path = item["paths"][0]
         args = item.get("Command", "")
@@ -1323,10 +1309,9 @@ class MainWindow(QMainWindow):
             exe, run_args = "python.exe", f'"{path}"' + (f' {args}' if args else '')
         else:
             exe, run_args = path, args
-        suffix = "admin" if window_style == 1 else "hidden"
-        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_{suffix}.vbs")
+        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_admin.vbs")
         with open(vbs_path, "w") as f:
-            f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "", {window_style}\n')
+            f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "runas", 1\n')
         return vbs_path
 
     def check_registry(self, item):
@@ -1346,10 +1331,7 @@ class MainWindow(QMainWindow):
                 if should_enable:
                      with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
                         if item.get("run_as_admin"):
-                            vbs_path = self._make_vbs(item, window_style=1)
-                            full = f'wscript.exe "{vbs_path}"'
-                        elif not item.get("show_terminal", False) and os.path.splitext(item["paths"][0])[1].lower() in (".py", ".ps1", ".bat", ".cmd"):
-                            vbs_path = self._make_vbs(item, window_style=0)
+                            vbs_path = self._make_vbs(item)
                             full = f'wscript.exe "{vbs_path}"'
                         else:
                             path = item["paths"][0]
@@ -1409,9 +1391,6 @@ class MainWindow(QMainWindow):
                         if item.get("run_as_admin"): cmd += ' -Verb RunAs'
                     elif item.get("run_as_admin") and "-Verb RunAs" not in cmd:
                         cmd += ' -Verb RunAs'
-
-                    if not item.get("show_terminal", False) and "-WindowStyle" not in cmd:
-                        cmd += ' -WindowStyle Hidden'
                     
                     content += f"# {name}\n"
                     content += "try {\n"
@@ -1435,41 +1414,36 @@ class MainWindow(QMainWindow):
 
     def handle_launch(self, item):
         try:
-            force_admin = item.get("_run_as_admin", False)
-            run_as_admin = force_admin or item.get("run_as_admin", False)
+            path = item["paths"][0]
+            cmd = item.get("Command", "")
+            run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
+            ext = os.path.splitext(path)[1].lower()
 
-            if self.current_mode == "REGISTRY":
-                # Simulate exactly what Windows runs from the registry value
-                if run_as_admin:
-                    # Registry stores wscript.exe + vbs path for admin items
-                    vbs_path = self._make_vbs(item)
-                    subprocess.Popen(["wscript.exe", vbs_path])
+            if run_as_admin:
+                # Wrap in Start-Process with -Verb RunAs via the appropriate host
+                if ext == ".ps1":
+                    inner_cmd = f'& "{path}"'
+                    if cmd: inner_cmd += f' {cmd}'
+                    encoded = __import__('base64').b64encode(inner_cmd.encode('utf-16-le')).decode()
+                    ps_cmd = f'Start-Process powershell -ArgumentList \'-EncodedCommand\', \'{encoded}\' -Verb RunAs'
+                elif ext == ".bat" or ext == ".cmd":
+                    inner = f'/c "{path}"'
+                    if cmd: inner += f' {cmd}'
+                    ps_cmd = f'Start-Process cmd -ArgumentList \'{inner}\' -Verb RunAs'
+                elif ext == ".py":
+                    inner = f'"{path}"'
+                    if cmd: inner += f' {cmd}'
+                    ps_cmd = f'Start-Process python -ArgumentList \'{inner}\' -Verb RunAs'
                 else:
-                    path = item["paths"][0]
-                    args = item.get("Command", "")
-                    show_terminal = item.get("show_terminal", False)
-                    if show_terminal:
-                        full = f'"{path}" {args}' if args else f'"{path}"'
-                        subprocess.Popen(f'start "" {full}', shell=True)
-                    else:
-                        si = subprocess.STARTUPINFO()
-                        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                        si.wShowWindow = 0
-                        full = f'"{path}" {args}' if args else f'"{path}"'
-                        subprocess.Popen(full, shell=True, startupinfo=si)
+                    ps_cmd = f'Start-Process "{path}"'
+                    if cmd: ps_cmd += f' -ArgumentList \'{cmd}\''
+                    ps_cmd += ' -Verb RunAs'
+                subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd])
+                self.update_status(f"EXECUTING AS ADMIN: {item['name']}")
             else:
-                # SCRIPT mode: run the ps1_command exactly as the generated PS1 does
-                cmd = item.get("ps1_command", "")
-                if not cmd:
-                    path = item["paths"][0]
-                    args = item.get("Command", "")
-                    cmd = f'Start-Process -FilePath "{path}"'
-                    if args: cmd += f' -ArgumentList "{args}"'
-                if run_as_admin and "-Verb RunAs" not in cmd:
-                    cmd += " -Verb RunAs"
-                subprocess.Popen(["powershell", "-NoProfile", "-Command", cmd])
-
-            self.update_status(f"EXECUTING: {item['name']}")
+                full = f'"{path}" {cmd}' if cmd else f'"{path}"'
+                subprocess.Popen(f'start "" {full}', shell=True)
+                self.update_status(f"EXECUTING: {item['name']}")
         except Exception as e:
             self.update_status(f"EXEC FACTOR FAILED: {str(e)}")
 
