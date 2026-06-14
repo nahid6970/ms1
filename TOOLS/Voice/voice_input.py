@@ -761,7 +761,7 @@ class VoiceApp(QMainWindow):
         is_en = self.config["language"] == "en-US"
         self.lang_btn.setText("EN" if is_en else "BN")
         mode = self.config.get("output_mode", "search")
-        border_color = "#FFFF00" if mode == "search" else "#FFFFFF"
+        border_color = "#FF8C00" if mode == "search" else "#00BFFF"
         text_color = CP_RED if is_en else CP_GREEN
         self.lang_btn.setStyleSheet(f"border: 2px solid {border_color}; color: {text_color}; font-weight: bold; margin: 0px; padding: 0px; min-height: 18px; max-height: 18px;")
         self.lang_btn.setFixedSize(self.lang_btn.width(), 18)
