@@ -110,6 +110,25 @@ class CyberDelegate(QStyledItemDelegate):
         
         painter.restore()
 
+def time_ago(date_str):
+    """Convert 'YYYY-MM-DD--HH:MM' to relative time like '1y 2d 5h 8m'"""
+    try:
+        from datetime import datetime
+        dt = datetime.strptime(date_str, "%Y-%m-%d--%H:%M")
+        diff = int((datetime.now() - dt).total_seconds())
+        if diff < 0: diff = 0
+        parts = []
+        for unit, secs in [("y", 31536000), ("mo", 2592000), ("d", 86400), ("h", 3600), ("m", 60)]:
+            val = diff // secs
+            if val:
+                parts.append(f"{val}{unit}")
+                diff %= secs
+            if len(parts) == 2:
+                break
+        return " ".join(parts) + " ago" if parts else "just now"
+    except:
+        return date_str
+
 # --- GIT LOGIC ---
 class CommitLoaderThread(QThread):
     """Background thread for loading commits"""
@@ -1673,9 +1692,11 @@ class MainWindow(QMainWindow):
             row_offset = 1
 
         for i, commit in enumerate(commits):
+            date_item = QTableWidgetItem(time_ago(commit['date']))
+            date_item.setToolTip(commit['date'])
             items = [
                 QTableWidgetItem(commit['hash']),
-                QTableWidgetItem(commit['date']),
+                date_item,
                 QTableWidgetItem(commit['author']),
                 QTableWidgetItem(commit['message'])
             ]
@@ -2232,9 +2253,11 @@ class FileTimelineDialog(QDialog):
         
         self.table.setRowCount(len(commits))
         for i, commit in enumerate(commits):
+            date_item = QTableWidgetItem(time_ago(commit['date']))
+            date_item.setToolTip(commit['date'])
             items = [
                 QTableWidgetItem(commit['hash']),
-                QTableWidgetItem(commit['date']),
+                date_item,
                 QTableWidgetItem(commit['message'])
             ]
             
@@ -2437,9 +2460,11 @@ class ReflogDialog(QDialog):
         
         self.table.setRowCount(len(entries))
         for i, entry in enumerate(entries):
+            date_item = QTableWidgetItem(time_ago(entry['date']))
+            date_item.setToolTip(entry['date'])
             items = [
                 QTableWidgetItem(entry['hash']),
-                QTableWidgetItem(entry['date']),
+                date_item,
                 QTableWidgetItem(entry['message'])
             ]
             items[0].setForeground(QColor(CP_YELLOW))
