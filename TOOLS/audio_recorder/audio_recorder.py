@@ -1,8 +1,8 @@
 import sys
 import os
+import json
 import wave
 import threading
-import time
 import numpy as np
 import soundcard as sc
 from datetime import datetime
@@ -146,6 +146,8 @@ class _NullContext:
 
 # ── Main Window ───────────────────────────────────────────────────────────────
 class AudioRecorder(QMainWindow):
+    SETTINGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("◈ AUDIO RECORDER")
@@ -167,7 +169,53 @@ class AudioRecorder(QMainWindow):
             self._loopbacks = [d for d in all_devs if "loopback" in repr(d).lower() or "speaker" in repr(d).lower()]
             self._mics      = [d for d in all_devs if d not in self._loopbacks]
 
+        self._cfg = self._load_settings()
         self._build_ui()
+        self._apply_settings()
+
+    # ── Settings ──────────────────────────────────────────────────────────────
+    def _load_settings(self) -> dict:
+        try:
+            with open(self.SETTINGS, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def _save_settings(self):
+        cfg = {
+            "sys_enabled":  self.chk_sys.isChecked(),
+            "mic_enabled":  self.chk_mic.isChecked(),
+            "sys_device":   self.cmb_sys.currentText(),
+            "mic_device":   self.cmb_mic.currentText(),
+            "save_dir":     self._save_dir,
+        }
+        try:
+            with open(self.SETTINGS, "w") as f:
+                json.dump(cfg, f, indent=2)
+        except Exception:
+            pass
+
+    def _apply_settings(self):
+        c = self._cfg
+        if "save_dir" in c and os.path.isdir(c["save_dir"]):
+            self._save_dir = c["save_dir"]
+            self.lbl_out.setText(self._save_dir)
+        if "sys_enabled" in c:
+            self.chk_sys.setChecked(c["sys_enabled"])
+        if "mic_enabled" in c:
+            self.chk_mic.setChecked(c["mic_enabled"])
+        if "sys_device" in c:
+            idx = self.cmb_sys.findText(c["sys_device"])
+            if idx >= 0:
+                self.cmb_sys.setCurrentIndex(idx)
+        if "mic_device" in c:
+            idx = self.cmb_mic.findText(c["mic_device"])
+            if idx >= 0:
+                self.cmb_mic.setCurrentIndex(idx)
+
+    def closeEvent(self, event):
+        self._save_settings()
+        super().closeEvent(event)
 
     def _build_ui(self):
         root = QWidget()
@@ -284,6 +332,7 @@ class AudioRecorder(QMainWindow):
         if d:
             self._save_dir = d
             self.lbl_out.setText(d)
+            self._save_settings()
 
     def _resolve_out(self) -> str:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
