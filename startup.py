@@ -350,14 +350,26 @@ class ItemDialog(QDialog):
         self.ps1_input = CyberInput("Complete PowerShell command line...")
         layout.addWidget(self.ps1_input)
 
-        # Run as Admin
+        # Checkboxes row
+        checks_layout = QHBoxLayout()
+
         self.admin_check = QCheckBox("RUN AS ADMIN")
         self.admin_check.setStyleSheet(f"""
             QCheckBox {{ color: {CP_RED}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
             QCheckBox::indicator:checked {{ background: {CP_RED}; border: 1px solid {CP_RED}; }}
         """)
-        layout.addWidget(self.admin_check)
+        checks_layout.addWidget(self.admin_check)
+
+        self.terminal_check = QCheckBox("SHOW TERMINAL")
+        self.terminal_check.setStyleSheet(f"""
+            QCheckBox {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
+            QCheckBox::indicator:checked {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; }}
+        """)
+        checks_layout.addWidget(self.terminal_check)
+        checks_layout.addStretch()
+        layout.addLayout(checks_layout)
 
         layout.addStretch()
 
@@ -395,6 +407,7 @@ class ItemDialog(QDialog):
         self.ps1_input.setText(self.item.get("ps1_command", ""))
         self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
         self.admin_check.setChecked(self.item.get("run_as_admin", False))
+        self.terminal_check.setChecked(self.item.get("show_terminal", False))
 
     def save_item(self):
         if not self.name_input.text():
@@ -417,6 +430,7 @@ class ItemDialog(QDialog):
             "ps1_command": ps_cmd,
             "ExecutableType": self.exec_type_combo.currentText(),
             "run_as_admin": self.admin_check.isChecked(),
+            "show_terminal": self.terminal_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
@@ -1417,6 +1431,7 @@ class MainWindow(QMainWindow):
             path = item["paths"][0]
             cmd = item.get("Command", "")
             run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
+            show_terminal = item.get("show_terminal", False)
             ext = os.path.splitext(path)[1].lower()
 
             if run_as_admin:
@@ -1441,8 +1456,15 @@ class MainWindow(QMainWindow):
                 subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd])
                 self.update_status(f"EXECUTING AS ADMIN: {item['name']}")
             else:
-                full = f'"{path}" {cmd}' if cmd else f'"{path}"'
-                subprocess.Popen(f'start "" {full}', shell=True)
+                if show_terminal:
+                    full = f'"{path}" {cmd}' if cmd else f'"{path}"'
+                    subprocess.Popen(f'start "" {full}', shell=True)
+                else:
+                    si = subprocess.STARTUPINFO()
+                    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                    si.wShowWindow = 0  # SW_HIDE
+                    args = [path] + (cmd.split() if cmd else [])
+                    subprocess.Popen(args, startupinfo=si)
                 self.update_status(f"EXECUTING: {item['name']}")
         except Exception as e:
             self.update_status(f"EXEC FACTOR FAILED: {str(e)}")
