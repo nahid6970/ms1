@@ -1448,7 +1448,8 @@ class MainWindow(QMainWindow):
                         si = subprocess.STARTUPINFO()
                         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                         si.wShowWindow = 0
-                        subprocess.Popen([path] + (args.split() if args else []), startupinfo=si)
+                        full = f'"{path}" {args}' if args else f'"{path}"'
+                        subprocess.Popen(full, shell=True, startupinfo=si)
             else:
                 # SCRIPT mode: run the ps1_command exactly as the generated PS1 does
                 cmd = item.get("ps1_command", "")
