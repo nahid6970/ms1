@@ -158,12 +158,24 @@ class AudioRecorder(QMainWindow):
         self._timer.timeout.connect(self._tick)
 
         all_devs = sc.all_microphones(include_loopback=True)
-        self._loopbacks = [d for d in all_devs if "loopback" in repr(d).lower() or "speaker" in repr(d).lower()]
-        self._mics      = [d for d in all_devs if d not in self._loopbacks]
+        all_loopbacks = [d for d in all_devs if "loopback" in repr(d).lower() or "speaker" in repr(d).lower()]
+        all_mics      = [d for d in all_devs if d not in all_loopbacks]
+        self._loopbacks = [d for d in all_loopbacks if self._probe(d)]
+        self._mics      = [d for d in all_mics      if self._probe(d)]
 
         self._cfg = self._load_settings()
         self._build_ui()
         self._apply_settings()
+
+    @staticmethod
+    def _probe(dev) -> bool:
+        """Return True if device can actually be opened for recording."""
+        try:
+            with dev.recorder(samplerate=SAMPLERATE, channels=dev.channels, blocksize=CHUNK):
+                pass
+            return True
+        except Exception:
+            return False
 
     # ── Settings ──────────────────────────────────────────────────────────────
     def _load_settings(self):
