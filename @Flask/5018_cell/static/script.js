@@ -10890,6 +10890,53 @@ async function changeTextCase(caseType, event) {
     showToast(`Converted to ${caseNames[caseType]}`, 'success');
 }
 
+function convertNumbersToBangla(event) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        selectedText = input.value.substring(quickFormatterSelection.start, quickFormatterSelection.end);
+    }
+
+    if (!selectedText) { showToast('No text selected', 'warning'); return; }
+
+    const engToBng = { '0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯' };
+    const convertedText = selectedText.replace(/[0-9]/g, d => engToBng[d]);
+
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(convertedText);
+        range.insertNode(textNode);
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            actualInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        sel.addRange(newRange);
+    } else {
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        input.value = input.value.substring(0, start) + convertedText + input.value.substring(end);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.setSelectionRange(start, start + convertedText.length);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast('Numbers converted to Bangla', 'success');
+}
+
 function applySqrtFormat(event) {
     if (!quickFormatterTarget) return;
 
