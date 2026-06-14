@@ -510,10 +510,9 @@ function runExtension() {
                 found = wrapTextInParent(parent, h);
             }
 
-            // Strategy 2: Fallback to Body (if path search failed to find text)
-            if (!found) {
-                // Only if text is long enough to avoid massive noise, or just do it?
-                // Let's rely on the text being somewhat unique or user intent.
+            // Strategy 2: Fallback to Body — only for reasonably unique/long text
+            // to avoid freezing on large DOMs (e.g. YouTube) with short/common strings
+            if (!found && h.text.length >= 10) {
                 wrapTextInParent(document.body, h);
             }
 
@@ -576,7 +575,10 @@ function runExtension() {
             }
         });
 
-        parent.normalize();
+        // Avoid normalizing the entire body — too expensive on large DOMs
+        if (parent !== document.body) {
+            parent.normalize();
+        }
         return success;
     }
 }
