@@ -1428,44 +1428,40 @@ class MainWindow(QMainWindow):
 
     def handle_launch(self, item):
         try:
-            path = item["paths"][0]
-            cmd = item.get("Command", "")
-            run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
-            show_terminal = item.get("show_terminal", False)
-            ext = os.path.splitext(path)[1].lower()
+            force_admin = item.get("_run_as_admin", False)
+            run_as_admin = force_admin or item.get("run_as_admin", False)
 
-            if run_as_admin:
-                # Wrap in Start-Process with -Verb RunAs via the appropriate host
-                if ext == ".ps1":
-                    inner_cmd = f'& "{path}"'
-                    if cmd: inner_cmd += f' {cmd}'
-                    encoded = __import__('base64').b64encode(inner_cmd.encode('utf-16-le')).decode()
-                    ps_cmd = f'Start-Process powershell -ArgumentList \'-EncodedCommand\', \'{encoded}\' -Verb RunAs'
-                elif ext == ".bat" or ext == ".cmd":
-                    inner = f'/c "{path}"'
-                    if cmd: inner += f' {cmd}'
-                    ps_cmd = f'Start-Process cmd -ArgumentList \'{inner}\' -Verb RunAs'
-                elif ext == ".py":
-                    inner = f'"{path}"'
-                    if cmd: inner += f' {cmd}'
-                    ps_cmd = f'Start-Process python -ArgumentList \'{inner}\' -Verb RunAs'
+            if self.current_mode == "REGISTRY":
+                # Simulate exactly what Windows runs from the registry value
+                if run_as_admin:
+                    # Registry stores wscript.exe + vbs path for admin items
+                    vbs_path = self._make_vbs(item)
+                    subprocess.Popen(["wscript.exe", vbs_path])
                 else:
-                    ps_cmd = f'Start-Process "{path}"'
-                    if cmd: ps_cmd += f' -ArgumentList \'{cmd}\''
-                    ps_cmd += ' -Verb RunAs'
-                subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd])
-                self.update_status(f"EXECUTING AS ADMIN: {item['name']}")
+                    path = item["paths"][0]
+                    args = item.get("Command", "")
+                    show_terminal = item.get("show_terminal", False)
+                    if show_terminal:
+                        full = f'"{path}" {args}' if args else f'"{path}"'
+                        subprocess.Popen(f'start "" {full}', shell=True)
+                    else:
+                        si = subprocess.STARTUPINFO()
+                        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                        si.wShowWindow = 0
+                        subprocess.Popen([path] + (args.split() if args else []), startupinfo=si)
             else:
-                if show_terminal:
-                    full = f'"{path}" {cmd}' if cmd else f'"{path}"'
-                    subprocess.Popen(f'start "" {full}', shell=True)
-                else:
-                    si = subprocess.STARTUPINFO()
-                    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                    si.wShowWindow = 0  # SW_HIDE
-                    args = [path] + (cmd.split() if cmd else [])
-                    subprocess.Popen(args, startupinfo=si)
-                self.update_status(f"EXECUTING: {item['name']}")
+                # SCRIPT mode: run the ps1_command exactly as the generated PS1 does
+                cmd = item.get("ps1_command", "")
+                if not cmd:
+                    path = item["paths"][0]
+                    args = item.get("Command", "")
+                    cmd = f'Start-Process -FilePath "{path}"'
+                    if args: cmd += f' -ArgumentList "{args}"'
+                if run_as_admin and "-Verb RunAs" not in cmd:
+                    cmd += " -Verb RunAs"
+                subprocess.Popen(["powershell", "-NoProfile", "-Command", cmd])
+
+            self.update_status(f"EXECUTING: {item['name']}")
         except Exception as e:
             self.update_status(f"EXEC FACTOR FAILED: {str(e)}")
 
