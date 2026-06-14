@@ -238,10 +238,11 @@ class AudioRecorder(QMainWindow):
         layout.addWidget(grp_mic)
 
         # ── Output ──
-        grp_out = QGroupBox("OUTPUT")
+        grp_out = QGroupBox("SAVE DIRECTORY")
         out_layout = QHBoxLayout(grp_out)
-        self.lbl_out = QLabel("(auto-named in same folder)")
-        self.lbl_out.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
+        self._save_dir: str = os.path.dirname(os.path.abspath(__file__))
+        self.lbl_out = QLabel(self._save_dir)
+        self.lbl_out.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
         self.lbl_out.setWordWrap(True)
         out_layout.addWidget(self.lbl_out, 1)
         btn_browse = QPushButton("BROWSE")
@@ -249,7 +250,6 @@ class AudioRecorder(QMainWindow):
         btn_browse.clicked.connect(self._browse)
         out_layout.addWidget(btn_browse)
         layout.addWidget(grp_out)
-        self._out_path: str | None = None
 
         # ── Timer ──
         self.lbl_time = QLabel("00:00:00")
@@ -277,17 +277,17 @@ class AudioRecorder(QMainWindow):
         self.statusBar().showMessage("READY")
 
     def _browse(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Save recording as", "", "WAV Files (*.wav)")
-        if path:
-            self._out_path = path
-            self.lbl_out.setText(os.path.basename(path))
-            self.lbl_out.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
+        d = QFileDialog.getExistingDirectory(
+            self, "Select save directory", self._save_dir,
+            QFileDialog.Option.DontUseNativeDialog
+        )
+        if d:
+            self._save_dir = d
+            self.lbl_out.setText(d)
 
     def _resolve_out(self) -> str:
-        if self._out_path:
-            return self._out_path
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), f"recording_{ts}.wav")
+        return os.path.join(self._save_dir, f"recording_{ts}.wav")
 
     def _start(self):
         rec_sys = self.chk_sys.isChecked() and self.cmb_sys.count() > 0
