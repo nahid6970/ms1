@@ -278,8 +278,7 @@ class VoiceApp(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Voice Input")
         
-        # Set window position
-        self.move(self.config.get("x", 100), self.config.get("y", 100))
+        # Set window position (deferred to showEvent after size is known)
 
         self._apply_window_flags()
 
@@ -406,6 +405,7 @@ class VoiceApp(QMainWindow):
             # Update config with new position but don't save yet to avoid heavy disk IO
             self.config["x"] = self.x()
             self.config["y"] = self.y()
+            self.config["right_edge"] = self.x() + self.width()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -690,11 +690,17 @@ class VoiceApp(QMainWindow):
 
     def showEvent(self, event):
         super().showEvent(event)
-        QTimer.singleShot(0, lambda: self._apply_window_layout(preserve_right_edge=False))
+        def _restore():
+            self._apply_window_layout(preserve_right_edge=False)
+            if "right_edge" in self.config:
+                self.move(self.config["right_edge"] - self.width(), self.config.get("y", 100))
+            else:
+                self.move(self.config.get("x", 100), self.config.get("y", 100))
+        QTimer.singleShot(0, _restore)
 
     def closeEvent(self, event):
         self.config["compact_view"] = self._compact_view
-        self.config["x"] = self.x()
+        self.config["right_edge"] = self.x() + self.width()
         self.config["y"] = self.y()
         self.save_config()
         super().closeEvent(event)
