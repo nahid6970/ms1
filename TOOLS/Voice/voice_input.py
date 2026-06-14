@@ -688,6 +688,10 @@ class VoiceApp(QMainWindow):
         self.save_config()
         self._apply_window_layout(preserve_right_edge=True)
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        QTimer.singleShot(0, lambda: self._apply_window_layout(preserve_right_edge=False))
+
     def closeEvent(self, event):
         self.config["compact_view"] = self._compact_view
         self.config["x"] = self.x()
@@ -754,7 +758,7 @@ class VoiceApp(QMainWindow):
         is_en = self.config["language"] == "en-US"
         self.lang_btn.setText("EN" if is_en else "BN")
         color = CP_RED if is_en else CP_GREEN
-        self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold;")
+        self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold; margin: 0px; padding: 0px;")
 
     def _set_toggle_btn(self, btn, label, enabled):
         color = CP_GREEN if enabled else CP_DIM
