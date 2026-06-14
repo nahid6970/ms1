@@ -213,6 +213,7 @@ class VoiceApp(QMainWindow):
                 "status_btn_width": 8,
                 "status_btn_height": 18,
                 "status_lang_gap": 2,
+                "output_mode": "search",
                 "compact_left_padding": 0,
                 "compact_right_padding": 0,
                 "expanded_left_padding": 0,
@@ -322,6 +323,7 @@ class VoiceApp(QMainWindow):
         self.lang_btn.setObjectName("lang")
         self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.lang_btn.clicked.connect(self.toggle_language)
+        self.lang_btn.installEventFilter(self)
         self._update_lang_btn()
         layout.addWidget(self.lang_btn)
 
@@ -413,6 +415,10 @@ class VoiceApp(QMainWindow):
         if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.RightButton:
                 self.toggle_compact_view()
+                return True
+        if hasattr(self, 'lang_btn') and obj is self.lang_btn and event.type() == QEvent.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.RightButton:
+                self._toggle_output_mode()
                 return True
         return super().eventFilter(obj, event)
 
@@ -754,9 +760,23 @@ class VoiceApp(QMainWindow):
     def _update_lang_btn(self):
         is_en = self.config["language"] == "en-US"
         self.lang_btn.setText("EN" if is_en else "BN")
-        color = CP_RED if is_en else CP_GREEN
+        mode = self.config.get("output_mode", "search")
+        if mode == "search":
+            color = "#FFFF00"  # yellow
+        else:
+            color = "#FFFFFF"  # white
         self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold; margin: 0px; padding: 0px; min-height: 18px; max-height: 18px;")
         self.lang_btn.setFixedSize(self.lang_btn.width(), 18)
+
+    def _toggle_output_mode(self):
+        current = self.config.get("output_mode", "search")
+        self.config["output_mode"] = "clipboard" if current == "search" else "search"
+        self.config["open_google"] = self.config["output_mode"] == "search"
+        self.config["copy_to_clipboard"] = self.config["output_mode"] == "clipboard"
+        self.save_config()
+        self._update_lang_btn()
+        self._update_google_btn()
+        self._update_copy_btn()
 
     def _set_toggle_btn(self, btn, label, enabled):
         color = CP_GREEN if enabled else CP_DIM
