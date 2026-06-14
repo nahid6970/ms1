@@ -1,7 +1,7 @@
 {
   "sys_enabled": true,
   "mic_enabled": true,
-  "sys_device": "Speakers (High Definition Audio Device) (2 channels)",
-  "mic_device": "Microphone (High Definition Audio Device) (2 channels)",
+  "sys_device": "Speakers",
+  "mic_device": "Microphone",
   "save_dir": "C:\\@delta\\ms1\\TOOLS\\audio_recorder"
 }
