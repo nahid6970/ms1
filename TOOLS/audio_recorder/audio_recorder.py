@@ -149,7 +149,7 @@ class AudioRecorder(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("◈ AUDIO RECORDER")
-        self.setFixedWidth(480)
+        self.setFixedWidth(520)
         self.setStyleSheet(QSS)
 
         self._recorder: Recorder | None = None
@@ -221,7 +221,8 @@ class AudioRecorder(QMainWindow):
         row.addWidget(self.chk_sys)
         self.cmb_sys = QComboBox()
         for d in self._loopbacks:
-            label = repr(d).replace("<Loopback ", "").replace(">", "").split("(")[0].strip()
+            name = d.name
+            label = f"{name}  [{d.channels}ch]"
             self.cmb_sys.addItem(label, d)
             self.cmb_sys.setItemData(self.cmb_sys.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
         if not self._loopbacks:
@@ -240,8 +241,10 @@ class AudioRecorder(QMainWindow):
         row2.addWidget(self.chk_mic)
         self.cmb_mic = QComboBox()
         for d in self._mics:
-            label = repr(d).replace("<Microphone ", "").replace(">", "").split("(")[0].strip()
+            name = d.name
+            label = f"{name}  [{d.channels}ch]"
             self.cmb_mic.addItem(label, d)
+            self.cmb_mic.setItemData(self.cmb_mic.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
             self.cmb_mic.setItemData(self.cmb_mic.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
         if not self._mics:
             self.cmb_mic.addItem("No microphone"); self.chk_mic.setChecked(False); self.chk_mic.setEnabled(False)
