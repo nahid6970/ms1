@@ -371,6 +371,10 @@ class VoiceApp(QMainWindow):
 
         self._apply_button_geometry()
         self._apply_window_layout(preserve_right_edge=False)
+        if "right_edge" in self.config:
+            self.move(self.config["right_edge"] - self.width(), self.config.get("y", 100))
+        else:
+            self.move(self.config.get("x", 100), self.config.get("y", 100))
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -690,13 +694,7 @@ class VoiceApp(QMainWindow):
 
     def showEvent(self, event):
         super().showEvent(event)
-        def _restore():
-            self._apply_window_layout(preserve_right_edge=False)
-            if "right_edge" in self.config:
-                self.move(self.config["right_edge"] - self.width(), self.config.get("y", 100))
-            else:
-                self.move(self.config.get("x", 100), self.config.get("y", 100))
-        QTimer.singleShot(0, _restore)
+        QTimer.singleShot(0, self._apply_button_geometry)
 
     def closeEvent(self, event):
         self.config["compact_view"] = self._compact_view
