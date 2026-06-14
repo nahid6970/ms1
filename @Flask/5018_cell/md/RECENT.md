@@ -1,5 +1,26 @@
 # Recent Development Log
 
+## [2026-06-14 21:06] - English to Bangla Number Conversion in F3 Formatter
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎯 F3 Number Conversion Button (১২৩)
+- Added a new `১২৩` button in the F3 Quick Formatter, placed right after the existing `বাং` (Bangla Phonetic) button in the Text Case section.
+- The button converts only English digits (0–9) in the selected text to Bangla digits (০–৯), leaving all other characters unchanged.
+- Works in both contentEditable (WYSIWYG) mode and legacy input/textarea mode — mirrors the same dual-mode pattern as `changeTextCase`.
+- New function: `convertNumbersToBangla(event)` in `static/script.js`.
+
+**Files Modified:**
+- `templates/index.html` — Added `১২৩` button after the `বাং` button in the F3 formatter.
+- `static/script.js` — Added `convertNumbersToBangla()` function after `changeTextCase()`.
+
+**Current Status:**
+- ✅ Selecting any text and pressing F3 → `১২৩` converts all English numbers in selection to Bangla digits.
+
+---
+
 ## [2026-06-13 15:11] - Fix Ctrl+Alt+Up/Down Not Persisting in Visual Mode
 
 **Session Duration:** 0.1 hours
