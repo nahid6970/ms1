@@ -26,13 +26,13 @@ except Exception:
 LOG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output", "mypygui", "mypygui_log.log"))
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
+_log_handlers = [logging.FileHandler(LOG_FILE, encoding='utf-8')]
+if sys.__stdout__ is not None:
+    _log_handlers.append(logging.StreamHandler(sys.__stdout__))
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.FileHandler(LOG_FILE, encoding='utf-8'),
-        logging.StreamHandler(sys.__stdout__)
-    ]
+    handlers=_log_handlers
 )
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -53,7 +53,7 @@ class StreamToLogger:
         pass
 
 sys.stdout = StreamToLogger(logging.INFO)
-sys.stderr = StreamToLogger(logging.ERROR)
+# stderr redirected after imports so import failures still reach the log file
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
@@ -65,6 +65,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase
 from PyQt6.QtSvg import QSvgRenderer
+
+sys.stderr = StreamToLogger(logging.ERROR)
 
 
 start_time = time.time()
@@ -1391,7 +1393,7 @@ class CpuCoreFrame(QWidget):
 _git_queue = Queue()
 def check_git_status(repo, q):
     if not os.path.exists(repo["path"]): q.put((repo["name"], repo["label"], "#000000")); return
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo["path"])
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
     lines = result.stdout.strip().splitlines()
     
     config = load_config()
@@ -1456,7 +1458,10 @@ def apply_git_style(lbl, cfg):
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
-os.makedirs(LOG_DIR, exist_ok=True)
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+except Exception:
+    pass
 rclone_status = {}
 def _update_toggle_color_cb(toggle_lbl):
     if not rclone_status: return
@@ -1472,7 +1477,7 @@ def check_and_update_rclone(cfg, toggle_lbl):
     def run():
         try:
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-            with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+            with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, creationflags=subprocess.CREATE_NO_WINDOW)
             with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f: content = f.read()
             rclone_status[cfg.get("id", cfg["label"])] = CP_GREEN if "ERROR" not in content else CP_RED
             if _rclone_sig: 
