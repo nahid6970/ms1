@@ -125,7 +125,7 @@ def time_ago(date_str):
                 diff %= secs
             if len(parts) == 2:
                 break
-        return " ".join(parts) + " ago" if parts else "just now"
+        return " ".join(parts) if parts else "just now"
     except:
         return date_str
 
