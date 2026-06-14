@@ -1310,7 +1310,7 @@ class MainWindow(QMainWindow):
 
     VBS_DIR = r"C:\@delta\output\startup\vbs"
 
-    def _make_vbs(self, item):
+    def _make_vbs(self, item, window_style=1):
         os.makedirs(self.VBS_DIR, exist_ok=True)
         path = item["paths"][0]
         args = item.get("Command", "")
@@ -1323,9 +1323,10 @@ class MainWindow(QMainWindow):
             exe, run_args = "python.exe", f'"{path}"' + (f' {args}' if args else '')
         else:
             exe, run_args = path, args
-        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_admin.vbs")
+        suffix = "admin" if window_style == 1 else "hidden"
+        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_{suffix}.vbs")
         with open(vbs_path, "w") as f:
-            f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "runas", 1\n')
+            f.write(f'CreateObject("Shell.Application").ShellExecute "{exe}", "{run_args}", "", "", {window_style}\n')
         return vbs_path
 
     def check_registry(self, item):
@@ -1345,7 +1346,10 @@ class MainWindow(QMainWindow):
                 if should_enable:
                      with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as reg_key:
                         if item.get("run_as_admin"):
-                            vbs_path = self._make_vbs(item)
+                            vbs_path = self._make_vbs(item, window_style=1)
+                            full = f'wscript.exe "{vbs_path}"'
+                        elif not item.get("show_terminal", False) and os.path.splitext(item["paths"][0])[1].lower() in (".py", ".ps1", ".bat", ".cmd"):
+                            vbs_path = self._make_vbs(item, window_style=0)
                             full = f'wscript.exe "{vbs_path}"'
                         else:
                             path = item["paths"][0]
@@ -1405,6 +1409,9 @@ class MainWindow(QMainWindow):
                         if item.get("run_as_admin"): cmd += ' -Verb RunAs'
                     elif item.get("run_as_admin") and "-Verb RunAs" not in cmd:
                         cmd += ' -Verb RunAs'
+
+                    if not item.get("show_terminal", False) and "-WindowStyle" not in cmd:
+                        cmd += ' -WindowStyle Hidden'
                     
                     content += f"# {name}\n"
                     content += "try {\n"
