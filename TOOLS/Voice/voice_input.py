@@ -762,14 +762,16 @@ class VoiceApp(QMainWindow):
         is_en = self.config["language"] == "en-US"
         self.lang_btn.setText("EN" if is_en else "BN")
         color = CP_RED if is_en else CP_GREEN
-        self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold; margin: 0px; padding: 0px;")
+        self.lang_btn.setStyleSheet(f"border: 2px solid {color}; color: {color}; font-weight: bold; margin: 0px; padding: 0px; min-height: 18px; max-height: 18px;")
+        self.lang_btn.setFixedSize(self.lang_btn.width(), 18)
 
     def _set_toggle_btn(self, btn, label, enabled):
         color = CP_GREEN if enabled else CP_DIM
         btn.setText(label)
         btn.setStyleSheet(
-            f"border: 2px solid {color}; color: {color}; font-weight: bold; padding: 0;"
+            f"border: 2px solid {color}; color: {color}; font-weight: bold; padding: 0; min-height: 18px; max-height: 18px;"
         )
+        btn.setFixedSize(btn.width(), 18)
 
     def _update_google_btn(self):
         self._set_toggle_btn(self.google_btn, "G", self.config.get("open_google", False))
