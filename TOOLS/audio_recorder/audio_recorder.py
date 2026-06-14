@@ -7,6 +7,7 @@ import threading
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 import numpy as np
 import soundcard as sc
+import pyaudio
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -32,25 +33,16 @@ CHUNK      = 1024
 
 QSS = f"""
 QMainWindow, QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; font-size: 10pt; }}
-QGroupBox {{
-    border: 1px solid {CP_DIM}; margin-top: 12px; padding-top: 8px;
-    font-weight: bold; color: {CP_YELLOW};
-}}
+QGroupBox {{ border: 1px solid {CP_DIM}; margin-top: 12px; padding-top: 8px; font-weight: bold; color: {CP_YELLOW}; }}
 QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-QComboBox {{
-    background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
-}}
-QComboBox QAbstractItemView {{ background: {CP_PANEL}; color: {CP_CYAN};
-    selection-background-color: {CP_CYAN}; selection-color: #000; }}
+QComboBox {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px; }}
+QComboBox QAbstractItemView {{ background: {CP_PANEL}; color: {CP_CYAN}; selection-background-color: {CP_CYAN}; selection-color: #000; }}
 QCheckBox {{ spacing: 8px; color: {CP_TEXT}; }}
 QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
 QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
 QProgressBar {{ background: {CP_PANEL}; border: 1px solid {CP_DIM}; text-align: center; }}
 QProgressBar::chunk {{ background: {CP_CYAN}; }}
-QPushButton {{
-    background: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
-    padding: 7px 18px; font-weight: bold;
-}}
+QPushButton {{ background: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 7px 18px; font-weight: bold; }}
 QPushButton:hover {{ background: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
 QPushButton:pressed {{ background: {CP_YELLOW}; color: #000; }}
 QPushButton:disabled {{ color: #555; border-color: #2a2a2a; }}
@@ -60,16 +52,21 @@ QStatusBar {{ background: {CP_PANEL}; color: {CP_DIM}; font-size: 9pt; }}
 # ── SVG icons ─────────────────────────────────────────────────────────────────
 def svg_icon(svg: str, size: int = 18) -> QIcon:
     r = QSvgRenderer(QByteArray(svg.encode()))
-    px = QPixmap(size, size)
-    px.fill(Qt.GlobalColor.transparent)
-    p = QPainter(px)
-    r.render(p)
-    p.end()
+    px = QPixmap(size, size); px.fill(Qt.GlobalColor.transparent)
+    p = QPainter(px); r.render(p); p.end()
     return QIcon(px)
 
 ICON_REC  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#00ff21"/></svg>'
 ICON_STOP = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" fill="#FF003C"/></svg>'
 ICON_DIR  = '<svg viewBox="0 0 24 24"><path d="M2 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" fill="#FCEE0A"/></svg>'
+
+# ── Device wrapper ────────────────────────────────────────────────────────────
+class MicDevice:
+    """Wraps either a soundcard mic or a pyaudio device index."""
+    def __init__(self, name: str, channels: int, pa_index: int):
+        self.name     = name
+        self.channels = channels
+        self.pa_index = pa_index  # pyaudio device index
 
 # ── Signals ───────────────────────────────────────────────────────────────────
 class RecorderSignals(QObject):
@@ -81,8 +78,8 @@ class RecorderSignals(QObject):
 class Recorder:
     def __init__(self, out_path, sys_dev, mic_dev, record_sys, record_mic):
         self.out_path   = out_path
-        self.sys_dev    = sys_dev
-        self.mic_dev    = mic_dev
+        self.sys_dev    = sys_dev   # soundcard loopback device
+        self.mic_dev    = mic_dev   # MicDevice
         self.record_sys = record_sys
         self.record_mic = record_mic
         self.signals    = RecorderSignals()
@@ -97,27 +94,59 @@ class Recorder:
 
     def _run(self):
         frames_sys, frames_mic = [], []
-        sys_ch = self.sys_dev.channels if self.record_sys else 2
-        mic_ch = self.mic_dev.channels if self.record_mic else 2
+        pa = pyaudio.PyAudio() if self.record_mic else None
 
+        # Open mic via pyaudio
+        mic_stream = None
+        mic_ch = 1
+        mic_rate = SAMPLERATE
+        if self.record_mic and pa:
+            d = self.mic_dev
+            # Use device's native rate if it doesn't support 48kHz
+            info = pa.get_device_info_by_index(d.pa_index)
+            mic_rate = int(info["defaultSampleRate"])
+            mic_ch   = max(1, int(info["maxInputChannels"]))
+            try:
+                mic_stream = pa.open(
+                    format=pyaudio.paInt16, channels=mic_ch,
+                    rate=mic_rate, input=True,
+                    input_device_index=d.pa_index,
+                    frames_per_buffer=CHUNK
+                )
+            except Exception as e:
+                self.signals.stopped.emit(f"ERROR (mic): {e}")
+                pa.terminate(); return
+
+        sys_ch = self.sys_dev.channels if self.record_sys else 2
         ctx_sys = self.sys_dev.recorder(samplerate=SAMPLERATE, channels=sys_ch, blocksize=CHUNK) if self.record_sys else None
-        ctx_mic = self.mic_dev.recorder(samplerate=SAMPLERATE, channels=mic_ch, blocksize=CHUNK) if self.record_mic else None
 
         try:
-            with (ctx_sys or _Null(sys_ch)) as rs, (ctx_mic or _Null(mic_ch)) as rm:
+            with (ctx_sys or _Null(sys_ch)) as rs:
                 while not self._stop.is_set():
                     if self.record_sys:
                         raw = rs.record(numframes=CHUNK)
                         if raw.shape[1] == 1: raw = np.repeat(raw, 2, axis=1)
                         frames_sys.append((raw * 32767).astype(np.int16).tobytes())
                         self.signals.level_sys.emit(min(float(np.sqrt(np.mean(raw**2))) * 4, 1.0))
-                    if self.record_mic:
-                        raw = rm.record(numframes=CHUNK)
-                        if raw.shape[1] == 1: raw = np.repeat(raw, 2, axis=1)
+                    if self.record_mic and mic_stream:
+                        raw_bytes = mic_stream.read(CHUNK, exception_on_overflow=False)
+                        raw = np.frombuffer(raw_bytes, np.int16).astype(np.float32) / 32768.0
+                        raw = raw.reshape(-1, mic_ch)
+                        if mic_ch == 1: raw = np.repeat(raw, 2, axis=1)
+                        # resample to SAMPLERATE if needed
+                        if mic_rate != SAMPLERATE:
+                            factor = SAMPLERATE / mic_rate
+                            n_out = int(len(raw) * factor)
+                            idx = np.linspace(0, len(raw)-1, n_out)
+                            raw = np.stack([np.interp(idx, np.arange(len(raw)), raw[:,c]) for c in range(2)], axis=1)
                         frames_mic.append((raw * 32767).astype(np.int16).tobytes())
                         self.signals.level_mic.emit(min(float(np.sqrt(np.mean(raw**2))) * 4, 1.0))
         except Exception as e:
-            self.signals.stopped.emit(f"ERROR: {e}"); return
+            self.signals.stopped.emit(f"ERROR: {e}")
+        finally:
+            if mic_stream:
+                mic_stream.stop_stream(); mic_stream.close()
+            if pa: pa.terminate()
 
         self._save(frames_sys, frames_mic)
 
@@ -142,6 +171,40 @@ class _Null:
     def __exit__(self, *_): pass
     def record(self, numframes=None): return np.zeros((numframes, self._ch), np.float32)
 
+# ── Device enumeration ────────────────────────────────────────────────────────
+def get_loopbacks():
+    """Probe soundcard loopback devices."""
+    devs = []
+    for d in sc.all_microphones(include_loopback=True):
+        if "loopback" not in repr(d).lower() and "speaker" not in repr(d).lower():
+            continue
+        try:
+            with d.recorder(samplerate=SAMPLERATE, channels=d.channels, blocksize=CHUNK): pass
+            devs.append(d)
+        except Exception:
+            pass
+    return devs
+
+def get_mics():
+    """Enumerate all input-capable devices via pyaudio (works for any driver)."""
+    pa = pyaudio.PyAudio()
+    seen, devs = set(), []
+    for i in range(pa.get_device_count()):
+        info = pa.get_device_info_by_index(i)
+        if info["maxInputChannels"] < 1: continue
+        # prefer WASAPI, then DirectSound, then MME — skip WDM-KS (often duplicates)
+        api = pa.get_host_api_info_by_index(info["hostApi"])["name"]
+        if "WDM" in api: continue
+        name = info["name"]
+        key  = name.lower()[:30]
+        # keep first occurrence per name (avoids MME/DS/WASAPI triplicates)
+        if key in seen: continue
+        seen.add(key)
+        ch = max(1, int(info["maxInputChannels"]))
+        devs.append(MicDevice(name=name, channels=ch, pa_index=i))
+    pa.terminate()
+    return devs
+
 # ── Main Window ───────────────────────────────────────────────────────────────
 class AudioRecorder(QMainWindow):
     SETTINGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
@@ -157,25 +220,12 @@ class AudioRecorder(QMainWindow):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
 
-        all_devs = sc.all_microphones(include_loopback=True)
-        all_loopbacks = [d for d in all_devs if "loopback" in repr(d).lower() or "speaker" in repr(d).lower()]
-        all_mics      = [d for d in all_devs if d not in all_loopbacks]
-        self._loopbacks = [d for d in all_loopbacks if self._probe(d)]
-        self._mics      = [d for d in all_mics      if self._probe(d)]
+        self._loopbacks = get_loopbacks()
+        self._mics      = get_mics()
 
         self._cfg = self._load_settings()
         self._build_ui()
         self._apply_settings()
-
-    @staticmethod
-    def _probe(dev) -> bool:
-        """Return True if device can actually be opened for recording."""
-        try:
-            with dev.recorder(samplerate=SAMPLERATE, channels=dev.channels, blocksize=CHUNK):
-                pass
-            return True
-        except Exception:
-            return False
 
     # ── Settings ──────────────────────────────────────────────────────────────
     def _load_settings(self):
@@ -216,7 +266,6 @@ class AudioRecorder(QMainWindow):
         layout = QVBoxLayout(root)
         layout.setSpacing(10); layout.setContentsMargins(14, 14, 14, 14)
 
-        # Title
         title = QLabel("▶  AUDIO  RECORDER")
         title.setFont(QFont("Consolas", 14, QFont.Weight.Bold))
         title.setStyleSheet(f"color:{CP_CYAN}; letter-spacing:3px;")
@@ -233,12 +282,10 @@ class AudioRecorder(QMainWindow):
         row.addWidget(self.chk_sys)
         self.cmb_sys = QComboBox()
         for d in self._loopbacks:
-            name = d.name
-            label = f"{name}  [{d.channels}ch]"
-            self.cmb_sys.addItem(label, d)
-            self.cmb_sys.setItemData(self.cmb_sys.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
+            self.cmb_sys.addItem(f"{d.name}  [{d.channels}ch]", d)
         if not self._loopbacks:
-            self.cmb_sys.addItem("No loopback device"); self.chk_sys.setChecked(False); self.chk_sys.setEnabled(False)
+            self.cmb_sys.addItem("No loopback device")
+            self.chk_sys.setChecked(False); self.chk_sys.setEnabled(False)
         row.addWidget(self.cmb_sys, 1); sl.addLayout(row)
         self.bar_sys = QProgressBar(); self.bar_sys.setRange(0,100); self.bar_sys.setTextVisible(False); self.bar_sys.setFixedHeight(6)
         sl.addWidget(self.bar_sys); layout.addWidget(grp_sys)
@@ -253,13 +300,10 @@ class AudioRecorder(QMainWindow):
         row2.addWidget(self.chk_mic)
         self.cmb_mic = QComboBox()
         for d in self._mics:
-            name = d.name
-            label = f"{name}  [{d.channels}ch]"
-            self.cmb_mic.addItem(label, d)
-            self.cmb_mic.setItemData(self.cmb_mic.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
-            self.cmb_mic.setItemData(self.cmb_mic.count()-1, repr(d), Qt.ItemDataRole.ToolTipRole)
+            self.cmb_mic.addItem(f"{d.name}  [{d.channels}ch]", d)
         if not self._mics:
-            self.cmb_mic.addItem("No microphone"); self.chk_mic.setChecked(False); self.chk_mic.setEnabled(False)
+            self.cmb_mic.addItem("No microphone")
+            self.chk_mic.setChecked(False); self.chk_mic.setEnabled(False)
         row2.addWidget(self.cmb_mic, 1); ml.addLayout(row2)
         self.bar_mic = QProgressBar(); self.bar_mic.setRange(0,100); self.bar_mic.setTextVisible(False); self.bar_mic.setFixedHeight(6)
         ml.addWidget(self.bar_mic); layout.addWidget(grp_mic)
@@ -274,12 +318,10 @@ class AudioRecorder(QMainWindow):
         ol.addWidget(self.lbl_dir, 1)
         btn_browse = QPushButton()
         btn_browse.setIcon(svg_icon(ICON_DIR, 16))
-        btn_browse.setFixedSize(32, 32)
-        btn_browse.setToolTip("Browse")
+        btn_browse.setFixedSize(32, 32); btn_browse.setToolTip("Browse")
         btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_browse.clicked.connect(self._browse)
-        self._btn_dir = btn_browse
-        ol.addWidget(btn_browse)
+        self._btn_dir = btn_browse; ol.addWidget(btn_browse)
         layout.addWidget(grp_out)
 
         # Timer
@@ -289,7 +331,7 @@ class AudioRecorder(QMainWindow):
         self.lbl_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.lbl_time)
 
-        # Record / Stop
+        # Buttons
         btn_row = QHBoxLayout()
         self.btn_rec = QPushButton("  RECORD")
         self.btn_rec.setIcon(svg_icon(ICON_REC, 16))
@@ -313,9 +355,7 @@ class AudioRecorder(QMainWindow):
         d = QFileDialog.getExistingDirectory(self, "Select save directory", self._save_dir,
                                               QFileDialog.Option.DontUseNativeDialog)
         if d:
-            self._save_dir = d
-            self.lbl_dir.setText(d)
-            self._save_settings()
+            self._save_dir = d; self.lbl_dir.setText(d); self._save_settings()
 
     def _resolve_out(self):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -344,8 +384,7 @@ class AudioRecorder(QMainWindow):
 
     def _stop(self):
         if self._recorder: self._recorder.stop()
-        self._timer.stop()
-        self.btn_stop.setEnabled(False)
+        self._timer.stop(); self.btn_stop.setEnabled(False)
         self.statusBar().showMessage("Stopping…")
 
     def _tick(self):
