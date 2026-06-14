@@ -391,6 +391,8 @@ class AudioRecorder(QMainWindow):
 
 
 if __name__ == "__main__":
+    import ctypes
+    ctypes.windll.ole32.CoInitializeEx(None, 0x2)  # COINIT_APARTMENTTHREADED before Qt
     app = QApplication(sys.argv)
     w = AudioRecorder()
     w.show()
