@@ -2845,6 +2845,15 @@ class AHKShortcutEditor(QMainWindow):
                         for line in action_lines:
                             if line.strip():
                                 output_lines.append(f"        {line.strip()}")
+                        output_lines.append("    } else {")
+                        # Hotkey syntax -> Send syntax: bare keys need {}, modifier prefixes don't
+                        if hotkey and hotkey[0] in ('^', '!', '+', '#'):
+                            send_key = hotkey
+                        else:
+                            send_key = '{' + hotkey + '}'
+                        output_lines.append(f'        Hotkey "{hotkey}", "Off"')
+                        output_lines.append(f'        Send("{send_key}")')
+                        output_lines.append(f'        Hotkey "{hotkey}", "On"')
                         output_lines.append("    }")
                         output_lines.append("}")
                     else:
