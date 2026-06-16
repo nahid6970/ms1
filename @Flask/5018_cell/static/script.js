@@ -14463,6 +14463,7 @@ async function loadCustomColorSyntaxes() {
                 if (syntax.isBold) style += ' font-weight: bold;';
                 if (syntax.isItalic) style += ' font-style: italic;';
                 if (syntax.isUnderline) style += ' text-decoration: underline;';
+                if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
 
                 return { regex, style, marker: escapedMarker };
             }).filter(s => s !== null);
@@ -14504,6 +14505,21 @@ function renderCustomSyntaxButtons() {
     });
 }
 
+function rebuildCustomSyntaxCache() {
+    customColorSyntaxesCache = customColorSyntaxes.map(syntax => {
+        if (!syntax.marker) return null;
+        const escapedMarker = escapeHtml(syntax.marker);
+        const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
+        let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
+        if (syntax.isBold) style += ' font-weight: bold;';
+        if (syntax.isItalic) style += ' font-style: italic;';
+        if (syntax.isUnderline) style += ' text-decoration: underline;';
+        if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
+        return { regex, style, marker: escapedMarker };
+    }).filter(s => s !== null);
+}
+
 async function saveCustomColorSyntaxes() {
     try {
         await fetch('/api/custom-syntaxes', {
@@ -14534,7 +14550,7 @@ function renderCustomColorSyntaxList() {
     header.innerHTML = `
         <div style="flex: 0 0 80px;">Marker</div>
         <div style="flex: 0 0 100px;">Colors</div>
-        <div style="flex: 0 0 120px;">Format</div>
+        <div style="flex: 0 0 170px;">Format</div>
         <div style="flex: 1;">Preview</div>
         <div style="flex: 0 0 40px;"></div>
     `;
@@ -14573,10 +14589,13 @@ function renderCustomColorSyntaxList() {
                 <label class="toggle-icon ${syntax.isUnderline ? 'active' : ''}" style="text-decoration: underline;" title="Underline">
                     <input type="checkbox" ${syntax.isUnderline ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isUnderline', this.checked)"> U
                 </label>
+                <input type="number" value="${syntax.fontSize || ''}" placeholder="px" min="8" max="72"
+                    onchange="updateCustomSyntax(${index}, 'fontSize', this.value ? parseInt(this.value) : '')"
+                    title="Font size (px)" style="width:44px; padding:2px 4px; font-size:11px; border:1px solid #ccc; border-radius:3px;">
             </div>
 
             <div class="cs-col-preview">
-                <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''}">
+                <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''} ${syntax.fontSize ? 'font-size:' + syntax.fontSize + 'px;' : ''}">
                     ${syntax.marker || '..'}sample${syntax.marker || '..'}
                 </div>
             </div>
@@ -14602,7 +14621,8 @@ function addCustomColorSyntax() {
         fgColor: '#ffffff',
         isBold: false,
         isItalic: false,
-        isUnderline: false
+        isUnderline: false,
+        fontSize: ''
     });
     saveCustomColorSyntaxes();
     renderCustomColorSyntaxList();
@@ -14612,6 +14632,7 @@ function addCustomColorSyntax() {
 function updateCustomSyntax(index, field, value) {
     if (customColorSyntaxes[index]) {
         customColorSyntaxes[index][field] = value;
+        rebuildCustomSyntaxCache();
         saveCustomColorSyntaxes();
         renderCustomColorSyntaxList();
         renderTable(); // Re-render to apply changes
