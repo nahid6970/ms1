@@ -4763,7 +4763,19 @@ async function setSheetCustomIndex(sheetIdx) {
 async function setAndCopySheetIndex() {
     await setSheetCustomIndex(currentSheet);
     const idx = tableData.sheets[currentSheet]?.customIndex;
-    if (idx) navigator.clipboard.writeText(idx).catch(() => {});
+    if (!idx) return;
+    try {
+        await navigator.clipboard.writeText(idx);
+    } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = idx;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    }
 }
 
 function closeCellContextMenuOnClickOutside(event) {
