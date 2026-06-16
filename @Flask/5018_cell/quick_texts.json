@@ -1,6 +1,10 @@
 [
   {
-    "name": "P",
+    "name": "Photo",
     "text": "![Text](link)"
+  },
+  {
+    "name": "Index",
+    "text": "[[I:Index:Name]]"
   }
 ]
