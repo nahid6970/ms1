@@ -1,5 +1,39 @@
 # Recent Development Log
 
+## [2026-06-16 11:49] - UI Polish & Custom Syntax Font Size
+
+**Session Duration:** 0.3 hours
+
+**What We Accomplished:**
+
+### 🎨 UI: Border-radius removed from all popups
+- Added CSS overrides to set `border-radius: 0` on `.quick-formatter`, `.f1-popup`, `.modal-content`, `.recent-edits-popup`, `#quickTextPopup`.
+
+### 🎨 F3 grid changed to 10 items per row
+- Changed `.quick-formatter-options` grid from `repeat(8, 1fr)` to `repeat(10, 1fr)`.
+- Updated `min-width` from `480px` to `600px` to fit 10 buttons.
+
+### 🎯 Custom Color Syntax: Font Size option
+- Added `fontSize` field to each custom syntax object (default empty = inherit).
+- Added a number input (px) in the Format column of the custom syntax settings table.
+- Preview box updates live with chosen font size.
+- Added `rebuildCustomSyntaxCache()` helper — called on every `updateCustomSyntax` so changes apply immediately without reload.
+- Fixed font size not applying in preview (non-edit) mode: added `fontSize` to `applyCustomColorSyntaxes()` and `applyCustomColorSyntaxesRaw()` (both occurrences).
+- Font size also applied in edit/highlight mode via `customColorSyntaxesCache`.
+
+### 🎨 Removed number input spinner arrows globally via CSS.
+
+**Files Modified:**
+- `static/style.css` — border-radius overrides, 10-col grid, spinner arrow removal.
+- `static/script.js` — `rebuildCustomSyntaxCache()`, `fontSize` in cache build, `applyCustomColorSyntaxes`, `applyCustomColorSyntaxesRaw`, settings row UI, default object.
+
+**Current Status:**
+- ✅ All popup windows have square corners.
+- ✅ F3 shows 10 buttons per row.
+- ✅ Custom syntax font size works in both preview and edit mode.
+
+---
+
 ## [2026-06-16 11:27] - Quick Texts Section in F3 Formatter
 
 **Session Duration:** 0.2 hours
