@@ -3745,7 +3745,7 @@ Markdown Table Styles */
     padding: 12px;
     box-shadow: 0 8px 24px rgba(0, 123, 255, 0.3);
     z-index: 10000;
-    min-width: 480px;
+    min-width: 600px;
     animation: quickFormatterFadeIn 0.2s ease-out;
 }
 
@@ -3785,7 +3785,7 @@ Markdown Table Styles */
 
 .quick-formatter-options {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     gap: 8px;
 }
 
