@@ -1,5 +1,24 @@
 # Recent Development Log
 
+## [2026-06-16 12:08] - Custom Syntax Font Size Unit Changed to em
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎨 Font size in Custom Color Syntax now uses `em` (relative)
+- Changed from `px` to `em` to match the existing `#2#text#/#` variable font size syntax.
+- Input field updated: placeholder `em`, min `0.5`, max `5`, step `0.1`, value parsed as `float`.
+- Updated all 5 locations where `fontSize` is applied in style strings (`customColorSyntaxesCache` builder, `rebuildCustomSyntaxCache`, `applyCustomColorSyntaxes` ×2, preview box in settings row).
+
+**Files Modified:**
+- `static/script.js` — all `fontSize` style outputs changed from `px` to `em`, input field attributes updated.
+
+**Current Status:**
+- ✅ Custom syntax font size is relative (e.g. `1.5` = 1.5× cell font size).
+
+---
+
 ## [2026-06-16 11:49] - UI Polish & Custom Syntax Font Size
 
 **Session Duration:** 0.3 hours
