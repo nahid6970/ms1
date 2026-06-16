@@ -1314,14 +1314,6 @@
             <button onclick="showQuickTextForm(event)" title="Add new quick text"
                 style="width: 16px; height: 16px; border-radius: 50%; border: none; background: #4caf50; color: white; font-size: 13px; line-height: 1; cursor: pointer; padding: 0; vertical-align: middle; margin-left: 4px;">+</button>
         </div>
-        <div id="quickTextForm" style="display:none; padding: 4px 0 6px; gap: 4px; flex-direction: column;">
-            <input id="quickTextName" type="text" placeholder="Name" style="padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; width: 100%; box-sizing: border-box;">
-            <textarea id="quickTextBody" placeholder="Text to insert" rows="2" style="padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; width: 100%; box-sizing: border-box; resize: vertical; font-family: inherit;"></textarea>
-            <div style="display: flex; gap: 4px;">
-                <button onclick="saveQuickText(event)" style="flex:1; padding: 4px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 12px; cursor: pointer;">Save</button>
-                <button onclick="cancelQuickTextForm(event)" style="flex:1; padding: 4px; background: #eee; color: #333; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; cursor: pointer;">Cancel</button>
-            </div>
-        </div>
         <div id="quickTextButtons" class="quick-formatter-options" style="flex-wrap: wrap;"></div>
 
         <div class="quick-formatter-separator"></div>
@@ -1386,6 +1378,17 @@
     <!-- Recent Edits Popup (Moved to body to avoid overflow clipping) -->
     <div id="lastEditedPopup" class="recent-edits-popup">
         <!-- Content injected via JS -->
+    </div>
+
+    <!-- Quick Text Add Popup -->
+    <div id="quickTextPopup" style="display:none; position:fixed; z-index:25000; background:#fff; border:1px solid #ccc; border-radius:6px; box-shadow:0 4px 16px rgba(0,0,0,0.18); padding:14px 16px; width:240px;">
+        <div style="font-weight:600; font-size:13px; margin-bottom:10px;">Add Quick Text</div>
+        <input id="quickTextName" type="text" placeholder="Name" style="padding:5px 7px; font-size:12px; border:1px solid #ccc; border-radius:3px; width:100%; box-sizing:border-box; margin-bottom:6px;">
+        <textarea id="quickTextBody" placeholder="Text to insert" rows="3" style="padding:5px 7px; font-size:12px; border:1px solid #ccc; border-radius:3px; width:100%; box-sizing:border-box; resize:vertical; font-family:inherit; margin-bottom:8px;"></textarea>
+        <div style="display:flex; gap:6px;">
+            <button onclick="saveQuickText(event)" style="flex:1; padding:5px; background:#007bff; color:white; border:none; border-radius:3px; font-size:12px; cursor:pointer;">Save</button>
+            <button onclick="cancelQuickTextForm(event)" style="flex:1; padding:5px; background:#eee; color:#333; border:1px solid #ccc; border-radius:3px; font-size:12px; cursor:pointer;">Cancel</button>
+        </div>
     </div>
 
     <!-- Syntax Inspector Modal -->

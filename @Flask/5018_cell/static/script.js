@@ -15089,14 +15089,17 @@ function insertQuickText(text, event) {
 
 function showQuickTextForm(event) {
     event.stopPropagation();
-    const form = document.getElementById('quickTextForm');
-    form.style.display = form.style.display === 'none' ? 'flex' : 'none';
-    if (form.style.display === 'flex') document.getElementById('quickTextName').focus();
+    const popup = document.getElementById('quickTextPopup');
+    const rect = event.target.getBoundingClientRect();
+    popup.style.display = 'block';
+    popup.style.top = (rect.bottom + 6 + window.scrollY) + 'px';
+    popup.style.left = (rect.left + window.scrollX) + 'px';
+    document.getElementById('quickTextName').focus();
 }
 
 function cancelQuickTextForm(event) {
     event.stopPropagation();
-    document.getElementById('quickTextForm').style.display = 'none';
+    document.getElementById('quickTextPopup').style.display = 'none';
     document.getElementById('quickTextName').value = '';
     document.getElementById('quickTextBody').value = '';
 }
