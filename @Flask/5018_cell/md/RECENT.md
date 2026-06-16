@@ -1,5 +1,23 @@
 # Recent Development Log
 
+## [2026-06-16 14:35] - Sheet Index Copy Format
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### 🎯 Sheet index copied in `[[I:index:sheetname]]` format
+- `setAndCopySheetIndex` now copies `[[I:indexvalue:sheetname]]` instead of bare index value.
+- Works in both cases: newly set index and already-existing index.
+
+**Files Modified:**
+- `static/script.js` — updated `setAndCopySheetIndex` copy text format.
+
+**Current Status:**
+- ✅ Clicking `#` copies `[[I:20260616143000:SheetName]]` to clipboard.
+
+---
+
 ## [2026-06-16 14:21] - Fix Sheet Index Copy & Variable Font Size Default
 
 **Session Duration:** 0.1 hours
