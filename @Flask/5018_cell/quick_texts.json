@@ -6,5 +6,9 @@
   {
     "name": "Index",
     "text": "[[I:Index:Name]]"
+  },
+  {
+    "name": "Header",
+    "text": "| --- | --- | --- | --- | --- |"
   }
 ]
