@@ -1309,6 +1309,22 @@
         </div>
 
         <div class="quick-formatter-separator"></div>
+        <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+            Quick Texts
+            <button onclick="showQuickTextForm(event)" title="Add new quick text"
+                style="width: 18px; height: 18px; border-radius: 50%; border: none; background: #4caf50; color: white; font-size: 13px; line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
+        </div>
+        <div id="quickTextForm" style="display:none; padding: 4px 0 6px; gap: 4px; flex-direction: column;">
+            <input id="quickTextName" type="text" placeholder="Name" style="padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; width: 100%; box-sizing: border-box;">
+            <textarea id="quickTextBody" placeholder="Text to insert" rows="2" style="padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; width: 100%; box-sizing: border-box; resize: vertical; font-family: inherit;"></textarea>
+            <div style="display: flex; gap: 4px;">
+                <button onclick="saveQuickText(event)" style="flex:1; padding: 4px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 12px; cursor: pointer;">Save</button>
+                <button onclick="cancelQuickTextForm(event)" style="flex:1; padding: 4px; background: #eee; color: #333; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+        <div id="quickTextButtons" class="quick-formatter-options" style="flex-wrap: wrap;"></div>
+
+        <div class="quick-formatter-separator"></div>
         <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Quick Highlights</div>
         <div class="quick-formatter-options">
             <button class="format-btn" onclick="applyQuickFormat('==', '==', event)"

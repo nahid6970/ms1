@@ -15016,11 +15016,108 @@ function applyCustomColorSyntaxesRaw(text) {
     return formatted;
 }
 
+// Quick Texts
+let quickTexts = [];
+
+async function loadQuickTexts() {
+    try {
+        const res = await fetch('/api/quick-texts');
+        if (res.ok) quickTexts = await res.json();
+    } catch (e) { quickTexts = []; }
+    renderQuickTextButtons();
+}
+
+async function saveQuickTextsToServer() {
+    await fetch('/api/quick-texts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quickTexts)
+    });
+}
+
+function renderQuickTextButtons() {
+    const container = document.getElementById('quickTextButtons');
+    if (!container) return;
+    container.innerHTML = '';
+    quickTexts.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'format-btn';
+        btn.title = item.text;
+        btn.style.cssText = 'position:relative; font-size:11px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+        btn.textContent = item.name;
+        btn.onclick = (e) => { insertQuickText(item.text, e); };
+
+        const dot = document.createElement('span');
+        dot.textContent = '×';
+        dot.title = 'Remove';
+        dot.style.cssText = 'position:absolute; top:1px; right:2px; font-size:10px; color:#f44; line-height:1; cursor:pointer;';
+        dot.onclick = (e) => { e.stopPropagation(); quickTexts.splice(i, 1); saveQuickTextsToServer(); renderQuickTextButtons(); };
+
+        btn.appendChild(dot);
+        container.appendChild(btn);
+    });
+}
+
+function insertQuickText(text, event) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+    if (!quickFormatterTarget) return;
+    const input = quickFormatterTarget;
+
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            actualInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    } else {
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        input.value = input.value.substring(0, start) + text + input.value.substring(end);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        const pos = start + text.length;
+        input.setSelectionRange(pos, pos);
+        input.focus();
+    }
+    closeQuickFormatter();
+    showToast('Text inserted', 'success');
+}
+
+function showQuickTextForm(event) {
+    event.stopPropagation();
+    const form = document.getElementById('quickTextForm');
+    form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+    if (form.style.display === 'flex') document.getElementById('quickTextName').focus();
+}
+
+function cancelQuickTextForm(event) {
+    event.stopPropagation();
+    document.getElementById('quickTextForm').style.display = 'none';
+    document.getElementById('quickTextName').value = '';
+    document.getElementById('quickTextBody').value = '';
+}
+
+function saveQuickText(event) {
+    event.stopPropagation();
+    const name = document.getElementById('quickTextName').value.trim();
+    const text = document.getElementById('quickTextBody').value;
+    if (!name || !text) return;
+    quickTexts.push({ name, text });
+    saveQuickTextsToServer();
+    renderQuickTextButtons();
+    cancelQuickTextForm(event);
+}
+
 // Initialize on page load
 (async function () {
     await loadCustomColorSyntaxes();
     // Render custom syntax buttons in F3 formatter
     renderCustomSyntaxButtons();
+    await loadQuickTexts();
     // Re-render table after syntaxes are loaded
     if (typeof renderTable === 'function') {
         renderTable();

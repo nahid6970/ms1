@@ -18,6 +18,7 @@ def add_header(response):
 DATA_FILE = r'C:\@delta\ms1\@Flask\5018_cell\data.json'
 STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
 CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json'
+QUICK_TEXTS_FILE = r'C:\@delta\ms1\@Flask\5018_cell\quick_texts.json'
 SETTINGS_FILE = r'C:\@delta\db\5018_cell\setting.json'
 
 def load_data():
@@ -270,6 +271,20 @@ def save_custom_syntaxes():
     except Exception as e:
         print(f"Auto-export failed: {e}")
     
+    return jsonify({'success': True})
+
+@app.route('/api/quick-texts', methods=['GET'])
+def get_quick_texts():
+    if os.path.exists(QUICK_TEXTS_FILE):
+        with open(QUICK_TEXTS_FILE, 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    return jsonify([])
+
+@app.route('/api/quick-texts', methods=['POST'])
+def save_quick_texts():
+    items = request.json
+    with open(QUICK_TEXTS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(items, f, indent=2, ensure_ascii=False)
     return jsonify({'success': True})
 
 @app.route('/api/settings', methods=['GET'])
