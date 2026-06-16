@@ -1,5 +1,31 @@
 # Recent Development Log
 
+## [2026-06-16 11:27] - Quick Texts Section in F3 Formatter
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### 🎯 Quick Texts Feature
+- Added a new **"Quick Texts"** section in the F3 Quick Formatter, placed after the "Text Case" section.
+- Section header matches the style of other F3 headers (centered, uppercase, blue) with an inline green `+` circle button.
+- Clicking `+` opens a floating popup (not inline — doesn't expand the F3 panel) with a Name field and a Text textarea.
+- Clicking **Save** adds the snippet to the section as a button. Each button has a red `×` dot at top-right to delete it.
+- Clicking a saved text button inserts its text at the cursor position in the active cell (supports both contentEditable WYSIWYG mode and legacy input/textarea mode).
+- Snippets persist across sessions via a new `quick_texts.json` file, saved/loaded through new API endpoints.
+
+**Files Modified:**
+- `app.py` — Added `QUICK_TEXTS_FILE` path constant and `/api/quick-texts` GET + POST endpoints.
+- `templates/index.html` — Added Quick Texts section header (with `+` button), `#quickTextButtons` container, and `#quickTextPopup` floating form modal.
+- `static/script.js` — Added `loadQuickTexts`, `saveQuickTextsToServer`, `renderQuickTextButtons`, `insertQuickText`, `showQuickTextForm`, `cancelQuickTextForm`, `saveQuickText` functions; added `loadQuickTexts()` call to init IIFE.
+
+**Current Status:**
+- ✅ Quick Texts section visible in F3 after Text Case.
+- ✅ Add/save/delete snippets with JSON persistence.
+- ✅ Inserting text works in both WYSIWYG and raw mode.
+
+---
+
 ## [2026-06-14 21:06] - English to Bangla Number Conversion in F3 Formatter
 
 **Session Duration:** 0.1 hours
