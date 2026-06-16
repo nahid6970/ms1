@@ -1,5 +1,28 @@
 # Recent Development Log
 
+## [2026-06-16 14:21] - Fix Sheet Index Copy & Variable Font Size Default
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+
+### ✅ Sheet index copy when already set
+- Clicking `#` (Set & Copy Sheet Index) now copies the index even when it's already set.
+- Root cause: `navigator.clipboard.writeText()` silently fails when index already exists (no fetch delay = no active user gesture context). Fixed by adding `execCommand('copy')` fallback via a temporary textarea.
+- Warning toast still shows unchanged.
+
+### 🎨 Variable font size default changed to 1.5
+- Both prompts in `applyVariableFontSize` (contentEditable and legacy input paths) now default to `1.5` instead of `2`.
+
+**Files Modified:**
+- `static/script.js` — `setAndCopySheetIndex` with execCommand fallback; `applyVariableFontSize` default prompt value.
+
+**Current Status:**
+- ✅ `#` button always copies index (new or existing).
+- ✅ Font size prompt defaults to 1.5×.
+
+---
+
 ## [2026-06-16 12:08] - Custom Syntax Font Size Unit Changed to em
 
 **Session Duration:** 0.1 hours
