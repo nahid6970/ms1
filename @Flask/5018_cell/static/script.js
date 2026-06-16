@@ -14463,7 +14463,7 @@ async function loadCustomColorSyntaxes() {
                 if (syntax.isBold) style += ' font-weight: bold;';
                 if (syntax.isItalic) style += ' font-style: italic;';
                 if (syntax.isUnderline) style += ' text-decoration: underline;';
-                if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
+                if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
 
                 return { regex, style, marker: escapedMarker };
             }).filter(s => s !== null);
@@ -14515,7 +14515,7 @@ function rebuildCustomSyntaxCache() {
         if (syntax.isBold) style += ' font-weight: bold;';
         if (syntax.isItalic) style += ' font-style: italic;';
         if (syntax.isUnderline) style += ' text-decoration: underline;';
-        if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
+        if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
         return { regex, style, marker: escapedMarker };
     }).filter(s => s !== null);
 }
@@ -14589,13 +14589,13 @@ function renderCustomColorSyntaxList() {
                 <label class="toggle-icon ${syntax.isUnderline ? 'active' : ''}" style="text-decoration: underline;" title="Underline">
                     <input type="checkbox" ${syntax.isUnderline ? 'checked' : ''} onchange="updateCustomSyntax(${index}, 'isUnderline', this.checked)"> U
                 </label>
-                <input type="number" value="${syntax.fontSize || ''}" placeholder="px" min="8" max="72"
-                    onchange="updateCustomSyntax(${index}, 'fontSize', this.value ? parseInt(this.value) : '')"
-                    title="Font size (px)" style="width:44px; padding:2px 4px; font-size:11px; border:1px solid #ccc; border-radius:3px;">
+                <input type="number" value="${syntax.fontSize || ''}" placeholder="em" min="0.5" max="5" step="0.1"
+                    onchange="updateCustomSyntax(${index}, 'fontSize', this.value ? parseFloat(this.value) : '')"
+                    title="Font size in em (e.g. 1.5 = 1.5× normal)" style="width:44px; padding:2px 4px; font-size:11px; border:1px solid #ccc; border-radius:3px;">
             </div>
 
             <div class="cs-col-preview">
-                <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''} ${syntax.fontSize ? 'font-size:' + syntax.fontSize + 'px;' : ''}">
+                <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''} ${syntax.fontSize ? 'font-size:' + syntax.fontSize + 'em;' : ''}">
                     ${syntax.marker || '..'}sample${syntax.marker || '..'}
                 </div>
             </div>
@@ -15005,7 +15005,7 @@ function applyCustomColorSyntaxes(text) {
             if (syntax.isBold) style += ' font-weight: bold;';
             if (syntax.isItalic) style += ' font-style: italic;';
             if (syntax.isUnderline) style += ' text-decoration: underline;';
-            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
+            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
 
             return `<span style="${style}">${content}</span>`;
         });
@@ -15030,7 +15030,7 @@ function applyCustomColorSyntaxesRaw(text) {
             if (syntax.isBold) style += ' font-weight: bold;';
             if (syntax.isItalic) style += ' font-style: italic;';
             if (syntax.isUnderline) style += ' text-decoration: underline;';
-            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
+            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
 
             return `<span style="${style}">${match}</span>`;
         });
