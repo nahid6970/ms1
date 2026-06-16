@@ -15005,6 +15005,7 @@ function applyCustomColorSyntaxes(text) {
             if (syntax.isBold) style += ' font-weight: bold;';
             if (syntax.isItalic) style += ' font-style: italic;';
             if (syntax.isUnderline) style += ' text-decoration: underline;';
+            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
 
             return `<span style="${style}">${content}</span>`;
         });
@@ -15029,6 +15030,7 @@ function applyCustomColorSyntaxesRaw(text) {
             if (syntax.isBold) style += ' font-weight: bold;';
             if (syntax.isItalic) style += ' font-style: italic;';
             if (syntax.isUnderline) style += ' text-decoration: underline;';
+            if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}px;`;
 
             return `<span style="${style}">${match}</span>`;
         });

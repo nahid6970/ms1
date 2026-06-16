@@ -78,5 +78,14 @@
     "isItalic": false,
     "isUnderline": true,
     "marker": "\u2195\u2195"
+  },
+  {
+    "bgColor": "transparent",
+    "fgColor": "#212529",
+    "fontSize": 150,
+    "isBold": false,
+    "isItalic": false,
+    "isUnderline": false,
+    "marker": "XLX"
   }
 ]
