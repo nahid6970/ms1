@@ -3825,12 +3825,14 @@ def generate_static_html(data, custom_syntaxes):
                 event.preventDefault();
                 const sheetIndex = link.dataset.sheetIndex;
                 const sheetName = link.dataset.sheetName;
+                let idx = -1;
                 if (sheetIndex !== undefined) {
-                    const idx = parseInt(sheetIndex);
-                    if (!isNaN(idx)) switchSheet(idx);
+                    idx = parseInt(sheetIndex);
                 } else if (sheetName) {
-                    const idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
-                    if (idx !== -1) switchSheet(idx);
+                    idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
+                }
+                if (!isNaN(idx) && idx !== -1) {
+                    window.open(location.pathname + location.search + '#sheet=' + idx, '_blank');
                 }
                 return;
             }
@@ -4413,6 +4415,15 @@ def generate_static_html(data, custom_syntaxes):
             setTimeout(() => {
                 applyFontSizeScale();
             }, 100);
+
+            // Hash-based sheet navigation: #sheet=N opens that sheet index
+            const hashMatch = location.hash.match(/^#sheet=(\d+)$/);
+            if (hashMatch) {
+                const targetIdx = parseInt(hashMatch[1]);
+                if (!isNaN(targetIdx) && targetIdx >= 0 && targetIdx < tableData.sheets.length) {
+                    switchSheet(targetIdx);
+                }
+            }
         };
     </script>
 </head>
