@@ -4764,12 +4764,13 @@ async function setAndCopySheetIndex() {
     await setSheetCustomIndex(currentSheet);
     const idx = tableData.sheets[currentSheet]?.customIndex;
     if (!idx) return;
+    const sheetName = tableData.sheets[currentSheet]?.name || '';
+    const copyText = `[[I:${idx}:${sheetName}]]`;
     try {
-        await navigator.clipboard.writeText(idx);
+        await navigator.clipboard.writeText(copyText);
     } catch (e) {
-        // fallback
         const ta = document.createElement('textarea');
-        ta.value = idx;
+        ta.value = copyText;
         ta.style.position = 'fixed'; ta.style.opacity = '0';
         document.body.appendChild(ta);
         ta.focus(); ta.select();
