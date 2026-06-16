@@ -15232,7 +15232,7 @@ function applyVariableFontSize(event) {
         }
 
         // Prompt for font size
-        const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '2');
+        const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '1.5');
 
         if (size === null) return; // User cancelled
 
@@ -15286,7 +15286,7 @@ function applyVariableFontSize(event) {
     }
 
     // Prompt for font size
-    const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '2');
+    const size = prompt('Enter font size multiplier (e.g., 2 for 2x, 1.5 for 1.5x, 0.8 for smaller):', '1.5');
 
     if (size === null) return; // User cancelled
 
