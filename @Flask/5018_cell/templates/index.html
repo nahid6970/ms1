@@ -222,6 +222,10 @@
                     <span>📋</span>
                 </button>
 
+                <button onclick="(function(){const i=tableData.sheets.findIndex(s=>String(s.customIndex)==='20260520102127');if(i>=0)switchSheet(i);else showToast('Sheet not found','warning');})()" class="btn-icon" title="Go to Syllabus sheet">
+                    <span>📚</span>
+                </button>
+
 
             </div>
 
