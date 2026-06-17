@@ -3560,6 +3560,10 @@ Markdown Table Styles */
     word-break: break-word !important;
 }
 
+.md-ruled .md-cell {
+    border-bottom: 1px solid #000000 !important;
+}
+
 .md-empty {
     color: #aaa !important;
     background: transparent !important;

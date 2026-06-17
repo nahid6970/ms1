@@ -2956,9 +2956,13 @@ function parseGridTable(lines) {
     const hasHeaderSeparator = rows.length > 1 &&
         rows[1].every(cell => /^-+$/.test(cell.trim()));
 
+    // Check if ruled separator (e.g., |~~~|~~~|)
+    const isRuled = rows.length > 1 &&
+        rows[1].every(cell => /^~+$/.test(cell.trim()));
+
     // If header separator exists, skip it from rendering
-    const dataRows = hasHeaderSeparator ? [rows[0], ...rows.slice(2)] : rows;
-    const hasHeader = hasHeaderSeparator;
+    const dataRows = (hasHeaderSeparator || isRuled) ? [rows[0], ...rows.slice(2)] : rows;
+    const hasHeader = hasHeaderSeparator || isRuled;
 
     // Color map for separator colors
     const colorMap = {
@@ -3078,7 +3082,7 @@ function parseGridTable(lines) {
     });
 
     /*  build a single <div> that looks like a table  */
-    let html = `<div class="md-grid" style="--cols:${cols}">`;
+    let html = `<div class="md-grid${isRuled ? ' md-ruled' : ''}" style="--cols:${cols}">`;
     grid.forEach((row, i) => {
         row.forEach((cell, colIndex) => {
             // Skip cells with ^^ (they're merged)
