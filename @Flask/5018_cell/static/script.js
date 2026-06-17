@@ -682,9 +682,13 @@ function handleKeyboardShortcuts(e) {
                 <button id="rg-asc" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">A→Z</button>
                 <button id="rg-desc" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">Z→A</button>
             </div>
-            <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+            <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
                 <label style="font-size:12px;white-space:nowrap;">Separator:</label>
-                <input id="rg-sep" value="," style="background:#0d1f0d;border:1px solid #00ff9d;color:#00ff9d;padding:3px 6px;width:60px;font-family:inherit;">
+                <button class="rg-preset" data-sep="," style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">,</button>
+                <button class="rg-preset" data-sep=" | " style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">|</button>
+                <button class="rg-preset" data-sep=" & " style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">&amp;</button>
+                <button class="rg-preset" data-sep=" → " style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">→</button>
+                <input id="rg-sep" value="," style="background:#0d1f0d;border:1px solid #00ff9d;color:#00ff9d;padding:3px 6px;width:50px;font-family:inherit;">
                 <button id="rg-split" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:3px 10px;cursor:pointer;">Split</button>
                 <span id="rg-info" style="font-size:11px;opacity:0.6;"></span>
             </div>
@@ -728,11 +732,22 @@ function handleKeyboardShortcuts(e) {
 
         function doSplit() {
             const rawSep = sepInput.value === 'space' ? ' ' : sepInput.value;
-            sepWithSpace = text.includes(rawSep + ' ') ? rawSep + ' ' : rawSep;
-            current = text.split(rawSep).map(p => p.trim()).filter(p => p.length > 0);
+            const trimmed = rawSep.trim();
+            // Detect spacing around separator in original text: " | " vs "| " vs "|"
+            if (text.includes(' ' + trimmed + ' ')) sepWithSpace = ' ' + trimmed + ' ';
+            else if (text.includes(trimmed + ' ')) sepWithSpace = trimmed + ' ';
+            else if (text.includes(' ' + trimmed)) sepWithSpace = ' ' + trimmed;
+            else sepWithSpace = rawSep;
+            current = text.split(trimmed).map(p => p.trim()).filter(p => p.length > 0);
             renderList();
         }
 
+        panel.querySelectorAll('.rg-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sepInput.value = btn.dataset.sep;
+                doSplit();
+            });
+        });
         panel.querySelector('#rg-split').onclick = doSplit;
         sepInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') doSplit(); });
         panel.querySelector('#rg-asc').onclick = () => { current.sort((a,b) => a.localeCompare(b)); renderList(); };
