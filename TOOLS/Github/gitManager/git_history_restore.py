@@ -15,10 +15,11 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
-    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu, QSizePolicy
+    QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu, QSizePolicy,
+    QComboBox
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
-from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem
+from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem, QFontDatabase, QFontInfo
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -29,6 +30,9 @@ CP_RED = "#FF003C"          # Accent: Red
 CP_GREEN = "#00ff21"        # Accent: Green
 CP_DIM = "#3a3a3a"          # Dimmed/Borders/Inactive
 CP_TEXT = "#E0E0E0"         # Primary Text
+
+# --- GLOBAL FONT FAMILY CONFIG ---
+CURRENT_FONT_FAMILY = "Consolas"
 
 # --- CUSTOM ICON PROVIDER FOR FOLDERS ---
 class CyberIconProvider(QFileIconProvider):
@@ -102,6 +106,9 @@ class CyberDelegate(QStyledItemDelegate):
         
         # 4. Draw Text
         painter.setPen(text_color)
+        font = option.font
+        font.setFamily(CURRENT_FONT_FAMILY)
+        painter.setFont(font)
         text = str(index.data(Qt.ItemDataRole.DisplayRole))
         
         # Add some padding
@@ -539,7 +546,7 @@ class RepoButton(QPushButton):
                 color: {CP_TEXT};
                 border: 1px solid {CP_DIM};
                 padding: 4px 12px 4px 22px;
-                font-family: 'Consolas';
+                font-family: '{CURRENT_FONT_FAMILY}';
                 font-size: 9pt;
                 text-align: left;
             }}
@@ -633,7 +640,7 @@ class CyberButton(QPushButton):
                 color: {text_color};
                 border: 1px solid {CP_DIM};
                 padding: 8px 16px;
-                font-family: 'Consolas';
+                font-family: '{CURRENT_FONT_FAMILY}';
                 font-weight: bold;
                 font-size: 10pt;
             }}
@@ -705,93 +712,12 @@ class MainWindow(QMainWindow):
         self.restored_files = {} # Track restored files: {rel_path: commit_hash}
         self.saved_repos = [] # List of {"name": str, "path": str}
         
+        self.font_family = CURRENT_FONT_FAMILY
+        
         # Load config first to get window size
         self.load_config()
         self.resize(self.window_width, self.window_height)
-
-        self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            
-            QLineEdit {{
-                background-color: {CP_PANEL}; 
-                color: {CP_CYAN}; 
-                border: 1px solid {CP_DIM}; 
-                padding: 6px;
-            }}
-            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
-            
-            QTableWidget {{
-                background-color: {CP_PANEL};
-                gridline-color: {CP_DIM};
-                border: 1px solid {CP_DIM};
-                outline: none;
-            }}
-            QHeaderView::section {{
-                background-color: {CP_DIM};
-                color: {CP_YELLOW};
-                padding: 6px;
-                border: 1px solid {CP_PANEL};
-                font-weight: bold;
-            }}
-            QScrollBar:vertical {{
-                border: 1px solid {CP_DIM};
-                background: {CP_BG};
-                width: 12px;
-                margin: 0px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {CP_CYAN};
-                min-height: 20px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: {CP_YELLOW};
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-                height: 0px;
-            }}
-            QScrollBar:horizontal {{
-                border: 1px solid {CP_DIM};
-                background: {CP_BG};
-                height: 12px;
-                margin: 0px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {CP_CYAN};
-                min-width: 20px;
-            }}
-            QScrollBar::handle:horizontal:hover {{
-                background: {CP_YELLOW};
-            }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
-                width: 0px;
-            }}
-            QTextEdit {{
-                background-color: {CP_PANEL};
-                color: {CP_TEXT};
-                border: 1px solid {CP_DIM};
-                font-family: 'Consolas';
-                font-size: 9pt;
-            }}
-            
-            /* TREE VIEW */
-            QTreeView {{
-                background-color: #080808;
-                border: 1px solid {CP_DIM};
-                color: {CP_TEXT};
-                outline: none;
-                show-decoration-selected: 1;
-            }}
-            QTreeView::item {{
-                padding: 2px;
-            }}
-            QTreeView::item:hover {{ background-color: #1a1a1a; }}
-            QTreeView::item:selected {{ 
-                background-color: #222222; 
-                color: {CP_YELLOW}; 
-            }}
-        """
-        )
+        self.apply_styles()
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -962,15 +888,6 @@ class MainWindow(QMainWindow):
         self.diff_display.file_timeline_requested.connect(self.open_file_timeline)
         self.diff_display.setOpenExternalLinks(False)
         self.diff_display.setOpenLinks(False)
-        self.diff_display.setStyleSheet(f"""
-            QTextBrowser {{
-                background-color: {CP_BG};
-                border: 1px solid {CP_DIM};
-                color: {CP_TEXT};
-                font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
-                font-size: 10pt;
-            }}
-        """)
         self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>Select a commit to view changes...</div>")
         self.diff_display.anchorClicked.connect(self.on_file_header_clicked)
         diff_layout.addWidget(self.diff_display)
@@ -1024,6 +941,100 @@ class MainWindow(QMainWindow):
         if os.path.isdir(self.path_input.text()):
             self.load_commits()
 
+    def apply_styles(self):
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{self.font_family}'; font-size: 10pt; }}
+            
+            QLineEdit {{
+                background-color: {CP_PANEL}; 
+                color: {CP_CYAN}; 
+                border: 1px solid {CP_DIM}; 
+                padding: 6px;
+            }}
+            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            
+            QTableWidget {{
+                background-color: {CP_PANEL};
+                gridline-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                outline: none;
+            }}
+            QHeaderView::section {{
+                background-color: {CP_DIM};
+                color: {CP_YELLOW};
+                padding: 6px;
+                border: 1px solid {CP_PANEL};
+                font-weight: bold;
+            }}
+            QScrollBar:vertical {{
+                border: 1px solid {CP_DIM};
+                background: {CP_BG};
+                width: 12px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {CP_CYAN};
+                min-height: 20px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {CP_YELLOW};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QScrollBar:horizontal {{
+                border: 1px solid {CP_DIM};
+                background: {CP_BG};
+                height: 12px;
+                margin: 0px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {CP_CYAN};
+                min-width: 20px;
+            }}
+            QScrollBar::handle:horizontal:hover {{
+                background: {CP_YELLOW};
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+            }}
+            QTextEdit {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                font-family: '{self.font_family}';
+                font-size: 9pt;
+            }}
+            
+            /* TREE VIEW */
+            QTreeView {{
+                background-color: #080808;
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                outline: none;
+                show-decoration-selected: 1;
+            }}
+            QTreeView::item {{
+                padding: 2px;
+            }}
+            QTreeView::item:hover {{ background-color: #1a1a1a; }}
+            QTreeView::item:selected {{ 
+                background-color: #222222; 
+                color: {CP_YELLOW}; 
+            }}
+        """)
+        if hasattr(self, 'diff_display'):
+            self.diff_display.setStyleSheet(f"""
+                QTextBrowser {{
+                    background-color: {CP_BG};
+                    border: 1px solid {CP_DIM};
+                    color: {CP_TEXT};
+                    font-family: '{self.font_family}', 'Consolas', monospace;
+                    font-size: 10pt;
+                }}
+            """)
+
     def open_git_console(self):
         """Open the git operations popup dialog"""
         directory = self.path_input.text().strip()
@@ -1055,96 +1066,6 @@ class MainWindow(QMainWindow):
                 self.status_label.setText(f"LIMIT SET: {limit} COMMITS")
 
     def open_settings(self):
-        """Open settings dialog for window size and split ratio"""
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Settings")
-        dialog.resize(400, 250)
-        dialog.setStyleSheet(f"""
-            QDialog {{ background-color: {CP_BG}; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            QLineEdit {{
-                background-color: {CP_PANEL};
-                color: {CP_CYAN};
-                border: 1px solid {CP_DIM};
-                padding: 6px;
-            }}
-        """)
-        
-        layout = QVBoxLayout(dialog)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Header
-        header = QLabel("WINDOW SETTINGS:")
-        header.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 12pt;")
-        layout.addWidget(header)
-        
-        # Window Width
-        width_layout = QHBoxLayout()
-        width_layout.addWidget(QLabel("Window Width:"))
-        width_input = QLineEdit(str(self.window_width))
-        width_layout.addWidget(width_input)
-        layout.addLayout(width_layout)
-        
-        # Window Height
-        height_layout = QHBoxLayout()
-        height_layout.addWidget(QLabel("Window Height:"))
-        height_input = QLineEdit(str(self.window_height))
-        height_layout.addWidget(height_input)
-        layout.addLayout(height_layout)
-        
-        # Split Ratio
-        split_layout = QHBoxLayout()
-        split_layout.addWidget(QLabel("Left Panel %:"))
-        split_input = QLineEdit(str(int(self.split_ratio[0] / sum(self.split_ratio) * 100)))
-        split_layout.addWidget(split_input)
-        layout.addLayout(split_layout)
-        
-        info_label = QLabel("(Right panel will take the remaining %)")
-        info_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt;")
-        layout.addWidget(info_label)
-        
-        layout.addStretch()
-        
-        # Buttons
-        btn_layout = QHBoxLayout()
-        btn_layout.addStretch()
-        
-        cancel_btn = CyberButton("CANCEL", CP_DIM, CP_RED)
-        cancel_btn.clicked.connect(dialog.reject)
-        btn_layout.addWidget(cancel_btn)
-        
-        save_btn = CyberButton("SAVE", CP_DIM, CP_GREEN)
-        save_btn.clicked.connect(dialog.accept)
-        btn_layout.addWidget(save_btn)
-        
-        layout.addLayout(btn_layout)
-        
-        if dialog.exec():
-            try:
-                new_width = int(width_input.text())
-                new_height = int(height_input.text())
-                left_percent = int(split_input.text())
-                
-                if 800 <= new_width <= 3840 and 600 <= new_height <= 2160 and 10 <= left_percent <= 90:
-                    self.window_width = new_width
-                    self.window_height = new_height
-                    right_percent = 100 - left_percent
-                    self.split_ratio = [left_percent, right_percent]
-                    
-                    self.resize(self.window_width, self.window_height)
-                    self.main_splitter.setStretchFactor(0, self.split_ratio[0])
-                    self.main_splitter.setStretchFactor(1, self.split_ratio[1])
-                    
-                    self.save_config()
-                    self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
-                    self.status_label.setText("SETTINGS SAVED")
-                else:
-                    QMessageBox.warning(self, "Invalid Values", "Please enter valid values:\nWidth: 800-3840\nHeight: 600-2160\nLeft %: 10-90")
-            except ValueError:
-                QMessageBox.warning(self, "Invalid Input", "Please enter valid numbers")
-
-    def open_settings(self):
         """Open settings dialog"""
         dialog = SettingsDialog(self, self.window_width, self.window_height, self.split_ratio)
         if dialog.exec():
@@ -1154,10 +1075,19 @@ class MainWindow(QMainWindow):
             right_ratio = dialog.right_spin.value()
             self.split_ratio = [left_ratio, right_ratio]
             
+            # Save selected font style
+            new_font = dialog.font_combo.currentText()
+            global CURRENT_FONT_FAMILY
+            CURRENT_FONT_FAMILY = new_font
+            self.font_family = new_font
+            
             # Apply settings
             self.resize(self.window_width, self.window_height)
             self.main_splitter.setStretchFactor(0, self.split_ratio[0])
             self.main_splitter.setStretchFactor(1, self.split_ratio[1])
+            self.apply_styles()
+            self.refresh_repo_buttons()
+            self.on_commit_selected()
             
             # Save to config
             self.save_config()
@@ -1375,7 +1305,7 @@ class MainWindow(QMainWindow):
             return
         
         html_parts = []
-        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"JetBrainsMono Nerd Font\", \"Consolas\", monospace; font-size: 10pt;'>")
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{self.font_family}\", \"Consolas\", monospace; font-size: 10pt;'>")
         
         for idx, section in enumerate(self.current_diff_sections):
             stats = section['stats']
@@ -1537,6 +1467,9 @@ class MainWindow(QMainWindow):
                     self.split_ratio = data.get("split_ratio", [2, 3])
                     self.saved_repos = data.get("saved_repos", [])
                     self.last_directory = data.get("last_directory", "")
+                    global CURRENT_FONT_FAMILY
+                    CURRENT_FONT_FAMILY = data.get("font_family", "Consolas")
+                    self.font_family = CURRENT_FONT_FAMILY
                     return self.last_directory
         except: pass
         return ""
@@ -1553,7 +1486,8 @@ class MainWindow(QMainWindow):
                     "window_width": self.window_width,
                     "window_height": self.window_height,
                     "split_ratio": self.split_ratio,
-                    "saved_repos": self.saved_repos
+                    "saved_repos": self.saved_repos,
+                    "font_family": CURRENT_FONT_FAMILY
                 }, f)
         except: pass
 
@@ -1920,7 +1854,7 @@ class GitOpsDialog(QDialog):
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QLineEdit {{
                 background-color: {CP_PANEL};
                 color: {CP_CYAN};
@@ -2088,11 +2022,11 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None, width=1400, height=700, split_ratio=[2, 3]):
         super().__init__(parent)
         self.setWindowTitle("Settings")
-        self.resize(500, 300)
+        self.resize(500, 380)
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QLabel {{ color: {CP_TEXT}; }}
             QSpinBox {{
                 background-color: {CP_PANEL};
@@ -2100,20 +2034,34 @@ class SettingsDialog(QDialog):
                 border: 1px solid {CP_DIM};
                 padding: 5px;
             }}
+            QComboBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 5px;
+                font-family: '{CURRENT_FONT_FAMILY}';
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {CP_CYAN};
+                selection-color: black;
+            }}
         """)
         
         layout = QVBoxLayout(self)
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(15)
+        layout.setContentsMargins(30, 20, 30, 20)
         
         # Header
-        header = QLabel("⚙️ WINDOW SETTINGS")
+        header = QLabel("⚙️ WINDOW & FONT SETTINGS")
         header.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 14pt;")
         layout.addWidget(header)
         
         # Window Size
         size_group = QWidget()
         size_layout = QVBoxLayout(size_group)
+        size_layout.setContentsMargins(0, 0, 0, 0)
         
         size_label = QLabel("Window Size:")
         size_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
@@ -2121,7 +2069,6 @@ class SettingsDialog(QDialog):
         
         width_layout = QHBoxLayout()
         width_layout.addWidget(QLabel("Width:"))
-        self.width_spin = QInputDialog.getInt(self, "", "", width, 800, 3840, 1)[0] if False else None
         from PyQt6.QtWidgets import QSpinBox
         self.width_spin = QSpinBox()
         self.width_spin.setRange(800, 3840)
@@ -2144,6 +2091,7 @@ class SettingsDialog(QDialog):
         # Split Ratio
         split_group = QWidget()
         split_layout = QVBoxLayout(split_group)
+        split_layout.setContentsMargins(0, 0, 0, 0)
         
         split_label = QLabel("Panel Split Ratio:")
         split_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
@@ -2165,11 +2113,47 @@ class SettingsDialog(QDialog):
         right_layout.addWidget(self.right_spin)
         split_layout.addLayout(right_layout)
         
-        hint_label = QLabel("💡 Tip: Higher values = more space")
-        hint_label.setStyleSheet(f"color: {CP_DIM}; font-size: 9pt; margin-top: 5px;")
-        split_layout.addWidget(hint_label)
-        
         layout.addWidget(split_group)
+        
+        # Font Selection
+        font_group = QWidget()
+        font_layout = QVBoxLayout(font_group)
+        font_layout.setContentsMargins(0, 0, 0, 0)
+        
+        font_label = QLabel("Font Style:")
+        font_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; margin-bottom: 5px;")
+        font_layout.addWidget(font_label)
+        
+        font_selection_layout = QHBoxLayout()
+        font_selection_layout.addWidget(QLabel("Family:"))
+        
+        self.font_combo = QComboBox()
+        # Fetch system monospace fonts
+        mono_fonts = []
+        for family in QFontDatabase.families():
+            if QFontInfo(QFont(family)).fixedPitch():
+                mono_fonts.append(family)
+        # Ensure we have common ones even if not detected
+        defaults = ["Consolas", "JetBrains Mono", "Courier New", "Courier", "monospace"]
+        for d in defaults:
+            if d not in mono_fonts:
+                mono_fonts.append(d)
+        mono_fonts.sort()
+        
+        self.font_combo.addItems(mono_fonts)
+        # Set current selection
+        current_font = parent.font_family if parent else "Consolas"
+        idx = self.font_combo.findText(current_font)
+        if idx >= 0:
+            self.font_combo.setCurrentIndex(idx)
+        else:
+            self.font_combo.addItem(current_font)
+            self.font_combo.setCurrentIndex(self.font_combo.count() - 1)
+            
+        font_selection_layout.addWidget(self.font_combo)
+        font_layout.addLayout(font_selection_layout)
+        
+        layout.addWidget(font_group)
         
         layout.addStretch()
         
@@ -2201,7 +2185,7 @@ class FileTimelineDialog(QDialog):
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QTableWidget {{
                 background-color: {CP_PANEL};
                 gridline-color: {CP_DIM};
@@ -2289,7 +2273,7 @@ class FileTimelineDialog(QDialog):
                 background-color: {CP_BG};
                 border: 1px solid {CP_DIM};
                 color: {CP_TEXT};
-                font-family: 'JetBrainsMono Nerd Font', 'Consolas', monospace;
+                font-family: '{CURRENT_FONT_FAMILY}', 'Consolas', monospace;
                 font-size: 10pt;
             }}
         """)
@@ -2359,7 +2343,7 @@ class FileTimelineDialog(QDialog):
             return
             
         html_parts = []
-        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"JetBrainsMono Nerd Font\", \"Consolas\", monospace; font-size: 10pt;'>")
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{CURRENT_FONT_FAMILY}\", \"Consolas\", monospace; font-size: 10pt;'>")
         
         for section in sections:
             rel_path = section['name']
@@ -2421,7 +2405,7 @@ class ReflogDialog(QDialog):
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QTableWidget {{
                 background-color: {CP_PANEL};
                 gridline-color: {CP_DIM};
@@ -2532,7 +2516,7 @@ class CommitExplorerDialog(QDialog):
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QTreeView {{
                 background-color: #080808;
                 border: 1px solid {CP_DIM};
@@ -2696,7 +2680,7 @@ class TreeBrowserDialog(QDialog):
         
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
             QLineEdit {{
                 background-color: {CP_PANEL};
                 color: {CP_CYAN};
