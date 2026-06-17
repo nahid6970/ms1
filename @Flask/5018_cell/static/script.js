@@ -7012,23 +7012,36 @@ function renderSubSheetList(filterText = '') {
                     const toIndex = index;
                     if (fromIndex === toIndex) return;
 
-                    // Swap the two sheets in tableData
-                    const temp = tableData.sheets[fromIndex];
-                    tableData.sheets[fromIndex] = tableData.sheets[toIndex];
-                    tableData.sheets[toIndex] = temp;
+                    // Move sheet from fromIndex to toIndex (insert, not swap)
+                    const movedSheet = tableData.sheets.splice(fromIndex, 1)[0];
+                    const movedCat = tableData.sheetCategories[fromIndex] ?? tableData.sheetCategories[String(fromIndex)] ?? null;
+                    delete tableData.sheetCategories[fromIndex];
+                    delete tableData.sheetCategories[String(fromIndex)];
 
-                    // Swap category assignments
+                    // Adjust toIndex after removal
+                    const insertAt = fromIndex < toIndex ? toIndex - 1 : toIndex;
+                    tableData.sheets.splice(insertAt, 0, movedSheet);
+
+                    // Rebuild sheetCategories by shifting keys
                     const cats = tableData.sheetCategories;
-                    const tempCat = cats[fromIndex] ?? cats[String(fromIndex)] ?? null;
-                    const toCat = cats[toIndex] ?? cats[String(toIndex)] ?? null;
-                    delete cats[fromIndex]; delete cats[String(fromIndex)];
-                    delete cats[toIndex];   delete cats[String(toIndex)];
-                    if (tempCat !== null) cats[toIndex] = tempCat;
-                    if (toCat !== null)   cats[fromIndex] = toCat;
+                    const oldCats = {};
+                    Object.keys(cats).forEach(k => { oldCats[parseInt(k)] = cats[k]; delete cats[k]; delete cats[String(k)]; });
 
-                    // Fix currentSheet pointer if one of the swapped sheets is active
-                    if (currentSheet === fromIndex) currentSheet = toIndex;
-                    else if (currentSheet === toIndex) currentSheet = fromIndex;
+                    // Shift keys: remove gap at fromIndex, insert gap at insertAt
+                    const newCats = {};
+                    Object.keys(oldCats).forEach(k => {
+                        let i = parseInt(k);
+                        if (i >= fromIndex) i--;       // close gap
+                        if (i >= insertAt) i++;        // open gap
+                        if (oldCats[k] !== null) newCats[i] = oldCats[k];
+                    });
+                    if (movedCat !== null) newCats[insertAt] = movedCat;
+                    Object.assign(cats, newCats);
+
+                    // Fix currentSheet pointer
+                    if (currentSheet === fromIndex) currentSheet = insertAt;
+                    else if (currentSheet > fromIndex && currentSheet <= insertAt) currentSheet--;
+                    else if (currentSheet < fromIndex && currentSheet >= insertAt) currentSheet++;
 
                     saveData();
                     renderSubSheetBar();
