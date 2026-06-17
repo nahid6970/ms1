@@ -2354,7 +2354,7 @@ def generate_static_html(data, custom_syntaxes):
             
             // Check if ruled separator (e.g., |~~~|~~~|)
             const isRuled = rows.length > 1 &&
-                rows[1].every(cell => /^~+$/.test(cell.trim()));
+                rows[1].every(cell => /^━+$/.test(cell.trim()));
 
             // If header separator exists, skip it from rendering
             const dataRows = (hasHeaderSeparator || isRuled) ? [rows[0], ...rows.slice(2)] : rows;
