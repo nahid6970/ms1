@@ -1293,6 +1293,7 @@ def generate_static_html(data, custom_syntaxes):
         /* Top border on entire grid (first row top edge) */
         .md-grid {
             border-top: 2px solid #000000;
+            border-bottom: 2px solid #000000;
         }
 
         .md-header {

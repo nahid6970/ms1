@@ -3560,6 +3560,7 @@ Markdown Table Styles */
 /* Top border on entire grid (first row top edge) */
 .md-grid {
     border-top: 2px solid #000000 !important;
+    border-bottom: 2px solid #000000 !important;
 }
 
 .md-header {
