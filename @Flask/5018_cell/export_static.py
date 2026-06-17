@@ -511,6 +511,25 @@ def generate_static_html(data, custom_syntaxes):
             stroke: #bbb;
         }
 
+        .btn-header-bookmark {
+            background: #fff8e1 !important;
+            border-color: #f59e0b !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        .btn-header-bookmark svg {
+            stroke: #d97706 !important;
+        }
+        .btn-header-bookmark:hover {
+            background: #f59e0b !important;
+            border-color: #d97706 !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        .btn-header-bookmark:hover svg {
+            stroke: #fff !important;
+        }
+
         .header-toggle-group {
             display: flex;
             align-items: center;
