@@ -248,6 +248,15 @@ body {
     color: #000;
 }
 
+.subsheet-drag-handle {
+    cursor: grab;
+    opacity: 0.4;
+    font-size: 14px;
+    user-select: none;
+    padding: 0 2px;
+}
+.subsheet-drag-handle:hover { opacity: 1; }
+
 .subsheet-dropdown-add {
     padding: 12px 15px;
     cursor: pointer;

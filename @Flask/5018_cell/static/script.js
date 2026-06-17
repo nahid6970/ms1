@@ -6990,10 +6990,53 @@ function renderSubSheetList(filterText = '') {
             if (sheet.name.toLowerCase().includes(filter)) {
                 const item = document.createElement('div');
                 item.className = `subsheet-dropdown-item ${currentSheet === index ? 'active' : ''}`;
-                item.innerHTML = `<span>📄</span> <span>${sheet.name}</span>`;
+                item.innerHTML = `<span class="subsheet-drag-handle" title="Drag to reorder">⠿</span><span>📄</span> <span>${sheet.name}</span>`;
+                item.draggable = true;
+                item.dataset.sheetIndex = index;
                 applyColors(item, sheet, index);
                 
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', index);
+                    item.style.opacity = '0.4';
+                });
+                item.addEventListener('dragend', () => { item.style.opacity = ''; });
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    item.style.borderTop = '2px solid #00ff88';
+                });
+                item.addEventListener('dragleave', () => { item.style.borderTop = ''; });
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    item.style.borderTop = '';
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    const toIndex = index;
+                    if (fromIndex === toIndex) return;
+
+                    // Swap the two sheets in tableData
+                    const temp = tableData.sheets[fromIndex];
+                    tableData.sheets[fromIndex] = tableData.sheets[toIndex];
+                    tableData.sheets[toIndex] = temp;
+
+                    // Swap category assignments
+                    const cats = tableData.sheetCategories;
+                    const tempCat = cats[fromIndex] ?? cats[String(fromIndex)] ?? null;
+                    const toCat = cats[toIndex] ?? cats[String(toIndex)] ?? null;
+                    delete cats[fromIndex]; delete cats[String(fromIndex)];
+                    delete cats[toIndex];   delete cats[String(toIndex)];
+                    if (tempCat !== null) cats[toIndex] = tempCat;
+                    if (toCat !== null)   cats[fromIndex] = toCat;
+
+                    // Fix currentSheet pointer if one of the swapped sheets is active
+                    if (currentSheet === fromIndex) currentSheet = toIndex;
+                    else if (currentSheet === toIndex) currentSheet = fromIndex;
+
+                    saveData();
+                    renderSubSheetBar();
+                    renderSubSheetList(filterText);
+                });
+
                 item.onclick = (e) => {
+                    if (e.target.classList.contains('subsheet-drag-handle')) return;
                     if (e.button === 0) {
                         switchSheet(index);
                         document.getElementById('subSheetDropdown').style.display = 'none';
