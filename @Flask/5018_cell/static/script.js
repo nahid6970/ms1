@@ -613,87 +613,142 @@ function handleKeyboardShortcuts(e) {
     // F9 to swap two words containing a separator in the middle
     if (e.key === 'F9') {
         e.preventDefault();
-        const activeElement = document.activeElement;
+        const activeEl = document.activeElement;
+        const isCE = activeEl.isContentEditable;
 
-        // Handle both contentEditable and input/textarea
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' ||
-            (activeElement.classList && activeElement.classList.contains('markdown-preview'))) {
+        if (!activeEl.tagName.match(/^(INPUT|TEXTAREA)$/) && !isCE) return;
 
-            let text = '';
-            let isContentEditable = activeElement.isContentEditable;
-
-            if (isContentEditable) {
-                const selection = window.getSelection();
-                if (selection && !selection.isCollapsed) {
-                    text = selection.toString();
-                } else {
-                    showToast('Please select text to swap', 'info');
-                    return;
-                }
-            } else {
-                const start = activeElement.selectionStart;
-                const end = activeElement.selectionEnd;
-
-                if (start !== end) {
-                    text = activeElement.value.substring(start, end);
-                } else {
-                    showToast('Please select text to swap', 'info');
-                    return;
-                }
-            }
-
-            // Regex to split: (Part1)(Separator)(Part2)
-            const match = text.match(/^(.+?)([\t ,]+)(.+)$/);
-
-            if (match) {
-                const part1 = match[1];
-                const separator = match[2];
-                const part2 = match[3];
-                const newText = part2 + separator + part1;
-
-                if (isContentEditable) {
-                    // Handle contentEditable
-                    const selection = window.getSelection();
-                    if (selection.rangeCount > 0) {
-                        const range = selection.getRangeAt(0);
-                        range.deleteContents();
-                        const textNode = document.createTextNode(newText);
-                        range.insertNode(textNode);
-
-                        // Update underlying input
-                        const rawText = extractRawText(activeElement);
-                        const actualInput = activeElement.previousElementSibling;
-                        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
-                            actualInput.value = rawText;
-                            const event = new Event('input', { bubbles: true });
-                            actualInput.dispatchEvent(event);
-                        }
-
-                        // Select the swapped text
-                        const newRange = document.createRange();
-                        newRange.selectNodeContents(textNode);
-                        selection.removeAllRanges();
-                        selection.addRange(newRange);
-                    }
-                } else {
-                    // Handle input/textarea
-                    const start = activeElement.selectionStart;
-                    const end = activeElement.selectionEnd;
-                    const val = activeElement.value;
-                    const newVal = val.substring(0, start) + newText + val.substring(end);
-                    activeElement.value = newVal;
-                    activeElement.selectionStart = start;
-                    activeElement.selectionEnd = start + newText.length;
-
-                    const event = new Event('input', { bubbles: true });
-                    activeElement.dispatchEvent(event);
-                }
-
-                showToast('Swapped text position', 'success');
-            } else {
-                showToast('Could not identify two parts separated by space/comma', 'warning');
-            }
+        // Capture selection NOW before any GUI opens
+        let text = '', selStart = 0, selEnd = 0, savedRange = null;
+        if (isCE) {
+            const sel = window.getSelection();
+            if (!sel || sel.isCollapsed) { showToast('Please select text', 'info'); return; }
+            text = sel.toString();
+            savedRange = sel.getRangeAt(0).cloneRange();
+            // Get offsets from the hidden textarea (source of truth)
+            const cell = activeEl.closest('td');
+            const actualInput = cell && cell.querySelector('input, textarea');
+            const rawFull = actualInput ? actualInput.value : extractRawText(activeEl);
+            const idx = rawFull.indexOf(text);
+            if (idx === -1) { showToast('Could not locate selection in source', 'warning'); return; }
+            selStart = idx; selEnd = idx + text.length;
+        } else {
+            selStart = activeEl.selectionStart; selEnd = activeEl.selectionEnd;
+            if (selStart === selEnd) { showToast('Please select text', 'info'); return; }
+            text = activeEl.value.substring(selStart, selEnd);
         }
+
+        const applyText = (newText) => {
+            if (isCE) {
+                // Find the hidden textarea (source of truth), update it directly
+                const cell = activeEl.closest('td');
+                const actualInput = cell && cell.querySelector('input, textarea');
+                if (actualInput) {
+                    const raw = actualInput.value;
+                    const newRaw = raw.substring(0, selStart) + newText + raw.substring(selEnd);
+                    actualInput.value = newRaw;
+                    actualInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            } else {
+                activeEl.focus();
+                const before = activeEl.value.substring(0, selStart);
+                const after = activeEl.value.substring(selEnd);
+                activeEl.value = before + newText + after;
+                activeEl.setSelectionRange(selStart, selStart + newText.length);
+                activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+
+        showReorderGui(text, applyText);
+    }
+
+    function showReorderGui(text, onConfirm) {
+        const existing = document.getElementById('reorderGuiOverlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'reorderGuiOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;';
+
+        const panel = document.createElement('div');
+        panel.style.cssText = 'background:#0d1f0d;border:1px solid #00ff9d;padding:16px;min-width:320px;max-width:480px;font-family:JetBrains Mono,monospace;color:#00ff9d;box-shadow:0 0 30px #00ff9d44;';
+
+        let current = [];
+        let sepWithSpace = ',';
+
+        panel.innerHTML = `
+            <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+                <b style="flex:1">Reorder Parts</b>
+                <button id="rg-asc" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">A→Z</button>
+                <button id="rg-desc" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:2px 8px;cursor:pointer;">Z→A</button>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+                <label style="font-size:12px;white-space:nowrap;">Separator:</label>
+                <input id="rg-sep" value="," style="background:#0d1f0d;border:1px solid #00ff9d;color:#00ff9d;padding:3px 6px;width:60px;font-family:inherit;">
+                <button id="rg-split" style="background:#1a3a1a;border:1px solid #00ff9d;color:#00ff9d;padding:3px 10px;cursor:pointer;">Split</button>
+                <span id="rg-info" style="font-size:11px;opacity:0.6;"></span>
+            </div>
+            <div id="rg-list" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;min-height:30px;"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button id="rg-cancel" style="background:#1a1a1a;border:1px solid #666;color:#aaa;padding:4px 14px;cursor:pointer;">Cancel</button>
+                <button id="rg-confirm" style="background:#00ff9d;border:none;color:#000;padding:4px 14px;cursor:pointer;font-weight:bold;">Confirm</button>
+            </div>`;
+
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        const listEl = panel.querySelector('#rg-list');
+        const sepInput = panel.querySelector('#rg-sep');
+        const infoEl = panel.querySelector('#rg-info');
+        let dragSrcIdx = null;
+
+        function renderList() {
+            listEl.innerHTML = '';
+            current.forEach((part, i) => {
+                const item = document.createElement('div');
+                item.draggable = true;
+                item.textContent = '⠿  ' + part;
+                item.style.cssText = 'padding:5px 10px;background:#1a3a1a;border:1px solid #00ff9d44;cursor:grab;user-select:none;';
+                item.addEventListener('dragstart', () => { dragSrcIdx = i; item.style.opacity='0.4'; });
+                item.addEventListener('dragend', () => { item.style.opacity=''; });
+                item.addEventListener('dragover', ev => { ev.preventDefault(); item.style.borderTop='2px solid #00ff9d'; });
+                item.addEventListener('dragleave', () => { item.style.borderTop=''; });
+                item.addEventListener('drop', ev => {
+                    ev.preventDefault(); item.style.borderTop='';
+                    if (dragSrcIdx === null || dragSrcIdx === i) return;
+                    const moved = current.splice(dragSrcIdx, 1)[0];
+                    current.splice(dragSrcIdx < i ? i-1 : i, 0, moved);
+                    dragSrcIdx = null;
+                    renderList();
+                });
+                listEl.appendChild(item);
+            });
+            infoEl.textContent = current.length ? `${current.length} parts` : '';
+        }
+
+        function doSplit() {
+            const rawSep = sepInput.value === 'space' ? ' ' : sepInput.value;
+            sepWithSpace = text.includes(rawSep + ' ') ? rawSep + ' ' : rawSep;
+            current = text.split(rawSep).map(p => p.trim()).filter(p => p.length > 0);
+            renderList();
+        }
+
+        panel.querySelector('#rg-split').onclick = doSplit;
+        sepInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') doSplit(); });
+        panel.querySelector('#rg-asc').onclick = () => { current.sort((a,b) => a.localeCompare(b)); renderList(); };
+        panel.querySelector('#rg-desc').onclick = () => { current.sort((a,b) => b.localeCompare(a)); renderList(); };
+        panel.querySelector('#rg-cancel').onclick = () => overlay.remove();
+        overlay.addEventListener('mousedown', ev => { if (ev.target === overlay) overlay.remove(); });
+        panel.querySelector('#rg-confirm').onclick = () => {
+            if (!current.length) { showToast('Split first', 'warning'); return; }
+            overlay.remove();
+            onConfirm(current.join(sepWithSpace));
+            showToast('Text reordered', 'success');
+        };
+
+        // Auto-split with comma default
+        doSplit();
+        setTimeout(() => sepInput.focus(), 50);
     }
 
     // Ctrl+Shift+D to select next occurrence (multi-cursor simulation)
