@@ -3109,7 +3109,8 @@ function parseGridTable(lines) {
             const isHeader = hasHeader && i === 0;
             const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
             const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+            const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';

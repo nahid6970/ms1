@@ -1302,10 +1302,14 @@ def generate_static_html(data, custom_syntaxes):
             opacity: 0.6;
         }
 
-        /* Rowspan borders - add thin black line above and below ALL cells in rows that contain rowspan */
+        /* Rowspan borders - add thin black line below cells in rows that contain rowspan */
         .md-cell.md-rowspan-row {
-            border-top: 1px solid #000000;
             border-bottom: 1px solid #000000;
+        }
+
+        /* Top border for first row in rowspan tables */
+        .md-cell.md-rowspan-top {
+            border-top: 1px solid #000000;
         }
 
         /* Let coloured text / background css shine through */
@@ -2497,7 +2501,8 @@ def generate_static_html(data, custom_syntaxes):
                     const isHeader = hasHeader && i === 0;
                     const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
                     const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
-                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+                    const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
                 });
             });
             html += '</div>';

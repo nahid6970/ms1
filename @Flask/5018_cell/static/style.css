@@ -3569,10 +3569,15 @@ Markdown Table Styles */
     opacity: 0.6 !important;
 }
 
-/* Rowspan borders - add thin black line above and below ALL cells in rows that contain rowspan */
+/* Rowspan borders - add thin black line below cells in rows that contain rowspan */
 .md-cell.md-rowspan-row {
-    border-top: 1px solid #000000 !important;
     border-bottom: 1px solid #000000 !important;
+}
+
+/* Top border for first row in rowspan tables */
+.md-cell.md-rowspan-top {
+    border-top: 1px solid #000000 !important;
+}
 }
 
 /* Raw mode: preview is not created, so no need to hide it */
