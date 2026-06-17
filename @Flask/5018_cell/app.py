@@ -49,13 +49,13 @@ def load_data():
     }
     
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
             file_data = json.load(f)
             data.update(file_data)
             
     if os.path.exists(STATE_FILE):
         try:
-            with open(STATE_FILE, 'r') as f:
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
                 content = f.read().strip()
                 if content:
                     state_data = json.loads(content)
@@ -71,7 +71,7 @@ def save_data(data):
     state = {'activeSheet': data.get('activeSheet', 0)}
     # Ensure directory exists
     os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
-    with open(STATE_FILE, 'w') as f:
+    with open(STATE_FILE, 'w', encoding='utf-8') as f:
         json.dump(state, f, indent=2, sort_keys=True)
         
     # Save sheets to data file (excluding activeSheet)
@@ -81,15 +81,15 @@ def save_data(data):
     existing_content = None
     if os.path.exists(DATA_FILE):
         try:
-            with open(DATA_FILE, 'r') as f:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
                 existing_content = json.load(f)
         except:
             existing_content = None
     
     # Compare: only write if content is different
     if existing_content != content:
-        with open(DATA_FILE, 'w') as f:
-            json.dump(content, f, indent=2, sort_keys=True)
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(content, f, indent=2, sort_keys=True, ensure_ascii=False)
         
         # Auto-export static HTML ONLY if data actually changed
         try:
@@ -250,15 +250,15 @@ def delete_row(sheet_index, row_index):
 @app.route('/api/custom-syntaxes', methods=['GET'])
 def get_custom_syntaxes():
     if os.path.exists(CUSTOM_SYNTAXES_FILE):
-        with open(CUSTOM_SYNTAXES_FILE, 'r') as f:
+        with open(CUSTOM_SYNTAXES_FILE, 'r', encoding='utf-8') as f:
             return jsonify(json.load(f))
     return jsonify([])
 
 @app.route('/api/custom-syntaxes', methods=['POST'])
 def save_custom_syntaxes():
     syntaxes = request.json
-    with open(CUSTOM_SYNTAXES_FILE, 'w') as f:
-        json.dump(syntaxes, f, indent=2)
+    with open(CUSTOM_SYNTAXES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(syntaxes, f, indent=2, ensure_ascii=False)
     
     # Auto-export static HTML after saving syntaxes
     try:
@@ -291,7 +291,7 @@ def save_quick_texts():
 def get_settings():
     if os.path.exists(SETTINGS_FILE):
         try:
-            with open(SETTINGS_FILE, 'r') as f:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
                 return jsonify(json.load(f))
         except:
             return jsonify({})
@@ -302,8 +302,8 @@ def save_settings():
     settings = request.json
     try:
         os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-        with open(SETTINGS_FILE, 'w') as f:
-            json.dump(settings, f, indent=2, sort_keys=True)
+        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=2, sort_keys=True, ensure_ascii=False)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
