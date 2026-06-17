@@ -3783,90 +3783,6 @@ def generate_static_html(data, custom_syntaxes):
             return true;
         };
 
-        const openManualFileTab = async (href) => {
-            const manualTab = window.open('about:blank', '_blank');
-
-            if (manualTab && !manualTab.closed) {
-                manualTab.document.open();
-                manualTab.document.write(`
-                    <!doctype html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>File Path</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; }
-                            code, pre { background: #f4f4f4; padding: 8px 12px; display: block; white-space: pre-wrap; word-break: break-all; }
-                        </style>
-                    </head>
-                    <body>
-                        <h3>Copy file path</h3>
-                        <p>Click the button below to copy the file path from this tab, or copy it manually from the box.</p>
-                        <textarea id="filePathBox" readonly style="width:100%;min-height:90px;resize:vertical;white-space:pre-wrap;word-break:break-all;">${href
-                            .replace(/&/g, '&amp;')
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\"/g, '&quot;')
-                            .replace(/'/g, '&#39;')}</textarea>
-                        <div style="margin-top: 12px;">
-                            <button id="copyPathBtn" type="button" style="padding: 8px 12px; cursor: pointer;">Copy file path</button>
-                        </div>
-                        <div id="copyStatus" style="margin-top: 10px; color: #666;"></div>
-                        <script>
-                            const box = document.getElementById('filePathBox');
-                            const btn = document.getElementById('copyPathBtn');
-                            const status = document.getElementById('copyStatus');
-
-                            const copyPath = async () => {
-                                const text = box ? box.value : '';
-                                try {
-                                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                                        await navigator.clipboard.writeText(text);
-                                    } else if (box) {
-                                        box.focus();
-                                        box.select();
-                                        document.execCommand('copy');
-                                    }
-                                    if (status) status.textContent = 'Copied to clipboard.';
-                                } catch (error) {
-                                    if (status) status.textContent = 'Clipboard blocked. Copy the text manually.';
-                                }
-                            };
-
-                            if (btn) {
-                                btn.addEventListener('click', copyPath);
-                            }
-
-                            if (box) {
-                                box.focus();
-                                box.select();
-                            }
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                manualTab.document.close();
-                showToast('File helper tab opened.', 'info');
-            } else {
-                showToast('Popup blocked. Allow popups for the helper tab.', 'error');
-            }
-        };
-
-        document.addEventListener('mousedown', function(event) {
-            const fileButton = event.target.closest('button.file-link-open-btn');
-            const link = event.target.closest('a');
-            if (fileButton) {
-                event.preventDefault();
-                event.stopPropagation();
-                const href = decodeURIComponent(fileButton.dataset.fileUrl || '');
-                if (href) openManualFileTab(href);
-            } else if (link && link.href && link.href.startsWith('file:')) {
-                event.preventDefault();
-                event.stopPropagation();
-                openManualFileTab(link.href);
-            }
-        }, true);
-
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             // Handle internal sheet navigation links
@@ -3884,13 +3800,6 @@ def generate_static_html(data, custom_syntaxes):
                 if (!isNaN(idx) && idx !== -1) {
                     switchSheet(idx);
                 }
-                return;
-            }
-
-            const externalLink = event.target.closest('a');
-            if (externalLink && externalLink.href && externalLink.href.startsWith('file:')) {
-                event.preventDefault();
-                event.stopPropagation();
                 return;
             }
 
