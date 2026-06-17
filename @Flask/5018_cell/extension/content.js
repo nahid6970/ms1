@@ -1,12 +1,10 @@
 (() => {
-  if (window.__inspectorActive) return;
+  if (window.__inspectorActivate) { window.__inspectorActivate(); return; }
 
-  let active = false;
-  let hovered = null;
-  let panel = null;
-  let overlay = null;
+  let active = false, hovered = null, panel = null, cursorStyle = null;
+  let prevOutlineEl = null, prevOutline = '', prevOutlineOffset = '';
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   function getCssSelector(el) {
     if (el.id) return '#' + CSS.escape(el.id);
@@ -14,9 +12,9 @@
     let cur = el;
     while (cur && cur.nodeType === 1 && cur !== document.body) {
       let part = cur.tagName.toLowerCase();
-      if (cur.id) { part = '#' + CSS.escape(cur.id); parts.unshift(part); break; }
-      const siblings = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
-      if (siblings.length > 1) part += `:nth-of-type(${siblings.indexOf(cur) + 1})`;
+      if (cur.id) { parts.unshift('#' + CSS.escape(cur.id)); break; }
+      const sibs = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
+      if (sibs.length > 1) part += `:nth-of-type(${sibs.indexOf(cur) + 1})`;
       parts.unshift(part);
       cur = cur.parentNode;
     }
@@ -28,81 +26,67 @@
     const parts = [];
     let cur = el;
     while (cur && cur.nodeType === 1) {
-      const siblings = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
-      const idx = siblings.indexOf(cur) + 1;
-      parts.unshift(cur.tagName.toLowerCase() + (siblings.length > 1 ? `[${idx}]` : ''));
+      const sibs = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
+      parts.unshift(cur.tagName.toLowerCase() + (sibs.length > 1 ? `[${sibs.indexOf(cur)+1}]` : ''));
       cur = cur.parentNode;
     }
     return '/' + parts.join('/');
   }
 
   function getStyles(el) {
-    const computed = window.getComputedStyle(el);
-    const keys = ['display','position','width','height','margin','padding','background','color',
-                  'font-size','font-family','border','flex','grid','z-index','opacity','overflow'];
-    return keys.map(k => `${k}: ${computed.getPropertyValue(k)}`).join(';\n') + ';';
-  }
-
-  function getAttrs(el) {
-    return Array.from(el.attributes).map(a => `${a.name}="${a.value}"`).join('\n') || '(none)';
-  }
-
-  function getOuterHTML(el) {
-    const clone = el.cloneNode(false);
-    return clone.outerHTML;
+    const cs = window.getComputedStyle(el);
+    return ['display','position','width','height','margin','padding','background','color',
+            'font-size','font-family','border','flex','z-index','opacity','overflow']
+      .map(k => `${k}: ${cs.getPropertyValue(k)}`).join(';\n') + ';';
   }
 
   function buildData(el) {
     return [
-      { label: 'CSS Selector', value: getCssSelector(el) },
-      { label: 'Tag',          value: el.tagName.toLowerCase() },
-      { label: 'Classes',      value: el.className || '(none)' },
-      { label: 'ID',           value: el.id || '(none)' },
-      { label: 'XPath',        value: getXPath(el) },
-      { label: 'Attributes',   value: getAttrs(el) },
-      { label: 'Inline Style', value: el.style.cssText || '(none)' },
-      { label: 'Computed Style', value: getStyles(el) },
-      { label: 'HTML (open tag)', value: getOuterHTML(el) },
-      { label: 'Text Content', value: (el.textContent || '').trim().slice(0, 200) || '(none)' },
+      { label: 'CSS Selector',    value: getCssSelector(el) },
+      { label: 'Tag',             value: el.tagName.toLowerCase() },
+      { label: 'Classes',         value: el.className || '(none)' },
+      { label: 'ID',              value: el.id || '(none)' },
+      { label: 'XPath',           value: getXPath(el) },
+      { label: 'Attributes',      value: Array.from(el.attributes).map(a=>`${a.name}="${a.value}"`).join('\n') || '(none)' },
+      { label: 'Inline Style',    value: el.style.cssText || '(none)' },
+      { label: 'Computed Style',  value: getStyles(el) },
+      { label: 'HTML (open tag)', value: el.cloneNode(false).outerHTML },
+      { label: 'Text Content',    value: (el.textContent||'').trim().slice(0,200) || '(none)' },
     ];
   }
 
-  // ── Overlay highlight ─────────────────────────────────────────────────────
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Highlight ─────────────────────────────────────────────────────────────
 
   function showOverlay(el) {
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = '__insp_overlay';
-      Object.assign(overlay.style, {
-        position: 'fixed', pointerEvents: 'none', zIndex: '2147483646',
-        background: 'rgba(59,130,246,0.25)', border: '2px solid #3b82f6',
-        boxSizing: 'border-box', transition: 'all 0.05s',
-      });
-      document.body.appendChild(overlay);
+    if (prevOutlineEl && prevOutlineEl !== el) {
+      prevOutlineEl.style.outline = prevOutline;
+      prevOutlineEl.style.outlineOffset = prevOutlineOffset;
     }
-    const r = el.getBoundingClientRect();
-    Object.assign(overlay.style, {
-      top: r.top + 'px', left: r.left + 'px',
-      width: r.width + 'px', height: r.height + 'px', display: 'block',
-    });
+    prevOutline = el.style.outline;
+    prevOutlineOffset = el.style.outlineOffset;
+    el.style.outline = '2px solid #3b82f6';
+    el.style.outlineOffset = '1px';
+    prevOutlineEl = el;
   }
 
   function hideOverlay() {
-    if (overlay) overlay.style.display = 'none';
+    if (prevOutlineEl) {
+      prevOutlineEl.style.outline = prevOutline;
+      prevOutlineEl.style.outlineOffset = prevOutlineOffset;
+      prevOutlineEl = null;
+    }
   }
 
   // ── Panel ─────────────────────────────────────────────────────────────────
 
   function showPanel(el) {
     if (panel) panel.remove();
-
     panel = document.createElement('div');
     panel.id = '__insp_panel';
     panel.innerHTML = `
-      <div id="__insp_header">
-        <span>🔍 Inspector</span>
-        <button id="__insp_close">✕</button>
-      </div>
+      <div id="__insp_header"><span>🔍 Inspector</span><button id="__insp_close">✕</button></div>
       <div id="__insp_tag">&lt;${el.tagName.toLowerCase()}&gt;</div>
       <div id="__insp_rows"></div>`;
     document.body.appendChild(panel);
@@ -111,89 +95,74 @@
     buildData(el).forEach(({ label, value }) => {
       const row = document.createElement('div');
       row.className = '__insp_row';
-      row.innerHTML = `
-        <div class="__insp_label">${label}</div>
-        <pre class="__insp_value">${escHtml(value)}</pre>
-        <button class="__insp_copy" data-val="${escAttr(value)}">Copy</button>`;
+      row.innerHTML = `<div class="__insp_label">${label}</div><pre class="__insp_value">${esc(value)}</pre><button class="__insp_copy">Copy</button>`;
+      row.querySelector('.__insp_copy').addEventListener('click', () => {
+        const btn = row.querySelector('.__insp_copy');
+        const ok = () => { btn.textContent = '✓'; setTimeout(() => btn.textContent = 'Copy', 1200); };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(value).then(ok);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = value;
+          ta.style.cssText = 'position:fixed;opacity:0;';
+          document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); ta.remove(); ok();
+        }
+      });
       rows.appendChild(row);
     });
 
     panel.querySelector('#__insp_close').onclick = deactivate;
 
-    panel.querySelectorAll('.__insp_copy').forEach(btn => {
-      btn.onclick = () => {
-        const val = btn.dataset.val;
-        const ok = () => { btn.textContent = '✓'; setTimeout(() => (btn.textContent = 'Copy'), 1200); };
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(val).then(ok);
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = val;
-          ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
-          document.body.appendChild(ta);
-          ta.focus(); ta.select();
-          document.execCommand('copy');
-          ta.remove();
-          ok();
-        }
-      };
-    });
-
-    // Drag panel
-    const header = panel.querySelector('#__insp_header');
     let ox, oy, dragging = false;
-    header.addEventListener('mousedown', e => {
+    panel.querySelector('#__insp_header').addEventListener('mousedown', e => {
       dragging = true; ox = e.clientX - panel.offsetLeft; oy = e.clientY - panel.offsetTop;
+      e.preventDefault();
     });
     document.addEventListener('mousemove', e => {
       if (!dragging) return;
-      panel.style.left = (e.clientX - ox) + 'px';
-      panel.style.top  = (e.clientY - oy) + 'px';
-      panel.style.right = 'auto';
+      panel.style.left = (e.clientX - ox) + 'px'; panel.style.top = (e.clientY - oy) + 'px'; panel.style.right = 'auto';
     });
-    document.addEventListener('mouseup', () => { dragging = false; });
+    document.addEventListener('mouseup', () => dragging = false);
   }
 
-  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function escAttr(s) { return String(s).replace(/"/g,'&quot;'); }
-
-  // ── Event handlers ────────────────────────────────────────────────────────
+  // ── Events ────────────────────────────────────────────────────────────────
 
   function onMouseOver(e) {
-    if (!active) return;
     if (panel && panel.contains(e.target)) return;
-    hovered = e.target;
-    showOverlay(hovered);
+    hovered = e.target; showOverlay(hovered);
   }
-
   function onClick(e) {
-    if (!active) return;
     if (panel && panel.contains(e.target)) return;
-    e.preventDefault(); e.stopPropagation();
-    showPanel(hovered || e.target);
+    e.preventDefault(); e.stopPropagation(); showPanel(hovered || e.target);
   }
+  function onKeyDown(e) { if (e.key === 'Escape') deactivate(); }
 
   // ── Activate / Deactivate ─────────────────────────────────────────────────
 
-  window.__inspectorActivate = function () {
+  function activate() {
     if (active) return;
     active = true;
-    window.__inspectorActive = true;
-    document.body.style.cursor = 'crosshair';
+    cursorStyle = document.createElement('style');
+    cursorStyle.textContent = '*{cursor:crosshair!important}';
+    document.head.appendChild(cursorStyle);
     document.addEventListener('mouseover', onMouseOver, true);
     document.addEventListener('click', onClick, true);
-  };
-
-  window.__inspectorDeactivate = deactivate;
+    document.addEventListener('keydown', onKeyDown, true);
+  }
 
   function deactivate() {
     active = false;
-    window.__inspectorActive = false;
-    document.body.style.cursor = '';
+    if (cursorStyle) { cursorStyle.remove(); cursorStyle = null; }
     document.removeEventListener('mouseover', onMouseOver, true);
     document.removeEventListener('click', onClick, true);
+    document.removeEventListener('keydown', onKeyDown, true);
     hideOverlay();
     if (panel) { panel.remove(); panel = null; }
   }
 
+  window.__inspectorActivate = activate;
+  window.__inspectorDeactivate = deactivate;
+
+  activate();
 })();
