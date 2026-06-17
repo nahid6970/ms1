@@ -1,5 +1,44 @@
 # Recent Development Log
 
+## [2026-06-17 18:45] - JSON UTF-8, Subsheet Drag Reorder, F9 Reorder GUI
+
+**Session Duration:** 1.2 hours
+
+**What We Accomplished:**
+
+### 🔧 JSON UTF-8 encoding fix
+- All `json.dump` / `open()` calls in `app.py` now use `encoding='utf-8'` and `ensure_ascii=False`.
+- Bangla text is now stored as real characters in JSON files instead of `\u09xx` escape sequences.
+- GitHub diffs will now show readable text changes instead of walls of escape codes.
+- `quick_texts.json` already had this — fixed `data.json`, `custom_syntaxes.json`, `setting.json`, `sheet_active.json`.
+
+### 🎯 Subsheet drag-to-reorder in dropdown
+- Each subsheet item in the `⋮` dropdown now has a `⠿` drag handle on the left.
+- Dragging inserts at the target position (shifts others), not swaps.
+- Saves and re-renders immediately. Parent sheet row has no handle.
+
+### 🎯 F9 upgraded to multi-part reorder GUI
+- **2 parts**: still swaps directly (instant, no GUI).
+- **3+ parts**: opens a modal GUI with:
+  - Separator input with preset buttons: `,` `|` `&` `→`
+  - Drag-to-reorder list
+  - A→Z / Z→A sort buttons
+  - Confirm / Cancel
+- Separator spacing auto-detected from original text (e.g. ` | ` preserved as ` | `).
+- Applies by writing directly to the hidden textarea (source of truth), avoiding contentEditable duplication bugs.
+
+**Files Modified:**
+- `app.py` — UTF-8 encoding + `ensure_ascii=False` on all JSON reads/writes.
+- `static/script.js` — Subsheet drag reorder (insert logic), F9 reorder GUI (`showReorderGui`).
+- `static/style.css` — `.subsheet-drag-handle` style.
+
+**Current Status:**
+- ✅ JSON files now store Bangla as readable text.
+- ✅ Subsheets can be drag-reordered in the dropdown.
+- ✅ F9 reorder GUI works with drag, sort, and preset separators.
+
+---
+
 ## [2026-06-17 12:16] - Table Styling Overhaul
 
 **Session Duration:** 0.6 hours
