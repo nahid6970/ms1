@@ -3863,7 +3863,7 @@ def generate_static_html(data, custom_syntaxes):
                     idx = tableData.sheets.findIndex(s => s.name.trim() === sheetName.trim());
                 }
                 if (!isNaN(idx) && idx !== -1) {
-                    window.open(location.pathname + location.search + '#sheet=' + idx, '_blank');
+                    switchSheet(idx);
                 }
                 return;
             }
@@ -4446,15 +4446,6 @@ def generate_static_html(data, custom_syntaxes):
             setTimeout(() => {
                 applyFontSizeScale();
             }, 100);
-
-            // Hash-based sheet navigation: #sheet=N opens that sheet index
-            const hashMatch = location.hash.match(/^#sheet=(\d+)$/);
-            if (hashMatch) {
-                const targetIdx = parseInt(hashMatch[1]);
-                if (!isNaN(targetIdx) && targetIdx >= 0 && targetIdx < tableData.sheets.length) {
-                    switchSheet(targetIdx);
-                }
-            }
         };
     </script>
 </head>
