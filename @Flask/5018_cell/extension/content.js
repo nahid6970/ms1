@@ -122,10 +122,20 @@
 
     panel.querySelectorAll('.__insp_copy').forEach(btn => {
       btn.onclick = () => {
-        navigator.clipboard.writeText(btn.dataset.val).then(() => {
-          btn.textContent = '✓';
-          setTimeout(() => (btn.textContent = 'Copy'), 1200);
-        });
+        const val = btn.dataset.val;
+        const ok = () => { btn.textContent = '✓'; setTimeout(() => (btn.textContent = 'Copy'), 1200); };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(val).then(ok);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = val;
+          ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+          document.body.appendChild(ta);
+          ta.focus(); ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          ok();
+        }
       };
     });
 
