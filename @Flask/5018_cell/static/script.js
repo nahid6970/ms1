@@ -159,7 +159,7 @@ function initializeApp() {
     loadData();
 
     // Restore wrap toggle state
-    const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
+    const wrapEnabled = localStorage.getItem('rowWrapEnabled') !== 'false'; // Default true
     const wrapToggle = document.getElementById('wrapToggle');
     if (wrapToggle) {
         wrapToggle.checked = wrapEnabled;
@@ -172,7 +172,7 @@ function initializeApp() {
     }
 
     // Restore row numbers toggle state
-    const rowNumbersVisible = localStorage.getItem('rowNumbersVisible') !== 'false'; // Default true
+    const rowNumbersVisible = localStorage.getItem('rowNumbersVisible') === 'true'; // Default false
     const rowToggle = document.getElementById('rowToggle');
     if (rowToggle) {
         rowToggle.checked = rowNumbersVisible;
