@@ -3115,7 +3115,8 @@ function parseGridTable(lines) {
             const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
             const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
             const firstRowClass = (isRuled && i === 0) ? ' md-first-row' : '';
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+            const firstColClass = colIndex === 0 ? ' md-first-col' : '';
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}${firstColClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';

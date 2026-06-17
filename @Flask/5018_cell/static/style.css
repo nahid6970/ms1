@@ -3552,6 +3552,16 @@ Markdown Table Styles */
     border-right: none !important;
 }
 
+/* Left border on first cell of each row */
+.md-cell.md-first-col {
+    border-left: 3px solid #000000 !important;
+}
+
+/* Top border on entire grid (first row top edge) */
+.md-grid {
+    border-top: 2px solid #000000 !important;
+}
+
 .md-header {
     background: transparent !important;
     font-weight: 600 !important;
@@ -3562,10 +3572,6 @@ Markdown Table Styles */
 
 .md-ruled .md-cell {
     border-bottom: 1px solid #000000 !important;
-}
-
-.md-ruled .md-cell.md-first-row {
-    border-top: 2px solid #000000 !important;
 }
 
 .md-ruled .md-header {

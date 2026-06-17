@@ -1285,6 +1285,16 @@ def generate_static_html(data, custom_syntaxes):
             border-right: none;
         }
 
+        /* Left border on first cell of each row */
+        .md-cell.md-first-col {
+            border-left: 3px solid #000000;
+        }
+
+        /* Top border on entire grid (first row top edge) */
+        .md-grid {
+            border-top: 2px solid #000000;
+        }
+
         .md-header {
             background: transparent;
             font-weight: 600;
@@ -1295,10 +1305,6 @@ def generate_static_html(data, custom_syntaxes):
 
         .md-ruled .md-cell {
             border-bottom: 1px solid #000000;
-        }
-
-        .md-ruled .md-cell.md-first-row {
-            border-top: 2px solid #000000;
         }
 
         .md-ruled .md-header {
@@ -2519,7 +2525,8 @@ def generate_static_html(data, custom_syntaxes):
                     const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
                     const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
                     const firstRowClass = (isRuled && i === 0) ? ' md-first-row' : '';
-                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+                    const firstColClass = colIndex === 0 ? ' md-first-col' : '';
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}${firstColClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
                 });
             });
             html += '</div>';
