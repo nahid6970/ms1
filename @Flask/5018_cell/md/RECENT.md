@@ -1,5 +1,36 @@
 # Recent Development Log
 
+## [2026-06-17 12:16] - Table Styling Overhaul
+
+**Session Duration:** 0.6 hours
+
+**What We Accomplished:**
+
+### 🎨 Fix double border in rowspan tables (bolder middle row bug)
+- Root cause: each `md-rowspan-row` cell had `border-top` + `border-bottom`, so adjacent rowspan rows doubled the border between them (2px instead of 1px).
+- Fix: `md-rowspan-row` now only has `border-bottom`. Added new `md-rowspan-top` class (applied when previous row is NOT in the rowspan set) for the top border of each rowspan block.
+
+### 🎨 Ruled table syntax `|━━━|━━━|━━━|`
+- New separator row syntax using `━` (U+2501).
+- Works like `|---|` (skipped from rendering, first row gets header style) but also adds `md-ruled` class to the grid → 1px `border-bottom` on every cell row.
+- Header bottom border is 2px (bolder) to distinguish it from row separators.
+
+### 🎨 Outer frame borders for all tables
+- All `.md-grid` tables now have `border-top: 2px` and `border-bottom: 2px` on the container.
+- First cell of every row gets `md-first-col` class → `border-left: 3px` (matching right column dividers).
+
+**Files Modified:**
+- `static/style.css` — `md-rowspan-row` border fix, new `md-rowspan-top`, `md-first-col`, `md-ruled`, `md-grid` outer borders.
+- `static/script.js` — Added `isRuled` detection, `md-ruled` class on grid, `md-rowspan-top`, `md-first-col`, `md-first-row` classes in cell rendering.
+- `export_static.py` — All above changes mirrored.
+
+**Current Status:**
+- ✅ Rowspan tables no longer have a bolder middle row.
+- ✅ `|━━━|` ruled tables show row separators with header styling.
+- ✅ All tables have a complete outer frame (top, bottom, left, right borders).
+
+---
+
 ## [2026-06-16 14:35] - Sheet Index Copy Format
 
 **Session Duration:** 0.1 hours
