@@ -1297,6 +1297,14 @@ def generate_static_html(data, custom_syntaxes):
             border-bottom: 1px solid #000000;
         }
 
+        .md-ruled .md-cell.md-first-row {
+            border-top: 2px solid #000000;
+        }
+
+        .md-ruled .md-header {
+            border-bottom: 2px solid #000000;
+        }
+
         .md-empty {
             color: #aaa;
             background: transparent;
@@ -2510,7 +2518,8 @@ def generate_static_html(data, custom_syntaxes):
                     const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
                     const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
                     const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
-                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+                    const firstRowClass = (isRuled && i === 0) ? ' md-first-row' : '';
+                    html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
                 });
             });
             html += '</div>';

@@ -3564,6 +3564,14 @@ Markdown Table Styles */
     border-bottom: 1px solid #000000 !important;
 }
 
+.md-ruled .md-cell.md-first-row {
+    border-top: 2px solid #000000 !important;
+}
+
+.md-ruled .md-header {
+    border-bottom: 2px solid #000000 !important;
+}
+
 .md-empty {
     color: #aaa !important;
     background: transparent !important;

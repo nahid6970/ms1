@@ -3114,7 +3114,8 @@ function parseGridTable(lines) {
             const rowspanAttr = rowspan > 1 ? ` rowspan="${rowspan}"` : '';
             const rowspanRowClass = isInRowspanRow ? ' md-rowspan-row' : '';
             const rowspanTopClass = (isInRowspanRow && !rowsWithRowspan.has(i - 1)) ? ' md-rowspan-top' : '';
-            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
+            const firstRowClass = (isRuled && i === 0) ? ' md-first-row' : '';
+            html += `<div class="md-cell ${isHeader ? 'md-header' : ''}${emptyClass}${rowspanRowClass}${rowspanTopClass}${firstRowClass}"${rowspanAttr}${styleAttr}>${cell.content}</div>`;
         });
     });
     html += '</div>';
