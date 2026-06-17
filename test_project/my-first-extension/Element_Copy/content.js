@@ -1,8 +1,7 @@
 (() => {
   if (window.__inspectorActivate) { window.__inspectorActivate(); return; }
 
-  let active = false, hovered = null, panel = null, cursorStyle = null;
-  let prevOutlineEl = null, prevOutline = '', prevOutlineOffset = '';
+  let active = false, hovered = null, panel = null, cursorStyle = null, overlayEl = null;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -60,23 +59,21 @@
   // ── Highlight ─────────────────────────────────────────────────────────────
 
   function showOverlay(el) {
-    if (prevOutlineEl && prevOutlineEl !== el) {
-      prevOutlineEl.style.outline = prevOutline;
-      prevOutlineEl.style.outlineOffset = prevOutlineOffset;
+    if (!overlayEl) {
+      overlayEl = document.createElement('div');
+      overlayEl.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483646;background:rgba(59,130,246,0.35);border:2px solid #3b82f6;box-sizing:border-box;transition:all 0.05s;';
+      document.body.appendChild(overlayEl);
     }
-    prevOutline = el.style.outline;
-    prevOutlineOffset = el.style.outlineOffset;
-    el.style.outline = '2px solid #3b82f6';
-    el.style.outlineOffset = '1px';
-    prevOutlineEl = el;
+    const r = el.getBoundingClientRect();
+    Object.assign(overlayEl.style, {
+      display: 'block',
+      top: r.top + 'px', left: r.left + 'px',
+      width: r.width + 'px', height: r.height + 'px',
+    });
   }
 
   function hideOverlay() {
-    if (prevOutlineEl) {
-      prevOutlineEl.style.outline = prevOutline;
-      prevOutlineEl.style.outlineOffset = prevOutlineOffset;
-      prevOutlineEl = null;
-    }
+    if (overlayEl) overlayEl.style.display = 'none';
   }
 
   // ── Panel ─────────────────────────────────────────────────────────────────
@@ -121,7 +118,9 @@
     });
     document.addEventListener('mousemove', e => {
       if (!dragging) return;
-      panel.style.left = (e.clientX - ox) + 'px'; panel.style.top = (e.clientY - oy) + 'px'; panel.style.right = 'auto';
+      panel.style.left = (e.clientX - ox) + 'px';
+      panel.style.top = (e.clientY - oy) + 'px';
+      panel.style.right = 'auto';
     });
     document.addEventListener('mouseup', () => dragging = false);
   }
@@ -154,6 +153,7 @@
   function deactivate() {
     active = false;
     if (cursorStyle) { cursorStyle.remove(); cursorStyle = null; }
+    if (overlayEl) { overlayEl.remove(); overlayEl = null; }
     document.removeEventListener('mouseover', onMouseOver, true);
     document.removeEventListener('click', onClick, true);
     document.removeEventListener('keydown', onKeyDown, true);
