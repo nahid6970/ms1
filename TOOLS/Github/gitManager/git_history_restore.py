@@ -33,6 +33,7 @@ CP_TEXT = "#E0E0E0"         # Primary Text
 
 # --- GLOBAL FONT FAMILY CONFIG ---
 CURRENT_FONT_FAMILY = "Consolas"
+CURRENT_DIFF_FONT_SIZE = 10
 
 # --- CUSTOM ICON PROVIDER FOR FOLDERS ---
 class CyberIconProvider(QFileIconProvider):
@@ -713,6 +714,7 @@ class MainWindow(QMainWindow):
         self.saved_repos = [] # List of {"name": str, "path": str}
         
         self.font_family = CURRENT_FONT_FAMILY
+        self.diff_font_size = CURRENT_DIFF_FONT_SIZE
         
         # Load config first to get window size
         self.load_config()
@@ -1031,7 +1033,7 @@ class MainWindow(QMainWindow):
                     border: 1px solid {CP_DIM};
                     color: {CP_TEXT};
                     font-family: '{self.font_family}', 'Consolas', monospace;
-                    font-size: 10pt;
+                    font-size: {self.diff_font_size}pt;
                 }}
             """)
 
@@ -1075,11 +1077,14 @@ class MainWindow(QMainWindow):
             right_ratio = dialog.right_spin.value()
             self.split_ratio = [left_ratio, right_ratio]
             
-            # Save selected font style
+            # Save selected font style and size
             new_font = dialog.font_combo.currentText()
-            global CURRENT_FONT_FAMILY
+            new_size = dialog.diff_size_spin.value()
+            global CURRENT_FONT_FAMILY, CURRENT_DIFF_FONT_SIZE
             CURRENT_FONT_FAMILY = new_font
+            CURRENT_DIFF_FONT_SIZE = new_size
             self.font_family = new_font
+            self.diff_font_size = new_size
             
             # Apply settings
             self.resize(self.window_width, self.window_height)
@@ -1305,7 +1310,7 @@ class MainWindow(QMainWindow):
             return
         
         html_parts = []
-        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{self.font_family}\", \"Consolas\", monospace; font-size: 10pt;'>")
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{self.font_family}\", \"Consolas\", monospace; font-size: {self.diff_font_size}pt;'>")
         
         for idx, section in enumerate(self.current_diff_sections):
             stats = section['stats']
@@ -1467,9 +1472,11 @@ class MainWindow(QMainWindow):
                     self.split_ratio = data.get("split_ratio", [2, 3])
                     self.saved_repos = data.get("saved_repos", [])
                     self.last_directory = data.get("last_directory", "")
-                    global CURRENT_FONT_FAMILY
+                    global CURRENT_FONT_FAMILY, CURRENT_DIFF_FONT_SIZE
                     CURRENT_FONT_FAMILY = data.get("font_family", "Consolas")
+                    CURRENT_DIFF_FONT_SIZE = data.get("diff_font_size", 10)
                     self.font_family = CURRENT_FONT_FAMILY
+                    self.diff_font_size = CURRENT_DIFF_FONT_SIZE
                     return self.last_directory
         except: pass
         return ""
@@ -1487,7 +1494,8 @@ class MainWindow(QMainWindow):
                     "window_height": self.window_height,
                     "split_ratio": self.split_ratio,
                     "saved_repos": self.saved_repos,
-                    "font_family": CURRENT_FONT_FAMILY
+                    "font_family": CURRENT_FONT_FAMILY,
+                    "diff_font_size": CURRENT_DIFF_FONT_SIZE
                 }, f)
         except: pass
 
@@ -2151,6 +2159,15 @@ class SettingsDialog(QDialog):
             self.font_combo.setCurrentIndex(self.font_combo.count() - 1)
             
         font_selection_layout.addWidget(self.font_combo)
+        
+        # Diff font size
+        font_selection_layout.addWidget(QLabel("Size:"))
+        self.diff_size_spin = QSpinBox()
+        self.diff_size_spin.setRange(6, 24)
+        self.diff_size_spin.setValue(parent.diff_font_size if parent else 10)
+        self.diff_size_spin.setSuffix(" pt")
+        font_selection_layout.addWidget(self.diff_size_spin)
+        
         font_layout.addLayout(font_selection_layout)
         
         layout.addWidget(font_group)
@@ -2274,7 +2291,7 @@ class FileTimelineDialog(QDialog):
                 border: 1px solid {CP_DIM};
                 color: {CP_TEXT};
                 font-family: '{CURRENT_FONT_FAMILY}', 'Consolas', monospace;
-                font-size: 10pt;
+                font-size: {CURRENT_DIFF_FONT_SIZE}pt;
             }}
         """)
         self.diff_display.setHtml("<div style='color: #E0E0E0; padding: 20px;'>Select a version to view changes...</div>")
@@ -2343,7 +2360,7 @@ class FileTimelineDialog(QDialog):
             return
             
         html_parts = []
-        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{CURRENT_FONT_FAMILY}\", \"Consolas\", monospace; font-size: 10pt;'>")
+        html_parts.append(f"<html><body style='background-color: {CP_BG}; color: {CP_TEXT}; margin: 0; padding: 10px; font-family: \"{CURRENT_FONT_FAMILY}\", \"Consolas\", monospace; font-size: {CURRENT_DIFF_FONT_SIZE}pt;'>")
         
         for section in sections:
             rel_path = section['name']
