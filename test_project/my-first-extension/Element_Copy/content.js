@@ -146,7 +146,7 @@
     active = true;
     if (panel) { panel.remove(); panel = null; }
     cursorStyle = document.createElement('style');
-    cursorStyle.textContent = '*{cursor:crosshair!important}';
+    cursorStyle.textContent = '*{cursor:pointer!important}';
     document.head.appendChild(cursorStyle);
     document.addEventListener('mouseover', onMouseOver, true);
     document.addEventListener('click', onClick, true);
