@@ -266,17 +266,19 @@ class PrepTab(QWidget):
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(120)
         btn_row = QHBoxLayout()
-        btn_add  = QPushButton("＋ ADD FILES")
+        btn_add     = QPushButton("＋ ADD FILES")
         btn_add_dir = QPushButton("📁 ADD DIR")
-        btn_clear = QPushButton("✕ CLEAR")
-        btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_add_dir.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_recent  = QPushButton("🕘 RECENT")
+        btn_clear   = QPushButton("✕ CLEAR")
+        for b in (btn_add, btn_add_dir, btn_recent, btn_clear):
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add.clicked.connect(self._add_files)
         btn_add_dir.clicked.connect(self._add_dir)
+        btn_recent.clicked.connect(self._show_recent)
         btn_clear.clicked.connect(self._clear_files)
         btn_row.addWidget(btn_add)
         btn_row.addWidget(btn_add_dir)
+        btn_row.addWidget(btn_recent)
         btn_row.addWidget(btn_clear)
         vf.addWidget(self.file_list)
         vf.addLayout(btn_row)
@@ -328,6 +330,9 @@ class PrepTab(QWidget):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
         if not d:
             return
+        self._load_dir(d)
+
+    def _load_dir(self, d: str):
         count = 0
         for root, _, fnames in os.walk(d):
             for fn in fnames:
@@ -336,9 +341,24 @@ class PrepTab(QWidget):
                     self.files.append(fp)
                     self.file_list.addItem(QListWidgetItem(fp))
                     count += 1
+        add_recent(d)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
+
+    def _show_recent(self):
+        items = load_recent()
+        if not items:
+            self.status_cb("No recent projects")
+            return
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background: #111111; color: #E0E0E0; border: 1px solid #00F0FF; }}"
+                           f"QMenu::item:selected {{ background: #00F0FF; color: #000; }}")
+        for path in items:
+            menu.addAction(path).setData(path)
+        chosen = menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
+        if chosen:
+            self._load_dir(chosen.data())
 
     def _clear_files(self):
         self.files.clear()
@@ -400,14 +420,10 @@ class MergeTab(QWidget):
         self.root_input = QLineEdit()
         self.root_input.setPlaceholderText("Directory that contains your source files…")
         btn_browse = QPushButton("📁 BROWSE")
-        btn_recent = QPushButton("🕘 RECENT")
         btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_recent.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_browse.clicked.connect(self._browse_root)
-        btn_recent.clicked.connect(self._show_recent)
         hr.addWidget(self.root_input)
         hr.addWidget(btn_browse)
-        hr.addWidget(btn_recent)
         layout.addWidget(grp_root)
 
         # AI response input
@@ -480,21 +496,7 @@ class MergeTab(QWidget):
         self.root_input.setText(path)
         add_recent(path)
 
-    def _show_recent(self):
-        items = load_recent()
-        if not items:
-            self.status_cb("No recent projects")
-            return
-        menu = QMenu(self)
-        menu.setStyleSheet(f"QMenu {{ background: #111111; color: #E0E0E0; border: 1px solid #00F0FF; }}"
-                           f"QMenu::item:selected {{ background: #00F0FF; color: #000; }}")
-        for path in items:
-            action = menu.addAction(path)
-            action.setData(path)
-        chosen = menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
-        if chosen:
-            self.set_root(chosen.data())
-
+    
     def _append_clipboard(self):
         clip = QApplication.clipboard().text()
         if not clip:

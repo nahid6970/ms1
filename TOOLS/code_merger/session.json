@@ -1,3 +1,16 @@
 [
-  "C:/@delta/ms1/TOOLS/port killer\\port_killer.py"
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\CONTEXT_MENU_GUIDE.md",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\CREATE_SCRIPT.md",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\data.json",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\ENV_MANAGER_README.md",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\env_variable_manager.py",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\android_icon_generator.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\convert.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\image_dimension.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\image_resizer.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\image_resizer_gui.py",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\merge.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\trim.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\scripts\\vid_dim.ps1",
+  "C:\\@delta\\ms1\\TOOLS\\ENV\\__pycache__\\env_variable_manager.cpython-312.pyc"
 ]
