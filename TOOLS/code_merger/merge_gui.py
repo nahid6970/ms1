@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTextEdit, QTabWidget, QGroupBox,
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
-    QStatusBar, QCheckBox, QMessageBox
+    QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QColor
@@ -65,7 +65,29 @@ QSplitter::handle {{ background: {CP_DIM}; }}
 QStatusBar {{ background: {CP_PANEL}; color: {CP_SUB}; border-top: 1px solid {CP_DIM}; }}
 """
 
-GUIDE_PATH = os.path.join(os.path.dirname(__file__), "PROMPT_GUIDE.md")
+_HERE        = os.path.dirname(os.path.abspath(__file__))
+GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
+RECENT_PATH  = os.path.join(_HERE, "recent_projects.json")
+SESSION_PATH = os.path.join(_HERE, "session.json")
+MAX_RECENT   = 8
+
+def load_recent() -> list[str]:
+    try:
+        import json
+        with open(RECENT_PATH, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_recent(paths: list[str]):
+    import json
+    with open(RECENT_PATH, 'w') as f:
+        json.dump(paths, f, indent=2)
+
+def add_recent(path: str):
+    items = [p for p in load_recent() if p != path]
+    items.insert(0, path)
+    save_recent(items[:MAX_RECENT])
 
 # ── MERGE LOGIC ───────────────────────────────────────────────────────────────
 _TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
@@ -202,9 +224,30 @@ class PrepTab(QWidget):
     def __init__(self, status_cb, root_cb=None):
         super().__init__()
         self.status_cb = status_cb
-        self.root_cb = root_cb  # called with common root whenever files change
+        self.root_cb = root_cb
         self.files: list[str] = []
         self._build()
+        self._load_session()
+
+    def _save_session(self):
+        import json
+        with open(SESSION_PATH, 'w') as f:
+            json.dump(self.files, f, indent=2)
+
+    def _load_session(self):
+        import json
+        try:
+            with open(SESSION_PATH, 'r') as f:
+                saved = json.load(f)
+            for fp in saved:
+                if fp not in self.files and os.path.exists(fp):
+                    self.files.append(fp)
+                    self.file_list.addItem(QListWidgetItem(fp))
+            if self.files:
+                self._update_root()
+                self.status_cb(f"Restored {len(self.files)} file(s) from last session")
+        except Exception:
+            pass
 
     def _update_root(self):
         if self.root_cb and self.files:
@@ -279,6 +322,7 @@ class PrepTab(QWidget):
                 self.file_list.addItem(QListWidgetItem(f))
         self.status_cb(f"{len(self.files)} file(s) loaded")
         self._update_root()
+        self._save_session()
 
     def _add_dir(self):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -294,10 +338,12 @@ class PrepTab(QWidget):
                     count += 1
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
+        self._save_session()
 
     def _clear_files(self):
         self.files.clear()
         self.file_list.clear()
+        self._save_session()
         self.status_cb("File list cleared")
 
     def _generate(self):
@@ -351,14 +397,17 @@ class MergeTab(QWidget):
         # Root dir
         grp_root = QGroupBox("PROJECT ROOT DIRECTORY")
         hr = QHBoxLayout(grp_root)
-        from PyQt6.QtWidgets import QLineEdit
         self.root_input = QLineEdit()
         self.root_input.setPlaceholderText("Directory that contains your source files…")
         btn_browse = QPushButton("📁 BROWSE")
+        btn_recent = QPushButton("🕘 RECENT")
         btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_recent.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_browse.clicked.connect(self._browse_root)
+        btn_recent.clicked.connect(self._show_recent)
         hr.addWidget(self.root_input)
         hr.addWidget(btn_browse)
+        hr.addWidget(btn_recent)
         layout.addWidget(grp_root)
 
         # AI response input
@@ -425,10 +474,26 @@ class MergeTab(QWidget):
     def _browse_root(self):
         d = QFileDialog.getExistingDirectory(self, "Select Project Root")
         if d:
-            self.root_input.setText(d)
+            self.set_root(d)
 
     def set_root(self, path: str):
         self.root_input.setText(path)
+        add_recent(path)
+
+    def _show_recent(self):
+        items = load_recent()
+        if not items:
+            self.status_cb("No recent projects")
+            return
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background: #111111; color: #E0E0E0; border: 1px solid #00F0FF; }}"
+                           f"QMenu::item:selected {{ background: #00F0FF; color: #000; }}")
+        for path in items:
+            action = menu.addAction(path)
+            action.setData(path)
+        chosen = menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
+        if chosen:
+            self.set_root(chosen.data())
 
     def _append_clipboard(self):
         clip = QApplication.clipboard().text()
