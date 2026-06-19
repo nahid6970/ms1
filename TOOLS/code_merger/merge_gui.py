@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTextEdit, QTabWidget, QGroupBox,
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
-    QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame
+    QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
+    QDialog, QScrollArea, QGridLayout
 )
 from PyQt6.QtCore import Qt, QPoint, QSize
 from PyQt6.QtGui import QFont, QColor
@@ -279,6 +280,92 @@ class RecentPopup(QFrame):
         self.adjustSize()
 
 
+# ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
+class ExtensionSelectorDialog(QDialog):
+    def __init__(self, extensions: list[str], parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("SELECT EXTENSIONS")
+        self.resize(500, 300)
+        self.setStyleSheet(THEME)
+
+        self.checkboxes: dict[str, QCheckBox] = {}
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        lbl = QLabel("Select file extensions to include:")
+        lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        layout.addWidget(lbl)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
+
+        scroll_content = QWidget()
+        scroll_content.setStyleSheet(f"background-color: {CP_PANEL};")
+        grid = QGridLayout(scroll_content)
+        grid.setContentsMargins(10, 10, 10, 10)
+        grid.setSpacing(10)
+
+        sorted_exts = sorted(extensions, key=lambda x: x.lower())
+        cols = 3
+        for i, ext in enumerate(sorted_exts):
+            display_text = ext if ext else "(no extension)"
+            chk = QCheckBox(display_text)
+            chk.setChecked(True)
+            self.checkboxes[ext] = chk
+            row = i // cols
+            col = i % cols
+            grid.addWidget(chk, row, col)
+
+        scroll.setWidget(scroll_content)
+        layout.addWidget(scroll, 1)
+
+        btn_row_sel = QHBoxLayout()
+        btn_all = QPushButton("SELECT ALL")
+        btn_none = QPushButton("SELECT NONE")
+        btn_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_none.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_all.clicked.connect(self._select_all)
+        btn_none.clicked.connect(self._select_none)
+        btn_row_sel.addWidget(btn_all)
+        btn_row_sel.addWidget(btn_none)
+        btn_row_sel.addStretch()
+        layout.addLayout(btn_row_sel)
+
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ OK")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+    def _select_all(self):
+        for chk in self.checkboxes.values():
+            chk.setChecked(True)
+
+    def _select_none(self):
+        for chk in self.checkboxes.values():
+            chk.setChecked(False)
+
+    def get_selected(self) -> set[str]:
+        return {ext for ext, chk in self.checkboxes.items() if chk.isChecked()}
+
+
+
 # ── PREP TAB ──────────────────────────────────────────────────────────────────
 class PrepTab(QWidget):
     def __init__(self, status_cb, root_cb=None):
@@ -467,15 +554,37 @@ class PrepTab(QWidget):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
         if not d:
             return
-        self._load_dir(d)
 
-    def _load_dir(self, d: str):
+        # Scan for existing file extensions first, respecting ignore patterns
+        found_exts = set()
+        for root, dirs, fnames in os.walk(d):
+            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
+            for fn in fnames:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext in IGNORE_EXTS:
+                    continue
+                found_exts.add(ext)
+
+        if not found_exts:
+            self.status_cb("No valid files found in directory")
+            return
+
+        # Show selector dialog for toggling extensions
+        dialog = ExtensionSelectorDialog(list(found_exts), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            selected_exts = dialog.get_selected()
+            self._load_dir(d, selected_exts)
+
+    def _load_dir(self, d: str, selected_exts: set[str] = None):
         count = 0
         for root, dirs, fnames in os.walk(d):
             # Skip ignored directories in-place
             dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
             for fn in fnames:
-                if os.path.splitext(fn)[1].lower() in IGNORE_EXTS:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext in IGNORE_EXTS:
+                    continue
+                if selected_exts is not None and ext not in selected_exts:
                     continue
                 fp = os.path.join(root, fn)
                 if fp not in self.files:
