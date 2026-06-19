@@ -68,10 +68,22 @@ QStatusBar {{ background: {CP_PANEL}; color: {CP_SUB}; border-top: 1px solid {CP
 GUIDE_PATH = os.path.join(os.path.dirname(__file__), "PROMPT_GUIDE.md")
 
 # ── MERGE LOGIC ───────────────────────────────────────────────────────────────
+_TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
+
+def _normalize(text: str) -> str:
+    """Ensure every @@ token is on its own line, and inline content after : moves to next line."""
+    # 1. Insert newline before any @@ token not already at start of line
+    text = re.sub(r'(?<!\n)(@@(?:FILE|MODE|TO|FROM|AFTER|INSERT|END)\b:?)', r'\n\1', text)
+    # 2. Move inline content after content-bearing tokens to the next line
+    #    e.g. "@@TO: some code" → "@@TO:\nsome code"
+    text = re.sub(r'^(@@(?:TO|FROM|AFTER|INSERT):) *(.+)$', r'\1\n\2', text, flags=re.MULTILINE)
+    return text
+
+
 def parse_ai_response(text: str) -> list[dict]:
-    """Parse AI response into list of change dicts."""
+    """Parse AI response into list of change dicts. Handles inline and multi-line formats."""
+    text = _normalize(text)
     changes = []
-    # Split on @@FILE: markers
     parts = re.split(r'(?=@@FILE:)', text)
     for part in parts:
         part = part.strip()
