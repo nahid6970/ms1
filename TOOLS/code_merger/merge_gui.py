@@ -370,14 +370,23 @@ class PrepTab(QWidget):
 
     def _build(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(8)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(6)
 
-        # File list group
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # ── LEFT PANEL ───────────────────────────────────────────
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(8)
+
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
         self.file_list = QListWidget()
-        self.file_list.setMinimumHeight(120)
+        self.file_list.setMinimumHeight(200)
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
         btn_add_dir = QPushButton("📁 ADD DIR")
@@ -393,18 +402,25 @@ class PrepTab(QWidget):
         btn_row.addWidget(btn_add_dir)
         btn_row.addWidget(btn_recent)
         btn_row.addWidget(btn_clear)
+
         vf.addWidget(self.file_list)
         vf.addLayout(btn_row)
-        layout.addWidget(grp_files)
+        left_layout.addWidget(grp_files)
+
+        # ── RIGHT PANEL ──────────────────────────────────────────
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(8)
 
         # Task description
         grp_task = QGroupBox("TASK / INSTRUCTIONS  (optional)")
         vt = QVBoxLayout(grp_task)
         self.task_input = QTextEdit()
         self.task_input.setPlaceholderText("Describe what you want the AI to do…")
-        self.task_input.setMaximumHeight(80)
+        self.task_input.setMaximumHeight(100)
         vt.addWidget(self.task_input)
-        layout.addWidget(grp_task)
+        right_layout.addWidget(grp_task)
 
         # Output prompt
         grp_out = QGroupBox("GENERATED PROMPT  (copy → paste into AI)")
@@ -413,7 +429,7 @@ class PrepTab(QWidget):
         self.prompt_out.setReadOnly(True)
         self.prompt_out.setPlaceholderText("Click GENERATE to build prompt…")
         vo.addWidget(self.prompt_out)
-        layout.addWidget(grp_out)
+        right_layout.addWidget(grp_out)
 
         # Buttons
         btn_row2 = QHBoxLayout()
@@ -427,7 +443,15 @@ class PrepTab(QWidget):
         btn_copy.clicked.connect(self._copy)
         btn_row2.addWidget(btn_gen)
         btn_row2.addWidget(btn_copy)
-        layout.addLayout(btn_row2)
+        right_layout.addLayout(btn_row2)
+
+        # Assemble Splitter
+        splitter.addWidget(left_widget)
+        splitter.addWidget(right_widget)
+        splitter.setStretchFactor(0, 2)
+        splitter.setStretchFactor(1, 3)
+
+        layout.addWidget(splitter)
 
     def _add_files(self):
         files, _ = QFileDialog.getOpenFileNames(self, "Select Files")
@@ -730,20 +754,32 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         self._set_status("Ready")
 
+        btn_restart = QPushButton("↺ RESTART")
+        btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_restart.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+                color: {CP_YELLOW};
+                padding: 4px 12px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+                color: {CP_CYAN};
+                border-color: {CP_CYAN};
+            }}
+        """)
+        btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
+        self.tabs.setCornerWidget(btn_restart, Qt.Corner.TopRightCorner)
+
         self.merge_tab = MergeTab(self._set_status)
         self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
         root_layout.addWidget(self.tabs)
-
-        # Footer buttons
-        foot = QHBoxLayout()
-        btn_restart = QPushButton("↺ RESTART")
-        btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
-        foot.addStretch()
-        foot.addWidget(btn_restart)
-        root_layout.addLayout(foot)
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
