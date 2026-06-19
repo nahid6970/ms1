@@ -196,11 +196,19 @@ def _backup(fpath: str):
 
 # ── PREP TAB ──────────────────────────────────────────────────────────────────
 class PrepTab(QWidget):
-    def __init__(self, status_cb):
+    def __init__(self, status_cb, root_cb=None):
         super().__init__()
         self.status_cb = status_cb
+        self.root_cb = root_cb  # called with common root whenever files change
         self.files: list[str] = []
         self._build()
+
+    def _update_root(self):
+        if self.root_cb and self.files:
+            common = os.path.commonpath(self.files)
+            if os.path.isfile(common):
+                common = os.path.dirname(common)
+            self.root_cb(common)
 
     def _build(self):
         layout = QVBoxLayout(self)
@@ -267,6 +275,7 @@ class PrepTab(QWidget):
                 self.files.append(f)
                 self.file_list.addItem(QListWidgetItem(f))
         self.status_cb(f"{len(self.files)} file(s) loaded")
+        self._update_root()
 
     def _add_dir(self):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -281,6 +290,7 @@ class PrepTab(QWidget):
                     self.file_list.addItem(QListWidgetItem(fp))
                     count += 1
         self.status_cb(f"Added {count} file(s) from directory")
+        self._update_root()
 
     def _clear_files(self):
         self.files.clear()
@@ -413,6 +423,9 @@ class MergeTab(QWidget):
         if d:
             self.root_input.setText(d)
 
+    def set_root(self, path: str):
+        self.root_input.setText(path)
+
     def _append_clipboard(self):
         clip = QApplication.clipboard().text()
         if not clip:
@@ -504,8 +517,8 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         self._set_status("Ready")
 
-        self.prep_tab  = PrepTab(self._set_status)
         self.merge_tab = MergeTab(self._set_status)
+        self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
         root_layout.addWidget(self.tabs)
