@@ -71,10 +71,13 @@ GUIDE_PATH = os.path.join(os.path.dirname(__file__), "PROMPT_GUIDE.md")
 _TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
 
 def _normalize(text: str) -> str:
-    """Ensure every @@ token is on its own line, and inline content after : moves to next line."""
-    # 1. Insert newline before any @@ token not already at start of line
+    """Normalize AI response: strip markdown fences, ensure @@ tokens are on their own lines."""
+    # 1. Strip markdown code fences (```lang ... ```) wrapping the whole response or blocks
+    text = re.sub(r'^```[^\n]*\n', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^```$', '', text, flags=re.MULTILINE)
+    # 2. Insert newline before any @@ token not already at start of line
     text = re.sub(r'(?<!\n)(@@(?:FILE|MODE|TO|FROM|AFTER|INSERT|END)\b:?)', r'\n\1', text)
-    # 2. Move inline content after content-bearing tokens to the next line
+    # 3. Move inline content after content-bearing tokens to the next line
     #    e.g. "@@TO: some code" → "@@TO:\nsome code"
     text = re.sub(r'^(@@(?:TO|FROM|AFTER|INSERT):) *(.+)$', r'\1\n\2', text, flags=re.MULTILINE)
     return text
