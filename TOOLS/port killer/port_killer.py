@@ -4,58 +4,118 @@ import subprocess
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QTableWidget, QTableWidgetItem, QLabel,
                              QMessageBox, QHeaderView)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 
-# CYBERPUNK PALETTE
-CP_BG = "#050505"
-CP_PANEL = "#111111"
-CP_YELLOW = "#FCEE0A"
-CP_CYAN = "#00F0FF"
-CP_RED = "#FF003C"
-CP_GREEN = "#00ff21"
-CP_DIM = "#3a3a3a"
-CP_TEXT = "#E0E0E0"
+# SLIGHTER, SIMPLER FLAT DARK THEME
+BG_COLOR = "#1e1e1e"
+PANEL_COLOR = "#252526"
+BORDER_COLOR = "#3c3c3c"
+ACCENT_COLOR = "#007acc"
+TEXT_COLOR = "#d4d4d4"
+TEXT_MUTED = "#858585"
+RED_COLOR = "#f44336"
+
+class PortWorker(QThread):
+    result_ready = pyqtSignal(list)
+
+    def __init__(self, port_filter=None):
+        super().__init__()
+        self.port_filter = port_filter
+
+    def run(self):
+        pid_map = {}
+        # 1. Run tasklist once to fetch all running processes
+        try:
+            cmd = 'tasklist /FO CSV /NH'
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, errors='replace')
+            for line in res.stdout.strip().split('\n'):
+                if not line.strip():
+                    continue
+                parts = [p.strip('"') for p in line.split(',')]
+                if len(parts) >= 2:
+                    name = parts[0]
+                    pid = parts[1]
+                    pid_map[pid] = name
+        except Exception:
+            pass
+
+        # 2. Get active listening ports
+        try:
+            if self.port_filter:
+                cmd = f"netstat -ano | findstr :{self.port_filter}"
+            else:
+                cmd = "netstat -ano | findstr LISTENING"
+            
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, errors='replace')
+            lines = result.stdout.strip().split('\n') if result.stdout else []
+        except Exception:
+            lines = []
+
+        # 3. Match netstat info with process names
+        results = []
+        seen = set()
+        for line in lines:
+            if not line.strip():
+                continue
+            parts = line.split()
+            if len(parts) >= 5:
+                local_addr = parts[1]
+                port = local_addr.split(':')[-1]
+                pid = parts[-1]
+                
+                if self.port_filter and self.port_filter not in port:
+                    continue
+
+                if (port, pid) not in seen:
+                    seen.add((port, pid))
+                    process_name = pid_map.get(pid, "Unknown")
+                    results.append((pid, port, process_name, line.strip()))
+                    
+        self.result_ready.emit(results)
+
 
 class PortKillerApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PORT KILLER")
-        self.resize(900, 500)
+        self.resize(850, 480)
+        self.worker = None
+        self.all_ports = []
         
         self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+            QMainWindow {{ background-color: {BG_COLOR}; }}
+            QWidget {{ color: {TEXT_COLOR}; font-family: 'Segoe UI', 'Consolas', sans-serif; font-size: 10pt; }}
             
             QLineEdit {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; 
-                padding: 6px; font-size: 11pt;
+                background-color: {PANEL_COLOR}; color: white; border: 1px solid {BORDER_COLOR}; 
+                padding: 5px; border-radius: 3px;
             }}
-            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QLineEdit:focus {{ border: 1px solid {ACCENT_COLOR}; }}
             
             QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; 
-                padding: 8px 16px; font-weight: bold;
+                background-color: {PANEL_COLOR}; border: 1px solid {BORDER_COLOR}; color: {TEXT_COLOR}; 
+                padding: 6px 12px; border-radius: 3px; font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
+                background-color: {BORDER_COLOR}; border: 1px solid {ACCENT_COLOR}; color: white;
             }}
             QPushButton:pressed {{
-                background-color: {CP_YELLOW}; color: black;
+                background-color: {ACCENT_COLOR}; color: white;
             }}
             
             QTableWidget {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM};
-                gridline-color: {CP_DIM}; font-size: 10pt;
+                background-color: {PANEL_COLOR}; color: {TEXT_COLOR}; border: 1px solid {BORDER_COLOR};
+                gridline-color: {BORDER_COLOR}; font-size: 9.5pt;
             }}
             QTableWidget::item:selected {{
-                background-color: {CP_CYAN}; color: {CP_BG};
+                background-color: {ACCENT_COLOR}; color: white;
             }}
             QHeaderView::section {{
-                background-color: {CP_DIM}; color: {CP_YELLOW}; padding: 6px;
-                border: 1px solid {CP_DIM}; font-weight: bold;
+                background-color: {PANEL_COLOR}; color: white; padding: 5px;
+                border: 1px solid {BORDER_COLOR}; font-weight: bold;
             }}
             
-            QLabel {{ color: {CP_TEXT}; font-size: 10pt; }}
+            QLabel {{ color: {TEXT_COLOR}; }}
         """)
         
         central = QWidget()
@@ -64,24 +124,23 @@ class PortKillerApp(QMainWindow):
         layout.setSpacing(10)
         layout.setContentsMargins(15, 15, 15, 15)
         
-        # Title
+        # Title Header
         title = QLabel("PORT KILLER")
-        title.setStyleSheet(f"font-size: 16pt; font-weight: bold; color: {CP_YELLOW};")
+        title.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {ACCENT_COLOR};")
         layout.addWidget(title)
         
-        # Search bar
+        # Search & controls bar
         search_layout = QHBoxLayout()
-        search_layout.addWidget(QLabel("Port:"))
+        search_layout.addWidget(QLabel("Port filter:"))
+        
         self.port_entry = QLineEdit()
-        self.port_entry.setPlaceholderText("Enter port number...")
-        self.port_entry.setMaximumWidth(150)
+        self.port_entry.setPlaceholderText("Filter...")
+        self.port_entry.setMaximumWidth(120)
         self.port_entry.textChanged.connect(self.filter_ports)
         search_layout.addWidget(self.port_entry)
         
-        self.all_ports = []
-        
         btn_search = QPushButton("SEARCH")
-        btn_search.clicked.connect(self.refresh)
+        btn_search.clicked.connect(self.filter_ports)
         btn_search.setCursor(Qt.CursorShape.PointingHandCursor)
         search_layout.addWidget(btn_search)
         
@@ -103,7 +162,7 @@ class PortKillerApp(QMainWindow):
         search_layout.addStretch()
         layout.addLayout(search_layout)
         
-        # Table
+        # Table UI
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["PID", "PORT", "PROCESS", "DETAILS"])
@@ -114,80 +173,48 @@ class PortKillerApp(QMainWindow):
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         layout.addWidget(self.table)
         
-        # Kill button
+        # Action Button
         btn_kill = QPushButton("KILL SELECTED")
         btn_kill.setStyleSheet(f"""
             QPushButton {{
-                background-color: {CP_RED}; border: 1px solid {CP_RED}; color: white;
-                padding: 10px; font-weight: bold; font-size: 11pt;
+                background-color: {RED_COLOR}; border: 1px solid {RED_COLOR}; color: white;
+                padding: 8px; font-weight: bold; font-size: 10pt;
             }}
             QPushButton:hover {{
-                background-color: #cc0030; border: 1px solid {CP_YELLOW};
+                background-color: #d32f2f; border: 1px solid #d32f2f;
             }}
         """)
         btn_kill.clicked.connect(self.kill_selected)
         btn_kill.setCursor(Qt.CursorShape.PointingHandCursor)
         layout.addWidget(btn_kill)
         
-        # Load ports after GUI is shown
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(0, self.list_all)
+        # Status Label
+        self.status_label = QLabel("Initializing...")
+        self.status_label.setStyleSheet(f"color: {TEXT_MUTED}; font-size: 9pt;")
+        layout.addWidget(self.status_label)
+        
+        # Load ports asynchronously
+        QTimer.singleShot(50, self.list_all)
     
     def restart_app(self):
         QApplication.quit()
         subprocess.Popen([sys.executable] + sys.argv)
     
-    
-    def get_listening_ports(self, port=None):
-        try:
-            if port:
-                cmd = f"netstat -ano | findstr :{port}"
-            else:
-                cmd = "netstat -ano | findstr LISTENING"
-            
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            return result.stdout.strip().split('\n') if result.stdout else []
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to get ports: {e}")
-            return []
-    
-    def parse_netstat_line(self, line):
-        parts = line.split()
-        if len(parts) >= 5:
-            local_addr = parts[1]
-            port = local_addr.split(':')[-1]
-            pid = parts[-1]
-            return port, pid
-        return None, None
-    
-    def get_process_info(self, pid):
-        try:
-            cmd = f'tasklist /FI "PID eq {pid}" /FO CSV /NH'
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            if result.stdout:
-                parts = result.stdout.strip().split(',')
-                if len(parts) >= 1:
-                    return parts[0].strip('"')
-        except:
-            pass
-        return "Unknown"
-    
     def list_all(self):
+        self.status_label.setText("Scanning active connections...")
+        if self.worker and self.worker.isRunning():
+            self.worker.terminate()
+            self.worker.wait()
+            
         self.table.setRowCount(0)
-        lines = self.get_listening_ports()
+        self.worker = PortWorker()
+        self.worker.result_ready.connect(self.on_ports_loaded)
+        self.worker.start()
         
-        self.all_ports = []
-        seen = set()
-        for line in lines:
-            if not line.strip():
-                continue
-            port, pid = self.parse_netstat_line(line)
-            if port and pid and (port, pid) not in seen:
-                seen.add((port, pid))
-                process = self.get_process_info(pid)
-                self.all_ports.append((pid, port, process, line.strip()))
-        
-        self.display_ports(self.all_ports)
+    def on_ports_loaded(self, ports):
+        self.all_ports = ports
+        self.display_ports(ports)
+        self.status_label.setText(f"Scan complete. Found {len(ports)} ports.")
     
     def display_ports(self, ports):
         self.table.setRowCount(0)
@@ -208,9 +235,6 @@ class PortKillerApp(QMainWindow):
         filtered = [p for p in self.all_ports if search_text in p[1]]
         self.display_ports(filtered)
     
-    def search_port(self):
-        self.refresh()
-    
     def refresh(self):
         self.port_entry.clear()
         self.list_all()
@@ -221,9 +245,7 @@ class PortKillerApp(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please select a process to kill")
             return
         
-        rows = set()
-        for item in selected:
-            rows.add(item.row())
+        rows = {item.row() for item in selected}
         
         for row in rows:
             pid = self.table.item(row, 0).text()
