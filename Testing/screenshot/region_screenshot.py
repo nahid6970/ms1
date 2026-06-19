@@ -862,7 +862,7 @@ def _run_ocr_and_show(img):
     lbl.pack(expand=True)
     loading.update()
 
-    text = ""
+    raw_text = ""
     error = None
 
     try:
@@ -871,11 +871,11 @@ def _run_ocr_and_show(img):
         img_np = np.array(img)
         reader = easyocr.Reader(easyocr_langs)
         results = reader.readtext(img_np, detail=0)
-        text = "\n".join(results)
+        raw_text = "\n".join(results)
     except ImportError:
         try:
             import pytesseract
-            text = pytesseract.image_to_string(img, lang=tesseract_langs)
+            raw_text = pytesseract.image_to_string(img, lang=tesseract_langs)
         except ImportError:
             error = "Could not import 'easyocr' or 'pytesseract'.\n\nPlease install easyocr with English and Bangla support:\npip install easyocr torch torchvision"
         except Exception as pe:
@@ -886,25 +886,71 @@ def _run_ocr_and_show(img):
     loading.destroy()
 
     root.title("OCR Extraction Results")
-    root.geometry("600x450")
+    root.geometry("600x485")
     root.config(bg="#0e0e0e")
     root.attributes('-topmost', True)
     
     rx = (ws/2) - (600/2)
-    ry = (hs/2) - (450/2)
-    root.geometry(f"600x450+{int(rx)}+{int(ry)}")
+    ry = (hs/2) - (485/2)
+    root.geometry(f"600x485+{int(rx)}+{int(ry)}")
     root.deiconify()
 
     title = tk.Label(root, text=f"EXTRACTED TEXT ({mode_label})", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
-    title.pack(pady=10)
+    title.pack(pady=(10, 5))
+
+    # Format / Extraction Mode Toolbar
+    toolbar = tk.Frame(root, bg="#0e0e0e")
+    toolbar.pack(fill="x", padx=15, pady=(0, 5))
 
     text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
     text_area.pack(fill="both", expand=True, padx=15, pady=5)
 
     if error:
         text_area.insert(tk.END, f"Error/Status:\n{error}")
+        # Disable formatting options if error
+        for widget in toolbar.winfo_children():
+            widget.config(state="disabled")
     else:
-        text_area.insert(tk.END, text)
+        text_area.insert(tk.END, raw_text)
+
+    # Actions for Toolbar Buttons
+    def show_raw():
+        text_area.delete("1.0", tk.END)
+        text_area.insert(tk.END, raw_text)
+        set_active_btn(btn_raw)
+
+    def show_single_line():
+        import re
+        single_line = re.sub(r'\s+', ' ', raw_text).strip()
+        text_area.delete("1.0", tk.END)
+        text_area.insert(tk.END, single_line)
+        set_active_btn(btn_single)
+
+    def show_links_emails():
+        import re
+        emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', raw_text)
+        urls = re.findall(r'https?://[^\s]+', raw_text)
+        found = emails + urls
+        result_str = "\n".join(found) if found else "No links or emails found."
+        text_area.delete("1.0", tk.END)
+        text_area.insert(tk.END, result_str)
+        set_active_btn(btn_links)
+
+    def set_active_btn(active):
+        for btn in [btn_raw, btn_single, btn_links]:
+            if btn == active:
+                btn.config(bg="#e040fb", fg="black")
+            else:
+                btn.config(bg="#1a1a1a", fg="#ffffff")
+
+    btn_raw = tk.Button(toolbar, text="RAW TEXT", font=(font_name, 8), bg="#e040fb", fg="black", relief="flat", padx=10, pady=2, command=show_raw)
+    btn_raw.pack(side="left", padx=(0, 5))
+
+    btn_single = tk.Button(toolbar, text="SINGLE LINE", font=(font_name, 8), bg="#1a1a1a", fg="#ffffff", relief="flat", padx=10, pady=2, command=show_single_line)
+    btn_single.pack(side="left", padx=5)
+
+    btn_links = tk.Button(toolbar, text="EXTRACT LINKS/EMAILS", font=(font_name, 8), bg="#1a1a1a", fg="#ffffff", relief="flat", padx=10, pady=2, command=show_links_emails)
+    btn_links.pack(side="left", padx=5)
 
     btn_frame = tk.Frame(root, bg="#0e0e0e")
     btn_frame.pack(fill="x", pady=10)
