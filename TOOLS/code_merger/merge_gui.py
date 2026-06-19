@@ -7,9 +7,9 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTextEdit, QTabWidget, QGroupBox,
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
-    QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu
+    QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtGui import QFont, QColor
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
@@ -228,6 +228,51 @@ def _backup(fpath: str):
     shutil.copy2(fpath, bak)
 
 
+# ── RECENT POPUP ─────────────────────────────────────────────────────────────
+class RecentPopup(QFrame):
+    def __init__(self, parent, on_load, on_remove):
+        super().__init__(parent, Qt.WindowType.Popup)
+        self.on_load   = on_load
+        self.on_remove = on_remove
+        self.setStyleSheet(f"""
+            QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
+            QPushButton {{ background: transparent; border: none; color: #E0E0E0;
+                           text-align: left; padding: 4px 8px; font-family: Consolas; font-size: 9pt; }}
+            QPushButton:hover {{ background: #1e1e1e; color: #00F0FF; }}
+            QPushButton#remove {{ color: #FF003C; padding: 4px 6px; }}
+            QPushButton#remove:hover {{ background: #FF003C; color: #000; }}
+        """)
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        items = load_recent()
+        if not items:
+            lbl = QLabel("  No recent projects")
+            lbl.setStyleSheet("color: #808080; padding: 8px; font-family: Consolas;")
+            layout.addWidget(lbl)
+            return
+        for path in items:
+            row = QWidget()
+            row.setStyleSheet("background: transparent;")
+            hl = QHBoxLayout(row)
+            hl.setContentsMargins(0, 0, 0, 0)
+            hl.setSpacing(0)
+            btn_load = QPushButton(path)
+            btn_load.setMinimumWidth(300)
+            btn_load.clicked.connect(lambda _, p=path: (self.close(), self.on_load(p)))
+            btn_rem  = QPushButton("✕")
+            btn_rem.setObjectName("remove")
+            btn_rem.setFixedWidth(28)
+            btn_rem.clicked.connect(lambda _, p=path: (self.close(), self.on_remove(p)))
+            hl.addWidget(btn_load)
+            hl.addWidget(btn_rem)
+            layout.addWidget(row)
+        self.adjustSize()
+
+
 # ── PREP TAB ──────────────────────────────────────────────────────────────────
 class PrepTab(QWidget):
     def __init__(self, status_cb, root_cb=None):
@@ -356,28 +401,18 @@ class PrepTab(QWidget):
         self._save_session()
 
     def _show_recent(self):
-        items = load_recent()
-        if not items:
-            self.status_cb("No recent projects")
-            return
-        menu = QMenu(self)
-        menu.setStyleSheet(f"QMenu {{ background: #111111; color: #E0E0E0; border: 1px solid #00F0FF; }}"
-                           f"QMenu::item:selected {{ background: #00F0FF; color: #000; }}")
-        for path in items:
-            sub = menu.addMenu(f"  {path}")
-            sub.setStyleSheet(menu.styleSheet())
-            load_a = sub.addAction("📁 Load this project")
-            load_a.setData(("load", path))
-            rem_a  = sub.addAction("✕ Remove from list")
-            rem_a.setData(("remove", path))
-        chosen = menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
-        if chosen:
-            action, path = chosen.data()
-            if action == "load":
-                self._load_dir(path)
-            elif action == "remove":
-                save_recent([p for p in load_recent() if os.path.normpath(p) != os.path.normpath(path)])
-                self.status_cb(f"Removed from recent: {path}")
+        btn = self.sender()
+        popup = RecentPopup(
+            self,
+            on_load=self._load_dir,
+            on_remove=lambda p: (
+                save_recent([x for x in load_recent() if os.path.normpath(x) != os.path.normpath(p)]),
+                self.status_cb(f"Removed: {p}")
+            )
+        )
+        pos = btn.mapToGlobal(QPoint(0, btn.height()))
+        popup.move(pos)
+        popup.show()
 
     def _clear_files(self):
         self.files.clear()
