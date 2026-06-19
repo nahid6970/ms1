@@ -421,11 +421,14 @@ class RecentPopup(QFrame):
 
 
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
+SCRIPTS_EXTS = {'.py', '.ps1', '.bat', '.sh', '.cmd', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.cpp', '.c', '.h', '.cs', '.java', '.kt', '.rb', '.pl', '.php'}
+WEB_EXTS     = {'.html', '.htm', '.css', '.scss', '.sass', '.less', '.vue', '.svelte'}
+
 class ExtensionSelectorDialog(QDialog):
     def __init__(self, extensions: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("SELECT EXTENSIONS")
-        self.resize(550, 240)
+        self.resize(600, 290)
         self.setStyleSheet(THEME)
 
         self.checkboxes: dict[str, QCheckBox] = {}
@@ -440,25 +443,76 @@ class ExtensionSelectorDialog(QDialog):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedHeight(65)
+        scroll.setFixedHeight(120) # Fits up to 3 categorical horizontal rows beautifully
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
 
         scroll_content = QWidget()
         scroll_content.setStyleSheet(f"background-color: {CP_PANEL};")
-        hbox = QHBoxLayout(scroll_content)
-        hbox.setContentsMargins(12, 4, 12, 4)
-        hbox.setSpacing(18)
+        vbox = QVBoxLayout(scroll_content)
+        vbox.setContentsMargins(12, 10, 12, 10)
+        vbox.setSpacing(12)
 
-        sorted_exts = sorted(extensions, key=lambda x: x.lower())
-        for ext in sorted_exts:
-            display_text = ext if ext else "(no extension)"
-            chk = QCheckBox(display_text)
-            chk.setChecked(True)
-            self.checkboxes[ext] = chk
-            hbox.addWidget(chk)
-        hbox.addStretch()
+        # Classify the found extensions
+        scripts_found = []
+        web_found     = []
+        other_found   = []
+
+        for ext in sorted(extensions, key=lambda x: x.lower()):
+            ext_lower = ext.lower()
+            if ext_lower in SCRIPTS_EXTS:
+                scripts_found.append(ext)
+            elif ext_lower in WEB_EXTS:
+                web_found.append(ext)
+            else:
+                other_found.append(ext)
+
+        # 1st Row: Scripts
+        if scripts_found:
+            row1 = QHBoxLayout()
+            row1.setSpacing(18)
+            lbl_r1 = QLabel("SCRIPTS: ")
+            lbl_r1.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; min-width: 70px;")
+            row1.addWidget(lbl_r1)
+            for ext in scripts_found:
+                chk = QCheckBox(ext)
+                chk.setChecked(True)
+                self.checkboxes[ext] = chk
+                row1.addWidget(chk)
+            row1.addStretch()
+            vbox.addLayout(row1)
+
+        # 2nd Row: Web related
+        if web_found:
+            row2 = QHBoxLayout()
+            row2.setSpacing(18)
+            lbl_r2 = QLabel("WEB:     ")
+            lbl_r2.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; min-width: 70px;")
+            row2.addWidget(lbl_r2)
+            for ext in web_found:
+                chk = QCheckBox(ext)
+                chk.setChecked(True)
+                self.checkboxes[ext] = chk
+                row2.addWidget(chk)
+            row2.addStretch()
+            vbox.addLayout(row2)
+
+        # 3rd Row: Data, Docs, Configuration & Others
+        if other_found:
+            row3 = QHBoxLayout()
+            row3.setSpacing(18)
+            lbl_r3 = QLabel("OTHER:   ")
+            lbl_r3.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; min-width: 70px;")
+            row3.addWidget(lbl_r3)
+            for ext in other_found:
+                display_text = ext if ext else "(no extension)"
+                chk = QCheckBox(display_text)
+                chk.setChecked(True)
+                self.checkboxes[ext] = chk
+                row3.addWidget(chk)
+            row3.addStretch()
+            vbox.addLayout(row3)
 
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll, 0)
