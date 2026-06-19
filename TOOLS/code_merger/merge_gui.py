@@ -330,20 +330,20 @@ class PrepTab(QWidget):
         widget = QWidget()
         widget.setStyleSheet("background: transparent;")
         hl = QHBoxLayout(widget)
-        hl.setContentsMargins(4, 2, 4, 2)
-        hl.setSpacing(6)
+        hl.setContentsMargins(4, 0, 4, 0)
+        hl.setSpacing(4)
 
         lbl = QLabel(fp)
-        lbl.setStyleSheet(f"color: {CP_TEXT}; background: transparent;")
+        lbl.setStyleSheet(f"color: {CP_TEXT}; background: transparent; font-size: 9pt;")
 
         btn_rem = QPushButton("✕")
         btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_rem.setFixedWidth(24)
-        btn_rem.setFixedHeight(20)
+        btn_rem.setFixedWidth(18)
+        btn_rem.setFixedHeight(16)
         btn_rem.setStyleSheet(f"""
             QPushButton {{
                 background: transparent; border: 1px solid {CP_DIM}; color: {CP_RED};
-                padding: 0; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0; font-family: 'Consolas'; font-size: 7pt; font-weight: bold;
             }}
             QPushButton:hover {{
                 background: {CP_RED}; color: #000; border-color: {CP_RED};
@@ -354,7 +354,7 @@ class PrepTab(QWidget):
         hl.addWidget(lbl, 1)
         hl.addWidget(btn_rem, 0)
 
-        item.setSizeHint(QSize(100, 28))
+        item.setSizeHint(QSize(100, 22))
         self.file_list.addItem(item)
         self.file_list.setItemWidget(item, widget)
 
