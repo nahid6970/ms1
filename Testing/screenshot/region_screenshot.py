@@ -757,12 +757,92 @@ def _recv_exact(sock, length):
     return bytes(chunks)
 
 
+class LanguageSelectionDialog:
+    def __init__(self, parent):
+        self.root = tk.Toplevel(parent)
+        self.root.title("Select Language")
+        self.root.overrideredirect(True)
+        self.root.attributes('-topmost', True)
+        self.choice = None
+        
+        self.bg_color = "#0e0e0e"
+        self.fg_color = "#ffffff"
+        self.accent_color = "#e040fb"
+        self.font_name = "JetBrainsMono NFP"
+        
+        self.root.config(bg=self.accent_color)
+        
+        container = tk.Frame(self.root, bg=self.bg_color)
+        container.pack(fill="both", expand=True, padx=1, pady=1)
+        
+        width, height = 300, 180
+        ws = self.root.winfo_screenwidth()
+        hs = self.root.winfo_screenheight()
+        x = (ws/2) - (width/2)
+        y = (hs/2) - (height/2)
+        self.root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
+        
+        label = tk.Label(container, text="SELECT EXTRACTION MODE", font=(self.font_name + " Bold", 10), bg=self.bg_color, fg=self.accent_color)
+        label.pack(pady=(15, 10))
+        
+        btn_opts = [
+            ("ENGLISH ONLY", "en"),
+            ("BANGLA ONLY", "bn"),
+            ("MIXED (EN + BN)", "mixed")
+        ]
+        
+        for text, val in btn_opts:
+            btn = tk.Button(
+                container, text=text, font=(self.font_name, 9),
+                bg="#1a1a1a", fg=self.fg_color,
+                activebackground=self.accent_color, activeforeground="black",
+                relief="flat", bd=0, width=22, pady=4,
+                command=lambda v=val: self.set_choice(v)
+            )
+            btn.pack(pady=4)
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#252525"))
+            btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#1a1a1a"))
+            
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
+        self.root.focus_force()
+        self.root.grab_set()
+
+    def set_choice(self, val):
+        self.choice = val
+        self.root.destroy()
+
+    def get_choice(self):
+        self.root.wait_window(self.root)
+        return self.choice
+
+
 def _run_ocr_and_show(img):
     import tkinter as tk
     from tkinter import scrolledtext, messagebox
 
     root = tk.Tk()
     root.withdraw()
+
+    # Get language extraction preference
+    lang_dialog = LanguageSelectionDialog(root)
+    choice = lang_dialog.get_choice()
+    if not choice:
+        root.destroy()
+        return
+
+    # Determine configured languages
+    if choice == "en":
+        easyocr_langs = ['en']
+        tesseract_langs = 'eng'
+        mode_label = "ENGLISH"
+    elif choice == "bn":
+        easyocr_langs = ['bn']
+        tesseract_langs = 'ben'
+        mode_label = "BANGLA"
+    else:
+        easyocr_langs = ['bn', 'en']
+        tesseract_langs = 'ben+eng'
+        mode_label = "MIXED (EN/BN)"
 
     loading = tk.Toplevel(root)
     loading.title("OCR Processing")
@@ -777,7 +857,7 @@ def _run_ocr_and_show(img):
     loading.geometry(f"350x120+{int(x)}+{int(y)}")
 
     font_name = "JetBrainsMono NFP"
-    lbl = tk.Label(loading, text="Extracting English/Bangla text...\nPlease wait.", 
+    lbl = tk.Label(loading, text=f"Extracting {mode_label} text...\nPlease wait.", 
                    font=(font_name, 10), bg="#0e0e0e", fg="#e040fb")
     lbl.pack(expand=True)
     loading.update()
@@ -789,13 +869,13 @@ def _run_ocr_and_show(img):
         import numpy as np
         import easyocr
         img_np = np.array(img)
-        reader = easyocr.Reader(['bn', 'en'])
+        reader = easyocr.Reader(easyocr_langs)
         results = reader.readtext(img_np, detail=0)
         text = "\n".join(results)
     except ImportError:
         try:
             import pytesseract
-            text = pytesseract.image_to_string(img, lang='ben+eng')
+            text = pytesseract.image_to_string(img, lang=tesseract_langs)
         except ImportError:
             error = "Could not import 'easyocr' or 'pytesseract'.\n\nPlease install easyocr with English and Bangla support:\npip install easyocr torch torchvision"
         except Exception as pe:
@@ -815,7 +895,7 @@ def _run_ocr_and_show(img):
     root.geometry(f"600x450+{int(rx)}+{int(ry)}")
     root.deiconify()
 
-    title = tk.Label(root, text="EXTRACTED TEXT (EN/BN)", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
+    title = tk.Label(root, text=f"EXTRACTED TEXT ({mode_label})", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
     title.pack(pady=10)
 
     text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
