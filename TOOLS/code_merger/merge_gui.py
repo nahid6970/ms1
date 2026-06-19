@@ -291,14 +291,23 @@ class PrepTab(QWidget):
 
     def _save_session(self):
         import json
+        try:
+            with open(SESSION_PATH, 'r') as f:
+                data = json.load(f)
+            if not isinstance(data, dict):
+                data = {}
+        except Exception:
+            data = {}
+        data['files'] = self.files
         with open(SESSION_PATH, 'w') as f:
-            json.dump(self.files, f, indent=2)
+            json.dump(data, f, indent=2)
 
     def _load_session(self):
         import json
         try:
             with open(SESSION_PATH, 'r') as f:
-                saved = json.load(f)
+                data = json.load(f)
+            saved = data if isinstance(data, list) else data.get('files', [])
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
@@ -492,6 +501,29 @@ class MergeTab(QWidget):
         super().__init__()
         self.status_cb = status_cb
         self._build()
+        self._load_prefs()
+
+    def _save_prefs(self):
+        import json
+        try:
+            with open(SESSION_PATH, 'r') as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+        data['backup']  = self.chk_backup.isChecked()
+        data['preview'] = self.chk_preview.isChecked()
+        with open(SESSION_PATH, 'w') as f:
+            json.dump(data, f, indent=2)
+
+    def _load_prefs(self):
+        import json
+        try:
+            with open(SESSION_PATH, 'r') as f:
+                data = json.load(f)
+            if 'backup'  in data: self.chk_backup.setChecked(data['backup'])
+            if 'preview' in data: self.chk_preview.setChecked(data['preview'])
+        except Exception:
+            pass
 
     def _build(self):
         layout = QVBoxLayout(self)
@@ -535,6 +567,8 @@ class MergeTab(QWidget):
         self.chk_backup.setChecked(True)
         self.chk_preview = QCheckBox("Preview changes before applying")
         self.chk_preview.setChecked(True)
+        self.chk_backup.toggled.connect(self._save_prefs)
+        self.chk_preview.toggled.connect(self._save_prefs)
         opt_row.addWidget(self.chk_backup)
         opt_row.addWidget(self.chk_preview)
         opt_row.addStretch()
