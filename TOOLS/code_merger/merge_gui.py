@@ -798,7 +798,25 @@ class PrepTab(QWidget):
         hl.setSpacing(4)
 
         lbl = QLabel(fp)
-        lbl.setStyleSheet(f"color: {CP_TEXT}; background: transparent; font-size: 9pt;")
+        
+        # Smart file size analysis for warning highlights and context limits
+        try:
+            sz_bytes = os.path.getsize(fp)
+            sz_kb = sz_bytes / 1024
+            if sz_kb > 500:
+                lbl_color = CP_RED
+                lbl.setToolTip(f"⚠️ DANGER: Very large file ({sz_kb:.1f} KB).\nRecommended to exclude or split to prevent LLM context overflow.")
+            elif sz_kb > 250:
+                lbl_color = CP_YELLOW
+                lbl.setToolTip(f"⚠️ WARNING: Large file ({sz_kb:.1f} KB).\nMay consume significant context window memory.")
+            else:
+                lbl_color = CP_TEXT
+                lbl.setToolTip(f"File size: {sz_kb:.1f} KB")
+        except Exception:
+            lbl_color = CP_TEXT
+            lbl.setToolTip("Could not read file size details")
+
+        lbl.setStyleSheet(f"color: {lbl_color}; background: transparent; font-size: 9pt;")
 
         btn_rem = QPushButton("✕")
         btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
