@@ -759,17 +759,20 @@ class MainWindow(QMainWindow):
         btn_restart.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_PANEL};
+                color: {CP_SUB};
                 border: 1px solid {CP_DIM};
-                color: {CP_YELLOW};
-                padding: 4px 12px;
+                border-bottom: none;
+                padding: 6px 18px;
                 font-family: 'Consolas';
-                font-size: 9pt;
+                font-size: 10pt;
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {CP_DIM};
+                color: {CP_YELLOW};
+                background-color: {CP_BG};
+            }}
+            QPushButton:pressed {{
                 color: {CP_CYAN};
-                border-color: {CP_CYAN};
             }}
         """)
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
