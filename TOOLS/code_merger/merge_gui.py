@@ -418,9 +418,10 @@ class PrepTab(QWidget):
         vt = QVBoxLayout(grp_task)
         self.task_input = QTextEdit()
         self.task_input.setPlaceholderText("Describe what you want the AI to do…")
-        self.task_input.setMaximumHeight(100)
+        self.task_input.setMaximumHeight(80)
         vt.addWidget(self.task_input)
-        right_layout.addWidget(grp_task)
+        grp_task.setMaximumHeight(120)
+        right_layout.addWidget(grp_task, 0)
 
         # Output prompt
         grp_out = QGroupBox("GENERATED PROMPT  (copy → paste into AI)")
@@ -429,7 +430,7 @@ class PrepTab(QWidget):
         self.prompt_out.setReadOnly(True)
         self.prompt_out.setPlaceholderText("Click GENERATE to build prompt…")
         vo.addWidget(self.prompt_out)
-        right_layout.addWidget(grp_out)
+        right_layout.addWidget(grp_out, 1)
 
         # Buttons
         btn_row2 = QHBoxLayout()
@@ -443,7 +444,7 @@ class PrepTab(QWidget):
         btn_copy.clicked.connect(self._copy)
         btn_row2.addWidget(btn_gen)
         btn_row2.addWidget(btn_copy)
-        right_layout.addLayout(btn_row2)
+        right_layout.addLayout(btn_row2, 0)
 
         # Assemble Splitter
         splitter.addWidget(left_widget)
