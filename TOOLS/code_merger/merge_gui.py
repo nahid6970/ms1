@@ -421,7 +421,6 @@ class RecentPopup(QFrame):
 
 
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
-# JavaScript and TypeScript are programming/scripting languages, so we list them under SCRIPTS
 SCRIPTS_EXTS = {'.py', '.ps1', '.bat', '.sh', '.cmd', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.cpp', '.c', '.h', '.cs', '.java', '.kt', '.rb', '.pl', '.php'}
 WEB_EXTS     = {'.html', '.htm', '.css', '.scss', '.sass', '.less', '.vue', '.svelte'}
 
@@ -429,30 +428,23 @@ class ExtensionSelectorDialog(QDialog):
     def __init__(self, extensions: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("SELECT EXTENSIONS")
-        self.resize(600, 240)
         self.setStyleSheet(THEME)
 
         self.checkboxes: dict[str, QCheckBox] = {}
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(12)
+        layout.setSpacing(14)
 
         lbl = QLabel("Select file extensions to include:")
         lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         layout.addWidget(lbl)
 
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFixedHeight(120) # Fits categorical rows beautifully with scroll options
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
-
-        scroll_content = QWidget()
-        scroll_content.setStyleSheet(f"background-color: {CP_PANEL};")
-        vbox = QVBoxLayout(scroll_content)
-        vbox.setContentsMargins(12, 10, 12, 10)
+        # Using a QFrame instead of QScrollArea to prevent scrollbars and automatically fit content cleanly
+        content_frame = QFrame()
+        content_frame.setStyleSheet(f"QFrame {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
+        vbox = QVBoxLayout(content_frame)
+        vbox.setContentsMargins(12, 12, 12, 12)
         vbox.setSpacing(12)
 
         # Classify the found extensions
@@ -478,7 +470,7 @@ class ExtensionSelectorDialog(QDialog):
             row1 = QHBoxLayout()
             row1.setSpacing(18)
             lbl_r1 = QLabel("SCRIPTS: ")
-            lbl_r1.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; min-width: 70px;")
+            lbl_r1.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; min-width: 80px;")
             row1.addWidget(lbl_r1)
             for ext in scripts_found:
                 chk = QCheckBox(ext)
@@ -493,7 +485,7 @@ class ExtensionSelectorDialog(QDialog):
             row2 = QHBoxLayout()
             row2.setSpacing(18)
             lbl_r2 = QLabel("WEB:     ")
-            lbl_r2.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; min-width: 70px;")
+            lbl_r2.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; min-width: 80px;")
             row2.addWidget(lbl_r2)
             for ext in web_found:
                 chk = QCheckBox(ext)
@@ -503,12 +495,12 @@ class ExtensionSelectorDialog(QDialog):
             row2.addStretch()
             vbox.addLayout(row2)
 
-        # 3rd Row: Data, Docs, Configuration & Others
+        # 3rd Row: Data, Docs, Configuration, and Text Files
         if other_found:
             row3 = QHBoxLayout()
             row3.setSpacing(18)
-            lbl_r3 = QLabel("OTHER:   ")
-            lbl_r3.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; min-width: 70px;")
+            lbl_r3 = QLabel("DB & TXT:")
+            lbl_r3.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; min-width: 80px;")
             row3.addWidget(lbl_r3)
             for ext in other_found:
                 chk = QCheckBox(ext)
@@ -523,7 +515,7 @@ class ExtensionSelectorDialog(QDialog):
             row4 = QHBoxLayout()
             row4.setSpacing(18)
             lbl_r4 = QLabel("NO EXT:  ")
-            lbl_r4.setStyleSheet(f"color: {CP_SUB}; font-weight: bold; min-width: 70px;")
+            lbl_r4.setStyleSheet(f"color: {CP_SUB}; font-weight: bold; min-width: 80px;")
             row4.addWidget(lbl_r4)
             for ext in no_ext_found:
                 chk = QCheckBox("(no extension)")
@@ -533,8 +525,7 @@ class ExtensionSelectorDialog(QDialog):
             row4.addStretch()
             vbox.addLayout(row4)
 
-        scroll.setWidget(scroll_content)
-        layout.addWidget(scroll, 0)
+        layout.addWidget(content_frame)
 
         # ── Consolidated Button Row at the Bottom ──
         btn_row = QHBoxLayout()
@@ -569,6 +560,9 @@ class ExtensionSelectorDialog(QDialog):
         btn_row.addWidget(btn_ok)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
+
+        # Let Qt automatically scale the window to fit the contents perfectly
+        self.adjustSize()
 
     def _select_all(self):
         for chk in self.checkboxes.values():
