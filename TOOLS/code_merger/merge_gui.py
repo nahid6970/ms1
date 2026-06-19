@@ -378,7 +378,7 @@ class PrepTab(QWidget):
         # ── LEFT PANEL ───────────────────────────────────────────
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
-        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setContentsMargins(0, 0, 6, 0)
         left_layout.setSpacing(8)
 
         grp_files = QGroupBox("SOURCE FILES")
@@ -386,6 +386,8 @@ class PrepTab(QWidget):
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        vf.addWidget(self.file_list)
+        left_layout.addWidget(grp_files, 1)
 
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
@@ -402,15 +404,12 @@ class PrepTab(QWidget):
         btn_row.addWidget(btn_add_dir)
         btn_row.addWidget(btn_recent)
         btn_row.addWidget(btn_clear)
-
-        vf.addWidget(self.file_list)
-        vf.addLayout(btn_row)
-        left_layout.addWidget(grp_files)
+        left_layout.addLayout(btn_row, 0)
 
         # ── RIGHT PANEL ──────────────────────────────────────────
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setContentsMargins(6, 0, 0, 0)
         right_layout.setSpacing(8)
 
         # Task description
