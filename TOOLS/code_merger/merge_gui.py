@@ -336,11 +336,23 @@ class MergeTab(QWidget):
         layout.addWidget(grp_root)
 
         # AI response input
-        grp_resp = QGroupBox("AI RESPONSE  (paste here)")
+        grp_resp = QGroupBox("AI RESPONSE  (paste here — supports multiple partial blocks)")
         vr = QVBoxLayout(grp_resp)
         self.response_input = QTextEdit()
-        self.response_input.setPlaceholderText("Paste the AI's full response here…")
+        self.response_input.setPlaceholderText(
+            "Paste the AI's response here.\n"
+            "If the AI gave you multiple separate blocks/messages, use APPEND FROM CLIPBOARD "
+            "to accumulate them all before parsing."
+        )
         vr.addWidget(self.response_input)
+        paste_row = QHBoxLayout()
+        btn_paste_append = QPushButton("📋 APPEND FROM CLIPBOARD")
+        btn_paste_append.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_paste_append.setToolTip("Appends clipboard content to whatever is already in the box")
+        btn_paste_append.clicked.connect(self._append_clipboard)
+        paste_row.addWidget(btn_paste_append)
+        paste_row.addStretch()
+        vr.addLayout(paste_row)
         layout.addWidget(grp_resp)
 
         # Options
@@ -388,6 +400,16 @@ class MergeTab(QWidget):
         d = QFileDialog.getExistingDirectory(self, "Select Project Root")
         if d:
             self.root_input.setText(d)
+
+    def _append_clipboard(self):
+        clip = QApplication.clipboard().text()
+        if not clip:
+            self.status_cb("⚠ Clipboard is empty")
+            return
+        current = self.response_input.toPlainText()
+        separator = "\n" if current and not current.endswith("\n") else ""
+        self.response_input.setPlainText(current + separator + clip)
+        self.status_cb("✔ Appended clipboard content")
 
     def _parse(self):
         text = self.response_input.toPlainText().strip()
