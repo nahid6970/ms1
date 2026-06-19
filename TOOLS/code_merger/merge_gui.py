@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame
 )
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPoint, QSize
 from PyQt6.QtGui import QFont, QColor
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
@@ -311,7 +311,7 @@ class PrepTab(QWidget):
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
-                    self._add_file_row(fp)
+                    self._add_file_item(fp)
             if self.files:
                 self._update_root()
                 self.status_cb(f"Restored {len(self.files)} file(s) from last session")
@@ -325,6 +325,49 @@ class PrepTab(QWidget):
                 common = os.path.dirname(common)
             self.root_cb(common)
 
+    def _add_file_item(self, fp: str):
+        item = QListWidgetItem()
+        widget = QWidget()
+        widget.setStyleSheet("background: transparent;")
+        hl = QHBoxLayout(widget)
+        hl.setContentsMargins(4, 2, 4, 2)
+        hl.setSpacing(6)
+
+        lbl = QLabel(fp)
+        lbl.setStyleSheet(f"color: {CP_TEXT}; background: transparent;")
+
+        btn_rem = QPushButton("✕")
+        btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_rem.setFixedWidth(24)
+        btn_rem.setFixedHeight(20)
+        btn_rem.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: 1px solid {CP_DIM}; color: {CP_RED};
+                padding: 0; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background: {CP_RED}; color: #000; border-color: {CP_RED};
+            }}
+        """)
+        btn_rem.clicked.connect(lambda _, f=fp, it=item: self._remove_file(f, it))
+
+        hl.addWidget(lbl, 1)
+        hl.addWidget(btn_rem, 0)
+
+        item.setSizeHint(QSize(100, 28))
+        self.file_list.addItem(item)
+        self.file_list.setItemWidget(item, widget)
+
+    def _remove_file(self, fp: str, item: QListWidgetItem):
+        if fp in self.files:
+            self.files.remove(fp)
+        row = self.file_list.row(item)
+        if row >= 0:
+            self.file_list.takeItem(row)
+        self._update_root()
+        self._save_session()
+        self.status_cb(f"Removed: {os.path.basename(fp)}")
+
     def _build(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
@@ -334,11 +377,14 @@ class PrepTab(QWidget):
         vf = QVBoxLayout(grp_files)
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(120)
+        self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
         btn_add_dir = QPushButton("📁 ADD DIR")
         btn_recent  = QPushButton("🕘 RECENT")
         btn_clear   = QPushButton("✕ CLEAR ALL")
+        for b in (btn_add, btn_add_dir, btn_recent, btn_clear):
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add.clicked.connect(self._add_files)
         btn_add_dir.clicked.connect(self._add_dir)
         btn_recent.clicked.connect(self._show_recent)
@@ -388,38 +434,10 @@ class PrepTab(QWidget):
         for f in files:
             if f not in self.files:
                 self.files.append(f)
-                self._add_file_row(f)
+                self._add_file_item(f)
         self.status_cb(f"{len(self.files)} file(s) loaded")
         self._update_root()
         self._save_session()
-
-    def _add_file_row(self, fp: str):
-        from PyQt6.QtCore import QSize
-        item = QListWidgetItem(self.file_list)
-        item.setSizeHint(QSize(100, 26))
-        row = QWidget()
-        row.setStyleSheet(f"QWidget {{ background-color: {CP_PANEL}; }} QLabel {{ color: {CP_TEXT}; font-family: Consolas; font-size: 9pt; }}")
-        hl = QHBoxLayout(row)
-        hl.setContentsMargins(6, 2, 2, 2)
-        hl.setSpacing(0)
-        lbl = QLabel(fp)
-        btn_x = QPushButton("✕")
-        btn_x.setFixedSize(22, 18)
-        btn_x.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_x.setStyleSheet(f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; font-size: 9pt; }}"
-                            f"QPushButton:hover {{ color: {CP_RED}; }}")
-        btn_x.clicked.connect(lambda _, f=fp, i=item: self._remove_file(f, i))
-        hl.addWidget(lbl)
-        hl.addStretch()
-        hl.addWidget(btn_x)
-        self.file_list.setItemWidget(item, row)
-
-    def _remove_file(self, fp: str, item: QListWidgetItem):
-        if fp in self.files:
-            self.files.remove(fp)
-        self.file_list.takeItem(self.file_list.row(item))
-        self._save_session()
-        self.status_cb(f"Removed: {os.path.basename(fp)}")
 
     def _add_dir(self):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -430,6 +448,7 @@ class PrepTab(QWidget):
     def _load_dir(self, d: str):
         count = 0
         for root, dirs, fnames in os.walk(d):
+            # Skip ignored directories in-place
             dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
             for fn in fnames:
                 if os.path.splitext(fn)[1].lower() in IGNORE_EXTS:
@@ -437,7 +456,7 @@ class PrepTab(QWidget):
                 fp = os.path.join(root, fn)
                 if fp not in self.files:
                     self.files.append(fp)
-                    self._add_file_row(fp)
+                    self._add_file_item(fp)
                     count += 1
         add_recent(d)
         self.status_cb(f"Added {count} file(s) from directory")
