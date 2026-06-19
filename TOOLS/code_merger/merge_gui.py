@@ -680,8 +680,57 @@ class PrepTab(QWidget):
         self.status_cb = status_cb
         self.root_cb = root_cb
         self.files: list[str] = []
+        self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
         self._load_session()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()
+        count_files = 0
+        count_dirs = 0
+        for url in urls:
+            path = url.toLocalFile()
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    self._load_dropped_dir(path)
+                    count_dirs += 1
+                elif os.path.isfile(path):
+                    # Skip if the file extension is in the ignore list
+                    if os.path.splitext(path)[1].lower() in IGNORE_EXTS:
+                        continue
+                    if path not in self.files:
+                        self.files.append(path)
+                        self._add_file_item(path)
+                        count_files += 1
+
+        if count_files > 0 or count_dirs > 0:
+            self._update_root()
+            self._save_session()
+            self.status_cb(f"Dropped: {count_files} file(s) and {count_dirs} directory/directories processed")
+
+    def _load_dropped_dir(self, d: str):
+        # Scan for existing file extensions first, respecting ignore patterns
+        found_exts = set()
+        for root, dirs, fnames in os.walk(d):
+            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
+            for fn in fnames:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext in IGNORE_EXTS:
+                    continue
+                found_exts.add(ext)
+
+        if not found_exts:
+            return
+
+        # Show selector dialog for toggling extensions
+        dialog = ExtensionSelectorDialog(list(found_exts), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            selected_exts = dialog.get_selected()
+            self._load_dir(d, selected_exts, overwrite_recent=True)
 
     def _save_session(self):
         import json
