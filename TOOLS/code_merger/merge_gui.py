@@ -179,7 +179,7 @@ def save_recent(items: list[dict]):
     with open(RECENT_PATH, 'w') as f:
         json.dump(items, f, indent=2)
 
-def add_recent(path: str, files: list[str] = None, extensions: list[str] = None):
+def add_recent(path: str, files: list[str] = None, extensions: list[str] = None, overwrite_existing: bool = False):
     path = os.path.normpath(path)
 
     current = load_recent_details()
@@ -191,13 +191,20 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None)
             existing = item
             break
 
-    # If no files/extensions are passed, preserve existing details if available
-    if not files:
-        if existing and existing.get("files"):
+    # If overwrite_existing is False, preserve any existing saved selection details
+    if not overwrite_existing and existing:
+        if existing.get("files"):
             files = existing["files"]
-    if not extensions:
-        if existing and existing.get("extensions"):
+        if existing.get("extensions"):
             extensions = existing["extensions"]
+    else:
+        # Fallback if none provided
+        if not files:
+            if existing and existing.get("files"):
+                files = existing["files"]
+        if not extensions:
+            if existing and existing.get("extensions"):
+                extensions = existing["extensions"]
 
     if files is None:
         files = []
@@ -418,14 +425,14 @@ class ExtensionSelectorDialog(QDialog):
     def __init__(self, extensions: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("SELECT EXTENSIONS")
-        self.resize(550, 200)
+        self.resize(550, 240)
         self.setStyleSheet(THEME)
 
         self.checkboxes: dict[str, QCheckBox] = {}
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
-        layout.setSpacing(10)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
         lbl = QLabel("Select file extensions to include:")
         lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
@@ -433,12 +440,15 @@ class ExtensionSelectorDialog(QDialog):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setFixedHeight(65)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
 
         scroll_content = QWidget()
         scroll_content.setStyleSheet(f"background-color: {CP_PANEL};")
         hbox = QHBoxLayout(scroll_content)
-        hbox.setContentsMargins(12, 10, 12, 10)
+        hbox.setContentsMargins(12, 4, 12, 4)
         hbox.setSpacing(18)
 
         sorted_exts = sorted(extensions, key=lambda x: x.lower())
@@ -451,7 +461,51 @@ class ExtensionSelectorDialog(QDialog):
         hbox.addStretch()
 
         scroll.setWidget(scroll_content)
-        layout.addWidget(scroll, 1)
+        layout.addWidget(scroll, 0)
+
+        # ── Buttons for selecting/unselecting all ──
+        btn_row_sel = QHBoxLayout()
+        btn_all = QPushButton("SELECT ALL")
+        btn_none = QPushButton("SELECT NONE")
+        btn_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_none.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_all.clicked.connect(self._select_all)
+        btn_none.clicked.connect(self._select_none)
+        btn_row_sel.addWidget(btn_all)
+        btn_row_sel.addWidget(btn_none)
+        btn_row_sel.addStretch()
+        layout.addLayout(btn_row_sel)
+
+        # ── OK / CANCEL Buttons ──
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ OK")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+    def _select_all(self):
+        for chk in self.checkboxes.values():
+            chk.setChecked(True)
+
+    def _select_none(self):
+        for chk in self.checkboxes.values():
+            chk.setChecked(False)
+
+    def get_selected(self) -> set[str]:
+        return {ext for ext, chk in self.checkboxes.items() if chk.isChecked()}
 
 
 # ── IGNORE LIST DIALOG ───────────────────────────────────────────────────────
@@ -459,21 +513,21 @@ class IgnoreListDialog(QDialog):
     def __init__(self, current_custom: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("CUSTOM IGNORE EXTENSIONS")
-        self.resize(400, 150)
+        self.resize(460, 260)
         self.setStyleSheet(THEME)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(10)
 
-        lbl = QLabel("Add extra extensions to ignore (comma-separated):")
+        lbl = QLabel("Add extra extensions to ignore (comma-separated or on separate lines):")
         lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         layout.addWidget(lbl)
 
-        self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("e.g. .mp3, .mp4, .ogg")
-        self.input_field.setText(", ".join(sorted(current_custom)))
-        layout.addWidget(self.input_field)
+        self.input_field = QTextEdit()
+        self.input_field.setPlaceholderText("e.g.\n.mp3, .mp4\n.ogg, .wav")
+        self.input_field.setPlainText(", ".join(sorted(current_custom)))
+        layout.addWidget(self.input_field, 1)
 
         btn_row = QHBoxLayout()
         btn_ok = QPushButton("✔ SAVE")
@@ -494,9 +548,11 @@ class IgnoreListDialog(QDialog):
         layout.addLayout(btn_row)
 
     def get_extensions(self) -> list[str]:
-        raw = self.input_field.text()
+        raw = self.input_field.toPlainText()
         exts = []
-        for x in raw.split(','):
+        # Support splitting by both commas and newlines
+        parts = raw.replace('\n', ',').split(',')
+        for x in parts:
             cleaned = x.strip().lower()
             if cleaned:
                 if not cleaned.startswith('.'):
@@ -756,9 +812,9 @@ class PrepTab(QWidget):
         dialog = ExtensionSelectorDialog(list(found_exts), self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             selected_exts = dialog.get_selected()
-            self._load_dir(d, selected_exts)
+            self._load_dir(d, selected_exts, overwrite_recent=True)
 
-    def _load_dir(self, d: str, selected_exts: set[str] = None):
+    def _load_dir(self, d: str, selected_exts: set[str] = None, overwrite_recent: bool = False):
         count = 0
         added_files = []
         discovered_exts = set()
@@ -780,7 +836,7 @@ class PrepTab(QWidget):
                     count += 1
         
         exts_list = list(selected_exts) if selected_exts is not None else list(discovered_exts)
-        add_recent(d, added_files, exts_list)
+        add_recent(d, added_files, exts_list, overwrite_existing=overwrite_recent)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
@@ -788,7 +844,7 @@ class PrepTab(QWidget):
     def _load_specific_files(self, d: str, files: list[str], extensions: list[str]):
         if extensions:
             # Re-load the directory filtering specifically by the stored extensions
-            self._load_dir(d, set(extensions))
+            self._load_dir(d, set(extensions), overwrite_recent=False)
         elif files:
             # Fallback to absolute file paths list if no extensions were registered
             count = 0
@@ -797,12 +853,12 @@ class PrepTab(QWidget):
                     self.files.append(fp)
                     self._add_file_item(fp)
                     count += 1
-            add_recent(d, files, [])
+            add_recent(d, files, [], overwrite_existing=False)
             self.status_cb(f"Restored {count} specific file(s) for project")
             self._update_root()
             self._save_session()
         else:
-            self._load_dir(d)
+            self._load_dir(d, overwrite_recent=False)
 
     def _show_recent(self):
         btn = self.sender()
@@ -1053,8 +1109,9 @@ class MainWindow(QMainWindow):
 
         # Corner layout container for multiple buttons
         corner_widget = QWidget()
+        corner_widget.setStyleSheet("background: transparent;")
         corner_layout = QHBoxLayout(corner_widget)
-        corner_layout.setContentsMargins(0, 0, 0, 0)
+        corner_layout.setContentsMargins(0, 2, 8, 2)
         corner_layout.setSpacing(6)
 
         btn_ignore = QPushButton("⚙ IGNORE LIST")
@@ -1064,14 +1121,14 @@ class MainWindow(QMainWindow):
                 background-color: {CP_PANEL};
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
-                border-bottom: none;
-                padding: 6px 14px;
+                padding: 4px 12px;
                 font-family: 'Consolas';
-                font-size: 10pt;
+                font-size: 9pt;
                 font-weight: bold;
             }}
             QPushButton:hover {{
                 color: {CP_CYAN};
+                border-color: {CP_CYAN};
                 background-color: {CP_BG};
             }}
         """)
@@ -1084,14 +1141,14 @@ class MainWindow(QMainWindow):
                 background-color: {CP_PANEL};
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
-                border-bottom: none;
-                padding: 6px 18px;
+                padding: 4px 12px;
                 font-family: 'Consolas';
-                font-size: 10pt;
+                font-size: 9pt;
                 font-weight: bold;
             }}
             QPushButton:hover {{
                 color: {CP_YELLOW};
+                border-color: {CP_YELLOW};
                 background-color: {CP_BG};
             }}
             QPushButton:pressed {{
