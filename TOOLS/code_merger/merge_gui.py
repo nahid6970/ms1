@@ -421,6 +421,7 @@ class RecentPopup(QFrame):
 
 
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
+# JavaScript and TypeScript are programming/scripting languages, so we list them under SCRIPTS
 SCRIPTS_EXTS = {'.py', '.ps1', '.bat', '.sh', '.cmd', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.cpp', '.c', '.h', '.cs', '.java', '.kt', '.rb', '.pl', '.php'}
 WEB_EXTS     = {'.html', '.htm', '.css', '.scss', '.sass', '.less', '.vue', '.svelte'}
 
@@ -428,7 +429,7 @@ class ExtensionSelectorDialog(QDialog):
     def __init__(self, extensions: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("SELECT EXTENSIONS")
-        self.resize(600, 290)
+        self.resize(600, 240)
         self.setStyleSheet(THEME)
 
         self.checkboxes: dict[str, QCheckBox] = {}
@@ -443,7 +444,7 @@ class ExtensionSelectorDialog(QDialog):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedHeight(120) # Fits up to 3 categorical horizontal rows beautifully
+        scroll.setFixedHeight(120) # Fits categorical rows beautifully with scroll options
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}")
@@ -458,8 +459,12 @@ class ExtensionSelectorDialog(QDialog):
         scripts_found = []
         web_found     = []
         other_found   = []
+        no_ext_found  = []
 
         for ext in sorted(extensions, key=lambda x: x.lower()):
+            if ext == "":
+                no_ext_found.append(ext)
+                continue
             ext_lower = ext.lower()
             if ext_lower in SCRIPTS_EXTS:
                 scripts_found.append(ext)
@@ -506,32 +511,48 @@ class ExtensionSelectorDialog(QDialog):
             lbl_r3.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; min-width: 70px;")
             row3.addWidget(lbl_r3)
             for ext in other_found:
-                display_text = ext if ext else "(no extension)"
-                chk = QCheckBox(display_text)
+                chk = QCheckBox(ext)
                 chk.setChecked(True)
                 self.checkboxes[ext] = chk
                 row3.addWidget(chk)
             row3.addStretch()
             vbox.addLayout(row3)
 
+        # 4th Row: Files with no extension
+        if no_ext_found:
+            row4 = QHBoxLayout()
+            row4.setSpacing(18)
+            lbl_r4 = QLabel("NO EXT:  ")
+            lbl_r4.setStyleSheet(f"color: {CP_SUB}; font-weight: bold; min-width: 70px;")
+            row4.addWidget(lbl_r4)
+            for ext in no_ext_found:
+                chk = QCheckBox("(no extension)")
+                chk.setChecked(True)
+                self.checkboxes[ext] = chk
+                row4.addWidget(chk)
+            row4.addStretch()
+            vbox.addLayout(row4)
+
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll, 0)
 
-        # ── Buttons for selecting/unselecting all ──
-        btn_row_sel = QHBoxLayout()
+        # ── Consolidated Button Row at the Bottom ──
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(10)
+
+        # Selection Utilities (Left Aligned)
         btn_all = QPushButton("SELECT ALL")
         btn_none = QPushButton("SELECT NONE")
         btn_all.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_none.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_all.clicked.connect(self._select_all)
         btn_none.clicked.connect(self._select_none)
-        btn_row_sel.addWidget(btn_all)
-        btn_row_sel.addWidget(btn_none)
-        btn_row_sel.addStretch()
-        layout.addLayout(btn_row_sel)
+        btn_row.addWidget(btn_all)
+        btn_row.addWidget(btn_none)
 
-        # ── OK / CANCEL Buttons ──
-        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+
+        # Action Confirmation (Right Aligned)
         btn_ok = QPushButton("✔ OK")
         btn_cancel = QPushButton("✕ CANCEL")
         btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -544,8 +565,7 @@ class ExtensionSelectorDialog(QDialog):
 
         btn_ok.clicked.connect(self.accept)
         btn_cancel.clicked.connect(self.reject)
-
-        btn_row.addStretch()
+        
         btn_row.addWidget(btn_ok)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
