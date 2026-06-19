@@ -369,7 +369,7 @@ class ExtensionSelectorDialog(QDialog):
     def __init__(self, extensions: list[str], parent=None):
         super().__init__(parent)
         self.setWindowTitle("SELECT EXTENSIONS")
-        self.resize(500, 300)
+        self.resize(550, 200)
         self.setStyleSheet(THEME)
 
         self.checkboxes: dict[str, QCheckBox] = {}
@@ -388,20 +388,18 @@ class ExtensionSelectorDialog(QDialog):
 
         scroll_content = QWidget()
         scroll_content.setStyleSheet(f"background-color: {CP_PANEL};")
-        grid = QGridLayout(scroll_content)
-        grid.setContentsMargins(10, 10, 10, 10)
-        grid.setSpacing(10)
+        hbox = QHBoxLayout(scroll_content)
+        hbox.setContentsMargins(12, 10, 12, 10)
+        hbox.setSpacing(18)
 
         sorted_exts = sorted(extensions, key=lambda x: x.lower())
-        cols = 3
-        for i, ext in enumerate(sorted_exts):
+        for ext in sorted_exts:
             display_text = ext if ext else "(no extension)"
             chk = QCheckBox(display_text)
             chk.setChecked(True)
             self.checkboxes[ext] = chk
-            row = i // cols
-            col = i % cols
-            grid.addWidget(chk, row, col)
+            hbox.addWidget(chk)
+        hbox.addStretch()
 
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll, 1)
