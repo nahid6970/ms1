@@ -739,6 +739,18 @@ class PrepTab(QWidget):
         token_est = int(char_count / 3.5) if char_count > 0 else 0
         self.counter_lbl.setText(f"Size: {char_count:,} chars  |  ~{token_est:,} tokens")
 
+    def _filter_files(self):
+        query = self.search_input.text().strip().lower()
+        for i in range(self.file_list.count()):
+            item = self.file_list.item(i)
+            fp = item.data(Qt.ItemDataRole.UserRole)
+            if not fp:
+                continue
+            # Show the item if search query matches file path or is empty
+            match = (not query) or (query in fp.lower())
+            item.setHidden(not match)
+
+
 
     def _save_session(self):
         import json
@@ -778,6 +790,7 @@ class PrepTab(QWidget):
 
     def _add_file_item(self, fp: str):
         item = QListWidgetItem()
+        item.setData(Qt.ItemDataRole.UserRole, fp) # Store the file path for fast filtering
         widget = QWidget()
         widget.setStyleSheet("background: transparent;")
         hl = QHBoxLayout(widget)
@@ -834,6 +847,13 @@ class PrepTab(QWidget):
 
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
+
+        # File List Search/Filter Bar
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Filter files by name…")
+        self.search_input.textChanged.connect(self._filter_files)
+        vf.addWidget(self.search_input)
+
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
