@@ -50,8 +50,8 @@ QListWidget {{
     background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM};
     alternate-background-color: #1a1a1a;
 }}
-QListWidget::item:selected {{ background-color: {CP_CYAN}; color: #000; }}
-QListWidget::item:hover {{ background-color: #1e1e1e; }}
+QListWidget::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; border-left: 2px solid {CP_CYAN}; }}
+QListWidget::item:hover {{ background-color: #1a1a1a; }}
 QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0; }}
 QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; background: none; }}
@@ -70,6 +70,12 @@ GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
 RECENT_PATH  = os.path.join(_HERE, "recent_projects.json")
 SESSION_PATH = os.path.join(_HERE, "session.json")
 MAX_RECENT   = 8
+
+IGNORE_PATTERNS = {
+    '__pycache__', '.git', '.venv', 'venv', 'node_modules', '.idea', '.vscode',
+    'dist', 'build', '.mypy_cache', '.pytest_cache',
+}
+IGNORE_EXTS = {'.pyc', '.pyo', '.pyd', '.exe', '.dll', '.so', '.egg', '.db', '.lock'}
 
 def load_recent() -> list[str]:
     try:
@@ -319,20 +325,26 @@ class PrepTab(QWidget):
         vf = QVBoxLayout(grp_files)
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(120)
+        self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
         btn_add_dir = QPushButton("📁 ADD DIR")
         btn_recent  = QPushButton("🕘 RECENT")
-        btn_clear   = QPushButton("✕ CLEAR")
-        for b in (btn_add, btn_add_dir, btn_recent, btn_clear):
+        btn_remove  = QPushButton("✕ REMOVE SELECTED")
+        btn_clear   = QPushButton("✕ CLEAR ALL")
+        for b in (btn_add, btn_add_dir, btn_recent, btn_remove, btn_clear):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_remove.setStyleSheet(f"QPushButton {{ color: {CP_RED}; border-color: {CP_DIM}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #fff; border-color: {CP_RED}; }}")
         btn_add.clicked.connect(self._add_files)
         btn_add_dir.clicked.connect(self._add_dir)
         btn_recent.clicked.connect(self._show_recent)
+        btn_remove.clicked.connect(self._remove_selected)
         btn_clear.clicked.connect(self._clear_files)
         btn_row.addWidget(btn_add)
         btn_row.addWidget(btn_add_dir)
         btn_row.addWidget(btn_recent)
+        btn_row.addWidget(btn_remove)
         btn_row.addWidget(btn_clear)
         vf.addWidget(self.file_list)
         vf.addLayout(btn_row)
@@ -388,8 +400,12 @@ class PrepTab(QWidget):
 
     def _load_dir(self, d: str):
         count = 0
-        for root, _, fnames in os.walk(d):
+        for root, dirs, fnames in os.walk(d):
+            # Skip ignored directories in-place
+            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
             for fn in fnames:
+                if os.path.splitext(fn)[1].lower() in IGNORE_EXTS:
+                    continue
                 fp = os.path.join(root, fn)
                 if fp not in self.files:
                     self.files.append(fp)
@@ -399,6 +415,19 @@ class PrepTab(QWidget):
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
+
+    def _remove_selected(self):
+        selected = self.file_list.selectedItems()
+        if not selected:
+            self.status_cb("⚠ Select files to remove first")
+            return
+        for item in selected:
+            fp = item.text()
+            if fp in self.files:
+                self.files.remove(fp)
+            self.file_list.takeItem(self.file_list.row(item))
+        self._save_session()
+        self.status_cb(f"Removed {len(selected)} file(s)")
 
     def _show_recent(self):
         btn = self.sender()
