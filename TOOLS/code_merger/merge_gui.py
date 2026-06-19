@@ -83,9 +83,14 @@ def load_recent() -> list[str]:
         import json
         with open(RECENT_PATH, 'r') as f:
             raw = json.load(f)
-        # Deduplicate by normalized path, preserve order
         seen, out = set(), []
-        for p in raw:
+        for item in raw:
+            if isinstance(item, dict):
+                p = item.get("path")
+            else:
+                p = item
+            if not p:
+                continue
             n = os.path.normpath(p)
             if n not in seen:
                 seen.add(n)
@@ -94,16 +99,78 @@ def load_recent() -> list[str]:
     except Exception:
         return []
 
-def save_recent(paths: list[str]):
+def load_recent_details() -> list[dict]:
+    try:
+        import json
+        with open(RECENT_PATH, 'r') as f:
+            raw = json.load(f)
+        out = []
+        seen = set()
+        for item in raw:
+            if isinstance(item, dict):
+                p = item.get("path")
+                files = item.get("files", [])
+                extensions = item.get("extensions", [])
+            else:
+                p = item
+                files = []
+                extensions = []
+            if not p:
+                continue
+            n = os.path.normpath(p)
+            if n not in seen:
+                seen.add(n)
+                out.append({"path": n, "files": files, "extensions": extensions})
+        return out
+    except Exception:
+        return []
+
+def save_recent(items: list[dict]):
     import json
     with open(RECENT_PATH, 'w') as f:
-        json.dump(paths, f, indent=2)
+        json.dump(items, f, indent=2)
 
-def add_recent(path: str):
+def add_recent(path: str, files: list[str] = None, extensions: list[str] = None):
     path = os.path.normpath(path)
-    items = [os.path.normpath(p) for p in load_recent() if os.path.normpath(p) != path]
-    items.insert(0, path)
-    save_recent(items[:MAX_RECENT])
+
+    current = load_recent_details()
+    
+    # Locate existing entry to avoid overwriting previously stored selection details
+    existing = None
+    for item in current:
+        if os.path.normpath(item["path"]) == path:
+            existing = item
+            break
+
+    # If no files/extensions are passed, preserve existing details if available
+    if not files:
+        if existing and existing.get("files"):
+            files = existing["files"]
+    if not extensions:
+        if existing and existing.get("extensions"):
+            extensions = existing["extensions"]
+
+    if files is None:
+        files = []
+    if extensions is None:
+        extensions = []
+
+    normalized_files = [os.path.normpath(f) for f in files]
+
+    # Remove existing entry to move it to the top of the list
+    current = [item for item in current if os.path.normpath(item["path"]) != path]
+    current.insert(0, {
+        "path": path,
+        "files": normalized_files,
+        "extensions": extensions
+    })
+    save_recent(current[:MAX_RECENT])
+
+def remove_recent(path: str):
+    path = os.path.normpath(path)
+    current = load_recent_details()
+    current = [item for item in current if os.path.normpath(item["path"]) != path]
+    save_recent(current)
 
 # ── MERGE LOGIC ───────────────────────────────────────────────────────────────
 _TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
@@ -237,16 +304,19 @@ def _backup(fpath: str):
 
 # ── RECENT POPUP ─────────────────────────────────────────────────────────────
 class RecentPopup(QFrame):
-    def __init__(self, parent, on_load, on_remove):
+    def __init__(self, parent, on_load, on_load_specific, on_remove):
         super().__init__(parent, Qt.WindowType.Popup)
-        self.on_load   = on_load
-        self.on_remove = on_remove
+        self.on_load          = on_load
+        self.on_load_specific = on_load_specific
+        self.on_remove        = on_remove
         self.setStyleSheet(f"""
             QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
             QPushButton {{ background: transparent; border: none; color: #E0E0E0;
                            text-align: left; padding: 4px 8px; font-family: Consolas; font-size: 9pt; }}
             QPushButton:hover {{ background: #1e1e1e; color: #00F0FF; }}
-            QPushButton#remove {{ color: #FF003C; padding: 4px 6px; }}
+            QPushButton#play {{ color: {CP_GREEN}; padding: 4px 6px; text-align: center; }}
+            QPushButton#play:hover {{ background: {CP_GREEN}; color: #000; }}
+            QPushButton#remove {{ color: #FF003C; padding: 4px 6px; text-align: center; }}
             QPushButton#remove:hover {{ background: #FF003C; color: #000; }}
         """)
         self._build()
@@ -255,26 +325,40 @@ class RecentPopup(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        items = load_recent()
+        items = load_recent_details()
         if not items:
             lbl = QLabel("  No recent projects")
             lbl.setStyleSheet("color: #808080; padding: 8px; font-family: Consolas;")
             layout.addWidget(lbl)
             return
-        for path in items:
+        for item in items:
+            path = item["path"]
+            files = item["files"]
+            extensions = item.get("extensions", [])
+
             row = QWidget()
             row.setStyleSheet("background: transparent;")
             hl = QHBoxLayout(row)
             hl.setContentsMargins(0, 0, 0, 0)
             hl.setSpacing(0)
+
             btn_load = QPushButton(path)
             btn_load.setMinimumWidth(300)
             btn_load.clicked.connect(lambda _, p=path: (self.close(), self.on_load(p)))
+
+            btn_play = QPushButton("▶")
+            btn_play.setObjectName("play")
+            btn_play.setFixedWidth(28)
+            btn_play.setToolTip("Open only the files matching the extensions previously selected for this project")
+            btn_play.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load_specific(p, f, e)))
+
             btn_rem  = QPushButton("✕")
             btn_rem.setObjectName("remove")
             btn_rem.setFixedWidth(28)
             btn_rem.clicked.connect(lambda _, p=path: (self.close(), self.on_remove(p)))
+
             hl.addWidget(btn_load)
+            hl.addWidget(btn_play)
             hl.addWidget(btn_rem)
             layout.addWidget(row)
         self.adjustSize()
@@ -577,6 +661,8 @@ class PrepTab(QWidget):
 
     def _load_dir(self, d: str, selected_exts: set[str] = None):
         count = 0
+        added_files = []
+        discovered_exts = set()
         for root, dirs, fnames in os.walk(d):
             # Skip ignored directories in-place
             dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
@@ -584,25 +670,49 @@ class PrepTab(QWidget):
                 ext = os.path.splitext(fn)[1].lower()
                 if ext in IGNORE_EXTS:
                     continue
+                discovered_exts.add(ext)
                 if selected_exts is not None and ext not in selected_exts:
                     continue
                 fp = os.path.join(root, fn)
+                added_files.append(fp)
                 if fp not in self.files:
                     self.files.append(fp)
                     self._add_file_item(fp)
                     count += 1
-        add_recent(d)
+        
+        exts_list = list(selected_exts) if selected_exts is not None else list(discovered_exts)
+        add_recent(d, added_files, exts_list)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
+
+    def _load_specific_files(self, d: str, files: list[str], extensions: list[str]):
+        if extensions:
+            # Re-load the directory filtering specifically by the stored extensions
+            self._load_dir(d, set(extensions))
+        elif files:
+            # Fallback to absolute file paths list if no extensions were registered
+            count = 0
+            for fp in files:
+                if os.path.exists(fp) and fp not in self.files:
+                    self.files.append(fp)
+                    self._add_file_item(fp)
+                    count += 1
+            add_recent(d, files, [])
+            self.status_cb(f"Restored {count} specific file(s) for project")
+            self._update_root()
+            self._save_session()
+        else:
+            self._load_dir(d)
 
     def _show_recent(self):
         btn = self.sender()
         popup = RecentPopup(
             self,
             on_load=self._load_dir,
+            on_load_specific=self._load_specific_files,
             on_remove=lambda p: (
-                save_recent([x for x in load_recent() if os.path.normpath(x) != os.path.normpath(p)]),
+                remove_recent(p),
                 self.status_cb(f"Removed: {p}")
             )
         )
