@@ -394,17 +394,17 @@ class PrepTab(QWidget):
         self._save_session()
 
     def _add_file_row(self, fp: str):
+        from PyQt6.QtCore import QSize
         item = QListWidgetItem(self.file_list)
+        item.setSizeHint(QSize(100, 26))
         row = QWidget()
-        row.setStyleSheet("background: transparent;")
+        row.setStyleSheet(f"QWidget {{ background-color: {CP_PANEL}; }} QLabel {{ color: {CP_TEXT}; font-family: Consolas; font-size: 9pt; }}")
         hl = QHBoxLayout(row)
-        hl.setContentsMargins(4, 0, 0, 0)
+        hl.setContentsMargins(6, 2, 2, 2)
         hl.setSpacing(0)
         lbl = QLabel(fp)
-        lbl.setStyleSheet(f"color: {CP_TEXT}; font-family: Consolas; font-size: 9pt; background: transparent;")
         btn_x = QPushButton("✕")
-        btn_x.setFixedWidth(24)
-        btn_x.setFixedHeight(20)
+        btn_x.setFixedSize(22, 18)
         btn_x.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_x.setStyleSheet(f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; font-size: 9pt; }}"
                             f"QPushButton:hover {{ color: {CP_RED}; }}")
@@ -412,7 +412,6 @@ class PrepTab(QWidget):
         hl.addWidget(lbl)
         hl.addStretch()
         hl.addWidget(btn_x)
-        item.setSizeHint(row.sizeHint())
         self.file_list.setItemWidget(item, row)
 
     def _remove_file(self, fp: str, item: QListWidgetItem):
