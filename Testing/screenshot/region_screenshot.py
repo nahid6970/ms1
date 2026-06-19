@@ -194,7 +194,7 @@ class FolderChooser:
         self.list_container.update_idletasks()
         # Increased dimensions for 36pt icons
         width = 820 
-        total_items = len(self.folders) + 5 # CLIPBOARD, CLIP+PATH, CHROME, GOOGLE_IMG, ADD
+        total_items = len(self.folders) + 6 # CLIPBOARD, CLIP+PATH, CHROME, GOOGLE_IMG, EXTRACT TEXT, ADD
         rows = (total_items + 4) // 5
         height = 110 + (rows * 135)
         
@@ -214,6 +214,7 @@ class FolderChooser:
         all_items.append(("CLIP+PATH", "#00ffcc", "🔗", "CLIPBOARD_PATH", -3))
         all_items.append(("CHROME", "#ff9900", "🌏", "BROWSER", -2))
         all_items.append(("GOOGLE IMG", "#4285f4", "🔍", "GOOGLE_IMG", -4))
+        all_items.append(("EXTRACT TEXT", "#e040fb", "📝", "OCR", -5))
         
         for i, f_data in enumerate(self.folders):
             icon = f_data.get("icon", "\ueaf7")
@@ -274,6 +275,8 @@ class FolderChooser:
                     w.bind("<Button-1>", lambda e: self.open_in_browser())
                 elif card_type == "GOOGLE_IMG":
                     w.bind("<Button-1>", lambda e: self.google_image_search())
+                elif card_type == "OCR":
+                    w.bind("<Button-1>", lambda e: self.set_choice("OCR"))
                 else: # FOLDER
                     w.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
                     w.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
@@ -754,6 +757,92 @@ def _recv_exact(sock, length):
     return bytes(chunks)
 
 
+def _run_ocr_and_show(img):
+    import tkinter as tk
+    from tkinter import scrolledtext, messagebox
+
+    loading_root = tk.Toplevel()
+    loading_root.title("OCR Processing")
+    loading_root.geometry("350x120")
+    loading_root.config(bg="#0e0e0e")
+    loading_root.attributes('-topmost', True)
+    
+    ws = loading_root.winfo_screenwidth()
+    hs = loading_root.winfo_screenheight()
+    x = (ws/2) - (350/2)
+    y = (hs/2) - (120/2)
+    loading_root.geometry(f"350x120+{int(x)}+{int(y)}")
+
+    font_name = "JetBrainsMono NFP"
+    lbl = tk.Label(loading_root, text="Extracting English/Bangla text...\nPlease wait.", 
+                   font=(font_name, 10), bg="#0e0e0e", fg="#e040fb")
+    lbl.pack(expand=True)
+    loading_root.update()
+
+    text = ""
+    error = None
+
+    try:
+        import numpy as np
+        import easyocr
+        img_np = np.array(img)
+        reader = easyocr.Reader(['bn', 'en'])
+        results = reader.readtext(img_np, detail=0)
+        text = "\n".join(results)
+    except ImportError:
+        try:
+            import pytesseract
+            text = pytesseract.image_to_string(img, lang='ben+eng')
+        except ImportError:
+            error = "Could not import 'easyocr' or 'pytesseract'.\n\nPlease install easyocr with English and Bangla support:\npip install easyocr torch torchvision"
+        except Exception as pe:
+            error = f"Pytesseract error: {pe}\n\nPlease install easyocr:\npip install easyocr torch torchvision"
+    except Exception as e:
+        error = f"OCR Error: {e}"
+
+    loading_root.destroy()
+
+    result_root = tk.Tk()
+    result_root.title("OCR Extraction Results")
+    result_root.geometry("600x450")
+    result_root.config(bg="#0e0e0e")
+    result_root.attributes('-topmost', True)
+    
+    rx = (ws/2) - (600/2)
+    ry = (hs/2) - (450/2)
+    result_root.geometry(f"600x450+{int(rx)}+{int(ry)}")
+
+    title = tk.Label(result_root, text="EXTRACTED TEXT (EN/BN)", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
+    title.pack(pady=10)
+
+    text_area = scrolledtext.ScrolledText(result_root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
+    text_area.pack(fill="both", expand=True, padx=15, pady=5)
+
+    if error:
+        text_area.insert(tk.END, f"Error/Status:\n{error}")
+    else:
+        text_area.insert(tk.END, text)
+
+    btn_frame = tk.Frame(result_root, bg="#0e0e0e")
+    btn_frame.pack(fill="x", pady=10)
+
+    def copy_to_clipboard():
+        content = text_area.get("1.0", tk.END).strip()
+        result_root.clipboard_clear()
+        result_root.clipboard_append(content)
+        result_root.update()
+        messagebox.showinfo("Success", "Copied to clipboard!", parent=result_root)
+
+    copy_btn = tk.Button(btn_frame, text="COPY TO CLIPBOARD", font=(font_name, 9), bg="#1a1a1a", fg="#e040fb", activebackground="#e040fb", activeforeground="black", relief="flat", padx=15, pady=5, command=copy_to_clipboard)
+    copy_btn.pack(side="left", padx=15)
+
+    close_btn = tk.Button(btn_frame, text="CLOSE", font=(font_name, 9), bg="#1a1a1a", fg="#666666", activebackground="#ff4444", activeforeground="white", relief="flat", padx=15, pady=5, command=result_root.destroy)
+    close_btn.pack(side="right", padx=15)
+
+    result_root.bind("<Escape>", lambda e: result_root.destroy())
+    result_root.mainloop()
+
+
 def main():
     try:
         folders = load_folders()
@@ -781,6 +870,8 @@ def main():
             filepath = os.path.join(save_dir, filename)
             img.save(filepath)
             send_to_clipboard(img, filepath)
+        elif folder == "OCR":
+            _run_ocr_and_show(img)
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"screenshot_{timestamp}.png"
