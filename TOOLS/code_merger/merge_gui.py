@@ -313,7 +313,9 @@ class PrepTab(QWidget):
         task = self.task_input.toPlainText().strip()
         parts = [guide]
         if task:
-            parts.append(f"\n## MY REQUEST\n\n{task}\n")
+            parts.append(f"## MY REQUEST\n\n{task}\n\n---")
+        else:
+            parts.append("## MY REQUEST\n\n*(describe your changes here before sending)*\n\n---")
 
         for fp in self.files:
             try:

@@ -94,6 +94,18 @@ def greet(name: str) -> None:
 @@END
 ```
 
+## RESPONSE WRAPPER
+
+Always wrap your **entire response** in a single markdown code block like this:
+
+\`\`\`
+@@FILE: ...
+...
+@@END
+\`\`\`
+
+This ensures copy-paste preserves indentation correctly regardless of the web UI used.
+
 ---
 
 ## NOW, HERE ARE MY FILES:
