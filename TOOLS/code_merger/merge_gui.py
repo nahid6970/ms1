@@ -164,124 +164,68 @@ def parse_ai_response(text: str) -> list[dict]:
     return changes
 
 
-def apply_changes(changes: list[dict], root: str, backup: bool) -> tuple[list[str], list[str]]:
-    """Apply parsed changes. Returns a tuple of (list of result messages, list of failure details)."""
+def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
+    """Apply parsed changes. Returns list of result messages."""
     results = []
-    failures = []
     for ch in changes:
         fpath = os.path.join(root, ch["file"].lstrip("/\\"))
         mode  = ch["mode"]
 
         if mode == "replace_file":
-            try:
-                if backup and os.path.exists(fpath):
-                    _backup(fpath)
-                os.makedirs(os.path.dirname(fpath), exist_ok=True)
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(ch["to"])
-                results.append(f"✔ replace_file  → {ch['file']}")
-            except Exception as e:
-                results.append(f"✘ ERROR         → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (replace_file)\nError writing file: {e}\n")
+            if backup and os.path.exists(fpath):
+                _backup(fpath)
+            os.makedirs(os.path.dirname(fpath), exist_ok=True)
+            with open(fpath, 'w', encoding='utf-8') as f:
+                f.write(ch["to"])
+            results.append(f"✔ replace_file  → {ch['file']}")
 
         elif mode == "replace_block":
             if not os.path.exists(fpath):
                 results.append(f"✘ NOT FOUND     → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (replace_block)\nFile does not exist: {fpath}\n")
                 continue
-            try:
-                with open(fpath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            except Exception as e:
-                results.append(f"✘ ERROR READING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (replace_block)\nError reading file: {e}\n")
-                continue
-
+            with open(fpath, 'r', encoding='utf-8') as f:
+                content = f.read()
             if ch["from"] not in content:
                 results.append(f"✘ BLOCK MISSING → {ch['file']}")
-                failures.append(
-                    f"### FAILURE in {ch['file']} (replace_block)\n"
-                    f"The following 
-@@FROM block was not found in the file:\n"
-                    f"```\n{ch['from']}\n```\n"
-                )
                 continue
             if backup:
                 _backup(fpath)
-            try:
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(content.replace(ch["from"], ch["to"], 1))
-                results.append(f"✔ replace_block → {ch['file']}")
-            except Exception as e:
-                results.append(f"✘ ERROR WRITING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (replace_block)\nError writing file: {e}\n")
+            with open(fpath, 'w', encoding='utf-8') as f:
+                f.write(content.replace(ch["from"], ch["to"], 1))
+            results.append(f"✔ replace_block → {ch['file']}")
 
         elif mode == "insert_after":
             if not os.path.exists(fpath):
                 results.append(f"✘ NOT FOUND     → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (insert_after)\nFile does not exist: {fpath}\n")
                 continue
-            try:
-                with open(fpath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            except Exception as e:
-                results.append(f"✘ ERROR READING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (insert_after)\nError reading file: {e}\n")
-                continue
-
+            with open(fpath, 'r', encoding='utf-8') as f:
+                content = f.read()
             if ch["after"] not in content:
                 results.append(f"✘ ANCHOR MISSING→ {ch['file']}")
-                failures.append(
-                    f"### FAILURE in {ch['file']} (insert_after)\n"
-                    f"The following 
-@@AFTER anchor line was not found in the file:\n"
-                    f"```\n{ch['after']}\n```\n"
-                )
                 continue
             if backup:
                 _backup(fpath)
-            try:
-                new = content.replace(ch["after"], ch["after"] + '\n' + ch["insert"], 1)
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(new)
-                results.append(f"✔ insert_after  → {ch['file']}")
-            except Exception as e:
-                results.append(f"✘ ERROR WRITING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (insert_after)\nError writing file: {e}\n")
+            new = content.replace(ch["after"], ch["after"] + '\n' + ch["insert"], 1)
+            with open(fpath, 'w', encoding='utf-8') as f:
+                f.write(new)
+            results.append(f"✔ insert_after  → {ch['file']}")
 
         elif mode == "delete_block":
             if not os.path.exists(fpath):
                 results.append(f"✘ NOT FOUND     → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (delete_block)\nFile does not exist: {fpath}\n")
                 continue
-            try:
-                with open(fpath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            except Exception as e:
-                results.append(f"✘ ERROR READING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (delete_block)\nError reading file: {e}\n")
-                continue
-
+            with open(fpath, 'r', encoding='utf-8') as f:
+                content = f.read()
             if ch["from"] not in content:
                 results.append(f"✘ BLOCK MISSING → {ch['file']}")
-                failures.append(
-                    f"### FAILURE in {ch['file']} (delete_block)\n"
-                    f"The following 
-@@FROM block to delete was not found in the file:\n"
-                    f"```\n{ch['from']}\n```\n"
-                )
                 continue
             if backup:
                 _backup(fpath)
-            try:
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(content.replace(ch["from"], "", 1))
-                results.append(f"✔ delete_block  → {ch['file']}")
-            except Exception as e:
-                results.append(f"✘ ERROR WRITING → {ch['file']}")
-                failures.append(f"### FAILURE in {ch['file']} (delete_block)\nError writing file: {e}\n")
+            with open(fpath, 'w', encoding='utf-8') as f:
+                f.write(content.replace(ch["from"], "", 1))
+            results.append(f"✔ delete_block  → {ch['file']}")
 
-    return results, failures
+    return results
 
 
 def _backup(fpath: str):
@@ -742,19 +686,10 @@ class MergeTab(QWidget):
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
-        results, failures = apply_changes(self._pending_changes, root, self.chk_backup.isChecked())
+        results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked())
         ok  = sum(1 for r in results if r.startswith("✔"))
         err = len(results) - ok
-        
-        out_text = '\n'.join(results)
-        if failures:
-            out_text += "\n\n" + "="*60 + "\n"
-            out_text += "  FAILURE DIAGNOSTICS FOR YOUR NEXT AI PROMPT\n"
-            out_text += "  (Copy and paste this section to the AI to fix)\n"
-            out_text += "="*60 + "\n\n"
-            out_text += '\n'.join(failures)
-
-        self.result_out.setPlainText(out_text)
+        self.result_out.setPlainText('\n'.join(results))
         self.status_cb(f"Done — {ok} applied, {err} failed")
         self._pending_changes = []
 
