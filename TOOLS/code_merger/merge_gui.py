@@ -311,7 +311,7 @@ class PrepTab(QWidget):
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
-                    self.file_list.addItem(QListWidgetItem(fp))
+                    self._add_file_row(fp)
             if self.files:
                 self._update_root()
                 self.status_cb(f"Restored {len(self.files)} file(s) from last session")
@@ -334,26 +334,18 @@ class PrepTab(QWidget):
         vf = QVBoxLayout(grp_files)
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(120)
-        self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
         btn_add_dir = QPushButton("📁 ADD DIR")
         btn_recent  = QPushButton("🕘 RECENT")
-        btn_remove  = QPushButton("✕ REMOVE SELECTED")
         btn_clear   = QPushButton("✕ CLEAR ALL")
-        for b in (btn_add, btn_add_dir, btn_recent, btn_remove, btn_clear):
-            b.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_remove.setStyleSheet(f"QPushButton {{ color: {CP_RED}; border-color: {CP_DIM}; }}"
-                                 f"QPushButton:hover {{ background: {CP_RED}; color: #fff; border-color: {CP_RED}; }}")
         btn_add.clicked.connect(self._add_files)
         btn_add_dir.clicked.connect(self._add_dir)
         btn_recent.clicked.connect(self._show_recent)
-        btn_remove.clicked.connect(self._remove_selected)
         btn_clear.clicked.connect(self._clear_files)
         btn_row.addWidget(btn_add)
         btn_row.addWidget(btn_add_dir)
         btn_row.addWidget(btn_recent)
-        btn_row.addWidget(btn_remove)
         btn_row.addWidget(btn_clear)
         vf.addWidget(self.file_list)
         vf.addLayout(btn_row)
@@ -396,10 +388,39 @@ class PrepTab(QWidget):
         for f in files:
             if f not in self.files:
                 self.files.append(f)
-                self.file_list.addItem(QListWidgetItem(f))
+                self._add_file_row(f)
         self.status_cb(f"{len(self.files)} file(s) loaded")
         self._update_root()
         self._save_session()
+
+    def _add_file_row(self, fp: str):
+        item = QListWidgetItem(self.file_list)
+        row = QWidget()
+        row.setStyleSheet("background: transparent;")
+        hl = QHBoxLayout(row)
+        hl.setContentsMargins(4, 0, 0, 0)
+        hl.setSpacing(0)
+        lbl = QLabel(fp)
+        lbl.setStyleSheet(f"color: {CP_TEXT}; font-family: Consolas; font-size: 9pt; background: transparent;")
+        btn_x = QPushButton("✕")
+        btn_x.setFixedWidth(24)
+        btn_x.setFixedHeight(20)
+        btn_x.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_x.setStyleSheet(f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; font-size: 9pt; }}"
+                            f"QPushButton:hover {{ color: {CP_RED}; }}")
+        btn_x.clicked.connect(lambda _, f=fp, i=item: self._remove_file(f, i))
+        hl.addWidget(lbl)
+        hl.addStretch()
+        hl.addWidget(btn_x)
+        item.setSizeHint(row.sizeHint())
+        self.file_list.setItemWidget(item, row)
+
+    def _remove_file(self, fp: str, item: QListWidgetItem):
+        if fp in self.files:
+            self.files.remove(fp)
+        self.file_list.takeItem(self.file_list.row(item))
+        self._save_session()
+        self.status_cb(f"Removed: {os.path.basename(fp)}")
 
     def _add_dir(self):
         d = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -410,7 +431,6 @@ class PrepTab(QWidget):
     def _load_dir(self, d: str):
         count = 0
         for root, dirs, fnames in os.walk(d):
-            # Skip ignored directories in-place
             dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
             for fn in fnames:
                 if os.path.splitext(fn)[1].lower() in IGNORE_EXTS:
@@ -418,25 +438,12 @@ class PrepTab(QWidget):
                 fp = os.path.join(root, fn)
                 if fp not in self.files:
                     self.files.append(fp)
-                    self.file_list.addItem(QListWidgetItem(fp))
+                    self._add_file_row(fp)
                     count += 1
         add_recent(d)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
-
-    def _remove_selected(self):
-        selected = self.file_list.selectedItems()
-        if not selected:
-            self.status_cb("⚠ Select files to remove first")
-            return
-        for item in selected:
-            fp = item.text()
-            if fp in self.files:
-                self.files.remove(fp)
-            self.file_list.takeItem(self.file_list.row(item))
-        self._save_session()
-        self.status_cb(f"Removed {len(selected)} file(s)")
 
     def _show_recent(self):
         btn = self.sender()
