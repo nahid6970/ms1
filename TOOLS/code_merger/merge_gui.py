@@ -93,6 +93,40 @@ IGNORE_EXTS = {
     '.ttf', '.otf', '.woff', '.woff2', '.eot'
 }
 
+CUSTOM_IGNORED_EXTS = set()
+
+def load_custom_ignores():
+    global CUSTOM_IGNORED_EXTS
+    import json
+    try:
+        if os.path.exists(SESSION_PATH):
+            with open(SESSION_PATH, 'r') as f:
+                data = json.load(f)
+            ignores = data.get('custom_ignored_exts', [])
+            CUSTOM_IGNORED_EXTS = set(ignores)
+            IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+    except Exception:
+        pass
+
+def save_custom_ignores(ignores: list[str]):
+    global CUSTOM_IGNORED_EXTS
+    import json
+    CUSTOM_IGNORED_EXTS = set(ignores)
+    IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+    try:
+        data = {}
+        if os.path.exists(SESSION_PATH):
+            with open(SESSION_PATH, 'r') as f:
+                data = json.load(f)
+            if not isinstance(data, dict):
+                data = {}
+        data['custom_ignored_exts'] = list(CUSTOM_IGNORED_EXTS)
+        with open(SESSION_PATH, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
+
 def load_recent() -> list[str]:
     try:
         import json
@@ -418,6 +452,58 @@ class ExtensionSelectorDialog(QDialog):
 
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll, 1)
+
+
+# ── IGNORE LIST DIALOG ───────────────────────────────────────────────────────
+class IgnoreListDialog(QDialog):
+    def __init__(self, current_custom: list[str], parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("CUSTOM IGNORE EXTENSIONS")
+        self.resize(400, 150)
+        self.setStyleSheet(THEME)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        lbl = QLabel("Add extra extensions to ignore (comma-separated):")
+        lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        layout.addWidget(lbl)
+
+        self.input_field = QLineEdit()
+        self.input_field.setPlaceholderText("e.g. .mp3, .mp4, .ogg")
+        self.input_field.setText(", ".join(sorted(current_custom)))
+        layout.addWidget(self.input_field)
+
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ SAVE")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel.clicked.connect(self.reject)
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+    def get_extensions(self) -> list[str]:
+        raw = self.input_field.text()
+        exts = []
+        for x in raw.split(','):
+            cleaned = x.strip().lower()
+            if cleaned:
+                if not cleaned.startswith('.'):
+                    cleaned = '.' + cleaned
+                exts.append(cleaned)
+        return exts
+
 
         btn_row_sel = QHBoxLayout()
         btn_all = QPushButton("SELECT ALL")
@@ -965,6 +1051,32 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
         self._set_status("Ready")
 
+        # Corner layout container for multiple buttons
+        corner_widget = QWidget()
+        corner_layout = QHBoxLayout(corner_widget)
+        corner_layout.setContentsMargins(0, 0, 0, 0)
+        corner_layout.setSpacing(6)
+
+        btn_ignore = QPushButton("⚙ IGNORE LIST")
+        btn_ignore.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_ignore.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                color: {CP_SUB};
+                border: 1px solid {CP_DIM};
+                border-bottom: none;
+                padding: 6px 14px;
+                font-family: 'Consolas';
+                font-size: 10pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                color: {CP_CYAN};
+                background-color: {CP_BG};
+            }}
+        """)
+        btn_ignore.clicked.connect(self._manage_ignores)
+
         btn_restart = QPushButton("↺ RESTART")
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_restart.setStyleSheet(f"""
@@ -987,7 +1099,10 @@ class MainWindow(QMainWindow):
             }}
         """)
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
-        self.tabs.setCornerWidget(btn_restart, Qt.Corner.TopRightCorner)
+
+        corner_layout.addWidget(btn_ignore)
+        corner_layout.addWidget(btn_restart)
+        self.tabs.setCornerWidget(corner_widget, Qt.Corner.TopRightCorner)
 
         self.merge_tab = MergeTab(self._set_status)
         self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
@@ -995,11 +1110,19 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
         root_layout.addWidget(self.tabs)
 
+    def _manage_ignores(self):
+        dialog = IgnoreListDialog(list(CUSTOM_IGNORED_EXTS), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            new_exts = dialog.get_extensions()
+            save_custom_ignores(new_exts)
+            self._set_status(f"Updated ignore list with {len(new_exts)} custom extension(s)")
+
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
 
 
 if __name__ == "__main__":
+    load_custom_ignores()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     w = MainWindow()
