@@ -75,7 +75,15 @@ def load_recent() -> list[str]:
     try:
         import json
         with open(RECENT_PATH, 'r') as f:
-            return json.load(f)
+            raw = json.load(f)
+        # Deduplicate by normalized path, preserve order
+        seen, out = set(), []
+        for p in raw:
+            n = os.path.normpath(p)
+            if n not in seen:
+                seen.add(n)
+                out.append(n)
+        return out
     except Exception:
         return []
 
@@ -85,7 +93,8 @@ def save_recent(paths: list[str]):
         json.dump(paths, f, indent=2)
 
 def add_recent(path: str):
-    items = [p for p in load_recent() if p != path]
+    path = os.path.normpath(path)
+    items = [os.path.normpath(p) for p in load_recent() if os.path.normpath(p) != path]
     items.insert(0, path)
     save_recent(items[:MAX_RECENT])
 
@@ -355,10 +364,20 @@ class PrepTab(QWidget):
         menu.setStyleSheet(f"QMenu {{ background: #111111; color: #E0E0E0; border: 1px solid #00F0FF; }}"
                            f"QMenu::item:selected {{ background: #00F0FF; color: #000; }}")
         for path in items:
-            menu.addAction(path).setData(path)
+            sub = menu.addMenu(f"  {path}")
+            sub.setStyleSheet(menu.styleSheet())
+            load_a = sub.addAction("📁 Load this project")
+            load_a.setData(("load", path))
+            rem_a  = sub.addAction("✕ Remove from list")
+            rem_a.setData(("remove", path))
         chosen = menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
         if chosen:
-            self._load_dir(chosen.data())
+            action, path = chosen.data()
+            if action == "load":
+                self._load_dir(path)
+            elif action == "remove":
+                save_recent([p for p in load_recent() if os.path.normpath(p) != os.path.normpath(path)])
+                self.status_cb(f"Removed from recent: {path}")
 
     def _clear_files(self):
         self.files.clear()
