@@ -133,7 +133,9 @@
   }
   function onClick(e) {
     if (panel && panel.contains(e.target)) return;
-    e.preventDefault(); e.stopPropagation(); showPanel(hovered || e.target);
+    e.preventDefault(); e.stopPropagation();
+    showPanel(hovered || e.target);
+    stopSelecting();
   }
   function onKeyDown(e) { if (e.key === 'Escape') deactivate(); }
 
@@ -142,6 +144,7 @@
   function activate() {
     if (active) return;
     active = true;
+    if (panel) { panel.remove(); panel = null; }
     cursorStyle = document.createElement('style');
     cursorStyle.textContent = '*{cursor:crosshair!important}';
     document.head.appendChild(cursorStyle);
@@ -150,14 +153,18 @@
     document.addEventListener('keydown', onKeyDown, true);
   }
 
-  function deactivate() {
+  function stopSelecting() {
     active = false;
     if (cursorStyle) { cursorStyle.remove(); cursorStyle = null; }
-    if (overlayEl) { overlayEl.remove(); overlayEl = null; }
+    hideOverlay();
     document.removeEventListener('mouseover', onMouseOver, true);
     document.removeEventListener('click', onClick, true);
+  }
+
+  function deactivate() {
+    stopSelecting();
+    if (overlayEl) { overlayEl.remove(); overlayEl = null; }
     document.removeEventListener('keydown', onKeyDown, true);
-    hideOverlay();
     if (panel) { panel.remove(); panel = null; }
   }
 
