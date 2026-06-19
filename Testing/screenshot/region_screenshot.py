@@ -761,23 +761,26 @@ def _run_ocr_and_show(img):
     import tkinter as tk
     from tkinter import scrolledtext, messagebox
 
-    loading_root = tk.Toplevel()
-    loading_root.title("OCR Processing")
-    loading_root.geometry("350x120")
-    loading_root.config(bg="#0e0e0e")
-    loading_root.attributes('-topmost', True)
+    root = tk.Tk()
+    root.withdraw()
+
+    loading = tk.Toplevel(root)
+    loading.title("OCR Processing")
+    loading.geometry("350x120")
+    loading.config(bg="#0e0e0e")
+    loading.attributes('-topmost', True)
     
-    ws = loading_root.winfo_screenwidth()
-    hs = loading_root.winfo_screenheight()
+    ws = loading.winfo_screenwidth()
+    hs = loading.winfo_screenheight()
     x = (ws/2) - (350/2)
     y = (hs/2) - (120/2)
-    loading_root.geometry(f"350x120+{int(x)}+{int(y)}")
+    loading.geometry(f"350x120+{int(x)}+{int(y)}")
 
     font_name = "JetBrainsMono NFP"
-    lbl = tk.Label(loading_root, text="Extracting English/Bangla text...\nPlease wait.", 
+    lbl = tk.Label(loading, text="Extracting English/Bangla text...\nPlease wait.", 
                    font=(font_name, 10), bg="#0e0e0e", fg="#e040fb")
     lbl.pack(expand=True)
-    loading_root.update()
+    loading.update()
 
     text = ""
     error = None
@@ -800,22 +803,22 @@ def _run_ocr_and_show(img):
     except Exception as e:
         error = f"OCR Error: {e}"
 
-    loading_root.destroy()
+    loading.destroy()
 
-    result_root = tk.Tk()
-    result_root.title("OCR Extraction Results")
-    result_root.geometry("600x450")
-    result_root.config(bg="#0e0e0e")
-    result_root.attributes('-topmost', True)
+    root.title("OCR Extraction Results")
+    root.geometry("600x450")
+    root.config(bg="#0e0e0e")
+    root.attributes('-topmost', True)
     
     rx = (ws/2) - (600/2)
     ry = (hs/2) - (450/2)
-    result_root.geometry(f"600x450+{int(rx)}+{int(ry)}")
+    root.geometry(f"600x450+{int(rx)}+{int(ry)}")
+    root.deiconify()
 
-    title = tk.Label(result_root, text="EXTRACTED TEXT (EN/BN)", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
+    title = tk.Label(root, text="EXTRACTED TEXT (EN/BN)", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
     title.pack(pady=10)
 
-    text_area = scrolledtext.ScrolledText(result_root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
+    text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
     text_area.pack(fill="both", expand=True, padx=15, pady=5)
 
     if error:
@@ -823,24 +826,24 @@ def _run_ocr_and_show(img):
     else:
         text_area.insert(tk.END, text)
 
-    btn_frame = tk.Frame(result_root, bg="#0e0e0e")
+    btn_frame = tk.Frame(root, bg="#0e0e0e")
     btn_frame.pack(fill="x", pady=10)
 
     def copy_to_clipboard():
         content = text_area.get("1.0", tk.END).strip()
-        result_root.clipboard_clear()
-        result_root.clipboard_append(content)
-        result_root.update()
-        messagebox.showinfo("Success", "Copied to clipboard!", parent=result_root)
+        root.clipboard_clear()
+        root.clipboard_append(content)
+        root.update()
+        messagebox.showinfo("Success", "Copied to clipboard!", parent=root)
 
     copy_btn = tk.Button(btn_frame, text="COPY TO CLIPBOARD", font=(font_name, 9), bg="#1a1a1a", fg="#e040fb", activebackground="#e040fb", activeforeground="black", relief="flat", padx=15, pady=5, command=copy_to_clipboard)
     copy_btn.pack(side="left", padx=15)
 
-    close_btn = tk.Button(btn_frame, text="CLOSE", font=(font_name, 9), bg="#1a1a1a", fg="#666666", activebackground="#ff4444", activeforeground="white", relief="flat", padx=15, pady=5, command=result_root.destroy)
+    close_btn = tk.Button(btn_frame, text="CLOSE", font=(font_name, 9), bg="#1a1a1a", fg="#666666", activebackground="#ff4444", activeforeground="white", relief="flat", padx=15, pady=5, command=root.destroy)
     close_btn.pack(side="right", padx=15)
 
-    result_root.bind("<Escape>", lambda e: result_root.destroy())
-    result_root.mainloop()
+    root.bind("<Escape>", lambda e: root.destroy())
+    root.mainloop()
 
 
 def main():
