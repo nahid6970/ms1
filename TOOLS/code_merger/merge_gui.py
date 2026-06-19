@@ -312,10 +312,6 @@ class PrepTab(QWidget):
 
         task = self.task_input.toPlainText().strip()
         parts = [guide]
-        if task:
-            parts.append(f"## MY REQUEST\n\n{task}\n\n---")
-        else:
-            parts.append("## MY REQUEST\n\n*(describe your changes here before sending)*\n\n---")
 
         for fp in self.files:
             try:
@@ -325,6 +321,11 @@ class PrepTab(QWidget):
                 parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
             except Exception as e:
                 parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
+
+        if task:
+            parts.append(f"\n---\n## MY REQUEST\n\n{task}")
+        else:
+            parts.append(f"\n---\n## MY REQUEST\n\n*(describe your changes here before sending)*")
 
         self.prompt_out.setPlainText('\n'.join(parts))
         self.status_cb("Prompt generated — copy and paste into AI")
