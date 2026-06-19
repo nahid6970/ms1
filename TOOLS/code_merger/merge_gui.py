@@ -732,6 +732,14 @@ class PrepTab(QWidget):
             selected_exts = dialog.get_selected()
             self._load_dir(d, selected_exts, overwrite_recent=True)
 
+    def _update_counter(self):
+        text = self.prompt_out.toPlainText()
+        char_count = len(text)
+        # Using a solid /3.5 character ratio as a token proxy for code and natural text
+        token_est = int(char_count / 3.5) if char_count > 0 else 0
+        self.counter_lbl.setText(f"Size: {char_count:,} chars  |  ~{token_est:,} tokens")
+
+
     def _save_session(self):
         import json
         try:
@@ -871,7 +879,14 @@ class PrepTab(QWidget):
         self.prompt_out = QTextEdit()
         self.prompt_out.setReadOnly(True)
         self.prompt_out.setPlaceholderText("Click GENERATE to build prompt…")
+        self.prompt_out.textChanged.connect(self._update_counter)
         vo.addWidget(self.prompt_out)
+
+        # Live Token / Character Counter Label
+        self.counter_lbl = QLabel("Size: 0 chars  |  ~0 tokens")
+        self.counter_lbl.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt; font-family: 'Consolas';")
+        vo.addWidget(self.counter_lbl)
+
         right_layout.addWidget(grp_out, 1)
 
         # Buttons
