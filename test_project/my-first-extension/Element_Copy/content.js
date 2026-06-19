@@ -82,8 +82,17 @@
     if (panel) panel.remove();
     panel = document.createElement('div');
     panel.id = '__insp_panel';
+    
+    const crosshairSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; display: block;"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`;
+
     panel.innerHTML = `
-      <div id="__insp_header"><span>🔍 Inspector</span><button id="__insp_close">✕</button></div>
+      <div id="__insp_header">
+        <span>🔍 Inspector</span>
+        <div id="__insp_actions">
+          <button id="__insp_reselect" title="Inspect another element">${crosshairSvg}</button>
+          <button id="__insp_close" title="Close">✕</button>
+        </div>
+      </div>
       <div id="__insp_tag">&lt;${el.tagName.toLowerCase()}&gt;</div>
       <div id="__insp_rows"></div>`;
     document.body.appendChild(panel);
@@ -109,6 +118,7 @@
       rows.appendChild(row);
     });
 
+    panel.querySelector('#__insp_reselect').onclick = activate;
     panel.querySelector('#__insp_close').onclick = deactivate;
 
     let ox, oy, dragging = false;
