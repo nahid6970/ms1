@@ -74,9 +74,24 @@ MAX_RECENT   = 8
 
 IGNORE_PATTERNS = {
     '__pycache__', '.git', '.venv', 'venv', 'node_modules', '.idea', '.vscode',
-    'dist', 'build', '.mypy_cache', '.pytest_cache',
+    'dist', 'build', '.mypy_cache', '.pytest_cache', '.next', '.nuxt', 'out', 
+    'coverage', '.DS_Store', 'Thumbs.db'
 }
-IGNORE_EXTS = {'.pyc', '.pyo', '.pyd', '.exe', '.dll', '.so', '.egg', '.db', '.lock'}
+IGNORE_EXTS = {
+    # Compiled / Binaries
+    '.pyc', '.pyo', '.pyd', '.exe', '.dll', '.so', '.egg', '.db', '.lock', 
+    '.class', '.jar', '.war', '.sqlite', '.sqlite3',
+    # Images / Graphics
+    '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.bmp', '.tiff',
+    # Audio / Video
+    '.mp3', '.wav', '.ogg', '.mp4', '.avi', '.mkv', '.mov', '.webm',
+    # Compressed Archives
+    '.zip', '.tar', '.gz', '.rar', '.7z',
+    # Documents
+    '.pdf', '.docx', '.xlsx', '.pptx',
+    # Fonts
+    '.ttf', '.otf', '.woff', '.woff2', '.eot'
+}
 
 def load_recent() -> list[str]:
     try:
@@ -811,20 +826,8 @@ class MergeTab(QWidget):
         grp_resp = QGroupBox("AI RESPONSE  (paste here — supports multiple partial blocks)")
         vr = QVBoxLayout(grp_resp)
         self.response_input = QTextEdit()
-        self.response_input.setPlaceholderText(
-            "Paste the AI's response here.\n"
-            "If the AI gave you multiple separate blocks/messages, use APPEND FROM CLIPBOARD "
-            "to accumulate them all before parsing."
-        )
+        self.response_input.setPlaceholderText("Paste the AI's response here…")
         vr.addWidget(self.response_input)
-        paste_row = QHBoxLayout()
-        btn_paste_append = QPushButton("📋 APPEND FROM CLIPBOARD")
-        btn_paste_append.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_paste_append.setToolTip("Appends clipboard content to whatever is already in the box")
-        btn_paste_append.clicked.connect(self._append_clipboard)
-        paste_row.addWidget(btn_paste_append)
-        paste_row.addStretch()
-        vr.addLayout(paste_row)
         layout.addWidget(grp_resp)
 
         # Options
@@ -880,15 +883,6 @@ class MergeTab(QWidget):
         add_recent(path)
 
     
-    def _append_clipboard(self):
-        clip = QApplication.clipboard().text()
-        if not clip:
-            self.status_cb("⚠ Clipboard is empty")
-            return
-        current = self.response_input.toPlainText()
-        separator = "\n" if current and not current.endswith("\n") else ""
-        self.response_input.setPlainText(current + separator + clip)
-        self.status_cb("✔ Appended clipboard content")
 
     def _parse(self):
         text = self.response_input.toPlainText().strip()
