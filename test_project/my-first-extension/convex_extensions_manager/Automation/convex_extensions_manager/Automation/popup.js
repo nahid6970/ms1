@@ -1,3 +1,5 @@
+let currentlyPickingStepId = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
   // Initialize UI components
   await initSettings();
@@ -181,13 +183,50 @@ async function deleteStep(stepId) {
   });
 }
 
+// Send message with fallback auto-injection
+function sendTabMessageWithInjection(tabId, message, callback) {
+  chrome.tabs.sendMessage(tabId, message, (response) => {
+    if (chrome.runtime.lastError) {
+      // Content script is not injected. Inject dynamically
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content.js']
+      }).then(() => {
+        return chrome.scripting.insertCSS({
+          target: { tabId: tabId },
+          files: ['content.css']
+        });
+      }).then(() => {
+        // Retry message delivery
+        chrome.tabs.sendMessage(tabId, message, (secondResponse) => {
+          if (chrome.runtime.lastError) {
+            console.warn("Failed to communicate with content script after injection:", chrome.runtime.lastError.message);
+          } else if (callback) {
+            callback(secondResponse);
+          }
+        });
+      }).catch(err => {
+        console.error("Automator injection failure:", err);
+        if (message.action === 'start_picker') {
+          chrome.storage.local.set({ pickingStepId: null });
+        }
+        alert("This page doesn't support element selection (e.g. system pages, new tabs, or extension stores). Please try on a standard web page.");
+      });
+    } else {
+      if (callback) {
+        callback(response);
+      }
+    }
+  });
+}
+
 // Picker trigger logic
 async function startPickMode(stepId) {
   chrome.storage.local.set({ pickingStepId: stepId }, async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) return;
     
-    chrome.tabs.sendMessage(tab.id, { action: 'start_picker' }, () => {
+    sendTabMessageWithInjection(tab.id, { action: 'start_picker' }, () => {
       // Close popup window to allow picker visibility on site
       window.close();
     });
@@ -207,7 +246,7 @@ async function startAutomation() {
     state.logs = state.logs || [];
     state.logs.push(`[Popup] Initiating click automation sequence...`);
     chrome.storage.local.set({ automationState: state }, () => {
-      chrome.tabs.sendMessage(tab.id, { action: 'trigger_run' });
+      sendTabMessageWithInjection(tab.id, { action: 'trigger_run' });
     });
   });
 }
@@ -216,7 +255,7 @@ async function startAutomation() {
 async function stopAutomation() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab) return;
-  chrome.tabs.sendMessage(tab.id, { action: 'trigger_stop' });
+  sendTabMessageWithInjection(tab.id, { action: 'trigger_stop' });
 }
 
 // Log Terminal updates
