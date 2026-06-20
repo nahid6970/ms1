@@ -1202,6 +1202,21 @@ class PrepTab(QWidget):
             self.status_cb("✔ Copied to clipboard")
         else:
             self.status_cb("⚠ Nothing to copy — generate first")
+def extract_commit_message(text: str) -> str:
+    # Try looking for patterns like:
+    # - Suggested Commit Message: <msg>
+    # - Commit Message: <msg>
+    # - git commit -m "<msg>"
+    m1 = re.search(r'(?:Suggested\s+)?Commit\s+Message:\s*(.+)', text, re.IGNORECASE)
+    if m1:
+        return m1.group(1).strip().strip('"`')
+    m2 = re.search(r'git\s+commit\s+-m\s+"([^"]+)"', text, re.IGNORECASE)
+    if m2:
+        return m2.group(1).strip()
+    m3 = re.search(r'git\s+commit\s+-m\s+\'([^\']+)\'', text, re.IGNORECASE)
+    if m3:
+        return m3.group(1).strip()
+    return ""
 
 
 # ── MERGE TAB ─────────────────────────────────────────────────────────────────
@@ -1209,6 +1224,7 @@ class MergeTab(QWidget):
     def __init__(self, status_cb):
         super().__init__()
         self.status_cb = status_cb
+        self._parsed_commit_msg = ""
         self._build()
         self._load_prefs()
 
@@ -1323,6 +1339,8 @@ class MergeTab(QWidget):
             self.status_cb("No changes parsed")
             return
 
+        self._parsed_commit_msg = extract_commit_message(text)
+
         lines = [f"Found {len(self._pending_changes)} change(s):\n"]
         for ch in self._pending_changes:
             lines.append(f"  [{ch['mode']:15s}] {ch['file']}")
@@ -1352,14 +1370,41 @@ class MergeTab(QWidget):
         results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked())
         ok  = sum(1 for r in results if r.startswith("✔"))
         err = len(results) - ok
+
+        if ok > 0:
+            commit_msg = self._parsed_commit_msg
+            if not commit_msg:
+                # Fallback commit message generated automatically based on changed files
+                successful_files = []
+                for r in results:
+                    if r.startswith("✔"):
+                        parts = r.split("→")
+                        if len(parts) > 1:
+                            filepath = parts[1].strip()
+                            basename = os.path.basename(filepath)
+                            if basename not in successful_files:
+                                successful_files.append(basename)
+                if successful_files:
+                    files_str = ", ".join(successful_files[:3])
+                    if len(successful_files) > 3:
+                        files_str += f" and {len(successful_files) - 3} other(s)"
+                    commit_msg = f"update {files_str}"
+                else:
+                    commit_msg = "update files"
+
+            results.append("\nSuggested Git Commit Command:")
+            results.append(f'git commit -m "{commit_msg}"')
+
         self.result_out.setPlainText('\n'.join(results))
         self.status_cb(f"Done — {ok} applied, {err} failed")
         self._pending_changes = []
+        self._parsed_commit_msg = ""
 
     def _clear(self):
         self.response_input.clear()
         self.result_out.clear()
         self._pending_changes = []
+        self._parsed_commit_msg = ""
         self.status_cb("Cleared")
 
 

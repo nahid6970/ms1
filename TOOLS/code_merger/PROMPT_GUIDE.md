@@ -108,6 +108,13 @@ This ensures copy-paste preserves indentation correctly regardless of the web UI
 
 ---
 
+## GIT COMMIT MESSAGE
+
+At the very end of your response, after the code blocks, please provide a suggested one-line git commit message summarizing the changes you made. Format it exactly as:
+Suggested Commit Message: <your commit message here>
+
+---
+
 ## NOW, HERE ARE MY FILES:
 
 <!-- The tool will append your file contents below this line -->
