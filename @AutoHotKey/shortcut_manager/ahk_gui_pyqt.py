@@ -181,16 +181,20 @@ class ShortcutBuilderPopup(QDialog):
             btn.setFixedWidth(width)
         active = (label.lower() == self.main_key.lower())
         btn.setChecked(active)
-        self._apply_key_style(btn, active, 0 if (expand or width == 0) else width)
+        # Store original custom width on button object to prevent shifting when selected/deselected
+        btn.custom_width = 0 if (expand or width == 0) else width
+        self._apply_key_style(btn, active)
         btn.clicked.connect(lambda _, k=label: self.select_key(k))
         self._key_buttons[label] = btn
         return btn
 
-    def _apply_key_style(self, btn, active, width=34):
+    def _apply_key_style(self, btn, active):
+        # Retrieve the custom width assigned during creation, fallback to 34
+        w = getattr(btn, "custom_width", 34)
         if active:
-            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=width))
+            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=w))
         else:
-            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=width))
+            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=w))
 
     # ── Modifier button ───────────────────────────────────────────────
     def _mod_btn(self, sym, label, width=52):
