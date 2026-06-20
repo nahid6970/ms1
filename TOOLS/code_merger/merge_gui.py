@@ -288,66 +288,182 @@ def parse_ai_response(text: str) -> list[dict]:
     return changes
 
 
+def analyze_match_failure(content: str, target_block: str, mode: str) -> str:
+    """Analyze why target_block (either 'from' or 'after') was not found in content."""
+    lines_content = content.splitlines()
+    lines_block = target_block.splitlines()
+    
+    # Strip empty lines from block to find first meaningful line
+    block_stripped = [l for l in lines_block if l.strip()]
+    if not block_stripped:
+        return "The block is empty."
+    
+    first_meaningful = block_stripped[0].strip()
+    
+    # Find matching lines in content
+    matches = []
+    for idx, line in enumerate(lines_content):
+        if first_meaningful in line:
+            matches.append(idx)
+            
+    if not matches:
+        return (
+            "The block's first meaningful line was not found in the file:\n"
+            f"  Expected: \"{first_meaningful}\"\n"
+            "This block does not appear to exist in the target file at all."
+        )
+    
+    # Find the best match if there are multiple occurrences of the first line
+    import difflib
+    best_match_idx = matches[0]
+    best_ratio = -1.0
+    
+    for start_idx in matches:
+        actual_slice = lines_content[start_idx : start_idx + len(lines_block)]
+        # Compute similarity ratio
+        matcher = difflib.SequenceMatcher(None, actual_slice, lines_block)
+        ratio = matcher.ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_match_idx = start_idx
+            
+    actual_slice = lines_content[best_match_idx : best_match_idx + len(lines_block)]
+    diff = difflib.unified_diff(
+        actual_slice,
+        lines_block,
+        fromfile=f"Actual file content (starting at line {best_match_idx + 1})",
+        tofile="Expected AI block",
+        lineterm=""
+    )
+    diff_text = "\n".join(list(diff)[2:]) # Skip the --- and +++ lines
+    
+    return (
+        f"The block's first line was found at line {best_match_idx + 1}, but the rest did not match.\n"
+        "Here is the diff showing the discrepancy between the file and what the AI expected:\n"
+        f"{diff_text}"
+    )
+
+
 def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
     """Apply parsed changes. Returns list of result messages."""
     results = []
     for ch in changes:
-        fpath = os.path.join(root, ch["file"].lstrip("/\\"))
-        mode  = ch["mode"]
+        try:
+            fpath = os.path.join(root, ch["file"].lstrip("/\\"))
+            mode  = ch["mode"]
 
-        if mode == "replace_file":
-            if backup and os.path.exists(fpath):
-                _backup(fpath)
-            os.makedirs(os.path.dirname(fpath), exist_ok=True)
-            with open(fpath, 'w', encoding='utf-8') as f:
-                f.write(ch["to"])
-            results.append(f"✔ replace_file  → {ch['file']}")
+            if mode == "replace_file":
+                if backup and os.path.exists(fpath):
+                    _backup(fpath)
+                os.makedirs(os.path.dirname(fpath), exist_ok=True)
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    f.write(ch["to"])
+                results.append(f"✔ replace_file  → {ch['file']}")
 
-        elif mode == "replace_block":
-            if not os.path.exists(fpath):
-                results.append(f"✘ NOT FOUND     → {ch['file']}")
-                continue
-            with open(fpath, 'r', encoding='utf-8') as f:
-                content = f.read()
-            if ch["from"] not in content:
-                results.append(f"✘ BLOCK MISSING → {ch['file']}")
-                continue
-            if backup:
-                _backup(fpath)
-            with open(fpath, 'w', encoding='utf-8') as f:
-                f.write(content.replace(ch["from"], ch["to"], 1))
-            results.append(f"✔ replace_block → {ch['file']}")
+            elif mode == "replace_block":
+                if not os.path.exists(fpath):
+                    results.append(
+                        f"✘ NOT FOUND     → {ch['file']}\n"
+                        f"  Mode: replace_block\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: The target file does not exist at this path.\n"
+                        f"  Root Directory: {root}\n"
+                        f"  Attempted Full Path: {fpath}"
+                    )
+                    continue
+                with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+                if ch["from"] not in content:
+                    try:
+                        failure_info = analyze_match_failure(content, ch["from"], "replace_block")
+                    except Exception as ex:
+                        failure_info = f"Failed to generate diff analysis: {str(ex)}"
+                    results.append(
+                        f"✘ BLOCK MISSING → {ch['file']}\n"
+                        f"  Mode: replace_block\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: Block to replace was not found in the file.\n"
+                        f"  Analysis:\n  {failure_info.replace('\n', '\n  ')}"
+                    )
+                    continue
+                if backup:
+                    _backup(fpath)
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    f.write(content.replace(ch["from"], ch["to"], 1))
+                results.append(f"✔ replace_block → {ch['file']}")
 
-        elif mode == "insert_after":
-            if not os.path.exists(fpath):
-                results.append(f"✘ NOT FOUND     → {ch['file']}")
-                continue
-            with open(fpath, 'r', encoding='utf-8') as f:
-                content = f.read()
-            if ch["after"] not in content:
-                results.append(f"✘ ANCHOR MISSING→ {ch['file']}")
-                continue
-            if backup:
-                _backup(fpath)
-            new = content.replace(ch["after"], ch["after"] + '\n' + ch["insert"], 1)
-            with open(fpath, 'w', encoding='utf-8') as f:
-                f.write(new)
-            results.append(f"✔ insert_after  → {ch['file']}")
+            elif mode == "insert_after":
+                if not os.path.exists(fpath):
+                    results.append(
+                        f"✘ NOT FOUND     → {ch['file']}\n"
+                        f"  Mode: insert_after\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: The target file does not exist at this path.\n"
+                        f"  Root Directory: {root}\n"
+                        f"  Attempted Full Path: {fpath}"
+                    )
+                    continue
+                with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+                if ch["after"] not in content:
+                    try:
+                        failure_info = analyze_match_failure(content, ch["after"], "insert_after")
+                    except Exception as ex:
+                        failure_info = f"Failed to generate diff analysis: {str(ex)}"
+                    results.append(
+                        f"✘ ANCHOR MISSING→ {ch['file']}\n"
+                        f"  Mode: insert_after\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: Anchor block to insert after was not found in the file.\n"
+                        f"  Analysis:\n  {failure_info.replace('\n', '\n  ')}"
+                    )
+                    continue
+                if backup:
+                    _backup(fpath)
+                new = content.replace(ch["after"], ch["after"] + '\n' + ch["insert"], 1)
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    f.write(new)
+                results.append(f"✔ insert_after  → {ch['file']}")
 
-        elif mode == "delete_block":
-            if not os.path.exists(fpath):
-                results.append(f"✘ NOT FOUND     → {ch['file']}")
-                continue
-            with open(fpath, 'r', encoding='utf-8') as f:
-                content = f.read()
-            if ch["from"] not in content:
-                results.append(f"✘ BLOCK MISSING → {ch['file']}")
-                continue
-            if backup:
-                _backup(fpath)
-            with open(fpath, 'w', encoding='utf-8') as f:
-                f.write(content.replace(ch["from"], "", 1))
-            results.append(f"✔ delete_block  → {ch['file']}")
+            elif mode == "delete_block":
+                if not os.path.exists(fpath):
+                    results.append(
+                        f"✘ NOT FOUND     → {ch['file']}\n"
+                        f"  Mode: delete_block\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: The target file does not exist at this path.\n"
+                        f"  Root Directory: {root}\n"
+                        f"  Attempted Full Path: {fpath}"
+                    )
+                    continue
+                with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+                if ch["from"] not in content:
+                    try:
+                        failure_info = analyze_match_failure(content, ch["from"], "delete_block")
+                    except Exception as ex:
+                        failure_info = f"Failed to generate diff analysis: {str(ex)}"
+                    results.append(
+                        f"✘ BLOCK MISSING → {ch['file']}\n"
+                        f"  Mode: delete_block\n"
+                        f"  File: {ch['file']}\n"
+                        f"  Error: Block to delete was not found in the file.\n"
+                        f"  Analysis:\n  {failure_info.replace('\n', '\n  ')}"
+                    )
+                    continue
+                if backup:
+                    _backup(fpath)
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    f.write(content.replace(ch["from"], "", 1))
+                results.append(f"✔ delete_block  → {ch['file']}")
+
+        except Exception as outer_ex:
+            results.append(
+                f"✘ CRITICAL ERROR→ {ch.get('file', 'unknown')}\n"
+                f"  Mode: {ch.get('mode', 'unknown')}\n"
+                f"  File: {ch.get('file', 'unknown')}\n"
+                f"  Error: An unexpected exception occurred while applying changes ({str(outer_ex)})."
+            )
 
     return results
 
