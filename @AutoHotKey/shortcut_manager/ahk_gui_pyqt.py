@@ -719,6 +719,7 @@ class AddEditShortcutDialog(QDialog):
         
         # Left side - form fields
         form_layout = QVBoxLayout()
+        form_layout.setSpacing(10)
         
         # Row layout helper to place label and field together horizontally
         def _add_row(label_text, widget_or_layout):
@@ -934,6 +935,8 @@ class AddEditShortcutDialog(QDialog):
                 form_layout.addLayout(_ctx_row('window_title_toggle', 'startup_window_title', 'Window Title:', 'e.g., Notepad, Chrome'))
                 form_layout.addLayout(_ctx_row('process_name_toggle', 'startup_process_name', 'Process Name:', 'e.g., chrome.exe'))
                 form_layout.addLayout(_ctx_row('window_class_toggle', 'startup_window_class', 'Window Class:', 'e.g., CabinetWClass'))
+
+        form_layout.addStretch(1)
 
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
