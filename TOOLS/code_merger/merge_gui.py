@@ -492,36 +492,51 @@ def _backup(fpath: str):
 
 # ── RECENT POPUP ─────────────────────────────────────────────────────────────
 class RecentPopup(QFrame):
-    def __init__(self, parent, on_load, on_load_specific, on_remove):
+    def __init__(self, parent, on_load, on_load_all, on_remove):
         super().__init__(parent, Qt.WindowType.Popup)
-        self.on_load          = on_load
-        self.on_load_specific = on_load_specific
-        self.on_remove        = on_remove
+        self.on_load     = on_load
+        self.on_load_all  = on_load_all
+        self.on_remove    = on_remove
         self.setStyleSheet(f"""
             QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
             QPushButton {{ background: transparent; border: none; color: #E0E0E0;
                            text-align: left; padding: 4px 8px; font-family: Consolas; font-size: 9pt; }}
             QPushButton:hover {{ background: #1e1e1e; color: #00F0FF; }}
-            QPushButton#play {{ color: {CP_GREEN}; padding: 4px 6px; text-align: center; }}
-            QPushButton#play:hover {{ background: {CP_GREEN}; color: #000; }}
+            QPushButton#load_all {{ color: {CP_GREEN}; padding: 4px 6px; text-align: center; }}
+            QPushButton#load_all:hover {{ background: {CP_GREEN}; color: #000; }}
             QPushButton#remove {{ color: #FF003C; padding: 4px 6px; text-align: center; }}
             QPushButton#remove:hover {{ background: #FF003C; color: #000; }}
+            QScrollArea {{ border: none; background: transparent; }}
         """)
         self._build()
 
     def _build(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
         items = load_recent_details()
         if not items:
             lbl = QLabel("  No recent projects")
             lbl.setStyleSheet("color: #808080; padding: 8px; font-family: Consolas;")
-            layout.addWidget(lbl)
+            main_layout.addWidget(lbl)
+            self.adjustSize()
             return
+
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+        content = QWidget()
+        content.setStyleSheet("background: transparent;")
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
         for item in items:
             path = item["path"]
-            files = item["files"]
+            files = item.get("files", [])
             extensions = item.get("extensions", [])
 
             row = QWidget()
@@ -531,14 +546,15 @@ class RecentPopup(QFrame):
             hl.setSpacing(0)
 
             btn_load = QPushButton(path)
-            btn_load.setMinimumWidth(300)
-            btn_load.clicked.connect(lambda _, p=path: (self.close(), self.on_load(p)))
+            btn_load.setMinimumWidth(320)
+            btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
+            btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
 
-            btn_play = QPushButton("▶")
-            btn_play.setObjectName("play")
-            btn_play.setFixedWidth(28)
-            btn_play.setToolTip("Open only the files matching the extensions previously selected for this project")
-            btn_play.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load_specific(p, f, e)))
+            btn_load_all = QPushButton("🔄")
+            btn_load_all.setObjectName("load_all")
+            btn_load_all.setFixedWidth(28)
+            btn_load_all.setToolTip("Re-scan directory and load ALL non-ignored files, updating project in JSON")
+            btn_load_all.clicked.connect(lambda _, p=path: (self.close(), self.on_load_all(p)))
 
             btn_rem  = QPushButton("✕")
             btn_rem.setObjectName("remove")
@@ -546,9 +562,13 @@ class RecentPopup(QFrame):
             btn_rem.clicked.connect(lambda _, p=path: (self.close(), self.on_remove(p)))
 
             hl.addWidget(btn_load)
-            hl.addWidget(btn_play)
+            hl.addWidget(btn_load_all)
             hl.addWidget(btn_rem)
             layout.addWidget(row)
+
+        scroll.setWidget(content)
+        scroll.setMaximumHeight(240)
+        main_layout.addWidget(scroll)
         self.adjustSize()
 
 
@@ -896,6 +916,29 @@ class PrepTab(QWidget):
         data['files'] = self.files
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
+        self._sync_to_recent_projects()
+
+    def _sync_to_recent_projects(self):
+        if not self.files:
+            return
+        try:
+            common = os.path.commonpath(self.files)
+            if os.path.isfile(common):
+                common = os.path.dirname(common)
+            common = os.path.normpath(common)
+            
+            current_recent = load_recent_details()
+            updated = False
+            for item in current_recent:
+                if os.path.normpath(item["path"]) == common:
+                    item["files"] = [os.path.normpath(f) for f in self.files]
+                    updated = True
+                    break
+                    
+            if updated:
+                save_recent(current_recent)
+        except Exception:
+            pass
 
     def _load_session(self):
         import json
@@ -1420,8 +1463,6 @@ class MergeTab(QWidget):
                     commit_msg = "update files"
 
             self._final_commit_cmd = f'git commit -m "{commit_msg}"'
-            results.append("\nSuggested Git Commit Command:")
-            results.append(self._final_commit_cmd)
             self.btn_copy_commit.setVisible(True)
         else:
             self.btn_copy_commit.setVisible(False)
