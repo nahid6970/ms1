@@ -573,6 +573,86 @@ class HotkeyLineEdit(QLineEdit):
         # We might still want to capture normal typing for manual entry
         super().keyPressEvent(event)
 
+# ── Windows System Defaults Database ──────────────────────────────
+WINDOWS_DEFAULTS = [
+    {"hotkey": "#e", "name": "Open File Explorer", "description": "Launches the Windows File Explorer", "action": 'Run("explorer.exe")'},
+    {"hotkey": "#i", "name": "Open Settings", "description": "Launches the Windows Settings app", "action": 'Run("ms-settings:")'},
+    {"hotkey": "#p", "name": "Project Settings / Projection", "description": "Opens the display projection sidebar", "action": 'Run("DisplaySwitch.exe")'},
+    {"hotkey": "#+s", "name": "Snipping Tool / Screen Snip", "description": "Initiates a screenshot crop using Snipping Tool", "action": 'Run("ms-screenclip:")'},
+    {"hotkey": "#k", "name": "Cast Settings", "description": "Opens the Cast connect flyout", "action": 'Run("ms-settings-connectabledevices:cast")'},
+    {"hotkey": "#a", "name": "Action Center / Quick Settings", "description": "Opens the Quick Settings flyout", "action": 'Send("#a")'},
+    {"hotkey": "#v", "name": "Clipboard History", "description": "Launches the system clipboard history menu", "action": 'Send("#v")'},
+    {"hotkey": "^+Esc", "name": "Task Manager", "description": "Launches the system Task Manager", "action": 'Run("taskmgr.exe")'},
+    {"hotkey": "#l", "name": "Lock Computer", "description": "Instantly locks the Windows session", "action": 'DllCall("LockWorkStation")'},
+    {"hotkey": "#d", "name": "Toggle Show Desktop", "description": "Minimizes or restores all open windows", "action": 'WinMinimizeAll()'},
+    {"hotkey": "#x", "name": "Quick Link / WinX Menu", "description": "Opens the power user start menu", "action": 'Send("#x")'},
+    {"hotkey": "#r", "name": "Run Dialog", "description": "Opens the Run command box", "action": 'Send("#r")'},
+]
+
+class WindowsDefaultLookupDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Import Windows Default Shortcut")
+        self.resize(600, 450)
+        self.setStyleSheet("""
+            QDialog { background-color: #1e1e1e; color: white; }
+            QLineEdit { background-color: #2d2d2d; color: white; border: 1px solid #444; padding: 6px; }
+            QListWidget { background-color: #2b2b2b; color: #e0e0e0; border: 1px solid #444; }
+            QListWidget::item { padding: 8px; border-bottom: 1px solid #3a3a3a; }
+            QListWidget::item:selected { background-color: #00F0FF; color: black; }
+        """)
+        self.selected_item = None
+        self.setup_ui()
+        self.populate_list()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("🔍 Search default shortcuts (e.g., explorer, settings, snip)...")
+        self.search_edit.textChanged.connect(self.filter_list)
+        layout.addWidget(self.search_edit)
+        
+        from PyQt6.QtWidgets import QListWidget
+        self.list_widget = QListWidget()
+        self.list_widget.itemDoubleClicked.connect(self.accept_selection)
+        layout.addWidget(self.list_widget)
+        
+        btn_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        btn_box.accepted.connect(self.accept_selection)
+        btn_box.rejected.connect(self.reject)
+        layout.addWidget(btn_box)
+
+    def populate_list(self):
+        from PyQt6.QtWidgets import QListWidgetItem
+        self.list_widget.clear()
+        for item in WINDOWS_DEFAULTS:
+            pretty_hk = item["hotkey"].replace("#", "Win+").replace("^", "Ctrl+").replace("+", "Shift+").replace("!", "Alt+")
+            display_text = f"{pretty_hk}  ➔  {item['name']}\n{item['description']}"
+            list_item = QListWidgetItem(display_text)
+            list_item.setData(Qt.ItemDataRole.UserRole, item)
+            self.list_widget.addItem(list_item)
+
+    def filter_list(self, text):
+        query = text.lower()
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            data = item.data(Qt.ItemDataRole.UserRole)
+            match = (query in data["name"].lower() or 
+                     query in data["description"].lower() or 
+                     query in data["hotkey"].lower() or 
+                     query in item.text().lower())
+            item.setHidden(not match)
+
+    def accept_selection(self):
+        current_item = self.list_widget.currentItem()
+        if current_item:
+            self.selected_item = current_item.data(Qt.ItemDataRole.UserRole)
+            self.accept()
+        else:
+            self.reject()
+
+
 class AddEditShortcutDialog(QDialog):
     def __init__(self, parent, shortcut_type, shortcut_data=None):
         super().__init__(parent)
@@ -591,7 +671,7 @@ class AddEditShortcutDialog(QDialog):
         pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
         self.setModal(True)
-        self.resize(500, 400)
+        self.resize(800, 550)
         self.setStyleSheet(f"""
             QDialog {{ background-color: #1e1e1e; color: white; }}
             QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
@@ -627,6 +707,27 @@ class AddEditShortcutDialog(QDialog):
         self.category_combo.addItems(existing_categories)
         self.category_combo.setCurrentText("General")
         form_layout.addWidget(self.category_combo)
+
+        # Import default button (Only for "script" and "context" types)
+        if self.shortcut_type in ["script", "context"]:
+            self.import_default_btn = QPushButton("🔍 Import Windows Default")
+            self.import_default_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_PANEL};
+                    border: 1px solid {CP_DIM};
+                    color: {CP_CYAN};
+                    padding: 8px;
+                    font-family: 'Consolas';
+                    font-weight: bold;
+                    border-radius: 0px;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_CYAN};
+                    color: black;
+                }}
+            """)
+            self.import_default_btn.clicked.connect(self.import_windows_default)
+            form_layout.addWidget(self.import_default_btn)
         
         # Description
         form_layout.addWidget(QLabel("Description:"))
@@ -965,6 +1066,19 @@ SendText("Hello World")"""
         file_path, _ = QFileDialog.getOpenFileName(self, "Select File to Drop")
         if file_path:
             self.file_path_edit.setText(file_path)
+
+    def import_windows_default(self):
+        dialog = WindowsDefaultLookupDialog(self)
+        if dialog.exec():
+            item = dialog.selected_item
+            if item:
+                self.name_edit.setText(item["name"])
+                self.description_edit.setText(item["description"])
+                if hasattr(self, "hotkey_edit"):
+                    self.hotkey_edit.setText(item["hotkey"])
+                if hasattr(self, "action_edit"):
+                    self.action_edit.setPlainText(item["action"])
+                self.category_combo.setCurrentText("System")
 
     def populate_fields(self):
         self.name_edit.setText(self.shortcut_data.get("name", ""))
