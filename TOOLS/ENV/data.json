@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-06-12T15:15:06.838600",
+    "timestamp": "2026-06-20T23:36:39.286467",
     "user_env": {
         "chocolateyinstall": "C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey",
         "OneDrive": "C:\\Users\\nahid\\OneDrive",
@@ -16,7 +16,6 @@
         "export": "GOOSE_PROVIDER=gemini-cli",
         "PSReadLineScreenReaderOptimization": "None",
         "GOOGLE_CLOUD_PROJECT": "123",
-        "JD2_HOME": "C:\\Users\\nahid\\AppData\\Local\\JDownloader 2",
         "HERMES_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
         "HERMES_HOME": "C:\\Users\\nahid\\AppData\\Local\\hermes",
         "POSH_THEMES_PATH": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\themes"
@@ -27,7 +26,7 @@
         "DriverData": "C:\\Windows\\System32\\Drivers\\DriverData",
         "NUMBER_OF_PROCESSORS": "8",
         "OS": "Windows_NT",
-        "Path": "C:\\Program Files\\ImageMagick-7.1.2-Q16;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\scoop\\apps\\python311\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python311\\current;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Mic;C:\\Program Files\\Tailscale\\;C:\\Program Files\\Dart\\dart-sdk\\bin;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\jre\\bin\\server;C:\\Program Files\\Sniffnet\\;C:\\Program Files\\Meld\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\",
+        "Path": "C:\\Program Files\\coreutils\\bin;C:\\Program Files\\ImageMagick-7.1.2-Q16;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\scoop\\apps\\python311\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python311\\current;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Mic;C:\\Program Files\\Tailscale\\;C:\\Program Files\\Dart\\dart-sdk\\bin;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\jre\\bin\\server;C:\\Program Files\\Sniffnet\\;C:\\Program Files\\Meld\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\",
         "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC",
         "PROCESSOR_ARCHITECTURE": "AMD64",
         "PROCESSOR_IDENTIFIER": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
@@ -68,6 +67,9 @@
                     "Antigravity-Cli": {
                         "MUIVerb": "Antigravity-Cli",
                         "command": "cmd /k cd /d \"%V\" && agy --dangerously-skip-permissions"
+                    },
+                    "Antigravity-Cli Resume": {
+                        "command": "cmd /k cd /d \"%V\" && agy --dangerously-skip-permissions -c"
                     },
                     "Codex": {
                         "MUIVerb": "Codex",
