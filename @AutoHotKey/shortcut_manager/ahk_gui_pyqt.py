@@ -115,6 +115,7 @@ class ShortcutBuilderPopup(QDialog):
             color: {fg};
             border: 2px solid {border};
             border-radius: 0px;
+            font-family: '{font}';
             font-size: 11px;
             font-weight: normal;
             padding: 0px;
@@ -128,6 +129,7 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: {bg}; color: {fg};
             border: 2px solid {border}; border-radius: 0px;
+            font-family: '{font}';
             font-size: 11px; font-weight: normal;
             padding: 0px;
             min-height: {h}px; min-width: {w}px;
@@ -137,6 +139,7 @@ class ShortcutBuilderPopup(QDialog):
         QPushButton {{
             background: {bg}; color: {fg};
             border: {border}; border-radius: 0px;
+            font-family: '{font}';
             font-size: 13px; font-weight: normal;
             padding: 0px 6px;
             min-height: 36px;
@@ -195,12 +198,14 @@ class ShortcutBuilderPopup(QDialog):
         self.setWindowTitle("⌨  Shortcut Builder")
         self.setModal(True)
         
-        # Load theme setting
+        # Load theme & font settings
         settings = QSettings("AHKEditor", "ShortcutEditor")
         self.theme_name = settings.value("shortcut_builder_theme", "cyberpunk")
         self.t_config = self.THEMES.get(self.theme_name, self.THEMES["cyberpunk"])
+        self.builder_font_family = settings.value("shortcut_builder_font", "Consolas")
         
         self.setStyleSheet(f"QDialog {{ background: {self.t_config['win_bg']}; color: {self.t_config['win_fg']}; }}")
+        self.setFont(QFont(self.builder_font_family, 10))
         # mods: key = ahk prefix string (e.g. "^", "<^", ">^"), value = bool
         all_syms = [s for d in self.MOD_DEFS for s in (d[0], d[1], d[2])]
         self.mods = {s: False for s in all_syms}
@@ -249,6 +254,7 @@ class ShortcutBuilderPopup(QDialog):
                 bg=self.t_config["key_active_bg"],
                 fg=self.t_config["key_active_fg"],
                 border=self.t_config["key_active_border"],
+                font=self.builder_font_family,
                 h=h,
                 w=w
             ))
@@ -261,6 +267,7 @@ class ShortcutBuilderPopup(QDialog):
                 hover_border=self.t_config["key_hover_border"],
                 hover_fg=self.t_config["key_hover_fg"],
                 pressed_bg=self.t_config["key_pressed_bg"],
+                font=self.builder_font_family,
                 h=h,
                 w=w
             ))
@@ -289,6 +296,7 @@ class ShortcutBuilderPopup(QDialog):
                 hover_bg=self.t_config["mod_hover_bg"],
                 hover_border=self.t_config["mod_hover_border"],
                 hover_fg=self.t_config["mod_hover_fg"],
+                font=self.builder_font_family,
                 w=0
             ))
         else:
@@ -299,6 +307,7 @@ class ShortcutBuilderPopup(QDialog):
                 hover_bg=self.t_config["mod_hover_bg"],
                 hover_border=self.t_config["mod_hover_border"],
                 hover_fg=self.t_config["mod_hover_fg"],
+                font=self.builder_font_family,
                 w=0
             ))
 
@@ -361,11 +370,11 @@ class ShortcutBuilderPopup(QDialog):
 
         # ── Preview ───────────────────────────────────────────────────
         preview_frame = QFrame()
-        preview_frame.setStyleSheet(f"background: {self.t_config['preview_bg']}; border-radius: 8px; border: {self.t_config['preview_border']};")
+        preview_frame.setStyleSheet(f"background: {self.t_config['preview_bg']}; border-radius: 0px; border: {self.t_config['preview_border']};")
         pf = QVBoxLayout(preview_frame); pf.setContentsMargins(10, 8, 10, 8)
         self.preview_label = QLabel(self.get_formatted_preview())
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {self.t_config['preview_fg']}; letter-spacing: 2px; background: transparent; border: none;")
+        self.preview_label.setStyleSheet(f"font-family: '{self.builder_font_family}'; font-size: 20px; font-weight: bold; color: {self.t_config['preview_fg']}; letter-spacing: 2px; background: transparent; border: none;")
         pf.addWidget(self.preview_label)
         layout.addWidget(preview_frame)
 
@@ -521,9 +530,9 @@ class ShortcutBuilderPopup(QDialog):
         # ── OK / Cancel ───────────────────────────────────────────────
         btn_row = QHBoxLayout(); btn_row.addStretch()
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet(self.t_config["cancel_style"])
+        cancel_btn.setStyleSheet(self.t_config["cancel_style"] + f" QPushButton {{ font-family: '{self.builder_font_family}'; }}")
         ok_btn = QPushButton("  ✓  Apply")
-        ok_btn.setStyleSheet(self.t_config["ok_style"])
+        ok_btn.setStyleSheet(self.t_config["ok_style"] + f" QPushButton {{ font-family: '{self.builder_font_family}'; }}")
         ok_btn.clicked.connect(self.accept); cancel_btn.clicked.connect(self.reject)
         btn_row.addWidget(cancel_btn); btn_row.addWidget(ok_btn)
         layout.addLayout(btn_row)
@@ -1589,6 +1598,15 @@ class SettingsDialog(QDialog):
         theme_layout.addWidget(self.theme_combo)
         layout.addLayout(theme_layout)
 
+        # Shortcut Preview Font Selection
+        pfont_layout = QHBoxLayout()
+        pfont_layout.addWidget(QLabel("Shortcut Preview Font:"))
+        self.pfont_combo = QFontComboBox()
+        current_pfont = settings.value("shortcut_builder_font", "Consolas")
+        self.pfont_combo.setCurrentFont(QFont(current_pfont))
+        pfont_layout.addWidget(self.pfont_combo)
+        layout.addLayout(pfont_layout)
+
         layout.addWidget(QLabel("<small><i>Note: Some icons require a Nerd Font (NFP) to display correctly.</i></small>"))
 
         # Buttons
@@ -1612,8 +1630,13 @@ class SettingsDialog(QDialog):
         
         # Save shortcut builder theme
         selected_theme = self.theme_combo.currentData()
+        
+        # Save shortcut builder preview font
+        selected_pfont = self.pfont_combo.currentFont().family()
+        
         settings = QSettings("AHKEditor", "ShortcutEditor")
         settings.setValue("shortcut_builder_theme", selected_theme)
+        settings.setValue("shortcut_builder_font", selected_pfont)
         
         self.parent_window.apply_global_font()
         self.parent_window.save_shortcuts_json()
