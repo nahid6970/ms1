@@ -141,7 +141,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   const data = await getStorageData();
   const steps = data.steps || [];
   const loopCount = parseInt(data.loopCount) || 1;
-  const loopDelay = parseInt(data.loopDelay) || 0;
+  const loopDelay = parseFloat(data.loopDelay) || 0;
 
   if (steps.length === 0) {
     logMessage("No steps configured to run.", true);
@@ -162,10 +162,11 @@ async function runAutomation(startLoop = 0, startStep = 0) {
       const step = steps[i];
       updateState("running", currentLoop, i);
       
-      logMessage(`[Step ${i + 1}] Waiting ${step.delay}ms...`);
-      await delayMs(step.delay);
+      logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
+      await delayMs(step.delay * 1000);
       
       if (stopRequested) break;
+@@TO:
       
       try {
         if (step.action === 'wait') {
@@ -218,8 +219,8 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     currentLoop++;
     
     if (loopCount === -1 || currentLoop < loopCount) {
-      logMessage(`Loop ${currentLoop} complete. Delaying ${loopDelay}ms before next loop.`);
-      await delayMs(loopDelay);
+      logMessage(`Loop ${currentLoop} complete. Delaying ${loopDelay}s before next loop.`);
+      await delayMs(loopDelay * 1000);
     }
   }
 

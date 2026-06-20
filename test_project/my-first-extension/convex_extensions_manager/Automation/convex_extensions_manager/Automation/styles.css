@@ -177,6 +177,60 @@ input[type="number"]:focus, input[type="text"]:focus, select:focus {
   border-color: var(--accent-purple);
 }
 
+/* Hide number input spinners/arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Input layout with visual timer icon/badge indicators */
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.input-with-icon:focus-within {
+  border-color: var(--accent-purple);
+}
+
+.input-with-icon .input-icon {
+  padding-left: 8px;
+  padding-right: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.input-with-icon input {
+  border: none !important;
+  background-color: transparent !important;
+  flex-grow: 1;
+  width: 100%;
+  padding: 6px 4px !important;
+  outline: none;
+}
+
+.input-with-icon .unit-badge {
+  font-size: 11px;
+  background-color: var(--border-color);
+  color: var(--text-dim);
+  padding: 6px 8px;
+  font-weight: 600;
+  user-select: none;
+}
+
 /* Steps Section */
 .steps-section {
   display: flex;

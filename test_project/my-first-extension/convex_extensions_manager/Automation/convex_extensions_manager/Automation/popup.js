@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   loopDelayInput.addEventListener('change', () => {
-    chrome.storage.local.set({ loopDelay: parseInt(loopDelayInput.value) || 0 });
+    chrome.storage.local.set({ loopDelay: parseFloat(loopDelayInput.value) || 0 });
   });
 });
 
@@ -37,7 +37,7 @@ async function initSettings() {
     if (data.loopDelay !== undefined) {
       document.getElementById('loopDelay').value = data.loopDelay;
     } else {
-      chrome.storage.local.set({ loopDelay: 1000 });
+      chrome.storage.local.set({ loopDelay: 1.0 }); // Default to 1.0 second
     }
   });
 }
@@ -81,7 +81,11 @@ async function renderSteps() {
         <div class="step-row-bottom">
           <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
           <div class="field delay-input">
-            <input type="number" placeholder="Delay (ms)" value="${step.delay || 0}" data-id="${step.id}" />
+            <div class="input-with-icon" title="Execution delay in seconds">
+              <span class="input-icon">⏱️</span>
+              <input type="number" placeholder="Delay" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
+              <span class="unit-badge">sec</span>
+            </div>
           </div>
         </div>
       `;
@@ -118,7 +122,7 @@ function attachStepChangeHandlers() {
   // Delay inputs
   document.querySelectorAll('.delay-input input').forEach(input => {
     input.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'delay', parseInt(e.target.value) || 0);
+      updateStepField(parseInt(e.target.dataset.id), 'delay', parseFloat(e.target.value) || 0);
     });
   });
 
@@ -149,7 +153,7 @@ async function addNewStep() {
       action: 'click',
       selector: '',
       value: '',
-      delay: 500
+      delay: 0.5 // Default to 0.5 seconds
     });
     chrome.storage.local.set({ steps }, () => {
       renderSteps();
