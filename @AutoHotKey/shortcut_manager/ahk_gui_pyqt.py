@@ -693,6 +693,7 @@ class AddEditShortcutDialog(QDialog):
             "text": "Text Shortcut",
             "file": "File Shortcut",
             "exclude": "Exclusion Rule",
+            "remap": "Key Remap"
         }
         pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
@@ -719,30 +720,138 @@ class AddEditShortcutDialog(QDialog):
         # Left side - form fields
         form_layout = QVBoxLayout()
         
+        # Row layout helper to place label and field together horizontally
+        def _add_row(label_text, widget_or_layout):
+            from PyQt6.QtWidgets import QLayout
+            row = QHBoxLayout()
+            lbl = QLabel(label_text)
+            lbl.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold;")
+            lbl.setFixedWidth(90)
+            row.addWidget(lbl)
+            if isinstance(widget_or_layout, QLayout):
+                row.addLayout(widget_or_layout)
+            else:
+                row.addWidget(widget_or_layout)
+            form_layout.addLayout(row)
+
+        # ── Initialize Input Fields ───────────────────────────────────
+        
         # Name
-        form_layout.addWidget(QLabel("Name:"))
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText("e.g., Open Terminal, Version 1 Text")
-        form_layout.addWidget(self.name_edit)
         
         # Category
-        form_layout.addWidget(QLabel("Category:"))
         self.category_combo = QComboBox()
         self.category_combo.setEditable(True)
         existing_categories = self.get_existing_categories()
         self.category_combo.addItems(existing_categories)
         self.category_combo.setCurrentText("General")
-        form_layout.addWidget(self.category_combo)
+        
+        # Description
+        self.description_edit = QLineEdit()
+        self.description_edit.setPlaceholderText("Brief description of what this does")
+        
+        # Enabled checkbox
+        self.enabled_checkbox = QCheckBox("Enabled (include in generated script)")
+        self.enabled_checkbox.setChecked(True)
 
-        # Import default button (Only for "script" and "context" types)
+        # Common template helper style for standard recording buttons
+        record_style = """
+            QPushButton {
+                font-family: inherit;
+                background-color: #cc2222;
+                border: none;
+                border-radius: 13px;
+                color: white;
+                font-size: 18px;
+            }
+            QPushButton:checked {
+                background-color: #61dafb;
+                color: black;
+                border-color: #61dafb;
+            }
+            QPushButton:hover {
+                background-color: #4d4d4d;
+                border-color: #61dafb;
+            }
+        """
+
+        # ── Build Layout Fields Sequentially (Flowing Downward) ───────
+
+        # 1. Name Row
+        _add_row("Name:", self.name_edit)
+
+        # 2. Shortcut/Trigger Row (Placement immediately below Name)
         if self.shortcut_type in ["script", "context"]:
-            self.import_default_btn = QPushButton("🔍 Import Windows Default")
+            hotkey_row = QHBoxLayout()
+            self.hotkey_edit = HotkeyLineEdit()
+            self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
+            
+            self.record_hotkey_btn = QPushButton("")
+            self.record_hotkey_btn.setCheckable(True)
+            self.record_hotkey_btn.setFixedSize(26,26)
+            self.record_hotkey_btn.setStyleSheet(record_style)
+            self.record_hotkey_btn.setToolTip("Open Shortcut Builder")
+            self.record_hotkey_btn.clicked.connect(lambda checked: self.hotkey_edit.set_recording(checked))
+            self.hotkey_edit.record_button = self.record_hotkey_btn
+            
+            hotkey_row.addWidget(self.hotkey_edit)
+            hotkey_row.addWidget(self.record_hotkey_btn)
+            _add_row("Hotkey:", hotkey_row)
+            
+        elif self.shortcut_type in ["text", "file"]:
+            self.trigger_edit = QLineEdit()
+            placeholder = "e.g., ;theme, ;file" if self.shortcut_type == "file" else "e.g., ;v1, ;run"
+            self.trigger_edit.setPlaceholderText(placeholder)
+            _add_row("Trigger:", self.trigger_edit)
+            
+        elif self.shortcut_type == "remap":
+            # Origin Key
+            origin_row = QHBoxLayout()
+            self.origin_key_edit = HotkeyLineEdit()
+            self.origin_key_edit.setPlaceholderText("e.g., CapsLock, F1, ScrollLock")
+            
+            self.record_origin_btn = QPushButton("")
+            self.record_origin_btn.setCheckable(True)
+            self.record_origin_btn.setFixedSize(26,26)
+            self.record_origin_btn.setStyleSheet(record_style)
+            self.record_origin_btn.setToolTip("Open Shortcut Builder")
+            self.record_origin_btn.clicked.connect(lambda checked: self.origin_key_edit.set_recording(checked))
+            self.origin_key_edit.record_button = self.record_origin_btn
+            
+            origin_row.addWidget(self.origin_key_edit)
+            origin_row.addWidget(self.record_origin_btn)
+            _add_row("Origin Key:", origin_row)
+
+            # Destination Key
+            dest_row = QHBoxLayout()
+            self.destination_key_edit = HotkeyLineEdit()
+            self.destination_key_edit.setPlaceholderText("e.g., Backspace, Mute, PageUp")
+            
+            self.record_dest_btn = QPushButton("")
+            self.record_dest_btn.setCheckable(True)
+            self.record_dest_btn.setFixedSize(26,26)
+            self.record_dest_btn.setStyleSheet(record_style)
+            self.record_dest_btn.setToolTip("Open Shortcut Builder")
+            self.record_dest_btn.clicked.connect(lambda checked: self.destination_key_edit.set_recording(checked))
+            self.destination_key_edit.record_button = self.record_dest_btn
+            
+            dest_row.addWidget(self.destination_key_edit)
+            dest_row.addWidget(self.record_dest_btn)
+            _add_row("Dest Key:", dest_row)
+
+        # 3. Category Row (Including nested "🔍 Defaults" selector side-by-side)
+        cat_row_layout = QHBoxLayout()
+        cat_row_layout.addWidget(self.category_combo)
+        if self.shortcut_type in ["script", "context"]:
+            self.import_default_btn = QPushButton("🔍 Defaults")
+            self.import_default_btn.setFixedWidth(120)
             self.import_default_btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: {CP_PANEL};
                     border: 1px solid {CP_DIM};
                     color: {CP_CYAN};
-                    padding: 8px;
+                    padding: 6px;
                     font-family: 'Consolas';
                     font-weight: bold;
                     border-radius: 0px;
@@ -753,221 +862,14 @@ class AddEditShortcutDialog(QDialog):
                 }}
             """)
             self.import_default_btn.clicked.connect(self.import_windows_default)
-            form_layout.addWidget(self.import_default_btn)
-        
-        # Description
-        form_layout.addWidget(QLabel("Description:"))
-        self.description_edit = QLineEdit()
-        self.description_edit.setPlaceholderText("Brief description of what this does")
-        form_layout.addWidget(self.description_edit)
-        
-        # Enabled checkbox
-        self.enabled_checkbox = QCheckBox("Enabled (include in generated script)")
-        self.enabled_checkbox.setChecked(True)
-        form_layout.addWidget(self.enabled_checkbox)
+            cat_row_layout.addWidget(self.import_default_btn)
+        _add_row("Category:", cat_row_layout)
 
-        # Match foreground checkbox (context shortcuts only)
-        self.match_foreground_checkbox = QCheckBox("Match any foreground window (not just focused)")
-        self.match_foreground_checkbox.setChecked(False)
-        if self.shortcut_type == "context":
-            form_layout.addWidget(self.match_foreground_checkbox)
+        # 4. Description Row
+        _add_row("Description:", self.description_edit)
 
-        if self.shortcut_type == "script":
-            hotkey_row = QHBoxLayout()
-            self.hotkey_edit = HotkeyLineEdit()
-            self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
-            
-            self.record_hotkey_btn = QPushButton("")
-            self.record_hotkey_btn.setCheckable(True)
-            self.record_hotkey_btn.setFixedSize(26,26)
-            self.record_hotkey_btn.setStyleSheet("""
-                QPushButton {
-                    font-family: inherit;
-                    background-color: #cc2222;
-                    border: none;
-                    border-radius: 13px;
-                    color: white;
-                    font-size: 18px;
-                }
-                QPushButton:checked {
-                    background-color: #61dafb;
-                    color: black;
-                    border-color: #61dafb;
-                }
-                QPushButton:hover {
-                    background-color: #4d4d4d;
-                    border-color: #61dafb;
-                }
-            """)
-            self.record_hotkey_btn.setToolTip("Open Shortcut Builder")
-            self.record_hotkey_btn.clicked.connect(lambda checked: self.hotkey_edit.set_recording(checked))
-            self.hotkey_edit.record_button = self.record_hotkey_btn
-            
-            hotkey_row.addWidget(self.hotkey_edit)
-            hotkey_row.addWidget(self.record_hotkey_btn)
-            form_layout.addLayout(hotkey_row)
-        elif self.shortcut_type == "remap":
-            # Origin Key
-            form_layout.addWidget(QLabel("Origin Key (The key you press):"))
-            origin_row = QHBoxLayout()
-            self.origin_key_edit = HotkeyLineEdit()
-            self.origin_key_edit.setPlaceholderText("e.g., CapsLock, F1, ScrollLock")
-            
-            self.record_origin_btn = QPushButton("")
-            self.record_origin_btn.setCheckable(True)
-            self.record_origin_btn.setFixedSize(26,26)
-            self.record_origin_btn.setStyleSheet("""
-                QPushButton {
-                    font-family: inherit;
-                    background-color: #cc2222;
-                    border: none;
-                    border-radius: 13px;
-                    color: white;
-                    font-size: 18px;
-                }
-                QPushButton:checked {
-                    background-color: #61dafb;
-                    color: black;
-                    border-color: #61dafb;
-                }
-                QPushButton:hover {
-                    background-color: #4d4d4d;
-                    border-color: #61dafb;
-                }
-            """)
-            self.record_origin_btn.setToolTip("Open Shortcut Builder")
-            self.record_origin_btn.clicked.connect(lambda checked: self.origin_key_edit.set_recording(checked))
-            self.origin_key_edit.record_button = self.record_origin_btn
-            
-            origin_row.addWidget(self.origin_key_edit)
-            origin_row.addWidget(self.record_origin_btn)
-            form_layout.addLayout(origin_row)
-
-            # Destination Key
-            form_layout.addWidget(QLabel("Destination Key (What the key will do):"))
-            dest_row = QHBoxLayout()
-            self.destination_key_edit = HotkeyLineEdit()
-            self.destination_key_edit.setPlaceholderText("e.g., Backspace, Mute, PageUp")
-            
-            self.record_dest_btn = QPushButton("")
-            self.record_dest_btn.setCheckable(True)
-            self.record_dest_btn.setFixedSize(26,26)
-            self.record_dest_btn.setStyleSheet("""
-                QPushButton {
-                    font-family: inherit;
-                    background-color: #cc2222;
-                    border: none;
-                    border-radius: 13px;
-                    color: white;
-                    font-size: 18px;
-                }
-                QPushButton:checked {
-                    background-color: #61dafb;
-                    color: black;
-                    border-color: #61dafb;
-                }
-                QPushButton:hover {
-                    background-color: #4d4d4d;
-                    border-color: #61dafb;
-                }
-            """)
-            self.record_dest_btn.setToolTip("Open Shortcut Builder")
-            self.record_dest_btn.clicked.connect(lambda checked: self.destination_key_edit.set_recording(checked))
-            self.destination_key_edit.record_button = self.record_dest_btn
-            
-            dest_row.addWidget(self.destination_key_edit)
-            dest_row.addWidget(self.record_dest_btn)
-            form_layout.addLayout(dest_row)
-        elif self.shortcut_type == "context":
-            # Context shortcuts have both hotkey and context fields
-            form_layout.addWidget(QLabel("Hotkey:"))
-            hotkey_row = QHBoxLayout()
-            self.hotkey_edit = HotkeyLineEdit()
-            self.hotkey_edit.setPlaceholderText("e.g., ^s, ^r")
-            
-            self.record_hotkey_btn = QPushButton("")
-            self.record_hotkey_btn.setCheckable(True)
-            self.record_hotkey_btn.setFixedSize(26,26)
-            self.record_hotkey_btn.setStyleSheet("""
-                QPushButton {
-                    font-family: inherit;
-                    background-color: #cc2222;
-                    border: none;
-                    border-radius: 13px;
-                    color: white;
-                    font-size: 18px;
-                }
-                QPushButton:checked {
-                    background-color: #61dafb;
-                    color: black;
-                    border-color: #61dafb;
-                }
-                QPushButton:hover {
-                    background-color: #4d4d4d;
-                    border-color: #61dafb;
-                }
-            """)
-            self.record_hotkey_btn.setToolTip("Open Shortcut Builder")
-            self.record_hotkey_btn.clicked.connect(lambda checked: self.hotkey_edit.set_recording(checked))
-            self.hotkey_edit.record_button = self.record_hotkey_btn
-            
-            hotkey_row.addWidget(self.hotkey_edit)
-            hotkey_row.addWidget(self.record_hotkey_btn)
-            form_layout.addLayout(hotkey_row)
-            
-            # Context fields — checkbox + input on same row
-            def _ctx_row(toggle_attr, edit_attr, label, placeholder):
-                row = QHBoxLayout()
-                toggle = QCheckBox()
-                toggle.setChecked(True)
-                toggle.setFixedWidth(24)
-                edit = QLineEdit()
-                edit.setPlaceholderText(placeholder)
-                toggle.toggled.connect(edit.setEnabled)
-                setattr(self, toggle_attr, toggle)
-                setattr(self, edit_attr, edit)
-                row.addWidget(toggle)
-                row.addWidget(edit)
-                return row
-
-            form_layout.addLayout(_ctx_row('window_title_toggle', 'window_title_edit', 'Window Title:', 'e.g., Gemini, Visual Studio Code'))
-            form_layout.addLayout(_ctx_row('process_name_toggle', 'process_name_edit', 'Process Name:', 'e.g., WindowsTerminal.exe'))
-            form_layout.addLayout(_ctx_row('window_class_toggle', 'window_class_edit', 'Window Class:', 'e.g., CabinetWClass'))
-        elif self.shortcut_type == "exclude":
-            form_layout.addWidget(QLabel("This rule blocks shortcuts when matched."))
-
-            def _excl_row(toggle_attr, edit_attr, label, placeholder):
-                row = QHBoxLayout()
-                toggle = QCheckBox()
-                toggle.setChecked(True)
-                toggle.setFixedWidth(24)
-                edit = QLineEdit()
-                edit.setPlaceholderText(placeholder)
-                toggle.toggled.connect(edit.setEnabled)
-                setattr(self, toggle_attr, toggle)
-                setattr(self, edit_attr, edit)
-                row.addWidget(toggle)
-                row.addWidget(edit)
-                return row
-
-            form_layout.addLayout(_excl_row('window_title_toggle', 'window_title_edit', 'Window Title:', 'e.g., Discord, Visual Studio Code'))
-            form_layout.addLayout(_excl_row('process_name_toggle', 'process_name_edit', 'Process Name:', 'e.g., Discord.exe, Code.exe'))
-            form_layout.addLayout(_excl_row('window_class_toggle', 'window_class_edit', 'Window Class:', 'e.g., Chrome_WidgetWin_1'))
-        elif self.shortcut_type == "text":
-            # Trigger
-            form_layout.addWidget(QLabel("Trigger (without ::):"))
-            self.trigger_edit = QLineEdit()
-            self.trigger_edit.setPlaceholderText("e.g., ;v1, ;run")
-            form_layout.addWidget(self.trigger_edit)
-        elif self.shortcut_type == "file":
-            # Trigger
-            form_layout.addWidget(QLabel("Trigger (without ::):"))
-            self.trigger_edit = QLineEdit()
-            self.trigger_edit.setPlaceholderText("e.g., ;theme, ;file")
-            form_layout.addWidget(self.trigger_edit)
-            
-            # File Path
-            form_layout.addWidget(QLabel("File Path:"))
+        # ── Extra Type-Specific Rows ──
+        if self.shortcut_type == "file":
             file_row = QHBoxLayout()
             self.file_path_edit = QLineEdit()
             self.file_path_edit.setPlaceholderText("C:\\path\\to\\file.ext or @..\\path")
@@ -976,30 +878,63 @@ class AddEditShortcutDialog(QDialog):
             self.browse_btn.clicked.connect(self.browse_file)
             file_row.addWidget(self.file_path_edit)
             file_row.addWidget(self.browse_btn)
-            form_layout.addLayout(file_row)
+            _add_row("File Path:", file_row)
+            
         elif self.shortcut_type == "startup":
-            form_layout.addWidget(QLabel("Context Mode:"))
             self.startup_context_mode = QComboBox()
             self.startup_context_mode.addItems(["No context (always run)", "Active in (only these windows)", "Inactive in (exclude these windows)"])
-            form_layout.addWidget(self.startup_context_mode)
+            _add_row("Ctx Mode:", self.startup_context_mode)
 
-            def _startup_row(toggle_attr, edit_attr, label, placeholder):
+        # ── Toggle Buttons (Placed neatly at the bottom) ──────────────
+        form_layout.addSpacing(10)
+        form_layout.addWidget(self.enabled_checkbox)
+
+        if self.shortcut_type == "context":
+            self.match_foreground_checkbox = QCheckBox("Match any foreground window (not just focused)")
+            self.match_foreground_checkbox.setChecked(False)
+            form_layout.addWidget(self.match_foreground_checkbox)
+
+        # Context criteria input groups
+        if self.shortcut_type in ["context", "exclude", "startup"]:
+            form_layout.addSpacing(10)
+            form_layout.addWidget(QLabel("<b>Window Context Matching:</b>"))
+            
+            def _ctx_row(toggle_attr, edit_attr, label, placeholder):
                 row = QHBoxLayout()
                 toggle = QCheckBox()
                 toggle.setChecked(True)
                 toggle.setFixedWidth(24)
+                
                 edit = QLineEdit()
                 edit.setPlaceholderText(placeholder)
                 toggle.toggled.connect(edit.setEnabled)
+                
                 setattr(self, toggle_attr, toggle)
                 setattr(self, edit_attr, edit)
+                
+                # Align elements horizontally
+                ctx_lbl = QLabel(label)
+                ctx_lbl.setFixedWidth(90)
+                ctx_lbl.setStyleSheet("color: #808080; font-family: 'Consolas';")
+                
                 row.addWidget(toggle)
+                row.addWidget(ctx_lbl)
                 row.addWidget(edit)
                 return row
 
-            form_layout.addLayout(_startup_row('window_title_toggle', 'startup_window_title', 'Window Title:', 'e.g., Notepad, Chrome'))
-            form_layout.addLayout(_startup_row('process_name_toggle', 'startup_process_name', 'Process Name:', 'e.g., chrome.exe'))
-            form_layout.addLayout(_startup_row('window_class_toggle', 'startup_window_class', 'Window Class:', 'e.g., CabinetWClass'))
+            if self.shortcut_type == "context":
+                form_layout.addLayout(_ctx_row('window_title_toggle', 'window_title_edit', 'Window Title:', 'e.g., Gemini, Visual Studio Code'))
+                form_layout.addLayout(_ctx_row('process_name_toggle', 'process_name_edit', 'Process Name:', 'e.g., WindowsTerminal.exe'))
+                form_layout.addLayout(_ctx_row('window_class_toggle', 'window_class_edit', 'Window Class:', 'e.g., CabinetWClass'))
+            elif self.shortcut_type == "exclude":
+                form_layout.addLayout(_ctx_row('window_title_toggle', 'window_title_edit', 'Window Title:', 'e.g., Discord, Visual Studio Code'))
+                form_layout.addLayout(_ctx_row('process_name_toggle', 'process_name_edit', 'Process Name:', 'e.g., Discord.exe, Code.exe'))
+                form_layout.addLayout(_ctx_row('window_class_toggle', 'window_class_edit', 'Window Class:', 'e.g., Chrome_WidgetWin_1'))
+            elif self.shortcut_type == "startup":
+                form_layout.addLayout(_ctx_row('window_title_toggle', 'startup_window_title', 'Window Title:', 'e.g., Notepad, Chrome'))
+                form_layout.addLayout(_ctx_row('process_name_toggle', 'startup_process_name', 'Process Name:', 'e.g., chrome.exe'))
+                form_layout.addLayout(_ctx_row('window_class_toggle', 'startup_window_class', 'Window Class:', 'e.g., CabinetWClass'))
+
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
