@@ -115,6 +115,15 @@ Suggested Commit Message: <your commit message here>
 
 ---
 
+## LOCAL CODEBASE SEARCH TOOL
+
+The user has a local codebase search tool integrated into their interface. It scans the files recursively and supports literal strings and regular expressions.
+If you (the AI) need to find where a variable, function, class, or pattern is defined, or if you need more context from files not listed below, you can request the user to run a search query in their "SEARCH" tab.
+Format your search requests at the end of your response exactly like this:
+Suggested Search: <your text or regex query here>
+
+---
+
 ## NOW, HERE ARE MY FILES:
 
 <!-- The tool will append your file contents below this line -->
