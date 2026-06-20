@@ -781,50 +781,6 @@ class IgnoreListDialog(QDialog):
         return exts
 
 
-        btn_row_sel = QHBoxLayout()
-        btn_all = QPushButton("SELECT ALL")
-        btn_none = QPushButton("SELECT NONE")
-        btn_all.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_none.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_all.clicked.connect(self._select_all)
-        btn_none.clicked.connect(self._select_none)
-        btn_row_sel.addWidget(btn_all)
-        btn_row_sel.addWidget(btn_none)
-        btn_row_sel.addStretch()
-        layout.addLayout(btn_row_sel)
-
-        btn_row = QHBoxLayout()
-        btn_ok = QPushButton("✔ OK")
-        btn_cancel = QPushButton("✕ CANCEL")
-        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
-                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
-        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
-                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
-
-        btn_ok.clicked.connect(self.accept)
-        btn_cancel.clicked.connect(self.reject)
-
-        btn_row.addStretch()
-        btn_row.addWidget(btn_ok)
-        btn_row.addWidget(btn_cancel)
-        layout.addLayout(btn_row)
-
-    def _select_all(self):
-        for chk in self.checkboxes.values():
-            chk.setChecked(True)
-
-    def _select_none(self):
-        for chk in self.checkboxes.values():
-            chk.setChecked(False)
-
-    def get_selected(self) -> set[str]:
-        return {ext for ext, chk in self.checkboxes.items() if chk.isChecked()}
-
-
-
 # ── PREP TAB ──────────────────────────────────────────────────────────────────
 class PrepTab(QWidget):
     def __init__(self, status_cb, root_cb=None):
@@ -901,8 +857,6 @@ class PrepTab(QWidget):
             # Show the item if search query matches file path or is empty
             match = (not query) or (query in fp.lower())
             item.setHidden(not match)
-
-
 
     def _save_session(self):
         import json
@@ -1187,36 +1141,68 @@ class PrepTab(QWidget):
         self._save_session()
 
     def _load_specific_files(self, d: str, files: list[str], extensions: list[str]):
-        if extensions:
-            # Re-load the directory filtering specifically by the stored extensions
-            self._load_dir(d, set(extensions), overwrite_recent=False)
-        elif files:
-            # Fallback to absolute file paths list if no extensions were registered
-            count = 0
-            for fp in files:
-                if os.path.exists(fp) and fp not in self.files:
+        if not files:
+            self._load_all_project_files(d)
+            return
+
+        self.files.clear()
+        self.file_list.clear()
+        
+        count = 0
+        for fp in files:
+            if os.path.exists(fp):
+                self.files.append(fp)
+                self._add_file_item(fp)
+                count += 1
+                
+        add_recent(d, self.files, extensions, overwrite_existing=False)
+        self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
+        self._update_root()
+        self._save_session()
+
+    def _load_all_project_files(self, d: str):
+        self.files.clear()
+        self.file_list.clear()
+        
+        count = 0
+        added_files = []
+        discovered_exts = set()
+        for root, dirs, fnames in os.walk(d):
+            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
+            for fn in fnames:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext in IGNORE_EXTS:
+                    continue
+                discovered_exts.add(ext)
+                fp = os.path.normpath(os.path.join(root, fn))
+                added_files.append(fp)
+                if fp not in self.files:
                     self.files.append(fp)
                     self._add_file_item(fp)
                     count += 1
-            add_recent(d, files, [], overwrite_existing=False)
-            self.status_cb(f"Restored {count} specific file(s) for project")
-            self._update_root()
-            self._save_session()
-        else:
-            self._load_dir(d, overwrite_recent=False)
+                    
+        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
+        self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
+        self._update_root()
+        self._save_session()
 
     def _show_recent(self):
         btn = self.sender()
         popup = RecentPopup(
             self,
-            on_load=self._load_dir,
-            on_load_specific=self._load_specific_files,
+            on_load=self._load_specific_files,
+            on_load_all=self._load_all_project_files,
             on_remove=lambda p: (
                 remove_recent(p),
                 self.status_cb(f"Removed: {p}")
             )
         )
-        pos = btn.mapToGlobal(QPoint(0, btn.height()))
+        btn_pos = btn.mapToGlobal(QPoint(0, 0))
+        popup_height = popup.sizeHint().height()
+        y = btn_pos.y() - popup_height - 2
+        if y < 10:
+            y = btn_pos.y() + btn.height() + 2
+        pos = QPoint(btn_pos.x(), y)
         popup.move(pos)
         popup.show()
 
@@ -1261,6 +1247,8 @@ class PrepTab(QWidget):
             self.status_cb("✔ Copied to clipboard")
         else:
             self.status_cb("⚠ Nothing to copy — generate first")
+
+
 def extract_commit_message(text: str) -> str:
     # Try looking for patterns like:
     # - Suggested Commit Message: <msg>
@@ -1394,8 +1382,6 @@ class MergeTab(QWidget):
         self.root_input.setText(path)
         add_recent(path)
 
-    
-
     def _parse(self):
         text = self.response_input.toPlainText().strip()
         if not text:
@@ -1463,6 +1449,8 @@ class MergeTab(QWidget):
                     commit_msg = "update files"
 
             self._final_commit_cmd = f'git commit -m "{commit_msg}"'
+            results.append("\nSuggested Git Commit Command:")
+            results.append(self._final_commit_cmd)
             self.btn_copy_commit.setVisible(True)
         else:
             self.btn_copy_commit.setVisible(False)
