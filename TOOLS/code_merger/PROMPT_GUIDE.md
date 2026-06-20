@@ -115,12 +115,12 @@ Suggested Commit Message: <your commit message here>
 
 ---
 
-## LOCAL CODEBASE SEARCH TOOL
+## LOCAL COMMAND EXECUTION TOOL
 
-The user has a local codebase search tool integrated into their interface. It scans the files recursively and supports literal strings and regular expressions.
-If you (the AI) need to find where a variable, function, class, or pattern is defined, or if you need more context from files not listed below, you can request the user to run a search query in their "SEARCH" tab.
-Format your search requests at the end of your response exactly like this:
-Suggested Search: <your text or regex query here>
+The user has a local command runner integrated into their interface. It can execute arbitrary shell commands within the project directory.
+If you (the AI) need to search the codebase (e.g. using `git grep` or `grep`), test the code (e.g. `npm run test`), check git status, or require more context from the environment, you can request the user to run a shell command in their "COMMAND" tab.
+Format your command requests at the end of your response exactly like this:
+Suggested Command: <your shell command here>
 
 ---
 
