@@ -114,6 +114,7 @@ function startPicker() {
   document.addEventListener('keydown', onPickerKeyDown, true);
 }
 
+// Stop element picker mode
 function stopPicker() {
   if (!pickerActive) return;
   pickerActive = false;
@@ -132,6 +133,18 @@ function stopPicker() {
 
 // Execution triggers
 const delayMs = ms => new Promise(res => setTimeout(res, ms));
+
+async function interruptibleDelay(seconds) {
+  const ms = seconds * 1000;
+  const chunk = 100; // Check state and stop requests every 100ms
+  let waited = 0;
+  while (waited < ms) {
+    if (stopRequested) break;
+    const timeToWait = Math.min(chunk, ms - waited);
+    await delayMs(timeToWait);
+    waited += timeToWait;
+  }
+}
 
 async function runAutomation(startLoop = 0, startStep = 0) {
   if (isAutomating) return;
@@ -163,10 +176,9 @@ async function runAutomation(startLoop = 0, startStep = 0) {
       updateState("running", currentLoop, i);
       
       logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
-      await delayMs(step.delay * 1000);
+      await interruptibleDelay(step.delay);
       
       if (stopRequested) break;
-@@TO:
       
       try {
         if (step.action === 'wait') {
@@ -220,7 +232,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     
     if (loopCount === -1 || currentLoop < loopCount) {
       logMessage(`Loop ${currentLoop} complete. Delaying ${loopDelay}s before next loop.`);
-      await delayMs(loopDelay * 1000);
+      await interruptibleDelay(loopDelay);
     }
   }
 
@@ -233,6 +245,16 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     logMessage("✅ Automation sequence completed!");
   }
 }
+
+// Listen to storage changes to sync stop signal instantly
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.automationState) {
+    const newValue = changes.automationState.newValue;
+    if (newValue && newValue.status === 'idle') {
+      stopRequested = true;
+    }
+  }
+});
 
 // Global Message Listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

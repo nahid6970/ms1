@@ -257,9 +257,17 @@ async function startAutomation() {
 
 // Stop sequence
 async function stopAutomation() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) return;
-  sendTabMessageWithInjection(tab.id, { action: 'trigger_stop' });
+  chrome.storage.local.get('automationState', (data) => {
+    const state = data.automationState || { logs: [] };
+    state.status = 'idle';
+    state.logs = state.logs || [];
+    state.logs.push(`[Popup] Stop requested by user.`);
+    chrome.storage.local.set({ automationState: state }, async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab) return;
+      sendTabMessageWithInjection(tab.id, { action: 'trigger_stop' });
+    });
+  });
 }
 
 // Log Terminal updates
