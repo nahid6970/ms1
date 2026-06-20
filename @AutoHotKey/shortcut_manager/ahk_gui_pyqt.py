@@ -752,9 +752,31 @@ class AddEditShortcutDialog(QDialog):
         self.description_edit = QLineEdit()
         self.description_edit.setPlaceholderText("Brief description of what this does")
         
-        # Enabled checkbox
+        # Enabled checkbox styled as a modern green checkbox matching user image
         self.enabled_checkbox = QCheckBox("Enable Shortcut")
         self.enabled_checkbox.setChecked(True)
+        
+        unchecked_b64 = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDY0IDY0Ij48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIHJ4PSIxMiIgZmlsbD0iIzExMTExMSIgc3Ryb2tlPSIjM2EzYTNhIiBzdHJva2Utd2lkdGg9IjYiLz48L3N2Zz4="
+        checked_b64 = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDY0IDY0Ij48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxMiIgZmlsbD0iIzNmYzU4ZSIvPjxwYXRoIGQ9Ik0xOCAzMiBMMjggNDIgTDQ2IDIyIiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg=="
+        
+        self.enabled_checkbox.setStyleSheet(f"""
+            QCheckBox {{
+                font-family: 'Consolas', sans-serif;
+                font-size: 11pt;
+                color: {CP_TEXT};
+                spacing: 8px;
+            }}
+            QCheckBox::indicator {{
+                width: 18px;
+                height: 18px;
+            }}
+            QCheckBox::indicator:unchecked {{
+                image: url(data:image/svg+xml;base64,{unchecked_b64});
+            }}
+            QCheckBox::indicator:checked {{
+                image: url(data:image/svg+xml;base64,{checked_b64});
+            }}
+        """)
 
         # Common template helper style for standard recording buttons
         record_style = """
@@ -2061,7 +2083,13 @@ class AHKShortcutEditor(QMainWindow):
                 margin-left: 5px;
                 margin-right: 5px;
             }
-            QCheckBox::indicator { width: 0px; height: 0px; }
+            QCheckBox::indicator {
+                width: 0px;
+                height: 0px;
+                background: none;
+                border: none;
+                image: none;
+            }
         """)
         top_layout.addWidget(self.category_toggle)
 
