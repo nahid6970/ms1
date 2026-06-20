@@ -121,13 +121,13 @@ class ShortcutBuilderPopup(QDialog):
             min-height: {h}px;
             min-width: {w}px;
         }}
-        QPushButton:hover {{ background: #3a4a5a; border-color: #61dafb; color: #61dafb; }}
-        QPushButton:pressed {{ background: #4a90d9; }}
+        QPushButton:hover {{ background: {hover_bg}; border-color: {hover_border}; color: {hover_fg}; }}
+        QPushButton:pressed {{ background: {pressed_bg}; }}
     """
     KEY_STYLE_ACTIVE = """
         QPushButton {{
-            background: #61dafb; color: #1a1a2e;
-            border: 2px solid #61dafb; border-radius: 0px;
+            background: {bg}; color: {fg};
+            border: 2px solid {border}; border-radius: 0px;
             font-size: 11px; font-weight: normal;
             padding: 0px;
             min-height: {h}px; min-width: {w}px;
@@ -142,14 +142,65 @@ class ShortcutBuilderPopup(QDialog):
             min-height: 36px;
             min-width: {w}px;
         }}
-        QPushButton:hover {{ background: #3a4a5a; border: 2px solid #61dafb; color: #61dafb; }}
+        QPushButton:hover {{ background: {hover_bg}; border: {hover_border}; color: {hover_fg}; }}
     """
+
+    THEMES = {
+        "cyberpunk": {
+            "win_bg": "#1a1a2e", "win_fg": "#e0e0e0",
+            "key_inactive_bg": "#252540", "key_inactive_fg": "#c8d0e0", "key_inactive_border": "#55556a",
+            "key_active_bg": "#61dafb", "key_active_fg": "#1a1a2e", "key_active_border": "#61dafb",
+            "mod_active_bg": "#61dafb", "mod_active_fg": "#1a1a2e", "mod_active_border": "2px solid #61dafb",
+            "mod_inactive_bg": "#1e1e38", "mod_inactive_fg": "#8090a8", "mod_inactive_border": "2px solid #55556a",
+            "preview_bg": "#0d0d1a", "preview_border": "1px solid #2a2a4a", "preview_fg": "#61dafb",
+            "kb_frame_bg": "#12122a", "lbl_fg": "#505070",
+            "cancel_style": "QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #55556a; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #55556a; color: white; }",
+            "ok_style": "QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #4ac8e8; }",
+            "key_hover_bg": "#3a4a5a", "key_hover_border": "#61dafb", "key_hover_fg": "#61dafb",
+            "key_pressed_bg": "#4a90d9",
+            "mod_hover_bg": "#3a4a5a", "mod_hover_border": "2px solid #61dafb", "mod_hover_fg": "#61dafb",
+        },
+        "black_white": {
+            "win_bg": "#000000", "win_fg": "#ffffff",
+            "key_inactive_bg": "#1a1a1a", "key_inactive_fg": "#dddddd", "key_inactive_border": "#444444",
+            "key_active_bg": "#ffffff", "key_active_fg": "#000000", "key_active_border": "#ffffff",
+            "mod_active_bg": "#ffffff", "mod_active_fg": "#000000", "mod_active_border": "2px solid #ffffff",
+            "mod_inactive_bg": "#222222", "mod_inactive_fg": "#cccccc", "mod_inactive_border": "2px solid #444444",
+            "preview_bg": "#000000", "preview_border": "1px solid #ffffff", "preview_fg": "#ffffff",
+            "kb_frame_bg": "#111111", "lbl_fg": "#888888",
+            "cancel_style": "QPushButton { background: #222222; color: #cccccc; border: 1px solid #444444; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #444444; color: white; }",
+            "ok_style": "QPushButton { background: #ffffff; color: #000000; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #e0e0e0; }",
+            "key_hover_bg": "#333333", "key_hover_border": "#ffffff", "key_hover_fg": "#ffffff",
+            "key_pressed_bg": "#555555",
+            "mod_hover_bg": "#333333", "mod_hover_border": "2px solid #ffffff", "mod_hover_fg": "#ffffff",
+        },
+        "white_black": {
+            "win_bg": "#ffffff", "win_fg": "#000000",
+            "key_inactive_bg": "#f0f0f0", "key_inactive_fg": "#222222", "key_inactive_border": "#cccccc",
+            "key_active_bg": "#000000", "key_active_fg": "#ffffff", "key_active_border": "#000000",
+            "mod_active_bg": "#000000", "mod_active_fg": "#ffffff", "mod_active_border": "2px solid #000000",
+            "mod_inactive_bg": "#dddddd", "mod_inactive_fg": "#333333", "mod_inactive_border": "2px solid #cccccc",
+            "preview_bg": "#ffffff", "preview_border": "1px solid #000000", "preview_fg": "#000000",
+            "kb_frame_bg": "#e6e6e6", "lbl_fg": "#666666",
+            "cancel_style": "QPushButton { background: #dddddd; color: #333333; border: 1px solid #cccccc; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #cccccc; color: black; }",
+            "ok_style": "QPushButton { background: #000000; color: #ffffff; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #222222; }",
+            "key_hover_bg": "#e0e0e0", "key_hover_border": "#000000", "key_hover_fg": "#000000",
+            "key_pressed_bg": "#aaaaaa",
+            "mod_hover_bg": "#e0e0e0", "mod_hover_border": "2px solid #000000", "mod_hover_fg": "#000000",
+        }
+    }
 
     def __init__(self, parent=None, initial_value=""):
         super().__init__(parent)
         self.setWindowTitle("⌨  Shortcut Builder")
         self.setModal(True)
-        self.setStyleSheet("QDialog { background: #1a1a2e; color: #e0e0e0; }")
+        
+        # Load theme setting
+        settings = QSettings("AHKEditor", "ShortcutEditor")
+        self.theme_name = settings.value("shortcut_builder_theme", "cyberpunk")
+        self.t_config = self.THEMES.get(self.theme_name, self.THEMES["cyberpunk"])
+        
+        self.setStyleSheet(f"QDialog {{ background: {self.t_config['win_bg']}; color: {self.t_config['win_fg']}; }}")
         # mods: key = ahk prefix string (e.g. "^", "<^", ">^"), value = bool
         all_syms = [s for d in self.MOD_DEFS for s in (d[0], d[1], d[2])]
         self.mods = {s: False for s in all_syms}
@@ -194,9 +245,25 @@ class ShortcutBuilderPopup(QDialog):
         w = getattr(btn, "custom_width", 34)
         h = getattr(btn, "custom_height", 32)
         if active:
-            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=w, h=h))
+            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(
+                bg=self.t_config["key_active_bg"],
+                fg=self.t_config["key_active_fg"],
+                border=self.t_config["key_active_border"],
+                h=h,
+                w=w
+            ))
         else:
-            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=w, h=h))
+            btn.setStyleSheet(self.KEY_STYLE.format(
+                bg=self.t_config["key_inactive_bg"],
+                fg=self.t_config["key_inactive_fg"],
+                border=self.t_config["key_inactive_border"],
+                hover_bg=self.t_config["key_hover_bg"],
+                hover_border=self.t_config["key_hover_border"],
+                hover_fg=self.t_config["key_hover_fg"],
+                pressed_bg=self.t_config["key_pressed_bg"],
+                h=h,
+                w=w
+            ))
 
     # ── Modifier button ───────────────────────────────────────────────
     def _mod_btn(self, sym, label, width=52, expand=False):
@@ -215,9 +282,25 @@ class ShortcutBuilderPopup(QDialog):
 
     def _apply_mod_style(self, btn, active):
         if active:
-            btn.setStyleSheet(self.MOD_STYLE.format(bg="#61dafb", fg="#1a1a2e", border="2px solid #61dafb", fw="normal", w=0))
+            btn.setStyleSheet(self.MOD_STYLE.format(
+                bg=self.t_config["mod_active_bg"],
+                fg=self.t_config["mod_active_fg"],
+                border=self.t_config["mod_active_border"],
+                hover_bg=self.t_config["mod_hover_bg"],
+                hover_border=self.t_config["mod_hover_border"],
+                hover_fg=self.t_config["mod_hover_fg"],
+                w=0
+            ))
         else:
-            btn.setStyleSheet(self.MOD_STYLE.format(bg="#1e1e38", fg="#8090a8", border="2px solid #55556a", fw="normal", w=0))
+            btn.setStyleSheet(self.MOD_STYLE.format(
+                bg=self.t_config["mod_inactive_bg"],
+                fg=self.t_config["mod_inactive_fg"],
+                border=self.t_config["mod_inactive_border"],
+                hover_bg=self.t_config["mod_hover_bg"],
+                hover_border=self.t_config["mod_hover_border"],
+                hover_fg=self.t_config["mod_hover_fg"],
+                w=0
+            ))
 
     def toggle_mod(self, sym, state):
         self.mods[sym] = state
@@ -278,17 +361,17 @@ class ShortcutBuilderPopup(QDialog):
 
         # ── Preview ───────────────────────────────────────────────────
         preview_frame = QFrame()
-        preview_frame.setStyleSheet("background: #0d0d1a; border-radius: 8px; border: 1px solid #2a2a4a;")
+        preview_frame.setStyleSheet(f"background: {self.t_config['preview_bg']}; border-radius: 8px; border: {self.t_config['preview_border']};")
         pf = QVBoxLayout(preview_frame); pf.setContentsMargins(10, 8, 10, 8)
         self.preview_label = QLabel(self.get_formatted_preview())
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #61dafb; letter-spacing: 2px; background: transparent; border: none;")
+        self.preview_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {self.t_config['preview_fg']}; letter-spacing: 2px; background: transparent; border: none;")
         pf.addWidget(self.preview_label)
         layout.addWidget(preview_frame)
 
         # ── Keyboard ──────────────────────────────────────────────────
         kb_frame = QFrame()
-        kb_frame.setStyleSheet("background: #12122a; border-radius: 10px; padding: 6px;")
+        kb_frame.setStyleSheet(f"background: {self.t_config['kb_frame_bg']}; border-radius: 10px; padding: 6px;")
         kb_layout = QVBoxLayout(kb_frame)
         kb_layout.setSpacing(4)
 
@@ -358,11 +441,11 @@ class ShortcutBuilderPopup(QDialog):
 
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
-        numpad_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 4px;")
+        numpad_frame.setStyleSheet(f"background: {self.t_config['kb_frame_bg']}; border-radius: 8px; padding: 4px;")
         numpad_frame.setMinimumWidth(180)
         num_v = QVBoxLayout(numpad_frame); num_v.setSpacing(4); num_v.setContentsMargins(4,4,4,4)
         lbl_np = QLabel("Numpad"); lbl_np.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_np.setStyleSheet("color:#505070; font-size:10px; margin-bottom:2px;")
+        lbl_np.setStyleSheet(f"color: {self.t_config['lbl_fg']}; font-size:10px; margin-bottom:2px;")
         num_v.addWidget(lbl_np)
 
         from PyQt6.QtWidgets import QGridLayout
@@ -426,9 +509,9 @@ class ShortcutBuilderPopup(QDialog):
         # ── Generic modifier strip (Ctrl / Alt / Shift / Win) ────────
         # Useful when user doesn't care about L/R
         gmod_frame = QFrame()
-        gmod_frame.setStyleSheet("background: #12122a; border-radius: 8px; padding: 2px;")
+        gmod_frame.setStyleSheet(f"background: {self.t_config['kb_frame_bg']}; border-radius: 8px; padding: 2px;")
         gmod_l = QHBoxLayout(gmod_frame); gmod_l.setSpacing(6)
-        lbl = QLabel("Any side:"); lbl.setStyleSheet("color:#505070; font-size:11px;")
+        lbl = QLabel("Any side:"); lbl.setStyleSheet(f"color: {self.t_config['lbl_fg']}; font-size:11px;")
         gmod_l.addWidget(lbl)
         for sym, _, _, name in self.MOD_DEFS:
             gmod_l.addWidget(self._mod_btn(sym, name, 64))
@@ -438,9 +521,9 @@ class ShortcutBuilderPopup(QDialog):
         # ── OK / Cancel ───────────────────────────────────────────────
         btn_row = QHBoxLayout(); btn_row.addStretch()
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet("QPushButton { background: #1e1e38; color: #a0a0b0; border: 1px solid #55556a; border-radius: 0px; padding: 8px 18px; } QPushButton:hover { background: #55556a; color: white; }")
+        cancel_btn.setStyleSheet(self.t_config["cancel_style"])
         ok_btn = QPushButton("  ✓  Apply")
-        ok_btn.setStyleSheet("QPushButton { background: #61dafb; color: #1a1a2e; border-radius: 0px; padding: 8px 24px; font-weight: bold; } QPushButton:hover { background: #4ac8e8; }")
+        ok_btn.setStyleSheet(self.t_config["ok_style"])
         ok_btn.clicked.connect(self.accept); cancel_btn.clicked.connect(self.reject)
         btn_row.addWidget(cancel_btn); btn_row.addWidget(ok_btn)
         layout.addLayout(btn_row)
@@ -1488,6 +1571,24 @@ class SettingsDialog(QDialog):
         size_layout.addStretch()
         layout.addLayout(size_layout)
 
+        # Theme Selection
+        theme_layout = QHBoxLayout()
+        theme_layout.addWidget(QLabel("Shortcut Builder Theme:"))
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItem("Cyberpunk (Default)", "cyberpunk")
+        self.theme_combo.addItem("Black & White", "black_white")
+        self.theme_combo.addItem("White & Black", "white_black")
+        
+        # Select current theme
+        settings = QSettings("AHKEditor", "ShortcutEditor")
+        current_theme = settings.value("shortcut_builder_theme", "cyberpunk")
+        index = self.theme_combo.findData(current_theme)
+        if index != -1:
+            self.theme_combo.setCurrentIndex(index)
+            
+        theme_layout.addWidget(self.theme_combo)
+        layout.addLayout(theme_layout)
+
         layout.addWidget(QLabel("<small><i>Note: Some icons require a Nerd Font (NFP) to display correctly.</i></small>"))
 
         # Buttons
@@ -1508,6 +1609,12 @@ class SettingsDialog(QDialog):
         new_size = self.size_spin.value()
         self.parent_window.app_font_family = new_font
         self.parent_window.app_font_size = new_size
+        
+        # Save shortcut builder theme
+        selected_theme = self.theme_combo.currentData()
+        settings = QSettings("AHKEditor", "ShortcutEditor")
+        settings.setValue("shortcut_builder_theme", selected_theme)
+        
         self.parent_window.apply_global_font()
         self.parent_window.save_shortcuts_json()
         QMessageBox.information(self, "Success", f"Settings updated and applied!")
