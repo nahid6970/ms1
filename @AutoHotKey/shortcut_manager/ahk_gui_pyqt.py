@@ -197,12 +197,15 @@ class ShortcutBuilderPopup(QDialog):
             btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=w))
 
     # ── Modifier button ───────────────────────────────────────────────
-    def _mod_btn(self, sym, label, width=52):
+    def _mod_btn(self, sym, label, width=52, expand=False):
         btn = QPushButton(label)
         btn.setCheckable(True)
         btn.setChecked(self.mods[sym])
         btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        btn.setFixedWidth(width)
+        if expand:
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        elif width > 0:
+            btn.setFixedWidth(width)
         self._apply_mod_style(btn, self.mods[sym])
         btn.toggled.connect(lambda checked, s=sym: self.toggle_mod(s, checked))
         self._mod_buttons[sym].append(btn)
@@ -288,7 +291,7 @@ class ShortcutBuilderPopup(QDialog):
         kb_layout.setSpacing(4)
 
         # row index -> index of key that should expand to fill remaining space
-        expand_key = {1: 13, 2: 13, 3: 11}  # Backspace, \, Enter
+        expand_key = {1: 13, 2: 13, 3: 11, 4: 999}  # Backspace, \, Enter, RShift Custom Expand
 
         row_widths = [
             {0: 40},           # Esc wider
@@ -305,7 +308,7 @@ class ShortcutBuilderPopup(QDialog):
                 should_expand = (expand_key.get(ri) == i)
                 rl.addWidget(self._key_btn(k, overrides.get(i, 34), expand=should_expand))
             if ri == 4:
-                rl.addWidget(self._mod_btn(">+", "RShift", 74))
+                rl.addWidget(self._mod_btn(">+", "RShift", width=0, expand=True))
             if ri not in expand_key:
                 rl.addStretch(1)
             kb_layout.addWidget(rw)
@@ -316,13 +319,13 @@ class ShortcutBuilderPopup(QDialog):
 
         # Left side: LCtrl, LWin, LAlt
         for sym, label in [("<^","LCtrl"), ("<#","LWin"), ("<!","LAlt")]:
-            sr.addWidget(self._mod_btn(sym, label, 80))
+            sr.addWidget(self._mod_btn(sym, label, 60))
 
-        sr.addWidget(self._key_btn("Space", 120))
+        sr.addWidget(self._key_btn("Space", 240))
 
         # Right side: RAlt, RWin, RCtrl
         for sym, label in [(">!","RAlt"), (">#","RWin"), (">^","RCtrl")]:
-            sr.addWidget(self._mod_btn(sym, label, 80))
+            sr.addWidget(self._mod_btn(sym, label, 60))
 
         kb_layout.addWidget(space_row)
 
