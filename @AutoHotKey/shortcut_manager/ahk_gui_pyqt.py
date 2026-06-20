@@ -105,7 +105,7 @@ class ShortcutBuilderPopup(QDialog):
         ["Esc", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"],
         ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "Backspace"],
         ["Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
-        ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"],
+        ["CapsLock", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"],
         ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
     ]
 
@@ -393,13 +393,13 @@ class ShortcutBuilderPopup(QDialog):
         kb_layout.setSpacing(4)
 
         # row index -> index of key that should expand to fill remaining space
-        expand_key = {1: 13, 2: 13, 3: 11, 4: 999}  # Backspace, \, Enter, RShift Custom Expand
+        expand_key = {1: 13, 2: 13, 3: 12, 4: 999}  # Backspace, \, Enter, RShift Custom Expand
 
         row_widths = [
             {0: 40},           # Esc wider
             {13: 68},          # Backspace wider
             {0: 52, 13: 44},   # Tab, backslash
-            {11: 68},          # Enter
+            {0: 58, 12: 68},   # CapsLock, Enter
             {},                # bottom letter row
         ]
         for ri, (keys, overrides) in enumerate(zip(self.KB_ROWS, row_widths)):
@@ -2682,6 +2682,20 @@ class AHKShortcutEditor(QMainWindow):
         try:
             output_lines = ["#Requires AutoHotkey v2.0", "#SingleInstance", "Persistent", ""]
 
+            # Sanitization helpers for AHK syntax compatibility
+            def escape_hotkey(hotkey: str) -> str:
+                # Literal backticks must be doubled in AHK v2 hotkey definitions
+                escaped = hotkey.replace("`", "``")
+                # Semicolons must be escaped to prevent being interpreted as comment lines
+                escaped = escaped.replace(";", "`;")
+                return escaped
+
+            def escape_ahk_string(s: str) -> str:
+                # Escapes characters inside an AHK double-quoted string literal
+                escaped = s.replace("`", "``")
+                escaped = escaped.replace('"', '`"')
+                return escaped
+
             # Add helper function for fast pasting
             output_lines.extend([
                 "Paste(text) {",
@@ -2935,8 +2949,10 @@ class AHKShortcutEditor(QMainWindow):
                     if guarded:
                         output_lines.append("#HotIf !IsShortcutExcluded()")
 
+                    safe_hotkey = escape_hotkey(hotkey)
+
                     if '\n' in action:
-                        output_lines.append(f"{hotkey}:: {{")
+                        output_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
                         match = re.search(r"^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{", action, re.MULTILINE)
                         if match and len(lines) > 0:
@@ -2948,7 +2964,7 @@ class AHKShortcutEditor(QMainWindow):
                                 output_lines.append(f"    {line}")
                         output_lines.append("}")
                     else:
-                        output_lines.append(f"{hotkey}::{action}")
+                        output_lines.append(f"{safe_hotkey}::{action}")
 
                     if guarded:
                         output_lines.append("#HotIf")
@@ -2982,6 +2998,8 @@ class AHKShortcutEditor(QMainWindow):
                     action = shortcut.get('action', '')
                     action = action.replace(',,,', ',,')
 
+                    safe_hotkey = escape_hotkey(hotkey)
+
                     if match_foreground and has_context_fields:
                         # Strip outer braces if action is wrapped in them
                         stripped = action.strip()
@@ -2990,7 +3008,7 @@ class AHKShortcutEditor(QMainWindow):
                         else:
                             action_lines = action.splitlines()
                         # Global hotkey: find matching window, activate it, then run action
-                        output_lines.append(f"{hotkey}:: {{")
+                        output_lines.append(f"{safe_hotkey}:: {{")
                         output_lines.append(f"    hwnd := {func_name}()")
                         output_lines.append("    if hwnd {")
                         output_lines.append("        WinActivate(hwnd)")
@@ -3004,9 +3022,13 @@ class AHKShortcutEditor(QMainWindow):
                             send_key = hotkey
                         else:
                             send_key = '{' + hotkey + '}'
-                        output_lines.append(f'        Hotkey "{hotkey}", "Off"')
-                        output_lines.append(f'        Send("{send_key}")')
-                        output_lines.append(f'        Hotkey "{hotkey}", "On"')
+                        
+                        safe_hotkey_str = escape_ahk_string(hotkey)
+                        safe_send_key_str = escape_ahk_string(send_key)
+
+                        output_lines.append(f'        Hotkey "{safe_hotkey_str}", "Off"')
+                        output_lines.append(f'        Send("{safe_send_key_str}")')
+                        output_lines.append(f'        Hotkey "{safe_hotkey_str}", "On"')
                         output_lines.append("    }")
                         output_lines.append("}")
                     else:
@@ -3022,13 +3044,13 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append("")
 
                         if '\n' in action:
-                            output_lines.append(f"{hotkey}:: {{")
+                            output_lines.append(f"{safe_hotkey}:: {{")
                             for line in action.split('\n'):
                                 if line.strip():
                                     output_lines.append(f"    {line}")
                             output_lines.append("}")
                         else:
-                            output_lines.append(f"{hotkey}::{action}")
+                            output_lines.append(f"{safe_hotkey}::{action}")
                         output_lines.append("")
                         if hotif_opened:
                             output_lines.append("#HotIf")
