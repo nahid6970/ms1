@@ -344,18 +344,43 @@ def analyze_match_failure(content: str, target_block: str, mode: str) -> str:
             best_match_idx = start_idx
             
     actual_slice = lines_content[best_match_idx : best_match_idx + len(lines_block)]
+    
+    matched_lines = 0
+    first_mismatch = None
+    for i, expected in enumerate(lines_block):
+        if i < len(actual_slice):
+            actual = actual_slice[i]
+            if expected == actual:
+                matched_lines += 1
+            elif first_mismatch is None:
+                first_mismatch = (i, expected, actual)
+        else:
+            if first_mismatch is None:
+                first_mismatch = (i, expected, None)
+
+    summary = f"Out of {len(lines_block)} lines in the block, the first {matched_lines} lines matched perfectly.\n"
+    if first_mismatch:
+        idx, exp, act = first_mismatch
+        summary += f"The divergence started at line {idx + 1} of the block (file line {best_match_idx + 1 + idx}):\n"
+        summary += f"  Expected: {repr(exp)}\n"
+        if act is not None:
+            summary += f"  Actual:   {repr(act)}\n"
+        else:
+            summary += f"  Actual:   <End of file>\n"
+
     diff = difflib.unified_diff(
         actual_slice,
         lines_block,
-        fromfile=f"Actual file content (starting at line {best_match_idx + 1})",
+        fromfile=f"Actual file content",
         tofile="Expected AI block",
         lineterm=""
     )
     diff_text = "\n".join(list(diff)[2:]) # Skip the --- and +++ lines
     
     return (
-        f"The block's first line was found at line {best_match_idx + 1}, but the rest did not match.\n"
-        "Here is the diff showing the discrepancy between the file and what the AI expected:\n"
+        f"The block's first line was found at line {best_match_idx + 1}.\n"
+        f"{summary}\n"
+        "Full diff of the expected block vs actual file:\n"
         f"{diff_text}"
     )
 
