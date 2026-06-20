@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ClickFlow Automator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo-area">
+        <span class="logo-icon">⚡</span>
+        <h1>ClickFlow Automator</h1>
+      </div>
+      <div id="status-badge" class="badge idle">Idle</div>
+    </div>
+
+    <!-- Convex Sync Header Block -->
+    <div class="convex-sync-section">
+      <span class="section-title">Cloud Backup</span>
+      <div class="convex-buttons">
+        <button id="saveToConvex" class="btn-convex-save">💾 Backup</button>
+        <button id="loadFromConvex" class="btn-convex-load">📂 Restore</button>
+      </div>
+    </div>
+
+    <!-- Loop Config -->
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="field">
+          <label for="loopCount">Loop Count (-1 = infinite)</label>
+          <input type="number" id="loopCount" value="1" min="-1" />
+        </div>
+        <div class="field">
+          <label for="loopDelay">Loop Delay (ms)</label>
+          <input type="number" id="loopDelay" value="1000" min="0" step="100" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Sequences Section -->
+    <div class="steps-section">
+      <div class="section-header">
+        <h2>Automation Steps</h2>
+        <button id="addStepBtn" class="btn-secondary">➕ Add Step</button>
+      </div>
+      
+      <div id="stepsList" class="steps-list">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Action Panel -->
+    <div class="action-panel">
+      <button id="startBtn" class="btn-primary">▶️ Start Automation</button>
+      <button id="stopBtn" class="btn-danger">⏹️ Stop</button>
+    </div>
+
+    <!-- Live Execution Console Logs -->
+    <div class="logs-section">
+      <div class="section-header">
+        <h2>Live Logs</h2>
+        <button id="clearLogsBtn" class="btn-text">Clear</button>
+      </div>
+      <div id="logsTerminal" class="logs-terminal">
+        <div class="log-placeholder">No action executed yet. Ready...</div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

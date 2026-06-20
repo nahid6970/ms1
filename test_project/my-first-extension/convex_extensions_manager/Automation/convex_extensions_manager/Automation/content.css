@@ -1,0 +1,35 @@
+#automation-picker-toast {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  border: 1px solid #cba6f7;
+  z-index: 100000000;
+  pointer-events: none;
+  animation: pickerSlideIn 0.3s ease-out;
+}
+
+.automation-highlight {
+  outline: 3px solid #f38ba8 !important;
+  box-shadow: 0 0 10px #f38ba8 !important;
+  transition: all 0.2s ease;
+}
+
+@keyframes pickerSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
