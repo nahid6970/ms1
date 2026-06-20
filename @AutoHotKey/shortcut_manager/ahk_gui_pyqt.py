@@ -118,7 +118,7 @@ class ShortcutBuilderPopup(QDialog):
             font-size: 11px;
             font-weight: normal;
             padding: 0px;
-            min-height: 32px;
+            min-height: {h}px;
             min-width: {w}px;
         }}
         QPushButton:hover {{ background: #3a4a5a; border-color: #61dafb; color: #61dafb; }}
@@ -130,7 +130,7 @@ class ShortcutBuilderPopup(QDialog):
             border: 2px solid #61dafb; border-radius: 0px;
             font-size: 11px; font-weight: normal;
             padding: 0px;
-            min-height: 32px; min-width: {w}px;
+            min-height: {h}px; min-width: {w}px;
         }}
     """
     MOD_STYLE = """
@@ -171,7 +171,7 @@ class ShortcutBuilderPopup(QDialog):
         self.main_key = value
 
     # ── Key button ────────────────────────────────────────────────────
-    def _key_btn(self, label, width=34, expand=False):
+    def _key_btn(self, label, width=34, expand=False, height=32):
         btn = QPushButton(label)
         btn.setCheckable(True)
         btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -181,20 +181,22 @@ class ShortcutBuilderPopup(QDialog):
             btn.setFixedWidth(width)
         active = (label.lower() == self.main_key.lower())
         btn.setChecked(active)
-        # Store original custom width on button object to prevent shifting when selected/deselected
+        # Store original custom width & height on button object to prevent style degradation on action
         btn.custom_width = 0 if (expand or width == 0) else width
+        btn.custom_height = height
         self._apply_key_style(btn, active)
         btn.clicked.connect(lambda _, k=label: self.select_key(k))
         self._key_buttons[label] = btn
         return btn
 
     def _apply_key_style(self, btn, active):
-        # Retrieve the custom width assigned during creation, fallback to 34
+        # Retrieve the custom width & height assigned during creation
         w = getattr(btn, "custom_width", 34)
+        h = getattr(btn, "custom_height", 32)
         if active:
-            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=w))
+            btn.setStyleSheet(self.KEY_STYLE_ACTIVE.format(w=w, h=h))
         else:
-            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=w))
+            btn.setStyleSheet(self.KEY_STYLE.format(bg="#252540", fg="#c8d0e0", border="#55556a", w=w, h=h))
 
     # ── Modifier button ───────────────────────────────────────────────
     def _mod_btn(self, sym, label, width=52, expand=False):
@@ -321,7 +323,7 @@ class ShortcutBuilderPopup(QDialog):
         for sym, label in [("<^","LCtrl"), ("<#","LWin"), ("<!","LAlt")]:
             sr.addWidget(self._mod_btn(sym, label, 60))
 
-        sr.addWidget(self._key_btn("Space", 240))
+        sr.addWidget(self._key_btn("Space", 240, height=36))
 
         # Right side: RAlt, RWin, RCtrl
         for sym, label in [(">!","RAlt"), (">#","RWin"), (">^","RCtrl")]:
