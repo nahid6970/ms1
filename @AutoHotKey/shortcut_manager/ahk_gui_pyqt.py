@@ -441,7 +441,9 @@ class ShortcutBuilderPopup(QDialog):
             [["","Up",""], ["Left","Down","Right"]],
         ]
         for gi, group in enumerate(nav_groups):
-            if gi > 0:
+            if gi == 2:
+                nav_v.addStretch(1)
+            elif gi > 0:
                 nav_v.addSpacing(12)
             for row in group:
                 rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
@@ -455,7 +457,6 @@ class ShortcutBuilderPopup(QDialog):
                         if k in nav_labels: btn.setText(nav_labels[k])
                         rl.addWidget(btn)
                 nav_v.addWidget(rw)
-        nav_v.addStretch(1)
 
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
