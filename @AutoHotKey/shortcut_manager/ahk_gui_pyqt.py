@@ -753,7 +753,7 @@ class AddEditShortcutDialog(QDialog):
         self.description_edit.setPlaceholderText("Brief description of what this does")
         
         # Enabled checkbox
-        self.enabled_checkbox = QCheckBox("Enabled (include in generated script)")
+        self.enabled_checkbox = QCheckBox("Enable Shortcut")
         self.enabled_checkbox.setChecked(True)
 
         # Common template helper style for standard recording buttons
