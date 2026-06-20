@@ -627,7 +627,27 @@ class WindowsDefaultLookupDialog(QDialog):
         from PyQt6.QtWidgets import QListWidgetItem
         self.list_widget.clear()
         for item in WINDOWS_DEFAULTS:
-            pretty_hk = item["hotkey"].replace("#", "Win+").replace("^", "Ctrl+").replace("+", "Shift+").replace("!", "Alt+")
+            hk_str = item["hotkey"]
+            pretty_parts = []
+            i = 0
+            while i < len(hk_str):
+                char = hk_str[i]
+                if char == "#":
+                    pretty_parts.append("Win")
+                    i += 1
+                elif char == "^":
+                    pretty_parts.append("Ctrl")
+                    i += 1
+                elif char == "!":
+                    pretty_parts.append("Alt")
+                    i += 1
+                elif char == "+":
+                    pretty_parts.append("Shift")
+                    i += 1
+                else:
+                    pretty_parts.append(hk_str[i:])
+                    break
+            pretty_hk = "+".join(pretty_parts)
             display_text = f"{pretty_hk}  ➔  {item['name']}\n{item['description']}"
             list_item = QListWidgetItem(display_text)
             list_item.setData(Qt.ItemDataRole.UserRole, item)
