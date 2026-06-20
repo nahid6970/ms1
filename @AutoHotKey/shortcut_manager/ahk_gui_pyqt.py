@@ -67,7 +67,7 @@ class CyberButton(QPushButton):
 
     def enterEvent(self, event):
         if self.svg_data:
-            self.update_icon(CP_YELLOW if self.color == CP_DIM else CP_BG)
+            self.update_icon(CP_YELLOW if self.color == CP_DIM else self.color)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
