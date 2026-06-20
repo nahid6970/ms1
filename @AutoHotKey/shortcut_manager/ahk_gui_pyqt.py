@@ -525,27 +525,33 @@ class ShortcutBuilderPopup(QDialog):
         kb_nav.addWidget(kb_frame); kb_nav.addWidget(nav_frame); kb_nav.addWidget(numpad_frame)
         layout.addLayout(kb_nav)
 
-        # ── Generic modifier strip (Ctrl / Alt / Shift / Win) ────────
-        # Useful when user doesn't care about L/R
+        # ── Generic modifier strip with OK / Cancel Actions ───────────
         gmod_frame = QFrame()
-        gmod_frame.setStyleSheet(f"background: {self.t_config['kb_frame_bg']}; border-radius: 8px; padding: 2px;")
+        gmod_frame.setStyleSheet(f"background: {self.t_config['kb_frame_bg']}; border-radius: 8px; padding: 4px;")
         gmod_l = QHBoxLayout(gmod_frame); gmod_l.setSpacing(6)
+        
         lbl = QLabel("Any side:"); lbl.setStyleSheet(f"color: {self.t_config['lbl_fg']}; font-size:11px;")
         gmod_l.addWidget(lbl)
         for sym, _, _, name in self.MOD_DEFS:
             gmod_l.addWidget(self._mod_btn(sym, name, 64))
-        gmod_l.addStretch()
-        layout.addWidget(gmod_frame)
-
-        # ── OK / Cancel ───────────────────────────────────────────────
-        btn_row = QHBoxLayout(); btn_row.addStretch()
+            
+        gmod_l.addStretch(1)
+        
+        # Right-aligned Cancel and Apply buttons
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setStyleSheet(self.t_config["cancel_style"] + f" QPushButton {{ font-family: '{self.builder_font_family}'; }}")
         ok_btn = QPushButton("  ✓  Apply")
         ok_btn.setStyleSheet(self.t_config["ok_style"] + f" QPushButton {{ font-family: '{self.builder_font_family}'; }}")
         ok_btn.clicked.connect(self.accept); cancel_btn.clicked.connect(self.reject)
-        btn_row.addWidget(cancel_btn); btn_row.addWidget(ok_btn)
-        layout.addLayout(btn_row)
+        
+        # Match standard modifier button height
+        cancel_btn.setFixedHeight(36)
+        ok_btn.setFixedHeight(36)
+        
+        gmod_l.addWidget(cancel_btn)
+        gmod_l.addWidget(ok_btn)
+        
+        layout.addWidget(gmod_frame)
         self.adjustSize()
 
     def filter_keys(self, text): pass  # compat stub
