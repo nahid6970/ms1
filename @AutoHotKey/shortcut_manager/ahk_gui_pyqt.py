@@ -140,9 +140,9 @@ class ShortcutBuilderPopup(QDialog):
             background: {bg}; color: {fg};
             border: {border}; border-radius: 0px;
             font-family: '{font}';
-            font-size: 13px; font-weight: normal;
+            font-size: {font_size}px; font-weight: normal;
             padding: 0px 6px;
-            min-height: 36px;
+            min-height: {h}px;
             min-width: {w}px;
         }}
         QPushButton:hover {{ background: {hover_bg}; border: {hover_border}; color: {hover_fg}; }}
@@ -273,7 +273,7 @@ class ShortcutBuilderPopup(QDialog):
             ))
 
     # ── Modifier button ───────────────────────────────────────────────
-    def _mod_btn(self, sym, label, width=52, expand=False):
+    def _mod_btn(self, sym, label, width=52, expand=False, height=36, font_size=13):
         btn = QPushButton(label)
         btn.setCheckable(True)
         btn.setChecked(self.mods[sym])
@@ -282,12 +282,16 @@ class ShortcutBuilderPopup(QDialog):
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         elif width > 0:
             btn.setFixedWidth(width)
+        btn.custom_height = height
+        btn.custom_font_size = font_size
         self._apply_mod_style(btn, self.mods[sym])
         btn.toggled.connect(lambda checked, s=sym: self.toggle_mod(s, checked))
         self._mod_buttons[sym].append(btn)
         return btn
 
     def _apply_mod_style(self, btn, active):
+        h = getattr(btn, "custom_height", 36)
+        fs = getattr(btn, "custom_font_size", 13)
         if active:
             btn.setStyleSheet(self.MOD_STYLE.format(
                 bg=self.t_config["mod_active_bg"],
@@ -297,6 +301,8 @@ class ShortcutBuilderPopup(QDialog):
                 hover_border=self.t_config["mod_hover_border"],
                 hover_fg=self.t_config["mod_hover_fg"],
                 font=self.builder_font_family,
+                font_size=fs,
+                h=h,
                 w=0
             ))
         else:
@@ -308,6 +314,8 @@ class ShortcutBuilderPopup(QDialog):
                 hover_border=self.t_config["mod_hover_border"],
                 hover_fg=self.t_config["mod_hover_fg"],
                 font=self.builder_font_family,
+                font_size=fs,
+                h=h,
                 w=0
             ))
 
@@ -397,12 +405,12 @@ class ShortcutBuilderPopup(QDialog):
         for ri, (keys, overrides) in enumerate(zip(self.KB_ROWS, row_widths)):
             rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
             if ri == 4:
-                rl.addWidget(self._mod_btn("<+", "LShift", 58))
+                rl.addWidget(self._mod_btn("<+", "LShift", 74, height=32, font_size=11))
             for i, k in enumerate(keys):
                 should_expand = (expand_key.get(ri) == i)
                 rl.addWidget(self._key_btn(k, overrides.get(i, 34), expand=should_expand))
             if ri == 4:
-                rl.addWidget(self._mod_btn(">+", "RShift", width=0, expand=True))
+                rl.addWidget(self._mod_btn(">+", "RShift", width=0, expand=True, height=32, font_size=11))
             if ri not in expand_key:
                 rl.addStretch(1)
             kb_layout.addWidget(rw)
@@ -447,6 +455,7 @@ class ShortcutBuilderPopup(QDialog):
                         if k in nav_labels: btn.setText(nav_labels[k])
                         rl.addWidget(btn)
                 nav_v.addWidget(rw)
+        nav_v.addStretch(1)
 
         # ── Numpad cluster ────────────────────────────────────────────
         numpad_frame = QFrame()
