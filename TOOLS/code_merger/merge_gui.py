@@ -1479,8 +1479,8 @@ class MergeTab(QWidget):
         self.status_cb("Cleared")
 
 
-# ── SEARCH TAB ────────────────────────────────────────────────────────────────
-class SearchTab(QWidget):
+# ── COMMAND TAB ───────────────────────────────────────────────────────────────
+class CommandTab(QWidget):
     def __init__(self, status_cb, get_root_fn):
         super().__init__()
         self.status_cb = status_cb
@@ -1492,10 +1492,10 @@ class SearchTab(QWidget):
         layout.setSpacing(8)
 
         # Directory Row
-        grp_dir = QGroupBox("SEARCH DIRECTORY")
+        grp_dir = QGroupBox("WORKING DIRECTORY")
         hd = QHBoxLayout(grp_dir)
         self.dir_input = QLineEdit()
-        self.dir_input.setPlaceholderText("Directory to search in (defaults to Project Root)…")
+        self.dir_input.setPlaceholderText("Directory to run command in (defaults to Project Root)…")
         btn_browse = QPushButton("📁 BROWSE")
         btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_browse.clicked.connect(self._browse_dir)
@@ -1503,51 +1503,46 @@ class SearchTab(QWidget):
         hd.addWidget(btn_browse)
         layout.addWidget(grp_dir)
 
-        # Query Row
-        grp_query = QGroupBox("SEARCH OPTIONS")
-        hq = QHBoxLayout(grp_query)
-        self.query_input = QLineEdit()
-        self.query_input.setPlaceholderText("Enter search string or regex…")
-        self.query_input.returnPressed.connect(self._run_search)
+        # Command Row
+        grp_cmd = QGroupBox("COMMAND INPUT")
+        hc = QHBoxLayout(grp_cmd)
+        self.cmd_input = QLineEdit()
+        self.cmd_input.setPlaceholderText("Enter command (e.g. git status, npm run test)…")
+        self.cmd_input.returnPressed.connect(self._run_cmd)
         
-        self.chk_regex = QCheckBox("Regex")
-        self.chk_case = QCheckBox("Match Case")
-        
-        btn_search = QPushButton("🔍 SEARCH")
-        btn_search.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_search.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
-                                 f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
-        btn_search.clicked.connect(self._run_search)
+        btn_run = QPushButton("▶ RUN COMMAND")
+        btn_run.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_run.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
+                              f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
+        btn_run.clicked.connect(self._run_cmd)
 
-        hq.addWidget(self.query_input, 1)
-        hq.addWidget(self.chk_regex, 0)
-        hq.addWidget(self.chk_case, 0)
-        hq.addWidget(btn_search, 0)
-        layout.addWidget(grp_query)
+        hc.addWidget(self.cmd_input, 1)
+        hc.addWidget(btn_run, 0)
+        layout.addWidget(grp_cmd)
 
         # Results
-        grp_res = QGroupBox("MATCH RESULTS  (double-click to copy)")
+        grp_res = QGroupBox("COMMAND OUTPUT")
         vr = QVBoxLayout(grp_res)
         
-        self.results_list = QListWidget()
-        self.results_list.itemDoubleClicked.connect(self._copy_item_text)
-        vr.addWidget(self.results_list)
+        self.output_text = QTextEdit()
+        self.output_text.setReadOnly(True)
+        vr.addWidget(self.output_text, 1)
         
-        self.count_lbl = QLabel("Matches: 0")
-        self.count_lbl.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt; font-family: 'Consolas';")
-        vr.addWidget(self.count_lbl)
+        btn_copy = QPushButton("📋 COPY OUTPUT")
+        btn_copy.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_copy.clicked.connect(self._copy_output)
+        vr.addWidget(btn_copy)
         
         layout.addWidget(grp_res, 1)
 
     def _browse_dir(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Search Directory")
+        d = QFileDialog.getExistingDirectory(self, "Select Working Directory")
         if d:
             self.dir_input.setText(d)
 
-    def _run_search(self):
-        self.results_list.clear()
-        self.count_lbl.setText("Searching…")
-        self.status_cb("Searching…")
+    def _run_cmd(self):
+        self.output_text.clear()
+        self.status_cb("Running command…")
         
         d = self.dir_input.text().strip()
         if not d:
@@ -1555,65 +1550,45 @@ class SearchTab(QWidget):
             self.dir_input.setText(d)
             
         if not d or not os.path.isdir(d):
-            self.status_cb("⚠ Invalid search directory")
-            self.count_lbl.setText("Matches: 0 (Invalid Directory)")
+            self.status_cb("⚠ Invalid working directory")
+            self.output_text.setPlainText("Error: Invalid working directory")
             return
             
-        query = self.query_input.text()
-        if not query:
-            self.status_cb("⚠ Empty search query")
-            self.count_lbl.setText("Matches: 0")
+        cmd = self.cmd_input.text().strip()
+        if not cmd:
+            self.status_cb("⚠ Empty command")
+            self.output_text.setPlainText("Error: Command is empty")
             return
 
-        is_regex = self.chk_regex.isChecked()
-        is_case = self.chk_case.isChecked()
-
+        import subprocess
         try:
-            flags = 0 if is_case else re.IGNORECASE
-            if is_regex:
-                pattern = re.compile(query, flags)
-            else:
-                pattern = re.compile(re.escape(query), flags)
+            result = subprocess.run(cmd, cwd=d, shell=True, capture_output=True, text=True, timeout=60)
+            output = ""
+            if result.stdout:
+                output += result.stdout
+            if result.stderr:
+                if output: output += "\n"
+                output += "--- STDERR ---\n" + result.stderr
+                
+            if not output:
+                output = f"Command completed successfully with exit code {result.returncode} (No output)"
+                
+            self.output_text.setPlainText(output)
+            self.status_cb(f"Command finished with exit code {result.returncode}")
+        except subprocess.TimeoutExpired:
+            self.output_text.setPlainText("Error: Command timed out after 60 seconds")
+            self.status_cb("⚠ Command timed out")
         except Exception as e:
-            self.status_cb(f"⚠ Invalid Regex: {e}")
-            self.count_lbl.setText("Matches: 0 (Invalid Regex)")
-            return
+            self.output_text.setPlainText(f"Error running command:\n{str(e)}")
+            self.status_cb("⚠ Error running command")
 
-        matches_count = 0
-        
-        for root_dir, dirs, fnames in os.walk(d):
-            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
-            for fn in fnames:
-                ext = os.path.splitext(fn)[1].lower()
-                if ext in IGNORE_EXTS:
-                    continue
-                    
-                fpath = os.path.join(root_dir, fn)
-                rel_path = os.path.relpath(fpath, d)
-                
-                try:
-                    with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
-                        for line_num, line in enumerate(f, 1):
-                            if pattern.search(line):
-                                display_text = f"{rel_path}:{line_num}: {line.strip()}"
-                                item = QListWidgetItem(display_text)
-                                item.setData(Qt.ItemDataRole.UserRole, fpath)
-                                self.results_list.addItem(item)
-                                matches_count += 1
-                                if matches_count >= 500:
-                                    break
-                except Exception:
-                    pass
-            if matches_count >= 500:
-                break
-                
-        self.count_lbl.setText(f"Matches: {matches_count}" + (" (Capped at 500)" if matches_count >= 500 else ""))
-        self.status_cb(f"Search completed: found {matches_count} match(es)")
-
-    def _copy_item_text(self, item):
-        text = item.text()
-        QApplication.clipboard().setText(text)
-        self.status_cb("✔ Copied match line to clipboard")
+    def _copy_output(self):
+        text = self.output_text.toPlainText()
+        if text:
+            QApplication.clipboard().setText(text)
+            self.status_cb("✔ Copied output to clipboard")
+        else:
+            self.status_cb("⚠ Nothing to copy")
 
 
 # ── MAIN WINDOW ───────────────────────────────────────────────────────────────
@@ -1702,10 +1677,10 @@ class MainWindow(QMainWindow):
 
         self.merge_tab = MergeTab(self._set_status)
         self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
-        self.search_tab = SearchTab(self._set_status, lambda: self.merge_tab.root_input.text().strip())
+        self.command_tab = CommandTab(self._set_status, lambda: self.merge_tab.root_input.text().strip())
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
-        self.tabs.addTab(self.search_tab, "🔍  SEARCH ( codebase )")
+        self.tabs.addTab(self.command_tab, "💻  COMMAND ( runner )")
         root_layout.addWidget(self.tabs)
 
     def _manage_ignores(self):
