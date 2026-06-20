@@ -800,6 +800,78 @@ class AddEditShortcutDialog(QDialog):
             hotkey_row.addWidget(self.hotkey_edit)
             hotkey_row.addWidget(self.record_hotkey_btn)
             form_layout.addLayout(hotkey_row)
+        elif self.shortcut_type == "remap":
+            # Origin Key
+            form_layout.addWidget(QLabel("Origin Key (The key you press):"))
+            origin_row = QHBoxLayout()
+            self.origin_key_edit = HotkeyLineEdit()
+            self.origin_key_edit.setPlaceholderText("e.g., CapsLock, F1, ScrollLock")
+            
+            self.record_origin_btn = QPushButton("")
+            self.record_origin_btn.setCheckable(True)
+            self.record_origin_btn.setFixedSize(26,26)
+            self.record_origin_btn.setStyleSheet("""
+                QPushButton {
+                    font-family: inherit;
+                    background-color: #cc2222;
+                    border: none;
+                    border-radius: 13px;
+                    color: white;
+                    font-size: 18px;
+                }
+                QPushButton:checked {
+                    background-color: #61dafb;
+                    color: black;
+                    border-color: #61dafb;
+                }
+                QPushButton:hover {
+                    background-color: #4d4d4d;
+                    border-color: #61dafb;
+                }
+            """)
+            self.record_origin_btn.setToolTip("Open Shortcut Builder")
+            self.record_origin_btn.clicked.connect(lambda checked: self.origin_key_edit.set_recording(checked))
+            self.origin_key_edit.record_button = self.record_origin_btn
+            
+            origin_row.addWidget(self.origin_key_edit)
+            origin_row.addWidget(self.record_origin_btn)
+            form_layout.addLayout(origin_row)
+
+            # Destination Key
+            form_layout.addWidget(QLabel("Destination Key (What the key will do):"))
+            dest_row = QHBoxLayout()
+            self.destination_key_edit = HotkeyLineEdit()
+            self.destination_key_edit.setPlaceholderText("e.g., Backspace, Mute, PageUp")
+            
+            self.record_dest_btn = QPushButton("")
+            self.record_dest_btn.setCheckable(True)
+            self.record_dest_btn.setFixedSize(26,26)
+            self.record_dest_btn.setStyleSheet("""
+                QPushButton {
+                    font-family: inherit;
+                    background-color: #cc2222;
+                    border: none;
+                    border-radius: 13px;
+                    color: white;
+                    font-size: 18px;
+                }
+                QPushButton:checked {
+                    background-color: #61dafb;
+                    color: black;
+                    border-color: #61dafb;
+                }
+                QPushButton:hover {
+                    background-color: #4d4d4d;
+                    border-color: #61dafb;
+                }
+            """)
+            self.record_dest_btn.setToolTip("Open Shortcut Builder")
+            self.record_dest_btn.clicked.connect(lambda checked: self.destination_key_edit.set_recording(checked))
+            self.destination_key_edit.record_button = self.record_dest_btn
+            
+            dest_row.addWidget(self.destination_key_edit)
+            dest_row.addWidget(self.record_dest_btn)
+            form_layout.addLayout(dest_row)
         elif self.shortcut_type == "context":
             # Context shortcuts have both hotkey and context fields
             form_layout.addWidget(QLabel("Hotkey:"))
@@ -925,8 +997,28 @@ class AddEditShortcutDialog(QDialog):
         # Add form layout to top layout
         top_layout.addLayout(form_layout)
         
-        # Right side - action/replacement with bigger height and width
-        if self.shortcut_type in ["script", "startup", "context"]:
+        # Right side - action/replacement/remap info layout
+        if self.shortcut_type == "remap":
+            info_layout = QVBoxLayout()
+            info_layout.addWidget(QLabel("ℹ️ Key Remapping Guide:"))
+            
+            info_browser = QTextBrowser()
+            info_browser.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 10px;")
+            info_browser.setHtml(f"""
+                <h3 style="color: {CP_CYAN}; margin-top: 0px; font-family: 'Consolas';">How Key Remapping Works</h3>
+                <p style="font-family: 'Consolas'; color: {CP_TEXT};">Key Remapping changes a key or combination so that it behaves exactly like a different key.</p>
+                <p style="font-family: 'Consolas'; color: {CP_TEXT};"><b>Examples:</b></p>
+                <ul style="font-family: 'Consolas'; color: {CP_TEXT};">
+                    <li><b>CapsLock ➔ Backspace</b>: Turns your CapsLock key into a Backspace key.</li>
+                    <li><b>F1 ➔ Esc</b>: Makes the F1 key trigger the Escape function.</li>
+                </ul>
+                <p style="font-family: 'Consolas'; color: {CP_SUBTEXT};"><i>Note: Unlike script shortcuts, Key Remaps perform clean 1-to-1 raw key substitutions without executing custom code blocks.</i></p>
+            """)
+            info_browser.setMinimumHeight(300)
+            info_browser.setMinimumWidth(400)
+            info_layout.addWidget(info_browser)
+            top_layout.addLayout(info_layout)
+        elif self.shortcut_type in ["script", "startup", "context"]:
             # Action
             action_layout = QVBoxLayout()
             action_layout.addWidget(QLabel("Script/Action Code:"))
@@ -1066,7 +1158,7 @@ SendText("Hello World")"""
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules + self.parent_window.remap_shortcuts:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -1149,6 +1241,9 @@ SendText("Hello World")"""
         elif self.shortcut_type == "file":
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.file_path_edit.setText(self.shortcut_data.get("file_path", ""))
+        elif self.shortcut_type == "remap":
+            self.origin_key_edit.setText(self.shortcut_data.get("origin_key", ""))
+            self.destination_key_edit.setText(self.shortcut_data.get("destination_key", ""))
         else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
@@ -1551,6 +1646,22 @@ SendText("Hello World")"""
                 "file_path": file_path,
                 "enabled": enabled
             }
+        elif self.shortcut_type == "remap":
+            origin_key = self.origin_key_edit.text().strip()
+            destination_key = self.destination_key_edit.text().strip()
+
+            if not origin_key or not destination_key:
+                QMessageBox.warning(self, "Warning", "Both origin and destination keys are required.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "origin_key": origin_key,
+                "destination_key": destination_key,
+                "enabled": enabled
+            }
         else: # self.shortcut_type == "text"
             trigger = self.trigger_edit.text().strip()
             replacement = self.replacement_edit.toPlainText().strip()
@@ -1583,6 +1694,8 @@ SendText("Hello World")"""
                 self.parent_window.file_shortcuts.append(shortcut_data)
             elif self.shortcut_type == "exclude":
                 self.parent_window.exclusion_rules.append(shortcut_data)
+            elif self.shortcut_type == "remap":
+                self.parent_window.remap_shortcuts.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
 
@@ -1631,7 +1744,7 @@ class CategoryColorDialog(QDialog):
     def populate_colors(self, layout):
         # Get all categories
         all_categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.context_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.context_shortcuts + self.parent_window.remap_shortcuts:
             category = shortcut.get('category', 'General')
             if category:
                 all_categories.add(category)
@@ -1796,6 +1909,7 @@ class AHKShortcutEditor(QMainWindow):
         self.startup_scripts = []
         self.context_shortcuts = []
         self.exclusion_rules = []
+        self.remap_shortcuts = []
         self.app_font_family = "Consolas" # Default per theme guide
         self.app_font_size = 10
         self.category_colors = {
@@ -1810,7 +1924,8 @@ class AHKShortcutEditor(QMainWindow):
             "exclude": True,
             "startup": True,
             "text": True,
-            "file": True
+            "file": True,
+            "remap": True
         }
 
         # Settings for remembering preferences
@@ -1984,6 +2099,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
         self.add_menu.addAction("Exclusion Rule", lambda: self.open_add_dialog("exclude"))
+        self.add_menu.addAction("Key Remap", lambda: self.open_add_dialog("remap"))
         self.add_menu.addAction("Background Script", lambda: self.open_add_dialog("startup"))
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
@@ -2172,6 +2288,9 @@ class AHKShortcutEditor(QMainWindow):
             elif shortcut_type == "startup" and index < len(self.startup_scripts):
                 self.selected_shortcut = self.startup_scripts[index]
                 self.selected_type = "startup"
+            elif shortcut_type == "remap" and index < len(self.remap_shortcuts):
+                self.selected_shortcut = self.remap_shortcuts[index]
+                self.selected_type = "remap"
 
             self.update_display()
 
@@ -2194,6 +2313,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.exclusion_rules[index]["enabled"] = not self.exclusion_rules[index].get("enabled", True)
             elif shortcut_type == "startup" and index < len(self.startup_scripts):
                 self.startup_scripts[index]["enabled"] = not self.startup_scripts[index].get("enabled", True)
+            elif shortcut_type == "remap" and index < len(self.remap_shortcuts):
+                self.remap_shortcuts[index]["enabled"] = not self.remap_shortcuts[index].get("enabled", True)
 
             self.save_shortcuts_json()
             self.update_display()
@@ -2244,6 +2365,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.startup_scripts = data.get("startup_scripts", [])
                     self.context_shortcuts = data.get("context_shortcuts", [])
                     self.exclusion_rules = data.get("exclusion_rules", data.get("excluded_contexts", []))
+                    self.remap_shortcuts = data.get("remap_shortcuts", [])
                     self.app_font_family = data.get("app_font_family", "Consolas")
                     self.app_font_size = data.get("app_font_size", 10)
                     
@@ -2295,6 +2417,7 @@ class AHKShortcutEditor(QMainWindow):
                 "startup_scripts": self.startup_scripts,
                 "context_shortcuts": self.context_shortcuts,
                 "exclusion_rules": self.exclusion_rules,
+                "remap_shortcuts": self.remap_shortcuts,
                 "app_font_family": self.app_font_family,
                 "app_font_size": self.app_font_size
             }
@@ -2331,8 +2454,10 @@ class AHKShortcutEditor(QMainWindow):
                               if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')} {s.get('window_title', '')} {s.get('process_name', '')} {s.get('window_class', '')}".lower()]
         filtered_startup = [s for s in self.startup_scripts
                            if search_query in f"{s.get('name', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
+        filtered_remap = [s for s in self.remap_shortcuts
+                         if search_query in f"{s.get('name', '')} {s.get('origin_key', '')} {s.get('destination_key', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         
-        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, group_by_category)
+        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category)
         
         # Block signals and updates to prevent flickering/jumping
         v_bar.blockSignals(True)
@@ -2364,7 +2489,7 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(0, backup_restore)
 
-    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, group_by_category):
+    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, remap_shortcuts, group_by_category):
         def get_toggle_icon(section):
             return "▾" if self.section_states.get(section, True) else "▸"
 
@@ -2479,6 +2604,32 @@ class AHKShortcutEditor(QMainWindow):
                 for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.script_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "script", original_index, False)
+
+        html += f"""
+                    <div class="section-title"><a href="toggle-section://remap">{get_toggle_icon('remap')} Key Remaps</a></div>
+        """
+
+        if self.section_states.get("remap", True):
+            if group_by_category:
+                remap_categories = {}
+                for shortcut in remap_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in remap_categories:
+                        remap_categories[category] = []
+                    remap_categories[category].append(shortcut)
+
+                for i, category in enumerate(sorted(remap_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                    for shortcut in sorted(remap_categories[category], key=lambda x: x.get('origin_key', '').lower()):
+                        original_index = self.remap_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "remap", original_index, True)
+            else:
+                for shortcut in sorted(remap_shortcuts, key=lambda x: x.get('origin_key', '').lower()):
+                    original_index = self.remap_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "remap", original_index, False)
 
         html += f"""
                 </div>
@@ -2640,6 +2791,11 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
             key_width = 170
+        elif shortcut_type == "remap":
+            origin = shortcut.get('origin_key', '')
+            dest = shortcut.get('destination_key', '')
+            key = f"{origin} ➔ {dest}"
+            key_width = 170
         elif shortcut_type == "context":
             key = shortcut.get('hotkey', '')
             window_title = shortcut.get('window_title', '')
@@ -2764,6 +2920,10 @@ class AHKShortcutEditor(QMainWindow):
             self.startup_scripts.append(duplicated)
         elif self.selected_type == "file":
             self.file_shortcuts.append(duplicated)
+        elif self.selected_type == "remap":
+            duplicated['origin_key'] = ""
+            duplicated['destination_key'] = ""
+            self.remap_shortcuts.append(duplicated)
         else:
             self.text_shortcuts.append(duplicated)
         
@@ -2800,6 +2960,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.startup_scripts.remove(self.selected_shortcut)
             elif self.selected_type == "file":
                 self.file_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "remap":
+                self.remap_shortcuts.remove(self.selected_shortcut)
             else:
                 self.text_shortcuts.remove(self.selected_shortcut)
 
@@ -3241,6 +3403,25 @@ class AHKShortcutEditor(QMainWindow):
                     # Escape single quotes in path
                     safe_path = file_path.replace("'", "''")
                     output_lines.append(f":X:{trigger}::PasteFile('{safe_path}')")
+                    output_lines.append("")
+                output_lines.append("")
+
+            # Add key remaps
+            enabled_remaps = [s for s in self.remap_shortcuts if s.get('enabled', True)]
+            if enabled_remaps:
+                output_lines.append(";! === KEY REMAPS ===")
+                for shortcut in enabled_remaps:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    
+                    origin = shortcut.get('origin_key', '')
+                    dest = shortcut.get('destination_key', '')
+                    
+                    safe_origin = escape_hotkey(origin)
+                    safe_dest = escape_hotkey(dest)
+                    
+                    output_lines.append(f"{safe_origin}::{safe_dest}")
                     output_lines.append("")
                 output_lines.append("")
 
