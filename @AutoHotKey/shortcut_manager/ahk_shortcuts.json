@@ -776,6 +776,7 @@
         }
     ],
     "exclusion_rules": [],
+    "remap_shortcuts": [],
     "app_font_family": "Consolas",
     "app_font_size": 16
 }

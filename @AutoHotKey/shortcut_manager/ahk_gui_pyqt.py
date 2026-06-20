@@ -1903,7 +1903,7 @@ class SettingsDialog(QDialog):
         
         self.parent_window.apply_global_font()
         self.parent_window.save_shortcuts_json()
-        QMessageBox.information(self, "Success", f"Settings updated and applied!")
+        self.accept()
 
 
 class AHKShortcutEditor(QMainWindow):
