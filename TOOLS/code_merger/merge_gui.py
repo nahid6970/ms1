@@ -1360,14 +1360,6 @@ class MergeTab(QWidget):
         self.result_out = QTextEdit()
         self.result_out.setReadOnly(True)
         vres.addWidget(self.result_out)
-        
-        self.btn_copy_commit = QPushButton("📋 COPY GIT COMMIT COMMAND")
-        self.btn_copy_commit.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_copy_commit.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
-                                           f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
-        self.btn_copy_commit.clicked.connect(self._copy_commit)
-        self.btn_copy_commit.setVisible(False)
-        vres.addWidget(self.btn_copy_commit)
 
         layout.addWidget(grp_res)
 
@@ -1394,8 +1386,6 @@ class MergeTab(QWidget):
             return
 
         self._parsed_commit_msg = extract_commit_message(text)
-        if hasattr(self, 'btn_copy_commit'):
-            self.btn_copy_commit.setVisible(False)
 
         lines = [f"Found {len(self._pending_changes)} change(s):\n"]
         for ch in self._pending_changes:
@@ -1448,12 +1438,8 @@ class MergeTab(QWidget):
                 else:
                     commit_msg = "update files"
 
-            self._final_commit_cmd = f'git commit -m "{commit_msg}"'
             results.append("\nSuggested Git Commit Command:")
-            results.append(self._final_commit_cmd)
-            self.btn_copy_commit.setVisible(True)
-        else:
-            self.btn_copy_commit.setVisible(False)
+            results.append(f'git commit -m "{commit_msg}"')
 
         self.result_out.setPlainText('\n'.join(results))
         self.status_cb(f"Done — {ok} applied, {err} failed")
@@ -1465,14 +1451,7 @@ class MergeTab(QWidget):
         self.result_out.clear()
         self._pending_changes = []
         self._parsed_commit_msg = ""
-        if hasattr(self, 'btn_copy_commit'):
-            self.btn_copy_commit.setVisible(False)
         self.status_cb("Cleared")
-
-    def _copy_commit(self):
-        if hasattr(self, '_final_commit_cmd') and self._final_commit_cmd:
-            QApplication.clipboard().setText(self._final_commit_cmd)
-            self.status_cb("✔ Copied git commit command to clipboard")
 
 
 # ── SEARCH TAB ────────────────────────────────────────────────────────────────
