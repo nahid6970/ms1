@@ -299,9 +299,13 @@ class ShortcutBuilderPopup(QDialog):
         ]
         for ri, (keys, overrides) in enumerate(zip(self.KB_ROWS, row_widths)):
             rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
+            if ri == 4:
+                rl.addWidget(self._mod_btn("<+", "LShift", 58))
             for i, k in enumerate(keys):
                 should_expand = (expand_key.get(ri) == i)
                 rl.addWidget(self._key_btn(k, overrides.get(i, 34), expand=should_expand))
+            if ri == 4:
+                rl.addWidget(self._mod_btn(">+", "RShift", 74))
             if ri not in expand_key:
                 rl.addStretch(1)
             kb_layout.addWidget(rw)
