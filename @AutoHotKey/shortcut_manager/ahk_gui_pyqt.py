@@ -118,7 +118,7 @@ class ShortcutBuilderPopup(QDialog):
             font-family: '{font}';
             font-size: 11px;
             font-weight: normal;
-            padding: 0px;
+            padding: 0px 3px;
             min-height: {h}px;
             min-width: {w}px;
         }}
@@ -131,7 +131,7 @@ class ShortcutBuilderPopup(QDialog):
             border: 2px solid {border}; border-radius: 0px;
             font-family: '{font}';
             font-size: 11px; font-weight: normal;
-            padding: 0px;
+            padding: 0px 3px;
             min-height: {h}px; min-width: {w}px;
         }}
     """
@@ -439,11 +439,11 @@ class ShortcutBuilderPopup(QDialog):
                 rw = QWidget(); rl = QHBoxLayout(rw); rl.setSpacing(4); rl.setContentsMargins(0,0,0,0)
                 for k in row:
                     if k == "":
-                        sp = QWidget(); sp.setFixedWidth(38); rl.addWidget(sp)
+                        sp = QWidget(); sp.setFixedWidth(44); rl.addWidget(sp)
                     else:
                         nav_labels = {"PrintScreen":"PrtSc","ScrollLock":"ScrLk",
                                       "Up":"↑","Down":"↓","Left":"←","Right":"→"}
-                        btn = self._key_btn(k, 38)
+                        btn = self._key_btn(k, 44)
                         if k in nav_labels: btn.setText(nav_labels[k])
                         rl.addWidget(btn)
                 nav_v.addWidget(rw)
