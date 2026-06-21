@@ -11,7 +11,7 @@
 }
 
 body {
-  width: 580px;
+  width: 720px; /* Increased width to support wider selectors and conditions comfortably */
   height: 600px;
   margin: 0;
   padding: 0;
@@ -19,7 +19,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   box-sizing: border-box;
-  overflow: hidden; /* Prevents the body itself from scrolling so logs are always visible */
+  overflow: hidden; /* Prevents the body itself from scrolling so everything fits in the frame */
 }
 
 .container {
@@ -244,9 +244,9 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  height: 234px; /* Restored back to the original 5-step height */
-  min-height: 234px;
-  max-height: 234px;
+  height: 380px; /* Greatly expanded steps list layout to occupy space freed up by logs removal */
+  min-height: 380px;
+  max-height: 380px;
   overflow-y: auto;
   padding-right: 4px;
 }

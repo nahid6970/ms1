@@ -47,7 +47,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup main actions
   document.getElementById('addStepBtn').addEventListener('click', addNewStep);
   document.getElementById('toggleBtn').addEventListener('click', toggleAutomation);
-  document.getElementById('clearLogsBtn').addEventListener('click', clearLogs);
+  
+  const clearLogsBtn = document.getElementById('clearLogsBtn');
+  if (clearLogsBtn) {
+    clearLogsBtn.addEventListener('click', clearLogs);
+  }
 
   // Settings inputs
   const loopCountInput = document.getElementById('loopCount');
@@ -1126,19 +1130,21 @@ function startLogMonitoring() {
         }
       }
 
-      if (state.logs && state.logs.length > 0) {
-        logsTerminal.innerHTML = '';
-        state.logs.forEach(log => {
-          const div = document.createElement('div');
-          if (log.includes('❌') || log.includes('Error')) {
-            div.className = 'log-err';
-          }
-          div.innerText = log;
-          logsTerminal.appendChild(div);
-        });
-        logsTerminal.scrollTop = logsTerminal.scrollHeight;
-      } else {
-        logsTerminal.innerHTML = '<div class="log-placeholder">No actions recorded yet. Ready...</div>';
+      if (logsTerminal) {
+        if (state.logs && state.logs.length > 0) {
+          logsTerminal.innerHTML = '';
+          state.logs.forEach(log => {
+            const div = document.createElement('div');
+            if (log.includes('❌') || log.includes('Error')) {
+              div.className = 'log-err';
+            }
+            div.innerText = log;
+            logsTerminal.appendChild(div);
+          });
+          logsTerminal.scrollTop = logsTerminal.scrollHeight;
+        } else {
+          logsTerminal.innerHTML = '<div class="log-placeholder">No actions recorded yet. Ready...</div>';
+        }
       }
     });
   }, 400);
