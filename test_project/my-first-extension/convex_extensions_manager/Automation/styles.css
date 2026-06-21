@@ -224,14 +224,14 @@ input[type="number"] {
   text-align: center;
 }
 
-.input-with-icon .unit-badge {
-  font-size: 11px;
-  background-color: var(--border-color);
-  color: var(--text-dim);
-  padding: 6px 8px;
-  font-weight: 600;
-  user-select: none;
-  min-width: 38px;
+.input-with-icon input {
+  border: none !important;
+  background-color: transparent !important;
+  flex-grow: 1;
+  width: 100%;
+  padding: 6px 4px !important;
+  outline: none;
+  min-width: 32px;
   text-align: center;
 }
 
@@ -289,7 +289,7 @@ input[type="number"] {
 
 .delay-input {
   flex-shrink: 0;
-  width: 145px;
+  width: 115px;
 }
 
 .btn-delete {

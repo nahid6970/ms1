@@ -80,11 +80,10 @@ async function renderSteps() {
           </div>
           
           <!-- Inline Delay -->
-          <div class="field delay-input" style="margin-left: 4px; flex-shrink: 0; width: 145px;">
-            <div class="input-with-icon" title="Delay / Max wait time in seconds">
+          <div class="field delay-input" style="margin-left: 4px; flex-shrink: 0; width: 115px;">
+            <div class="input-with-icon" title="Delay (seconds) — for normal steps or max wait time for Wait For Element">
               <span class="input-icon">⏱️</span>
               <input type="number" placeholder="Delay" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
-              <span class="unit-badge">sec</span>
             </div>
           </div>
           
