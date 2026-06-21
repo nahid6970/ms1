@@ -12,50 +12,52 @@
 
 body {
   width: 580px;
-  max-height: 650px;
+  height: 600px;
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   box-sizing: border-box;
+  overflow: hidden; /* Prevents the body itself from scrolling so logs are always visible */
 }
 
 .container {
-  padding: 16px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 /* Header Area */
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .logo-area {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .logo-icon {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 h1 {
-  font-size: 18px;
+  font-size: 16px;
   margin: 0;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
 
 h2 {
-  font-size: 14px;
+  font-size: 13px;
   margin: 0;
   font-weight: 600;
   color: var(--text-dim);
@@ -87,26 +89,12 @@ h2 {
   100% { opacity: 0.7; }
 }
 
-/* Convex Sync */
-.convex-sync-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: rgba(203, 166, 247, 0.08);
-  border: 1px dashed var(--accent-purple);
-  padding: 8px 12px;
-  border-radius: 4px;
-}
-
-.section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent-purple);
-}
-
+/* Header Cloud Backup Buttons */
 .convex-buttons {
   display: flex;
   gap: 6px;
+  margin-left: auto;
+  margin-right: 12px;
 }
 
 .btn-convex-save {
@@ -140,26 +128,29 @@ h2 {
 /* Card Config */
 .settings-card {
   background-color: var(--card-bg);
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
 }
 
 .settings-row {
   display: flex;
-  gap: 12px;
+  gap: 16px;
+  align-items: center;
 }
 
 .field {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   flex: 1;
 }
 
 .field label {
   font-size: 11px;
   color: var(--text-dim);
+  white-space: nowrap;
 }
 
 input[type="number"], input[type="text"], select {
@@ -228,7 +219,7 @@ input[type="number"] {
 .steps-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .section-header {
@@ -241,7 +232,9 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 250px;
+  height: 234px; /* EXACTLY 5 steps height (5 * 42px card + 4 * 6px gap) */
+  min-height: 234px;
+  max-height: 234px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -252,10 +245,12 @@ input[type="number"] {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 6px 8px;
+  height: 42px; /* Fixed height for exact 5 step layout calculation */
   display: flex;
   flex-direction: column;
-  gap: 0;
+  justify-content: center;
   position: relative;
+  box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -417,11 +412,11 @@ input[type="number"] {
   color: var(--bg-color);
   border: none;
   font-weight: 700;
-  padding: 10px;
+  padding: 8px;
   border-radius: 4px;
   cursor: pointer;
   flex: 2;
-  font-size: 14px;
+  font-size: 13px;
   transition: opacity 0.2s;
 }
 
@@ -430,11 +425,11 @@ input[type="number"] {
   color: var(--bg-color);
   border: none;
   font-weight: 700;
-  padding: 10px;
+  padding: 8px;
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
-  font-size: 14px;
+  font-size: 13px;
   transition: opacity 0.2s;
 }
 

@@ -10,33 +10,29 @@
     <div class="header">
       <div class="logo-area">
         <span class="logo-icon">⚡</span>
-        <h1>ClickFlow Automator</h1>
+        <h1>ClickFlow</h1>
+      </div>
+      <!-- Compact Cloud Backup Buttons in Header -->
+      <div class="convex-buttons">
+        <button id="saveToConvex" class="btn-convex-save" title="Backup configuration to Convex Cloud">💾 Backup</button>
+        <button id="loadFromConvex" class="btn-convex-load" title="Restore configuration from Convex Cloud">📂 Restore</button>
       </div>
       <div id="status-badge" class="badge idle">Idle</div>
     </div>
 
-    <!-- Convex Sync Header Block -->
-    <div class="convex-sync-section">
-      <span class="section-title">Cloud Backup</span>
-      <div class="convex-buttons">
-        <button id="saveToConvex" class="btn-convex-save">💾 Backup</button>
-        <button id="loadFromConvex" class="btn-convex-load">📂 Restore</button>
-      </div>
-    </div>
-
-    <!-- Loop Config -->
+    <!-- Compact Loop Config -->
     <div class="settings-card">
       <div class="settings-row">
         <div class="field">
-          <label for="loopCount">Loop Count (-1 = infinite)</label>
-          <input type="number" id="loopCount" value="1" min="-1" />
+          <label for="loopCount">Loops:</label>
+          <input type="number" id="loopCount" value="1" min="-1" style="width: 55px; text-align: center;" title="Loop Count (-1 = infinite)" />
         </div>
         <div class="field">
-          <label for="loopDelay">Loop Interval</label>
-          <div class="input-with-icon" title="Delay between loop iterations in seconds">
+          <label for="loopDelay">Interval:</label>
+          <div class="input-with-icon" title="Delay between loop iterations in seconds" style="width: 85px;">
             <span class="input-icon">⏱️</span>
             <input type="number" id="loopDelay" value="1" min="0" step="0.1" />
-            <span class="unit-badge">sec</span>
+            <span class="unit-badge" style="font-size: 10px; padding-right: 6px; color: var(--text-dim); user-select: none;">s</span>
           </div>
         </div>
       </div>
