@@ -1,4 +1,4 @@
-const CONVEX_URL = "YOUR_CONVEX_URL_HERE";
+const CONVEX_URL = "https://joyous-stingray-672.convex.cloud";
 const EXTENSION_NAME = 'click_automation_extension'; // unique name per extension
 
 async function convexFetch(type, path, args) {
