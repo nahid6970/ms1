@@ -383,6 +383,25 @@ input[type="number"] {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+}
+
+.step-index:active {
+  cursor: grabbing;
+}
+
+.step-card.dragging {
+  opacity: 0.4;
+  border: 1px dashed var(--accent-purple);
+}
+
+.step-card.drag-over-above {
+  border-top: 2px solid var(--accent-purple) !important;
+}
+
+.step-card.drag-over-below {
+  border-bottom: 2px solid var(--accent-purple) !important;
 }
 
 .btn-pick {

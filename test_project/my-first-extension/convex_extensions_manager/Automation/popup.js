@@ -41,6 +41,36 @@ async function initSettings() {
   });
 }
 
+// Helper to reorder steps in storage
+function reorderSteps(fromIdx, toIdx, isAbove) {
+  chrome.storage.local.get('steps', (data) => {
+    const steps = data.steps || [];
+    const movedStep = steps[fromIdx];
+    if (!movedStep) return;
+
+    // Remove the step from its original position
+    steps.splice(fromIdx, 1);
+    
+    // Calculate the new destination index
+    let insertIdx = toIdx;
+    if (fromIdx < toIdx) {
+      insertIdx = isAbove ? toIdx - 1 : toIdx;
+    } else {
+      insertIdx = isAbove ? toIdx : toIdx + 1;
+    }
+    
+    // Safety bounds
+    insertIdx = Math.max(0, Math.min(steps.length, insertIdx));
+    
+    // Insert at new position
+    steps.splice(insertIdx, 0, movedStep);
+    
+    chrome.storage.local.set({ steps }, () => {
+      renderSteps();
+    });
+  });
+}
+
 // Render dynamic steps
 async function renderSteps() {
   chrome.storage.local.get('steps', (data) => {
@@ -63,7 +93,7 @@ async function renderSteps() {
 
       stepCard.innerHTML = `
         <div class="step-row-top">
-          <span class="step-index">${idx + 1}</span>
+          <span class="step-index" title="Hold and drag to reorder step">${idx + 1}</span>
           <select class="step-action-select" data-id="${step.id}">
             <option value="click" ${step.action === 'click' ? 'selected' : ''}>Click</option>
             <option value="type" ${step.action === 'type' ? 'selected' : ''}>Type Text</option>
@@ -91,6 +121,68 @@ async function renderSteps() {
           <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
         </div>
       `;
+
+      // Enable drag only when grabbing the step index
+      const stepIndexEl = stepCard.querySelector('.step-index');
+      if (stepIndexEl) {
+        stepIndexEl.addEventListener('mousedown', () => {
+          stepCard.draggable = true;
+        });
+        stepIndexEl.addEventListener('mouseup', () => {
+          stepCard.draggable = false;
+        });
+      }
+
+      stepCard.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        stepCard.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', idx);
+      });
+
+      stepCard.addEventListener('dragend', () => {
+        stepCard.classList.remove('dragging');
+        stepCard.draggable = false;
+        document.querySelectorAll('.step-card').forEach(c => {
+          c.classList.remove('drag-over-above', 'drag-over-below');
+        });
+      });
+
+      stepCard.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        const draggingCard = document.querySelector('.step-card.dragging');
+        if (!draggingCard || draggingCard === stepCard) return;
+
+        const rect = stepCard.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        if (e.clientY < midpoint) {
+          stepCard.classList.add('drag-over-above');
+          stepCard.classList.remove('drag-over-below');
+        } else {
+          stepCard.classList.add('drag-over-below');
+          stepCard.classList.remove('drag-over-above');
+        }
+      });
+
+      stepCard.addEventListener('dragleave', () => {
+        stepCard.classList.remove('drag-over-above', 'drag-over-below');
+      });
+
+      stepCard.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const rect = stepCard.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        const isAbove = e.clientY < midpoint;
+        
+        if (isNaN(fromIdx) || fromIdx === idx) {
+          stepCard.classList.remove('drag-over-above', 'drag-over-below');
+          return;
+        }
+
+        reorderSteps(fromIdx, idx, isAbove);
+      });
 
       stepsListContainer.appendChild(stepCard);
     });
