@@ -1026,8 +1026,38 @@ class PrepTab(QWidget):
             if self.files:
                 self._update_root()
                 self.status_cb(f"Restored {len(self.files)} file(s) from last session")
+            elif self.project_root:
+                self._update_project_label()
         except Exception:
             pass
+
+    def _display_path(self, fp: str) -> str:
+        root = self.project_root.strip()
+        if root:
+            try:
+                rel = os.path.relpath(fp, root)
+                if not rel.startswith('..'):
+                    return rel
+            except Exception:
+                pass
+        return os.path.basename(fp)
+
+    def _update_project_label(self):
+        if hasattr(self, 'project_path_lbl'):
+            if self.project_root:
+                self.project_path_lbl.setText(f"PROJECT ROOT: {self.project_root}")
+                self.project_path_lbl.setToolTip(self.project_root)
+            else:
+                self.project_path_lbl.setText("PROJECT ROOT: <not set>")
+                self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
+
+    def _refresh_file_items(self):
+        if not hasattr(self, 'file_list'):
+            return
+        current_files = list(self.files)
+        self.file_list.clear()
+        for fp in current_files:
+            self._add_file_item(fp)
 
     def _update_root(self):
         if self.root_cb and self.files:
@@ -1036,12 +1066,15 @@ class PrepTab(QWidget):
                 common = os.path.dirname(common)
             self.project_root = common
             self.root_cb(common)
+            self._update_project_label()
+            self._refresh_file_items()
 
     def _set_project_root(self, d: str, save_recent: bool = True):
         d = os.path.normpath(d)
         self.project_root = d
         if self.root_cb:
             self.root_cb(d)
+        self._update_project_label()
         if save_recent:
             add_recent(d, [], [], overwrite_existing=True)
         self._save_session()
@@ -1055,26 +1088,31 @@ class PrepTab(QWidget):
         hl.setContentsMargins(4, 0, 4, 0)
         hl.setSpacing(4)
 
-        lbl = QLabel(fp)
+        display_path = self._display_path(fp)
+        lbl = QLabel(display_path)
         
         # Smart file size analysis for warning highlights and context limits
+        tooltip = [fp]
         try:
             sz_bytes = os.path.getsize(fp)
             sz_kb = sz_bytes / 1024
             if sz_kb > 500:
                 lbl_color = CP_RED
-                lbl.setToolTip(f"⚠️ DANGER: Very large file ({sz_kb:.1f} KB).\nRecommended to exclude or split to prevent LLM context overflow.")
+                tooltip.append(f"⚠️ DANGER: Very large file ({sz_kb:.1f} KB).")
+                tooltip.append("Recommended to exclude or split to prevent LLM context overflow.")
             elif sz_kb > 250:
                 lbl_color = CP_YELLOW
-                lbl.setToolTip(f"⚠️ WARNING: Large file ({sz_kb:.1f} KB).\nMay consume significant context window memory.")
+                tooltip.append(f"⚠️ WARNING: Large file ({sz_kb:.1f} KB).")
+                tooltip.append("May consume significant context window memory.")
             else:
                 lbl_color = CP_TEXT
-                lbl.setToolTip(f"File size: {sz_kb:.1f} KB")
+                tooltip.append(f"File size: {sz_kb:.1f} KB")
         except Exception:
             lbl_color = CP_TEXT
-            lbl.setToolTip("Could not read file size details")
+            tooltip.append("Could not read file size details")
 
         lbl.setStyleSheet(f"color: {lbl_color}; background: transparent; font-size: 9pt;")
+        lbl.setToolTip("\n".join(tooltip))
 
         btn_rem = QPushButton("✕")
         btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -1123,6 +1161,14 @@ class PrepTab(QWidget):
 
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
+
+        self.project_path_lbl = QLabel("PROJECT ROOT: <not set>")
+        self.project_path_lbl.setStyleSheet(
+            f"color: {CP_SUB}; font-size: 9pt; font-family: 'Consolas';"
+        )
+        self.project_path_lbl.setWordWrap(False)
+        self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
+        vf.addWidget(self.project_path_lbl)
 
         # File List Search/Filter Bar
         self.search_input = QLineEdit()
