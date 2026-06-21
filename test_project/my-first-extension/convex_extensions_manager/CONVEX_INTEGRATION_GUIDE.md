@@ -85,11 +85,6 @@ async function loadDataFromConvex() {
   }
 }
 
-// Auto-save on storage changes
-chrome.storage.local.onChanged.addListener(() => {
-  chrome.storage.local.get(null, (items) => sendDataToConvex(items));
-});
-
 // Handle manual backup/restore from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'saveToConvex') {
@@ -158,6 +153,9 @@ if (loadFromConvexBtn) {
       if (response && response.success !== false && response.data) {
         chrome.storage.local.set(response.data, () => {
           loadFromConvexBtn.innerHTML = '✅ Restored!';
+          // Re-render UI to reflect restored data
+          if (typeof initSettings === 'function') initSettings();
+          if (typeof renderSteps === 'function') renderSteps();
           setTimeout(() => { loadFromConvexBtn.innerHTML = original; }, 2000);
         });
       } else {
