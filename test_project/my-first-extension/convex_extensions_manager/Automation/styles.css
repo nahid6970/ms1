@@ -11,8 +11,8 @@
 }
 
 body {
-  width: 720px; /* Increased width to support wider selectors and conditions comfortably */
-  height: 600px;
+  width: 800px; 
+  height: 900px; /* Increased to 1.5x vertical height */
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
@@ -244,9 +244,9 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  height: 380px; /* Greatly expanded steps list layout to occupy space freed up by logs removal */
-  min-height: 380px;
-  max-height: 380px;
+  height: 680px; /* Expanded step list viewport height to fully occupy the new 900px frame height */
+  min-height: 680px;
+  max-height: 680px;
   overflow-y: auto;
   padding-right: 4px;
 }
