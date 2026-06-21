@@ -133,6 +133,7 @@ async function renderSteps() {
       const isTypeAction = step.action === 'type';
       const isWaitAction = step.action === 'wait';
       const selectorMode = step.selectorMode || 'css';
+      const timeoutEnabled = step.timeoutEnabled === true;
 
       stepCard.innerHTML = `
         <div class="step-row-top">
@@ -164,6 +165,11 @@ async function renderSteps() {
             <span class="delay-icon">⏱️</span>
             <input type="number" class="delay-input-val" placeholder="0" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
           </div>
+
+          <label class="timeout-toggle" title="Use the global timeout for this step">
+            <input type="checkbox" class="timeout-checkbox" data-id="${step.id}" ${timeoutEnabled ? 'checked' : ''} />
+            <span>⏳</span>
+          </label>
           
           <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
         </div>
@@ -274,6 +280,13 @@ function attachStepChangeHandlers() {
     });
   });
 
+  // Timeout opt-in checkboxes
+  document.querySelectorAll('.timeout-checkbox').forEach(input => {
+    input.addEventListener('change', (e) => {
+      updateStepField(parseInt(e.target.dataset.id), 'timeoutEnabled', e.target.checked);
+    });
+  });
+
   // Delete buttons
   document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -300,6 +313,7 @@ async function addNewStep() {
       id: newId,
       action: 'click',
       selectorMode: 'css',
+      timeoutEnabled: false,
       selector: '',
       value: '',
       delay: 1 // Default to 1 second

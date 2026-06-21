@@ -365,6 +365,38 @@ input[type="number"] {
   font-family: inherit;
 }
 
+.timeout-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: var(--bg-color);
+  color: var(--text-dim);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.timeout-toggle:hover {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+.timeout-toggle input {
+  margin: 0;
+  accent-color: var(--accent-purple);
+}
+
+.timeout-toggle span {
+  font-size: 12px;
+  line-height: 1;
+}
+
 .btn-delete {
   background: none;
   border: none;
