@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Setup main actions
   document.getElementById('addStepBtn').addEventListener('click', addNewStep);
-  document.getElementById('startBtn').addEventListener('click', startAutomation);
-  document.getElementById('stopBtn').addEventListener('click', stopAutomation);
+  document.getElementById('toggleBtn').addEventListener('click', toggleAutomation);
   document.getElementById('clearLogsBtn').addEventListener('click', clearLogs);
 
   // Settings inputs
@@ -237,6 +236,18 @@ async function startPickMode(stepId) {
   });
 }
 
+// Toggle sequence
+async function toggleAutomation() {
+  chrome.storage.local.get('automationState', async (data) => {
+    const state = data.automationState || { status: 'idle' };
+    if (state.status === 'running') {
+      await stopAutomation();
+    } else {
+      await startAutomation();
+    }
+  });
+}
+
 // Run sequence
 async function startAutomation() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -274,6 +285,7 @@ async function stopAutomation() {
 function startLogMonitoring() {
   const statusBadge = document.getElementById('status-badge');
   const logsTerminal = document.getElementById('logsTerminal');
+  const toggleBtn = document.getElementById('toggleBtn');
 
   setInterval(() => {
     chrome.storage.local.get('automationState', (data) => {
@@ -281,6 +293,16 @@ function startLogMonitoring() {
       
       statusBadge.innerText = state.status;
       statusBadge.className = `badge ${state.status}`;
+
+      if (toggleBtn) {
+        if (state.status === 'running') {
+          toggleBtn.innerText = '⏹️ Stop Automation';
+          toggleBtn.className = 'btn-danger';
+        } else {
+          toggleBtn.innerText = '▶️ Start Automation';
+          toggleBtn.className = 'btn-primary';
+        }
+      }
 
       if (state.logs && state.logs.length > 0) {
         logsTerminal.innerHTML = '';

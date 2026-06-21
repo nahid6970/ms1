@@ -85,5 +85,31 @@
             }
         ],
         "copy_mode": false
+    },
+    {
+        "name": "VLR.gg STATS",
+        "items": [
+            {
+                "type": "file",
+                "target": "C:\\@delta\\msBackups\\DataBase\\VLR_STATS\\ignorelist.json",
+                "fake": "C:\\@delta\\db\\vlr\\ignorelist.json"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\msBackups\\DataBase\\VLR_STATS\\matches.backup.json",
+                "fake": "C:\\@delta\\db\\vlr\\matches.backup.json"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\msBackups\\DataBase\\VLR_STATS\\matches.json",
+                "fake": "C:\\@delta\\db\\vlr\\matches.json"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\msBackups\\DataBase\\VLR_STATS\\settings.json",
+                "fake": "C:\\@delta\\db\\vlr\\settings.json"
+            }
+        ],
+        "copy_mode": false
     }
 ]
