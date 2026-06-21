@@ -44,10 +44,6 @@ function notifyTimeout(title, message) {
   });
 }
 
-function shouldUseTimeout(step) {
-  return step && step.timeoutEnabled === true;
-}
-
 function isElementVisible(el) {
   if (!(el instanceof Element)) return false;
   const style = window.getComputedStyle(el);
@@ -263,7 +259,6 @@ async function runAutomation(startLoop = 0, startStep = 0) {
       if (stopRequested) break;
       const step = steps[i];
       const selectorMode = step.selectorMode || 'css';
-      const stepTimeout = shouldUseTimeout(step) ? waitTimeout : 0;
       updateState("running", currentLoop, i);
       
       logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
@@ -280,10 +275,10 @@ async function runAutomation(startLoop = 0, startStep = 0) {
         if (step.action === 'waitFor') {
           logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
           
-          const result = await resolveSelector(step.selector, stepTimeout, {
+          const result = await resolveSelector(step.selector, waitTimeout, {
             matchMode: selectorMode,
             requireVisible: true,
-            allowInfiniteWait: stepTimeout === 0
+            allowInfiniteWait: true
           });
 
           if (result.status === 'found') {
@@ -296,7 +291,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
             logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
             notifyTimeout(
               'ClickFlow timeout',
-              `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
+              `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
             );
           }
           continue;
@@ -306,7 +301,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           logMessage(`[Step ${i + 1}] Navigating to: ${step.selector || step.value}`);
           // For navigate action we expect selector or value to be a URL or link text
           if (step.selector) {
-            const navResult = await resolveSelector(step.selector, stepTimeout, {
+            const navResult = await resolveSelector(step.selector, waitTimeout, {
               matchMode: selectorMode,
               requireVisible: false,
               allowInfiniteWait: false
@@ -316,7 +311,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
               logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
               notifyTimeout(
                 'ClickFlow timeout',
-                `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
+                `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
               );
               continue;
             }
@@ -338,7 +333,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           return;
         }
 
-        const result = await resolveSelector(step.selector, stepTimeout, {
+        const result = await resolveSelector(step.selector, waitTimeout, {
           matchMode: selectorMode,
           requireVisible: false,
           allowInfiniteWait: false
@@ -348,7 +343,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
           notifyTimeout(
             'ClickFlow timeout',
-            `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
+            `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
           );
           continue;
         }
