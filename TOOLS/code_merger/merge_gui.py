@@ -927,7 +927,7 @@ class PrepTab(QWidget):
         task = self.task_input.toPlainText().strip()
         parts = [guide] if guide else []
 
-        root = (project_root or self.project_root_input.text().strip()).strip()
+        root = (project_root or self.project_root).strip()
 
         if self.files:
             if root:
@@ -985,7 +985,7 @@ class PrepTab(QWidget):
         except Exception:
             data = {}
         data['files'] = self.files
-        data['project_root'] = self.project_root_input.text().strip()
+        data['project_root'] = self.project_root.strip()
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
         self._sync_to_recent_projects()
@@ -1019,8 +1019,6 @@ class PrepTab(QWidget):
                 data = json.load(f)
             saved = data if isinstance(data, list) else data.get('files', [])
             self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
-            if self.project_root:
-                self.project_root_input.setText(self.project_root)
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
@@ -1037,31 +1035,16 @@ class PrepTab(QWidget):
             if os.path.isfile(common):
                 common = os.path.dirname(common)
             self.project_root = common
-            self.project_root_input.setText(common)
             self.root_cb(common)
 
-    def _pick_project_root(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Project Root")
-        if not d:
-            return
-        self.project_root_input.setText(d)
+    def _set_project_root(self, d: str, save_recent: bool = True):
+        d = os.path.normpath(d)
         self.project_root = d
+        if self.root_cb:
+            self.root_cb(d)
+        if save_recent:
+            add_recent(d, [], [], overwrite_existing=True)
         self._save_session()
-        self.status_cb(f"Project root set to {d}")
-
-    def _new_project_prompt(self):
-        root = self.project_root_input.text().strip()
-        if not root or not os.path.isdir(root):
-            d = QFileDialog.getExistingDirectory(self, "Select New Project Root")
-            if not d:
-                return
-            root = d
-            self.project_root_input.setText(root)
-        self.project_root = root
-        self._save_session()
-        prompt = self._build_prompt(new_project=True, project_root=root)
-        self.prompt_out.setPlainText(prompt)
-        self.status_cb("New project prompt generated — copy and paste into AI")
 
     def _add_file_item(self, fp: str):
         item = QListWidgetItem()
@@ -1155,7 +1138,7 @@ class PrepTab(QWidget):
 
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
-        btn_add_dir = QPushButton("📁 ADD DIR")
+        btn_add_dir = QPushButton("📁 ADD DIR / ROOT")
         btn_recent  = QPushButton("🕘 RECENT")
         btn_clear   = QPushButton("✕ CLEAR ALL")
         for b in (btn_add, btn_add_dir, btn_recent, btn_clear):
@@ -1175,24 +1158,6 @@ class PrepTab(QWidget):
         right_layout = QVBoxLayout(right_widget)
         right_layout.setContentsMargins(6, 0, 0, 0)
         right_layout.setSpacing(8)
-
-        # Project root for empty / new projects
-        grp_root = QGroupBox("PROJECT ROOT  (optional for new projects)")
-        vr_root = QHBoxLayout(grp_root)
-        self.project_root_input = QLineEdit()
-        self.project_root_input.setPlaceholderText("Choose the folder for a new project or leave blank for file-based prompts…")
-        btn_root = QPushButton("📁 BROWSE")
-        btn_root.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_root.clicked.connect(self._pick_project_root)
-        btn_new = QPushButton("🆕 NEW PROJECT")
-        btn_new.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_new.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
-                              f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
-        btn_new.clicked.connect(self._new_project_prompt)
-        vr_root.addWidget(self.project_root_input, 1)
-        vr_root.addWidget(btn_root, 0)
-        vr_root.addWidget(btn_new, 0)
-        right_layout.addWidget(grp_root, 0)
 
         # Task description
         grp_task = QGroupBox("TASK / INSTRUCTIONS  (optional)")
@@ -1268,7 +1233,8 @@ class PrepTab(QWidget):
                 found_exts.add(ext)
 
         if not found_exts:
-            self.status_cb("No valid files found in directory")
+            self._set_project_root(d)
+            self.status_cb(f"Project root set: {d}")
             return
 
         # Show selector dialog for toggling extensions
@@ -1300,6 +1266,7 @@ class PrepTab(QWidget):
         
         exts_list = list(selected_exts) if selected_exts is not None else list(discovered_exts)
         add_recent(d, added_files, exts_list, overwrite_existing=overwrite_recent)
+        self._set_project_root(d, save_recent=False)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
@@ -1320,6 +1287,7 @@ class PrepTab(QWidget):
                 count += 1
                 
         add_recent(d, self.files, extensions, overwrite_existing=False)
+        self._set_project_root(d, save_recent=False)
         self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
         self._update_root()
         self._save_session()
@@ -1346,6 +1314,7 @@ class PrepTab(QWidget):
                     count += 1
                     
         add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
+        self._set_project_root(d, save_recent=False)
         self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
         self._update_root()
         self._save_session()
@@ -1394,8 +1363,8 @@ class PrepTab(QWidget):
         self.status_cb("File list cleared")
 
     def _generate(self):
-        if not self.files and not self.project_root_input.text().strip():
-            self.status_cb("⚠ Add files or choose a project root for a new project")
+        if not self.files and not self.project_root:
+            self.status_cb("⚠ Add files or choose a directory first")
             return
 
         prompt = self._build_prompt()
