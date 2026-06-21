@@ -63,6 +63,15 @@ function isElementClickable(el) {
   return true;
 }
 
+function getStepTimeoutSeconds(step, globalTimeoutSeconds) {
+  if (!step || step.timeoutEnabled !== true) return null;
+
+  const parsed = Number(globalTimeoutSeconds);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+
+  return parsed;
+}
+
 // Generate unique selector
 function getUniqueSelector(el) {
   if (!(el instanceof Element)) return '';
@@ -188,13 +197,28 @@ async function interruptibleDelay(seconds) {
   }
 }
 
-async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', requireVisible = false, allowInfiniteWait = false } = {}) {
+async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', requireVisible = false, allowInfiniteWait = false, pauseWhileHidden = false } = {}) {
   const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
   const startTime = Date.now();
+  let pausedMs = 0;
+  let hiddenSince = null;
 
   while (true) {
     if (stopRequested) {
       return { status: 'stopped', element: null };
+    }
+
+    if (pauseWhileHidden) {
+      if (document.visibilityState === 'hidden') {
+        if (hiddenSince === null) hiddenSince = Date.now();
+        await delayMs(250);
+        continue;
+      }
+
+      if (hiddenSince !== null) {
+        pausedMs += Date.now() - hiddenSince;
+        hiddenSince = null;
+      }
     }
 
     let element = null;
@@ -222,7 +246,7 @@ async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', re
       return { status: 'not_found', element: null };
     }
 
-    if (timeoutMs > 0 && Date.now() - startTime >= timeoutMs) {
+    if (timeoutMs > 0 && Date.now() - startTime - pausedMs >= timeoutMs) {
       return { status: 'timeout', element: null };
     }
 
@@ -259,6 +283,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
       if (stopRequested) break;
       const step = steps[i];
       const selectorMode = step.selectorMode || 'css';
+      const stepTimeout = getStepTimeoutSeconds(step, waitTimeout);
       updateState("running", currentLoop, i);
       
       logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
@@ -275,10 +300,11 @@ async function runAutomation(startLoop = 0, startStep = 0) {
         if (step.action === 'waitFor') {
           logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
           
-          const result = await resolveSelector(step.selector, waitTimeout, {
+          const result = await resolveSelector(step.selector, stepTimeout ?? 0, {
             matchMode: selectorMode,
             requireVisible: true,
-            allowInfiniteWait: true
+            allowInfiniteWait: stepTimeout === null,
+            pauseWhileHidden: stepTimeout !== null
           });
 
           if (result.status === 'found') {
@@ -291,7 +317,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
             logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
             notifyTimeout(
               'ClickFlow timeout',
-              `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+              `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
             );
           }
           continue;
@@ -301,17 +327,18 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           logMessage(`[Step ${i + 1}] Navigating to: ${step.selector || step.value}`);
           // For navigate action we expect selector or value to be a URL or link text
           if (step.selector) {
-            const navResult = await resolveSelector(step.selector, waitTimeout, {
+            const navResult = await resolveSelector(step.selector, stepTimeout ?? 0, {
               matchMode: selectorMode,
               requireVisible: false,
-              allowInfiniteWait: false
+              allowInfiniteWait: false,
+              pauseWhileHidden: stepTimeout !== null
             });
 
             if (navResult.status === 'timeout') {
               logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
               notifyTimeout(
                 'ClickFlow timeout',
-                `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+                `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
               );
               continue;
             }
@@ -333,17 +360,18 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           return;
         }
 
-        const result = await resolveSelector(step.selector, waitTimeout, {
+        const result = await resolveSelector(step.selector, stepTimeout ?? 0, {
           matchMode: selectorMode,
           requireVisible: false,
-          allowInfiniteWait: false
+          allowInfiniteWait: false,
+          pauseWhileHidden: stepTimeout !== null
         });
 
         if (result.status === 'timeout') {
           logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
           notifyTimeout(
             'ClickFlow timeout',
-            `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+            `Step ${i + 1} did not find a matching element within ${stepTimeout}s.`
           );
           continue;
         }
