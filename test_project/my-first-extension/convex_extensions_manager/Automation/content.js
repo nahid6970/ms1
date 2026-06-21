@@ -301,24 +301,49 @@ async function evaluateConditionsList(conditions, logicMode) {
   }
 }
 
-async function evaluateConditionsWithTimeout(conditions, logicMode, timeoutSeconds) {
+async function evaluateConcurrentConditions(step, timeoutSeconds) {
   const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
   const startTime = Date.now();
 
-  while (true) {
-    if (stopRequested) return { passed: false, timedOut: false };
+  const thenConds = step.conditions || [];
+  const thenMode = step.logicMode || 'all';
 
-    const passed = await evaluateConditionsList(conditions, logicMode);
-    if (passed) {
-      return { passed: true, timedOut: false };
+  const elseIfConds = step.elseIfConditions || [];
+  const elseIfMode = step.elseIfLogicMode || 'all';
+
+  while (true) {
+    if (stopRequested) return { outcome: 'else' };
+
+    // 1. Check IF (THEN) conditions
+    const thenPassed = await evaluateConditionsList(thenConds, thenMode);
+    if (thenPassed && thenConds.length > 0) {
+      return { outcome: 'then' };
+    }
+
+    // 2. Check ELSE-IF conditions
+    const elseIfPassed = await evaluateConditionsList(elseIfConds, elseIfMode);
+    if (elseIfPassed && elseIfConds.length > 0) {
+      return { outcome: 'elseIf' };
+    }
+
+    // Default outcome if no conditions are configured
+    if (thenConds.length === 0 && elseIfConds.length === 0) {
+      return { outcome: 'then' };
     }
 
     if (timeoutMs === 0) {
-      return { passed: false, timedOut: false };
+      if (thenPassed) return { outcome: 'then' };
+      if (elseIfPassed) return { outcome: 'elseIf' };
+      return { outcome: 'else' };
     }
 
     if (Date.now() - startTime >= timeoutMs) {
-      return { passed: false, timedOut: true };
+      // Re-evaluate one final time on expiration
+      const finalThen = await evaluateConditionsList(thenConds, thenMode);
+      if (finalThen) return { outcome: 'then' };
+      const finalElseIf = await evaluateConditionsList(elseIfConds, elseIfMode);
+      if (finalElseIf) return { outcome: 'elseIf' };
+      return { outcome: 'else' };
     }
 
     await delayMs(500);
@@ -460,23 +485,22 @@ async function executeSubStepsList(subSteps, currentLoop, parentLabel, waitTimeo
       if (step.action === 'branch') {
         logMessage(`[Step ${label}] Evaluating nested branch...`);
         const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
-        const result = await evaluateConditionsWithTimeout(step.conditions || [], step.logicMode || 'all', timeoutVal);
+        const result = await evaluateConcurrentConditions(step, timeoutVal);
 
-        if (result.passed) {
-          logMessage(`[Step ${label}] Nested branch PASSED.`);
+        if (result.outcome === 'then') {
+          logMessage(`[Step ${label}] Nested branch IF condition met.`);
           if (step.thenSteps && step.thenSteps.length > 0) {
             const nav = await executeSubStepsList(step.thenSteps, currentLoop, `${label} > THEN`, waitTimeout);
             if (nav) return true;
           }
-        } else if (result.timedOut) {
-          logMessage(`[Step ${label}] Nested branch TIMED OUT.`);
-          const fallbackSteps = (step.onTimeoutSteps && step.onTimeoutSteps.length > 0) ? step.onTimeoutSteps : (step.elseSteps || []);
-          if (fallbackSteps && fallbackSteps.length > 0) {
-            const nav = await executeSubStepsList(fallbackSteps, currentLoop, `${label} > TIMEOUT`, waitTimeout);
+        } else if (result.outcome === 'elseIf') {
+          logMessage(`[Step ${label}] Nested branch ELSE-IF condition met.`);
+          if (step.elseIfSteps && step.elseIfSteps.length > 0) {
+            const nav = await executeSubStepsList(step.elseIfSteps, currentLoop, `${label} > ELSEIF`, waitTimeout);
             if (nav) return true;
           }
         } else {
-          logMessage(`[Step ${label}] Nested branch FAILED.`);
+          logMessage(`[Step ${label}] Nested branch fallback ELSE triggered.`);
           if (step.elseSteps && step.elseSteps.length > 0) {
             const nav = await executeSubStepsList(step.elseSteps, currentLoop, `${label} > ELSE`, waitTimeout);
             if (nav) return true;
@@ -513,23 +537,22 @@ async function executeStepsList(stepsList, currentLoop, startStepIndex, waitTime
       if (step.action === 'branch') {
         logMessage(`[Step ${i + 1}] Evaluating branch step...`);
         const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
-        const result = await evaluateConditionsWithTimeout(step.conditions || [], step.logicMode || 'all', timeoutVal);
+        const result = await evaluateConcurrentConditions(step, timeoutVal);
         
-        if (result.passed) {
-          logMessage(`[Step ${i + 1}] Branch condition PASSED. Executing THEN steps.`);
+        if (result.outcome === 'then') {
+          logMessage(`[Step ${i + 1}] IF condition met. Executing THEN steps.`);
           if (step.thenSteps && step.thenSteps.length > 0) {
             const nav = await executeSubStepsList(step.thenSteps, currentLoop, `${i + 1} > THEN`, waitTimeout);
             if (nav) return true;
           }
-        } else if (result.timedOut) {
-          logMessage(`[Step ${i + 1}] Branch condition TIMED OUT. Executing TIMEOUT fallback steps.`);
-          const fallbackSteps = (step.onTimeoutSteps && step.onTimeoutSteps.length > 0) ? step.onTimeoutSteps : (step.elseSteps || []);
-          if (fallbackSteps && fallbackSteps.length > 0) {
-            const nav = await executeSubStepsList(fallbackSteps, currentLoop, `${i + 1} > TIMEOUT`, waitTimeout);
+        } else if (result.outcome === 'elseIf') {
+          logMessage(`[Step ${i + 1}] ELSE-IF condition met. Executing ELSE-IF steps.`);
+          if (step.elseIfSteps && step.elseIfSteps.length > 0) {
+            const nav = await executeSubStepsList(step.elseIfSteps, currentLoop, `${i + 1} > ELSEIF`, waitTimeout);
             if (nav) return true;
           }
         } else {
-          logMessage(`[Step ${i + 1}] Branch condition FAILED. Executing ELSE steps.`);
+          logMessage(`[Step ${i + 1}] Timeout or conditions failed. Executing ELSE fallback steps.`);
           if (step.elseSteps && step.elseSteps.length > 0) {
             const nav = await executeSubStepsList(step.elseSteps, currentLoop, `${i + 1} > ELSE`, waitTimeout);
             if (nav) return true;

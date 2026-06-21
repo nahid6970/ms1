@@ -319,6 +319,11 @@ function renderBranchStepDetails(step) {
   const logicMode = step.logicMode || 'all';
   const conditions = step.conditions || [];
   const thenSteps = step.thenSteps || [];
+
+  const elseIfLogicMode = step.elseIfLogicMode || 'all';
+  const elseIfConditions = step.elseIfConditions || [];
+  const elseIfSteps = step.elseIfSteps || [];
+
   const elseSteps = step.elseSteps || [];
 
   const condTypes = [
@@ -333,6 +338,7 @@ function renderBranchStepDetails(step) {
     { value: 'value_equals', label: 'Value Equals' }
   ];
 
+  // IF Conditions
   let conditionsHtml = '';
   if (conditions.length === 0) {
     conditionsHtml = `<div class="branch-empty-text">No conditions. Executes THEN directly.</div>`;
@@ -342,12 +348,35 @@ function renderBranchStepDetails(step) {
       const isValueNeeded = cond.type.includes('contains') || cond.type.includes('equals');
 
       conditionsHtml += `
-        <div class="branch-cond-row" data-step-id="${step.id}" data-cond-idx="${condIdx}">
+        <div class="branch-cond-row" data-step-id="${step.id}" data-cond-type="conditions" data-cond-idx="${condIdx}">
           <select class="branch-cond-type-select">
             ${condTypes.map(t => `<option value="${t.value}" ${cond.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
           </select>
           <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'}; width: 105px;" />
-          <button class="btn-pick-cond" title="Pick element" style="display: ${isSelectorNeeded ? 'block' : 'none'};">🎯</button>
+          <button class="btn-pick-cond" title="Pick element">🎯</button>
+          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'}; width: 90px;" />
+          <button class="btn-branch-del-cond" title="Delete Condition">❌</button>
+        </div>
+      `;
+    });
+  }
+
+  // ELSE-IF Conditions
+  let elseIfConditionsHtml = '';
+  if (elseIfConditions.length === 0) {
+    elseIfConditionsHtml = `<div class="branch-empty-text">No alternate conditions.</div>`;
+  } else {
+    elseIfConditions.forEach((cond, condIdx) => {
+      const isSelectorNeeded = !cond.type.startsWith('url');
+      const isValueNeeded = cond.type.includes('contains') || cond.type.includes('equals');
+
+      elseIfConditionsHtml += `
+        <div class="branch-cond-row" data-step-id="${step.id}" data-cond-type="elseIfConditions" data-cond-idx="${condIdx}">
+          <select class="branch-cond-type-select">
+            ${condTypes.map(t => `<option value="${t.value}" ${cond.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
+          </select>
+          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'}; width: 105px;" />
+          <button class="btn-pick-cond" title="Pick element">🎯</button>
           <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'}; width: 90px;" />
           <button class="btn-branch-del-cond" title="Delete Condition">❌</button>
         </div>
@@ -364,6 +393,15 @@ function renderBranchStepDetails(step) {
     });
   }
 
+  let elseIfStepsHtml = '';
+  if (elseIfSteps.length === 0) {
+    elseIfStepsHtml = `<div class="branch-empty-text">No actions.</div>`;
+  } else {
+    elseIfSteps.forEach((subStep, subIdx) => {
+      elseIfStepsHtml += renderSubStepRow(step.id, 'elseIfSteps', subStep, subIdx);
+    });
+  }
+
   let elseStepsHtml = '';
   if (elseSteps.length === 0) {
     elseStepsHtml = `<div class="branch-empty-text">No actions.</div>`;
@@ -375,17 +413,17 @@ function renderBranchStepDetails(step) {
 
   return `
     <div class="branch-editor-container" data-id="${step.id}">
+      <!-- IF Conditions Header -->
       <div class="branch-header-row">
-        <label>Match Mode:</label>
-        <select class="branch-logic-mode-select">
+        <label style="font-weight: 600; color: var(--accent-purple);">IF Conditions Match:</label>
+        <select class="branch-logic-mode-select" data-field="logicMode">
           <option value="all" ${logicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
           <option value="any" ${logicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
         </select>
-        <button class="btn-branch-add-cond btn-secondary" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add Condition</button>
+        <button class="btn-branch-add-cond btn-secondary" data-type="conditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add IF Condition</button>
       </div>
 
       <div class="branch-sub-section">
-        <div class="branch-sub-title">Conditions:</div>
         <div class="branch-conditions-list">
           ${conditionsHtml}
         </div>
@@ -393,7 +431,7 @@ function renderBranchStepDetails(step) {
 
       <div class="branch-sub-section">
         <div class="branch-sub-title-row">
-          <span class="branch-sub-title">THEN Actions (true):</span>
+          <span class="branch-sub-title">THEN Actions (if true):</span>
           <button class="btn-branch-add-substep btn-secondary" data-type="thenSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
         </div>
         <div class="branch-substeps-list">
@@ -401,9 +439,36 @@ function renderBranchStepDetails(step) {
         </div>
       </div>
 
+      <!-- ELSE-IF Conditions Header -->
+      <div class="branch-header-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+        <label style="font-weight: 600; color: var(--accent-blue);">ELSE-IF Conditions Match:</label>
+        <select class="branch-logic-mode-select" data-field="elseIfLogicMode">
+          <option value="all" ${elseIfLogicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
+          <option value="any" ${elseIfLogicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
+        </select>
+        <button class="btn-branch-add-cond btn-secondary" data-type="elseIfConditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add ELSE-IF Condition</button>
+      </div>
+
+      <div class="branch-sub-section">
+        <div class="branch-conditions-list">
+          ${elseIfConditionsHtml}
+        </div>
+      </div>
+
       <div class="branch-sub-section">
         <div class="branch-sub-title-row">
-          <span class="branch-sub-title">ELSE Actions (false):</span>
+          <span class="branch-sub-title">ELSE-IF Actions (if true):</span>
+          <button class="btn-branch-add-substep btn-secondary" data-type="elseIfSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+        </div>
+        <div class="branch-substeps-list">
+          ${elseIfStepsHtml}
+        </div>
+      </div>
+
+      <!-- Fallback ELSE Section -->
+      <div class="branch-sub-section" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+        <div class="branch-sub-title-row">
+          <span class="branch-sub-title" style="color: var(--accent-red);">ELSE Actions (if neither met):</span>
           <button class="btn-branch-add-substep btn-secondary" data-type="elseSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
         </div>
         <div class="branch-substeps-list">
@@ -642,19 +707,21 @@ function attachStepChangeHandlers() {
   document.querySelectorAll('.branch-logic-mode-select').forEach(select => {
     select.addEventListener('change', (e) => {
       const stepId = parseInt(e.target.closest('.branch-editor-container').dataset.id, 10);
-      updateBranchField(stepId, 'logicMode', e.target.value);
+      const field = e.target.dataset.field; // 'logicMode' or 'elseIfLogicMode'
+      updateBranchField(stepId, field, e.target.value);
     });
   });
 
   document.querySelectorAll('.btn-branch-add-cond').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const stepId = parseInt(e.target.closest('.branch-editor-container').dataset.id, 10);
+      const condType = e.target.dataset.type; // 'conditions' or 'elseIfConditions'
       chrome.storage.local.get('steps', (data) => {
         const steps = data.steps || [];
         const step = steps.find(s => s.id === stepId);
         if (step) {
-          if (!step.conditions) step.conditions = [];
-          step.conditions.push({ type: 'exists', selector: '', value: '' });
+          if (!step[condType]) step[condType] = [];
+          step[condType].push({ type: 'exists', selector: '', value: '' });
           saveToActiveProjectAndStorage({ steps }, renderSteps);
         }
       });
@@ -665,12 +732,13 @@ function attachStepChangeHandlers() {
     select.addEventListener('change', (e) => {
       const row = e.target.closest('.branch-cond-row');
       const stepId = parseInt(row.dataset.stepId, 10);
+      const condType = row.dataset.condType; // 'conditions' or 'elseIfConditions'
       const condIdx = parseInt(row.dataset.condIdx, 10);
       chrome.storage.local.get('steps', (data) => {
         const steps = data.steps || [];
         const step = steps.find(s => s.id === stepId);
-        if (step && step.conditions && step.conditions[condIdx]) {
-          step.conditions[condIdx].type = e.target.value;
+        if (step && step[condType] && step[condType][condIdx]) {
+          step[condType][condIdx].type = e.target.value;
           saveToActiveProjectAndStorage({ steps }, renderSteps);
         }
       });
@@ -681,12 +749,13 @@ function attachStepChangeHandlers() {
     input.addEventListener('change', (e) => {
       const row = e.target.closest('.branch-cond-row');
       const stepId = parseInt(row.dataset.stepId, 10);
+      const condType = row.dataset.condType;
       const condIdx = parseInt(row.dataset.condIdx, 10);
       chrome.storage.local.get('steps', (data) => {
         const steps = data.steps || [];
         const step = steps.find(s => s.id === stepId);
-        if (step && step.conditions && step.conditions[condIdx]) {
-          step.conditions[condIdx].selector = e.target.value;
+        if (step && step[condType] && step[condType][condIdx]) {
+          step[condType][condIdx].selector = e.target.value;
           saveToActiveProjectAndStorage({ steps });
         }
       });
@@ -697,8 +766,9 @@ function attachStepChangeHandlers() {
     btn.addEventListener('click', (e) => {
       const row = e.target.closest('.branch-cond-row');
       const stepId = parseInt(row.dataset.stepId, 10);
+      const condType = row.dataset.condType; // 'conditions' or 'elseIfConditions'
       const condIdx = parseInt(row.dataset.condIdx, 10);
-      startPickMode(`cond_${stepId}_${condIdx}`);
+      startPickMode(`cond_${stepId}_${condType}_${condIdx}`);
     });
   });
 
@@ -706,12 +776,13 @@ function attachStepChangeHandlers() {
     input.addEventListener('change', (e) => {
       const row = e.target.closest('.branch-cond-row');
       const stepId = parseInt(row.dataset.stepId, 10);
+      const condType = row.dataset.condType;
       const condIdx = parseInt(row.dataset.condIdx, 10);
       chrome.storage.local.get('steps', (data) => {
         const steps = data.steps || [];
         const step = steps.find(s => s.id === stepId);
-        if (step && step.conditions && step.conditions[condIdx]) {
-          step.conditions[condIdx].value = e.target.value;
+        if (step && step[condType] && step[condType][condIdx]) {
+          step[condType][condIdx].value = e.target.value;
           saveToActiveProjectAndStorage({ steps });
         }
       });
@@ -722,12 +793,13 @@ function attachStepChangeHandlers() {
     btn.addEventListener('click', (e) => {
       const row = e.target.closest('.branch-cond-row');
       const stepId = parseInt(row.dataset.stepId, 10);
+      const condType = row.dataset.condType;
       const condIdx = parseInt(row.dataset.condIdx, 10);
       chrome.storage.local.get('steps', (data) => {
         const steps = data.steps || [];
         const step = steps.find(s => s.id === stepId);
-        if (step && step.conditions) {
-          step.conditions.splice(condIdx, 1);
+        if (step && step[condType]) {
+          step[condType].splice(condIdx, 1);
           saveToActiveProjectAndStorage({ steps }, renderSteps);
         }
       });
@@ -867,6 +939,11 @@ async function addNewStep() {
       conditions: [],
       logicMode: 'all',
       thenSteps: [],
+      
+      elseIfConditions: [],
+      elseIfLogicMode: 'all',
+      elseIfSteps: [],
+
       elseSteps: [],
       timeout: 0
     });

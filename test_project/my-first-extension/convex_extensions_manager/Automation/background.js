@@ -15,15 +15,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       let updatedSteps = [...steps];
 
       if (stepIdStr.startsWith('cond_')) {
-        // Format: cond_stepId_condIdx
+        // Format: cond_stepId_condType_condIdx
         const parts = stepIdStr.split('_');
         const sId = parseInt(parts[1], 10);
-        const condIdx = parseInt(parts[2], 10);
+        const condType = parts[2]; // 'conditions' or 'elseIfConditions'
+        const condIdx = parseInt(parts[3], 10);
         updatedSteps = steps.map(step => {
-          if (step.id === sId && step.conditions && step.conditions[condIdx]) {
-            const updatedConds = [...step.conditions];
+          if (step.id === sId && step[condType] && step[condType][condIdx]) {
+            const updatedConds = [...step[condType]];
             updatedConds[condIdx] = { ...updatedConds[condIdx], selector: message.selector };
-            return { ...step, conditions: updatedConds };
+            return { ...step, [condType]: updatedConds };
           }
           return step;
         });
