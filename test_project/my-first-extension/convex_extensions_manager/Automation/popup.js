@@ -356,9 +356,9 @@ function renderBranchStepDetails(step) {
           <select class="branch-cond-type-select">
             ${condTypes.map(t => `<option value="${t.value}" ${cond.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
           </select>
-          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'}; width: 105px;" />
+          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'};" />
           <button class="btn-pick-cond" title="Pick element">🎯</button>
-          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'}; width: 90px;" />
+          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'};" />
           <button class="btn-branch-del-cond" title="Delete Condition">❌</button>
         </div>
       `;
@@ -379,9 +379,9 @@ function renderBranchStepDetails(step) {
           <select class="branch-cond-type-select">
             ${condTypes.map(t => `<option value="${t.value}" ${cond.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
           </select>
-          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'}; width: 105px;" />
+          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'};" />
           <button class="btn-pick-cond" title="Pick element">🎯</button>
-          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'}; width: 90px;" />
+          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'};" />
           <button class="btn-branch-del-cond" title="Delete Condition">❌</button>
         </div>
       `;
@@ -518,9 +518,9 @@ function renderSubStepRow(stepId, subStepType, subStep, subIdx) {
       </select>
 
       <div class="branch-substep-inputs" style="display: ${isWait ? 'none' : 'flex'}; flex: 1; gap: 4px;">
-        <input type="text" class="branch-substep-selector" placeholder="Selector / URL" value="${subStep.selector || ''}" style="width: 100px; flex-grow: 1;" />
+        <input type="text" class="branch-substep-selector" placeholder="Selector / URL" value="${subStep.selector || ''}" />
         <button class="btn-pick-substep" title="Pick element">🎯</button>
-        <input type="text" class="branch-substep-value" placeholder="Text" value="${subStep.value || ''}" style="display: ${isType ? 'block' : 'none'}; width: 80px;" />
+        <input type="text" class="branch-substep-value" placeholder="Text" value="${subStep.value || ''}" style="display: ${isType ? 'block' : 'none'};" />
       </div>
 
       <div class="branch-substep-delay-wrapper" title="Delay in seconds">
@@ -1123,10 +1123,10 @@ function startLogMonitoring() {
       if (toggleBtn) {
         if (state.status === 'running') {
           toggleBtn.innerText = '⏹️ Stop Automation';
-          toggleBtn.className = 'btn-danger';
+          toggleBtn.className = 'btn-danger btn-header-start';
         } else {
           toggleBtn.innerText = '▶️ Start Automation';
-          toggleBtn.className = 'btn-primary';
+          toggleBtn.className = 'btn-primary btn-header-start';
         }
       }
 

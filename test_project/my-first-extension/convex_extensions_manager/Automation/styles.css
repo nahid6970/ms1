@@ -10,16 +10,21 @@
   --border-color: #313244;
 }
 
+html {
+  overflow: hidden !important; /* Block any vertical scrolling at the window page level */
+  height: 100%;
+}
+
 body {
   width: 800px; 
-  height: 900px; /* Increased to 1.5x vertical height */
+  height: 600px; /* Set to the absolute physical maximum height allowed by Chrome popups to eliminate the outside scrollbar */
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   box-sizing: border-box;
-  overflow: hidden; /* Prevents the body itself from scrolling so everything fits in the frame */
+  overflow: hidden !important; /* Ensure the main popup window frame never shows a scrollbar */
 }
 
 .container {
@@ -28,7 +33,9 @@ body {
   flex-direction: column;
   gap: 10px;
   height: 100%;
+  max-height: 100%;
   box-sizing: border-box;
+  overflow: hidden; /* Enforce clipping on the main container to prevent second scrollbar leaking */
 }
 
 /* Header Area */
@@ -244,11 +251,12 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  height: 680px; /* Expanded step list viewport height to fully occupy the new 900px frame height */
-  min-height: 680px;
-  max-height: 680px;
+  height: 410px; /* Safely set to 410px so all controls and list items fit perfectly inside the 600px window with zero empty space */
+  min-height: 410px;
+  max-height: 410px;
   overflow-y: auto;
   padding-right: 4px;
+  scroll-behavior: smooth; /* Enables smooth animated scroll transitions */
 }
 
 /* Project Profile styles */
@@ -280,6 +288,26 @@ input[type="number"] {
   color: var(--accent-red);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-header-start {
+  height: 24px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 /* Step Row Layout */
 .step-card {
   background-color: var(--card-bg);
@@ -294,6 +322,7 @@ input[type="number"] {
   position: relative;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
+  transform: translate3d(0, 0, 0); /* Forces GPU composition layers to eliminate repaint lag during smooth scrolling */
 }
 
 /* Branch Editor Styling */
@@ -313,7 +342,8 @@ input[type="number"] {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-color);
-  overflow: hidden;
+  margin-bottom: 2px; /* Breathing room to avoid border overlapping */
+  /* Removed overflow: hidden to prevent Chrome from capturing and blocking scroll events on hover */
 }
 
 .branch-details-block[open] {
@@ -330,6 +360,10 @@ input[type="number"] {
   border-bottom: 1px solid transparent;
   outline: none;
   display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 3px 3px 0 0; /* Clip top corners to match parent border-radius */
+}
   align-items: center;
   gap: 4px;
 }
@@ -390,11 +424,12 @@ input[type="number"] {
 .branch-cond-row, .branch-substep-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 4px;
+  padding: 6px 8px;
+  width: 100%;
 }
 
 .branch-substep-index {
@@ -408,12 +443,24 @@ input[type="number"] {
   align-items: center;
   justify-content: center;
   border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .branch-cond-type-select, .branch-substep-action {
-  font-size: 10px;
-  padding: 2px 4px;
-  max-width: 105px;
+  font-size: 11px;
+  padding: 4px 6px;
+  width: 140px !important;
+  flex-shrink: 0;
+}
+
+.branch-cond-selector, .branch-substep-selector {
+  flex: 2; /* Selector takes up more available width */
+  min-width: 120px;
+}
+
+.branch-cond-value, .branch-substep-value {
+  flex: 1; /* Value input takes remaining width */
+  min-width: 90px;
 }
 
 .btn-pick-cond, .btn-pick-substep {

@@ -22,10 +22,15 @@
         <button id="deleteProjectBtn" class="btn-small btn-small-danger" title="Delete Profile" style="height: 24px; padding: 3px 6px;">🗑️</button>
       </div>
 
-      <!-- Compact Cloud Backup Buttons -->
-      <div class="convex-buttons">
-        <button id="saveToConvex" class="btn-convex-save" title="Backup configuration to Convex Cloud">💾 Backup</button>
-        <button id="loadFromConvex" class="btn-convex-load" title="Restore configuration from Convex Cloud">📂 Restore</button>
+      <!-- Unified Actions containing Start button right before Backup -->
+      <div class="header-actions">
+        <button id="toggleBtn" class="btn-primary btn-header-start">▶️ Start Automation</button>
+
+        <!-- Compact Cloud Backup Buttons -->
+        <div class="convex-buttons">
+          <button id="saveToConvex" class="btn-convex-save" title="Backup configuration to Convex Cloud">💾 Backup</button>
+          <button id="loadFromConvex" class="btn-convex-load" title="Restore configuration from Convex Cloud">📂 Restore</button>
+        </div>
       </div>
     </div>
 
@@ -65,10 +70,6 @@
       </div>
     </div>
 
-    <!-- Action Panel -->
-    <div class="action-panel">
-      <button id="toggleBtn" class="btn-primary">▶️ Start Automation</button>
-    </div>
   </div>
   <script src="popup.js"></script>
 </body>

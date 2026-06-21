@@ -61,6 +61,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       chrome.storage.local.set({ steps: updatedSteps, projects, pickingStepId: null }, () => {
         sendResponse({ success: true });
+
+        // Auto-reopen the extension popup window programmatically in Manifest V3 (Chrome 127+)
+        if (chrome.action && typeof chrome.action.openPopup === 'function') {
+          chrome.action.openPopup().catch(err => {
+            console.warn("Automatic popup reopening is only supported in newer Chromium environments or under policy gestures:", err.message);
+          });
+        }
       });
     });
     return true;
