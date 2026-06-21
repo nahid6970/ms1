@@ -306,8 +306,8 @@ input[type="number"] {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   height: 28px;
-  padding: 0 4px;
-  width: 68px;
+  padding: 0 6px;
+  width: 58px;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -317,9 +317,12 @@ input[type="number"] {
 }
 
 .delay-icon {
-  font-size: 11px;
-  margin-right: 2px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   user-select: none;
+  line-height: 1;
 }
 
 .delay-input-val {
@@ -330,14 +333,9 @@ input[type="number"] {
   width: 100%;
   text-align: center;
   padding: 0 !important;
+  margin-left: 2px;
   outline: none;
-}
-
-.delay-unit {
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-left: 1px;
-  user-select: none;
+  font-family: inherit;
 }
 
 .btn-delete {

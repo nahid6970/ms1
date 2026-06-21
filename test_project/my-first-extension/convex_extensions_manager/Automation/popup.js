@@ -115,7 +115,6 @@ async function renderSteps() {
           <div class="delay-wrapper" title="Delay (seconds) — for normal steps or max wait time for Wait For Element">
             <span class="delay-icon">⏱️</span>
             <input type="number" class="delay-input-val" placeholder="0" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
-            <span class="delay-unit">s</span>
           </div>
           
           <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
