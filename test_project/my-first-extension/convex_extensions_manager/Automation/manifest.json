@@ -3,6 +3,11 @@
   "name": "ClickFlow Automator",
   "version": "1.0.0",
   "description": "Automate custom sequences of clicks, keystrokes, and delays on any website. Supports loops and local testing servers.",
+  "icons": {
+    "16": "icons/clickflow-icon16.png",
+    "48": "icons/clickflow-icon48.png",
+    "128": "icons/clickflow-icon128.png"
+  },
   "permissions": [
     "storage",
     "activeTab",
@@ -15,7 +20,12 @@
     "https://*.convex.cloud/*"
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/clickflow-icon16.png",
+      "48": "icons/clickflow-icon48.png",
+      "128": "icons/clickflow-icon128.png"
+    }
   },
   "background": {
     "service_worker": "background.js",
