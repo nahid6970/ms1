@@ -74,23 +74,21 @@ async function renderSteps() {
             <option value="waitFor" ${step.action === 'waitFor' ? 'selected' : ''}>Wait For Element</option>
           </select>
           
-          <div class="selector-wrapper" style="display: ${isWaitAction ? 'none' : 'flex'}; flex-grow: 1; min-width: 140px;">
-            <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />
-            <button class="btn-pick" title="Pick element on page" data-id="${step.id}">🎯</button>
+          <div class="inputs-container" style="display: ${isWaitAction ? 'none' : 'flex'};">
+            <div class="selector-wrapper">
+              <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />
+              <button class="btn-pick" title="Pick element on page" data-id="${step.id}">🎯</button>
+            </div>
+            <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
           </div>
           
-          <!-- Inline Delay -->
-          <div class="field delay-input" style="margin-left: 4px; flex-shrink: 0; width: 115px;">
-            <div class="input-with-icon" title="Delay (seconds) — for normal steps or max wait time for Wait For Element">
-              <span class="input-icon">⏱️</span>
-              <input type="number" placeholder="Delay" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
-            </div>
+          <div class="delay-wrapper" title="Delay (seconds) — for normal steps or max wait time for Wait For Element">
+            <span class="delay-icon">⏱️</span>
+            <input type="number" class="delay-input-val" placeholder="0" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
+            <span class="delay-unit">s</span>
           </div>
           
           <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
-        </div>
-        <div class="step-row-bottom">
-          <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
         </div>
       `;
 
@@ -124,7 +122,7 @@ function attachStepChangeHandlers() {
   });
 
   // Delay inputs
-  document.querySelectorAll('.delay-input input').forEach(input => {
+  document.querySelectorAll('.delay-input-val').forEach(input => {
     input.addEventListener('change', (e) => {
       updateStepField(parseInt(e.target.dataset.id), 'delay', parseFloat(e.target.value) || 0);
     });

@@ -64,7 +64,7 @@ h2 {
 .badge {
   font-size: 11px;
   padding: 4px 8px;
-  border-radius: 0;
+  border-radius: 4px;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -95,7 +95,7 @@ h2 {
   background-color: rgba(203, 166, 247, 0.08);
   border: 1px dashed var(--accent-purple);
   padding: 8px 12px;
-  border-radius: 0;
+  border-radius: 4px;
 }
 
 .section-title {
@@ -114,7 +114,7 @@ h2 {
   color: white;
   border: none;
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
   font-weight: 600;
@@ -126,7 +126,7 @@ h2 {
   color: white;
   border: none;
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
   font-weight: 600;
@@ -141,7 +141,7 @@ h2 {
 .settings-card {
   background-color: var(--card-bg);
   padding: 12px;
-  border-radius: 0;
+  border-radius: 6px;
   border: 1px solid var(--border-color);
 }
 
@@ -166,9 +166,9 @@ input[type="number"], input[type="text"], select {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
   color: var(--text-color);
-  padding: 6px 10px;
-  border-radius: 0;
-  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -195,7 +195,7 @@ input[type="number"] {
   position: relative;
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
-  border-radius: 0;
+  border-radius: 4px;
   overflow: hidden;
   transition: border-color 0.2s;
 }
@@ -207,7 +207,7 @@ input[type="number"] {
 .input-with-icon .input-icon {
   padding-left: 8px;
   padding-right: 4px;
-  font-size: 13px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   user-select: none;
@@ -218,18 +218,7 @@ input[type="number"] {
   background-color: transparent !important;
   flex-grow: 1;
   width: 100%;
-  padding: 6px 4px !important;
-  outline: none;
-  min-width: 32px;
-  text-align: center;
-}
-
-.input-with-icon input {
-  border: none !important;
-  background-color: transparent !important;
-  flex-grow: 1;
-  width: 100%;
-  padding: 6px 4px !important;
+  padding: 5px 4px !important;
   outline: none;
   min-width: 32px;
   text-align: center;
@@ -251,8 +240,8 @@ input[type="number"] {
 .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 220px;
+  gap: 6px;
+  max-height: 250px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -261,12 +250,18 @@ input[type="number"] {
 .step-card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 0;
-  padding: 10px;
+  border-radius: 4px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.step-card:hover {
+  border-color: rgba(203, 166, 247, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .step-row-top {
@@ -275,60 +270,124 @@ input[type="number"] {
   gap: 8px;
   flex-wrap: nowrap;
   min-width: 0;
+  width: 100%;
 }
 
-.step-row-top .selector-wrapper {
-  flex-grow: 1;
-  min-width: 180px;
-}
-
-.selector-input {
-  min-width: 0;
-  flex: 1;
-}
-
-.delay-input {
-  flex-shrink: 0;
-  width: 115px;
-}
-
-.btn-delete {
-  flex-shrink: 0;
-}
-
-/* Make action dropdown wider */
-.step-action-select {
-  width: 138px !important;
-  min-width: 138px;
-}
-
-.step-index {
-  background-color: var(--border-color);
-  color: var(--text-color);
-  font-size: 11px;
-  font-weight: bold;
-  width: 18px;
-  height: 18px;
-  border-radius: 0;
+.inputs-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.step-action-select {
-  width: 90px;
+  gap: 6px;
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .selector-wrapper {
   display: flex;
-  flex-grow: 1;
+  flex: 1;
+  min-width: 0;
   position: relative;
 }
 
-.selector-input {
+.selector-input, .value-input {
   width: 100%;
-  padding-right: 32px !important;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.selector-input {
+  padding-right: 28px !important;
   text-overflow: ellipsis;
+}
+
+.value-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.delay-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 28px;
+  padding: 0 4px;
+  width: 68px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.delay-wrapper:focus-within {
+  border-color: var(--accent-purple);
+}
+
+.delay-icon {
+  font-size: 11px;
+  margin-right: 2px;
+  user-select: none;
+}
+
+.delay-input-val {
+  border: none !important;
+  background-color: transparent !important;
+  color: var(--text-color);
+  font-size: 12px;
+  width: 100%;
+  text-align: center;
+  padding: 0 !important;
+  outline: none;
+}
+
+.delay-unit {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 1px;
+  user-select: none;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.btn-delete:hover {
+  color: var(--accent-red);
+  background-color: rgba(243, 139, 168, 0.1);
+}
+
+/* Make action dropdown wider */
+.step-action-select {
+  width: 110px !important;
+  min-width: 110px;
+  flex-shrink: 0;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.step-index {
+  background-color: var(--border-color);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .btn-pick {
@@ -341,7 +400,7 @@ input[type="number"] {
   color: var(--text-dim);
   cursor: pointer;
   padding: 4px;
-  border-radius: 0;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -352,34 +411,6 @@ input[type="number"] {
   background-color: rgba(203, 166, 247, 0.1);
 }
 
-.btn-delete {
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 0;
-  font-size: 14px;
-}
-
-.btn-delete:hover {
-  color: var(--accent-red);
-  background-color: rgba(243, 139, 168, 0.1);
-}
-
-.step-row-bottom {
-  display: flex;
-  gap: 8px;
-}
-
-.value-input {
-  flex: 2;
-}
-
-.delay-input {
-  flex: 1;
-}
-
 /* Buttons */
 .btn-primary {
   background-color: var(--accent-purple);
@@ -387,7 +418,7 @@ input[type="number"] {
   border: none;
   font-weight: 700;
   padding: 10px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   flex: 2;
   font-size: 14px;
@@ -400,7 +431,7 @@ input[type="number"] {
   border: none;
   font-weight: 700;
   padding: 10px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   flex: 1;
   font-size: 14px;
@@ -414,7 +445,7 @@ input[type="number"] {
   font-size: 11px;
   font-weight: 600;
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -457,7 +488,7 @@ input[type="number"] {
 .logs-terminal {
   background-color: #11111b;
   border: 1px solid var(--border-color);
-  border-radius: 0;
+  border-radius: 4px;
   height: 100px;
   font-family: 'Courier New', Courier, monospace;
   font-size: 11px;
@@ -489,7 +520,7 @@ input[type="number"] {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
-  border-radius: 0;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-purple);
