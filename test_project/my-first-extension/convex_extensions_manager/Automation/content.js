@@ -44,6 +44,25 @@ function notifyTimeout(title, message) {
   });
 }
 
+function isElementVisible(el) {
+  if (!(el instanceof Element)) return false;
+  const style = window.getComputedStyle(el);
+  if (!style) return false;
+  if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse') return false;
+  if (parseFloat(style.opacity || '1') <= 0) return false;
+  if (el.hidden) return false;
+  return el.getClientRects().length > 0;
+}
+
+function isElementClickable(el) {
+  if (!isElementVisible(el)) return false;
+  if (el.matches(':disabled')) return false;
+  if (el.getAttribute('aria-disabled') === 'true') return false;
+  const style = window.getComputedStyle(el);
+  if (style && style.pointerEvents === 'none') return false;
+  return true;
+}
+
 // Generate unique selector
 function getUniqueSelector(el) {
   if (!(el instanceof Element)) return '';
@@ -169,7 +188,7 @@ async function interruptibleDelay(seconds) {
   }
 }
 
-async function resolveSelector(selector, timeoutSeconds, { requireVisible = false, allowInfiniteWait = false } = {}) {
+async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', requireVisible = false, allowInfiniteWait = false } = {}) {
   const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
   const startTime = Date.now();
 
@@ -180,7 +199,17 @@ async function resolveSelector(selector, timeoutSeconds, { requireVisible = fals
 
     let element = null;
     try {
-      element = document.querySelector(selector);
+      if (matchMode === 'visible' || matchMode === 'clickable') {
+        const candidates = Array.from(document.querySelectorAll(selector));
+        element = candidates.find((candidate) => {
+          if (matchMode === 'visible') {
+            return isElementVisible(candidate);
+          }
+          return isElementClickable(candidate);
+        }) || null;
+      } else {
+        element = document.querySelector(selector);
+      }
     } catch (err) {
       throw new Error(`Invalid selector "${selector}": ${err.message}`);
     }
@@ -229,6 +258,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     for (let i = startIndex; i < steps.length; i++) {
       if (stopRequested) break;
       const step = steps[i];
+      const selectorMode = step.selectorMode || 'css';
       updateState("running", currentLoop, i);
       
       logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
@@ -246,6 +276,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
           
           const result = await resolveSelector(step.selector, waitTimeout, {
+            matchMode: selectorMode,
             requireVisible: true,
             allowInfiniteWait: true
           });
@@ -270,7 +301,29 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           logMessage(`[Step ${i + 1}] Navigating to: ${step.selector || step.value}`);
           // For navigate action we expect selector or value to be a URL or link text
           if (step.selector) {
-            const navEl = document.querySelector(step.selector);
+            const navResult = await resolveSelector(step.selector, waitTimeout, {
+              matchMode: selectorMode,
+              requireVisible: false,
+              allowInfiniteWait: false
+            });
+
+            if (navResult.status === 'timeout') {
+              logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
+              notifyTimeout(
+                'ClickFlow timeout',
+                `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+              );
+              continue;
+            }
+
+            if (navResult.status === 'not_found') {
+              const navEl = document.querySelector(step.selector);
+              if (navEl) navEl.click();
+              else window.location.href = step.selector; // fallback if it's a URL
+              return;
+            }
+
+            const navEl = navResult.element;
             if (navEl) navEl.click();
             else window.location.href = step.selector; // fallback if it's a URL
           } else if (step.value) {
@@ -281,6 +334,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
         }
 
         const result = await resolveSelector(step.selector, waitTimeout, {
+          matchMode: selectorMode,
           requireVisible: false,
           allowInfiniteWait: false
         });

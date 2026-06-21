@@ -132,6 +132,7 @@ async function renderSteps() {
 
       const isTypeAction = step.action === 'type';
       const isWaitAction = step.action === 'wait';
+      const selectorMode = step.selectorMode || 'css';
 
       stepCard.innerHTML = `
         <div class="step-row-top">
@@ -148,6 +149,11 @@ async function renderSteps() {
           
           <div class="inputs-container" style="display: ${isWaitAction ? 'none' : 'flex'};">
             <div class="selector-wrapper">
+              <select class="selector-mode-select" data-id="${step.id}" title="Selector match mode">
+                <option value="css" ${selectorMode === 'css' ? 'selected' : ''}>CSS</option>
+                <option value="visible" ${selectorMode === 'visible' ? 'selected' : ''}>Visible CSS</option>
+                <option value="clickable" ${selectorMode === 'clickable' ? 'selected' : ''}>Clickable CSS</option>
+              </select>
               <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />
               <button class="btn-pick" title="Pick element on page" data-id="${step.id}">🎯</button>
             </div>
@@ -240,6 +246,13 @@ function attachStepChangeHandlers() {
     });
   });
 
+  // Selector mode dropdowns
+  document.querySelectorAll('.selector-mode-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+      updateStepField(parseInt(e.target.dataset.id), 'selectorMode', e.target.value);
+    });
+  });
+
   // Action dropdown selectors
   document.querySelectorAll('.step-action-select').forEach(select => {
     select.addEventListener('change', (e) => {
@@ -286,6 +299,7 @@ async function addNewStep() {
     steps.push({
       id: newId,
       action: 'click',
+      selectorMode: 'css',
       selector: '',
       value: '',
       delay: 1 // Default to 1 second
