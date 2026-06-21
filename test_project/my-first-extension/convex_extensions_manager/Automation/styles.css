@@ -285,11 +285,12 @@ input[type="number"] {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 6px 8px;
-  min-height: 42px; /* Changed from fixed height: 42px to support expanding branch conditions and sub-actions editor */
+  padding: 8px 10px;
+  min-height: 42px; /* Support expanding branching steps natively */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* Aligns elements to top to prevent vertical centering overlap */
+  flex-shrink: 0; /* CRITICAL: Prevents Chrome flex container from shrinking/squishing cards when contents exceed steps list height */
   position: relative;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -299,12 +300,13 @@ input[type="number"] {
 .branch-editor-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   background-color: #1a1a26;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 6px;
-  margin-top: 6px;
+  padding: 12px; /* Generous internal padding keeps inner components strictly inside borders */
+  margin-top: 8px;
+  margin-bottom: 4px; /* Bottom margin prevents clipping by the containing card */
 }
 
 .branch-details-block {
