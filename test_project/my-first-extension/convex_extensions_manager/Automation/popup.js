@@ -70,6 +70,8 @@ async function renderSteps() {
             <option value="focus" ${step.action === 'focus' ? 'selected' : ''}>Focus</option>
             <option value="clear" ${step.action === 'clear' ? 'selected' : ''}>Clear Field</option>
             <option value="wait" ${step.action === 'wait' ? 'selected' : ''}>Wait Only</option>
+            <option value="navigate" ${step.action === 'navigate' ? 'selected' : ''}>Navigate</option>
+            <option value="waitFor" ${step.action === 'waitFor' ? 'selected' : ''}>Wait For Element</option>
           </select>
           <div class="selector-wrapper" style="display: ${isWaitAction ? 'none' : 'flex'};">
             <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />

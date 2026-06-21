@@ -199,6 +199,47 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           continue;
         }
 
+        if (step.action === 'waitFor') {
+          logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
+          
+          const maxWait = 30; // seconds (can be made configurable later)
+          const startTime = Date.now();
+          
+          while (Date.now() - startTime < maxWait * 1000) {
+            if (stopRequested) break;
+            
+            const el = document.querySelector(step.selector);
+            if (el && el.offsetParent !== null) { // visible in DOM
+              logMessage(`[Step ${i + 1}] Element found and visible!`);
+              // Brief flash to confirm
+              el.classList.add('automation-highlight');
+              setTimeout(() => el.classList.remove('automation-highlight'), 800);
+              break;
+            }
+            
+            await delayMs(500); // poll every 500ms
+          }
+          
+          if (Date.now() - startTime >= maxWait * 1000) {
+            logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
+          }
+          continue;
+        }
+
+        if (step.action === 'navigate') {
+          logMessage(`[Step ${i + 1}] Navigating to: ${step.selector || step.value}`);
+          // For navigate action we expect selector or value to be a URL or link text
+          if (step.selector) {
+            const navEl = document.querySelector(step.selector);
+            if (navEl) navEl.click();
+            else window.location.href = step.selector; // fallback if it's a URL
+          } else if (step.value) {
+            window.location.href = step.value;
+          }
+          // Do NOT continue execution — let page load handler resume
+          return;
+        }
+
         const el = document.querySelector(step.selector);
         if (!el) {
           throw new Error(`Element not found for selector: "${step.selector}"`);
@@ -305,16 +346,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Automatic resume check
+// Automatic resume check after navigation
 window.addEventListener('load', () => {
   setTimeout(async () => {
     const data = await getStorageData();
-    if (data.automationState && data.automationState.status === 'running') {
-      logMessage("🔄 Tab navigation/reload detected. Resuming click automation sequence...");
+    const state = data.automationState;
+
+    if (state && state.status === 'running') {
+      const nextStep = (state.currentStep || 0) + 1; // Advance past the navigation step
+      logMessage(`🔄 Page loaded. Resuming from step ${nextStep + 1}...`);
+      
       startKeepAlive();
-      runAutomation(data.automationState.currentLoop, data.automationState.currentStep);
+      runAutomation(state.currentLoop, nextStep);
     }
-  }, 1000);
+  }, 800);
 });
 
 // Also handle visibility changes (minimize / restore)
