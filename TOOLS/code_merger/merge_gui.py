@@ -158,10 +158,12 @@ def load_recent_details() -> list[dict]:
         for item in raw:
             if isinstance(item, dict):
                 p = item.get("path")
+                name = item.get("name", "")
                 files = item.get("files", [])
                 extensions = item.get("extensions", [])
             else:
                 p = item
+                name = ""
                 files = []
                 extensions = []
             if not p:
@@ -169,7 +171,10 @@ def load_recent_details() -> list[dict]:
             n = os.path.normpath(p)
             if n not in seen:
                 seen.add(n)
-                out.append({"path": n, "files": files, "extensions": extensions})
+                out_dict = {"path": n, "files": files, "extensions": extensions}
+                if name:
+                    out_dict["name"] = name
+                out.append(out_dict)
         return out
     except Exception:
         return []
@@ -190,6 +195,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
         if os.path.normpath(item["path"]) == path:
             existing = item
             break
+
+    name = existing.get("name", "") if existing else ""
 
     # If overwrite_existing is False, preserve any existing saved selection details
     if not overwrite_existing and existing:
@@ -215,11 +222,14 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
 
     # Remove existing entry to move it to the top of the list
     current = [item for item in current if os.path.normpath(item["path"]) != path]
-    current.insert(0, {
+    new_entry = {
         "path": path,
         "files": normalized_files,
         "extensions": extensions
-    })
+    }
+    if name:
+        new_entry["name"] = name
+    current.insert(0, new_entry)
     save_recent(current[:MAX_RECENT])
 
 def remove_recent(path: str):
@@ -585,7 +595,7 @@ class RecentPopup(QFrame):
                 btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
             btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
 
-            btn_rename = QPushButton("✏")
+            btn_rename = QPushButton("|")
             btn_rename.setObjectName("rename")
             btn_rename.setFixedWidth(28)
             btn_rename.setToolTip("Rename this project alias")
