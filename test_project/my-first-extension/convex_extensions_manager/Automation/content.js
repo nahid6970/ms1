@@ -135,14 +135,27 @@ function stopPicker() {
 const delayMs = ms => new Promise(res => setTimeout(res, ms));
 
 async function interruptibleDelay(seconds) {
+  if (seconds <= 0) return;
   const ms = seconds * 1000;
   const chunk = 100; // Check state and stop requests every 100ms
+
+  // Use a more robust delay that fights Chrome throttling when minimized/background
+  const startTime = Date.now();
   let waited = 0;
+
   while (waited < ms) {
     if (stopRequested) break;
-    const timeToWait = Math.min(chunk, ms - waited);
+
+    const remaining = ms - waited;
+    const timeToWait = Math.min(chunk, remaining);
+
     await delayMs(timeToWait);
-    waited += timeToWait;
+    waited = Date.now() - startTime;
+
+    // Force a small yield to help keep execution alive in minimized window
+    if (document.visibilityState === 'hidden') {
+      await delayMs(10);
+    }
   }
 }
 
@@ -256,16 +269,38 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 });
 
+// Keep page alive when minimized by periodically waking up
+let keepAliveInterval = null;
+
+function startKeepAlive() {
+  if (keepAliveInterval) return;
+  keepAliveInterval = setInterval(() => {
+    if (isAutomating && document.visibilityState === 'hidden') {
+      // Minimal activity to reduce throttling
+      void document.title; // Force micro task
+    }
+  }, 800);
+}
+
+function stopKeepAlive() {
+  if (keepAliveInterval) {
+    clearInterval(keepAliveInterval);
+    keepAliveInterval = null;
+  }
+}
+
 // Global Message Listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'start_picker') {
     startPicker();
     sendResponse({ success: true });
   } else if (message.action === 'trigger_run') {
+    startKeepAlive();
     runAutomation();
     sendResponse({ success: true });
   } else if (message.action === 'trigger_stop') {
     stopRequested = true;
+    stopKeepAlive();
     sendResponse({ success: true });
   }
 });
@@ -276,7 +311,19 @@ window.addEventListener('load', () => {
     const data = await getStorageData();
     if (data.automationState && data.automationState.status === 'running') {
       logMessage("🔄 Tab navigation/reload detected. Resuming click automation sequence...");
+      startKeepAlive();
       runAutomation(data.automationState.currentLoop, data.automationState.currentStep);
     }
   }, 1000);
+});
+
+// Also handle visibility changes (minimize / restore)
+document.addEventListener('visibilitychange', () => {
+  if (isAutomating) {
+    if (document.visibilityState === 'visible') {
+      logMessage("🌐 Browser window restored.");
+    } else {
+      logMessage("📉 Browser minimized - continuing in background...");
+    }
+  }
 });
