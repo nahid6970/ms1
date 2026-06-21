@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Settings inputs
   const loopCountInput = document.getElementById('loopCount');
   const loopDelayInput = document.getElementById('loopDelay');
+  const waitTimeoutInput = document.getElementById('waitTimeout');
 
   loopCountInput.addEventListener('change', () => {
     chrome.storage.local.set({ loopCount: parseInt(loopCountInput.value) || 1 });
@@ -55,11 +56,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   loopDelayInput.addEventListener('change', () => {
     chrome.storage.local.set({ loopDelay: parseFloat(loopDelayInput.value) || 0 });
   });
+
+  waitTimeoutInput.addEventListener('change', () => {
+    chrome.storage.local.set({ waitTimeout: parseFloat(waitTimeoutInput.value) || 0 });
+  });
 });
 
 // Settings Initialization
 async function initSettings() {
-  chrome.storage.local.get(['loopCount', 'loopDelay'], (data) => {
+  chrome.storage.local.get(['loopCount', 'loopDelay', 'waitTimeout'], (data) => {
     if (data.loopCount !== undefined) {
       document.getElementById('loopCount').value = data.loopCount;
     } else {
@@ -69,6 +74,11 @@ async function initSettings() {
       document.getElementById('loopDelay').value = data.loopDelay;
     } else {
       chrome.storage.local.set({ loopDelay: 1.0 }); // Default to 1.0 second
+    }
+    if (data.waitTimeout !== undefined) {
+      document.getElementById('waitTimeout').value = data.waitTimeout;
+    } else {
+      chrome.storage.local.set({ waitTimeout: 0 });
     }
   });
 }
@@ -278,7 +288,7 @@ async function addNewStep() {
       action: 'click',
       selector: '',
       value: '',
-      delay: 0.5 // Default to 0.5 seconds
+      delay: 1 // Default to 1 second
     });
     chrome.storage.local.set({ steps }, () => {
       renderSteps();
@@ -467,7 +477,7 @@ function initConvexButtons() {
       const original = saveToConvexBtn.innerHTML;
       saveToConvexBtn.innerHTML = '⏳ Saving...';
 
-      chrome.storage.local.get(['steps', 'loopCount', 'loopDelay'], async (items) => {
+      chrome.storage.local.get(['steps', 'loopCount', 'loopDelay', 'waitTimeout'], async (items) => {
         try {
           await sendDataToConvex(items);
           saveToConvexBtn.innerHTML = '✅ Saved!';

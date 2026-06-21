@@ -136,6 +136,7 @@ h2 {
   display: flex;
   gap: 16px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .field {
@@ -144,6 +145,7 @@ h2 {
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 160px;
 }
 
 .field label {

@@ -34,6 +34,16 @@ function logMessage(text, isError = false) {
   });
 }
 
+function notifyTimeout(title, message) {
+  chrome.runtime.sendMessage({
+    action: 'notify_timeout',
+    title,
+    message
+  }, () => {
+    void chrome.runtime.lastError;
+  });
+}
+
 // Generate unique selector
 function getUniqueSelector(el) {
   if (!(el instanceof Element)) return '';
@@ -159,6 +169,38 @@ async function interruptibleDelay(seconds) {
   }
 }
 
+async function resolveSelector(selector, timeoutSeconds, { requireVisible = false, allowInfiniteWait = false } = {}) {
+  const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
+  const startTime = Date.now();
+
+  while (true) {
+    if (stopRequested) {
+      return { status: 'stopped', element: null };
+    }
+
+    let element = null;
+    try {
+      element = document.querySelector(selector);
+    } catch (err) {
+      throw new Error(`Invalid selector "${selector}": ${err.message}`);
+    }
+
+    if (element && (!requireVisible || element.offsetParent !== null)) {
+      return { status: 'found', element };
+    }
+
+    if (timeoutMs === 0 && !allowInfiniteWait) {
+      return { status: 'not_found', element: null };
+    }
+
+    if (timeoutMs > 0 && Date.now() - startTime >= timeoutMs) {
+      return { status: 'timeout', element: null };
+    }
+
+    await delayMs(500);
+  }
+}
+
 async function runAutomation(startLoop = 0, startStep = 0) {
   if (isAutomating) return;
   isAutomating = true;
@@ -168,6 +210,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   const steps = data.steps || [];
   const loopCount = parseInt(data.loopCount) || 1;
   const loopDelay = parseFloat(data.loopDelay) || 0;
+  const waitTimeout = parseFloat(data.waitTimeout) || 0;
 
   if (steps.length === 0) {
     logMessage("No steps configured to run.", true);
@@ -202,26 +245,23 @@ async function runAutomation(startLoop = 0, startStep = 0) {
         if (step.action === 'waitFor') {
           logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
           
-          const maxWait = 30; // seconds (can be made configurable later)
-          const startTime = Date.now();
-          
-          while (Date.now() - startTime < maxWait * 1000) {
-            if (stopRequested) break;
-            
-            const el = document.querySelector(step.selector);
-            if (el && el.offsetParent !== null) { // visible in DOM
-              logMessage(`[Step ${i + 1}] Element found and visible!`);
-              // Brief flash to confirm
-              el.classList.add('automation-highlight');
-              setTimeout(() => el.classList.remove('automation-highlight'), 800);
-              break;
-            }
-            
-            await delayMs(500); // poll every 500ms
-          }
-          
-          if (Date.now() - startTime >= maxWait * 1000) {
+          const result = await resolveSelector(step.selector, waitTimeout, {
+            requireVisible: true,
+            allowInfiniteWait: true
+          });
+
+          if (result.status === 'found') {
+            const el = result.element;
+            logMessage(`[Step ${i + 1}] Element found and visible!`);
+            // Brief flash to confirm
+            el.classList.add('automation-highlight');
+            setTimeout(() => el.classList.remove('automation-highlight'), 800);
+          } else if (result.status === 'timeout') {
             logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
+            notifyTimeout(
+              'ClickFlow timeout',
+              `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+            );
           }
           continue;
         }
@@ -240,10 +280,29 @@ async function runAutomation(startLoop = 0, startStep = 0) {
           return;
         }
 
-        const el = document.querySelector(step.selector);
-        if (!el) {
+        const result = await resolveSelector(step.selector, waitTimeout, {
+          requireVisible: false,
+          allowInfiniteWait: false
+        });
+
+        if (result.status === 'timeout') {
+          logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
+          notifyTimeout(
+            'ClickFlow timeout',
+            `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
+          );
+          continue;
+        }
+
+        if (result.status === 'not_found') {
           throw new Error(`Element not found for selector: "${step.selector}"`);
         }
+
+        if (result.status === 'stopped') {
+          break;
+        }
+
+        const el = result.element;
 
         // Flash target element to show execution visual
         el.classList.add('automation-highlight');

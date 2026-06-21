@@ -20,4 +20,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (message.action === 'notify_timeout') {
+    const title = message.title || 'ClickFlow timeout';
+    const messageText = message.message || 'A configured wait timed out.';
+
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title,
+      message: messageText
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn('Notification failed:', chrome.runtime.lastError.message);
+      }
+      sendResponse({ success: true });
+    });
+
+    return true;
+  }
 });
