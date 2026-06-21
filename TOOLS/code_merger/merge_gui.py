@@ -595,7 +595,7 @@ class RecentPopup(QFrame):
                 btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
             btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
 
-            btn_rename = QPushButton("|")
+            btn_rename = QPushButton("I")
             btn_rename.setObjectName("rename")
             btn_rename.setFixedWidth(28)
             btn_rename.setToolTip("Rename this project alias")
