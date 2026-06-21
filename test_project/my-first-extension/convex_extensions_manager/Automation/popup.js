@@ -1119,7 +1119,7 @@ function startLogMonitoring() {
     if (state === 'running') {
       toggleBtn.innerHTML = `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M6 6h12v12H6z"></path>
+          <rect x="7" y="7" width="10" height="10" rx="1"></rect>
         </svg>
       `;
       toggleBtn.className = 'btn-header-start btn-icon-toggle is-running';
@@ -1129,7 +1129,7 @@ function startLogMonitoring() {
     } else {
       toggleBtn.innerHTML = `
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M7 5.5v13l11-6.5-11-6.5z"></path>
+          <path d="M7 6.5L17.5 12L7 17.5Z"></path>
         </svg>
       `;
       toggleBtn.className = 'btn-header-start btn-icon-toggle is-idle';
