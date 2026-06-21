@@ -858,6 +858,7 @@ class PrepTab(QWidget):
         self.status_cb = status_cb
         self.root_cb = root_cb
         self.files: list[str] = []
+        self.project_root = ""
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
         self._load_session()
@@ -917,6 +918,52 @@ class PrepTab(QWidget):
         token_est = int(char_count / 3.5) if char_count > 0 else 0
         self.counter_lbl.setText(f"Size: {char_count:,} chars  |  ~{token_est:,} tokens")
 
+    def _build_prompt(self, new_project: bool = False, project_root: str | None = None) -> str:
+        guide = ""
+        if os.path.exists(GUIDE_PATH):
+            with open(GUIDE_PATH, 'r', encoding='utf-8') as f:
+                guide = f.read().strip()
+
+        task = self.task_input.toPlainText().strip()
+        parts = [guide] if guide else []
+
+        root = (project_root or self.project_root_input.text().strip()).strip()
+
+        if self.files:
+            if root:
+                parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
+            for fp in self.files:
+                try:
+                    with open(fp, 'r', encoding='utf-8', errors='replace') as f:
+                        content = f.read()
+                    ext = os.path.splitext(fp)[1].lstrip('.')
+                    parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
+                except Exception as e:
+                    parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
+        else:
+            if root:
+                parts.append(
+                    "\n## NEW PROJECT ROOT\n\n"
+                    f"`{root}`"
+                )
+            parts.append(
+                "\n## NEW PROJECT MODE\n\n"
+                "No local source files are loaded yet.\n"
+                "Create the project from scratch in the root directory above."
+            )
+
+        if new_project and root and not self.files:
+            parts.append(
+                "\n## NEW PROJECT INSTRUCTIONS\n\n"
+                "Treat this as a fresh project scaffold. "
+                "Return complete file contents for any new files you create."
+            )
+
+        if task:
+            parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
+
+        return '\n'.join(parts).strip()
+
     def _filter_files(self):
         query = self.search_input.text().strip().lower()
         for i in range(self.file_list.count()):
@@ -938,6 +985,7 @@ class PrepTab(QWidget):
         except Exception:
             data = {}
         data['files'] = self.files
+        data['project_root'] = self.project_root_input.text().strip()
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
         self._sync_to_recent_projects()
@@ -970,6 +1018,9 @@ class PrepTab(QWidget):
             with open(SESSION_PATH, 'r') as f:
                 data = json.load(f)
             saved = data if isinstance(data, list) else data.get('files', [])
+            self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
+            if self.project_root:
+                self.project_root_input.setText(self.project_root)
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
@@ -985,7 +1036,32 @@ class PrepTab(QWidget):
             common = os.path.commonpath(self.files)
             if os.path.isfile(common):
                 common = os.path.dirname(common)
+            self.project_root = common
+            self.project_root_input.setText(common)
             self.root_cb(common)
+
+    def _pick_project_root(self):
+        d = QFileDialog.getExistingDirectory(self, "Select Project Root")
+        if not d:
+            return
+        self.project_root_input.setText(d)
+        self.project_root = d
+        self._save_session()
+        self.status_cb(f"Project root set to {d}")
+
+    def _new_project_prompt(self):
+        root = self.project_root_input.text().strip()
+        if not root or not os.path.isdir(root):
+            d = QFileDialog.getExistingDirectory(self, "Select New Project Root")
+            if not d:
+                return
+            root = d
+            self.project_root_input.setText(root)
+        self.project_root = root
+        self._save_session()
+        prompt = self._build_prompt(new_project=True, project_root=root)
+        self.prompt_out.setPlainText(prompt)
+        self.status_cb("New project prompt generated — copy and paste into AI")
 
     def _add_file_item(self, fp: str):
         item = QListWidgetItem()
@@ -1099,6 +1175,24 @@ class PrepTab(QWidget):
         right_layout = QVBoxLayout(right_widget)
         right_layout.setContentsMargins(6, 0, 0, 0)
         right_layout.setSpacing(8)
+
+        # Project root for empty / new projects
+        grp_root = QGroupBox("PROJECT ROOT  (optional for new projects)")
+        vr_root = QHBoxLayout(grp_root)
+        self.project_root_input = QLineEdit()
+        self.project_root_input.setPlaceholderText("Choose the folder for a new project or leave blank for file-based prompts…")
+        btn_root = QPushButton("📁 BROWSE")
+        btn_root.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_root.clicked.connect(self._pick_project_root)
+        btn_new = QPushButton("🆕 NEW PROJECT")
+        btn_new.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_new.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                              f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_new.clicked.connect(self._new_project_prompt)
+        vr_root.addWidget(self.project_root_input, 1)
+        vr_root.addWidget(btn_root, 0)
+        vr_root.addWidget(btn_new, 0)
+        right_layout.addWidget(grp_root, 0)
 
         # Task description
         grp_task = QGroupBox("TASK / INSTRUCTIONS  (optional)")
@@ -1300,32 +1394,20 @@ class PrepTab(QWidget):
         self.status_cb("File list cleared")
 
     def _generate(self):
-        if not self.files:
-            self.status_cb("⚠ No files added")
+        if not self.files and not self.project_root_input.text().strip():
+            self.status_cb("⚠ Add files or choose a project root for a new project")
             return
 
-        guide = ""
-        if os.path.exists(GUIDE_PATH):
-            with open(GUIDE_PATH, 'r', encoding='utf-8') as f:
-                guide = f.read()
+        prompt = self._build_prompt()
+        if not prompt:
+            self.status_cb("⚠ Nothing to generate")
+            return
 
-        task = self.task_input.toPlainText().strip()
-        parts = [guide]
-
-        for fp in self.files:
-            try:
-                with open(fp, 'r', encoding='utf-8', errors='replace') as f:
-                    content = f.read()
-                ext = os.path.splitext(fp)[1].lstrip('.')
-                parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
-            except Exception as e:
-                parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
-
-        if task:
-            parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
-
-        self.prompt_out.setPlainText('\n'.join(parts))
-        self.status_cb("Prompt generated — copy and paste into AI")
+        self.prompt_out.setPlainText(prompt)
+        if self.files:
+            self.status_cb("Prompt generated — copy and paste into AI")
+        else:
+            self.status_cb("New project prompt generated — copy and paste into AI")
 
     def _copy(self):
         text = self.prompt_out.toPlainText()

@@ -22,8 +22,9 @@ python merge_gui.py
 1. Click **ADD FILES** (or **ADD DIR**) to load the files you want the AI to modify.
 2. Use **RECENT** to quickly load previously used projects, rename their aliases, or open them in File Explorer.
 3. Optionally type your task/instructions in the box.
-4. Click **GENERATE PROMPT** → a full prompt is built including the format guide + your file contents.
-5. Click **COPY TO CLIPBOARD** and paste into Gemini / ChatGPT / AI Studio.
+4. For a brand-new project, set the **PROJECT ROOT** and click **NEW PROJECT** to generate a prompt without local files.
+5. Otherwise click **GENERATE PROMPT** → a full prompt is built including the format guide + your file contents.
+6. Click **COPY TO CLIPBOARD** and paste into Gemini / ChatGPT / AI Studio.
 
 ### Step 2 — Ask the AI
 The AI will respond using the `@@FILE` / `@@MODE` / `@@END` format defined in `PROMPT_GUIDE.md`.
