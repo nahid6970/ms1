@@ -73,21 +73,25 @@ async function renderSteps() {
             <option value="navigate" ${step.action === 'navigate' ? 'selected' : ''}>Navigate</option>
             <option value="waitFor" ${step.action === 'waitFor' ? 'selected' : ''}>Wait For Element</option>
           </select>
-          <div class="selector-wrapper" style="display: ${isWaitAction ? 'none' : 'flex'};">
+          
+          <div class="selector-wrapper" style="display: ${isWaitAction ? 'none' : 'flex'}; flex-grow: 1; min-width: 140px;">
             <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />
             <button class="btn-pick" title="Pick element on page" data-id="${step.id}">🎯</button>
           </div>
-          <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
-        </div>
-        <div class="step-row-bottom">
-          <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
-          <div class="field delay-input">
-            <div class="input-with-icon" title="Execution delay in seconds">
+          
+          <!-- Inline Delay -->
+          <div class="field delay-input" style="margin-left: 4px; flex-shrink: 0; width: 118px;">
+            <div class="input-with-icon" title="Delay / Max wait time in seconds">
               <span class="input-icon">⏱️</span>
               <input type="number" placeholder="Delay" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
               <span class="unit-badge">sec</span>
             </div>
           </div>
+          
+          <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
+        </div>
+        <div class="step-row-bottom">
+          <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
         </div>
       `;
 
