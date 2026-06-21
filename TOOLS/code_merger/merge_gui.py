@@ -517,11 +517,12 @@ def _backup(fpath: str):
 
 # ── RECENT POPUP ─────────────────────────────────────────────────────────────
 class RecentPopup(QFrame):
-    def __init__(self, parent, on_load, on_load_all, on_remove):
+    def __init__(self, parent, on_load, on_load_all, on_remove, on_rename=None):
         super().__init__(parent, Qt.WindowType.Popup)
         self.on_load     = on_load
         self.on_load_all  = on_load_all
         self.on_remove    = on_remove
+        self.on_rename    = on_rename
         self.setStyleSheet(f"""
             QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
             QPushButton {{ background: transparent; border: none; color: #E0E0E0;
@@ -529,6 +530,10 @@ class RecentPopup(QFrame):
             QPushButton:hover {{ background: #1e1e1e; color: #00F0FF; }}
             QPushButton#load_all {{ color: {CP_GREEN}; padding: 4px 6px; text-align: center; }}
             QPushButton#load_all:hover {{ background: {CP_GREEN}; color: #000; }}
+            QPushButton#open {{ color: {CP_YELLOW}; padding: 4px 6px; text-align: center; }}
+            QPushButton#open:hover {{ background: {CP_YELLOW}; color: #000; }}
+            QPushButton#rename {{ color: {CP_CYAN}; padding: 4px 6px; text-align: center; }}
+            QPushButton#rename:hover {{ background: {CP_CYAN}; color: #000; }}
             QPushButton#remove {{ color: #FF003C; padding: 4px 6px; text-align: center; }}
             QPushButton#remove:hover {{ background: #FF003C; color: #000; }}
             QScrollArea {{ border: none; background: transparent; }}
@@ -561,6 +566,7 @@ class RecentPopup(QFrame):
 
         for item in items:
             path = item["path"]
+            name = item.get("name")
             files = item.get("files", [])
             extensions = item.get("extensions", [])
 
@@ -570,10 +576,27 @@ class RecentPopup(QFrame):
             hl.setContentsMargins(0, 0, 0, 0)
             hl.setSpacing(0)
 
-            btn_load = QPushButton(path)
+            display_text = name if name else path
+            btn_load = QPushButton(display_text)
             btn_load.setMinimumWidth(320)
-            btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
+            if name:
+                btn_load.setToolTip(f"{path}\n\nLoad only the {len(files)} saved file(s) for this project")
+            else:
+                btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
             btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
+
+            btn_rename = QPushButton("✏")
+            btn_rename.setObjectName("rename")
+            btn_rename.setFixedWidth(28)
+            btn_rename.setToolTip("Rename this project alias")
+            if self.on_rename:
+                btn_rename.clicked.connect(lambda _, p=path: (self.close(), self.on_rename(p)))
+
+            btn_open = QPushButton("📂")
+            btn_open.setObjectName("open")
+            btn_open.setFixedWidth(28)
+            btn_open.setToolTip("Open project folder in File Explorer")
+            btn_open.clicked.connect(lambda _, p=path: (self.close(), self._open_explorer(p)))
 
             btn_load_all = QPushButton("🔄")
             btn_load_all.setObjectName("load_all")
@@ -587,6 +610,8 @@ class RecentPopup(QFrame):
             btn_rem.clicked.connect(lambda _, p=path: (self.close(), self.on_remove(p)))
 
             hl.addWidget(btn_load)
+            hl.addWidget(btn_rename)
+            hl.addWidget(btn_open)
             hl.addWidget(btn_load_all)
             hl.addWidget(btn_rem)
             layout.addWidget(row)
@@ -595,6 +620,16 @@ class RecentPopup(QFrame):
         scroll.setMaximumHeight(240)
         main_layout.addWidget(scroll)
         self.adjustSize()
+
+    def _open_explorer(self, p):
+        try:
+            if hasattr(os, 'startfile'):
+                os.startfile(p)
+            else:
+                import subprocess
+                subprocess.Popen(['explorer', p])
+        except Exception:
+            pass
 
 
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
@@ -1211,6 +1246,22 @@ class PrepTab(QWidget):
         self._update_root()
         self._save_session()
 
+    def _rename_recent(self, path: str):
+        from PyQt6.QtWidgets import QInputDialog
+        current_name = ""
+        items = load_recent_details()
+        for item in items:
+            if item["path"] == path:
+                current_name = item.get("name", "")
+                break
+        new_name, ok = QInputDialog.getText(self, "Rename Project", "Enter new name (leave empty to show full path):", text=current_name)
+        if ok:
+            for item in items:
+                if item["path"] == path:
+                    item["name"] = new_name.strip()
+            save_recent(items)
+            self.status_cb(f"Renamed: {path}")
+
     def _show_recent(self):
         btn = self.sender()
         popup = RecentPopup(
@@ -1220,7 +1271,8 @@ class PrepTab(QWidget):
             on_remove=lambda p: (
                 remove_recent(p),
                 self.status_cb(f"Removed: {p}")
-            )
+            ),
+            on_rename=self._rename_recent
         )
         btn_pos = btn.mapToGlobal(QPoint(0, 0))
         popup_height = popup.sizeHint().height()
