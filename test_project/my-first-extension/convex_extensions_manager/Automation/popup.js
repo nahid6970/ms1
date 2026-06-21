@@ -33,7 +33,12 @@ async function loadDataFromConvex() {
 let currentlyPickingStepId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize UI components
+  // Initialize multiple project profiles first
+  const { projects, activeProjectId } = await initProjects();
+  renderProjectSelector(projects, activeProjectId);
+  initProjectEventListeners();
+
+  // Initialize settings and dynamic elements
   await initSettings();
   await renderSteps();
   startLogMonitoring();
@@ -50,15 +55,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const waitTimeoutInput = document.getElementById('waitTimeout');
 
   loopCountInput.addEventListener('change', () => {
-    chrome.storage.local.set({ loopCount: parseInt(loopCountInput.value) || 1 });
+    saveToActiveProjectAndStorage({ loopCount: parseInt(loopCountInput.value) || 1 });
   });
 
   loopDelayInput.addEventListener('change', () => {
-    chrome.storage.local.set({ loopDelay: parseFloat(loopDelayInput.value) || 0 });
+    saveToActiveProjectAndStorage({ loopDelay: parseFloat(loopDelayInput.value) || 0 });
   });
 
   waitTimeoutInput.addEventListener('change', () => {
-    chrome.storage.local.set({ waitTimeout: parseFloat(waitTimeoutInput.value) || 0 });
+    saveToActiveProjectAndStorage({ waitTimeout: parseFloat(waitTimeoutInput.value) || 0 });
   });
 });
 
@@ -80,6 +85,202 @@ async function initSettings() {
     } else {
       chrome.storage.local.set({ waitTimeout: 0 });
     }
+  });
+}
+
+// Project Profiles Management
+async function initProjects() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['projects', 'activeProjectId'], (data) => {
+      let projects = data.projects || [];
+      let activeProjectId = data.activeProjectId;
+
+      if (projects.length === 0) {
+        // Create initial default project profile
+        const defaultProj = {
+          id: 'proj_' + Date.now(),
+          name: 'Default Profile',
+          steps: [],
+          loopCount: 1,
+          loopDelay: 1.0,
+          waitTimeout: 0
+        };
+        projects = [defaultProj];
+        activeProjectId = defaultProj.id;
+
+        chrome.storage.local.set({
+          projects,
+          activeProjectId,
+          steps: defaultProj.steps,
+          loopCount: defaultProj.loopCount,
+          loopDelay: defaultProj.loopDelay,
+          waitTimeout: defaultProj.waitTimeout
+        }, () => {
+          resolve({ projects, activeProjectId });
+        });
+      } else {
+        // Sync active profile settings to root
+        let activeProj = projects.find(p => p.id === activeProjectId);
+        if (!activeProj) {
+          activeProjectId = projects[0].id;
+          activeProj = projects[0];
+        }
+        chrome.storage.local.set({
+          activeProjectId,
+          steps: activeProj.steps || [],
+          loopCount: activeProj.loopCount !== undefined ? activeProj.loopCount : 1,
+          loopDelay: activeProj.loopDelay !== undefined ? activeProj.loopDelay : 1.0,
+          waitTimeout: activeProj.waitTimeout !== undefined ? activeProj.waitTimeout : 0
+        }, () => {
+          resolve({ projects, activeProjectId });
+        });
+      }
+    });
+  });
+}
+
+function renderProjectSelector(projects, activeProjectId) {
+  const projectSelect = document.getElementById('projectSelect');
+  if (!projectSelect) return;
+  projectSelect.innerHTML = '';
+
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.innerText = p.name;
+    if (p.id === activeProjectId) {
+      opt.selected = true;
+    }
+    projectSelect.appendChild(opt);
+  });
+}
+
+function initProjectEventListeners() {
+  const projectSelect = document.getElementById('projectSelect');
+  const addProjectBtn = document.getElementById('addProjectBtn');
+  const renameProjectBtn = document.getElementById('renameProjectBtn');
+  const deleteProjectBtn = document.getElementById('deleteProjectBtn');
+
+  if (projectSelect) {
+    projectSelect.addEventListener('change', async (e) => {
+      await switchProject(e.target.value);
+    });
+  }
+
+  if (addProjectBtn) {
+    addProjectBtn.addEventListener('click', async () => {
+      const name = prompt('Enter project profile name:');
+      if (!name) return;
+      await createProject(name);
+    });
+  }
+
+  if (renameProjectBtn) {
+    renameProjectBtn.addEventListener('click', () => {
+      chrome.storage.local.get(['projects', 'activeProjectId'], (data) => {
+        const projects = data.projects || [];
+        const activeId = data.activeProjectId;
+        const currentProj = projects.find(p => p.id === activeId);
+        if (!currentProj) return;
+
+        const newName = prompt('Rename project profile:', currentProj.name);
+        if (!newName) return;
+
+        currentProj.name = newName;
+        chrome.storage.local.set({ projects }, () => {
+          renderProjectSelector(projects, activeId);
+        });
+      });
+    });
+  }
+
+  if (deleteProjectBtn) {
+    deleteProjectBtn.addEventListener('click', () => {
+      chrome.storage.local.get(['projects', 'activeProjectId'], async (data) => {
+        const projects = data.projects || [];
+        const activeId = data.activeProjectId;
+
+        if (projects.length <= 1) {
+          alert('At least one project profile must be retained.');
+          return;
+        }
+
+        if (!confirm('Are you sure you want to delete this project profile?')) {
+          return;
+        }
+
+        const filteredProjects = projects.filter(p => p.id !== activeId);
+        const nextActiveId = filteredProjects[0].id;
+
+        await chrome.storage.local.set({ projects: filteredProjects });
+        await switchProject(nextActiveId);
+      });
+    });
+  }
+}
+
+async function switchProject(projectId) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('projects', (data) => {
+      const projects = data.projects || [];
+      const proj = projects.find(p => p.id === projectId);
+      if (!proj) return resolve();
+
+      chrome.storage.local.set({
+        activeProjectId: projectId,
+        steps: proj.steps || [],
+        loopCount: proj.loopCount !== undefined ? proj.loopCount : 1,
+        loopDelay: proj.loopDelay !== undefined ? proj.loopDelay : 1.0,
+        waitTimeout: proj.waitTimeout !== undefined ? proj.waitTimeout : 0
+      }, async () => {
+        await initSettings();
+        await renderSteps();
+        renderProjectSelector(projects, projectId);
+        resolve();
+      });
+    });
+  });
+}
+
+async function createProject(name) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('projects', (data) => {
+      const projects = data.projects || [];
+      const newProj = {
+        id: 'proj_' + Date.now(),
+        name: name,
+        steps: [],
+        loopCount: 1,
+        loopDelay: 1.0,
+        waitTimeout: 0
+      };
+      projects.push(newProj);
+
+      chrome.storage.local.set({ projects }, async () => {
+        await switchProject(newProj.id);
+        resolve();
+      });
+    });
+  });
+}
+
+// Master save utility to sync changes both inside the active profile and at the root level
+function saveToActiveProjectAndStorage(changes, callback) {
+  chrome.storage.local.get(['projects', 'activeProjectId'], (data) => {
+    const projects = data.projects || [];
+    const activeId = data.activeProjectId;
+    const activeProj = projects.find(p => p.id === activeId);
+
+    if (activeProj) {
+      for (const [key, val] of Object.entries(changes)) {
+        activeProj[key] = val;
+      }
+    }
+
+    const updateObj = { ...changes, projects };
+    chrome.storage.local.set(updateObj, () => {
+      if (callback) callback();
+    });
   });
 }
 
@@ -107,10 +308,142 @@ function reorderSteps(fromIdx, toIdx, isAbove) {
     // Insert at new position
     steps.splice(insertIdx, 0, movedStep);
     
-    chrome.storage.local.set({ steps }, () => {
+    saveToActiveProjectAndStorage({ steps }, () => {
       renderSteps();
     });
   });
+}
+
+// Sub-step layout generators for conditionals
+function renderBranchStepDetails(step) {
+  const logicMode = step.logicMode || 'all';
+  const conditions = step.conditions || [];
+  const thenSteps = step.thenSteps || [];
+  const elseSteps = step.elseSteps || [];
+
+  const condTypes = [
+    { value: 'exists', label: 'Element Exists' },
+    { value: 'visible', label: 'Element Is Visible' },
+    { value: 'clickable', label: 'Element Is Clickable' },
+    { value: 'text_contains', label: 'Text Contains' },
+    { value: 'text_equals', label: 'Text Equals' },
+    { value: 'url_contains', label: 'URL Contains' },
+    { value: 'url_equals', label: 'URL Equals' },
+    { value: 'value_contains', label: 'Value Contains' },
+    { value: 'value_equals', label: 'Value Equals' }
+  ];
+
+  let conditionsHtml = '';
+  if (conditions.length === 0) {
+    conditionsHtml = `<div class="branch-empty-text">No conditions. Executes THEN directly.</div>`;
+  } else {
+    conditions.forEach((cond, condIdx) => {
+      const isSelectorNeeded = !cond.type.startsWith('url');
+      const isValueNeeded = cond.type.includes('contains') || cond.type.includes('equals');
+
+      conditionsHtml += `
+        <div class="branch-cond-row" data-step-id="${step.id}" data-cond-idx="${condIdx}">
+          <select class="branch-cond-type-select">
+            ${condTypes.map(t => `<option value="${t.value}" ${cond.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
+          </select>
+          <input type="text" class="branch-cond-selector" placeholder="Selector" value="${cond.selector || ''}" style="display: ${isSelectorNeeded ? 'block' : 'none'}; width: 105px;" />
+          <button class="btn-pick-cond" title="Pick element" style="display: ${isSelectorNeeded ? 'block' : 'none'};">🎯</button>
+          <input type="text" class="branch-cond-value" placeholder="Value" value="${cond.value || ''}" style="display: ${isValueNeeded ? 'block' : 'none'}; width: 90px;" />
+          <button class="btn-branch-del-cond" title="Delete Condition">❌</button>
+        </div>
+      `;
+    });
+  }
+
+  let thenStepsHtml = '';
+  if (thenSteps.length === 0) {
+    thenStepsHtml = `<div class="branch-empty-text">No actions.</div>`;
+  } else {
+    thenSteps.forEach((subStep, subIdx) => {
+      thenStepsHtml += renderSubStepRow(step.id, 'thenSteps', subStep, subIdx);
+    });
+  }
+
+  let elseStepsHtml = '';
+  if (elseSteps.length === 0) {
+    elseStepsHtml = `<div class="branch-empty-text">No actions.</div>`;
+  } else {
+    elseSteps.forEach((subStep, subIdx) => {
+      elseStepsHtml += renderSubStepRow(step.id, 'elseSteps', subStep, subIdx);
+    });
+  }
+
+  return `
+    <div class="branch-editor-container" data-id="${step.id}">
+      <div class="branch-header-row">
+        <label>Match Mode:</label>
+        <select class="branch-logic-mode-select">
+          <option value="all" ${logicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
+          <option value="any" ${logicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
+        </select>
+        <button class="btn-branch-add-cond btn-secondary" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add Condition</button>
+      </div>
+
+      <div class="branch-sub-section">
+        <div class="branch-sub-title">Conditions:</div>
+        <div class="branch-conditions-list">
+          ${conditionsHtml}
+        </div>
+      </div>
+
+      <div class="branch-sub-section">
+        <div class="branch-sub-title-row">
+          <span class="branch-sub-title">THEN Actions (true):</span>
+          <button class="btn-branch-add-substep btn-secondary" data-type="thenSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+        </div>
+        <div class="branch-substeps-list">
+          ${thenStepsHtml}
+        </div>
+      </div>
+
+      <div class="branch-sub-section">
+        <div class="branch-sub-title-row">
+          <span class="branch-sub-title">ELSE Actions (false):</span>
+          <button class="btn-branch-add-substep btn-secondary" data-type="elseSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+        </div>
+        <div class="branch-substeps-list">
+          ${elseStepsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSubStepRow(stepId, subStepType, subStep, subIdx) {
+  const isType = subStep.action === 'type';
+  const isWait = subStep.action === 'wait';
+
+  return `
+    <div class="branch-substep-row" data-step-id="${stepId}" data-type="${subStepType}" data-sub-idx="${subIdx}">
+      <span class="branch-substep-index">${subIdx + 1}</span>
+      <select class="branch-substep-action">
+        <option value="click" ${subStep.action === 'click' ? 'selected' : ''}>Click</option>
+        <option value="type" ${subStep.action === 'type' ? 'selected' : ''}>Type Text</option>
+        <option value="focus" ${subStep.action === 'focus' ? 'selected' : ''}>Focus</option>
+        <option value="clear" ${subStep.action === 'clear' ? 'selected' : ''}>Clear Field</option>
+        <option value="wait" ${subStep.action === 'wait' ? 'selected' : ''}>Wait Only</option>
+        <option value="navigate" ${subStep.action === 'navigate' ? 'selected' : ''}>Navigate</option>
+        <option value="waitFor" ${subStep.action === 'waitFor' ? 'selected' : ''}>Wait For Element</option>
+      </select>
+
+      <div class="branch-substep-inputs" style="display: ${isWait ? 'none' : 'flex'}; flex: 1; gap: 4px;">
+        <input type="text" class="branch-substep-selector" placeholder="Selector / URL" value="${subStep.selector || ''}" style="width: 100px; flex-grow: 1;" />
+        <button class="btn-pick-substep" title="Pick element">🎯</button>
+        <input type="text" class="branch-substep-value" placeholder="Text" value="${subStep.value || ''}" style="display: ${isType ? 'block' : 'none'}; width: 80px;" />
+      </div>
+
+      <div class="branch-substep-delay-wrapper" title="Delay in seconds">
+        ⏱️<input type="number" class="branch-substep-delay" value="${subStep.delay || 0}" step="0.1" min="0" style="width: 30px; text-align: center;" />
+      </div>
+
+      <button class="btn-branch-del-substep" title="Delete Action">🗑️</button>
+    </div>
+  `;
 }
 
 // Render dynamic steps
@@ -132,6 +465,7 @@ async function renderSteps() {
 
       const isTypeAction = step.action === 'type';
       const isWaitAction = step.action === 'wait';
+      const isBranchAction = step.action === 'branch';
       const selectorMode = step.selectorMode || 'css';
 
       stepCard.innerHTML = `
@@ -145,9 +479,10 @@ async function renderSteps() {
             <option value="wait" ${step.action === 'wait' ? 'selected' : ''}>Wait Only</option>
             <option value="navigate" ${step.action === 'navigate' ? 'selected' : ''}>Navigate</option>
             <option value="waitFor" ${step.action === 'waitFor' ? 'selected' : ''}>Wait For Element</option>
+            <option value="branch" ${step.action === 'branch' ? 'selected' : ''}>If / Branch</option>
           </select>
           
-          <div class="inputs-container" style="display: ${isWaitAction ? 'none' : 'flex'};">
+          <div class="inputs-container" style="display: ${(isWaitAction || isBranchAction) ? 'none' : 'flex'};">
             <div class="selector-wrapper">
               <select class="selector-mode-select" data-id="${step.id}" title="Selector match mode">
                 <option value="css" ${selectorMode === 'css' ? 'selected' : ''}>CSS</option>
@@ -160,13 +495,14 @@ async function renderSteps() {
             <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
           </div>
           
-          <div class="delay-wrapper" title="Delay (seconds) — for normal steps or max wait time for Wait For Element">
+          <div class="delay-wrapper" title="${isBranchAction ? 'Conditions timeout before fallback executes (seconds)' : 'Delay (seconds)'}">
             <span class="delay-icon">⏱️</span>
-            <input type="number" class="delay-input-val" placeholder="0" value="${step.delay || 0}" data-id="${step.id}" step="0.1" min="0" />
+            <input type="number" class="delay-input-val" placeholder="0" value="${isBranchAction ? (step.timeout || 0) : (step.delay || 0)}" data-id="${step.id}" step="0.1" min="0" />
           </div>
           
           <button class="btn-delete" title="Delete Step" data-id="${step.id}">🗑️</button>
         </div>
+        ${isBranchAction ? renderBranchStepDetails(step) : ''}
       `;
 
       // Enable drag only when grabbing the step index
@@ -242,42 +578,54 @@ function attachStepChangeHandlers() {
   // Selector inputs
   document.querySelectorAll('.selector-input').forEach(input => {
     input.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'selector', e.target.value);
+      updateStepField(parseInt(e.target.dataset.id, 10), 'selector', e.target.value);
     });
   });
 
   // Selector mode dropdowns
   document.querySelectorAll('.selector-mode-select').forEach(select => {
     select.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'selectorMode', e.target.value);
+      updateStepField(parseInt(e.target.dataset.id, 10), 'selectorMode', e.target.value);
     });
   });
 
   // Action dropdown selectors
   document.querySelectorAll('.step-action-select').forEach(select => {
     select.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'action', e.target.value);
+      updateStepField(parseInt(e.target.dataset.id, 10), 'action', e.target.value);
     });
   });
 
   // Value inputs (for Type)
   document.querySelectorAll('.value-input').forEach(input => {
     input.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'value', e.target.value);
+      updateStepField(parseInt(e.target.dataset.id, 10), 'value', e.target.value);
     });
   });
 
   // Delay inputs
   document.querySelectorAll('.delay-input-val').forEach(input => {
     input.addEventListener('change', (e) => {
-      updateStepField(parseInt(e.target.dataset.id), 'delay', parseFloat(e.target.value) || 0);
+      const stepId = parseInt(e.target.dataset.id, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step) {
+          if (step.action === 'branch') {
+            step.timeout = parseFloat(e.target.value) || 0;
+          } else {
+            step.delay = parseFloat(e.target.value) || 0;
+          }
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
     });
   });
 
   // Delete buttons
   document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const stepId = parseInt(e.currentTarget.dataset.id);
+      const stepId = parseInt(e.currentTarget.dataset.id, 10);
       deleteStep(stepId);
     });
   });
@@ -285,8 +633,221 @@ function attachStepChangeHandlers() {
   // Target pickers
   document.querySelectorAll('.btn-pick').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const stepId = parseInt(e.currentTarget.dataset.id);
+      const stepId = parseInt(e.currentTarget.dataset.id, 10);
       startPickMode(stepId);
+    });
+  });
+
+  // --- Branch Condition Listeners ---
+  document.querySelectorAll('.branch-logic-mode-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const stepId = parseInt(e.target.closest('.branch-editor-container').dataset.id, 10);
+      updateBranchField(stepId, 'logicMode', e.target.value);
+    });
+  });
+
+  document.querySelectorAll('.btn-branch-add-cond').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const stepId = parseInt(e.target.closest('.branch-editor-container').dataset.id, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step) {
+          if (!step.conditions) step.conditions = [];
+          step.conditions.push({ type: 'exists', selector: '', value: '' });
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-cond-type-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-cond-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const condIdx = parseInt(row.dataset.condIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step.conditions && step.conditions[condIdx]) {
+          step.conditions[condIdx].type = e.target.value;
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-cond-selector').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-cond-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const condIdx = parseInt(row.dataset.condIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step.conditions && step.conditions[condIdx]) {
+          step.conditions[condIdx].selector = e.target.value;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-pick-cond').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const row = e.target.closest('.branch-cond-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const condIdx = parseInt(row.dataset.condIdx, 10);
+      startPickMode(`cond_${stepId}_${condIdx}`);
+    });
+  });
+
+  document.querySelectorAll('.branch-cond-value').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-cond-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const condIdx = parseInt(row.dataset.condIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step.conditions && step.conditions[condIdx]) {
+          step.conditions[condIdx].value = e.target.value;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-branch-del-cond').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const row = e.target.closest('.branch-cond-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const condIdx = parseInt(row.dataset.condIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step.conditions) {
+          step.conditions.splice(condIdx, 1);
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
+  // --- Sub-steps Action Listeners ---
+  document.querySelectorAll('.btn-branch-add-substep').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const stepId = parseInt(e.target.closest('.branch-editor-container').dataset.id, 10);
+      const subStepType = e.target.dataset.type; // 'thenSteps' or 'elseSteps'
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step) {
+          if (!step[subStepType]) step[subStepType] = [];
+          step[subStepType].push({
+            action: 'click',
+            selector: '',
+            value: '',
+            delay: 0.5
+          });
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-action').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].action = e.target.value;
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-selector').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].selector = e.target.value;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-pick-substep').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      startPickMode(`substep_${stepId}_${subStepType}_${subIdx}`);
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-value').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].value = e.target.value;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-delay').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].delay = parseFloat(e.target.value) || 0;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-branch-del-substep').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType]) {
+          step[subStepType].splice(subIdx, 1);
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
     });
   });
 }
@@ -302,9 +863,14 @@ async function addNewStep() {
       selectorMode: 'css',
       selector: '',
       value: '',
-      delay: 1 // Default to 1 second
+      delay: 1, // Default to 1 second
+      conditions: [],
+      logicMode: 'all',
+      thenSteps: [],
+      elseSteps: [],
+      timeout: 0
     });
-    chrome.storage.local.set({ steps }, () => {
+    saveToActiveProjectAndStorage({ steps }, () => {
       renderSteps();
     });
   });
@@ -317,7 +883,7 @@ async function updateStepField(stepId, field, value) {
     const step = steps.find(s => s.id === stepId);
     if (step) {
       step[field] = value;
-      chrome.storage.local.set({ steps }, () => {
+      saveToActiveProjectAndStorage({ steps }, () => {
         if (field === 'action') {
           renderSteps();
         }
@@ -326,11 +892,23 @@ async function updateStepField(stepId, field, value) {
   });
 }
 
+// Update branch field directly in storage
+async function updateBranchField(stepId, field, value) {
+  chrome.storage.local.get('steps', (data) => {
+    const steps = data.steps || [];
+    const step = steps.find(s => s.id === stepId);
+    if (step) {
+      step[field] = value;
+      saveToActiveProjectAndStorage({ steps });
+    }
+  });
+}
+
 // Delete step
 async function deleteStep(stepId) {
   chrome.storage.local.get('steps', (data) => {
     const steps = (data.steps || []).filter(s => s.id !== stepId);
-    chrome.storage.local.set({ steps }, () => {
+    saveToActiveProjectAndStorage({ steps }, () => {
       renderSteps();
     });
   });
@@ -491,7 +1069,7 @@ function initConvexButtons() {
       const original = saveToConvexBtn.innerHTML;
       saveToConvexBtn.innerHTML = '⏳ Saving...';
 
-      chrome.storage.local.get(['steps', 'loopCount', 'loopDelay', 'waitTimeout'], async (items) => {
+      chrome.storage.local.get(['projects', 'activeProjectId', 'steps', 'loopCount', 'loopDelay', 'waitTimeout'], async (items) => {
         try {
           await sendDataToConvex(items);
           saveToConvexBtn.innerHTML = '✅ Saved!';
@@ -513,8 +1091,22 @@ function initConvexButtons() {
         const data = await loadDataFromConvex();
         if (!data) throw new Error('No backup found');
 
+        // Verify and construct projects array if we are restoring from legacy configuration
+        if (!data.projects || data.projects.length === 0) {
+          data.projects = [{
+            id: data.activeProjectId || 'proj_' + Date.now(),
+            name: 'Restored Profile',
+            steps: data.steps || [],
+            loopCount: data.loopCount !== undefined ? data.loopCount : 1,
+            loopDelay: data.loopDelay !== undefined ? data.loopDelay : 1.0,
+            waitTimeout: data.waitTimeout !== undefined ? data.waitTimeout : 0
+          }];
+          data.activeProjectId = data.projects[0].id;
+        }
+
         chrome.storage.local.set(data, () => {
           loadFromConvexBtn.innerHTML = '✅ Restored!';
+          renderProjectSelector(data.projects, data.activeProjectId);
           initSettings();
           renderSteps();
           setTimeout(() => { loadFromConvexBtn.innerHTML = original; }, 2000);

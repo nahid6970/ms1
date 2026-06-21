@@ -230,6 +230,325 @@ async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', re
   }
 }
 
+// Helpers for condition evaluations
+async function evaluateCondition(cond) {
+  if (!cond) return false;
+  const type = cond.type;
+  const selector = cond.selector;
+  const targetValue = cond.value || '';
+
+  try {
+    if (type === 'exists') {
+      const el = document.querySelector(selector);
+      return !!el;
+    }
+    if (type === 'visible') {
+      const el = document.querySelector(selector);
+      return el ? isElementVisible(el) : false;
+    }
+    if (type === 'clickable') {
+      const el = document.querySelector(selector);
+      return el ? isElementClickable(el) : false;
+    }
+    if (type === 'text_contains') {
+      const el = document.querySelector(selector);
+      if (!el) return false;
+      const text = el.textContent || el.innerText || '';
+      return text.toLowerCase().includes(targetValue.toLowerCase());
+    }
+    if (type === 'text_equals') {
+      const el = document.querySelector(selector);
+      if (!el) return false;
+      const text = (el.textContent || el.innerText || '').trim();
+      return text.toLowerCase() === targetValue.trim().toLowerCase();
+    }
+    if (type === 'url_contains') {
+      return window.location.href.toLowerCase().includes(targetValue.toLowerCase());
+    }
+    if (type === 'url_equals') {
+      return window.location.href.trim().toLowerCase() === targetValue.trim().toLowerCase();
+    }
+    if (type === 'value_contains') {
+      const el = document.querySelector(selector);
+      if (!el || el.value === undefined) return false;
+      return String(el.value).toLowerCase().includes(targetValue.toLowerCase());
+    }
+    if (type === 'value_equals') {
+      const el = document.querySelector(selector);
+      if (!el || el.value === undefined) return false;
+      return String(el.value).trim().toLowerCase() === targetValue.trim().toLowerCase();
+    }
+  } catch (err) {
+    console.error('Condition evaluation error:', err);
+    return false;
+  }
+  return false;
+}
+
+async function evaluateConditionsList(conditions, logicMode) {
+  if (!conditions || conditions.length === 0) return true;
+
+  const results = [];
+  for (const cond of conditions) {
+    const res = await evaluateCondition(cond);
+    results.push(res);
+  }
+
+  if (logicMode === 'any') {
+    return results.some(r => r === true);
+  } else {
+    return results.every(r => r === true);
+  }
+}
+
+async function evaluateConditionsWithTimeout(conditions, logicMode, timeoutSeconds) {
+  const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
+  const startTime = Date.now();
+
+  while (true) {
+    if (stopRequested) return { passed: false, timedOut: false };
+
+    const passed = await evaluateConditionsList(conditions, logicMode);
+    if (passed) {
+      return { passed: true, timedOut: false };
+    }
+
+    if (timeoutMs === 0) {
+      return { passed: false, timedOut: false };
+    }
+
+    if (Date.now() - startTime >= timeoutMs) {
+      return { passed: false, timedOut: true };
+    }
+
+    await delayMs(500);
+  }
+}
+
+// Nested branching & standard actions executors
+async function executeStandardAction(step, label, waitTimeout, selectorMode) {
+  if (step.action === 'wait') {
+    logMessage(`[Step ${label}] Wait step completed.`);
+    return false;
+  }
+
+  if (step.action === 'waitFor') {
+    logMessage(`[Step ${label}] Waiting for element: ${step.selector}`);
+    const result = await resolveSelector(step.selector, waitTimeout, {
+      matchMode: selectorMode,
+      requireVisible: true,
+      allowInfiniteWait: true
+    });
+
+    if (result.status === 'found') {
+      const el = result.element;
+      logMessage(`[Step ${label}] Element found and visible!`);
+      el.classList.add('automation-highlight');
+      setTimeout(() => el.classList.remove('automation-highlight'), 800);
+    } else if (result.status === 'timeout') {
+      logMessage(`[Step ${label}] Timeout waiting for element`, true);
+      notifyTimeout(
+        'ClickFlow timeout',
+        `Step ${label} did not find a matching element within ${waitTimeout}s.`
+      );
+    }
+    return false;
+  }
+
+  if (step.action === 'navigate') {
+    logMessage(`[Step ${label}] Navigating to: ${step.selector || step.value}`);
+    if (step.selector) {
+      const navResult = await resolveSelector(step.selector, waitTimeout, {
+        matchMode: selectorMode,
+        requireVisible: false,
+        allowInfiniteWait: false
+      });
+
+      if (navResult.status === 'timeout') {
+        logMessage(`[Step ${label}] Timeout waiting for element`, true);
+        notifyTimeout(
+          'ClickFlow timeout',
+          `Step ${label} did not find a matching element within ${waitTimeout}s.`
+        );
+        return false;
+      }
+
+      if (navResult.status === 'not_found') {
+        const navEl = document.querySelector(step.selector);
+        if (navEl) navEl.click();
+        else window.location.href = step.selector;
+        return true;
+      }
+
+      const navEl = navResult.element;
+      if (navEl) navEl.click();
+      else window.location.href = step.selector;
+    } else if (step.value) {
+      window.location.href = step.value;
+    }
+    return true;
+  }
+
+  const result = await resolveSelector(step.selector, waitTimeout, {
+    matchMode: selectorMode,
+    requireVisible: false,
+    allowInfiniteWait: false
+  });
+
+  if (result.status === 'timeout') {
+    logMessage(`[Step ${label}] Timeout waiting for element`, true);
+    notifyTimeout(
+      'ClickFlow timeout',
+      `Step ${label} did not find a matching element within ${waitTimeout}s.`
+    );
+    return false;
+  }
+
+  if (result.status === 'not_found') {
+    throw new Error(`Element not found for selector: "${step.selector}"`);
+  }
+
+  if (result.status === 'stopped') {
+    return false;
+  }
+
+  const el = result.element;
+  el.classList.add('automation-highlight');
+  setTimeout(() => el.classList.remove('automation-highlight'), 500);
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+  if (step.action === 'click') {
+    logMessage(`[Step ${label}] Clicking "${step.selector}"`);
+    el.focus();
+    const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window });
+    const mouseup = new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window });
+    el.dispatchEvent(mousedown);
+    el.dispatchEvent(mouseup);
+    el.click();
+  } else if (step.action === 'type') {
+    logMessage(`[Step ${label}] Typing "${step.value}" in "${step.selector}"`);
+    el.focus();
+    el.value = step.value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  } else if (step.action === 'focus') {
+    logMessage(`[Step ${label}] Focusing "${step.selector}"`);
+    el.focus();
+  } else if (step.action === 'clear') {
+    logMessage(`[Step ${label}] Clearing input "${step.selector}"`);
+    el.focus();
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  return false;
+}
+
+async function executeSubStepsList(subSteps, currentLoop, parentLabel, waitTimeout) {
+  for (let idx = 0; idx < subSteps.length; idx++) {
+    if (stopRequested) break;
+    const step = subSteps[idx];
+    const selectorMode = step.selectorMode || 'css';
+    const label = `${parentLabel}.${idx + 1}`;
+
+    logMessage(`[Step ${label}] Waiting ${step.delay}s...`);
+    await interruptibleDelay(step.delay);
+
+    if (stopRequested) break;
+
+    try {
+      if (step.action === 'branch') {
+        logMessage(`[Step ${label}] Evaluating nested branch...`);
+        const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
+        const result = await evaluateConditionsWithTimeout(step.conditions || [], step.logicMode || 'all', timeoutVal);
+
+        if (result.passed) {
+          logMessage(`[Step ${label}] Nested branch PASSED.`);
+          if (step.thenSteps && step.thenSteps.length > 0) {
+            const nav = await executeSubStepsList(step.thenSteps, currentLoop, `${label} > THEN`, waitTimeout);
+            if (nav) return true;
+          }
+        } else if (result.timedOut) {
+          logMessage(`[Step ${label}] Nested branch TIMED OUT.`);
+          const fallbackSteps = (step.onTimeoutSteps && step.onTimeoutSteps.length > 0) ? step.onTimeoutSteps : (step.elseSteps || []);
+          if (fallbackSteps && fallbackSteps.length > 0) {
+            const nav = await executeSubStepsList(fallbackSteps, currentLoop, `${label} > TIMEOUT`, waitTimeout);
+            if (nav) return true;
+          }
+        } else {
+          logMessage(`[Step ${label}] Nested branch FAILED.`);
+          if (step.elseSteps && step.elseSteps.length > 0) {
+            const nav = await executeSubStepsList(step.elseSteps, currentLoop, `${label} > ELSE`, waitTimeout);
+            if (nav) return true;
+          }
+        }
+        continue;
+      }
+
+      const didNav = await executeStandardAction(step, label, waitTimeout, selectorMode);
+      if (didNav) {
+        return true;
+      }
+    } catch (err) {
+      logMessage(`[Step ${label}] Error: ${err.message}`, true);
+    }
+  }
+  return false;
+}
+
+async function executeStepsList(stepsList, currentLoop, startStepIndex, waitTimeout) {
+  for (let i = startStepIndex; i < stepsList.length; i++) {
+    if (stopRequested) break;
+    const step = stepsList[i];
+    const selectorMode = step.selectorMode || 'css';
+    
+    updateState("running", currentLoop, i);
+
+    logMessage(`[Step ${i + 1}] Waiting ${step.delay || 0}s...`);
+    await interruptibleDelay(step.delay || 0);
+
+    if (stopRequested) break;
+
+    try {
+      if (step.action === 'branch') {
+        logMessage(`[Step ${i + 1}] Evaluating branch step...`);
+        const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
+        const result = await evaluateConditionsWithTimeout(step.conditions || [], step.logicMode || 'all', timeoutVal);
+        
+        if (result.passed) {
+          logMessage(`[Step ${i + 1}] Branch condition PASSED. Executing THEN steps.`);
+          if (step.thenSteps && step.thenSteps.length > 0) {
+            const nav = await executeSubStepsList(step.thenSteps, currentLoop, `${i + 1} > THEN`, waitTimeout);
+            if (nav) return true;
+          }
+        } else if (result.timedOut) {
+          logMessage(`[Step ${i + 1}] Branch condition TIMED OUT. Executing TIMEOUT fallback steps.`);
+          const fallbackSteps = (step.onTimeoutSteps && step.onTimeoutSteps.length > 0) ? step.onTimeoutSteps : (step.elseSteps || []);
+          if (fallbackSteps && fallbackSteps.length > 0) {
+            const nav = await executeSubStepsList(fallbackSteps, currentLoop, `${i + 1} > TIMEOUT`, waitTimeout);
+            if (nav) return true;
+          }
+        } else {
+          logMessage(`[Step ${i + 1}] Branch condition FAILED. Executing ELSE steps.`);
+          if (step.elseSteps && step.elseSteps.length > 0) {
+            const nav = await executeSubStepsList(step.elseSteps, currentLoop, `${i + 1} > ELSE`, waitTimeout);
+            if (nav) return true;
+          }
+        }
+        continue;
+      }
+
+      const didNav = await executeStandardAction(step, i + 1, waitTimeout, selectorMode);
+      if (didNav) {
+        return true;
+      }
+    } catch (err) {
+      logMessage(`[Step ${i + 1}] Error: ${err.message}`, true);
+    }
+  }
+  return false;
+}
+
 async function runAutomation(startLoop = 0, startStep = 0) {
   if (isAutomating) return;
   isAutomating = true;
@@ -255,143 +574,9 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     logMessage(`♻️ Starting Loop ${currentLoop + 1}`);
     
     const startIndex = (currentLoop === startLoop) ? startStep : 0;
-    for (let i = startIndex; i < steps.length; i++) {
-      if (stopRequested) break;
-      const step = steps[i];
-      const selectorMode = step.selectorMode || 'css';
-      updateState("running", currentLoop, i);
-      
-      logMessage(`[Step ${i + 1}] Waiting ${step.delay}s...`);
-      await interruptibleDelay(step.delay);
-      
-      if (stopRequested) break;
-      
-      try {
-        if (step.action === 'wait') {
-          logMessage(`[Step ${i + 1}] Wait step completed.`);
-          continue;
-        }
-
-        if (step.action === 'waitFor') {
-          logMessage(`[Step ${i + 1}] Waiting for element: ${step.selector}`);
-          
-          const result = await resolveSelector(step.selector, waitTimeout, {
-            matchMode: selectorMode,
-            requireVisible: true,
-            allowInfiniteWait: true
-          });
-
-          if (result.status === 'found') {
-            const el = result.element;
-            logMessage(`[Step ${i + 1}] Element found and visible!`);
-            // Brief flash to confirm
-            el.classList.add('automation-highlight');
-            setTimeout(() => el.classList.remove('automation-highlight'), 800);
-          } else if (result.status === 'timeout') {
-            logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
-            notifyTimeout(
-              'ClickFlow timeout',
-              `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
-            );
-          }
-          continue;
-        }
-
-        if (step.action === 'navigate') {
-          logMessage(`[Step ${i + 1}] Navigating to: ${step.selector || step.value}`);
-          // For navigate action we expect selector or value to be a URL or link text
-          if (step.selector) {
-            const navResult = await resolveSelector(step.selector, waitTimeout, {
-              matchMode: selectorMode,
-              requireVisible: false,
-              allowInfiniteWait: false
-            });
-
-            if (navResult.status === 'timeout') {
-              logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
-              notifyTimeout(
-                'ClickFlow timeout',
-                `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
-              );
-              continue;
-            }
-
-            if (navResult.status === 'not_found') {
-              const navEl = document.querySelector(step.selector);
-              if (navEl) navEl.click();
-              else window.location.href = step.selector; // fallback if it's a URL
-              return;
-            }
-
-            const navEl = navResult.element;
-            if (navEl) navEl.click();
-            else window.location.href = step.selector; // fallback if it's a URL
-          } else if (step.value) {
-            window.location.href = step.value;
-          }
-          // Do NOT continue execution — let page load handler resume
-          return;
-        }
-
-        const result = await resolveSelector(step.selector, waitTimeout, {
-          matchMode: selectorMode,
-          requireVisible: false,
-          allowInfiniteWait: false
-        });
-
-        if (result.status === 'timeout') {
-          logMessage(`[Step ${i + 1}] Timeout waiting for element`, true);
-          notifyTimeout(
-            'ClickFlow timeout',
-            `Step ${i + 1} did not find a matching element within ${waitTimeout}s.`
-          );
-          continue;
-        }
-
-        if (result.status === 'not_found') {
-          throw new Error(`Element not found for selector: "${step.selector}"`);
-        }
-
-        if (result.status === 'stopped') {
-          break;
-        }
-
-        const el = result.element;
-
-        // Flash target element to show execution visual
-        el.classList.add('automation-highlight');
-        setTimeout(() => el.classList.remove('automation-highlight'), 500);
-        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-
-        if (step.action === 'click') {
-          logMessage(`[Step ${i + 1}] Clicking "${step.selector}"`);
-          el.focus();
-          
-          // Trigger natural event path
-          const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window });
-          const mouseup = new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window });
-          el.dispatchEvent(mousedown);
-          el.dispatchEvent(mouseup);
-          el.click();
-        } else if (step.action === 'type') {
-          logMessage(`[Step ${i + 1}] Typing "${step.value}" in "${step.selector}"`);
-          el.focus();
-          el.value = step.value;
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        } else if (step.action === 'focus') {
-          logMessage(`[Step ${i + 1}] Focusing "${step.selector}"`);
-          el.focus();
-        } else if (step.action === 'clear') {
-          logMessage(`[Step ${i + 1}] Clearing input "${step.selector}"`);
-          el.focus();
-          el.value = '';
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      } catch (err) {
-        logMessage(`[Step ${i + 1}] Error: ${err.message}`, true);
-      }
+    const didNav = await executeStepsList(steps, currentLoop, startIndex, waitTimeout);
+    if (didNav) {
+      return; // Stop execution - page reload handler will resume
     }
     
     if (stopRequested) break;

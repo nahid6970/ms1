@@ -13,7 +13,16 @@
         <h1>ClickFlow</h1>
         <div id="status-badge" class="badge idle">Idle</div>
       </div>
-      <!-- Compact Cloud Backup Buttons in Header -->
+
+      <!-- Horizontal Project Profiles Selector -->
+      <div class="project-selector-row">
+        <select id="projectSelect" title="Select Project Profile" style="width: 130px; font-size: 11px; padding: 3px 6px; height: 24px;"></select>
+        <button id="addProjectBtn" class="btn-small" title="Create Profile" style="height: 24px; padding: 3px 6px;">➕</button>
+        <button id="renameProjectBtn" class="btn-small" title="Rename Profile" style="height: 24px; padding: 3px 6px;">✏️</button>
+        <button id="deleteProjectBtn" class="btn-small btn-small-danger" title="Delete Profile" style="height: 24px; padding: 3px 6px;">🗑️</button>
+      </div>
+
+      <!-- Compact Cloud Backup Buttons -->
       <div class="convex-buttons">
         <button id="saveToConvex" class="btn-convex-save" title="Backup configuration to Convex Cloud">💾 Backup</button>
         <button id="loadFromConvex" class="btn-convex-load" title="Restore configuration from Convex Cloud">📂 Restore</button>

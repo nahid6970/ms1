@@ -1,22 +1,66 @@
 // Handle Element Picker logic (requires background service worker as relay between content and popup)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'elementPicked') {
-    chrome.storage.local.get(['steps', 'pickingStepId'], (data) => {
+    chrome.storage.local.get(['steps', 'pickingStepId', 'projects', 'activeProjectId'], (data) => {
       const steps = data.steps || [];
-      const stepId = data.pickingStepId;
-      if (stepId !== undefined && stepId !== null) {
-        const updatedSteps = steps.map(step => {
-          if (step.id === stepId) {
+      const stepIdStr = String(data.pickingStepId || '');
+      const projects = data.projects || [];
+      const activeId = data.activeProjectId;
+      
+      if (!stepIdStr) {
+        sendResponse({ success: false, error: "No active picking step recorded." });
+        return;
+      }
+
+      let updatedSteps = [...steps];
+
+      if (stepIdStr.startsWith('cond_')) {
+        // Format: cond_stepId_condIdx
+        const parts = stepIdStr.split('_');
+        const sId = parseInt(parts[1], 10);
+        const condIdx = parseInt(parts[2], 10);
+        updatedSteps = steps.map(step => {
+          if (step.id === sId && step.conditions && step.conditions[condIdx]) {
+            const updatedConds = [...step.conditions];
+            updatedConds[condIdx] = { ...updatedConds[condIdx], selector: message.selector };
+            return { ...step, conditions: updatedConds };
+          }
+          return step;
+        });
+      } else if (stepIdStr.startsWith('substep_')) {
+        // Format: substep_stepId_subStepType_subIdx
+        const parts = stepIdStr.split('_');
+        const sId = parseInt(parts[1], 10);
+        const subStepType = parts[2]; // 'thenSteps' or 'elseSteps'
+        const subIdx = parseInt(parts[3], 10);
+        updatedSteps = steps.map(step => {
+          if (step.id === sId && step[subStepType] && step[subStepType][subIdx]) {
+            const updatedSubs = [...step[subStepType]];
+            updatedSubs[subIdx] = { ...updatedSubs[subIdx], selector: message.selector };
+            return { ...step, [subStepType]: updatedSubs };
+          }
+          return step;
+        });
+      } else {
+        // Standard step ID
+        const sId = parseInt(stepIdStr, 10);
+        updatedSteps = steps.map(step => {
+          if (step.id === sId) {
             return { ...step, selector: message.selector };
           }
           return step;
         });
-        chrome.storage.local.set({ steps: updatedSteps, pickingStepId: null }, () => {
-          sendResponse({ success: true });
-        });
-      } else {
-        sendResponse({ success: false, error: "No active picking step recorded." });
       }
+
+      // Sync to the active project in projects list
+      const activeProj = projects.find(p => p.id === activeId);
+      if (activeProj) {
+        activeProj.steps = updatedSteps;
+      }
+
+      chrome.storage.local.set({ steps: updatedSteps, projects, pickingStepId: null }, () => {
+        sendResponse({ success: true });
+      });
     });
     return true;
   }

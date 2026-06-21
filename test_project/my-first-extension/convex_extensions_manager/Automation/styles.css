@@ -35,6 +35,7 @@ body {
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
 }
@@ -243,11 +244,40 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  height: 234px; /* EXACTLY 5 steps height (5 * 42px card + 4 * 6px gap) */
+  height: 234px; /* Restored back to the original 5-step height */
   min-height: 234px;
   max-height: 234px;
   overflow-y: auto;
   padding-right: 4px;
+}
+
+/* Project Profile styles */
+.project-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-small {
+  background-color: var(--border-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.btn-small:hover {
+  border-color: var(--accent-purple);
+  background-color: rgba(203, 166, 247, 0.1);
+}
+.btn-small-danger:hover {
+  border-color: var(--accent-red);
+  background-color: rgba(243, 139, 168, 0.1);
+  color: var(--accent-red);
 }
 
 /* Step Row Layout */
@@ -256,13 +286,132 @@ input[type="number"] {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 6px 8px;
-  height: 42px; /* Fixed height for exact 5 step layout calculation */
+  min-height: 42px; /* Changed from fixed height: 42px to support expanding branch conditions and sub-actions editor */
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Branch Editor Styling */
+.branch-editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #1a1a26;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 6px;
+}
+
+.branch-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.branch-logic-mode-select {
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.branch-sub-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 6px;
+}
+
+.branch-sub-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.branch-sub-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-purple);
+}
+
+.branch-empty-text {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
+  padding-left: 4px;
+}
+
+.branch-cond-row, .branch-substep-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.branch-substep-index {
+  font-size: 10px;
+  font-weight: bold;
+  background-color: var(--border-color);
+  color: var(--text-dim);
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+}
+
+.branch-cond-type-select, .branch-substep-action {
+  font-size: 10px;
+  padding: 2px 4px;
+  max-width: 105px;
+}
+
+.btn-pick-cond, .btn-pick-substep {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.btn-pick-cond:hover, .btn-pick-substep:hover {
+  color: var(--accent-purple);
+}
+
+.btn-branch-del-cond, .btn-branch-del-substep {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px;
+}
+
+.btn-branch-del-cond:hover, .btn-branch-del-substep:hover {
+  color: var(--accent-red);
+}
+
+.branch-substep-delay-wrapper {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  gap: 1px;
+}
+
+.branch-substep-delay {
+  font-size: 10px;
+  padding: 1px 2px;
+  height: 16px;
+  background: none;
 }
 
 .step-card:hover {
