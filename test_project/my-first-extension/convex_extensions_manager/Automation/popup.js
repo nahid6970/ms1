@@ -1113,6 +1113,37 @@ function startLogMonitoring() {
   const logsTerminal = document.getElementById('logsTerminal');
   const toggleBtn = document.getElementById('toggleBtn');
 
+  const renderToggleButton = (state) => {
+    if (!toggleBtn) return;
+
+    if (state === 'running') {
+      toggleBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6 6h12v12H6z"></path>
+        </svg>
+      `;
+      toggleBtn.className = 'btn-header-start btn-icon-toggle is-running';
+      toggleBtn.title = 'Stop Automation';
+      toggleBtn.setAttribute('aria-label', 'Stop Automation');
+      toggleBtn.setAttribute('aria-pressed', 'true');
+    } else {
+      toggleBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M7 5.5v13l11-6.5-11-6.5z"></path>
+        </svg>
+      `;
+      toggleBtn.className = 'btn-header-start btn-icon-toggle is-idle';
+      toggleBtn.title = 'Start Automation';
+      toggleBtn.setAttribute('aria-label', 'Start Automation');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+    }
+  };
+
+  chrome.storage.local.get('automationState', (data) => {
+    const state = data.automationState || { status: 'idle' };
+    renderToggleButton(state.status);
+  });
+
   setInterval(() => {
     chrome.storage.local.get('automationState', (data) => {
       const state = data.automationState || { status: 'idle', logs: [] };
@@ -1120,15 +1151,7 @@ function startLogMonitoring() {
       statusBadge.innerText = state.status;
       statusBadge.className = `badge ${state.status}`;
 
-      if (toggleBtn) {
-        if (state.status === 'running') {
-          toggleBtn.innerText = '⏹️ Stop Automation';
-          toggleBtn.className = 'btn-danger btn-header-start';
-        } else {
-          toggleBtn.innerText = '▶️ Start Automation';
-          toggleBtn.className = 'btn-primary btn-header-start';
-        }
-      }
+      renderToggleButton(state.status);
 
       if (logsTerminal) {
         if (state.logs && state.logs.length > 0) {

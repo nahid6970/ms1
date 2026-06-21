@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
     QDialog, QScrollArea, QGridLayout
 )
-from PyQt6.QtCore import Qt, QPoint, QSize
+from PyQt6.QtCore import Qt, QPoint, QSize, QEvent
 from PyQt6.QtGui import QFont, QColor
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
@@ -863,6 +863,12 @@ class PrepTab(QWidget):
         self._build()
         self._load_session()
 
+    def eventFilter(self, obj, event):
+        if hasattr(self, 'file_list') and obj == self.file_list.viewport() and event.type() == QEvent.Type.Resize:
+            self._update_file_item_texts()
+            self._update_project_label()
+        return super().eventFilter(obj, event)
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -1042,10 +1048,32 @@ class PrepTab(QWidget):
                 pass
         return os.path.basename(fp)
 
+    def _elide_text(self, text: str, reserve: int = 70) -> str:
+        if not hasattr(self, 'file_list'):
+            return text
+        width = max(100, self.file_list.viewport().width() - reserve)
+        return self.fontMetrics().elidedText(text, Qt.TextElideMode.ElideMiddle, width)
+
+    def _update_file_item_texts(self):
+        if not hasattr(self, 'file_list'):
+            return
+        for i in range(self.file_list.count()):
+            item = self.file_list.item(i)
+            widget = self.file_list.itemWidget(item)
+            if not widget:
+                continue
+            lbl = widget.findChild(QLabel, "file_path_label")
+            if not lbl:
+                continue
+            fp = item.data(Qt.ItemDataRole.UserRole)
+            if not fp:
+                continue
+            lbl.setText(self._elide_text(self._display_path(fp)))
+
     def _update_project_label(self):
         if hasattr(self, 'project_path_lbl'):
             if self.project_root:
-                self.project_path_lbl.setText(f"PROJECT ROOT: {self.project_root}")
+                self.project_path_lbl.setText(self._elide_text(f"PROJECT ROOT: {self.project_root}", reserve=120))
                 self.project_path_lbl.setToolTip(self.project_root)
             else:
                 self.project_path_lbl.setText("PROJECT ROOT: <not set>")
@@ -1068,6 +1096,7 @@ class PrepTab(QWidget):
             self.root_cb(common)
             self._update_project_label()
             self._refresh_file_items()
+            self._update_file_item_texts()
 
     def _set_project_root(self, d: str, save_recent: bool = True):
         d = os.path.normpath(d)
@@ -1089,7 +1118,8 @@ class PrepTab(QWidget):
         hl.setSpacing(4)
 
         display_path = self._display_path(fp)
-        lbl = QLabel(display_path)
+        lbl = QLabel(self._elide_text(display_path))
+        lbl.setObjectName("file_path_label")
         
         # Smart file size analysis for warning highlights and context limits
         tooltip = [fp]
@@ -1135,6 +1165,7 @@ class PrepTab(QWidget):
         item.setSizeHint(QSize(100, 22))
         self.file_list.addItem(item)
         self.file_list.setItemWidget(item, widget)
+        self._update_file_item_texts()
 
     def _remove_file(self, fp: str, item: QListWidgetItem):
         if fp in self.files:
@@ -1179,6 +1210,8 @@ class PrepTab(QWidget):
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        self.file_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.file_list.viewport().installEventFilter(self)
         vf.addWidget(self.file_list)
         left_layout.addWidget(grp_files, 1)
 
