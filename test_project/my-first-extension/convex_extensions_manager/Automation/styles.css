@@ -299,12 +299,53 @@ input[type="number"] {
 .branch-editor-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   background-color: #1a1a26;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 8px;
+  padding: 6px;
   margin-top: 6px;
+}
+
+.branch-details-block {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+.branch-details-block[open] {
+  padding-bottom: 6px;
+}
+
+.branch-summary-header {
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  outline: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.branch-details-block[open] .branch-summary-header {
+  border-bottom-color: var(--border-color);
+  margin-bottom: 6px;
+}
+
+.branch-summary-header::-webkit-details-marker {
+  color: var(--text-dim);
+}
+
+.branch-details-content {
+  padding: 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .branch-header-row {
@@ -323,8 +364,6 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-top: 1px solid var(--border-color);
-  padding-top: 6px;
 }
 
 .branch-sub-title-row {

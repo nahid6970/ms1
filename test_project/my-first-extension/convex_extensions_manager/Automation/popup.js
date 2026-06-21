@@ -413,68 +413,85 @@ function renderBranchStepDetails(step) {
 
   return `
     <div class="branch-editor-container" data-id="${step.id}">
-      <!-- IF Conditions Header -->
-      <div class="branch-header-row">
-        <label style="font-weight: 600; color: var(--accent-purple);">IF Conditions Match:</label>
-        <select class="branch-logic-mode-select" data-field="logicMode">
-          <option value="all" ${logicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
-          <option value="any" ${logicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
-        </select>
-        <button class="btn-branch-add-cond btn-secondary" data-type="conditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add IF Condition</button>
-      </div>
+      <!-- IF Conditions Block -->
+      <details class="branch-details-block" open>
+        <summary class="branch-summary-header">
+          <span class="branch-summary-title" style="color: var(--accent-purple);">IF / THEN Config</span>
+        </summary>
+        <div class="branch-details-content">
+          <div class="branch-header-row" style="margin-top: 4px;">
+            <label>IF Conditions Match:</label>
+            <select class="branch-logic-mode-select" data-field="logicMode">
+              <option value="all" ${logicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
+              <option value="any" ${logicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
+            </select>
+            <button class="btn-branch-add-cond btn-secondary" data-type="conditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add Condition</button>
+          </div>
+          <div class="branch-sub-section">
+            <div class="branch-conditions-list">
+              ${conditionsHtml}
+            </div>
+          </div>
+          <div class="branch-sub-section">
+            <div class="branch-sub-title-row">
+              <span class="branch-sub-title">THEN Actions (if true):</span>
+              <button class="btn-branch-add-substep btn-secondary" data-type="thenSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+            </div>
+            <div class="branch-substeps-list">
+              ${thenStepsHtml}
+            </div>
+          </div>
+        </div>
+      </details>
 
-      <div class="branch-sub-section">
-        <div class="branch-conditions-list">
-          ${conditionsHtml}
+      <!-- ELSE-IF Conditions Block -->
+      <details class="branch-details-block" ${elseIfConditions.length > 0 || elseIfSteps.length > 0 ? 'open' : ''}>
+        <summary class="branch-summary-header">
+          <span class="branch-summary-title" style="color: var(--accent-blue);">ELSE-IF Config (Optional)</span>
+        </summary>
+        <div class="branch-details-content">
+          <div class="branch-header-row" style="margin-top: 4px;">
+            <label>ELSE-IF Conditions Match:</label>
+            <select class="branch-logic-mode-select" data-field="elseIfLogicMode">
+              <option value="all" ${elseIfLogicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
+              <option value="any" ${elseIfLogicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
+            </select>
+            <button class="btn-branch-add-cond btn-secondary" data-type="elseIfConditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add Condition</button>
+          </div>
+          <div class="branch-sub-section">
+            <div class="branch-conditions-list">
+              ${elseIfConditionsHtml}
+            </div>
+          </div>
+          <div class="branch-sub-section">
+            <div class="branch-sub-title-row">
+              <span class="branch-sub-title">ELSE-IF Actions (if true):</span>
+              <button class="btn-branch-add-substep btn-secondary" data-type="elseIfSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+            </div>
+            <div class="branch-substeps-list">
+              ${elseIfStepsHtml}
+            </div>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="branch-sub-section">
-        <div class="branch-sub-title-row">
-          <span class="branch-sub-title">THEN Actions (if true):</span>
-          <button class="btn-branch-add-substep btn-secondary" data-type="thenSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+      <!-- Fallback ELSE Block -->
+      <details class="branch-details-block" ${elseSteps.length > 0 ? 'open' : ''}>
+        <summary class="branch-summary-header">
+          <span class="branch-summary-title" style="color: var(--accent-red);">ELSE Config (Fallback)</span>
+        </summary>
+        <div class="branch-details-content">
+          <div class="branch-sub-section" style="margin-top: 4px;">
+            <div class="branch-sub-title-row">
+              <span class="branch-sub-title" style="color: var(--accent-red);">ELSE Actions (if neither met):</span>
+              <button class="btn-branch-add-substep btn-secondary" data-type="elseSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
+            </div>
+            <div class="branch-substeps-list">
+              ${elseStepsHtml}
+            </div>
+          </div>
         </div>
-        <div class="branch-substeps-list">
-          ${thenStepsHtml}
-        </div>
-      </div>
-
-      <!-- ELSE-IF Conditions Header -->
-      <div class="branch-header-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-        <label style="font-weight: 600; color: var(--accent-blue);">ELSE-IF Conditions Match:</label>
-        <select class="branch-logic-mode-select" data-field="elseIfLogicMode">
-          <option value="all" ${elseIfLogicMode === 'all' ? 'selected' : ''}>All match (AND)</option>
-          <option value="any" ${elseIfLogicMode === 'any' ? 'selected' : ''}>Any match (OR)</option>
-        </select>
-        <button class="btn-branch-add-cond btn-secondary" data-type="elseIfConditions" style="padding: 2px 6px; font-size: 10px; margin-left: auto;">➕ Add ELSE-IF Condition</button>
-      </div>
-
-      <div class="branch-sub-section">
-        <div class="branch-conditions-list">
-          ${elseIfConditionsHtml}
-        </div>
-      </div>
-
-      <div class="branch-sub-section">
-        <div class="branch-sub-title-row">
-          <span class="branch-sub-title">ELSE-IF Actions (if true):</span>
-          <button class="btn-branch-add-substep btn-secondary" data-type="elseIfSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
-        </div>
-        <div class="branch-substeps-list">
-          ${elseIfStepsHtml}
-        </div>
-      </div>
-
-      <!-- Fallback ELSE Section -->
-      <div class="branch-sub-section" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-        <div class="branch-sub-title-row">
-          <span class="branch-sub-title" style="color: var(--accent-red);">ELSE Actions (if neither met):</span>
-          <button class="btn-branch-add-substep btn-secondary" data-type="elseSteps" style="padding: 2px 6px; font-size: 10px;">➕ Add Action</button>
-        </div>
-        <div class="branch-substeps-list">
-          ${elseStepsHtml}
-        </div>
-      </div>
+      </details>
     </div>
   `;
 }
