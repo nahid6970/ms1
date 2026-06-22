@@ -932,6 +932,7 @@ class PrepTab(QWidget):
 
         task = self.task_input.toPlainText().strip()
         parts = [guide] if guide else []
+        parts.append("You are a senior software engineer. Make the smallest correct code change that satisfies the task.")
 
         if self.files:
             for fp in self.files:
@@ -960,6 +961,7 @@ class PrepTab(QWidget):
         parts = []
         if guide:
             parts.append(guide)
+        parts.append("You are a senior software engineer. Make the smallest correct code change that satisfies the task.")
 
         root = (project_root or self.project_root).strip()
 
