@@ -932,51 +932,12 @@ class PrepTab(QWidget):
 
         task = self.task_input.toPlainText().strip()
         parts = [guide] if guide else []
-        parts.append("You are a senior software engineer. Make the smallest correct code change that satisfies the task.")
-
-        if self.files:
-            for fp in self.files:
-                try:
-                    with open(fp, 'r', encoding='utf-8', errors='replace') as f:
-                        content = f.read()
-                    ext = os.path.splitext(fp)[1].lstrip('.')
-                    parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
-                except Exception as e:
-                    parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
-        else:
-            return ""
-
-        if task:
-            parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
-
-        return '\n'.join(parts).strip()
-
-    def _build_notebooklm_prompt(self, new_project: bool = False, project_root: str | None = None) -> str:
-        guide = ""
-        if os.path.exists(GUIDE_PATH):
-            with open(GUIDE_PATH, 'r', encoding='utf-8') as f:
-                guide = f.read().strip()
-
-        task = self.task_input.toPlainText().strip()
-        parts = []
-        if guide:
-            parts.append(guide)
-        parts.append("You are a senior software engineer. Make the smallest correct code change that satisfies the task.")
 
         root = (project_root or self.project_root).strip()
 
-        parts.append("")
-        parts.append("## NOTEBOOKLM MODE")
-        parts.append("Use the same file-context layout as the normal prompt, but keep your final answer strict and short.")
-        parts.append("Return only valid `@@FILE` blocks.")
-        parts.append("If you use `replace_block`, include both `@@FROM` and `@@TO`.")
-        parts.append("Prefer `replace_file` for whole-file changes.")
-        parts.append("Do not add explanations, summaries, or markdown fences around the final answer.")
-
-        if root:
-            parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
-
         if self.files:
+            if root:
+                parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
             for fp in self.files:
                 try:
                     with open(fp, 'r', encoding='utf-8', errors='replace') as f:
@@ -986,12 +947,23 @@ class PrepTab(QWidget):
                 except Exception as e:
                     parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
         else:
-            parts.append("No local source files are loaded yet.")
-            parts.append("Create the project from scratch in the project root above.")
+            if root:
+                parts.append(
+                    "\n## NEW PROJECT ROOT\n\n"
+                    f"`{root}`"
+                )
+            parts.append(
+                "\n## NEW PROJECT MODE\n\n"
+                "No local source files are loaded yet.\n"
+                "Create the project from scratch in the root directory above."
+            )
 
         if new_project and root and not self.files:
-            parts.append("\n## NEW PROJECT INSTRUCTIONS")
-            parts.append("Treat this as a fresh project scaffold and return complete file contents for any new files.")
+            parts.append(
+                "\n## NEW PROJECT INSTRUCTIONS\n\n"
+                "Treat this as a fresh project scaffold. "
+                "Return complete file contents for any new files you create."
+            )
 
         if task:
             parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
@@ -1075,17 +1047,6 @@ class PrepTab(QWidget):
             except Exception:
                 pass
         return os.path.basename(fp)
-
-    def _prompt_path(self, fp: str) -> str:
-        root = self.project_root.strip()
-        if root:
-            try:
-                rel = os.path.relpath(fp, root)
-                if not rel.startswith('..'):
-                    return rel.replace('\\', '/')
-            except Exception:
-                pass
-        return os.path.basename(fp).replace('\\', '/')
 
     def _elide_text(self, text: str, reserve: int = 70) -> str:
         if not hasattr(self, 'file_list'):
@@ -1306,20 +1267,14 @@ class PrepTab(QWidget):
         # Buttons
         btn_row2 = QHBoxLayout()
         btn_gen  = QPushButton("⚡ GENERATE PROMPT")
-        btn_nb   = QPushButton("🧠 NOTEBOOKLM PROMPT")
         btn_copy = QPushButton("📋 COPY TO CLIPBOARD")
         btn_gen.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_nb.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_copy.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_gen.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
                               f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
-        btn_nb.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
-                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
         btn_gen.clicked.connect(self._generate)
-        btn_nb.clicked.connect(self._generate_notebooklm)
         btn_copy.clicked.connect(self._copy)
         btn_row2.addWidget(btn_gen)
-        btn_row2.addWidget(btn_nb)
         btn_row2.addWidget(btn_copy)
         right_layout.addLayout(btn_row2, 0)
 
@@ -1487,8 +1442,8 @@ class PrepTab(QWidget):
         self.status_cb("File list cleared")
 
     def _generate(self):
-        if not self.files:
-            self.status_cb("⚠ No files added")
+        if not self.files and not self.project_root:
+            self.status_cb("⚠ Add files or choose a directory first")
             return
 
         prompt = self._build_prompt()
@@ -1497,20 +1452,10 @@ class PrepTab(QWidget):
             return
 
         self.prompt_out.setPlainText(prompt)
-        self.status_cb("Prompt generated — copy and paste into AI")
-
-    def _generate_notebooklm(self):
-        if not self.files and not self.project_root:
-            self.status_cb("⚠ Add files or choose a directory first")
-            return
-
-        prompt = self._build_notebooklm_prompt()
-        if not prompt:
-            self.status_cb("⚠ Nothing to generate")
-            return
-
-        self.prompt_out.setPlainText(prompt)
-        self.status_cb("NotebookLM prompt generated — copy and paste into NotebookLM")
+        if self.files:
+            self.status_cb("Prompt generated — copy and paste into AI")
+        else:
+            self.status_cb("New project prompt generated — copy and paste into AI")
 
     def _copy(self):
         text = self.prompt_out.toPlainText()
