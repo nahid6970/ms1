@@ -933,11 +933,7 @@ class PrepTab(QWidget):
         task = self.task_input.toPlainText().strip()
         parts = [guide] if guide else []
 
-        root = (project_root or self.project_root).strip()
-
         if self.files:
-            if root:
-                parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
             for fp in self.files:
                 try:
                     with open(fp, 'r', encoding='utf-8', errors='replace') as f:
@@ -947,23 +943,7 @@ class PrepTab(QWidget):
                 except Exception as e:
                     parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
         else:
-            if root:
-                parts.append(
-                    "\n## NEW PROJECT ROOT\n\n"
-                    f"`{root}`"
-                )
-            parts.append(
-                "\n## NEW PROJECT MODE\n\n"
-                "No local source files are loaded yet.\n"
-                "Create the project from scratch in the root directory above."
-            )
-
-        if new_project and root and not self.files:
-            parts.append(
-                "\n## NEW PROJECT INSTRUCTIONS\n\n"
-                "Treat this as a fresh project scaffold. "
-                "Return complete file contents for any new files you create."
-            )
+            return ""
 
         if task:
             parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
@@ -1105,6 +1085,17 @@ class PrepTab(QWidget):
             except Exception:
                 pass
         return os.path.basename(fp)
+
+    def _prompt_path(self, fp: str) -> str:
+        root = self.project_root.strip()
+        if root:
+            try:
+                rel = os.path.relpath(fp, root)
+                if not rel.startswith('..'):
+                    return rel.replace('\\', '/')
+            except Exception:
+                pass
+        return os.path.basename(fp).replace('\\', '/')
 
     def _elide_text(self, text: str, reserve: int = 70) -> str:
         if not hasattr(self, 'file_list'):
@@ -1506,8 +1497,8 @@ class PrepTab(QWidget):
         self.status_cb("File list cleared")
 
     def _generate(self):
-        if not self.files and not self.project_root:
-            self.status_cb("⚠ Add files or choose a directory first")
+        if not self.files:
+            self.status_cb("⚠ No files added")
             return
 
         prompt = self._build_prompt()
@@ -1516,10 +1507,7 @@ class PrepTab(QWidget):
             return
 
         self.prompt_out.setPlainText(prompt)
-        if self.files:
-            self.status_cb("Prompt generated — copy and paste into AI")
-        else:
-            self.status_cb("New project prompt generated — copy and paste into AI")
+        self.status_cb("Prompt generated — copy and paste into AI")
 
     def _generate_notebooklm(self):
         if not self.files and not self.project_root:
