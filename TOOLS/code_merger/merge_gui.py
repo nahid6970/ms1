@@ -951,60 +951,48 @@ class PrepTab(QWidget):
         return '\n'.join(parts).strip()
 
     def _build_notebooklm_prompt(self, new_project: bool = False, project_root: str | None = None) -> str:
+        guide = ""
+        if os.path.exists(GUIDE_PATH):
+            with open(GUIDE_PATH, 'r', encoding='utf-8') as f:
+                guide = f.read().strip()
+
         task = self.task_input.toPlainText().strip()
+        parts = []
+        if guide:
+            parts.append(guide)
+
         root = (project_root or self.project_root).strip()
 
-        parts = [
-            "You are editing a codebase.",
-            "Return ONLY the final file change blocks.",
-            "Do NOT add search confirmations, explanations, summaries, or markdown fences.",
-            "Use this exact format and nothing else:",
-            "@@FILE: relative/path/to/file",
-            "@@MODE: replace_file",
-            "@@TO:",
-            "full file content here",
-            "@@END",
-            "",
-            "Rules:",
-            "- Use project-relative paths only.",
-            "- Supported modes: replace_file, replace_block, insert_after, delete_block.",
-            "- Choose the smallest mode that matches the change request.",
-            "- If a file is unchanged, omit it.",
-            "- Repeat the same block structure for each file.",
-        ]
+        parts.append("")
+        parts.append("## NOTEBOOKLM MODE")
+        parts.append("Use the same file-context layout as the normal prompt, but keep your final answer strict and short.")
+        parts.append("Return only valid `@@FILE` blocks.")
+        parts.append("If you use `replace_block`, include both `@@FROM` and `@@TO`.")
+        parts.append("Prefer `replace_file` for whole-file changes.")
+        parts.append("Do not add explanations, summaries, or markdown fences around the final answer.")
 
         if root:
-            parts.append("")
-            parts.append("PROJECT ROOT:")
-            parts.append(f"`{root}`")
+            parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
 
         if self.files:
-            parts.append("")
-            parts.append("FILES:")
             for fp in self.files:
                 try:
                     with open(fp, 'r', encoding='utf-8', errors='replace') as f:
                         content = f.read()
                     ext = os.path.splitext(fp)[1].lstrip('.')
-                    parts.append(f"### `{self._prompt_path(fp)}`")
-                    parts.append(f"```{ext}\n{content}\n```")
+                    parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
                 except Exception as e:
-                    parts.append(f"### `{self._prompt_path(fp)}`")
-                    parts.append(f"[ERROR reading file: {e}]")
+                    parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
         else:
-            parts.append("")
             parts.append("No local source files are loaded yet.")
             parts.append("Create the project from scratch in the project root above.")
 
         if new_project and root and not self.files:
-            parts.append("")
-            parts.append("NEW PROJECT INSTRUCTIONS:")
+            parts.append("\n## NEW PROJECT INSTRUCTIONS")
             parts.append("Treat this as a fresh project scaffold and return complete file contents for any new files.")
 
         if task:
-            parts.append("")
-            parts.append("TASK:")
-            parts.append(task)
+            parts.append(f"\n---\n## NOW DO THIS\n\n{task}")
 
         return '\n'.join(parts).strip()
 
