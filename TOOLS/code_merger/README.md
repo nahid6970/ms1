@@ -24,7 +24,8 @@ python merge_gui.py
 3. Optionally type your task/instructions in the box.
 4. For a brand-new project, click **ADD DIR / ROOT** and choose the empty folder you want to use as the project root.
 5. Click **GENERATE PROMPT** → a full prompt is built even if no local files are present yet.
-6. Click **COPY TO CLIPBOARD** and paste into Gemini / ChatGPT / AI Studio.
+6. Use **NOTEBOOKLM PROMPT** when you want a stricter prompt tailored for NotebookLM-style output.
+7. Click **COPY TO CLIPBOARD** and paste into Gemini / ChatGPT / AI Studio.
 
 ### Step 2 — Ask the AI
 The AI will respond using the `@@FILE` / `@@MODE` / `@@END` format defined in `PROMPT_GUIDE.md`.
