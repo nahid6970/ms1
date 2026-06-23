@@ -63,6 +63,10 @@ function isElementClickable(el) {
   return true;
 }
 
+function normalizeMatchText(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
 // Generate unique selector
 function getUniqueSelector(el) {
   if (!(el instanceof Element)) return '';
@@ -117,7 +121,12 @@ function onPickerClick(e) {
   e.stopPropagation();
   
   const selector = getUniqueSelector(e.target);
-  chrome.runtime.sendMessage({ action: 'elementPicked', selector: selector });
+  chrome.runtime.sendMessage({
+    action: 'elementPicked',
+    selector,
+    tagName: e.target.tagName ? e.target.tagName.toLowerCase() : '',
+    text: (e.target.innerText || e.target.textContent || '').trim()
+  });
   
   stopPicker();
 }
@@ -188,7 +197,7 @@ async function interruptibleDelay(seconds) {
   }
 }
 
-async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', requireVisible = false, allowInfiniteWait = false } = {}) {
+async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', requireVisible = false, allowInfiniteWait = false, selectorText = '' } = {}) {
   const timeoutMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
   const startTime = Date.now();
 
@@ -199,7 +208,15 @@ async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', re
 
     let element = null;
     try {
-      if (matchMode === 'visible' || matchMode === 'clickable') {
+      if (matchMode === 'text') {
+        const targetText = normalizeMatchText(selectorText);
+        if (!targetText) {
+          element = selector ? document.querySelector(selector) : null;
+        } else {
+          const candidates = Array.from(document.querySelectorAll(selector || '*'));
+          element = candidates.find((candidate) => normalizeMatchText(candidate.textContent || candidate.innerText || '') === targetText) || null;
+        }
+      } else if (matchMode === 'visible' || matchMode === 'clickable') {
         const candidates = Array.from(document.querySelectorAll(selector));
         element = candidates.find((candidate) => {
           if (matchMode === 'visible') {
@@ -352,6 +369,8 @@ async function evaluateConcurrentConditions(step, timeoutSeconds) {
 
 // Nested branching & standard actions executors
 async function executeStandardAction(step, label, waitTimeout, selectorMode) {
+  const selectorText = step.selectorText || '';
+
   if (step.action === 'wait') {
     logMessage(`[Step ${label}] Wait step completed.`);
     return false;
@@ -361,6 +380,7 @@ async function executeStandardAction(step, label, waitTimeout, selectorMode) {
     logMessage(`[Step ${label}] Waiting for element: ${step.selector}`);
     const result = await resolveSelector(step.selector, waitTimeout, {
       matchMode: selectorMode,
+      selectorText,
       requireVisible: true,
       allowInfiniteWait: true
     });
@@ -385,6 +405,7 @@ async function executeStandardAction(step, label, waitTimeout, selectorMode) {
     if (step.selector) {
       const navResult = await resolveSelector(step.selector, waitTimeout, {
         matchMode: selectorMode,
+        selectorText,
         requireVisible: false,
         allowInfiniteWait: false
       });
@@ -416,6 +437,7 @@ async function executeStandardAction(step, label, waitTimeout, selectorMode) {
 
   const result = await resolveSelector(step.selector, waitTimeout, {
     matchMode: selectorMode,
+    selectorText,
     requireVisible: false,
     allowInfiniteWait: false
   });

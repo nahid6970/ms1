@@ -14,6 +14,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       let updatedSteps = [...steps];
 
+      const pickedSelector = message.selector || '';
+      const pickedTagName = message.tagName || '';
+      const pickedText = message.text || '';
+
+      const applyPickedSelection = (item, selectorMode) => {
+        const nextItem = { ...item };
+        if (selectorMode === 'text') {
+          nextItem.selectorMode = 'text';
+          nextItem.selector = pickedTagName || pickedSelector;
+          nextItem.selectorText = pickedText;
+        } else {
+          nextItem.selector = pickedSelector;
+        }
+        return nextItem;
+      };
+
       if (stepIdStr.startsWith('cond_')) {
         // Format: cond_stepId_condType_condIdx
         const parts = stepIdStr.split('_');
@@ -23,7 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         updatedSteps = steps.map(step => {
           if (step.id === sId && step[condType] && step[condType][condIdx]) {
             const updatedConds = [...step[condType]];
-            updatedConds[condIdx] = { ...updatedConds[condIdx], selector: message.selector };
+            updatedConds[condIdx] = { ...updatedConds[condIdx], selector: pickedSelector };
             return { ...step, [condType]: updatedConds };
           }
           return step;
@@ -37,7 +53,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         updatedSteps = steps.map(step => {
           if (step.id === sId && step[subStepType] && step[subStepType][subIdx]) {
             const updatedSubs = [...step[subStepType]];
-            updatedSubs[subIdx] = { ...updatedSubs[subIdx], selector: message.selector };
+            const selectorMode = updatedSubs[subIdx].selectorMode || 'css';
+            updatedSubs[subIdx] = applyPickedSelection(updatedSubs[subIdx], selectorMode);
             return { ...step, [subStepType]: updatedSubs };
           }
           return step;
@@ -47,7 +64,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const sId = parseInt(stepIdStr, 10);
         updatedSteps = steps.map(step => {
           if (step.id === sId) {
-            return { ...step, selector: message.selector };
+            const selectorMode = step.selectorMode || 'css';
+            return applyPickedSelection(step, selectorMode);
           }
           return step;
         });

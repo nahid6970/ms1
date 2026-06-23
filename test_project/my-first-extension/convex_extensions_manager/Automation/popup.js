@@ -503,6 +503,8 @@ function renderBranchStepDetails(step) {
 function renderSubStepRow(stepId, subStepType, subStep, subIdx) {
   const isType = subStep.action === 'type';
   const isWait = subStep.action === 'wait';
+  const selectorMode = subStep.selectorMode || 'css';
+  const isTextMode = selectorMode === 'text';
 
   return `
     <div class="branch-substep-row" data-step-id="${stepId}" data-type="${subStepType}" data-sub-idx="${subIdx}">
@@ -518,7 +520,14 @@ function renderSubStepRow(stepId, subStepType, subStep, subIdx) {
       </select>
 
       <div class="branch-substep-inputs" style="display: ${isWait ? 'none' : 'flex'}; flex: 1; gap: 4px;">
-        <input type="text" class="branch-substep-selector" placeholder="Selector / URL" value="${subStep.selector || ''}" />
+        <select class="branch-substep-selector-mode" title="Selector match mode">
+          <option value="css" ${selectorMode === 'css' ? 'selected' : ''}>CSS</option>
+          <option value="visible" ${selectorMode === 'visible' ? 'selected' : ''}>Visible CSS</option>
+          <option value="clickable" ${selectorMode === 'clickable' ? 'selected' : ''}>Clickable CSS</option>
+          <option value="text" ${isTextMode ? 'selected' : ''}>Text</option>
+        </select>
+        <input type="text" class="branch-substep-selector" placeholder="CSS selector / tag" value="${subStep.selector || ''}" />
+        <input type="text" class="branch-substep-text" placeholder="Text to match" value="${subStep.selectorText || ''}" style="display: ${isTextMode ? 'block' : 'none'};" />
         <button class="btn-pick-substep" title="Pick element">🎯</button>
         <input type="text" class="branch-substep-value" placeholder="Text" value="${subStep.value || ''}" style="display: ${isType ? 'block' : 'none'};" />
       </div>
@@ -553,6 +562,7 @@ async function renderSteps() {
       const isWaitAction = step.action === 'wait';
       const isBranchAction = step.action === 'branch';
       const selectorMode = step.selectorMode || 'css';
+      const isTextMode = selectorMode === 'text';
 
       stepCard.innerHTML = `
         <div class="step-row-top">
@@ -574,8 +584,10 @@ async function renderSteps() {
                 <option value="css" ${selectorMode === 'css' ? 'selected' : ''}>CSS</option>
                 <option value="visible" ${selectorMode === 'visible' ? 'selected' : ''}>Visible CSS</option>
                 <option value="clickable" ${selectorMode === 'clickable' ? 'selected' : ''}>Clickable CSS</option>
+                <option value="text" ${isTextMode ? 'selected' : ''}>Text</option>
               </select>
-              <input type="text" class="selector-input" placeholder="CSS Selector" value="${step.selector || ''}" data-id="${step.id}" />
+              <input type="text" class="selector-input" placeholder="CSS selector / tag" value="${step.selector || ''}" data-id="${step.id}" />
+              <input type="text" class="selector-text-input" placeholder="Text to match" value="${step.selectorText || ''}" data-id="${step.id}" style="display: ${isTextMode ? 'block' : 'none'};" />
               <button class="btn-pick" title="Pick element on page" data-id="${step.id}">🎯</button>
             </div>
             <input type="text" class="value-input" placeholder="Text to type" value="${step.value || ''}" data-id="${step.id}" style="display: ${isTypeAction ? 'block' : 'none'};" />
@@ -665,6 +677,12 @@ function attachStepChangeHandlers() {
   document.querySelectorAll('.selector-input').forEach(input => {
     input.addEventListener('change', (e) => {
       updateStepField(parseInt(e.target.dataset.id, 10), 'selector', e.target.value);
+    });
+  });
+
+  document.querySelectorAll('.selector-text-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      updateStepField(parseInt(e.target.dataset.id, 10), 'selectorText', e.target.value);
     });
   });
 
@@ -839,7 +857,9 @@ function attachStepChangeHandlers() {
           if (!step[subStepType]) step[subStepType] = [];
           step[subStepType].push({
             action: 'click',
+            selectorMode: 'css',
             selector: '',
+            selectorText: '',
             value: '',
             delay: 0.5
           });
@@ -883,6 +903,23 @@ function attachStepChangeHandlers() {
     });
   });
 
+  document.querySelectorAll('.branch-substep-selector-mode').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].selectorMode = e.target.value;
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
+        }
+      });
+    });
+  });
+
   document.querySelectorAll('.btn-pick-substep').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const row = e.target.closest('.branch-substep-row');
@@ -904,6 +941,23 @@ function attachStepChangeHandlers() {
         const step = steps.find(s => s.id === stepId);
         if (step && step[subStepType] && step[subStepType][subIdx]) {
           step[subStepType][subIdx].value = e.target.value;
+          saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-text').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].selectorText = e.target.value;
           saveToActiveProjectAndStorage({ steps });
         }
       });
@@ -955,6 +1009,7 @@ async function addNewStep() {
       action: 'click',
       selectorMode: 'css',
       selector: '',
+      selectorText: '',
       value: '',
       delay: 1, // Default to 1 second
       conditions: [],
@@ -982,7 +1037,7 @@ async function updateStepField(stepId, field, value) {
     if (step) {
       step[field] = value;
       saveToActiveProjectAndStorage({ steps }, () => {
-        if (field === 'action') {
+        if (field === 'action' || field === 'selectorMode') {
           renderSteps();
         }
       });
