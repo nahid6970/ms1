@@ -483,6 +483,20 @@ input[type="number"] {
   width: 100%;
 }
 
+.step-enabled-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.step-enabled-toggle input {
+  margin: 0;
+}
+
 .branch-substep-index {
   font-size: 10px;
   font-weight: bold;
@@ -495,6 +509,10 @@ input[type="number"] {
   justify-content: center;
   border-radius: 2px;
   flex-shrink: 0;
+}
+
+.branch-substep-row .step-enabled-toggle {
+  margin-left: 2px;
 }
 
 .branch-cond-type-select, .branch-substep-action {
@@ -563,6 +581,12 @@ input[type="number"] {
 .step-card:hover {
   border-color: rgba(203, 166, 247, 0.4);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.step-card.is-disabled,
+.branch-substep-row.is-disabled {
+  opacity: 0.55;
+  filter: grayscale(0.15);
 }
 
 .step-row-top {

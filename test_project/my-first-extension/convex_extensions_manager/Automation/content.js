@@ -68,6 +68,10 @@ function normalizeMatchText(text) {
   return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+function isStepEnabled(step) {
+  return step && step.enabled !== false;
+}
+
 function getSearchDocuments(rootWindow = window) {
   const docs = [];
 
@@ -446,6 +450,11 @@ async function evaluateConcurrentConditions(step, timeoutSeconds) {
 
 // Nested branching & standard actions executors
 async function executeStandardAction(step, label, waitTimeout, selectorMode) {
+  if (!isStepEnabled(step)) {
+    logMessage(`[Step ${label}] Skipped (disabled).`);
+    return false;
+  }
+
   const selectorText = step.selectorText || '';
 
   if (step.action === 'wait') {
@@ -572,6 +581,10 @@ async function executeSubStepsList(subSteps, currentLoop, parentLabel, waitTimeo
   for (let idx = 0; idx < subSteps.length; idx++) {
     if (stopRequested) break;
     const step = subSteps[idx];
+    if (!isStepEnabled(step)) {
+      logMessage(`[Step ${parentLabel}.${idx + 1}] Skipped (disabled).`);
+      continue;
+    }
     const selectorMode = step.selectorMode || 'css';
     const label = `${parentLabel}.${idx + 1}`;
 
@@ -623,6 +636,10 @@ async function executeStepsList(stepsList, currentLoop, startStepIndex, waitTime
   for (let i = startStepIndex; i < stepsList.length; i++) {
     if (stopRequested) break;
     const step = stepsList[i];
+    if (!isStepEnabled(step)) {
+      logMessage(`[Step ${i + 1}] Skipped (disabled).`);
+      continue;
+    }
     const selectorMode = step.selectorMode || 'css';
     
     updateState("running", currentLoop, i);

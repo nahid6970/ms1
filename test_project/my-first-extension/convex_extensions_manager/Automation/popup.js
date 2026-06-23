@@ -505,10 +505,15 @@ function renderSubStepRow(stepId, subStepType, subStep, subIdx) {
   const isWait = subStep.action === 'wait';
   const selectorMode = subStep.selectorMode || 'css';
   const isTextMode = selectorMode === 'text';
+  const isEnabled = subStep.enabled !== false;
 
   return `
-    <div class="branch-substep-row" data-step-id="${stepId}" data-type="${subStepType}" data-sub-idx="${subIdx}">
+    <div class="branch-substep-row ${isEnabled ? '' : 'is-disabled'}" data-step-id="${stepId}" data-type="${subStepType}" data-sub-idx="${subIdx}">
       <span class="branch-substep-index">${subIdx + 1}</span>
+      <label class="step-enabled-toggle" title="Disable this sub-step temporarily">
+        <input type="checkbox" class="branch-substep-enabled" ${isEnabled ? 'checked' : ''} />
+        <span>On</span>
+      </label>
       <select class="branch-substep-action">
         <option value="click" ${subStep.action === 'click' ? 'selected' : ''}>Click</option>
         <option value="type" ${subStep.action === 'type' ? 'selected' : ''}>Type Text</option>
@@ -555,7 +560,7 @@ async function renderSteps() {
 
     steps.forEach((step, idx) => {
       const stepCard = document.createElement('div');
-      stepCard.className = 'step-card';
+      stepCard.className = `step-card ${step.enabled === false ? 'is-disabled' : ''}`;
       stepCard.dataset.id = step.id;
 
       const isTypeAction = step.action === 'type';
@@ -563,10 +568,15 @@ async function renderSteps() {
       const isBranchAction = step.action === 'branch';
       const selectorMode = step.selectorMode || 'css';
       const isTextMode = selectorMode === 'text';
+      const isEnabled = step.enabled !== false;
 
       stepCard.innerHTML = `
         <div class="step-row-top">
           <span class="step-index" title="Hold and drag to reorder step">${idx + 1}</span>
+          <label class="step-enabled-toggle" title="Disable this step temporarily">
+            <input type="checkbox" class="step-enabled-input" data-id="${step.id}" ${isEnabled ? 'checked' : ''} />
+            <span>On</span>
+          </label>
           <select class="step-action-select" data-id="${step.id}">
             <option value="click" ${step.action === 'click' ? 'selected' : ''}>Click</option>
             <option value="type" ${step.action === 'type' ? 'selected' : ''}>Type Text</option>
@@ -697,6 +707,12 @@ function attachStepChangeHandlers() {
   document.querySelectorAll('.step-action-select').forEach(select => {
     select.addEventListener('change', (e) => {
       updateStepField(parseInt(e.target.dataset.id, 10), 'action', e.target.value);
+    });
+  });
+
+  document.querySelectorAll('.step-enabled-input').forEach(input => {
+    input.addEventListener('change', (e) => {
+      updateStepField(parseInt(e.target.dataset.id, 10), 'enabled', e.target.checked);
     });
   });
 
@@ -857,6 +873,7 @@ function attachStepChangeHandlers() {
           if (!step[subStepType]) step[subStepType] = [];
           step[subStepType].push({
             action: 'click',
+            enabled: true,
             selectorMode: 'css',
             selector: '',
             selectorText: '',
@@ -898,6 +915,23 @@ function attachStepChangeHandlers() {
         if (step && step[subStepType] && step[subStepType][subIdx]) {
           step[subStepType][subIdx].selector = e.target.value;
           saveToActiveProjectAndStorage({ steps });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.branch-substep-enabled').forEach(input => {
+    input.addEventListener('change', (e) => {
+      const row = e.target.closest('.branch-substep-row');
+      const stepId = parseInt(row.dataset.stepId, 10);
+      const subStepType = row.dataset.type;
+      const subIdx = parseInt(row.dataset.subIdx, 10);
+      chrome.storage.local.get('steps', (data) => {
+        const steps = data.steps || [];
+        const step = steps.find(s => s.id === stepId);
+        if (step && step[subStepType] && step[subStepType][subIdx]) {
+          step[subStepType][subIdx].enabled = e.target.checked;
+          saveToActiveProjectAndStorage({ steps }, renderSteps);
         }
       });
     });
@@ -1007,6 +1041,7 @@ async function addNewStep() {
     steps.push({
       id: newId,
       action: 'click',
+      enabled: true,
       selectorMode: 'css',
       selector: '',
       selectorText: '',
@@ -1037,7 +1072,7 @@ async function updateStepField(stepId, field, value) {
     if (step) {
       step[field] = value;
       saveToActiveProjectAndStorage({ steps }, () => {
-        if (field === 'action' || field === 'selectorMode') {
+        if (field === 'action' || field === 'selectorMode' || field === 'enabled') {
           renderSteps();
         }
       });
