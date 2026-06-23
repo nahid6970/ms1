@@ -1073,11 +1073,11 @@ function sendTabMessageWithInjection(tabId, message, callback) {
     if (chrome.runtime.lastError) {
       // Content script is not injected. Inject dynamically
       chrome.scripting.executeScript({
-        target: { tabId: tabId },
+        target: { tabId: tabId, allFrames: true },
         files: ['content.js']
       }).then(() => {
         return chrome.scripting.insertCSS({
-          target: { tabId: tabId },
+          target: { tabId: tabId, allFrames: true },
           files: ['content.css']
         });
       }).then(() => {

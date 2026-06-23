@@ -2,6 +2,7 @@ let pickerActive = false;
 let hoveredElement = null;
 let isAutomating = false;
 let stopRequested = false;
+const CLICKFLOW_BROADCAST_KEY = '__clickflow_broadcast__';
 
 // Helpers to read/write storage
 function getStorageData() {
@@ -67,6 +68,96 @@ function normalizeMatchText(text) {
   return String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+function getSearchDocuments(rootWindow = window) {
+  const docs = [];
+
+  const visit = (win) => {
+    try {
+      if (!win || !win.document || docs.includes(win.document)) return;
+      docs.push(win.document);
+    } catch {
+      return;
+    }
+
+    let frameCount = 0;
+    try {
+      frameCount = win.frames.length;
+    } catch {
+      frameCount = 0;
+    }
+
+    for (let i = 0; i < frameCount; i++) {
+      try {
+        visit(win.frames[i]);
+      } catch {
+        // Skip cross-origin or inaccessible frames.
+      }
+    }
+  };
+
+  visit(rootWindow);
+  return docs;
+}
+
+function findElementAcrossDocuments(selector, matchMode, selectorText = '') {
+  let selectorError = null;
+  const docs = getSearchDocuments(window);
+  const targetText = normalizeMatchText(selectorText);
+
+  for (const doc of docs) {
+    try {
+      if (matchMode === 'text') {
+        if (!targetText) {
+          const el = selector ? doc.querySelector(selector) : null;
+          if (el) return el;
+          continue;
+        }
+
+        const candidates = Array.from(doc.querySelectorAll(selector || '*'));
+        const el = candidates.find((candidate) => normalizeMatchText(candidate.textContent || candidate.innerText || '') === targetText) || null;
+        if (el) return el;
+      } else if (matchMode === 'visible' || matchMode === 'clickable') {
+        const candidates = Array.from(doc.querySelectorAll(selector));
+        const el = candidates.find((candidate) => {
+          if (matchMode === 'visible') {
+            return isElementVisible(candidate);
+          }
+          return isElementClickable(candidate);
+        }) || null;
+        if (el) return el;
+      } else {
+        const el = doc.querySelector(selector);
+        if (el) return el;
+      }
+    } catch (err) {
+      selectorError = err;
+    }
+  }
+
+  if (selectorError) {
+    throw selectorError;
+  }
+
+  return null;
+}
+
+function broadcastPickerControl(action) {
+  let frameCount = 0;
+  try {
+    frameCount = window.frames.length;
+  } catch {
+    frameCount = 0;
+  }
+
+  for (let i = 0; i < frameCount; i++) {
+    try {
+      window.frames[i].postMessage({ [CLICKFLOW_BROADCAST_KEY]: true, action }, '*');
+    } catch {
+      // Ignore inaccessible frames.
+    }
+  }
+}
+
 // Generate unique selector
 function getUniqueSelector(el) {
   if (!(el instanceof Element)) return '';
@@ -129,11 +220,13 @@ function onPickerClick(e) {
   });
   
   stopPicker();
+  broadcastPickerControl('stop_picker');
 }
 
 function onPickerKeyDown(e) {
   if (e.key === 'Escape') {
     stopPicker();
+    broadcastPickerControl('stop_picker');
   }
 }
 
@@ -208,25 +301,7 @@ async function resolveSelector(selector, timeoutSeconds, { matchMode = 'css', re
 
     let element = null;
     try {
-      if (matchMode === 'text') {
-        const targetText = normalizeMatchText(selectorText);
-        if (!targetText) {
-          element = selector ? document.querySelector(selector) : null;
-        } else {
-          const candidates = Array.from(document.querySelectorAll(selector || '*'));
-          element = candidates.find((candidate) => normalizeMatchText(candidate.textContent || candidate.innerText || '') === targetText) || null;
-        }
-      } else if (matchMode === 'visible' || matchMode === 'clickable') {
-        const candidates = Array.from(document.querySelectorAll(selector));
-        element = candidates.find((candidate) => {
-          if (matchMode === 'visible') {
-            return isElementVisible(candidate);
-          }
-          return isElementClickable(candidate);
-        }) || null;
-      } else {
-        element = document.querySelector(selector);
-      }
+      element = findElementAcrossDocuments(selector, matchMode, selectorText);
     } catch (err) {
       throw new Error(`Invalid selector "${selector}": ${err.message}`);
     }
@@ -255,26 +330,28 @@ async function evaluateCondition(cond) {
   const targetValue = cond.value || '';
 
   try {
+    const findFirst = (sel) => findElementAcrossDocuments(sel, 'css');
+
     if (type === 'exists') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       return !!el;
     }
     if (type === 'visible') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       return el ? isElementVisible(el) : false;
     }
     if (type === 'clickable') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       return el ? isElementClickable(el) : false;
     }
     if (type === 'text_contains') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       if (!el) return false;
       const text = el.textContent || el.innerText || '';
       return text.toLowerCase().includes(targetValue.toLowerCase());
     }
     if (type === 'text_equals') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       if (!el) return false;
       const text = (el.textContent || el.innerText || '').trim();
       return text.toLowerCase() === targetValue.trim().toLowerCase();
@@ -286,12 +363,12 @@ async function evaluateCondition(cond) {
       return window.location.href.trim().toLowerCase() === targetValue.trim().toLowerCase();
     }
     if (type === 'value_contains') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       if (!el || el.value === undefined) return false;
       return String(el.value).toLowerCase().includes(targetValue.toLowerCase());
     }
     if (type === 'value_equals') {
-      const el = document.querySelector(selector);
+      const el = findFirst(selector);
       if (!el || el.value === undefined) return false;
       return String(el.value).trim().toLowerCase() === targetValue.trim().toLowerCase();
     }
@@ -677,15 +754,37 @@ function stopKeepAlive() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'start_picker') {
     startPicker();
+    broadcastPickerControl('start_picker');
     sendResponse({ success: true });
   } else if (message.action === 'trigger_run') {
+    if (window.top !== window) {
+      sendResponse({ success: false, ignored: true });
+      return;
+    }
     startKeepAlive();
     runAutomation();
     sendResponse({ success: true });
   } else if (message.action === 'trigger_stop') {
+    if (window.top !== window) {
+      sendResponse({ success: false, ignored: true });
+      return;
+    }
     stopRequested = true;
     stopKeepAlive();
     sendResponse({ success: true });
+  }
+});
+
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (!data || data[CLICKFLOW_BROADCAST_KEY] !== true) return;
+
+  if (data.action === 'start_picker') {
+    startPicker();
+    broadcastPickerControl('start_picker');
+  } else if (data.action === 'stop_picker') {
+    stopPicker();
+    broadcastPickerControl('stop_picker');
   }
 });
 
