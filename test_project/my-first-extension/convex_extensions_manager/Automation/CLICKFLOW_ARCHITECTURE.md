@@ -7,7 +7,7 @@ This document provides a comprehensive overview of the ClickFlow Automator Chrom
 ## 1. Core Architecture Overview
 ClickFlow is a Manifest V3 Chrome Extension designed for complex, sequential page automations. It consists of three primary modules:
 *   **Popup Window (`popup.html` / `popup.js`)**: The user control center where you create project profiles, manage automation configurations, configure standard or conditional steps, and trigger runs.
-*   **Content Script (`content.js`)**: The active runtime execution engine injected directly into target pages. It executes step sequences, runs evaluations, handles page-load resume logic, and interfaces with the web DOM.
+*   **Content Script (`content.js`)**: The active runtime execution engine injected directly into target pages and same-origin frames. It executes step sequences, runs evaluations, handles page-load resume logic, and interfaces with the web DOM.
 *   **Background Worker (`background.js`)**: Operates as a light-weight relay. It handles notification dispatch, manages active element-picking states across tabs, and programmatically reopens the popup when element selection completes.
 
 ---
@@ -31,6 +31,7 @@ The state is managed inside `chrome.storage.local`. To maintain backwards compat
   "loopCount": 1,
   "loopDelay": 1.0,
   "waitTimeout": 0,
+  "enabled": true,
   "automationState": {
     "status": "idle",
     "currentLoop": 0,
@@ -50,6 +51,10 @@ Standard steps execute sequentially. To support complex branching, a special `'b
 {
   "id": 2,
   "action": "branch",
+  "enabled": true,
+  "selectorMode": "css",      // 'css', 'visible', 'clickable', or 'text'
+  "selector": "#menu_tools",  // CSS selector or tag name
+  "selectorText": "System Tools",
   "timeout": 5,                 // Wait timeout for conditions to be resolved
   "logicMode": "all",           // IF match rules: 'all' (AND) or 'any' (OR)
   "conditions": [               // IF condition list
@@ -78,6 +83,11 @@ Standard steps execute sequentially. To support complex branching, a special `'b
   ]
 }
 
+### Step Execution Notes
+*   `enabled: false` skips a step or sub-step without deleting it.
+*   `selectorMode: "text"` uses the selector field as a tag or selector filter and matches `selectorText` against visible text content.
+*   The picker now captures the clicked element's selector, tag name, and text so text-mode steps can be populated directly.
+
 ### Condition Types
 *   `exists`, `visible`, `clickable` (checks element states via selector).
 *   `text_contains`, `text_equals` (checks element text content).
@@ -93,6 +103,11 @@ The engine executes branching rules concurrently. In a continuous `while` loop u
 
 This concurrent check removes layout-trapping lag, meaning that if `#mdm-no-stats` appears after only 1 second, the engine immediately switches paths without wasting the rest of the timeout duration.
 
+### Frame Handling
+*   The content script is injected into all same-origin frames.
+*   Selector resolution searches the top document and same-origin descendant frames.
+*   Picker start/stop messages are broadcast into frames so router UIs that split navigation into iframes remain selectable.
+
 ---
 
 ## 4. UI Layout & Sizing Engineering
@@ -101,8 +116,9 @@ Chromium enforces a hard limit of `800px` width by `600px` height on popups. To 
 *   **No Redundant Vertical Rows**: The "Start/Stop Automation" controls (`#toggleBtn`) are integrated directly into the header adjacent to the Profile dropdown and Backup actions.
 *   **Window Constraints**: The body has `overflow: hidden !important` and `.steps-list` is capped at a strict height of `410px` with `scroll-behavior: smooth;`. This guarantees that only a single, unified scrollbar is rendered, eliminating mouse-wheel focus traps.
 *   **Space-Saving Collapsible Editors**: Branch step cards use native, hardware-accelerated HTML `<details>` and `<summary>` components to collapse optional paths (ELSE-IF, ELSE) by default. Cards only expand when custom pathways are actively configured.
+*   **Step Disable Toggle**: Each step and sub-step includes a temporary enable/disable checkbox so test runs can skip selected actions without removing them.
 *   **GPU Rendering Optimization**: The `.step-card` class applies `transform: translate3d(0, 0, 0);` to force GPU compositing. This prevents paint recalculation bottlenecks when scrolling large, expanded branching elements.
-*   **Responsive Input Flexbox**: Squeezed, inline pixel widths on input fields are replaced with flexbox weightings (`flex: 2` for selectors, `flex: 1` for values) allowing inputs to dynamically stretch across the entire `800px` width.
+*   **Responsive Input Flexbox**: Squeezed, inline pixel widths on input fields are replaced with flexbox weightings (`flex: 2` for selectors, `flex: 1` for values) allowing inputs to dynamically stretch across the entire `800px` width. Text-mode selector inputs reuse the same row without breaking the layout.
 
 ---
 
@@ -117,3 +133,4 @@ Chromium enforces a hard limit of `800px` width by `600px` height on popups. To 
 *   If picking for standard steps, it sets a simple ID like `1`.
 *   If picking for branches, it passes a composite token: `cond_stepId_condType_condIdx` or `substep_stepId_subStepType_subIdx`.
 *   `background.js` parses this token, traverses the correct nested JSON fields, performs the write, updates the active project in the `projects` list, and calls `chrome.action.openPopup()` to automatically bring the extension interface back to the foreground.
+*   The picker and selector resolution are frame-aware, so same-origin router iframes are included.
