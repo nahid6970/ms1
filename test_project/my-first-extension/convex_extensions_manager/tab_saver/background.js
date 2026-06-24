@@ -100,83 +100,71 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "saveAndCloseTab") {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
+    (async () => {
+      const sharedModalCss = await fetch(chrome.runtime.getURL('shared-modal.css')).then((response) => response.text());
+
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        args: [sharedModalCss],
+        func: (sharedModalCssText) => {
         try {
           const id = 'tab-saver-deadline-modal';
           if (document.getElementById(id)) return;
 
-          // Add style to hide number arrows
           let style = document.getElementById(id + '-style');
           if (!style) {
             style = document.createElement('style');
             style.id = id + '-style';
-            style.textContent = `
-              #deadlineDays::-webkit-outer-spin-button,
-              #deadlineDays::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-              }
-              #deadlineDays {
-                -moz-appearance: textfield;
-              }
-            `;
+            style.textContent = sharedModalCssText;
             document.head.appendChild(style);
           }
 
           const overlay = document.createElement('div');
           overlay.id = id + '-overlay';
-          overlay.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.9); z-index: 2147483646; transition: opacity 0.3s; pointer-events: auto; backdrop-filter: blur(8px);';
+          overlay.className = 'shared-modal-overlay';
           
           const modal = document.createElement('div');
           modal.id = id;
-          modal.style = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: #0d0d12; padding: 0; border: 1px solid #00f3ff; 
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); 
-            z-index: 2147483647; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            display: flex; flex-direction: column; width: 320px; color: #fff; pointer-events: auto;
-          `;
+          modal.className = 'shared-modal';
           
           modal.innerHTML = `
-            <div style="background: #00f3ff; color: #000; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;">Edit</span>
-              <button id="closeBtn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #000; font-weight: bold; line-height: 1; padding: 0;">&times;</button>
+            <div class="modal-theme-header">
+              <span class="modal-theme-title">Edit</span>
+              <button id="closeBtn" class="close-btn modal-theme-close">&times;</button>
             </div>
             
-            <div style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Days from today</label>
-                <input type="number" id="deadlineDays" min="1" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='#00f3ff'" onblur="this.style.borderColor='#333'">
+            <div class="modal-theme-body">
+              <div class="modal-field">
+                <label for="deadlineDays">Days from today</label>
+                <input type="number" id="deadlineDays" min="1" class="modal-input">
               </div>
               
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Pick a date</label>
-                <input type="date" id="deadlineDate" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; cursor: pointer; width: 100%; color-scheme: dark;" onfocus="this.style.borderColor='#00f3ff'" onblur="this.style.borderColor='#333'">
+              <div class="modal-field">
+                <label for="deadlineDate">Pick a date</label>
+                <input type="date" id="deadlineDate" class="modal-input modal-date-input">
               </div>
 
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Tag</label>
-                <div style="display: flex; gap: 10px;">
-                  <select id="deadlineTag" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1; cursor: pointer;">
+              <div class="modal-field">
+                <label for="deadlineTag">Tag</label>
+                <div class="modal-inline-row">
+                  <select id="deadlineTag" class="modal-select">
                     <option value="">No Tag</option>
                   </select>
-                  <button id="addTagBtn" style="background: #1a1a24; border: 1px solid #00f3ff; color: #00f3ff; padding: 0 15px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+                  <button id="addTagBtn" class="modal-add-btn">+</button>
                 </div>
               </div>
 
-              <div id="newTagContainer" style="display: none; flex-direction: column; gap: 8px;">
-                <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name</label>
-                <div style="display: flex; gap: 10px;">
-                  <input type="text" id="newTagName" placeholder="Enter tag name..." style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1;">
-                  <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; font-weight: 800; cursor: pointer;">Add</button>
+              <div id="newTagContainer" class="modal-field modal-new-tag" style="display: none;">
+                <label for="newTagName">New Tag Name</label>
+                <div class="modal-inline-row">
+                  <input type="text" id="newTagName" placeholder="Enter tag name..." class="modal-input">
+                  <button id="saveNewTagBtn" class="modal-primary-btn">Add</button>
                 </div>
               </div>
               
-              <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <button id="cancelBtn" style="flex: 1; padding: 12px; border: 1px solid #333; background: transparent; color: #999; font-weight: 700; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">Cancel</button>
-                <button id="saveBtn" style="flex: 1.5; padding: 12px; border: none; background: #00f3ff; color: #000; font-weight: 800; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.2s;">Save & Close</button>
+              <div class="modal-actions">
+                <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                <button id="saveBtn" class="btn btn-primary">Save & Close</button>
               </div>
             </div>
           `;
@@ -235,11 +223,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           daysInput.focus();
 
-          cancelBtn.onmouseover = () => { cancelBtn.style.borderColor = '#666'; cancelBtn.style.color = '#fff'; };
-          cancelBtn.onmouseout = () => { cancelBtn.style.borderColor = '#333'; cancelBtn.style.color = '#999'; };
-          saveBtn.onmouseover = () => { saveBtn.style.opacity = '0.8'; };
-          saveBtn.onmouseout = () => { saveBtn.style.opacity = '1'; };
-
           daysInput.addEventListener('input', () => { if (daysInput.value) dateInput.value = ''; });
           dateInput.addEventListener('input', () => { if (dateInput.value) daysInput.value = ''; });
 
@@ -285,8 +268,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           console.error('Modal injection error:', e);
           chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: null, error: e.message });
         }
-      }
-    }).catch((err) => {
+        }
+      });
+    })().catch((err) => {
       console.error('Failed to inject script:', err);
       handleTabSaving(tab, null, null);
     });

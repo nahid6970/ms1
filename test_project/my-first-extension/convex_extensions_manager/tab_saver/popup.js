@@ -69,20 +69,20 @@ function renderManageTags() {
   manageTagsList.innerHTML = '';
   availableTags.forEach((tag, index) => {
     const tagItem = document.createElement('div');
-    tagItem.style = 'display: flex; align-items: center; gap: 8px; padding: 6px; border-bottom: 1px solid #333;';
+    tagItem.className = 'tag-item';
     
     const nameLabel = document.createElement('span');
     nameLabel.textContent = tag.name;
-    nameLabel.style = 'flex: 1; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+    nameLabel.className = 'tag-name';
     
     const colorInputs = document.createElement('div');
-    colorInputs.style = 'display: flex; gap: 4px; flex-shrink: 0;';
+    colorInputs.className = 'tag-colors';
 
     const bgPicker = document.createElement('input');
     bgPicker.type = 'color';
     bgPicker.value = tag.color;
     bgPicker.title = 'Background Color';
-    bgPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    bgPicker.className = 'theme-color-input tag-color-input';
     bgPicker.oninput = (e) => { availableTags[index].color = e.target.value; };
     bgPicker.onchange = () => { saveTagsAndRefresh(); };
     
@@ -90,13 +90,13 @@ function renderManageTags() {
     borderPicker.type = 'color';
     borderPicker.value = tag.borderColor || tag.color;
     borderPicker.title = 'Border Color';
-    borderPicker.style = 'width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;';
+    borderPicker.className = 'theme-color-input tag-color-input';
     borderPicker.oninput = (e) => { availableTags[index].borderColor = e.target.value; };
     borderPicker.onchange = () => { saveTagsAndRefresh(); };
     
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '×';
-    deleteBtn.style = 'background: #ff4757; color: white; border: none; border-radius: 4px; width: 18px; height: 18px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;';
+    deleteBtn.className = 'tag-delete-btn';
     deleteBtn.onclick = () => {
       if (confirm(`Delete tag "${tag.name}"?`)) {
         availableTags.splice(index, 1);

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Saver</title>
+  <link rel="stylesheet" href="shared-modal.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -43,52 +44,54 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>⚙️ Settings</h2>
-        <button id="closeModal" class="close-btn">&times;</button>
+    <div class="modal-content modal-theme">
+      <div class="modal-theme-header">
+        <span class="modal-theme-title">Settings</span>
+        <button id="closeModal" class="close-btn modal-theme-close">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body modal-theme-body settings-theme-body">
         <div class="setting-group">
           <label for="ytIconSize">YouTube Icon Size (px):</label>
-          <input type="range" id="ytIconSize" min="16" max="32" value="20" step="2">
-          <span id="ytIconValue">20px</span>
+          <div class="setting-inline">
+            <input type="range" id="ytIconSize" min="16" max="32" value="20" step="2" class="setting-range">
+            <span id="ytIconValue">20px</span>
+          </div>
         </div>
         <div class="setting-group">
           <label for="channelIconSize">Channel Icon Size (px):</label>
-          <input type="range" id="channelIconSize" min="12" max="24" value="18" step="2">
-          <span id="channelIconValue">18px</span>
+          <div class="setting-inline">
+            <input type="range" id="channelIconSize" min="12" max="24" value="18" step="2" class="setting-range">
+            <span id="channelIconValue">18px</span>
+          </div>
         </div>
         
         <div class="setting-group">
-          <label style="font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">Deadline Styles</label>
-          <div style="display: flex; flex-direction: column; background: #1a1a24; padding: 12px; border-radius: 4px; border: 1px solid #333; margin-top: 8px;">
-            <!-- Urgent Style Row -->
-            <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #333; margin-bottom: 8px;">
-              <span style="flex: 1; font-size: 10px; font-weight: 700; color: #ff4757; text-transform: uppercase;">Urgent (<= 3 days)</span>
-              <div style="display: flex; gap: 4px; align-items: center;">
-                <input type="color" id="urgentBg" title="Background Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="color" id="urgentFg" title="Text Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="color" id="urgentBorder" title="Border Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="checkbox" id="urgentBold" title="Bold Text" style="cursor: pointer;">
+          <label class="section-label">Deadline Styles</label>
+          <div class="settings-panel">
+            <div class="settings-row settings-row-divider">
+              <span class="settings-row-label urgent">Urgent (<= 3 days)</span>
+              <div class="settings-controls">
+                <input type="color" id="urgentBg" title="Background Color" class="theme-color-input">
+                <input type="color" id="urgentFg" title="Text Color" class="theme-color-input">
+                <input type="color" id="urgentBorder" title="Border Color" class="theme-color-input">
+                <input type="checkbox" id="urgentBold" title="Bold Text" class="theme-check">
               </div>
             </div>
-            <!-- Safe Style Row -->
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="flex: 1; font-size: 10px; font-weight: 700; color: #00f3ff; text-transform: uppercase;">Safe Style</span>
-              <div style="display: flex; gap: 4px; align-items: center;">
-                <input type="color" id="safeBg" title="Background Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="color" id="safeFg" title="Text Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="color" id="safeBorder" title="Border Color" style="width: 20px; height: 20px; border: 1px solid #444; background: none; cursor: pointer; padding: 0;">
-                <input type="checkbox" id="safeBold" title="Bold Text" style="cursor: pointer;">
+            <div class="settings-row">
+              <span class="settings-row-label safe">Safe Style</span>
+              <div class="settings-controls">
+                <input type="color" id="safeBg" title="Background Color" class="theme-color-input">
+                <input type="color" id="safeFg" title="Text Color" class="theme-color-input">
+                <input type="color" id="safeBorder" title="Border Color" class="theme-color-input">
+                <input type="checkbox" id="safeBold" title="Bold Text" class="theme-check">
               </div>
             </div>
           </div>
         </div>
 
         <div class="setting-group">
-          <label style="font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">Manage Tags</label>
-          <div id="manageTagsList" style="display: flex; flex-direction: column; gap: 8px; background: #1a1a24; padding: 12px; border-radius: 4px; border: 1px solid #333; max-height: 200px; overflow-y: auto; margin-top: 8px;">
+          <label class="section-label">Manage Tags</label>
+          <div id="manageTagsList" class="settings-panel settings-tags-list">
             <!-- Tags will be listed here dynamically -->
           </div>
         </div>
