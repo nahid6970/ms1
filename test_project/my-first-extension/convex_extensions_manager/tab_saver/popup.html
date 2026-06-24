@@ -11,9 +11,20 @@
     <div class="header">
       <h1>📑 Saved Tabs</h1>
       <div class="tab-count">
-        <span id="tabCount">0</span> tabs saved
+        <span id="tabCount">0</span> tabs shown
       </div>
       <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
+    </div>
+
+    <div class="view-tabs" role="tablist" aria-label="Saved tab views">
+      <button id="viewAllTabs" class="view-tab active" role="tab" aria-selected="true" data-view="all">
+        <span>All</span>
+        <span class="view-tab-count" id="allTabCount">0</span>
+      </button>
+      <button id="viewOutdatedTabs" class="view-tab" role="tab" aria-selected="false" data-view="outdated">
+        <span>Outdated +2d</span>
+        <span class="view-tab-count" id="outdatedTabCount">0</span>
+      </button>
     </div>
 
     <div id="tabList" class="tab-list">
@@ -143,4 +154,3 @@
   <script src="popup.js"></script>
 </body>
 </html>
->

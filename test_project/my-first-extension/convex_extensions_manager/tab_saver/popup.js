@@ -8,6 +8,7 @@ function loadTabs() {
 
 // Variables for context menu and modal
 let currentRightClickedTabId = null;
+let currentTabView = 'all';
 const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
@@ -20,6 +21,10 @@ const newTagColor = document.getElementById('newTagColor');
 const newTagBorderColor = document.getElementById('newTagBorderColor');
 const saveNewTagBtn = document.getElementById('saveNewTagBtn');
 const manageTagsList = document.getElementById('manageTagsList');
+const viewAllTabsBtn = document.getElementById('viewAllTabs');
+const viewOutdatedTabsBtn = document.getElementById('viewOutdatedTabs');
+const allTabCount = document.getElementById('allTabCount');
+const outdatedTabCount = document.getElementById('outdatedTabCount');
 
 // Tags management
 let availableTags = [
@@ -142,9 +147,19 @@ saveNewTagBtn.onclick = () => {
 function displayTabs(tabs) {
   const tabList = document.getElementById('tabList');
   const tabCount = document.getElementById('tabCount');
-  
+
+  const totalTabs = tabs.length;
+  const outdatedTabs = tabs.filter(tab => isOutdatedDeadline(tab));
+  const visibleTabs = currentTabView === 'outdated' ? outdatedTabs : tabs;
+
+  tabCount.textContent = visibleTabs.length;
+  allTabCount.textContent = totalTabs;
+  outdatedTabCount.textContent = outdatedTabs.length;
+
+  setActiveViewButton(currentTabView);
+
   // Sort tabs: deadlines first (soonest first), then newest first for those without deadlines
-  tabs.sort((a, b) => {
+  visibleTabs.sort((a, b) => {
     if (a.deadline && b.deadline) {
       return a.deadline - b.deadline;
     }
@@ -152,10 +167,8 @@ function displayTabs(tabs) {
     if (b.deadline) return 1;
     return b.id - a.id;
   });
-  
-  tabCount.textContent = tabs.length;
-  
-  if (tabs.length === 0) {
+
+  if (totalTabs === 0) {
     tabList.innerHTML = `
       <div class="empty-state">
         <p>No saved tabs yet!</p>
@@ -164,10 +177,20 @@ function displayTabs(tabs) {
     `;
     return;
   }
-  
+
+  if (visibleTabs.length === 0) {
+    tabList.innerHTML = `
+      <div class="empty-state">
+        <p>No outdated deadlines yet!</p>
+        <p class="hint">This view shows tabs whose deadlines are at least 2 days past due.</p>
+      </div>
+    `;
+    return;
+  }
+
   tabList.innerHTML = '';
-  
-  tabs.forEach((tab) => {
+
+  visibleTabs.forEach((tab) => {
     const tabItem = document.createElement('div');
     tabItem.className = 'tab-item';
     
@@ -280,6 +303,32 @@ function displayTabs(tabs) {
     tabList.appendChild(tabItem);
   });
 }
+
+function isOutdatedDeadline(tab) {
+  if (!tab.deadline) return false;
+  const deadline = Number(tab.deadline);
+  if (Number.isNaN(deadline)) return false;
+  const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
+  return Date.now() - deadline >= twoDaysMs;
+}
+
+function setActiveViewButton(view) {
+  const isOutdated = view === 'outdated';
+  viewAllTabsBtn.classList.toggle('active', !isOutdated);
+  viewOutdatedTabsBtn.classList.toggle('active', isOutdated);
+  viewAllTabsBtn.setAttribute('aria-selected', String(!isOutdated));
+  viewOutdatedTabsBtn.setAttribute('aria-selected', String(isOutdated));
+}
+
+viewAllTabsBtn.addEventListener('click', () => {
+  currentTabView = 'all';
+  loadTabs();
+});
+
+viewOutdatedTabsBtn.addEventListener('click', () => {
+  currentTabView = 'outdated';
+  loadTabs();
+});
 
 // Open deadline modal from context menu
 document.getElementById('menuSetDeadline').onclick = () => {

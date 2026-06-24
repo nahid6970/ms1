@@ -60,6 +60,60 @@ body {
   opacity: 0.9;
 }
 
+.view-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f8ff 100%);
+  border-bottom: 1px solid #e8e8f5;
+}
+
+.view-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid #d9d9e8;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #4a4a63;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(20, 20, 40, 0.06);
+}
+
+.view-tab:hover {
+  transform: translateY(-1px);
+  border-color: #9aa7ff;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.12);
+}
+
+.view-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(118, 75, 162, 0.22);
+}
+
+.view-tab-count {
+  min-width: 24px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(102, 126, 234, 0.12);
+  color: inherit;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.view-tab.active .view-tab-count {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .tab-list {
   flex: 1;
   overflow-y: auto;
