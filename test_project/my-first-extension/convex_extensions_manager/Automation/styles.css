@@ -165,6 +165,20 @@ h2 {
   white-space: nowrap;
 }
 
+.mini-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.mini-toggle input {
+  margin: 0;
+}
+
 input[type="number"], input[type="text"], select {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);

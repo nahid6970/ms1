@@ -57,6 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loopCountInput = document.getElementById('loopCount');
   const loopDelayInput = document.getElementById('loopDelay');
   const waitTimeoutInput = document.getElementById('waitTimeout');
+  const notificationEnabledInput = document.getElementById('notificationEnabled');
+  const notificationModeInput = document.getElementById('notificationMode');
+  const notificationIntervalInput = document.getElementById('notificationInterval');
 
   loopCountInput.addEventListener('change', () => {
     saveToActiveProjectAndStorage({ loopCount: parseInt(loopCountInput.value) || 1 });
@@ -69,11 +72,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   waitTimeoutInput.addEventListener('change', () => {
     saveToActiveProjectAndStorage({ waitTimeout: parseFloat(waitTimeoutInput.value) || 0 });
   });
+
+  notificationEnabledInput.addEventListener('change', () => {
+    saveToActiveProjectAndStorage({ notificationEnabled: notificationEnabledInput.checked });
+  });
+
+  notificationModeInput.addEventListener('change', () => {
+    saveToActiveProjectAndStorage({ notificationMode: notificationModeInput.value });
+  });
+
+  notificationIntervalInput.addEventListener('change', () => {
+    saveToActiveProjectAndStorage({ notificationInterval: parseFloat(notificationIntervalInput.value) || 5 });
+  });
 });
 
 // Settings Initialization
 async function initSettings() {
-  chrome.storage.local.get(['loopCount', 'loopDelay', 'waitTimeout'], (data) => {
+  chrome.storage.local.get(['loopCount', 'loopDelay', 'waitTimeout', 'notificationEnabled', 'notificationMode', 'notificationInterval'], (data) => {
     if (data.loopCount !== undefined) {
       document.getElementById('loopCount').value = data.loopCount;
     } else {
@@ -88,6 +103,31 @@ async function initSettings() {
       document.getElementById('waitTimeout').value = data.waitTimeout;
     } else {
       chrome.storage.local.set({ waitTimeout: 0 });
+    }
+
+    const notificationEnabledEl = document.getElementById('notificationEnabled');
+    const notificationModeEl = document.getElementById('notificationMode');
+    const notificationIntervalEl = document.getElementById('notificationInterval');
+
+    if (data.notificationEnabled !== undefined) {
+      notificationEnabledEl.checked = !!data.notificationEnabled;
+    } else {
+      notificationEnabledEl.checked = true;
+      chrome.storage.local.set({ notificationEnabled: true });
+    }
+
+    if (data.notificationMode !== undefined) {
+      notificationModeEl.value = data.notificationMode;
+    } else {
+      notificationModeEl.value = 'one_time';
+      chrome.storage.local.set({ notificationMode: 'one_time' });
+    }
+
+    if (data.notificationInterval !== undefined) {
+      notificationIntervalEl.value = data.notificationInterval;
+    } else {
+      notificationIntervalEl.value = 5;
+      chrome.storage.local.set({ notificationInterval: 5 });
     }
   });
 }
@@ -107,7 +147,10 @@ async function initProjects() {
           steps: [],
           loopCount: 1,
           loopDelay: 1.0,
-          waitTimeout: 0
+          waitTimeout: 0,
+          notificationEnabled: true,
+          notificationMode: 'one_time',
+          notificationInterval: 5
         };
         projects = [defaultProj];
         activeProjectId = defaultProj.id;
@@ -118,7 +161,10 @@ async function initProjects() {
           steps: defaultProj.steps,
           loopCount: defaultProj.loopCount,
           loopDelay: defaultProj.loopDelay,
-          waitTimeout: defaultProj.waitTimeout
+          waitTimeout: defaultProj.waitTimeout,
+          notificationEnabled: defaultProj.notificationEnabled,
+          notificationMode: defaultProj.notificationMode,
+          notificationInterval: defaultProj.notificationInterval
         }, () => {
           resolve({ projects, activeProjectId });
         });
@@ -134,7 +180,10 @@ async function initProjects() {
           steps: activeProj.steps || [],
           loopCount: activeProj.loopCount !== undefined ? activeProj.loopCount : 1,
           loopDelay: activeProj.loopDelay !== undefined ? activeProj.loopDelay : 1.0,
-          waitTimeout: activeProj.waitTimeout !== undefined ? activeProj.waitTimeout : 0
+          waitTimeout: activeProj.waitTimeout !== undefined ? activeProj.waitTimeout : 0,
+          notificationEnabled: activeProj.notificationEnabled !== undefined ? activeProj.notificationEnabled : true,
+          notificationMode: activeProj.notificationMode !== undefined ? activeProj.notificationMode : 'one_time',
+          notificationInterval: activeProj.notificationInterval !== undefined ? activeProj.notificationInterval : 5
         }, () => {
           resolve({ projects, activeProjectId });
         });
@@ -235,7 +284,10 @@ async function switchProject(projectId) {
         steps: proj.steps || [],
         loopCount: proj.loopCount !== undefined ? proj.loopCount : 1,
         loopDelay: proj.loopDelay !== undefined ? proj.loopDelay : 1.0,
-        waitTimeout: proj.waitTimeout !== undefined ? proj.waitTimeout : 0
+        waitTimeout: proj.waitTimeout !== undefined ? proj.waitTimeout : 0,
+        notificationEnabled: proj.notificationEnabled !== undefined ? proj.notificationEnabled : true,
+        notificationMode: proj.notificationMode !== undefined ? proj.notificationMode : 'one_time',
+        notificationInterval: proj.notificationInterval !== undefined ? proj.notificationInterval : 5
       }, async () => {
         await initSettings();
         await renderSteps();
@@ -256,7 +308,10 @@ async function createProject(name) {
         steps: [],
         loopCount: 1,
         loopDelay: 1.0,
-        waitTimeout: 0
+        waitTimeout: 0,
+        notificationEnabled: true,
+        notificationMode: 'one_time',
+        notificationInterval: 5
       };
       projects.push(newProj);
 
@@ -1282,7 +1337,7 @@ function initConvexButtons() {
       const original = saveToConvexBtn.innerHTML;
       saveToConvexBtn.innerHTML = '⏳ Saving...';
 
-      chrome.storage.local.get(['projects', 'activeProjectId', 'steps', 'loopCount', 'loopDelay', 'waitTimeout'], async (items) => {
+      chrome.storage.local.get(['projects', 'activeProjectId', 'steps', 'loopCount', 'loopDelay', 'waitTimeout', 'notificationEnabled', 'notificationMode', 'notificationInterval'], async (items) => {
         try {
           await sendDataToConvex(items);
           saveToConvexBtn.innerHTML = '✅ Saved!';
@@ -1312,7 +1367,10 @@ function initConvexButtons() {
             steps: data.steps || [],
             loopCount: data.loopCount !== undefined ? data.loopCount : 1,
             loopDelay: data.loopDelay !== undefined ? data.loopDelay : 1.0,
-            waitTimeout: data.waitTimeout !== undefined ? data.waitTimeout : 0
+            waitTimeout: data.waitTimeout !== undefined ? data.waitTimeout : 0,
+            notificationEnabled: data.notificationEnabled !== undefined ? data.notificationEnabled : true,
+            notificationMode: data.notificationMode !== undefined ? data.notificationMode : 'one_time',
+            notificationInterval: data.notificationInterval !== undefined ? data.notificationInterval : 5
           }];
           data.activeProjectId = data.projects[0].id;
         }
