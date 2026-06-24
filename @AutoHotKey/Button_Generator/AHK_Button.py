@@ -253,7 +253,7 @@ class RowWidget(QFrame):
             #RowWidget {{
                 border: 1px solid {CP_DIM};
                 background-color: {CP_PANEL};
-                border-radius: 6px;
+                border-radius: 0px;
                 margin-bottom: 5px;
             }}
             #RowWidget:hover {{
@@ -741,21 +741,21 @@ class App(QMainWindow):
             QWidget {{ color: {CP_TEXT}; font-family: '{font_family}'; font-size: {font_size}; }}
             QScrollArea {{ background: transparent; border: none; }}
             QLineEdit {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; padding: 5px;
+                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 0px; padding: 5px;
             }}
             QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
             QComboBox {{
-                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; padding: 4px 8px;
+                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 0px; padding: 4px 8px;
             }}
             QComboBox::drop-down {{ border: 0px; width: 18px; }}
             QPushButton {{
-                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 4px; color: {CP_TEXT}; padding: 6px 14px; font-weight: bold;
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 0px; color: {CP_TEXT}; padding: 6px 14px; font-weight: bold;
             }}
             QPushButton:hover {{
                 background-color: {CP_DIM}; border: 1px solid {CP_CYAN}; color: {CP_CYAN};
             }}
             QGroupBox {{
-                border: 1px solid {CP_DIM}; border-radius: 6px; margin-top: 10px; padding-top: 15px; font-weight: bold; color: {CP_CYAN};
+                border: 1px solid {CP_DIM}; border-radius: 0px; margin-top: 10px; padding-top: 15px; font-weight: bold; color: {CP_CYAN};
             }}
             QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 8px; }}
         """)
