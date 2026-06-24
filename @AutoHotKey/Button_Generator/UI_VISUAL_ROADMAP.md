@@ -36,6 +36,7 @@ This file tracks the next visual pass for the Python GUI.
 - Use consistent icon-only utility buttons with tooltips.
 - Add stronger contrast between panel backgrounds and input fields.
 - Use highlighted accent borders only on active or important controls.
+- Add a font family dropdown in Settings so the whole app can switch typefaces more easily.
 
 ## Better Layout Ideas
 
@@ -61,6 +62,7 @@ This file tracks the next visual pass for the Python GUI.
 - Use green only for success or generation states.
 - Use orange/red sparingly for warnings and destructive actions.
 - Reduce the number of competing accent colors in one row.
+- Let the font family be configurable from the UI so readability and style can be tuned without editing code.
 
 ## Future Refinements
 
