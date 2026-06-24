@@ -56,7 +56,7 @@
             "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
-            "title_action": "no_action",
+            "title_action": "send_text",
             "title_trigger": "click",
             "buttons": [
                 {
@@ -94,7 +94,7 @@
                     "color": "00CCFF",
                     "text_color": "000000",
                     "action": "send_text",
-                    "trigger": "double_click"
+                    "trigger": "click"
                 },
                 {
                     "label": "bn",
@@ -290,7 +290,7 @@
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
-            "title_trigger": "double_click",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Roll",

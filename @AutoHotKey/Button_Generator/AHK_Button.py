@@ -153,6 +153,11 @@ def icon_size(px=16):
     return QSize(px, px)
 
 
+class WheelSafeComboBox(QComboBox):
+    def wheelEvent(self, event):
+        event.ignore()
+
+
 def ahk_escape(value):
     return (value or "").replace('"', '""')
 
@@ -348,12 +353,12 @@ class RowWidget(QFrame):
         header_layout.addWidget(self.title_color_btn)
         header_layout.addWidget(self.title_text_color_btn)
 
-        self.title_action_combo = QComboBox()
+        self.title_action_combo = WheelSafeComboBox()
         combo_add_options(self.title_action_combo, ACTION_OPTIONS)
         combo_set_code(self.title_action_combo, data.get("title_action", "send_text") if data else "send_text")
         self.title_action_combo.setFixedWidth(150)
 
-        self.title_trigger_combo = QComboBox()
+        self.title_trigger_combo = WheelSafeComboBox()
         combo_add_options(self.title_trigger_combo, TRIGGER_OPTIONS)
         combo_set_code(self.title_trigger_combo, data.get("title_trigger", "click") if data else "click")
         self.title_trigger_combo.setFixedWidth(150)
@@ -469,12 +474,12 @@ class RowWidget(QFrame):
         text_input.setPlaceholderText("Payload Text")
         text_input.setText(b_data.get("text", "") if b_data else "")
 
-        action_combo = QComboBox()
+        action_combo = WheelSafeComboBox()
         combo_add_options(action_combo, ACTION_OPTIONS)
         combo_set_code(action_combo, b_data.get("action", "send_text") if b_data else "send_text")
         action_combo.setFixedWidth(150)
 
-        trigger_combo = QComboBox()
+        trigger_combo = WheelSafeComboBox()
         combo_add_options(trigger_combo, TRIGGER_OPTIONS)
         combo_set_code(trigger_combo, b_data.get("trigger", "click") if b_data else "click")
         trigger_combo.setFixedWidth(150)
@@ -631,7 +636,7 @@ class SettingsPanel(QGroupBox):
         self.sleep_delay = QLineEdit("200")
         self.font_size = QLineEdit("12")
         
-        self.font_family_combo = QComboBox()
+        self.font_family_combo = WheelSafeComboBox()
         font_families = QFontDatabase.families()
         self.font_family_combo.addItem("System Default", "")
         for font in font_families:
@@ -646,7 +651,7 @@ class SettingsPanel(QGroupBox):
         self.btn_w = QLineEdit("100")
         self.win_w = QLineEdit("1000")
         self.win_h = QLineEdit("800")
-        self.default_row_buttons = QComboBox()
+        self.default_row_buttons = WheelSafeComboBox()
         self.default_row_buttons.addItem("Add default button", "yes")
         self.default_row_buttons.addItem("Start empty", "no")
 
@@ -698,7 +703,7 @@ class App(QMainWindow):
         toolbar.setContentsMargins(10, 10, 10, 10)
         toolbar.setSpacing(6)
 
-        self.profile_combo = QComboBox()
+        self.profile_combo = WheelSafeComboBox()
         self.profile_combo.setFixedWidth(150)
         self.profile_combo.currentTextChanged.connect(self.on_profile_changed)
         
