@@ -68,8 +68,89 @@
             "buttons": []
         },
         {
+            "title": "g6",
+            "title_text": "nahid69706@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
             "title": "",
             "title_text": "",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g7",
+            "title_text": "nahid69707@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g8",
+            "title_text": "nahid69708@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "copy_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g9",
+            "title_text": "nahid69709@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g10",
+            "title_text": "nahid697010@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g11",
+            "title_text": "nahid697011@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g12",
+            "title_text": "nahid697012@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g13",
+            "title_text": "nahid697013@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g14",
+            "title_text": "nahid697014@gmail.com",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",

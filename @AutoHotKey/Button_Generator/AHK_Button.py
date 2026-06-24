@@ -305,8 +305,11 @@ class RowWidget(QFrame):
             for b in data["buttons"]:
                 self.add_button_ui(b)
         else:
-            # Default empty button
-            self.add_button_ui()
+            default_mode = "yes"
+            if self.parent_app and hasattr(self.parent_app, "settings_panel"):
+                default_mode = self.parent_app.settings_panel.default_row_buttons.currentData() or "yes"
+            if default_mode == "yes":
+                self.add_button_ui()
 
     def _update_title_color_btn(self):
         c = self.title_color
@@ -510,7 +513,10 @@ class SettingsPanel(QGroupBox):
         self.btn_w = QLineEdit("100")
         self.win_w = QLineEdit("1000")
         self.win_h = QLineEdit("800")
-        
+        self.default_row_buttons = QComboBox()
+        self.default_row_buttons.addItem("Add default button", "yes")
+        self.default_row_buttons.addItem("Start empty", "no")
+
         self.ui_label_w.textChanged.connect(update_callback)
         self.ui_text_w.textChanged.connect(update_callback)
         self.win_w.textChanged.connect(update_callback)
@@ -529,6 +535,7 @@ class SettingsPanel(QGroupBox):
         self.layout.addRow("Title H / W:", row(self.title_h, ("W:", self.title_w)))
         self.layout.addRow("Button H / W:", row(self.btn_h, ("W:", self.btn_w)))
         self.layout.addRow("Window W / H:", row(self.win_w, ("H:", self.win_h)))
+        self.layout.addRow("New Row Default:", self.default_row_buttons)
 
 class App(QMainWindow):
     def __init__(self):
@@ -693,6 +700,8 @@ class App(QMainWindow):
         self.rows.append(row)
         self.rows_layout.addWidget(row)
         row.setVisible(row.matches(self.search_input.text()))
+        if data is None:
+            self.save_config()
 
     def remove_row(self, row_widget):
         self.rows.remove(row_widget)
