@@ -109,4 +109,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     return true;
   }
+
+  if (message.action === 'notify_complete') {
+    const title = message.title || 'ClickFlow complete';
+    const messageText = message.message || 'Automation completed successfully.';
+
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/clickflow-icon128.png',
+      title,
+      message: messageText
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn('Notification failed:', chrome.runtime.lastError.message);
+      }
+      sendResponse({ success: true });
+    });
+
+    return true;
+  }
 });

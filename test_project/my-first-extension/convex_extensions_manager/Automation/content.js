@@ -45,6 +45,16 @@ function notifyTimeout(title, message) {
   });
 }
 
+function notifyCompletion(title, message) {
+  chrome.runtime.sendMessage({
+    action: 'notify_complete',
+    title,
+    message
+  }, () => {
+    void chrome.runtime.lastError;
+  });
+}
+
 function isElementVisible(el) {
   if (!(el instanceof Element)) return false;
   const style = window.getComputedStyle(el);
@@ -734,6 +744,12 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   } else {
     updateState("idle", 0, 0);
     logMessage("✅ Automation sequence completed!");
+    if (loopCount !== -1) {
+      notifyCompletion(
+        'ClickFlow complete',
+        `Automation finished successfully after ${loopCount} loop${loopCount === 1 ? '' : 's'}.`
+      );
+    }
   }
 }
 
