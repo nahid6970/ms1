@@ -417,6 +417,7 @@ class RowWidget(QFrame):
                 default_mode = self.parent_app.settings_panel.default_row_buttons.currentData() or "yes"
             if default_mode == "yes":
                 self.add_button_ui()
+        self.update_add_button_visibility()
 
     def _update_title_color_btn(self):
         c = self.title_color
@@ -617,12 +618,26 @@ class RowWidget(QFrame):
     def update_add_button_height(self):
         if not hasattr(self, "add_btn_btn"):
             return
-        count = max(1, self.btns_layout.count())
+        count = self.btns_layout.count()
+        if count <= 0:
+            self.add_btn_btn.setMinimumHeight(0)
+            self.add_btn_btn.setMaximumHeight(16777215)
+            return
         button_height = 54
         gap = 6
         target_height = max(160, (count * button_height) + ((count - 1) * gap))
         self.add_btn_btn.setMinimumHeight(target_height)
         self.add_btn_btn.setMaximumHeight(target_height)
+
+    def update_add_button_visibility(self):
+        if not hasattr(self, "add_btn_btn"):
+            return
+        show_empty = True
+        if self.parent_app and hasattr(self.parent_app, "settings_panel"):
+            show_empty = self.parent_app.settings_panel.show_empty_row_add_button.currentData() != "no"
+        has_buttons = self.btns_layout.count() > 0
+        self.add_btn_btn.setVisible(has_buttons or show_empty)
+        self.update_add_button_height()
 
 class SettingsPanel(QGroupBox):
     def __init__(self, update_callback):
@@ -654,6 +669,9 @@ class SettingsPanel(QGroupBox):
         self.default_row_buttons = WheelSafeComboBox()
         self.default_row_buttons.addItem("Add default button", "yes")
         self.default_row_buttons.addItem("Start empty", "no")
+        self.show_empty_row_add_button = WheelSafeComboBox()
+        self.show_empty_row_add_button.addItem("Show vertical +", "yes")
+        self.show_empty_row_add_button.addItem("Hide vertical +", "no")
 
         self.ui_label_w.textChanged.connect(update_callback)
         self.ui_text_w.textChanged.connect(update_callback)
@@ -661,6 +679,7 @@ class SettingsPanel(QGroupBox):
         self.win_h.textChanged.connect(update_callback)
         self.font_family_combo.currentIndexChanged.connect(update_callback)
         self.font_size.textChanged.connect(update_callback)
+        self.show_empty_row_add_button.currentIndexChanged.connect(update_callback)
 
         def row(field1, *pairs):
             w = QWidget(); h = QHBoxLayout(w); h.setContentsMargins(0,0,0,0)
@@ -676,6 +695,7 @@ class SettingsPanel(QGroupBox):
         self.layout.addRow("Button H / W:", row(self.btn_h, ("W:", self.btn_w)))
         self.layout.addRow("Window W / H:", row(self.win_w, ("H:", self.win_h)))
         self.layout.addRow("New Row Default:", self.default_row_buttons)
+        self.layout.addRow("Empty Row +:", self.show_empty_row_add_button)
 
 class App(QMainWindow):
     def __init__(self):
@@ -854,6 +874,7 @@ class App(QMainWindow):
         self.apply_theme_and_font()
         for row in self.rows:
             row.refresh_widths()
+            row.update_add_button_visibility()
 
     def open_reorder_dialog(self):
         dlg = ReorderDialog(self.rows, self)
@@ -881,12 +902,15 @@ class App(QMainWindow):
         self.rows.append(row)
         self.rows_layout.addWidget(row)
         row.setVisible(row.matches(self.search_input.text()))
+        row.update_add_button_visibility()
         if data is None:
             self.save_config()
 
     def remove_row(self, row_widget):
         self.rows.remove(row_widget)
         row_widget.deleteLater()
+        for row in self.rows:
+            row.update_add_button_visibility()
         if hasattr(self, "save_config"):
             self.save_config()
 
@@ -985,6 +1009,10 @@ class App(QMainWindow):
                                 combo_set_code(self.settings_panel.font_family_combo, s["font_family"])
                             else:
                                 combo_set_code(self.settings_panel.font_family_combo, "")
+                            if "show_empty_row_add_button" in s:
+                                combo_set_code(self.settings_panel.show_empty_row_add_button, s["show_empty_row_add_button"])
+                            else:
+                                combo_set_code(self.settings_panel.show_empty_row_add_button, "yes")
                             if "ui_label_w" in s: self.settings_panel.ui_label_w.setText(s["ui_label_w"])
                             if "ui_text_w" in s: self.settings_panel.ui_text_w.setText(s["ui_text_w"])
                             if "title_h" in s: self.settings_panel.title_h.setText(s["title_h"])
@@ -1028,6 +1056,7 @@ class App(QMainWindow):
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
                 "font_family": self.settings_panel.font_family_combo.currentData() or "",
+                "show_empty_row_add_button": self.settings_panel.show_empty_row_add_button.currentData() or "yes",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
@@ -1067,6 +1096,7 @@ class App(QMainWindow):
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
                 "font_family": self.settings_panel.font_family_combo.currentData() or "",
+                "show_empty_row_add_button": self.settings_panel.show_empty_row_add_button.currentData() or "yes",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
