@@ -184,6 +184,9 @@ class RowWidget(QFrame):
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText("Row Title (e.g., Name/Label)")
         self.title_input.setText(data.get("title", "") if data else "")
+        self.title_text_input = QLineEdit()
+        self.title_text_input.setPlaceholderText("Text")
+        self.title_text_input.setText(data.get("title_text", "") if data else "")
         self.title_color = data.get("title_color", "FFCC00") if data else "FFCC00"
         self.title_text_color = data.get("title_text_color", "000000") if data else "000000"
         self.title_color_btn = QPushButton()
@@ -198,6 +201,12 @@ class RowWidget(QFrame):
         self._update_title_text_color_btn()
         header_layout.addWidget(QLabel("TITLE:"))
         header_layout.addWidget(self.title_input)
+        title_text_tag = QLabel("V:")
+        title_text_tag.setFixedWidth(20)
+        title_text_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_text_tag.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        header_layout.addWidget(title_text_tag)
+        header_layout.addWidget(self.title_text_input)
         header_layout.addWidget(self.title_color_btn)
         header_layout.addWidget(self.title_text_color_btn)
 
@@ -385,6 +394,7 @@ class RowWidget(QFrame):
     def get_data(self):
         row_data = {
             "title": self.title_input.text(),
+            "title_text": self.title_text_input.text(),
             "title_color": self.title_color,
             "title_text_color": self.title_text_color,
             "title_action": self.title_action_combo.currentData(),
@@ -805,13 +815,14 @@ class App(QMainWindow):
             ttc = row.get("title_text_color", "000000")
             title_action = row.get("title_action", "send_text")
             title_trigger = row.get("title_trigger", "click")
+            title_text = row.get("title_text", "") or title
             ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "Jetbrainsmono nfp")')
             th = self.settings_panel.title_h.text() or "30"
             tw = self.settings_panel.title_w.text() or "200"
             bh = self.settings_panel.btn_h.text() or "30"
             bw = self.settings_panel.btn_w.text() or "100"
             ahk_code.append(f'titleCtrl := myGui.Add("Button", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{ahk_escape(title)}")')
-            title_action_line = action_to_ahk(title_action, title)
+            title_action_line = action_to_ahk(title_action, title_text)
             if title_action_line:
                 ahk_code.append(f'titleCtrl.OnEvent("{trigger_to_event(title_trigger)}", (*) => {title_action_line})')
             ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
