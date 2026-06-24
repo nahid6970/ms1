@@ -299,6 +299,7 @@ function displayTabs(tabs) {
     `;
     
     const tabInfo = tabItem.querySelector('.tab-info');
+    tabInfo.title = `${tab.title}\n${tab.url}`;
     tabInfo.addEventListener('click', () => {
       chrome.tabs.create({ url: tab.url });
     });

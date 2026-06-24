@@ -8,23 +8,21 @@
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
-    </div>
+    <div class="top-controls">
+      <div class="view-tabs" role="tablist" aria-label="Saved tab views">
+        <button id="viewAllTabs" class="view-tab active" role="tab" aria-selected="true" data-view="all">
+          <span>All</span>
+          <span class="view-tab-count" id="allTabCount">0</span>
+        </button>
+        <button id="viewOutdatedTabs" class="view-tab" role="tab" aria-selected="false" data-view="outdated">
+          <span>Outdated +2d</span>
+          <span class="view-tab-count" id="outdatedTabCount">0</span>
+        </button>
+      </div>
 
-    <div class="view-tabs" role="tablist" aria-label="Saved tab views">
-      <button id="viewAllTabs" class="view-tab active" role="tab" aria-selected="true" data-view="all">
-        <span>All</span>
-        <span class="view-tab-count" id="allTabCount">0</span>
-      </button>
-      <button id="viewOutdatedTabs" class="view-tab" role="tab" aria-selected="false" data-view="outdated">
-        <span>Outdated +2d</span>
-        <span class="view-tab-count" id="outdatedTabCount">0</span>
-      </button>
-    </div>
-
-    <div class="search-wrap">
-      <input id="tabSearch" class="tab-search" type="search" placeholder="Search tabs, URLs, or tags">
+      <div class="search-wrap">
+        <input id="tabSearch" class="tab-search" type="search" placeholder="Search tabs, URLs, or tags">
+      </div>
     </div>
 
     <div id="tabList" class="tab-list">
@@ -37,6 +35,7 @@
     <div class="footer">
       <button id="saveCurrentTab" class="btn btn-primary">Save Tab</button>
       <button id="addAllTabs" class="btn btn-secondary">➕ All Tabs</button>
+      <button id="settingsBtn" class="btn btn-settings" title="Settings">⚙️</button>
       <button id="saveToConvex" class="btn btn-primary">💾 Backup</button>
       <button id="loadFromConvex" class="btn btn-success">📥 Restore</button>
     </div>
