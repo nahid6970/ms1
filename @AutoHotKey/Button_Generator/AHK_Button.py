@@ -15,17 +15,17 @@ from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF, QSize
 from PyQt6.QtGui import QColor, QPainter, QImage, QIcon, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
 
-# CYBERPUNK THEME PALETTE (from THEME_GUIDE.md)
-CP_BG = "#050505"
-CP_PANEL = "#111111"
-CP_YELLOW = "#FCEE0A"
-CP_CYAN = "#00F0FF"
-CP_RED = "#FF003C"
-CP_GREEN = "#00ff21"
-CP_ORANGE = "#ff934b"
-CP_DIM = "#3a3a3a"
-CP_TEXT = "#E0E0E0"
-CP_SUBTEXT = "#808080"
+# PROFESSIONAL DARK PALETTE
+CP_BG = "#121212"        # Near-black charcoal background
+CP_PANEL = "#1E1E1E"     # Slightly lighter charcoal for cards and panels
+CP_YELLOW = "#D89E00"    # Professional Amber/Gold
+CP_CYAN = "#007ACC"      # Classic modern corporate blue (primary focus)
+CP_RED = "#D13438"       # Muted corporate crimson red for destructive items
+CP_GREEN = "#107C41"     # GitHub-style success emerald green
+CP_ORANGE = "#D83B01"    # Deep autumn corporate orange
+CP_DIM = "#2D2D2D"       # Muted slate border
+CP_TEXT = "#E0E0E0"      # Bright grey for comfortable readability
+CP_SUBTEXT = "#9E9E9E"   # Soft grey for subtle labels
 
 # Relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -45,27 +45,27 @@ TRIGGER_OPTIONS = [
 
 SETTINGS_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="3.2" fill="none" stroke="#00F0FF" stroke-width="1.8"/>
-  <path d="M12 3.5v2.1M12 18.4v2.1M3.5 12h2.1M18.4 12h2.1M6.1 6.1l1.5 1.5M16.4 16.4l1.5 1.5M16.4 7.6l1.5-1.5M6.1 17.9l1.5-1.5" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="12" cy="12" r="3.2" fill="none" stroke="#007ACC" stroke-width="1.8"/>
+  <path d="M12 3.5v2.1M12 18.4v2.1M3.5 12h2.1M18.4 12h2.1M6.1 6.1l1.5 1.5M16.4 16.4l1.5 1.5M16.4 7.6l1.5-1.5M6.1 17.9l1.5-1.5" stroke="#007ACC" stroke-width="1.8" stroke-linecap="round"/>
 </svg>
 """
 
 RESTART_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path d="M7 7a7 7 0 1 1-1.3 8.2" fill="none" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M5.4 8.1v3.4h3.4" fill="none" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7 7a7 7 0 1 1-1.3 8.2" fill="none" stroke="#007ACC" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M5.4 8.1v3.4h3.4" fill="none" stroke="#007ACC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 """
 
 GENERATE_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z" fill="none" stroke="#050505" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"/>
 </svg>
 """
 
 LAUNCH_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path d="M5 4l15 8-15 8V4z" fill="none" stroke="#050505" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M5 4l15 8-15 8V4z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"/>
 </svg>
 """
 
@@ -182,7 +182,13 @@ class ReorderDialog(QDialog):
         
         self.list_widget = QListWidget()
         self.list_widget.setDragDropMode(QListWidget.DragDropMode.InternalMove)
-        self.list_widget.setStyleSheet(f"background-color: #1a1a1a; color: {CP_CYAN}; font-family: 'Consolas'; font-size: 11pt;")
+        
+        font_family = "Segoe UI"
+        if parent and hasattr(parent, "settings_panel"):
+            font_family = parent.settings_panel.font_family_combo.currentText()
+            
+        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: '{font_family}';")
+        self.list_widget.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; font-size: 11pt;")
         
         for row in rows:
             title = row.title_input.text() or "Untitled Row"
@@ -216,7 +222,13 @@ class SVGInputDialog(QDialog):
         self.editor = QTextEdit()
         self.editor.setPlaceholderText("<svg ...> ... </svg>")
         self.editor.setPlainText(initial_code)
-        self.editor.setStyleSheet(f"background-color: #1a1a1a; color: {CP_CYAN}; font-family: 'Consolas';")
+        
+        font_family = "Segoe UI"
+        if parent and hasattr(parent, "settings_panel"):
+            font_family = parent.settings_panel.font_family_combo.currentText()
+            
+        self.setStyleSheet(f"background-color: {CP_BG}; color: {CP_TEXT}; font-family: '{font_family}';")
+        self.editor.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; font-family: 'Consolas';")
         self.layout.addWidget(self.editor)
         
         btns = QHBoxLayout()
@@ -235,38 +247,64 @@ class RowWidget(QFrame):
     def __init__(self, data=None, on_remove=None, parent_app=None):
         super().__init__()
         self.parent_app = parent_app
+        self.setObjectName("RowWidget")
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; margin-bottom: 5px;")
+        self.setStyleSheet(f"""
+            #RowWidget {{
+                border: 1px solid {CP_DIM};
+                background-color: {CP_PANEL};
+                border-radius: 6px;
+                margin-bottom: 5px;
+            }}
+            #RowWidget:hover {{
+                border: 1px solid {CP_CYAN};
+            }}
+        """)
         self.on_remove = on_remove
         
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setSpacing(8)
         
-        # Header: Title and Remove Row
+        # Header: Title and Row level metadata
         header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(6)
+
         self.title_input = QLineEdit()
-        self.title_input.setPlaceholderText("Row Title (e.g., Name/Label)")
+        self.title_input.setPlaceholderText("Row Title (e.g., Category)")
         self.title_input.setText(data.get("title", "") if data else "")
+        self.title_input.setMaximumWidth(250)
+
         self.title_text_input = QLineEdit()
-        self.title_text_input.setPlaceholderText("Text")
+        self.title_text_input.setPlaceholderText("Payload")
         self.title_text_input.setText(data.get("title_text", "") if data else "")
-        self.title_color = data.get("title_color", "FFCC00") if data else "FFCC00"
+        
+        self.title_color = data.get("title_color", "D89E00") if data else "D89E00"
         self.title_text_color = data.get("title_text_color", "000000") if data else "000000"
+        
         self.title_color_btn = QPushButton()
-        self.title_color_btn.setFixedSize(50, 24)
+        self.title_color_btn.setFixedSize(85, 26)
         self.title_color_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.title_color_btn.clicked.connect(self._pick_title_color)
+        
         self.title_text_color_btn = QPushButton()
-        self.title_text_color_btn.setFixedSize(50, 24)
+        self.title_text_color_btn.setFixedSize(85, 26)
         self.title_text_color_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.title_text_color_btn.clicked.connect(self._pick_title_text_color)
+        
         self._update_title_color_btn()
         self._update_title_text_color_btn()
-        header_layout.addWidget(QLabel("TITLE:"))
+
+        title_lbl = QLabel("TITLE:")
+        title_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-weight: bold; font-size: 9pt;")
+        header_layout.addWidget(title_lbl)
         header_layout.addWidget(self.title_input)
+        
         title_text_tag = QLabel("V:")
         title_text_tag.setFixedWidth(20)
         title_text_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_text_tag.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        title_text_tag.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         header_layout.addWidget(title_text_tag)
         header_layout.addWidget(self.title_text_input)
         header_layout.addWidget(self.title_color_btn)
@@ -287,7 +325,7 @@ class RowWidget(QFrame):
         
         remove_row_btn = QPushButton("×")
         remove_row_btn.setFixedWidth(30)
-        remove_row_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-weight: bold;")
+        remove_row_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED}; font-weight: bold; border-radius: 4px;")
         remove_row_btn.clicked.connect(self.remove_self)
         header_layout.addWidget(remove_row_btn)
         self.layout.addLayout(header_layout)
@@ -295,9 +333,12 @@ class RowWidget(QFrame):
         # Buttons Area
         self.btns_container = QWidget()
         self.btns_layout = QVBoxLayout(self.btns_container)
+        self.btns_layout.setContentsMargins(0, 0, 0, 0)
+        self.btns_layout.setSpacing(6)
         self.layout.addWidget(self.btns_container)
         
         add_btn_btn = QPushButton("+ ADD ACTION BUTTON")
+        add_btn_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px dashed {CP_CYAN}; color: {CP_CYAN};")
         add_btn_btn.clicked.connect(lambda: self.add_button_ui())
         self.layout.addWidget(add_btn_btn)
 
@@ -315,8 +356,8 @@ class RowWidget(QFrame):
         c = self.title_color
         r, g, b = int(c[0:2],16), int(c[2:4],16), int(c[4:6],16)
         fg = "black" if (r*299+g*587+b*114)/1000 > 128 else "white"
-        self.title_color_btn.setText(f"#{c}")
-        self.title_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid #888; font-size: 7pt; font-weight: bold; padding: 0;")
+        self.title_color_btn.setText(f"BG #{c}")
+        self.title_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid {CP_DIM}; border-radius: 4px; font-size: 8pt; font-weight: bold; padding: 0;")
 
     def _pick_title_color(self):
         color = QColorDialog.getColor(QColor(f"#{self.title_color}"))
@@ -328,8 +369,8 @@ class RowWidget(QFrame):
         c = self.title_text_color
         r, g, b = int(c[0:2],16), int(c[2:4],16), int(c[4:6],16)
         fg = "black" if (r*299+g*587+b*114)/1000 > 128 else "white"
-        self.title_text_color_btn.setText(f"#{c}")
-        self.title_text_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid #888; font-size: 7pt; font-weight: bold; padding: 0;")
+        self.title_text_color_btn.setText(f"TX #{c}")
+        self.title_text_color_btn.setStyleSheet(f"background-color: #{c}; color: {fg}; border: 1px solid {CP_DIM}; border-radius: 4px; font-size: 8pt; font-weight: bold; padding: 0;")
 
     def _pick_title_text_color(self):
         color = QColorDialog.getColor(QColor(f"#{self.title_text_color}"))
@@ -354,17 +395,17 @@ class RowWidget(QFrame):
     def add_button_ui(self, b_data=None):
         btn_frame = QFrame()
         btn_frame.setFrameShape(QFrame.Shape.Panel)
-        btn_frame.setStyleSheet(f"border: 1px dashed {CP_DIM}; padding: 2px;")
+        btn_frame.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: {CP_BG}; border-radius: 4px; padding: 6px;")
         blayout = QHBoxLayout(btn_frame)
-        blayout.setContentsMargins(0, 0, 0, 0)
-        blayout.setSpacing(4)
+        blayout.setContentsMargins(4, 4, 4, 4)
+        blayout.setSpacing(6)
         
         label_input = QLineEdit()
         label_input.setPlaceholderText("Label")
         label_input.setText(b_data.get("label", "") if b_data else "")
         
         text_input = QLineEdit()
-        text_input.setPlaceholderText("Text")
+        text_input.setPlaceholderText("Payload Text")
         text_input.setText(b_data.get("text", "") if b_data else "")
 
         action_combo = QComboBox()
@@ -386,29 +427,29 @@ class RowWidget(QFrame):
             dlg = SVGInputDialog(btn_frame.svg_code, self)
             if dlg.exec():
                 btn_frame.svg_code = dlg.get_code()
-                svg_btn.setStyleSheet(f"background-color: {CP_CYAN if btn_frame.svg_code else CP_DIM}; color: black;")
+                svg_btn.setStyleSheet(f"background-color: {CP_CYAN if btn_frame.svg_code else CP_DIM}; color: {'white' if btn_frame.svg_code else CP_TEXT};")
         
         svg_btn.clicked.connect(open_svg_dialog)
         if btn_frame.svg_code:
-            svg_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black;")
+            svg_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: white;")
 
         # BG Color Picker Button
         bg_btn = QPushButton("BG")
         bg_btn.setObjectName("bg_btn")
-        bg_btn.setFixedWidth(35)
+        bg_btn.setFixedWidth(55)
         bg_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         bg_btn.color_val = b_data.get("color", "00CCFF") if b_data else "00CCFF"
 
         # TX Color Picker Button
         tx_btn = QPushButton("TX")
         tx_btn.setObjectName("tx_btn")
-        tx_btn.setFixedWidth(35)
+        tx_btn.setFixedWidth(55)
         tx_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         tx_btn.color_val = b_data.get("text_color", "000000") if b_data else "000000"
 
         def update_styles():
-            bg_btn.setStyleSheet(f"background-color: #{bg_btn.color_val}; color: {'white' if bg_btn.color_val == '000000' else 'black'}; border: 1px solid white; font-size: 8pt; font-weight: bold;")
-            tx_btn.setStyleSheet(f"background-color: #{tx_btn.color_val}; color: {'white' if tx_btn.color_val == '000000' else 'black'}; border: 1px solid white; font-size: 8pt; font-weight: bold;")
+            bg_btn.setStyleSheet(f"background-color: #{bg_btn.color_val}; color: {'white' if bg_btn.color_val == '000000' else 'black'}; border: 1px solid {CP_DIM}; border-radius: 4px; font-size: 8pt; font-weight: bold; padding: 2px;")
+            tx_btn.setStyleSheet(f"background-color: #{tx_btn.color_val}; color: {'white' if tx_btn.color_val == '000000' else 'black'}; border: 1px solid {CP_DIM}; border-radius: 4px; font-size: 8pt; font-weight: bold; padding: 2px;")
         
         def pick_bg():
             color = QColorDialog.getColor(QColor(f"#{bg_btn.color_val}"))
@@ -428,18 +469,20 @@ class RowWidget(QFrame):
 
         rem_btn = QPushButton("-")
         rem_btn.setFixedWidth(25)
+        rem_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; border-radius: 4px;")
         rem_btn.clicked.connect(lambda: btn_frame.deleteLater())
 
         label_tag = QLabel("L:")
         label_tag.setFixedWidth(20)
         label_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label_tag.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        label_tag.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         blayout.addWidget(label_tag)
         blayout.addWidget(label_input)
+        
         text_tag = QLabel("T:")
         text_tag.setFixedWidth(20)
         text_tag.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        text_tag.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        text_tag.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         blayout.addWidget(text_tag)
         blayout.addWidget(text_input)
         blayout.addWidget(action_combo)
@@ -501,10 +544,18 @@ class SettingsPanel(QGroupBox):
         super().__init__("SETTINGS")
         self.setVisible(False)
         self.layout = QFormLayout(self)
+        self.layout.setContentsMargins(15, 15, 15, 15)
+        self.layout.setSpacing(10)
         
         self.auto_hide = QLineEdit("True")
         self.sleep_delay = QLineEdit("200")
         self.font_size = QLineEdit("12")
+        
+        self.font_family_combo = QComboBox()
+        for font in ["Segoe UI", "Consolas", "JetBrains Mono", "Arial", "Calibri", "Courier New"]:
+            self.font_family_combo.addItem(font, font)
+        self.font_family_combo.setCurrentText("Segoe UI")
+        
         self.ui_label_w = QLineEdit("80")
         self.ui_text_w = QLineEdit("200")
         self.title_h = QLineEdit("30")
@@ -521,6 +572,8 @@ class SettingsPanel(QGroupBox):
         self.ui_text_w.textChanged.connect(update_callback)
         self.win_w.textChanged.connect(update_callback)
         self.win_h.textChanged.connect(update_callback)
+        self.font_family_combo.currentIndexChanged.connect(update_callback)
+        self.font_size.textChanged.connect(update_callback)
 
         def row(field1, *pairs):
             w = QWidget(); h = QHBoxLayout(w); h.setContentsMargins(0,0,0,0)
@@ -529,8 +582,8 @@ class SettingsPanel(QGroupBox):
                 h.addWidget(QLabel(lbl)); h.addWidget(field)
             return w
 
-        self.layout.addRow("Auto-Hide / Sleep (ms):", row(self.auto_hide, ("Sleep:", self.sleep_delay)))
-        self.layout.addRow("Font Size:", self.font_size)
+        self.layout.addRow("Auto-Hide / Sleep (ms):", row(self.auto_hide, ("Sleep Delay:", self.sleep_delay)))
+        self.layout.addRow("Font Size / Family:", row(self.font_size, ("Family:", self.font_family_combo)))
         self.layout.addRow("UI Label / Text Width:", row(self.ui_label_w, ("T:", self.ui_text_w)))
         self.layout.addRow("Title H / W:", row(self.title_h, ("W:", self.title_w)))
         self.layout.addRow("Button H / W:", row(self.btn_h, ("W:", self.btn_w)))
@@ -540,7 +593,7 @@ class SettingsPanel(QGroupBox):
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CyberAHK Generator")
+        self.setWindowTitle("AHK Button Studio")
         self.resize(1000, 800)
         self.rows = []
         self.current_profile_name = None
@@ -548,108 +601,107 @@ class App(QMainWindow):
 
         self._ensure_profile_storage()
 
-        # Global Theme Application
-        self.setStyleSheet(f"""
-            QMainWindow {{ background-color: {CP_BG}; }}
-            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-            QScrollArea {{ background: transparent; border: none; }}
-            QLineEdit {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
-            }}
-            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
-            QComboBox {{
-                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 3px 6px;
-            }}
-            QComboBox::drop-down {{ border: 0px; width: 18px; }}
-            QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
-            }}
-            QGroupBox {{
-                border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
-            }}
-            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
-        """)
+        # Settings Panel (needs configuration setup first)
+        self.settings_panel = SettingsPanel(self.update_ui_widths)
+
+        # Apply Global Theme & Selected Font
+        self.apply_theme_and_font()
 
         central = QWidget()
         self.setCentralWidget(central)
         self.main_layout = QVBoxLayout(central)
 
-        # Toolbar
+        # Toolbar Container
         toolbar = QHBoxLayout()
+        toolbar.setContentsMargins(10, 10, 10, 10)
+        toolbar.setSpacing(6)
+
         self.profile_combo = QComboBox()
-        self.profile_combo.setFixedWidth(180)
+        self.profile_combo.setFixedWidth(150)
         self.profile_combo.currentTextChanged.connect(self.on_profile_changed)
-        toolbar.addWidget(QLabel("PROFILE:"))
+        
+        profile_lbl = QLabel("PROFILE:")
+        profile_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-weight: bold; font-size: 9pt;")
+        toolbar.addWidget(profile_lbl)
         toolbar.addWidget(self.profile_combo)
 
-        new_profile_btn = QPushButton("+ NEW PROFILE")
+        new_profile_btn = QPushButton("+ NEW")
+        new_profile_btn.setToolTip("Create new profile")
         new_profile_btn.clicked.connect(self.create_profile)
         toolbar.addWidget(new_profile_btn)
 
+        # Visual Separator Function
+        def create_v_separator():
+            sep = QFrame()
+            sep.setFrameShape(QFrame.Shape.VLine)
+            sep.setStyleSheet(f"color: {CP_DIM}; background-color: {CP_DIM}; width: 1px; margin: 4px 8px;")
+            return sep
+
+        toolbar.addWidget(create_v_separator())
+
         add_row_btn = QPushButton("+ NEW ROW")
         add_row_btn.clicked.connect(self.add_row)
+        toolbar.addWidget(add_row_btn)
 
         reorder_btn = QPushButton("REORDER")
         reorder_btn.clicked.connect(self.open_reorder_dialog)
+        toolbar.addWidget(reorder_btn)
+
+        toolbar.addWidget(create_v_separator())
         
-        gen_btn = QPushButton("GENERATE AHK")
-        gen_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
-        gen_btn.clicked.connect(self.generate_ahk)
-        gen_btn.setIcon(svg_icon(GENERATE_SVG, 16))
-        gen_btn.setIconSize(icon_size(16))
-        gen_btn.setText("")
-        gen_btn.setToolTip("Generate AHK")
-        gen_btn.setFixedSize(34, 34)
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Search Rows/Buttons...")
+        self.search_input.setFixedWidth(200)
+        self.search_input.textChanged.connect(self.filter_rows)
+        toolbar.addWidget(self.search_input)
 
-        launch_btn = QPushButton("LAUNCH")
-        launch_btn.setStyleSheet(f"background-color: {CP_ORANGE}; color: black;")
-        launch_btn.clicked.connect(self.launch_ahk)
-        launch_btn.setIcon(svg_icon(LAUNCH_SVG, 16))
-        launch_btn.setIconSize(icon_size(16))
-        launch_btn.setText("")
-        launch_btn.setToolTip("Launch generated AHK")
-        launch_btn.setFixedSize(34, 34)
-
-        restart_btn = QPushButton("RESTART APP")
-        restart_btn.clicked.connect(self.restart_app)
-        restart_btn.setIcon(svg_icon(RESTART_SVG, 16))
-        restart_btn.setIconSize(icon_size(16))
-        restart_btn.setText("")
-        restart_btn.setToolTip("Restart app")
-        restart_btn.setFixedSize(34, 34)
-
+        toolbar.addStretch()
+        
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 10pt; font-weight: bold; margin-right: 10px;")
+        toolbar.addWidget(self.status_label)
+        
         settings_btn = QPushButton("SETTINGS")
         settings_btn.clicked.connect(self.toggle_settings)
         settings_btn.setIcon(svg_icon(SETTINGS_SVG, 16))
         settings_btn.setIconSize(icon_size(16))
         settings_btn.setText("")
-        settings_btn.setToolTip("Toggle settings")
+        settings_btn.setToolTip("Toggle Settings")
         settings_btn.setFixedSize(34, 34)
 
-        toolbar.addWidget(add_row_btn)
-        toolbar.addWidget(reorder_btn)
-        
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search Rows/Buttons...")
-        self.search_input.setFixedWidth(250)
-        self.search_input.textChanged.connect(self.filter_rows)
-        toolbar.addWidget(self.search_input)
+        restart_btn = QPushButton("RESTART")
+        restart_btn.clicked.connect(self.restart_app)
+        restart_btn.setIcon(svg_icon(RESTART_SVG, 16))
+        restart_btn.setIconSize(icon_size(16))
+        restart_btn.setText("")
+        restart_btn.setToolTip("Restart App")
+        restart_btn.setFixedSize(34, 34)
 
-        toolbar.addStretch()
-        self.status_label = QLabel("")
-        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 9pt;")
-        toolbar.addWidget(self.status_label)
+        gen_btn = QPushButton("GENERATE")
+        gen_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: white; border: 1px solid {CP_GREEN};")
+        gen_btn.clicked.connect(self.generate_ahk)
+        gen_btn.setIcon(svg_icon(GENERATE_SVG, 16))
+        gen_btn.setIconSize(icon_size(16))
+        gen_btn.setText("")
+        gen_btn.setToolTip("Generate AHK Script")
+        gen_btn.setFixedSize(34, 34)
+
+        launch_btn = QPushButton("LAUNCH")
+        launch_btn.setStyleSheet(f"background-color: {CP_ORANGE}; color: white; border: 1px solid {CP_ORANGE};")
+        launch_btn.clicked.connect(self.launch_ahk)
+        launch_btn.setIcon(svg_icon(LAUNCH_SVG, 16))
+        launch_btn.setIconSize(icon_size(16))
+        launch_btn.setText("")
+        launch_btn.setToolTip("Launch Generated AHK")
+        launch_btn.setFixedSize(34, 34)
+
         toolbar.addWidget(settings_btn)
         toolbar.addWidget(restart_btn)
         toolbar.addWidget(gen_btn)
         toolbar.addWidget(launch_btn)
         self.main_layout.addLayout(toolbar)
 
-        # Settings Panel (Hidden by default)
-        self.settings_panel = SettingsPanel(self.update_ui_widths)
+        # Settings Panel
         self.main_layout.addWidget(self.settings_panel)
 
         # Content Area (Scrollable)
@@ -657,11 +709,50 @@ class App(QMainWindow):
         self.scroll_content = QWidget()
         self.rows_layout = QVBoxLayout(self.scroll_content)
         self.rows_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.rows_layout.setContentsMargins(10, 10, 10, 10)
+        self.rows_layout.setSpacing(8)
         self.scroll.setWidget(self.scroll_content)
         self.scroll.setWidgetResizable(True)
         self.main_layout.addWidget(self.scroll)
 
         self.load_config()
+
+    def apply_theme_and_font(self):
+        font_family = "Segoe UI"
+        if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "font_family_combo"):
+            font_family = self.settings_panel.font_family_combo.currentText()
+        
+        font_size = "10.5pt"
+        if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "font_size"):
+            try:
+                fs = int(self.settings_panel.font_size.text())
+                font_size = f"{fs}pt"
+            except:
+                pass
+
+        self.setStyleSheet(f"""
+            QMainWindow {{ background-color: {CP_BG}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{font_family}'; font-size: {font_size}; }}
+            QScrollArea {{ background: transparent; border: none; }}
+            QLineEdit {{
+                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; padding: 5px;
+            }}
+            QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QComboBox {{
+                background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; border-radius: 4px; padding: 4px 8px;
+            }}
+            QComboBox::drop-down {{ border: 0px; width: 18px; }}
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 4px; color: {CP_TEXT}; padding: 6px 14px; font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM}; border: 1px solid {CP_CYAN}; color: {CP_CYAN};
+            }}
+            QGroupBox {{
+                border: 1px solid {CP_DIM}; border-radius: 6px; margin-top: 10px; padding-top: 15px; font-weight: bold; color: {CP_CYAN};
+            }}
+            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 8px; }}
+        """)
 
     def update_ui_widths(self):
         try:
@@ -669,6 +760,7 @@ class App(QMainWindow):
             wh = int(self.settings_panel.win_h.text())
             self.resize(ww, wh)
         except: pass
+        self.apply_theme_and_font()
         for row in self.rows:
             row.refresh_widths()
 
@@ -683,11 +775,9 @@ class App(QMainWindow):
         self.rows = new_order
         
         # Refresh UI layout
-        # 1. Remove all from layout
         for r in self.rows:
             self.rows_layout.removeWidget(r)
             
-        # 2. Add back in new order
         for r in self.rows:
             self.rows_layout.addWidget(r)
 
@@ -798,6 +888,10 @@ class App(QMainWindow):
                             if "auto_hide" in s: self.settings_panel.auto_hide.setText(s["auto_hide"])
                             if "sleep_delay" in s: self.settings_panel.sleep_delay.setText(s["sleep_delay"])
                             if "font_size" in s: self.settings_panel.font_size.setText(s["font_size"])
+                            if "font_family" in s:
+                                combo_set_code(self.settings_panel.font_family_combo, s["font_family"])
+                            else:
+                                combo_set_code(self.settings_panel.font_family_combo, "Segoe UI")
                             if "ui_label_w" in s: self.settings_panel.ui_label_w.setText(s["ui_label_w"])
                             if "ui_text_w" in s: self.settings_panel.ui_text_w.setText(s["ui_text_w"])
                             if "title_h" in s: self.settings_panel.title_h.setText(s["title_h"])
@@ -840,6 +934,7 @@ class App(QMainWindow):
                 "auto_hide": self.settings_panel.auto_hide.text(),
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
+                "font_family": self.settings_panel.font_family_combo.currentData() or "Segoe UI",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
@@ -878,6 +973,7 @@ class App(QMainWindow):
                 "auto_hide": self.settings_panel.auto_hide.text(),
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
+                "font_family": self.settings_panel.font_family_combo.currentData() or "Segoe UI",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
@@ -915,11 +1011,13 @@ class App(QMainWindow):
         assets_dir = self.current_assets_dir() or os.path.join(SCRIPT_DIR, "assets")
         os.makedirs(assets_dir, exist_ok=True)
 
+        selected_font = self.settings_panel.font_family_combo.currentData() or "Segoe UI"
+
         ahk_code = [
             "#Requires AutoHotkey v2.0",
             "",
             'myGui := Gui("+AlwaysOnTop", "Generated Keyboard")',
-            'myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")',
+            f'myGui.SetFont("s12 Bold", "{selected_font}")',
             "myGui.MarginX := 20",
             "myGui.MarginY := 20",
             ""
@@ -931,12 +1029,12 @@ class App(QMainWindow):
             ahk_code.append(f'; {title}')
             
             # Title button/label
-            tc = row.get("title_color", "FFCC00")
+            tc = row.get("title_color", "D89E00")
             ttc = row.get("title_text_color", "000000")
             title_action = row.get("title_action", "send_text")
             title_trigger = row.get("title_trigger", "click")
             title_text = row.get("title_text", "") or title
-            ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "Jetbrainsmono nfp")')
+            ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "{selected_font}")')
             th = self.settings_panel.title_h.text() or "30"
             tw = self.settings_panel.title_w.text() or "200"
             bh = self.settings_panel.btn_h.text() or "30"
@@ -945,7 +1043,7 @@ class App(QMainWindow):
             title_action_line = action_to_ahk(title_action, title_text)
             if title_action_line:
                 ahk_code.append(f'titleCtrl.OnEvent("{trigger_to_event(title_trigger)}", (*) => {title_action_line})')
-            ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
+            ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "{selected_font}")')
             
             for j, btn in enumerate(row["buttons"]):
                 label = btn["label"]
