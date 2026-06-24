@@ -9,7 +9,7 @@
         "title_w": "150",
         "btn_h": "25",
         "btn_w": "100",
-        "win_w": "1100",
+        "win_w": "1500",
         "win_h": "800"
     },
     "rows": [
@@ -17,27 +17,35 @@
             "title": "Nahid Ahmed",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "en",
                     "text": "Nahid Ahmed",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "bn",
                     "text": "\u09a8\u09be\u09b9\u09bf\u09a6 \u0986\u09b9\u09ae\u09c7\u09a6",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "NID",
                     "text": "1505190676",
                     "svg_code": "",
                     "color": "6DFF63",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -45,20 +53,26 @@
             "title": "Father",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "en",
                     "text": "Nurul Amin",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "bn",
                     "text": "\u09a8\u09c1\u09b0\u09c1\u09b2 \u0986\u09ae\u09bf\u09a8",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -66,20 +80,26 @@
             "title": "Mother",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "en",
                     "text": "Nazma Begum",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "bn",
                     "text": "\u09a8\u09be\u099c\u09ae\u09be \u09ac\u09c7\u0997\u09ae",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -87,20 +107,26 @@
             "title": "Address",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Present",
                     "text": "Village/Town: AAM Tower, Flat: A-8, Giridhara Residential Area, Saddam Market, Matuail, Dhaka",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "Permanent",
                     "text": "Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -108,20 +134,26 @@
             "title": "P.O",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "\ueb71",
                     "text": "Narayangonj",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "\ueb71",
                     "text": "Radhapur",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -129,20 +161,26 @@
             "title": "P.C",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "\ueb71",
                     "text": "1420",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "\ueb71",
                     "text": "3706",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -150,13 +188,17 @@
             "title": "SSC & HSC REG",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "REG",
                     "text": "1110241111",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -164,27 +206,35 @@
             "title": "SSC",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Roll",
                     "text": "402206",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "YR",
                     "text": "2014",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "School",
                     "text": "Provati Uchya Bidyanikaton",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -192,27 +242,35 @@
             "title": "HSC",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Roll",
                     "text": "510014",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "YR",
                     "text": "2016",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "College",
                     "text": "Notre Dame College",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -220,34 +278,44 @@
             "title": "BBA",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Roll",
                     "text": "23-208",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "YR",
                     "text": "2020",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "Versity",
                     "text": "University of Dhaka",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "CGPA",
                     "text": "3.3",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
@@ -255,34 +323,44 @@
             "title": "MBA",
             "title_color": "FFCC00",
             "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
             "buttons": [
                 {
                     "label": "Roll",
                     "text": "23-2191",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "YR",
                     "text": "2021",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "Versity",
                     "text": "University of Dhaka",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 },
                 {
                     "label": "CGPA",
                     "text": "3.23",
                     "svg_code": "",
                     "color": "00CCFF",
-                    "text_color": "000000"
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         }
