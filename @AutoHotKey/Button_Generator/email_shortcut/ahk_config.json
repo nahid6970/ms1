@@ -21,6 +21,60 @@
             "title_action": "send_text",
             "title_trigger": "click",
             "buttons": []
+        },
+        {
+            "title": "g1",
+            "title_text": "nahid69701@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g2",
+            "title_text": "nahid69702@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g3",
+            "title_text": "nahid69703@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g4",
+            "title_text": "nahid69704@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "g5",
+            "title_text": "nahid69705@gmail.com",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "copy_text",
+            "title_trigger": "click",
+            "buttons": []
+        },
+        {
+            "title": "",
+            "title_text": "",
+            "title_color": "FFCC00",
+            "title_text_color": "000000",
+            "title_action": "send_text",
+            "title_trigger": "click",
+            "buttons": []
         }
     ]
 }

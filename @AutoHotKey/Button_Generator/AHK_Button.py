@@ -765,6 +765,10 @@ class App(QMainWindow):
             return
         self._loading_profile = True
         try:
+            if self.profile_combo.currentText() != profile_name:
+                self.profile_combo.blockSignals(True)
+                self.profile_combo.setCurrentText(profile_name)
+                self.profile_combo.blockSignals(False)
             self.clear_rows()
             self.current_profile_name = profile_name
             self.status_label.setText(f"Profile: {profile_name}")
@@ -815,6 +819,7 @@ class App(QMainWindow):
             first_profile = last_profile
         else:
             first_profile = self.profile_combo.currentText() or self.profile_combo.itemText(0)
+        self.refresh_profile_list(first_profile)
         self.load_profile(first_profile)
 
     def save_config(self):
