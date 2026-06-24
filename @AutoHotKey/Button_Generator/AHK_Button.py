@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit, QListWidget, QListWidgetItem,
                              QComboBox, QInputDialog, QMessageBox)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF, QSize
-from PyQt6.QtGui import QColor, QPainter, QImage, QIcon, QPixmap
+from PyQt6.QtGui import QColor, QPainter, QImage, QIcon, QPixmap, QFontDatabase
 from PyQt6.QtSvg import QSvgRenderer
 
 # PROFESSIONAL DARK PALETTE
@@ -552,9 +552,11 @@ class SettingsPanel(QGroupBox):
         self.font_size = QLineEdit("12")
         
         self.font_family_combo = QComboBox()
-        for font in ["Segoe UI", "Consolas", "JetBrains Mono", "Arial", "Calibri", "Courier New"]:
+        font_families = QFontDatabase.families()
+        self.font_family_combo.addItem("System Default", "")
+        for font in font_families:
             self.font_family_combo.addItem(font, font)
-        self.font_family_combo.setCurrentText("Segoe UI")
+        self.font_family_combo.setCurrentText("Segoe UI" if "Segoe UI" in font_families else "System Default")
         
         self.ui_label_w = QLineEdit("80")
         self.ui_text_w = QLineEdit("200")
@@ -718,9 +720,13 @@ class App(QMainWindow):
         self.load_config()
 
     def apply_theme_and_font(self):
-        font_family = "Segoe UI"
+        font_family = QApplication.font().family()
         if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "font_family_combo"):
-            font_family = self.settings_panel.font_family_combo.currentText()
+            selected_font = self.settings_panel.font_family_combo.currentData()
+            if selected_font:
+                font_family = selected_font
+            elif self.settings_panel.font_family_combo.currentText() != "System Default":
+                font_family = self.settings_panel.font_family_combo.currentText()
         
         font_size = "10.5pt"
         if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "font_size"):
@@ -891,7 +897,7 @@ class App(QMainWindow):
                             if "font_family" in s:
                                 combo_set_code(self.settings_panel.font_family_combo, s["font_family"])
                             else:
-                                combo_set_code(self.settings_panel.font_family_combo, "Segoe UI")
+                                combo_set_code(self.settings_panel.font_family_combo, "")
                             if "ui_label_w" in s: self.settings_panel.ui_label_w.setText(s["ui_label_w"])
                             if "ui_text_w" in s: self.settings_panel.ui_text_w.setText(s["ui_text_w"])
                             if "title_h" in s: self.settings_panel.title_h.setText(s["title_h"])
@@ -934,7 +940,7 @@ class App(QMainWindow):
                 "auto_hide": self.settings_panel.auto_hide.text(),
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
-                "font_family": self.settings_panel.font_family_combo.currentData() or "Segoe UI",
+                "font_family": self.settings_panel.font_family_combo.currentData() or "",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
@@ -973,7 +979,7 @@ class App(QMainWindow):
                 "auto_hide": self.settings_panel.auto_hide.text(),
                 "sleep_delay": self.settings_panel.sleep_delay.text(),
                 "font_size": self.settings_panel.font_size.text(),
-                "font_family": self.settings_panel.font_family_combo.currentData() or "Segoe UI",
+                "font_family": self.settings_panel.font_family_combo.currentData() or "",
                 "ui_label_w": self.settings_panel.ui_label_w.text(),
                 "ui_text_w": self.settings_panel.ui_text_w.text(),
                 "title_h": self.settings_panel.title_h.text(),
