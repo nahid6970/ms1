@@ -9,6 +9,7 @@ function loadTabs() {
 // Variables for context menu and modal
 let currentRightClickedTabId = null;
 let currentTabView = 'all';
+let currentSearchQuery = '';
 const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
@@ -25,6 +26,7 @@ const viewAllTabsBtn = document.getElementById('viewAllTabs');
 const viewOutdatedTabsBtn = document.getElementById('viewOutdatedTabs');
 const allTabCount = document.getElementById('allTabCount');
 const outdatedTabCount = document.getElementById('outdatedTabCount');
+const tabSearch = document.getElementById('tabSearch');
 
 // Tags management
 let availableTags = [
@@ -146,13 +148,14 @@ saveNewTagBtn.onclick = () => {
 // Display tabs in the popup
 function displayTabs(tabs) {
   const tabList = document.getElementById('tabList');
-  const tabCount = document.getElementById('tabCount');
 
   const totalTabs = tabs.length;
   const outdatedTabs = tabs.filter(tab => isOutdatedDeadline(tab));
-  const visibleTabs = currentTabView === 'outdated' ? outdatedTabs : tabs;
+  const filteredTabs = tabs.filter(tab => matchesSearch(tab, currentSearchQuery));
+  const visibleTabs = currentTabView === 'outdated'
+    ? filteredTabs.filter(tab => isOutdatedDeadline(tab))
+    : filteredTabs;
 
-  tabCount.textContent = visibleTabs.length;
   allTabCount.textContent = totalTabs;
   outdatedTabCount.textContent = outdatedTabs.length;
 
@@ -179,10 +182,16 @@ function displayTabs(tabs) {
   }
 
   if (visibleTabs.length === 0) {
+    const noResults = currentSearchQuery.trim()
+      ? `No tabs match "${currentSearchQuery.trim()}".`
+      : 'No outdated deadlines yet!';
+    const noResultsHint = currentSearchQuery.trim()
+      ? 'Try a different title, URL, or tag.'
+      : 'This view shows tabs whose deadlines are at least 2 days past due.';
     tabList.innerHTML = `
       <div class="empty-state">
-        <p>No outdated deadlines yet!</p>
-        <p class="hint">This view shows tabs whose deadlines are at least 2 days past due.</p>
+        <p>${noResults}</p>
+        <p class="hint">${noResultsHint}</p>
       </div>
     `;
     return;
@@ -312,6 +321,17 @@ function isOutdatedDeadline(tab) {
   return Date.now() - deadline >= twoDaysMs;
 }
 
+function matchesSearch(tab, query) {
+  const value = query.trim().toLowerCase();
+  if (!value) return true;
+  const haystack = [
+    tab.title || '',
+    tab.url || '',
+    tab.tag || ''
+  ].join(' ').toLowerCase();
+  return haystack.includes(value);
+}
+
 function setActiveViewButton(view) {
   const isOutdated = view === 'outdated';
   viewAllTabsBtn.classList.toggle('active', !isOutdated);
@@ -327,6 +347,11 @@ viewAllTabsBtn.addEventListener('click', () => {
 
 viewOutdatedTabsBtn.addEventListener('click', () => {
   currentTabView = 'outdated';
+  loadTabs();
+});
+
+tabSearch.addEventListener('input', (e) => {
+  currentSearchQuery = e.target.value;
   loadTabs();
 });
 

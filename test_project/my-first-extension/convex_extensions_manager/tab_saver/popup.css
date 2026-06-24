@@ -20,9 +20,10 @@ body {
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 20px;
-  text-align: center;
+  padding: 12px 20px;
+  text-align: right;
   position: relative;
+  min-height: 56px;
 }
 
 .settings-btn {
@@ -50,20 +51,10 @@ body {
   transform: rotate(90deg);
 }
 
-.header h1 {
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.tab-count {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
 .view-tabs {
   display: flex;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 10px 8px;
   background: linear-gradient(180deg, #ffffff 0%, #f7f8ff 100%);
   border-bottom: 1px solid #e8e8f5;
 }
@@ -112,6 +103,33 @@ body {
 
 .view-tab.active .view-tab-count {
   background: rgba(255, 255, 255, 0.18);
+}
+
+.search-wrap {
+  padding: 0 10px 10px;
+  background: #ffffff;
+  border-bottom: 1px solid #eef0fb;
+}
+
+.tab-search {
+  width: 100%;
+  border: 1px solid #d9d9e8;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: #2f3142;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tab-search::placeholder {
+  color: #9093a8;
+}
+
+.tab-search:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.14);
 }
 
 .tab-list {

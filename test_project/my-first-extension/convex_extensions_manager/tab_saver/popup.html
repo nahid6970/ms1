@@ -9,10 +9,6 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>📑 Saved Tabs</h1>
-      <div class="tab-count">
-        <span id="tabCount">0</span> tabs shown
-      </div>
       <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
     </div>
 
@@ -25,6 +21,10 @@
         <span>Outdated +2d</span>
         <span class="view-tab-count" id="outdatedTabCount">0</span>
       </button>
+    </div>
+
+    <div class="search-wrap">
+      <input id="tabSearch" class="tab-search" type="search" placeholder="Search tabs, URLs, or tags">
     </div>
 
     <div id="tabList" class="tab-list">
