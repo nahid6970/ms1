@@ -1045,7 +1045,7 @@ class App(QMainWindow):
             tw = self.settings_panel.title_w.text() or "200"
             bh = self.settings_panel.btn_h.text() or "30"
             bw = self.settings_panel.btn_w.text() or "100"
-            ahk_code.append(f'titleCtrl := myGui.Add("Button", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{ahk_escape(title)}")')
+            ahk_code.append(f'titleCtrl := myGui.Add("Text", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{ahk_escape(title)}")')
             title_action_line = action_to_ahk(title_action, title_text)
             if title_action_line:
                 ahk_code.append(f'titleCtrl.OnEvent("{trigger_to_event(title_trigger)}", (*) => {title_action_line})')
@@ -1099,7 +1099,7 @@ class App(QMainWindow):
                     ahk_code.append(f'btn := myGui.Add("Picture", "x+5 yp w{bw} h{bh} +Border Background{bg}", "{ahk_img_path}")')
                 else:
                     # Priority 2: Text Label
-                    ahk_code.append(f'btn := myGui.Add("Button", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{ahk_escape(label)}")')
+                    ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{ahk_escape(label)}")')
                     ahk_code.append(f'btn.SetFont("c{fg}")')
                 
                 if action_line:
