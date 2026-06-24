@@ -103,43 +103,43 @@
 
   <!-- Deadline Edit Modal -->
   <div id="deadlineModal" class="modal">
-    <div class="modal-content" style="background: #0d0d12; border: 1px solid #00f3ff; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); color: #fff;">
-      <div style="background: #00f3ff; color: #000; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;">Edit</span>
-        <button id="closeDeadlineModal" class="close-btn" style="color: #000; opacity: 1;">&times;</button>
+    <div class="modal-content modal-theme">
+      <div class="modal-theme-header">
+        <span class="modal-theme-title">Edit</span>
+        <button id="closeDeadlineModal" class="close-btn modal-theme-close">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Days from today</label>
-          <input type="number" id="editDeadlineDays" min="1" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;">
+      <div class="modal-body modal-theme-body">
+        <div class="modal-field">
+          <label for="editDeadlineDays">Days from today</label>
+          <input type="number" id="editDeadlineDays" min="1" class="modal-input">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Pick a date</label>
-          <input type="date" id="editDeadlineDate" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; cursor: pointer; width: 100%; color-scheme: dark; box-sizing: border-box;">
+        <div class="modal-field">
+          <label for="editDeadlineDate">Pick a date</label>
+          <input type="date" id="editDeadlineDate" class="modal-input modal-date-input">
         </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">Tag</label>
-          <div style="display: flex; gap: 10px;">
-            <select id="editTag" style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1; cursor: pointer;">
+        <div class="modal-field">
+          <label for="editTag">Tag</label>
+          <div class="modal-inline-row">
+            <select id="editTag" class="modal-select">
               <option value="">No Tag</option>
             </select>
-            <button id="addTagBtn" style="background: #1a1a24; border: 1px solid #00f3ff; color: #00f3ff; padding: 0 15px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 0;">+</button>
+            <button id="addTagBtn" class="modal-add-btn">+</button>
           </div>
         </div>
-        <div id="newTagInputContainer" style="display: none; flex-direction: column; gap: 8px;">
-          <label style="font-size: 10px; font-weight: 800; color: #00f3ff; text-transform: uppercase; letter-spacing: 1px;">New Tag Name & Colors (BG / Border)</label>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" id="newTagName" placeholder="Enter tag name..." style="background: #1a1a24; border: 1px solid #333; color: #fff; padding: 12px; font-size: 14px; outline: none; flex: 1;">
-            <div style="display: flex; gap: 4px;">
-              <input type="color" id="newTagColor" value="#e3f2fd" title="Background Color" style="width: 32px; height: 32px; border: 1px solid #333; background: none; padding: 0; cursor: pointer;">
-              <input type="color" id="newTagBorderColor" value="#bbdefb" title="Border Color" style="width: 32px; height: 32px; border: 1px solid #333; background: none; padding: 0; cursor: pointer;">
+        <div id="newTagInputContainer" class="modal-field modal-new-tag" style="display: none;">
+          <label for="newTagName">New Tag Name & Colors (BG / Border)</label>
+          <div class="modal-inline-row">
+            <input type="text" id="newTagName" placeholder="Enter tag name..." class="modal-input">
+            <div class="modal-color-row">
+              <input type="color" id="newTagColor" value="#e3f2fd" title="Background Color" class="modal-color-input">
+              <input type="color" id="newTagBorderColor" value="#bbdefb" title="Border Color" class="modal-color-input">
             </div>
-            <button id="saveNewTagBtn" style="background: #00f3ff; color: #000; border: none; padding: 0 15px; height: 32px; font-weight: 800; cursor: pointer;">Add</button>
+            <button id="saveNewTagBtn" class="modal-primary-btn">Add</button>
           </div>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 5px;">
-          <button id="cancelDeadlineBtn" class="btn btn-secondary" style="background: transparent; border: 1px solid #333; color: #999; border-radius: 0;">Cancel</button>
-          <button id="saveDeadlineBtn" class="btn btn-primary" style="background: #00f3ff; color: #000; border-radius: 0; font-weight: 800; border: none;">Apply</button>
+        <div class="modal-actions">
+          <button id="cancelDeadlineBtn" class="btn btn-secondary">Cancel</button>
+          <button id="saveDeadlineBtn" class="btn btn-primary">Apply</button>
         </div>
       </div>
     </div>
