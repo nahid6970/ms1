@@ -10,9 +10,9 @@ os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
                              QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit, QListWidget, QListWidgetItem,
-                             QComboBox, QInputDialog, QMessageBox)
+                             QComboBox, QInputDialog, QMessageBox, QStyleOptionButton, QStyle)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF, QSize
-from PyQt6.QtGui import QColor, QPainter, QImage, QIcon, QPixmap, QFontDatabase
+from PyQt6.QtGui import QColor, QPainter, QImage, QIcon, QPixmap, QFontDatabase, QPen
 from PyQt6.QtSvg import QSvgRenderer
 
 # PROFESSIONAL DARK PALETTE
@@ -243,6 +243,44 @@ class SVGInputDialog(QDialog):
     def get_code(self):
         return self.editor.toPlainText().strip()
 
+
+class VerticalTextButton(QPushButton):
+    def __init__(self, text, parent=None):
+        super().__init__(text, parent)
+        self._vertical_text = text
+
+    def sizeHint(self):
+        hint = super().sizeHint()
+        return QSize(42, max(hint.height(), 160))
+
+    def minimumSizeHint(self):
+        return QSize(42, 160)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        try:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            rect = self.rect()
+
+            # Draw the base button using the current Qt style.
+            opt = QStyleOptionButton()
+            self.initStyleOption(opt)
+            self.style().drawControl(QStyle.ControlElement.CE_PushButtonBevel, opt, painter, self)
+
+            painter.save()
+            painter.translate(rect.center())
+            painter.rotate(-90)
+            painter.setPen(QPen(self.palette().buttonText().color()))
+            font = self.font()
+            font.setBold(True)
+            font.setPointSize(max(font.pointSize(), 18))
+            painter.setFont(font)
+            text_rect = QRectF(-rect.height() / 2.0, -rect.width() / 2.0, rect.height(), rect.width())
+            painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, self._vertical_text)
+            painter.restore()
+        finally:
+            painter.end()
+
 class RowWidget(QFrame):
     def __init__(self, data=None, on_remove=None, parent_app=None):
         super().__init__()
@@ -331,16 +369,39 @@ class RowWidget(QFrame):
         self.layout.addLayout(header_layout)
 
         # Buttons Area
+        buttons_area = QHBoxLayout()
+        buttons_area.setContentsMargins(0, 0, 0, 0)
+        buttons_area.setSpacing(8)
+
         self.btns_container = QWidget()
         self.btns_layout = QVBoxLayout(self.btns_container)
         self.btns_layout.setContentsMargins(0, 0, 0, 0)
         self.btns_layout.setSpacing(6)
-        self.layout.addWidget(self.btns_container)
+        buttons_area.addWidget(self.btns_container, 1)
         
-        add_btn_btn = QPushButton("+ ADD ACTION BUTTON")
-        add_btn_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px dashed {CP_CYAN}; color: {CP_CYAN};")
-        add_btn_btn.clicked.connect(lambda: self.add_button_ui())
-        self.layout.addWidget(add_btn_btn)
+        self.add_btn_btn = VerticalTextButton("+")
+        self.add_btn_btn.setToolTip("Add action button")
+        self.add_btn_btn.setFixedWidth(42)
+        self.add_btn_btn.setMinimumHeight(160)
+        self.add_btn_btn.setSizePolicy(self.add_btn_btn.sizePolicy().horizontalPolicy(), self.add_btn_btn.sizePolicy().verticalPolicy())
+        self.add_btn_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                border: 1px dashed {CP_CYAN};
+                color: {CP_CYAN};
+                border-radius: 0px;
+                padding: 6px 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+                color: {CP_CYAN};
+            }}
+        """)
+        self.add_btn_btn.clicked.connect(lambda: self.add_button_ui())
+        buttons_area.addWidget(self.add_btn_btn, 0, Qt.AlignmentFlag.AlignTop)
+
+        self.layout.addLayout(buttons_area)
 
         if data and "buttons" in data:
             for b in data["buttons"]:
@@ -470,7 +531,15 @@ class RowWidget(QFrame):
         rem_btn = QPushButton("-")
         rem_btn.setFixedWidth(25)
         rem_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; border-radius: 4px;")
-        rem_btn.clicked.connect(lambda: btn_frame.deleteLater())
+        def remove_button():
+            self.btns_layout.removeWidget(btn_frame)
+            btn_frame.setParent(None)
+            btn_frame.deleteLater()
+            self.update_add_button_height()
+            if self.parent_app:
+                self.parent_app.save_config()
+
+        rem_btn.clicked.connect(remove_button)
 
         label_tag = QLabel("L:")
         label_tag.setFixedWidth(30)
@@ -494,6 +563,7 @@ class RowWidget(QFrame):
         
         self.btns_layout.addWidget(btn_frame)
         self.refresh_widths()
+        self.update_add_button_height()
 
     def remove_self(self):
         if self.on_remove:
@@ -538,6 +608,16 @@ class RowWidget(QFrame):
                 for inp in inputs:
                     if search_text in inp.text().lower(): return True
         return False
+
+    def update_add_button_height(self):
+        if not hasattr(self, "add_btn_btn"):
+            return
+        count = max(1, self.btns_layout.count())
+        button_height = 54
+        gap = 6
+        target_height = max(160, (count * button_height) + ((count - 1) * gap))
+        self.add_btn_btn.setMinimumHeight(target_height)
+        self.add_btn_btn.setMaximumHeight(target_height)
 
 class SettingsPanel(QGroupBox):
     def __init__(self, update_callback):
@@ -802,6 +882,8 @@ class App(QMainWindow):
     def remove_row(self, row_widget):
         self.rows.remove(row_widget)
         row_widget.deleteLater()
+        if hasattr(self, "save_config"):
+            self.save_config()
 
     def toggle_settings(self):
         self.settings_panel.setVisible(not self.settings_panel.isVisible())
