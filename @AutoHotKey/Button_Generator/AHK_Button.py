@@ -2,13 +2,15 @@ import sys
 import os
 import json
 import subprocess
+import shutil
 
 # Suppress Qt font warnings
 os.environ["QT_LOGGING_RULES"] = "qt.text.font.db=false"
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QScrollArea,
-                             QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit, QListWidget, QListWidgetItem)
+                             QFormLayout, QFrame, QColorDialog, QDialog, QTextEdit, QListWidget, QListWidgetItem,
+                             QComboBox, QInputDialog, QMessageBox)
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QRectF
 from PyQt6.QtGui import QColor, QPainter, QImage
 from PyQt6.QtSvg import QSvgRenderer
@@ -27,10 +29,42 @@ CP_SUBTEXT = "#808080"
 
 # Relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
-AHK_OUTPUT_DIR = r"C:\@delta\output\ahk"
-os.makedirs(AHK_OUTPUT_DIR, exist_ok=True)
-AHK_OUTPUT = os.path.join(AHK_OUTPUT_DIR, "generate_Button_AHK.ahk")
+LEGACY_CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
+DEFAULT_PROFILE_NAME = "Default"
+
+
+def sanitize_profile_name(name):
+    cleaned = "".join(ch for ch in name.strip() if ch not in r'<>:"/\|?*')
+    return cleaned.strip(" .")
+
+
+def profile_dir(profile_name):
+    return os.path.join(SCRIPT_DIR, profile_name)
+
+
+def profile_config_path(profile_name):
+    return os.path.join(profile_dir(profile_name), "ahk_config.json")
+
+
+def profile_ahk_path(profile_name):
+    return os.path.join(profile_dir(profile_name), "generate_Button_AHK.ahk")
+
+
+def profile_assets_dir(profile_name):
+    return os.path.join(profile_dir(profile_name), "assets")
+
+
+def profile_exists(profile_name):
+    return os.path.isdir(profile_dir(profile_name)) and os.path.exists(profile_config_path(profile_name))
+
+
+def list_profile_names():
+    names = []
+    for entry in sorted(os.listdir(SCRIPT_DIR), key=str.lower):
+        path = os.path.join(SCRIPT_DIR, entry)
+        if os.path.isdir(path) and os.path.exists(os.path.join(path, "ahk_config.json")):
+            names.append(entry)
+    return names
 
 class ReorderDialog(QDialog):
     def __init__(self, rows, parent=None):
@@ -345,6 +379,10 @@ class App(QMainWindow):
         self.setWindowTitle("CyberAHK Generator")
         self.resize(1000, 800)
         self.rows = []
+        self.current_profile_name = None
+        self._loading_profile = False
+
+        self._ensure_profile_storage()
 
         # Global Theme Application
         self.setStyleSheet(f"""
@@ -373,6 +411,16 @@ class App(QMainWindow):
 
         # Toolbar
         toolbar = QHBoxLayout()
+        self.profile_combo = QComboBox()
+        self.profile_combo.setFixedWidth(180)
+        self.profile_combo.currentTextChanged.connect(self.on_profile_changed)
+        toolbar.addWidget(QLabel("PROFILE:"))
+        toolbar.addWidget(self.profile_combo)
+
+        new_profile_btn = QPushButton("+ NEW PROFILE")
+        new_profile_btn.clicked.connect(self.create_profile)
+        toolbar.addWidget(new_profile_btn)
+
         add_row_btn = QPushButton("+ NEW ROW")
         add_row_btn.clicked.connect(self.add_row)
 
@@ -420,7 +468,11 @@ class App(QMainWindow):
         self.scroll.setWidgetResizable(True)
         self.main_layout.addWidget(self.scroll)
 
-        self.load_config()
+        self.refresh_profile_list()
+        if self.profile_combo.count() == 0:
+            self.create_profile("Default")
+        if self.profile_combo.count() > 0 and not self.current_profile_name:
+            self.profile_combo.setCurrentIndex(0)
 
     def update_ui_widths(self):
         try:
@@ -468,13 +520,69 @@ class App(QMainWindow):
         self.settings_panel.setVisible(not self.settings_panel.isVisible())
 
     def restart_app(self):
+        self.save_config()
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    def load_config(self):
-        if os.path.exists(CONFIG_FILE):
-            try:
-                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+    def _ensure_profile_storage(self):
+        if os.path.exists(LEGACY_CONFIG_FILE) and not list_profile_names():
+            default_dir = profile_dir(DEFAULT_PROFILE_NAME)
+            os.makedirs(default_dir, exist_ok=True)
+            shutil.copy2(LEGACY_CONFIG_FILE, profile_config_path(DEFAULT_PROFILE_NAME))
+
+    def refresh_profile_list(self, select_name=None):
+        profiles = list_profile_names()
+        self.profile_combo.blockSignals(True)
+        self.profile_combo.clear()
+        self.profile_combo.addItems(profiles)
+        if select_name and select_name in profiles:
+            self.profile_combo.setCurrentText(select_name)
+        self.profile_combo.blockSignals(False)
+        if select_name and select_name in profiles:
+            self.current_profile_name = select_name
+            self.status_label.setText(f"Profile: {select_name}")
+
+    def current_config_file(self):
+        if not self.current_profile_name:
+            return None
+        return profile_config_path(self.current_profile_name)
+
+    def current_ahk_file(self):
+        if not self.current_profile_name:
+            return None
+        return profile_ahk_path(self.current_profile_name)
+
+    def current_assets_dir(self):
+        if not self.current_profile_name:
+            return None
+        return profile_assets_dir(self.current_profile_name)
+
+    def clear_rows(self):
+        while self.rows_layout.count():
+            item = self.rows_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+        self.rows = []
+
+    def load_profile(self, profile_name):
+        if not profile_name:
+            return
+        self._loading_profile = True
+        try:
+            self.clear_rows()
+            self.current_profile_name = profile_name
+            self.status_label.setText(f"Profile: {profile_name}")
+            config_file = self.current_config_file()
+            if config_file and os.path.exists(config_file):
+                try:
+                    with open(config_file, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                except Exception as e:
+                    QMessageBox.warning(self, "Load Error", f"Could not load profile '{profile_name}': {e}")
+                    data = None
+
+                if data is not None:
                     rows_data = []
                     if isinstance(data, dict):
                         if "settings" in data:
@@ -493,17 +601,29 @@ class App(QMainWindow):
                         rows_data = data.get("rows", [])
                     else:
                         rows_data = data
-                    
+
                     for r_data in rows_data:
                         self.add_row(r_data)
                     self.update_ui_widths()
-            except Exception as e:
-                print(f"Error loading config: {e}")
+            else:
+                self.add_row({"title": "Example Name", "buttons": [{"label": "en", "text": "Hello", "color": "00CCFF"}]})
+        finally:
+            self._loading_profile = False
+
+    def load_config(self):
+        self.refresh_profile_list()
+        if self.profile_combo.count() == 0:
+            self.create_profile(DEFAULT_PROFILE_NAME)
+            return
+        if self.current_profile_name in list_profile_names():
+            self.load_profile(self.current_profile_name)
         else:
-            # Default example
-            self.add_row({"title": "Example Name", "buttons": [{"label": "en", "text": "Hello", "color": "00CCFF"}]})
+            self.profile_combo.setCurrentIndex(0)
 
     def save_config(self):
+        if not self.current_profile_name:
+            return
+        os.makedirs(profile_dir(self.current_profile_name), exist_ok=True)
         data = {
             "settings": {
                 "auto_hide": self.settings_panel.auto_hide.text(),
@@ -520,15 +640,66 @@ class App(QMainWindow):
             },
             "rows": [r.get_data() for r in self.rows]
         }
-        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        with open(self.current_config_file(), "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
+
+    def create_profile(self, checked=False, profile_name=None):
+        if isinstance(checked, str) and profile_name is None:
+            profile_name = checked
+            checked = False
+
+        if profile_name is None:
+            profile_name, ok = QInputDialog.getText(self, "New Profile", "Profile name:")
+            if not ok:
+                return
+
+        profile_name = sanitize_profile_name(profile_name)
+        if not profile_name:
+            QMessageBox.warning(self, "Invalid Name", "Profile name cannot be empty.")
+            return
+        if profile_exists(profile_name):
+            QMessageBox.information(self, "Profile Exists", f"Profile '{profile_name}' already exists.")
+            return
+
+        os.makedirs(profile_dir(profile_name), exist_ok=True)
+        template = {
+            "settings": {
+                "auto_hide": self.settings_panel.auto_hide.text(),
+                "sleep_delay": self.settings_panel.sleep_delay.text(),
+                "font_size": self.settings_panel.font_size.text(),
+                "ui_label_w": self.settings_panel.ui_label_w.text(),
+                "ui_text_w": self.settings_panel.ui_text_w.text(),
+                "title_h": self.settings_panel.title_h.text(),
+                "title_w": self.settings_panel.title_w.text(),
+                "btn_h": self.settings_panel.btn_h.text(),
+                "btn_w": self.settings_panel.btn_w.text(),
+                "win_w": self.settings_panel.win_w.text(),
+                "win_h": self.settings_panel.win_h.text()
+            },
+            "rows": []
+        }
+        with open(profile_config_path(profile_name), "w", encoding="utf-8") as f:
+            json.dump(template, f, indent=4)
+
+        self.refresh_profile_list(profile_name)
+        self.profile_combo.setCurrentText(profile_name)
+        self.load_profile(profile_name)
+
+    def on_profile_changed(self, profile_name):
+        if self._loading_profile or not profile_name:
+            return
+        if profile_name == self.current_profile_name:
+            return
+        if self.current_profile_name:
+            self.save_config()
+        self.load_profile(profile_name)
 
     def generate_ahk(self):
         self.save_config()
         data = [r.get_data() for r in self.rows]
         
         # Setup assets directory
-        assets_dir = os.path.join(AHK_OUTPUT_DIR, "assets")
+        assets_dir = self.current_assets_dir() or os.path.join(SCRIPT_DIR, "assets")
         os.makedirs(assets_dir, exist_ok=True)
 
         ahk_code = [
@@ -624,11 +795,15 @@ class App(QMainWindow):
             "}"
         ])
 
-        with open(AHK_OUTPUT, "w", encoding="utf-8-sig") as f:
+        with open(self.current_ahk_file(), "w", encoding="utf-8-sig") as f:
             f.write("\n".join(ahk_code))
         
         self.status_label.setText("✔ Generated")
         QTimer.singleShot(1000, lambda: self.status_label.setText(""))
+
+    def closeEvent(self, event):
+        self.save_config()
+        super().closeEvent(event)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
