@@ -20,17 +20,7 @@
             "title_text_color": "000000",
             "title_action": "send_text",
             "title_trigger": "click",
-            "buttons": [
-                {
-                    "label": "",
-                    "text": "",
-                    "svg_code": "",
-                    "color": "00CCFF",
-                    "text_color": "000000",
-                    "action": "send_text",
-                    "trigger": "click"
-                }
-            ]
+            "buttons": []
         }
     ]
 }
