@@ -655,13 +655,7 @@
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "code C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
+                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py"
                 }
             },
             "bg": "",
@@ -681,7 +675,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "left"
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "id": "Folder_bt",
