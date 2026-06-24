@@ -313,12 +313,12 @@ class RowWidget(QFrame):
         self.title_action_combo = QComboBox()
         combo_add_options(self.title_action_combo, ACTION_OPTIONS)
         combo_set_code(self.title_action_combo, data.get("title_action", "send_text") if data else "send_text")
-        self.title_action_combo.setFixedWidth(110)
+        self.title_action_combo.setFixedWidth(150)
 
         self.title_trigger_combo = QComboBox()
         combo_add_options(self.title_trigger_combo, TRIGGER_OPTIONS)
         combo_set_code(self.title_trigger_combo, data.get("title_trigger", "click") if data else "click")
-        self.title_trigger_combo.setFixedWidth(110)
+        self.title_trigger_combo.setFixedWidth(150)
 
         header_layout.addWidget(self.title_action_combo)
         header_layout.addWidget(self.title_trigger_combo)
@@ -411,12 +411,12 @@ class RowWidget(QFrame):
         action_combo = QComboBox()
         combo_add_options(action_combo, ACTION_OPTIONS)
         combo_set_code(action_combo, b_data.get("action", "send_text") if b_data else "send_text")
-        action_combo.setFixedWidth(110)
+        action_combo.setFixedWidth(150)
 
         trigger_combo = QComboBox()
         combo_add_options(trigger_combo, TRIGGER_OPTIONS)
         combo_set_code(trigger_combo, b_data.get("trigger", "click") if b_data else "click")
-        trigger_combo.setFixedWidth(110)
+        trigger_combo.setFixedWidth(150)
 
         # SVG Code Storage
         btn_frame.svg_code = b_data.get("svg_code", "") if b_data else ""
