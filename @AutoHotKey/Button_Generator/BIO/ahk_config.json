@@ -28,7 +28,7 @@
                     "svg_code": "",
                     "color": "00CCFF",
                     "text_color": "000000",
-                    "action": "send_text",
+                    "action": "no_action",
                     "trigger": "click"
                 },
                 {
@@ -192,7 +192,7 @@
             ]
         },
         {
-            "title": "SSC & HSC REG",
+            "title": "SSC // HSC REG",
             "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
