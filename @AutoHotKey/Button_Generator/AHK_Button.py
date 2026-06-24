@@ -31,6 +31,16 @@ CP_SUBTEXT = "#808080"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LEGACY_CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
 DEFAULT_PROFILE_NAME = "Default"
+ACTION_OPTIONS = [
+    ("send_text", "Send Text"),
+    ("copy_text", "Copy Text"),
+    ("no_action", "No Action"),
+]
+TRIGGER_OPTIONS = [
+    ("click", "Left Click"),
+    ("context_menu", "Right Click"),
+    ("double_click", "Double Click"),
+]
 
 
 def sanitize_profile_name(name):
@@ -65,6 +75,41 @@ def list_profile_names():
         if os.path.isdir(path) and os.path.exists(os.path.join(path, "ahk_config.json")):
             names.append(entry)
     return names
+
+
+def combo_set_code(combo, code, fallback_index=0):
+    for i in range(combo.count()):
+        if combo.itemData(i) == code:
+            combo.setCurrentIndex(i)
+            return
+    if combo.count():
+        combo.setCurrentIndex(fallback_index)
+
+
+def combo_add_options(combo, options):
+    for code, label in options:
+        combo.addItem(label, code)
+
+
+def ahk_escape(value):
+    return (value or "").replace('"', '""')
+
+
+def trigger_to_event(trigger_code):
+    return {
+        "click": "Click",
+        "context_menu": "ContextMenu",
+        "double_click": "DoubleClick",
+    }.get(trigger_code, "Click")
+
+
+def action_to_ahk(action_code, payload):
+    payload = ahk_escape(payload)
+    if action_code == "copy_text":
+        return f'A_Clipboard := "{payload}"'
+    if action_code == "send_text":
+        return f'SendText("{payload}")'
+    return None
 
 class ReorderDialog(QDialog):
     def __init__(self, rows, parent=None):
@@ -155,6 +200,19 @@ class RowWidget(QFrame):
         header_layout.addWidget(self.title_input)
         header_layout.addWidget(self.title_color_btn)
         header_layout.addWidget(self.title_text_color_btn)
+
+        self.title_action_combo = QComboBox()
+        combo_add_options(self.title_action_combo, ACTION_OPTIONS)
+        combo_set_code(self.title_action_combo, data.get("title_action", "send_text") if data else "send_text")
+        self.title_action_combo.setFixedWidth(110)
+
+        self.title_trigger_combo = QComboBox()
+        combo_add_options(self.title_trigger_combo, TRIGGER_OPTIONS)
+        combo_set_code(self.title_trigger_combo, data.get("title_trigger", "click") if data else "click")
+        self.title_trigger_combo.setFixedWidth(110)
+
+        header_layout.addWidget(self.title_action_combo)
+        header_layout.addWidget(self.title_trigger_combo)
         
         remove_row_btn = QPushButton("×")
         remove_row_btn.setFixedWidth(30)
@@ -233,6 +291,16 @@ class RowWidget(QFrame):
         text_input.setPlaceholderText("Text")
         text_input.setText(b_data.get("text", "") if b_data else "")
 
+        action_combo = QComboBox()
+        combo_add_options(action_combo, ACTION_OPTIONS)
+        combo_set_code(action_combo, b_data.get("action", "send_text") if b_data else "send_text")
+        action_combo.setFixedWidth(110)
+
+        trigger_combo = QComboBox()
+        combo_add_options(trigger_combo, TRIGGER_OPTIONS)
+        combo_set_code(trigger_combo, b_data.get("trigger", "click") if b_data else "click")
+        trigger_combo.setFixedWidth(110)
+
         # SVG Code Storage
         btn_frame.svg_code = b_data.get("svg_code", "") if b_data else ""
         
@@ -290,6 +358,8 @@ class RowWidget(QFrame):
         blayout.addWidget(label_input)
         blayout.addWidget(QLabel("T:"))
         blayout.addWidget(text_input)
+        blayout.addWidget(action_combo)
+        blayout.addWidget(trigger_combo)
         blayout.addWidget(svg_btn)
         blayout.addWidget(bg_btn)
         blayout.addWidget(tx_btn)
@@ -307,6 +377,8 @@ class RowWidget(QFrame):
             "title": self.title_input.text(),
             "title_color": self.title_color,
             "title_text_color": self.title_text_color,
+            "title_action": self.title_action_combo.currentData(),
+            "title_trigger": self.title_trigger_combo.currentData(),
             "buttons": []
         }
         for i in range(self.btns_layout.count()):
@@ -315,12 +387,15 @@ class RowWidget(QFrame):
                 inputs = btn_frame.findChildren(QLineEdit)
                 bg = btn_frame.findChild(QPushButton, "bg_btn").color_val
                 tx = btn_frame.findChild(QPushButton, "tx_btn").color_val
+                combos = btn_frame.findChildren(QComboBox)
                 row_data["buttons"].append({
                     "label": inputs[0].text(),
                     "text": inputs[1].text(),
                     "svg_code": getattr(btn_frame, "svg_code", ""),
                     "color": bg,
-                    "text_color": tx
+                    "text_color": tx,
+                    "action": combos[0].currentData() if len(combos) > 0 else "send_text",
+                    "trigger": combos[1].currentData() if len(combos) > 1 else "click"
                 })
         return row_data
 
@@ -393,6 +468,10 @@ class App(QMainWindow):
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
             }}
             QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QComboBox {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 3px 6px;
+            }}
+            QComboBox::drop-down {{ border: 0px; width: 18px; }}
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
             }}
@@ -468,11 +547,7 @@ class App(QMainWindow):
         self.scroll.setWidgetResizable(True)
         self.main_layout.addWidget(self.scroll)
 
-        self.refresh_profile_list()
-        if self.profile_combo.count() == 0:
-            self.create_profile("Default")
-        if self.profile_combo.count() > 0 and not self.current_profile_name:
-            self.profile_combo.setCurrentIndex(0)
+        self.load_config()
 
     def update_ui_widths(self):
         try:
@@ -615,10 +690,8 @@ class App(QMainWindow):
         if self.profile_combo.count() == 0:
             self.create_profile(DEFAULT_PROFILE_NAME)
             return
-        if self.current_profile_name in list_profile_names():
-            self.load_profile(self.current_profile_name)
-        else:
-            self.profile_combo.setCurrentIndex(0)
+        first_profile = self.profile_combo.currentText() or self.profile_combo.itemText(0)
+        self.load_profile(first_profile)
 
     def save_config(self):
         if not self.current_profile_name:
@@ -720,20 +793,28 @@ class App(QMainWindow):
             # Title button/label
             tc = row.get("title_color", "FFCC00")
             ttc = row.get("title_text_color", "000000")
+            title_action = row.get("title_action", "send_text")
+            title_trigger = row.get("title_trigger", "click")
             ahk_code.append(f'myGui.SetFont("s12 Bold c{ttc}", "Jetbrainsmono nfp")')
             th = self.settings_panel.title_h.text() or "30"
             tw = self.settings_panel.title_w.text() or "200"
             bh = self.settings_panel.btn_h.text() or "30"
             bw = self.settings_panel.btn_w.text() or "100"
-            ahk_code.append(f'myGui.Add("Text", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{title}")')
+            ahk_code.append(f'titleCtrl := myGui.Add("Button", "xm {y_pos} w{tw} h{th} +Border Center Background{tc}", "{ahk_escape(title)}")')
+            title_action_line = action_to_ahk(title_action, title)
+            if title_action_line:
+                ahk_code.append(f'titleCtrl.OnEvent("{trigger_to_event(title_trigger)}", (*) => {title_action_line})')
             ahk_code.append(f'myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")')
             
             for j, btn in enumerate(row["buttons"]):
                 label = btn["label"]
-                text = btn["text"].replace('"', '""') # AHK escape
+                text = btn["text"]
                 bg = btn.get("color", "00CCFF")
                 fg = btn.get("text_color", "000000")
                 svg_code = btn.get("svg_code", "")
+                action_code = btn.get("action", "send_text")
+                trigger_code = btn.get("trigger", "click")
+                action_line = action_to_ahk(action_code, text)
 
                 if svg_code:
                     # Priority 1: SVG Code (Render to PNG for AHK compatibility)
@@ -773,11 +854,11 @@ class App(QMainWindow):
                     ahk_code.append(f'btn := myGui.Add("Picture", "x+5 yp w{bw} h{bh} +Border Background{bg}", "{ahk_img_path}")')
                 else:
                     # Priority 2: Text Label
-                    ahk_code.append(f'btn := myGui.Add("Text", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{label}")')
+                    ahk_code.append(f'btn := myGui.Add("Button", "x+5 yp w{bw} h{bh} +Border Center Background{bg}", "{ahk_escape(label)}")')
                     ahk_code.append(f'btn.SetFont("c{fg}")')
                 
-                ahk_code.append(f'btn.OnEvent("Click", (*) => SendText("{text}"))')
-                ahk_code.append(f'btn.OnEvent("ContextMenu", (*) => (A_Clipboard := "{text}"))')
+                if action_line:
+                    ahk_code.append(f'btn.OnEvent("{trigger_to_event(trigger_code)}", (*) => {action_line})')
             
             ahk_code.append("")
 

@@ -38,7 +38,7 @@
             "name": "Monitor Extend"
         },
         {
-            "action": "Run(\"C:\\@delta\\output\\ahk\\generate_Button_AHK.ahk\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\BIO\\generate_Button_AHK.ahk\")",
             "category": "Launch",
             "description": "Opens Bio.ahk GUI",
             "enabled": true,
