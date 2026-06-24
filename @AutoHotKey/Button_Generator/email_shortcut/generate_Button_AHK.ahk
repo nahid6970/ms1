@@ -8,8 +8,11 @@ myGui.MarginY := 20
 ; g0
 myGui.SetFont("s12 Bold c000000", "Jetbrainsmono nfp")
 titleCtrl := myGui.Add("Button", "xm ym w150 h25 +Border Center BackgroundFFCC00", "g0")
-titleCtrl.OnEvent("Click", (*) => SendText("g0"))
+titleCtrl.OnEvent("Click", (*) => SendText("nahid6970@gmail.com"))
 myGui.SetFont("s12 Bold cDefault", "Jetbrainsmono nfp")
+btn := myGui.Add("Button", "x+5 yp w100 h25 +Border Center Background00CCFF", "")
+btn.SetFont("c000000")
+btn.OnEvent("Click", (*) => SendText(""))
 
 myGui.Show()
 myGui.OnEvent("Close", (*) => ExitApp())

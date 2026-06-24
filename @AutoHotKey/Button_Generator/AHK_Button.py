@@ -30,6 +30,7 @@ CP_SUBTEXT = "#808080"
 # Relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LEGACY_CONFIG_FILE = os.path.join(SCRIPT_DIR, "ahk_config.json")
+LAST_PROFILE_FILE = os.path.join(SCRIPT_DIR, "last_profile.txt")
 DEFAULT_PROFILE_NAME = "Default"
 ACTION_OPTIONS = [
     ("send_text", "Send Text"),
@@ -75,6 +76,25 @@ def list_profile_names():
         if os.path.isdir(path) and os.path.exists(os.path.join(path, "ahk_config.json")):
             names.append(entry)
     return names
+
+
+def read_last_profile():
+    if not os.path.exists(LAST_PROFILE_FILE):
+        return None
+    try:
+        with open(LAST_PROFILE_FILE, "r", encoding="utf-8") as f:
+            value = f.read().strip()
+        return value or None
+    except Exception:
+        return None
+
+
+def write_last_profile(profile_name):
+    try:
+        with open(LAST_PROFILE_FILE, "w", encoding="utf-8") as f:
+            f.write(profile_name or "")
+    except Exception:
+        pass
 
 
 def combo_set_code(combo, code, fallback_index=0):
@@ -710,7 +730,11 @@ class App(QMainWindow):
         if self.profile_combo.count() == 0:
             self.create_profile(DEFAULT_PROFILE_NAME)
             return
-        first_profile = self.profile_combo.currentText() or self.profile_combo.itemText(0)
+        last_profile = read_last_profile()
+        if last_profile and last_profile in list_profile_names():
+            first_profile = last_profile
+        else:
+            first_profile = self.profile_combo.currentText() or self.profile_combo.itemText(0)
         self.load_profile(first_profile)
 
     def save_config(self):
@@ -777,6 +801,7 @@ class App(QMainWindow):
         self.refresh_profile_list(profile_name)
         self.profile_combo.setCurrentText(profile_name)
         self.load_profile(profile_name)
+        write_last_profile(profile_name)
 
     def on_profile_changed(self, profile_name):
         if self._loading_profile or not profile_name:
@@ -786,6 +811,7 @@ class App(QMainWindow):
         if self.current_profile_name:
             self.save_config()
         self.load_profile(profile_name)
+        write_last_profile(profile_name)
 
     def generate_ahk(self):
         self.save_config()

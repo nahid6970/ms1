@@ -15,6 +15,7 @@
     "rows": [
         {
             "title": "Nahid Ahmed",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -51,6 +52,7 @@
         },
         {
             "title": "Father",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -78,6 +80,7 @@
         },
         {
             "title": "Mother",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -105,6 +108,7 @@
         },
         {
             "title": "Address",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -132,6 +136,7 @@
         },
         {
             "title": "P.O",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -159,6 +164,7 @@
         },
         {
             "title": "P.C",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -186,6 +192,7 @@
         },
         {
             "title": "SSC & HSC REG",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -204,6 +211,7 @@
         },
         {
             "title": "SSC",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -240,6 +248,7 @@
         },
         {
             "title": "HSC",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -276,6 +285,7 @@
         },
         {
             "title": "BBA",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
@@ -321,6 +331,7 @@
         },
         {
             "title": "MBA",
+            "title_text": "",
             "title_color": "FFCC00",
             "title_text_color": "000000",
             "title_action": "send_text",
