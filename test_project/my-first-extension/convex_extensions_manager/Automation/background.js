@@ -110,9 +110,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  if (message.action === 'notify_custom' || message.action === 'notify_complete') {
-    const title = message.title || (message.action === 'notify_complete' ? 'ClickFlow complete' : 'ClickFlow notification');
-    const messageText = message.message || (message.action === 'notify_complete' ? 'Automation completed successfully.' : 'Automation is still running.');
+  if (message.action === 'notify_complete') {
+    const title = message.title || 'ClickFlow complete';
+    const messageText = message.message || 'Automation completed successfully.';
 
     chrome.notifications.create({
       type: 'basic',
@@ -128,5 +128,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     return true;
   }
-
 });

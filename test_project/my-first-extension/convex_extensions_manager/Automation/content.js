@@ -3,7 +3,6 @@ let hoveredElement = null;
 let isAutomating = false;
 let stopRequested = false;
 const CLICKFLOW_BROADCAST_KEY = '__clickflow_broadcast__';
-let notificationIntervalId = null;
 
 // Helpers to read/write storage
 function getStorageData() {
@@ -54,36 +53,6 @@ function notifyCompletion(title, message) {
   }, () => {
     void chrome.runtime.lastError;
   });
-}
-
-function notifyCustom(title, message) {
-  chrome.runtime.sendMessage({
-    action: 'notify_custom',
-    title,
-    message
-  }, () => {
-    void chrome.runtime.lastError;
-  });
-}
-
-function startContinuousNotifications(intervalSeconds) {
-  stopContinuousNotifications();
-
-  const intervalMs = Math.max(1, parseFloat(intervalSeconds) || 5) * 1000;
-  notificationIntervalId = setInterval(() => {
-    if (!isAutomating || stopRequested) return;
-    notifyCustom(
-      'ClickFlow running',
-      'Automation is still running. Click Stop to end it.'
-    );
-  }, intervalMs);
-}
-
-function stopContinuousNotifications() {
-  if (notificationIntervalId) {
-    clearInterval(notificationIntervalId);
-    notificationIntervalId = null;
-  }
 }
 
 function isElementVisible(el) {
@@ -733,16 +702,12 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   if (isAutomating) return;
   isAutomating = true;
   stopRequested = false;
-  stopContinuousNotifications();
 
   const data = await getStorageData();
   const steps = data.steps || [];
   const loopCount = parseInt(data.loopCount) || 1;
   const loopDelay = parseFloat(data.loopDelay) || 0;
   const waitTimeout = parseFloat(data.waitTimeout) || 0;
-  const notificationEnabled = data.notificationEnabled !== undefined ? !!data.notificationEnabled : true;
-  const notificationMode = data.notificationMode || 'one_time';
-  const notificationInterval = parseFloat(data.notificationInterval) || 5;
 
   if (steps.length === 0) {
     logMessage("No steps configured to run.", true);
@@ -752,10 +717,6 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   }
 
   logMessage(`Starting sequence (Loops: ${loopCount === -1 ? 'Infinite' : loopCount})...`);
-
-  if (notificationEnabled && notificationMode === 'continuous') {
-    startContinuousNotifications(notificationInterval);
-  }
 
   let currentLoop = startLoop;
   while ((loopCount === -1 || currentLoop < loopCount) && !stopRequested) {
@@ -776,7 +737,6 @@ async function runAutomation(startLoop = 0, startStep = 0) {
     }
   }
 
-  stopContinuousNotifications();
   isAutomating = false;
   if (stopRequested) {
     updateState("idle", 0, 0);
@@ -784,7 +744,7 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   } else {
     updateState("idle", 0, 0);
     logMessage("✅ Automation sequence completed!");
-    if (notificationEnabled && notificationMode === 'one_time' && loopCount !== -1) {
+    if (loopCount !== -1) {
       notifyCompletion(
         'ClickFlow complete',
         `Automation finished successfully after ${loopCount} loop${loopCount === 1 ? '' : 's'}.`
@@ -843,7 +803,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return;
     }
     stopRequested = true;
-    stopContinuousNotifications();
     stopKeepAlive();
     sendResponse({ success: true });
   }
