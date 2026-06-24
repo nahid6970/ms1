@@ -12,26 +12,30 @@ function getStorageData() {
 }
 
 function updateState(status, loopIndex, stepIndex) {
-  chrome.storage.local.get('automationState', (data) => {
-    const state = data.automationState || { logs: [] };
-    state.status = status;
-    state.currentLoop = loopIndex;
-    state.currentStep = stepIndex;
-    chrome.storage.local.set({ automationState: state });
+  return new Promise((resolve) => {
+    chrome.storage.local.get('automationState', (data) => {
+      const state = data.automationState || { logs: [] };
+      state.status = status;
+      state.currentLoop = loopIndex;
+      state.currentStep = stepIndex;
+      chrome.storage.local.set({ automationState: state }, resolve);
+    });
   });
 }
 
 function logMessage(text, isError = false) {
-  const timestamp = new Date().toLocaleTimeString();
-  const logLine = `[${timestamp}] ${isError ? '❌ ' : ''}${text}`;
-  
-  chrome.storage.local.get('automationState', (data) => {
-    const state = data.automationState || { status: 'idle', currentLoop: 0, currentStep: 0, logs: [] };
-    if (!state.logs) state.logs = [];
-    state.logs.push(logLine);
-    // Keep max 100 logs
-    if (state.logs.length > 100) state.logs.shift();
-    chrome.storage.local.set({ automationState: state });
+  return new Promise((resolve) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logLine = `[${timestamp}] ${isError ? '❌ ' : ''}${text}`;
+    
+    chrome.storage.local.get('automationState', (data) => {
+      const state = data.automationState || { status: 'idle', currentLoop: 0, currentStep: 0, logs: [] };
+      if (!state.logs) state.logs = [];
+      state.logs.push(logLine);
+      // Keep max 100 logs
+      if (state.logs.length > 100) state.logs.shift();
+      chrome.storage.local.set({ automationState: state }, resolve);
+    });
   });
 }
 
@@ -710,9 +714,9 @@ async function runAutomation(startLoop = 0, startStep = 0) {
   const waitTimeout = parseFloat(data.waitTimeout) || 0;
 
   if (steps.length === 0) {
-    logMessage("No steps configured to run.", true);
+    await logMessage("No steps configured to run.", true);
     isAutomating = false;
-    updateState("idle", 0, 0);
+    await updateState("idle", 0, 0);
     return;
   }
 
@@ -739,11 +743,11 @@ async function runAutomation(startLoop = 0, startStep = 0) {
 
   isAutomating = false;
   if (stopRequested) {
-    updateState("idle", 0, 0);
-    logMessage("⏹️ Automation stopped.");
+    await logMessage("⏹️ Automation stopped.");
+    await updateState("idle", 0, 0);
   } else {
-    updateState("idle", 0, 0);
-    logMessage("✅ Automation sequence completed!");
+    await logMessage("✅ Automation sequence completed!");
+    await updateState("idle", 0, 0);
     if (loopCount !== -1) {
       notifyCompletion(
         'ClickFlow complete',
