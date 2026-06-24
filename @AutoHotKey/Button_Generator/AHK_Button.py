@@ -45,25 +45,27 @@ TRIGGER_OPTIONS = [
 
 SETTINGS_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path fill="#00F0FF" d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.39,0.12-0.59l-1.92-3.32c-0.11-0.2-0.35-0.28-0.56-0.2l-2.39,0.96c-0.5-0.38-1.04-0.69-1.64-0.92L14.4,2.5c-0.03-0.22-0.22-0.38-0.44-0.38h-3.84c-0.22,0-0.41,0.16-0.44,0.38L9.2,4.41c-0.6,0.23-1.14,0.55-1.64,0.92L5.17,4.37c-0.21-0.08-0.45,0-0.56,0.2L2.69,7.89c-0.11,0.2-0.06,0.45,0.12,0.59l2.03,1.58C4.8,10.37,4.78,10.69,4.78,11s0.02,0.63,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.39-0.12,0.59l1.92,3.32c0.11,0.2,0.35,0.28,0.56,0.2l2.39-0.96c0.5,0.38,1.04,0.69,1.64,0.92l0.72,1.91c0.03,0.22,0.22,0.38,0.44,0.38h3.84c0.22,0,0.41-0.16,0.44-0.38l0.72-1.91c0.6-0.23,1.14-0.55,1.64-0.92l2.39,0.96c0.21,0.08,0.45,0,0.56-0.2l1.92-3.32c0.11-0.2,0.06-0.45-0.12-0.59L19.14,12.94z M12,15.5A3.5,3.5,0,1,1,12,8.5a3.5,3.5,0,0,1,0,7z"/>
+  <circle cx="12" cy="12" r="3.2" fill="none" stroke="#00F0FF" stroke-width="1.8"/>
+  <path d="M12 3.5v2.1M12 18.4v2.1M3.5 12h2.1M18.4 12h2.1M6.1 6.1l1.5 1.5M16.4 16.4l1.5 1.5M16.4 7.6l1.5-1.5M6.1 17.9l1.5-1.5" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round"/>
 </svg>
 """
 
 RESTART_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path fill="#00F0FF" d="M12 6V3L7 8l5 5V9c2.76 0 5 2.24 5 5 0 2.21-1.43 4.09-3.41 4.79l1.48 1.48C17.72 19.48 19 16.95 19 14c0-3.87-3.13-7-7-7zm-5 5c0-2.21 1.43-4.09 3.41-4.79L8.93 4.73C6.28 5.52 4.5 7.99 4.5 11c0 3.87 3.13 7 7 7v3l5-5-5-5v3c-2.76 0-5-2.24-5-5z"/>
+  <path d="M7 7a7 7 0 1 1-1.3 8.2" fill="none" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M5.4 8.1v3.4h3.4" fill="none" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 """
 
 GENERATE_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path fill="#050505" d="M13 2L4 14h6l-1 8 11-14h-6l-1-6z"/>
+  <path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z" fill="none" stroke="#050505" stroke-width="1.8" stroke-linejoin="round"/>
 </svg>
 """
 
 LAUNCH_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-  <path fill="#00F0FF" d="M5 4v16l15-8L5 4z"/>
+  <path d="M5 4l15 8-15 8V4z" fill="none" stroke="#050505" stroke-width="1.8" stroke-linejoin="round"/>
 </svg>
 """
 
@@ -141,7 +143,7 @@ def svg_icon(svg_text, size=18):
     painter = QPainter(image)
     try:
         renderer = QSvgRenderer(QByteArray(svg_text.encode("utf-8")))
-        renderer.render(painter, image.rect())
+        renderer.render(painter, QRectF(0, 0, size, size))
     finally:
         painter.end()
     return QIcon(QPixmap.fromImage(image))
@@ -591,22 +593,34 @@ class App(QMainWindow):
         gen_btn.clicked.connect(self.generate_ahk)
         gen_btn.setIcon(svg_icon(GENERATE_SVG, 16))
         gen_btn.setIconSize(icon_size(16))
+        gen_btn.setText("")
+        gen_btn.setToolTip("Generate AHK")
+        gen_btn.setFixedSize(34, 34)
 
         launch_btn = QPushButton("LAUNCH")
         launch_btn.setStyleSheet(f"background-color: {CP_ORANGE}; color: black;")
         launch_btn.clicked.connect(self.launch_ahk)
         launch_btn.setIcon(svg_icon(LAUNCH_SVG, 16))
         launch_btn.setIconSize(icon_size(16))
+        launch_btn.setText("")
+        launch_btn.setToolTip("Launch generated AHK")
+        launch_btn.setFixedSize(34, 34)
 
         restart_btn = QPushButton("RESTART APP")
         restart_btn.clicked.connect(self.restart_app)
         restart_btn.setIcon(svg_icon(RESTART_SVG, 16))
         restart_btn.setIconSize(icon_size(16))
+        restart_btn.setText("")
+        restart_btn.setToolTip("Restart app")
+        restart_btn.setFixedSize(34, 34)
 
         settings_btn = QPushButton("SETTINGS")
         settings_btn.clicked.connect(self.toggle_settings)
         settings_btn.setIcon(svg_icon(SETTINGS_SVG, 16))
         settings_btn.setIconSize(icon_size(16))
+        settings_btn.setText("")
+        settings_btn.setToolTip("Toggle settings")
+        settings_btn.setFixedSize(34, 34)
 
         toolbar.addWidget(add_row_btn)
         toolbar.addWidget(reorder_btn)
