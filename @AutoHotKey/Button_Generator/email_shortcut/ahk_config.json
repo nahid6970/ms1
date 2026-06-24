@@ -9,7 +9,7 @@
         "title_w": "150",
         "btn_h": "25",
         "btn_w": "100",
-        "win_w": "1100",
+        "win_w": "1500",
         "win_h": "800"
     },
     "rows": [
@@ -19,7 +19,17 @@
             "title_text_color": "000000",
             "title_action": "send_text",
             "title_trigger": "click",
-            "buttons": []
+            "buttons": [
+                {
+                    "label": "",
+                    "text": "",
+                    "svg_code": "",
+                    "color": "00CCFF",
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
+                }
+            ]
         }
     ]
 }
