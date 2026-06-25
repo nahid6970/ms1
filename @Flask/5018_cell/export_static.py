@@ -995,6 +995,8 @@ def generate_static_html(data, custom_syntaxes):
         .subsheet-items-container {
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -1961,7 +1963,16 @@ def generate_static_html(data, custom_syntaxes):
                 dropdown.style.maxHeight = availableHeight + 'px';
                 
                 renderSubSheetDropdown();
-                dropdown.style.display = 'block';
+                dropdown.style.display = 'flex';
+                
+                // Set items container height for mobile scroll
+                const searchWrapper = dropdown.querySelector('.subsheet-search-wrapper');
+                const searchHeight = searchWrapper ? searchWrapper.offsetHeight : 40;
+                const itemsContainer = dropdown.querySelector('.subsheet-items-container');
+                if (itemsContainer) {
+                    itemsContainer.style.maxHeight = (availableHeight - searchHeight - 10) + 'px';
+                    itemsContainer.style.overflowY = 'auto';
+                }
             }
         }
 
