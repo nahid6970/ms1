@@ -11085,6 +11085,131 @@ function convertNumbersToBangla(event) {
     showToast('Numbers converted to Bangla', 'success');
 }
 
+function convertBanglaToEnglish(event) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+    if (!quickFormatterTarget) return;
+
+    const input = quickFormatterTarget;
+    let selectedText = '';
+
+    if (quickFormatterSelection.isContentEditable) {
+        selectedText = quickFormatterSelection.text || '';
+    } else {
+        selectedText = input.value.substring(quickFormatterSelection.start, quickFormatterSelection.end);
+    }
+
+    if (!selectedText) { showToast('No text selected', 'warning'); return; }
+
+    // Comprehensive Bangla to English transliteration map
+    // Order matters: longer sequences first for greedy matching
+    const banglaToEnglishMap = [
+        // Common conjuncts (যুক্তাক্ষর)
+        ['ক্ষ', 'kkh'], ['জ্ঞ', 'ggy'], ['ঞ্চ', 'nch'], ['ঞ্ছ', 'nchh'], ['ঞ্জ', 'nj'],
+        ['ঙ্ক', 'nk'], ['ঙ্গ', 'ng'], ['ঙ্খ', 'nkh'],
+        ['ক্ক', 'kk'], ['ক্ট', 'kt'], ['ক্ত', 'kt'], ['ক্র', 'kr'], ['ক্ল', 'kl'],
+        ['গ্ধ', 'gdh'], ['গ্ন', 'gn'], ['গ্র', 'gr'], ['গ্ল', 'gl'],
+        ['চ্ছ', 'cch'], ['চ্চ', 'cch'],
+        ['জ্জ', 'jj'], ['জ্ঝ', 'jjh'], ['জ্র', 'jr'],
+        ['ট্ট', 'tt'], ['ট্র', 'tr'],
+        ['ড্ড', 'dd'], ['ড্র', 'dr'],
+        ['ণ্ড', 'nd'], ['ণ্ণ', 'nn'], ['ণ্ট', 'nt'], ['ণ্ঠ', 'nth'],
+        ['ত্ত', 'tt'], ['ত্থ', 'tth'], ['ত্ন', 'tn'], ['ত্র', 'tr'], ['ত্ম', 'tm'],
+        ['দ্দ', 'dd'], ['দ্ধ', 'ddh'], ['দ্ভ', 'dbh'], ['দ্ব', 'dw'], ['দ্র', 'dr'], ['দ্ম', 'dm'],
+        ['ন্ত', 'nt'], ['ন্থ', 'nth'], ['ন্দ', 'nd'], ['ন্ধ', 'ndh'], ['ন্ন', 'nn'], ['ন্র', 'nr'], ['ন্ম', 'nm'],
+        ['প্প', 'pp'], ['প্ত', 'pt'], ['প্র', 'pr'], ['প্ল', 'pl'],
+        ['ব্দ', 'bd'], ['ব্ধ', 'bdh'], ['ব্র', 'br'], ['ব্ল', 'bl'], ['ব্ব', 'bb'],
+        ['ম্ম', 'mm'], ['ম্র', 'mr'], ['ম্ল', 'ml'], ['ম্ন', 'mn'],
+        ['ল্ল', 'll'], ['ল্ক', 'lk'], ['ল্গ', 'lg'], ['ল্প', 'lp'],
+        ['শ্চ', 'sch'], ['শ্র', 'shr'],
+        ['ষ্ক', 'shk'], ['ষ্ট', 'sht'], ['ষ্ঠ', 'shth'], ['ষ্ণ', 'shn'], ['ষ্প', 'shp'],
+        ['স্ত', 'st'], ['স্থ', 'sth'], ['স্ন', 'sn'], ['স্প', 'sp'], ['স্ফ', 'sph'], ['স্র', 'sr'],
+        ['হ্ন', 'hn'], ['হ্ম', 'hm'], ['হ্র', 'hr'], ['হ্ল', 'hl'],
+        ['র্', 'r'],  // র‍্ (র-ফলা prefix)
+
+        // Vowel signs (কার)
+        ['া', 'a'], ['ি', 'i'], ['ী', 'ee'], ['ু', 'u'], ['ূ', 'oo'],
+        ['ে', 'e'], ['ৈ', 'oi'], ['ো', 'o'], ['ৌ', 'ou'],
+        ['ৃ', 'ri'],
+
+        // Hasanta (virama) - consonant joiner, handled in conjuncts above
+        ['্', ''],
+
+        // Chandrabindu, Anusvara, Visarga
+        ['ঁ', 'n'], ['ং', 'ng'], ['ঃ', 'h'],
+
+        // Independent vowels (স্বরবর্ণ)
+        ['অ', 'o'], ['আ', 'a'], ['ই', 'i'], ['ঈ', 'ee'],
+        ['উ', 'u'], ['ঊ', 'oo'], ['ঋ', 'ri'],
+        ['এ', 'e'], ['ঐ', 'oi'], ['ও', 'o'], ['ঔ', 'ou'],
+
+        // Consonants (ব্যঞ্জনবর্ণ)
+        ['ক', 'k'], ['খ', 'kh'], ['গ', 'g'], ['ঘ', 'gh'], ['ঙ', 'ng'],
+        ['চ', 'ch'], ['ছ', 'chh'], ['জ', 'j'], ['ঝ', 'jh'], ['ঞ', 'n'],
+        ['ট', 't'], ['ঠ', 'th'], ['ড', 'd'], ['ঢ', 'dh'], ['ণ', 'n'],
+        ['ত', 't'], ['থ', 'th'], ['দ', 'd'], ['ধ', 'dh'], ['ন', 'n'],
+        ['প', 'p'], ['ফ', 'ph'], ['ব', 'b'], ['ভ', 'bh'], ['ম', 'm'],
+        ['য', 'z'], ['র', 'r'], ['ল', 'l'],
+        ['শ', 'sh'], ['ষ', 'sh'], ['স', 's'], ['হ', 'h'],
+        ['ড়', 'r'], ['ঢ়', 'rh'], ['য়', 'y'],
+        ['ৎ', 't'],
+
+        // Bangla digits
+        ['০', '0'], ['১', '1'], ['২', '2'], ['৩', '3'], ['৪', '4'],
+        ['৫', '5'], ['৬', '6'], ['৭', '7'], ['৮', '8'], ['৯', '9'],
+
+        // Bangla punctuation
+        ['।', '.'], ['॥', '.'],
+    ];
+
+    // Build a greedy transliteration by checking longest match first
+    let convertedText = '';
+    let i = 0;
+    while (i < selectedText.length) {
+        let matched = false;
+        // Try longest possible match first (max 3 chars for conjuncts with hasanta)
+        for (const [bangla, english] of banglaToEnglishMap) {
+            if (selectedText.substring(i, i + bangla.length) === bangla) {
+                convertedText += english;
+                i += bangla.length;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            // Keep character as-is (spaces, English text, etc.)
+            convertedText += selectedText[i];
+            i++;
+        }
+    }
+
+    if (quickFormatterSelection.isContentEditable) {
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(convertedText);
+        range.insertNode(textNode);
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+            actualInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(textNode);
+        sel.addRange(newRange);
+    } else {
+        const start = quickFormatterSelection.start;
+        const end = quickFormatterSelection.end;
+        input.value = input.value.substring(0, start) + convertedText + input.value.substring(end);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.setSelectionRange(start, start + convertedText.length);
+        input.focus();
+    }
+
+    closeQuickFormatter();
+    showToast('Converted Bangla to English', 'success');
+}
 function applySqrtFormat(event) {
     if (!quickFormatterTarget) return;
 
