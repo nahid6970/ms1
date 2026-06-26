@@ -3473,7 +3473,14 @@ class AHKShortcutEditor(QMainWindow):
                     # Escape and format AHK parameters
                     safe_cmd_str = cmd_str.replace("'", "''")
                     safe_working_dir = working_dir.replace("'", "''") if working_dir else ""
-                    hide_opt = '"Hide"' if hide_terminal else ''
+                    
+                    # If it is Python and hide_terminal is True, we run the script with pythonw.exe
+                    # which naturally suppresses the console window. We omit the "Hide" parameter 
+                    # from AHK's Run command so any GUI windows created by the script can be seen.
+                    if is_python and hide_terminal:
+                        hide_opt = ''
+                    else:
+                        hide_opt = '"Hide"' if hide_terminal else ''
 
                     if safe_working_dir:
                         if hide_opt:
