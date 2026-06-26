@@ -888,3 +888,73 @@ input[type="number"] {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-purple);
 }
+
+/* Loop Count Button & Edit Input */
+.loop-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.loop-value-btn {
+  background: linear-gradient(135deg, #7c3aed, #a855f7, #c084fc);
+  color: #fff;
+  border: none;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 48px;
+  text-align: center;
+  letter-spacing: 0.3px;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease;
+  user-select: none;
+}
+
+.loop-value-btn:hover {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.55);
+  background: linear-gradient(135deg, #6d28d9, #9333ea, #a855f7);
+}
+
+.loop-value-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.3);
+}
+
+.loop-value-btn.is-infinite {
+  background: linear-gradient(135deg, #059669, #10b981, #34d399);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+}
+
+.loop-value-btn.is-infinite:hover {
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.55);
+  background: linear-gradient(135deg, #047857, #059669, #10b981);
+}
+
+.loop-edit-input {
+  width: 72px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 6px;
+  border: 2px solid #a855f7;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  outline: none;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  animation: loopInputFadeIn 0.15s ease;
+}
+
+.loop-edit-input:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+}
+
+@keyframes loopInputFadeIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}

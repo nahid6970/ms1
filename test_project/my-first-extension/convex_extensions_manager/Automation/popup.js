@@ -55,11 +55,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Settings inputs
   const loopCountInput = document.getElementById('loopCount');
+  const loopValueBtn = document.getElementById('loopValueBtn');
   const loopDelayInput = document.getElementById('loopDelay');
   const waitTimeoutInput = document.getElementById('waitTimeout');
 
-  loopCountInput.addEventListener('change', () => {
-    saveToActiveProjectAndStorage({ loopCount: parseInt(loopCountInput.value) || 1 });
+  // Helper: update button label from a numeric value
+  function updateLoopBtn(val) {
+    const n = parseInt(val);
+    loopCountInput.value = isNaN(n) ? 1 : n;
+    if (n === -1) {
+      loopValueBtn.textContent = '∞';
+      loopValueBtn.classList.add('is-infinite');
+    } else {
+      loopValueBtn.textContent = isNaN(n) || n < 1 ? '1' : String(n);
+      loopValueBtn.classList.remove('is-infinite');
+    }
+  }
+
+  // Click button → hide button, show empty input
+  loopValueBtn.addEventListener('click', () => {
+    loopValueBtn.style.display = 'none';
+    loopCountInput.value = '';
+    loopCountInput.style.display = '';
+    loopCountInput.focus();
+  });
+
+  // Commit edit → hide input, show button, save
+  function commitLoopEdit() {
+    const raw = loopCountInput.value.trim();
+    const n = raw === '' ? 1 : parseInt(raw);
+    const final = isNaN(n) ? 1 : n;
+    updateLoopBtn(final);
+    loopCountInput.style.display = 'none';
+    loopValueBtn.style.display = '';
+    saveToActiveProjectAndStorage({ loopCount: final });
+  }
+
+  loopCountInput.addEventListener('blur', commitLoopEdit);
+  loopCountInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commitLoopEdit(); }
+    if (e.key === 'Escape') {
+      // Cancel — restore previous value
+      loopCountInput.style.display = 'none';
+      loopValueBtn.style.display = '';
+    }
   });
 
   loopDelayInput.addEventListener('change', () => {
@@ -76,6 +115,16 @@ async function initSettings() {
   chrome.storage.local.get(['loopCount', 'loopDelay', 'waitTimeout'], (data) => {
     if (data.loopCount !== undefined) {
       document.getElementById('loopCount').value = data.loopCount;
+      // Sync the loop button display
+      const btn = document.getElementById('loopValueBtn');
+      const n = parseInt(data.loopCount);
+      if (n === -1) {
+        btn.textContent = '∞';
+        btn.classList.add('is-infinite');
+      } else {
+        btn.textContent = isNaN(n) || n < 1 ? '1' : String(n);
+        btn.classList.remove('is-infinite');
+      }
     } else {
       chrome.storage.local.set({ loopCount: 1 });
     }
