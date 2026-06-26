@@ -1644,6 +1644,15 @@ SendText("Hello World")"""
             if not trigger or not file_path:
                 QMessageBox.warning(self, "Warning", "Both trigger and file path are required.")
                 return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "trigger": trigger,
+                "file_path": file_path,
+                "enabled": enabled
+            }
         elif self.shortcut_type == "launcher":
             hotkey = self.hotkey_edit.text().strip()
             target_path = self.file_path_edit.text().strip()
@@ -1659,15 +1668,6 @@ SendText("Hello World")"""
                 "hotkey": hotkey,
                 "target_path": target_path,
                 "hide_terminal": self.hide_terminal_checkbox.isChecked(),
-                "enabled": enabled
-            }
-
-            shortcut_data = {
-                "name": name,
-                "category": category,
-                "description": description,
-                "trigger": trigger,
-                "file_path": file_path,
                 "enabled": enabled
             }
         elif self.shortcut_type == "remap":
@@ -3345,6 +3345,53 @@ class AHKShortcutEditor(QMainWindow):
                     output_lines.append("")
                 output_lines.append("")
 
+            # Helper to parse Windows command line arguments robustly
+            def parse_windows_command_line(cmd_str):
+                cmd_str = cmd_str.strip()
+                if not cmd_str:
+                    return "", ""
+                
+                # Unpack outer Run('...') if user accidentally typed or pasted full Run statement
+                run_match = re.match(r'^\s*Run\s*\(\s*[\'"](.*?)[\'"]\s*(?:,\s*(.*?)\s*)?(?:,\s*[\'"](.*?)[\'"]\s*)?\)\s*$', cmd_str, re.IGNORECASE)
+                if run_match:
+                    cmd_str = run_match.group(1).strip()
+
+                # Check if it starts with quote
+                if cmd_str.startswith('"'):
+                    closing_idx = cmd_str.find('"', 1)
+                    if closing_idx != -1:
+                        exe_path = cmd_str[1:closing_idx]
+                        args = cmd_str[closing_idx+1:].strip()
+                        return exe_path, args
+                elif cmd_str.startswith("'"):
+                    closing_idx = cmd_str.find("'", 1)
+                    if closing_idx != -1:
+                        exe_path = cmd_str[1:closing_idx]
+                        args = cmd_str[closing_idx+1:].strip()
+                        return exe_path, args
+                        
+                if " " not in cmd_str:
+                    return cmd_str, ""
+                    
+                first_part = cmd_str.split(" ", 1)[0].lower()
+                if first_part in ("python.exe", "pythonw.exe", "python", "pythonw", "py.exe", "pyw.exe", "py", "pyw", "cmd.exe", "cmd", "powershell.exe", "powershell", "pwsh.exe", "pwsh"):
+                    return cmd_str.split(" ", 1)[0], cmd_str.split(" ", 1)[1].strip()
+                    
+                # Look for known extensions with a trailing boundary (space or end of line)
+                # This ensures we don't break mid-path if there's an extension inside the folder name
+                for ext in (".pyw", ".py", ".exe", ".bat", ".cmd", ".ps1"):
+                    match = re.search(re.escape(ext) + r'(?:\s|$)', cmd_str, re.IGNORECASE)
+                    if match:
+                        idx = match.end()
+                        exe_path = cmd_str[:idx].strip()
+                        args = cmd_str[idx:].strip()
+                        if (exe_path.startswith('"') and exe_path.endswith('"')) or (exe_path.startswith("'") and exe_path.endswith("'")):
+                            exe_path = exe_path[1:-1]
+                        return exe_path, args
+                        
+                parts = cmd_str.split(" ", 1)
+                return parts[0], parts[1].strip()
+
             # Add launcher shortcuts
             enabled_launchers = [s for s in self.launcher_shortcuts if s.get('enabled', True)]
             if enabled_launchers:
@@ -3358,55 +3405,86 @@ class AHKShortcutEditor(QMainWindow):
                     hotkey = shortcut.get('hotkey', '')
                     hide_terminal = shortcut.get('hide_terminal', True)
 
-                    clean_path = target_path.replace('/', '\\')
-                    
-                    path_part = clean_path
-                    args_part = ""
-                    
-                    if clean_path.startswith('"'):
-                        closing_idx = clean_path.find('"', 1)
-                        if closing_idx != -1:
-                            path_part = clean_path[1:closing_idx]
-                            args_part = clean_path[closing_idx+1:].strip()
-                    elif clean_path.startswith("'"):
-                        closing_idx = clean_path.find("'", 1)
-                        if closing_idx != -1:
-                            path_part = clean_path[1:closing_idx]
-                            args_part = clean_path[closing_idx+1:].strip()
-                    else:
-                        for ext in [".pyw", ".py", ".exe", ".bat", ".cmd", ".ps1"]:
-                            ext_idx = clean_path.lower().find(ext)
-                            if ext_idx != -1:
-                                path_part = clean_path[:ext_idx + len(ext)].strip()
-                                args_part = clean_path[ext_idx + len(ext):].strip()
-                                break
-                        else:
-                            if " " in clean_path:
-                                parts = clean_path.split(" ", 1)
-                                path_part = parts[0]
-                                args_part = parts[1]
-                    
-                    is_python = path_part.lower().endswith(('.py', '.pyw'))
-                    is_ps = path_part.lower().endswith('.ps1')
-                    
+                    # Extract executable/script and its arguments
+                    exe_path, args_part = parse_windows_command_line(target_path)
+                    exe_path = exe_path.replace('/', '\\')
+
+                    is_python = False
+                    script_path = ""
+                    python_interpreter = ""
+
+                    # Detect if explicitly starting with a Python interpreter
+                    exe_name = os.path.basename(exe_path).lower()
+                    if exe_name in ("python.exe", "pythonw.exe", "python", "pythonw", "py.exe", "pyw.exe", "py", "pyw"):
+                        is_python = True
+                        python_interpreter = exe_path
+                        if args_part:
+                            script_match = re.match(r'^\s*"([^"]+)"(.*)$', args_part)
+                            if not script_match:
+                                script_match = re.match(r'^\s*\'([^\']+)\'(.*)$', args_part)
+                            if not script_match:
+                                script_match = re.match(r'^\s*([^\s]+)(.*)$', args_part)
+                                
+                            if script_match:
+                                script_path = script_match.group(1).strip()
+                                args_part = script_match.group(2).strip()
+                            else:
+                                script_path = args_part.strip()
+                                args_part = ""
+                    elif exe_path.lower().endswith(('.py', '.pyw')):
+                        is_python = True
+                        script_path = exe_path
+                        python_interpreter = "pythonw.exe" if hide_terminal else "python.exe"
+
+                    # Determine working directory dynamically
+                    path_for_wdir = script_path if script_path else exe_path
+                    working_dir = ""
+                    if path_for_wdir and ("\\" in path_for_wdir or "/" in path_for_wdir):
+                        try:
+                            if not path_for_wdir.startswith("@"):
+                                working_dir = os.path.dirname(path_for_wdir)
+                        except Exception:
+                            working_dir = ""
+
+                    # Build Command String
                     if is_python:
-                        py_exe = "pythonw.exe" if hide_terminal else "python.exe"
-                        cmd_str = f'{py_exe} "{path_part}"'
+                        if "\\" in python_interpreter or "/" in python_interpreter:
+                            py_exe = python_interpreter
+                            if hide_terminal and py_exe.lower().endswith("python.exe"):
+                                py_exe = py_exe[:-10] + "pythonw.exe"
+                            elif not hide_terminal and py_exe.lower().endswith("pythonw.exe"):
+                                py_exe = py_exe[:-11] + "python.exe"
+                        else:
+                            py_exe = "pythonw.exe" if hide_terminal else "python.exe"
+                        
+                        cmd_str = f'{py_exe} "{script_path}"'
                         if args_part:
                             cmd_str += f' {args_part}'
-                    elif is_ps:
+                    elif exe_path.lower().endswith('.ps1'):
                         ps_options = "-WindowStyle Hidden -File" if hide_terminal else "-NoExit -File"
-                        cmd_str = f'powershell.exe {ps_options} "{path_part}"'
+                        cmd_str = f'powershell.exe {ps_options} "{exe_path}"'
                         if args_part:
                             cmd_str += f' {args_part}'
                     else:
-                        cmd_str = f'"{path_part}"'
+                        cmd_str = f'"{exe_path}"'
                         if args_part:
                             cmd_str += f' {args_part}'
-                    
+
+                    # Escape and format AHK parameters
                     safe_cmd_str = cmd_str.replace("'", "''")
-                    hide_opt = ', , "Hide"' if hide_terminal else ''
-                    action = f"Run('{safe_cmd_str}'{hide_opt})"
+                    safe_working_dir = working_dir.replace("'", "''") if working_dir else ""
+                    hide_opt = '"Hide"' if hide_terminal else ''
+
+                    if safe_working_dir:
+                        if hide_opt:
+                            action = f"Run('{safe_cmd_str}', '{safe_working_dir}', {hide_opt})"
+                        else:
+                            action = f"Run('{safe_cmd_str}', '{safe_working_dir}')"
+                    else:
+                        if hide_opt:
+                            action = f"Run('{safe_cmd_str}', , {hide_opt})"
+                        else:
+                            action = f"Run('{safe_cmd_str}')"
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:

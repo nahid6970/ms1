@@ -14,6 +14,7 @@ All sessions are recorded here. Do not archive old entries.
   - If the path is a PowerShell file (`.ps1`), it prepends `powershell.exe -WindowStyle Hidden` (hidden) or `powershell.exe -NoExit` (visible).
   - For other files/applications, it runs them directly, applying the `"Hide"` window option if requested.
 - Integrated the new type into the GUI main list, add menu, database JSON serialization/deserialization, search, category color/grouping support, and duplication/removal operations.
+- Fixed an UnboundLocalError during dialog confirmation validation in `accept_dialog` by separating the dictionary creation logic for the File and Launcher shortcut types.
 
 **Files Modified:**
 

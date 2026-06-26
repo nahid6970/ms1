@@ -337,6 +337,17 @@
             "name": "Email List (AHK-GUI)"
         }
     ],
+    "launcher_shortcuts": [
+        {
+            "name": "mypygui",
+            "category": "General",
+            "description": "",
+            "hotkey": "!l",
+            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
+            "hide_terminal": true,
+            "enabled": true
+        }
+    ],
     "text_shortcuts": [
         {
             "category": "AHK",
