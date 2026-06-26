@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QTextEdit, QTabWidget, QGroupBox,
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
-    QDialog, QScrollArea, QGridLayout
+    QDialog, QScrollArea, QGridLayout, QComboBox
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent
 from PyQt6.QtGui import QFont, QColor
@@ -525,6 +525,192 @@ def _backup(fpath: str):
     shutil.copy2(fpath, bak)
 
 
+# ── TOKEN OPTIMIZATION LOGIC ──────────────────────────────────────────────────
+
+def minify_code(content: str, ext: str) -> str:
+    """Minify code by stripping comments and redundant blank lines based on file extension."""
+    ext = ext.lower()
+    
+    if ext == '.py':
+        try:
+            import ast
+            tree = ast.parse(content)
+            # Remove docstrings
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+                    if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant) and isinstance(node.body[0].value.value, str):
+                        node.body.pop(0)
+                        if not node.body:
+                            node.body.append(ast.Pass())
+            return ast.unparse(tree)
+        except Exception:
+            # Fallback if parsing fails
+            pass
+
+    if ext in ('.js', '.ts', '.tsx', '.jsx', '.cs', '.java', '.cpp', '.h', '.go', '.rs', '.swift', '.css', '.scss'):
+        # Strip block comments /* ... */
+        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+        # Strip line comments // ... (basic regex)
+        lines = []
+        for line in content.splitlines():
+            stripped_line = re.sub(r'(?<!:)\/\/.*$', '', line)
+            if stripped_line.strip() or line.strip() == '':
+                lines.append(stripped_line)
+        content = '\n'.join(lines)
+        
+    elif ext == '.ps1':
+        # Strip block comments <# ... #>
+        content = re.sub(r'<#.*?#>', '', content, flags=re.DOTALL)
+        # Strip line comments # ...
+        lines = []
+        for line in content.splitlines():
+            stripped_line = re.sub(r'#.*$', '', line)
+            if stripped_line.strip() or line.strip() == '':
+                lines.append(stripped_line)
+        content = '\n'.join(lines)
+        
+    # Remove redundant consecutive blank lines
+    lines = []
+    prev_empty = False
+    for line in content.splitlines():
+        is_empty = not line.strip()
+        if is_empty:
+            if not prev_empty:
+                lines.append('')
+                prev_empty = True
+        else:
+            lines.append(line)
+            prev_empty = False
+            
+    # Remove leading/trailing blank lines
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+        
+    return '\n'.join(lines)
+
+
+def fallback_skeletonize_py(content: str) -> str:
+    lines = content.splitlines()
+    out = []
+    in_def = False
+    def_indent = 0
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        indent = len(line) - len(line.lstrip())
+        
+        if in_def:
+            if indent <= def_indent and stripped:
+                in_def = False
+            else:
+                continue
+        
+        if stripped.startswith(("def ", "async def ")):
+            out.append(line)
+            out.append(" " * (indent + 4) + "pass")
+            in_def = True
+            def_indent = indent
+        elif stripped.startswith("class "):
+            out.append(line)
+        elif indent == 0:
+            out.append(line)
+    return "\n".join(out)
+
+
+def skeletonize_js_ts(content: str) -> str:
+    lines = content.splitlines()
+    out = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        
+        is_decl = False
+        if stripped.startswith((
+            "class ", "export class ", "interface ", "export interface ",
+            "type ", "export type ", "function ", "export function ", "async function ", "export async function ",
+            "const ", "export const ", "let ", "export let ", "var ", "export var "
+        )):
+            is_decl = True
+        elif "(" in stripped and ")" in stripped and stripped.rstrip().endswith("{"):
+            is_decl = True
+            
+        if is_decl:
+            if "(" in stripped:
+                decl = line.split("{")[0].rstrip()
+                indent = len(line) - len(line.lstrip())
+                out.append(" " * indent + decl + " { /* ... */ }")
+            else:
+                out.append(line)
+        elif stripped.startswith("import ") or stripped.startswith("require("):
+            out.append(line)
+            
+    return "\n".join(out)
+
+
+def skeletonize_powershell(content: str) -> str:
+    lines = content.splitlines()
+    out = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("function ") or stripped.startswith("filter "):
+            decl = line.split("{")[0].rstrip()
+            indent = len(line) - len(line.lstrip())
+            out.append(" " * indent + decl + " { <# ... #> }")
+        elif stripped.startswith("[CmdletBinding") or stripped.startswith("param("):
+            out.append(line)
+        elif stripped.startswith("#"):
+            if any(tag in stripped.lower() for tag in [".synopsis", ".description", ".parameter"]):
+                out.append(line)
+    return "\n".join(out)
+
+
+def skeletonize_code(content: str, ext: str) -> str:
+    """Skeletonize code: return only API outline and strip function bodies."""
+    ext = ext.lower()
+    
+    if ext == '.py':
+        try:
+            import ast
+            tree = ast.parse(content)
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    docstring = ast.get_docstring(node)
+                    if docstring:
+                        node.body = [ast.Expr(value=ast.Constant(value=docstring)), ast.Pass()]
+                    else:
+                        node.body = [ast.Pass()]
+            return ast.unparse(tree)
+        except Exception:
+            return fallback_skeletonize_py(content)
+            
+    elif ext in ('.js', '.ts', '.tsx', '.jsx'):
+        return skeletonize_js_ts(content)
+        
+    elif ext == '.ps1':
+        return skeletonize_powershell(content)
+        
+    else:
+        lines = content.splitlines()
+        if len(lines) > 50:
+            return '\n'.join(lines[:50]) + f"\n\n{get_comment_char(ext)} ... [TRUNCATED REFERENCE FILE] ..."
+        return content
+
+
+def get_comment_char(ext: str) -> str:
+    ext = ext.lower()
+    if ext in ('.py', '.ps1', '.sh', '.yaml', '.yml', '.ini', '.properties'):
+        return "#"
+    elif ext in ('.html', '.xml', '.vue', '.svg'):
+        return "<!--"
+    return "//"
+
+
 # ── RECENT POPUP ─────────────────────────────────────────────────────────────
 class RecentPopup(QFrame):
     def __init__(self, parent, on_load, on_load_all, on_remove, on_rename=None):
@@ -858,6 +1044,7 @@ class PrepTab(QWidget):
         self.status_cb = status_cb
         self.root_cb = root_cb
         self.files: list[str] = []
+        self.file_modes: dict[str, str] = {}
         self.project_root = ""
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
@@ -942,8 +1129,16 @@ class PrepTab(QWidget):
                 try:
                     with open(fp, 'r', encoding='utf-8', errors='replace') as f:
                         content = f.read()
-                    ext = os.path.splitext(fp)[1].lstrip('.')
-                    parts.append(f"\n### `{fp}`\n```{ext}\n{content}\n```")
+                    ext = os.path.splitext(fp)[1]
+                    mode = self.file_modes.get(fp, 'Full')
+                    
+                    if mode == 'Outline':
+                        content = skeletonize_code(content, ext)
+                        parts.append(f"\n### `{fp}` (API Outline / References Only)\n```{ext.lstrip('.')}\n{content}\n```")
+                    else:
+                        if self.chk_minify.isChecked():
+                            content = minify_code(content, ext)
+                        parts.append(f"\n### `{fp}`\n```{ext.lstrip('.')}\n{content}\n```")
                 except Exception as e:
                     parts.append(f"\n### `{fp}`\n[ERROR reading file: {e}]")
         else:
@@ -992,6 +1187,8 @@ class PrepTab(QWidget):
             data = {}
         data['files'] = self.files
         data['project_root'] = self.project_root.strip()
+        data['minify'] = self.chk_minify.isChecked()
+        data['file_modes'] = self.file_modes
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
         self._sync_to_recent_projects()
@@ -1025,6 +1222,9 @@ class PrepTab(QWidget):
                 data = json.load(f)
             saved = data if isinstance(data, list) else data.get('files', [])
             self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
+            if isinstance(data, dict):
+                self.chk_minify.setChecked(data.get('minify', False))
+                self.file_modes = data.get('file_modes', {})
             for fp in saved:
                 if fp not in self.files and os.path.exists(fp):
                     self.files.append(fp)
@@ -1144,6 +1344,35 @@ class PrepTab(QWidget):
         lbl.setStyleSheet(f"color: {lbl_color}; background: transparent; font-size: 9pt;")
         lbl.setToolTip("\n".join(tooltip))
 
+        mode_combo = QComboBox()
+        mode_combo.addItems(["Full", "Outline"])
+        mode_combo.setFixedWidth(80)
+        mode_combo.setCursor(Qt.CursorShape.PointingHandCursor)
+        mode_combo.setStyleSheet(f"""
+            QComboBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                border-radius: 2px;
+                padding: 1px 4px;
+                font-family: 'Consolas';
+                font-size: 8pt;
+            }}
+            QComboBox::drop-down {{
+                border: none;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                selection-background-color: {CP_CYAN};
+                selection-color: black;
+                border: 1px solid {CP_DIM};
+            }}
+        """)
+        current_mode = self.file_modes.get(fp, 'Full')
+        mode_combo.setCurrentText(current_mode)
+        mode_combo.currentTextChanged.connect(lambda mode, f=fp: self._on_file_mode_changed(f, mode))
+
         btn_rem = QPushButton("✕")
         btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_rem.setFixedWidth(18)
@@ -1160,6 +1389,7 @@ class PrepTab(QWidget):
         btn_rem.clicked.connect(lambda _, f=fp, it=item: self._remove_file(f, it))
 
         hl.addWidget(lbl, 1)
+        hl.addWidget(mode_combo, 0)
         hl.addWidget(btn_rem, 0)
 
         item.setSizeHint(QSize(100, 22))
@@ -1176,6 +1406,25 @@ class PrepTab(QWidget):
         self._update_root()
         self._save_session()
         self.status_cb(f"Removed: {os.path.basename(fp)}")
+
+    def _on_file_mode_changed(self, fp: str, mode: str):
+        self.file_modes[fp] = mode
+        self._save_session()
+        self.status_cb(f"Set {os.path.basename(fp)} to {mode}")
+
+    def _set_all_full(self):
+        for fp in self.files:
+            self.file_modes[fp] = 'Full'
+        self._refresh_file_items()
+        self._save_session()
+        self.status_cb("Set all files to Full mode")
+
+    def _set_all_outline(self):
+        for fp in self.files:
+            self.file_modes[fp] = 'Outline'
+        self._refresh_file_items()
+        self._save_session()
+        self.status_cb("Set all files to Outline (API Skeleton) mode")
 
     def _build(self):
         layout = QVBoxLayout(self)
@@ -1206,6 +1455,48 @@ class PrepTab(QWidget):
         self.search_input.setPlaceholderText("🔍 Filter files by name…")
         self.search_input.textChanged.connect(self._filter_files)
         vf.addWidget(self.search_input)
+
+        # Bulk actions row
+        bulk_row = QHBoxLayout()
+        bulk_row.setSpacing(4)
+        
+        self.chk_minify = QCheckBox("Minify (save tokens)")
+        self.chk_minify.setChecked(False)
+        self.chk_minify.setToolTip("Strips comments and blank lines from full code files to minimize prompt size.")
+        self.chk_minify.stateChanged.connect(self._save_session)
+        bulk_row.addWidget(self.chk_minify)
+        
+        bulk_row.addStretch()
+        
+        lbl_bulk = QLabel("Set all:")
+        lbl_bulk.setStyleSheet(f"color: {CP_SUB}; font-size: 8pt;")
+        bulk_row.addWidget(lbl_bulk)
+        
+        btn_bulk_full = QPushButton("FULL")
+        btn_bulk_full.setFixedWidth(50)
+        btn_bulk_full.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-size: 8pt; padding: 2px 4px;
+            }}
+            QPushButton:hover {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
+        """)
+        btn_bulk_full.clicked.connect(self._set_all_full)
+        
+        btn_bulk_out = QPushButton("OUTLINE")
+        btn_bulk_out.setFixedWidth(65)
+        btn_bulk_out.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-size: 8pt; padding: 2px 4px;
+            }}
+            QPushButton:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}
+        """)
+        btn_bulk_out.clicked.connect(self._set_all_outline)
+        
+        bulk_row.addWidget(btn_bulk_full)
+        bulk_row.addWidget(btn_bulk_out)
+        vf.addLayout(bulk_row)
 
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
