@@ -753,23 +753,15 @@ class AddEditShortcutDialog(QDialog):
         self.description_edit = QLineEdit()
         self.description_edit.setPlaceholderText("Brief description of what this does")
         
-        # Enabled checkbox styled as a modern toggle using same ✅ and ❌ emojis as main page
-        self.enabled_checkbox = QCheckBox("✅ Enable Shortcut")
+        # Enabled checkbox styled exactly like other options for consistent alignment
+        self.enabled_checkbox = QCheckBox("Enable Shortcut")
         self.enabled_checkbox.setChecked(True)
-        self.enabled_checkbox.toggled.connect(self.on_enabled_toggle)
         self.enabled_checkbox.setStyleSheet(f"""
             QCheckBox {{
                 font-family: 'Consolas', 'Segoe UI', sans-serif;
                 font-size: 11pt;
                 color: {CP_TEXT};
                 spacing: 8px;
-            }}
-            QCheckBox::indicator {{
-                width: 0px;
-                height: 0px;
-                background: none;
-                border: none;
-                image: none;
             }}
         """)
 
@@ -901,20 +893,6 @@ class AddEditShortcutDialog(QDialog):
             file_row.addWidget(self.browse_btn)
             _add_row("Target Path:" if self.shortcut_type == "launcher" else "File Path:", file_row)
             
-            if self.shortcut_type == "launcher":
-                self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
-                self.hide_terminal_checkbox.setChecked(True)
-                self.hide_terminal_checkbox.setStyleSheet(f"""
-                    QCheckBox {{
-                        font-family: 'Consolas', 'Segoe UI', sans-serif;
-                        font-size: 11pt;
-                        color: {CP_TEXT};
-                        spacing: 8px;
-                        margin-top: 5px;
-                    }}
-                """)
-                form_layout.addWidget(self.hide_terminal_checkbox)
-            
         elif self.shortcut_type == "startup":
             self.startup_context_mode = QComboBox()
             self.startup_context_mode.addItems(["No context (always run)", "Active in (only these windows)", "Inactive in (exclude these windows)"])
@@ -923,6 +901,20 @@ class AddEditShortcutDialog(QDialog):
         # ── Toggle Buttons (Placed neatly at the bottom) ──────────────
         form_layout.addSpacing(10)
         form_layout.addWidget(self.enabled_checkbox)
+
+        if self.shortcut_type == "launcher":
+            self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
+            self.hide_terminal_checkbox.setChecked(True)
+            self.hide_terminal_checkbox.setStyleSheet(f"""
+                QCheckBox {{
+                    font-family: 'Consolas', 'Segoe UI', sans-serif;
+                    font-size: 11pt;
+                    color: {CP_TEXT};
+                    spacing: 8px;
+                    margin-top: 5px;
+                }}
+            """)
+            form_layout.addWidget(self.hide_terminal_checkbox)
 
         if self.shortcut_type == "context":
             self.match_foreground_checkbox = QCheckBox("Match any foreground window (not just focused)")
@@ -1189,11 +1181,6 @@ SendText("Hello World")"""
                     self.action_edit.setPlainText(item["action"])
                 self.category_combo.setCurrentText("System")
 
-    def on_enabled_toggle(self, checked):
-        if checked:
-            self.enabled_checkbox.setText("✅ Enable Shortcut")
-        else:
-            self.enabled_checkbox.setText("❌ Enable Shortcut")
 
     def populate_fields(self):
         self.name_edit.setText(self.shortcut_data.get("name", ""))

@@ -339,11 +339,11 @@
     ],
     "launcher_shortcuts": [
         {
-            "name": "mypygui",
+            "name": "Code Merger",
             "category": "General",
             "description": "",
             "hotkey": "!l",
-            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py",
+            "target_path": "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
             "hide_terminal": true,
             "enabled": true
         }
