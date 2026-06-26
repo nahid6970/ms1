@@ -693,7 +693,8 @@ class AddEditShortcutDialog(QDialog):
             "text": "Text Shortcut",
             "file": "File Shortcut",
             "exclude": "Exclusion Rule",
-            "remap": "Key Remap"
+            "remap": "Key Remap",
+            "launcher": "Launcher Shortcut"
         }
         pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
@@ -799,7 +800,7 @@ class AddEditShortcutDialog(QDialog):
         _add_row("Name:", self.name_edit)
 
         # 2. Shortcut/Trigger Row (Placement immediately below Name)
-        if self.shortcut_type in ["script", "context"]:
+        if self.shortcut_type in ["script", "context", "launcher"]:
             hotkey_row = QHBoxLayout()
             self.hotkey_edit = HotkeyLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
@@ -886,16 +887,33 @@ class AddEditShortcutDialog(QDialog):
         _add_row("Description:", self.description_edit)
 
         # ── Extra Type-Specific Rows ──
-        if self.shortcut_type == "file":
+        if self.shortcut_type in ["file", "launcher"]:
             file_row = QHBoxLayout()
             self.file_path_edit = QLineEdit()
-            self.file_path_edit.setPlaceholderText("C:\\path\\to\\file.ext or @..\\path")
+            if self.shortcut_type == "file":
+                self.file_path_edit.setPlaceholderText("C:\\path\\to\\file.ext or @..\\path")
+            else:
+                self.file_path_edit.setPlaceholderText("e.g., C:\\path\\to\\script.py, C:\\Windows\\notepad.exe")
             self.browse_btn = QPushButton("Browse")
             from PyQt6.QtWidgets import QFileDialog
             self.browse_btn.clicked.connect(self.browse_file)
             file_row.addWidget(self.file_path_edit)
             file_row.addWidget(self.browse_btn)
-            _add_row("File Path:", file_row)
+            _add_row("Target Path:" if self.shortcut_type == "launcher" else "File Path:", file_row)
+            
+            if self.shortcut_type == "launcher":
+                self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
+                self.hide_terminal_checkbox.setChecked(True)
+                self.hide_terminal_checkbox.setStyleSheet(f"""
+                    QCheckBox {{
+                        font-family: 'Consolas', 'Segoe UI', sans-serif;
+                        font-size: 11pt;
+                        color: {CP_TEXT};
+                        spacing: 8px;
+                        margin-top: 5px;
+                    }}
+                """)
+                form_layout.addWidget(self.hide_terminal_checkbox)
             
         elif self.shortcut_type == "startup":
             self.startup_context_mode = QComboBox()
@@ -973,6 +991,25 @@ class AddEditShortcutDialog(QDialog):
                     <li><b>F1 ➔ Esc</b>: Makes the F1 key trigger the Escape function.</li>
                 </ul>
                 <p style="font-family: 'Consolas'; color: {CP_SUBTEXT};"><i>Note: Unlike script shortcuts, Key Remaps perform clean 1-to-1 raw key substitutions without executing custom code blocks.</i></p>
+            """)
+            info_browser.setMinimumHeight(300)
+            info_browser.setMinimumWidth(400)
+            info_layout.addWidget(info_browser)
+            top_layout.addLayout(info_layout)
+        elif self.shortcut_type == "launcher":
+            info_layout = QVBoxLayout()
+            info_layout.addWidget(QLabel("ℹ️ Launcher Guide:"))
+            
+            info_browser = QTextBrowser()
+            info_browser.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; padding: 10px;")
+            info_browser.setHtml(f"""
+                <h3 style="color: {CP_CYAN}; margin-top: 0px; font-family: 'Consolas';">Launcher Shortcuts</h3>
+                <p style="font-family: 'Consolas'; color: {CP_TEXT};">Launchers allow you to directly run any script, application, or file using a hotkey without writing raw AutoHotkey code.</p>
+                <p style="font-family: 'Consolas'; color: {CP_TEXT};"><b>How it works:</b></p>
+                <ul style="font-family: 'Consolas'; color: {CP_TEXT};">
+                    <li><b>Target Path</b>: Select or type the absolute path of the file or application you want to run. You can also append arguments.</li>
+                    <li><b>Hide Terminal</b>: If checked, it will execute in the background. For Python scripts (`.py`), this automatically uses <code>pythonw.exe</code>. For console apps/scripts, it runs them hidden.</li>
+                </ul>
             """)
             info_browser.setMinimumHeight(300)
             info_browser.setMinimumWidth(400)
@@ -1118,7 +1155,7 @@ SendText("Hello World")"""
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules + self.parent_window.remap_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.launcher_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules + self.parent_window.remap_shortcuts:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -1207,6 +1244,10 @@ SendText("Hello World")"""
         elif self.shortcut_type == "file":
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.file_path_edit.setText(self.shortcut_data.get("file_path", ""))
+        elif self.shortcut_type == "launcher":
+            self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
+            self.file_path_edit.setText(self.shortcut_data.get("target_path", ""))
+            self.hide_terminal_checkbox.setChecked(self.shortcut_data.get("hide_terminal", True))
         elif self.shortcut_type == "remap":
             self.origin_key_edit.setText(self.shortcut_data.get("origin_key", ""))
             self.destination_key_edit.setText(self.shortcut_data.get("destination_key", ""))
@@ -1603,6 +1644,23 @@ SendText("Hello World")"""
             if not trigger or not file_path:
                 QMessageBox.warning(self, "Warning", "Both trigger and file path are required.")
                 return
+        elif self.shortcut_type == "launcher":
+            hotkey = self.hotkey_edit.text().strip()
+            target_path = self.file_path_edit.text().strip()
+
+            if not hotkey or not target_path:
+                QMessageBox.warning(self, "Warning", "Both hotkey and target path are required.")
+                return
+
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "hotkey": hotkey,
+                "target_path": target_path,
+                "hide_terminal": self.hide_terminal_checkbox.isChecked(),
+                "enabled": enabled
+            }
 
             shortcut_data = {
                 "name": name,
@@ -1662,6 +1720,8 @@ SendText("Hello World")"""
                 self.parent_window.exclusion_rules.append(shortcut_data)
             elif self.shortcut_type == "remap":
                 self.parent_window.remap_shortcuts.append(shortcut_data)
+            elif self.shortcut_type == "launcher":
+                self.parent_window.launcher_shortcuts.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
 
@@ -1710,7 +1770,7 @@ class CategoryColorDialog(QDialog):
     def populate_colors(self, layout):
         # Get all categories
         all_categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.text_shortcuts + self.parent_window.context_shortcuts + self.parent_window.remap_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.launcher_shortcuts + self.parent_window.text_shortcuts + self.parent_window.context_shortcuts + self.parent_window.remap_shortcuts:
             category = shortcut.get('category', 'General')
             if category:
                 all_categories.add(category)
@@ -1870,6 +1930,7 @@ class AHKShortcutEditor(QMainWindow):
     def __init__(self):
         super().__init__()
         self.script_shortcuts = []
+        self.launcher_shortcuts = []
         self.text_shortcuts = []
         self.file_shortcuts = []
         self.startup_scripts = []
@@ -1886,6 +1947,7 @@ class AHKShortcutEditor(QMainWindow):
         # Section expanded/collapsed states
         self.section_states = {
             "script": True,
+            "launcher": True,
             "context": True,
             "exclude": True,
             "startup": True,
@@ -2061,6 +2123,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_btn = CyberButton(" ADD", color=CP_GREEN, svg_data=SVGS["PLUS"])
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
+        self.add_menu.addAction("Launcher Shortcut", lambda: self.open_add_dialog("launcher"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
         self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
@@ -2245,6 +2308,9 @@ class AHKShortcutEditor(QMainWindow):
             if shortcut_type == "script" and index < len(self.script_shortcuts):
                 self.selected_shortcut = self.script_shortcuts[index]
                 self.selected_type = "script"
+            elif shortcut_type == "launcher" and index < len(self.launcher_shortcuts):
+                self.selected_shortcut = self.launcher_shortcuts[index]
+                self.selected_type = "launcher"
             elif shortcut_type == "text" and index < len(self.text_shortcuts):
                 self.selected_shortcut = self.text_shortcuts[index]
                 self.selected_type = "text"
@@ -2275,6 +2341,8 @@ class AHKShortcutEditor(QMainWindow):
 
             if shortcut_type == "script" and index < len(self.script_shortcuts):
                 self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "launcher" and index < len(self.launcher_shortcuts):
+                self.launcher_shortcuts[index]["enabled"] = not self.launcher_shortcuts[index].get("enabled", True)
             elif shortcut_type == "text" and index < len(self.text_shortcuts):
                 self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
             elif shortcut_type == "file" and index < len(self.file_shortcuts):
@@ -2332,6 +2400,7 @@ class AHKShortcutEditor(QMainWindow):
                 with open(SHORTCUTS_JSON_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.script_shortcuts = data.get("script_shortcuts", [])
+                    self.launcher_shortcuts = data.get("launcher_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
                     self.file_shortcuts = data.get("file_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
@@ -2384,6 +2453,7 @@ class AHKShortcutEditor(QMainWindow):
         try:
             data = {
                 "script_shortcuts": self.script_shortcuts, 
+                "launcher_shortcuts": self.launcher_shortcuts, 
                 "text_shortcuts": self.text_shortcuts,
                 "file_shortcuts": self.file_shortcuts,
                 "startup_scripts": self.startup_scripts,
@@ -2416,6 +2486,8 @@ class AHKShortcutEditor(QMainWindow):
         # Filter shortcuts
         filtered_script = [s for s in self.script_shortcuts
                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
+        filtered_launcher = [s for s in self.launcher_shortcuts
+                            if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('target_path', '')}".lower()]
         filtered_text = [s for s in self.text_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_file = [s for s in self.file_shortcuts
@@ -2429,7 +2501,7 @@ class AHKShortcutEditor(QMainWindow):
         filtered_remap = [s for s in self.remap_shortcuts
                          if search_query in f"{s.get('name', '')} {s.get('origin_key', '')} {s.get('destination_key', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         
-        html = self.generate_html(filtered_script, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category)
+        html = self.generate_html(filtered_script, filtered_launcher, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category)
         
         # Block signals and updates to prevent flickering/jumping
         v_bar.blockSignals(True)
@@ -2461,7 +2533,7 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(0, backup_restore)
 
-    def generate_html(self, script_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, remap_shortcuts, group_by_category):
+    def generate_html(self, script_shortcuts, launcher_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, remap_shortcuts, group_by_category):
         def get_toggle_icon(section):
             return "▾" if self.section_states.get(section, True) else "▸"
 
@@ -2576,6 +2648,32 @@ class AHKShortcutEditor(QMainWindow):
                 for shortcut in sorted(script_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.script_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "script", original_index, False)
+
+        html += f"""
+                    <div class="section-title"><a href="toggle-section://launcher">{get_toggle_icon('launcher')} Launcher Shortcuts</a></div>
+        """
+
+        if self.section_states.get("launcher", True):
+            if group_by_category:
+                launcher_categories = {}
+                for shortcut in launcher_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in launcher_categories:
+                        launcher_categories[category] = []
+                    launcher_categories[category].append(shortcut)
+
+                for i, category in enumerate(sorted(launcher_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                    for shortcut in sorted(launcher_categories[category], key=lambda x: x.get('hotkey', '').lower()):
+                        original_index = self.launcher_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "launcher", original_index, True)
+            else:
+                for shortcut in sorted(launcher_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
+                    original_index = self.launcher_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "launcher", original_index, False)
 
         html += f"""
                     <div class="section-title"><a href="toggle-section://remap">{get_toggle_icon('remap')} Key Remaps</a></div>
@@ -2763,6 +2861,9 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
             key_width = 170
+        elif shortcut_type == "launcher":
+            key = shortcut.get('hotkey', '')
+            key_width = 170
         elif shortcut_type == "remap":
             origin = shortcut.get('origin_key', '')
             dest = shortcut.get('destination_key', '')
@@ -2884,6 +2985,9 @@ class AHKShortcutEditor(QMainWindow):
         # Add to the appropriate list
         if self.selected_type == "script":
             self.script_shortcuts.append(duplicated)
+        elif self.selected_type == "launcher":
+            duplicated['hotkey'] = ""
+            self.launcher_shortcuts.append(duplicated)
         elif self.selected_type == "context":
             self.context_shortcuts.append(duplicated)
         elif self.selected_type == "exclude":
@@ -2924,6 +3028,8 @@ class AHKShortcutEditor(QMainWindow):
         if reply == QMessageBox.StandardButton.Yes:
             if self.selected_type == "script":
                 self.script_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "launcher":
+                self.launcher_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "context":
                 self.context_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "exclude":
@@ -3233,6 +3339,81 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append("}")
                     else:
                         output_lines.append(f"{safe_hotkey}::{action}")
+
+                    if guarded:
+                        output_lines.append("#HotIf")
+                    output_lines.append("")
+                output_lines.append("")
+
+            # Add launcher shortcuts
+            enabled_launchers = [s for s in self.launcher_shortcuts if s.get('enabled', True)]
+            if enabled_launchers:
+                output_lines.append(";! === LAUNCHER SHORTCUTS ===")
+                for shortcut in enabled_launchers:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+
+                    target_path = shortcut.get('target_path', '')
+                    hotkey = shortcut.get('hotkey', '')
+                    hide_terminal = shortcut.get('hide_terminal', True)
+
+                    clean_path = target_path.replace('/', '\\')
+                    
+                    path_part = clean_path
+                    args_part = ""
+                    
+                    if clean_path.startswith('"'):
+                        closing_idx = clean_path.find('"', 1)
+                        if closing_idx != -1:
+                            path_part = clean_path[1:closing_idx]
+                            args_part = clean_path[closing_idx+1:].strip()
+                    elif clean_path.startswith("'"):
+                        closing_idx = clean_path.find("'", 1)
+                        if closing_idx != -1:
+                            path_part = clean_path[1:closing_idx]
+                            args_part = clean_path[closing_idx+1:].strip()
+                    else:
+                        for ext in [".pyw", ".py", ".exe", ".bat", ".cmd", ".ps1"]:
+                            ext_idx = clean_path.lower().find(ext)
+                            if ext_idx != -1:
+                                path_part = clean_path[:ext_idx + len(ext)].strip()
+                                args_part = clean_path[ext_idx + len(ext):].strip()
+                                break
+                        else:
+                            if " " in clean_path:
+                                parts = clean_path.split(" ", 1)
+                                path_part = parts[0]
+                                args_part = parts[1]
+                    
+                    is_python = path_part.lower().endswith(('.py', '.pyw'))
+                    is_ps = path_part.lower().endswith('.ps1')
+                    
+                    if is_python:
+                        py_exe = "pythonw.exe" if hide_terminal else "python.exe"
+                        cmd_str = f'{py_exe} "{path_part}"'
+                        if args_part:
+                            cmd_str += f' {args_part}'
+                    elif is_ps:
+                        ps_options = "-WindowStyle Hidden -File" if hide_terminal else "-NoExit -File"
+                        cmd_str = f'powershell.exe {ps_options} "{path_part}"'
+                        if args_part:
+                            cmd_str += f' {args_part}'
+                    else:
+                        cmd_str = f'"{path_part}"'
+                        if args_part:
+                            cmd_str += f' {args_part}'
+                    
+                    safe_cmd_str = cmd_str.replace("'", "''")
+                    hide_opt = ', , "Hide"' if hide_terminal else ''
+                    action = f"Run('{safe_cmd_str}'{hide_opt})"
+
+                    guarded = needs_exclusion_guard(hotkey)
+                    if guarded:
+                        output_lines.append("#HotIf !IsShortcutExcluded()")
+
+                    safe_hotkey = escape_hotkey(hotkey)
+                    output_lines.append(f"{safe_hotkey}::{action}")
 
                     if guarded:
                         output_lines.append("#HotIf")

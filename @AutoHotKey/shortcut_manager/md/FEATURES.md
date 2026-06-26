@@ -39,6 +39,31 @@
 - `ahk_gui_pyqt.py`
 - `ahk_shortcuts.json`
 
+## Launcher Shortcuts
+
+**Status:** Complete
+
+**Description:** Hotkeys that run any script, app, or file directly without writing raw AutoHotkey code. Supports toggling the terminal window visibility.
+
+**Implementation:**
+
+- Stored in `launcher_shortcuts`
+- Target path input with file browse dialog
+- Supports optional command line arguments
+- "Hide Terminal Window" toggle (boolean, `hide_terminal`)
+- Generates `Run()` statements:
+  - `.py`/`.pyw` files execute via `pythonw.exe` (hidden) or `python.exe` (shown)
+  - `.ps1` files execute via `powershell.exe -WindowStyle Hidden` (hidden) or `powershell.exe -NoExit` (shown)
+  - Other executables/files run directly, using `"Hide"` window option if hidden
+
+**Usage:**
+
+- Select Launcher Shortcut from the ADD menu.
+- Browse to the target script or application.
+- Toggle terminal window hide/show using the checkbox.
+- Set a hotkey and category.
+- Generate and run the AHK script.
+
 ## Context Shortcuts
 
 **Status:** Complete

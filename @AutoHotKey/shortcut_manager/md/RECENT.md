@@ -2,6 +2,25 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-06-26 19:30 - Launcher Shortcut Type & Terminal Hide Toggle
+
+**What We Accomplished:**
+
+- Introduced a new "Launcher Shortcut" type which allows users to directly map hotkeys to python scripts, shell scripts, applications, and files without writing raw AutoHotkey code.
+- Added support for specifying target paths (with browse buttons) and arguments.
+- Added a "Hide Terminal Window" checkbox/toggle for the Launcher Shortcut dialog.
+- Configured dynamic AHK code generation for Launcher Shortcuts:
+  - If the path is a Python file (`.py`, `.pyw`), it prepends `pythonw.exe` (hidden) or `python.exe` (visible) and correctly handles command-line arguments.
+  - If the path is a PowerShell file (`.ps1`), it prepends `powershell.exe -WindowStyle Hidden` (hidden) or `powershell.exe -NoExit` (visible).
+  - For other files/applications, it runs them directly, applying the `"Hide"` window option if requested.
+- Integrated the new type into the GUI main list, add menu, database JSON serialization/deserialization, search, category color/grouping support, and duplication/removal operations.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+- `md/FEATURES.md`
+
 ## 2026-06-13 20:19 - match_foreground toggle for context shortcuts
 
 **What We Accomplished:**
