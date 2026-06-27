@@ -10,6 +10,7 @@ function loadTabs() {
 let currentRightClickedTabId = null;
 let currentTabView = 'all';
 let currentSearchQuery = '';
+let outdatedThresholdDays = 2;
 const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
@@ -189,7 +190,7 @@ function displayTabs(tabs) {
       noResultsHint = 'Try a different title, URL, or tag.';
     } else if (currentTabView === 'outdated') {
       noResults = 'No outdated deadlines yet!';
-      noResultsHint = 'This view shows tabs whose deadlines are at least 2 days past due.';
+      noResultsHint = `This view shows tabs whose deadlines are at least ${outdatedThresholdDays} days past due.`;
     } else {
       noResults = 'No active tabs here!';
       noResultsHint = 'All your saved tabs are in the outdated section.';
@@ -324,8 +325,8 @@ function isOutdatedDeadline(tab) {
   if (!tab.deadline) return false;
   const deadline = Number(tab.deadline);
   if (Number.isNaN(deadline)) return false;
-  const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-  return Date.now() - deadline >= twoDaysMs;
+  const thresholdMs = outdatedThresholdDays * 24 * 60 * 60 * 1000;
+  return Date.now() - deadline >= thresholdMs;
 }
 
 function matchesSearch(tab, query) {
@@ -587,6 +588,9 @@ const ytIconSize = document.getElementById('ytIconSize');
 const channelIconSize = document.getElementById('channelIconSize');
 const ytIconValue = document.getElementById('ytIconValue');
 const channelIconValue = document.getElementById('channelIconValue');
+const outdatedThreshold = document.getElementById('outdatedThreshold');
+const outdatedThresholdValue = document.getElementById('outdatedThresholdValue');
+const outdatedTabLabel = document.getElementById('outdatedTabLabel');
 
 const urgentBg = document.getElementById('urgentBg');
 const urgentFg = document.getElementById('urgentFg');
@@ -604,8 +608,15 @@ function loadSettings() {
     const iconSettings = result.iconSettings || { ytIconSize: 20, channelIconSize: 18 };
     const deadlineSettings = result.deadlineSettings || {
       urgentBg: '#ff4757', urgentFg: '#ffffff', urgentBorder: '#eb3b5a', urgentBold: true,
-      safeBg: '#e3f2fd', safeFg: '#1976d2', safeBorder: '#bbdefb', safeBold: false
+      safeBg: '#e3f2fd', safeFg: '#1976d2', safeBorder: '#bbdefb', safeBold: false,
+      outdatedThreshold: 2
     };
+    if (deadlineSettings.outdatedThreshold === undefined) {
+      deadlineSettings.outdatedThreshold = 2;
+    }
+    
+    // Set global threshold
+    outdatedThresholdDays = deadlineSettings.outdatedThreshold;
     
     // Icons
     ytIconSize.value = iconSettings.ytIconSize;
@@ -623,6 +634,13 @@ function loadSettings() {
     safeFg.value = deadlineSettings.safeFg;
     safeBorder.value = deadlineSettings.safeBorder;
     safeBold.checked = deadlineSettings.safeBold;
+    
+    // Outdated Threshold
+    outdatedThreshold.value = deadlineSettings.outdatedThreshold;
+    outdatedThresholdValue.textContent = deadlineSettings.outdatedThreshold + ' days';
+    if (outdatedTabLabel) {
+      outdatedTabLabel.textContent = `Outdated +${deadlineSettings.outdatedThreshold}d`;
+    }
     
     applySettings(iconSettings, deadlineSettings);
   });
@@ -665,20 +683,29 @@ function saveAllSettings() {
   };
   const deadlineSettings = {
     urgentBg: urgentBg.value, urgentFg: urgentFg.value, urgentBorder: urgentBorder.value, urgentBold: urgentBold.checked,
-    safeBg: safeBg.value, safeFg: safeFg.value, safeBorder: safeBorder.value, safeBold: safeBold.checked
+    safeBg: safeBg.value, safeFg: safeFg.value, safeBorder: safeBorder.value, safeBold: safeBold.checked,
+    outdatedThreshold: parseInt(outdatedThreshold.value)
   };
+  
+  // Update global variable
+  outdatedThresholdDays = deadlineSettings.outdatedThreshold;
+  if (outdatedTabLabel) {
+    outdatedTabLabel.textContent = `Outdated +${outdatedThresholdDays}d`;
+  }
   
   chrome.storage.local.set({ iconSettings, deadlineSettings }, () => {
     applySettings(iconSettings, deadlineSettings);
+    loadTabs(); // Refresh the tab lists to reflect changes with new threshold
   });
 }
 
 // Event Listeners
-[ytIconSize, channelIconSize, urgentBg, urgentFg, urgentBorder, urgentBold, safeBg, safeFg, safeBorder, safeBold].forEach(el => {
+[ytIconSize, channelIconSize, outdatedThreshold, urgentBg, urgentFg, urgentBorder, urgentBold, safeBg, safeFg, safeBorder, safeBold].forEach(el => {
   const eventType = el.type === 'checkbox' ? 'change' : 'input';
   el.addEventListener(eventType, () => {
     if (el === ytIconSize) ytIconValue.textContent = el.value + 'px';
     if (el === channelIconSize) channelIconValue.textContent = el.value + 'px';
+    if (el === outdatedThreshold) outdatedThresholdValue.textContent = el.value + ' days';
     saveAllSettings();
   });
 });
@@ -690,6 +717,7 @@ settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal)
 resetSettings.addEventListener('click', () => {
   ytIconSize.value = 20;
   channelIconSize.value = 18;
+  outdatedThreshold.value = 2;
   urgentBg.value = '#ff4757';
   urgentFg.value = '#ffffff';
   urgentBorder.value = '#eb3b5a';
