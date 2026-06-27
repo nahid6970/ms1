@@ -13498,6 +13498,35 @@ function populateF1Sheets(searchAllCategories = false) {
             const actions = document.createElement('div');
             actions.className = 'f1-separator-actions';
 
+            const sepVal = tableData.sheetSeparators[separatorKey];
+            const titleText = (typeof sepVal === 'object' && sepVal !== null) ? (sepVal.title || '') : '';
+
+            if (titleText) {
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'f1-separator-title';
+                titleSpan.textContent = titleText;
+                actions.appendChild(titleSpan);
+            }
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'f1-separator-btn';
+            editBtn.innerHTML = '✎';
+            editBtn.title = 'Edit title text';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                const newTitle = prompt('Enter separator title text:', titleText);
+                if (newTitle !== null) {
+                    const trimmed = newTitle.trim();
+                    if (trimmed === '') {
+                        tableData.sheetSeparators[separatorKey] = true;
+                    } else {
+                        tableData.sheetSeparators[separatorKey] = { title: trimmed };
+                    }
+                    saveData();
+                    populateF1Sheets(searchAllCategories);
+                }
+            };
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'f1-separator-btn';
             deleteBtn.innerHTML = '×';
@@ -13509,6 +13538,7 @@ function populateF1Sheets(searchAllCategories = false) {
                 populateF1Sheets(searchAllCategories);
             };
 
+            actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
             separator.appendChild(actions);
             sheetList.appendChild(separator);
@@ -13842,7 +13872,7 @@ function handleF1Drop(e) {
                 newIdx++;
             }
 
-            newSeparators[`${cat}_${newIdx}`] = true;
+            newSeparators[`${cat}_${newIdx}`] = tableData.sheetSeparators[key];
         });
         tableData.sheetSeparators = newSeparators;
 

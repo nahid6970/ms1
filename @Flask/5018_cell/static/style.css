@@ -3197,12 +3197,26 @@ tr {
 }
 
 .f1-separator-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     background: #0d0d0d;
-    padding: 2px 4px;
+    padding: 2px 6px;
     border-radius: 2px;
     border: 1px solid #00ff9d;
     position: relative;
     z-index: 1;
+}
+
+.f1-separator-title {
+    color: #00ff9d;
+    font-size: 11px;
+    font-weight: bold;
+    margin-right: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+    white-space: nowrap;
 }
 
 .f1-separator-btn {
