@@ -13840,16 +13840,19 @@ function handleF1Drop(e) {
     if (e.stopPropagation) {
         e.stopPropagation();
     }
+    
+    const isDropAfter = this.classList.contains('drop-after');
     document.querySelectorAll('.f1-sheet-item').forEach(el => el.classList.remove('drop-before', 'drop-after'));
 
     if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
         const targetIndex = parseInt(this.dataset.sheetIndex);
 
-        // Remove the dragged sheet from its current position
-        const movedSheet = tableData.sheets.splice(draggedSheetIndex, 1)[0];
+        const movedSheet = tableData.sheets[draggedSheetIndex];
         const movedCategory = tableData.sheetCategories[draggedSheetIndex];
+        const targetSheetObj = tableData.sheets[targetIndex];
 
-        // Remove the category entry for the old position
+        // Remove the dragged sheet from its current position
+        tableData.sheets.splice(draggedSheetIndex, 1);
         delete tableData.sheetCategories[draggedSheetIndex];
 
         // Rebuild sheetCategories with updated indices
@@ -13857,7 +13860,6 @@ function handleF1Drop(e) {
         Object.keys(tableData.sheetCategories).forEach(key => {
             const idx = parseInt(key);
             if (idx > draggedSheetIndex) {
-                // Shift down indices that were after the dragged item
                 newCategories[idx - 1] = tableData.sheetCategories[key];
             } else {
                 newCategories[idx] = tableData.sheetCategories[key];
@@ -13869,24 +13871,29 @@ function handleF1Drop(e) {
         tableData.sheets.forEach((sheet, idx) => {
             if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
                 if (sheet.parentSheet === draggedSheetIndex) {
-                    // This sub-sheet's parent was moved, update later
                     sheet.parentSheet = -1; // Temporary marker
                 } else if (sheet.parentSheet > draggedSheetIndex) {
-                    // Parent was after the moved sheet, shift down
                     sheet.parentSheet--;
                 }
             }
         });
 
+        // Find the target sheet's new index after removal
+        const newTargetIndex = tableData.sheets.indexOf(targetSheetObj);
+
+        // Calculate correct insertion index based on whether it was dropped before or after the target
+        let insertIndex = isDropAfter ? newTargetIndex + 1 : newTargetIndex;
+        if (insertIndex < 0) insertIndex = 0;
+        if (insertIndex > tableData.sheets.length) insertIndex = tableData.sheets.length;
+
         // Insert the sheet at the target position
-        tableData.sheets.splice(targetIndex, 0, movedSheet);
+        tableData.sheets.splice(insertIndex, 0, movedSheet);
 
         // Rebuild sheetCategories again to account for the insertion
         const finalCategories = {};
         Object.keys(tableData.sheetCategories).forEach(key => {
             const idx = parseInt(key);
-            if (idx >= targetIndex) {
-                // Shift up indices at or after the target position
+            if (idx >= insertIndex) {
                 finalCategories[idx + 1] = tableData.sheetCategories[key];
             } else {
                 finalCategories[idx] = tableData.sheetCategories[key];
@@ -13895,7 +13902,7 @@ function handleF1Drop(e) {
 
         // Set the category for the moved sheet
         if (movedCategory) {
-            finalCategories[targetIndex] = movedCategory;
+            finalCategories[insertIndex] = movedCategory;
         }
         tableData.sheetCategories = finalCategories;
 
@@ -13903,10 +13910,8 @@ function handleF1Drop(e) {
         tableData.sheets.forEach((sheet, idx) => {
             if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
                 if (sheet.parentSheet === -1) {
-                    // This sub-sheet's parent was moved, update to new position
-                    sheet.parentSheet = targetIndex;
-                } else if (sheet.parentSheet >= targetIndex && idx !== targetIndex) {
-                    // Parent was at or after target, shift up
+                    sheet.parentSheet = insertIndex;
+                } else if (sheet.parentSheet >= insertIndex && idx !== insertIndex) {
                     sheet.parentSheet++;
                 }
             }
@@ -13921,11 +13926,10 @@ function handleF1Drop(e) {
             const idx = parseInt(parts[parts.length - 1]);
 
             let newIdx = idx;
-            // Shifting logic identical to how sheet indices themselves shift
             if (idx > draggedSheetIndex) {
                 newIdx--;
             }
-            if (newIdx > targetIndex) {
+            if (newIdx >= insertIndex) {
                 newIdx++;
             }
 
@@ -13935,10 +13939,10 @@ function handleF1Drop(e) {
 
         // Update current sheet index
         if (currentSheet === draggedSheetIndex) {
-            currentSheet = targetIndex;
-        } else if (draggedSheetIndex < targetIndex && currentSheet > draggedSheetIndex && currentSheet <= targetIndex) {
+            currentSheet = insertIndex;
+        } else if (draggedSheetIndex < insertIndex && currentSheet > draggedSheetIndex && currentSheet <= insertIndex) {
             currentSheet--;
-        } else if (draggedSheetIndex > targetIndex && currentSheet >= targetIndex && currentSheet < draggedSheetIndex) {
+        } else if (draggedSheetIndex > insertIndex && currentSheet >= insertIndex && currentSheet < draggedSheetIndex) {
             currentSheet++;
         }
 
