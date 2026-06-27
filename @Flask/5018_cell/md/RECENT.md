@@ -1,5 +1,41 @@
 # Recent Development Log
 
+## [2026-06-27 20:05] - Customizable F1 Separators & Drag-Drop Safety
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🎨 Customizable F1 Sheet Separator Titles, Colors, and Font Sizes
+- Added a styled popup modal window (`editSeparatorModal`) to customize horizontal sheet separators in the F1 menu.
+- Users can edit separator title text, choose a text color (using color picker and hex input), and set font size (using a slider range and number input).
+- Text color, size, and border styles are synced to the edit/delete buttons and the actions container box for a cohesive look.
+- Set parent separator container opacity to 1.0 so title text and buttons display at full brightness (no shadowing/dimming), while using a subtle 0.4 opacity on the horizontal line element itself.
+- Dimmed idle buttons to 0.5 opacity (shadowed effect) by default, raising to 1.0 with scale hover feedback.
+
+### 🎯 Drag & Drop Index Calculation & State Safety
+- Reordered drops now check the visual `drop-after` class state to calculate the exact target array insertion index, ensuring sheets reorder exactly where dropped.
+- Preserved separator custom title and styling values during drag index shifting (instead of resetting to `true`).
+- Added immediate drag state cleanup and reset guards in `handleF1Drop` and `handleF1DragEnd` to prevent double-drop trigger bugs (which caused duplicated sheets and deleted sheets).
+
+### 🚀 Auto-trigger Set & Copy Sheet Index on Creation
+- Created or duplicated sheets and sub-sheets now automatically trigger `setAndCopySheetIndex()` to generate a unique `customIndex` and copy the link code to the clipboard.
+- Success toasts are only displayed when a new index is successfully generated. If the index is already set, it copies the index silently to prevent conflicting success/error toasts.
+
+**Files Modified:**
+- `static/script.js` — Customizable separator modal logic, button style syncing, safe drag-and-drop shifting, drag variable safety resets, and auto-trigger index copy.
+- `static/style.css` — `.f1-separator-title` styling, `.f1-separator-btn` opacity states, pipeline `|` drop indicator line styling, and parent flex layout overrides.
+- `templates/index.html` — Added markup for the new `#editSeparatorModal` editor popup.
+
+**Current Status:**
+- ✅ F1 sheet separators can now have custom titles, colors, and sizes.
+- ✅ Separator line has subtle opacity while custom title and buttons render at full brightness.
+- ✅ Reordering drop indicator is a vertical pipeline `|` bar in the card gaps with precise drop index targeting.
+- ✅ Reset guards prevent stale drag state double-trigger bugs.
+- ✅ Creating new sheets/sub-sheets automatically registers and copies the sheet index.
+
+---
+
 ## [2026-06-17 18:45] - JSON UTF-8, Subsheet Drag Reorder, F9 Reorder GUI
 
 **Session Duration:** 1.2 hours
