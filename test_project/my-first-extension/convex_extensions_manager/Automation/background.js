@@ -130,26 +130,53 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Update the extension icon state dynamically (running = green dot, idle = normal)
+let blinkInterval = null;
+let showGreen = true;
+
+// Update the extension icon state dynamically (running = blink, idle = normal)
 function updateIconState(isRunning) {
   if (!isRunning) {
+    if (blinkInterval) {
+      clearInterval(blinkInterval);
+      blinkInterval = null;
+    }
     // Reset to default paths
     chrome.action.setIcon({
       path: {
-        "16": "icons/clickflow-icon16.png",
-        "48": "icons/clickflow-icon48.png",
-        "128": "icons/clickflow-icon128.png"
+        "16": "icons/icon-16.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
       }
     });
   } else {
-    // Set to running paths with green dot
-    chrome.action.setIcon({
-      path: {
-        "16": "icons/clickflow-icon16-running.png",
-        "48": "icons/clickflow-icon48-running.png",
-        "128": "icons/clickflow-icon128-running.png"
+    // If it's already running, don't restart the interval!
+    if (blinkInterval) return;
+
+    // Start blinking between green and red
+    showGreen = true;
+    const toggleIcon = () => {
+      if (showGreen) {
+        chrome.action.setIcon({
+          path: {
+            "16": "icons/icon-green-16.png",
+            "48": "icons/icon-green-48.png",
+            "128": "icons/icon-green-128.png"
+          }
+        });
+      } else {
+        chrome.action.setIcon({
+          path: {
+            "16": "icons/icon-red-16.png",
+            "48": "icons/icon-red-48.png",
+            "128": "icons/icon-red-128.png"
+          }
+        });
       }
-    });
+      showGreen = !showGreen;
+    };
+    
+    toggleIcon(); // Show immediately
+    blinkInterval = setInterval(toggleIcon, 1000); // Toggle every 1 second
   }
 }
 
