@@ -171,7 +171,12 @@ def load_recent_details() -> list[dict]:
             n = os.path.normpath(p)
             if n not in seen:
                 seen.add(n)
-                out_dict = {"path": n, "files": files, "extensions": extensions}
+                out_dict = {
+                    "path": n, 
+                    "files": files, 
+                    "extensions": extensions,
+                    "clicks": item.get("clicks", 0) if isinstance(item, dict) else 0
+                }
                 if name:
                     out_dict["name"] = name
                 out.append(out_dict)
@@ -197,6 +202,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
             break
 
     name = existing.get("name", "") if existing else ""
+    clicks = existing.get("clicks", 0) if existing else 0
+    clicks += 1
 
     # If overwrite_existing is False, preserve any existing saved selection details
     if not overwrite_existing and existing:
@@ -225,7 +232,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     new_entry = {
         "path": path,
         "files": normalized_files,
-        "extensions": extensions
+        "extensions": extensions,
+        "clicks": clicks
     }
     if name:
         new_entry["name"] = name
@@ -720,6 +728,15 @@ class RecentPopup(QFrame):
         self.on_remove    = on_remove
         self.on_rename    = on_rename
         self.sort_mode   = "Rec"
+        try:
+            if os.path.exists(SESSION_PATH):
+                import json
+                with open(SESSION_PATH, 'r') as f:
+                    data = json.load(f)
+                if isinstance(data, dict) and 'recent_sort_mode' in data:
+                    self.sort_mode = data['recent_sort_mode']
+        except Exception:
+            pass
         self.setStyleSheet(f"""
             QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
             QPushButton {{ background: transparent; border: none; color: #E0E0E0;
@@ -768,6 +785,7 @@ class RecentPopup(QFrame):
             name = item.get("name")
             files = item.get("files", [])
             extensions = item.get("extensions", [])
+            clicks = item.get("clicks", 0)
 
             row = QWidget()
             row.setStyleSheet("background: transparent;")
@@ -779,9 +797,9 @@ class RecentPopup(QFrame):
             btn_load = QPushButton(display_text)
             btn_load.setMinimumWidth(320)
             if name:
-                btn_load.setToolTip(f"{path}\n\nLoad only the {len(files)} saved file(s) for this project")
+                btn_load.setToolTip(f"{path}\n\nLoad only the {len(files)} saved file(s) for this project (Opened: {clicks} time(s))")
             else:
-                btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
+                btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project (Opened: {clicks} time(s))")
             btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
 
             btn_rename = QPushButton("I")
@@ -819,10 +837,10 @@ class RecentPopup(QFrame):
                 "widget": row,
                 "display_text": display_text,
                 "path": path,
-                "order_index": idx
+                "order_index": idx,
+                "clicks": clicks
             })
 
-        self.list_layout.addStretch()
         scroll.setWidget(content)
         scroll.setMaximumHeight(240)
         main_layout.addWidget(scroll)
@@ -852,7 +870,7 @@ class RecentPopup(QFrame):
         self.search_input.textChanged.connect(self._filter_items)
         search_layout.addWidget(self.search_input, 1)
 
-        self.btn_sort = QPushButton("SORT: REC")
+        self.btn_sort = QPushButton()
         self.btn_sort.setFixedWidth(90)
         self.btn_sort.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_sort.setStyleSheet(f"""
@@ -871,6 +889,15 @@ class RecentPopup(QFrame):
                 background-color: #222;
             }}
         """)
+        if self.sort_mode == "Rec":
+            self.btn_sort.setText("SORT: REC")
+        elif self.sort_mode == "Name":
+            self.btn_sort.setText("SORT: A-Z")
+        elif self.sort_mode == "Path":
+            self.btn_sort.setText("SORT: DIR")
+        elif self.sort_mode == "Clicks":
+            self.btn_sort.setText("SORT: CLK")
+
         self.btn_sort.clicked.connect(self._toggle_sort)
         search_layout.addWidget(self.btn_sort, 0)
 
@@ -879,6 +906,8 @@ class RecentPopup(QFrame):
         self.adjustSize()
         self.search_input.setFocus()
 
+        self._apply_sort()
+
     def _toggle_sort(self):
         if self.sort_mode == "Rec":
             self.sort_mode = "Name"
@@ -886,9 +915,26 @@ class RecentPopup(QFrame):
         elif self.sort_mode == "Name":
             self.sort_mode = "Path"
             self.btn_sort.setText("SORT: DIR")
+        elif self.sort_mode == "Path":
+            self.sort_mode = "Clicks"
+            self.btn_sort.setText("SORT: CLK")
         else:
             self.sort_mode = "Rec"
             self.btn_sort.setText("SORT: REC")
+
+        try:
+            import json
+            data = {}
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r') as f:
+                    data = json.load(f)
+            if not isinstance(data, dict):
+                data = {}
+            data['recent_sort_mode'] = self.sort_mode
+            with open(SESSION_PATH, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            pass
             
         self._apply_sort()
 
@@ -899,6 +945,8 @@ class RecentPopup(QFrame):
             self.project_rows.sort(key=lambda x: x["display_text"].lower())
         elif self.sort_mode == "Path":
             self.project_rows.sort(key=lambda x: x["path"].lower())
+        elif self.sort_mode == "Clicks":
+            self.project_rows.sort(key=lambda x: x["clicks"], reverse=True)
 
         while self.list_layout.count() > 0:
             item = self.list_layout.takeAt(0)
