@@ -151,12 +151,13 @@ function displayTabs(tabs) {
 
   const totalTabs = tabs.length;
   const outdatedTabs = tabs.filter(tab => isOutdatedDeadline(tab));
+  const nonOutdatedTabs = tabs.filter(tab => !isOutdatedDeadline(tab));
   const filteredTabs = tabs.filter(tab => matchesSearch(tab, currentSearchQuery));
   const visibleTabs = currentTabView === 'outdated'
     ? filteredTabs.filter(tab => isOutdatedDeadline(tab))
-    : filteredTabs;
+    : filteredTabs.filter(tab => !isOutdatedDeadline(tab));
 
-  allTabCount.textContent = totalTabs;
+  allTabCount.textContent = nonOutdatedTabs.length;
   outdatedTabCount.textContent = outdatedTabs.length;
 
   setActiveViewButton(currentTabView);
@@ -182,12 +183,17 @@ function displayTabs(tabs) {
   }
 
   if (visibleTabs.length === 0) {
-    const noResults = currentSearchQuery.trim()
-      ? `No tabs match "${currentSearchQuery.trim()}".`
-      : 'No outdated deadlines yet!';
-    const noResultsHint = currentSearchQuery.trim()
-      ? 'Try a different title, URL, or tag.'
-      : 'This view shows tabs whose deadlines are at least 2 days past due.';
+    let noResults, noResultsHint;
+    if (currentSearchQuery.trim()) {
+      noResults = `No tabs match "${currentSearchQuery.trim()}".`;
+      noResultsHint = 'Try a different title, URL, or tag.';
+    } else if (currentTabView === 'outdated') {
+      noResults = 'No outdated deadlines yet!';
+      noResultsHint = 'This view shows tabs whose deadlines are at least 2 days past due.';
+    } else {
+      noResults = 'No active tabs here!';
+      noResultsHint = 'All your saved tabs are in the outdated section.';
+    }
     tabList.innerHTML = `
       <div class="empty-state">
         <p>${noResults}</p>
