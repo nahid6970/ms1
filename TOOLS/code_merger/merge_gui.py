@@ -719,6 +719,7 @@ class RecentPopup(QFrame):
         self.on_load_all  = on_load_all
         self.on_remove    = on_remove
         self.on_rename    = on_rename
+        self.sort_mode   = "Rec"
         self.setStyleSheet(f"""
             QFrame {{ background: #111111; border: 1px solid #00F0FF; }}
             QPushButton {{ background: transparent; border: none; color: #E0E0E0;
@@ -756,13 +757,13 @@ class RecentPopup(QFrame):
 
         content = QWidget()
         content.setStyleSheet("background: transparent;")
-        layout = QVBoxLayout(content)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        self.list_layout = QVBoxLayout(content)
+        self.list_layout.setContentsMargins(0, 0, 0, 0)
+        self.list_layout.setSpacing(0)
 
         self.project_rows = []
 
-        for item in items:
+        for idx, item in enumerate(items):
             path = item["path"]
             name = item.get("name")
             files = item.get("files", [])
@@ -812,11 +813,16 @@ class RecentPopup(QFrame):
             hl.addWidget(btn_open)
             hl.addWidget(btn_load_all)
             hl.addWidget(btn_rem)
-            layout.addWidget(row)
+            self.list_layout.addWidget(row)
 
-            self.project_rows.append((row, display_text.lower(), path.lower()))
+            self.project_rows.append({
+                "widget": row,
+                "display_text": display_text,
+                "path": path,
+                "order_index": idx
+            })
 
-        layout.addStretch()
+        self.list_layout.addStretch()
         scroll.setWidget(content)
         scroll.setMaximumHeight(240)
         main_layout.addWidget(scroll)
@@ -844,15 +850,73 @@ class RecentPopup(QFrame):
             }}
         """)
         self.search_input.textChanged.connect(self._filter_items)
-        search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.search_input, 1)
+
+        self.btn_sort = QPushButton("SORT: REC")
+        self.btn_sort.setFixedWidth(90)
+        self.btn_sort.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_sort.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_BG};
+                color: {CP_YELLOW};
+                border: 1px solid {CP_DIM};
+                font-family: 'Consolas';
+                font-size: 8pt;
+                font-weight: bold;
+                padding: 4px;
+            }}
+            QPushButton:hover {{
+                border-color: {CP_YELLOW};
+                color: white;
+                background-color: #222;
+            }}
+        """)
+        self.btn_sort.clicked.connect(self._toggle_sort)
+        search_layout.addWidget(self.btn_sort, 0)
+
         main_layout.addWidget(search_widget)
 
         self.adjustSize()
         self.search_input.setFocus()
 
+    def _toggle_sort(self):
+        if self.sort_mode == "Rec":
+            self.sort_mode = "Name"
+            self.btn_sort.setText("SORT: A-Z")
+        elif self.sort_mode == "Name":
+            self.sort_mode = "Path"
+            self.btn_sort.setText("SORT: DIR")
+        else:
+            self.sort_mode = "Rec"
+            self.btn_sort.setText("SORT: REC")
+            
+        self._apply_sort()
+
+    def _apply_sort(self):
+        if self.sort_mode == "Rec":
+            self.project_rows.sort(key=lambda x: x["order_index"])
+        elif self.sort_mode == "Name":
+            self.project_rows.sort(key=lambda x: x["display_text"].lower())
+        elif self.sort_mode == "Path":
+            self.project_rows.sort(key=lambda x: x["path"].lower())
+
+        while self.list_layout.count() > 0:
+            item = self.list_layout.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
+
+        for item_data in self.project_rows:
+            self.list_layout.addWidget(item_data["widget"])
+
+        self.list_layout.addStretch()
+        self._filter_items()
+
     def _filter_items(self):
         query = self.search_input.text().strip().lower()
-        for row, display_text, path in self.project_rows:
+        for item_data in self.project_rows:
+            row = item_data["widget"]
+            display_text = item_data["display_text"].lower()
+            path = item_data["path"].lower()
             visible = (not query) or (query in display_text) or (query in path)
             row.setVisible(visible)
 
