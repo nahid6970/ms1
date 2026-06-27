@@ -13,6 +13,9 @@ function getStorageData() {
 
 function updateState(status, loopIndex, stepIndex) {
   return new Promise((resolve) => {
+    if (status === 'running' && stopRequested) {
+      return resolve();
+    }
     chrome.storage.local.get('automationState', (data) => {
       const state = data.automationState || { logs: [] };
       state.status = status;
@@ -602,7 +605,7 @@ async function executeSubStepsList(subSteps, currentLoop, parentLabel, waitTimeo
     const selectorMode = step.selectorMode || 'css';
     const label = `${parentLabel}.${idx + 1}`;
 
-    logMessage(`[Step ${label}] Waiting ${step.delay}s...`);
+    await logMessage(`[Step ${label}] Waiting ${step.delay}s...`);
     await interruptibleDelay(step.delay);
 
     if (stopRequested) break;
@@ -612,6 +615,7 @@ async function executeSubStepsList(subSteps, currentLoop, parentLabel, waitTimeo
         logMessage(`[Step ${label}] Evaluating nested branch...`);
         const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
         const result = await evaluateConcurrentConditions(step, timeoutVal);
+        if (stopRequested) break;
 
         if (result.outcome === 'then') {
           logMessage(`[Step ${label}] Nested branch IF condition met.`);
@@ -656,9 +660,9 @@ async function executeStepsList(stepsList, currentLoop, startStepIndex, waitTime
     }
     const selectorMode = step.selectorMode || 'css';
     
-    updateState("running", currentLoop, i);
+    await updateState("running", currentLoop, i);
 
-    logMessage(`[Step ${i + 1}] Waiting ${step.delay || 0}s...`);
+    await logMessage(`[Step ${i + 1}] Waiting ${step.delay || 0}s...`);
     await interruptibleDelay(step.delay || 0);
 
     if (stopRequested) break;
@@ -668,6 +672,7 @@ async function executeStepsList(stepsList, currentLoop, startStepIndex, waitTime
         logMessage(`[Step ${i + 1}] Evaluating branch step...`);
         const timeoutVal = step.timeout !== undefined ? parseFloat(step.timeout) : 0;
         const result = await evaluateConcurrentConditions(step, timeoutVal);
+        if (stopRequested) break;
         
         if (result.outcome === 'then') {
           logMessage(`[Step ${i + 1}] IF condition met. Executing THEN steps.`);
