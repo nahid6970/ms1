@@ -816,6 +816,7 @@ class RecentPopup(QFrame):
 
             self.project_rows.append((row, display_text.lower(), path.lower()))
 
+        layout.addStretch()
         scroll.setWidget(content)
         scroll.setMaximumHeight(240)
         main_layout.addWidget(scroll)
