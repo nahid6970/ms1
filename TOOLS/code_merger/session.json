@@ -1,0 +1,33 @@
+{
+  "backup": false,
+  "preview": true,
+  "files": [],
+  "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+  "minify": false,
+  "file_modes": {
+    "C:\\@delta\\db\\fifa\\app.py": "Outline",
+    "C:\\@delta\\db\\fifa\\index.html": "Outline",
+    "C:\\@delta\\db\\vlr\\app.py": "Outline",
+    "C:\\@delta\\db\\vlr\\scraper.py": "Outline",
+    "C:\\@delta\\db\\vlr\\static\\css\\style.css": "Outline",
+    "C:\\@delta\\db\\vlr\\static\\js\\main.js": "Outline",
+    "C:\\@delta\\db\\vlr\\templates\\index.html": "Outline",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\dev.md": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\generated_shortcuts.ahk": "Outline",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\README.md": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\FEATURES.md": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\KEYBOARD_SHORTCUTS.md": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\PROBLEMS_AND_FIXES.md": "Outline",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\RECENT.md": "Full",
+    "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\UI_UX.md": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\script.js": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\export_static.py": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\recent_edits.js": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\style.css": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\temp_notepad.js": "Full",
+    "C:\\@delta\\ms1\\@Flask\\5018_cell\\templates\\index.html": "Full"
+  },
+  "recent_sort_mode": "Name"
+}
