@@ -70,7 +70,7 @@ _HERE        = os.path.dirname(os.path.abspath(__file__))
 GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
 RECENT_PATH  = os.path.join(_HERE, "recent_projects.json")
 SESSION_PATH = os.path.join(_HERE, "session.json")
-MAX_RECENT   = 8
+MAX_RECENT   = 999999
 
 IGNORE_PATTERNS = {
     '__pycache__', '.git', '.venv', 'venv', 'node_modules', '.idea', '.vscode',
@@ -760,6 +760,8 @@ class RecentPopup(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
+        self.project_rows = []
+
         for item in items:
             path = item["path"]
             name = item.get("name")
@@ -812,10 +814,46 @@ class RecentPopup(QFrame):
             hl.addWidget(btn_rem)
             layout.addWidget(row)
 
+            self.project_rows.append((row, display_text.lower(), path.lower()))
+
         scroll.setWidget(content)
         scroll.setMaximumHeight(240)
         main_layout.addWidget(scroll)
+
+        # Search box widget at the bottom
+        search_widget = QWidget()
+        search_widget.setStyleSheet(f"background-color: {CP_PANEL}; border-top: 1px solid {CP_DIM};")
+        search_layout = QHBoxLayout(search_widget)
+        search_layout.setContentsMargins(6, 6, 6, 6)
+        search_layout.setSpacing(4)
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Search recent projects…")
+        self.search_input.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {CP_BG};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px 8px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {CP_CYAN};
+            }}
+        """)
+        self.search_input.textChanged.connect(self._filter_items)
+        search_layout.addWidget(self.search_input)
+        main_layout.addWidget(search_widget)
+
         self.adjustSize()
+        self.search_input.setFocus()
+
+    def _filter_items(self):
+        query = self.search_input.text().strip().lower()
+        for row, display_text, path in self.project_rows:
+            visible = (not query) or (query in display_text) or (query in path)
+            row.setVisible(visible)
 
     def _open_explorer(self, p):
         try:
