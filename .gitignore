@@ -4,7 +4,6 @@
 *.msi
 *.rar
 *.zip
-# *.png
 *.pyc
 *.cpython-312.pyc
 *.cpython-312
