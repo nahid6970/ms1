@@ -3149,10 +3149,10 @@ tr {
 .f1-sheet-item.drop-after::after {
     content: '';
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 3px;
+    height: 26px;
     background: #ff9d00;
-    border-radius: 50%;
+    border-radius: 1.5px;
     box-shadow: 0 0 6px #ff9d00;
     top: 50%;
     transform: translateY(-50%);
@@ -3160,11 +3160,13 @@ tr {
     pointer-events: none;
 }
 
-.f1-sheet-item.drop-before { padding-left: 14px; }
-.f1-sheet-item.drop-before::before { left: 3px; }
+.f1-sheet-item.drop-before::before {
+    left: -4px;
+}
 
-.f1-sheet-item.drop-after { padding-right: 14px; }
-.f1-sheet-item.drop-after::after { right: 3px; }
+.f1-sheet-item.drop-after::after {
+    right: -4px;
+}
 
 .f1-sheet-separator {
     width: 100%;
