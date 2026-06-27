@@ -372,6 +372,45 @@
         </div>
     </div>
 
+    <!-- Edit Separator Modal -->
+    <div id="editSeparatorModal" class="modal" style="z-index: 20000;">
+        <div class="modal-content rename-modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Edit Separator</h2>
+                <span class="close" onclick="closeEditSeparatorModal()">&times;</span>
+            </div>
+            <form id="editSeparatorForm">
+                <input type="hidden" id="editSeparatorKey">
+                <div class="form-group">
+                    <label for="editSeparatorTitle">Title Text</label>
+                    <input type="text" id="editSeparatorTitle" class="form-input" placeholder="e.g., Section 1, Important">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="editSeparatorColor">Text Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="editSeparatorColor" class="form-input" style="width: 50px; height: 35px; padding: 2px; cursor: pointer;" value="#00ff9d"
+                            oninput="document.getElementById('editSeparatorColorText').value = this.value">
+                        <input type="text" id="editSeparatorColorText" class="form-input" style="flex: 1;" placeholder="#00ff9d" value="#00ff9d"
+                            oninput="if(/^#[0-9A-F]{6}$/i.test(this.value)) document.getElementById('editSeparatorColor').value = this.value">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="editSeparatorSize">Text Size (px)</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="range" id="editSeparatorSize" min="9" max="24" step="1" value="11" style="flex: 1; cursor: pointer;"
+                            oninput="document.getElementById('editSeparatorSizeText').value = this.value">
+                        <input type="number" id="editSeparatorSizeText" class="form-input" style="width: 60px;" min="9" max="24" value="11"
+                            oninput="document.getElementById('editSeparatorSize').value = this.value">
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditSeparatorModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Add Category Modal -->
     <div id="addCategoryModal" class="modal">
         <div class="modal-content rename-modal">

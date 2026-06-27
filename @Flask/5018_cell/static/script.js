@@ -7338,6 +7338,59 @@ document.getElementById('addCategoryForm').onsubmit = async function (e) {
     showToast(`Category "${categoryName}" added`, 'success');
 };
 
+// Edit separator form handlers
+function showEditSeparatorModal(separatorKey) {
+    const sepVal = tableData.sheetSeparators[separatorKey];
+    const titleText = (typeof sepVal === 'object' && sepVal !== null) ? (sepVal.title || '') : '';
+    const color = (typeof sepVal === 'object' && sepVal !== null) ? (sepVal.color || '#00ff9d') : '#00ff9d';
+    const size = (typeof sepVal === 'object' && sepVal !== null) ? (sepVal.size || 11) : 11;
+
+    document.getElementById('editSeparatorKey').value = separatorKey;
+    document.getElementById('editSeparatorTitle').value = titleText;
+    document.getElementById('editSeparatorColor').value = color;
+    document.getElementById('editSeparatorColorText').value = color;
+    document.getElementById('editSeparatorSize').value = size;
+    document.getElementById('editSeparatorSizeText').value = size;
+
+    document.getElementById('editSeparatorModal').style.display = 'block';
+}
+
+function closeEditSeparatorModal() {
+    document.getElementById('editSeparatorModal').style.display = 'none';
+}
+
+// Edit separator form handler hook
+document.getElementById('editSeparatorForm').onsubmit = async function (e) {
+    e.preventDefault();
+    const key = document.getElementById('editSeparatorKey').value;
+    const titleText = document.getElementById('editSeparatorTitle').value.trim();
+    const color = document.getElementById('editSeparatorColor').value;
+    const size = parseInt(document.getElementById('editSeparatorSize').value);
+
+    if (!key) return;
+
+    if (titleText === '') {
+        tableData.sheetSeparators[key] = true;
+    } else {
+        tableData.sheetSeparators[key] = {
+            title: titleText,
+            color: color,
+            size: size
+        };
+    }
+
+    await saveData();
+    
+    // Determine if we need to search all categories
+    const searchInput = document.getElementById('f1SearchInput');
+    const searchTerm = searchInput ? searchInput.value.trim() : '';
+    const searchAllCategories = searchTerm.startsWith('*');
+    
+    populateF1Sheets(searchAllCategories);
+    closeEditSeparatorModal();
+    showToast('Separator updated', 'success');
+};
+
 // Rename category form handler
 document.getElementById('renameCategoryForm').onsubmit = async function (e) {
     e.preventDefault();
@@ -13505,6 +13558,12 @@ function populateF1Sheets(searchAllCategories = false) {
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'f1-separator-title';
                 titleSpan.textContent = titleText;
+                if (typeof sepVal === 'object' && sepVal.color) {
+                    titleSpan.style.color = sepVal.color;
+                }
+                if (typeof sepVal === 'object' && sepVal.size) {
+                    titleSpan.style.fontSize = sepVal.size + 'px';
+                }
                 actions.appendChild(titleSpan);
             }
 
@@ -13514,17 +13573,7 @@ function populateF1Sheets(searchAllCategories = false) {
             editBtn.title = 'Edit title text';
             editBtn.onclick = (e) => {
                 e.stopPropagation();
-                const newTitle = prompt('Enter separator title text:', titleText);
-                if (newTitle !== null) {
-                    const trimmed = newTitle.trim();
-                    if (trimmed === '') {
-                        tableData.sheetSeparators[separatorKey] = true;
-                    } else {
-                        tableData.sheetSeparators[separatorKey] = { title: trimmed };
-                    }
-                    saveData();
-                    populateF1Sheets(searchAllCategories);
-                }
+                showEditSeparatorModal(separatorKey);
             };
 
             const deleteBtn = document.createElement('button');
