@@ -1,8 +1,12 @@
 {
   "backup": false,
   "preview": true,
-  "files": [],
-  "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+  "files": [
+    "C:\\@delta\\db\\@Convex\\image-share\\index.html",
+    "C:\\@delta\\db\\@Convex\\image-share\\convex\\images.ts",
+    "C:\\@delta\\db\\@Convex\\image-share\\convex\\tsconfig.json"
+  ],
+  "project_root": "C:\\@delta\\db\\@Convex\\image-share",
   "minify": false,
   "file_modes": {
     "C:\\@delta\\db\\fifa\\app.py": "Outline",
@@ -29,5 +33,5 @@
     "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\temp_notepad.js": "Full",
     "C:\\@delta\\ms1\\@Flask\\5018_cell\\templates\\index.html": "Full"
   },
-  "recent_sort_mode": "Name"
+  "recent_sort_mode": "Rec"
 }

@@ -1,5 +1,24 @@
 [
   {
+    "path": "C:\\@delta\\db\\@Convex\\image-share",
+    "files": [
+      "C:\\@delta\\db\\@Convex\\image-share\\index.html",
+      "C:\\@delta\\db\\@Convex\\image-share\\convex\\images.ts",
+      "C:\\@delta\\db\\@Convex\\image-share\\convex\\tsconfig.json"
+    ],
+    "extensions": [
+      "",
+      ".md",
+      ".html",
+      ".js",
+      ".ts",
+      ".local",
+      ".json"
+    ],
+    "clicks": 38,
+    "name": "Convex - Gallery"
+  },
+  {
     "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "files": [
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py"
@@ -143,29 +162,6 @@
     ],
     "clicks": 0,
     "name": "AHK - Button Generator"
-  },
-  {
-    "path": "C:\\@delta\\db\\@Convex\\image-share",
-    "files": [
-      "C:\\@delta\\db\\@Convex\\image-share\\index.html",
-      "C:\\@delta\\db\\@Convex\\image-share\\package-lock.json",
-      "C:\\@delta\\db\\@Convex\\image-share\\package.json",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\images.ts",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\tsconfig.json",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\_generated\\api.d.ts",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\_generated\\api.js",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\_generated\\dataModel.d.ts",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\_generated\\server.d.ts",
-      "C:\\@delta\\db\\@Convex\\image-share\\convex\\_generated\\server.js"
-    ],
-    "extensions": [
-      ".json",
-      ".ts",
-      ".js",
-      ".html"
-    ],
-    "clicks": 0,
-    "name": "Convex - Gallery"
   },
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",

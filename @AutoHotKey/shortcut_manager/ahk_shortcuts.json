@@ -38,14 +38,6 @@
             "name": "Monitor Extend"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\BIO\\generate_Button_AHK.ahk\")",
-            "category": "Launch",
-            "description": "Opens Bio.ahk GUI",
-            "enabled": true,
-            "hotkey": "!b",
-            "name": "Bio GUI"
-        },
-        {
             "action": "Run(\"C:\\@delta\\ms1\\TOOLS\\Ultimate_Gui.py\", \"\", \"Hide\")",
             "category": "Launch",
             "description": "Opens Ultimate_Gui.py",
@@ -134,14 +126,6 @@
             "name": "Replace - w Space"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")",
-            "category": "Display",
-            "description": "",
-            "enabled": true,
-            "hotkey": "!1",
-            "name": "Send Apps to 2nd Display"
-        },
-        {
             "action": "Run(\"C:\\@delta\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")",
             "category": "General",
             "description": "",
@@ -191,14 +175,6 @@
             "enabled": true,
             "hotkey": "#e",
             "name": "Merge all window in a single explorer"
-        },
-        {
-            "action": "Run(\"C:\\@delta\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
-            "category": "General",
-            "description": "",
-            "enabled": false,
-            "hotkey": "!n",
-            "name": "autofill job field"
         },
         {
             "action": "OpenWithEditor() {\n    ; Backup current clipboard content\n    ClipboardBackup := ClipboardAll()\n    \n    ; Clear clipboard and copy the selected file path\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    if !ClipWait(1) {\n        MsgBox(\"No valid file path found.\")\n        A_Clipboard := ClipboardBackup\n        return\n    }\n    \n    ClipBoardContent := A_Clipboard\n    if InStr(ClipBoardContent, \"\\\") {\n        ; Handle multiple files (split by newline)\n        FilePaths := \"\"\n        Loop Parse, ClipBoardContent, \"`n\", \"`r\" {\n            if (A_LoopField != \"\") {\n                FilePaths .= '\"' . A_LoopField . '\" '\n            }\n        }\n        if (FilePaths != \"\") {\n            ; Use pythonw to run without console window\n            Run('pythonw \"C:\\@delta\\ms1\\scripts\\run\\editor_chooser.py\" ' . FilePaths, , \"Hide\")\n        }\n    } else {\n        MsgBox(\"No valid file path found.\")\n    }\n    \n    ; Restore original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
@@ -305,36 +281,12 @@
             "name": "Paste as One Line"
         },
         {
-            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\screenshot\\file_mover.py\"', , \"Hide\")",
-            "category": "Launch",
-            "description": "",
-            "hotkey": "!m",
-            "name": "move selected files",
-            "enabled": false
-        },
-        {
-            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher.py\"', , \"Hide\")",
-            "category": "Launch",
-            "description": "",
-            "hotkey": "!+d",
-            "name": "drag files from the gui drop down",
-            "enabled": true
-        },
-        {
             "action": "replacewith_()\nreplacewith_()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Remove all whitespace, including spaces and line breaks\n        ClipboardContent := RegExReplace(ClipboardContent, \"\\s+\", \"\")\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
             "category": "Text",
             "description": "",
             "hotkey": "RAlt & Space",
             "name": "Remove Spaces and White spaces",
             "enabled": false
-        },
-        {
-            "action": "Run(\"C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\email_shortcut\\generate_Button_AHK.ahk\")",
-            "category": "Launch",
-            "description": "Opens Bio.ahk GUI",
-            "enabled": true,
-            "hotkey": "!a",
-            "name": "Email List (AHK-GUI)"
         }
     ],
     "launcher_shortcuts": [
@@ -346,6 +298,60 @@
             "target_path": "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
             "hide_terminal": true,
             "enabled": true
+        },
+        {
+            "name": "drag files from the gui",
+            "category": "General",
+            "description": "",
+            "hotkey": "!+d",
+            "target_path": "C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher.py",
+            "hide_terminal": true,
+            "enabled": true
+        },
+        {
+            "name": "Send apps to 2nd display (ldplayer)",
+            "category": "General",
+            "description": "",
+            "hotkey": "!1",
+            "target_path": "C:\\@delta\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk",
+            "hide_terminal": true,
+            "enabled": false
+        },
+        {
+            "name": "Email list",
+            "category": "General",
+            "description": "",
+            "hotkey": "!a",
+            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\email_shortcut\\generate_Button_AHK.ahk",
+            "hide_terminal": true,
+            "enabled": true
+        },
+        {
+            "name": "Bio",
+            "category": "General",
+            "description": "",
+            "hotkey": "!b",
+            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\BIO\\generate_Button_AHK.ahk",
+            "hide_terminal": true,
+            "enabled": true
+        },
+        {
+            "name": "move selected files",
+            "category": "General",
+            "description": "",
+            "hotkey": "!m",
+            "target_path": "C:\\@delta\\ms1\\Testing\\screenshot\\file_mover.py",
+            "hide_terminal": true,
+            "enabled": true
+        },
+        {
+            "name": "autofill job field",
+            "category": "General",
+            "description": "",
+            "hotkey": "!n",
+            "target_path": "C:\\@delta\\msBackups\\@JOB\\autofill.ahk",
+            "hide_terminal": true,
+            "enabled": false
         }
     ],
     "text_shortcuts": [
