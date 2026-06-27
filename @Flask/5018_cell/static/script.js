@@ -13844,22 +13844,27 @@ function handleF1Drop(e) {
     const isDropAfter = this.classList.contains('drop-after');
     document.querySelectorAll('.f1-sheet-item').forEach(el => el.classList.remove('drop-before', 'drop-after'));
 
-    if (draggedF1Item !== this && this.classList.contains('f1-sheet-item')) {
+    if (draggedF1Item !== this && draggedSheetIndex !== null && this.classList.contains('f1-sheet-item')) {
+        const localDraggedIndex = draggedSheetIndex;
+        // Reset drag variables immediately to prevent double execution / duplicate drops
+        draggedF1Item = null;
+        draggedSheetIndex = null;
+
         const targetIndex = parseInt(this.dataset.sheetIndex);
 
-        const movedSheet = tableData.sheets[draggedSheetIndex];
-        const movedCategory = tableData.sheetCategories[draggedSheetIndex];
+        const movedSheet = tableData.sheets[localDraggedIndex];
+        const movedCategory = tableData.sheetCategories[localDraggedIndex];
         const targetSheetObj = tableData.sheets[targetIndex];
 
         // Remove the dragged sheet from its current position
-        tableData.sheets.splice(draggedSheetIndex, 1);
-        delete tableData.sheetCategories[draggedSheetIndex];
+        tableData.sheets.splice(localDraggedIndex, 1);
+        delete tableData.sheetCategories[localDraggedIndex];
 
         // Rebuild sheetCategories with updated indices
         const newCategories = {};
         Object.keys(tableData.sheetCategories).forEach(key => {
             const idx = parseInt(key);
-            if (idx > draggedSheetIndex) {
+            if (idx > localDraggedIndex) {
                 newCategories[idx - 1] = tableData.sheetCategories[key];
             } else {
                 newCategories[idx] = tableData.sheetCategories[key];
@@ -13870,9 +13875,9 @@ function handleF1Drop(e) {
         // Update parentSheet references after removal
         tableData.sheets.forEach((sheet, idx) => {
             if (sheet.parentSheet !== undefined && sheet.parentSheet !== null) {
-                if (sheet.parentSheet === draggedSheetIndex) {
+                if (sheet.parentSheet === localDraggedIndex) {
                     sheet.parentSheet = -1; // Temporary marker
-                } else if (sheet.parentSheet > draggedSheetIndex) {
+                } else if (sheet.parentSheet > localDraggedIndex) {
                     sheet.parentSheet--;
                 }
             }
@@ -13926,7 +13931,7 @@ function handleF1Drop(e) {
             const idx = parseInt(parts[parts.length - 1]);
 
             let newIdx = idx;
-            if (idx > draggedSheetIndex) {
+            if (idx > localDraggedIndex) {
                 newIdx--;
             }
             if (newIdx >= insertIndex) {
@@ -13938,11 +13943,11 @@ function handleF1Drop(e) {
         tableData.sheetSeparators = newSeparators;
 
         // Update current sheet index
-        if (currentSheet === draggedSheetIndex) {
+        if (currentSheet === localDraggedIndex) {
             currentSheet = insertIndex;
-        } else if (draggedSheetIndex < insertIndex && currentSheet > draggedSheetIndex && currentSheet <= insertIndex) {
+        } else if (localDraggedIndex < insertIndex && currentSheet > localDraggedIndex && currentSheet <= insertIndex) {
             currentSheet--;
-        } else if (draggedSheetIndex > insertIndex && currentSheet >= insertIndex && currentSheet < draggedSheetIndex) {
+        } else if (localDraggedIndex > insertIndex && currentSheet >= insertIndex && currentSheet < localDraggedIndex) {
             currentSheet++;
         }
 
@@ -13957,6 +13962,8 @@ function handleF1Drop(e) {
 }
 
 function handleF1DragEnd(e) {
+    draggedF1Item = null;
+    draggedSheetIndex = null;
     this.classList.remove('dragging');
     document.querySelectorAll('.f1-sheet-item').forEach(item => {
         item.style.borderColor = '';
