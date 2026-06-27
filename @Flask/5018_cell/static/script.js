@@ -4837,14 +4837,15 @@ async function setSheetCustomIndex(sheetIdx) {
     }
 }
 
-async function setAndCopySheetIndex() {
-    await setSheetCustomIndex(currentSheet);
-    const idx = tableData.sheets[currentSheet]?.customIndex;
+async function setAndCopySheetIndex(sheetIdx = currentSheet) {
+    await setSheetCustomIndex(sheetIdx);
+    const idx = tableData.sheets[sheetIdx]?.customIndex;
     if (!idx) return;
-    const sheetName = tableData.sheets[currentSheet]?.name || '';
+    const sheetName = tableData.sheets[sheetIdx]?.name || '';
     const copyText = `[[I:${idx}:${sheetName}]]`;
     try {
         await navigator.clipboard.writeText(copyText);
+        showToast(`Copied index: ${copyText}`, 'success');
     } catch (e) {
         const ta = document.createElement('textarea');
         ta.value = copyText;
@@ -4853,6 +4854,7 @@ async function setAndCopySheetIndex() {
         ta.focus(); ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
+        showToast(`Copied index: ${copyText}`, 'success');
     }
 }
 
@@ -6224,6 +6226,7 @@ async function addSheet() {
 
             renderSidebar();
             renderTable();
+            await setAndCopySheetIndex(currentSheet);
         }
     } catch (error) {
         console.error('Error adding sheet:', error);
@@ -6258,6 +6261,7 @@ async function addSubSheet(parentIndex) {
             await saveData();
             renderSidebar();
             renderTable();
+            await setAndCopySheetIndex(currentSheet);
             showToast(`Sub-sheet added under "${parentSheet.name}"`, 'success');
         }
     } catch (error) {
@@ -13425,6 +13429,7 @@ async function addF1Sheet() {
 
     await saveData();
     renderSidebar();
+    await setAndCopySheetIndex(newIndex);
     populateF1Categories();
     populateF1Sheets();
     showToast(`Sheet "${sheetName}" added`, 'success');
@@ -14782,6 +14787,7 @@ async function showAddSheetToCategory(category) {
 
             renderSidebar();
             renderTable();
+            await setAndCopySheetIndex(newIndex);
         }
     } catch (error) {
         console.error('Error adding sheet:', error);
