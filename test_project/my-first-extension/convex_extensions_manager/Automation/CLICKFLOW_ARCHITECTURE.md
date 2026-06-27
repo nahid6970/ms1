@@ -8,7 +8,7 @@ This document provides a comprehensive overview of the ClickFlow Automator Chrom
 ClickFlow is a Manifest V3 Chrome Extension designed for complex, sequential page automations. It consists of three primary modules:
 *   **Popup Window (`popup.html` / `popup.js`)**: The user control center where you create project profiles, manage automation configurations, configure standard or conditional steps, and trigger runs.
 *   **Content Script (`content.js`)**: The active runtime execution engine injected directly into target pages and same-origin frames. It executes step sequences, runs evaluations, handles page-load resume logic, and interfaces with the web DOM.
-*   **Background Worker (`background.js`)**: Operates as a light-weight relay. It handles notification dispatch, manages active element-picking states across tabs, and programmatically reopens the popup when element selection completes.
+*   **Background Worker (`background.js`)**: Operates as a light-weight relay. It handles notification dispatch, manages active element-picking states across tabs, programmatically reopens the popup when element selection completes, and dynamically manages the extension icon (blinking between green and red states when automation is running).
 
 ---
 
@@ -134,3 +134,9 @@ Chromium enforces a hard limit of `800px` width by `600px` height on popups. To 
 *   If picking for branches, it passes a composite token: `cond_stepId_condType_condIdx` or `substep_stepId_subStepType_subIdx`.
 *   `background.js` parses this token, traverses the correct nested JSON fields, performs the write, updates the active project in the `projects` list, and calls `chrome.action.openPopup()` to automatically bring the extension interface back to the foreground.
 *   The picker and selector resolution are frame-aware, so same-origin router iframes are included.
+
+### Icon Naming Convention & State
+*   **Idle**: `icon-16.png`, `icon-48.png`, `icon-128.png`
+*   **Running (Blink State 1)**: `icon-green-16.png`, `icon-green-48.png`, `icon-green-128.png`
+*   **Running (Blink State 2)**: `icon-red-16.png`, `icon-red-48.png`, `icon-red-128.png`
+*   The `background.js` script dynamically toggles between the green and red sets every 1 second when the automation state is `running`.
