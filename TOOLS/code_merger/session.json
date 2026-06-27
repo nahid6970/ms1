@@ -1,11 +1,7 @@
 {
   "backup": false,
   "preview": true,
-  "files": [
-    "C:\\@delta\\db\\@Convex\\image-share\\index.html",
-    "C:\\@delta\\db\\@Convex\\image-share\\convex\\images.ts",
-    "C:\\@delta\\db\\@Convex\\image-share\\convex\\tsconfig.json"
-  ],
+  "files": [],
   "project_root": "C:\\@delta\\db\\@Convex\\image-share",
   "minify": false,
   "file_modes": {

@@ -129,3 +129,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+// Update the extension icon state dynamically (running = green dot, idle = normal)
+function updateIconState(isRunning) {
+  if (!isRunning) {
+    // Reset to default paths
+    chrome.action.setIcon({
+      path: {
+        "16": "icons/clickflow-icon16.png",
+        "48": "icons/clickflow-icon48.png",
+        "128": "icons/clickflow-icon128.png"
+      }
+    });
+  } else {
+    // Set to running paths with green dot
+    chrome.action.setIcon({
+      path: {
+        "16": "icons/clickflow-icon16-running.png",
+        "48": "icons/clickflow-icon48-running.png",
+        "128": "icons/clickflow-icon128-running.png"
+      }
+    });
+  }
+}
+
+// Watch for automationState changes to update the icon
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.automationState) {
+    const status = changes.automationState.newValue?.status;
+    updateIconState(status === 'running');
+  }
+});
+
+// Initialize the icon state on background script startup
+chrome.storage.local.get('automationState', (data) => {
+  const status = data.automationState?.status;
+  updateIconState(status === 'running');
+});
+
