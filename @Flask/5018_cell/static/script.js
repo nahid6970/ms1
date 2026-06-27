@@ -13587,6 +13587,14 @@ function populateF1Sheets(searchAllCategories = false) {
                 populateF1Sheets(searchAllCategories);
             };
 
+            if (typeof sepVal === 'object' && sepVal.color) {
+                editBtn.style.color = sepVal.color;
+                editBtn.style.borderColor = sepVal.color;
+                deleteBtn.style.color = sepVal.color;
+                deleteBtn.style.borderColor = sepVal.color;
+                actions.style.borderColor = sepVal.color;
+            }
+
             actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
             separator.appendChild(actions);

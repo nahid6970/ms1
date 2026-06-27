@@ -3233,12 +3233,15 @@ tr {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    opacity: 0.5;
 }
 
 .f1-separator-btn:hover {
-    background: #00ff9d;
-    color: #000;
+    background: #00ff9d !important;
+    color: #000 !important;
+    border-color: #00ff9d !important;
     transform: scale(1.1);
+    opacity: 1;
 }
 
 .f1-sheet-item {
