@@ -4817,7 +4817,7 @@ function copySheetIndex() {
 async function setSheetCustomIndex(sheetIdx) {
     if (tableData.sheets[sheetIdx]?.customIndex) {
         showToast(`Index already set: ${tableData.sheets[sheetIdx].customIndex}`, 'error');
-        return;
+        return false;
     }
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
@@ -4831,21 +4831,25 @@ async function setSheetCustomIndex(sheetIdx) {
         if (response.ok) {
             tableData.sheets[sheetIdx].customIndex = customIndex;
             showToast(`Index set: ${customIndex}`, 'info');
+            return true;
         }
     } catch (err) {
         console.error('Failed to set custom index:', err);
     }
+    return false;
 }
 
 async function setAndCopySheetIndex(sheetIdx = currentSheet) {
-    await setSheetCustomIndex(sheetIdx);
+    const isNew = await setSheetCustomIndex(sheetIdx);
     const idx = tableData.sheets[sheetIdx]?.customIndex;
     if (!idx) return;
     const sheetName = tableData.sheets[sheetIdx]?.name || '';
     const copyText = `[[I:${idx}:${sheetName}]]`;
     try {
         await navigator.clipboard.writeText(copyText);
-        showToast(`Copied index: ${copyText}`, 'success');
+        if (isNew) {
+            showToast(`Copied index: ${copyText}`, 'success');
+        }
     } catch (e) {
         const ta = document.createElement('textarea');
         ta.value = copyText;
@@ -4854,7 +4858,9 @@ async function setAndCopySheetIndex(sheetIdx = currentSheet) {
         ta.focus(); ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        showToast(`Copied index: ${copyText}`, 'success');
+        if (isNew) {
+            showToast(`Copied index: ${copyText}`, 'success');
+        }
     }
 }
 
