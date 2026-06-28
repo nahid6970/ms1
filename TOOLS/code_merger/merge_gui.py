@@ -1204,22 +1204,62 @@ class SettingsDialog(QDialog):
 
         self.tabs = QTabWidget()
 
-        # --- TAB 1: IGNORE LIST ---
-        tab_ignore = QWidget()
-        v_ignore = QVBoxLayout(tab_ignore)
-        v_ignore.setContentsMargins(8, 8, 8, 8)
-        v_ignore.setSpacing(8)
+        # --- TAB 1: DISPLAY SIZES ---
+        tab_font = QWidget()
+        v_font = QVBoxLayout(tab_font)
+        v_font.setContentsMargins(8, 8, 8, 8)
+        v_font.setSpacing(12)
 
-        lbl_ignore = QLabel("Add extra extensions to ignore (comma-separated or on separate lines):")
-        lbl_ignore.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        v_ignore.addWidget(lbl_ignore)
+        lbl_font = QLabel("Adjust display settings:")
+        lbl_font.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_font.addWidget(lbl_font)
 
-        self.ignore_input = QTextEdit()
-        self.ignore_input.setPlaceholderText("e.g.\n.mp3, .mp4\n.ogg, .wav")
-        self.ignore_input.setPlainText(", ".join(sorted(self.custom_ignores)))
-        v_ignore.addWidget(self.ignore_input)
+        # Source Files List Font Size
+        h_font_settings = QHBoxLayout()
+        lbl_fs = QLabel("Source Files List Font Size (pt):")
+        lbl_fs.setStyleSheet(f"color: {CP_TEXT};")
 
-        self.tabs.addTab(tab_ignore, "🚫 IGNORE LIST")
+        self.spin_fs = QSpinBox()
+        self.spin_fs.setRange(6, 24)
+        self.spin_fs.setValue(self.font_size)
+        self.spin_fs.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        h_font_settings.addWidget(lbl_fs)
+        h_font_settings.addWidget(self.spin_fs)
+        h_font_settings.addStretch()
+
+        v_font.addLayout(h_font_settings)
+
+        # Extension Icon Display Size
+        h_icon_settings = QHBoxLayout()
+        lbl_is = QLabel("Extension Icon Display Size (px):")
+        lbl_is.setStyleSheet(f"color: {CP_TEXT};")
+
+        self.spin_is = QSpinBox()
+        self.spin_is.setRange(8, 48)
+        self.spin_is.setValue(self.icon_size)
+        self.spin_is.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        h_icon_settings.addWidget(lbl_is)
+        h_icon_settings.addWidget(self.spin_is)
+        h_icon_settings.addStretch()
+
+        v_font.addLayout(h_icon_settings)
+        v_font.addStretch()
+
+        self.tabs.addTab(tab_font, "🅰 DISPLAY SIZES")
 
         # --- TAB 2: EXTENSION ICONS ---
         tab_icons = QWidget()
@@ -1323,62 +1363,22 @@ class SettingsDialog(QDialog):
         for ext, icon_val in sorted(self.icons.items()):
             self._insert_table_row(ext, icon_val)
 
-        # --- TAB 3: DISPLAY SIZES ---
-        tab_font = QWidget()
-        v_font = QVBoxLayout(tab_font)
-        v_font.setContentsMargins(8, 8, 8, 8)
-        v_font.setSpacing(12)
+        # --- TAB 3: IGNORE LIST ---
+        tab_ignore = QWidget()
+        v_ignore = QVBoxLayout(tab_ignore)
+        v_ignore.setContentsMargins(8, 8, 8, 8)
+        v_ignore.setSpacing(8)
 
-        lbl_font = QLabel("Adjust display settings:")
-        lbl_font.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        v_font.addWidget(lbl_font)
+        lbl_ignore = QLabel("Add extra extensions to ignore (comma-separated or on separate lines):")
+        lbl_ignore.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_ignore.addWidget(lbl_ignore)
 
-        # Source Files List Font Size
-        h_font_settings = QHBoxLayout()
-        lbl_fs = QLabel("Source Files List Font Size (pt):")
-        lbl_fs.setStyleSheet(f"color: {CP_TEXT};")
+        self.ignore_input = QTextEdit()
+        self.ignore_input.setPlaceholderText("e.g.\n.mp3, .mp4\n.ogg, .wav")
+        self.ignore_input.setPlainText(", ".join(sorted(self.custom_ignores)))
+        v_ignore.addWidget(self.ignore_input)
 
-        self.spin_fs = QSpinBox()
-        self.spin_fs.setRange(6, 24)
-        self.spin_fs.setValue(self.font_size)
-        self.spin_fs.setStyleSheet(f"""
-            QSpinBox {{
-                background-color: {CP_PANEL};
-                color: {CP_CYAN};
-                border: 1px solid {CP_DIM};
-                padding: 4px;
-            }}
-        """)
-        h_font_settings.addWidget(lbl_fs)
-        h_font_settings.addWidget(self.spin_fs)
-        h_font_settings.addStretch()
-
-        v_font.addLayout(h_font_settings)
-
-        # Extension Icon Display Size
-        h_icon_settings = QHBoxLayout()
-        lbl_is = QLabel("Extension Icon Display Size (px):")
-        lbl_is.setStyleSheet(f"color: {CP_TEXT};")
-
-        self.spin_is = QSpinBox()
-        self.spin_is.setRange(8, 48)
-        self.spin_is.setValue(self.icon_size)
-        self.spin_is.setStyleSheet(f"""
-            QSpinBox {{
-                background-color: {CP_PANEL};
-                color: {CP_CYAN};
-                border: 1px solid {CP_DIM};
-                padding: 4px;
-            }}
-        """)
-        h_icon_settings.addWidget(lbl_is)
-        h_icon_settings.addWidget(self.spin_is)
-        h_icon_settings.addStretch()
-
-        v_font.addLayout(h_icon_settings)
-        v_font.addStretch()
-
-        self.tabs.addTab(tab_font, "🅰 DISPLAY SIZES")
+        self.tabs.addTab(tab_ignore, "🚫 IGNORE LIST")
 
         layout.addWidget(self.tabs)
 
