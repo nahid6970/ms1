@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import shutil
+import json
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -134,10 +135,9 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
-    import json
     try:
         if os.path.exists(SESSION_PATH):
-            with open(SESSION_PATH, 'r') as f:
+            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             if isinstance(data, dict):
                 ignores = data.get('custom_ignored_exts', [])
@@ -147,8 +147,8 @@ def load_settings():
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Error loading settings: {e}", file=sys.stderr)
 
 def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int):
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
@@ -160,7 +160,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
     try:
         data = {}
         if os.path.exists(SESSION_PATH):
-            with open(SESSION_PATH, 'r') as f:
+            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             if not isinstance(data, dict):
                 data = {}
@@ -168,10 +168,10 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
-        with open(SESSION_PATH, 'w') as f:
-            json.dump(data, f, indent=2)
-    except Exception:
-        pass
+        with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving settings: {e}", file=sys.stderr)
 
 
 def load_recent() -> list[str]:
@@ -1694,18 +1694,23 @@ class PrepTab(QWidget):
     def _save_session(self):
         import json
         try:
-            with open(SESSION_PATH, 'r') as f:
-                data = json.load(f)
-            if not isinstance(data, dict):
-                data = {}
+            data = {}
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if not isinstance(data, dict):
+                    data = {}
         except Exception:
             data = {}
         data['files'] = self.files
         data['project_root'] = self.project_root.strip()
         data['minify'] = self.chk_minify.isChecked()
         data['file_modes'] = self.file_modes
-        with open(SESSION_PATH, 'w') as f:
-            json.dump(data, f, indent=2)
+        try:
+            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error saving session: {e}", file=sys.stderr)
         self._sync_to_recent_projects()
 
     def _sync_to_recent_projects(self):
@@ -1733,24 +1738,27 @@ class PrepTab(QWidget):
     def _load_session(self):
         import json
         try:
-            with open(SESSION_PATH, 'r') as f:
-                data = json.load(f)
-            saved = data if isinstance(data, list) else data.get('files', [])
-            self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
-            if isinstance(data, dict):
-                self.chk_minify.setChecked(data.get('minify', False))
-                self.file_modes = data.get('file_modes', {})
-            for fp in saved:
-                if fp not in self.files and os.path.exists(fp):
-                    self.files.append(fp)
-                    self._add_file_item(fp)
-            if self.files:
-                self._update_root()
-                self.status_cb(f"Restored {len(self.files)} file(s) from last session")
-            elif self.project_root:
-                self._update_project_label()
-        except Exception:
-            pass
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                saved = data if isinstance(data, list) else data.get('files', [])
+                self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
+                if isinstance(data, dict):
+                    self.chk_minify.blockSignals(True)
+                    self.chk_minify.setChecked(data.get('minify', False))
+                    self.chk_minify.blockSignals(False)
+                    self.file_modes = data.get('file_modes', {})
+                for fp in saved:
+                    if fp not in self.files and os.path.exists(fp):
+                        self.files.append(fp)
+                        self._add_file_item(fp)
+                if self.files:
+                    self._update_root()
+                    self.status_cb(f"Restored {len(self.files)} file(s) from last session")
+                elif self.project_root:
+                    self._update_project_label()
+        except Exception as e:
+            print(f"Error loading session: {e}", file=sys.stderr)
 
     def _display_path(self, fp: str) -> str:
         root = self.project_root.strip()
@@ -2317,24 +2325,37 @@ class MergeTab(QWidget):
     def _save_prefs(self):
         import json
         try:
-            with open(SESSION_PATH, 'r') as f:
-                data = json.load(f)
+            data = {}
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if not isinstance(data, dict):
+                    data = {}
         except Exception:
             data = {}
         data['backup']  = self.chk_backup.isChecked()
         data['preview'] = self.chk_preview.isChecked()
-        with open(SESSION_PATH, 'w') as f:
-            json.dump(data, f, indent=2)
+        try:
+            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error saving prefs: {e}", file=sys.stderr)
 
     def _load_prefs(self):
         import json
         try:
-            with open(SESSION_PATH, 'r') as f:
-                data = json.load(f)
-            if 'backup'  in data: self.chk_backup.setChecked(data['backup'])
-            if 'preview' in data: self.chk_preview.setChecked(data['preview'])
-        except Exception:
-            pass
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    self.chk_backup.blockSignals(True)
+                    self.chk_preview.blockSignals(True)
+                    if 'backup'  in data: self.chk_backup.setChecked(data['backup'])
+                    if 'preview' in data: self.chk_preview.setChecked(data['preview'])
+                    self.chk_backup.blockSignals(False)
+                    self.chk_preview.blockSignals(False)
+        except Exception as e:
+            print(f"Error loading prefs: {e}", file=sys.stderr)
 
     def _build(self):
         layout = QVBoxLayout(self)
