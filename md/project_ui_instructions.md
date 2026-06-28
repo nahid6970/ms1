@@ -18,6 +18,7 @@ Whenever you are asked to generate or bootstrap a new HTML or Python project (e.
 - There MUST be a dedicated section inside the Settings Menu specifically for **Customizing Buttons**.
 - This interface must allow the user to modify the appearance of *each and every button* present in the project.
 - It must provide a text area or input field allowing the user to **paste raw SVG code** directly to replace or add icons to the buttons (do not ask for SVG file uploads).
+- **IMPORTANT**: Do NOT add or generate any SVG icons for the buttons initially (except the gear icon for settings). Leave the buttons text-only or use simple defaults, as the user will paste their own SVGs later. Generating SVGs initially wastes time and causes confusion.
 
 ## 4. Dynamic UI Architecture
 - To support this customization, structure the project so that button configurations (including their raw SVG markup, colors, and styles) are managed centrally (e.g., using a state object in JS, a config dictionary in Python, or dynamic DOM insertion).
