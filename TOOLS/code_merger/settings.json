@@ -14,6 +14,10 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\db\\@Convex\\image-share",
+      "name": "Convex - Gallery"
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Tool - Code Manager"
     },
@@ -32,10 +36,6 @@
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
       "name": "Tool - Nerd Icon Cnverter"
-    },
-    {
-      "path": "C:\\@delta\\db\\@Convex\\image-share",
-      "name": "Convex - Gallery"
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
