@@ -97,7 +97,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/clickflow-icon128.png',
+      iconUrl: 'icons/icon-128.png',
       title,
       message: messageText
     }, () => {
@@ -116,7 +116,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/clickflow-icon128.png',
+      iconUrl: 'icons/icon-128.png',
       title,
       message: messageText
     }, () => {
