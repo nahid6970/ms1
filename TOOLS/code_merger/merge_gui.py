@@ -8,10 +8,11 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QTextEdit, QTabWidget, QGroupBox,
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
-    QDialog, QScrollArea, QGridLayout, QComboBox
+    QDialog, QScrollArea, QGridLayout, QComboBox, QTableWidget,
+    QTableWidgetItem, QHeaderView, QSpinBox
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent
-from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
@@ -94,25 +95,53 @@ IGNORE_EXTS = {
 }
 
 CUSTOM_IGNORED_EXTS = set()
+EXTENSION_ICONS = {}
+SOURCE_FILES_FONT_SIZE = 9
 
-def load_custom_ignores():
-    global CUSTOM_IGNORED_EXTS
+try:
+    from PyQt6.QtSvg import QSvgRenderer
+    HAS_SVG = True
+except ImportError:
+    HAS_SVG = False
+
+def load_svg_icon(path: str, size: int = 16) -> QPixmap:
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    if HAS_SVG and os.path.exists(path):
+        try:
+            renderer = QSvgRenderer(path)
+            painter = QPainter(pixmap)
+            renderer.render(painter)
+            painter.end()
+        except Exception:
+            pass
+    elif os.path.exists(path):
+        pixmap.load(path)
+    return pixmap
+
+def load_settings():
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE
     import json
     try:
         if os.path.exists(SESSION_PATH):
             with open(SESSION_PATH, 'r') as f:
                 data = json.load(f)
-            ignores = data.get('custom_ignored_exts', [])
-            CUSTOM_IGNORED_EXTS = set(ignores)
-            IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+            if isinstance(data, dict):
+                ignores = data.get('custom_ignored_exts', [])
+                CUSTOM_IGNORED_EXTS = set(ignores)
+                IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+                
+                EXTENSION_ICONS = data.get('extension_icons', {})
+                SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
     except Exception:
         pass
 
-def save_custom_ignores(ignores: list[str]):
-    global CUSTOM_IGNORED_EXTS
-    import json
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int):
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+    EXTENSION_ICONS = icons
+    SOURCE_FILES_FONT_SIZE = font_size
     try:
         data = {}
         if os.path.exists(SESSION_PATH):
@@ -121,6 +150,8 @@ def save_custom_ignores(ignores: list[str]):
             if not isinstance(data, dict):
                 data = {}
         data['custom_ignored_exts'] = list(CUSTOM_IGNORED_EXTS)
+        data['extension_icons'] = EXTENSION_ICONS
+        data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
     except Exception:
@@ -1135,27 +1166,141 @@ class ExtensionSelectorDialog(QDialog):
         return {ext for ext, chk in self.checkboxes.items() if chk.isChecked()}
 
 
-# ── IGNORE LIST DIALOG ───────────────────────────────────────────────────────
-class IgnoreListDialog(QDialog):
-    def __init__(self, current_custom: list[str], parent=None):
+# ── SETTINGS DIALOG ──────────────────────────────────────────────────────────
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("CUSTOM IGNORE EXTENSIONS")
-        self.resize(460, 260)
+        self.setWindowTitle("SETTINGS")
+        self.resize(550, 420)
         self.setStyleSheet(THEME)
 
+        self.custom_ignores = list(CUSTOM_IGNORED_EXTS)
+        self.icons = dict(EXTENSION_ICONS)
+        self.font_size = SOURCE_FILES_FONT_SIZE
+
+        self._build()
+
+    def _build(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(10)
 
-        lbl = QLabel("Add extra extensions to ignore (comma-separated or on separate lines):")
-        lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        layout.addWidget(lbl)
+        self.tabs = QTabWidget()
 
-        self.input_field = QTextEdit()
-        self.input_field.setPlaceholderText("e.g.\n.mp3, .mp4\n.ogg, .wav")
-        self.input_field.setPlainText(", ".join(sorted(current_custom)))
-        layout.addWidget(self.input_field, 1)
+        # --- TAB 1: IGNORE LIST ---
+        tab_ignore = QWidget()
+        v_ignore = QVBoxLayout(tab_ignore)
+        v_ignore.setContentsMargins(8, 8, 8, 8)
+        v_ignore.setSpacing(8)
 
+        lbl_ignore = QLabel("Add extra extensions to ignore (comma-separated or on separate lines):")
+        lbl_ignore.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_ignore.addWidget(lbl_ignore)
+
+        self.ignore_input = QTextEdit()
+        self.ignore_input.setPlaceholderText("e.g.\n.mp3, .mp4\n.ogg, .wav")
+        self.ignore_input.setPlainText(", ".join(sorted(self.custom_ignores)))
+        v_ignore.addWidget(self.ignore_input)
+
+        self.tabs.addTab(tab_ignore, "🚫 IGNORE LIST")
+
+        # --- TAB 2: EXTENSION ICONS ---
+        tab_icons = QWidget()
+        v_icons = QVBoxLayout(tab_icons)
+        v_icons.setContentsMargins(8, 8, 8, 8)
+        v_icons.setSpacing(8)
+
+        lbl_icons = QLabel("Map file extensions to SVG icons:")
+        lbl_icons.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_icons.addWidget(lbl_icons)
+
+        # Table of icons
+        self.table = QTableWidget(0, 2)
+        self.table.setHorizontalHeaderLabels(["Extension", "SVG Icon Path"])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.table.setColumnWidth(0, 120)
+        self.table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {CP_PANEL};
+                gridline-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+            QHeaderView::section {{
+                background-color: {CP_PANEL};
+                color: {CP_YELLOW};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+            QTableWidget::item:selected {{
+                background-color: #1a3a3a;
+                color: {CP_CYAN};
+            }}
+        """)
+        v_icons.addWidget(self.table)
+
+        # Row with Add / Delete buttons
+        h_btn = QHBoxLayout()
+        btn_add = QPushButton("＋ ADD ICON MAPPING")
+        btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_add.clicked.connect(self._add_row)
+
+        btn_delete = QPushButton("✕ DELETE SELECTED")
+        btn_delete.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_delete.clicked.connect(self._delete_row)
+
+        h_btn.addWidget(btn_add)
+        h_btn.addWidget(btn_delete)
+        v_icons.addLayout(h_btn)
+
+        self.tabs.addTab(tab_icons, "🎨 EXTENSION ICONS")
+
+        # Populate table
+        for ext, path in sorted(self.icons.items()):
+            self._insert_table_row(ext, path)
+
+        # --- TAB 3: FONT SIZE ---
+        tab_font = QWidget()
+        v_font = QVBoxLayout(tab_font)
+        v_font.setContentsMargins(8, 8, 8, 8)
+        v_font.setSpacing(12)
+
+        lbl_font = QLabel("Adjust display settings:")
+        lbl_font.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_font.addWidget(lbl_font)
+
+        h_font_settings = QHBoxLayout()
+        lbl_fs = QLabel("Source Files List Font Size (pt):")
+        lbl_fs.setStyleSheet(f"color: {CP_TEXT};")
+
+        self.spin_fs = QSpinBox()
+        self.spin_fs.setRange(6, 24)
+        self.spin_fs.setValue(self.font_size)
+        self.spin_fs.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        h_font_settings.addWidget(lbl_fs)
+        h_font_settings.addWidget(self.spin_fs)
+        h_font_settings.addStretch()
+
+        v_font.addLayout(h_font_settings)
+        v_font.addStretch()
+
+        self.tabs.addTab(tab_font, "🅰 FONT SIZE")
+
+        layout.addWidget(self.tabs)
+
+        # Bottom save/cancel buttons
         btn_row = QHBoxLayout()
         btn_ok = QPushButton("✔ SAVE")
         btn_cancel = QPushButton("✕ CANCEL")
@@ -1167,25 +1312,103 @@ class IgnoreListDialog(QDialog):
         btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
                                  f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
 
-        btn_ok.clicked.connect(self.accept)
+        btn_ok.clicked.connect(self._on_save)
         btn_cancel.clicked.connect(self.reject)
         btn_row.addStretch()
         btn_row.addWidget(btn_ok)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
 
-    def get_extensions(self) -> list[str]:
-        raw = self.input_field.toPlainText()
-        exts = []
-        # Support splitting by both commas and newlines
-        parts = raw.replace('\n', ',').split(',')
+        btn_add.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
+                padding: 4px 10px; font-weight: bold; font-family: 'Consolas'; font-size: 9pt;
+            }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        """)
+        btn_delete.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM}; border: 1px solid {CP_RED}; color: {CP_RED};
+                padding: 4px 10px; font-weight: bold; font-family: 'Consolas'; font-size: 9pt;
+            }}
+            QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
+        """)
+
+    def _insert_table_row(self, ext: str = "", path: str = ""):
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+
+        ext_item = QTableWidgetItem(ext)
+        ext_item.setFont(QFont("Consolas", 10))
+        self.table.setItem(row, 0, ext_item)
+
+        widget = QWidget()
+        hl = QHBoxLayout(widget)
+        hl.setContentsMargins(2, 2, 2, 2)
+        hl.setSpacing(4)
+
+        path_input = QLineEdit(path)
+        path_input.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM};")
+        path_input.setFont(QFont("Consolas", 9))
+
+        btn_browse = QPushButton("📁")
+        btn_browse.setFixedWidth(28)
+        btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_browse.setStyleSheet(f"QPushButton {{ background-color: {CP_DIM}; padding: 2px; }}")
+        btn_browse.clicked.connect(lambda _, inp=path_input: self._browse_svg(inp))
+
+        hl.addWidget(path_input, 1)
+        hl.addWidget(btn_browse, 0)
+
+        self.table.setCellWidget(row, 1, widget)
+
+    def _browse_svg(self, line_edit: QLineEdit):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select SVG Icon", "", "SVG Files (*.svg)")
+        if file_path:
+            line_edit.setText(os.path.normpath(file_path))
+
+    def _add_row(self):
+        self._insert_table_row("", "")
+
+    def _delete_row(self):
+        curr_row = self.table.currentRow()
+        if curr_row >= 0:
+            self.table.removeRow(curr_row)
+
+    def _get_icon_mappings(self) -> dict[str, str]:
+        mappings = {}
+        for row in range(self.table.rowCount()):
+            ext_item = self.table.item(row, 0)
+            ext = ext_item.text().strip().lower() if ext_item else ""
+            if not ext:
+                continue
+            if not ext.startswith('.'):
+                ext = '.' + ext
+
+            cell_widget = self.table.cellWidget(row, 1)
+            if cell_widget:
+                path_input = cell_widget.findChild(QLineEdit)
+                path = path_input.text().strip() if path_input else ""
+                if path:
+                    mappings[ext] = path
+        return mappings
+
+    def _on_save(self):
+        raw_ignores = self.ignore_input.toPlainText()
+        ignores = []
+        parts = raw_ignores.replace('\n', ',').split(',')
         for x in parts:
             cleaned = x.strip().lower()
             if cleaned:
                 if not cleaned.startswith('.'):
                     cleaned = '.' + cleaned
-                exts.append(cleaned)
-        return exts
+                ignores.append(cleaned)
+
+        icons = self._get_icon_mappings()
+        font_size = self.spin_fs.value()
+
+        save_settings(ignores, icons, font_size)
+        self.accept()
 
 
 # ── PREP TAB ──────────────────────────────────────────────────────────────────
@@ -1492,8 +1715,21 @@ class PrepTab(QWidget):
             lbl_color = CP_TEXT
             tooltip.append("Could not read file size details")
 
-        lbl.setStyleSheet(f"color: {lbl_color}; background: transparent; font-size: 9pt;")
+        lbl.setStyleSheet(f"color: {lbl_color}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
         lbl.setToolTip("\n".join(tooltip))
+
+        # SVG icon support if configured
+        ext = os.path.splitext(fp)[1].lower()
+        icon_lbl = None
+        if ext in EXTENSION_ICONS:
+            svg_path = EXTENSION_ICONS[ext]
+            if os.path.exists(svg_path):
+                pix = load_svg_icon(svg_path, 16)
+                if not pix.isNull():
+                    icon_lbl = QLabel()
+                    icon_lbl.setPixmap(pix)
+                    icon_lbl.setFixedSize(16, 16)
+                    icon_lbl.setStyleSheet("background: transparent;")
 
         mode_combo = QComboBox()
         mode_combo.addItems(["Full", "Outline"])
@@ -1539,6 +1775,8 @@ class PrepTab(QWidget):
         """)
         btn_rem.clicked.connect(lambda _, f=fp, it=item: self._remove_file(f, it))
 
+        if icon_lbl:
+            hl.addWidget(icon_lbl, 0)
         hl.addWidget(lbl, 1)
         hl.addWidget(mode_combo, 0)
         hl.addWidget(btn_rem, 0)
@@ -2262,9 +2500,9 @@ class MainWindow(QMainWindow):
         corner_layout.setContentsMargins(0, 2, 8, 2)
         corner_layout.setSpacing(6)
 
-        btn_ignore = QPushButton("⚙ IGNORE LIST")
-        btn_ignore.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_ignore.setStyleSheet(f"""
+        btn_settings = QPushButton("⚙ SETTINGS")
+        btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_settings.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_PANEL};
                 color: {CP_SUB};
@@ -2280,7 +2518,7 @@ class MainWindow(QMainWindow):
                 background-color: {CP_BG};
             }}
         """)
-        btn_ignore.clicked.connect(self._manage_ignores)
+        btn_settings.clicked.connect(self._open_settings)
 
         btn_restart = QPushButton("↺ RESTART")
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -2305,7 +2543,7 @@ class MainWindow(QMainWindow):
         """)
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
 
-        corner_layout.addWidget(btn_ignore)
+        corner_layout.addWidget(btn_settings)
         corner_layout.addWidget(btn_restart)
         self.tabs.setCornerWidget(corner_widget, Qt.Corner.TopRightCorner)
 
@@ -2317,19 +2555,18 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.command_tab, "💻  COMMAND ( runner )")
         root_layout.addWidget(self.tabs)
 
-    def _manage_ignores(self):
-        dialog = IgnoreListDialog(list(CUSTOM_IGNORED_EXTS), self)
+    def _open_settings(self):
+        dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            new_exts = dialog.get_extensions()
-            save_custom_ignores(new_exts)
-            self._set_status(f"Updated ignore list with {len(new_exts)} custom extension(s)")
+            self.prep_tab._refresh_file_items()
+            self._set_status(f"Settings saved. Applied new font size ({SOURCE_FILES_FONT_SIZE}pt) and icon mappings.")
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
 
 
 if __name__ == "__main__":
-    load_custom_ignores()
+    load_settings()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     w = MainWindow()
