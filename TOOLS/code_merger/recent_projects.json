@@ -2,13 +2,37 @@
   {
     "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\recent_projects.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\session.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
     ],
     "extensions": [
+      "",
+      ".json",
+      ".md",
       ".py"
     ],
-    "clicks": 18,
+    "clicks": 28,
     "name": "Tool - Code Manager"
+  },
+  {
+    "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
+    "files": [
+      "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py",
+      "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\UI_VISUAL_ROADMAP.md"
+    ],
+    "extensions": [
+      ".py",
+      ".md"
+    ],
+    "clicks": 3,
+    "name": "AHK - Button Generator"
   },
   {
     "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
@@ -171,19 +195,6 @@
     ],
     "clicks": 0,
     "name": "Flask - FIFA"
-  },
-  {
-    "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
-    "files": [
-      "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py",
-      "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\UI_VISUAL_ROADMAP.md"
-    ],
-    "extensions": [
-      ".py",
-      ".md"
-    ],
-    "clicks": 0,
-    "name": "AHK - Button Generator"
   },
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",

@@ -97,6 +97,7 @@ IGNORE_EXTS = {
 CUSTOM_IGNORED_EXTS = set()
 EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
+EXTENSION_ICON_SIZE = 16
 
 try:
     from PyQt6.QtSvg import QSvgRenderer
@@ -132,7 +133,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
     return pixmap
 
 def load_settings():
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
     import json
     try:
         if os.path.exists(SESSION_PATH):
@@ -145,15 +146,17 @@ def load_settings():
                 
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
+                EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
     except Exception:
         pass
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int):
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int):
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
+    EXTENSION_ICON_SIZE = icon_size
     try:
         data = {}
         if os.path.exists(SESSION_PATH):
@@ -164,6 +167,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int):
         data['custom_ignored_exts'] = list(CUSTOM_IGNORED_EXTS)
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
+        data['extension_icon_size'] = EXTENSION_ICON_SIZE
         with open(SESSION_PATH, 'w') as f:
             json.dump(data, f, indent=2)
     except Exception:
@@ -1183,12 +1187,13 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("SETTINGS")
-        self.resize(550, 420)
+        self.resize(550, 480)
         self.setStyleSheet(THEME)
 
         self.custom_ignores = list(CUSTOM_IGNORED_EXTS)
         self.icons = dict(EXTENSION_ICONS)
         self.font_size = SOURCE_FILES_FONT_SIZE
+        self.icon_size = EXTENSION_ICON_SIZE
 
         self._build()
 
@@ -1222,13 +1227,46 @@ class SettingsDialog(QDialog):
         v_icons.setContentsMargins(8, 8, 8, 8)
         v_icons.setSpacing(8)
 
-        lbl_icons = QLabel("Map file extensions to SVG icons:")
+        lbl_icons = QLabel("Map file extensions to SVG icons / Nerd Font / Emojis:")
         lbl_icons.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         v_icons.addWidget(lbl_icons)
 
+        # Quick Add Form (With 2 fields: Extension name and Icon input field)
+        form_widget = QWidget()
+        form_layout = QHBoxLayout(form_widget)
+        form_layout.setContentsMargins(0, 0, 0, 4)
+        form_layout.setSpacing(6)
+
+        self.input_ext = QLineEdit()
+        self.input_ext.setPlaceholderText(".ext (e.g., .py)")
+        self.input_ext.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+
+        self.input_icon = QLineEdit()
+        self.input_icon.setPlaceholderText("Emoji, Nerd Font, or SVG XML...")
+        self.input_icon.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+
+        btn_form_add = QPushButton("＋ ADD")
+        btn_form_add.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_form_add.clicked.connect(self._add_from_form)
+        btn_form_add.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
+                padding: 4px 12px; font-weight: bold; font-family: 'Consolas'; font-size: 9pt;
+            }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        """)
+
+        form_layout.addWidget(QLabel("Ext:"), 0)
+        form_layout.addWidget(self.input_ext, 1)
+        form_layout.addWidget(QLabel("Icon:"), 0)
+        form_layout.addWidget(self.input_icon, 2)
+        form_layout.addWidget(btn_form_add, 0)
+
+        v_icons.addWidget(form_widget)
+
         # Table of icons
         self.table = QTableWidget(0, 2)
-        self.table.setHorizontalHeaderLabels(["Extension", "SVG Icon Path"])
+        self.table.setHorizontalHeaderLabels(["Extension", "Icon Value"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.table.setColumnWidth(0, 120)
@@ -1258,7 +1296,7 @@ class SettingsDialog(QDialog):
 
         # Row with Add / Delete buttons
         h_btn = QHBoxLayout()
-        btn_add = QPushButton("＋ ADD ICON MAPPING")
+        btn_add = QPushButton("＋ ADD BLANK ROW")
         btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add.clicked.connect(self._add_row)
 
@@ -1276,7 +1314,7 @@ class SettingsDialog(QDialog):
         for ext, icon_val in sorted(self.icons.items()):
             self._insert_table_row(ext, icon_val)
 
-        # --- TAB 3: FONT SIZE ---
+        # --- TAB 3: DISPLAY SIZES ---
         tab_font = QWidget()
         v_font = QVBoxLayout(tab_font)
         v_font.setContentsMargins(8, 8, 8, 8)
@@ -1286,6 +1324,7 @@ class SettingsDialog(QDialog):
         lbl_font.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         v_font.addWidget(lbl_font)
 
+        # Source Files List Font Size
         h_font_settings = QHBoxLayout()
         lbl_fs = QLabel("Source Files List Font Size (pt):")
         lbl_fs.setStyleSheet(f"color: {CP_TEXT};")
@@ -1306,9 +1345,31 @@ class SettingsDialog(QDialog):
         h_font_settings.addStretch()
 
         v_font.addLayout(h_font_settings)
+
+        # Extension Icon Display Size
+        h_icon_settings = QHBoxLayout()
+        lbl_is = QLabel("Extension Icon Display Size (px):")
+        lbl_is.setStyleSheet(f"color: {CP_TEXT};")
+
+        self.spin_is = QSpinBox()
+        self.spin_is.setRange(8, 48)
+        self.spin_is.setValue(self.icon_size)
+        self.spin_is.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        h_icon_settings.addWidget(lbl_is)
+        h_icon_settings.addWidget(self.spin_is)
+        h_icon_settings.addStretch()
+
+        v_font.addLayout(h_icon_settings)
         v_font.addStretch()
 
-        self.tabs.addTab(tab_font, "🅰 FONT SIZE")
+        self.tabs.addTab(tab_font, "🅰 DISPLAY SIZES")
 
         layout.addWidget(self.tabs)
 
@@ -1345,6 +1406,35 @@ class SettingsDialog(QDialog):
             }}
             QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
         """)
+
+    def _add_from_form(self):
+        ext = self.input_ext.text().strip()
+        icon = self.input_icon.text().strip()
+        if not ext:
+            return
+        if not ext.startswith('.'):
+            ext = '.' + ext
+        if not icon:
+            return
+        
+        # Check if already exists in table, if so update it
+        exists = False
+        for r in range(self.table.rowCount()):
+            ext_item = self.table.item(r, 0)
+            if ext_item and ext_item.text().strip().lower() == ext.lower():
+                cell_widget = self.table.cellWidget(r, 1)
+                if cell_widget:
+                    val_input = cell_widget.findChild(QLineEdit)
+                    if val_input:
+                        val_input.setText(icon)
+                exists = True
+                break
+        
+        if not exists:
+            self._insert_table_row(ext, icon)
+            
+        self.input_ext.clear()
+        self.input_icon.clear()
 
     def _insert_table_row(self, ext: str = "", icon_value: str = ""):
         row = self.table.rowCount()
@@ -1456,8 +1546,9 @@ class SettingsDialog(QDialog):
 
         icons = self._get_icon_mappings()
         font_size = self.spin_fs.value()
+        icon_size = self.spin_is.value()
 
-        save_settings(ignores, icons, font_size)
+        save_settings(ignores, icons, font_size, icon_size)
         self.accept()
 
 
@@ -1774,11 +1865,11 @@ class PrepTab(QWidget):
         if ext in EXTENSION_ICONS:
             icon_value = EXTENSION_ICONS[ext]
             if icon_value:
-                pix = render_extension_icon(icon_value, 16)
+                pix = render_extension_icon(icon_value, EXTENSION_ICON_SIZE)
                 if not pix.isNull():
                     icon_lbl = QLabel()
                     icon_lbl.setPixmap(pix)
-                    icon_lbl.setFixedSize(16, 16)
+                    icon_lbl.setFixedSize(EXTENSION_ICON_SIZE, EXTENSION_ICON_SIZE)
                     icon_lbl.setStyleSheet("background: transparent;")
 
         mode_combo = QComboBox()
@@ -1831,7 +1922,8 @@ class PrepTab(QWidget):
         hl.addWidget(mode_combo, 0)
         hl.addWidget(btn_rem, 0)
 
-        item.setSizeHint(QSize(100, 22))
+        item_height = max(22, EXTENSION_ICON_SIZE + 4, SOURCE_FILES_FONT_SIZE + 10)
+        item.setSizeHint(QSize(100, item_height))
         self.file_list.addItem(item)
         self.file_list.setItemWidget(item, widget)
         self._update_file_item_texts()
@@ -2609,7 +2701,7 @@ class MainWindow(QMainWindow):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.prep_tab._refresh_file_items()
-            self._set_status(f"Settings saved. Applied new font size ({SOURCE_FILES_FONT_SIZE}pt) and icon mappings.")
+            self._set_status(f"Settings saved. Applied new font size ({SOURCE_FILES_FONT_SIZE}pt), icon mappings, and icon size ({EXTENSION_ICON_SIZE}px).")
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
