@@ -1,9 +1,7 @@
 {
   "backup": false,
   "preview": true,
-  "files": [
-    "C:\\Users\\nahid\\Desktop\\New folder\\project_ui_instructions.md"
-  ],
+  "files": [],
   "project_root": "C:\\Users\\nahid\\Desktop\\New folder",
   "minify": false,
   "file_modes": {
