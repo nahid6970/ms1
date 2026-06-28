@@ -1,8 +1,10 @@
 {
   "backup": false,
   "preview": true,
-  "files": [],
-  "project_root": "C:\\@delta\\db\\@Convex\\image-share",
+  "files": [
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py"
+  ],
+  "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
   "minify": false,
   "file_modes": {
     "C:\\@delta\\db\\fifa\\app.py": "Outline",

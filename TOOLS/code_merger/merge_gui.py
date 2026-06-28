@@ -821,9 +821,9 @@ class RecentPopup(QFrame):
             btn_load_all.setToolTip("Re-scan directory and load ALL non-ignored files, updating project in JSON")
             btn_load_all.clicked.connect(lambda _, p=path: (self.close(), self.on_load_all(p)))
 
-            btn_rem  = QPushButton("✕")
+            btn_rem  = QPushButton("✕  ")
             btn_rem.setObjectName("remove")
-            btn_rem.setFixedWidth(28)
+            btn_rem.setFixedWidth(50)
             btn_rem.clicked.connect(lambda _, p=path: (self.close(), self.on_remove(p)))
 
             hl.addWidget(btn_load)

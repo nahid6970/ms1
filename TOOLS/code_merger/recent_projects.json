@@ -1,5 +1,38 @@
 [
   {
+    "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+    "files": [
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py"
+    ],
+    "extensions": [
+      ".py"
+    ],
+    "clicks": 15,
+    "name": "Tool - Code Manager"
+  },
+  {
+    "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
+    "files": [
+      "C:\\@delta\\ms1\\TOOLS\\Image folder mover\\image_folder_mover.py"
+    ],
+    "extensions": [
+      ".py"
+    ],
+    "clicks": 6,
+    "name": "Tool - Image Mover"
+  },
+  {
+    "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
+    "files": [
+      "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon\\nerdfont_icon_converter.py"
+    ],
+    "extensions": [
+      ".py"
+    ],
+    "clicks": 6,
+    "name": "Tool - Nerd Icon Cnverter"
+  },
+  {
     "path": "C:\\@delta\\db\\@Convex\\image-share",
     "files": [
       "C:\\@delta\\db\\@Convex\\image-share\\index.html",
@@ -17,17 +50,6 @@
     ],
     "clicks": 39,
     "name": "Convex - Gallery"
-  },
-  {
-    "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-    "files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py"
-    ],
-    "extensions": [
-      ".py"
-    ],
-    "clicks": 6,
-    "name": "Tool - Code Manager"
   },
   {
     "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
