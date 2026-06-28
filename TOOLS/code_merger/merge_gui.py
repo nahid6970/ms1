@@ -2389,17 +2389,8 @@ class MergeTab(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
 
-        # Root dir
-        grp_root = QGroupBox("PROJECT ROOT DIRECTORY")
-        hr = QHBoxLayout(grp_root)
+        # Silently keep root_input for internal path resolution
         self.root_input = QLineEdit()
-        self.root_input.setPlaceholderText("Directory that contains your source files…")
-        btn_browse = QPushButton("📁 BROWSE")
-        btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_browse.clicked.connect(self._browse_root)
-        hr.addWidget(self.root_input)
-        hr.addWidget(btn_browse)
-        layout.addWidget(grp_root)
 
         # AI response input
         grp_resp = QGroupBox("AI RESPONSE  (paste here — supports multiple partial blocks)")
@@ -2452,11 +2443,6 @@ class MergeTab(QWidget):
         layout.addWidget(grp_res)
 
         self._pending_changes: list[dict] = []
-
-    def _browse_root(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Project Root")
-        if d:
-            self.set_root(d)
 
     def set_root(self, path: str):
         self.root_input.setText(path)
@@ -2554,18 +2540,6 @@ class CommandTab(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
 
-        # Directory Row
-        grp_dir = QGroupBox("WORKING DIRECTORY")
-        hd = QHBoxLayout(grp_dir)
-        self.dir_input = QLineEdit()
-        self.dir_input.setPlaceholderText("Directory to run command in (defaults to Project Root)…")
-        btn_browse = QPushButton("📁 BROWSE")
-        btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_browse.clicked.connect(self._browse_dir)
-        hd.addWidget(self.dir_input)
-        hd.addWidget(btn_browse)
-        layout.addWidget(grp_dir)
-
         # Command Row
         grp_cmd = QGroupBox("COMMAND INPUT")
         hc = QHBoxLayout(grp_cmd)
@@ -2598,23 +2572,14 @@ class CommandTab(QWidget):
         
         layout.addWidget(grp_res, 1)
 
-    def _browse_dir(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Working Directory")
-        if d:
-            self.dir_input.setText(d)
-
     def _run_cmd(self):
         self.output_text.clear()
         self.status_cb("Running command…")
         
-        d = self.dir_input.text().strip()
-        if not d:
-            d = self.get_root_fn()
-            self.dir_input.setText(d)
-            
+        d = self.get_root_fn()
         if not d or not os.path.isdir(d):
-            self.status_cb("⚠ Invalid working directory")
-            self.output_text.setPlainText("Error: Invalid working directory")
+            self.status_cb("⚠ Invalid project root directory")
+            self.output_text.setPlainText("Error: Invalid project root directory. Please load a project in the Prep tab.")
             return
             
         cmd = self.cmd_input.text().strip()
