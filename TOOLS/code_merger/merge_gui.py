@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QDialog, QScrollArea, QGridLayout, QComboBox, QTableWidget,
     QTableWidgetItem, QHeaderView, QSpinBox
 )
-from PyQt6.QtCore import Qt, QPoint, QSize, QEvent
+from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
@@ -104,19 +104,31 @@ try:
 except ImportError:
     HAS_SVG = False
 
-def load_svg_icon(path: str, size: int = 16) -> QPixmap:
+def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
     pixmap = QPixmap(size, size)
     pixmap.fill(Qt.GlobalColor.transparent)
-    if HAS_SVG and os.path.exists(path):
-        try:
-            renderer = QSvgRenderer(path)
-            painter = QPainter(pixmap)
-            renderer.render(painter)
-            painter.end()
-        except Exception:
-            pass
-    elif os.path.exists(path):
-        pixmap.load(path)
+    
+    icon_data = icon_data.strip()
+    if not icon_data:
+        return pixmap
+        
+    if icon_data.startswith("<") and "svg" in icon_data.lower():
+        if HAS_SVG:
+            try:
+                renderer = QSvgRenderer(QByteArray(icon_data.encode('utf-8')))
+                painter = QPainter(pixmap)
+                renderer.render(painter)
+                painter.end()
+            except Exception:
+                pass
+    else:
+        painter = QPainter(pixmap)
+        font = QFont()
+        font.setPixelSize(size - 2)
+        painter.setFont(font)
+        painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, icon_data)
+        painter.end()
+        
     return pixmap
 
 def load_settings():
@@ -1261,8 +1273,8 @@ class SettingsDialog(QDialog):
         self.tabs.addTab(tab_icons, "🎨 EXTENSION ICONS")
 
         # Populate table
-        for ext, path in sorted(self.icons.items()):
-            self._insert_table_row(ext, path)
+        for ext, icon_val in sorted(self.icons.items()):
+            self._insert_table_row(ext, icon_val)
 
         # --- TAB 3: FONT SIZE ---
         tab_font = QWidget()
@@ -1334,7 +1346,7 @@ class SettingsDialog(QDialog):
             QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
         """)
 
-    def _insert_table_row(self, ext: str = "", path: str = ""):
+    def _insert_table_row(self, ext: str = "", icon_value: str = ""):
         row = self.table.rowCount()
         self.table.insertRow(row)
 
@@ -1347,25 +1359,63 @@ class SettingsDialog(QDialog):
         hl.setContentsMargins(2, 2, 2, 2)
         hl.setSpacing(4)
 
-        path_input = QLineEdit(path)
-        path_input.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM};")
-        path_input.setFont(QFont("Consolas", 9))
+        val_input = QLineEdit(icon_value)
+        val_input.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM};")
+        val_input.setFont(QFont("Consolas", 9))
+        val_input.setToolTip("Enter an Emoji, Nerd Font character, or raw SVG XML code.")
 
-        btn_browse = QPushButton("📁")
-        btn_browse.setFixedWidth(28)
-        btn_browse.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_browse.setStyleSheet(f"QPushButton {{ background-color: {CP_DIM}; padding: 2px; }}")
-        btn_browse.clicked.connect(lambda _, inp=path_input: self._browse_svg(inp))
+        btn_edit = QPushButton("✏️")
+        btn_edit.setFixedWidth(28)
+        btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_edit.setStyleSheet(f"QPushButton {{ background-color: {CP_DIM}; padding: 2px; }}")
+        btn_edit.clicked.connect(lambda _, inp=val_input: self._open_multiline_editor(inp))
 
-        hl.addWidget(path_input, 1)
-        hl.addWidget(btn_browse, 0)
+        hl.addWidget(val_input, 1)
+        hl.addWidget(btn_edit, 0)
 
         self.table.setCellWidget(row, 1, widget)
 
-    def _browse_svg(self, line_edit: QLineEdit):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select SVG Icon", "", "SVG Files (*.svg)")
-        if file_path:
-            line_edit.setText(os.path.normpath(file_path))
+    def _open_multiline_editor(self, line_edit: QLineEdit):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("EDIT ICON VALUE")
+        dialog.resize(400, 300)
+        dialog.setStyleSheet(THEME)
+
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        lbl = QLabel("Paste raw SVG XML code, Emoji, or Nerd Font character:")
+        lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        layout.addWidget(lbl)
+
+        txt = QTextEdit()
+        txt.setPlainText(line_edit.text())
+        txt.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM};")
+        txt.setFont(QFont("Consolas", 10))
+        layout.addWidget(txt)
+
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ APPLY")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(dialog.accept)
+        btn_cancel.clicked.connect(dialog.reject)
+
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            line_edit.setText(txt.toPlainText().strip())
 
     def _add_row(self):
         self._insert_table_row("", "")
@@ -1722,9 +1772,9 @@ class PrepTab(QWidget):
         ext = os.path.splitext(fp)[1].lower()
         icon_lbl = None
         if ext in EXTENSION_ICONS:
-            svg_path = EXTENSION_ICONS[ext]
-            if os.path.exists(svg_path):
-                pix = load_svg_icon(svg_path, 16)
+            icon_value = EXTENSION_ICONS[ext]
+            if icon_value:
+                pix = render_extension_icon(icon_value, 16)
                 if not pix.isNull():
                     icon_lbl = QLabel()
                     icon_lbl.setPixmap(pix)
