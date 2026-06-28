@@ -841,7 +841,7 @@ class SettingsDialog(QDialog):
         
         try:
             import winreg
-            exe_path = sys.executable if getattr(sys, 'frozen', False) else f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+            exe_path = f'"{sys.executable}"' if getattr(sys, 'frozen', False) else f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
             app_name = "CyberEditor"
             
             # Register App
@@ -906,7 +906,7 @@ class MainWindow(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle(f"CYBER_EDITOR // {'[SUPERUSER]' if self.is_admin else '[USER]'}")
-        icon_path = os.path.join(sys._MEIPASS, "icon.ico") if getattr(sys, 'frozen', False) else "icon.ico"
+        icon_path = os.path.join(sys._MEIPASS, "icon.png") if getattr(sys, 'frozen', False) else "icon.png"
         if os.path.exists(icon_path): self.setWindowIcon(QIcon(icon_path))
         self.resize(self.mgr.settings.get("width", 1000), self.mgr.settings.get("height", 700))
         central = QWidget(); self.setCentralWidget(central); self.main_layout = QVBoxLayout(central); self.main_layout.setContentsMargins(10, 10, 10, 10)
@@ -1073,9 +1073,13 @@ class MainWindow(QMainWindow):
             try:
                 with open(path, 'r', encoding='utf-8') as f: 
                     content = f.read()
-                    editor.setPlainText(content)
-                    editor.clean_text = content
-            except: pass
+            except UnicodeDecodeError:
+                with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+            except Exception as e:
+                content = f"// Error reading file: {e}"
+            editor.setPlainText(content)
+            editor.clean_text = content
         
         editor.document().setModified(False)
         if not path: editor.clean_text = "" # For untilted
@@ -1261,6 +1265,13 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "ERR", str(e))
 
 if __name__ == "__main__":
+    # Force Windows to show the correct taskbar icon
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("cyberpunk.cyber_editor.1.0")
+    except Exception as e:
+        print(f"Failed to set AppUserModelID: {e}")
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     
