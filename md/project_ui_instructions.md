@@ -8,6 +8,7 @@ Whenever you are asked to generate or bootstrap a new HTML or Python project (e.
 ## 2. Tabbed Settings Interface (Modern Aesthetics)
 - Clicking the Settings button must open a comprehensive Settings Menu (e.g., a modal dialog, side drawer, or new window).
 - Organize the Settings Menu using **tabs or sections** (e.g., General, Theme, Button Customization, Advanced) for easy navigation.
+- **Theme Controls:** In the "Theme" tab, include **sliders** so the user can finely tune global visual properties (e.g., adjust glassmorphism blur intensity, transparency/opacity levels, or primary theme color hue).
 - **Premium Design Requirements:** The Settings UI must look modern and premium. Implement visual enhancements such as:
   - **Glassmorphism** (translucent backgrounds with background-blur).
   - **Sleek dark mode / light mode themes** with harmonious color palettes.
@@ -20,7 +21,7 @@ Whenever you are asked to generate or bootstrap a new HTML or Python project (e.
   - **Text & Naming**: Ability to change the button's label text.
   - **Colors**: Foreground (text/icon color) and Background color pickers.
   - **Typography**: Controls for Font Size, Bold, and Italic toggles.
-  - **Shape & Borders**: Controls for Border Radius (adjusting squareness vs. roundness).
+  - **Shape, Padding & Borders**: Controls for Border Radius (adjusting squareness vs. roundness) and **Padding** (adjusting inner spacing).
   - **Icon (SVG)**: A text area to **paste raw SVG code** directly to replace or add icons (do not ask for file uploads).
 - **IMPORTANT**: Do NOT add or generate any SVG icons for the buttons initially (except the gear icon for settings). Leave the buttons text-only or use simple defaults, as the user will paste their own SVGs later.
 - **Theming & Layout**: Ensure the Settings UI itself and the buttons it controls maintain a premium, well-structured layout with beautiful theming and coloring as described in Section 2.
