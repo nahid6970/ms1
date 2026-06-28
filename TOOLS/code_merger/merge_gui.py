@@ -1245,6 +1245,12 @@ class SettingsDialog(QDialog):
         self.input_icon.setPlaceholderText("Emoji, Nerd Font, or SVG XML...")
         self.input_icon.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
 
+        self.form_preview = QLabel()
+        self.form_preview.setFixedSize(24, 24)
+        self.form_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.form_preview.setStyleSheet(f"border: 1px solid {CP_DIM}; background-color: {CP_BG};")
+        self.input_icon.textChanged.connect(self._update_form_preview)
+
         btn_form_add = QPushButton("＋ ADD")
         btn_form_add.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_form_add.clicked.connect(self._add_from_form)
@@ -1260,16 +1266,19 @@ class SettingsDialog(QDialog):
         form_layout.addWidget(self.input_ext, 1)
         form_layout.addWidget(QLabel("Icon:"), 0)
         form_layout.addWidget(self.input_icon, 2)
+        form_layout.addWidget(self.form_preview, 0)
         form_layout.addWidget(btn_form_add, 0)
 
         v_icons.addWidget(form_widget)
 
-        # Table of icons
-        self.table = QTableWidget(0, 2)
-        self.table.setHorizontalHeaderLabels(["Extension", "Icon Value"])
+        # Table of icons (with Preview column)
+        self.table = QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels(["Extension", "Icon Value", "Preview"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.table.setColumnWidth(0, 120)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setColumnWidth(0, 100)
+        self.table.setColumnWidth(2, 60)
         self.table.setStyleSheet(f"""
             QTableWidget {{
                 background-color: {CP_PANEL};
@@ -1407,6 +1416,10 @@ class SettingsDialog(QDialog):
             QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
         """)
 
+    def _update_form_preview(self, text: str):
+        pix = render_extension_icon(text, 20)
+        self.form_preview.setPixmap(pix)
+
     def _add_from_form(self):
         ext = self.input_ext.text().strip()
         icon = self.input_icon.text().strip()
@@ -1464,6 +1477,21 @@ class SettingsDialog(QDialog):
         hl.addWidget(btn_edit, 0)
 
         self.table.setCellWidget(row, 1, widget)
+
+        # 3rd Column: Live Preview Label
+        preview_lbl = QLabel()
+        preview_lbl.setFixedSize(24, 24)
+        preview_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        preview_lbl.setStyleSheet("background: transparent;")
+        
+        # Initial render
+        pix = render_extension_icon(icon_value, 20)
+        preview_lbl.setPixmap(pix)
+        
+        self.table.setCellWidget(row, 2, preview_lbl)
+
+        # Update preview whenever input text changes
+        val_input.textChanged.connect(lambda text, lbl=preview_lbl: lbl.setPixmap(render_extension_icon(text, 20)))
 
     def _open_multiline_editor(self, line_edit: QLineEdit):
         dialog = QDialog(self)
