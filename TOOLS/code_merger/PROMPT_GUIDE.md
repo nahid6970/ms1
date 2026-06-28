@@ -120,7 +120,7 @@ Suggested Commit Message: <your commit message here>
 The user has a local command runner integrated into their interface. It can execute arbitrary shell commands within the project directory.
 If you (the AI) need to search the codebase (e.g. using `git grep` or `grep`), test the code (e.g. `npm run test`), check git status, or require more context from the environment, you can request the user to run a shell command in their "COMMAND" tab.
 Format your command requests at the end of your response exactly like this:
-Suggested Command: <your shell command here>
+<your shell command here>
 
 ---
 
