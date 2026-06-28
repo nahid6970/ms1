@@ -70,7 +70,7 @@ QStatusBar {{ background: {CP_PANEL}; color: {CP_SUB}; border-top: 1px solid {CP
 
 _HERE        = os.path.dirname(os.path.abspath(__file__))
 GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
-RECENT_PATH  = os.path.join(_HERE, "recent_projects.json")
+SETTINGS_PATH = os.path.join(_HERE, "settings.json")
 SESSION_PATH = os.path.join(_HERE, "session.json")
 MAX_RECENT   = 999999
 
@@ -136,14 +136,24 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
     try:
-        if os.path.exists(SESSION_PATH):
+        if os.path.exists(SETTINGS_PATH):
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                ignores = data.get('custom_ignored_exts', [])
+                CUSTOM_IGNORED_EXTS = set(ignores)
+                IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
+                EXTENSION_ICONS = data.get('extension_icons', {})
+                SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
+                EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
+        elif os.path.exists(SESSION_PATH):
+            # Fallback for older format
             with open(SESSION_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             if isinstance(data, dict):
                 ignores = data.get('custom_ignored_exts', [])
                 CUSTOM_IGNORED_EXTS = set(ignores)
                 IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
-                
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
@@ -159,8 +169,8 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
     EXTENSION_ICON_SIZE = icon_size
     try:
         data = {}
-        if os.path.exists(SESSION_PATH):
-            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+        if os.path.exists(SETTINGS_PATH):
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             if not isinstance(data, dict):
                 data = {}
@@ -168,73 +178,112 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
-        with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving settings: {e}", file=sys.stderr)
 
 
 def load_recent() -> list[str]:
-    try:
-        import json
-        with open(RECENT_PATH, 'r') as f:
-            raw = json.load(f)
-        seen, out = set(), []
-        for item in raw:
-            if isinstance(item, dict):
-                p = item.get("path")
-            else:
-                p = item
-            if not p:
-                continue
-            n = os.path.normpath(p)
-            if n not in seen:
-                seen.add(n)
-                out.append(n)
-        return out
-    except Exception:
-        return []
+    return [item["path"] for item in load_recent_details()]
 
 def load_recent_details() -> list[dict]:
     try:
         import json
-        with open(RECENT_PATH, 'r') as f:
-            raw = json.load(f)
+        settings_data = {}
+        if os.path.exists(SETTINGS_PATH):
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+                settings_data = json.load(f)
+        
+        # Backward compatibility with old recent_projects.json
+        old_recent = os.path.join(_HERE, "recent_projects.json")
+        if not os.path.exists(SETTINGS_PATH) and os.path.exists(old_recent):
+            with open(old_recent, 'r', encoding='utf-8') as f:
+                raw = json.load(f)
+            out = []
+            seen = set()
+            for item in raw:
+                if isinstance(item, dict):
+                    p = item.get("path")
+                else:
+                    p = item
+                if not p:
+                    continue
+                n = os.path.normpath(p)
+                if n not in seen:
+                    seen.add(n)
+                    out.append({
+                        "path": n,
+                        "name": item.get("name", "") if isinstance(item, dict) else "",
+                        "files": item.get("files", []) if isinstance(item, dict) else [],
+                        "extensions": item.get("extensions", []) if isinstance(item, dict) else [],
+                        "clicks": item.get("clicks", 0) if isinstance(item, dict) else 0
+                    })
+            return out
+
+        projects = settings_data.get('projects', [])
+        
+        session_data = {}
+        if os.path.exists(SESSION_PATH):
+            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                session_data = json.load(f)
+        
+        project_states = session_data.get('project_states', [])
+        state_map = {os.path.normpath(state.get("path", "")): state for state in project_states if "path" in state}
+        
         out = []
         seen = set()
-        for item in raw:
-            if isinstance(item, dict):
-                p = item.get("path")
-                name = item.get("name", "")
-                files = item.get("files", [])
-                extensions = item.get("extensions", [])
-            else:
-                p = item
-                name = ""
-                files = []
-                extensions = []
-            if not p:
-                continue
-            n = os.path.normpath(p)
+        for p in projects:
+            path = p.get("path")
+            if not path: continue
+            n = os.path.normpath(path)
             if n not in seen:
                 seen.add(n)
-                out_dict = {
-                    "path": n, 
-                    "files": files, 
-                    "extensions": extensions,
-                    "clicks": item.get("clicks", 0) if isinstance(item, dict) else 0
-                }
-                if name:
-                    out_dict["name"] = name
-                out.append(out_dict)
+                state = state_map.get(n, {})
+                out.append({
+                    "path": n,
+                    "name": p.get("name", ""),
+                    "files": state.get("files", []),
+                    "extensions": state.get("extensions", []),
+                    "clicks": state.get("clicks", 0)
+                })
         return out
     except Exception:
         return []
 
 def save_recent(items: list[dict]):
     import json
-    with open(RECENT_PATH, 'w') as f:
-        json.dump(items, f, indent=2)
+    try:
+        settings_data = {}
+        if os.path.exists(SETTINGS_PATH):
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+                settings_data = json.load(f)
+        
+        settings_data['projects'] = [
+            {"path": item["path"], "name": item.get("name", "")}
+            for item in items
+        ]
+        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
+            json.dump(settings_data, f, indent=2, ensure_ascii=False)
+            
+        session_data = {}
+        if os.path.exists(SESSION_PATH):
+            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                session_data = json.load(f)
+                
+        session_data['project_states'] = [
+            {
+                "path": item["path"],
+                "files": item.get("files", []),
+                "extensions": item.get("extensions", []),
+                "clicks": item.get("clicks", 0)
+            }
+            for item in items
+        ]
+        with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+            json.dump(session_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving recent projects: {e}", file=sys.stderr)
 
 def add_recent(path: str, files: list[str] = None, extensions: list[str] = None, overwrite_existing: bool = False):
     path = os.path.normpath(path)
