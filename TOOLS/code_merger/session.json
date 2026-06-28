@@ -2,17 +2,9 @@
   "backup": false,
   "preview": true,
   "files": [
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\recent_projects.json",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\session.json",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+    "C:\\Users\\nahid\\Desktop\\New folder\\project_ui_instructions.md"
   ],
-  "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+  "project_root": "C:\\Users\\nahid\\Desktop\\New folder",
   "minify": false,
   "file_modes": {
     "C:\\@delta\\db\\fifa\\app.py": "Outline",

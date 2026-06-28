@@ -1,5 +1,15 @@
 [
   {
+    "path": "C:\\Users\\nahid\\Desktop\\New folder",
+    "files": [
+      "C:\\Users\\nahid\\Desktop\\New folder\\project_ui_instructions.md"
+    ],
+    "extensions": [
+      ".md"
+    ],
+    "clicks": 12
+  },
+  {
     "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "files": [
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
@@ -18,7 +28,7 @@
       ".md",
       ".py"
     ],
-    "clicks": 49,
+    "clicks": 50,
     "name": "Tool - Code Manager"
   },
   {
