@@ -1824,11 +1824,13 @@ class PrepTab(QWidget):
     def _update_project_label(self):
         if hasattr(self, 'project_path_lbl'):
             if self.project_root:
-                self.project_path_lbl.setText(self._elide_text(f"PROJECT ROOT: {self.project_root}", reserve=120))
+                self.project_path_lbl.setText(self._elide_text(self.project_root, reserve=120))
                 self.project_path_lbl.setToolTip(self.project_root)
+                self.project_path_lbl.setStyleSheet("color: lightgreen; font-size: 9pt; font-family: 'Consolas';")
             else:
-                self.project_path_lbl.setText("PROJECT ROOT: <not set>")
+                self.project_path_lbl.setText("<not set>")
                 self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
+                self.project_path_lbl.setStyleSheet("color: lightgreen; font-size: 9pt; font-family: 'Consolas';")
 
     def _refresh_file_items(self):
         if not hasattr(self, 'file_list'):
@@ -2009,9 +2011,9 @@ class PrepTab(QWidget):
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
 
-        self.project_path_lbl = QLabel("PROJECT ROOT: <not set>")
+        self.project_path_lbl = QLabel("<not set>")
         self.project_path_lbl.setStyleSheet(
-            f"color: {CP_SUB}; font-size: 9pt; font-family: 'Consolas';"
+            "color: lightgreen; font-size: 9pt; font-family: 'Consolas';"
         )
         self.project_path_lbl.setWordWrap(False)
         self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
