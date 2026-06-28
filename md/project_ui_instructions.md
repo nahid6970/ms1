@@ -12,8 +12,13 @@ Whenever you are asked to generate or bootstrap a new HTML or Python project (e.
 ## 3. Button Customization Section
 - There MUST be a dedicated section inside the Settings Menu specifically for **Customizing Buttons**.
 - This interface must allow the user to modify the appearance of *each and every button* present in the project.
-- It must provide options to **upload or select SVG icons** to replace or add to the buttons.
+- It must provide a text area or input field allowing the user to **paste raw SVG code** directly to replace or add icons to the buttons (do not ask for SVG file uploads).
 
 ## 4. Dynamic UI Architecture
-- To support this customization, structure the project so that button configurations (like their SVG icons, colors, and styles) are managed centrally (e.g., using a state object in JS, a config dictionary in Python, or CSS variables).
-- This ensures that when the user changes a button's SVG icon via the Settings menu, the change is dynamically applied to the UI without requiring code changes.
+- To support this customization, structure the project so that button configurations (including their raw SVG markup, colors, and styles) are managed centrally (e.g., using a state object in JS, a config dictionary in Python, or dynamic DOM insertion).
+- This ensures that when the user pastes new SVG code via the Settings menu, the raw SVG is injected and the change is dynamically applied to the UI without requiring code changes.
+
+## 5. Professional Toast Notifications
+- Integrate a sleek, professional notification system (like a toast or popup notification) to display status updates, successes, or errors to the user.
+- These notifications should pop up gracefully (e.g., in the bottom-right or top-center of the screen) and disappear automatically after a few seconds.
+- Provide a dismiss (X) button on the notification for immediate closure.
