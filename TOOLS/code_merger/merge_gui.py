@@ -222,6 +222,8 @@ def load_recent_details() -> list[dict]:
             return out
 
         projects = settings_data.get('projects', [])
+        # Create a lookup for names from settings.json
+        name_map = {os.path.normpath(p.get("path", "")): p.get("name", "") for p in projects if "path" in p}
         
         session_data = {}
         if os.path.exists(SESSION_PATH):
@@ -229,24 +231,39 @@ def load_recent_details() -> list[dict]:
                 session_data = json.load(f)
         
         project_states = session_data.get('project_states', [])
-        state_map = {os.path.normpath(state.get("path", "")): state for state in project_states if "path" in state}
         
         out = []
         seen = set()
+        # Iterate over project_states to preserve recency order!
+        for state in project_states:
+            path = state.get("path")
+            if not path: continue
+            n = os.path.normpath(path)
+            if n not in seen:
+                seen.add(n)
+                out.append({
+                    "path": n,
+                    "name": name_map.get(n, ""),
+                    "files": state.get("files", []),
+                    "extensions": state.get("extensions", []),
+                    "clicks": state.get("clicks", 0)
+                })
+        
+        # Also include any projects from settings that aren't in session state
         for p in projects:
             path = p.get("path")
             if not path: continue
             n = os.path.normpath(path)
             if n not in seen:
                 seen.add(n)
-                state = state_map.get(n, {})
                 out.append({
                     "path": n,
                     "name": p.get("name", ""),
-                    "files": state.get("files", []),
-                    "extensions": state.get("extensions", []),
-                    "clicks": state.get("clicks", 0)
+                    "files": [],
+                    "extensions": [],
+                    "clicks": 0
                 })
+                
         return out
     except Exception:
         return []
@@ -259,18 +276,31 @@ def save_recent(items: list[dict]):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                 settings_data = json.load(f)
         
-        settings_data['projects'] = [
-            {"path": item["path"], "name": item.get("name", "")}
-            for item in items
-        ]
-        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-            json.dump(settings_data, f, indent=2, ensure_ascii=False)
+        # Keep existing projects, update names, add new ones
+        existing_projects = settings_data.get('projects', [])
+        proj_map = {os.path.normpath(p["path"]): p.get("name", "") for p in existing_projects if "path" in p}
+        
+        changed = False
+        for item in items:
+            p = os.path.normpath(item["path"])
+            name = item.get("name", "")
+            if p not in proj_map or proj_map[p] != name:
+                proj_map[p] = name
+                changed = True
+                
+        if changed:
+            # Sort alphabetically by path so the order in JSON never changes based on recency
+            new_projects = [{"path": k, "name": v} for k, v in sorted(proj_map.items())]
+            settings_data['projects'] = new_projects
+            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
+                json.dump(settings_data, f, indent=2, ensure_ascii=False)
             
         session_data = {}
         if os.path.exists(SESSION_PATH):
             with open(SESSION_PATH, 'r', encoding='utf-8') as f:
                 session_data = json.load(f)
                 
+        # Save exact recency order and states to session
         session_data['project_states'] = [
             {
                 "path": item["path"],

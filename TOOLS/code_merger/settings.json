@@ -18,48 +18,48 @@
       "name": "Convex - Gallery"
     },
     {
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-      "name": "Tool - Code Manager"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
-      "name": "Flask - 5018 (Cell)"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
-      "name": "AHK - Button Generator"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
-      "name": "Tool - Image Mover"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
-      "name": "Tool - Nerd Icon Cnverter"
-    },
-    {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
       "name": "Convex - myhome"
-    },
-    {
-      "path": "C:\\@delta\\db\\vlr",
-      "name": "Flask - VLR STATS"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
-      "name": "Extension - Tab Saver"
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
-      "name": "AHK - Shortcut Manager"
     },
     {
       "path": "C:\\@delta\\db\\fifa",
       "name": "Flask - FIFA"
     },
     {
+      "path": "C:\\@delta\\db\\vlr",
+      "name": "Flask - VLR STATS"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
+      "name": "AHK - Button Generator"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
+      "name": "AHK - Shortcut Manager"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
+      "name": "Flask - 5018 (Cell)"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
+      "name": "Tool - Image Mover"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": "Tool - Code Manager"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
+      "name": "Tool - Nerd Icon Cnverter"
+    },
+    {
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",
       "name": "Extension - Automation"
+    },
+    {
+      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
+      "name": "Extension - Tab Saver"
     }
   ]
 }
