@@ -5,9 +5,14 @@ Whenever you are asked to generate or bootstrap a new HTML or Python project (e.
 ## 1. Global Settings Button
 - Always place a **Settings button** (preferably using a gear SVG icon) in the **top-right corner** of the application's main window or web page.
 
-## 2. Tabbed Settings Interface
+## 2. Tabbed Settings Interface (Modern Aesthetics)
 - Clicking the Settings button must open a comprehensive Settings Menu (e.g., a modal dialog, side drawer, or new window).
-- Organize the Settings Menu using **tabs or sections** (e.g., General, Theme, Button Customization, Advanced).
+- Organize the Settings Menu using **tabs or sections** (e.g., General, Theme, Button Customization, Advanced) for easy navigation.
+- **Premium Design Requirements:** The Settings UI must look modern and premium. Implement visual enhancements such as:
+  - **Glassmorphism** (translucent backgrounds with background-blur).
+  - **Sleek dark mode / light mode themes** with harmonious color palettes.
+  - **Modern typography** (e.g., Inter, Roboto, or system UI fonts).
+  - **Micro-animations and smooth transitions** on tabs, inputs, and hover states to make the interface feel responsive and alive.
 
 ## 3. Button Customization Section
 - There MUST be a dedicated section inside the Settings Menu specifically for **Customizing Buttons**.
