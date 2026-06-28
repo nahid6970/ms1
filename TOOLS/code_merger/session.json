@@ -1,5 +1,4 @@
 {
-  "recent_sort_mode": "Name",
   "project_states": [
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
@@ -8,205 +7,97 @@
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\recent_projects.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\session.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
       ],
       "extensions": [
         "",
-        ".json",
         ".md",
+        ".json",
         ".py"
       ],
-      "clicks": 50
+      "clicks": 3
     },
     {
       "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
-      "files": [
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\export_static.py",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\recent_edits.js",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\script.js",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\style.css",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\static\\temp_notepad.js",
-        "C:\\@delta\\ms1\\@Flask\\5018_cell\\templates\\index.html"
-      ],
-      "extensions": [
-        ".css",
-        ".py",
-        ".js",
-        ".html"
-      ],
-      "clicks": 9
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
-      "files": [
-        "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py",
-        "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\UI_VISUAL_ROADMAP.md"
-      ],
-      "extensions": [
-        ".py",
-        ".md"
-      ],
-      "clicks": 6
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\Image folder mover\\image_folder_mover.py"
-      ],
-      "extensions": [
-        ".py"
-      ],
-      "clicks": 6
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon\\nerdfont_icon_converter.py"
-      ],
-      "extensions": [
-        ".py"
-      ],
-      "clicks": 6
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\image-share",
-      "files": [
-        "C:\\@delta\\db\\@Convex\\image-share\\index.html",
-        "C:\\@delta\\db\\@Convex\\image-share\\convex\\images.ts",
-        "C:\\@delta\\db\\@Convex\\image-share\\convex\\tsconfig.json"
-      ],
-      "extensions": [
-        "",
-        ".md",
-        ".html",
-        ".js",
-        ".ts",
-        ".local",
-        ".json"
-      ],
-      "clicks": 39
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
-      "files": [
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\app.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\context-menu.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\index.html",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\links-handler.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\open-folder-handler.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\package-lock.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\package.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\sidebar-handler.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\style.css",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\background.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\manifest.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.html",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\actions.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\functions.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\schema.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\tsconfig.json"
-      ],
-      "extensions": [
-        ".ts",
-        ".html",
-        ".py",
-        ".json",
-        ".js",
-        ".css"
-      ],
-      "clicks": 15
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\db\\vlr",
-      "files": [
-        "C:\\@delta\\db\\vlr\\app.py",
-        "C:\\@delta\\db\\vlr\\scraper.py",
-        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
-        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
-        "C:\\@delta\\db\\vlr\\templates\\index.html"
-      ],
-      "extensions": [
-        "",
-        ".py",
-        ".css",
-        ".js",
-        ".html"
-      ],
-      "clicks": 9
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
-      "files": [
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\background.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\manifest.json",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.css",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.html",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\README.md",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\shared-modal.css"
-      ],
-      "extensions": [
-        ".css",
-        ".json",
-        ".md",
-        ".js",
-        ".html"
-      ],
-      "clicks": 2
+      "files": [],
+      "extensions": [],
+      "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
-      "files": [
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
-      ],
-      "extensions": [
-        ".ahk",
-        ".md",
-        ".py"
-      ],
+      "files": [],
+      "extensions": [],
       "clicks": 0
     },
     {
       "path": "C:\\@delta\\db\\fifa",
-      "files": [
-        "C:\\@delta\\db\\fifa\\app.py",
-        "C:\\@delta\\db\\fifa\\index.html"
-      ],
-      "extensions": [
-        ".json",
-        ".py",
-        ".txt",
-        ".html"
-      ],
+      "files": [],
+      "extensions": [],
       "clicks": 0
     },
     {
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",
-      "files": [
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\background.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\CLICKFLOW_ARCHITECTURE.md",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\content.css",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\content.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\manifest.json",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\popup.html",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\popup.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation\\styles.css"
-      ],
-      "extensions": [
-        ".html",
-        ".md",
-        ".js",
-        ".css",
-        ".json"
-      ],
+      "files": [],
+      "extensions": [],
       "clicks": 0
     }
-  ]
+  ],
+  "files": [
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+    "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+  ],
+  "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+  "minify": false,
+  "file_modes": {}
 }
