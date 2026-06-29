@@ -271,7 +271,7 @@
             "name": "Code Merger",
             "category": "General",
             "description": "",
-            "hotkey": "!l",
+            "hotkey": "!z",
             "target_path": "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
             "hide_terminal": true,
             "enabled": true
