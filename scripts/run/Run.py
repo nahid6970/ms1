@@ -539,7 +539,7 @@ if os.path.exists(bookmarks_file):
 
 # Load collapsed folders
 collapsed = set()
-collapsed_file = r"C:\@delta\db\FZF_launcher\collapsed.json"
+collapsed_file = r"C:\\@delta\\db\\FZF_launcher\\collapsed.json"
 if os.path.exists(collapsed_file):
     try:
         with open(collapsed_file, 'r', encoding='utf-8') as f:
