@@ -180,6 +180,34 @@ def load_config():
         r"C:\Users\nahid\Pictures": True,
         "D:\\": True
     }
+    default_icons = {
+        ".py": "🐍",
+        ".json": "⚙️",
+        ".md": "📝",
+        ".txt": "📄",
+        ".png": "🖼️",
+        ".jpg": "🖼️",
+        ".jpeg": "🖼️",
+        ".gif": "🖼️",
+        ".webp": "🖼️",
+        ".ico": "🎨",
+        ".svg": "🎨",
+        ".html": "🌐",
+        ".css": "🎨",
+        ".js": "📜",
+        ".ts": "📜",
+        ".cpp": "⚙️",
+        ".h": "⚙️",
+        ".cs": "⚙️",
+        ".go": "🐹",
+        ".rs": "🦀",
+        ".pdf": "📕",
+        ".zip": "📦",
+        ".tar": "📦",
+        ".gz": "📦",
+        ".7z": "📦",
+        "folder": "📁"
+    }
     config = {
         "search_roots": default_roots,
         "visibility": {
@@ -192,7 +220,8 @@ def load_config():
             "file_normal": 250,
             "file_bookmark": 121
         },
-        "show_collapse_indicators": True
+        "show_collapse_indicators": True,
+        "extension_icons": default_icons
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -206,6 +235,8 @@ def load_config():
                     config["theme"].update(data["theme"])
                 if "show_collapse_indicators" in data:
                     config["show_collapse_indicators"] = data["show_collapse_indicators"]
+                if "extension_icons" in data:
+                    config["extension_icons"] = data["extension_icons"]
         except:
             pass
             
@@ -214,7 +245,7 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            if "search_roots" not in data or not data["search_roots"]:
+            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data:
                 save_config(config)
         except:
             pass
@@ -964,12 +995,28 @@ if ($imageExtensions -contains $ext) {{
         }}
     }}
     
+    $tempFile = $null
+    $previewPath = $FilePath
+    if ($ext -eq ".ico") {{
+        try {{
+            Add-Type -AssemblyName System.Drawing
+            $ico = New-Object System.Drawing.Icon($FilePath)
+            $bmp = $ico.ToBitmap()
+            $tempFile = [System.IO.Path]::GetTempFileName() + ".png"
+            $bmp.Save($tempFile, [System.Drawing.Imaging.ImageFormat]::Png)
+            $ico.Dispose()
+            $bmp.Dispose()
+            $previewPath = $tempFile
+        }} catch {{}}
+    }}
+
     if ($previewMode -eq "chafa") {{
         # Try chafa for image preview with better sizing
         try {{
             $chafaPath = Get-Command chafa -ErrorAction Stop
             # Use smaller dimensions that fit better in preview pane
-            & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
+            & chafa --size=40x20 --symbols=block --fill=space --stretch $previewPath
+            if ($tempFile -and (Test-Path $tempFile)) {{ Remove-Item $tempFile -Force }}
             Write-Host ""
             # Show file info below image
             $fileInfo = Get-Item $FilePath
@@ -985,7 +1032,8 @@ if ($imageExtensions -contains $ext) {{
             # Try viu with smaller dimensions
             try {{
                 $viuPath = Get-Command viu -ErrorAction Stop
-                & viu -w 40 -h 20 $FilePath
+                & viu -w 40 -h 20 $previewPath
+                if ($tempFile -and (Test-Path $tempFile)) {{ Remove-Item $tempFile -Force }}
                 Write-Host ""
                 $fileInfo = Get-Item $FilePath
                 Write-Host "[VIU MODE]" -ForegroundColor Green
@@ -996,6 +1044,7 @@ if ($imageExtensions -contains $ext) {{
                 exit 0
             }}
             catch {{
+                if ($tempFile -and (Test-Path $tempFile)) {{ Remove-Item $tempFile -Force }}
                 # Fallback: show image info
                 Write-Host ""
                 Write-Host "[IMAGE FILE - No preview tool available]" -ForegroundColor Cyan
@@ -1275,7 +1324,35 @@ config = {{
         ".vscode": False, "obj": False, "bin": False
     }},
     "view_mode": "full",
-    "show_collapse_indicators": True
+    "show_collapse_indicators": True,
+    "extension_icons": {{
+        ".py": "🐍",
+        ".json": "⚙️",
+        ".md": "📝",
+        ".txt": "📄",
+        ".png": "🖼️",
+        ".jpg": "🖼️",
+        ".jpeg": "🖼️",
+        ".gif": "🖼️",
+        ".webp": "🖼️",
+        ".ico": "🎨",
+        ".svg": "🎨",
+        ".html": "🌐",
+        ".css": "🎨",
+        ".js": "📜",
+        ".ts": "📜",
+        ".cpp": "⚙️",
+        ".h": "⚙️",
+        ".cs": "⚙️",
+        ".go": "🐹",
+        ".rs": "🦀",
+        ".pdf": "📕",
+        ".zip": "📦",
+        ".tar": "📦",
+        ".gz": "📦",
+        ".7z": "📦",
+        "folder": "📁"
+    }}
 }}
 if os.path.exists(config_file):
     try:
@@ -1285,6 +1362,7 @@ if os.path.exists(config_file):
             if "visibility" in data: config["visibility"] = data["visibility"]
             if "view_mode" in data: config["view_mode"] = data["view_mode"]
             if "show_collapse_indicators" in data: config["show_collapse_indicators"] = data["show_collapse_indicators"]
+            if "extension_icons" in data: config["extension_icons"] = data["extension_icons"]
     except: pass
 
 view_mode = config["view_mode"]
@@ -1332,6 +1410,15 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
         
     marker = "* " if is_bookmarked else ""
     
+    icon = ""
+    if is_dir:
+        folder_icon = config.get("extension_icons", {{}}).get("folder", "📁")
+        icon = (folder_icon + " ") if folder_icon else ""
+    else:
+        ext = os.path.splitext(full_path)[1].lower()
+        file_icon = config.get("extension_icons", {{}}).get(ext, "📄")
+        icon = (file_icon + " ") if file_icon else ""
+        
     custom_name = ""
     if is_bookmarked:
         bm = next((b for b in bookmarks if b['path'] == full_path), None)
@@ -1339,7 +1426,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             custom_name = bm.get('name', '')
 
     if custom_name:
-        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{custom_name}}"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{custom_name}}"
     elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
@@ -1348,9 +1435,9 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             parent = ""
         else:
             parent = os.path.basename(os.path.dirname(path_norm))
-        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{name}} ({{parent}})"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{name}} ({{parent}})"
     else:
-        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{full_path}}"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{full_path}}"
     
     if is_dir:
         if is_bookmarked:
