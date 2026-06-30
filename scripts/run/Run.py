@@ -540,8 +540,8 @@ def configure_menu():
         options = [
             f"{pad}{esc('#9efa49')} Configure Search Roots (Directories)\x1b[0m",
             f"{pad}{esc('#faf069')}󰗉 Configure Ignored Patterns\x1b[0m",
-            f"{pad}{esc('#00f0ff')}🎨 Configure Theme Colors\x1b[0m",
-            f"{pad}{esc('#ff5757')}⌨ View Keyboard Shortcuts\x1b[0m",
+            f"{pad}{esc('#00f0ff')} Configure Theme Colors\x1b[0m",
+            f"{pad}{esc('#ff5757')}󰌌 View Keyboard Shortcuts\x1b[0m",
             f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
         ]
@@ -576,10 +576,10 @@ def configure_menu():
         elif choice.startswith("󰗉"):
             manage_ignores_menu()
             
-        elif choice.startswith("🎨"):
+        elif choice.startswith(""):
             manage_colors_menu()
             
-        elif choice.startswith("⌨"):
+        elif choice.startswith("󰌌"):
             view_shortcuts_menu()
             
         elif choice.startswith("󰘦"):
