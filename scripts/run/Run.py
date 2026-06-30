@@ -208,6 +208,34 @@ def load_config():
         ".7z": "📦",
         "folder": "📁"
     }
+    default_colors = {
+        ".py": 220,
+        ".json": 215,
+        ".md": 39,
+        ".txt": 250,
+        ".png": 197,
+        ".jpg": 197,
+        ".jpeg": 197,
+        ".gif": 197,
+        ".webp": 197,
+        ".ico": 39,
+        ".svg": 39,
+        ".html": 202,
+        ".css": 39,
+        ".js": 220,
+        ".ts": 39,
+        ".cpp": 110,
+        ".h": 110,
+        ".cs": 110,
+        ".go": 81,
+        ".rs": 208,
+        ".pdf": 196,
+        ".zip": 220,
+        ".tar": 220,
+        ".gz": 220,
+        ".7z": 220,
+        "folder": 208
+    }
     config = {
         "search_roots": default_roots,
         "visibility": {
@@ -221,7 +249,8 @@ def load_config():
             "file_bookmark": 121
         },
         "show_collapse_indicators": True,
-        "extension_icons": default_icons
+        "extension_icons": default_icons,
+        "icon_colors": default_colors
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -237,6 +266,8 @@ def load_config():
                     config["show_collapse_indicators"] = data["show_collapse_indicators"]
                 if "extension_icons" in data:
                     config["extension_icons"] = data["extension_icons"]
+                if "icon_colors" in data:
+                    config["icon_colors"] = data["icon_colors"]
         except:
             pass
             
@@ -245,7 +276,7 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data:
+            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data or "icon_colors" not in data:
                 save_config(config)
         except:
             pass
@@ -1352,6 +1383,34 @@ config = {{
         ".gz": "📦",
         ".7z": "📦",
         "folder": "📁"
+    }},
+    "icon_colors": {{
+        ".py": 220,
+        ".json": 215,
+        ".md": 39,
+        ".txt": 250,
+        ".png": 197,
+        ".jpg": 197,
+        ".jpeg": 197,
+        ".gif": 197,
+        ".webp": 197,
+        ".ico": 39,
+        ".svg": 39,
+        ".html": 202,
+        ".css": 39,
+        ".js": 220,
+        ".ts": 39,
+        ".cpp": 110,
+        ".h": 110,
+        ".cs": 110,
+        ".go": 81,
+        ".rs": 208,
+        ".pdf": 196,
+        ".zip": 220,
+        ".tar": 220,
+        ".gz": 220,
+        ".7z": 220,
+        "folder": 208
     }}
 }}
 if os.path.exists(config_file):
@@ -1363,6 +1422,7 @@ if os.path.exists(config_file):
             if "view_mode" in data: config["view_mode"] = data["view_mode"]
             if "show_collapse_indicators" in data: config["show_collapse_indicators"] = data["show_collapse_indicators"]
             if "extension_icons" in data: config["extension_icons"] = data["extension_icons"]
+            if "icon_colors" in data: config["icon_colors"] = data["icon_colors"]
     except: pass
 
 view_mode = config["view_mode"]
@@ -1410,14 +1470,32 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
         
     marker = "* " if is_bookmarked else ""
     
+    # Determine colors
+    if is_dir:
+        if is_bookmarked:
+            line_color = theme['folder_bookmark']
+        else:
+            line_color = theme['folder_normal']
+        icon_color = config.get("icon_colors", {{}}).get("folder", line_color)
+    else:
+        if is_bookmarked:
+            line_color = theme['file_bookmark']
+        else:
+            line_color = theme['file_normal']
+        ext = os.path.splitext(full_path)[1].lower()
+        icon_color = config.get("icon_colors", {{}}).get(ext, line_color)
+
+    # Format icon with color override
     icon = ""
     if is_dir:
         folder_icon = config.get("extension_icons", {{}}).get("folder", "📁")
-        icon = (folder_icon + " ") if folder_icon else ""
+        if folder_icon:
+            icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m "
     else:
         ext = os.path.splitext(full_path)[1].lower()
         file_icon = config.get("extension_icons", {{}}).get(ext, "📄")
-        icon = (file_icon + " ") if file_icon else ""
+        if file_icon:
+            icon = f"\033[38;5;{{icon_color}}m{{file_icon}}\033[38;5;{{line_color}}m "
         
     custom_name = ""
     if is_bookmarked:
@@ -1439,16 +1517,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
     else:
         display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{full_path}}"
     
-    if is_dir:
-        if is_bookmarked:
-            display = f"\033[38;5;{{theme['folder_bookmark']}}m{{display}}\033[0m"
-        else:
-            display = f"\033[38;5;{{theme['folder_normal']}}m{{display}}\033[0m"
-    elif is_bookmarked:
-        display = f"\033[38;5;{{theme['file_bookmark']}}m{{display}}\033[0m"
-    else:
-        display = f"\033[38;5;{{theme['file_normal']}}m{{display}}\033[0m"
-    
+    display = f"\033[38;5;{{line_color}}m{{display}}\033[0m"
     return display
 
 # Helper to check if child is descendant of parent
