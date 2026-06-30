@@ -231,6 +231,8 @@ def load_config():
                     config["show_extension_dots"] = data["show_extension_dots"]
                 if "show_extension_commas" in data:
                     config["show_extension_commas"] = data["show_extension_commas"]
+                if "bookmarked_config_setting" in data:
+                    config["bookmarked_config_setting"] = data["bookmarked_config_setting"]
         except:
             pass
             
@@ -738,7 +740,8 @@ def manage_icon_colors_menu():
                 "--prompt=Icon Colors > ", 
                 "--layout=reverse", 
                 "--border", 
-                "--header=Configure Icon Colors (Select extension/folder to change)",
+                "--header=Configure Icon Colors (F5: Toggle Bookmark)",
+                "--expect=f5",
                 "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
             ],
             stdin=subprocess.PIPE,
@@ -750,7 +753,13 @@ def manage_icon_colors_menu():
         if not stdout or fzf.returncode != 0:
             break
             
-        choice = ansi_escape.sub('', stdout.strip())
+        lines = stdout.splitlines()
+        if len(lines) < 2:
+            break
+        key_pressed = lines[0].strip()
+        chosen_line = lines[1]
+        
+        choice = ansi_escape.sub('', chosen_line).strip()
         if "Return to Theme Colors Menu" in choice:
             break
             
@@ -767,6 +776,20 @@ def manage_icon_colors_menu():
         is_add = "[+] Add New Extension Icon" in choice
         ext_key = ""
         
+        if key_pressed == "f5":
+            target_ext = choices_map.get(choice)
+            if target_ext:
+                bookmark = config.get("bookmarked_config_setting")
+                if isinstance(bookmark, dict) and bookmark.get("key") == target_ext and bookmark.get("type") == "icon_color":
+                    config["bookmarked_config_setting"] = None
+                    print(f"\n\033[93mRemoved bookmark from icon: {target_ext}\033[0m")
+                else:
+                    config["bookmarked_config_setting"] = {"type": "icon_color", "key": target_ext, "label": f"Configure {target_ext} Icon"}
+                    print(f"\n\033[92mBookmarked icon setting: {target_ext}\033[0m")
+                save_config(config)
+                import time; time.sleep(1.0)
+            continue
+            
         if is_add:
             try:
                 con_path = 'CON' if os.name == 'nt' else '/dev/tty'
@@ -827,6 +850,7 @@ def manage_colors_menu():
             "file_normal": 250,
             "file_bookmark": 121
         })
+        bookmark = config.get("bookmarked_config_setting")
         
         pad = "  "
         options = [
@@ -846,7 +870,8 @@ def manage_colors_menu():
                 "--prompt=Theme Config > ", 
                 "--layout=reverse", 
                 "--border", 
-                "--header=Configure Colors (Previews shown in brackets)",
+                "--header=Configure Colors (F5: Toggle Bookmark)",
+                "--expect=f5",
                 "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
             ],
             stdin=subprocess.PIPE,
@@ -858,11 +883,41 @@ def manage_colors_menu():
         if not stdout or fzf.returncode != 0:
             break
             
-        choice = ansi_escape.sub('', stdout.strip())
+        lines = stdout.splitlines()
+        if len(lines) < 2:
+            break
+        key_pressed = lines[0].strip()
+        chosen_line = lines[1]
+        
+        choice = ansi_escape.sub('', chosen_line).strip()
         if "Return to Main Menu" in choice:
             break
             
-        elif "Normal Folder Color" in choice:
+        bm_info = None
+        if "Normal Folder Color" in choice:
+            bm_info = {"type": "theme_color", "key": "folder_normal", "label": "Normal Folder Color"}
+        elif "Bookmark Folder Color" in choice:
+            bm_info = {"type": "theme_color", "key": "folder_bookmark", "label": "Bookmark Folder Color"}
+        elif "Normal File Color" in choice:
+            bm_info = {"type": "theme_color", "key": "file_normal", "label": "Normal File Color"}
+        elif "Bookmark File Color" in choice:
+            bm_info = {"type": "theme_color", "key": "file_bookmark", "label": "Bookmark File Color"}
+        elif "Configure Icon Colors" in choice:
+            bm_info = {"type": "theme_color", "key": "icon_colors", "label": "Configure Icon Colors"}
+            
+        if key_pressed == "f5":
+            if bm_info:
+                if isinstance(bookmark, dict) and bookmark.get("key") == bm_info["key"] and bookmark.get("type") == "theme_color":
+                    config["bookmarked_config_setting"] = None
+                    print(f"\n\033[93mRemoved bookmark from setting: {choice}\033[0m")
+                else:
+                    config["bookmarked_config_setting"] = bm_info
+                    print(f"\n\033[92mBookmarked sub-setting: {choice}\033[0m")
+                save_config(config)
+                import time; time.sleep(1.0)
+            continue
+            
+        if "Normal Folder Color" in choice:
             color = select_color("Normal Folder")
             if color is not None:
                 config.setdefault("theme", {})["folder_normal"] = color
@@ -1139,20 +1194,41 @@ def configure_menu():
         config = load_config()
         show_signs = config.get("show_collapse_indicators", True)
         signs_status = "Show signs" if show_signs else "Hide signs"
+        bookmark = config.get("bookmarked_config_setting")
         
-        # Styled Configuration options
         pad = "  "
-        options = [
-            f"{pad}{esc('#9efa49')}[D] Configure Search Roots (Directories)\x1b[0m",
-            f"{pad}{esc('#faf069')}[I] Configure Ignored Patterns\x1b[0m",
-            f"{pad}{esc('#00f0ff')}[C] Configure Theme Colors\x1b[0m",
-            f"{pad}{esc('#ff934b')}[F] Configure Console Font\x1b[0m",
-            f"{pad}{esc('#d782ff')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
-            f"{pad}{esc('#ff5757')}[K] View Keyboard Shortcuts\x1b[0m",
-            f"{pad}{esc('#ffffff')}[O] Open Config JSON in Notepad\x1b[0m",
-            f"{pad}{esc('#808080')}[X] Exit Configuration\x1b[0m",
-        ]
+        option_templates = {
+            "[D]": f"{pad}{esc('#9efa49')}[D] Configure Search Roots (Directories)\x1b[0m",
+            "[I]": f"{pad}{esc('#faf069')}[I] Configure Ignored Patterns\x1b[0m",
+            "[C]": f"{pad}{esc('#00f0ff')}[C] Configure Theme Colors\x1b[0m",
+            "[F]": f"{pad}{esc('#ff934b')}[F] Configure Console Font\x1b[0m",
+            "[S]": f"{pad}{esc('#d782ff')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
+            "[K]": f"{pad}{esc('#ff5757')}[K] View Keyboard Shortcuts\x1b[0m",
+            "[O]": f"{pad}{esc('#ffffff')}[O] Open Config JSON in Notepad\x1b[0m",
+            "[X]": f"{pad}{esc('#808080')}[X] Exit Configuration\x1b[0m",
+        }
         
+        options = []
+        # Prepend the bookmarked item at the top if present
+        if bookmark and isinstance(bookmark, dict):
+            bm_type = bookmark.get("type")
+            bm_key = bookmark.get("key")
+            bm_label = bookmark.get("label", "")
+            
+            if bm_type == "main":
+                starred_opt = option_templates.get(bm_key, "").replace(pad, "⭐ ")
+                if starred_opt:
+                    options.append(starred_opt)
+            elif bm_type == "theme_color":
+                options.append(f"⭐ [B_COLOR:{bm_key}] {bm_label}")
+            elif bm_type == "icon_color":
+                options.append(f"⭐ [B_ICON:{bm_key}] {bm_label}")
+            
+        for k, v in option_templates.items():
+            if bookmark and isinstance(bookmark, dict) and bookmark.get("type") == "main" and k == bookmark.get("key"):
+                continue
+            options.append(v)
+            
         # Run FZF to choose option
         fzf = subprocess.Popen(
             [
@@ -1161,7 +1237,8 @@ def configure_menu():
                 "--prompt=Config Menu > ", 
                 "--layout=reverse", 
                 "--border", 
-                "--header=Runner Terminal Configurator",
+                "--header=Runner Terminal Configurator (F5: Toggle Bookmark)",
+                "--expect=f5",
                 "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
             ],
             stdin=subprocess.PIPE,
@@ -1173,7 +1250,61 @@ def configure_menu():
         if not stdout or fzf.returncode != 0:
             break
             
-        choice = ansi_escape.sub('', stdout.strip())
+        lines = stdout.splitlines()
+        if len(lines) < 2:
+            break
+        key_pressed = lines[0].strip()
+        chosen_line = lines[1]
+        
+        choice = ansi_escape.sub('', chosen_line).strip()
+        
+        # Check if they selected a bookmarked shortcut
+        if choice.startswith("⭐"):
+            cleaned_choice = choice.replace("⭐", "").strip()
+            if cleaned_choice.startswith("[B_COLOR:"):
+                color_key = cleaned_choice.split("[B_COLOR:")[1].split("]")[0]
+                label_mapping = {
+                    "folder_normal": "Normal Folder",
+                    "folder_bookmark": "Bookmark Folder",
+                    "file_normal": "Normal File",
+                    "file_bookmark": "Bookmark File"
+                }
+                if color_key == "icon_colors":
+                    manage_icon_colors_menu()
+                elif color_key in label_mapping:
+                    color = select_color(label_mapping[color_key])
+                    if color is not None:
+                        config.setdefault("theme", {})[color_key] = color
+                        save_config(config)
+                continue
+            elif cleaned_choice.startswith("[B_ICON:"):
+                icon_key = cleaned_choice.split("[B_ICON:")[1].split("]")[0]
+                configure_single_icon_menu(icon_key)
+                continue
+            else:
+                choice = cleaned_choice.replace("⭐ ", "").strip()
+        else:
+            choice = choice.replace("⭐ ", "").strip()
+            
+        # Determine prefix for main menu items
+        prefix = None
+        for p in ["[D]", "[I]", "[C]", "[F]", "[S]", "[K]", "[O]", "[X]"]:
+            if choice.startswith(p):
+                prefix = p
+                break
+                
+        if key_pressed == "f5":
+            if prefix and prefix != "[X]":
+                if isinstance(bookmark, dict) and bookmark.get("key") == prefix and bookmark.get("type") == "main":
+                    config["bookmarked_config_setting"] = None
+                    print(f"\n\033[93mRemoved bookmark from: {choice}\033[0m")
+                else:
+                    config["bookmarked_config_setting"] = {"type": "main", "key": prefix, "label": choice}
+                    print(f"\n\033[92mBookmarked setting: {choice}\033[0m")
+                save_config(config)
+                import time; time.sleep(1.0)
+            continue
+            
         if choice.startswith("[X]"):
             break
             

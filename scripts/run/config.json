@@ -75,5 +75,10 @@
     }
   },
   "show_extension_dots": false,
-  "show_extension_commas": false
+  "show_extension_commas": false,
+  "bookmarked_config_setting": {
+    "type": "theme_color",
+    "key": "icon_colors",
+    "label": "Configure Icon Colors"
+  }
 }
