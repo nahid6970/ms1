@@ -181,60 +181,32 @@ def load_config():
         "D:\\": True
     }
     default_icons = {
-        ".py": "🐍",
-        ".json": "⚙️",
-        ".md": "📝",
-        ".txt": "📄",
-        ".png": "🖼️",
-        ".jpg": "🖼️",
-        ".jpeg": "🖼️",
-        ".gif": "🖼️",
-        ".webp": "🖼️",
-        ".ico": "🎨",
-        ".svg": "🎨",
-        ".html": "🌐",
-        ".css": "🎨",
-        ".js": "📜",
-        ".ts": "📜",
-        ".cpp": "⚙️",
-        ".h": "⚙️",
-        ".cs": "⚙️",
-        ".go": "🐹",
-        ".rs": "🦀",
-        ".pdf": "📕",
-        ".zip": "📦",
-        ".tar": "📦",
-        ".gz": "📦",
-        ".7z": "📦",
-        "folder": "📁"
-    }
-    default_colors = {
-        ".py": 220,
-        ".json": 215,
-        ".md": 39,
-        ".txt": 250,
-        ".png": 197,
-        ".jpg": 197,
-        ".jpeg": 197,
-        ".gif": 197,
-        ".webp": 197,
-        ".ico": 39,
-        ".svg": 39,
-        ".html": 202,
-        ".css": 39,
-        ".js": 220,
-        ".ts": 39,
-        ".cpp": 110,
-        ".h": 110,
-        ".cs": 110,
-        ".go": 81,
-        ".rs": 208,
-        ".pdf": 196,
-        ".zip": 220,
-        ".tar": 220,
-        ".gz": 220,
-        ".7z": 220,
-        "folder": 208
+        ".py": {"icon": "🐍", "color": 220},
+        ".json": {"icon": "⚙️", "color": 215},
+        ".md": {"icon": "📝", "color": 39},
+        ".txt": {"icon": "📄", "color": 250},
+        ".png": {"icon": "🖼️", "color": 197},
+        ".jpg": {"icon": "🖼️", "color": 197},
+        ".jpeg": {"icon": "🖼️", "color": 197},
+        ".gif": {"icon": "🖼️", "color": 197},
+        ".webp": {"icon": "🖼️", "color": 197},
+        ".ico": {"icon": "🎨", "color": 39},
+        ".svg": {"icon": "🎨", "color": 39},
+        ".html": {"icon": "🌐", "color": 202},
+        ".css": {"icon": "🎨", "color": 39},
+        ".js": {"icon": "📜", "color": 220},
+        ".ts": {"icon": "📜", "color": 39},
+        ".cpp": {"icon": "⚙️", "color": 110},
+        ".h": {"icon": "⚙️", "color": 110},
+        ".cs": {"icon": "⚙️", "color": 110},
+        ".go": {"icon": "🐹", "color": 81},
+        ".rs": {"icon": "🦀", "color": 208},
+        ".pdf": {"icon": "📕", "color": 196},
+        ".zip": {"icon": "📦", "color": 220},
+        ".tar": {"icon": "📦", "color": 220},
+        ".gz": {"icon": "📦", "color": 220},
+        ".7z": {"icon": "📦", "color": 220},
+        "folder": {"icon": "📁", "color": 208}
     }
     config = {
         "search_roots": default_roots,
@@ -249,8 +221,7 @@ def load_config():
             "file_bookmark": 121
         },
         "show_collapse_indicators": True,
-        "extension_icons": default_icons,
-        "icon_colors": default_colors
+        "extension_icons": default_icons
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -266,8 +237,6 @@ def load_config():
                     config["show_collapse_indicators"] = data["show_collapse_indicators"]
                 if "extension_icons" in data:
                     config["extension_icons"] = data["extension_icons"]
-                if "icon_colors" in data:
-                    config["icon_colors"] = data["icon_colors"]
         except:
             pass
             
@@ -276,7 +245,7 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data or "icon_colors" not in data:
+            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data:
                 save_config(config)
         except:
             pass
@@ -544,6 +513,84 @@ def select_color(category_name):
             pass
     return None
 
+def manage_icon_colors_menu():
+    ctypes.windll.kernel32.SetConsoleTitleW("Runner - Icon Colors Configuration")
+    
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+    while True:
+        config = load_config()
+        icon_map = config.get("extension_icons", {})
+        
+        pad = "  "
+        options = []
+        for ext, entry in sorted(icon_map.items()):
+            icon = ""
+            color = 250
+            if isinstance(entry, dict):
+                icon = entry.get("icon", "")
+                color = entry.get("color", 250)
+            else:
+                icon = entry
+            
+            options.append(f"{pad}{ext:<10} {icon}  (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
+            
+        options.append(f"{pad}{esc('#808080')}Return to Theme Colors Menu\x1b[0m")
+        
+        fzf = subprocess.Popen(
+            [
+                "fzf", 
+                "--ansi",
+                "--prompt=Icon Colors > ", 
+                "--layout=reverse", 
+                "--border", 
+                "--header=Configure Icon Colors (Select extension/folder to change)",
+                "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, _ = fzf.communicate(input="\n".join(options))
+        if not stdout or fzf.returncode != 0:
+            break
+            
+        choice = ansi_escape.sub('', stdout.strip())
+        if "Return to Theme Colors Menu" in choice:
+            break
+            
+        parts = choice.split()
+        if parts:
+            ext_key = parts[0]
+            if ext_key in icon_map:
+                color = select_color(f"Icon: {ext_key}")
+                if color is not None:
+                    entry = icon_map[ext_key]
+                    if isinstance(entry, dict):
+                        entry["color"] = color
+                    else:
+                        icon_map[ext_key] = {"icon": entry, "color": color}
+                    save_config(config)
+
 def manage_colors_menu():
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Theme Color Configuration")
     
@@ -582,6 +629,7 @@ def manage_colors_menu():
             f"{pad}{esc('#00f0ff')}Bookmark Folder Color\x1b[0m (Current: \x1b[38;5;{theme.get('folder_bookmark', 51)}m{theme.get('folder_bookmark', 51)}\x1b[0m)",
             f"{pad}{esc('#ffffff')}Normal File Color\x1b[0m (Current: \x1b[38;5;{theme.get('file_normal', 250)}m{theme.get('file_normal', 250)}\x1b[0m)",
             f"{pad}{esc('#ff934b')}Bookmark File Color\x1b[0m (Current: \x1b[38;5;{theme.get('file_bookmark', 121)}m{theme.get('file_bookmark', 121)}\x1b[0m)",
+            f"{pad}{esc('#d782ff')}Configure Icon Colors\x1b[0m",
             f"{pad}{esc('#ff5757')}Reset to Default Colors\x1b[0m",
             f"{pad}{esc('#808080')}Return to Main Menu\x1b[0m",
         ]
@@ -632,6 +680,9 @@ def manage_colors_menu():
             if color is not None:
                 config.setdefault("theme", {})["file_bookmark"] = color
                 save_config(config)
+                
+        elif "Configure Icon Colors" in choice:
+            manage_icon_colors_menu()
                 
         elif "Reset to Default" in choice:
             config["theme"] = {
@@ -940,7 +991,7 @@ def configure_menu():
         elif choice.startswith("[K]"):
             view_shortcuts_menu()
             
-        elif choice.startswith("󰘦"):
+        elif choice.startswith("[O]"):
             subprocess.run(["notepad.exe", CONFIG_FILE])
             
     # Restore original title
@@ -1357,60 +1408,32 @@ config = {{
     "view_mode": "full",
     "show_collapse_indicators": True,
     "extension_icons": {{
-        ".py": "🐍",
-        ".json": "⚙️",
-        ".md": "📝",
-        ".txt": "📄",
-        ".png": "🖼️",
-        ".jpg": "🖼️",
-        ".jpeg": "🖼️",
-        ".gif": "🖼️",
-        ".webp": "🖼️",
-        ".ico": "🎨",
-        ".svg": "🎨",
-        ".html": "🌐",
-        ".css": "🎨",
-        ".js": "📜",
-        ".ts": "📜",
-        ".cpp": "⚙️",
-        ".h": "⚙️",
-        ".cs": "⚙️",
-        ".go": "🐹",
-        ".rs": "🦀",
-        ".pdf": "📕",
-        ".zip": "📦",
-        ".tar": "📦",
-        ".gz": "📦",
-        ".7z": "📦",
-        "folder": "📁"
-    }},
-    "icon_colors": {{
-        ".py": 220,
-        ".json": 215,
-        ".md": 39,
-        ".txt": 250,
-        ".png": 197,
-        ".jpg": 197,
-        ".jpeg": 197,
-        ".gif": 197,
-        ".webp": 197,
-        ".ico": 39,
-        ".svg": 39,
-        ".html": 202,
-        ".css": 39,
-        ".js": 220,
-        ".ts": 39,
-        ".cpp": 110,
-        ".h": 110,
-        ".cs": 110,
-        ".go": 81,
-        ".rs": 208,
-        ".pdf": 196,
-        ".zip": 220,
-        ".tar": 220,
-        ".gz": 220,
-        ".7z": 220,
-        "folder": 208
+        ".py": {{"icon": "🐍", "color": 220}},
+        ".json": {{"icon": "⚙️", "color": 215}},
+        ".md": {{"icon": "📝", "color": 39}},
+        ".txt": {{"icon": "📄", "color": 250}},
+        ".png": {{"icon": "🖼️", "color": 197}},
+        ".jpg": {{"icon": "🖼️", "color": 197}},
+        ".jpeg": {{"icon": "🖼️", "color": 197}},
+        ".gif": {{"icon": "🖼️", "color": 197}},
+        ".webp": {{"icon": "🖼️", "color": 197}},
+        ".ico": {{"icon": "🎨", "color": 39}},
+        ".svg": {{"icon": "🎨", "color": 39}},
+        ".html": {{"icon": "🌐", "color": 202}},
+        ".css": {{"icon": "🎨", "color": 39}},
+        ".js": {{"icon": "📜", "color": 220}},
+        ".ts": {{"icon": "📜", "color": 39}},
+        ".cpp": {{"icon": "⚙️", "color": 110}},
+        ".h": {{"icon": "⚙️", "color": 110}},
+        ".cs": {{"icon": "⚙️", "color": 110}},
+        ".go": {{"icon": "🐹", "color": 81}},
+        ".rs": {{"icon": "🦀", "color": 208}},
+        ".pdf": {{"icon": "📕", "color": 196}},
+        ".zip": {{"icon": "📦", "color": 220}},
+        ".tar": {{"icon": "📦", "color": 220}},
+        ".gz": {{"icon": "📦", "color": 220}},
+        ".7z": {{"icon": "📦", "color": 220}},
+        "folder": {{"icon": "📁", "color": 208}}
     }}
 }}
 if os.path.exists(config_file):
@@ -1422,7 +1445,6 @@ if os.path.exists(config_file):
             if "view_mode" in data: config["view_mode"] = data["view_mode"]
             if "show_collapse_indicators" in data: config["show_collapse_indicators"] = data["show_collapse_indicators"]
             if "extension_icons" in data: config["extension_icons"] = data["extension_icons"]
-            if "icon_colors" in data: config["icon_colors"] = data["icon_colors"]
     except: pass
 
 view_mode = config["view_mode"]
@@ -1470,30 +1492,41 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
         
     marker = "* " if is_bookmarked else ""
     
-    # Determine colors
+    # Determine colors and icons
+    icon = ""
+    icon_map = config.get("extension_icons", {{}})
+    
     if is_dir:
         if is_bookmarked:
             line_color = theme['folder_bookmark']
         else:
             line_color = theme['folder_normal']
-        icon_color = config.get("icon_colors", {{}}).get("folder", line_color)
+            
+        entry = icon_map.get("folder", {{}})
+        if isinstance(entry, dict):
+            folder_icon = entry.get("icon", "📁")
+            icon_color = entry.get("color", line_color)
+        else:
+            folder_icon = entry
+            icon_color = line_color
+            
+        if folder_icon:
+            icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m "
     else:
         if is_bookmarked:
             line_color = theme['file_bookmark']
         else:
             line_color = theme['file_normal']
+            
         ext = os.path.splitext(full_path)[1].lower()
-        icon_color = config.get("icon_colors", {{}}).get(ext, line_color)
-
-    # Format icon with color override
-    icon = ""
-    if is_dir:
-        folder_icon = config.get("extension_icons", {{}}).get("folder", "📁")
-        if folder_icon:
-            icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m "
-    else:
-        ext = os.path.splitext(full_path)[1].lower()
-        file_icon = config.get("extension_icons", {{}}).get(ext, "📄")
+        entry = icon_map.get(ext, {{}})
+        if isinstance(entry, dict):
+            file_icon = entry.get("icon", "📄")
+            icon_color = entry.get("color", line_color)
+        else:
+            file_icon = entry
+            icon_color = line_color
+            
         if file_icon:
             icon = f"\033[38;5;{{icon_color}}m{{file_icon}}\033[38;5;{{line_color}}m "
         
