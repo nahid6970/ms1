@@ -547,9 +547,9 @@ def format_display(full_path, is_bookmarked, depth=0):
     
     indicator = ""
     if is_dir:
-        indicator = " [+]" if is_collapsed else " [-]"
+        indicator = "[+] " if is_collapsed else "[-] "
         
-    marker = f"{{indent}}* " if is_bookmarked else f"{{indent}}  "
+    marker = f"{{indent}}* " if is_bookmarked else f"{{indent}}"
     
     custom_name = ""
     if is_bookmarked:
@@ -558,7 +558,7 @@ def format_display(full_path, is_bookmarked, depth=0):
             custom_name = bm.get('name', '')
 
     if custom_name:
-        display = f"{{marker}}{{custom_name}}{{indicator}}"
+        display = f"{{marker}}{{indicator}}{{custom_name}}"
     elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
@@ -567,9 +567,9 @@ def format_display(full_path, is_bookmarked, depth=0):
             parent = ""
         else:
             parent = os.path.basename(os.path.dirname(path_norm))
-        display = f"{{marker}}{{name}}{{indicator}} ({{parent}})"
+        display = f"{{marker}}{{indicator}}{{name}} ({{parent}})"
     else:
-        display = f"{{marker}}{{full_path}}{{indicator}}"
+        display = f"{{marker}}{{indicator}}{{full_path}}"
     
     if is_dir:
         if is_bookmarked:
