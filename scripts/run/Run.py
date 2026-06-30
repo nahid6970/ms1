@@ -761,7 +761,7 @@ def configure_menu():
             f"{pad}{esc('#faf069')}[I] Configure Ignored Patterns\x1b[0m",
             f"{pad}{esc('#00f0ff')}[C] Configure Theme Colors\x1b[0m",
             f"{pad}{esc('#ff934b')}[F] Configure Console Font\x1b[0m",
-            f"{pad}{esc('#3a3a3a')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
+            f"{pad}{esc('#d782ff')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
             f"{pad}{esc('#ff5757')}[K] View Keyboard Shortcuts\x1b[0m",
             f"{pad}{esc('#ffffff')}[O] Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}[X] Exit Configuration\x1b[0m",
