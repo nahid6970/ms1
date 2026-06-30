@@ -14,6 +14,40 @@ BOOKMARKS_FILE = os.path.join(script_dir, "bookmarks.json")
 COLLAPSED_FILE = os.path.join(script_dir, "collapsed.json")
 CONFIG_FILE = os.path.join(script_dir, "config.json")
 
+# Apply saved font face and size if present
+try:
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            cfg = json.load(f)
+            theme = cfg.get("theme", {})
+            font_face = theme.get("font_face", None)
+            font_size = theme.get("font_size", 16)
+            if font_face:
+                LF_FACESIZE = 32
+                STD_OUTPUT_HANDLE = -11
+                class COORD(ctypes.Structure):
+                    _fields_ = [("X", ctypes.c_short), ("Y", ctypes.c_short)]
+                class CONSOLE_FONT_INFOEX(ctypes.Structure):
+                    _fields_ = [
+                        ("cbSize", ctypes.c_ulong),
+                        ("nFont", ctypes.c_ulong),
+                        ("dwFontSize", COORD),
+                        ("FontFamily", ctypes.c_uint),
+                        ("FontWeight", ctypes.c_uint),
+                        ("FaceName", ctypes.c_wchar * LF_FACESIZE)
+                    ]
+                handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+                font_info = CONSOLE_FONT_INFOEX()
+                font_info.cbSize = ctypes.sizeof(CONSOLE_FONT_INFOEX)
+                font_info.dwFontSize.X = 0
+                font_info.dwFontSize.Y = font_size
+                font_info.FontFamily = 54
+                font_info.FontWeight = 400
+                font_info.FaceName = font_face
+                ctypes.windll.kernel32.SetCurrentConsoleFontEx(handle, False, ctypes.byref(font_info))
+except:
+    pass
+
 def toggle_collapse(file_path):
     if not os.path.isdir(file_path):
         return
@@ -509,6 +543,176 @@ def view_shortcuts_menu():
     )
     fzf.communicate(input="\n".join(shortcuts))
 
+def get_installed_fonts():
+    import winreg
+    fonts = set()
+    try:
+        reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path) as key:
+            for i in range(winreg.QueryInfoKey(key)[1]):
+                name, _, _ = winreg.EnumValue(key, i)
+                clean_name = name.split("(")[0].strip()
+                for suffix in ["Bold", "Italic", "Regular", "Semibold", "Light", "Oblique"]:
+                    if clean_name.endswith(" " + suffix):
+                        clean_name = clean_name[:-len(" " + suffix)].strip()
+                if clean_name:
+                    fonts.add(clean_name)
+    except:
+        pass
+    if not fonts:
+        fonts = {"Consolas", "Cascadia Code", "Lucida Console", "Courier New", "Fira Code", "JetBrains Mono"}
+    return sorted(list(fonts))
+
+def set_console_font(font_name, font_size=16):
+    try:
+        LF_FACESIZE = 32
+        STD_OUTPUT_HANDLE = -11
+        
+        class COORD(ctypes.Structure):
+            _fields_ = [("X", ctypes.c_short), ("Y", ctypes.c_short)]
+
+        class CONSOLE_FONT_INFOEX(ctypes.Structure):
+            _fields_ = [
+                ("cbSize", ctypes.c_ulong),
+                ("nFont", ctypes.c_ulong),
+                ("dwFontSize", COORD),
+                ("FontFamily", ctypes.c_uint),
+                ("FontWeight", ctypes.c_uint),
+                ("FaceName", ctypes.c_wchar * LF_FACESIZE)
+            ]
+            
+        handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+        font_info = CONSOLE_FONT_INFOEX()
+        font_info.cbSize = ctypes.sizeof(CONSOLE_FONT_INFOEX)
+        
+        font_info.dwFontSize.X = 0
+        font_info.dwFontSize.Y = font_size
+        font_info.FontFamily = 54
+        font_info.FontWeight = 400
+        font_info.FaceName = font_name
+        
+        ctypes.windll.kernel32.SetCurrentConsoleFontEx(handle, False, ctypes.byref(font_info))
+    except:
+        pass
+
+def manage_font_menu():
+    ctypes.windll.kernel32.SetConsoleTitleW("Runner - Console Font Configuration")
+    
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+    while True:
+        config = load_config()
+        theme = config.setdefault("theme", {})
+        curr_font = theme.get("font_face", "Default Console Font")
+        curr_size = theme.get("font_size", 16)
+        
+        pad = "  "
+        options = [
+            f"{pad}{esc('#9efa49')}Select Font Family\x1b[0m (Current: {curr_font})",
+            f"{pad}{esc('#00f0ff')}Select Font Size\x1b[0m (Current: {curr_size}pt)",
+            f"{pad}{esc('#ff5757')}Reset Font to Default\x1b[0m",
+            f"{pad}{esc('#808080')}Return to Main Menu\x1b[0m",
+        ]
+        
+        fzf = subprocess.Popen(
+            [
+                "fzf", 
+                "--ansi",
+                "--prompt=Font Config > ", 
+                "--layout=reverse", 
+                "--border", 
+                "--header=Configure Console Font (Applies to classic conhost sessions)",
+                "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, _ = fzf.communicate(input="\n".join(options))
+        if not stdout or fzf.returncode != 0:
+            break
+            
+        choice = ansi_escape.sub('', stdout.strip())
+        if "Return to Main Menu" in choice:
+            break
+            
+        elif "Select Font Family" in choice:
+            fonts = get_installed_fonts()
+            fzf_font = subprocess.Popen(
+                [
+                    "fzf",
+                    "--prompt=Select Font Family > ",
+                    "--layout=reverse",
+                    "--border",
+                    "--header=Search and select system font",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            out_font, _ = fzf_font.communicate(input="\n".join(fonts))
+            if out_font and fzf_font.returncode == 0:
+                selected_font = out_font.strip()
+                theme["font_face"] = selected_font
+                save_config(config)
+                set_console_font(selected_font, curr_size)
+                print(f"\033[92mApplied font: {selected_font}\033[0m")
+                import time; time.sleep(1.0)
+                
+        elif "Select Font Size" in choice:
+            sizes = ["10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "32", "36", "40"]
+            fzf_size = subprocess.Popen(
+                [
+                    "fzf",
+                    "--prompt=Select Font Size > ",
+                    "--layout=reverse",
+                    "--border",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            out_size, _ = fzf_size.communicate(input="\n".join(sizes))
+            if out_size and fzf_size.returncode == 0:
+                selected_size = int(out_size.strip())
+                theme["font_size"] = selected_size
+                save_config(config)
+                if "font_face" in theme:
+                    set_console_font(theme["font_face"], selected_size)
+                print(f"\033[92mApplied font size: {selected_size}pt\033[0m")
+                import time; time.sleep(1.0)
+                
+        elif "Reset Font" in choice:
+            if "font_face" in theme:
+                del theme["font_face"]
+            theme["font_size"] = 16
+            save_config(config)
+            print("\033[92mReset font configuration to default.\033[0m")
+            import time; time.sleep(1.0)
+
 def configure_menu():
     # Setup terminal title
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Configuration Menu")
@@ -541,6 +745,7 @@ def configure_menu():
             f"{pad}{esc('#9efa49')} Configure Search Roots (Directories)\x1b[0m",
             f"{pad}{esc('#faf069')}󰗉 Configure Ignored Patterns\x1b[0m",
             f"{pad}{esc('#00f0ff')} Configure Theme Colors\x1b[0m",
+            f"{pad}{esc('#ff934b')} Configure Console Font\x1b[0m",
             f"{pad}{esc('#ff5757')}󰌌 View Keyboard Shortcuts\x1b[0m",
             f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
@@ -578,6 +783,9 @@ def configure_menu():
             
         elif choice.startswith(""):
             manage_colors_menu()
+            
+        elif choice.startswith(""):
+            manage_font_menu()
             
         elif choice.startswith("󰌌"):
             view_shortcuts_menu()
