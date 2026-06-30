@@ -654,7 +654,11 @@ def manage_icon_colors_menu():
             else:
                 icon = entry
             
-            options.append(f"{pad}{ext:<10} {icon}  (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
+            icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in icon)
+            icon_pad = " " * max(1, 3 - icon_width)
+            colored_icon = f"\x1b[38;5;{color}m{icon}\x1b[0m{icon_pad}"
+            
+            options.append(f"{pad}{ext:<10} {colored_icon} (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
             
         options.append(f"{pad}{esc('#808080')}Return to Theme Colors Menu\x1b[0m")
         
@@ -1627,7 +1631,9 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             icon_color = line_color
             
         if folder_icon:
-            icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m "
+            icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in folder_icon)
+            padding = " " * max(1, 3 - icon_width)
+            icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m{{padding}}"
     else:
         if is_bookmarked:
             line_color = theme['file_bookmark']
@@ -1644,7 +1650,9 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             icon_color = line_color
             
         if file_icon:
-            icon = f"\033[38;5;{{icon_color}}m{{file_icon}}\033[38;5;{{line_color}}m "
+            icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in file_icon)
+            padding = " " * max(1, 3 - icon_width)
+            icon = f"\033[38;5;{{icon_color}}m{{file_icon}}\033[38;5;{{line_color}}m{{padding}}"
         
     custom_name = ""
     if is_bookmarked:
