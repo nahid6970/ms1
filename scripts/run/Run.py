@@ -105,6 +105,27 @@ def configure_menu():
     # Setup terminal title
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Configuration Menu")
     
+    # ANSI RGB helpers
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    
     while True:
         # Load config
         config = {
@@ -125,20 +146,29 @@ def configure_menu():
             except:
                 pass
                 
-        # Main configuration options
+        # Styled Configuration options
+        pad = "  "
         options = [
-            "1. Add Search Root (Directory)",
-            "2. Toggle Search Root (Enable/Disable)",
-            "3. Delete Search Root",
-            "4. Add Ignored Pattern (e.g. .venv)",
-            "5. Remove Ignored Pattern",
-            "6. Open Config JSON in Notepad",
-            "7. Exit Configuration"
+            f"{pad}{esc('#9efa49')} Add Search Root (Directory)\x1b[0m",
+            f"{pad}{esc('#00f0ff')}󰔡 Toggle Search Root (Enable/Disable)\x1b[0m",
+            f"{pad}{esc('#ff5757')}󰆴 Delete Search Root\x1b[0m",
+            f"{pad}{esc('#faf069')}󰗉 Add Ignored Pattern (e.g. .venv)\x1b[0m",
+            f"{pad}{esc('#ff934b')}󰗊 Remove Ignored Pattern\x1b[0m",
+            f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
+            f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
         ]
         
         # Run FZF to choose option
         fzf = subprocess.Popen(
-            ["fzf", "--prompt=Config Menu > ", "--layout=reverse", "--border", "--header=Runner Terminal Configurator"],
+            [
+                "fzf", 
+                "--ansi",
+                "--prompt=Config Menu > ", 
+                "--layout=reverse", 
+                "--border", 
+                "--header=Runner Terminal Configurator",
+                "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+            ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             text=True,
@@ -148,11 +178,11 @@ def configure_menu():
         if not stdout or fzf.returncode != 0:
             break
             
-        choice = stdout.strip()
-        if "7. Exit" in choice:
+        choice = ansi_escape.sub('', stdout.strip())
+        if "Exit Configuration" in choice or choice.startswith("󰩈"):
             break
             
-        elif "1. Add Search" in choice:
+        elif choice.startswith(""):
             print("\n" * 2)
             path = input("Enter directory path to add: ").strip()
             if path:
@@ -166,7 +196,7 @@ def configure_menu():
                     print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
             import time; time.sleep(1.5)
             
-        elif "2. Toggle Search" in choice:
+        elif choice.startswith("󰔡"):
             roots = config["search_roots"]
             if not roots:
                 print("\nNo search roots defined.")
@@ -174,10 +204,19 @@ def configure_menu():
                 continue
             root_options = []
             for path, enabled in roots.items():
-                status = "Enabled" if enabled else "Disabled"
-                root_options.append(f"{path} ({status})")
+                if enabled:
+                    root_options.append(f"  {esc('#9efa49')}󰄵\x1b[0m  {path}")
+                else:
+                    root_options.append(f"  {esc('#808080')}󰄱\x1b[0m  {path}")
             fzf_toggle = subprocess.Popen(
-                ["fzf", "--prompt=Select root to toggle (Enable/Disable) > ", "--layout=reverse", "--border"],
+                [
+                    "fzf", 
+                    "--ansi",
+                    "--prompt=Select root to toggle (Enable/Disable) > ", 
+                    "--layout=reverse", 
+                    "--border",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
@@ -185,20 +224,28 @@ def configure_menu():
             )
             out_toggle, _ = fzf_toggle.communicate(input="\n".join(root_options))
             if out_toggle and fzf_toggle.returncode == 0:
-                selected_path = out_toggle.strip().rsplit(" (", 1)[0]
+                clean_sel = ansi_escape.sub('', out_toggle.strip())
+                selected_path = clean_sel[3:]
                 if selected_path in roots:
                     roots[selected_path] = not roots[selected_path]
                     save_config(config)
                 
-        elif "3. Delete Search" in choice:
+        elif choice.startswith("󰆴"):
             roots = config["search_roots"]
             if not roots:
                 print("\nNo search roots defined.")
                 import time; time.sleep(1.5)
                 continue
-            root_options = list(roots.keys())
+            root_options = [f"  {esc('#ff5757')}󰆴\x1b[0m  {path}" for path in roots.keys()]
             fzf_del = subprocess.Popen(
-                ["fzf", "--prompt=Select root to DELETE > ", "--layout=reverse", "--border"],
+                [
+                    "fzf", 
+                    "--ansi",
+                    "--prompt=Select root to DELETE > ", 
+                    "--layout=reverse", 
+                    "--border",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
@@ -206,14 +253,15 @@ def configure_menu():
             )
             out_del, _ = fzf_del.communicate(input="\n".join(root_options))
             if out_del and fzf_del.returncode == 0:
-                selected_path = out_del.strip()
+                clean_sel = ansi_escape.sub('', out_del.strip())
+                selected_path = clean_sel[3:]
                 if selected_path in roots:
                     del roots[selected_path]
                     save_config(config)
                     print(f"\033[91mDeleted search root: {selected_path}\033[0m")
                     import time; time.sleep(1.0)
                     
-        elif "4. Add Ignored" in choice:
+        elif choice.startswith("󰗉"):
             print("\n" * 2)
             pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
             if pattern:
@@ -222,29 +270,38 @@ def configure_menu():
                 print(f"\033[92mAdded to ignore list: {pattern}\033[0m")
             import time; time.sleep(1.5)
             
-        elif "5. Remove Ignored" in choice:
+        elif choice.startswith("󰗊"):
             ignored = [k for k, v in config["visibility"].items() if v == False]
             if not ignored:
                 print("\nNo ignored patterns defined.")
                 import time; time.sleep(1.5)
                 continue
+            ignore_options = [f"  {esc('#ff934b')}󰗊\x1b[0m  {pattern}" for pattern in ignored]
             fzf_ig = subprocess.Popen(
-                ["fzf", "--prompt=Select pattern to REMOVE from ignore list > ", "--layout=reverse", "--border"],
+                [
+                    "fzf", 
+                    "--ansi",
+                    "--prompt=Select pattern to REMOVE from ignore list > ", 
+                    "--layout=reverse", 
+                    "--border",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
                 encoding='utf-8'
             )
-            out_ig, _ = fzf_ig.communicate(input="\n".join(ignored))
+            out_ig, _ = fzf_ig.communicate(input="\n".join(ignore_options))
             if out_ig and fzf_ig.returncode == 0:
-                selected_pattern = out_ig.strip()
+                clean_sel = ansi_escape.sub('', out_ig.strip())
+                selected_pattern = clean_sel[3:]
                 if selected_pattern in config["visibility"]:
                     config["visibility"][selected_pattern] = True
                     save_config(config)
                     print(f"\033[92mRemoved pattern from ignore list: {selected_pattern}\033[0m")
                     import time; time.sleep(1.0)
                     
-        elif "6. Open Config" in choice:
+        elif choice.startswith("󰘦"):
             subprocess.run(["notepad.exe", CONFIG_FILE])
             
     # Restore original title
