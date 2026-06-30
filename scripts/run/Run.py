@@ -506,8 +506,9 @@ if os.path.exists(bookmarks_file):
         bookmarks = []
 
 # Helper function to format display
-def format_display(full_path, is_bookmarked):
-    marker = "* " if is_bookmarked else "  "
+def format_display(full_path, is_bookmarked, depth=0):
+    indent = "  " * depth
+    marker = f"{{indent}}* " if is_bookmarked else "  "
     is_dir = os.path.isdir(full_path)
     
     custom_name = ""
@@ -542,12 +543,53 @@ def format_display(full_path, is_bookmarked):
     
     return display
 
-# Output bookmarked files first
-printed_paths = set()
+# Helper to check if child is descendant of parent
+def is_descendant(parent_path, child_path):
+    p = os.path.normpath(parent_path).lower()
+    c = os.path.normpath(child_path).lower()
+    if p == c:
+        return False
+    return c.startswith(p + os.sep) or (p.endswith(os.sep) and c.startswith(p))
+
+# Deduplicate bookmarks by path (case-insensitive, normalized)
+seen_bms = set()
+unique_bookmarks = []
 for bm_item in bookmarks:
+    p_norm = os.path.normpath(bm_item['path']).lower()
+    if p_norm not in seen_bms:
+        seen_bms.add(p_norm)
+        unique_bookmarks.append(bm_item)
+bookmarks = unique_bookmarks
+
+# Build hierarchy
+roots = []
+children_map = {{}}
+for bm_item in bookmarks:
+    path = bm_item['path']
+    ancestors = [other for other in bookmarks if is_descendant(other['path'], path)]
+    if not ancestors:
+        roots.append(bm_item)
+    else:
+        # closest ancestor has the longest path
+        closest = max(ancestors, key=lambda x: len(x['path']))
+        children_map.setdefault(closest['path'], []).append(bm_item)
+
+# Traverse tree and collect ordered bookmarks with depths
+ordered_bookmarks = []
+def traverse(bm_item, depth):
+    ordered_bookmarks.append((bm_item, depth))
+    for child in children_map.get(bm_item['path'], []):
+        traverse(child, depth + 1)
+
+for root in roots:
+    traverse(root, 0)
+
+# Output bookmarked files first in tree order
+printed_paths = set()
+for bm_item, depth in ordered_bookmarks:
     bm = bm_item['path']
     if os.path.exists(bm):
-        display = format_display(bm, True)
+        display = format_display(bm, True, depth)
         print(f"{{display}}\\t{{bm}}")
         printed_paths.add(bm)
 
