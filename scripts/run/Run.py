@@ -768,6 +768,7 @@ if __name__ == "__main__":
             "--ansi",
             "--multi",
             "--no-sort",
+            "--exact",
             "--with-nth=1",
             "--delimiter=\t",
             "--prompt=Search [?] > ",
