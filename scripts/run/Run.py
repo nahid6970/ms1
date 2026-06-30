@@ -6,8 +6,10 @@ import json
 import ctypes
 
 ctypes.windll.kernel32.SetConsoleTitleW("RUNNER")
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
+script_path = os.path.abspath(__file__)
 BOOKMARKS_FILE = os.path.join(script_dir, "bookmarks.json")
 COLLAPSED_FILE = os.path.join(script_dir, "collapsed.json")
 CONFIG_FILE = os.path.join(script_dir, "config.json")
@@ -94,12 +96,231 @@ def move_bookmark(file_path, direction):
             json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
 
+def load_config():
+    config = {
+        "search_roots": {},
+        "visibility": {
+            ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
+            ".vscode": False, "obj": False, "bin": False
+        }
+    }
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if "search_roots" in data:
+                    config["search_roots"] = data["search_roots"]
+                if "visibility" in data:
+                    config["visibility"] = data["visibility"]
+        except:
+            pass
+    return config
+
 def save_config(config):
     dir_path = os.path.dirname(CONFIG_FILE)
     if dir_path:
         os.makedirs(dir_path, exist_ok=True)
     with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
+
+def list_roots():
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    print(f"  {esc('#9efa49')}[+] Add New Search Root\x1b[0m")
+    
+    config = load_config()
+    roots = config.get("search_roots", {})
+    for path, enabled in roots.items():
+        if enabled:
+            print(f"  {esc('#9efa49')}󰄵\x1b[0m  {path}")
+        else:
+            print(f"  {esc('#808080')}󰄱\x1b[0m  {path}")
+
+def toggle_root(selected_line):
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    clean_line = ansi_escape.sub('', selected_line).strip()
+    
+    if clean_line.startswith("[+]"):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("\n" * 2)
+        path = input("Enter directory path to add: ").strip()
+        if path:
+            path = path.strip('\'"')
+            if os.path.isdir(path):
+                abs_path = os.path.abspath(path)
+                config = load_config()
+                config.setdefault("search_roots", {})[abs_path] = True
+                save_config(config)
+                print(f"\033[92mSuccessfully added search root: {abs_path}\033[0m")
+            else:
+                print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
+            import time; time.sleep(1.5)
+    else:
+        clean_sel = clean_line[3:]
+        config = load_config()
+        roots = config.get("search_roots", {})
+        if clean_sel in roots:
+            roots[clean_sel] = not roots[clean_sel]
+            save_config(config)
+
+def delete_root(selected_line):
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    clean_line = ansi_escape.sub('', selected_line).strip()
+    
+    if not clean_line.startswith("[+]"):
+        clean_sel = clean_line[3:]
+        config = load_config()
+        roots = config.get("search_roots", {})
+        if clean_sel in roots:
+            del roots[clean_sel]
+            save_config(config)
+
+def list_ignores():
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    print(f"  {esc('#faf069')}[+] Add New Ignored Pattern\x1b[0m")
+    
+    config = load_config()
+    visibility = config.get("visibility", {})
+    for pattern, visible in visibility.items():
+        if not visible:
+            print(f"  {esc('#ff934b')}󰄵\x1b[0m  {pattern} (Ignored)")
+        else:
+            print(f"  {esc('#808080')}󰄱\x1b[0m  {pattern} (Visible)")
+
+def toggle_ignore(selected_line):
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    clean_line = ansi_escape.sub('', selected_line).strip()
+    
+    if clean_line.startswith("[+]"):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("\n" * 2)
+        pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
+        if pattern:
+            config = load_config()
+            config.setdefault("visibility", {})[pattern] = False
+            save_config(config)
+            print(f"\033[92mSuccessfully added to ignore list: {pattern}\033[0m")
+            import time; time.sleep(1.5)
+    else:
+        clean_pat = clean_line[3:]
+        if " (" in clean_pat:
+            pattern = clean_pat.rsplit(" (", 1)[0]
+            config = load_config()
+            visibility = config.get("visibility", {})
+            if pattern in visibility:
+                visibility[pattern] = not visibility[pattern]
+                save_config(config)
+
+def delete_ignore(selected_line):
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    clean_line = ansi_escape.sub('', selected_line).strip()
+    
+    if not clean_line.startswith("[+]"):
+        clean_pat = clean_line[3:]
+        if " (" in clean_pat:
+            pattern = clean_pat.rsplit(" (", 1)[0]
+            config = load_config()
+            visibility = config.get("visibility", {})
+            if pattern in visibility:
+                del visibility[pattern]
+                save_config(config)
+
+def manage_roots_menu():
+    fzf_args = [
+        "fzf",
+        "--ansi",
+        "--prompt=Manage Search Roots > ",
+        "--layout=reverse",
+        "--border",
+        "--header=Enter: Toggle/Add  |  Alt-D/Del: Delete",
+        f"--bind=enter:execute(python \"{script_path}\" --toggle-root {{}})+reload(python \"{script_path}\" --list-roots)",
+        f"--bind=alt-d:execute(python \"{script_path}\" --delete-root {{}})+reload(python \"{script_path}\" --list-roots)",
+        f"--bind=del:execute(python \"{script_path}\" --delete-root {{}})+reload(python \"{script_path}\" --list-roots)",
+        "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+    ]
+    
+    p_feed = subprocess.Popen(
+        ["python", script_path, "--list-roots"],
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    
+    p_fzf = subprocess.Popen(
+        fzf_args,
+        stdin=p_feed.stdout,
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    p_feed.stdout.close()
+    p_fzf.communicate()
+
+def manage_ignores_menu():
+    fzf_args = [
+        "fzf",
+        "--ansi",
+        "--prompt=Manage Ignored Patterns > ",
+        "--layout=reverse",
+        "--border",
+        "--header=Enter: Toggle/Add  |  Alt-D/Del: Delete",
+        f"--bind=enter:execute(python \"{script_path}\" --toggle-ignore {{}})+reload(python \"{script_path}\" --list-ignores)",
+        f"--bind=alt-d:execute(python \"{script_path}\" --delete-ignore {{}})+reload(python \"{script_path}\" --list-ignores)",
+        f"--bind=del:execute(python \"{script_path}\" --delete-ignore {{}})+reload(python \"{script_path}\" --list-ignores)",
+        "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+    ]
+    
+    p_feed = subprocess.Popen(
+        ["python", script_path, "--list-ignores"],
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    
+    p_fzf = subprocess.Popen(
+        fzf_args,
+        stdin=p_feed.stdout,
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    p_feed.stdout.close()
+    p_fzf.communicate()
 
 def configure_menu():
     # Setup terminal title
@@ -127,37 +348,12 @@ def configure_menu():
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     
     while True:
-        # Load config
-        config = {
-            "search_roots": {},
-            "visibility": {
-                ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
-                ".vscode": False, "obj": False, "bin": False
-            }
-        }
-        if os.path.exists(CONFIG_FILE):
-            try:
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    if "search_roots" in data:
-                        config["search_roots"] = data["search_roots"]
-                    if "visibility" in data:
-                        config["visibility"] = data["visibility"]
-            except:
-                pass
-                
-        # Styled Configuration options (using tree connectors)
+        # Styled Configuration options
         pad = "  "
         options = [
-            f"{pad}{esc('#00f0ff')}[-] Search Roots\x1b[0m",
-            f"{pad}├── {esc('#9efa49')} Add Search Root (Directory)\x1b[0m",
-            f"{pad}├── {esc('#00f0ff')}󰔡 Toggle Search Root (Enable/Disable)\x1b[0m",
-            f"{pad}└── {esc('#ff5757')}󰆴 Delete Search Root\x1b[0m",
-            f"{pad}{esc('#faf069')}[-] Ignored Patterns\x1b[0m",
-            f"{pad}├── {esc('#faf069')}󰗉 Add Ignored Pattern (e.g. .venv)\x1b[0m",
-            f"{pad}└── {esc('#ff934b')}󰗊 Remove Ignored Pattern\x1b[0m",
-            f"{pad}{esc('#ffffff')}[-] Configuration File\x1b[0m",
-            f"{pad}└── {esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
+            f"{pad}{esc('#9efa49')} Configure Search Roots (Directories)\x1b[0m",
+            f"{pad}{esc('#faf069')}󰗉 Configure Ignored Patterns\x1b[0m",
+            f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
         ]
         
@@ -182,129 +378,16 @@ def configure_menu():
             break
             
         choice = ansi_escape.sub('', stdout.strip())
-        if "󰩈" in choice:
+        if "Exit Configuration" in choice or choice.startswith("󰩈"):
             break
             
-        elif "" in choice:
-            print("\n" * 2)
-            path = input("Enter directory path to add: ").strip()
-            if path:
-                path = path.strip('\'"')
-                if os.path.isdir(path):
-                    abs_path = os.path.abspath(path)
-                    config["search_roots"][abs_path] = True
-                    save_config(config)
-                    print(f"\033[92mSuccessfully added search root: {abs_path}\033[0m")
-                else:
-                    print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
-            import time; time.sleep(1.5)
+        elif choice.startswith(""):
+            manage_roots_menu()
             
-        elif "󰔡" in choice:
-            roots = config["search_roots"]
-            if not roots:
-                print("\nNo search roots defined.")
-                import time; time.sleep(1.5)
-                continue
-            root_options = []
-            for path, enabled in roots.items():
-                if enabled:
-                    root_options.append(f"  {esc('#9efa49')}󰄵\x1b[0m  {path}")
-                else:
-                    root_options.append(f"  {esc('#808080')}󰄱\x1b[0m  {path}")
-            fzf_toggle = subprocess.Popen(
-                [
-                    "fzf", 
-                    "--ansi",
-                    "--prompt=Select root to toggle (Enable/Disable) > ", 
-                    "--layout=reverse", 
-                    "--border",
-                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                encoding='utf-8'
-            )
-            out_toggle, _ = fzf_toggle.communicate(input="\n".join(root_options))
-            if out_toggle and fzf_toggle.returncode == 0:
-                clean_sel = ansi_escape.sub('', out_toggle.strip())
-                selected_path = clean_sel[3:]
-                if selected_path in roots:
-                    roots[selected_path] = not roots[selected_path]
-                    save_config(config)
-                
-        elif "󰆴" in choice:
-            roots = config["search_roots"]
-            if not roots:
-                print("\nNo search roots defined.")
-                import time; time.sleep(1.5)
-                continue
-            root_options = [f"  {esc('#ff5757')}󰆴\x1b[0m  {path}" for path in roots.keys()]
-            fzf_del = subprocess.Popen(
-                [
-                    "fzf", 
-                    "--ansi",
-                    "--prompt=Select root to DELETE > ", 
-                    "--layout=reverse", 
-                    "--border",
-                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                encoding='utf-8'
-            )
-            out_del, _ = fzf_del.communicate(input="\n".join(root_options))
-            if out_del and fzf_del.returncode == 0:
-                clean_sel = ansi_escape.sub('', out_del.strip())
-                selected_path = clean_sel[3:]
-                if selected_path in roots:
-                    del roots[selected_path]
-                    save_config(config)
-                    print(f"\033[91mDeleted search root: {selected_path}\033[0m")
-                    import time; time.sleep(1.0)
-                    
-        elif "󰗉" in choice:
-            print("\n" * 2)
-            pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
-            if pattern:
-                config["visibility"][pattern] = False
-                save_config(config)
-                print(f"\033[92mAdded to ignore list: {pattern}\033[0m")
-            import time; time.sleep(1.5)
+        elif choice.startswith("󰗉"):
+            manage_ignores_menu()
             
-        elif "󰗊" in choice:
-            ignored = [k for k, v in config["visibility"].items() if v == False]
-            if not ignored:
-                print("\nNo ignored patterns defined.")
-                import time; time.sleep(1.5)
-                continue
-            ignore_options = [f"  {esc('#ff934b')}󰗊\x1b[0m  {pattern}" for pattern in ignored]
-            fzf_ig = subprocess.Popen(
-                [
-                    "fzf", 
-                    "--ansi",
-                    "--prompt=Select pattern to REMOVE from ignore list > ", 
-                    "--layout=reverse", 
-                    "--border",
-                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                encoding='utf-8'
-            )
-            out_ig, _ = fzf_ig.communicate(input="\n".join(ignore_options))
-            if out_ig and fzf_ig.returncode == 0:
-                clean_sel = ansi_escape.sub('', out_ig.strip())
-                selected_pattern = clean_sel[3:]
-                if selected_pattern in config["visibility"]:
-                    config["visibility"][selected_pattern] = True
-                    save_config(config)
-                    print(f"\033[92mRemoved pattern from ignore list: {selected_pattern}\033[0m")
-                    import time; time.sleep(1.0)
-                    
-        elif "󰘦" in choice:
+        elif choice.startswith("󰘦"):
             subprocess.run(["notepad.exe", CONFIG_FILE])
             
     # Restore original title
@@ -517,7 +600,6 @@ Start-Sleep -Milliseconds 500
             toggle_script_file = toggle_script.name
 
         # Get absolute paths for scripts
-        script_path = os.path.abspath(__file__)
         editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
 
         # Create the menu handler Python script
@@ -1133,6 +1215,24 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--configure":
             configure_menu()
+            sys.exit(0)
+        elif sys.argv[1] == "--list-roots":
+            list_roots()
+            sys.exit(0)
+        elif sys.argv[1] == "--toggle-root" and len(sys.argv) > 2:
+            toggle_root(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--delete-root" and len(sys.argv) > 2:
+            delete_root(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--list-ignores":
+            list_ignores()
+            sys.exit(0)
+        elif sys.argv[1] == "--toggle-ignore" and len(sys.argv) > 2:
+            toggle_ignore(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--delete-ignore" and len(sys.argv) > 2:
+            delete_ignore(sys.argv[2])
             sys.exit(0)
         elif sys.argv[1] == "--rename-bookmark" and len(sys.argv) > 2:
             rename_bookmark(sys.argv[2])
