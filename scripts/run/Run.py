@@ -33,6 +33,14 @@ def toggle_collapse(file_path):
     with open(COLLAPSED_FILE, 'w', encoding='utf-8') as f:
         json.dump(collapsed, f, indent=2, ensure_ascii=False)
 
+def reset_collapsed():
+    if os.path.exists(COLLAPSED_FILE):
+        try:
+            with open(COLLAPSED_FILE, 'w', encoding='utf-8') as f:
+                json.dump([], f)
+        except:
+            pass
+
 def toggle_bookmark(file_path):
     dir_path = os.path.dirname(BOOKMARKS_FILE)
     if dir_path:
@@ -119,9 +127,9 @@ def search_directories_and_files():
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
 │  F7: Configuration             Ctrl-H: Full Help GUI                      │
 │                                                                           │
-│  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Ctrl-N: Editor              │
-│  Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run   Alt-Up/Down: Move Bookmark  │
-│  Enter: Action Menu     Tab: Multi-select     ?: Toggle this header       │
+│  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Alt-E: Expand All           │
+│  Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run                 │
+│  Alt-Up/Down: Move Bookmark    Enter: Menu     Tab: Select   ?: Toggle    │
 └───────────────────────────────────────────────────────────────────────────┘"""
 
     # Create a state file to track preview mode (chafa vs quicklook)
@@ -549,7 +557,8 @@ def format_display(full_path, is_bookmarked, depth=0):
     if is_dir:
         indicator = "[+] " if is_collapsed else "[-] "
         
-    marker = f"{{indent}}* " if is_bookmarked else f"{{indent}}"
+    marker = "* " if is_bookmarked else ""
+    display_indent = f"{{indent}}"
     
     custom_name = ""
     if is_bookmarked:
@@ -558,7 +567,7 @@ def format_display(full_path, is_bookmarked, depth=0):
             custom_name = bm.get('name', '')
 
     if custom_name:
-        display = f"{{marker}}{{indicator}}{{custom_name}}"
+        display = f"{{marker}}{{display_indent}}{{indicator}}{{custom_name}}"
     elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
@@ -567,9 +576,9 @@ def format_display(full_path, is_bookmarked, depth=0):
             parent = ""
         else:
             parent = os.path.basename(os.path.dirname(path_norm))
-        display = f"{{marker}}{{indicator}}{{name}} ({{parent}})"
+        display = f"{{marker}}{{display_indent}}{{indicator}}{{name}} ({{parent}})"
     else:
-        display = f"{{marker}}{{indicator}}{{full_path}}"
+        display = f"{{marker}}{{display_indent}}{{indicator}}{{full_path}}"
     
     if is_dir:
         if is_bookmarked:
@@ -756,6 +765,7 @@ if __name__ == "__main__":
 │  Ctrl-R    : Run file with PowerShell Start-Process                       │
 │                                                                           │
 │  [ NAVIGATION & OTHER ]                                                   │
+│  Alt-E     : Expand/reset all collapsed folders                           │
 │  Alt-Up    : Move bookmarked file up in order                             │
 │  Alt-Down  : Move bookmarked file down in order                           │
 │  Enter     : Show action menu (Editor/Folder/Run/Copy/Terminal)           │
@@ -796,6 +806,7 @@ if __name__ == "__main__":
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
+            f"--bind=alt-e:execute-silent(python \"{script_path}\" --reset-collapsed)+reload(python \"{feeder_script_file}\")",
             f"--bind=alt-up:execute-silent(python \"{script_path}\" --move-bookmark up {{2}})+reload(python \"{feeder_script_file}\")+up",
             f"--bind=alt-down:execute-silent(python \"{script_path}\" --move-bookmark down {{2}})+reload(python \"{feeder_script_file}\")+down",
         ]
@@ -883,6 +894,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--toggle-collapse" and len(sys.argv) > 2:
             toggle_collapse(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--reset-collapsed":
+            reset_collapsed()
             sys.exit(0)
         elif sys.argv[1] == "--rename-bookmark" and len(sys.argv) > 2:
             rename_bookmark(sys.argv[2])

@@ -812,7 +812,21 @@
             "match_foreground": false
         }
     ],
-    "exclusion_rules": [],
+    "exclusion_rules": [
+        {
+            "name": "RUNNER",
+            "category": "General",
+            "description": "",
+            "window_title": "RUNNER",
+            "process_name": "WindowsTerminal.exe",
+            "window_class": "",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "excluded_hotkeys": "LAlt & e",
+            "enabled": true
+        }
+    ],
     "remap_shortcuts": [],
     "app_font_family": "Consolas",
     "app_font_size": 16
