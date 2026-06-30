@@ -513,6 +513,107 @@ def select_color(category_name):
             pass
     return None
 
+def configure_single_icon_menu(ext_key):
+    ctypes.windll.kernel32.SetConsoleTitleW(f"Runner - Configure Icon for {ext_key}")
+    
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+    while True:
+        config = load_config()
+        icon_map = config.get("extension_icons", {})
+        
+        if ext_key not in icon_map:
+            break
+            
+        entry = icon_map[ext_key]
+        icon = ""
+        color = 250
+        if isinstance(entry, dict):
+            icon = entry.get("icon", "")
+            color = entry.get("color", 250)
+        else:
+            icon = entry
+            
+        pad = "  "
+        options = [
+            f"{pad}{esc('#9efa49')}[I] Change Icon Glyph\x1b[0m (Current: '{icon}')",
+            f"{pad}{esc('#00f0ff')}[C] Change Icon Color\x1b[0m (Current: \x1b[38;5;{color}m{color}\x1b[0m)",
+            f"{pad}{esc('#ff5757')}[D] Delete Extension Icon mapping\x1b[0m",
+            f"{pad}{esc('#808080')}[B] Back to Icon List\x1b[0m",
+        ]
+        
+        fzf = subprocess.Popen(
+            [
+                "fzf", 
+                "--ansi",
+                f"--prompt=Configure {ext_key} > ", 
+                "--layout=reverse", 
+                "--border", 
+                f"--header=Configure settings for {ext_key} icon",
+                "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, _ = fzf.communicate(input="\n".join(options))
+        if not stdout or fzf.returncode != 0:
+            break
+            
+        choice = ansi_escape.sub('', stdout.strip())
+        if choice.startswith("[B]"):
+            break
+            
+        elif choice.startswith("[I]"):
+            try:
+                con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+                with open(con_path, 'r', encoding='utf-8') as f_in:
+                    print(f"\nEnter new icon glyph for {ext_key} (current: '{icon}'): ", end='', flush=True)
+                    new_icon = f_in.readline().strip()
+                    if new_icon:
+                        if isinstance(entry, dict):
+                            entry["icon"] = new_icon
+                        else:
+                            icon_map[ext_key] = {"icon": new_icon, "color": color}
+                        save_config(config)
+            except KeyboardInterrupt:
+                pass
+                
+        elif choice.startswith("[C]"):
+            new_color = select_color(f"Icon: {ext_key}")
+            if new_color is not None:
+                if isinstance(entry, dict):
+                    entry["color"] = new_color
+                else:
+                    icon_map[ext_key] = {"icon": icon, "color": new_color}
+                save_config(config)
+                
+        elif choice.startswith("[D]"):
+            del icon_map[ext_key]
+            save_config(config)
+            print(f"\n\033[91mDeleted icon mapping for {ext_key}.\033[0m")
+            import time; time.sleep(1.0)
+            break
+
 def manage_icon_colors_menu():
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Icon Colors Configuration")
     
@@ -593,6 +694,9 @@ def manage_icon_colors_menu():
                         if val != "folder" and not val.startswith("."):
                             val = "." + val
                         ext_key = val
+                        if ext_key not in icon_map:
+                            icon_map[ext_key] = {"icon": "📄" if ext_key != "folder" else "📁", "color": 250}
+                            save_config(config)
             except KeyboardInterrupt:
                 pass
         else:
@@ -601,30 +705,7 @@ def manage_icon_colors_menu():
                 ext_key = parts[0]
                 
         if ext_key:
-            # Step 1: Change Icon
-            try:
-                current_entry = icon_map.get(ext_key, {})
-                if isinstance(current_entry, dict):
-                    current_icon = current_entry.get("icon", "📄" if ext_key != "folder" else "📁")
-                else:
-                    current_icon = current_entry or ("📄" if ext_key != "folder" else "📁")
-                    
-                con_path = 'CON' if os.name == 'nt' else '/dev/tty'
-                with open(con_path, 'r', encoding='utf-8') as f_in:
-                    print(f"\nEnter new icon glyph for {ext_key} (current: '{current_icon}'): ", end='', flush=True)
-                    new_icon = f_in.readline().strip()
-                    if not new_icon:
-                        new_icon = current_icon
-            except KeyboardInterrupt:
-                new_icon = ""
-                
-            if new_icon:
-                # Step 2: Change Color
-                color = select_color(f"Icon: {ext_key}")
-                if color is not None:
-                    # Save both to config
-                    icon_map[ext_key] = {"icon": new_icon, "color": color}
-                    save_config(config)
+            configure_single_icon_menu(ext_key)
 
 def manage_colors_menu():
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Theme Color Configuration")
