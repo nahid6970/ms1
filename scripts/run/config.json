@@ -29,15 +29,16 @@
       "icon": "",
       "color": 221
     },
-    ".json": "",
+    ".json": {
+      "icon": "",
+      "color": 178
+    },
     ".ahk": {
       "icon": "󰘳",
       "color": 83
     },
     ".md": "󰈙",
     ".txt": "📄",
-    ".png": "🖼️",
-    ".jpg": "🖼️",
     ".webp": "🖼️",
     ".svg": "🎨",
     ".html": "🌐",
@@ -62,16 +63,14 @@
     },
     ".rs": "🦀",
     ".pdf": "📕",
-    ".tar": "📦",
-    ".gz": "📦",
     "folder": "📁",
-    ".7z, .rar, .zip": {
-      "icon": "󰗄",
-      "color": 127
-    },
     ".jpeg, .gif, .png, .ico": {
       "icon": "",
       "color": 207
+    },
+    ".7z, .rar, .zip, .gz, .tar": {
+      "icon": "󰿺",
+      "color": 219
     }
   },
   "show_extension_dots": false,

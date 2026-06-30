@@ -558,6 +558,7 @@ def configure_single_icon_menu(ext_key):
             f"{pad}{esc('#9efa49')}[I] Change Icon Glyph\x1b[0m (Current: '{icon}')",
             f"{pad}{esc('#00f0ff')}[C] Change Icon Color\x1b[0m (Current: \x1b[38;5;{color}m{color}\x1b[0m)",
             f"{pad}{esc('#faf069')}[M] Modify This Extension List\x1b[0m",
+            f"{pad}{esc('#d782ff')}[U] Combine with another extension list\x1b[0m",
             f"{pad}{esc('#ff5757')}[D] Delete Extension Icon mapping\x1b[0m",
             f"{pad}{esc('#808080')}[B] Back to Icon List\x1b[0m",
         ]
@@ -638,6 +639,89 @@ def configure_single_icon_menu(ext_key):
                                 import time; time.sleep(1.5)
             except KeyboardInterrupt:
                 pass
+                
+        elif choice.startswith("[U]"):
+            show_dots = config.get("show_extension_dots", True)
+            show_commas = config.get("show_extension_commas", True)
+            
+            def format_ext_list(k):
+                parts = [x.strip() for x in k.replace(',', ' ').split()]
+                cleaned = []
+                for p in parts:
+                    if not p:
+                        continue
+                    if not show_dots and p.startswith("."):
+                        cleaned.append(p[1:])
+                    elif show_dots and not p.startswith("."):
+                        cleaned.append("." + p)
+                    else:
+                        cleaned.append(p)
+                separator = ", " if show_commas else " "
+                return separator.join(cleaned)
+                
+            other_options = []
+            other_choices_map = {}
+            for other_ext, other_entry in sorted(icon_map.items()):
+                if other_ext == ext_key or other_ext == "folder":
+                    continue
+                other_icon = ""
+                other_color = 250
+                if isinstance(other_entry, dict):
+                    other_icon = other_entry.get("icon", "")
+                    other_color = other_entry.get("color", 250)
+                else:
+                    other_icon = other_entry
+                    
+                other_icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in other_icon)
+                other_icon_pad = " " * max(1, 3 - other_icon_width)
+                colored_icon = f"\x1b[38;5;{other_color}m{other_icon}\x1b[0m{other_icon_pad}"
+                
+                display_ext = format_ext_list(other_ext)
+                option_line = f"{display_ext:<20} {colored_icon}"
+                other_options.append(option_line)
+                other_choices_map[ansi_escape.sub('', option_line).strip()] = other_ext
+                
+            if not other_options:
+                print("\n\033[91mNo other extensions found to combine with.\033[0m")
+                import time; time.sleep(1.5)
+                continue
+                
+            fzf_combine = subprocess.Popen(
+                [
+                    "fzf", 
+                    "--ansi",
+                    f"--prompt=Combine {ext_key} with > ", 
+                    "--layout=reverse", 
+                    "--border", 
+                    f"--header=Combine {ext_key} with another list (Target settings will be used)",
+                    "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            stdout_c, _ = fzf_combine.communicate(input="\n".join(other_options))
+            if stdout_c and fzf_combine.returncode == 0:
+                selected_choice = ansi_escape.sub('', stdout_c.strip())
+                target_key = other_choices_map.get(selected_choice)
+                if target_key:
+                    target_parts = [x.strip() for x in target_key.replace(',', ' ').split() if x.strip()]
+                    current_parts = [x.strip() for x in ext_key.replace(',', ' ').split() if x.strip()]
+                    combined_parts = target_parts + current_parts
+                    combined_key = ", ".join(combined_parts)
+                    
+                    icon_map[combined_key] = icon_map[target_key]
+                    
+                    if target_key in icon_map:
+                        del icon_map[target_key]
+                    if ext_key in icon_map:
+                        del icon_map[ext_key]
+                        
+                    save_config(config)
+                    print(f"\n\033[92mSuccessfully combined into: {combined_key}\033[0m")
+                    import time; time.sleep(1.5)
+                    break
                 
         elif choice.startswith("[D]"):
             del icon_map[ext_key]
