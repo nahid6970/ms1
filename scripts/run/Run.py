@@ -708,15 +708,15 @@ for root_dir in directories:
     if root_dir in printed_paths:
         continue
         
-    # Print the root directory itself (depth 0, no tree connector)
-    display = format_display(root_dir, False, "")
+    # Print the root directory itself (depth 0, no tree connector, indented by 2 spaces)
+    display = format_display(root_dir, False, "  ")
     print(f"{{display}}\\t{{root_dir}}")
     printed_paths.add(root_dir)
     
     root_norm = os.path.normpath(root_dir).lower()
     is_collapsed = root_norm in collapsed
     if not is_collapsed:
-        walk_tree(root_dir, "", True)
+        walk_tree(root_dir, "  ", True)
 '''
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as feeder_script:
