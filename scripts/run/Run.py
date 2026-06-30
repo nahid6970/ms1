@@ -547,7 +547,7 @@ def format_display(full_path, is_bookmarked, depth=0):
     
     indicator = ""
     if is_dir:
-        indicator = " ▸" if is_collapsed else " ▾"
+        indicator = " [+]" if is_collapsed else " [-]"
         
     marker = f"{{indent}}* " if is_bookmarked else f"{{indent}}  "
     
