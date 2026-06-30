@@ -146,15 +146,18 @@ def configure_menu():
             except:
                 pass
                 
-        # Styled Configuration options
+        # Styled Configuration options (using tree connectors)
         pad = "  "
         options = [
-            f"{pad}{esc('#9efa49')} Add Search Root (Directory)\x1b[0m",
-            f"{pad}{esc('#00f0ff')}󰔡 Toggle Search Root (Enable/Disable)\x1b[0m",
-            f"{pad}{esc('#ff5757')}󰆴 Delete Search Root\x1b[0m",
-            f"{pad}{esc('#faf069')}󰗉 Add Ignored Pattern (e.g. .venv)\x1b[0m",
-            f"{pad}{esc('#ff934b')}󰗊 Remove Ignored Pattern\x1b[0m",
-            f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
+            f"{pad}{esc('#00f0ff')}[-] Search Roots\x1b[0m",
+            f"{pad}├── {esc('#9efa49')} Add Search Root (Directory)\x1b[0m",
+            f"{pad}├── {esc('#00f0ff')}󰔡 Toggle Search Root (Enable/Disable)\x1b[0m",
+            f"{pad}└── {esc('#ff5757')}󰆴 Delete Search Root\x1b[0m",
+            f"{pad}{esc('#faf069')}[-] Ignored Patterns\x1b[0m",
+            f"{pad}├── {esc('#faf069')}󰗉 Add Ignored Pattern (e.g. .venv)\x1b[0m",
+            f"{pad}└── {esc('#ff934b')}󰗊 Remove Ignored Pattern\x1b[0m",
+            f"{pad}{esc('#ffffff')}[-] Configuration File\x1b[0m",
+            f"{pad}└── {esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
         ]
         
@@ -179,10 +182,10 @@ def configure_menu():
             break
             
         choice = ansi_escape.sub('', stdout.strip())
-        if "Exit Configuration" in choice or choice.startswith("󰩈"):
+        if "󰩈" in choice:
             break
             
-        elif choice.startswith(""):
+        elif "" in choice:
             print("\n" * 2)
             path = input("Enter directory path to add: ").strip()
             if path:
@@ -196,7 +199,7 @@ def configure_menu():
                     print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
             import time; time.sleep(1.5)
             
-        elif choice.startswith("󰔡"):
+        elif "󰔡" in choice:
             roots = config["search_roots"]
             if not roots:
                 print("\nNo search roots defined.")
@@ -230,7 +233,7 @@ def configure_menu():
                     roots[selected_path] = not roots[selected_path]
                     save_config(config)
                 
-        elif choice.startswith("󰆴"):
+        elif "󰆴" in choice:
             roots = config["search_roots"]
             if not roots:
                 print("\nNo search roots defined.")
@@ -261,7 +264,7 @@ def configure_menu():
                     print(f"\033[91mDeleted search root: {selected_path}\033[0m")
                     import time; time.sleep(1.0)
                     
-        elif choice.startswith("󰗉"):
+        elif "󰗉" in choice:
             print("\n" * 2)
             pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
             if pattern:
@@ -270,7 +273,7 @@ def configure_menu():
                 print(f"\033[92mAdded to ignore list: {pattern}\033[0m")
             import time; time.sleep(1.5)
             
-        elif choice.startswith("󰗊"):
+        elif "󰗊" in choice:
             ignored = [k for k, v in config["visibility"].items() if v == False]
             if not ignored:
                 print("\nNo ignored patterns defined.")
@@ -301,7 +304,7 @@ def configure_menu():
                     print(f"\033[92mRemoved pattern from ignore list: {selected_pattern}\033[0m")
                     import time; time.sleep(1.0)
                     
-        elif choice.startswith("󰘦"):
+        elif "󰘦" in choice:
             subprocess.run(["notepad.exe", CONFIG_FILE])
             
     # Restore original title
