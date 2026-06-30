@@ -665,6 +665,9 @@ def manage_icon_colors_menu():
         config = load_config()
         icon_map = config.get("extension_icons", {})
         
+        max_ext_len = max((len(ext) for ext in icon_map.keys()), default=10)
+        col_width = max(10, max_ext_len)
+        
         pad = "  "
         options = [
             f"{pad}{esc('#9efa49')}[+] Add New Extension Icon\x1b[0m"
@@ -682,7 +685,7 @@ def manage_icon_colors_menu():
             icon_pad = " " * max(1, 3 - icon_width)
             colored_icon = f"\x1b[38;5;{color}m{icon}\x1b[0m{icon_pad}"
             
-            options.append(f"{pad}{ext:<10} {colored_icon} (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
+            options.append(f"{pad}{ext:<{col_width}} {colored_icon} (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
             
         options.append(f"{pad}{esc('#808080')}Return to Theme Colors Menu\x1b[0m")
         

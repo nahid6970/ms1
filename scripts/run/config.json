@@ -38,13 +38,7 @@
     ".txt": "📄",
     ".png": "🖼️",
     ".jpg": "🖼️",
-    ".jpeg": "🖼️",
-    ".gif": {
-      "icon": "",
-      "color": 207
-    },
     ".webp": "🖼️",
-    ".ico": "🎨",
     ".svg": "🎨",
     ".html": "🌐",
     ".css": {
@@ -74,6 +68,10 @@
     ".7z, .rar, .zip": {
       "icon": "󰗄",
       "color": 127
+    },
+    ".jpeg, .gif, .png, .ico": {
+      "icon": "",
+      "color": 207
     }
   }
 }
