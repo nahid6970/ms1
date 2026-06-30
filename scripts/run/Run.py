@@ -173,8 +173,15 @@ def move_bookmark(file_path, direction):
 
 
 def load_config():
+    default_roots = {
+        r"C:\@delta\ms1": True,
+        r"C:\@delta\db": True,
+        r"C:\@delta\msBackups": True,
+        r"C:\Users\nahid\Pictures": True,
+        "D:\\": True
+    }
     config = {
-        "search_roots": {},
+        "search_roots": default_roots,
         "visibility": {
             ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
             ".vscode": False, "obj": False, "bin": False
@@ -191,7 +198,7 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                if "search_roots" in data:
+                if "search_roots" in data and data["search_roots"]:
                     config["search_roots"] = data["search_roots"]
                 if "visibility" in data:
                     config["visibility"] = data["visibility"]
@@ -201,6 +208,19 @@ def load_config():
                     config["show_collapse_indicators"] = data["show_collapse_indicators"]
         except:
             pass
+            
+    # Save default config if file does not exist, or save populated roots if missing/empty
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if "search_roots" not in data or not data["search_roots"]:
+                save_config(config)
+        except:
+            pass
+    else:
+        save_config(config)
+        
     return config
 
 def save_config(config):
@@ -234,9 +254,9 @@ def list_roots():
     roots = config.get("search_roots", {})
     for path, enabled in roots.items():
         if enabled:
-            print(f"  {esc('#9efa49')}󰄵\x1b[0m  {path}")
+            print(f"  {esc('#9efa49')}[x]\x1b[0m  {path}")
         else:
-            print(f"  {esc('#808080')}󰄱\x1b[0m  {path}")
+            print(f"  {esc('#808080')}[ ]\x1b[0m  {path}")
 
 def toggle_root(selected_line):
     import re
@@ -246,7 +266,14 @@ def toggle_root(selected_line):
     if clean_line.startswith("[+]"):
         os.system('cls' if os.name == 'nt' else 'clear')
         print("\n" * 2)
-        path = input("Enter directory path to add: ").strip()
+        try:
+            con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+            with open(con_path, 'r') as f_in:
+                print("Enter directory path to add: ", end='', flush=True)
+                path = f_in.readline().strip()
+        except KeyboardInterrupt:
+            return
+            
         if path:
             path = path.strip('\'"')
             if os.path.isdir(path):
@@ -259,7 +286,7 @@ def toggle_root(selected_line):
                 print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
             import time; time.sleep(1.5)
     else:
-        clean_sel = clean_line[3:]
+        clean_sel = clean_line[5:]
         config = load_config()
         roots = config.get("search_roots", {})
         if clean_sel in roots:
@@ -272,7 +299,7 @@ def delete_root(selected_line):
     clean_line = ansi_escape.sub('', selected_line).strip()
     
     if not clean_line.startswith("[+]"):
-        clean_sel = clean_line[3:]
+        clean_sel = clean_line[5:]
         config = load_config()
         roots = config.get("search_roots", {})
         if clean_sel in roots:
@@ -303,9 +330,9 @@ def list_ignores():
     visibility = config.get("visibility", {})
     for pattern, visible in visibility.items():
         if not visible:
-            print(f"  {esc('#ff934b')}󰄵\x1b[0m  {pattern} (Ignored)")
+            print(f"  {esc('#ff934b')}[x]\x1b[0m  {pattern} (Ignored)")
         else:
-            print(f"  {esc('#808080')}󰄱\x1b[0m  {pattern} (Visible)")
+            print(f"  {esc('#808080')}[ ]\x1b[0m  {pattern} (Visible)")
 
 def toggle_ignore(selected_line):
     import re
@@ -315,7 +342,14 @@ def toggle_ignore(selected_line):
     if clean_line.startswith("[+]"):
         os.system('cls' if os.name == 'nt' else 'clear')
         print("\n" * 2)
-        pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
+        try:
+            con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+            with open(con_path, 'r') as f_in:
+                print("Enter pattern/name to ignore (e.g. node_modules): ", end='', flush=True)
+                pattern = f_in.readline().strip()
+        except KeyboardInterrupt:
+            return
+            
         if pattern:
             config = load_config()
             config.setdefault("visibility", {})[pattern] = False
@@ -323,7 +357,7 @@ def toggle_ignore(selected_line):
             print(f"\033[92mSuccessfully added to ignore list: {pattern}\033[0m")
             import time; time.sleep(1.5)
     else:
-        clean_pat = clean_line[3:]
+        clean_pat = clean_line[5:]
         if " (" in clean_pat:
             pattern = clean_pat.rsplit(" (", 1)[0]
             config = load_config()
@@ -338,7 +372,7 @@ def delete_ignore(selected_line):
     clean_line = ansi_escape.sub('', selected_line).strip()
     
     if not clean_line.startswith("[+]"):
-        clean_pat = clean_line[3:]
+        clean_pat = clean_line[5:]
         if " (" in clean_pat:
             pattern = clean_pat.rsplit(" (", 1)[0]
             config = load_config()
@@ -856,25 +890,9 @@ def configure_menu():
 
 def search_directories_and_files():
     # Load search roots from config
-    config_file = CONFIG_FILE
-    directories = []
-    if os.path.exists(config_file):
-        try:
-            with open(config_file, 'r') as f:
-                cfg = json.load(f)
-                roots = cfg.get("search_roots", {})
-                directories = [path for path, enabled in roots.items() if enabled]
-        except: pass
-    
-    # Fallback to defaults if config is empty or missing
-    if not directories:
-        directories = [
-            r"C:\@delta\ms1",
-            r"C:\@delta\db",
-            r"C:\@delta\msBackups",
-            r"C:\Users\nahid\Pictures",
-            "D:\\"
-        ]
+    config = load_config()
+    roots = config.get("search_roots", {})
+    directories = [path for path, enabled in roots.items() if enabled]
 
     # Filter out empty or None directories
     directories = [d for d in directories if d and d.strip()]
