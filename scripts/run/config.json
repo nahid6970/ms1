@@ -37,44 +37,65 @@
       "icon": "󰘳",
       "color": 83
     },
-    ".md": "󰈙",
-    ".txt": "📄",
-    ".webp": "🖼️",
-    ".svg": "🎨",
-    ".html": "🌐",
+    ".md": {
+      "icon": "󰈙",
+      "color": 250
+    },
+    ".txt": {
+      "icon": "󰦨",
+      "color": 250
+    },
+    ".svg": {
+      "icon": "󰜡",
+      "color": 9
+    },
+    ".html": {
+      "icon": "",
+      "color": 9
+    },
     ".css": {
       "icon": "",
       "color": 69
     },
-    ".js": "📜",
-    ".ts": "📜",
-    ".cpp": {
-      "icon": "",
-      "color": 250
+    ".js": {
+      "icon": "",
+      "color": 221
     },
-    ".h": "⚙️",
-    ".cs": {
-      "icon": "",
-      "color": 250
+    ".ts": {
+      "icon": "",
+      "color": 69
     },
     ".go": {
       "icon": "󰟓",
       "color": 250
     },
-    ".rs": "🦀",
-    ".pdf": "📕",
-    "folder": "📁",
-    ".jpeg, .gif, .png, .ico": {
-      "icon": "",
-      "color": 207
+    ".rs": {
+      "icon": "",
+      "color": 1
+    },
+    ".pdf": {
+      "icon": "",
+      "color": 197
+    },
+    "folder": {
+      "icon": "",
+      "color": 220
     },
     ".7z, .rar, .zip, .gz, .tar": {
       "icon": "󰿺",
       "color": 219
+    },
+    ".jpeg, .gif, .png, .ico, .webp": {
+      "icon": "",
+      "color": 207
+    },
+    ".cpp, .cs, .h": {
+      "icon": "",
+      "color": 250
     }
   },
-  "show_extension_dots": false,
-  "show_extension_commas": false,
+  "show_extension_dots": true,
+  "show_extension_commas": true,
   "bookmarked_config_setting": {
     "type": "theme_color",
     "key": "icon_colors",
