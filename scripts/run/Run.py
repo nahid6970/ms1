@@ -1209,6 +1209,7 @@ def configure_menu():
         }
         
         options = []
+        choices_map = {}
         # Prepend the bookmarked item at the top if present
         if bookmark and isinstance(bookmark, dict):
             bm_type = bookmark.get("type")
@@ -1219,15 +1220,32 @@ def configure_menu():
                 starred_opt = option_templates.get(bm_key, "").replace(pad, "⭐ ")
                 if starred_opt:
                     options.append(starred_opt)
+                    clean_opt = ansi_escape.sub('', starred_opt).strip()
+                    choices_map[clean_opt] = {"type": "main", "key": bm_key}
             elif bm_type == "theme_color":
-                options.append(f"⭐ [B_COLOR:{bm_key}] {bm_label}")
+                color_color = esc('#00f0ff')
+                if bm_key == "folder_normal":   color_color = esc('#9efa49')
+                elif bm_key == "folder_bookmark": color_color = esc('#00f0ff')
+                elif bm_key == "file_normal":    color_color = esc('#ffffff')
+                elif bm_key == "file_bookmark":  color_color = esc('#ff934b')
+                elif bm_key == "icon_colors":    color_color = esc('#d782ff')
+                
+                starred_opt = f"⭐ {color_color}{bm_label}\x1b[0m"
+                options.append(starred_opt)
+                clean_opt = ansi_escape.sub('', starred_opt).strip()
+                choices_map[clean_opt] = {"type": "theme_color", "key": bm_key}
             elif bm_type == "icon_color":
-                options.append(f"⭐ [B_ICON:{bm_key}] {bm_label}")
+                starred_opt = f"⭐ {esc('#d782ff')}Configure {bm_key} Icon\x1b[0m"
+                options.append(starred_opt)
+                clean_opt = ansi_escape.sub('', starred_opt).strip()
+                choices_map[clean_opt] = {"type": "icon_color", "key": bm_key}
             
         for k, v in option_templates.items():
             if bookmark and isinstance(bookmark, dict) and bookmark.get("type") == "main" and k == bookmark.get("key"):
                 continue
             options.append(v)
+            clean_v = ansi_escape.sub('', v).strip()
+            choices_map[clean_v] = {"type": "main", "key": k}
             
         # Run FZF to choose option
         fzf = subprocess.Popen(
@@ -1257,58 +1275,64 @@ def configure_menu():
         chosen_line = lines[1]
         
         choice = ansi_escape.sub('', chosen_line).strip()
+        selected_bm = choices_map.get(choice)
         
-        # Check if they selected a bookmarked shortcut
-        if choice.startswith("⭐"):
-            cleaned_choice = choice.replace("⭐", "").strip()
-            if cleaned_choice.startswith("[B_COLOR:"):
-                color_key = cleaned_choice.split("[B_COLOR:")[1].split("]")[0]
-                label_mapping = {
-                    "folder_normal": "Normal Folder",
-                    "folder_bookmark": "Bookmark Folder",
-                    "file_normal": "Normal File",
-                    "file_bookmark": "Bookmark File"
-                }
-                if color_key == "icon_colors":
-                    manage_icon_colors_menu()
-                elif color_key in label_mapping:
-                    color = select_color(label_mapping[color_key])
-                    if color is not None:
-                        config.setdefault("theme", {})[color_key] = color
-                        save_config(config)
-                continue
-            elif cleaned_choice.startswith("[B_ICON:"):
-                icon_key = cleaned_choice.split("[B_ICON:")[1].split("]")[0]
-                configure_single_icon_menu(icon_key)
-                continue
-            else:
-                choice = cleaned_choice.replace("⭐ ", "").strip()
-        else:
-            choice = choice.replace("⭐ ", "").strip()
-            
-        # Determine prefix for main menu items
-        prefix = None
-        for p in ["[D]", "[I]", "[C]", "[F]", "[S]", "[K]", "[O]", "[X]"]:
-            if choice.startswith(p):
-                prefix = p
-                break
-                
         if key_pressed == "f5":
-            if prefix and prefix != "[X]":
-                if isinstance(bookmark, dict) and bookmark.get("key") == prefix and bookmark.get("type") == "main":
+            if selected_bm:
+                bm_type = selected_bm["type"]
+                bm_key = selected_bm["key"]
+                
+                if bm_type == "main" and bm_key == "[X]":
+                    continue
+                    
+                if isinstance(bookmark, dict) and bookmark.get("type") == bm_type and bookmark.get("key") == bm_key:
                     config["bookmarked_config_setting"] = None
-                    print(f"\n\033[93mRemoved bookmark from: {choice}\033[0m")
+                    print(f"\n\033[93mRemoved bookmark\033[0m")
                 else:
-                    config["bookmarked_config_setting"] = {"type": "main", "key": prefix, "label": choice}
-                    print(f"\n\033[92mBookmarked setting: {choice}\033[0m")
+                    if bm_type == "main":
+                        label = choice.replace("⭐ ", "").strip()
+                        config["bookmarked_config_setting"] = {"type": "main", "key": bm_key, "label": label}
+                    elif bm_type == "theme_color":
+                        label = choice.replace("⭐ ", "").strip()
+                        if " (Current:" in label:
+                            label = label.split(" (Current:")[0].strip()
+                        config["bookmarked_config_setting"] = {"type": "theme_color", "key": bm_key, "label": label}
+                    elif bm_type == "icon_color":
+                        config["bookmarked_config_setting"] = {"type": "icon_color", "key": bm_key, "label": f"Configure {bm_key} Icon"}
+                        
+                    print(f"\n\033[92mBookmarked setting successfully!\033[0m")
                 save_config(config)
                 import time; time.sleep(1.0)
             continue
             
-        if choice.startswith("[X]"):
-            break
+        if selected_bm:
+            bm_type = selected_bm["type"]
+            bm_key = selected_bm["key"]
             
-        elif choice.startswith("[D]"):
+            if bm_type == "main":
+                if bm_key == "[X]":
+                    break
+                choice = bm_key
+            else:
+                if bm_type == "theme_color":
+                    label_mapping = {
+                        "folder_normal": "Normal Folder",
+                        "folder_bookmark": "Bookmark Folder",
+                        "file_normal": "Normal File",
+                        "file_bookmark": "Bookmark File"
+                    }
+                    if bm_key == "icon_colors":
+                        manage_icon_colors_menu()
+                    elif bm_key in label_mapping:
+                        color = select_color(label_mapping[bm_key])
+                        if color is not None:
+                            config.setdefault("theme", {})[bm_key] = color
+                            save_config(config)
+                elif bm_type == "icon_color":
+                    configure_single_icon_menu(bm_key)
+                continue
+            
+        if choice.startswith("[D]"):
             manage_roots_menu()
             
         elif choice.startswith("[I]"):
