@@ -4,6 +4,9 @@ import subprocess
 import tempfile
 import sys
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+bookmarks_file = os.path.join(script_dir, "bookmarks.json")
+
 def remove_bookmark(file_path, bookmarks_file):
     """Remove a file path from bookmarks.json"""
     if not os.path.exists(bookmarks_file):
@@ -35,7 +38,7 @@ def reload_bookmarks(bookmarks_file):
 
 def view_bookmarks():
     """Display bookmarks in fzf and allow actions on selected bookmark"""
-    bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
+    global bookmarks_file
     
     while True:  # Loop to keep showing bookmarks after opening files
         # Load bookmarks
@@ -175,8 +178,6 @@ catch {
                     pass
 
 if __name__ == "__main__":
-    bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
-    
     # Handle command line arguments for remove/reload
     if len(sys.argv) > 1:
         if sys.argv[1] == "--remove" and len(sys.argv) > 2:

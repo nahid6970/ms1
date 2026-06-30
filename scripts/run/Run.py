@@ -7,8 +7,10 @@ import ctypes
 
 ctypes.windll.kernel32.SetConsoleTitleW("RUNNER")
 
-BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\bookmarks.json"
-COLLAPSED_FILE = r"C:\@delta\db\FZF_launcher\collapsed.json"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+BOOKMARKS_FILE = os.path.join(script_dir, "bookmarks.json")
+COLLAPSED_FILE = os.path.join(script_dir, "collapsed.json")
+CONFIG_FILE = os.path.join(script_dir, "config.json")
 
 def toggle_collapse(file_path):
     if not os.path.isdir(file_path):
@@ -92,9 +94,165 @@ def move_bookmark(file_path, direction):
             json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
 
+def save_config(config):
+    dir_path = os.path.dirname(CONFIG_FILE)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+
+def configure_menu():
+    # Setup terminal title
+    ctypes.windll.kernel32.SetConsoleTitleW("Runner - Configuration Menu")
+    
+    while True:
+        # Load config
+        config = {
+            "search_roots": {},
+            "visibility": {
+                ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
+                ".vscode": False, "obj": False, "bin": False
+            }
+        }
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if "search_roots" in data:
+                        config["search_roots"] = data["search_roots"]
+                    if "visibility" in data:
+                        config["visibility"] = data["visibility"]
+            except:
+                pass
+                
+        # Main configuration options
+        options = [
+            "1. Add Search Root (Directory)",
+            "2. Toggle Search Root (Enable/Disable)",
+            "3. Delete Search Root",
+            "4. Add Ignored Pattern (e.g. .venv)",
+            "5. Remove Ignored Pattern",
+            "6. Open Config JSON in Notepad",
+            "7. Exit Configuration"
+        ]
+        
+        # Run FZF to choose option
+        fzf = subprocess.Popen(
+            ["fzf", "--prompt=Config Menu > ", "--layout=reverse", "--border", "--header=Runner Terminal Configurator"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, _ = fzf.communicate(input="\n".join(options))
+        if not stdout or fzf.returncode != 0:
+            break
+            
+        choice = stdout.strip()
+        if "7. Exit" in choice:
+            break
+            
+        elif "1. Add Search" in choice:
+            print("\n" * 2)
+            path = input("Enter directory path to add: ").strip()
+            if path:
+                path = path.strip('\'"')
+                if os.path.isdir(path):
+                    abs_path = os.path.abspath(path)
+                    config["search_roots"][abs_path] = True
+                    save_config(config)
+                    print(f"\033[92mSuccessfully added search root: {abs_path}\033[0m")
+                else:
+                    print(f"\033[91mError: '{path}' is not a valid directory.\033[0m")
+            import time; time.sleep(1.5)
+            
+        elif "2. Toggle Search" in choice:
+            roots = config["search_roots"]
+            if not roots:
+                print("\nNo search roots defined.")
+                import time; time.sleep(1.5)
+                continue
+            root_options = []
+            for path, enabled in roots.items():
+                status = "Enabled" if enabled else "Disabled"
+                root_options.append(f"{path} ({status})")
+            fzf_toggle = subprocess.Popen(
+                ["fzf", "--prompt=Select root to toggle (Enable/Disable) > ", "--layout=reverse", "--border"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            out_toggle, _ = fzf_toggle.communicate(input="\n".join(root_options))
+            if out_toggle and fzf_toggle.returncode == 0:
+                selected_path = out_toggle.strip().rsplit(" (", 1)[0]
+                if selected_path in roots:
+                    roots[selected_path] = not roots[selected_path]
+                    save_config(config)
+                
+        elif "3. Delete Search" in choice:
+            roots = config["search_roots"]
+            if not roots:
+                print("\nNo search roots defined.")
+                import time; time.sleep(1.5)
+                continue
+            root_options = list(roots.keys())
+            fzf_del = subprocess.Popen(
+                ["fzf", "--prompt=Select root to DELETE > ", "--layout=reverse", "--border"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            out_del, _ = fzf_del.communicate(input="\n".join(root_options))
+            if out_del and fzf_del.returncode == 0:
+                selected_path = out_del.strip()
+                if selected_path in roots:
+                    del roots[selected_path]
+                    save_config(config)
+                    print(f"\033[91mDeleted search root: {selected_path}\033[0m")
+                    import time; time.sleep(1.0)
+                    
+        elif "4. Add Ignored" in choice:
+            print("\n" * 2)
+            pattern = input("Enter pattern/name to ignore (e.g. node_modules): ").strip()
+            if pattern:
+                config["visibility"][pattern] = False
+                save_config(config)
+                print(f"\033[92mAdded to ignore list: {pattern}\033[0m")
+            import time; time.sleep(1.5)
+            
+        elif "5. Remove Ignored" in choice:
+            ignored = [k for k, v in config["visibility"].items() if v == False]
+            if not ignored:
+                print("\nNo ignored patterns defined.")
+                import time; time.sleep(1.5)
+                continue
+            fzf_ig = subprocess.Popen(
+                ["fzf", "--prompt=Select pattern to REMOVE from ignore list > ", "--layout=reverse", "--border"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding='utf-8'
+            )
+            out_ig, _ = fzf_ig.communicate(input="\n".join(ignored))
+            if out_ig and fzf_ig.returncode == 0:
+                selected_pattern = out_ig.strip()
+                if selected_pattern in config["visibility"]:
+                    config["visibility"][selected_pattern] = True
+                    save_config(config)
+                    print(f"\033[92mRemoved pattern from ignore list: {selected_pattern}\033[0m")
+                    import time; time.sleep(1.0)
+                    
+        elif "6. Open Config" in choice:
+            subprocess.run(["notepad.exe", CONFIG_FILE])
+            
+    # Restore original title
+    ctypes.windll.kernel32.SetConsoleTitleW("RUNNER")
+
 def search_directories_and_files():
     # Load search roots from config
-    config_file = r"C:\@delta\db\FZF_launcher\config.json"
+    config_file = CONFIG_FILE
     directories = []
     if os.path.exists(config_file):
         try:
@@ -125,7 +283,7 @@ def search_directories_and_files():
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
-│  F7: Configuration             Ctrl-H: Full Help GUI                      │
+│  F7: Configure                 Ctrl-H: Configure                          │
 │                                                                           │
 │  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Alt-E: Expand All           │
 │  Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run                 │
@@ -299,7 +457,6 @@ Start-Sleep -Milliseconds 500
             toggle_script_file = toggle_script.name
 
         # Get absolute paths for scripts
-        script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.abspath(__file__)
         editor_chooser_script = os.path.join(script_dir, "editor_chooser.py")
 
@@ -471,15 +628,14 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
 
 
         # View mode state file for F3 toggle (full path vs filename)
-        view_mode_file = r"C:\@delta\db\FZF_launcher\run_settings.txt"
+        view_mode_file = os.path.join(script_dir, "run_settings.txt")
         if not os.path.exists(view_mode_file):
-            os.makedirs(os.path.dirname(view_mode_file), exist_ok=True)
             with open(view_mode_file, 'w') as f:
                 f.write("full")
         
         # Create file feeder script that outputs files in different formats based on view mode
-        bookmarks_file = r"C:\@delta\db\FZF_launcher\bookmarks.json"
-        config_file = r"C:\@delta\db\FZF_launcher\config.json"
+        bookmarks_file = os.path.join(script_dir, "bookmarks.json")
+        config_file = os.path.join(script_dir, "config.json")
         feeder_script_content = f'''
 import os
 import sys
@@ -491,6 +647,7 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 view_mode_file = r"{view_mode_file}"
 bookmarks_file = r"{bookmarks_file}"
 config_file = r"{config_file}"
+collapsed_file = r"{COLLAPSED_FILE}"
 directories = {repr(directories)}
 
 # Read current view mode
@@ -539,7 +696,6 @@ if os.path.exists(bookmarks_file):
 
 # Load collapsed folders
 collapsed = set()
-collapsed_file = r"C:\\@delta\\db\\FZF_launcher\\collapsed.json"
 if os.path.exists(collapsed_file):
     try:
         with open(collapsed_file, 'r', encoding='utf-8') as f:
@@ -771,7 +927,7 @@ if __name__ == "__main__":
 │  F4        : Refresh file list                                            │
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
-│  F7        : Configuration                                                │
+│  F7        : Terminal Configurator (roots/ignores)                         │
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
@@ -818,8 +974,8 @@ if __name__ == "__main__":
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
-            f"--bind=f7:execute(python \"{os.path.join(script_dir, 'configurator_gui.py')}\")+reload(python \"{feeder_script_file}\")",
-            f"--bind=ctrl-h:execute(python \"{os.path.join(script_dir, 'configurator_gui.py')}\" --help)+reload(python \"{feeder_script_file}\")",
+            f"--bind=f7:execute(python \"{script_path}\" --configure)+reload(python \"{feeder_script_file}\")",
+            f"--bind=ctrl-h:execute(python \"{script_path}\" --configure)+reload(python \"{feeder_script_file}\")",
             "--bind=ctrl-p:toggle-preview",
             "--bind=?:toggle-header",
             "--bind=start:toggle-header",
@@ -914,6 +1070,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--reset-collapsed":
             reset_collapsed()
+            sys.exit(0)
+        elif sys.argv[1] == "--configure":
+            configure_menu()
             sys.exit(0)
         elif sys.argv[1] == "--rename-bookmark" and len(sys.argv) > 2:
             rename_bookmark(sys.argv[2])

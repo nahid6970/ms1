@@ -21,7 +21,8 @@ CP_SUBTEXT = "#808080"
 CP_GREEN = "#00ff21"
 CP_ORANGE = "#ff934b"
 
-CONFIG_FILE = r"C:\@delta\db\FZF_launcher\config.json"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(script_dir, "config.json")
 
 def get_ansi_color_hex(n):
     """Returns a hex color for an ANSI 256 color index."""
