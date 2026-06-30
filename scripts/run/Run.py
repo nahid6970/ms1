@@ -48,6 +48,14 @@ try:
 except:
     pass
 
+# Clean up deprecated run_settings.txt if it exists
+try:
+    old_settings = os.path.join(script_dir, "run_settings.txt")
+    if os.path.exists(old_settings):
+        os.remove(old_settings)
+except:
+    pass
+
 def toggle_collapse(file_path):
     if not os.path.isdir(file_path):
         return
@@ -1172,12 +1180,6 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
             batch_file = batch_temp.name
 
 
-        # View mode state file for F3 toggle (full path vs filename)
-        view_mode_file = os.path.join(script_dir, "run_settings.txt")
-        if not os.path.exists(view_mode_file):
-            with open(view_mode_file, 'w') as f:
-                f.write("full")
-        
         # Create file feeder script that outputs files in different formats based on view mode
         bookmarks_file = os.path.join(script_dir, "bookmarks.json")
         config_file = os.path.join(script_dir, "config.json")
@@ -1189,23 +1191,10 @@ import json
 # Fix Unicode encoding for Windows console
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-view_mode_file = r"{view_mode_file}"
 bookmarks_file = r"{bookmarks_file}"
 config_file = r"{config_file}"
 collapsed_file = r"{COLLAPSED_FILE}"
 directories = {repr(directories)}
-
-# Read current view mode
-view_mode = "full"
-if os.path.exists(view_mode_file):
-    with open(view_mode_file, 'r') as f:
-        view_mode = f.read().strip()
-
-# Toggle mode if requested
-if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
-    view_mode = "name" if view_mode == "full" else "full"
-    with open(view_mode_file, 'w') as f:
-        f.write(view_mode)
 
 # Load config
 config = {{
@@ -1213,16 +1202,27 @@ config = {{
     "visibility": {{
         ".git": False, "__pycache__": False, "node_modules": False, ".venv": False, 
         ".vscode": False, "obj": False, "bin": False
-    }}
+    }},
+    "view_mode": "full"
 }}
 if os.path.exists(config_file):
     try:
-        with open(config_file, 'r') as f:
+        with open(config_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
             if "theme" in data: config["theme"].update(data["theme"])
             if "visibility" in data: config["visibility"] = data["visibility"]
-            elif "ignore_list" in data:
-                for item in data["ignore_list"]: config["visibility"][item] = False
+            if "view_mode" in data: config["view_mode"] = data["view_mode"]
+    except: pass
+
+view_mode = config["view_mode"]
+
+# Toggle mode if requested
+if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
+    view_mode = "name" if view_mode == "full" else "full"
+    config["view_mode"] = view_mode
+    try:
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
     except: pass
 
 theme = config["theme"]
