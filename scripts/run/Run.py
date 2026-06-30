@@ -264,26 +264,23 @@ def toggle_root(selected_line):
     clean_line = ansi_escape.sub('', selected_line).strip()
     
     if clean_line.startswith("[+]"):
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n" * 2)
         try:
             con_path = 'CON' if os.name == 'nt' else '/dev/tty'
-            with open(con_path, 'r+', encoding='utf-8') as con:
-                con.write("Enter directory path to add: ")
-                con.flush()
-                path = con.readline().strip()
-                if path:
-                    path = path.strip('\'"')
-                    if os.path.isdir(path):
-                        abs_path = os.path.abspath(path)
-                        config = load_config()
-                        config.setdefault("search_roots", {})[abs_path] = True
-                        save_config(config)
-                        con.write(f"\n\033[92mSuccessfully added search root: {abs_path}\033[0m\n")
-                    else:
-                        con.write(f"\n\033[91mError: '{path}' is not a valid directory.\033[0m\n")
-                    con.flush()
-                    import time; time.sleep(1.5)
+            with open(con_path, 'r', encoding='utf-8') as f_in:
+                print("\nEnter directory path to add: ", end='', flush=True)
+                path = f_in.readline().strip()
+                
+            if path:
+                path = path.strip('\'"')
+                if os.path.isdir(path):
+                    abs_path = os.path.abspath(path)
+                    config = load_config()
+                    config.setdefault("search_roots", {})[abs_path] = True
+                    save_config(config)
+                    print(f"\n\033[92mSuccessfully added search root: {abs_path}\033[0m")
+                else:
+                    print(f"\n\033[91mError: '{path}' is not a valid directory.\033[0m")
+                import time; time.sleep(1.5)
         except KeyboardInterrupt:
             return
     else:
@@ -341,21 +338,18 @@ def toggle_ignore(selected_line):
     clean_line = ansi_escape.sub('', selected_line).strip()
     
     if clean_line.startswith("[+]"):
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n" * 2)
         try:
             con_path = 'CON' if os.name == 'nt' else '/dev/tty'
-            with open(con_path, 'r+', encoding='utf-8') as con:
-                con.write("Enter pattern/name to ignore (e.g. node_modules): ")
-                con.flush()
-                pattern = con.readline().strip()
-                if pattern:
-                    config = load_config()
-                    config.setdefault("visibility", {})[pattern] = False
-                    save_config(config)
-                    con.write(f"\n\033[92mSuccessfully added to ignore list: {pattern}\033[0m\n")
-                    con.flush()
-                    import time; time.sleep(1.5)
+            with open(con_path, 'r', encoding='utf-8') as f_in:
+                print("\nEnter pattern/name to ignore (e.g. node_modules): ", end='', flush=True)
+                pattern = f_in.readline().strip()
+                
+            if pattern:
+                config = load_config()
+                config.setdefault("visibility", {})[pattern] = False
+                save_config(config)
+                print(f"\n\033[92mSuccessfully added to ignore list: {pattern}\033[0m")
+                import time; time.sleep(1.5)
         except KeyboardInterrupt:
             return
     else:
