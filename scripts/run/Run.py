@@ -541,7 +541,9 @@ def manage_icon_colors_menu():
         icon_map = config.get("extension_icons", {})
         
         pad = "  "
-        options = []
+        options = [
+            f"{pad}{esc('#9efa49')}[+] Add New Extension Icon\x1b[0m"
+        ]
         for ext, entry in sorted(icon_map.items()):
             icon = ""
             color = 250
@@ -578,17 +580,50 @@ def manage_icon_colors_menu():
         if "Return to Theme Colors Menu" in choice:
             break
             
-        parts = choice.split()
-        if parts:
-            ext_key = parts[0]
-            if ext_key in icon_map:
+        is_add = "[+] Add New Extension Icon" in choice
+        ext_key = ""
+        
+        if is_add:
+            try:
+                con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+                with open(con_path, 'r', encoding='utf-8') as f_in:
+                    print("\nEnter extension to add (e.g. .py or .txt): ", end='', flush=True)
+                    val = f_in.readline().strip().lower()
+                    if val:
+                        if val != "folder" and not val.startswith("."):
+                            val = "." + val
+                        ext_key = val
+            except KeyboardInterrupt:
+                pass
+        else:
+            parts = choice.split()
+            if parts:
+                ext_key = parts[0]
+                
+        if ext_key:
+            # Step 1: Change Icon
+            try:
+                current_entry = icon_map.get(ext_key, {})
+                if isinstance(current_entry, dict):
+                    current_icon = current_entry.get("icon", "📄" if ext_key != "folder" else "📁")
+                else:
+                    current_icon = current_entry or ("📄" if ext_key != "folder" else "📁")
+                    
+                con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+                with open(con_path, 'r', encoding='utf-8') as f_in:
+                    print(f"\nEnter new icon glyph for {ext_key} (current: '{current_icon}'): ", end='', flush=True)
+                    new_icon = f_in.readline().strip()
+                    if not new_icon:
+                        new_icon = current_icon
+            except KeyboardInterrupt:
+                new_icon = ""
+                
+            if new_icon:
+                # Step 2: Change Color
                 color = select_color(f"Icon: {ext_key}")
                 if color is not None:
-                    entry = icon_map[ext_key]
-                    if isinstance(entry, dict):
-                        entry["color"] = color
-                    else:
-                        icon_map[ext_key] = {"icon": entry, "color": color}
+                    # Save both to config
+                    icon_map[ext_key] = {"icon": new_icon, "color": color}
                     save_config(config)
 
 def manage_colors_menu():
