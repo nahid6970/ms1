@@ -102,6 +102,12 @@ def load_config():
         "visibility": {
             ".git": False, "__pycache__": False, "node_modules": False, ".venv": False,
             ".vscode": False, "obj": False, "bin": False
+        },
+        "theme": {
+            "folder_normal": 208,
+            "folder_bookmark": 51,
+            "file_normal": 250,
+            "file_bookmark": 121
         }
     }
     if os.path.exists(CONFIG_FILE):
@@ -112,6 +118,8 @@ def load_config():
                     config["search_roots"] = data["search_roots"]
                 if "visibility" in data:
                     config["visibility"] = data["visibility"]
+                if "theme" in data:
+                    config["theme"].update(data["theme"])
         except:
             pass
     return config
@@ -322,6 +330,185 @@ def manage_ignores_menu():
     p_feed.stdout.close()
     p_fzf.communicate()
 
+def list_colors():
+    for i in range(256):
+        print(f"\x1b[38;5;{i}m  Color {i:03d}  ■■■■■■■■■■\x1b[0m")
+
+def select_color(category_name):
+    fzf_args = [
+        "fzf",
+        "--ansi",
+        f"--prompt=Select Color for {category_name} > ",
+        "--layout=reverse",
+        "--border",
+        "--header=Arrow keys to browse  |  Type color number to filter"
+    ]
+    p_feed = subprocess.Popen(
+        ["python", script_path, "--list-colors-raw"],
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    p_fzf = subprocess.Popen(
+        fzf_args,
+        stdin=p_feed.stdout,
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    p_feed.stdout.close()
+    stdout, _ = p_fzf.communicate()
+    if stdout and p_fzf.returncode == 0:
+        import re
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        clean_line = ansi_escape.sub('', stdout.strip())
+        try:
+            color_str = clean_line.split()[1]
+            return int(color_str)
+        except:
+            pass
+    return None
+
+def manage_colors_menu():
+    ctypes.windll.kernel32.SetConsoleTitleW("Runner - Theme Color Configuration")
+    
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        if r == g == b:
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+        def _cube(x):
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    def esc(rgb: str) -> str:
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+    while True:
+        config = load_config()
+        theme = config.get("theme", {
+            "folder_normal": 208,
+            "folder_bookmark": 51,
+            "file_normal": 250,
+            "file_bookmark": 121
+        })
+        
+        pad = "  "
+        options = [
+            f"{pad}{esc('#9efa49')}Normal Folder Color\x1b[0m (Current: \x1b[38;5;{theme.get('folder_normal', 208)}m{theme.get('folder_normal', 208)}\x1b[0m)",
+            f"{pad}{esc('#00f0ff')}Bookmark Folder Color\x1b[0m (Current: \x1b[38;5;{theme.get('folder_bookmark', 51)}m{theme.get('folder_bookmark', 51)}\x1b[0m)",
+            f"{pad}{esc('#ffffff')}Normal File Color\x1b[0m (Current: \x1b[38;5;{theme.get('file_normal', 250)}m{theme.get('file_normal', 250)}\x1b[0m)",
+            f"{pad}{esc('#ff934b')}Bookmark File Color\x1b[0m (Current: \x1b[38;5;{theme.get('file_bookmark', 121)}m{theme.get('file_bookmark', 121)}\x1b[0m)",
+            f"{pad}{esc('#ff5757')}Reset to Default Colors\x1b[0m",
+            f"{pad}{esc('#808080')}Return to Main Menu\x1b[0m",
+        ]
+        
+        fzf = subprocess.Popen(
+            [
+                "fzf", 
+                "--ansi",
+                "--prompt=Theme Config > ", 
+                "--layout=reverse", 
+                "--border", 
+                "--header=Configure Colors (Previews shown in brackets)",
+                "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, _ = fzf.communicate(input="\n".join(options))
+        if not stdout or fzf.returncode != 0:
+            break
+            
+        choice = ansi_escape.sub('', stdout.strip())
+        if "Return to Main Menu" in choice:
+            break
+            
+        elif "Normal Folder Color" in choice:
+            color = select_color("Normal Folder")
+            if color is not None:
+                config.setdefault("theme", {})["folder_normal"] = color
+                save_config(config)
+                
+        elif "Bookmark Folder Color" in choice:
+            color = select_color("Bookmark Folder")
+            if color is not None:
+                config.setdefault("theme", {})["folder_bookmark"] = color
+                save_config(config)
+                
+        elif "Normal File Color" in choice:
+            color = select_color("Normal File")
+            if color is not None:
+                config.setdefault("theme", {})["file_normal"] = color
+                save_config(config)
+                
+        elif "Bookmark File Color" in choice:
+            color = select_color("Bookmark File")
+            if color is not None:
+                config.setdefault("theme", {})["file_bookmark"] = color
+                save_config(config)
+                
+        elif "Reset to Default" in choice:
+            config["theme"] = {
+                "folder_normal": 208,
+                "folder_bookmark": 51,
+                "file_normal": 250,
+                "file_bookmark": 121
+            }
+            save_config(config)
+            print("\033[92mReset colors to default.\033[0m")
+            import time; time.sleep(1.0)
+
+def view_shortcuts_menu():
+    ctypes.windll.kernel32.SetConsoleTitleW("Runner - Keyboard Shortcuts Guide")
+    
+    shortcuts = [
+        "Enter       : Show Action Menu (Run/Editor/Folder/Terminal/Copy)",
+        "Tab         : Multi-select items",
+        "F2          : Toggle image preview mode (Chafa/Viu vs QuickLook)",
+        "F3          : Toggle View Mode (Full Path vs Filename)",
+        "F4          : Refresh file list",
+        "F5          : Toggle bookmark on/off (Prompts for custom name)",
+        "F6          : Rename bookmark custom name",
+        "F7 / Ctrl-H : Open Terminal Configuration Menu",
+        "Ctrl-C      : Copy full path to clipboard",
+        "Ctrl-E      : Toggle folder collapse/expand",
+        "Ctrl-N      : Open selected file(s) with Editor Chooser",
+        "Ctrl-O      : Open file or folder location in Explorer",
+        "Ctrl-P      : Toggle preview window on/off",
+        "Ctrl-R      : Run file using PowerShell",
+        "Alt-E       : Expand and reset all collapsed folders",
+        "Alt-Up      : Move bookmark up in custom order",
+        "Alt-Down    : Move bookmark down in custom order",
+        "Escape      : Exit / Close Runner"
+    ]
+    
+    fzf = subprocess.Popen(
+        [
+            "fzf",
+            "--prompt=Shortcuts Guide > ",
+            "--layout=reverse",
+            "--border",
+            "--header=Press Enter or Escape to return to Main Config Menu",
+            "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff"
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding='utf-8'
+    )
+    fzf.communicate(input="\n".join(shortcuts))
+
 def configure_menu():
     # Setup terminal title
     ctypes.windll.kernel32.SetConsoleTitleW("Runner - Configuration Menu")
@@ -353,6 +540,8 @@ def configure_menu():
         options = [
             f"{pad}{esc('#9efa49')} Configure Search Roots (Directories)\x1b[0m",
             f"{pad}{esc('#faf069')}󰗉 Configure Ignored Patterns\x1b[0m",
+            f"{pad}{esc('#00f0ff')}🎨 Configure Theme Colors\x1b[0m",
+            f"{pad}{esc('#ff5757')}⌨ View Keyboard Shortcuts\x1b[0m",
             f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
             f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
         ]
@@ -386,6 +575,12 @@ def configure_menu():
             
         elif choice.startswith("󰗉"):
             manage_ignores_menu()
+            
+        elif choice.startswith("🎨"):
+            manage_colors_menu()
+            
+        elif choice.startswith("⌨"):
+            view_shortcuts_menu()
             
         elif choice.startswith("󰘦"):
             subprocess.run(["notepad.exe", CONFIG_FILE])
@@ -1227,6 +1422,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--list-ignores":
             list_ignores()
+            sys.exit(0)
+        elif sys.argv[1] == "--list-colors-raw":
+            list_colors()
             sys.exit(0)
         elif sys.argv[1] == "--toggle-ignore" and len(sys.argv) > 2:
             toggle_ignore(sys.argv[2])
