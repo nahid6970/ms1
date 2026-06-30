@@ -317,6 +317,8 @@ def manage_roots_menu():
     fzf_args = [
         "fzf",
         "--ansi",
+        "--track",
+        "--id-nth=2..",
         "--prompt=Manage Search Roots > ",
         "--layout=reverse",
         "--border",
@@ -348,6 +350,8 @@ def manage_ignores_menu():
     fzf_args = [
         "fzf",
         "--ansi",
+        "--track",
+        "--id-nth=2..",
         "--prompt=Manage Ignored Patterns > ",
         "--layout=reverse",
         "--border",
@@ -1511,6 +1515,8 @@ if __name__ == "__main__":
             "--multi",
             "--no-sort",
             "--exact",
+            "--track",
+            "--id-nth=2",
             "--with-nth=1",
             "--delimiter=\t",
             "--prompt=Search [?] > ",

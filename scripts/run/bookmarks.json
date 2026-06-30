@@ -106,5 +106,9 @@
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\extension-manager",
     "name": "Extension Manager"
+  },
+  {
+    "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\google_talk",
+    "name": "Google Talk"
   }
 ]
