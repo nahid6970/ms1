@@ -4,16 +4,16 @@
     "name": "5018 [Cell]"
   },
   {
-    "path": "C:\\@delta\\db\\@Convex",
-    "name": "Convex Projects"
+    "path": "C:\\@delta\\ms1\\scripts\\run",
+    "name": "RUN Manager"
   },
   {
     "path": "C:\\@delta\\ms1\\@Flask\\5000_myhome",
     "name": "5000 [myHome]"
   },
   {
-    "path": "C:\\@delta\\ms1\\scripts\\run",
-    "name": "RUN Manager"
+    "path": "C:\\@delta\\db\\@Convex",
+    "name": "Convex Projects"
   },
   {
     "path": "C:\\@delta\\ms1\\@Flask",
@@ -64,12 +64,12 @@
     "name": "Port Killer"
   },
   {
-    "path": "C:\\@delta\\ms1\\asset\\Glance\\glance.yml",
-    "name": "Glance"
-  },
-  {
     "path": "C:\\@delta\\msBackups\\icon",
     "name": "ICON"
+  },
+  {
+    "path": "C:\\@delta\\db\\vlr",
+    "name": "VLR Valorant Stats"
   },
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\Element_Copy",
@@ -96,8 +96,8 @@
     "name": "Tab Saver"
   },
   {
-    "path": "C:\\@delta\\db\\vlr",
-    "name": "VLR Valorant Stats"
+    "path": "C:\\@delta\\ms1\\asset\\Glance\\glance.yml",
+    "name": "Glance"
   },
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
