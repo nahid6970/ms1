@@ -150,7 +150,8 @@ def load_config():
             "folder_bookmark": 51,
             "file_normal": 250,
             "file_bookmark": 121
-        }
+        },
+        "show_collapse_indicators": True
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -162,6 +163,8 @@ def load_config():
                     config["visibility"] = data["visibility"]
                 if "theme" in data:
                     config["theme"].update(data["theme"])
+                if "show_collapse_indicators" in data:
+                    config["show_collapse_indicators"] = data["show_collapse_indicators"]
         except:
             pass
     return config
@@ -747,16 +750,21 @@ def configure_menu():
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     
     while True:
+        config = load_config()
+        show_signs = config.get("show_collapse_indicators", True)
+        signs_status = "Show signs" if show_signs else "Hide signs"
+        
         # Styled Configuration options
         pad = "  "
         options = [
-            f"{pad}{esc('#9efa49')} Configure Search Roots (Directories)\x1b[0m",
-            f"{pad}{esc('#faf069')}󰗉 Configure Ignored Patterns\x1b[0m",
-            f"{pad}{esc('#00f0ff')} Configure Theme Colors\x1b[0m",
-            f"{pad}{esc('#ff934b')} Configure Console Font\x1b[0m",
-            f"{pad}{esc('#ff5757')}󰌌 View Keyboard Shortcuts\x1b[0m",
-            f"{pad}{esc('#ffffff')}󰘦 Open Config JSON in Notepad\x1b[0m",
-            f"{pad}{esc('#808080')}󰩈 Exit Configuration\x1b[0m",
+            f"{pad}{esc('#9efa49')}[D] Configure Search Roots (Directories)\x1b[0m",
+            f"{pad}{esc('#faf069')}[I] Configure Ignored Patterns\x1b[0m",
+            f"{pad}{esc('#00f0ff')}[C] Configure Theme Colors\x1b[0m",
+            f"{pad}{esc('#ff934b')}[F] Configure Console Font\x1b[0m",
+            f"{pad}{esc('#3a3a3a')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
+            f"{pad}{esc('#ff5757')}[K] View Keyboard Shortcuts\x1b[0m",
+            f"{pad}{esc('#ffffff')}[O] Open Config JSON in Notepad\x1b[0m",
+            f"{pad}{esc('#808080')}[X] Exit Configuration\x1b[0m",
         ]
         
         # Run FZF to choose option
@@ -780,22 +788,26 @@ def configure_menu():
             break
             
         choice = ansi_escape.sub('', stdout.strip())
-        if "Exit Configuration" in choice or choice.startswith("󰩈"):
+        if choice.startswith("[X]"):
             break
             
-        elif choice.startswith(""):
+        elif choice.startswith("[D]"):
             manage_roots_menu()
             
-        elif choice.startswith("󰗉"):
+        elif choice.startswith("[I]"):
             manage_ignores_menu()
             
-        elif choice.startswith(""):
+        elif choice.startswith("[C]"):
             manage_colors_menu()
             
-        elif choice.startswith(""):
+        elif choice.startswith("[F]"):
             manage_font_menu()
             
-        elif choice.startswith("󰌌"):
+        elif choice.startswith("[S]"):
+            config["show_collapse_indicators"] = not show_signs
+            save_config(config)
+            
+        elif choice.startswith("[K]"):
             view_shortcuts_menu()
             
         elif choice.startswith("󰘦"):
@@ -1203,7 +1215,8 @@ config = {{
         ".git": False, "__pycache__": False, "node_modules": False, ".venv": False, 
         ".vscode": False, "obj": False, "bin": False
     }},
-    "view_mode": "full"
+    "view_mode": "full",
+    "show_collapse_indicators": True
 }}
 if os.path.exists(config_file):
     try:
@@ -1212,6 +1225,7 @@ if os.path.exists(config_file):
             if "theme" in data: config["theme"].update(data["theme"])
             if "visibility" in data: config["visibility"] = data["visibility"]
             if "view_mode" in data: config["view_mode"] = data["view_mode"]
+            if "show_collapse_indicators" in data: config["show_collapse_indicators"] = data["show_collapse_indicators"]
     except: pass
 
 view_mode = config["view_mode"]
@@ -1254,7 +1268,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
     is_collapsed = is_dir and os.path.normpath(full_path).lower() in collapsed
     
     indicator = ""
-    if is_dir:
+    if is_dir and config.get("show_collapse_indicators", True):
         indicator = "[+] " if is_collapsed else "[-] "
         
     marker = "* " if is_bookmarked else ""
