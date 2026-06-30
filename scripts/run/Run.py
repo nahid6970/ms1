@@ -129,11 +129,45 @@ def move_bookmark(file_path, direction):
             bookmarks = [b if isinstance(b, dict) else {"path": b, "name": ""} for b in data]
     except: return
     
-    idx = next((i for i, b in enumerate(bookmarks) if b['path'] == file_path), -1)
-    if idx == -1: return
-    new_idx = idx + direction
-    if 0 <= new_idx < len(bookmarks):
-        bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
+    def is_descendant(parent, child):
+        p = os.path.normpath(parent).lower()
+        c = os.path.normpath(child).lower()
+        if p == c: return False
+        return c.startswith(p + os.sep) or (p.endswith(os.sep) and c.startswith(p))
+
+    # Determine parent for each bookmark
+    parent_map = {}
+    for bm in bookmarks:
+        path = bm['path']
+        ancestors = [other for other in bookmarks if is_descendant(other['path'], path)]
+        if not ancestors:
+            parent_map[path] = None
+        else:
+            closest = max(ancestors, key=lambda x: len(x['path']))
+            parent_map[path] = closest['path']
+
+    target_idx = next((i for i, b in enumerate(bookmarks) if b['path'] == file_path), -1)
+    if target_idx == -1: return
+    
+    target_path = bookmarks[target_idx]['path']
+    parent_path = parent_map[target_path]
+    
+    # Get siblings and sort them by their current index in the flat list
+    siblings = [b for b in bookmarks if parent_map[b['path']] == parent_path]
+    siblings.sort(key=lambda b: bookmarks.index(b))
+    
+    sib_idx = next((i for i, b in enumerate(siblings) if b['path'] == target_path), -1)
+    if sib_idx == -1: return
+    
+    new_sib_idx = sib_idx + direction
+    if 0 <= new_sib_idx < len(siblings):
+        sibling_to_swap = siblings[new_sib_idx]
+        idx_to_swap = bookmarks.index(sibling_to_swap)
+        
+        # Swap target and sibling in the flat list
+        bookmarks[target_idx], bookmarks[idx_to_swap] = bookmarks[idx_to_swap], bookmarks[target_idx]
+        
+        # Save bookmarks
         with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
             json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
@@ -853,7 +887,7 @@ def search_directories_and_files():
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
-│  F7: Configure                 Ctrl-H: Configure                          │
+│  F7: Configure  Alt-R: Ref/Top Ctrl-H: Configure                          │
 │                                                                           │
 │  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Alt-E: Expand All           │
 │  Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run                 │
@@ -1207,6 +1241,13 @@ import json
 # Fix Unicode encoding for Windows console
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
+def safe_print(*args, **kwargs):
+    try:
+        print(*args, **kwargs)
+        sys.stdout.flush()
+    except OSError:
+        sys.exit(0)
+
 bookmarks_file = r"{bookmarks_file}"
 config_file = r"{config_file}"
 collapsed_file = r"{COLLAPSED_FILE}"
@@ -1340,10 +1381,13 @@ for bm_item in bookmarks:
         closest = max(ancestors, key=lambda x: len(x['path']))
         children_map.setdefault(closest['path'], []).append(bm_item)
 
-# Sort roots and children: files first, then folders, alphabetically by path
+# Sort roots and children according to their index in the flat bookmarks list
+bm_paths = [b['path'] for b in bookmarks]
 def bookmark_sort_key(item):
-    is_dir = os.path.isdir(item['path'])
-    return (is_dir, item['path'].lower())
+    try:
+        return bm_paths.index(item['path'])
+    except:
+        return 999999
 
 roots.sort(key=bookmark_sort_key)
 for path in children_map:
@@ -1376,7 +1420,7 @@ for bm_item, tree_prefix in ordered_bookmarks:
     bm = bm_item['path']
     if os.path.exists(bm):
         display = format_display(bm, True, tree_prefix)
-        print(f"{{display}}\\t{{bm}}")
+        safe_print(f"{{display}}\\t{{bm}}")
 
 # Recursive tree walk helper to output files/folders with connectors
 def walk_tree(root_dir, prefix="", is_final=True):
@@ -1413,7 +1457,7 @@ def walk_tree(root_dir, prefix="", is_final=True):
         is_collapsed = is_dir and os.path.normpath(full_path).lower() in collapsed
         
         display = format_display(full_path, False, prefix + connector)
-        print(f"{{display}}\\t{{full_path}}")
+        safe_print(f"{{display}}\\t{{full_path}}")
         printed_paths.add(full_path)
         
         if is_dir and not is_collapsed:
@@ -1429,7 +1473,7 @@ for root_dir in directories:
         
     # Print the root directory itself (depth 0, no tree connector)
     display = format_display(root_dir, False, "")
-    print(f"{{display}}\\t{{root_dir}}")
+    safe_print(f"{{display}}\\t{{root_dir}}")
     printed_paths.add(root_dir)
     
     root_norm = os.path.normpath(root_dir).lower()
@@ -1442,52 +1486,16 @@ for root_dir in directories:
             feeder_script.write(feeder_script_content)
             feeder_script_file = feeder_script.name
         
-        # Create bookmark reorder script for Alt+Up/Down
-        bookmark_reorder_script_content = f'''
-import sys
-import json
-import os
 
-bookmarks_file = r"{bookmarks_file}"
-
-def move_bookmark(file_path, direction):
-    if not os.path.exists(bookmarks_file):
-        return
-    try:
-        with open(bookmarks_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            bookmarks = [b if isinstance(b, dict) else {{"path": b, "name": ""}} for b in data]
-    except:
-        return
-    
-    idx = next((i for i, b in enumerate(bookmarks) if b['path'] == file_path), -1)
-    if idx == -1: return
-    
-    new_idx = idx + direction
-    if 0 <= new_idx < len(bookmarks):
-        bookmarks[idx], bookmarks[new_idx] = bookmarks[new_idx], bookmarks[idx]
-        with open(bookmarks_file, 'w', encoding='utf-8') as f:
-            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
-
-if __name__ == "__main__":
-    if len(sys.argv) >= 3:
-        direction = -1 if sys.argv[1] == "up" else 1
-        file_path = sys.argv[2]
-        move_bookmark(file_path, direction)
-'''
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as reorder_script:
-            reorder_script.write(bookmark_reorder_script_content)
-            bookmark_reorder_script_file = reorder_script.name
-        
-        # Shortcut help header (toggled by ?)
+           # Shortcut help header (toggled by ?)
         help_header = r"""┌───────────────────────────────────────────────────────────────────────────┐
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  [ FUNCTION KEYS ]                                                        │
 │  F2        : Toggle image preview mode (chafa/viu vs QuickLook)           │
 │  F3        : Toggle view mode (Full Path vs Filename)                     │
-│  F4        : Refresh file list                                            │
+│  F4        : Refresh file list (keeps focus)                              │
+│  Alt-R     : Refresh file list (resets to top)                            │
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
 │  F7        : Terminal Configurator (roots/ignores)                         │
@@ -1508,7 +1516,7 @@ if __name__ == "__main__":
 │  Tab       : Multi-select files                                           │
 │  ?         : Toggle this shortcuts help header                            │
 └───────────────────────────────────────────────────────────────────────────┘"""
-         
+          
         fzf_args = [
             "fzf",
             "--ansi",
@@ -1537,6 +1545,7 @@ if __name__ == "__main__":
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
+            f"--bind=alt-r:reload(python \"{feeder_script_file}\")+first",
             f"--bind=f5:execute(python \"{script_path}\" --toggle-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f6:execute(python \"{script_path}\" --rename-bookmark {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=f7:execute(python \"{script_path}\" --configure)+reload(python \"{feeder_script_file}\")",
