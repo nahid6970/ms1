@@ -625,13 +625,11 @@ for root in roots:
     traverse(root, 0)
 
 # Output bookmarked files first in tree order
-printed_paths = set()
 for bm_item, depth in ordered_bookmarks:
     bm = bm_item['path']
     if os.path.exists(bm):
         display = format_display(bm, True, depth)
         print(f"{{display}}\\t{{bm}}")
-        printed_paths.add(bm)
 
 # Helper to get depth of path relative to search root
 def get_path_depth(root_dir, path):
@@ -644,6 +642,7 @@ def get_path_depth(root_dir, path):
         return 0
 
 # Output other files and directories
+printed_paths = set()
 for root_dir in directories:
     if not os.path.isdir(root_dir):
         continue
