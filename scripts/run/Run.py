@@ -614,6 +614,15 @@ for bm_item in bookmarks:
         closest = max(ancestors, key=lambda x: len(x['path']))
         children_map.setdefault(closest['path'], []).append(bm_item)
 
+# Sort roots and children: files first, then folders, alphabetically by path
+def bookmark_sort_key(item):
+    is_dir = os.path.isdir(item['path'])
+    return (is_dir, item['path'].lower())
+
+roots.sort(key=bookmark_sort_key)
+for path in children_map:
+    children_map[path].sort(key=bookmark_sort_key)
+
 # Traverse tree and collect ordered bookmarks with depths
 ordered_bookmarks = []
 def traverse(bm_item, depth):
@@ -649,6 +658,10 @@ for root_dir in directories:
     for root, dirs, files in os.walk(root_dir, onerror=lambda e: None):
         # Prune ignored directories
         dirs[:] = [d for d in dirs if d not in ignore_list and not any(i in d for i in ignore_list)]
+        
+        # Sort subdirectories and files alphabetically
+        dirs.sort()
+        files.sort()
         
         # Check if root is collapsed
         root_norm = os.path.normpath(root).lower()
@@ -754,6 +767,7 @@ if __name__ == "__main__":
             "fzf",
             "--ansi",
             "--multi",
+            "--no-sort",
             "--with-nth=1",
             "--delimiter=\t",
             "--prompt=Search [?] > ",
