@@ -31,7 +31,7 @@
     },
     ".json": {
       "icon": "",
-      "color": 178
+      "color": 215
     },
     ".ahk": {
       "icon": "󰘳",
@@ -39,7 +39,7 @@
     },
     ".md": {
       "icon": "󰈙",
-      "color": 250
+      "color": 39
     },
     ".txt": {
       "icon": "󰦨",
@@ -47,11 +47,11 @@
     },
     ".svg": {
       "icon": "󰜡",
-      "color": 9
+      "color": 39
     },
     ".html": {
       "icon": "",
-      "color": 9
+      "color": 202
     },
     ".css": {
       "icon": "",
@@ -67,11 +67,11 @@
     },
     ".go": {
       "icon": "󰟓",
-      "color": 250
+      "color": 81
     },
     ".rs": {
       "icon": "",
-      "color": 1
+      "color": 208
     },
     ".pdf": {
       "icon": "",
@@ -83,7 +83,7 @@
     },
     ".7z, .rar, .zip, .gz, .tar": {
       "icon": "󰿺",
-      "color": 219
+      "color": 172
     },
     ".jpeg, .gif, .png, .ico, .webp": {
       "icon": "",
@@ -91,7 +91,7 @@
     },
     ".cpp, .cs, .h": {
       "icon": "",
-      "color": 250
+      "color": 110
     }
   },
   "show_extension_dots": true,
