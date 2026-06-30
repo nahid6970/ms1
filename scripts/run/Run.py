@@ -548,8 +548,7 @@ if os.path.exists(collapsed_file):
         pass
 
 # Helper function to format display
-def format_display(full_path, is_bookmarked, depth=0):
-    indent = "  " * depth
+def format_display(full_path, is_bookmarked, tree_prefix=""):
     is_dir = os.path.isdir(full_path)
     is_collapsed = is_dir and os.path.normpath(full_path).lower() in collapsed
     
@@ -558,7 +557,6 @@ def format_display(full_path, is_bookmarked, depth=0):
         indicator = "[+] " if is_collapsed else "[-] "
         
     marker = "* " if is_bookmarked else ""
-    display_indent = f"{{indent}}"
     
     custom_name = ""
     if is_bookmarked:
@@ -567,7 +565,7 @@ def format_display(full_path, is_bookmarked, depth=0):
             custom_name = bm.get('name', '')
 
     if custom_name:
-        display = f"{{marker}}{{display_indent}}{{indicator}}{{custom_name}}"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{custom_name}}"
     elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
@@ -576,9 +574,9 @@ def format_display(full_path, is_bookmarked, depth=0):
             parent = ""
         else:
             parent = os.path.basename(os.path.dirname(path_norm))
-        display = f"{{marker}}{{display_indent}}{{indicator}}{{name}} ({{parent}})"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{name}} ({{parent}})"
     else:
-        display = f"{{marker}}{{display_indent}}{{indicator}}{{full_path}}"
+        display = f"{{marker}}{{tree_prefix}}{{indicator}}{{full_path}}"
     
     if is_dir:
         if is_bookmarked:
@@ -634,72 +632,91 @@ for path in children_map:
 
 # Traverse tree and collect ordered bookmarks with depths
 ordered_bookmarks = []
-def traverse(bm_item, depth):
-    ordered_bookmarks.append((bm_item, depth))
-    for child in children_map.get(bm_item['path'], []):
-        traverse(child, depth + 1)
+def traverse(bm_item, prefix, is_root, is_final):
+    if is_root:
+        tree_prefix = ""
+        next_prefix = ""
+    else:
+        connector = "└── " if is_final else "├── "
+        tree_prefix = prefix + connector
+        next_prefix = prefix + ("    " if is_final else "│   ")
+        
+    ordered_bookmarks.append((bm_item, tree_prefix))
+    
+    children = children_map.get(bm_item['path'], [])
+    n = len(children)
+    for idx, child in enumerate(children):
+        traverse(child, next_prefix, False, idx == n - 1)
 
-for root in roots:
-    traverse(root, 0)
+n_roots = len(roots)
+for idx, root in enumerate(roots):
+    traverse(root, "", True, idx == n_roots - 1)
 
 # Output bookmarked files first in tree order
-for bm_item, depth in ordered_bookmarks:
+for bm_item, tree_prefix in ordered_bookmarks:
     bm = bm_item['path']
     if os.path.exists(bm):
-        display = format_display(bm, True, depth)
+        display = format_display(bm, True, tree_prefix)
         print(f"{{display}}\\t{{bm}}")
 
-# Helper to get depth of path relative to search root
-def get_path_depth(root_dir, path):
+# Recursive tree walk helper to output files/folders with connectors
+def walk_tree(root_dir, prefix="", is_final=True):
     try:
-        rel = os.path.relpath(path, root_dir)
-        if rel == ".":
-            return 0
-        return len(rel.split(os.sep))
+        entries = os.listdir(root_dir)
     except:
-        return 0
+        return
+        
+    valid_entries = []
+    for name in entries:
+        full_path = os.path.join(root_dir, name)
+        if name in ignore_list or any(i in name for i in ignore_list):
+            continue
+        if full_path in printed_paths:
+            continue
+        valid_entries.append(name)
+        
+    def entry_sort_key(name):
+        full_path = os.path.join(root_dir, name)
+        is_dir = os.path.isdir(full_path)
+        return (is_dir, name.lower())
+        
+    valid_entries.sort(key=entry_sort_key)
+    
+    n = len(valid_entries)
+    for idx, name in enumerate(valid_entries):
+        full_path = os.path.join(root_dir, name)
+        is_entry_final = (idx == n - 1)
+        
+        connector = "└── " if is_entry_final else "├── "
+        next_prefix = prefix + ("    " if is_entry_final else "│   ")
+        
+        is_dir = os.path.isdir(full_path)
+        is_collapsed = is_dir and os.path.normpath(full_path).lower() in collapsed
+        
+        display = format_display(full_path, False, prefix + connector)
+        print(f"{{display}}\\t{{full_path}}")
+        printed_paths.add(full_path)
+        
+        if is_dir and not is_collapsed:
+            walk_tree(full_path, next_prefix, is_entry_final)
 
 # Output other files and directories
 printed_paths = set()
 for root_dir in directories:
     if not os.path.isdir(root_dir):
         continue
-    for root, dirs, files in os.walk(root_dir, onerror=lambda e: None):
-        # Prune ignored directories
-        dirs[:] = [d for d in dirs if d not in ignore_list and not any(i in d for i in ignore_list)]
+    if root_dir in printed_paths:
+        continue
         
-        # Sort subdirectories and files alphabetically
-        dirs.sort()
-        files.sort()
-        
-        # Check if root is collapsed
-        root_norm = os.path.normpath(root).lower()
-        is_collapsed = root_norm in collapsed
-        
-        # Process the current directory (root)
-        if root not in printed_paths:
-            # Final check to avoid showing ignored root paths
-            if not any(i in root for i in ignore_list):
-                depth = get_path_depth(root_dir, root)
-                display = format_display(root, False, depth)
-                print(f"{{display}}\\t{{root}}")
-                printed_paths.add(root)
-                
-        if is_collapsed:
-            dirs[:] = []  # Don't walk into subdirectories
-            continue     # Skip processing files in this directory
-        
-        # Process files in this directory
-        for file in files:
-            full_path = os.path.join(root, file)
-            if full_path in printed_paths:
-                continue
-            if any(i in full_path for i in ignore_list):
-                continue
-            depth = get_path_depth(root_dir, full_path)
-            display = format_display(full_path, False, depth)
-            print(f"{{display}}\\t{{full_path}}")
-            printed_paths.add(full_path)
+    # Print the root directory itself (depth 0, no tree connector)
+    display = format_display(root_dir, False, "")
+    print(f"{{display}}\\t{{root_dir}}")
+    printed_paths.add(root_dir)
+    
+    root_norm = os.path.normpath(root_dir).lower()
+    is_collapsed = root_norm in collapsed
+    if not is_collapsed:
+        walk_tree(root_dir, "", True)
 '''
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as feeder_script:
