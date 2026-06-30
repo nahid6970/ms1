@@ -185,27 +185,15 @@ def load_config():
         ".json": {"icon": "⚙️", "color": 215},
         ".md": {"icon": "📝", "color": 39},
         ".txt": {"icon": "📄", "color": 250},
-        ".png": {"icon": "🖼️", "color": 197},
-        ".jpg": {"icon": "🖼️", "color": 197},
-        ".jpeg": {"icon": "🖼️", "color": 197},
-        ".gif": {"icon": "🖼️", "color": 197},
-        ".webp": {"icon": "🖼️", "color": 197},
-        ".ico": {"icon": "🎨", "color": 39},
-        ".svg": {"icon": "🎨", "color": 39},
+        ".png, .jpg, .jpeg, .gif, .webp": {"icon": "🖼️", "color": 197},
+        ".ico, .svg, .css": {"icon": "🎨", "color": 39},
         ".html": {"icon": "🌐", "color": 202},
-        ".css": {"icon": "🎨", "color": 39},
-        ".js": {"icon": "📜", "color": 220},
-        ".ts": {"icon": "📜", "color": 39},
-        ".cpp": {"icon": "⚙️", "color": 110},
-        ".h": {"icon": "⚙️", "color": 110},
-        ".cs": {"icon": "⚙️", "color": 110},
+        ".js, .ts": {"icon": "📜", "color": 220},
+        ".cpp, .h, .cs": {"icon": "⚙️", "color": 110},
         ".go": {"icon": "🐹", "color": 81},
         ".rs": {"icon": "🦀", "color": 208},
         ".pdf": {"icon": "📕", "color": 196},
-        ".zip": {"icon": "📦", "color": 220},
-        ".tar": {"icon": "📦", "color": 220},
-        ".gz": {"icon": "📦", "color": 220},
-        ".7z": {"icon": "📦", "color": 220},
+        ".zip, .tar, .gz, .7z": {"icon": "📦", "color": 220},
         "folder": {"icon": "📁", "color": 208}
     }
     config = {
@@ -376,11 +364,16 @@ def toggle_ignore(selected_line):
                 pattern = f_in.readline().strip()
                 
             if pattern:
-                config = load_config()
-                config.setdefault("visibility", {})[pattern] = False
-                save_config(config)
-                print(f"\n\033[92mSuccessfully added to ignore list: {pattern}\033[0m")
-                import time; time.sleep(1.5)
+                raw_parts = [x.strip() for x in pattern.replace(',', ' ').split()]
+                patterns = [p for p in raw_parts if p]
+                if patterns:
+                    config = load_config()
+                    visibility = config.setdefault("visibility", {})
+                    for p in patterns:
+                        visibility[p] = False
+                    save_config(config)
+                    print(f"\n\033[92mSuccessfully added to ignore list: {', '.join(patterns)}\033[0m")
+                    import time; time.sleep(1.5)
         except KeyboardInterrupt:
             return
     else:
@@ -556,6 +549,7 @@ def configure_single_icon_menu(ext_key):
         options = [
             f"{pad}{esc('#9efa49')}[I] Change Icon Glyph\x1b[0m (Current: '{icon}')",
             f"{pad}{esc('#00f0ff')}[C] Change Icon Color\x1b[0m (Current: \x1b[38;5;{color}m{color}\x1b[0m)",
+            f"{pad}{esc('#faf069')}[M] Modify This Extension List\x1b[0m",
             f"{pad}{esc('#ff5757')}[D] Delete Extension Icon mapping\x1b[0m",
             f"{pad}{esc('#808080')}[B] Back to Icon List\x1b[0m",
         ]
@@ -606,6 +600,36 @@ def configure_single_icon_menu(ext_key):
                 else:
                     icon_map[ext_key] = {"icon": icon, "color": new_color}
                 save_config(config)
+                
+        elif choice.startswith("[M]"):
+            try:
+                con_path = 'CON' if os.name == 'nt' else '/dev/tty'
+                with open(con_path, 'r', encoding='utf-8') as f_in:
+                    print(f"\nEnter new list of extensions for this icon (current: '{ext_key}'): ", end='', flush=True)
+                    val = f_in.readline().strip().lower()
+                    if val:
+                        raw_parts = [x.strip() for x in val.replace(',', ' ').split()]
+                        parts = []
+                        for part in raw_parts:
+                            if not part:
+                                continue
+                            if part != "folder" and not part.startswith("."):
+                                part = "." + part
+                            parts.append(part)
+                            
+                        if parts:
+                            new_key = ", ".join(parts)
+                            if new_key != ext_key:
+                                # Copy current properties to new key, delete old key
+                                icon_map[new_key] = entry
+                                if ext_key in icon_map:
+                                    del icon_map[ext_key]
+                                save_config(config)
+                                ext_key = new_key # Keep submenu open for new key!
+                                print(f"\n\033[92mSuccessfully updated extension list to: {new_key}\033[0m")
+                                import time; time.sleep(1.5)
+            except KeyboardInterrupt:
+                pass
                 
         elif choice.startswith("[D]"):
             del icon_map[ext_key]
@@ -692,15 +716,23 @@ def manage_icon_colors_menu():
             try:
                 con_path = 'CON' if os.name == 'nt' else '/dev/tty'
                 with open(con_path, 'r', encoding='utf-8') as f_in:
-                    print("\nEnter extension to add (e.g. .py or .txt): ", end='', flush=True)
+                    print("\nEnter extension(s) to add (e.g. .py or .7z, .rar, .zip): ", end='', flush=True)
                     val = f_in.readline().strip().lower()
                     if val:
-                        if val != "folder" and not val.startswith("."):
-                            val = "." + val
-                        ext_key = val
-                        if ext_key not in icon_map:
-                            icon_map[ext_key] = {"icon": "📄" if ext_key != "folder" else "📁", "color": 250}
-                            save_config(config)
+                        raw_parts = [x.strip() for x in val.replace(',', ' ').split()]
+                        added_keys = []
+                        for part in raw_parts:
+                            if not part:
+                                continue
+                            if part != "folder" and not part.startswith("."):
+                                part = "." + part
+                            added_keys.append(part)
+                            
+                        if added_keys:
+                            ext_key = ", ".join(added_keys)
+                            if ext_key not in icon_map:
+                                icon_map[ext_key] = {"icon": "📄" if ext_key != "folder" else "📁", "color": 250}
+                                save_config(config)
             except KeyboardInterrupt:
                 pass
         else:
@@ -1641,12 +1673,26 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             line_color = theme['file_normal']
             
         ext = os.path.splitext(full_path)[1].lower()
-        entry = icon_map.get(ext, {{}})
-        if isinstance(entry, dict):
-            file_icon = entry.get("icon", "📄")
-            icon_color = entry.get("color", line_color)
-        else:
-            file_icon = entry
+        file_icon = None
+        icon_color = line_color
+        
+        # Find matching key in icon_map (which could be a group key like ".7z, .rar, .zip")
+        for key, entry in icon_map.items():
+            if key == "folder":
+                continue
+            extensions = [x.strip().lower() for x in key.replace(',', ' ').split()]
+            if ext in extensions:
+                if isinstance(entry, dict):
+                    file_icon = entry.get("icon", "📄")
+                    icon_color = entry.get("color", line_color)
+                else:
+                    file_icon = entry
+                    icon_color = line_color
+                break
+                
+        # If no match, fallback to default file icon "📄"
+        if not file_icon:
+            file_icon = "📄"
             icon_color = line_color
             
         if file_icon:
