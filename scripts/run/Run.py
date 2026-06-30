@@ -209,7 +209,9 @@ def load_config():
             "file_bookmark": 121
         },
         "show_collapse_indicators": True,
-        "extension_icons": default_icons
+        "extension_icons": default_icons,
+        "show_extension_dots": True,
+        "show_extension_commas": True
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -225,6 +227,10 @@ def load_config():
                     config["show_collapse_indicators"] = data["show_collapse_indicators"]
                 if "extension_icons" in data:
                     config["extension_icons"] = data["extension_icons"]
+                if "show_extension_dots" in data:
+                    config["show_extension_dots"] = data["show_extension_dots"]
+                if "show_extension_commas" in data:
+                    config["show_extension_commas"] = data["show_extension_commas"]
         except:
             pass
             
@@ -233,7 +239,7 @@ def load_config():
         try:
             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data:
+            if "search_roots" not in data or not data["search_roots"] or "extension_icons" not in data or "show_extension_dots" not in data or "show_extension_commas" not in data:
                 save_config(config)
         except:
             pass
@@ -665,13 +671,44 @@ def manage_icon_colors_menu():
         config = load_config()
         icon_map = config.get("extension_icons", {})
         
-        max_ext_len = max((len(ext) for ext in icon_map.keys()), default=10)
+        show_dots = config.get("show_extension_dots", True)
+        show_commas = config.get("show_extension_commas", True)
+        
+        dots_status = "Show Dots" if show_dots else "Hide Dots"
+        commas_status = "Show Commas" if show_commas else "Hide Commas"
+        
+        def format_ext_list(ext_key):
+            if ext_key == "folder":
+                return "folder"
+            parts = [x.strip() for x in ext_key.replace(',', ' ').split()]
+            cleaned = []
+            for p in parts:
+                if not p:
+                    continue
+                if not show_dots and p.startswith("."):
+                    cleaned.append(p[1:])
+                elif show_dots and not p.startswith("."):
+                    cleaned.append("." + p)
+                else:
+                    cleaned.append(p)
+            separator = ", " if show_commas else " "
+            return separator.join(cleaned)
+            
+        display_map = {}
+        for ext in icon_map.keys():
+            display_map[ext] = format_ext_list(ext)
+            
+        max_ext_len = max((len(val) for val in display_map.values()), default=10)
         col_width = max(10, max_ext_len)
         
         pad = "  "
         options = [
-            f"{pad}{esc('#9efa49')}[+] Add New Extension Icon\x1b[0m"
+            f"{pad}{esc('#9efa49')}[+] Add New Extension Icon\x1b[0m",
+            f"{pad}{esc('#faf069')}[.] Toggle Extension Dots\x1b[0m (Current: {dots_status})",
+            f"{pad}{esc('#00f0ff')}[,] Toggle Extension Commas\x1b[0m (Current: {commas_status})"
         ]
+        
+        choices_map = {}
         for ext, entry in sorted(icon_map.items()):
             icon = ""
             color = 250
@@ -685,7 +722,12 @@ def manage_icon_colors_menu():
             icon_pad = " " * max(1, 3 - icon_width)
             colored_icon = f"\x1b[38;5;{color}m{icon}\x1b[0m{icon_pad}"
             
-            options.append(f"{pad}{ext:<{col_width}} {colored_icon} (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)")
+            display_ext = display_map[ext]
+            option_line = f"{pad}{display_ext:<{col_width}} {colored_icon} (Current Color: \x1b[38;5;{color}m{color}\x1b[0m)"
+            options.append(option_line)
+            
+            clean_opt = ansi_escape.sub('', option_line).strip()
+            choices_map[clean_opt] = ext
             
         options.append(f"{pad}{esc('#808080')}Return to Theme Colors Menu\x1b[0m")
         
@@ -711,6 +753,16 @@ def manage_icon_colors_menu():
         choice = ansi_escape.sub('', stdout.strip())
         if "Return to Theme Colors Menu" in choice:
             break
+            
+        if "[.] Toggle Extension Dots" in choice:
+            config["show_extension_dots"] = not show_dots
+            save_config(config)
+            continue
+            
+        if "[,] Toggle Extension Commas" in choice:
+            config["show_extension_commas"] = not show_commas
+            save_config(config)
+            continue
             
         is_add = "[+] Add New Extension Icon" in choice
         ext_key = ""
@@ -739,9 +791,7 @@ def manage_icon_colors_menu():
             except KeyboardInterrupt:
                 pass
         else:
-            parts = choice.split()
-            if parts:
-                ext_key = parts[0]
+            ext_key = choices_map.get(choice)
                 
         if ext_key:
             configure_single_icon_menu(ext_key)

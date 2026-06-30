@@ -73,5 +73,7 @@
       "icon": "",
       "color": 207
     }
-  }
+  },
+  "show_extension_dots": false,
+  "show_extension_commas": false
 }
