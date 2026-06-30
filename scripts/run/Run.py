@@ -8,6 +8,30 @@ import ctypes
 ctypes.windll.kernel32.SetConsoleTitleW("RUNNER")
 
 BOOKMARKS_FILE = r"C:\@delta\db\FZF_launcher\bookmarks.json"
+COLLAPSED_FILE = r"C:\@delta\db\FZF_launcher\collapsed.json"
+
+def toggle_collapse(file_path):
+    if not os.path.isdir(file_path):
+        return
+    dir_path = os.path.dirname(COLLAPSED_FILE)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+    collapsed = []
+    if os.path.exists(COLLAPSED_FILE):
+        try:
+            with open(COLLAPSED_FILE, 'r', encoding='utf-8') as f:
+                collapsed = json.load(f)
+        except:
+            pass
+    norm_path = os.path.normpath(file_path)
+    norm_path_lower = norm_path.lower()
+    existing = next((p for p in collapsed if os.path.normpath(p).lower() == norm_path_lower), None)
+    if existing:
+        collapsed.remove(existing)
+    else:
+        collapsed.append(norm_path)
+    with open(COLLAPSED_FILE, 'w', encoding='utf-8') as f:
+        json.dump(collapsed, f, indent=2, ensure_ascii=False)
 
 def toggle_bookmark(file_path):
     dir_path = os.path.dirname(BOOKMARKS_FILE)
@@ -95,9 +119,9 @@ def search_directories_and_files():
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
 │  F7: Configuration             Ctrl-H: Full Help GUI                      │
 │                                                                           │
-│  Ctrl-C: Copy   Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run │
-│  Alt-Up/Down: Move Bookmark    Enter: Action Menu     Tab: Multi-select   │
-│  ?: Toggle this header                                                    │
+│  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Ctrl-N: Editor              │
+│  Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run   Alt-Up/Down: Move Bookmark  │
+│  Enter: Action Menu     Tab: Multi-select     ?: Toggle this header       │
 └───────────────────────────────────────────────────────────────────────────┘"""
 
     # Create a state file to track preview mode (chafa vs quicklook)
@@ -505,11 +529,27 @@ if os.path.exists(bookmarks_file):
     except:
         bookmarks = []
 
+# Load collapsed folders
+collapsed = set()
+collapsed_file = r"C:\@delta\db\FZF_launcher\collapsed.json"
+if os.path.exists(collapsed_file):
+    try:
+        with open(collapsed_file, 'r', encoding='utf-8') as f:
+            collapsed = set(os.path.normpath(p).lower() for p in json.load(f))
+    except:
+        pass
+
 # Helper function to format display
 def format_display(full_path, is_bookmarked, depth=0):
     indent = "  " * depth
-    marker = f"{{indent}}* " if is_bookmarked else "  "
     is_dir = os.path.isdir(full_path)
+    is_collapsed = is_dir and os.path.normpath(full_path).lower() in collapsed
+    
+    indicator = ""
+    if is_dir:
+        indicator = " ▸" if is_collapsed else " ▾"
+        
+    marker = f"{{indent}}* " if is_bookmarked else f"{{indent}}  "
     
     custom_name = ""
     if is_bookmarked:
@@ -518,7 +558,7 @@ def format_display(full_path, is_bookmarked, depth=0):
             custom_name = bm.get('name', '')
 
     if custom_name:
-        display = f"{{marker}}{{custom_name}}"
+        display = f"{{marker}}{{custom_name}}{{indicator}}"
     elif view_mode == "name":
         path_norm = full_path.rstrip(os.sep)
         name = os.path.basename(path_norm)
@@ -527,9 +567,9 @@ def format_display(full_path, is_bookmarked, depth=0):
             parent = ""
         else:
             parent = os.path.basename(os.path.dirname(path_norm))
-        display = f"{{marker}}{{name}} ({{parent}})"
+        display = f"{{marker}}{{name}}{{indicator}} ({{parent}})"
     else:
-        display = f"{{marker}}{{full_path}}"
+        display = f"{{marker}}{{full_path}}{{indicator}}"
     
     if is_dir:
         if is_bookmarked:
@@ -593,6 +633,16 @@ for bm_item, depth in ordered_bookmarks:
         print(f"{{display}}\\t{{bm}}")
         printed_paths.add(bm)
 
+# Helper to get depth of path relative to search root
+def get_path_depth(root_dir, path):
+    try:
+        rel = os.path.relpath(path, root_dir)
+        if rel == ".":
+            return 0
+        return len(rel.split(os.sep))
+    except:
+        return 0
+
 # Output other files and directories
 for root_dir in directories:
     if not os.path.isdir(root_dir):
@@ -601,13 +651,22 @@ for root_dir in directories:
         # Prune ignored directories
         dirs[:] = [d for d in dirs if d not in ignore_list and not any(i in d for i in ignore_list)]
         
+        # Check if root is collapsed
+        root_norm = os.path.normpath(root).lower()
+        is_collapsed = root_norm in collapsed
+        
         # Process the current directory (root)
         if root not in printed_paths:
             # Final check to avoid showing ignored root paths
             if not any(i in root for i in ignore_list):
-                display = format_display(root, False)
+                depth = get_path_depth(root_dir, root)
+                display = format_display(root, False, depth)
                 print(f"{{display}}\\t{{root}}")
                 printed_paths.add(root)
+                
+        if is_collapsed:
+            dirs[:] = []  # Don't walk into subdirectories
+            continue     # Skip processing files in this directory
         
         # Process files in this directory
         for file in files:
@@ -616,7 +675,8 @@ for root_dir in directories:
                 continue
             if any(i in full_path for i in ignore_list):
                 continue
-            display = format_display(full_path, False)
+            depth = get_path_depth(root_dir, full_path)
+            display = format_display(full_path, False, depth)
             print(f"{{display}}\\t{{full_path}}")
             printed_paths.add(full_path)
 '''
@@ -677,6 +737,7 @@ if __name__ == "__main__":
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
+│  Ctrl-E    : Toggle collapse/expand on folder                             │
 │  Ctrl-N    : Open file with Editor Chooser                                │
 │  Ctrl-O    : Open file location in Explorer                               │
 │  Ctrl-P    : Toggle preview window on/off                                 │
@@ -706,6 +767,7 @@ if __name__ == "__main__":
             "--layout=reverse",
             "--color=bg:#1e1e1e,fg:#d0d0d0,bg+:#2e2e2e,fg+:#ffffff,hl:#00d9ff,hl+:#00ff00,info:#afaf87,prompt:#d782ff,pointer:#d782ff,marker:#19d600,header:#888888,border:#d782ff",
             f"--bind=enter:execute({batch_file} {{+2}})",
+            f"--bind=ctrl-e:execute-silent(python \"{script_path}\" --toggle-collapse {{2}})+reload(python \"{feeder_script_file}\")",
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
             f"--bind=ctrl-o:execute-silent(python \"{script_path}\" --open-item {{2}})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
@@ -804,6 +866,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--toggle-bookmark" and len(sys.argv) > 2:
             toggle_bookmark(sys.argv[2])
+            sys.exit(0)
+        elif sys.argv[1] == "--toggle-collapse" and len(sys.argv) > 2:
+            toggle_collapse(sys.argv[2])
             sys.exit(0)
         elif sys.argv[1] == "--rename-bookmark" and len(sys.argv) > 2:
             rename_bookmark(sys.argv[2])
