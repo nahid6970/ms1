@@ -1,0 +1,80 @@
+{
+  "search_roots": {
+    "C:\\@delta\\ms1": true,
+    "C:\\@delta\\db": true,
+    "C:\\@delta\\msBackups": true,
+    "C:\\Users\\nahid\\Pictures": true,
+    "D:\\": true
+  },
+  "visibility": {
+    ".git": false,
+    ".venv": false,
+    ".vscode": false,
+    "__pycache__": false,
+    "bin": false,
+    "node_modules": false,
+    "obj": false,
+    ".gitignore": false
+  },
+  "theme": {
+    "folder_normal": 208,
+    "folder_bookmark": 51,
+    "file_normal": 250,
+    "file_bookmark": 121,
+    "font_face": "JetBrainsMono NFP"
+  },
+  "show_collapse_indicators": false,
+  "extension_icons": {
+    ".py": {
+      "icon": "",
+      "color": 221
+    },
+    ".json": "",
+    ".ahk": {
+      "icon": "󰘳",
+      "color": 83
+    },
+    ".md": "󰈙",
+    ".txt": "📄",
+    ".png": "🖼️",
+    ".jpg": "🖼️",
+    ".jpeg": "🖼️",
+    ".gif": {
+      "icon": "",
+      "color": 207
+    },
+    ".webp": "🖼️",
+    ".ico": "🎨",
+    ".svg": "🎨",
+    ".html": "🌐",
+    ".css": {
+      "icon": "",
+      "color": 69
+    },
+    ".js": "📜",
+    ".ts": "📜",
+    ".cpp": {
+      "icon": "",
+      "color": 250
+    },
+    ".h": "⚙️",
+    ".cs": {
+      "icon": "",
+      "color": 250
+    },
+    ".go": {
+      "icon": "󰟓",
+      "color": 250
+    },
+    ".rs": "🦀",
+    ".pdf": "📕",
+    ".zip": "📦",
+    ".tar": "📦",
+    ".gz": "📦",
+    ".7z": {
+      "icon": "󰗄",
+      "color": 127
+    },
+    "folder": "📁"
+  }
+}
