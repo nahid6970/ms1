@@ -1,6 +1,6 @@
 [
   {
-    "name": "5018 myCell",
+    "name": "mycell",
     "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
     "pinned": false,
     "theme": {
@@ -9,7 +9,7 @@
       "cursor": "#3b82f6"
     },
     "cardTheme": {
-      "bgColor": "#5cd728",
+      "bgColor": "#5cd33c",
       "textColor": "#000000",
       "accentColor": "#2563eb"
     }
