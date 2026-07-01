@@ -195,7 +195,8 @@ def load_projects_config():
                             elif isinstance(bm, dict):
                                 sanitized.append({
                                     "command": bm.get("command", ""),
-                                    "global": bm.get("global", False)
+                                    "global": bm.get("global", False),
+                                    "name": bm.get("name", "")
                                 })
                         p["bookmarks"] = sanitized
                 return projs
@@ -374,6 +375,41 @@ def api_toggle_bookmark_global(project, index):
     if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
         proj["bookmarks"][index]["global"] = is_global
         
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks/<int:index>/edit', methods=['POST'])
+def api_edit_bookmark(project, index):
+    data = request.json or {}
+    command = data.get("command", "").strip()
+    name = data.get("name", "").strip()
+    new_index = data.get("newIndex")
+    
+    if not command:
+        return jsonify({"error": "Command is required"}), 400
+        
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
+        # Get target bookmark
+        bm = proj["bookmarks"][index]
+        bm["command"] = command
+        bm["name"] = name
+        
+        # If new_index is provided and valid, move the bookmark
+        if new_index is not None:
+            try:
+                new_index = int(new_index)
+                if 0 <= new_index < len(proj["bookmarks"]) and new_index != index:
+                    # Pop from old position and insert at new position
+                    bm_pop = proj["bookmarks"].pop(index)
+                    proj["bookmarks"].insert(new_index, bm_pop)
+            except Exception as e:
+                print(f"Error reordering bookmark: {e}")
+                
     save_projects_config(projects)
     return jsonify(scan_projects())
 

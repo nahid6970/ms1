@@ -753,6 +753,36 @@
         </div>
     </div>
 
+    <!-- Bookmark Edit Modal Dialog -->
+    <div class="modal-overlay" id="bookmark-modal">
+        <div class="modal-content" style="max-width: 420px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2>Edit Bookmark</h2>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="bookmark-modal-subtitle"></div>
+            </div>
+            <form id="bookmark-edit-form" onsubmit="handleSaveBookmark(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="edit-bookmark-cmd" style="font-size: 0.8rem; font-weight: 500;">Command</label>
+                    <input type="text" id="edit-bookmark-cmd" class="form-input" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="edit-bookmark-name" style="font-size: 0.8rem; font-weight: 500;">Display Name (Alias)</label>
+                    <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Build Project" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="edit-bookmark-index" style="font-size: 0.8rem; font-weight: 500;">Position / Order</label>
+                    <select id="edit-bookmark-index" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer;">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBookmarkModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
@@ -763,6 +793,8 @@
         let projects = [];
         let activeProject = null;
         let contextProject = null; // Holds the project currently right-clicked
+        let editingBookmarkProj = null;
+        let editingBookmarkIndex = null;
         let term = null;
         let fitAddon = null;
         let socket = null;
@@ -1742,11 +1774,13 @@
                     // Extract dictionary command/global properties
                     const cmdText = (typeof bm === 'string') ? bm : (bm.command || '');
                     const isGlobal = (typeof bm === 'object') ? (bm.global === true) : false;
+                    const bmName = (typeof bm === 'object') ? (bm.name || '') : '';
                     
                     if (isCurrent || isGlobal) {
                         displayList.push({
                             command: cmdText,
                             global: isGlobal,
+                            name: bmName,
                             project: p.name,
                             index: idx,
                             isOwned: isCurrent
@@ -1787,13 +1821,20 @@
                         row.style.borderBottomLeftRadius = '7px';
                         row.style.borderBottomRightRadius = '7px';
                     }
-                    
-                    row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-card-hover)';
+                        row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-card-hover)';
                     row.onmouseleave = () => row.style.backgroundColor = 'transparent';
                     row.onclick = () => runBookmarkedCommand(bm.command);
+                    row.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name);
+                    };
+
+                    const displayName = bm.name ? bm.name : bm.command;
+                    row.title = `Right click to rename / alias\nCommand: ${bm.command}`;
 
                     row.innerHTML = `
-                        <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${bm.command}</span>
+                        <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                             <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${bm.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
                                 <input type="checkbox" ${bm.global ? 'checked' : ''} onchange="toggleBookmarkGlobal('${bm.project}', ${bm.index}, this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
@@ -1806,6 +1847,78 @@
                     `;
                     content.appendChild(row);
                 });
+            }
+        }
+
+        function openBookmarkModal(projName, index, currentCmd, currentName) {
+            editingBookmarkProj = projName;
+            editingBookmarkIndex = index;
+            
+            document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName} (Current Position: ${index + 1})`;
+            document.getElementById('edit-bookmark-cmd').value = currentCmd;
+            document.getElementById('edit-bookmark-name').value = currentName || "";
+            
+            // Find the project's bookmarks to populate select dropdown
+            const proj = projects.find(p => p.name.toLowerCase() == projName.toLowerCase());
+            const select = document.getElementById('edit-bookmark-index');
+            select.innerHTML = '';
+            
+            if (proj && proj.bookmarks) {
+                proj.bookmarks.forEach((bm, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerText = `Position ${i + 1}${i === index ? ' (Current)' : ''}`;
+                    if (i === index) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            }
+            
+            document.getElementById('bookmark-modal').classList.add('show');
+            document.getElementById('edit-bookmark-cmd').focus();
+        }
+
+        function closeBookmarkModal() {
+            document.getElementById('bookmark-modal').classList.remove('show');
+            editingBookmarkProj = null;
+            editingBookmarkIndex = null;
+        }
+
+        async function handleSaveBookmark(event) {
+            event.preventDefault();
+            if (!editingBookmarkProj || editingBookmarkIndex === null) return;
+            
+            const cmd = document.getElementById('edit-bookmark-cmd').value.trim();
+            const alias = document.getElementById('edit-bookmark-name').value.trim();
+            const newIndex = parseInt(document.getElementById('edit-bookmark-index').value);
+            
+            if (!cmd) {
+                alert("Command is required");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks/${editingBookmarkIndex}/edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: cmd,
+                        name: alias,
+                        newIndex: newIndex
+                    })
+                });
+                
+                if (response.ok) {
+                    projects = await response.json();
+                    closeBookmarkModal();
+                    updateBookmarksDropdown();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to save bookmark changes");
+                }
+            } catch (err) {
+                console.error("Error saving bookmark:", err);
             }
         }
 
