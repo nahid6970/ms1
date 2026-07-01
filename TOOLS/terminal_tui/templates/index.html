@@ -835,13 +835,18 @@
                 <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Adjust workspace manager settings</div>
             </div>
             <form id="settings-form" onsubmit="handleSaveSettings(event)">
-                <div class="form-group" style="margin-bottom: 20px;">
+                <div class="form-group" style="margin-bottom: 14px;">
                     <label for="settings-font-family" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Family</label>
-                    <select id="settings-font-family" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; width: 100%;">
+                    <select id="settings-font-family" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; width: 100%;" onchange="handlePresetFontChange(this.value)">
                         <option value="'Fira Code', Consolas, monospace">Fira Code (Default)</option>
                         <option value="Consolas, monospace">Consolas</option>
                         <option value="monospace">Standard Monospace</option>
+                        <option value="custom">-- Custom System Font --</option>
                     </select>
+                </div>
+                <div class="form-group" id="custom-font-container" style="margin-bottom: 20px; display: none;">
+                    <label for="settings-custom-font" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Custom Font Name</label>
+                    <input type="text" id="settings-custom-font" class="form-input" placeholder="e.g. JetBrains Mono, Cascadia Code, Hack" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; width: 100%;">
                 </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
@@ -2170,9 +2175,41 @@
             }, 300);
         }
 
+        function handlePresetFontChange(value) {
+            const customContainer = document.getElementById('custom-font-container');
+            if (value === 'custom') {
+                customContainer.style.display = 'block';
+                document.getElementById('settings-custom-font').focus();
+            } else {
+                customContainer.style.display = 'none';
+            }
+        }
+
         function openSettingsModal() {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
-            document.getElementById('settings-font-family').value = savedFont;
+            const presetSelect = document.getElementById('settings-font-family');
+            const customInput = document.getElementById('settings-custom-font');
+            const customContainer = document.getElementById('custom-font-container');
+            
+            // Check if saved font matches one of the preset option values
+            let isPreset = false;
+            for (let option of presetSelect.options) {
+                if (option.value === savedFont) {
+                    presetSelect.value = savedFont;
+                    isPreset = true;
+                    break;
+                }
+            }
+            
+            if (!isPreset) {
+                presetSelect.value = 'custom';
+                customInput.value = savedFont.replace(/'/g, "").replace(/"/g, "").split(",")[0].trim();
+                customContainer.style.display = 'block';
+            } else {
+                customContainer.style.display = 'none';
+                customInput.value = '';
+            }
+            
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -2182,7 +2219,25 @@
 
         function handleSaveSettings(event) {
             event.preventDefault();
-            const selectedFont = document.getElementById('settings-font-family').value;
+            const presetValue = document.getElementById('settings-font-family').value;
+            let selectedFont = '';
+            
+            if (presetValue === 'custom') {
+                const customVal = document.getElementById('settings-custom-font').value.trim();
+                if (!customVal) {
+                    alert("Please enter a custom font name or select a preset.");
+                    return;
+                }
+                // Format the custom font correctly
+                if (customVal.includes(' ') && !customVal.startsWith("'") && !customVal.startsWith('"')) {
+                    selectedFont = `'${customVal}', monospace`;
+                } else {
+                    selectedFont = `${customVal}, monospace`;
+                }
+            } else {
+                selectedFont = presetValue;
+            }
+            
             localStorage.setItem('terminal-font-family', selectedFont);
             
             // Apply font family globally to the entire application body
