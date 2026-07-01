@@ -1170,11 +1170,6 @@
         let terminalPanes = [];
         let splitPaneCounter = 1;
         let projectWindowTitles = {};
-        try {
-            projectWindowTitles = JSON.parse(localStorage.getItem('project-window-titles')) || {};
-        } catch (e) {
-            projectWindowTitles = {};
-        }
 
         // Fetch project workspaces from Flask server
         async function fetchProjects(refresh = false) {
@@ -1489,7 +1484,6 @@
 
                 const data = await response.json();
                 activeProject = projectName;
-                applyProjectWindowTitle(projectName);
                 handleSearch();
 
                 // Toggle placeholders
@@ -1501,6 +1495,8 @@
                 document.getElementById('active-project-path').innerText = data.path;
                 
                 document.getElementById('active-project-branch').style.display = 'none';
+
+                applyProjectWindowTitle(projectName);
 
                 // Retrieve project config details to fetch its theme
                 const currentProjDetails = projects.find(p => p.name === projectName) || data;
@@ -2258,6 +2254,7 @@
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
+                    projectWindowTitles = {};
                     document.title = "Terminal Manager";
                     
                     // Reset UI to initial placeholder (home page) state
@@ -2582,13 +2579,18 @@
             // Hide dropdown
             document.getElementById('bookmark-dropdown-content').style.display = 'none';
 
-            if (windowTitle) {
-                document.title = windowTitle;
-                projectWindowTitles[activeProject] = windowTitle;
-                try {
-                    localStorage.setItem('project-window-titles', JSON.stringify(projectWindowTitles));
-                } catch (e) {
-                    console.error("Error writing window titles to localStorage:", e);
+            let titleToSet = windowTitle;
+            const titleMatch = cmd.match(/--title\s+["']([^"']+)["']/i);
+            if (titleMatch) {
+                titleToSet = titleMatch[1];
+            }
+
+            if (titleToSet) {
+                document.title = titleToSet;
+                projectWindowTitles[activeProject] = titleToSet;
+                const activeProjEl = document.getElementById('active-project-name');
+                if (activeProjEl) {
+                    activeProjEl.innerText = titleToSet;
                 }
             }
             
@@ -2898,10 +2900,20 @@
 
         function applyProjectWindowTitle(projectName) {
             const savedTitle = projectWindowTitles[projectName];
+            const activeProjEl = document.getElementById('active-project-name');
+            const currentProjDetails = projects.find(p => p.name === projectName) || {};
+            const defaultName = currentProjDetails.name || projectName;
+
             if (savedTitle) {
                 document.title = savedTitle;
+                if (activeProjEl) {
+                    activeProjEl.innerText = savedTitle;
+                }
             } else {
-                document.title = projectName;
+                document.title = defaultName;
+                if (activeProjEl) {
+                    activeProjEl.innerText = defaultName;
+                }
             }
         }
 
@@ -2934,7 +2946,6 @@
                 }
                 
                 activeProject = projectName;
-                applyProjectWindowTitle(projectName);
                 handleSearch();
                 
                 document.getElementById('no-workspace-placeholder').style.display = 'none';
@@ -2945,6 +2956,8 @@
                 document.getElementById('active-project-name').innerText = currentProjDetails.name || projectName;
                 document.getElementById('active-project-path').innerText = currentProjDetails.path || '';
                 document.getElementById('active-project-branch').style.display = 'none';
+                
+                applyProjectWindowTitle(projectName);
                 
                 clearTerminalPanes();
                 splitPaneCounter = 1;
