@@ -643,28 +643,46 @@
 
     <!-- Customize Theme Modal Dialog -->
     <div class="modal-overlay" id="theme-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="width: 520px;">
             <div class="modal-header">
-                <h2>Customize Terminal Theme</h2>
+                <h2>Customize Workspace & Terminal</h2>
                 <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="theme-modal-subtitle">Project: test1</div>
             </div>
             <form id="theme-customization-form" onsubmit="handleSaveTheme(event)">
-                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                <!-- Section 1: Workspace Button Style (Sidebar Card) -->
+                <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Workspace Button Style</h3>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label for="card-bg">Button Background</label>
+                    <input type="color" id="card-bg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label for="card-fg">Button Text Color</label>
+                    <input type="color" id="card-fg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+                    <label for="card-accent">Button Accent Line</label>
+                    <input type="color" id="card-accent" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+
+                <!-- Section 2: Terminal Console Theme -->
+                <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Terminal Console Theme</h3>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <label for="theme-bg">Terminal Background</label>
                     <input type="color" id="theme-bg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
                 </div>
-                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <label for="theme-fg">Terminal Foreground</label>
                     <input type="color" id="theme-fg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
                 </div>
-                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 18px;">
                     <label for="theme-cursor">Cursor Color</label>
                     <input type="color" id="theme-cursor" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
                 </div>
+                
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="resetThemeToDefault()">Reset Defaults</button>
                     <button type="button" class="btn btn-secondary" onclick="closeThemeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Theme</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
                 </div>
             </form>
         </div>
@@ -731,6 +749,24 @@
             filtered.forEach(proj => {
                 const card = document.createElement('div');
                 card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
+                
+                // Apply card customization style
+                const isCardActive = activeProject === proj.name;
+                if (proj.cardTheme) {
+                    card.style.backgroundColor = proj.cardTheme.bgColor;
+                    card.style.borderColor = isCardActive ? proj.cardTheme.accentColor : 'var(--border-color)';
+                    if (isCardActive) {
+                        card.style.boxShadow = `0 0 15px ${proj.cardTheme.accentColor}40`;
+                    } else {
+                        card.style.boxShadow = '';
+                    }
+                    if (proj.is_active) {
+                        card.style.borderLeft = `4px solid ${proj.cardTheme.accentColor}`;
+                    } else {
+                        card.style.borderLeft = '';
+                    }
+                }
+                
                 card.onclick = () => selectProject(proj.name);
 
                 // Right click context menu binding
@@ -745,6 +781,9 @@
 
                 const title = document.createElement('span');
                 title.className = 'project-title';
+                if (proj.cardTheme) {
+                    title.style.color = proj.cardTheme.textColor;
+                }
                 
                 // Add Pin icon prefix if workspace is pinned
                 if (proj.pinned) {
@@ -774,6 +813,9 @@
                 const path = document.createElement('div');
                 path.className = 'project-path';
                 path.innerText = proj.path;
+                if (proj.cardTheme) {
+                    path.style.color = `${proj.cardTheme.textColor}a0`;
+                }
                 card.appendChild(path);
 
                 // Delete button shown on hover
@@ -1103,10 +1145,19 @@
                 foreground: '#d1d5db',
                 cursor: '#3b82f6'
             };
+            const cardTheme = contextProject.cardTheme || {
+                bgColor: '#161c26',
+                textColor: '#f1f5f9',
+                accentColor: '#2563eb'
+            };
             
             document.getElementById('theme-bg').value = theme.background;
             document.getElementById('theme-fg').value = theme.foreground;
             document.getElementById('theme-cursor').value = theme.cursor;
+            
+            document.getElementById('card-bg').value = cardTheme.bgColor;
+            document.getElementById('card-fg').value = cardTheme.textColor;
+            document.getElementById('card-accent').value = cardTheme.accentColor;
 
             document.getElementById('theme-modal').classList.add('show');
         }
@@ -1122,11 +1173,20 @@
             const bg = document.getElementById('theme-bg').value;
             const fg = document.getElementById('theme-fg').value;
             const cursor = document.getElementById('theme-cursor').value;
+            
+            const cardBg = document.getElementById('card-bg').value;
+            const cardFg = document.getElementById('card-fg').value;
+            const cardAccent = document.getElementById('card-accent').value;
 
             const theme = {
                 background: bg,
                 foreground: fg,
                 cursor: cursor
+            };
+            const cardTheme = {
+                bgColor: cardBg,
+                textColor: cardFg,
+                accentColor: cardAccent
             };
 
             try {
@@ -1135,7 +1195,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: contextProject.name,
-                        theme: theme
+                        theme: theme,
+                        cardTheme: cardTheme
                     })
                 });
 
@@ -1162,6 +1223,11 @@
                 foreground: '#d1d5db',
                 cursor: '#3b82f6'
             };
+            const defaultCardTheme = {
+                bgColor: '#161c26',
+                textColor: '#f1f5f9',
+                accentColor: '#2563eb'
+            };
 
             try {
                 const response = await fetch('/api/projects/customize', {
@@ -1169,7 +1235,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: contextProject.name,
-                        theme: defaultTheme
+                        theme: defaultTheme,
+                        cardTheme: defaultCardTheme
                     })
                 });
 

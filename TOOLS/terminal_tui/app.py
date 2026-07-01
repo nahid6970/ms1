@@ -103,6 +103,11 @@ def scan_projects():
             "foreground": "#d1d5db",
             "cursor": "#3b82f6"
         })
+        card_theme = p.get("cardTheme", {
+            "bgColor": "#161c26",
+            "textColor": "#f1f5f9",
+            "accentColor": "#2563eb"
+        })
         
         # Fetch/Cache git branch
         branch = git_branch_cache.get(name)
@@ -119,7 +124,8 @@ def scan_projects():
             "branch": branch,
             "is_active": is_active,
             "pinned": pinned,
-            "theme": theme
+            "theme": theme,
+            "cardTheme": card_theme
         })
     # Sort projects: Pinned first, then alphabetically by name
     projects.sort(key=lambda x: (not x["pinned"], x["name"].lower()))
@@ -164,6 +170,11 @@ def api_projects_post():
             "background": "#000000",
             "foreground": "#d1d5db",
             "cursor": "#3b82f6"
+        },
+        "cardTheme": {
+            "bgColor": "#161c26",
+            "textColor": "#f1f5f9",
+            "accentColor": "#2563eb"
         }
     })
     save_projects_config(projects)
@@ -215,6 +226,8 @@ def api_projects_customize():
         proj["pinned"] = bool(data["pinned"])
     if "theme" in data:
         proj["theme"] = data["theme"]
+    if "cardTheme" in data:
+        proj["cardTheme"] = data["cardTheme"]
         
     save_projects_config(projects)
     return jsonify(scan_projects())

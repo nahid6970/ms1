@@ -3,8 +3,8 @@
     "name": "test1",
     "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint",
     "theme": {
-      "background": "#f24040",
-      "foreground": "#000000",
+      "background": "#000000",
+      "foreground": "#ffffff",
       "cursor": "#657da4"
     }
   },
