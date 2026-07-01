@@ -3,3 +3,4 @@ codex
 cmd
 cd
 cls
+codex

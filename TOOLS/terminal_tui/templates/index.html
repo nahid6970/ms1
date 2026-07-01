@@ -1464,6 +1464,48 @@
             }
         }
 
+        // Listen to global paste event to intercept image paste and upload it to active workspace
+        document.addEventListener('paste', async (e) => {
+            if (!activeProject) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') === 0) {
+                    e.preventDefault();
+                    const blob = items[i].getAsFile();
+                    
+                    const formData = new FormData();
+                    formData.append('image', blob, 'pasted_image.png');
+
+                    try {
+                        const response = await fetch(`/api/session/${activeProject}/paste-image`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            // Wrap path in quotes for cmd/powershell safety
+                            const pathToSend = `"${result.path}"`;
+                            
+                            // Send the path as input to the active terminal
+                            fetch(`/input/${activeProject}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ data: pathToSend })
+                            });
+                        } else {
+                            const errData = await response.json();
+                            alert(errData.error || "Failed to upload image");
+                        }
+                    } catch (err) {
+                        console.error("Error pasting image:", err);
+                    }
+                    break;
+                }
+            }
+        });
+
         window.onload = () => {
             fetchProjects();
         };

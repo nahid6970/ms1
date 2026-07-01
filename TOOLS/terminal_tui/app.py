@@ -393,6 +393,35 @@ def api_session(project):
         "branch": proj_details["branch"]
     })
 
+@app.route('/api/session/<project>/paste-image', methods=['POST'])
+def api_paste_image(project):
+    projects = scan_projects()
+    proj = next((p for p in projects if p["name"] == project), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file sent"}), 400
+        
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+        
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"pasted_image_{timestamp}.png"
+    
+    dest_path = os.path.join(proj["path"], filename)
+    try:
+        file.save(dest_path)
+        return jsonify({
+            "status": "success",
+            "path": dest_path.replace("\\", "/"),
+            "filename": filename
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+
 @app.route('/input/<project>', methods=['POST'])
 def api_input(project):
     with sessions_lock:
