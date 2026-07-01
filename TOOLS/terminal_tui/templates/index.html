@@ -820,10 +820,59 @@
             }
         }
 
+        // Update empty state placeholder based on active running workspaces
+        function updateEmptyStatePlaceholder() {
+            const placeholder = document.getElementById('no-workspace-placeholder');
+            if (!placeholder) return;
+            
+            // Only update if there is no active project
+            if (activeProject) return;
+            
+            const activeProjects = projects.filter(p => p.is_active);
+            
+            if (activeProjects.length > 0) {
+                let html = `
+                    <div class="placeholder-icon" style="font-size: 3rem; margin-bottom: 16px; color: var(--green-active); filter: drop-shadow(0 0 10px rgba(16,185,129,0.3));">⚡</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; background: linear-gradient(135deg, var(--text-primary), #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Active Workspaces Running</h3>
+                    <p style="color: var(--text-secondary); max-width: 460px; margin: 0 auto 24px auto; font-size: 0.95rem; line-height: 1.5;">The following terminal sessions are currently active in the background. Click one to connect immediately:</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px; margin: 0 auto 24px auto;">
+                `;
+                
+                activeProjects.forEach(proj => {
+                    html += `
+                        <button type="button" onclick="selectProject('${proj.name}')" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: all 0.2s ease; font-family: inherit; font-size: 0.95rem; font-weight: 500;" onmouseenter="this.style.backgroundColor='var(--bg-card-hover)'; this.style.borderColor='var(--accent-color)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(37,99,235,0.15)'" onmouseleave="this.style.backgroundColor='var(--bg-card)'; this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='none'">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="display: inline-block; width: 8px; height: 8px; background-color: var(--green-active); border-radius: 50%; box-shadow: 0 0 8px var(--green-active); animation: pulse 2s infinite ease-in-out;"></span>
+                                <span>${proj.name}</span>
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--accent-color); font-weight: 600; letter-spacing: 0.5px;">CONNECT →</span>
+                        </button>
+                    `;
+                });
+                
+                html += `
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 16px; width: 100%; max-width: 400px; margin: 0 auto;">
+                        Or click the <b style="color: var(--text-primary); font-weight: 600;">+</b> button on the sidebar to add a new workspace.
+                    </div>
+                `;
+                
+                placeholder.innerHTML = html;
+            } else {
+                // Restore default empty state
+                placeholder.innerHTML = `
+                    <div class="placeholder-icon">💻</div>
+                    <h3>No Workspace Active</h3>
+                    <p>Click the <b>+</b> button on the sidebar to add a workspace folder and spawn an interactive PowerShell terminal session.</p>
+                `;
+            }
+        }
+
         // Search trigger
         function handleSearch() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             renderSidebar(query);
+            updateEmptyStatePlaceholder();
         }
 
         // Render sidebar list
