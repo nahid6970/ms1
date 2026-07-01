@@ -1,18 +1,13 @@
 [
   {
-    "name": "asdasd",
-    "path": "C:\\@delta",
-    "pinned": true,
+    "name": "test1",
+    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint",
     "theme": {
       "background": "#000000",
-      "foreground": "#d1d5db",
-      "cursor": "#3b82f6"
+      "foreground": "#ffffff",
+      "cursor": "#657da4"
     },
-    "cardTheme": {
-      "bgColor": "#161c26",
-      "textColor": "#f1f5f9",
-      "accentColor": "#2563eb"
-    }
+    "pinned": true
   },
   {
     "name": "test2",
@@ -30,12 +25,18 @@
     }
   },
   {
-    "name": "test1",
-    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint",
+    "name": "asdasd",
+    "path": "C:\\@delta",
+    "pinned": false,
     "theme": {
       "background": "#000000",
-      "foreground": "#ffffff",
-      "cursor": "#657da4"
+      "foreground": "#d1d5db",
+      "cursor": "#3b82f6"
+    },
+    "cardTheme": {
+      "bgColor": "#161c26",
+      "textColor": "#f1f5f9",
+      "accentColor": "#2563eb"
     }
   }
 ]

@@ -232,26 +232,46 @@
             pointer-events: none;
         }
 
-        .delete-btn {
+        .card-actions {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            opacity: 0;
-            transition: all 0.2s ease;
+            top: 14px;
+            right: 18px;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10;
         }
 
-        .project-card:hover .delete-btn {
+        .project-card:hover .card-actions {
             opacity: 1;
+            pointer-events: auto;
         }
+
+        .action-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .action-dot:hover {
+            transform: scale(1.35);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+        }
+
+        /* Color variants */
+        .action-dot.red    { background: #ef4444; }
+        .action-dot.blue   { background: #3b82f6; }
+        .action-dot.yellow { background: #f59e0b; box-shadow: 0 1px 6px rgba(245,158,11,0.6); }
+        .action-dot.grey   { background: #94a3b8; }
+        .action-dot.green  { background: #22c55e; }
 
         .delete-btn:hover {
             color: #ef4444;
@@ -863,16 +883,16 @@
                 if (proj.cardTheme) {
                     title.style.color = proj.cardTheme.textColor;
                 }
-                
-                // Add Pin icon prefix if workspace is pinned
-                if (proj.pinned) {
-                    const pin = document.createElement('span');
-                    pin.innerText = '📌 ';
-                    title.appendChild(pin);
-                }
 
                 const titleText = document.createTextNode(proj.name);
                 title.appendChild(titleText);
+
+                // Add Pin icon suffix if workspace is pinned
+                if (proj.pinned) {
+                    const pin = document.createElement('span');
+                    pin.innerText = ' 📌';
+                    title.appendChild(pin);
+                }
                 titleContainer.appendChild(title);
 
                 if (proj.branch) {
@@ -897,21 +917,42 @@
                 }
                 card.appendChild(path);
 
-                // Delete button shown on hover
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn';
-                deleteBtn.title = 'Remove workspace';
-                deleteBtn.innerHTML = `
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                `;
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation(); // Prevent card select click trigger
+                // Card actions container (Action Dots Pattern)
+                const cardActions = document.createElement('div');
+                cardActions.className = 'card-actions';
+
+                // Yellow (pinned) / Grey (unpinned) Action Dot
+                const pinDot = document.createElement('button');
+                pinDot.className = `action-dot ${proj.pinned ? 'yellow' : 'grey'}`;
+                pinDot.title = proj.pinned ? 'Unpin Workspace' : 'Pin Workspace';
+                pinDot.onclick = (e) => {
+                    e.stopPropagation();
+                    togglePinProject(proj);
+                };
+                cardActions.appendChild(pinDot);
+
+                // Blue (Customize) Action Dot
+                const customizeDot = document.createElement('button');
+                customizeDot.className = 'action-dot blue';
+                customizeDot.title = 'Customize Style & Theme';
+                customizeDot.onclick = (e) => {
+                    e.stopPropagation();
+                    contextProject = proj;
+                    openThemeModal();
+                };
+                cardActions.appendChild(customizeDot);
+
+                // Red (Delete) Action Dot
+                const deleteDot = document.createElement('button');
+                deleteDot.className = 'action-dot red';
+                deleteDot.title = 'Remove Workspace';
+                deleteDot.onclick = (e) => {
+                    e.stopPropagation();
                     deleteProject(proj.name);
                 };
-                card.appendChild(deleteBtn);
+                cardActions.appendChild(deleteDot);
+
+                card.appendChild(cardActions);
 
                 container.appendChild(card);
             });
@@ -944,17 +985,14 @@
             document.getElementById('custom-context-menu').style.display = 'none';
         }
 
-        async function handleContextPin() {
-            if (!contextProject) return;
-            hideContextMenu();
-
+        async function togglePinProject(project) {
             try {
                 const response = await fetch('/api/projects/customize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        name: contextProject.name,
-                        pinned: !contextProject.pinned
+                        name: project.name,
+                        pinned: !project.pinned
                     })
                 });
 
@@ -965,6 +1003,12 @@
             } catch (err) {
                 console.error("Error pinning project:", err);
             }
+        }
+
+        async function handleContextPin() {
+            if (!contextProject) return;
+            hideContextMenu();
+            await togglePinProject(contextProject);
         }
 
         function handleContextDelete() {
