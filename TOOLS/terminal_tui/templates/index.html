@@ -1599,24 +1599,21 @@
                 if (response.ok) {
                     projects = await response.json();
                     
-                    // Reset current active terminal session if there is one
-                    if (activeProject) {
-                        const currentProject = activeProject;
-                        activeProject = null;
-                        if (socket) {
-                            socket.disconnect();
-                            socket = null;
-                        }
-                        
-                        if (term) {
-                            term.clear();
-                            term.write("\r\n\x1b[33m[Resetting Workspace Session...]\x1b[0m\r\n");
-                        }
-                        
-                        selectProject(currentProject);
-                    } else {
-                        handleSearch();
+                    activeProject = null;
+                    if (socket) {
+                        socket.disconnect();
+                        socket = null;
                     }
+                    if (term) {
+                        term.clear();
+                    }
+                    
+                    // Reset UI to initial placeholder (home page) state
+                    document.getElementById('workspace-header').style.display = 'none';
+                    document.getElementById('terminal-wrapper').style.display = 'none';
+                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                    
+                    handleSearch();
                 }
             } catch (err) {
                 console.error("Error resetting all sessions:", err);

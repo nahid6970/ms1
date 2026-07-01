@@ -165,6 +165,19 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         with self.history_lock:
             return self.history
 
+    def kill(self):
+        if hasattr(self, 'pty') and self.pty.pid:
+            try:
+                # Forcefully terminate the process tree starting from the WinPTY shell process
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(self.pty.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as e:
+                print(f"Error calling taskkill on PID {self.pty.pid}: {e}")
+        if hasattr(self, 'pty') and self.pty.isalive():
+            try:
+                os.close(self.pty.fd)
+            except Exception:
+                pass
+
 def load_projects_config():
     if os.path.exists(PROJECTS_FILE):
         try:
@@ -304,11 +317,7 @@ def api_projects_delete(project):
     with sessions_lock:
         if project in active_sessions:
             session = active_sessions[project]
-            if session.pty.isalive():
-                try:
-                    os.close(session.pty.fd)
-                except Exception:
-                    pass
+            session.kill()
             del active_sessions[project]
             
     return jsonify(scan_projects())
@@ -404,11 +413,7 @@ def api_projects_customize():
         with sessions_lock:
             if original_name in active_sessions:
                 session = active_sessions[original_name]
-                if session.pty.isalive():
-                    try:
-                        os.close(session.pty.fd)
-                    except Exception:
-                        pass
+                session.kill()
                 del active_sessions[original_name]
                 
     # Update properties
@@ -459,11 +464,7 @@ def api_projects_reorder():
 def api_sessions_reset():
     with sessions_lock:
         for name, session in list(active_sessions.items()):
-            if session.pty.isalive():
-                try:
-                    os.close(session.pty.fd)
-                except Exception:
-                    pass
+            session.kill()
         active_sessions.clear()
         
     return jsonify(scan_projects())
@@ -481,11 +482,7 @@ def api_session_stop(project):
         session_key = next((name for name in active_sessions if name.lower() == project.lower()), None)
         if session_key:
             session = active_sessions[session_key]
-            if session.pty.isalive():
-                try:
-                    os.close(session.pty.fd)
-                except Exception:
-                    pass
+            session.kill()
             del active_sessions[session_key]
             
     return jsonify(scan_projects())
