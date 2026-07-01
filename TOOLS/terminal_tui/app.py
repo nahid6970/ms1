@@ -598,6 +598,41 @@ def api_paste_image(project):
     except Exception as e:
         return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
 
+@app.route('/api/images/temp', methods=['POST'])
+def api_temp_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file sent"}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+
+    import datetime
+    import tempfile
+
+    original_filename = os.path.basename(file.filename)
+    name_part, ext_part = os.path.splitext(original_filename)
+    if not name_part:
+        name_part = "dropped_image"
+    if not ext_part:
+        ext_part = ".png"
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{name_part}_{timestamp}{ext_part}"
+    temp_dir = os.path.join(tempfile.gettempdir(), "terminal_tui_images")
+    os.makedirs(temp_dir, exist_ok=True)
+
+    dest_path = os.path.join(temp_dir, filename)
+    try:
+        file.save(dest_path)
+        return jsonify({
+            "status": "success",
+            "path": dest_path.replace("\\", "/"),
+            "filename": filename
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to save temporary image: {str(e)}"}), 500
+
 @app.route('/input/<project>', methods=['POST'])
 def api_input(project):
     with sessions_lock:
