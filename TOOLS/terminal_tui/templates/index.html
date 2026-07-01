@@ -1091,7 +1091,9 @@
             eventSource.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
                 if (msg.data) {
-                    term.write(msg.data);
+                    term.write(msg.data, () => {
+                        term.scrollToBottom();
+                    });
                 } else if (msg.eof) {
                     term.write("\r\n\x1b[31m[Shell Session Ended. Refresh or re-select to restart]\x1b[0m\r\n");
                     eventSource.close();

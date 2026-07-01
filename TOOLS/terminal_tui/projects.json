@@ -13,7 +13,10 @@
       "textColor": "#f1f5f9",
       "pathColor": "#94a3b8",
       "accentColor": "#2563eb"
-    }
+    },
+    "bookmarks": [
+      "agy --dangerously-skip-permissions -c"
+    ]
   },
   {
     "name": "mycell",

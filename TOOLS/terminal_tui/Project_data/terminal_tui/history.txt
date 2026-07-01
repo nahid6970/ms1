@@ -3,3 +3,4 @@ agy -c
 start "C:/@delta/ms1/TOOLS/terminal_tui/pasted_image_20260701_150101.png"
 cls
 agy -c
+agy --dangerously-skip-permissions -c
