@@ -58,6 +58,33 @@ def get_mouse_pos():
         return pt.x, pt.y
     return 0, 0
 
+def jiggle_mouse():
+    """
+    Slightly moves the cursor position and returns it to trigger
+    system-wide mousemove rendering updates.
+    """
+    print("[*] Phase 1: Jiggling mouse cursor to trigger pointer updates...")
+    user32 = ctypes.windll.user32
+    
+    # Get current position
+    pt = POINT()
+    if not user32.GetCursorPos(ctypes.byref(pt)):
+        print("[-] Failed to get current cursor position.")
+        return False
+        
+    original_x, original_y = pt.x, pt.y
+    print(f"    Current position: ({original_x}, {original_y})")
+    
+    # Move mouse by 15 pixels in a small square to trigger OS and browser updates
+    offsets = [(15, 0), (15, 15), (0, 15), (0, 0)]
+    for dx, dy in offsets:
+        user32.SetCursorPos(original_x + dx, original_y + dy)
+        time.sleep(0.05)
+        
+    # Return to original position
+    user32.SetCursorPos(original_x, original_y)
+    print("[+] Mouse jiggle complete.")
+    return True
 
 def reload_system_cursors():
     """
@@ -271,7 +298,8 @@ def main():
     print("=" * 60)
     
     # Execute standard safe fixes
-
+    jiggle_mouse()
+    print("-" * 40)
     reload_system_cursors()
     print("-" * 40)
     toggle_mouse_trails()

@@ -118,5 +118,21 @@
   {
     "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\note_taker",
     "name": "Note Taker (Domain)"
+  },
+  {
+    "path": "C:\\@delta\\db\\@Convex\\image-share",
+    "name": "Gallery"
+  },
+  {
+    "path": "C:\\@delta\\db\\@Convex\\myFiles",
+    "name": "myFiles"
+  },
+  {
+    "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
+    "name": "myHome"
+  },
+  {
+    "path": "C:\\@delta\\db\\@Convex\\gameARR-convex",
+    "name": "gameArr"
   }
 ]
