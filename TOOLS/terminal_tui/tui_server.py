@@ -70,15 +70,18 @@ def get_project_info(name):
             
     session = active_sessions.get(name)
     status = ""
+    is_alive = False
     if session:
         status = session.get("last_line", "")
-        if not session["pty"].isalive():
+        is_alive = session["pty"].isalive()
+        if not is_alive:
             status = "[Exited - Enter to restart]"
             
     return {
         "path": rel_path,
         "branch": branch,
-        "status": status
+        "status": status,
+        "is_alive": is_alive
     }
 
 async def read_msg(reader):

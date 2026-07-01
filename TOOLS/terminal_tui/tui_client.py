@@ -118,28 +118,27 @@ class ProjectItem(ListItem):
         self.info = info
 
     def compose(self) -> ComposeResult:
-        branch_badge = f" [white on #2c5282]  {self.info['branch']} [/white on #2c5282]" if self.info['branch'] else ""
-        yield Static(Text.from_markup(f"[bold]{self.project_name}[/bold]{branch_badge}"), classes="proj-title")
-        yield Static(Text.from_markup(f"[dim]📂 {self.info['path']}[/dim]"), classes="proj-path")
+        # Title of project
+        yield Static(Text(self.project_name, style="bold"), classes="proj-title")
         
-        status_text = self.info['status'] or "No active command"
-        if "Exited" in status_text:
-            status_markup = f"[red]⚠ {status_text}[/red]"
-        elif "started" in status_text:
-            status_markup = f"[green]● {status_text}[/green]"
+        # Branch + path combined for compactness
+        branch = self.info.get('branch')
+        path = self.info.get('path')
+        if branch:
+            subtext = f"[cyan] {branch}[/cyan] [dim]• {path}[/dim]"
         else:
-            status_markup = f"[dim]➜ {status_text}[/dim]"
-        yield Static(Text.from_markup(status_markup), classes="proj-status")
+            subtext = f"[dim]{path}[/dim]"
+        yield Static(Text.from_markup(subtext), classes="proj-subtext")
 
 class ProjectSidebar(Vertical):
     def compose(self) -> ComposeResult:
-        yield Static("📁 WORKSPACES", id="sidebar-header")
+        yield Static("WORKSPACES", id="sidebar-header")
         yield ListView(id="sidebar-list")
 
 class TerminalApp(App):
     CSS = """
     Screen {
-        background: #0f141c;
+        background: #000000;
         color: #d1d5db;
     }
     
@@ -151,93 +150,87 @@ class TerminalApp(App):
     }
     
     ProjectSidebar {
-        background: #0b0f17;
-        border-right: solid #1e293b;
+        background: #14161d;
+        border-right: solid #222632;
         height: 100%;
     }
     
     #sidebar-header {
-        background: #131a26;
-        color: #3b82f6;
+        background: #1c1e28;
+        color: #64748b;
         text-align: center;
         text-style: bold;
         padding: 1;
-        border-bottom: solid #1e293b;
+        border-bottom: solid #222632;
     }
     
     #sidebar-list {
         background: transparent;
         height: 1fr;
-        padding: 1;
+        padding: 0;
     }
     
     ProjectItem {
         padding: 1 2;
-        background: #172030;
-        border: solid #1e293b;
-        margin: 1 2;
+        background: transparent;
+        border-left: solid #14161d;
+        margin: 0;
         height: auto;
-        layout: vertical;
     }
     
     ProjectItem:hover {
-        background: #222f47;
-        border: solid #3b82f6;
+        background: #1f2330;
     }
     
     ProjectItem.active-project {
-        background: #1e3a8a;
-        border: solid #3b82f6;
+        background: #2563eb;
+    }
+    
+    ProjectItem.active-project:hover {
+        background: #2563eb;
+    }
+    
+    ProjectItem.running-process {
+        border-left: solid #10b981; /* Green vertical indicator bar */
     }
     
     ProjectItem.active-project Static {
         color: white;
     }
     
-    ProjectItem.active-project .proj-path {
+    ProjectItem.active-project .proj-subtext {
         color: #93c5fd;
     }
     
-    ProjectItem.active-project .proj-status {
-        color: #bfdbfe;
-    }
-    
     .proj-title {
-        color: #f3f4f6;
-        margin-bottom: 1;
+        color: #f1f5f9;
+        margin-bottom: 0;
     }
     
-    .proj-path {
-        color: #6b7280;
+    .proj-subtext {
+        color: #64748b;
         text-overflow: ellipsis;
-    }
-    
-    .proj-status {
-        color: #4b5563;
-        text-overflow: ellipsis;
-        margin-top: 1;
     }
     
     #terminal-container {
         height: 100%;
         width: 100%;
-        background: #080c10;
-        padding: 1 2;
+        background: #000000;
+        padding: 0;
         layout: vertical;
     }
     
     #terminal-header {
-        background: #131a26;
-        color: #e2e8f0;
-        padding: 1 2;
-        border: solid #1e293b;
-        border-bottom: none;
-        height: auto;
+        background: #0d0f14;
+        color: #94a3b8;
+        padding: 0 2;
+        height: 1;
+        border-bottom: solid #1e293b;
     }
     
     TerminalWidget {
-        background: #05070a;
-        border: solid #1e293b;
+        background: #000000;
+        border: none;
         height: 1fr;
         width: 100%;
         padding: 0 1;
@@ -245,7 +238,7 @@ class TerminalApp(App):
     }
     
     TerminalWidget:focus {
-        border: solid #3b82f6;
+        border: none;
     }
     """
 
@@ -273,7 +266,7 @@ class TerminalApp(App):
         with Horizontal(id="app-container"):
             yield ProjectSidebar()
             with Vertical(id="terminal-container"):
-                yield Static(Text.from_markup("📁 [bold #3b82f6]Loading workspaces...[/bold #3b82f6]"), id="terminal-header")
+                yield Static(Text("Loading workspaces...", style="dim"), id="terminal-header")
                 yield self.terminal_widget
         yield Footer()
 
@@ -294,7 +287,8 @@ class TerminalApp(App):
 
     def on_resize(self, event: Resize) -> None:
         new_cols = max(10, event.size.width - 37)
-        new_rows = max(5, event.size.height - 6)
+        # 1 line header, 1 line status header, 1 line footer, border
+        new_rows = max(5, event.size.height - 4)
         
         if new_cols != self.cols or new_rows != self.rows:
             self.cols = new_cols
@@ -307,10 +301,9 @@ class TerminalApp(App):
                 data = json.dumps(msg).encode("utf-8")
                 header = len(data).to_bytes(4, byteorder="big")
                 self.writer.write(header + data)
-                # Flush the stream buffer over TCP socket asynchronously
                 loop = asyncio.get_running_loop()
                 loop.create_task(self.writer.drain())
-            except Exception as e:
+            except Exception:
                 pass
 
     async def receive_loop(self):
@@ -351,6 +344,8 @@ class TerminalApp(App):
                 if name == self.active_project:
                     item.add_class("active-project")
                     active_idx = idx
+                if info.get("is_alive"):
+                    item.add_class("running-process")
                 sidebar_list.append(item)
                 
             if highlighted_idx is not None and highlighted_idx < len(project_names):
@@ -366,7 +361,7 @@ class TerminalApp(App):
                 return
             info = self.projects_data.get(self.active_project)
             if info:
-                branch_str = f" [white on #2c5282]  {info['branch']} [/white on #2c5282] •" if info['branch'] else ""
+                branch_str = f" [cyan] {info['branch']}[/cyan] •" if info['branch'] else ""
                 text = f"📁 [bold #3b82f6]{self.active_project}[/bold #3b82f6] •{branch_str} [dim]{info['path']}[/dim]"
                 self.query_one("#terminal-header", Static).update(Text.from_markup(text))
         except Exception as e:
