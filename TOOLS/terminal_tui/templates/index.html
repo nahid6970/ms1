@@ -162,13 +162,13 @@
             top: 0;
             bottom: 0;
             width: 4px;
-            background-color: transparent;
-            transition: all 0.2s ease;
+            background-color: var(--card-accent-color, var(--accent-color));
+            opacity: 0.35;
+            transition: all 0.25s ease;
         }
 
         .project-card:hover {
             background-color: var(--bg-card-hover);
-            border-color: var(--text-muted);
             transform: translateY(-2px);
         }
 
@@ -185,12 +185,13 @@
             transform: scale(0.98);
         }
 
-        .project-card.active::before {
-            background-color: var(--accent-color);
+        .project-card.active::before,
+        .project-card:hover::before {
+            opacity: 1;
         }
 
         .project-card.running {
-            border-left: 4px solid var(--green-active);
+            /* Running state is denoted by the green active-dot in the title */
         }
 
         .project-title-container {
@@ -487,7 +488,7 @@
         }
 
         .btn-primary:hover {
-            background-color: #1d4ed8;
+            filter: brightness(0.9);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
 
@@ -877,11 +878,19 @@
                     } else {
                         card.style.boxShadow = '';
                     }
-                    if (proj.is_active) {
-                        card.style.borderLeft = `4px solid ${proj.cardTheme.accentColor}`;
-                    } else {
-                        card.style.borderLeft = '';
-                    }
+                    card.style.setProperty('--card-accent-color', proj.cardTheme.accentColor);
+
+                    // Hover effects using project custom accent color
+                    card.onmouseenter = () => {
+                        card.style.borderColor = proj.cardTheme.accentColor;
+                        if (!isCardActive) {
+                            card.style.boxShadow = `0 0 8px ${proj.cardTheme.accentColor}25`;
+                        }
+                    };
+                    card.onmouseleave = () => {
+                        card.style.borderColor = isCardActive ? proj.cardTheme.accentColor : 'var(--border-color)';
+                        card.style.boxShadow = isCardActive ? `0 0 15px ${proj.cardTheme.accentColor}40` : '';
+                    };
                 }
                 
                 card.onclick = () => selectProject(proj.name);
@@ -894,6 +903,16 @@
                 title.className = 'project-title';
                 if (proj.cardTheme) {
                     title.style.color = proj.cardTheme.textColor;
+                }
+
+                // Show green active dot inside title if session is running
+                if (proj.is_active) {
+                    const dot = document.createElement('span');
+                    dot.className = 'active-dot';
+                    dot.style.marginRight = '6px';
+                    dot.style.flexShrink = '0';
+                    dot.title = 'Running session';
+                    title.appendChild(dot);
                 }
 
                 const titleText = document.createTextNode(proj.name);
@@ -983,6 +1002,17 @@
             if (activeProject === projectName) return;
             
             activeProject = projectName;
+
+            // Instantly apply the selected project's custom accent theme colors synchronously
+            const projDetails = projects.find(p => p.name === projectName);
+            if (projDetails && projDetails.cardTheme && projDetails.cardTheme.accentColor) {
+                document.documentElement.style.setProperty('--accent-color', projDetails.cardTheme.accentColor);
+                document.documentElement.style.setProperty('--accent-glow', projDetails.cardTheme.accentColor + '25');
+            } else {
+                document.documentElement.style.setProperty('--accent-color', '#2563eb');
+                document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
+            }
+
             handleSearch();
 
             // Toggle placeholders
@@ -1000,8 +1030,9 @@
                 document.getElementById('active-project-branch').style.display = 'none';
 
                 // Retrieve project config details to fetch its theme
-                const projDetails = projects.find(p => p.name === projectName) || data;
-                initTerminal(projectName, projDetails.theme);
+                const currentProjDetails = projects.find(p => p.name === projectName) || data;
+
+                initTerminal(projectName, currentProjDetails.theme);
                 updateBookmarksDropdown();
             } catch (err) {
                 console.error("Error setting up session:", err);
@@ -1190,6 +1221,8 @@
                     document.getElementById('workspace-header').style.display = 'none';
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                    document.documentElement.style.setProperty('--accent-color', '#2563eb');
+                    document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
                 }
 
                 handleSearch();
@@ -1358,6 +1391,10 @@
                         if (projDetails && term) {
                             term.options.theme = theme;
                         }
+                        if (projDetails && projDetails.cardTheme && projDetails.cardTheme.accentColor) {
+                            document.documentElement.style.setProperty('--accent-color', projDetails.cardTheme.accentColor);
+                            document.documentElement.style.setProperty('--accent-glow', projDetails.cardTheme.accentColor + '25');
+                        }
                     }
                     handleSearch();
                 } else {
@@ -1400,8 +1437,12 @@
                     projects = await response.json();
                     closeThemeModal();
 
-                    if (activeProject === contextProject.name && term) {
-                        term.options.theme = defaultTheme;
+                    if (activeProject === contextProject.name) {
+                        if (term) {
+                            term.options.theme = defaultTheme;
+                        }
+                        document.documentElement.style.setProperty('--accent-color', '#2563eb');
+                        document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
                     }
                     handleSearch();
                 }

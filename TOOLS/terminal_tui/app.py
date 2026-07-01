@@ -184,19 +184,26 @@ def scan_projects():
         name = p["name"]
         path = p["path"]
         pinned = p.get("pinned", False)
-        theme = p.get("theme", {
+        default_theme = {
             "background": "#000000",
             "foreground": "#d1d5db",
             "cursor": "#3b82f6"
-        })
-        card_theme = p.get("cardTheme", {
+        }
+        theme = p.get("theme", {})
+        for k, v in default_theme.items():
+            if k not in theme:
+                theme[k] = v
+
+        default_card_theme = {
             "bgColor": "#161c26",
             "textColor": "#f1f5f9",
             "pathColor": "#94a3b8",
             "accentColor": "#2563eb"
-        })
-        if "pathColor" not in card_theme:
-            card_theme["pathColor"] = "#94a3b8"
+        }
+        card_theme = p.get("cardTheme", {})
+        for k, v in default_card_theme.items():
+            if k not in card_theme:
+                card_theme[k] = v
         
         with sessions_lock:
             is_active = name in active_sessions and active_sessions[name].pty.isalive()
