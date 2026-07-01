@@ -356,6 +356,15 @@
             "target_path": "C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py",
             "hide_terminal": true,
             "enabled": true
+        },
+        {
+            "name": "Mouse cursor reset script",
+            "category": "General",
+            "description": "",
+            "hotkey": ">!m",
+            "target_path": "C:\\@delta\\ms1\\TOOLS\\mouse\\fix_cursor.py",
+            "hide_terminal": false,
+            "enabled": true
         }
     ],
     "text_shortcuts": [

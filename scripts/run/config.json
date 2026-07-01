@@ -2,9 +2,9 @@
   "search_roots": {
     "C:\\@delta\\ms1": true,
     "C:\\@delta\\db": true,
-    "C:\\@delta\\msBackups": true,
-    "C:\\Users\\nahid\\Pictures": true,
-    "D:\\": true
+    "C:\\@delta\\msBackups": false,
+    "C:\\Users\\nahid\\Pictures": false,
+    "D:\\": false
   },
   "visibility": {
     ".git": false,
@@ -78,7 +78,7 @@
       "color": 197
     },
     "folder": {
-      "icon": "",
+      "icon": ">",
       "color": 220
     },
     ".7z, .rar, .zip, .gz, .tar": {
@@ -95,10 +95,5 @@
     }
   },
   "show_extension_dots": true,
-  "show_extension_commas": true,
-  "bookmarked_config_setting": {
-    "type": "theme_color",
-    "key": "icon_colors",
-    "label": "Configure Icon Colors"
-  }
+  "show_extension_commas": true
 }
