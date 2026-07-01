@@ -1031,11 +1031,14 @@
             fitAddon = new FitAddon.FitAddon();
             term.loadAddon(fitAddon);
             term.open(termDiv);
-            fitAddon.fit();
-
-            // Resize Observer
+            
+            // Register Resize Observer to follow any future container resizing
             const resizeObserver = new ResizeObserver(() => {
-                fitAddon.fit();
+                try {
+                    fitAddon.fit();
+                } catch (e) {
+                    // Ignore transient layout fits
+                }
             });
             resizeObserver.observe(termDiv);
 
@@ -1047,11 +1050,19 @@
                 });
             });
 
-            fetch(`/resize/${projectName}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cols: term.cols, rows: term.rows })
-            });
+            // Delay initial fit slightly to ensure browser has computed container layout sizes
+            setTimeout(() => {
+                try {
+                    fitAddon.fit();
+                    fetch(`/resize/${projectName}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ cols: term.cols, rows: term.rows })
+                    });
+                } catch (e) {
+                    console.error("Initial terminal fit error:", e);
+                }
+            }, 100);
 
             // Handle Ctrl+C (copy) and Ctrl+V (paste) behaviours
             term.attachCustomKeyEventHandler(e => {
