@@ -745,4 +745,12 @@ def list_system_fonts():
     return jsonify(sorted(list(fonts), key=lambda s: s.lower()))
 
 if __name__ == '__main__':
-    socketio.run(app, host='127.0.0.1', port=PORT, debug=True, allow_unsafe_werkzeug=True)
+    debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
+    socketio.run(
+        app,
+        host='127.0.0.1',
+        port=PORT,
+        debug=debug_enabled,
+        use_reloader=False,
+        allow_unsafe_werkzeug=True,
+    )
