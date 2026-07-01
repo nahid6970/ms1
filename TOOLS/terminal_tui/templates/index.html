@@ -532,6 +532,12 @@
             width: 100%;
             flex-shrink: 0;
             overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+        }
+
+        .terminal-tabs-container::-webkit-scrollbar {
+            display: none;
         }
 
         .terminal-tab {
