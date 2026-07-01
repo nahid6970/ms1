@@ -745,6 +745,10 @@
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) {
                     return;
                 }
+                // Filter out Operating System Command (OSC) responses (like color query responses)
+                if (data.startsWith('\x1b]')) {
+                    return;
+                }
                 fetch(`/input/${projectName}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

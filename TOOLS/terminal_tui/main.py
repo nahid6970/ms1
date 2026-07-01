@@ -23,18 +23,14 @@ def start_server():
     if is_server_running():
         return True
         
-    # Use pythonw.exe if available to prevent console window spawn
-    python_exe = sys.executable
-    pythonw_exe = python_exe.lower().replace("python.exe", "pythonw.exe")
-    executable = pythonw_exe if os.path.exists(pythonw_exe) else python_exe
-    
     # Start the server process in the background without console window
     # CREATE_NO_WINDOW = 0x08000000
-    creationflags = 0x08000000
+    # DETACHED_PROCESS = 0x00000008
+    creationflags = 0x08000000 | 0x00000008
     
     try:
         subprocess.Popen(
-            [executable, SERVER_SCRIPT],
+            [sys.executable, SERVER_SCRIPT],
             creationflags=creationflags,
             cwd=r"C:\@delta\ms1\TOOLS\terminal_tui",
             close_fds=True
