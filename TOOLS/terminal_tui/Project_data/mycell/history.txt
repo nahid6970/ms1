@@ -1,7 +1,0 @@
-ls
-codex
-cmd
-cd
-cls
-codex
-agy

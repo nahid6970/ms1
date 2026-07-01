@@ -36,7 +36,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
-PROJECTS_FILE = r"C:\@delta\ms1\TOOLS\terminal_tui\projects.json"
+PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
 active_sessions = {}
 sessions_lock = threading.Lock()
 class TerminalSession:
@@ -49,8 +49,8 @@ class TerminalSession:
         self.history = ""
         self.history_lock = threading.Lock()
         
-        # Ensure project-specific data directory exists in C:\@delta\ms1\TOOLS\terminal_tui\Project_data\<project>
-        project_data_dir = os.path.join(r"C:\@delta\ms1\TOOLS\terminal_tui\Project_data", name)
+        # Ensure project-specific data directory exists in C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data\<project>
+        project_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", name)
         os.makedirs(project_data_dir, exist_ok=True)
         
         profile_path = os.path.join(project_data_dir, "profile.ps1")
