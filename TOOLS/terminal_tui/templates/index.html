@@ -313,14 +313,18 @@
         /* Modern Sidebar Toggle Button docked to vertical border */
         .sidebar-toggle-btn {
             position: absolute;
-            left: -10px;
+            left: -1px;
             top: 32px; /* vertically centered in the 64px header */
             transform: translateY(-50%);
-            width: 20px;
-            height: 36px;
+            width: 16px;
+            height: 38px;
             background-color: var(--bg-sidebar);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-left: none;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -328,7 +332,6 @@
             z-index: 100;
             color: var(--text-secondary);
             transition: all 0.2s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             padding: 0;
         }
 
@@ -336,12 +339,13 @@
             color: var(--text-primary);
             background-color: var(--bg-card-hover);
             border-color: var(--accent-color);
-            box-shadow: 0 0 8px var(--accent-glow);
+            width: 18px; /* slight expand on hover */
         }
 
         /* Shift button position slightly right when sidebar is collapsed to keep it visible */
         .sidebar.collapsed ~ .workspace .sidebar-toggle-btn {
-            left: 4px;
+            left: 0;
+            border-left: 1px solid var(--border-color);
         }
 
         .workspace-header {
