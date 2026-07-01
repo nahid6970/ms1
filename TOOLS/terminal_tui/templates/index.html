@@ -511,6 +511,82 @@
             opacity: 1;
         }
 
+        #terminal-parent.split-tabs {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        #terminal-parent.split-tabs .terminal-pane {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-top: none;
+        }
+
+        /* Terminal Tab Bar */
+        .terminal-tabs-container {
+            display: flex;
+            gap: 4px;
+            background-color: #0b0f19;
+            padding: 6px 8px 0 8px;
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .terminal-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background-color: #121824;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .terminal-tab:hover {
+            background-color: #1a2233;
+            color: var(--text-primary);
+        }
+
+        .terminal-tab.active {
+            background-color: var(--bg-main);
+            color: var(--accent-color);
+            border-color: var(--border-color);
+            border-bottom: 1px solid var(--bg-main);
+            margin-bottom: -1px;
+            font-weight: 500;
+            box-shadow: 0 -2px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .terminal-tab-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            font-size: 11px;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .terminal-tab-close:hover {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+
+        #terminal-parent.split-tabs .terminal-pane .terminal-pane-close {
+            display: none !important;
+        }
+
         .terminal-pane {
             flex: 1;
             min-width: 0;
@@ -1400,6 +1476,72 @@
             fitAddon = null;
         }
 
+        function updateTerminalTabs() {
+            const parent = document.getElementById('terminal-parent');
+            let tabsContainer = parent.querySelector('.terminal-tabs-container');
+            
+            if (!parent.classList.contains('split-tabs')) {
+                if (tabsContainer) {
+                    tabsContainer.remove();
+                }
+                document.querySelectorAll('.terminal-pane').forEach(pane => {
+                    pane.style.display = '';
+                });
+                return;
+            }
+            
+            if (!tabsContainer) {
+                tabsContainer = document.createElement('div');
+                tabsContainer.className = 'terminal-tabs-container';
+                parent.prepend(tabsContainer);
+            }
+            
+            tabsContainer.innerHTML = '';
+            
+            terminalPanes.forEach((pane, index) => {
+                const tab = document.createElement('div');
+                const isActive = pane.element.classList.contains('active-pane');
+                tab.className = `terminal-tab ${isActive ? 'active' : ''}`;
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'terminal-tab-title';
+                titleSpan.innerText = `Terminal ${index + 1}`;
+                tab.appendChild(titleSpan);
+                
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'terminal-tab-close';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    closeTerminalPane(pane.paneId);
+                };
+                tab.appendChild(closeBtn);
+                
+                tab.onclick = () => {
+                    term = pane.term;
+                    fitAddon = pane.fitAddon;
+                    socket = pane.socket;
+                    document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
+                    pane.element.classList.add('active-pane');
+                    
+                    updateTerminalTabs();
+                    
+                    setTimeout(() => {
+                        try { pane.fitAddon.fit(); } catch (e) {}
+                        pane.term.focus();
+                    }, 50);
+                };
+                
+                tabsContainer.appendChild(tab);
+                
+                if (isActive) {
+                    pane.element.style.display = 'block';
+                } else {
+                    pane.element.style.display = 'none';
+                }
+            });
+        }
+
         function closeTerminalPane(paneId) {
             if (terminalPanes.length <= 1) {
                 alert("At least one terminal pane must remain open.");
@@ -1437,6 +1579,8 @@
                 } catch (e) {}
             }
 
+            updateTerminalTabs();
+
             setTimeout(() => {
                 terminalPanes.forEach(p => {
                     try { p.fitAddon.fit(); } catch (e) {}
@@ -1452,6 +1596,7 @@
             parent.innerHTML = '';
             parent.className = 'split-right';
             createTerminalPane(projectName, 'main', projectTheme);
+            updateTerminalTabs();
         }
 
         function createTerminalPane(projectName, paneId, projectTheme = null) {
@@ -1592,12 +1737,17 @@
             const parent = document.getElementById('terminal-parent');
             if (direction === 'stacked') {
                 parent.className = 'split-stacked';
+            } else if (direction === 'tabs') {
+                parent.className = 'split-tabs';
             } else {
                 parent.className = direction === 'bottom' ? 'split-bottom' : 'split-right';
             }
             const currentProjDetails = projects.find(p => p.name === activeProject) || {};
             const paneId = `pane-${Date.now()}-${splitPaneCounter++}`;
             createTerminalPane(activeProject, paneId, currentProjDetails.theme);
+            
+            updateTerminalTabs();
+            
             setTimeout(() => {
                 terminalPanes.forEach(pane => {
                     try { pane.fitAddon.fit(); } catch (e) {}
@@ -1607,7 +1757,7 @@
 
         function chooseSplitTerminal() {
             if (!activeProject) return;
-            const choice = prompt("Split terminal panel: type V for vertical/right, H for horizontal/bottom, or S for stacked layout.", "V");
+            const choice = prompt("Split terminal panel: type V for vertical/right, H for horizontal/bottom, S for stacked, or T for tabbed layout.", "V");
             if (choice === null) return;
 
             const normalized = choice.trim().toLowerCase();
@@ -1623,8 +1773,12 @@
                 splitTerminal('stacked');
                 return;
             }
+            if (normalized === 't' || normalized === 'tab' || normalized === 'tabs' || normalized === 'tabbed') {
+                splitTerminal('tabs');
+                return;
+            }
 
-            alert("Use V for vertical, H for horizontal, or S for stacked layout.");
+            alert("Use V for vertical, H for horizontal, S for stacked, or T for tabbed layout.");
         }
 
         // Delete project workspace directory
