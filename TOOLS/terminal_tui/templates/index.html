@@ -307,6 +307,41 @@
             flex-direction: column;
             height: 100%;
             background-color: var(--bg-main);
+            position: relative;
+        }
+
+        /* Modern Sidebar Toggle Button docked to vertical border */
+        .sidebar-toggle-btn {
+            position: absolute;
+            left: -10px;
+            top: 32px; /* vertically centered in the 64px header */
+            transform: translateY(-50%);
+            width: 20px;
+            height: 36px;
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: var(--text-secondary);
+            transition: all 0.2s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            padding: 0;
+        }
+
+        .sidebar-toggle-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-card-hover);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* Shift button position slightly right when sidebar is collapsed to keep it visible */
+        .sidebar.collapsed ~ .workspace .sidebar-toggle-btn {
+            left: 4px;
         }
 
         .workspace-header {
@@ -559,21 +594,9 @@
 </head>
 <body>
 
-    <!-- Floating Expand Sidebar Button (Hidden by default) -->
-    <button id="expand-sidebar-btn" onclick="toggleSidebar()" title="Show Sidebar" style="position: fixed; top: 14px; left: 14px; z-index: 999; display: none; width: 36px; height: 36px; border-radius: 8px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: background-color 0.2s, color 0.2s;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M9 18l6-6-6-6"/>
-        </svg>
-    </button>
-
     <!-- Left Sidebar: Workspaces -->
     <div class="sidebar">
         <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px;">
-            <button class="action-btn" onclick="toggleSidebar()" title="Hide Sidebar" style="padding: 4px; flex-shrink: 0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M15 18l-6-6 6-6"/>
-                </svg>
-            </button>
             <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; min-width: 0; height: 32px; padding: 6px 10px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
             <div class="header-actions" style="flex-shrink: 0; gap: 4px;">
                 <button class="action-btn" onclick="openAddModal()" title="Add workspace folder" style="padding: 4px;">
@@ -597,6 +620,13 @@
 
     <!-- Right Area: Terminal Workspace -->
     <div class="workspace" id="workspace-container">
+        <!-- Modern Sidebar toggle button docked to the left border -->
+        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide Sidebar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
         <!-- Placeholder shown by default -->
         <div class="placeholder" id="no-workspace-placeholder">
             <div class="placeholder-icon">💻</div>
@@ -2063,17 +2093,28 @@
         // Toggle sidebar visibility
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
-            const expandBtn = document.getElementById('expand-sidebar-btn');
-            
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
             
-            expandBtn.style.display = isCollapsed ? 'flex' : 'none';
+            // Update toggle icon
+            const btn = document.getElementById('sidebar-toggle-btn');
+            if (btn) {
+                btn.innerHTML = isCollapsed ? `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                ` : `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                `;
+                btn.title = isCollapsed ? "Show Sidebar" : "Hide Sidebar";
+            }
             
-            // Adjust left padding of workspace header so the expand button doesn't overlap the project name
+            // Adjust left padding of workspace header
             const wsHeader = document.getElementById('workspace-header');
             if (wsHeader) {
-                wsHeader.style.paddingLeft = isCollapsed ? '64px' : '24px';
+                wsHeader.style.paddingLeft = '24px';
             }
             
             // Fit terminal to newly available width after transition finishes
