@@ -407,9 +407,22 @@ def api_paste_image(project):
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
         
+    original_filename = file.filename
+    # Detect if it's from clipboard paste
+    is_clipboard = original_filename in ["clipboard.png", "pasted_image.png", "image.png", "blob"]
+    
     import datetime
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"pasted_image_{timestamp}.png"
+    
+    if is_clipboard:
+        filename = f"pasted_image_{timestamp}.png"
+    else:
+        # For dragged files, preserve their original name to avoid confusion
+        name_part, ext_part = os.path.splitext(original_filename)
+        name_part = os.path.basename(name_part)  # Sanitize name
+        if not ext_part:
+            ext_part = ".png"
+        filename = f"{name_part}_{timestamp}{ext_part}"
     
     dest_path = os.path.join(proj["path"], filename)
     try:
