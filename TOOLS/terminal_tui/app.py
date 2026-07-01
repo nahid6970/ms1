@@ -15,7 +15,6 @@ PROJECTS_FILE = r"C:\@delta\ms1\TOOLS\terminal_tui\projects.json"
 active_sessions = {}
 git_branch_cache = {}
 sessions_lock = threading.Lock()
-
 class TerminalSession:
     def __init__(self, name, path):
         self.name = name
@@ -26,8 +25,40 @@ class TerminalSession:
         self.history = ""
         self.history_lock = threading.Lock()
         
+        # Ensure project-specific data directory exists in C:\@delta\ms1\TOOLS\terminal_tui\Project_data\<project>
+        project_data_dir = os.path.join(r"C:\@delta\ms1\TOOLS\terminal_tui\Project_data", name)
+        os.makedirs(project_data_dir, exist_ok=True)
+        
+        profile_path = os.path.join(project_data_dir, "profile.ps1")
+        history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
+        
+        if not os.path.exists(profile_path):
+            with open(profile_path, "w", encoding="utf-8") as f:
+                f.write(f"""# Custom PowerShell Profile for project: {name}
+# Everything here is loaded when you select this project workspace dashboard.
+
+# Force import PSReadLine in case it is disabled due to screen reader detection in PTY
+Import-Module PSReadLine -ErrorAction SilentlyContinue
+
+# Set custom project command history file
+if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
+    Set-PSReadLineOption -HistorySavePath "{history_path}"
+}}
+
+# Clear screen to start with a clean prompt
+Clear-Host
+
+# Add your custom project aliases, functions, and environment variables below:
+# Example:
+# Set-Alias ll Get-ChildItem
+""")
+        
+        # Spawn PowerShell with custom profile, bypassing main user profile
+        profile_arg = f". '{profile_path.replace('\\', '/')}'"
+        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{profile_arg}"'
+        
         # Spawn PowerShell
-        self.pty.spawn("powershell.exe", cwd=path)
+        self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
         
         self.output_queue = queue.Queue()
         self.reader_thread = threading.Thread(target=self._read_loop, daemon=True)
@@ -199,7 +230,10 @@ def api_projects_delete(project):
         if project in active_sessions:
             session = active_sessions[project]
             if session.pty.isalive():
-                session.pty.close()
+                try:
+                    os.close(session.pty.fd)
+                except Exception:
+                    pass
             del active_sessions[project]
             
     if project in git_branch_cache:
