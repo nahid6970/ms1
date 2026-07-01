@@ -1,22 +1,7 @@
 [
   {
-    "name": "test1",
-    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint",
-    "theme": {
-      "background": "#000000",
-      "foreground": "#d1d5db",
-      "cursor": "#3b82f6"
-    },
-    "pinned": false,
-    "cardTheme": {
-      "bgColor": "#161c26",
-      "textColor": "#f1f5f9",
-      "accentColor": "#2563eb"
-    }
-  },
-  {
-    "name": "test2",
-    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5018 2.0",
+    "name": "5018 myCell",
+    "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
     "pinned": false,
     "theme": {
       "background": "#000000",
@@ -24,23 +9,8 @@
       "cursor": "#3b82f6"
     },
     "cardTheme": {
-      "bgColor": "#161c26",
-      "textColor": "#f1f5f9",
-      "accentColor": "#2563eb"
-    }
-  },
-  {
-    "name": "asdasd",
-    "path": "C:\\@delta",
-    "pinned": false,
-    "theme": {
-      "background": "#000000",
-      "foreground": "#d1d5db",
-      "cursor": "#3b82f6"
-    },
-    "cardTheme": {
-      "bgColor": "#161c26",
-      "textColor": "#f1f5f9",
+      "bgColor": "#5cd728",
+      "textColor": "#000000",
       "accentColor": "#2563eb"
     }
   }
