@@ -1169,6 +1169,12 @@
         let socket = null;
         let terminalPanes = [];
         let splitPaneCounter = 1;
+        let projectWindowTitles = {};
+        try {
+            projectWindowTitles = JSON.parse(localStorage.getItem('project-window-titles')) || {};
+        } catch (e) {
+            projectWindowTitles = {};
+        }
 
         // Fetch project workspaces from Flask server
         async function fetchProjects(refresh = false) {
@@ -2578,7 +2584,12 @@
 
             if (windowTitle) {
                 document.title = windowTitle;
-                localStorage.setItem(`project-window-title-${activeProject}`, windowTitle);
+                projectWindowTitles[activeProject] = windowTitle;
+                try {
+                    localStorage.setItem('project-window-titles', JSON.stringify(projectWindowTitles));
+                } catch (e) {
+                    console.error("Error writing window titles to localStorage:", e);
+                }
             }
             
             try {
@@ -2886,7 +2897,7 @@
         }
 
         function applyProjectWindowTitle(projectName) {
-            const savedTitle = localStorage.getItem(`project-window-title-${projectName}`);
+            const savedTitle = projectWindowTitles[projectName];
             if (savedTitle) {
                 document.title = savedTitle;
             } else {
