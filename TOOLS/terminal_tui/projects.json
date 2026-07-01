@@ -11,6 +11,16 @@
   {
     "name": "test2",
     "path": "C:\\Users\\nahid\\Desktop\\TEST\\5018 2.0",
-    "pinned": true
+    "pinned": true,
+    "theme": {
+      "background": "#000000",
+      "foreground": "#d1d5db",
+      "cursor": "#3b82f6"
+    },
+    "cardTheme": {
+      "bgColor": "#2f2c18",
+      "textColor": "#ebecef",
+      "accentColor": "#f5dd29"
+    }
   }
 ]
