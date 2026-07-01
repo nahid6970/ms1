@@ -317,6 +317,7 @@
             align-items: center;
             justify-content: space-between;
             height: 64px;
+            transition: padding-left 0.3s ease;
         }
 
         .workspace-title-info {
@@ -1912,6 +1913,12 @@
             const isCollapsed = sidebar.classList.contains('collapsed');
             
             expandBtn.style.display = isCollapsed ? 'flex' : 'none';
+            
+            // Adjust left padding of workspace header so the expand button doesn't overlap the project name
+            const wsHeader = document.getElementById('workspace-header');
+            if (wsHeader) {
+                wsHeader.style.paddingLeft = isCollapsed ? '64px' : '24px';
+            }
             
             // Fit terminal to newly available width after transition finishes
             setTimeout(() => {
