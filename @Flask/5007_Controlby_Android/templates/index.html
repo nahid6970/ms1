@@ -135,13 +135,16 @@
             display: flex;
             width: 100%;
             border-radius: 10px;
-            background-color: var(--card-bg);
+            background-color: var(--bg-clr, var(--card-bg));
             border: 1px solid var(--border-color);
             border-left: 4px solid var(--accent-clr, var(--accent-primary));
             transition: all 0.25s ease;
             overflow: hidden;
             cursor: grab; /* Grab indicator */
             user-select: none;
+            
+            /* Gradient overlay to handle brightness/hover tint neatly */
+            background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
         }
 
         .command-card:active {
@@ -156,7 +159,7 @@
 
         .command-card:hover {
             border-color: var(--accent-clr, var(--accent-primary));
-            background-color: var(--card-hover);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07));
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
@@ -391,7 +394,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             width: 90%;
-            max-width: 480px;
+            max-width: 540px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transform: scale(0.9);
             transition: transform 0.25s ease;
@@ -466,12 +469,18 @@
             border-color: var(--accent-primary);
         }
 
-        /* Custom color picker styles */
+        /* Custom color picker grid */
         .color-picker-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .color-picker-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .color-picker-group {
@@ -481,9 +490,12 @@
         }
 
         .color-picker-group label {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         input[type="color"] {
@@ -707,15 +719,17 @@
                         {% set textColor = cmd_data.textColor if (cmd_data is mapping and cmd_data.textColor) else '#f8fafc' %}
                         {% set cmdColor = cmd_data.cmdColor if (cmd_data is mapping and cmd_data.cmdColor) else '#64748b' %}
                         {% set accentColor = cmd_data.accentColor if (cmd_data is mapping and cmd_data.accentColor) else '#cad13d' %}
+                        {% set bgColor = cmd_data.bgColor if (cmd_data is mapping and cmd_data.bgColor) else '#1e293b' %}
                         
                         <div class="command-card" id="card-{{ label | replace(' ', '_') }}" 
                              draggable="true" 
-                             style="--accent-clr: {{ accentColor }}; --text-clr: {{ textColor }}; --cmd-clr: {{ cmdColor }};"
+                             style="--accent-clr: {{ accentColor }}; --text-clr: {{ textColor }}; --cmd-clr: {{ cmdColor }}; --bg-clr: {{ bgColor }};"
                              data-label="{{ label }}" 
                              data-command="{{ cmd }}"
                              data-text-color="{{ textColor }}"
                              data-cmd-color="{{ cmdColor }}"
-                             data-accent-color="{{ accentColor }}">
+                             data-accent-color="{{ accentColor }}"
+                             data-bg-color="{{ bgColor }}">
                             <button class="command-btn" onclick="runCommand('{{ label | escape }}', '{{ cmd | escape }}')">
                                 <span class="cmd-label">{{ label }}</span>
                                 <span class="cmd-preview">{{ cmd }}</span>
@@ -799,16 +813,20 @@
                 <!-- Color pickers inside add modal -->
                 <div class="color-picker-grid">
                     <div class="color-picker-group">
-                        <label for="new-textColor">Text Color</label>
+                        <label for="new-textColor">Text Clr</label>
                         <input type="color" id="new-textColor" value="#f8fafc">
                     </div>
                     <div class="color-picker-group">
-                        <label for="new-cmdColor">Command Color</label>
+                        <label for="new-cmdColor">Cmd Clr</label>
                         <input type="color" id="new-cmdColor" value="#64748b">
                     </div>
                     <div class="color-picker-group">
-                        <label for="new-accentColor">Accent Color</label>
+                        <label for="new-accentColor">Accent Clr</label>
                         <input type="color" id="new-accentColor" value="#cad13d">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="new-bgColor">Button Bg</label>
+                        <input type="color" id="new-bgColor" value="#1e293b">
                     </div>
                 </div>
             </div>
@@ -836,16 +854,20 @@
                 <!-- Color pickers -->
                 <div class="color-picker-grid">
                     <div class="color-picker-group">
-                        <label for="edit-textColor">Text Color</label>
+                        <label for="edit-textColor">Text Clr</label>
                         <input type="color" id="edit-textColor" value="#f8fafc">
                     </div>
                     <div class="color-picker-group">
-                        <label for="edit-cmdColor">Command Color</label>
+                        <label for="edit-cmdColor">Cmd Clr</label>
                         <input type="color" id="edit-cmdColor" value="#64748b">
                     </div>
                     <div class="color-picker-group">
-                        <label for="edit-accentColor">Accent Color</label>
+                        <label for="edit-accentColor">Accent Clr</label>
                         <input type="color" id="edit-accentColor" value="#cad13d">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="edit-bgColor">Button Bg</label>
+                        <input type="color" id="edit-bgColor" value="#1e293b">
                     </div>
                 </div>
             </div>
@@ -1044,12 +1066,14 @@
                 const textColor = card.getAttribute('data-text-color') || '#f8fafc';
                 const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
                 const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
+                const bgColor = card.getAttribute('data-bg-color') || '#1e293b';
                 
                 updatedCommands[label] = {
                     command: command,
                     textColor: textColor,
                     cmdColor: cmdColor,
-                    accentColor: accentColor
+                    accentColor: accentColor,
+                    bgColor: bgColor
                 };
             });
             
@@ -1078,6 +1102,7 @@
                 const textColor = isObj ? (cmd_data.textColor || '#f8fafc') : '#f8fafc';
                 const cmdColor = isObj ? (cmd_data.cmdColor || '#64748b') : '#64748b';
                 const accentColor = isObj ? (cmd_data.accentColor || '#cad13d') : '#cad13d';
+                const bgColor = isObj ? (cmd_data.bgColor || '#1e293b') : '#1e293b';
 
                 // Escape simple values for safety
                 const safeLabel = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -1086,12 +1111,13 @@
                 html += `
                     <div class="command-card" id="card-${label.replace(/\s+/g, '_')}" 
                          draggable="true" 
-                         style="--accent-clr: ${accentColor}; --text-clr: ${textColor}; --cmd-clr: ${cmdColor};"
+                         style="--accent-clr: ${accentColor}; --text-clr: ${textColor}; --cmd-clr: ${cmdColor}; --bg-clr: ${bgColor};"
                          data-label="${label}" 
                          data-command="${cmd}"
                          data-text-color="${textColor}"
                          data-cmd-color="${cmdColor}"
-                         data-accent-color="${accentColor}">
+                         data-accent-color="${accentColor}"
+                         data-bg-color="${bgColor}">
                         <button class="command-btn" onclick="runCommand('${safeLabel}', '${safeCmd}')">
                             <span class="cmd-label" style="color: ${textColor};">${label}</span>
                             <span class="cmd-preview" style="color: ${cmdColor};">${cmd}</span>
@@ -1127,6 +1153,7 @@
             document.getElementById('new-textColor').value = '#f8fafc';
             document.getElementById('new-cmdColor').value = '#64748b';
             document.getElementById('new-accentColor').value = '#cad13d';
+            document.getElementById('new-bgColor').value = '#1e293b';
             
             document.getElementById('new-cmd-label').focus();
         }
@@ -1141,12 +1168,14 @@
             const textColor = card.getAttribute('data-text-color') || '#f8fafc';
             const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
             const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
+            const bgColor = card.getAttribute('data-bg-color') || '#1e293b';
             
             document.getElementById('edit-cmd-label').value = label;
             document.getElementById('edit-cmd-string').value = command;
             document.getElementById('edit-textColor').value = textColor;
             document.getElementById('edit-cmdColor').value = cmdColor;
             document.getElementById('edit-accentColor').value = accentColor;
+            document.getElementById('edit-bgColor').value = bgColor;
             
             overlay.classList.add('active');
             editContent.classList.add('active');
@@ -1199,6 +1228,7 @@
             const textColor = document.getElementById('new-textColor').value;
             const cmdColor = document.getElementById('new-cmdColor').value;
             const accentColor = document.getElementById('new-accentColor').value;
+            const bgColor = document.getElementById('new-bgColor').value;
 
             if (!label || !cmd) {
                 alert('Please enter both a label and a command.');
@@ -1213,7 +1243,8 @@
                     command: cmd,
                     textColor: textColor,
                     cmdColor: cmdColor,
-                    accentColor: accentColor
+                    accentColor: accentColor,
+                    bgColor: bgColor
                 })
             })
             .then(res => res.json())
@@ -1241,6 +1272,7 @@
             const textColor = document.getElementById('edit-textColor').value;
             const cmdColor = document.getElementById('edit-cmdColor').value;
             const accentColor = document.getElementById('edit-accentColor').value;
+            const bgColor = document.getElementById('edit-bgColor').value;
 
             if (!newLabel || !newCmd) {
                 alert('Please enter both a label and a command.');
@@ -1260,7 +1292,8 @@
                         command: newCmd,
                         textColor: textColor,
                         cmdColor: cmdColor,
-                        accentColor: accentColor
+                        accentColor: accentColor,
+                        bgColor: bgColor
                     };
                 } else {
                     // Keep the other cards exactly as is
@@ -1268,7 +1301,8 @@
                         command: card.getAttribute('data-command'),
                         textColor: card.getAttribute('data-text-color') || '#f8fafc',
                         cmdColor: card.getAttribute('data-cmd-color') || '#64748b',
-                        accentColor: card.getAttribute('data-accent-color') || '#cad13d'
+                        accentColor: card.getAttribute('data-accent-color') || '#cad13d',
+                        bgColor: card.getAttribute('data-bg-color') || '#1e293b'
                     };
                 }
             });

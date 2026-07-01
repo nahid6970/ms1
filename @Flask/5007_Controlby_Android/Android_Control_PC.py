@@ -2,11 +2,10 @@ from flask import Flask, request, render_template, redirect, url_for, jsonify
 import subprocess
 import threading
 import time
-
-app = Flask(__name__)
-
 import json
 import os
+
+app = Flask(__name__)
 
 COMMANDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.json')
 
@@ -15,61 +14,71 @@ DEFAULT_COMMANDS = {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Display 2": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Display 1 KillApps": {
         "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Show IP Config": {
         "command": "ipconfig",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Open Notepad": {
         "command": "start notepad",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Open Calculator": {
         "command": "start calc",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "System Info": {
         "command": "systeminfo",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#cad13d"
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Shutdown": {
         "command": "shutdown /s /t 0",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#ef4444"
+        "accentColor": "#ef4444",
+        "bgColor": "#1e293b"
     },
     "Restart": {
         "command": "shutdown /r /t 0",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#ef4444"
+        "accentColor": "#ef4444",
+        "bgColor": "#1e293b"
     },
     "Sign Out": {
         "command": "shutdown /l",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
-        "accentColor": "#ef4444"
+        "accentColor": "#ef4444",
+        "bgColor": "#1e293b"
     }
 }
 
@@ -81,7 +90,7 @@ def load_commands():
         with open(COMMANDS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
-        # Migrate old string-value format to object format
+        # Migrate old formats
         migrated = False
         for k, v in list(data.items()):
             if isinstance(v, str):
@@ -89,9 +98,25 @@ def load_commands():
                     "command": v,
                     "textColor": "#f8fafc",
                     "cmdColor": "#64748b",
-                    "accentColor": "#cad13d"
+                    "accentColor": "#cad13d",
+                    "bgColor": "#1e293b"
                 }
                 migrated = True
+            elif isinstance(v, dict):
+                # Ensure all dynamic keys exist
+                if "bgColor" not in v:
+                    v["bgColor"] = "#1e293b"
+                    migrated = True
+                if "textColor" not in v:
+                    v["textColor"] = "#f8fafc"
+                    migrated = True
+                if "cmdColor" not in v:
+                    v["cmdColor"] = "#64748b"
+                    migrated = True
+                if "accentColor" not in v:
+                    v["accentColor"] = "#cad13d"
+                    migrated = True
+                    
         if migrated:
             save_commands(data)
         return data
@@ -209,7 +234,8 @@ def add_command():
         "command": cmd,
         "textColor": data.get('textColor', '#f8fafc'),
         "cmdColor": data.get('cmdColor', '#64748b'),
-        "accentColor": data.get('accentColor', '#cad13d')
+        "accentColor": data.get('accentColor', '#cad13d'),
+        "bgColor": data.get('bgColor', '#1e293b')
     }
     save_commands(commands)
     return jsonify({"success": True, "commands": commands})
