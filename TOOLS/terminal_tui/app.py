@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, jsonify, Response, stream_wit
 from winpty import PTY
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
@@ -418,5 +419,4 @@ def api_shutdown():
     return jsonify({"status": "shutdown"})
 
 if __name__ == '__main__':
-    print(f"Starting Workspace Manager on http://localhost:{PORT}")
-    app.run(host='127.0.0.1', port=PORT, debug=False)
+    app.run(host='127.0.0.1', port=PORT, debug=True)

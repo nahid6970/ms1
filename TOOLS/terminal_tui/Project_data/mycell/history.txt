@@ -1,2 +1,5 @@
 ls
 codex
+cmd
+cd
+cls

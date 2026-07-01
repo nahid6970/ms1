@@ -11,6 +11,7 @@
     "cardTheme": {
       "bgColor": "#75f077",
       "textColor": "#000000",
+      "pathColor": "#494a4b",
       "accentColor": "#2563eb"
     }
   }
