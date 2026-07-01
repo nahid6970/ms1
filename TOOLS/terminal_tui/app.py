@@ -707,5 +707,42 @@ def ws_resize(data):
     if session:
         session.resize(cols, rows)
 
+@app.route('/api/fonts')
+def list_system_fonts():
+    fonts = set()
+    
+    # Common monospace fonts as baseline presets
+    presets = ["Fira Code", "Consolas", "Courier New", "Source Code Pro", "JetBrains Mono", "Cascadia Code", "Hack", "Monaco", "SF Mono", "monospace"]
+    for p in presets:
+        fonts.add(p)
+        
+    if sys.platform == 'win32':
+        import winreg
+        # Query local machine fonts
+        try:
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts")
+            for i in range(winreg.QueryInfoKey(key)[1]):
+                name, _, _ = winreg.EnumValue(key, i)
+                clean_name = name.split(" (")[0].strip()
+                if clean_name:
+                    fonts.add(clean_name)
+            winreg.CloseKey(key)
+        except Exception:
+            pass
+
+        # Query current user fonts
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows NT\CurrentVersion\Fonts")
+            for i in range(winreg.QueryInfoKey(key)[1]):
+                name, _, _ = winreg.EnumValue(key, i)
+                clean_name = name.split(" (")[0].strip()
+                if clean_name:
+                    fonts.add(clean_name)
+            winreg.CloseKey(key)
+        except Exception:
+            pass
+
+    return jsonify(sorted(list(fonts), key=lambda s: s.lower()))
+
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=PORT, debug=True, allow_unsafe_werkzeug=True)
