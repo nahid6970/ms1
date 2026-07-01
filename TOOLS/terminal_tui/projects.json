@@ -15,7 +15,10 @@
       "accentColor": "#2563eb"
     },
     "bookmarks": [
-      "agy --dangerously-skip-permissions -c"
+      {
+        "command": "agy --dangerously-skip-permissions -c",
+        "global": true
+      }
     ]
   },
   {
@@ -32,7 +35,8 @@
       "textColor": "#000000",
       "pathColor": "#494a4b",
       "accentColor": "#2166fd"
-    }
+    },
+    "bookmarks": []
   },
   {
     "name": "TV Show (Flask)",
@@ -48,6 +52,7 @@
       "textColor": "#f1f5f9",
       "pathColor": "#94a3b8",
       "accentColor": "#2563eb"
-    }
+    },
+    "bookmarks": []
   }
 ]

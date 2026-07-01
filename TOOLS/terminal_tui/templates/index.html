@@ -1632,24 +1632,65 @@
             content.innerHTML = '';
             
             if (!activeProject) return;
-            const proj = projects.find(p => p.name === activeProject);
-            const bookmarks = (proj && proj.bookmarks) ? proj.bookmarks : [];
             
-            if (bookmarks.length === 0) {
+            const displayList = [];
+            projects.forEach(p => {
+                const isCurrent = (p.name === activeProject);
+                const bookmarks = p.bookmarks || [];
+                bookmarks.forEach((bm, idx) => {
+                    // Extract dictionary command/global properties
+                    const cmdText = (typeof bm === 'string') ? bm : (bm.command || '');
+                    const isGlobal = (typeof bm === 'object') ? (bm.global === true) : false;
+                    
+                    if (isCurrent || isGlobal) {
+                        displayList.push({
+                            command: cmdText,
+                            global: isGlobal,
+                            project: p.name,
+                            index: idx,
+                            isOwned: isCurrent
+                        });
+                    }
+                });
+            });
+            
+            // De-duplicate command display list
+            const seen = new Set();
+            const uniqueList = [];
+            displayList.forEach(item => {
+                const key = item.command.toLowerCase();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueList.push(item);
+                }
+            });
+            
+            if (uniqueList.length === 0) {
                 content.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
             } else {
-                bookmarks.forEach((bm, index) => {
+                uniqueList.forEach(bm => {
                     const row = document.createElement('div');
                     row.className = 'bookmark-item';
                     row.style = 'display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; transition: background-color 0.15s; border-bottom: 1px solid var(--border-color);';
                     
                     row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-card-hover)';
                     row.onmouseleave = () => row.style.backgroundColor = 'transparent';
-                    row.onclick = () => runBookmarkedCommand(bm);
+                    row.onclick = () => runBookmarkedCommand(bm.command);
+
+                    // Add global indicator tag if bookmark belongs to another project
+                    const originTag = bm.isOwned ? '' : ` <span style="font-size: 0.65rem; color: var(--accent-color); background: rgba(37,99,235,0.15); padding: 1px 4px; border-radius: 4px; margin-left: 4px;">Global</span>`;
 
                     row.innerHTML = `
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 210px; font-size: 0.85rem; color: var(--text-primary);" title="${bm}">${bm}</span>
-                        <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onclick="event.stopPropagation(); deleteBookmark(${index})">❌</button>
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; font-size: 0.85rem; color: var(--text-primary);" title="${bm.command}">${bm.command}${originTag}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${bm.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
+                                <input type="checkbox" ${bm.global ? 'checked' : ''} onchange="toggleBookmarkGlobal('${bm.project}', ${bm.index}, this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
+                                <span class="slider-round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${bm.global ? 'var(--accent-color)' : '#475569'}; transition: 0.2s; border-radius: 16px;">
+                                    <span style="position: absolute; content: ''; height: 12px; width: 12px; left: ${bm.global ? '14px' : '2px'}; bottom: 2px; background-color: white; transition: 0.2s; border-radius: 50%;"></span>
+                                </span>
+                            </label>
+                            <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteBookmark('${bm.project}', ${bm.index})">❌</button>
+                        </div>
                     `;
                     content.appendChild(row);
                 });
@@ -1715,10 +1756,25 @@
             }
         }
 
-        async function deleteBookmark(index) {
-            if (!activeProject) return;
+        async function toggleBookmarkGlobal(projName, index, isGlobal) {
             try {
-                const response = await fetch(`/api/projects/${activeProject}/bookmarks/${index}`, {
+                const response = await fetch(`/api/projects/${projName}/bookmarks/${index}/global`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ global: isGlobal })
+                });
+                if (response.ok) {
+                    projects = await response.json();
+                    updateBookmarksDropdown();
+                }
+            } catch (err) {
+                console.error("Error toggling global bookmark:", err);
+            }
+        }
+
+        async function deleteBookmark(projName, index) {
+            try {
+                const response = await fetch(`/api/projects/${projName}/bookmarks/${index}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {

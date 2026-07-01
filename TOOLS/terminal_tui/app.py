@@ -114,7 +114,23 @@ def load_projects_config():
     if os.path.exists(PROJECTS_FILE):
         try:
             with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                projs = json.load(f)
+                # Sanitize bookmarks to be dicts
+                for p in projs:
+                    if "bookmarks" not in p:
+                        p["bookmarks"] = []
+                    else:
+                        sanitized = []
+                        for bm in p["bookmarks"]:
+                            if isinstance(bm, str):
+                                sanitized.append({"command": bm, "global": False})
+                            elif isinstance(bm, dict):
+                                sanitized.append({
+                                    "command": bm.get("command", ""),
+                                    "global": bm.get("global", False)
+                                })
+                        p["bookmarks"] = sanitized
+                return projs
         except Exception as e:
             print(f"Error reading projects config: {e}")
     return []
@@ -281,8 +297,14 @@ def api_add_bookmark(project):
         
     if "bookmarks" not in proj:
         proj["bookmarks"] = []
-    if command not in proj["bookmarks"]:
-        proj["bookmarks"].append(command)
+    # Check duplicate
+    exists = False
+    for bm in proj["bookmarks"]:
+        if bm.get("command", "").lower() == command.lower():
+            exists = True
+            break
+    if not exists:
+        proj["bookmarks"].append({"command": command, "global": False})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
@@ -296,6 +318,22 @@ def api_delete_bookmark(project, index):
         
     if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
         proj["bookmarks"].pop(index)
+        
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks/<int:index>/global', methods=['POST'])
+def api_toggle_bookmark_global(project, index):
+    data = request.json or {}
+    is_global = data.get("global", False)
+    
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
+        proj["bookmarks"][index]["global"] = is_global
         
     save_projects_config(projects)
     return jsonify(scan_projects())
