@@ -872,6 +872,7 @@
                 </div>
             </div>
             <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="resetEditColors()" style="margin-right: auto;">Reset Style</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="submitEditCommand()">Save Changes</button>
             </div>
@@ -1210,6 +1211,13 @@
             document.getElementById('edit-cmd-string').value = '';
             deleteTargetLabel = '';
             contextMenuTargetLabel = '';
+        }
+
+        function resetEditColors() {
+            document.getElementById('edit-textColor').value = '#f8fafc';
+            document.getElementById('edit-cmdColor').value = '#64748b';
+            document.getElementById('edit-accentColor').value = '#cad13d';
+            document.getElementById('edit-bgColor').value = '#1e293b';
         }
 
         function handleOverlayClick(e) {

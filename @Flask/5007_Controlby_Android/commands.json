@@ -1,10 +1,10 @@
 {
     "Display 1": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
-        "textColor": "#7db8f2",
-        "cmdColor": "#78abf2",
-        "accentColor": "#f9f901",
-        "bgColor": "#4485ee"
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     },
     "Display 1 KillApps": {
         "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
