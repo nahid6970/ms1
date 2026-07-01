@@ -1896,10 +1896,14 @@ view_mode = config["view_mode"]
 # Toggle mode if requested
 if len(sys.argv) > 1 and sys.argv[1] == "--toggle":
     view_mode = "name" if view_mode == "full" else "full"
-    config["view_mode"] = view_mode
     try:
+        existing_config = {{}}
+        if os.path.exists(config_file):
+            with open(config_file, 'r', encoding='utf-8') as f:
+                existing_config = json.load(f)
+        existing_config["view_mode"] = view_mode
         with open(config_file, 'w', encoding='utf-8') as f:
-            json.dump(config, f, indent=2, ensure_ascii=False)
+            json.dump(existing_config, f, indent=2, ensure_ascii=False)
     except: pass
 
 theme = config["theme"]

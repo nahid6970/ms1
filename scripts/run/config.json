@@ -1,10 +1,10 @@
 {
-  "theme": {
-    "folder_normal": 208,
-    "folder_bookmark": 51,
-    "file_normal": 250,
-    "file_bookmark": 121,
-    "font_face": "JetBrainsMono NFP"
+  "search_roots": {
+    "C:\\@delta\\ms1": true,
+    "C:\\@delta\\db": true,
+    "C:\\@delta\\msBackups": false,
+    "C:\\Users\\nahid\\Pictures": false,
+    "D:\\": false
   },
   "visibility": {
     ".git": false,
@@ -16,7 +16,13 @@
     "obj": false,
     ".gitignore": false
   },
-  "view_mode": "full",
+  "theme": {
+    "folder_normal": 208,
+    "folder_bookmark": 51,
+    "file_normal": 250,
+    "file_bookmark": 121,
+    "font_face": "JetBrainsMono NFP"
+  },
   "show_collapse_indicators": false,
   "extension_icons": {
     ".py": {
@@ -87,5 +93,12 @@
       "icon": "",
       "color": 110
     }
+  },
+  "show_extension_dots": true,
+  "show_extension_commas": true,
+  "bookmarked_config_setting": {
+    "type": "theme_color",
+    "key": "icon_colors",
+    "label": "Configure Icon Colors"
   }
 }

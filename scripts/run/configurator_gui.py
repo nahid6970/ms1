@@ -104,11 +104,9 @@ class ConfiguratorGUI(QMainWindow):
     def load_settings(self):
         if os.path.exists(CONFIG_FILE):
             try:
-                with open(CONFIG_FILE, 'r') as f:
+                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    if "theme" in data: self.config["theme"].update(data["theme"])
-                    if "visibility" in data: self.config["visibility"] = data["visibility"]
-                    if "search_roots" in data: self.config["search_roots"] = data["search_roots"]
+                    self.config.update(data)
             except: pass
 
     def save_settings(self):
@@ -125,8 +123,8 @@ class ConfiguratorGUI(QMainWindow):
             self.config["search_roots"][item.text()] = (item.checkState() == Qt.CheckState.Checked)
             
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
-        with open(CONFIG_FILE, 'w') as f:
-            json.dump(self.config, f, indent=4)
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(self.config, f, indent=4, ensure_ascii=False)
         print("Configuration saved.")
 
     def init_ui(self, start_tab=0):
