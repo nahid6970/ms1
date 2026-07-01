@@ -56,8 +56,7 @@
         }
 
         .sidebar-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 20px 24px 10px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -96,6 +95,30 @@
             background-color: var(--bg-card);
         }
 
+        /* Search Input */
+        .search-container {
+            padding: 8px 24px 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
         .project-list {
             flex: 1;
             overflow-y: auto;
@@ -110,7 +133,7 @@
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 14px 18px; /* Increased vertical padding to avoid font cutoffs */
+            padding: 14px 18px; 
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -118,7 +141,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-height: 80px; /* Force minimum height to avoid squishing */
+            min-height: 80px; 
         }
 
         .project-card::before {
@@ -156,7 +179,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-right: 18px; /* Leave space for delete button on hover */
+            margin-right: 18px; 
             margin-bottom: 2px;
         }
 
@@ -167,6 +190,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .branch-badge {
@@ -225,6 +251,45 @@
             border-radius: 50%;
             display: inline-block;
             box-shadow: 0 0 8px var(--green-glow);
+        }
+
+        /* Right-Click Context Menu */
+        .context-menu {
+            position: fixed;
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 0;
+            width: 220px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--bg-card-hover);
+        }
+
+        .context-menu-item.delete {
+            color: #f87171;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+            padding-top: 8px;
+        }
+
+        .context-menu-item.delete:hover {
+            background-color: rgba(239, 68, 68, 0.1);
         }
 
         /* Main Workspace Container */
@@ -490,6 +555,12 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Searchbox -->
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off">
+        </div>
+
         <div class="project-list" id="project-list-container">
             <!-- Project cards injected here -->
         </div>
@@ -530,6 +601,22 @@
         </div>
     </div>
 
+    <!-- Right-Click Context Menu -->
+    <div class="context-menu" id="custom-context-menu">
+        <div class="context-menu-item" onclick="handleContextPin()">
+            <span id="context-pin-icon">📌</span>
+            <span id="context-pin-text">Pin Workspace</span>
+        </div>
+        <div class="context-menu-item" onclick="openThemeModal()">
+            <span>🎨</span>
+            <span>Customize Terminal Theme</span>
+        </div>
+        <div class="context-menu-item delete" onclick="handleContextDelete()">
+            <span>❌</span>
+            <span>Remove Workspace</span>
+        </div>
+    </div>
+
     <!-- Add Workspace Modal Dialog -->
     <div class="modal-overlay" id="add-modal">
         <div class="modal-content">
@@ -554,6 +641,35 @@
         </div>
     </div>
 
+    <!-- Customize Theme Modal Dialog -->
+    <div class="modal-overlay" id="theme-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Customize Terminal Theme</h2>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="theme-modal-subtitle">Project: test1</div>
+            </div>
+            <form id="theme-customization-form" onsubmit="handleSaveTheme(event)">
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                    <label for="theme-bg">Terminal Background</label>
+                    <input type="color" id="theme-bg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                    <label for="theme-fg">Terminal Foreground</label>
+                    <input type="color" id="theme-fg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                    <label for="theme-cursor">Cursor Color</label>
+                    <input type="color" id="theme-cursor" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="resetThemeToDefault()">Reset Defaults</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeThemeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Theme</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
@@ -561,6 +677,7 @@
     <script>
         let projects = [];
         let activeProject = null;
+        let contextProject = null; // Holds the project currently right-clicked
         let term = null;
         let fitAddon = null;
         let eventSource = null;
@@ -571,30 +688,56 @@
                 const url = refresh ? '/api/projects?refresh=true' : '/api/projects';
                 const response = await fetch(url);
                 projects = await response.json();
-                renderSidebar();
+                
+                // Keep active project details updated with latest theme
+                if (activeProject) {
+                    const activeDetails = projects.find(p => p.name === activeProject);
+                    if (activeDetails && term) {
+                        term.options.theme = activeDetails.theme;
+                    }
+                }
+                
+                handleSearch(); // Triggers render with current search filter
             } catch (err) {
                 console.error("Error fetching projects:", err);
             }
         }
 
+        // Search trigger
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            renderSidebar(query);
+        }
+
         // Render sidebar list
-        function renderSidebar() {
+        function renderSidebar(searchQuery = '') {
             const container = document.getElementById('project-list-container');
             container.innerHTML = '';
 
-            if (projects.length === 0) {
+            const filtered = projects.filter(p => 
+                p.name.toLowerCase().includes(searchQuery) || 
+                p.path.toLowerCase().includes(searchQuery)
+            );
+
+            if (filtered.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px; font-size: 0.9rem;">
-                        No workspace folders added.<br>Click the <b>+</b> button above to add one.
+                        No workspaces found.
                     </div>
                 `;
                 return;
             }
 
-            projects.forEach(proj => {
+            filtered.forEach(proj => {
                 const card = document.createElement('div');
                 card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
                 card.onclick = () => selectProject(proj.name);
+
+                // Right click context menu binding
+                card.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, proj);
+                };
 
                 // Title bar container inside card
                 const titleContainer = document.createElement('div');
@@ -602,7 +745,16 @@
 
                 const title = document.createElement('span');
                 title.className = 'project-title';
-                title.innerText = proj.name;
+                
+                // Add Pin icon prefix if workspace is pinned
+                if (proj.pinned) {
+                    const pin = document.createElement('span');
+                    pin.innerText = '📌 ';
+                    title.appendChild(pin);
+                }
+
+                const titleText = document.createTextNode(proj.name);
+                title.appendChild(titleText);
                 titleContainer.appendChild(title);
 
                 if (proj.branch) {
@@ -644,12 +796,71 @@
             });
         }
 
+        // Context Menu Controls
+        function showContextMenu(e, project) {
+            contextProject = project;
+            const menu = document.getElementById('custom-context-menu');
+            
+            // Set menu item texts
+            document.getElementById('context-pin-text').innerText = project.pinned ? 'Unpin Workspace' : 'Pin Workspace';
+            document.getElementById('context-pin-icon').innerText = project.pinned ? '📍' : '📌';
+
+            menu.style.display = 'block';
+            menu.style.left = `${e.clientX}px`;
+            menu.style.top = `${e.clientY}px`;
+            
+            // Adjust position if it overflows browser borders
+            const rect = menu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                menu.style.left = `${e.clientX - rect.width}px`;
+            }
+            if (rect.bottom > window.innerHeight) {
+                menu.style.top = `${e.clientY - rect.height}px`;
+            }
+        }
+
+        function hideContextMenu() {
+            document.getElementById('custom-context-menu').style.display = 'none';
+        }
+
+        async function handleContextPin() {
+            if (!contextProject) return;
+            hideContextMenu();
+
+            try {
+                const response = await fetch('/api/projects/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: contextProject.name,
+                        pinned: !contextProject.pinned
+                    })
+                });
+
+                if (response.ok) {
+                    projects = await response.json();
+                    handleSearch();
+                }
+            } catch (err) {
+                console.error("Error pinning project:", err);
+            }
+        }
+
+        function handleContextDelete() {
+            if (!contextProject) return;
+            hideContextMenu();
+            deleteProject(contextProject.name);
+        }
+
+        // Hide context menu on click outside
+        window.addEventListener('click', hideContextMenu);
+
         // Switch workspace project
         async function selectProject(projectName) {
             if (activeProject === projectName) return;
             
             activeProject = projectName;
-            renderSidebar();
+            handleSearch();
 
             // Toggle placeholders
             document.getElementById('no-workspace-placeholder').style.display = 'none';
@@ -671,14 +882,16 @@
                     branchBadge.style.display = 'none';
                 }
 
-                initTerminal(projectName);
+                // Retrieve project config details to fetch its theme
+                const projDetails = projects.find(p => p.name === projectName) || data;
+                initTerminal(projectName, projDetails.theme);
             } catch (err) {
                 console.error("Error setting up session:", err);
             }
         }
 
         // Initialize xterm.js terminal instance
-        function initTerminal(projectName) {
+        function initTerminal(projectName, projectTheme = null) {
             if (eventSource) {
                 eventSource.close();
             }
@@ -686,56 +899,44 @@
             const termDiv = document.getElementById('terminal-parent');
             termDiv.innerHTML = ''; 
 
+            // Standard terminal color config
+            const defaultTheme = {
+                background: '#000000',
+                foreground: '#d1d5db',
+                cursor: '#3b82f6',
+                black: '#1e293b',
+                red: '#ef4444',
+                green: '#10b981',
+                yellow: '#f59e0b',
+                blue: '#3b82f6',
+                magenta: '#d946ef',
+                cyan: '#06b6d4',
+                white: '#f1f5f9',
+                brightBlack: '#475569',
+                brightRed: '#f87171',
+                brightGreen: '#34d399',
+                brightYellow: '#fbbf24',
+                brightBlue: '#60a5fa',
+                brightMagenta: '#f472b6',
+                brightCyan: '#22d3ee',
+                brightWhite: '#ffffff'
+            };
+
+            // Merge project customized theme options
+            const themeOptions = projectTheme ? { ...defaultTheme, ...projectTheme } : defaultTheme;
+
             term = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'bar',
                 fontSize: 14,
                 fontFamily: '"Fira Code", Courier, monospace',
-                theme: {
-                    background: '#000000',
-                    foreground: '#d1d5db',
-                    cursor: '#3b82f6',
-                    black: '#1e293b',
-                    red: '#ef4444',
-                    green: '#10b981',
-                    yellow: '#f59e0b',
-                    blue: '#3b82f6',
-                    magenta: '#d946ef',
-                    cyan: '#06b6d4',
-                    white: '#f1f5f9',
-                    brightBlack: '#475569',
-                    brightRed: '#f87171',
-                    brightGreen: '#34d399',
-                    brightYellow: '#fbbf24',
-                    brightBlue: '#60a5fa',
-                    brightMagenta: '#f472b6',
-                    brightCyan: '#22d3ee',
-                    brightWhite: '#ffffff'
-                }
+                theme: themeOptions
             });
 
             fitAddon = new FitAddon.FitAddon();
             term.loadAddon(fitAddon);
             term.open(termDiv);
             fitAddon.fit();
-
-            // Handle Ctrl+C (copy) and Ctrl+V (paste) behaviours
-            term.attachCustomKeyEventHandler(e => {
-                // Ctrl+C: copy selected text
-                if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
-                    if (term.hasSelection()) {
-                        navigator.clipboard.writeText(term.getSelection());
-                        return false; // Prevent sending Ctrl+C to terminal process
-                    }
-                }
-                
-                // Ctrl+V: block raw Ctrl+V character (0x16) from key events.
-                // The browser's native paste event is handled by xterm.js natively.
-                if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
-                    return false;
-                }
-                return true;
-            });
 
             // Resize Observer
             const resizeObserver = new ResizeObserver(() => {
@@ -757,13 +958,29 @@
                 body: JSON.stringify({ cols: term.cols, rows: term.rows })
             });
 
+            // Handle Ctrl+C (copy) and Ctrl+V (paste) behaviours
+            term.attachCustomKeyEventHandler(e => {
+                // Ctrl+C: copy selected text
+                if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
+                    if (term.hasSelection()) {
+                        navigator.clipboard.writeText(term.getSelection());
+                        return false; 
+                    }
+                }
+                
+                // Ctrl+V: block raw Ctrl+V character (0x16) from key events.
+                if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
+                    return false;
+                }
+                return true;
+            });
+
             term.onData(data => {
                 // Filter out Device Attributes (DA) queries sent back by xterm.js
-                // which winpty translates to raw keypresses, polluting the prompt.
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) {
                     return;
                 }
-                // Filter out Operating System Command (OSC) responses (like color query responses)
+                // Filter out Operating System Command (OSC) responses
                 if (data.startsWith('\x1b]')) {
                     return;
                 }
@@ -813,7 +1030,6 @@
 
                 projects = await response.json();
                 
-                // If the deleted project was the active one, clear workspace view
                 if (activeProject === projectName) {
                     activeProject = null;
                     if (eventSource) eventSource.close();
@@ -822,13 +1038,13 @@
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                 }
 
-                renderSidebar();
+                handleSearch();
             } catch (err) {
                 console.error("Error removing workspace:", err);
             }
         }
 
-        // Open/Close modal popup functions
+        // Add Workspace Modal Dialog Controls
         function openAddModal() {
             document.getElementById('proj-name').value = '';
             document.getElementById('proj-path').value = '';
@@ -841,7 +1057,6 @@
             document.getElementById('add-modal').classList.remove('show');
         }
 
-        // Handle Add Project submit form
         async function handleAddProject(event) {
             event.preventDefault();
             const errorMsg = document.getElementById('modal-error-msg');
@@ -866,15 +1081,109 @@
                 }
 
                 projects = data;
-                renderSidebar();
+                handleSearch();
                 closeAddModal();
-                
-                // Automatically switch to the newly added workspace
                 selectProject(name);
             } catch (err) {
                 errorMsg.innerText = "Connection error. Please ensure background server is running.";
                 errorMsg.style.display = 'block';
                 console.error("Error adding workspace:", err);
+            }
+        }
+
+        // Customize Theme Modal Dialog Controls
+        function openThemeModal() {
+            if (!contextProject) return;
+            hideContextMenu();
+
+            document.getElementById('theme-modal-subtitle').innerText = `Workspace: ${contextProject.name}`;
+            
+            const theme = contextProject.theme || {
+                background: '#000000',
+                foreground: '#d1d5db',
+                cursor: '#3b82f6'
+            };
+            
+            document.getElementById('theme-bg').value = theme.background;
+            document.getElementById('theme-fg').value = theme.foreground;
+            document.getElementById('theme-cursor').value = theme.cursor;
+
+            document.getElementById('theme-modal').classList.add('show');
+        }
+
+        function closeThemeModal() {
+            document.getElementById('theme-modal').classList.remove('show');
+        }
+
+        async function handleSaveTheme(event) {
+            event.preventDefault();
+            if (!contextProject) return;
+
+            const bg = document.getElementById('theme-bg').value;
+            const fg = document.getElementById('theme-fg').value;
+            const cursor = document.getElementById('theme-cursor').value;
+
+            const theme = {
+                background: bg,
+                foreground: fg,
+                cursor: cursor
+            };
+
+            try {
+                const response = await fetch('/api/projects/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: contextProject.name,
+                        theme: theme
+                    })
+                });
+
+                if (response.ok) {
+                    projects = await response.json();
+                    closeThemeModal();
+                    
+                    // If customized project is active, apply theme immediately without resetting session!
+                    if (activeProject === contextProject.name && term) {
+                        term.options.theme = theme;
+                    }
+                    handleSearch();
+                }
+            } catch (err) {
+                console.error("Error saving theme:", err);
+            }
+        }
+
+        async function resetThemeToDefault() {
+            if (!contextProject) return;
+            
+            const defaultTheme = {
+                background: '#000000',
+                foreground: '#d1d5db',
+                cursor: '#3b82f6'
+            };
+
+            try {
+                const response = await fetch('/api/projects/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: contextProject.name,
+                        theme: defaultTheme
+                    })
+                });
+
+                if (response.ok) {
+                    projects = await response.json();
+                    closeThemeModal();
+
+                    if (activeProject === contextProject.name && term) {
+                        term.options.theme = defaultTheme;
+                    }
+                    handleSearch();
+                }
+            } catch (err) {
+                console.error("Error resetting theme:", err);
             }
         }
 

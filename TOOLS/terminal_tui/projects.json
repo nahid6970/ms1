@@ -1,10 +1,16 @@
 [
   {
     "name": "test1",
-    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint"
+    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5004 paint",
+    "theme": {
+      "background": "#f24040",
+      "foreground": "#000000",
+      "cursor": "#657da4"
+    }
   },
   {
     "name": "test2",
-    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5018 2.0"
+    "path": "C:\\Users\\nahid\\Desktop\\TEST\\5018 2.0",
+    "pinned": true
   }
 ]

@@ -97,6 +97,12 @@ def scan_projects():
     for p in config_projects:
         name = p["name"]
         path = p["path"]
+        pinned = p.get("pinned", False)
+        theme = p.get("theme", {
+            "background": "#000000",
+            "foreground": "#d1d5db",
+            "cursor": "#3b82f6"
+        })
         
         # Fetch/Cache git branch
         branch = git_branch_cache.get(name)
@@ -111,8 +117,12 @@ def scan_projects():
             "name": name,
             "path": path.replace("\\", "/"),
             "branch": branch,
-            "is_active": is_active
+            "is_active": is_active,
+            "pinned": pinned,
+            "theme": theme
         })
+    # Sort projects: Pinned first, then alphabetically by name
+    projects.sort(key=lambda x: (not x["pinned"], x["name"].lower()))
     return projects
 
 @app.route('/')
@@ -148,7 +158,13 @@ def api_projects_post():
     # Add project
     projects.append({
         "name": name,
-        "path": os.path.abspath(path)
+        "path": os.path.abspath(path),
+        "pinned": False,
+        "theme": {
+            "background": "#000000",
+            "foreground": "#d1d5db",
+            "cursor": "#3b82f6"
+        }
     })
     save_projects_config(projects)
     
@@ -174,13 +190,33 @@ def api_projects_delete(project):
         if project in active_sessions:
             session = active_sessions[project]
             if session.pty.isalive():
-                # On Windows, winpty spawns PowerShell. Closing PTY will kill the spawned process.
                 session.pty.close()
             del active_sessions[project]
             
     if project in git_branch_cache:
         del git_branch_cache[project]
         
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/customize', methods=['POST'])
+def api_projects_customize():
+    data = request.json
+    name = data.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "Project Name is required"}), 400
+        
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == name.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    # Update properties
+    if "pinned" in data:
+        proj["pinned"] = bool(data["pinned"])
+    if "theme" in data:
+        proj["theme"] = data["theme"]
+        
+    save_projects_config(projects)
     return jsonify(scan_projects())
 
 @app.route('/api/session/<project>', methods=['POST'])
