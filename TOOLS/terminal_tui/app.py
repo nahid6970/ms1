@@ -46,13 +46,30 @@ if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
     Set-PSReadLineOption -HistorySavePath "{history_path}"
 }}
 
-# Clear screen to start with a clean prompt
-Clear-Host
+# Clear screen cleanly to start with a clean prompt and hide startup warnings
+Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
 
 # Add your custom project aliases, functions, and environment variables below:
 # Example:
 # Set-Alias ll Get-ChildItem
 """)
+        else:
+            try:
+                with open(profile_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                modified = False
+                if "Clear-Host" in content:
+                    content = content.replace("Clear-Host", 'Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline')
+                    modified = True
+                if "PROFILE_LOADED_OK" in content:
+                    content = content.replace('Write-Host "PROFILE_LOADED_OK"', '')
+                    content = content.replace('echo "PROFILE_LOADED_OK"', '')
+                    modified = True
+                if modified:
+                    with open(profile_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+            except Exception as e:
+                print(f"Error migrating profile: {e}")
         
         # Spawn PowerShell with custom profile, bypassing main user profile
         # Wrap in curly braces script block to handle spaces/parentheses in path correctly

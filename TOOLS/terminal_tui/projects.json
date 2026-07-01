@@ -1,5 +1,21 @@
 [
   {
+    "name": "terminal_tui",
+    "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui",
+    "pinned": true,
+    "theme": {
+      "background": "#000000",
+      "foreground": "#d1d5db",
+      "cursor": "#3b82f6"
+    },
+    "cardTheme": {
+      "bgColor": "#161c26",
+      "textColor": "#f1f5f9",
+      "pathColor": "#94a3b8",
+      "accentColor": "#2563eb"
+    }
+  },
+  {
     "name": "mycell",
     "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
     "pinned": true,
