@@ -5,7 +5,12 @@ import time
 
 app = Flask(__name__)
 
-COMMANDS = {
+import json
+import os
+
+COMMANDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.json')
+
+DEFAULT_COMMANDS = {
     "Display 1": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
     "Display 2": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
     "Display 1 KillApps": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
@@ -17,6 +22,24 @@ COMMANDS = {
     "Restart": "shutdown /r /t 0",
     "Sign Out": "shutdown /l"
 }
+
+def load_commands():
+    if not os.path.exists(COMMANDS_FILE):
+        save_commands(DEFAULT_COMMANDS)
+        return DEFAULT_COMMANDS
+    try:
+        with open(COMMANDS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading commands: {e}")
+        return DEFAULT_COMMANDS
+
+def save_commands(commands):
+    try:
+        with open(COMMANDS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(commands, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving commands: {e}")
 
 # Store command outputs
 command_outputs = []
@@ -51,33 +74,94 @@ def execute_command(cmd, label):
         command_outputs.append("Ready for next command...")
             
     except subprocess.TimeoutExpired:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         command_outputs.append(f"[{timestamp}] Command timed out after 30 seconds")
         command_outputs.append("-" * 50)
     except Exception as e:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         command_outputs.append(f"[{timestamp}] Error executing command: {str(e)}")
         command_outputs.append("-" * 50)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    commands = load_commands()
     if request.method == 'POST':
-        cmd = request.form['command']
-        # Find the label for this command
-        label = next((k for k, v in COMMANDS.items() if v == cmd), "Unknown Command")
-        
-        # Execute command in background thread
-        thread = threading.Thread(target=execute_command, args=(cmd, label))
-        thread.daemon = True
-        thread.start()
-        
-        # Redirect to prevent re-submitting the form on refresh
-        return redirect(url_for('index'))
+        cmd = request.form.get('command')
+        if cmd:
+            # Find the label for this command
+            label = next((k for k, v in commands.items() if v == cmd), "Unknown Command")
+            
+            # Execute command in background thread
+            thread = threading.Thread(target=execute_command, args=(cmd, label))
+            thread.daemon = True
+            thread.start()
+            
+            # Redirect to prevent re-submitting the form on refresh
+            return redirect(url_for('index'))
 
-    return render_template("index.html", commands=COMMANDS, outputs=command_outputs)
+    return render_template("index.html", commands=commands, outputs=command_outputs)
 
 @app.route('/get_output')
 def get_output():
     """API endpoint to get latest command outputs"""
     return jsonify({"outputs": command_outputs})
+
+@app.route('/run_command', methods=['POST'])
+def run_command_api():
+    """API endpoint to run a command asynchronously"""
+    data = request.get_json() or {}
+    cmd = data.get('command')
+    label = data.get('label', 'Unknown Command')
+    
+    if not cmd:
+        return jsonify({"success": False, "error": "No command provided"}), 400
+        
+    thread = threading.Thread(target=execute_command, args=(cmd, label))
+    thread.daemon = True
+    thread.start()
+    return jsonify({"success": True})
+
+@app.route('/add_command', methods=['POST'])
+def add_command():
+    """API endpoint to add a custom command"""
+    data = request.get_json() or {}
+    label = data.get('label', '').strip()
+    cmd = data.get('command', '').strip()
+    
+    if not label or not cmd:
+        return jsonify({"success": False, "error": "Both label and command are required"}), 400
+        
+    commands = load_commands()
+    if label in commands:
+        return jsonify({"success": False, "error": "A command with this label already exists"}), 400
+        
+    commands[label] = cmd
+    save_commands(commands)
+    return jsonify({"success": True, "commands": commands})
+
+@app.route('/delete_command', methods=['POST'])
+def delete_command():
+    """API endpoint to delete a custom command"""
+    data = request.get_json() or {}
+    label = data.get('label', '').strip()
+    
+    if not label:
+        return jsonify({"success": False, "error": "Label is required"}), 400
+        
+    commands = load_commands()
+    if label in commands:
+        del commands[label]
+        save_commands(commands)
+        return jsonify({"success": True, "commands": commands})
+        
+    return jsonify({"success": False, "error": "Command not found"}), 404
+
+@app.route('/clear_output', methods=['POST'])
+def clear_output():
+    """API endpoint to clear output history"""
+    global command_outputs
+    command_outputs.clear()
+    return jsonify({"success": True})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5007, debug=True)
