@@ -1483,6 +1483,7 @@
 
                 const data = await response.json();
                 activeProject = projectName;
+                applyProjectWindowTitle(projectName);
                 handleSearch();
 
                 // Toggle placeholders
@@ -2251,6 +2252,7 @@
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
+                    document.title = "Workspace Terminal Manager";
                     
                     // Reset UI to initial placeholder (home page) state
                     document.getElementById('workspace-header').style.display = 'none';
@@ -2576,6 +2578,7 @@
 
             if (windowTitle) {
                 document.title = windowTitle;
+                localStorage.setItem(`project-window-title-${activeProject}`, windowTitle);
             }
             
             try {
@@ -2882,6 +2885,15 @@
             closeSettingsModal();
         }
 
+        function applyProjectWindowTitle(projectName) {
+            const savedTitle = localStorage.getItem(`project-window-title-${projectName}`);
+            if (savedTitle) {
+                document.title = savedTitle;
+            } else {
+                document.title = "Workspace Terminal Manager";
+            }
+        }
+
         function saveTerminalLayoutState() {
             if (!activeProject) {
                 localStorage.removeItem('active-project');
@@ -2911,6 +2923,7 @@
                 }
                 
                 activeProject = projectName;
+                applyProjectWindowTitle(projectName);
                 handleSearch();
                 
                 document.getElementById('no-workspace-placeholder').style.display = 'none';
