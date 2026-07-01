@@ -212,12 +212,13 @@ def load_projects_config():
                         sanitized = []
                         for bm in p["bookmarks"]:
                             if isinstance(bm, str):
-                                sanitized.append({"command": bm, "global": False})
+                                sanitized.append({"command": bm, "global": False, "windowTitle": ""})
                             elif isinstance(bm, dict):
                                 sanitized.append({
                                     "command": bm.get("command", ""),
                                     "global": bm.get("global", False),
-                                    "name": bm.get("name", "")
+                                    "name": bm.get("name", ""),
+                                    "windowTitle": bm.get("windowTitle", "")
                                 })
                         p["bookmarks"] = sanitized
                 return projs
@@ -348,6 +349,7 @@ def api_projects_delete(project):
 def api_add_bookmark(project):
     data = request.json
     command = data.get("command", "").strip()
+    window_title = data.get("windowTitle", "").strip()
     if not command:
         return jsonify({"error": "Command is required"}), 400
         
@@ -365,7 +367,7 @@ def api_add_bookmark(project):
             exists = True
             break
     if not exists:
-        proj["bookmarks"].append({"command": command, "global": False})
+        proj["bookmarks"].append({"command": command, "global": False, "windowTitle": window_title})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
@@ -404,6 +406,7 @@ def api_edit_bookmark(project, index):
     data = request.json or {}
     command = data.get("command", "").strip()
     name = data.get("name", "").strip()
+    window_title = data.get("windowTitle", "").strip()
     new_index = data.get("newIndex")
     
     if not command:
@@ -419,6 +422,7 @@ def api_edit_bookmark(project, index):
         bm = proj["bookmarks"][index]
         bm["command"] = command
         bm["name"] = name
+        bm["windowTitle"] = window_title
         
         # If new_index is provided and valid, move the bookmark
         if new_index is not None:

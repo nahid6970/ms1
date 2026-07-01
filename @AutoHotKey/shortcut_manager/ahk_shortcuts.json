@@ -819,6 +819,21 @@
             "process_name_enabled": true,
             "window_class_enabled": true,
             "match_foreground": false
+        },
+        {
+            "action": "SendText(\"/status\")\nsleep(500)\nSend(\"{Enter}\")",
+            "category": "Browser",
+            "description": "Resume previous Gemini chat session",
+            "enabled": true,
+            "hotkey": "^z",
+            "name": "Codex Usage (Browser)",
+            "process_name": "chrome.exe",
+            "window_class": "",
+            "window_title": "Codex-cli",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "match_foreground": false
         }
     ],
     "exclusion_rules": [
