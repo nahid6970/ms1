@@ -39,6 +39,18 @@ BASE_DIR = r"C:\@delta\ms1\TOOLS"
 PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
 active_sessions = {}
 sessions_lock = threading.Lock()
+
+
+def restart_current_process(delay_seconds=1.0):
+    def _restart():
+        print("Restarting Terminal TUI process...")
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    timer = threading.Timer(delay_seconds, _restart)
+    timer.daemon = True
+    timer.start()
+
+
 class TerminalSession:
     def __init__(self, name, path):
         self.name = name
@@ -502,8 +514,12 @@ def api_sessions_reset():
         for name, session in list(active_sessions.items()):
             session.kill()
         active_sessions.clear()
-        
-    return jsonify(scan_projects())
+
+    restart_current_process()
+    return jsonify({
+        "projects": scan_projects(),
+        "restarting": True,
+    })
 
 @app.route('/api/session/<project>/stop', methods=['POST'])
 def api_session_stop(project):

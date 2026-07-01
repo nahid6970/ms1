@@ -664,7 +664,7 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
-                <button class="action-btn" onclick="resetAllSessions()" title="Reset all terminal sessions" style="padding: 4px;">
+                <button class="action-btn" onclick="resetAllSessions()" title="Reset sessions and restart app" style="padding: 4px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                     </svg>
@@ -1810,16 +1810,34 @@
             }
         }
 
-        // Reset and terminate all active terminal sessions across workspaces
+        async function waitForServerAndReload() {
+            for (let attempt = 0; attempt < 30; attempt++) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                try {
+                    const response = await fetch('/', { cache: 'no-store' });
+                    if (response.ok) {
+                        window.location.reload();
+                        return;
+                    }
+                } catch (err) {
+                    // Server is still restarting.
+                }
+            }
+
+            window.location.reload();
+        }
+
+        // Reset terminal sessions, then restart the Flask app so backend code changes load.
         async function resetAllSessions() {
-            if (!confirm("Are you sure you want to reset all workspace terminal sessions? All running background commands will be terminated.")) {
+            if (!confirm("Reset all workspace terminal sessions and restart the app? All running background commands will be terminated.")) {
                 return;
             }
             
             try {
                 const response = await fetch('/api/sessions/reset', { method: 'POST' });
                 if (response.ok) {
-                    projects = await response.json();
+                    const result = await response.json();
+                    projects = result.projects || result;
                     
                     activeProject = null;
                     if (socket) {
@@ -1836,6 +1854,10 @@
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                     
                     handleSearch();
+
+                    if (result.restarting) {
+                        waitForServerAndReload();
+                    }
                 }
             } catch (err) {
                 console.error("Error resetting all sessions:", err);
