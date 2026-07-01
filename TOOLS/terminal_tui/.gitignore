@@ -1,0 +1,22 @@
+# Log files
+app.log
+*.log
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local IDE configs
+.vscode/
+.idea/
+
+# Local workspace specific files (moved to backup)
+projects.json
+Project_data/
+
+# Temporary/backup files
+*.bak
+*.swp
+~*
