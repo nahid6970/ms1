@@ -287,44 +287,7 @@
             box-shadow: 0 0 8px var(--green-glow);
         }
 
-        /* Right-Click Context Menu */
-        .context-menu {
-            position: fixed;
-            background-color: var(--bg-sidebar);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 6px 0;
-            width: 220px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            display: none;
-        }
 
-        .context-menu-item {
-            padding: 8px 16px;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .context-menu-item:hover {
-            background-color: var(--bg-card-hover);
-        }
-
-        .context-menu-item.delete {
-            color: #f87171;
-            border-top: 1px solid var(--border-color);
-            margin-top: 4px;
-            padding-top: 8px;
-        }
-
-        .context-menu-item.delete:hover {
-            background-color: rgba(239, 68, 68, 0.1);
-        }
 
         /* Main Workspace Container */
         .workspace {
@@ -635,21 +598,7 @@
         </div>
     </div>
 
-    <!-- Right-Click Context Menu -->
-    <div class="context-menu" id="custom-context-menu">
-        <div class="context-menu-item" onclick="handleContextPin()">
-            <span id="context-pin-icon">📌</span>
-            <span id="context-pin-text">Pin Workspace</span>
-        </div>
-        <div class="context-menu-item" onclick="openThemeModal()">
-            <span>🎨</span>
-            <span>Customize Terminal Theme</span>
-        </div>
-        <div class="context-menu-item delete" onclick="handleContextDelete()">
-            <span>❌</span>
-            <span>Remove Workspace</span>
-        </div>
-    </div>
+
 
     <!-- Add Workspace Modal Dialog -->
     <div class="modal-overlay" id="add-modal">
@@ -713,6 +662,10 @@
                 <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <label for="card-fg">Button Text Color</label>
                     <input type="color" id="card-fg" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label for="card-path">Button Path Color</label>
+                    <input type="color" id="card-path" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
                 </div>
                 <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 18px;">
                     <label for="card-accent">Button Accent Line</label>
@@ -879,12 +832,6 @@
                 
                 card.onclick = () => selectProject(proj.name);
 
-                // Right click context menu binding
-                card.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    showContextMenu(e, proj);
-                };
-
                 // Title bar container inside card
                 const titleContainer = document.createElement('div');
                 titleContainer.className = 'project-title-container';
@@ -924,7 +871,7 @@
                 path.className = 'project-path';
                 path.innerText = proj.path;
                 if (proj.cardTheme) {
-                    path.style.color = `${proj.cardTheme.textColor}a0`;
+                    path.style.color = proj.cardTheme.pathColor;
                 }
                 card.appendChild(path);
 
@@ -969,33 +916,6 @@
             });
         }
 
-        // Context Menu Controls
-        function showContextMenu(e, project) {
-            contextProject = project;
-            const menu = document.getElementById('custom-context-menu');
-            
-            // Set menu item texts
-            document.getElementById('context-pin-text').innerText = project.pinned ? 'Unpin Workspace' : 'Pin Workspace';
-            document.getElementById('context-pin-icon').innerText = project.pinned ? '📍' : '📌';
-
-            menu.style.display = 'block';
-            menu.style.left = `${e.clientX}px`;
-            menu.style.top = `${e.clientY}px`;
-            
-            // Adjust position if it overflows browser borders
-            const rect = menu.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                menu.style.left = `${e.clientX - rect.width}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                menu.style.top = `${e.clientY - rect.height}px`;
-            }
-        }
-
-        function hideContextMenu() {
-            document.getElementById('custom-context-menu').style.display = 'none';
-        }
-
         async function togglePinProject(project) {
             try {
                 const response = await fetch('/api/projects/customize', {
@@ -1015,21 +935,6 @@
                 console.error("Error pinning project:", err);
             }
         }
-
-        async function handleContextPin() {
-            if (!contextProject) return;
-            hideContextMenu();
-            await togglePinProject(contextProject);
-        }
-
-        function handleContextDelete() {
-            if (!contextProject) return;
-            hideContextMenu();
-            deleteProject(contextProject.name);
-        }
-
-        // Hide context menu on click outside
-        window.addEventListener('click', hideContextMenu);
 
         // Switch workspace project
         async function selectProject(projectName) {
@@ -1270,7 +1175,6 @@
         // Customize Theme Modal Dialog Controls
         function openThemeModal() {
             if (!contextProject) return;
-            hideContextMenu();
 
             document.getElementById('theme-modal-subtitle').innerText = `Workspace: ${contextProject.name}`;
             
@@ -1286,6 +1190,7 @@
             const cardTheme = contextProject.cardTheme || {
                 bgColor: '#161c26',
                 textColor: '#f1f5f9',
+                pathColor: '#94a3b8',
                 accentColor: '#2563eb'
             };
             
@@ -1295,6 +1200,7 @@
             
             document.getElementById('card-bg').value = cardTheme.bgColor;
             document.getElementById('card-fg').value = cardTheme.textColor;
+            document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
             document.getElementById('card-accent').value = cardTheme.accentColor;
 
             // Populate Copy Style dropdown
@@ -1334,6 +1240,7 @@
             
             const cardBg = document.getElementById('card-bg').value;
             const cardFg = document.getElementById('card-fg').value;
+            const cardPath = document.getElementById('card-path').value;
             const cardAccent = document.getElementById('card-accent').value;
 
             const theme = {
@@ -1344,6 +1251,7 @@
             const cardTheme = {
                 bgColor: cardBg,
                 textColor: cardFg,
+                pathColor: cardPath,
                 accentColor: cardAccent
             };
 
@@ -1444,10 +1352,12 @@
             const h = rand(0, 360);
             const bg = hslToHex(h, rand(20, 35), rand(8, 14)); // Harmonized dark background
             const fg = hslToHex((h + 180) % 360, rand(10, 15), rand(85, 95)); // Light contrasting text
+            const pathColor = hslToHex(h, rand(10, 15), rand(50, 65)); // Muted path color
             const accent = hslToHex(h, rand(75, 100), rand(45, 60)); // Vibrant accent
             
             document.getElementById('card-bg').value = bg;
             document.getElementById('card-fg').value = fg;
+            document.getElementById('card-path').value = pathColor;
             document.getElementById('card-accent').value = accent;
         }
 
@@ -1460,10 +1370,12 @@
                 const cardTheme = source.cardTheme || {
                     bgColor: '#161c26',
                     textColor: '#f1f5f9',
+                    pathColor: '#94a3b8',
                     accentColor: '#2563eb'
                 };
                 document.getElementById('card-bg').value = cardTheme.bgColor;
                 document.getElementById('card-fg').value = cardTheme.textColor;
+                document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
                 document.getElementById('card-accent').value = cardTheme.accentColor;
 
                 // Copy console style as well

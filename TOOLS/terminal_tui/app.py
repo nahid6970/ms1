@@ -137,8 +137,11 @@ def scan_projects():
         card_theme = p.get("cardTheme", {
             "bgColor": "#161c26",
             "textColor": "#f1f5f9",
+            "pathColor": "#94a3b8",
             "accentColor": "#2563eb"
         })
+        if "pathColor" not in card_theme:
+            card_theme["pathColor"] = "#94a3b8"
         
         # Fetch/Cache git branch
         branch = git_branch_cache.get(name)
@@ -203,6 +206,7 @@ def api_projects_post():
         "cardTheme": {
             "bgColor": "#161c26",
             "textColor": "#f1f5f9",
+            "pathColor": "#94a3b8",
             "accentColor": "#2563eb"
         }
     })

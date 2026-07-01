@@ -2,14 +2,14 @@
   {
     "name": "mycell",
     "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
-    "pinned": false,
+    "pinned": true,
     "theme": {
       "background": "#000000",
       "foreground": "#d1d5db",
       "cursor": "#3b82f6"
     },
     "cardTheme": {
-      "bgColor": "#5cd33c",
+      "bgColor": "#75f077",
       "textColor": "#000000",
       "accentColor": "#2563eb"
     }
