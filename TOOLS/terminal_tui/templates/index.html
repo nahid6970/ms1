@@ -1087,8 +1087,12 @@
 
             socket.on('pty-output', (msg) => {
                 if (msg.data) {
+                    const buffer = term.buffer.active;
+                    const isAtBottom = (buffer.viewportY >= buffer.baseY - 1);
                     term.write(msg.data, () => {
-                        term.scrollToBottom();
+                        if (isAtBottom) {
+                            term.scrollToBottom();
+                        }
                     });
                 } else if (msg.eof) {
                     term.write("\r\n\x1b[31m[Shell Session Ended. Refresh or re-select to restart]\x1b[0m\r\n");
