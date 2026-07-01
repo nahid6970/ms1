@@ -34,8 +34,9 @@
       "cursor": "#3b82f6"
     },
     "cardTheme": {
-      "bgColor": "#161c26",
-      "textColor": "#f1f5f9",
+      "bgColor": "#61f556",
+      "textColor": "#000000",
+      "pathColor": "#383839",
       "accentColor": "#2563eb"
     },
     "bookmarks": []

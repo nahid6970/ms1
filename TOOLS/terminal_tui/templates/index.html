@@ -1002,17 +1002,6 @@
             if (activeProject === projectName) return;
             
             activeProject = projectName;
-
-            // Instantly apply the selected project's custom accent theme colors synchronously
-            const projDetails = projects.find(p => p.name === projectName);
-            if (projDetails && projDetails.cardTheme && projDetails.cardTheme.accentColor) {
-                document.documentElement.style.setProperty('--accent-color', projDetails.cardTheme.accentColor);
-                document.documentElement.style.setProperty('--accent-glow', projDetails.cardTheme.accentColor + '25');
-            } else {
-                document.documentElement.style.setProperty('--accent-color', '#2563eb');
-                document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
-            }
-
             handleSearch();
 
             // Toggle placeholders
@@ -1221,8 +1210,6 @@
                     document.getElementById('workspace-header').style.display = 'none';
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
-                    document.documentElement.style.setProperty('--accent-color', '#2563eb');
-                    document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
                 }
 
                 handleSearch();
@@ -1391,10 +1378,6 @@
                         if (projDetails && term) {
                             term.options.theme = theme;
                         }
-                        if (projDetails && projDetails.cardTheme && projDetails.cardTheme.accentColor) {
-                            document.documentElement.style.setProperty('--accent-color', projDetails.cardTheme.accentColor);
-                            document.documentElement.style.setProperty('--accent-glow', projDetails.cardTheme.accentColor + '25');
-                        }
                     }
                     handleSearch();
                 } else {
@@ -1441,8 +1424,6 @@
                         if (term) {
                             term.options.theme = defaultTheme;
                         }
-                        document.documentElement.style.setProperty('--accent-color', '#2563eb');
-                        document.documentElement.style.setProperty('--accent-glow', 'rgba(37, 99, 235, 0.4)');
                     }
                     handleSearch();
                 }
