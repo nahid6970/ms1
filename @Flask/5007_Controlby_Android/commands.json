@@ -6,13 +6,6 @@
         "accentColor": "#cad13d",
         "bgColor": "#1e293b"
     },
-    "Display 1 KillApps": {
-        "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
-    },
     "Display 2": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
         "textColor": "#f8fafc",
@@ -20,19 +13,26 @@
         "accentColor": "#cad13d",
         "bgColor": "#1e293b"
     },
-    "Open Calculator": {
-        "command": "start calc",
+    "Display 1 KillApps": {
+        "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
         "accentColor": "#cad13d",
         "bgColor": "#1e293b"
     },
+    "Open Calculator": {
+        "command": "start calc",
+        "textColor": "#000000",
+        "cmdColor": "#616161",
+        "accentColor": "#4592f7",
+        "bgColor": "#fcfcfc"
+    },
     "Open Notepad": {
         "command": "start notepad",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
+        "textColor": "#000000",
+        "cmdColor": "#616161",
+        "accentColor": "#4592f7",
+        "bgColor": "#fcfcfc"
     },
     "Restart": {
         "command": "shutdown /r /t 0",
@@ -51,7 +51,7 @@
     "Shutdown": {
         "command": "shutdown /s /t 0",
         "textColor": "#000000",
-        "cmdColor": "#4b4949",
+        "cmdColor": "#292929",
         "accentColor": "#f0e13d",
         "bgColor": "#ec4f27"
     },

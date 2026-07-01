@@ -851,6 +851,12 @@
                     <label for="edit-cmd-string">Command / Executable String</label>
                     <input type="text" id="edit-cmd-string" placeholder="e.g., start notepad" autocomplete="off">
                 </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="edit-copy-style-source">Apply Style From Another Button</label>
+                    <select id="edit-copy-style-source" onchange="copyStyleFromSource()" style="width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 0; font-family: inherit; font-size: 0.9rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+                        <option value="">-- Select a command --</option>
+                    </select>
+                </div>
                 <!-- Color pickers -->
                 <div class="color-picker-grid">
                     <div class="color-picker-group">
@@ -1181,6 +1187,8 @@
             document.getElementById('edit-accentColor').value = accentColor;
             document.getElementById('edit-bgColor').value = bgColor;
             
+            populateStyleSources(label);
+            
             overlay.classList.add('active');
             editContent.classList.add('active');
             addContent.classList.remove('active');
@@ -1233,6 +1241,44 @@
             document.getElementById('edit-cmdColor').value = midColors[Math.floor(Math.random() * midColors.length)];
             document.getElementById('edit-accentColor').value = vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
             document.getElementById('edit-bgColor').value = darkColors[Math.floor(Math.random() * darkColors.length)];
+        }
+
+        function populateStyleSources(currentLabel) {
+            const select = document.getElementById('edit-copy-style-source');
+            select.innerHTML = '<option value="">-- Select a command to copy style --</option>';
+            
+            const cards = document.querySelectorAll('.command-card');
+            cards.forEach(card => {
+                const label = card.getAttribute('data-label');
+                if (label !== currentLabel) {
+                    const option = document.createElement('option');
+                    option.value = label;
+                    option.textContent = label;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function copyStyleFromSource() {
+            const select = document.getElementById('edit-copy-style-source');
+            const sourceLabel = select.value;
+            if (!sourceLabel) return;
+            
+            const card = document.querySelector(`.command-card[data-label="${sourceLabel}"]`);
+            if (!card) return;
+            
+            const textColor = card.getAttribute('data-text-color') || '#f8fafc';
+            const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
+            const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
+            const bgColor = card.getAttribute('data-bg-color') || '#1e293b';
+            
+            document.getElementById('edit-textColor').value = textColor;
+            document.getElementById('edit-cmdColor').value = cmdColor;
+            document.getElementById('edit-accentColor').value = accentColor;
+            document.getElementById('edit-bgColor').value = bgColor;
+            
+            // Reset selection back to default placeholder
+            select.value = '';
         }
 
         function handleOverlayClick(e) {
