@@ -3,11 +3,13 @@ import sys
 import socket
 import subprocess
 import time
-import json
+import urllib.request
+import urllib.error
+import webbrowser
 
-PORT = 9988
-SERVER_SCRIPT = r"C:\@delta\ms1\TOOLS\terminal_tui\tui_server.py"
-CLIENT_SCRIPT = r"C:\@delta\ms1\TOOLS\terminal_tui\tui_client.py"
+PORT = 5577
+SERVER_URL = f"http://127.0.0.1:{PORT}"
+SERVER_SCRIPT = r"C:\@delta\ms1\TOOLS\terminal_tui\app.py"
 
 def is_server_running():
     try:
@@ -34,7 +36,7 @@ def start_server():
             close_fds=True
         )
     except Exception as e:
-        print(f"Error starting background server: {e}")
+        print(f"Error starting background Flask server: {e}")
         return False
         
     # Wait for connection to be available
@@ -50,23 +52,18 @@ def kill_server():
         return
         
     try:
-        s = socket.create_connection(("127.0.0.1", PORT), timeout=1.0)
-        # Send shutdown command
-        msg = {"type": "shutdown"}
-        data = json.dumps(msg).encode("utf-8")
-        header = len(data).to_bytes(4, byteorder="big")
-        s.sendall(header + data)
-        s.close()
-        print("Shutdown command sent to terminal server.")
+        # Send shutdown POST request
+        req = urllib.request.Request(
+            f"{SERVER_URL}/shutdown", 
+            data=b"{}", 
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=2.0) as response:
+            res = response.read().decode("utf-8")
+            print("Shutdown command sent successfully to workspace server.")
     except Exception as e:
-        print(f"Error sending shutdown command: {e}")
-
-def run_client():
-    # Run the client in the current terminal process
-    try:
-        subprocess.run([sys.executable, CLIENT_SCRIPT])
-    except KeyboardInterrupt:
-        pass
+        # The request might fail because the server exits immediately and closes connection, which is normal
+        print("Shutdown command triggered (server process terminated).")
 
 def main():
     if len(sys.argv) > 1:
@@ -76,25 +73,26 @@ def main():
             return
         elif cmd in ("status", "--status"):
             if is_server_running():
-                print("Terminal server is running in the background.")
+                print("Workspace server is running in the background.")
             else:
-                print("Terminal server is not running.")
+                print("Workspace server is not running.")
             return
         elif cmd in ("help", "--help", "-h"):
-            print("Terminal TUI Manager")
+            print("Workspace Web Dashboard Launcher")
             print("Usage:")
-            print("  python main.py           - Start client and connect to server (starts server if needed)")
-            print("  python main.py stop      - Stop the background server and all active terminal sessions")
-            print("  python main.py status    - Check if background server is running")
+            print("  python main.py           - Start server and open dashboard in your web browser")
+            print("  python main.py stop      - Stop the background server and all active PTY shell sessions")
+            print("  python main.py status    - Check if the background server is running")
             return
 
-    # Default action: start server and run client
-    print("Checking background terminal server...")
+    # Default action: start server and open web browser
+    print("Checking workspace server...")
     if not start_server():
-        print("Error: Could not start or connect to the terminal server.")
+        print("Error: Could not start or connect to the workspace server.")
         sys.exit(1)
         
-    run_client()
+    print(f"Opening Workspace Dashboard in browser: {SERVER_URL}")
+    webbrowser.open(SERVER_URL)
 
 if __name__ == "__main__":
     main()
