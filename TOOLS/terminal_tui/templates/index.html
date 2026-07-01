@@ -178,6 +178,7 @@
             background-color: var(--accent-glow);
             border-color: var(--accent-color);
             box-shadow: 0 0 15px var(--accent-glow);
+            min-height: 84px;
         }
 
         .project-card.dragging {
@@ -200,7 +201,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-right: 18px; 
+            margin-right: 4px; 
             margin-bottom: 2px;
         }
 
@@ -243,20 +244,24 @@
         }
 
         .card-actions {
-            position: absolute;
-            top: 10px;
-            right: 14px;
             display: flex;
             gap: 8px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
+            margin-top: 0;
+            height: 0;
+            overflow: hidden;
+            justify-content: flex-end;
         }
 
-        .project-card:hover .card-actions {
+        .project-card.active .card-actions {
             opacity: 1;
             pointer-events: auto;
+            height: 20px;
+            margin-top: 8px;
+            overflow: visible;
         }
 
         .action-dot {
