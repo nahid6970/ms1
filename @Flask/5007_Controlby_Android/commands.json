@@ -51,9 +51,9 @@
     "Shutdown": {
         "command": "shutdown /s /t 0",
         "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
+        "cmdColor": "#000000",
         "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
+        "bgColor": "#fb4518"
     },
     "Sign Out": {
         "command": "shutdown /l",
