@@ -342,6 +342,22 @@ def api_projects_reorder():
     save_projects_config(reordered_projects)
     return jsonify(scan_projects())
 
+@app.route('/api/sessions/reset', methods=['POST'])
+def api_sessions_reset():
+    with sessions_lock:
+        for name, session in list(active_sessions.items()):
+            if session.pty.isalive():
+                try:
+                    os.close(session.pty.fd)
+                except Exception:
+                    pass
+        active_sessions.clear()
+        
+    global git_branch_cache
+    git_branch_cache = {}
+    
+    return jsonify(scan_projects())
+
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):
     projects = scan_projects()
