@@ -1,5 +1,25 @@
 import os
 import sys
+
+# Redirect stdout and stderr when running windowless (e.g., with pythonw.exe)
+# to prevent silent crashes from print() or logging calls.
+if sys.stdout is None or sys.stderr is None:
+    try:
+        log_dir = os.path.dirname(os.path.abspath(__file__))
+        log_file = os.path.join(log_dir, "app.log")
+        # Open in append mode with line buffering
+        f = open(log_file, "a", encoding="utf-8", buffering=1)
+        if sys.stdout is None:
+            sys.stdout = f
+        if sys.stderr is None:
+            sys.stderr = f
+    except Exception:
+        # Fallback to devnull if log file is unwritable
+        if sys.stdout is None:
+            sys.stdout = open(os.devnull, "w")
+        if sys.stderr is None:
+            sys.stderr = open(os.devnull, "w")
+
 import json
 import queue
 import threading
@@ -633,4 +653,4 @@ def ws_resize(data):
         session.resize(cols, rows)
 
 if __name__ == '__main__':
-    socketio.run(app, host='127.0.0.1', port=PORT, debug=True)
+    socketio.run(app, host='127.0.0.1', port=PORT, debug=True, allow_unsafe_werkzeug=True)
