@@ -20,10 +20,6 @@
         "global": true
       },
       {
-        "command": "ffdasds",
-        "global": false
-      },
-      {
         "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
         "global": true
       }
