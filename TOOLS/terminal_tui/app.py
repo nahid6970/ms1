@@ -44,7 +44,16 @@ sessions_lock = threading.Lock()
 def restart_current_process(delay_seconds=1.0):
     def _restart():
         print("Restarting Terminal TUI process...")
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        helper_code = (
+            "import os, subprocess, sys, time;"
+            "time.sleep(float(sys.argv[1]));"
+            "subprocess.Popen(sys.argv[3:], cwd=sys.argv[2], close_fds=True)"
+        )
+        subprocess.Popen(
+            [sys.executable, "-c", helper_code, str(delay_seconds), os.getcwd(), sys.executable, *sys.argv],
+            close_fds=True,
+        )
+        os._exit(0)
 
     timer = threading.Timer(delay_seconds, _restart)
     timer.daemon = True
