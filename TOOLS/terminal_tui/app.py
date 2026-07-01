@@ -468,6 +468,28 @@ def api_sessions_reset():
         
     return jsonify(scan_projects())
 
+@app.route('/api/session/<project>/stop', methods=['POST'])
+def api_session_stop(project):
+    projects = scan_projects()
+    # Case-insensitive lookup
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+        
+    with sessions_lock:
+        # Match case-insensitive active_session name
+        session_key = next((name for name in active_sessions if name.lower() == project.lower()), None)
+        if session_key:
+            session = active_sessions[session_key]
+            if session.pty.isalive():
+                try:
+                    os.close(session.pty.fd)
+                except Exception:
+                    pass
+            del active_sessions[session_key]
+            
+    return jsonify(scan_projects())
+
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):
     projects = scan_projects()
