@@ -729,22 +729,10 @@
                     }
                 }
                 
-                // Ctrl+V: paste text from clipboard
+                // Ctrl+V: block raw Ctrl+V character (0x16) from key events.
+                // The browser's native paste event is handled by xterm.js natively.
                 if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
-                    if (e.type === 'keydown') {
-                        navigator.clipboard.readText().then(text => {
-                            if (text) {
-                                fetch(`/input/${projectName}`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ data: text })
-                                });
-                            }
-                        }).catch(err => {
-                            console.error("Failed to read clipboard text:", err);
-                        });
-                    }
-                    return false; // Prevent sending raw Ctrl+V control character (0x16) to terminal
+                    return false;
                 }
                 return true;
             });
