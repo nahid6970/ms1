@@ -1095,10 +1095,7 @@
                     <label for="edit-bookmark-name" style="font-size: 0.8rem; font-weight: 500;">Display Name (Alias)</label>
                     <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Build Project" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
                 </div>
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="edit-bookmark-window-title" style="font-size: 0.8rem; font-weight: 500;">Window Title for AHK</label>
-                    <input type="text" id="edit-bookmark-window-title" class="form-input" placeholder="e.g. Build Project Terminal" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
-                </div>
+
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label for="edit-bookmark-index" style="font-size: 0.8rem; font-weight: 500;">Position / Order</label>
                     <select id="edit-bookmark-index" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer;">
@@ -1169,7 +1166,6 @@
         let socket = null;
         let terminalPanes = [];
         let splitPaneCounter = 1;
-        let projectWindowTitles = {};
 
         // Fetch project workspaces from Flask server
         async function fetchProjects(refresh = false) {
@@ -1493,10 +1489,8 @@
                 
                 document.getElementById('active-project-name').innerText = data.name;
                 document.getElementById('active-project-path').innerText = data.path;
-                
                 document.getElementById('active-project-branch').style.display = 'none';
-
-                applyProjectWindowTitle(projectName);
+                document.title = data.name;
 
                 // Retrieve project config details to fetch its theme
                 const currentProjDetails = projects.find(p => p.name === projectName) || data;
@@ -2254,7 +2248,6 @@
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
-                    projectWindowTitles = {};
                     document.title = "Terminal Manager";
                     
                     // Reset UI to initial placeholder (home page) state
@@ -2505,7 +2498,6 @@
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName} (Current Position: ${index + 1})`;
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
-            document.getElementById('edit-bookmark-window-title').value = currentWindowTitle || "";
             
             // Find the project's bookmarks to populate select dropdown
             const proj = projects.find(p => p.name.toLowerCase() == projName.toLowerCase());
@@ -2540,7 +2532,6 @@
             
             const cmd = document.getElementById('edit-bookmark-cmd').value.trim();
             const alias = document.getElementById('edit-bookmark-name').value.trim();
-            const windowTitle = document.getElementById('edit-bookmark-window-title').value.trim();
             const newIndex = parseInt(document.getElementById('edit-bookmark-index').value);
             
             if (!cmd) {
@@ -2555,7 +2546,7 @@
                     body: JSON.stringify({
                         command: cmd,
                         name: alias,
-                        windowTitle: windowTitle,
+                        windowTitle: "",
                         newIndex: newIndex
                     })
                 });
@@ -2578,21 +2569,6 @@
             
             // Hide dropdown
             document.getElementById('bookmark-dropdown-content').style.display = 'none';
-
-            let titleToSet = windowTitle;
-            const titleMatch = cmd.match(/--title\s+["']([^"']+)["']/i);
-            if (titleMatch) {
-                titleToSet = titleMatch[1];
-            }
-
-            if (titleToSet) {
-                document.title = titleToSet;
-                projectWindowTitles[activeProject] = titleToSet;
-                const activeProjEl = document.getElementById('active-project-name');
-                if (activeProjEl) {
-                    activeProjEl.innerText = titleToSet;
-                }
-            }
             
             try {
                 await fetch(`/input/${activeProject}`, {
@@ -2898,25 +2874,6 @@
             closeSettingsModal();
         }
 
-        function applyProjectWindowTitle(projectName) {
-            const savedTitle = projectWindowTitles[projectName];
-            const activeProjEl = document.getElementById('active-project-name');
-            const currentProjDetails = projects.find(p => p.name === projectName) || {};
-            const defaultName = currentProjDetails.name || projectName;
-
-            if (savedTitle) {
-                document.title = savedTitle;
-                if (activeProjEl) {
-                    activeProjEl.innerText = savedTitle;
-                }
-            } else {
-                document.title = defaultName;
-                if (activeProjEl) {
-                    activeProjEl.innerText = defaultName;
-                }
-            }
-        }
-
         function saveTerminalLayoutState() {
             if (!activeProject) {
                 localStorage.removeItem('active-project');
@@ -2956,8 +2913,7 @@
                 document.getElementById('active-project-name').innerText = currentProjDetails.name || projectName;
                 document.getElementById('active-project-path').innerText = currentProjDetails.path || '';
                 document.getElementById('active-project-branch').style.display = 'none';
-                
-                applyProjectWindowTitle(projectName);
+                document.title = currentProjDetails.name || projectName;
                 
                 clearTerminalPanes();
                 splitPaneCounter = 1;
