@@ -2252,7 +2252,7 @@
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
-                    document.title = "Workspace Terminal Manager";
+                    document.title = "Terminal Manager";
                     
                     // Reset UI to initial placeholder (home page) state
                     document.getElementById('workspace-header').style.display = 'none';
@@ -2890,7 +2890,7 @@
             if (savedTitle) {
                 document.title = savedTitle;
             } else {
-                document.title = "Workspace Terminal Manager";
+                document.title = projectName;
             }
         }
 
