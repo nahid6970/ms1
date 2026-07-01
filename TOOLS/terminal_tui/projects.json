@@ -15,7 +15,8 @@
       "accentColor": "#2563eb"
     },
     "bookmarks": [
-      "agy --dangerously-skip-permissions -c"
+      "agy --dangerously-skip-permissions -c",
+      "fff"
     ]
   },
   {
@@ -31,7 +32,7 @@
       "bgColor": "#75f077",
       "textColor": "#000000",
       "pathColor": "#494a4b",
-      "accentColor": "#2563eb"
+      "accentColor": "#2166fd"
     }
   },
   {
