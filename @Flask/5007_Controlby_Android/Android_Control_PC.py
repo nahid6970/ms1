@@ -11,16 +11,66 @@ import os
 COMMANDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.json')
 
 DEFAULT_COMMANDS = {
-    "Display 1": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
-    "Display 2": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
-    "Display 1 KillApps": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
-    "Show IP Config": "ipconfig",
-    "Open Notepad": "start notepad",
-    "Open Calculator": "start calc",
-    "System Info": "systeminfo",
-    "Shutdown": "shutdown /s /t 0",
-    "Restart": "shutdown /r /t 0",
-    "Sign Out": "shutdown /l"
+    "Display 1": {
+        "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Display 2": {
+        "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Display 1 KillApps": {
+        "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Show IP Config": {
+        "command": "ipconfig",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Open Notepad": {
+        "command": "start notepad",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Open Calculator": {
+        "command": "start calc",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "System Info": {
+        "command": "systeminfo",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d"
+    },
+    "Shutdown": {
+        "command": "shutdown /s /t 0",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#ef4444"
+    },
+    "Restart": {
+        "command": "shutdown /r /t 0",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#ef4444"
+    },
+    "Sign Out": {
+        "command": "shutdown /l",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#ef4444"
+    }
 }
 
 def load_commands():
@@ -29,7 +79,22 @@ def load_commands():
         return DEFAULT_COMMANDS
     try:
         with open(COMMANDS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+            
+        # Migrate old string-value format to object format
+        migrated = False
+        for k, v in list(data.items()):
+            if isinstance(v, str):
+                data[k] = {
+                    "command": v,
+                    "textColor": "#f8fafc",
+                    "cmdColor": "#64748b",
+                    "accentColor": "#cad13d"
+                }
+                migrated = True
+        if migrated:
+            save_commands(data)
+        return data
     except Exception as e:
         print(f"Error loading commands: {e}")
         return DEFAULT_COMMANDS
@@ -89,7 +154,12 @@ def index():
         cmd = request.form.get('command')
         if cmd:
             # Find the label for this command
-            label = next((k for k, v in commands.items() if v == cmd), "Unknown Command")
+            label = "Unknown Command"
+            for k, v in commands.items():
+                v_cmd = v.get('command') if isinstance(v, dict) else v
+                if v_cmd == cmd:
+                    label = k
+                    break
             
             # Execute command in background thread
             thread = threading.Thread(target=execute_command, args=(cmd, label))
@@ -135,7 +205,12 @@ def add_command():
     if label in commands:
         return jsonify({"success": False, "error": "A command with this label already exists"}), 400
         
-    commands[label] = cmd
+    commands[label] = {
+        "command": cmd,
+        "textColor": data.get('textColor', '#f8fafc'),
+        "cmdColor": data.get('cmdColor', '#64748b'),
+        "accentColor": data.get('accentColor', '#cad13d')
+    }
     save_commands(commands)
     return jsonify({"success": True, "commands": commands})
 
@@ -155,6 +230,18 @@ def delete_command():
         return jsonify({"success": True, "commands": commands})
         
     return jsonify({"success": False, "error": "Command not found"}), 404
+
+@app.route('/save_commands', methods=['POST'])
+def save_commands_api():
+    """API endpoint to persist full commands list (useful for drag-n-drop reordering, edits, etc.)"""
+    data = request.get_json() or {}
+    commands = data.get('commands')
+    
+    if not isinstance(commands, dict):
+        return jsonify({"success": False, "error": "Invalid format, must be a dictionary"}), 400
+        
+    save_commands(commands)
+    return jsonify({"success": True, "commands": commands})
 
 @app.route('/clear_output', methods=['POST'])
 def clear_output():

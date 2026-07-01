@@ -53,7 +53,6 @@
             flex-direction: column;
         }
 
-
         /* Main Workspace split panel layout */
         .main-container {
             display: flex;
@@ -130,7 +129,7 @@
             gap: 12px;
         }
 
-        /* Command Card Layout */
+        /* Command Card Layout with CSS variables */
         .command-card {
             position: relative;
             display: flex;
@@ -138,12 +137,25 @@
             border-radius: 10px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-clr, var(--accent-primary));
             transition: all 0.25s ease;
             overflow: hidden;
+            cursor: grab; /* Grab indicator */
+            user-select: none;
+        }
+
+        .command-card:active {
+            cursor: grabbing;
+        }
+
+        .command-card.dragging {
+            opacity: 0.4;
+            border-style: dashed;
+            transform: scale(0.98);
         }
 
         .command-card:hover {
-            border-color: var(--accent-primary);
+            border-color: var(--accent-clr, var(--accent-primary));
             background-color: var(--card-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -167,18 +179,18 @@
         .cmd-label {
             font-size: 0.95rem;
             font-weight: 700;
-            color: var(--text-main);
-            transition: color 0.2s ease;
+            color: var(--text-clr, var(--text-main));
+            transition: filter 0.2s ease;
         }
 
         .command-card:hover .cmd-label {
-            color: var(--accent-primary);
+            filter: brightness(1.2);
         }
 
         .cmd-preview {
             font-family: 'Fira Code', monospace;
             font-size: 0.75rem;
-            color: var(--text-muted);
+            color: var(--cmd-clr, var(--text-muted));
             margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
@@ -203,26 +215,27 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.4;
+            opacity: 0; /* Hide delete button by default on desktop context menu era */
             transition: all 0.2s ease;
             z-index: 2;
         }
 
+        /* Show delete button on card hover */
         .command-card:hover .delete-btn {
-            opacity: 1;
+            opacity: 0.5;
         }
 
         .delete-btn:hover {
             background-color: var(--accent-danger);
             color: #fff;
             border-color: var(--accent-danger);
+            opacity: 1 !important;
             transform: translateY(-50%) scale(1.05);
         }
 
         .delete-btn:active {
             transform: translateY(-50%) scale(0.95);
         }
-
 
         /* Right Side: Terminal Output */
         .right-panel {
@@ -378,7 +391,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             width: 90%;
-            max-width: 460px;
+            max-width: 480px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transform: scale(0.9);
             transition: transform 0.25s ease;
@@ -436,7 +449,7 @@
             margin-bottom: 6px;
         }
 
-        .form-group input {
+        .form-group input[type="text"] {
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -448,9 +461,49 @@
             transition: border-color 0.2s;
         }
 
-        .form-group input:focus {
+        .form-group input[type="text"]:focus {
             outline: none;
             border-color: var(--accent-primary);
+        }
+
+        /* Custom color picker styles */
+        .color-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .color-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .color-picker-group label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 100%;
+            height: 38px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
         }
 
         .modal-actions {
@@ -460,6 +513,50 @@
             padding: 16px 20px;
             background-color: var(--panel-header-bg);
             border-top: 1px solid var(--border-color);
+        }
+
+        /* Context Menu style */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #111827;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: hidden;
+            min-width: 160px;
+            backdrop-filter: blur(8px);
+        }
+
+        .context-menu button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 14px;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .context-menu button:hover {
+            background-color: var(--card-bg);
+            color: var(--accent-primary);
+        }
+
+        .context-menu button.menu-danger {
+            color: var(--accent-danger);
+        }
+
+        .context-menu button.menu-danger:hover {
+            background-color: rgba(239, 68, 68, 0.1);
         }
 
         /* Shared Button Styles */
@@ -553,7 +650,7 @@
             }
 
             .delete-btn {
-                opacity: 0.7; /* Keep it visible enough to tap on mobile */
+                opacity: 0.7 !important; /* Keep it visible to tap on mobile */
                 right: 6px;
                 width: 24px;
                 height: 24px;
@@ -581,7 +678,7 @@
     </style>
 </head>
 <body>
-
+    
     <!-- Main container split -->
     <div class="main-container">
         <!-- Left Panel: Commands -->
@@ -605,8 +702,20 @@
             
             <div class="buttons-container-scroll">
                 <div class="button-grid" id="button-grid">
-                    {% for label, cmd in commands.items() %}
-                        <div class="command-card" id="card-{{ label | replace(' ', '_') }}">
+                    {% for label, cmd_data in commands.items() %}
+                        {% set cmd = cmd_data.command if cmd_data is mapping else cmd_data %}
+                        {% set textColor = cmd_data.textColor if (cmd_data is mapping and cmd_data.textColor) else '#f8fafc' %}
+                        {% set cmdColor = cmd_data.cmdColor if (cmd_data is mapping and cmd_data.cmdColor) else '#64748b' %}
+                        {% set accentColor = cmd_data.accentColor if (cmd_data is mapping and cmd_data.accentColor) else '#cad13d' %}
+                        
+                        <div class="command-card" id="card-{{ label | replace(' ', '_') }}" 
+                             draggable="true" 
+                             style="--accent-clr: {{ accentColor }}; --text-clr: {{ textColor }}; --cmd-clr: {{ cmdColor }};"
+                             data-label="{{ label }}" 
+                             data-command="{{ cmd }}"
+                             data-text-color="{{ textColor }}"
+                             data-cmd-color="{{ cmdColor }}"
+                             data-accent-color="{{ accentColor }}">
                             <button class="command-btn" onclick="runCommand('{{ label | escape }}', '{{ cmd | escape }}')">
                                 <span class="cmd-label">{{ label }}</span>
                                 <span class="cmd-preview">{{ cmd }}</span>
@@ -658,6 +767,18 @@
         </section>
     </div>
 
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <button onclick="handleContextMenuAction('edit')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
+            ✏️ Edit Command
+        </button>
+        <button onclick="handleContextMenuAction('delete')" class="menu-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            ❌ Delete Command
+        </button>
+    </div>
+
     <!-- Modals System Container -->
     <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
         <!-- Add Command Content -->
@@ -675,10 +796,62 @@
                     <label for="new-cmd-string">Command / Executable String</label>
                     <input type="text" id="new-cmd-string" placeholder="e.g., start notepad" autocomplete="off">
                 </div>
+                <!-- Color pickers inside add modal -->
+                <div class="color-picker-grid">
+                    <div class="color-picker-group">
+                        <label for="new-textColor">Text Color</label>
+                        <input type="color" id="new-textColor" value="#f8fafc">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="new-cmdColor">Command Color</label>
+                        <input type="color" id="new-cmdColor" value="#64748b">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="new-accentColor">Accent Color</label>
+                        <input type="color" id="new-accentColor" value="#cad13d">
+                    </div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="submitAddCommand()">Add Command</button>
+            </div>
+        </div>
+
+        <!-- Modify/Edit Command Content -->
+        <div class="modal-content" id="edit-modal-content">
+            <div class="modal-header">
+                <h3>Modify Command</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-cmd-label">Display Label</label>
+                    <input type="text" id="edit-cmd-label" placeholder="e.g., Open Notepad" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="edit-cmd-string">Command / Executable String</label>
+                    <input type="text" id="edit-cmd-string" placeholder="e.g., start notepad" autocomplete="off">
+                </div>
+                <!-- Color pickers -->
+                <div class="color-picker-grid">
+                    <div class="color-picker-group">
+                        <label for="edit-textColor">Text Color</label>
+                        <input type="color" id="edit-textColor" value="#f8fafc">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="edit-cmdColor">Command Color</label>
+                        <input type="color" id="edit-cmdColor" value="#64748b">
+                    </div>
+                    <div class="color-picker-group">
+                        <label for="edit-accentColor">Accent Color</label>
+                        <input type="color" id="edit-accentColor" value="#cad13d">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitEditCommand()">Save Changes</button>
             </div>
         </div>
 
@@ -701,6 +874,8 @@
     <script>
         let isRefreshing = false;
         let deleteTargetLabel = '';
+        let contextMenuTargetLabel = '';
+        let dragSrcEl = null;
 
         // Helper to format output lines beautifully
         function formatOutput(outputs) {
@@ -812,21 +987,114 @@
                 });
         }
 
+        // Drag and Drop implementation
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-label'));
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            
+            const draggingEl = document.querySelector('.dragging');
+            const card = e.target.closest('.command-card');
+            if (card && card !== draggingEl) {
+                const rect = card.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                const parent = card.parentNode;
+                if (e.clientY < midpoint) {
+                    parent.insertBefore(draggingEl, card);
+                } else {
+                    parent.insertBefore(draggingEl, card.nextSibling);
+                }
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            saveCurrentOrder();
+        }
+
+        function initDragAndDrop() {
+            const cards = document.querySelectorAll('.command-card');
+            cards.forEach(card => {
+                card.removeEventListener('dragstart', handleDragStart);
+                card.removeEventListener('dragover', handleDragOver);
+                card.removeEventListener('dragend', handleDragEnd);
+                
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function saveCurrentOrder() {
+            const cards = document.querySelectorAll('.command-card');
+            const updatedCommands = {};
+            
+            cards.forEach(card => {
+                const label = card.getAttribute('data-label');
+                const command = card.getAttribute('data-command');
+                const textColor = card.getAttribute('data-text-color') || '#f8fafc';
+                const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
+                const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
+                
+                updatedCommands[label] = {
+                    command: command,
+                    textColor: textColor,
+                    cmdColor: cmdColor,
+                    accentColor: accentColor
+                };
+            });
+            
+            fetch('/save_commands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commands: updatedCommands })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Failed to save order:', data.error);
+                }
+            })
+            .catch(err => console.error('Error saving order:', err));
+        }
+
         // Rebuild buttons list dynamically
         function rebuildButtons(commands) {
             const grid = document.getElementById('button-grid');
             let html = '';
             
-            Object.entries(commands).forEach(([label, cmd]) => {
+            Object.entries(commands).forEach(([label, cmd_data]) => {
+                const isObj = typeof cmd_data === 'object' && cmd_data !== null;
+                const cmd = isObj ? (cmd_data.command || '') : cmd_data;
+                const textColor = isObj ? (cmd_data.textColor || '#f8fafc') : '#f8fafc';
+                const cmdColor = isObj ? (cmd_data.cmdColor || '#64748b') : '#64748b';
+                const accentColor = isObj ? (cmd_data.accentColor || '#cad13d') : '#cad13d';
+
                 // Escape simple values for safety
                 const safeLabel = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const safeCmd = cmd.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 
                 html += `
-                    <div class="command-card" id="card-${label.replace(/\s+/g, '_')}">
+                    <div class="command-card" id="card-${label.replace(/\s+/g, '_')}" 
+                         draggable="true" 
+                         style="--accent-clr: ${accentColor}; --text-clr: ${textColor}; --cmd-clr: ${cmdColor};"
+                         data-label="${label}" 
+                         data-command="${cmd}"
+                         data-text-color="${textColor}"
+                         data-cmd-color="${cmdColor}"
+                         data-accent-color="${accentColor}">
                         <button class="command-btn" onclick="runCommand('${safeLabel}', '${safeCmd}')">
-                            <span class="cmd-label">${label}</span>
-                            <span class="cmd-preview">${cmd}</span>
+                            <span class="cmd-label" style="color: ${textColor};">${label}</span>
+                            <span class="cmd-preview" style="color: ${cmdColor};">${cmd}</span>
                         </button>
                         <button class="delete-btn" onclick="openDeleteModal('${safeLabel}')" title="Delete command">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -840,18 +1108,52 @@
                 `;
             });
             grid.innerHTML = html;
+            initDragAndDrop();
         }
 
         // Modal Management
         const overlay = document.getElementById('modal-overlay');
         const addContent = document.getElementById('add-modal-content');
+        const editContent = document.getElementById('edit-modal-content');
         const deleteContent = document.getElementById('delete-modal-content');
 
         function openAddModal() {
             overlay.classList.add('active');
             addContent.classList.add('active');
+            editContent.classList.remove('active');
             deleteContent.classList.remove('active');
+            
+            // Set default values for colors
+            document.getElementById('new-textColor').value = '#f8fafc';
+            document.getElementById('new-cmdColor').value = '#64748b';
+            document.getElementById('new-accentColor').value = '#cad13d';
+            
             document.getElementById('new-cmd-label').focus();
+        }
+
+        function openEditModal(label) {
+            const card = document.querySelector(`.command-card[data-label="${label}"]`);
+            if (!card) return;
+            
+            contextMenuTargetLabel = label;
+            
+            const command = card.getAttribute('data-command') || '';
+            const textColor = card.getAttribute('data-text-color') || '#f8fafc';
+            const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
+            const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
+            
+            document.getElementById('edit-cmd-label').value = label;
+            document.getElementById('edit-cmd-string').value = command;
+            document.getElementById('edit-textColor').value = textColor;
+            document.getElementById('edit-cmdColor').value = cmdColor;
+            document.getElementById('edit-accentColor').value = accentColor;
+            
+            overlay.classList.add('active');
+            editContent.classList.add('active');
+            addContent.classList.remove('active');
+            deleteContent.classList.remove('active');
+            
+            document.getElementById('edit-cmd-label').focus();
         }
 
         function openDeleteModal(label) {
@@ -860,6 +1162,7 @@
             overlay.classList.add('active');
             deleteContent.classList.add('active');
             addContent.classList.remove('active');
+            editContent.classList.remove('active');
             
             // Set action button focus
             document.getElementById('confirm-delete-btn').onclick = submitDeleteCommand;
@@ -868,12 +1171,16 @@
         function closeModal() {
             overlay.classList.remove('active');
             addContent.classList.remove('active');
+            editContent.classList.remove('active');
             deleteContent.classList.remove('active');
             
             // Reset fields
             document.getElementById('new-cmd-label').value = '';
             document.getElementById('new-cmd-string').value = '';
+            document.getElementById('edit-cmd-label').value = '';
+            document.getElementById('edit-cmd-string').value = '';
             deleteTargetLabel = '';
+            contextMenuTargetLabel = '';
         }
 
         function handleOverlayClick(e) {
@@ -889,6 +1196,9 @@
             
             const label = labelInput.value.trim();
             const cmd = cmdInput.value.trim();
+            const textColor = document.getElementById('new-textColor').value;
+            const cmdColor = document.getElementById('new-cmdColor').value;
+            const accentColor = document.getElementById('new-accentColor').value;
 
             if (!label || !cmd) {
                 alert('Please enter both a label and a command.');
@@ -898,7 +1208,75 @@
             fetch('/add_command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ label: label, command: cmd })
+                body: JSON.stringify({ 
+                    label: label, 
+                    command: cmd,
+                    textColor: textColor,
+                    cmdColor: cmdColor,
+                    accentColor: accentColor
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    rebuildButtons(data.commands);
+                    closeModal();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Connection error occurred.');
+            });
+        }
+
+        // Submit Modify / Edit Command
+        function submitEditCommand() {
+            const labelInput = document.getElementById('edit-cmd-label');
+            const cmdInput = document.getElementById('edit-cmd-string');
+            
+            const newLabel = labelInput.value.trim();
+            const newCmd = cmdInput.value.trim();
+            const textColor = document.getElementById('edit-textColor').value;
+            const cmdColor = document.getElementById('edit-cmdColor').value;
+            const accentColor = document.getElementById('edit-accentColor').value;
+
+            if (!newLabel || !newCmd) {
+                alert('Please enter both a label and a command.');
+                return;
+            }
+
+            // Gather all current commands in order from DOM
+            const cards = document.querySelectorAll('.command-card');
+            const updatedCommands = {};
+            
+            cards.forEach(card => {
+                const currentLabel = card.getAttribute('data-label');
+                
+                // If this is the card we are editing
+                if (currentLabel === contextMenuTargetLabel) {
+                    updatedCommands[newLabel] = {
+                        command: newCmd,
+                        textColor: textColor,
+                        cmdColor: cmdColor,
+                        accentColor: accentColor
+                    };
+                } else {
+                    // Keep the other cards exactly as is
+                    updatedCommands[currentLabel] = {
+                        command: card.getAttribute('data-command'),
+                        textColor: card.getAttribute('data-text-color') || '#f8fafc',
+                        cmdColor: card.getAttribute('data-cmd-color') || '#64748b',
+                        accentColor: card.getAttribute('data-accent-color') || '#cad13d'
+                    };
+                }
+            });
+
+            fetch('/save_commands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commands: updatedCommands })
             })
             .then(res => res.json())
             .then(data => {
@@ -939,6 +1317,41 @@
             });
         }
 
+        // Context Menu Handlers
+        const contextMenu = document.getElementById('context-menu');
+
+        document.addEventListener('contextmenu', function(e) {
+            const card = e.target.closest('.command-card');
+            if (card) {
+                e.preventDefault();
+                contextMenuTargetLabel = card.getAttribute('data-label');
+                
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            } else {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            // Dismiss context menu unless clicking inside it
+            if (!contextMenu.contains(e.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        function handleContextMenuAction(action) {
+            contextMenu.style.display = 'none';
+            if (!contextMenuTargetLabel) return;
+
+            if (action === 'edit') {
+                openEditModal(contextMenuTargetLabel);
+            } else if (action === 'delete') {
+                openDeleteModal(contextMenuTargetLabel);
+            }
+        }
+
         // Add keyboard shortcut for Modal (ESC closes it)
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
@@ -949,6 +1362,7 @@
         // Initialize and Setup periodic polling
         window.addEventListener('DOMContentLoaded', () => {
             refreshOutput();
+            initDragAndDrop();
             setInterval(refreshOutput, 1000);
         });
     </script>
