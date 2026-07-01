@@ -171,6 +171,7 @@ def scan_projects():
         with sessions_lock:
             is_active = name in active_sessions and active_sessions[name].pty.isalive()
             
+        bookmarks = p.get("bookmarks", [])
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
@@ -178,7 +179,8 @@ def scan_projects():
             "is_active": is_active,
             "pinned": pinned,
             "theme": theme,
-            "cardTheme": card_theme
+            "cardTheme": card_theme,
+            "bookmarks": bookmarks
         })
     return projects
 
@@ -227,7 +229,8 @@ def api_projects_post():
             "textColor": "#f1f5f9",
             "pathColor": "#94a3b8",
             "accentColor": "#2563eb"
-        }
+        },
+        "bookmarks": []
     })
     save_projects_config(projects)
     
@@ -262,6 +265,39 @@ def api_projects_delete(project):
     if project in git_branch_cache:
         del git_branch_cache[project]
         
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks', methods=['POST'])
+def api_add_bookmark(project):
+    data = request.json
+    command = data.get("command", "").strip()
+    if not command:
+        return jsonify({"error": "Command is required"}), 400
+        
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" not in proj:
+        proj["bookmarks"] = []
+    if command not in proj["bookmarks"]:
+        proj["bookmarks"].append(command)
+        
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks/<int:index>', methods=['DELETE'])
+def api_delete_bookmark(project, index):
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
+        proj["bookmarks"].pop(index)
+        
+    save_projects_config(projects)
     return jsonify(scan_projects())
 
 @app.route('/api/projects/customize', methods=['POST'])

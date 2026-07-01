@@ -587,9 +587,16 @@
                 </div>
                 <div class="workspace-path-bread" id="active-project-path">~/TOOLS/project</div>
             </div>
-            <div class="connection-status">
-                <span class="active-dot"></span>
-                <span>Active PowerShell Console</span>
+            <div class="header-bookmarks" style="display: flex; align-items: center; gap: 8px;">
+                <select id="bookmark-dropdown" class="form-input" style="width: 220px; padding: 6px 12px; font-size: 0.85rem; height: 34px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary);" onchange="runBookmarkedCommand(this.value)">
+                    <option value="">🔖 Bookmarked Commands...</option>
+                </select>
+                <button class="action-btn" onclick="addCurrentCommandAsBookmark()" title="Bookmark current command" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -685,6 +692,12 @@
                 <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 18px;">
                     <label for="theme-cursor">Cursor Color</label>
                     <input type="color" id="theme-cursor" class="form-input" style="width: 60px; height: 36px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                </div>
+
+                <!-- Section 3: Manage Bookmarks -->
+                <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Manage Bookmarks</h3>
+                <div id="theme-bookmarks-list" style="margin-bottom: 18px; max-height: 120px; overflow-y: auto; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                    <!-- Bookmarks will be rendered here dynamically -->
                 </div>
                 
                 <div class="form-actions">
@@ -966,6 +979,7 @@
                 // Retrieve project config details to fetch its theme
                 const projDetails = projects.find(p => p.name === projectName) || data;
                 initTerminal(projectName, projDetails.theme);
+                updateBookmarksDropdown();
             } catch (err) {
                 console.error("Error setting up session:", err);
             }
@@ -1214,6 +1228,24 @@
                     copySelect.appendChild(opt);
                 }
             });
+
+            // Populate Bookmarks list
+            const bmList = document.getElementById('theme-bookmarks-list');
+            bmList.innerHTML = '';
+            const bookmarks = contextProject.bookmarks || [];
+            if (bookmarks.length === 0) {
+                bmList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 10px;">No bookmarked commands.</div>';
+            } else {
+                bookmarks.forEach((bm, index) => {
+                    const row = document.createElement('div');
+                    row.style = 'display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 4px;';
+                    row.innerHTML = `
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;" title="${bm}">${bm}</span>
+                        <button type="button" class="btn" style="padding: 2px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); color: #f87171; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteBookmark(${index})">❌</button>
+                    `;
+                    bmList.appendChild(row);
+                });
+            }
 
             document.getElementById('theme-modal').classList.add('show');
         }
@@ -1550,6 +1582,119 @@
                 }
             }
         }, false);
+
+        // Bookmarks Dropdown & Manager Functions
+        function updateBookmarksDropdown() {
+            const dropdown = document.getElementById('bookmark-dropdown');
+            if (!dropdown) return;
+            dropdown.innerHTML = '<option value="">🔖 Bookmarked Commands...</option>';
+            
+            if (!activeProject) return;
+            const proj = projects.find(p => p.name === activeProject);
+            if (proj && proj.bookmarks) {
+                proj.bookmarks.forEach(bm => {
+                    const opt = document.createElement('option');
+                    opt.value = bm;
+                    opt.innerText = bm;
+                    dropdown.appendChild(opt);
+                });
+            }
+        }
+
+        async function runBookmarkedCommand(cmd) {
+            if (!cmd || !activeProject) return;
+            
+            document.getElementById('bookmark-dropdown').value = '';
+            
+            try {
+                await fetch(`/input/${activeProject}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: cmd + "\r" })
+                });
+            } catch (err) {
+                console.error("Error running bookmarked command:", err);
+            }
+        }
+
+        async function addCurrentCommandAsBookmark() {
+            if (!activeProject) return;
+            
+            let detected = "";
+            if (term) {
+                const buffer = term.buffer.active;
+                const lineIndex = buffer.viewportY + buffer.cursorY;
+                const line = buffer.getLine(lineIndex);
+                if (line) {
+                    detected = line.translateToString(true).trim();
+                    const promptRegex = /^PS\s+[A-Za-z]:\\[^>]*>\s*/i;
+                    detected = detected.replace(promptRegex, "");
+                }
+            }
+            
+            const cmd = prompt("Add bookmark command:", detected);
+            if (cmd === null) return; // Cancelled
+            const trimmed = cmd.trim();
+            if (!trimmed) {
+                alert("Command cannot be empty");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/projects/${activeProject}/bookmarks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: trimmed })
+                });
+                
+                if (response.ok) {
+                    projects = await response.json();
+                    updateBookmarksDropdown();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to add bookmark");
+                }
+            } catch (err) {
+                console.error("Error adding bookmark:", err);
+            }
+        }
+
+        async function deleteBookmark(index) {
+            if (!contextProject) return;
+            try {
+                const response = await fetch(`/api/projects/${contextProject.name}/bookmarks/${index}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    projects = await response.json();
+                    contextProject = projects.find(p => p.name === contextProject.name);
+                    
+                    // Re-render list inside openThemeModal context
+                    const bmList = document.getElementById('theme-bookmarks-list');
+                    bmList.innerHTML = '';
+                    const bookmarks = contextProject.bookmarks || [];
+                    if (bookmarks.length === 0) {
+                        bmList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 10px;">No bookmarked commands.</div>';
+                    } else {
+                        bookmarks.forEach((bm, idx) => {
+                            const row = document.createElement('div');
+                            row.style = 'display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 4px;';
+                            row.innerHTML = `
+                                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 380px;" title="${bm}">${bm}</span>
+                                <button type="button" class="btn" style="padding: 2px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); color: #f87171; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteBookmark(${idx})">❌</button>
+                            `;
+                            bmList.appendChild(row);
+                        });
+                    }
+                    
+                    if (activeProject === contextProject.name) {
+                        updateBookmarksDropdown();
+                    }
+                }
+            } catch (err) {
+                console.error("Error deleting bookmark:", err);
+            }
+        }
 
         window.onload = () => {
             fetchProjects();
