@@ -2570,14 +2570,24 @@
             // Hide dropdown
             document.getElementById('bookmark-dropdown-content').style.display = 'none';
             
-            try {
-                await fetch(`/input/${activeProject}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: cmd + "\r" })
+            if (socket && socket.connected) {
+                const activePane = terminalPanes.find(p => p.socket === socket);
+                const paneId = activePane ? activePane.paneId : 'main';
+                socket.emit('pty-input', {
+                    project: activeProject,
+                    paneId: paneId,
+                    data: cmd + "\r"
                 });
-            } catch (err) {
-                console.error("Error running bookmarked command:", err);
+            } else {
+                try {
+                    await fetch(`/input/${activeProject}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: cmd + "\r" })
+                    });
+                } catch (err) {
+                    console.error("Error running bookmarked command:", err);
+                }
             }
         }
 
