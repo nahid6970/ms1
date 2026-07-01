@@ -609,7 +609,7 @@
                             <path d="M6 9l6 6 6-6"/>
                         </svg>
                     </button>
-                    <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 6px 0; max-height: 320px; overflow-y: auto;">
+                    <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; max-height: 320px; overflow-y: auto;">
                         <!-- Bookmarks will be injected here dynamically -->
                     </div>
                 </div>
@@ -1668,10 +1668,24 @@
             if (uniqueList.length === 0) {
                 content.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
             } else {
-                uniqueList.forEach(bm => {
+                uniqueList.forEach((bm, idx) => {
                     const row = document.createElement('div');
                     row.className = 'bookmark-item';
-                    row.style = 'display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; transition: background-color 0.15s; border-bottom: 1px solid var(--border-color);';
+                    
+                    const isLast = (idx === uniqueList.length - 1);
+                    const borderStyle = isLast ? 'none' : '1px solid var(--border-color)';
+                    
+                    row.style = `display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; transition: background-color 0.15s; border-bottom: ${borderStyle};`;
+                    
+                    // Match container's border radius for rounded edges on hover
+                    if (idx === 0) {
+                        row.style.borderTopLeftRadius = '7px';
+                        row.style.borderTopRightRadius = '7px';
+                    }
+                    if (isLast) {
+                        row.style.borderBottomLeftRadius = '7px';
+                        row.style.borderBottomRightRadius = '7px';
+                    }
                     
                     row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-card-hover)';
                     row.onmouseleave = () => row.style.backgroundColor = 'transparent';

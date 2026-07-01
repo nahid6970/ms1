@@ -18,6 +18,10 @@
       {
         "command": "agy --dangerously-skip-permissions -c",
         "global": true
+      },
+      {
+        "command": "ffdasds",
+        "global": false
       }
     ]
   },
