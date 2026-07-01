@@ -2,16 +2,9 @@
     "Display 1": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /internal",
         "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
-    },
-    "Display 2": {
-        "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
+        "cmdColor": "#000000",
+        "accentColor": "#f57a29",
+        "bgColor": "#497dee"
     },
     "Display 1 KillApps": {
         "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
@@ -19,6 +12,13 @@
         "cmdColor": "#64748b",
         "accentColor": "#cad13d",
         "bgColor": "#1e293b"
+    },
+    "Display 2": {
+        "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
+        "textColor": "#f8fafc",
+        "cmdColor": "#000000",
+        "accentColor": "#f57a29",
+        "bgColor": "#497dee"
     },
     "Open Calculator": {
         "command": "start calc",
@@ -34,13 +34,6 @@
         "accentColor": "#4592f7",
         "bgColor": "#fcfcfc"
     },
-    "Restart": {
-        "command": "shutdown /r /t 0",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
-    },
     "Show IP Config": {
         "command": "ipconfig",
         "textColor": "#fef3c7",
@@ -48,19 +41,26 @@
         "accentColor": "#a855f7",
         "bgColor": "#1e1b4b"
     },
-    "Shutdown": {
-        "command": "shutdown /s /t 0",
-        "textColor": "#000000",
-        "cmdColor": "#292929",
-        "accentColor": "#f0e13d",
-        "bgColor": "#ec4f27"
-    },
     "Sign Out": {
         "command": "shutdown /l",
         "textColor": "#f8fafc",
         "cmdColor": "#64748b",
         "accentColor": "#cad13d",
         "bgColor": "#1e293b"
+    },
+    "Restart": {
+        "command": "shutdown /r /t 0",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
+    },
+    "Shutdown": {
+        "command": "shutdown /s /t 0",
+        "textColor": "#000000",
+        "cmdColor": "#292929",
+        "accentColor": "#f0e13d",
+        "bgColor": "#ec4f27"
     },
     "System Info": {
         "command": "systeminfo",
