@@ -609,7 +609,7 @@
                             <path d="M6 9l6 6 6-6"/>
                         </svg>
                     </button>
-                    <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 280px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 6px 0; max-height: 240px; overflow-y: auto;">
+                    <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 6px 0; max-height: 320px; overflow-y: auto;">
                         <!-- Bookmarks will be injected here dynamically -->
                     </div>
                 </div>
@@ -1681,8 +1681,8 @@
                     const originTag = bm.isOwned ? '' : ` <span style="font-size: 0.65rem; color: var(--accent-color); background: rgba(37,99,235,0.15); padding: 1px 4px; border-radius: 4px; margin-left: 4px;">Global</span>`;
 
                     row.innerHTML = `
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; font-size: 0.85rem; color: var(--text-primary);" title="${bm.command}">${bm.command}${originTag}</span>
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${bm.command}${originTag}</span>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                             <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${bm.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
                                 <input type="checkbox" ${bm.global ? 'checked' : ''} onchange="toggleBookmarkGlobal('${bm.project}', ${bm.index}, this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
                                 <span class="slider-round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${bm.global ? 'var(--accent-color)' : '#475569'}; transition: 0.2s; border-radius: 16px;">
