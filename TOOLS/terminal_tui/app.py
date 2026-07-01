@@ -244,16 +244,55 @@ def api_projects_delete(project):
 @app.route('/api/projects/customize', methods=['POST'])
 def api_projects_customize():
     data = request.json
-    name = data.get("name", "").strip()
-    if not name:
+    original_name = data.get("originalName", "").strip()
+    if not original_name:
+        # Fallback to name if originalName is not sent
+        original_name = data.get("name", "").strip()
+        
+    if not original_name:
         return jsonify({"error": "Project Name is required"}), 400
         
     projects = load_projects_config()
-    proj = next((p for p in projects if p["name"].lower() == name.lower()), None)
+    proj = next((p for p in projects if p["name"].lower() == original_name.lower()), None)
     if not proj:
         return jsonify({"error": "Project not found"}), 404
         
+    new_name = data.get("name", "").strip()
+    new_path = data.get("path", "").strip()
+    
+    # If name is changing, check duplicate name
+    name_changed = new_name and new_name.lower() != original_name.lower()
+    if name_changed:
+        if any(p["name"].lower() == new_name.lower() for p in projects):
+            return jsonify({"error": f"A workspace named '{new_name}' already exists."}), 400
+            
+    # If path is changing, check if folder exists
+    path_changed = new_path and new_path != proj["path"]
+    if path_changed:
+        if not os.path.exists(new_path) or not os.path.isdir(new_path):
+            return jsonify({"error": f"The directory path '{new_path}' does not exist."}), 400
+            
+    # Terminate active session if name or path changed, so it starts fresh!
+    if name_changed or path_changed:
+        with sessions_lock:
+            if original_name in active_sessions:
+                session = active_sessions[original_name]
+                if session.pty.isalive():
+                    try:
+                        os.close(session.pty.fd)
+                    except Exception:
+                        pass
+                del active_sessions[original_name]
+                
+        # Clear old branch cache
+        if original_name in git_branch_cache:
+            del git_branch_cache[original_name]
+            
     # Update properties
+    if new_name:
+        proj["name"] = new_name
+    if new_path:
+        proj["path"] = os.path.abspath(new_path)
     if "pinned" in data:
         proj["pinned"] = bool(data["pinned"])
         if proj["pinned"]:
@@ -266,6 +305,11 @@ def api_projects_customize():
         proj["cardTheme"] = data["cardTheme"]
         
     save_projects_config(projects)
+    
+    # Refresh cache branch for the project
+    if name_changed or path_changed:
+        git_branch_cache[proj["name"]] = get_git_branch(proj["path"])
+        
     return jsonify(scan_projects())
 
 @app.route('/api/projects/reorder', methods=['POST'])

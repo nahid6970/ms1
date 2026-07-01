@@ -683,6 +683,17 @@
                 <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="theme-modal-subtitle">Project: test1</div>
             </div>
             <form id="theme-customization-form" onsubmit="handleSaveTheme(event)">
+                <!-- Section 0: General Workspace Details -->
+                <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Workspace Details</h3>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="theme-proj-name" style="font-size: 0.85rem; font-weight: 500;">Workspace Name</label>
+                    <input type="text" id="theme-proj-name" class="form-input" required autocomplete="off" style="margin-top: 4px; box-sizing: border-box; width: 100%;">
+                </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label for="theme-proj-path" style="font-size: 0.85rem; font-weight: 500;">Local Directory Path</label>
+                    <input type="text" id="theme-proj-path" class="form-input" required autocomplete="off" style="margin-top: 4px; box-sizing: border-box; width: 100%;">
+                </div>
+
                 <!-- Section 1: Workspace Button Style (Sidebar Card) -->
                 <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">Workspace Button Style</h3>
                 
@@ -1263,6 +1274,10 @@
 
             document.getElementById('theme-modal-subtitle').innerText = `Workspace: ${contextProject.name}`;
             
+            // Populate workspace name and path inputs
+            document.getElementById('theme-proj-name').value = contextProject.name;
+            document.getElementById('theme-proj-path').value = contextProject.path;
+            
             const theme = contextProject.theme || {
                 background: '#000000',
                 foreground: '#d1d5db',
@@ -1305,6 +1320,14 @@
             event.preventDefault();
             if (!contextProject) return;
 
+            const newName = document.getElementById('theme-proj-name').value.trim();
+            const newPath = document.getElementById('theme-proj-path').value.trim();
+            
+            if (!newName || !newPath) {
+                alert("Workspace Name and Path are required");
+                return;
+            }
+
             const bg = document.getElementById('theme-bg').value;
             const fg = document.getElementById('theme-fg').value;
             const cursor = document.getElementById('theme-cursor').value;
@@ -1329,21 +1352,34 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        name: contextProject.name,
+                        originalName: contextProject.name,
+                        name: newName,
+                        path: newPath,
                         theme: theme,
                         cardTheme: cardTheme
                     })
                 });
 
                 if (response.ok) {
+                    const originalName = contextProject.name;
                     projects = await response.json();
                     closeThemeModal();
                     
                     // If customized project is active, apply theme immediately without resetting session!
-                    if (activeProject === contextProject.name && term) {
-                        term.options.theme = theme;
+                    if (activeProject === originalName) {
+                        if (originalName !== newName) {
+                            activeProject = newName;
+                        }
+                        
+                        const projDetails = projects.find(p => p.name === newName);
+                        if (projDetails && term) {
+                            term.options.theme = theme;
+                        }
                     }
                     handleSearch();
+                } else {
+                    const errData = await response.json();
+                    alert(errData.error || "Failed to update project settings");
                 }
             } catch (err) {
                 console.error("Error saving theme:", err);
@@ -1369,7 +1405,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        originalName: contextProject.name,
                         name: contextProject.name,
+                        path: contextProject.path,
                         theme: defaultTheme,
                         cardTheme: defaultCardTheme
                     })
