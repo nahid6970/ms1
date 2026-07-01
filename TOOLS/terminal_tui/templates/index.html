@@ -1237,11 +1237,14 @@
             // Merge project customized theme options
             const themeOptions = projectTheme ? { ...defaultTheme, ...projectTheme } : defaultTheme;
 
+            const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
+            termDiv.style.fontFamily = savedFont;
+            
             term = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'bar',
                 fontSize: 14,
-                fontFamily: localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace',
+                fontFamily: savedFont,
                 theme: themeOptions
             });
 
@@ -2187,9 +2190,22 @@
             const selectedFont = document.getElementById('settings-font-family').value;
             localStorage.setItem('terminal-font-family', selectedFont);
             
-            // Apply font family directly to the active terminal instance
+            // Apply font family directly to parent container and active terminal instance
+            const termDiv = document.getElementById('terminal-parent');
+            if (termDiv) {
+                termDiv.style.fontFamily = selectedFont;
+            }
+            
             if (term) {
                 term.options.fontFamily = selectedFont;
+                // Force layout refit to apply character width adjustments immediately
+                if (fitAddon) {
+                    try {
+                        fitAddon.fit();
+                    } catch (e) {
+                        // Ignore
+                    }
+                }
             }
             
             closeSettingsModal();
