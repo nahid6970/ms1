@@ -42,9 +42,11 @@ function showHiddenShows() {
             showItem.className = 'hidden-show-item';
             showItem.innerHTML = `
                 <img src="${coverImage}" alt="${title}">
-                <h4>${title}</h4>
-                <p>${year}</p>
-                <p>${status}</p>
+                <div class="hidden-show-item-info">
+                    <h4>${title}</h4>
+                    <p>${year}</p>
+                    <p class="status">${status}</p>
+                </div>
             `;
             
             hiddenShowsList.appendChild(showItem);

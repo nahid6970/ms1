@@ -556,8 +556,86 @@ input:checked + .slider:before { transform: translateX(22px); }
 .show-card.ended-completed { display: none; }
 html.show-hidden-shows .show-card.ended-completed { display: flex; }
 
-.hidden-shows-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.hidden-show-item img { width: 100%; border-radius: 10px; }
+.hidden-shows-modal-content {
+    max-width: 800px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden-shows-modal-content h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+.hidden-shows-list { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+    gap: 20px; 
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.hidden-show-item {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden-show-item:hover {
+    transform: translateY(-5px);
+    border-color: #1db954;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.hidden-show-item img { 
+    width: 100%; 
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-bottom: 1px solid #333;
+    display: block;
+}
+
+.hidden-show-item-info {
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.hidden-show-item h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.hidden-show-item p {
+    margin: 3px 0;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.hidden-show-item p.status {
+    color: #1db954;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-top: 6px;
+}
 
 /* Missing Episodes Modal */
 .missing-modal-content {

@@ -11,3 +11,4 @@ ls
 cls
 codex --dangerously-bypass-approvals-and-sandbox resume
 codex
+agy --dangerously-skip-permissions -c
