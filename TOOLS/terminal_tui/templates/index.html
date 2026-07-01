@@ -719,6 +719,17 @@
             term.open(termDiv);
             fitAddon.fit();
 
+            // Handle Ctrl+C copy behaviour when text is selected
+            term.attachCustomKeyEventHandler(e => {
+                if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
+                    if (term.hasSelection()) {
+                        navigator.clipboard.writeText(term.getSelection());
+                        return false; // Prevent sending Ctrl+C to terminal process
+                    }
+                }
+                return true;
+            });
+
             // Resize Observer
             const resizeObserver = new ResizeObserver(() => {
                 fitAddon.fit();
