@@ -56,5 +56,27 @@
       "accentColor": "#2563eb"
     },
     "bookmarks": []
+  },
+  {
+    "name": "Default",
+    "path": "C:\\Users\\nahid",
+    "pinned": false,
+    "theme": {
+      "background": "#000000",
+      "foreground": "#d1d5db",
+      "cursor": "#3b82f6"
+    },
+    "cardTheme": {
+      "bgColor": "#ffffff",
+      "textColor": "#000000",
+      "pathColor": "#163055",
+      "accentColor": "#2563eb"
+    },
+    "bookmarks": [
+      {
+        "command": "net stop winnat",
+        "global": false
+      }
+    ]
   }
 ]

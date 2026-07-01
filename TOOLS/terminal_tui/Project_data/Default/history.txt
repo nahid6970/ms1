@@ -1,0 +1,2 @@
+net stop winnatnet stop winnat
+net stop winnat
