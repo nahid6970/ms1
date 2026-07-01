@@ -569,4 +569,6 @@ def api_shutdown():
     return jsonify({"status": "shutdown"})
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=PORT, debug=True)
+    # SSE stream requests stay open, so the dev server must be threaded
+    # or input/resize posts can wait behind the active stream connection.
+    app.run(host='127.0.0.1', port=PORT, debug=True, threaded=True)
