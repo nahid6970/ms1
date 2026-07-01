@@ -53,65 +53,6 @@
             flex-direction: column;
         }
 
-        /* Top Header */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 24px;
-            background-color: var(--panel-header-bg);
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 10;
-        }
-
-        .app-title-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .app-title-group svg {
-            color: var(--accent-primary);
-        }
-
-        .app-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent-success);
-            background-color: rgba(16, 185, 129, 0.1);
-            padding: 4px 10px;
-            border-radius: 9999px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--accent-success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-success);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.6; }
-        }
 
         /* Main Workspace split panel layout */
         .main-container {
@@ -564,7 +505,7 @@
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
-                height: calc(100vh - 56px);
+                height: 100vh;
             }
 
             .left-panel {
@@ -640,22 +581,7 @@
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
-    <header class="app-header">
-        <div class="app-title-group">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <h1 class="app-title">Windows Command Center</h1>
-        </div>
-        <div class="connection-status">
-            <div class="status-dot"></div>
-            <span>Connected</span>
-        </div>
-    </header>
-    
+
     <!-- Main container split -->
     <div class="main-container">
         <!-- Left Panel: Commands -->
