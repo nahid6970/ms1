@@ -127,8 +127,6 @@ def scan_projects():
             "theme": theme,
             "cardTheme": card_theme
         })
-    # Sort projects: Pinned first, then alphabetically by name
-    projects.sort(key=lambda x: (not x["pinned"], x["name"].lower()))
     return projects
 
 @app.route('/')
@@ -224,12 +222,40 @@ def api_projects_customize():
     # Update properties
     if "pinned" in data:
         proj["pinned"] = bool(data["pinned"])
+        if proj["pinned"]:
+            # Move pinned project to the top
+            projects.remove(proj)
+            projects.insert(0, proj)
     if "theme" in data:
         proj["theme"] = data["theme"]
     if "cardTheme" in data:
         proj["cardTheme"] = data["cardTheme"]
         
     save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/reorder', methods=['POST'])
+def api_projects_reorder():
+    data = request.json
+    ordered_names = data.get("names", [])
+    if not ordered_names:
+        return jsonify({"error": "Names are required"}), 400
+        
+    projects = load_projects_config()
+    name_to_proj = {p["name"].lower(): p for p in projects}
+    reordered_projects = []
+    
+    for name in ordered_names:
+        proj = name_to_proj.get(name.lower())
+        if proj:
+            reordered_projects.append(proj)
+            
+    # Include any missing projects
+    for p in projects:
+        if p["name"].lower() not in [n.lower() for n in ordered_names]:
+            reordered_projects.append(p)
+            
+    save_projects_config(reordered_projects)
     return jsonify(scan_projects())
 
 @app.route('/api/session/<project>', methods=['POST'])

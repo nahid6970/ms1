@@ -142,6 +142,10 @@
             flex-direction: column;
             gap: 4px;
             min-height: 80px; 
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .project-card::before {
@@ -165,6 +169,13 @@
             background-color: var(--accent-glow);
             border-color: var(--accent-color);
             box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .project-card.dragging {
+            opacity: 0.45;
+            border: 1px dashed var(--accent-color) !important;
+            background-color: var(--accent-glow) !important;
+            transform: scale(0.98);
         }
 
         .project-card.active::before {
@@ -193,6 +204,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            pointer-events: none;
         }
 
         .branch-badge {
@@ -207,6 +219,7 @@
             gap: 4px;
             border: 1px solid rgba(56, 189, 248, 0.2);
             flex-shrink: 0;
+            pointer-events: none;
         }
 
         .project-path {
@@ -216,6 +229,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            pointer-events: none;
         }
 
         .delete-btn {
@@ -742,6 +756,23 @@
             const container = document.getElementById('project-list-container');
             container.innerHTML = '';
 
+            // Bind container drag events once
+            if (!container.dataset.dragBound) {
+                container.dataset.dragBound = 'true';
+                container.ondragover = (e) => {
+                    e.preventDefault();
+                    const draggingCard = document.querySelector('.dragging');
+                    if (!draggingCard) return;
+                    
+                    const afterElement = getDragAfterElement(container, e.clientY);
+                    if (afterElement == null) {
+                        container.appendChild(draggingCard);
+                    } else {
+                        container.insertBefore(draggingCard, afterElement);
+                    }
+                };
+            }
+
             const filtered = projects.filter(p => 
                 p.name.toLowerCase().includes(searchQuery) || 
                 p.path.toLowerCase().includes(searchQuery)
@@ -759,6 +790,20 @@
             filtered.forEach(proj => {
                 const card = document.createElement('div');
                 card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
+                
+                // Enable drag and drop reordering
+                card.setAttribute('draggable', 'true');
+                card.setAttribute('data-name', proj.name);
+                
+                card.ondragstart = (e) => {
+                    setTimeout(() => card.classList.add('dragging'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+                
+                card.ondragend = () => {
+                    card.classList.remove('dragging');
+                    saveProjectsOrder();
+                };
                 
                 // Apply card customization style
                 const isCardActive = activeProject === proj.name;
@@ -1327,6 +1372,46 @@
             }
             // Reset dropdown select index
             document.getElementById('copy-style-select').value = '';
+        }
+
+        // Determine drop insertion position relative to sibling elements
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Save reordered projects array order to projects.json config
+        async function saveProjectsOrder() {
+            const container = document.getElementById('project-list-container');
+            const cards = [...container.querySelectorAll('.project-card')];
+            const newNames = cards.map(c => c.getAttribute('data-name'));
+            
+            // Sync local projects array sorting
+            const reordered = [];
+            newNames.forEach(name => {
+                const p = projects.find(proj => proj.name === name);
+                if (p) reordered.push(p);
+            });
+            projects = reordered;
+
+            try {
+                await fetch('/api/projects/reorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ names: newNames })
+                });
+            } catch (err) {
+                console.error("Failed to save reordered list:", err);
+            }
         }
 
         window.onload = () => {
