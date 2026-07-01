@@ -838,13 +838,8 @@
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label for="settings-font-family" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Family</label>
                     <select id="settings-font-family" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; width: 100%;">
-                        <option value="Consolas, monospace">Consolas (Default)</option>
-                        <option value="'Fira Code', Consolas, monospace">Fira Code</option>
-                        <option value="'Courier New', Courier, monospace">Courier New</option>
-                        <option value="'Source Code Pro', monospace">Source Code Pro</option>
-                        <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-                        <option value="Monaco, monospace">Monaco</option>
-                        <option value="'SF Mono', monospace">SF Mono</option>
+                        <option value="'Fira Code', Consolas, monospace">Fira Code (Default)</option>
+                        <option value="Consolas, monospace">Consolas</option>
                         <option value="monospace">Standard Monospace</option>
                     </select>
                 </div>
@@ -2176,7 +2171,7 @@
         }
 
         function openSettingsModal() {
-            const savedFont = localStorage.getItem('terminal-font-family') || 'Consolas, monospace';
+            const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.getElementById('settings-font-family').value = savedFont;
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -2189,6 +2184,9 @@
             event.preventDefault();
             const selectedFont = document.getElementById('settings-font-family').value;
             localStorage.setItem('terminal-font-family', selectedFont);
+            
+            // Apply font family globally to the entire application body
+            document.body.style.fontFamily = selectedFont;
             
             // Apply font family directly to parent container and active terminal instance
             const termDiv = document.getElementById('terminal-parent');
@@ -2212,6 +2210,8 @@
         }
 
         window.onload = () => {
+            const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
+            document.body.style.fontFamily = savedFont;
             fetchProjects();
         };
     </script>
