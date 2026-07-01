@@ -7,3 +7,6 @@ agy --dangerously-skip-permissions -c
 codex
 codex --dangerously-bypass-approvals-and-sandbox resume
 codex
+ls
+cls
+codex --dangerously-bypass-approvals-and-sandbox resume

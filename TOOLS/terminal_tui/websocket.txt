@@ -1,3 +1,600 @@
+@@FILE: app.py
+@@MODE: replace_file
+@@TO:
+import os
+import sys
+import json
+import queue
+import threading
+import subprocess
+from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, emit, disconnect
+from winpty import PTY
+
+app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SECRET_KEY'] = 'terminal-tui-secret-key'
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+PORT = 5577
+BASE_DIR = r"C:\@delta\ms1\TOOLS"
+PROJECTS_FILE = r"C:\@delta\ms1\TOOLS\terminal_tui\projects.json"
+active_sessions = {}
+sessions_lock = threading.Lock()
+
+class TerminalSession:
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
+        self.cols = 100
+        self.rows = 30
+        self.pty = PTY(self.cols, self.rows)
+        self.history = ""
+        self.history_lock = threading.Lock()
+        self.connected_sids = set()
+        self.sids_lock = threading.Lock()
+        
+        # Ensure project-specific data directory exists in C:\@delta\ms1\TOOLS\terminal_tui\Project_data\<project>
+        project_data_dir = os.path.join(r"C:\@delta\ms1\TOOLS\terminal_tui\Project_data", name)
+        os.makedirs(project_data_dir, exist_ok=True)
+        
+        profile_path = os.path.join(project_data_dir, "profile.ps1")
+        history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
+        
+        if not os.path.exists(profile_path):
+            with open(profile_path, "w", encoding="utf-8") as f:
+                f.write(f"""# Custom PowerShell Profile for project: {name}
+# Everything here is loaded when you select this project workspace dashboard.
+
+# Force import PSReadLine in case it is disabled due to screen reader detection in PTY
+Import-Module PSReadLine -ErrorAction SilentlyContinue
+
+# Set custom project command history file
+if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
+    Set-PSReadLineOption -HistorySavePath "{history_path}"
+}}
+
+# Clear screen cleanly to start with a clean prompt and hide startup warnings
+Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
+
+# Add your custom project aliases, functions, and environment variables below:
+# Example:
+# Set-Alias ll Get-ChildItem
+""")
+        else:
+            try:
+                with open(profile_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                modified = False
+                if "Clear-Host" in content:
+                    content = content.replace("Clear-Host", 'Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline')
+                    modified = True
+                if "PROFILE_LOADED_OK" in content:
+                    content = content.replace('Write-Host "PROFILE_LOADED_OK"', '')
+                    content = content.replace('echo "PROFILE_LOADED_OK"', '')
+                    modified = True
+                if modified:
+                    with open(profile_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+            except Exception as e:
+                print(f"Error migrating profile: {e}")
+        
+        # Spawn PowerShell with custom profile, bypassing main user profile
+        # Wrap in curly braces script block to handle spaces/parentheses in path correctly
+        profile_path_clean = profile_path.replace("\\", "/")
+        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
+        
+        # Spawn PowerShell using ConPTY for lower input latency (Windows 10+)
+        # Fallback to winpty if conpty is not available
+        try:
+            self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path, backend=2)
+        except Exception:
+            self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
+        
+        # Start background thread to read PTY output and broadcast via WebSocket
+        self.read_thread = threading.Thread(target=self._read_loop, daemon=True)
+        self.read_thread.start()
+        
+    def _read_loop(self):
+        while self.pty.isalive():
+            try:
+                # Non-blocking read with small sleep to reduce latency
+                data = self.pty.read(blocking=False)
+                if data:
+                    with self.history_lock:
+                        self.history += data
+                        if len(self.history) > 100000:
+                            self.history = self.history[-100000:]
+                    # Broadcast to all connected WebSocket clients
+                    with self.sids_lock:
+                        sids = list(self.connected_sids)
+                    for sid in sids:
+                        try:
+                            socketio.emit('pty-output', {'data': data}, room=sid, namespace='/pty')
+                        except Exception:
+                            pass
+                else:
+                    import time
+                    time.sleep(0.005)  # 5ms poll to keep CPU low but responsive
+            except Exception:
+                break
+        # Notify all clients that session ended
+        with self.sids_lock:
+            sids = list(self.connected_sids)
+        for sid in sids:
+            try:
+                socketio.emit('pty-output', {'eof': True}, room=sid, namespace='/pty')
+            except Exception:
+                pass
+
+    def write(self, data):
+        if self.pty.isalive():
+            self.pty.write(data)
+
+    def resize(self, cols, rows):
+        if self.cols != cols or self.rows != rows:
+            self.cols = cols
+            self.rows = rows
+            if self.pty.isalive():
+                self.pty.set_size(cols, rows)
+
+    def add_sid(self, sid):
+        with self.sids_lock:
+            self.connected_sids.add(sid)
+
+    def remove_sid(self, sid):
+        with self.sids_lock:
+            self.connected_sids.discard(sid)
+
+    def get_history(self):
+        with self.history_lock:
+            return self.history
+
+def load_projects_config():
+    if os.path.exists(PROJECTS_FILE):
+        try:
+            with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+                projs = json.load(f)
+                # Sanitize bookmarks to be dicts
+                for p in projs:
+                    if "bookmarks" not in p:
+                        p["bookmarks"] = []
+                    else:
+                        sanitized = []
+                        for bm in p["bookmarks"]:
+                            if isinstance(bm, str):
+                                sanitized.append({"command": bm, "global": False})
+                            elif isinstance(bm, dict):
+                                sanitized.append({
+                                    "command": bm.get("command", ""),
+                                    "global": bm.get("global", False)
+                                })
+                        p["bookmarks"] = sanitized
+                return projs
+        except Exception as e:
+            print(f"Error reading projects config: {e}")
+    return []
+
+def save_projects_config(projects):
+    try:
+        with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(projects, f, indent=2)
+    except Exception as e:
+        print(f"Error saving projects config: {e}")
+
+def scan_projects():
+    config_projects = load_projects_config()
+    projects = []
+    for p in config_projects:
+        name = p["name"]
+        path = p["path"]
+        pinned = p.get("pinned", False)
+        theme = p.get("theme", {
+            "background": "#000000",
+            "foreground": "#d1d5db",
+            "cursor": "#3b82f6"
+        })
+        card_theme = p.get("cardTheme", {
+            "bgColor": "#161c26",
+            "textColor": "#f1f5f9",
+            "pathColor": "#94a3b8",
+            "accentColor": "#2563eb"
+        })
+        if "pathColor" not in card_theme:
+            card_theme["pathColor"] = "#94a3b8"
+        
+        with sessions_lock:
+            is_active = name in active_sessions and active_sessions[name].pty.isalive()
+            
+        bookmarks = p.get("bookmarks", [])
+        projects.append({
+            "name": name,
+            "path": path.replace("\\", "/"),
+            "is_active": is_active,
+            "pinned": pinned,
+            "theme": theme,
+            "cardTheme": card_theme,
+            "bookmarks": bookmarks
+        })
+    return projects
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/api/projects', methods=['GET'])
+def api_projects_get():
+    return jsonify(scan_projects())
+
+@app.route('/api/projects', methods=['POST'])
+def api_projects_post():
+    data = request.json
+    name = data.get("name", "").strip()
+    path = data.get("path", "").strip()
+    if not name or not path:
+        return jsonify({"error": "Project Name and Path are required"}), 400
+        
+    # Check if folder exists
+    if not os.path.exists(path) or not os.path.isdir(path):
+        return jsonify({"error": f"The directory path '{path}' does not exist."}), 400
+        
+    projects = load_projects_config()
+    
+    # Check duplicate name
+    if any(p["name"].lower() == name.lower() for p in projects):
+        return jsonify({"error": f"A workspace named '{name}' already exists."}), 400
+        
+    # Add project
+    projects.append({
+        "name": name,
+        "path": os.path.abspath(path),
+        "pinned": False,
+        "theme": {
+            "background": "#000000",
+            "foreground": "#d1d5db",
+            "cursor": "#3b82f6"
+        },
+        "cardTheme": {
+            "bgColor": "#161c26",
+            "textColor": "#f1f5f9",
+            "pathColor": "#94a3b8",
+            "accentColor": "#2563eb"
+        },
+        "bookmarks": []
+    })
+    save_projects_config(projects)
+    
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>', methods=['DELETE'])
+def api_projects_delete(project):
+    projects = load_projects_config()
+    
+    # Filter out project
+    filtered_projects = [p for p in projects if p["name"].lower() != project.lower()]
+    
+    if len(filtered_projects) == len(projects):
+        return jsonify({"error": "Project not found"}), 404
+        
+    save_projects_config(filtered_projects)
+    
+    # Kill active session if any
+    with sessions_lock:
+        if project in active_sessions:
+            session = active_sessions[project]
+            if session.pty.isalive():
+                try:
+                    os.close(session.pty.fd)
+                except Exception:
+                    pass
+            del active_sessions[project]
+            
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks', methods=['POST'])
+def api_add_bookmark(project):
+    data = request.json
+    command = data.get("command", "").strip()
+    if not command:
+        return jsonify({"error": "Command is required"}), 400
+        
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" not in proj:
+        proj["bookmarks"] = []
+    # Check duplicate
+    exists = False
+    for bm in proj["bookmarks"]:
+        if bm.get("command", "").lower() == command.lower():
+            exists = True
+            break
+    if not exists:
+        proj["bookmarks"].append({"command": command, "global": False})
+        
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks/<int:index>', methods=['DELETE'])
+def api_delete_bookmark(project, index):
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
+        proj["bookmarks"].pop(index)
+        
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/bookmarks/<int:index>/global', methods=['POST'])
+def api_toggle_bookmark_global(project, index):
+    data = request.json or {}
+    is_global = data.get("global", False)
+    
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if "bookmarks" in proj and 0 <= index < len(proj["bookmarks"]):
+        proj["bookmarks"][index]["global"] = is_global
+        
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/customize', methods=['POST'])
+def api_projects_customize():
+    data = request.json
+    original_name = data.get("originalName", "").strip()
+    if not original_name:
+        # Fallback to name if originalName is not sent
+        original_name = data.get("name", "").strip()
+        
+    if not original_name:
+        return jsonify({"error": "Project Name is required"}), 400
+        
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == original_name.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    new_name = data.get("name", "").strip()
+    new_path = data.get("path", "").strip()
+    
+    # If name is changing, check duplicate name
+    name_changed = new_name and new_name.lower() != original_name.lower()
+    if name_changed:
+        if any(p["name"].lower() == new_name.lower() for p in projects):
+            return jsonify({"error": f"A workspace named '{new_name}' already exists."}), 400
+            
+    # If path is changing, check if folder exists
+    path_changed = new_path and new_path != proj["path"]
+    if path_changed:
+        if not os.path.exists(new_path) or not os.path.isdir(new_path):
+            return jsonify({"error": f"The directory path '{new_path}' does not exist."}), 400
+            
+    # Terminate active session if name or path changed, so it starts fresh!
+    if name_changed or path_changed:
+        with sessions_lock:
+            if original_name in active_sessions:
+                session = active_sessions[original_name]
+                if session.pty.isalive():
+                    try:
+                        os.close(session.pty.fd)
+                    except Exception:
+                        pass
+                del active_sessions[original_name]
+                
+    # Update properties
+    if new_name:
+        proj["name"] = new_name
+    if new_path:
+        proj["path"] = os.path.abspath(new_path)
+    if "pinned" in data:
+        proj["pinned"] = bool(data["pinned"])
+        if proj["pinned"]:
+            # Move pinned project to the top
+            projects.remove(proj)
+            projects.insert(0, proj)
+    if "theme" in data:
+        proj["theme"] = data["theme"]
+    if "cardTheme" in data:
+        proj["cardTheme"] = data["cardTheme"]
+        
+    save_projects_config(projects)
+    
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/reorder', methods=['POST'])
+def api_projects_reorder():
+    data = request.json
+    ordered_names = data.get("names", [])
+    if not ordered_names:
+        return jsonify({"error": "Names are required"}), 400
+        
+    projects = load_projects_config()
+    name_to_proj = {p["name"].lower(): p for p in projects}
+    reordered_projects = []
+    
+    for name in ordered_names:
+        proj = name_to_proj.get(name.lower())
+        if proj:
+            reordered_projects.append(proj)
+            
+    # Include any missing projects
+    for p in projects:
+        if p["name"].lower() not in [n.lower() for n in ordered_names]:
+            reordered_projects.append(p)
+            
+    save_projects_config(reordered_projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/sessions/reset', methods=['POST'])
+def api_sessions_reset():
+    with sessions_lock:
+        for name, session in list(active_sessions.items()):
+            if session.pty.isalive():
+                try:
+                    os.close(session.pty.fd)
+                except Exception:
+                    pass
+        active_sessions.clear()
+        
+    return jsonify(scan_projects())
+
+@app.route('/api/session/<project>', methods=['POST'])
+def api_session(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"] == project), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+        
+    with sessions_lock:
+        if project not in active_sessions or not active_sessions[project].pty.isalive():
+            active_sessions[project] = TerminalSession(project, proj_details["path"])
+            
+    return jsonify({
+        "status": "connected",
+        "name": project,
+        "path": proj_details["path"]
+    })
+
+@app.route('/api/session/<project>/paste-image', methods=['POST'])
+def api_paste_image(project):
+    projects = scan_projects()
+    proj = next((p for p in projects if p["name"] == project), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file sent"}), 400
+        
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+        
+    original_filename = file.filename
+    # Detect if it's from clipboard paste
+    is_clipboard = original_filename in ["clipboard.png", "pasted_image.png", "image.png", "blob"]
+    
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    if is_clipboard:
+        filename = f"pasted_image_{timestamp}.png"
+    else:
+        # For dragged files, preserve their original name to avoid confusion
+        name_part, ext_part = os.path.splitext(original_filename)
+        name_part = os.path.basename(name_part)  # Sanitize name
+        if not ext_part:
+            ext_part = ".png"
+        filename = f"{name_part}_{timestamp}{ext_part}"
+    
+    dest_path = os.path.join(proj["path"], filename)
+    try:
+        file.save(dest_path)
+        return jsonify({
+            "status": "success",
+            "path": dest_path.replace("\\", "/"),
+            "filename": filename
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+
+@app.route('/shutdown', methods=['POST'])
+def api_shutdown():
+    import signal
+    print("Shutdown request received, terminating Flask server...")
+    os.kill(os.getpid(), signal.SIGTERM)
+    return jsonify({"status": "shutdown"})
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WebSocket handlers (namespace /pty) — replaces SSE /stream, /input, /resize
+# ─────────────────────────────────────────────────────────────────────────────
+
+@socketio.on('connect', namespace='/pty')
+def ws_connect():
+    """Client connected to PTY namespace."""
+    pass
+
+@socketio.on('disconnect', namespace='/pty')
+def ws_disconnect():
+    """Client disconnected — remove sid from any session."""
+    sid = request.sid
+    with sessions_lock:
+        for session in active_sessions.values():
+            session.remove_sid(sid)
+
+@socketio.on('join-session', namespace='/pty')
+def ws_join_session(data):
+    """Client wants to attach to a project session."""
+    project = data.get('project')
+    if not project:
+        emit('error', {'msg': 'Project name required'})
+        return
+        
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"] == project), None)
+    if not proj_details:
+        emit('error', {'msg': 'Project not found'})
+        return
+        
+    with sessions_lock:
+        if project not in active_sessions or not active_sessions[project].pty.isalive():
+            active_sessions[project] = TerminalSession(project, proj_details["path"])
+        session = active_sessions[project]
+        session.add_sid(request.sid)
+        
+    # Send accumulated history immediately
+    history = session.get_history()
+    if history:
+        emit('pty-output', {'data': history})
+        
+    emit('session-ready', {'name': project, 'path': proj_details["path"]})
+
+@socketio.on('pty-input', namespace='/pty')
+def ws_pty_input(data):
+    """Receive keystrokes from browser and write directly to PTY."""
+    project = data.get('project')
+    input_data = data.get('data', '')
+    if not project:
+        return
+        
+    with sessions_lock:
+        session = active_sessions.get(project)
+    if session and session.pty.isalive():
+        session.write(input_data)
+
+@socketio.on('resize', namespace='/pty')
+def ws_resize(data):
+    """Receive resize events from browser."""
+    project = data.get('project')
+    cols = data.get('cols', 100)
+    rows = data.get('rows', 30)
+    if not project:
+        return
+        
+    with sessions_lock:
+        session = active_sessions.get(project)
+    if session:
+        session.resize(cols, rows)
+
+if __name__ == '__main__':
+    socketio.run(app, host='127.0.0.1', port=PORT, debug=True)
+@@END
+
+
+
+
+
+@@FILE: templates/index.html
+@@MODE: replace_file
+@@TO:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -751,8 +1348,8 @@
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-    <!-- Socket.IO client library -->
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
+    <!-- Socket.IO Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 
     <script>
         let projects = [];
@@ -1008,8 +1605,9 @@
             }
         }
 
-        // Initialize xterm.js terminal instance
+        // Initialize xterm.js terminal instance with WebSocket
         function initTerminal(projectName, projectTheme = null) {
+            // Disconnect previous socket if any
             if (socket) {
                 socket.disconnect();
                 socket = null;
@@ -1069,35 +1667,7 @@
             term.onResize(size => {
                 if (socket && socket.connected) {
                     socket.emit('resize', { project: projectName, cols: size.cols, rows: size.rows });
-                } else {
-                    fetch(`/resize/${projectName}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cols: size.cols, rows: size.rows })
-                    });
                 }
-            });
-
-            // Connect to namespace /pty
-            socket = io('/pty');
-
-            socket.on('connect', () => {
-                socket.emit('join-session', { project: projectName });
-            });
-
-            socket.on('pty-output', (msg) => {
-                if (msg.data) {
-                    term.write(msg.data, () => {
-                        term.scrollToBottom();
-                    });
-                } else if (msg.eof) {
-                    term.write("\r\n\x1b[31m[Shell Session Ended. Refresh or re-select to restart]\x1b[0m\r\n");
-                    socket.disconnect();
-                }
-            });
-
-            socket.on('error', (err) => {
-                console.error("WebSocket error:", err);
             });
 
             // Delay initial fit slightly to ensure browser has computed container layout sizes
@@ -1106,12 +1676,6 @@
                     fitAddon.fit();
                     if (socket && socket.connected) {
                         socket.emit('resize', { project: projectName, cols: term.cols, rows: term.rows });
-                    } else {
-                        fetch(`/resize/${projectName}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ cols: term.cols, rows: term.rows })
-                        });
                     }
                 } catch (e) {
                     console.error("Initial terminal fit error:", e);
@@ -1135,6 +1699,7 @@
                 return true;
             });
 
+            // ── WebSocket Input: Direct emit, zero HTTP overhead ──
             term.onData(data => {
                 // Filter out Device Attributes (DA) queries sent back by xterm.js
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) {
@@ -1146,13 +1711,49 @@
                 }
                 if (socket && socket.connected) {
                     socket.emit('pty-input', { project: projectName, data: data });
-                } else {
-                    fetch(`/input/${projectName}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: data })
-                    });
                 }
+            });
+
+            // ── WebSocket Connection ──
+            socket = io({ path: '/socket.io' });
+
+            socket.on('connect', () => {
+                console.log('WebSocket connected');
+                // Join the PTY namespace and request session
+                const ptySocket = io('/pty');
+                
+                ptySocket.on('connect', () => {
+                    console.log('PTY namespace connected');
+                    ptySocket.emit('join-session', { project: projectName });
+                });
+                
+                ptySocket.on('session-ready', (data) => {
+                    console.log('Session ready:', data);
+                });
+                
+                ptySocket.on('pty-output', (msg) => {
+                    if (msg.data) {
+                        term.write(msg.data);
+                    } else if (msg.eof) {
+                        term.write("\r\n\x1b[31m[Shell Session Ended. Refresh or re-select to restart]\x1b[0m\r\n");
+                        ptySocket.disconnect();
+                    }
+                });
+                
+                ptySocket.on('error', (err) => {
+                    console.error('PTY error:', err);
+                });
+                
+                // Store reference for resize events
+                socket.ptySocket = ptySocket;
+            });
+
+            socket.on('disconnect', () => {
+                console.log('WebSocket disconnected');
+            });
+
+            socket.on('connect_error', (err) => {
+                console.error('WebSocket connection error:', err);
             });
 
             term.focus();
@@ -1267,583 +1868,4 @@
             document.getElementById('theme-fg').value = theme.foreground;
             document.getElementById('theme-cursor').value = theme.cursor;
             
-            document.getElementById('card-bg').value = cardTheme.bgColor;
-            document.getElementById('card-fg').value = cardTheme.textColor;
-            document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
-            document.getElementById('card-accent').value = cardTheme.accentColor;
-
-            // Populate Copy Style dropdown
-            const copySelect = document.getElementById('copy-style-select');
-            copySelect.innerHTML = '<option value="">📋 Copy Style From...</option>';
-            projects.forEach(p => {
-                if (p.name !== contextProject.name) {
-                    const opt = document.createElement('option');
-                    opt.value = p.name;
-                    opt.innerText = p.name;
-                    copySelect.appendChild(opt);
-                }
-            });
-
-
-
-            document.getElementById('theme-modal').classList.add('show');
-        }
-
-        function closeThemeModal() {
-            document.getElementById('theme-modal').classList.remove('show');
-        }
-
-        async function handleSaveTheme(event) {
-            event.preventDefault();
-            if (!contextProject) return;
-
-            const newName = document.getElementById('theme-proj-name').value.trim();
-            const newPath = document.getElementById('theme-proj-path').value.trim();
-            
-            if (!newName || !newPath) {
-                alert("Workspace Name and Path are required");
-                return;
-            }
-
-            const bg = document.getElementById('theme-bg').value;
-            const fg = document.getElementById('theme-fg').value;
-            const cursor = document.getElementById('theme-cursor').value;
-            
-            const cardBg = document.getElementById('card-bg').value;
-            const cardFg = document.getElementById('card-fg').value;
-            const cardPath = document.getElementById('card-path').value;
-            const cardAccent = document.getElementById('card-accent').value;
-
-            const theme = {
-                background: bg,
-                foreground: fg,
-                cursor: cursor
-            };
-            const cardTheme = {
-                bgColor: cardBg,
-                textColor: cardFg,
-                pathColor: cardPath,
-                accentColor: cardAccent
-            };
-
-            try {
-                const response = await fetch('/api/projects/customize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        originalName: contextProject.name,
-                        name: newName,
-                        path: newPath,
-                        theme: theme,
-                        cardTheme: cardTheme
-                    })
-                });
-
-                if (response.ok) {
-                    const originalName = contextProject.name;
-                    projects = await response.json();
-                    closeThemeModal();
-                    
-                    // If customized project is active, apply theme immediately without resetting session!
-                    if (activeProject === originalName) {
-                        if (originalName !== newName) {
-                            activeProject = newName;
-                        }
-                        
-                        const projDetails = projects.find(p => p.name === newName);
-                        if (projDetails && term) {
-                            term.options.theme = theme;
-                        }
-                    }
-                    handleSearch();
-                } else {
-                    const errData = await response.json();
-                    alert(errData.error || "Failed to update project settings");
-                }
-            } catch (err) {
-                console.error("Error saving theme:", err);
-            }
-        }
-
-        async function resetThemeToDefault() {
-            if (!contextProject) return;
-            
-            const defaultTheme = {
-                background: '#000000',
-                foreground: '#d1d5db',
-                cursor: '#3b82f6'
-            };
-            const defaultCardTheme = {
-                bgColor: '#161c26',
-                textColor: '#f1f5f9',
-                accentColor: '#2563eb'
-            };
-
-            try {
-                const response = await fetch('/api/projects/customize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        originalName: contextProject.name,
-                        name: contextProject.name,
-                        path: contextProject.path,
-                        theme: defaultTheme,
-                        cardTheme: defaultCardTheme
-                    })
-                });
-
-                if (response.ok) {
-                    projects = await response.json();
-                    closeThemeModal();
-
-                    if (activeProject === contextProject.name && term) {
-                        term.options.theme = defaultTheme;
-                    }
-                    handleSearch();
-                }
-            } catch (err) {
-                console.error("Error resetting theme:", err);
-            }
-        }
-        
-        // Randomize card button styling colors
-        function randomizeCardColors() {
-            const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-            const hslToHex = (h, s, l) => {
-                l /= 100;
-                const a = s * Math.min(l, 1 - l) / 100;
-                const f = n => {
-                    const k = (n + h / 30) % 12;
-                    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-                    return Math.round(255 * color).toString(16).padStart(2, '0');
-                };
-                return `#${f(0)}${f(8)}${f(4)}`;
-            };
-            
-            const h = rand(0, 360);
-            const bg = hslToHex(h, rand(20, 35), rand(8, 14)); // Harmonized dark background
-            const fg = hslToHex((h + 180) % 360, rand(10, 15), rand(85, 95)); // Light contrasting text
-            const pathColor = hslToHex(h, rand(10, 15), rand(50, 65)); // Muted path color
-            const accent = hslToHex(h, rand(75, 100), rand(45, 60)); // Vibrant accent
-            
-            document.getElementById('card-bg').value = bg;
-            document.getElementById('card-fg').value = fg;
-            document.getElementById('card-path').value = pathColor;
-            document.getElementById('card-accent').value = accent;
-        }
-
-        // Copy style from another workspace
-        function handleCopyStyle(sourceProjectName) {
-            if (!sourceProjectName) return;
-            const source = projects.find(p => p.name === sourceProjectName);
-            if (source) {
-                // Copy card button style
-                const cardTheme = source.cardTheme || {
-                    bgColor: '#161c26',
-                    textColor: '#f1f5f9',
-                    pathColor: '#94a3b8',
-                    accentColor: '#2563eb'
-                };
-                document.getElementById('card-bg').value = cardTheme.bgColor;
-                document.getElementById('card-fg').value = cardTheme.textColor;
-                document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
-                document.getElementById('card-accent').value = cardTheme.accentColor;
-
-                // Copy console style as well
-                const consoleTheme = source.theme || {
-                    background: '#000000',
-                    foreground: '#d1d5db',
-                    cursor: '#3b82f6'
-                };
-                document.getElementById('theme-bg').value = consoleTheme.background;
-                document.getElementById('theme-fg').value = consoleTheme.foreground;
-                document.getElementById('theme-cursor').value = consoleTheme.cursor;
-            }
-            // Reset dropdown select index
-            document.getElementById('copy-style-select').value = '';
-        }
-
-        // Determine drop insertion position relative to sibling elements
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
-            
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // Save reordered projects array order to projects.json config
-        async function saveProjectsOrder() {
-            const container = document.getElementById('project-list-container');
-            const cards = [...container.querySelectorAll('.project-card')];
-            const newNames = cards.map(c => c.getAttribute('data-name'));
-            
-            // Sync local projects array sorting
-            const reordered = [];
-            newNames.forEach(name => {
-                const p = projects.find(proj => proj.name === name);
-                if (p) reordered.push(p);
-            });
-            projects = reordered;
-
-            try {
-                await fetch('/api/projects/reorder', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ names: newNames })
-                });
-            } catch (err) {
-                console.error("Failed to save reordered list:", err);
-            }
-        }
-
-        // Reset and terminate all active terminal sessions across workspaces
-        async function resetAllSessions() {
-            if (!confirm("Are you sure you want to reset all workspace terminal sessions? All running background commands will be terminated.")) {
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/sessions/reset', { method: 'POST' });
-                if (response.ok) {
-                    projects = await response.json();
-                    
-                    // Reset current active terminal session if there is one
-                    if (activeProject) {
-                        const currentProject = activeProject;
-                        activeProject = null;
-                        if (socket) {
-                            socket.disconnect();
-                            socket = null;
-                        }
-                        
-                        if (term) {
-                            term.clear();
-                            term.write("\r\n\x1b[33m[Resetting Workspace Session...]\x1b[0m\r\n");
-                        }
-                        
-                        selectProject(currentProject);
-                    } else {
-                        handleSearch();
-                    }
-                }
-            } catch (err) {
-                console.error("Error resetting all sessions:", err);
-            }
-        }
-
-        // Listen to global paste event to intercept image paste and upload it to active workspace
-        document.addEventListener('paste', async (e) => {
-            if (!activeProject) return;
-
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') === 0) {
-                    e.preventDefault();
-                    const blob = items[i].getAsFile();
-                    
-                    const formData = new FormData();
-                    formData.append('image', blob, 'pasted_image.png');
-
-                    try {
-                        const response = await fetch(`/api/session/${activeProject}/paste-image`, {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        if (response.ok) {
-                            const result = await response.json();
-                            // Wrap path in quotes for cmd/powershell safety
-                            const pathToSend = `"${result.path}"`;
-                            
-                            // Send the path as input to the active terminal
-                            fetch(`/input/${activeProject}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ data: pathToSend })
-                            });
-                        } else {
-                            const errData = await response.json();
-                            alert(errData.error || "Failed to upload image");
-                        }
-                    } catch (err) {
-                        console.error("Error pasting image:", err);
-                    }
-                    break;
-                }
-            }
-        });
-
-        // Intercept file drag and drop to prevent browser from navigating/opening images
-        window.addEventListener('dragover', (e) => {
-            // Check if dragging files to only prevent default on file drops
-            if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
-                e.preventDefault();
-            }
-        }, false);
-
-        window.addEventListener('drop', async (e) => {
-            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-                const file = e.dataTransfer.files[0];
-                if (file.type.indexOf('image/') === 0) {
-                    e.preventDefault(); // Prevent default file opening behavior
-                    if (!activeProject) return;
-
-                    const formData = new FormData();
-                    formData.append('image', file, file.name);
-
-                    try {
-                        const response = await fetch(`/api/session/${activeProject}/paste-image`, {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        if (response.ok) {
-                            const result = await response.json();
-                            const pathToSend = `"${result.path}"`;
-                            
-                            // Send path as input to active terminal
-                            fetch(`/input/${activeProject}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ data: pathToSend })
-                            });
-                        } else {
-                            const errData = await response.json();
-                            alert(errData.error || "Failed to upload dropped image");
-                        }
-                    } catch (err) {
-                        console.error("Error uploading dropped image:", err);
-                    }
-                }
-            }
-        }, false);
-
-        // Bookmarks Custom Dropdown Functions
-        function toggleBookmarkDropdown(event) {
-            event.stopPropagation();
-            const content = document.getElementById('bookmark-dropdown-content');
-            if (content.style.display === 'none' || !content.style.display) {
-                content.style.display = 'block';
-            } else {
-                content.style.display = 'none';
-            }
-        }
-
-        // Close dropdown when clicking outside
-        window.addEventListener('click', (e) => {
-            const content = document.getElementById('bookmark-dropdown-content');
-            const btn = document.getElementById('bookmark-dropdown-btn');
-            if (content && btn && !btn.contains(e.target) && !content.contains(e.target)) {
-                content.style.display = 'none';
-            }
-        });
-
-        function updateBookmarksDropdown() {
-            const content = document.getElementById('bookmark-dropdown-content');
-            if (!content) return;
-            content.innerHTML = '';
-            
-            if (!activeProject) return;
-            
-            const displayList = [];
-            projects.forEach(p => {
-                const isCurrent = (p.name === activeProject);
-                const bookmarks = p.bookmarks || [];
-                bookmarks.forEach((bm, idx) => {
-                    // Extract dictionary command/global properties
-                    const cmdText = (typeof bm === 'string') ? bm : (bm.command || '');
-                    const isGlobal = (typeof bm === 'object') ? (bm.global === true) : false;
-                    
-                    if (isCurrent || isGlobal) {
-                        displayList.push({
-                            command: cmdText,
-                            global: isGlobal,
-                            project: p.name,
-                            index: idx,
-                            isOwned: isCurrent
-                        });
-                    }
-                });
-            });
-            
-            // De-duplicate command display list
-            const seen = new Set();
-            const uniqueList = [];
-            displayList.forEach(item => {
-                const key = item.command.toLowerCase();
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    uniqueList.push(item);
-                }
-            });
-            
-            if (uniqueList.length === 0) {
-                content.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
-            } else {
-                uniqueList.forEach((bm, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'bookmark-item';
-                    
-                    const isLast = (idx === uniqueList.length - 1);
-                    const borderStyle = isLast ? 'none' : '1px solid var(--border-color)';
-                    
-                    row.style = `display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; transition: background-color 0.15s; border-bottom: ${borderStyle};`;
-                    
-                    // Match container's border radius for rounded edges on hover
-                    if (idx === 0) {
-                        row.style.borderTopLeftRadius = '7px';
-                        row.style.borderTopRightRadius = '7px';
-                    }
-                    if (isLast) {
-                        row.style.borderBottomLeftRadius = '7px';
-                        row.style.borderBottomRightRadius = '7px';
-                    }
-                    
-                    row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-card-hover)';
-                    row.onmouseleave = () => row.style.backgroundColor = 'transparent';
-                    row.onclick = () => runBookmarkedCommand(bm.command);
-
-                    // Add global indicator tag if bookmark belongs to another project
-                    const originTag = bm.isOwned ? '' : ` <span style="font-size: 0.65rem; color: var(--accent-color); background: rgba(37,99,235,0.15); padding: 1px 4px; border-radius: 4px; margin-left: 4px;">Global</span>`;
-
-                    row.innerHTML = `
-                        <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${bm.command}${originTag}</span>
-                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                            <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${bm.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
-                                <input type="checkbox" ${bm.global ? 'checked' : ''} onchange="toggleBookmarkGlobal('${bm.project}', ${bm.index}, this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
-                                <span class="slider-round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${bm.global ? 'var(--accent-color)' : '#475569'}; transition: 0.2s; border-radius: 16px;">
-                                    <span style="position: absolute; content: ''; height: 12px; width: 12px; left: ${bm.global ? '14px' : '2px'}; bottom: 2px; background-color: white; transition: 0.2s; border-radius: 50%;"></span>
-                                </span>
-                            </label>
-                            <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteBookmark('${bm.project}', ${bm.index})">❌</button>
-                        </div>
-                    `;
-                    content.appendChild(row);
-                });
-            }
-        }
-
-        async function runBookmarkedCommand(cmd) {
-            if (!cmd || !activeProject) return;
-            
-            // Hide dropdown
-            document.getElementById('bookmark-dropdown-content').style.display = 'none';
-            
-            try {
-                await fetch(`/input/${activeProject}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: cmd + "\r" })
-                });
-            } catch (err) {
-                console.error("Error running bookmarked command:", err);
-            }
-        }
-
-        async function addCurrentCommandAsBookmark() {
-            if (!activeProject) return;
-            
-            let detected = "";
-            if (term) {
-                const buffer = term.buffer.active;
-                const lineIndex = buffer.viewportY + buffer.cursorY;
-                const line = buffer.getLine(lineIndex);
-                if (line) {
-                    detected = line.translateToString(true).trim();
-                    const promptRegex = /^PS\s+[A-Za-z]:\\[^>]*>\s*/i;
-                    detected = detected.replace(promptRegex, "");
-                }
-            }
-            
-            const cmd = prompt("Add bookmark command:", detected);
-            if (cmd === null) return; // Cancelled
-            const trimmed = cmd.trim();
-            if (!trimmed) {
-                alert("Command cannot be empty");
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/projects/${activeProject}/bookmarks`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: trimmed })
-                });
-                
-                if (response.ok) {
-                    projects = await response.json();
-                    updateBookmarksDropdown();
-                } else {
-                    const data = await response.json();
-                    alert(data.error || "Failed to add bookmark");
-                }
-            } catch (err) {
-                console.error("Error adding bookmark:", err);
-            }
-        }
-
-        async function toggleBookmarkGlobal(projName, index, isGlobal) {
-            try {
-                const response = await fetch(`/api/projects/${projName}/bookmarks/${index}/global`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ global: isGlobal })
-                });
-                if (response.ok) {
-                    projects = await response.json();
-                    updateBookmarksDropdown();
-                }
-            } catch (err) {
-                console.error("Error toggling global bookmark:", err);
-            }
-        }
-
-        async function deleteBookmark(projName, index) {
-            try {
-                const response = await fetch(`/api/projects/${projName}/bookmarks/${index}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    projects = await response.json();
-                    updateBookmarksDropdown();
-                }
-            } catch (err) {
-                console.error("Error deleting bookmark:", err);
-            }
-        }
-
-        // Toggle sidebar visibility
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const expandBtn = document.getElementById('expand-sidebar-btn');
-            
-            sidebar.classList.toggle('collapsed');
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            
-            expandBtn.style.display = isCollapsed ? 'flex' : 'none';
-            
-            // Fit terminal to newly available width after transition finishes
-            setTimeout(() => {
-                if (fitAddon) {
-                    try {
-                        fitAddon.fit();
-                    } catch (e) {
-                        // Ignore
-                    }
-                }
-            }, 300);
-        }
-
-        window.onload = () => {
-            fetchProjects();
-        };
-    </script>
-</body>
-</html>
+            document.getElementById('card-bg').value = cardTheme.bgColor

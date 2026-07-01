@@ -5,10 +5,14 @@ import queue
 import threading
 import subprocess
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
+from flask_socketio import SocketIO, emit, disconnect
 from winpty import PTY
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SECRET_KEY'] = 'terminal-tui-secret-key'
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
@@ -78,25 +82,45 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         # Spawn PowerShell
         self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
         
+        self.connected_sids = set()
+        self.sids_lock = threading.Lock()
+        
         self.output_queue = queue.Queue()
         self.reader_thread = threading.Thread(target=self._read_loop, daemon=True)
         self.reader_thread.start()
         
     def _read_loop(self):
+        import time
         while self.pty.isalive():
             try:
-                data = self.pty.read(blocking=True)
+                data = self.pty.read(blocking=False)
                 if data:
                     with self.history_lock:
                         self.history += data
                         if len(self.history) > 100000:
                             self.history = self.history[-100000:]
+                    
                     self.output_queue.put(data)
+                    
+                    with self.sids_lock:
+                        sids = list(self.connected_sids)
+                    for sid in sids:
+                        try:
+                            socketio.emit('pty-output', {'data': data}, room=sid, namespace='/pty')
+                        except Exception:
+                            pass
                 else:
-                    break
+                    time.sleep(0.005)
             except Exception:
                 break
         self.output_queue.put(None)
+        with self.sids_lock:
+            sids = list(self.connected_sids)
+        for sid in sids:
+            try:
+                socketio.emit('pty-output', {'eof': True}, room=sid, namespace='/pty')
+            except Exception:
+                pass
 
     def write(self, data):
         if self.pty.isalive():
@@ -108,6 +132,18 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             self.rows = rows
             if self.pty.isalive():
                 self.pty.set_size(cols, rows)
+
+    def add_sid(self, sid):
+        with self.sids_lock:
+            self.connected_sids.add(sid)
+
+    def remove_sid(self, sid):
+        with self.sids_lock:
+            self.connected_sids.discard(sid)
+
+    def get_history(self):
+        with self.history_lock:
+            return self.history
 
 def load_projects_config():
     if os.path.exists(PROJECTS_FILE):
@@ -523,7 +559,71 @@ def api_shutdown():
     os.kill(os.getpid(), signal.SIGTERM)
     return jsonify({"status": "shutdown"})
 
+# ─────────────────────────────────────────────────────────────────────────────
+# WebSocket handlers (namespace /pty)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@socketio.on('connect', namespace='/pty')
+def ws_connect():
+    pass
+
+@socketio.on('disconnect', namespace='/pty')
+def ws_disconnect():
+    sid = request.sid
+    with sessions_lock:
+        for session in active_sessions.values():
+            session.remove_sid(sid)
+
+@socketio.on('join-session', namespace='/pty')
+def ws_join_session(data):
+    project = data.get('project')
+    if not project:
+        emit('error', {'msg': 'Project name required'})
+        return
+        
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"] == project), None)
+    if not proj_details:
+        emit('error', {'msg': 'Project not found'})
+        return
+        
+    with sessions_lock:
+        if project not in active_sessions or not active_sessions[project].pty.isalive():
+            active_sessions[project] = TerminalSession(project, proj_details["path"])
+        session = active_sessions[project]
+        session.add_sid(request.sid)
+        
+    # Send history immediately
+    history = session.get_history()
+    if history:
+        emit('pty-output', {'data': history})
+        
+    emit('session-ready', {'name': project, 'path': proj_details["path"]})
+
+@socketio.on('pty-input', namespace='/pty')
+def ws_pty_input(data):
+    project = data.get('project')
+    input_data = data.get('data', '')
+    if not project:
+        return
+        
+    with sessions_lock:
+        session = active_sessions.get(project)
+    if session and session.pty.isalive():
+        session.write(input_data)
+
+@socketio.on('resize', namespace='/pty')
+def ws_resize(data):
+    project = data.get('project')
+    cols = data.get('cols', 100)
+    rows = data.get('rows', 30)
+    if not project:
+        return
+        
+    with sessions_lock:
+        session = active_sessions.get(project)
+    if session:
+        session.resize(cols, rows)
+
 if __name__ == '__main__':
-    # SSE stream requests stay open, so the dev server must be threaded
-    # or input/resize posts can wait behind the active stream connection.
-    app.run(host='127.0.0.1', port=PORT, debug=True, threaded=True)
+    socketio.run(app, host='127.0.0.1', port=PORT, debug=True)
