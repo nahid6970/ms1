@@ -14,7 +14,6 @@ PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
 PROJECTS_FILE = r"C:\@delta\ms1\TOOLS\terminal_tui\projects.json"
 active_sessions = {}
-git_branch_cache = {}
 sessions_lock = threading.Lock()
 class TerminalSession:
     def __init__(self, name, path):
@@ -142,21 +141,6 @@ def save_projects_config(projects):
     except Exception as e:
         print(f"Error saving projects config: {e}")
 
-def get_git_branch(path):
-    try:
-        if os.path.exists(os.path.join(path, ".git")):
-            res = subprocess.run(
-                ["git", "branch", "--show-current"],
-                cwd=path,
-                capture_output=True,
-                text=True,
-                timeout=0.5
-            )
-            return res.stdout.strip()
-    except Exception:
-        pass
-    return ""
-
 def scan_projects():
     config_projects = load_projects_config()
     projects = []
@@ -178,12 +162,6 @@ def scan_projects():
         if "pathColor" not in card_theme:
             card_theme["pathColor"] = "#94a3b8"
         
-        # Fetch/Cache git branch
-        branch = git_branch_cache.get(name)
-        if branch is None:
-            branch = get_git_branch(path)
-            git_branch_cache[name] = branch
-            
         with sessions_lock:
             is_active = name in active_sessions and active_sessions[name].pty.isalive()
             
@@ -191,7 +169,6 @@ def scan_projects():
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
-            "branch": branch,
             "is_active": is_active,
             "pinned": pinned,
             "theme": theme,
@@ -206,10 +183,6 @@ def index():
 
 @app.route('/api/projects', methods=['GET'])
 def api_projects_get():
-    refresh = request.args.get("refresh") == "true"
-    if refresh:
-        global git_branch_cache
-        git_branch_cache = {}
     return jsonify(scan_projects())
 
 @app.route('/api/projects', methods=['POST'])
@@ -250,9 +223,6 @@ def api_projects_post():
     })
     save_projects_config(projects)
     
-    # Force git branch cache refresh for this project
-    git_branch_cache[name] = get_git_branch(path)
-    
     return jsonify(scan_projects())
 
 @app.route('/api/projects/<project>', methods=['DELETE'])
@@ -278,9 +248,6 @@ def api_projects_delete(project):
                     pass
             del active_sessions[project]
             
-    if project in git_branch_cache:
-        del git_branch_cache[project]
-        
     return jsonify(scan_projects())
 
 @app.route('/api/projects/<project>/bookmarks', methods=['POST'])
@@ -381,10 +348,6 @@ def api_projects_customize():
                         pass
                 del active_sessions[original_name]
                 
-        # Clear old branch cache
-        if original_name in git_branch_cache:
-            del git_branch_cache[original_name]
-            
     # Update properties
     if new_name:
         proj["name"] = new_name
@@ -403,10 +366,6 @@ def api_projects_customize():
         
     save_projects_config(projects)
     
-    # Refresh cache branch for the project
-    if name_changed or path_changed:
-        git_branch_cache[proj["name"]] = get_git_branch(proj["path"])
-        
     return jsonify(scan_projects())
 
 @app.route('/api/projects/reorder', methods=['POST'])
@@ -444,9 +403,6 @@ def api_sessions_reset():
                     pass
         active_sessions.clear()
         
-    global git_branch_cache
-    git_branch_cache = {}
-    
     return jsonify(scan_projects())
 
 @app.route('/api/session/<project>', methods=['POST'])
@@ -463,8 +419,7 @@ def api_session(project):
     return jsonify({
         "status": "connected",
         "name": project,
-        "path": proj_details["path"],
-        "branch": proj_details["branch"]
+        "path": proj_details["path"]
     })
 
 @app.route('/api/session/<project>/paste-image', methods=['POST'])

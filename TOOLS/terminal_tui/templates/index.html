@@ -892,18 +892,6 @@
                 }
                 titleContainer.appendChild(title);
 
-                if (proj.branch) {
-                    const branch = document.createElement('div');
-                    branch.className = 'branch-badge';
-                    branch.innerHTML = `
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
-                            <path d="M18 15V9a4 4 0 0 0-4-4H9"/>
-                        </svg>${proj.branch}
-                    `;
-                    titleContainer.appendChild(branch);
-                }
-
                 card.appendChild(titleContainer);
 
                 const path = document.createElement('div');
@@ -994,13 +982,7 @@
                 document.getElementById('active-project-name').innerText = data.name;
                 document.getElementById('active-project-path').innerText = data.path;
                 
-                const branchBadge = document.getElementById('active-project-branch');
-                if (data.branch) {
-                    branchBadge.style.display = 'flex';
-                    document.getElementById('active-project-branch-text').innerText = data.branch;
-                } else {
-                    branchBadge.style.display = 'none';
-                }
+                document.getElementById('active-project-branch').style.display = 'none';
 
                 // Retrieve project config details to fetch its theme
                 const projDetails = projects.find(p => p.name === projectName) || data;
