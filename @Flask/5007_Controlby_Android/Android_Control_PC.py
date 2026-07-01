@@ -6,6 +6,11 @@ import json
 import os
 
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
+try:
+    app.json.sort_keys = False
+except AttributeError:
+    pass
 
 COMMANDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'commands.json')
 

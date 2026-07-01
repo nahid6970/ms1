@@ -6,19 +6,19 @@
         "accentColor": "#f57a29",
         "bgColor": "#497dee"
     },
-    "Display 1 KillApps": {
-        "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
-    },
     "Display 2": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
         "textColor": "#f8fafc",
         "cmdColor": "#000000",
         "accentColor": "#f57a29",
         "bgColor": "#497dee"
+    },
+    "Display 1 KillApps": {
+        "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
+        "textColor": "#d1fae5",
+        "cmdColor": "#a1a1aa",
+        "accentColor": "#ef4444",
+        "bgColor": "#1c1917"
     },
     "Open Calculator": {
         "command": "start calc",
@@ -41,19 +41,26 @@
         "accentColor": "#a855f7",
         "bgColor": "#1e1b4b"
     },
+    "System Info": {
+        "command": "systeminfo",
+        "textColor": "#fef3c7",
+        "cmdColor": "#a1a1aa",
+        "accentColor": "#a855f7",
+        "bgColor": "#1e1b4b"
+    },
     "Sign Out": {
         "command": "shutdown /l",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
+        "textColor": "#000000",
+        "cmdColor": "#292929",
+        "accentColor": "#f0e13d",
+        "bgColor": "#f5bcad"
     },
     "Restart": {
         "command": "shutdown /r /t 0",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
+        "textColor": "#000000",
+        "cmdColor": "#292929",
+        "accentColor": "#f0e13d",
+        "bgColor": "#f28c73"
     },
     "Shutdown": {
         "command": "shutdown /s /t 0",
@@ -61,12 +68,5 @@
         "cmdColor": "#292929",
         "accentColor": "#f0e13d",
         "bgColor": "#ec4f27"
-    },
-    "System Info": {
-        "command": "systeminfo",
-        "textColor": "#f8fafc",
-        "cmdColor": "#64748b",
-        "accentColor": "#cad13d",
-        "bgColor": "#1e293b"
     }
 }
