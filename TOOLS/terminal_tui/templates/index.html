@@ -282,6 +282,7 @@
         .action-dot.yellow { background: #f59e0b; box-shadow: 0 1px 6px rgba(245,158,11,0.6); }
         .action-dot.grey   { background: #94a3b8; }
         .action-dot.green  { background: #22c55e; }
+        .action-dot.orange { background: #f97316; }
 
         .delete-btn:hover {
             color: #ef4444;
@@ -963,6 +964,18 @@
                 };
                 cardActions.appendChild(customizeDot);
 
+                // Orange (Stop Session) Action Dot (Only shown if running)
+                if (proj.is_active) {
+                    const stopDot = document.createElement('button');
+                    stopDot.className = 'action-dot orange';
+                    stopDot.title = 'Stop/Kill Terminal Session';
+                    stopDot.onclick = (e) => {
+                        e.stopPropagation();
+                        stopProjectSession(proj.name);
+                    };
+                    cardActions.appendChild(stopDot);
+                }
+
                 // Red (Delete) Action Dot
                 const deleteDot = document.createElement('button');
                 deleteDot.className = 'action-dot red';
@@ -1025,6 +1038,9 @@
 
                 initTerminal(projectName, currentProjDetails.theme);
                 updateBookmarksDropdown();
+                
+                // Immediately refresh projects to show the green running dot on the card
+                fetchProjects();
             } catch (err) {
                 console.error("Error setting up session:", err);
             }
@@ -1217,6 +1233,46 @@
                 handleSearch();
             } catch (err) {
                 console.error("Error removing workspace:", err);
+            }
+        }
+
+        // Stop individual project session
+        async function stopProjectSession(projectName) {
+            if (!confirm(`Are you sure you want to stop the terminal session for '${projectName}'?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/session/${projectName}/stop`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    alert(data.error || "Failed to stop terminal session");
+                    return;
+                }
+
+                projects = await response.json();
+                
+                if (activeProject === projectName) {
+                    activeProject = null;
+                    if (socket) {
+                        socket.disconnect();
+                        socket = null;
+                    }
+                    if (term) {
+                        term.clear();
+                        term.write("\r\n\x1b[31m[Session Stopped]\x1b[0m\r\n");
+                    }
+                    document.getElementById('workspace-header').style.display = 'none';
+                    document.getElementById('terminal-wrapper').style.display = 'none';
+                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                }
+
+                handleSearch();
+            } catch (err) {
+                console.error("Error stopping session:", err);
             }
         }
 
