@@ -487,6 +487,31 @@
             border-radius: 8px;
             overflow: hidden;
             background: #000;
+            position: relative;
+        }
+
+        .terminal-pane-close {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f87171;
+            cursor: pointer;
+            z-index: 5;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .terminal-pane-close:hover {
+            background: rgba(31, 41, 55, 0.98);
+            border-color: rgba(248, 113, 113, 0.4);
         }
 
         .xterm-viewport {
@@ -1343,6 +1368,47 @@
             fitAddon = null;
         }
 
+        function closeTerminalPane(paneId) {
+            if (terminalPanes.length <= 1) {
+                alert("At least one terminal pane must remain open.");
+                return;
+            }
+
+            const paneIndex = terminalPanes.findIndex(p => p.paneId === paneId);
+            if (paneIndex < 0) return;
+
+            const pane = terminalPanes[paneIndex];
+            try { pane.socket.disconnect(); } catch (e) {}
+            try { pane.resizeObserver.disconnect(); } catch (e) {}
+            try { pane.term.dispose(); } catch (e) {}
+            if (pane.element && pane.element.parentNode) {
+                pane.element.parentNode.removeChild(pane.element);
+            }
+
+            terminalPanes.splice(paneIndex, 1);
+
+            const parent = document.getElementById('terminal-parent');
+            if (terminalPanes.length === 1) {
+                parent.className = 'split-right';
+            }
+
+            if (term === pane.term) {
+                const nextPane = terminalPanes[terminalPanes.length - 1];
+                term = nextPane.term;
+                fitAddon = nextPane.fitAddon;
+                socket = nextPane.socket;
+                try {
+                    nextPane.term.focus();
+                } catch (e) {}
+            }
+
+            setTimeout(() => {
+                terminalPanes.forEach(p => {
+                    try { p.fitAddon.fit(); } catch (e) {}
+                });
+            }, 100);
+        }
+
         // Initialize xterm.js terminal instance
         function initTerminal(projectName, projectTheme = null) {
             clearTerminalPanes();
@@ -1358,6 +1424,18 @@
             const paneDiv = document.createElement('div');
             paneDiv.className = 'terminal-pane';
             paneDiv.dataset.paneId = paneId;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'terminal-pane-close';
+            closeBtn.title = 'Close this terminal pane';
+            closeBtn.innerText = '×';
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                closeTerminalPane(paneId);
+            };
+            paneDiv.appendChild(closeBtn);
+
             parent.appendChild(paneDiv);
 
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
