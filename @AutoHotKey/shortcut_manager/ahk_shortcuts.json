@@ -363,7 +363,7 @@
             "description": "",
             "hotkey": ">!m",
             "target_path": "C:\\@delta\\ms1\\TOOLS\\mouse\\fix_cursor.py",
-            "hide_terminal": false,
+            "hide_terminal": true,
             "enabled": true
         }
     ],
