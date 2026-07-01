@@ -216,6 +216,19 @@ class App(QMainWindow):
             return parts[0], parts[1]
         return parts[0], ""
 
+    def get_private_flag(self, exe_path):
+        exe_name = os.path.basename(exe_path).lower()
+        if "chrome" in exe_name or "brave" in exe_name:
+            return "--incognito"
+        elif "edge" in exe_name or "msedge" in exe_name:
+            return "-inprivate"
+        elif "firefox" in exe_name or "librewolf" in exe_name or "waterfox" in exe_name:
+            return "-private-window"
+        elif "opera" in exe_name:
+            return "--private"
+        else:
+            return "--incognito"
+
     def refresh_status(self):
         prog_id = self.get_http_progid()
         if not prog_id:
@@ -237,8 +250,12 @@ class App(QMainWindow):
         exe, args = self.parse_command(cmd_str)
         arg_tokens = args.split()
         
-        if "--incognito" in arg_tokens:
-            self.incognito_status_label.setText("ACTIVE (INCOGNITO)")
+        flag = self.get_private_flag(exe)
+        all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+        is_active = any(f in arg_tokens for f in all_flags)
+        
+        if is_active:
+            self.incognito_status_label.setText(f"ACTIVE ({flag.upper().strip('-')})")
             self.incognito_status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold;")
         else:
             self.incognito_status_label.setText("INACTIVE (NORMAL)")
@@ -268,13 +285,18 @@ class App(QMainWindow):
 
         exe, args = self.parse_command(cmd_str)
         arg_tokens = args.split()
-        if "--incognito" not in arg_tokens:
-            arg_tokens.insert(0, "--incognito")
+        flag = self.get_private_flag(exe)
+        
+        # Clean any other known private flags first to avoid conflicts
+        all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+        
+        arg_tokens.insert(0, flag)
         new_args = " ".join(arg_tokens)
         new_value = f'"{exe}" {new_args}'
 
         if self.write_registry_value(prog_id, new_value):
-            self.console_msg.setText("Status: Incognito enabled")
+            self.console_msg.setText(f"Status: Private mode enabled ({flag})")
             self.console_msg.setStyleSheet(f"color: {CP_GREEN};")
             self.refresh_status()
 
@@ -291,12 +313,16 @@ class App(QMainWindow):
 
         exe, args = self.parse_command(cmd_str)
         arg_tokens = args.split()
-        arg_tokens = [t for t in arg_tokens if t != "--incognito"]
+        
+        # Clean all known private flags
+        all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+        
         new_args = " ".join(arg_tokens)
         new_value = f'"{exe}" {new_args}'
 
         if self.write_registry_value(prog_id, new_value):
-            self.console_msg.setText("Status: Incognito disabled")
+            self.console_msg.setText("Status: Private mode disabled")
             self.console_msg.setStyleSheet(f"color: {CP_ORANGE};")
             self.refresh_status()
 
