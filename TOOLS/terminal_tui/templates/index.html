@@ -1842,83 +1842,11 @@
             }
         }
 
-        function sendTextToTerminal(text) {
-            if (!activeProject || !text) return;
-
-            fetch(`/input/${activeProject}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: text })
-            });
-        }
-
-        function quotePathForShell(path) {
-            const trimmed = (path || '').trim();
-            if (!trimmed) return '';
-
-            if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
-                return trimmed;
-            }
-
-            return `"${trimmed.replace(/"/g, '""')}"`;
-        }
-
-        function normalizeDroppedPath(value) {
-            if (!value) return '';
-
-            let path = value.split(/\r?\n/)[0].trim();
-            if (!path) return '';
-
-            path = path.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
-
-            const lower = path.toLowerCase();
-            if (lower.startsWith('file:///')) {
-                path = decodeURIComponent(path.slice(8)).replace(/\//g, '\\');
-            } else if (lower.startsWith('file://')) {
-                path = decodeURIComponent(path.slice(7)).replace(/\//g, '\\');
-            }
-
-            return path;
-        }
-
-        function getDroppedPath(dataTransfer) {
-            if (!dataTransfer) return '';
-
-            const uriList = normalizeDroppedPath(dataTransfer.getData('text/uri-list'));
-            if (uriList) return uriList;
-
-            const plainText = normalizeDroppedPath(dataTransfer.getData('text/plain'));
-            if (plainText) return plainText;
-
-            if (dataTransfer.files && dataTransfer.files.length > 0) {
-                const file = dataTransfer.files[0];
-                if (file.path) return file.path;
-                if (file.name) return file.name;
-            }
-
-            return '';
-        }
-
-        function dataTransferHasType(dataTransfer, type) {
-            if (!dataTransfer || !dataTransfer.types) return false;
-            return Array.from(dataTransfer.types).includes(type);
-        }
-
-        // Listen to global paste event to intercept text and image clipboard data
+        // Listen to global paste event to intercept image paste and upload it to active workspace
         document.addEventListener('paste', async (e) => {
             if (!activeProject) return;
 
-            const clipboard = e.clipboardData || e.originalEvent?.clipboardData;
-            if (!clipboard) return;
-
-            const pastedText = clipboard.getData('text/plain');
-            if (pastedText) {
-                e.preventDefault();
-                sendTextToTerminal(pastedText);
-                return;
-            }
-
-            const items = clipboard.items || [];
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') === 0) {
                     e.preventDefault();
@@ -1935,7 +1863,15 @@
                         
                         if (response.ok) {
                             const result = await response.json();
-                            sendTextToTerminal(quotePathForShell(result.path));
+                            // Wrap path in quotes for cmd/powershell safety
+                            const pathToSend = `"${result.path}"`;
+                            
+                            // Send the path as input to the active terminal
+                            fetch(`/input/${activeProject}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ data: pathToSend })
+                            });
                         } else {
                             const errData = await response.json();
                             alert(errData.error || "Failed to upload image");
@@ -1948,32 +1884,48 @@
             }
         });
 
-        // Intercept file drag and drop to prevent browser from navigating/opening files
+        // Intercept file drag and drop to prevent browser from navigating/opening images
         window.addEventListener('dragover', (e) => {
             // Check if dragging files to only prevent default on file drops
-            if (dataTransferHasType(e.dataTransfer, 'Files')) {
+            if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
                 e.preventDefault();
             }
         }, false);
 
         window.addEventListener('drop', async (e) => {
-            if (!e.dataTransfer) return;
+            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type.indexOf('image/') === 0) {
+                    e.preventDefault(); // Prevent default file opening behavior
+                    if (!activeProject) return;
 
-            const looksLikeFileDrop =
-                dataTransferHasType(e.dataTransfer, 'Files') ||
-                dataTransferHasType(e.dataTransfer, 'text/uri-list') ||
-                dataTransferHasType(e.dataTransfer, 'text/plain') ||
-                (e.dataTransfer.files && e.dataTransfer.files.length > 0);
+                    const formData = new FormData();
+                    formData.append('image', file, file.name);
 
-            if (!looksLikeFileDrop) return;
-
-            e.preventDefault();
-
-            const droppedPath = getDroppedPath(e.dataTransfer);
-            if (droppedPath) {
-                sendTextToTerminal(quotePathForShell(droppedPath));
-            } else {
-                console.warn("Dropped file path could not be resolved from the browser event.");
+                    try {
+                        const response = await fetch(`/api/session/${activeProject}/paste-image`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            const pathToSend = `"${result.path}"`;
+                            
+                            // Send path as input to active terminal
+                            fetch(`/input/${activeProject}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ data: pathToSend })
+                            });
+                        } else {
+                            const errData = await response.json();
+                            alert(errData.error || "Failed to upload dropped image");
+                        }
+                    } catch (err) {
+                        console.error("Error uploading dropped image:", err);
+                    }
+                }
             }
         }, false);
 
