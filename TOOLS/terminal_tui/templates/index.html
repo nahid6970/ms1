@@ -719,13 +719,32 @@
             term.open(termDiv);
             fitAddon.fit();
 
-            // Handle Ctrl+C copy behaviour when text is selected
+            // Handle Ctrl+C (copy) and Ctrl+V (paste) behaviours
             term.attachCustomKeyEventHandler(e => {
+                // Ctrl+C: copy selected text
                 if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
                     if (term.hasSelection()) {
                         navigator.clipboard.writeText(term.getSelection());
                         return false; // Prevent sending Ctrl+C to terminal process
                     }
+                }
+                
+                // Ctrl+V: paste text from clipboard
+                if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
+                    if (e.type === 'keydown') {
+                        navigator.clipboard.readText().then(text => {
+                            if (text) {
+                                fetch(`/input/${projectName}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ data: text })
+                                });
+                            }
+                        }).catch(err => {
+                            console.error("Failed to read clipboard text:", err);
+                        });
+                    }
+                    return false; // Prevent sending raw Ctrl+V control character (0x16) to terminal
                 }
                 return true;
             });
