@@ -620,6 +620,16 @@
         <div class="project-list" id="project-list-container">
             <!-- Project cards injected here -->
         </div>
+        <!-- Sidebar Footer with settings icon -->
+        <div class="sidebar-footer" style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-sidebar); flex-shrink: 0;">
+            <button type="button" class="action-btn" onclick="openSettingsModal()" title="Settings" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; background: none; border: none; padding: 6px; border-radius: 6px; width: 100%; transition: all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.06)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Settings</span>
+            </button>
+        </div>
     </div>
 
     <!-- Right Area: Terminal Workspace -->
@@ -812,6 +822,35 @@
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeBookmarkModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global App Settings Modal Dialog -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content" style="max-width: 420px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2>Global Settings</h2>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Adjust workspace manager settings</div>
+            </div>
+            <form id="settings-form" onsubmit="handleSaveSettings(event)">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="settings-font-family" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Family</label>
+                    <select id="settings-font-family" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; width: 100%;">
+                        <option value="Consolas, monospace">Consolas (Default)</option>
+                        <option value="'Fira Code', Consolas, monospace">Fira Code</option>
+                        <option value="'Courier New', Courier, monospace">Courier New</option>
+                        <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                        <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                        <option value="Monaco, monospace">Monaco</option>
+                        <option value="'SF Mono', monospace">SF Mono</option>
+                        <option value="monospace">Standard Monospace</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
                 </div>
             </form>
         </div>
@@ -1202,7 +1241,7 @@
                 cursorBlink: true,
                 cursorStyle: 'bar',
                 fontSize: 14,
-                fontFamily: '"Fira Code", Courier, monospace',
+                fontFamily: localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace',
                 theme: themeOptions
             });
 
@@ -2131,6 +2170,29 @@
                     }
                 }
             }, 300);
+        }
+
+        function openSettingsModal() {
+            const savedFont = localStorage.getItem('terminal-font-family') || 'Consolas, monospace';
+            document.getElementById('settings-font-family').value = savedFont;
+            document.getElementById('settings-modal').classList.add('show');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('show');
+        }
+
+        function handleSaveSettings(event) {
+            event.preventDefault();
+            const selectedFont = document.getElementById('settings-font-family').value;
+            localStorage.setItem('terminal-font-family', selectedFont);
+            
+            // Apply font family directly to the active terminal instance
+            if (term) {
+                term.options.fontFamily = selectedFont;
+            }
+            
+            closeSettingsModal();
         }
 
         window.onload = () => {
