@@ -41,6 +41,7 @@
             height: 100vh;
             overflow: hidden;
             display: flex;
+            line-height: 1.5;
         }
 
         /* Sidebar styling */
@@ -55,7 +56,7 @@
         }
 
         .sidebar-header {
-            padding: 24px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -71,7 +72,13 @@
             letter-spacing: 0.5px;
         }
 
-        .refresh-btn {
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn {
             background: none;
             border: none;
             color: var(--text-secondary);
@@ -84,7 +91,7 @@
             justify-content: center;
         }
 
-        .refresh-btn:hover {
+        .action-btn:hover {
             color: var(--text-primary);
             background-color: var(--bg-card);
         }
@@ -103,11 +110,15 @@
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px 18px; /* Increased vertical padding to avoid font cutoffs */
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 80px; /* Force minimum height to avoid squishing */
         }
 
         .project-card::before {
@@ -145,32 +156,66 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 6px;
+            margin-right: 18px; /* Leave space for delete button on hover */
+            margin-bottom: 2px;
         }
 
         .project-title {
             font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .branch-badge {
             background-color: #1e293b;
             color: #38bdf8;
             font-family: 'Fira Code', monospace;
-            font-size: 0.75rem;
-            padding: 2px 8px;
+            font-size: 0.72rem;
+            padding: 1px 6px;
             border-radius: 4px;
             display: flex;
             align-items: center;
             gap: 4px;
             border: 1px solid rgba(56, 189, 248, 0.2);
+            flex-shrink: 0;
         }
 
         .project-path {
             font-size: 0.8rem;
             color: var(--text-secondary);
             word-break: break-all;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.15);
         }
 
         .active-dot {
@@ -245,6 +290,132 @@
             overflow-y: auto !important;
         }
 
+        /* Modal Overlay & Form */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            width: 480px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            transform: scale(0.92);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .modal-error {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+        }
+
         /* No active workspace placeholder */
         .placeholder {
             flex: 1;
@@ -305,11 +476,19 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <h1>📁 WORKSPACES</h1>
-            <button class="refresh-btn" onclick="fetchProjects()" title="Refresh workspaces">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                </svg>
-            </button>
+            <div class="header-actions">
+                <button class="action-btn" onclick="openAddModal()" title="Add workspace folder">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="action-btn" onclick="fetchProjects()" title="Refresh list">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="project-list" id="project-list-container">
             <!-- Project cards injected here -->
@@ -322,7 +501,7 @@
         <div class="placeholder" id="no-workspace-placeholder">
             <div class="placeholder-icon">💻</div>
             <h3>No Workspace Active</h3>
-            <p>Select a workspace folder from the sidebar on the left to spin up an interactive PowerShell terminal session.</p>
+            <p>Click the <b>+</b> button on the sidebar to add a workspace folder and spawn an interactive PowerShell terminal session.</p>
         </div>
 
         <!-- Terminal View (Hidden until project selected) -->
@@ -335,7 +514,7 @@
                         <circle cx="6" cy="6" r="3"/>
                         <circle cx="6" cy="18" r="3"/>
                         <path d="M18 15V9a4 4 0 0 0-4-4H9"/>
-                    </path>
+                    </svg>
                     <span id="active-project-branch-text">main</span>
                 </div>
                 <div class="workspace-path-bread" id="active-project-path">~/TOOLS/project</div>
@@ -348,6 +527,30 @@
 
         <div class="terminal-container-wrapper" id="terminal-wrapper" style="display: none;">
             <div id="terminal-parent"></div>
+        </div>
+    </div>
+
+    <!-- Add Workspace Modal Dialog -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Workspace Directory</h2>
+            </div>
+            <form id="add-project-form" onsubmit="handleAddProject(event)">
+                <div class="form-group">
+                    <label for="proj-name">Workspace Name</label>
+                    <input type="text" id="proj-name" class="form-input" placeholder="e.g. Capture" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="proj-path">Local Directory Path</label>
+                    <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" required autocomplete="off">
+                </div>
+                <div class="modal-error" id="modal-error-msg">Error message goes here</div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Workspace</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -378,11 +581,21 @@
             const container = document.getElementById('project-list-container');
             container.innerHTML = '';
 
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px; font-size: 0.9rem;">
+                        No workspace folders added.<br>Click the <b>+</b> button above to add one.
+                    </div>
+                `;
+                return;
+            }
+
             projects.forEach(proj => {
                 const card = document.createElement('div');
                 card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
                 card.onclick = () => selectProject(proj.name);
 
+                // Title bar container inside card
                 const titleContainer = document.createElement('div');
                 titleContainer.className = 'project-title-container';
 
@@ -395,10 +608,10 @@
                     const branch = document.createElement('div');
                     branch.className = 'branch-badge';
                     branch.innerHTML = `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
                             <path d="M18 15V9a4 4 0 0 0-4-4H9"/>
-                        </svg> ${proj.branch}
+                        </svg>${proj.branch}
                     `;
                     titleContainer.appendChild(branch);
                 }
@@ -407,9 +620,24 @@
 
                 const path = document.createElement('div');
                 path.className = 'project-path';
-                // Show shortened display path
                 path.innerText = proj.path;
                 card.appendChild(path);
+
+                // Delete button shown on hover
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.title = 'Remove workspace';
+                deleteBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                `;
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation(); // Prevent card select click trigger
+                    deleteProject(proj.name);
+                };
+                card.appendChild(deleteBtn);
 
                 container.appendChild(card);
             });
@@ -420,8 +648,6 @@
             if (activeProject === projectName) return;
             
             activeProject = projectName;
-            
-            // Highlight sidebar selection
             renderSidebar();
 
             // Toggle placeholders
@@ -429,12 +655,10 @@
             document.getElementById('workspace-header').style.display = 'flex';
             document.getElementById('terminal-wrapper').style.display = 'flex';
 
-            // Get target project metadata and start/load session
             try {
                 const response = await fetch(`/api/session/${projectName}`, { method: 'POST' });
                 const data = await response.json();
                 
-                // Update header info
                 document.getElementById('active-project-name').innerText = data.name;
                 document.getElementById('active-project-path').innerText = data.path;
                 
@@ -446,7 +670,6 @@
                     branchBadge.style.display = 'none';
                 }
 
-                // Spin up or re-connect the xterm console
                 initTerminal(projectName);
             } catch (err) {
                 console.error("Error setting up session:", err);
@@ -455,15 +678,13 @@
 
         // Initialize xterm.js terminal instance
         function initTerminal(projectName) {
-            // Close existing SSE stream
             if (eventSource) {
                 eventSource.close();
             }
 
             const termDiv = document.getElementById('terminal-parent');
-            termDiv.innerHTML = ''; // Clear terminal pane container
+            termDiv.innerHTML = ''; 
 
-            // Configure Xterm
             term = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'bar',
@@ -497,7 +718,7 @@
             term.open(termDiv);
             fitAddon.fit();
 
-            // Handle Resize
+            // Resize Observer
             const resizeObserver = new ResizeObserver(() => {
                 fitAddon.fit();
             });
@@ -511,14 +732,12 @@
                 });
             });
 
-            // Send initial fit dimension to server
             fetch(`/resize/${projectName}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cols: term.cols, rows: term.rows })
             });
 
-            // Listen to key inputs in browser xterm pane and send to backend PTY
             term.onData(data => {
                 fetch(`/input/${projectName}`, {
                     method: 'POST',
@@ -527,7 +746,6 @@
                 });
             });
 
-            // Connect to server event-stream (SSE) for receiving PTY output
             eventSource = new EventSource(`/stream/${projectName}`);
             
             eventSource.onmessage = (event) => {
@@ -545,11 +763,93 @@
                 eventSource.close();
             };
 
-            // Focus terminal immediately
             term.focus();
         }
 
-        // Initialize on page load
+        // Delete project workspace directory
+        async function deleteProject(projectName) {
+            if (!confirm(`Are you sure you want to remove the workspace '${projectName}'? (All background terminal sessions for this workspace will be closed).`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/projects/${projectName}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    alert(data.error || "Failed to remove workspace");
+                    return;
+                }
+
+                projects = await response.json();
+                
+                // If the deleted project was the active one, clear workspace view
+                if (activeProject === projectName) {
+                    activeProject = null;
+                    if (eventSource) eventSource.close();
+                    document.getElementById('workspace-header').style.display = 'none';
+                    document.getElementById('terminal-wrapper').style.display = 'none';
+                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                }
+
+                renderSidebar();
+            } catch (err) {
+                console.error("Error removing workspace:", err);
+            }
+        }
+
+        // Open/Close modal popup functions
+        function openAddModal() {
+            document.getElementById('proj-name').value = '';
+            document.getElementById('proj-path').value = '';
+            document.getElementById('modal-error-msg').style.display = 'none';
+            document.getElementById('add-modal').classList.add('show');
+            document.getElementById('proj-name').focus();
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('show');
+        }
+
+        // Handle Add Project submit form
+        async function handleAddProject(event) {
+            event.preventDefault();
+            const errorMsg = document.getElementById('modal-error-msg');
+            errorMsg.style.display = 'none';
+
+            const name = document.getElementById('proj-name').value;
+            const path = document.getElementById('proj-path').value;
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, path: path })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    errorMsg.innerText = data.error || "Failed to add workspace folder";
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+
+                projects = data;
+                renderSidebar();
+                closeAddModal();
+                
+                // Automatically switch to the newly added workspace
+                selectProject(name);
+            } catch (err) {
+                errorMsg.innerText = "Connection error. Please ensure background server is running.";
+                errorMsg.style.display = 'block';
+                console.error("Error adding workspace:", err);
+            }
+        }
+
         window.onload = () => {
             fetchProjects();
         };

@@ -4,7 +4,6 @@ import json
 import queue
 import threading
 import subprocess
-import webbrowser
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from winpty import PTY
 
@@ -12,6 +11,7 @@ app = Flask(__name__)
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
+PROJECTS_FILE = r"C:\@delta\ms1\TOOLS\terminal_tui\projects.json"
 active_sessions = {}
 git_branch_cache = {}
 sessions_lock = threading.Lock()
@@ -34,7 +34,6 @@ class TerminalSession:
     def _read_loop(self):
         while self.pty.isalive():
             try:
-                # Read blocking is extremely CPU friendly
                 data = self.pty.read(blocking=True)
                 if data:
                     self.output_queue.put(data)
@@ -42,7 +41,7 @@ class TerminalSession:
                     break
             except Exception:
                 break
-        self.output_queue.put(None) # Signal EOF
+        self.output_queue.put(None)
 
     def write(self, data):
         if self.pty.isalive():
@@ -54,6 +53,22 @@ class TerminalSession:
             self.rows = rows
             if self.pty.isalive():
                 self.pty.set_size(cols, rows)
+
+def load_projects_config():
+    if os.path.exists(PROJECTS_FILE):
+        try:
+            with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error reading projects config: {e}")
+    return []
+
+def save_projects_config(projects):
+    try:
+        with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(projects, f, indent=2)
+    except Exception as e:
+        print(f"Error saving projects config: {e}")
 
 def get_git_branch(path):
     try:
@@ -71,35 +86,27 @@ def get_git_branch(path):
     return ""
 
 def scan_projects():
+    config_projects = load_projects_config()
     projects = []
-    try:
-        entries = os.listdir(BASE_DIR)
-        for entry in entries:
-            path = os.path.join(BASE_DIR, entry)
-            if os.path.isdir(path):
-                if entry.startswith(".") or entry.startswith("_"):
-                    continue
-                if entry in ("__pycache__", "ENV", "node_modules", "DesktopOK"):
-                    continue
-                
-                # Fetch/Cache git branch
-                branch = git_branch_cache.get(entry)
-                if branch is None:
-                    branch = get_git_branch(path)
-                    git_branch_cache[entry] = branch
-                    
-                with sessions_lock:
-                    is_active = entry in active_sessions and active_sessions[entry].pty.isalive()
-                    
-                projects.append({
-                    "name": entry,
-                    "path": path.replace("\\", "/"),
-                    "branch": branch,
-                    "is_active": is_active
-                })
-        projects.sort(key=lambda x: x["name"].lower())
-    except Exception as e:
-        print(f"Error scanning projects: {e}")
+    for p in config_projects:
+        name = p["name"]
+        path = p["path"]
+        
+        # Fetch/Cache git branch
+        branch = git_branch_cache.get(name)
+        if branch is None:
+            branch = get_git_branch(path)
+            git_branch_cache[name] = branch
+            
+        with sessions_lock:
+            is_active = name in active_sessions and active_sessions[name].pty.isalive()
+            
+        projects.append({
+            "name": name,
+            "path": path.replace("\\", "/"),
+            "branch": branch,
+            "is_active": is_active
+        })
     return projects
 
 @app.route('/')
@@ -107,7 +114,63 @@ def index():
     return render_template('index.html')
 
 @app.route('/api/projects', methods=['GET'])
-def api_projects():
+def api_projects_get():
+    return jsonify(scan_projects())
+
+@app.route('/api/projects', methods=['POST'])
+def api_projects_post():
+    data = request.json
+    name = data.get("name", "").strip()
+    path = data.get("path", "").strip()
+    if not name or not path:
+        return jsonify({"error": "Project Name and Path are required"}), 400
+        
+    # Check if folder exists
+    if not os.path.exists(path) or not os.path.isdir(path):
+        return jsonify({"error": f"The directory path '{path}' does not exist."}), 400
+        
+    projects = load_projects_config()
+    
+    # Check duplicate name
+    if any(p["name"].lower() == name.lower() for p in projects):
+        return jsonify({"error": f"A workspace named '{name}' already exists."}), 400
+        
+    # Add project
+    projects.append({
+        "name": name,
+        "path": os.path.abspath(path)
+    })
+    save_projects_config(projects)
+    
+    # Force git branch cache refresh for this project
+    git_branch_cache[name] = get_git_branch(path)
+    
+    return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>', methods=['DELETE'])
+def api_projects_delete(project):
+    projects = load_projects_config()
+    
+    # Filter out project
+    filtered_projects = [p for p in projects if p["name"].lower() != project.lower()]
+    
+    if len(filtered_projects) == len(projects):
+        return jsonify({"error": "Project not found"}), 404
+        
+    save_projects_config(filtered_projects)
+    
+    # Kill active session if any
+    with sessions_lock:
+        if project in active_sessions:
+            session = active_sessions[project]
+            if session.pty.isalive():
+                # On Windows, winpty spawns PowerShell. Closing PTY will kill the spawned process.
+                session.pty.close()
+            del active_sessions[project]
+            
+    if project in git_branch_cache:
+        del git_branch_cache[project]
+        
     return jsonify(scan_projects())
 
 @app.route('/api/session/<project>', methods=['POST'])
@@ -161,17 +224,14 @@ def api_stream(project):
     def generate():
         while True:
             try:
-                # Timeout so the loop can check for disconnected clients occasionally
                 data = session.output_queue.get(timeout=2.0)
                 if data is None:
-                    # EOF
                     yield f"data: {json.dumps({'eof': True})}\n\n"
                     break
                 yield f"data: {json.dumps({'data': data})}\n\n"
             except queue.Empty:
-                # Yield heartbeat to keep connection alive
                 yield f"data: {json.dumps({'heartbeat': True})}\n\n"
-            except Exception as e:
+            except Exception:
                 break
                 
     return Response(stream_with_context(generate()), mimetype='text/event-stream',
