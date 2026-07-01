@@ -14,5 +14,21 @@
       "pathColor": "#494a4b",
       "accentColor": "#2563eb"
     }
+  },
+  {
+    "name": "TV Show (Flask)",
+    "path": "C:\\@delta\\ms1\\@Flask\\5011_tv_show",
+    "pinned": false,
+    "theme": {
+      "background": "#000000",
+      "foreground": "#d1d5db",
+      "cursor": "#3b82f6"
+    },
+    "cardTheme": {
+      "bgColor": "#161c26",
+      "textColor": "#f1f5f9",
+      "pathColor": "#94a3b8",
+      "accentColor": "#2563eb"
+    }
   }
 ]

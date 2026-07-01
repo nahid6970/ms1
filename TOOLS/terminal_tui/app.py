@@ -55,8 +55,9 @@ Clear-Host
 """)
         
         # Spawn PowerShell with custom profile, bypassing main user profile
-        profile_arg = f". '{profile_path.replace('\\', '/')}'"
-        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{profile_arg}"'
+        # Wrap in curly braces script block to handle spaces/parentheses in path correctly
+        profile_path_clean = profile_path.replace("\\", "/")
+        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
         
         # Spawn PowerShell
         self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
