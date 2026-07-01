@@ -764,11 +764,34 @@
                     const draggingCard = document.querySelector('.dragging');
                     if (!draggingCard) return;
                     
+                    const isDraggingPinned = draggingCard.dataset.pinned === 'true';
                     const afterElement = getDragAfterElement(container, e.clientY);
-                    if (afterElement == null) {
-                        container.appendChild(draggingCard);
+                    
+                    // Find the first normal (unpinned) card in the list to act as the boundary
+                    const firstNormalCard = [...container.querySelectorAll('.project-card')].find(c => c !== draggingCard && c.dataset.pinned === 'false');
+                    
+                    if (isDraggingPinned) {
+                        // A pinned card can only be placed in the pinned section (above the first normal card)
+                        if (afterElement && afterElement.dataset.pinned === 'true') {
+                            container.insertBefore(draggingCard, afterElement);
+                        } else {
+                            if (firstNormalCard) {
+                                container.insertBefore(draggingCard, firstNormalCard);
+                            } else {
+                                container.appendChild(draggingCard);
+                            }
+                        }
                     } else {
-                        container.insertBefore(draggingCard, afterElement);
+                        // A normal card can only be placed in the normal section (at or below the first normal card)
+                        if (afterElement && afterElement.dataset.pinned === 'false') {
+                            container.insertBefore(draggingCard, afterElement);
+                        } else {
+                            if (firstNormalCard) {
+                                container.insertBefore(draggingCard, firstNormalCard);
+                            } else {
+                                container.appendChild(draggingCard);
+                            }
+                        }
                     }
                 };
             }
@@ -794,6 +817,7 @@
                 // Enable drag and drop reordering
                 card.setAttribute('draggable', 'true');
                 card.setAttribute('data-name', proj.name);
+                card.dataset.pinned = proj.pinned ? 'true' : 'false';
                 
                 card.ondragstart = (e) => {
                     setTimeout(() => card.classList.add('dragging'), 0);
