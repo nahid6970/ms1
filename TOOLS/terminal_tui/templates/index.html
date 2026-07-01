@@ -483,7 +483,7 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
-                <button class="action-btn" onclick="fetchProjects()" title="Refresh list">
+                <button class="action-btn" onclick="fetchProjects(true)" title="Refresh list">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                     </svg>
@@ -566,9 +566,10 @@
         let eventSource = null;
 
         // Fetch project workspaces from Flask server
-        async function fetchProjects() {
+        async function fetchProjects(refresh = false) {
             try {
-                const response = await fetch('/api/projects');
+                const url = refresh ? '/api/projects?refresh=true' : '/api/projects';
+                const response = await fetch(url);
                 projects = await response.json();
                 renderSidebar();
             } catch (err) {
@@ -739,6 +740,11 @@
             });
 
             term.onData(data => {
+                // Filter out Device Attributes (DA) queries sent back by xterm.js
+                // which winpty translates to raw keypresses, polluting the prompt.
+                if (data.startsWith('\x1b[?') && data.endsWith('c')) {
+                    return;
+                }
                 fetch(`/input/${projectName}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

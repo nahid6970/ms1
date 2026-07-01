@@ -23,6 +23,8 @@ class TerminalSession:
         self.cols = 100
         self.rows = 30
         self.pty = PTY(self.cols, self.rows)
+        self.history = ""
+        self.history_lock = threading.Lock()
         
         # Spawn PowerShell
         self.pty.spawn("powershell.exe", cwd=path)
@@ -36,6 +38,10 @@ class TerminalSession:
             try:
                 data = self.pty.read(blocking=True)
                 if data:
+                    with self.history_lock:
+                        self.history += data
+                        if len(self.history) > 100000:
+                            self.history = self.history[-100000:]
                     self.output_queue.put(data)
                 else:
                     break
@@ -115,6 +121,10 @@ def index():
 
 @app.route('/api/projects', methods=['GET'])
 def api_projects_get():
+    refresh = request.args.get("refresh") == "true"
+    if refresh:
+        global git_branch_cache
+        git_branch_cache = {}
     return jsonify(scan_projects())
 
 @app.route('/api/projects', methods=['POST'])
@@ -222,6 +232,12 @@ def api_stream(project):
         return Response("Session not found", status=404)
         
     def generate():
+        # Yield accumulated terminal history immediately on stream open!
+        with session.history_lock:
+            history_data = session.history
+        if history_data:
+            yield f"data: {json.dumps({'data': history_data})}\n\n"
+            
         while True:
             try:
                 data = session.output_queue.get(timeout=2.0)
