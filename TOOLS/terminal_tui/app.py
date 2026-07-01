@@ -41,6 +41,16 @@ active_sessions = {}
 sessions_lock = threading.Lock()
 
 
+def get_session_key(project, pane_id=None):
+    if not pane_id or pane_id == "main":
+        return project
+    return f"{project}::{pane_id}"
+
+
+def session_belongs_to_project(session_key, project):
+    return session_key == project or session_key.startswith(f"{project}::")
+
+
 def restart_current_process(delay_seconds=1.0):
     def _restart():
         print("Restarting Terminal TUI process...")
@@ -262,7 +272,10 @@ def scan_projects():
                 card_theme[k] = v
         
         with sessions_lock:
-            is_active = name in active_sessions and active_sessions[name].pty.isalive()
+            is_active = any(
+                session_belongs_to_project(session_key, name) and session.pty.isalive()
+                for session_key, session in active_sessions.items()
+            )
             
         bookmarks = p.get("bookmarks", [])
         projects.append({
@@ -338,10 +351,11 @@ def api_projects_delete(project):
     
     # Kill active session if any
     with sessions_lock:
-        if project in active_sessions:
-            session = active_sessions[project]
+        for session_key, session in list(active_sessions.items()):
+            if not session_belongs_to_project(session_key, project):
+                continue
             session.kill()
-            del active_sessions[project]
+            del active_sessions[session_key]
             
     return jsonify(scan_projects())
 
@@ -472,10 +486,11 @@ def api_projects_customize():
     # Terminate active session if name or path changed, so it starts fresh!
     if name_changed or path_changed:
         with sessions_lock:
-            if original_name in active_sessions:
-                session = active_sessions[original_name]
+            for session_key, session in list(active_sessions.items()):
+                if not session_belongs_to_project(session_key.lower(), original_name.lower()):
+                    continue
                 session.kill()
-                del active_sessions[original_name]
+                del active_sessions[session_key]
                 
     # Update properties
     if new_name:
@@ -543,10 +558,9 @@ def api_session_stop(project):
         return jsonify({"error": "Project not found"}), 404
         
     with sessions_lock:
-        # Match case-insensitive active_session name
-        session_key = next((name for name in active_sessions if name.lower() == project.lower()), None)
-        if session_key:
-            session = active_sessions[session_key]
+        for session_key, session in list(active_sessions.items()):
+            if not session_belongs_to_project(session_key.lower(), project.lower()):
+                continue
             session.kill()
             del active_sessions[session_key]
             
@@ -554,18 +568,22 @@ def api_session_stop(project):
 
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):
+    data = request.get_json(silent=True) or {}
+    pane_id = data.get("paneId", "main")
     projects = scan_projects()
     proj_details = next((p for p in projects if p["name"] == project), None)
     if not proj_details:
         return jsonify({"error": "Project not found"}), 404
-        
+
+    session_key = get_session_key(project, pane_id)
     with sessions_lock:
-        if project not in active_sessions or not active_sessions[project].pty.isalive():
-            active_sessions[project] = TerminalSession(project, proj_details["path"])
+        if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"])
             
     return jsonify({
         "status": "connected",
         "name": project,
+        "paneId": pane_id,
         "path": proj_details["path"]
     })
 
@@ -723,6 +741,7 @@ def ws_disconnect():
 @socketio.on('join-session', namespace='/pty')
 def ws_join_session(data):
     project = data.get('project')
+    pane_id = data.get('paneId', 'main')
     if not project:
         emit('error', {'msg': 'Project name required'})
         return
@@ -732,11 +751,12 @@ def ws_join_session(data):
     if not proj_details:
         emit('error', {'msg': 'Project not found'})
         return
-        
+
+    session_key = get_session_key(project, pane_id)
     with sessions_lock:
-        if project not in active_sessions or not active_sessions[project].pty.isalive():
-            active_sessions[project] = TerminalSession(project, proj_details["path"])
-        session = active_sessions[project]
+        if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"])
+        session = active_sessions[session_key]
         session.add_sid(request.sid)
         
     # Send history immediately
@@ -744,30 +764,34 @@ def ws_join_session(data):
     if history:
         emit('pty-output', {'data': history})
         
-    emit('session-ready', {'name': project, 'path': proj_details["path"]})
+    emit('session-ready', {'name': project, 'paneId': pane_id, 'path': proj_details["path"]})
 
 @socketio.on('pty-input', namespace='/pty')
 def ws_pty_input(data):
     project = data.get('project')
+    pane_id = data.get('paneId', 'main')
     input_data = data.get('data', '')
     if not project:
         return
-        
+
+    session_key = get_session_key(project, pane_id)
     with sessions_lock:
-        session = active_sessions.get(project)
+        session = active_sessions.get(session_key)
     if session and session.pty.isalive():
         session.write(input_data)
 
 @socketio.on('resize', namespace='/pty')
 def ws_resize(data):
     project = data.get('project')
+    pane_id = data.get('paneId', 'main')
     cols = data.get('cols', 100)
     rows = data.get('rows', 30)
     if not project:
         return
-        
+
+    session_key = get_session_key(project, pane_id)
     with sessions_lock:
-        session = active_sessions.get(project)
+        session = active_sessions.get(session_key)
     if session:
         session.resize(cols, rows)
 
