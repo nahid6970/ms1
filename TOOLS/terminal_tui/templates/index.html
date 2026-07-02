@@ -892,13 +892,6 @@
             </svg>
         </button>
 
-        <!-- Placeholder shown by default -->
-        <div class="placeholder" id="no-workspace-placeholder">
-            <div class="placeholder-icon">💻</div>
-            <h3>No Workspace Active</h3>
-            <p>Click the <b>+</b> button on the sidebar to add a workspace folder and spawn an interactive PowerShell terminal session.</p>
-        </div>
-
         <!-- Terminal View (Hidden until project selected) -->
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
@@ -991,7 +984,14 @@
                         </svg>
                     </button>
                 </div>
-            </div>
+        </div>
+        </div>
+
+        <!-- Placeholder shown by default -->
+        <div class="placeholder" id="no-workspace-placeholder" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="placeholder-icon">💻</div>
+            <h3>No Workspace Active</h3>
+            <p>Click the <b>+</b> button on the sidebar to add a workspace folder and spawn an interactive PowerShell terminal session.</p>
         </div>
 
         <div class="terminal-container-wrapper" id="terminal-wrapper" style="display: none; flex-direction: column;">
@@ -3041,13 +3041,35 @@
             const showSidebarList = localStorage.getItem('show-sidebar-workspaces') !== 'false';
             
             // 1. Update sidebar visibility
-            const projList = document.getElementById('project-list-container');
-            const searchInput = document.getElementById('search-input');
-            if (projList) {
-                projList.style.display = showSidebarList ? 'block' : 'none';
-            }
-            if (searchInput) {
-                searchInput.style.display = showSidebarList ? 'block' : 'none';
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.getElementById('sidebar-toggle-btn');
+            
+            if (showSidebarList) {
+                if (sidebar) {
+                    sidebar.style.display = 'flex';
+                }
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'flex';
+                }
+                const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
+                document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+                
+                const projList = document.getElementById('project-list-container');
+                const searchInput = document.getElementById('search-input');
+                if (projList) {
+                    projList.style.display = 'block';
+                }
+                if (searchInput) {
+                    searchInput.style.display = 'block';
+                }
+            } else {
+                if (sidebar) {
+                    sidebar.style.display = 'none';
+                }
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'none';
+                }
+                document.documentElement.style.setProperty('--sidebar-width', '0px');
             }
             
             // 2. Update header dropdown visibility
