@@ -1166,6 +1166,19 @@
                     </div>
                 </div>
 
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; padding: 6px 10px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px;">
+                    <label for="theme-preset-select" style="font-size: 0.8rem; font-weight: 500; color: var(--text-primary); margin: 0; min-width: 120px;">Theme Preset</label>
+                    <select id="theme-preset-select" class="form-input" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;" onchange="applyPresetTheme(this.value)">
+                        <option value="custom">⚙️ Custom / Hand-picked</option>
+                        <option value="dracula">🧛 Dracula (Vibrant Purple)</option>
+                        <option value="nord">❄️ Nord (Clean Arctic Ice)</option>
+                        <option value="monokai">🌴 Monokai (Classic Dark)</option>
+                        <option value="solarized">☀️ Solarized Dark (Retro Teal)</option>
+                        <option value="onedark">💻 One Dark (Modern Atom)</option>
+                        <option value="cyberpunk">⚡ Cyberpunk (Neon Synthwave)</option>
+                    </select>
+                </div>
+
                 <div style="display: flex; gap: 20px; margin-bottom: 14px; align-items: stretch;">
                     
                     <!-- Left Column: Workspace Card Settings -->
@@ -2280,6 +2293,70 @@
             }
         }
 
+        const themePresets = {
+            dracula: {
+                theme: { background: '#282a36', foreground: '#f8f8f2', cursor: '#f1fa8c', borderColor: '#44475a' },
+                cardTheme: { bgColor: '#1e1f29', textColor: '#f8f8f2', pathColor: '#6272a4', accentColor: '#bd93f9' }
+            },
+            nord: {
+                theme: { background: '#2e3440', foreground: '#d8dee9', cursor: '#88c0d0', borderColor: '#3b4252' },
+                cardTheme: { bgColor: '#242933', textColor: '#eceff4', pathColor: '#4c566a', accentColor: '#81a1c1' }
+            },
+            monokai: {
+                theme: { background: '#272822', foreground: '#f8f8f2', cursor: '#f92672', borderColor: '#3e3d32' },
+                cardTheme: { bgColor: '#1e1f1c', textColor: '#f8f8f2', pathColor: '#75715e', accentColor: '#a6e22e' }
+            },
+            solarized: {
+                theme: { background: '#002b36', foreground: '#839496', cursor: '#b58900', borderColor: '#073642' },
+                cardTheme: { bgColor: '#001f27', textColor: '#93a1a1', pathColor: '#586e75', accentColor: '#268bd2' }
+            },
+            onedark: {
+                theme: { background: '#282c34', foreground: '#abb2bf', cursor: '#528bff', borderColor: '#3e4452' },
+                cardTheme: { bgColor: '#1e222b', textColor: '#abb2bf', pathColor: '#5c6370', accentColor: '#61afef' }
+            },
+            cyberpunk: {
+                theme: { background: '#000b19', foreground: '#00ffcc', cursor: '#ff007f', borderColor: '#ff007f' },
+                cardTheme: { bgColor: '#000610', textColor: '#00ffcc', pathColor: '#ff0055', accentColor: '#ffe600' }
+            }
+        };
+
+        function applyPresetTheme(presetName) {
+            if (presetName === 'custom') return;
+            const preset = themePresets[presetName];
+            if (!preset) return;
+            
+            document.getElementById('theme-bg').value = preset.theme.background;
+            document.getElementById('theme-fg').value = preset.theme.foreground;
+            document.getElementById('theme-cursor').value = preset.theme.cursor;
+            document.getElementById('theme-border').value = preset.theme.borderColor;
+            
+            document.getElementById('card-bg').value = preset.cardTheme.bgColor;
+            document.getElementById('card-fg').value = preset.cardTheme.textColor;
+            document.getElementById('card-path').value = preset.cardTheme.pathColor;
+            document.getElementById('card-accent').value = preset.cardTheme.accentColor;
+        }
+
+        function detectPresetFromColors(theme, cardTheme) {
+            for (const [key, preset] of Object.entries(themePresets)) {
+                const matchTheme = 
+                    preset.theme.background.toLowerCase() === theme.background.toLowerCase() &&
+                    preset.theme.foreground.toLowerCase() === theme.foreground.toLowerCase() &&
+                    preset.theme.cursor.toLowerCase() === theme.cursor.toLowerCase() &&
+                    preset.theme.borderColor.toLowerCase() === (theme.borderColor || '#232c3d').toLowerCase();
+                    
+                const matchCard = 
+                    preset.cardTheme.bgColor.toLowerCase() === cardTheme.bgColor.toLowerCase() &&
+                    preset.cardTheme.textColor.toLowerCase() === cardTheme.textColor.toLowerCase() &&
+                    preset.cardTheme.pathColor.toLowerCase() === (cardTheme.pathColor || '#94a3b8').toLowerCase() &&
+                    preset.cardTheme.accentColor.toLowerCase() === cardTheme.accentColor.toLowerCase();
+                    
+                if (matchTheme && matchCard) {
+                    return key;
+                }
+            }
+            return 'custom';
+        }
+
         // Customize Theme Modal Dialog Controls
         function openThemeModal() {
             if (!contextProject) return;
@@ -2318,6 +2395,25 @@
             document.getElementById('card-fg').value = cardTheme.textColor;
             document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
             document.getElementById('card-accent').value = cardTheme.accentColor;
+
+            // Detect matching preset
+            const currentPreset = detectPresetFromColors(theme, cardTheme);
+            document.getElementById('theme-preset-select').value = currentPreset;
+
+            // Bind manual picker changes to revert preset selection to 'custom'
+            const pickers = [
+                'theme-bg', 'theme-fg', 'theme-cursor', 'theme-border',
+                'card-bg', 'card-fg', 'card-path', 'card-accent'
+            ];
+            pickers.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.dataset.boundPresetWatcher) {
+                    el.dataset.boundPresetWatcher = 'true';
+                    el.addEventListener('input', () => {
+                        document.getElementById('theme-preset-select').value = 'custom';
+                    });
+                }
+            });
 
             // Populate Copy Style dropdown
             const copySelect = document.getElementById('copy-style-select');
