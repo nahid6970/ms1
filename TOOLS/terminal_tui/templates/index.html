@@ -164,6 +164,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            flex-shrink: 0;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -1828,7 +1829,7 @@
             updateTerminalTabs();
         }
 
-        function createTerminalPane(projectName, paneId, projectTheme = null) {
+        function createTerminalPane(projectName, paneId, projectTheme = null, initialCommand = null) {
             const parent = document.getElementById('terminal-parent');
             const paneDiv = document.createElement('div');
             document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
@@ -1932,6 +1933,12 @@
                         paneSocket.emit('resize', { project: projectName, paneId, cols: paneTerm.cols, rows: paneTerm.rows });
                     } catch (e) {}
                 }, 50);
+
+                if (initialCommand) {
+                    setTimeout(() => {
+                        paneSocket.emit('pty-input', { project: projectName, paneId, data: initialCommand + "\r" });
+                    }, 400);
+                }
             });
 
             paneSocket.on('pty-output', (msg) => {
@@ -1990,7 +1997,7 @@
             return pane;
         }
 
-        function splitTerminal(direction) {
+        function splitTerminal(direction, initialCommand = null) {
             if (!activeProject) return;
             const parent = document.getElementById('terminal-parent');
             if (direction === 'stacked') {
@@ -2002,7 +2009,7 @@
             }
             const currentProjDetails = projects.find(p => p.name === activeProject) || {};
             const paneId = `pane-${Date.now()}-${splitPaneCounter++}`;
-            createTerminalPane(activeProject, paneId, currentProjDetails.theme);
+            createTerminalPane(activeProject, paneId, currentProjDetails.theme, initialCommand);
             
             updateTerminalTabs();
             
@@ -2719,6 +2726,12 @@
                     row.innerHTML = `
                         <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bm.command.replace(/'/g, "\\'")}')" title="Run in new split terminal">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color);">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="3" x2="12" y2="21"></line>
+                                </svg>
+                            </button>
                             <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${bm.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
                                 <input type="checkbox" ${bm.global ? 'checked' : ''} onchange="toggleBookmarkGlobal('${bm.project}', ${bm.index}, this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
                                 <span class="slider-round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${bm.global ? 'var(--accent-color)' : '#475569'}; transition: 0.2s; border-radius: 16px;">
@@ -2831,6 +2844,10 @@
                     console.error("Error running bookmarked command:", err);
                 }
             }
+        }
+
+        function runBookmarkInSplit(cmd) {
+            splitTerminal('right', cmd);
         }
 
         async function addCurrentCommandAsBookmark() {
