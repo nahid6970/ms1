@@ -1141,6 +1141,10 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="settings-font-size" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Size (px)</label>
+                    <input type="number" id="settings-font-size" min="8" max="32" value="14" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
+                </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
@@ -1691,10 +1695,11 @@
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
 
+            const savedFontSize = parseInt(localStorage.getItem('terminal-font-size')) || 14;
             const paneTerm = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'bar',
-                fontSize: 14,
+                fontSize: savedFontSize,
                 fontFamily: savedFont,
                 theme: getTerminalTheme(projectTheme)
             });
@@ -2848,6 +2853,10 @@
             selectedFontValue = savedFont;
             updateSelectedFontUI();
             closeCustomFontDropdown();
+            
+            const savedFontSize = parseInt(localStorage.getItem('terminal-font-size')) || 14;
+            document.getElementById('settings-font-size').value = savedFontSize;
+            
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -2860,6 +2869,9 @@
             const selectedFont = selectedFontValue || "'Fira Code', Consolas, monospace";
             localStorage.setItem('terminal-font-family', selectedFont);
             
+            const selectedFontSize = parseInt(document.getElementById('settings-font-size').value) || 14;
+            localStorage.setItem('terminal-font-size', selectedFontSize);
+            
             // Apply font family globally to the entire application body
             document.body.style.fontFamily = selectedFont;
             
@@ -2871,6 +2883,7 @@
             
             terminalPanes.forEach(pane => {
                 pane.term.options.fontFamily = selectedFont;
+                pane.term.options.fontSize = selectedFontSize;
                 // Force layout refit to apply character width adjustments immediately
                 if (pane.fitAddon) {
                     try {
