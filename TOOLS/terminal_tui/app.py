@@ -936,9 +936,24 @@ def list_system_fonts():
 
 if __name__ == '__main__':
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
+    
+    import socket
+    local_ip = "127.0.0.1"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        pass
+
+    print(f"\n * Running on local address: http://127.0.0.1:{PORT}/")
+    if local_ip != "127.0.0.1":
+        print(f" * Running on network address: http://{local_ip}:{PORT}/\n")
+
     socketio.run(
         app,
-        host='127.0.0.1',
+        host='0.0.0.0',
         port=PORT,
         debug=debug_enabled,
         use_reloader=False,

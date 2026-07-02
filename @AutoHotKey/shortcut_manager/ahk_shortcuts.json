@@ -849,6 +849,21 @@
             "process_name_enabled": true,
             "window_class_enabled": true,
             "match_foreground": false
+        },
+        {
+            "action": "Send(\"{Esc}\")\nSleep(150)\nSend(\"{Esc}\")",
+            "category": "Terminal",
+            "description": "Resume previous Gemini chat session",
+            "enabled": true,
+            "hotkey": "RButton",
+            "name": "potplayer close",
+            "process_name": "PotPlayerMini64.exe",
+            "window_class": "",
+            "window_title": "",
+            "window_title_enabled": false,
+            "process_name_enabled": true,
+            "window_class_enabled": false,
+            "match_foreground": false
         }
     ],
     "exclusion_rules": [
