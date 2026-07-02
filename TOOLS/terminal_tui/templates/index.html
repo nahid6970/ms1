@@ -1292,34 +1292,40 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="settings-font-size" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Size (px)</label>
-                    <input type="number" id="settings-font-size" min="8" max="32" value="14" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; height: 38px;">
+                        <label for="settings-font-size" style="font-size: 0.8rem; font-weight: 500; color: var(--text-primary); margin: 0;">Terminal Font Size (px)</label>
+                        <input type="number" id="settings-font-size" min="8" max="32" value="14" style="width: 70px; height: 26px; padding: 2px 6px; font-size: 0.82rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;">
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; height: 38px;">
+                        <label for="settings-sidebar-width" style="font-size: 0.8rem; font-weight: 500; color: var(--text-primary); margin: 0;">Sidebar Width (px)</label>
+                        <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="width: 70px; height: 26px; padding: 2px 6px; font-size: 0.82rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;">
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; height: 38px;">
+                        <label for="settings-dropdown-height" style="font-size: 0.8rem; font-weight: 500; color: var(--text-primary); margin: 0;">Dropdown Max Height (px)</label>
+                        <input type="number" id="settings-dropdown-height" min="100" max="800" step="10" style="width: 70px; height: 26px; padding: 2px 6px; font-size: 0.82rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;">
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="settings-sidebar-width" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Sidebar Width (px)</label>
-                    <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-show-sidebar-workspaces" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-show-sidebar-workspaces" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspaces List in Left Sidebar</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-show-paths" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-show-paths" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspace Paths in Sidebar</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-show-categories" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-show-categories" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspace Category Tags</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-context-menu" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-context-menu" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Actions on Right-Click Context Menu</label>
+                    </div>
                 </div>
-                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
-                    <input type="checkbox" id="settings-show-sidebar-workspaces" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                    <label for="settings-show-sidebar-workspaces" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspaces List in Left Sidebar</label>
-                </div>
-                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
-                    <input type="checkbox" id="settings-show-paths" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                    <label for="settings-show-paths" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspace Paths in Sidebar</label>
-                </div>
-                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
-                    <input type="checkbox" id="settings-show-categories" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                    <label for="settings-show-categories" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspace Category Tags</label>
-                </div>
-                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
-                    <input type="checkbox" id="settings-context-menu" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                    <label for="settings-context-menu" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Actions on Right-Click Context Menu</label>
-                </div>
-                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; gap: 12px;">
-                    <label for="settings-dropdown-height" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; min-width: 180px;">Dropdown Max Height (px)</label>
-                    <input type="number" id="settings-dropdown-height" class="form-input" min="100" max="800" step="10" style="width: 100px; height: 28px; padding: 4px 8px; font-size: 0.8rem; text-align: center;">
-                </div>
+
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
