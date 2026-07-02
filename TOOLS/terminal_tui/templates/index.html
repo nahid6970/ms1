@@ -909,7 +909,12 @@
                             <path d="M6 9l6 6 6-6"/>
                         </svg>
                     </button>
-                    <div class="custom-dropdown-content" id="workspace-selector-dropdown-content" style="display: none; position: absolute; left: 0; top: 38px; width: 240px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 4px 0; max-height: 280px; overflow-y: auto;"></div>
+                    <div class="custom-dropdown-content" id="workspace-selector-dropdown-content" style="display: none; position: absolute; left: 0; top: 38px; width: 260px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; max-height: 320px; flex-direction: column;">
+                        <div style="padding: 8px; border-bottom: 1px solid var(--border-color); display: flex; flex-shrink: 0;">
+                            <input type="text" id="workspace-dropdown-search" placeholder="Search workspaces..." oninput="filterWorkspaceDropdownOptions(event)" style="width: 100%; height: 28px; padding: 4px 8px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); outline: none;" autocomplete="off">
+                        </div>
+                        <div id="workspace-selector-options-list" style="overflow-y: auto; flex: 1; padding: 4px 0; max-height: 240px;"></div>
+                    </div>
                 </div>
                 <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: inline-block;">
                     <h2 id="active-project-name" onclick="toggleProjectNameDropdown(event)" style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; margin: 0;">
@@ -2904,7 +2909,7 @@
             if (event) event.stopPropagation();
             const content = document.getElementById('workspace-selector-dropdown-content');
             if (!content) return;
-            const isShown = content.style.display === 'block';
+            const isShown = content.style.display === 'flex';
             
             // Hide other dropdowns
             const bookmarkContent = document.getElementById('bookmark-dropdown-content');
@@ -2915,25 +2920,43 @@
             if (isShown) {
                 content.style.display = 'none';
             } else {
-                updateWorkspaceSelectorDropdown();
-                content.style.display = 'block';
+                const searchInput = document.getElementById('workspace-dropdown-search');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                updateWorkspaceSelectorDropdown("");
+                content.style.display = 'flex';
+                if (searchInput) {
+                    setTimeout(() => searchInput.focus(), 50);
+                }
             }
         }
 
-        function updateWorkspaceSelectorDropdown() {
-            const content = document.getElementById('workspace-selector-dropdown-content');
-            if (!content) return;
-            content.innerHTML = '';
+        function filterWorkspaceDropdownOptions(event) {
+            const query = event.target.value.toLowerCase();
+            updateWorkspaceSelectorDropdown(query);
+        }
+
+        function updateWorkspaceSelectorDropdown(filterText = "") {
+            const listEl = document.getElementById('workspace-selector-options-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
             
-            if (projects.length === 0) {
+            const dropdownContent = document.getElementById('workspace-selector-dropdown-content');
+            
+            const filtered = projects.filter(proj => 
+                proj.name.toLowerCase().includes(filterText)
+            );
+            
+            if (filtered.length === 0) {
                 const emptyMsg = document.createElement('div');
-                emptyMsg.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic;';
-                emptyMsg.innerText = 'No workspaces added';
-                content.appendChild(emptyMsg);
+                emptyMsg.style = 'padding: 12px 14px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic; text-align: center;';
+                emptyMsg.innerText = projects.length === 0 ? 'No workspaces added' : 'No matches found';
+                listEl.appendChild(emptyMsg);
                 return;
             }
             
-            projects.forEach(proj => {
+            filtered.forEach(proj => {
                 const opt = document.createElement('div');
                 opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
                 if (proj.name === activeProject) {
@@ -2944,14 +2967,14 @@
                 opt.onmouseleave = () => opt.style.backgroundColor = 'transparent';
                 opt.onclick = () => {
                     selectProject(proj.name);
-                    content.style.display = 'none';
+                    if (dropdownContent) dropdownContent.style.display = 'none';
                 };
                 
                 opt.innerHTML = `
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${proj.name}</span>
                     ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>' : ''}
                 `;
-                content.appendChild(opt);
+                listEl.appendChild(opt);
             });
         }
 
