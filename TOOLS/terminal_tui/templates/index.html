@@ -276,6 +276,23 @@
             overflow: visible;
         }
 
+        body.context-menu-actions .card-actions {
+            display: none !important;
+        }
+
+        #card-context-menu {
+            display: none;
+            position: absolute;
+            z-index: 10000;
+            background-color: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            gap: 12px;
+            align-items: center;
+        }
+
         .action-dot {
             width: 12px;
             height: 12px;
@@ -1178,6 +1195,10 @@
                     <input type="checkbox" id="settings-show-paths" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                     <label for="settings-show-paths" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspace Paths in Sidebar</label>
                 </div>
+                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
+                    <input type="checkbox" id="settings-context-menu" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                    <label for="settings-context-menu" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Actions on Right-Click Context Menu</label>
+                </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
@@ -1185,6 +1206,9 @@
             </form>
         </div>
     </div>
+
+    <!-- Horizontal Context Menu Overlay for Card Actions -->
+    <div id="card-context-menu"></div>
 
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
@@ -1203,6 +1227,14 @@
         let socket = null;
         let terminalPanes = [];
         let splitPaneCounter = 1;
+
+        // Close context menu on any outside click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('card-context-menu');
+            if (menu) {
+                menu.style.display = 'none';
+            }
+        });
 
         // Fetch project workspaces from Flask server
         async function fetchProjects(refresh = false) {
@@ -1384,6 +1416,15 @@
                 }
                 
                 card.onclick = () => selectProject(proj.name);
+                
+                card.oncontextmenu = (e) => {
+                    const useMenu = localStorage.getItem('use-context-menu-actions') === 'true';
+                    if (useMenu) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showCardContextMenu(e, proj);
+                    }
+                };
 
                 // Title bar container inside card
                 const titleContainer = document.createElement('div');
@@ -2955,6 +2996,66 @@
             }
         }
 
+        function showCardContextMenu(e, proj) {
+            const menu = document.getElementById('card-context-menu');
+            if (!menu) return;
+            
+            menu.innerHTML = '';
+            menu.style.display = 'flex';
+            
+            // Reposition context menu to follow cursor
+            menu.style.left = `${e.pageX}px`;
+            menu.style.top = `${e.pageY}px`;
+            
+            // Build the action buttons horizontally
+            // 1. Pin Dot
+            const pinDot = document.createElement('button');
+            pinDot.className = `action-dot ${proj.pinned ? 'yellow' : 'grey'}`;
+            pinDot.title = proj.pinned ? 'Unpin Workspace' : 'Pin Workspace';
+            pinDot.onclick = (event) => {
+                event.stopPropagation();
+                togglePinProject(proj);
+                menu.style.display = 'none';
+            };
+            menu.appendChild(pinDot);
+            
+            // 2. Customize Dot
+            const customizeDot = document.createElement('button');
+            customizeDot.className = 'action-dot blue';
+            customizeDot.title = 'Customize Style & Theme';
+            customizeDot.onclick = (event) => {
+                event.stopPropagation();
+                contextProject = proj;
+                openThemeModal();
+                menu.style.display = 'none';
+            };
+            menu.appendChild(customizeDot);
+            
+            // 3. Stop Dot
+            if (proj.is_active) {
+                const stopDot = document.createElement('button');
+                stopDot.className = 'action-dot orange';
+                stopDot.title = 'Stop Session';
+                stopDot.onclick = (event) => {
+                    event.stopPropagation();
+                    stopProjectSession(proj.name);
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(stopDot);
+            }
+            
+            // 4. Delete Dot
+            const deleteDot = document.createElement('button');
+            deleteDot.className = 'action-dot red';
+            deleteDot.title = 'Remove Workspace';
+            deleteDot.onclick = (event) => {
+                event.stopPropagation();
+                deleteProject(proj.name);
+                menu.style.display = 'none';
+            };
+            menu.appendChild(deleteDot);
+        }
+
         function openSettingsModal() {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
@@ -2969,6 +3070,9 @@
             
             const savedShowPaths = localStorage.getItem('show-workspace-paths') !== 'false';
             document.getElementById('settings-show-paths').checked = savedShowPaths;
+            
+            const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
+            document.getElementById('settings-context-menu').checked = savedContextMenu;
             
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -2993,6 +3097,14 @@
             
             const selectedShowPaths = document.getElementById('settings-show-paths').checked;
             localStorage.setItem('show-workspace-paths', selectedShowPaths);
+            
+            const selectedContextMenu = document.getElementById('settings-context-menu').checked;
+            localStorage.setItem('use-context-menu-actions', selectedContextMenu);
+            if (selectedContextMenu) {
+                document.body.classList.add('context-menu-actions');
+            } else {
+                document.body.classList.remove('context-menu-actions');
+            }
             
             // Apply font family globally to the entire application body
             document.body.style.fontFamily = selectedFont;
@@ -3134,6 +3246,13 @@
             // Apply custom sidebar width on load
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
             document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+            
+            const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
+            if (savedContextMenu) {
+                document.body.classList.add('context-menu-actions');
+            } else {
+                document.body.classList.remove('context-menu-actions');
+            }
             
             loadSystemFonts();
             await fetchProjects();
