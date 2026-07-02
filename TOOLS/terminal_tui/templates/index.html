@@ -961,6 +961,10 @@
                     <label for="proj-path">Local Directory Path</label>
                     <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" required autocomplete="off">
                 </div>
+                <div class="form-group">
+                    <label for="proj-category">Category</label>
+                    <input type="text" id="proj-category" class="form-input" placeholder="e.g. Tools, Personal, Work" autocomplete="off">
+                </div>
                 <div class="modal-error" id="modal-error-msg">Error message goes here</div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
@@ -1047,6 +1051,10 @@
                     <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
                         <label for="theme-proj-path" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Path</label>
                         <input type="text" id="theme-proj-path" class="form-input" required autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
+                    </div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
+                        <label for="theme-proj-category" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Category</label>
+                        <input type="text" id="theme-proj-category" class="form-input" placeholder="e.g. Tools, Personal, Work" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
                     </div>
                 </div>
 
@@ -1369,7 +1377,8 @@
 
             const filtered = projects.filter(p => 
                 p.name.toLowerCase().includes(searchQuery) || 
-                p.path.toLowerCase().includes(searchQuery)
+                p.path.toLowerCase().includes(searchQuery) ||
+                (p.category && p.category.toLowerCase().includes(searchQuery))
             );
 
             if (filtered.length === 0) {
@@ -1466,6 +1475,24 @@
                     title.appendChild(pin);
                 }
                 titleContainer.appendChild(title);
+
+                if (proj.category) {
+                    const badge = document.createElement('span');
+                    badge.className = 'category-badge';
+                    badge.innerText = proj.category;
+                    badge.style.fontSize = '0.62rem';
+                    badge.style.fontWeight = '600';
+                    badge.style.textTransform = 'uppercase';
+                    badge.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                    badge.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+                    badge.style.color = 'var(--text-secondary)';
+                    badge.style.borderRadius = '4px';
+                    badge.style.padding = '1px 5px';
+                    badge.style.marginLeft = '8px';
+                    badge.style.display = 'inline-block';
+                    badge.style.verticalAlign = 'middle';
+                    titleContainer.appendChild(badge);
+                }
 
                 card.appendChild(titleContainer);
 
@@ -2019,6 +2046,7 @@
         function openAddModal() {
             document.getElementById('proj-name').value = '';
             document.getElementById('proj-path').value = '';
+            document.getElementById('proj-category').value = '';
             document.getElementById('modal-error-msg').style.display = 'none';
             document.getElementById('add-modal').classList.add('show');
             document.getElementById('proj-name').focus();
@@ -2035,12 +2063,13 @@
 
             const name = document.getElementById('proj-name').value;
             const path = document.getElementById('proj-path').value;
+            const category = document.getElementById('proj-category').value;
 
             try {
                 const response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name, path: path })
+                    body: JSON.stringify({ name: name, path: path, category: category })
                 });
 
                 const data = await response.json();
@@ -2071,6 +2100,7 @@
             // Populate workspace name and path inputs
             document.getElementById('theme-proj-name').value = contextProject.name;
             document.getElementById('theme-proj-path').value = contextProject.path;
+            document.getElementById('theme-proj-category').value = contextProject.category || '';
             
             const theme = contextProject.theme || {
                 background: '#000000',
@@ -2151,6 +2181,8 @@
                 accentColor: cardAccent
             };
 
+            const newCategory = document.getElementById('theme-proj-category').value.trim();
+
             try {
                 const response = await fetch('/api/projects/customize', {
                     method: 'POST',
@@ -2159,6 +2191,7 @@
                         originalName: contextProject.name,
                         name: newName,
                         path: newPath,
+                        category: newCategory,
                         theme: theme,
                         cardTheme: cardTheme
                     })

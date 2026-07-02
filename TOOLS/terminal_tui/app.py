@@ -287,9 +287,11 @@ def scan_projects():
             
         bookmarks = p.get("bookmarks", [])
         layout = p.get("layout", {})
+        category = p.get("category", "")
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
+            "category": category,
             "is_active": is_active,
             "pinned": pinned,
             "theme": theme,
@@ -325,10 +327,12 @@ def api_projects_post():
     if any(p["name"].lower() == name.lower() for p in projects):
         return jsonify({"error": f"A workspace named '{name}' already exists."}), 400
         
+    category = data.get("category", "").strip()
     # Add project
     projects.append({
         "name": name,
         "path": os.path.abspath(path),
+        "category": category,
         "pinned": False,
         "theme": {
             "background": "#000000",
@@ -515,6 +519,8 @@ def api_projects_customize():
             # Move pinned project to the top
             projects.remove(proj)
             projects.insert(0, proj)
+    if "category" in data:
+        proj["category"] = data["category"].strip()
     if "theme" in data:
         proj["theme"] = data["theme"]
     if "cardTheme" in data:
