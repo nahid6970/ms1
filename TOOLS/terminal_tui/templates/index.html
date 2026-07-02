@@ -1234,6 +1234,16 @@
             if (menu) {
                 menu.style.display = 'none';
             }
+            
+            // Close modal overlays when clicking outside modal content backdrop
+            if (e.target.classList.contains('modal-overlay')) {
+                const id = e.target.id;
+                if (id === 'add-modal') closeAddModal();
+                else if (id === 'split-select-modal') closeSplitSelectModal();
+                else if (id === 'theme-modal') closeThemeModal();
+                else if (id === 'bookmark-modal') closeBookmarkModal();
+                else if (id === 'settings-modal') closeSettingsModal();
+            }
         });
 
         // Fetch project workspaces from Flask server
