@@ -1053,7 +1053,12 @@
                     
                     <!-- Right Column: Terminal Console Theme -->
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 8px; border-left: 1px solid var(--border-color); padding-left: 20px;">
-                        <h3 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 4px; margin-bottom: 2px;">Terminal Console Theme</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; margin-bottom: 2px;">
+                            <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--accent-color); margin: 0;">Terminal Console Theme</h3>
+                            <button type="button" class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; height: 22px; display: flex; align-items: center; gap: 2px;" onclick="randomizeTerminalColors()">
+                                <span>🎲</span> Random
+                            </button>
+                        </div>
                         
                         <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 0;">
                             <label for="theme-bg" style="font-size: 0.75rem;">Terminal Background</label>
@@ -1066,6 +1071,10 @@
                         <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
                             <label for="theme-cursor" style="font-size: 0.75rem;">Cursor Color</label>
                             <input type="color" id="theme-cursor" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
+                            <label for="theme-border" style="font-size: 0.75rem;">Terminal Border Color</label>
+                            <input type="color" id="theme-border" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
                         </div>
                     </div>
                     
@@ -1695,6 +1704,10 @@
 
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
+            
+            if (projectTheme && projectTheme.borderColor) {
+                paneDiv.style.borderColor = projectTheme.borderColor;
+            }
 
             const savedFontSize = parseInt(localStorage.getItem('terminal-font-size')) || 14;
             const paneTerm = new Terminal({
@@ -1986,7 +1999,8 @@
             const theme = contextProject.theme || {
                 background: '#000000',
                 foreground: '#d1d5db',
-                cursor: '#3b82f6'
+                cursor: '#3b82f6',
+                borderColor: '#232c3d'
             };
             const cardTheme = contextProject.cardTheme || {
                 bgColor: '#161c26',
@@ -1998,6 +2012,7 @@
             document.getElementById('theme-bg').value = theme.background;
             document.getElementById('theme-fg').value = theme.foreground;
             document.getElementById('theme-cursor').value = theme.cursor;
+            document.getElementById('theme-border').value = theme.borderColor || '#232c3d';
             
             document.getElementById('card-bg').value = cardTheme.bgColor;
             document.getElementById('card-fg').value = cardTheme.textColor;
@@ -2040,6 +2055,7 @@
             const bg = document.getElementById('theme-bg').value;
             const fg = document.getElementById('theme-fg').value;
             const cursor = document.getElementById('theme-cursor').value;
+            const borderColor = document.getElementById('theme-border').value;
             
             const cardBg = document.getElementById('card-bg').value;
             const cardFg = document.getElementById('card-fg').value;
@@ -2049,7 +2065,8 @@
             const theme = {
                 background: bg,
                 foreground: fg,
-                cursor: cursor
+                cursor: cursor,
+                borderColor: borderColor
             };
             const cardTheme = {
                 bgColor: cardBg,
@@ -2083,8 +2100,11 @@
                         }
                         
                         const projDetails = projects.find(p => p.name === newName);
-                        if (projDetails && term) {
-                            term.options.theme = theme;
+                        if (projDetails) {
+                            terminalPanes.forEach(pane => {
+                                pane.term.options.theme = theme;
+                                pane.element.style.borderColor = borderColor;
+                            });
                         }
                     }
                     handleSearch();
@@ -2103,11 +2123,13 @@
             const defaultTheme = {
                 background: '#000000',
                 foreground: '#d1d5db',
-                cursor: '#3b82f6'
+                cursor: '#3b82f6',
+                borderColor: '#232c3d'
             };
             const defaultCardTheme = {
                 bgColor: '#161c26',
                 textColor: '#f1f5f9',
+                pathColor: '#94a3b8',
                 accentColor: '#2563eb'
             };
 
@@ -2129,9 +2151,10 @@
                     closeThemeModal();
 
                     if (activeProject === contextProject.name) {
-                        if (term) {
-                            term.options.theme = defaultTheme;
-                        }
+                        terminalPanes.forEach(pane => {
+                            pane.term.options.theme = defaultTheme;
+                            pane.element.style.borderColor = defaultTheme.borderColor;
+                        });
                     }
                     handleSearch();
                 }
@@ -2166,6 +2189,32 @@
             document.getElementById('card-accent').value = accent;
         }
 
+        // Randomize console theme colors
+        function randomizeTerminalColors() {
+            const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const hslToHex = (h, s, l) => {
+                l /= 100;
+                const a = s * Math.min(l, 1 - l) / 100;
+                const f = n => {
+                    const k = (n + h / 30) % 12;
+                    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                    return Math.round(255 * color).toString(16).padStart(2, '0');
+                };
+                return `#${f(0)}${f(8)}${f(4)}`;
+            };
+            
+            const h = rand(0, 360);
+            const bg = hslToHex(h, rand(20, 40), rand(3, 7)); // Rich dark background
+            const fg = hslToHex(h, rand(10, 20), rand(75, 88)); // Soft clear text
+            const cursor = hslToHex((h + rand(120, 240)) % 360, rand(80, 100), rand(50, 65)); // Vibrant accent cursor
+            const border = hslToHex(h, rand(30, 50), rand(15, 25)); // Harmonized border color
+            
+            document.getElementById('theme-bg').value = bg;
+            document.getElementById('theme-fg').value = fg;
+            document.getElementById('theme-cursor').value = cursor;
+            document.getElementById('theme-border').value = border;
+        }
+
         // Copy style from another workspace
         function handleCopyStyle(sourceProjectName) {
             if (!sourceProjectName) return;
@@ -2183,15 +2232,16 @@
                 document.getElementById('card-path').value = cardTheme.pathColor || '#94a3b8';
                 document.getElementById('card-accent').value = cardTheme.accentColor;
 
-                // Copy console style as well
                 const consoleTheme = source.theme || {
                     background: '#000000',
                     foreground: '#d1d5db',
-                    cursor: '#3b82f6'
+                    cursor: '#3b82f6',
+                    borderColor: '#232c3d'
                 };
                 document.getElementById('theme-bg').value = consoleTheme.background;
                 document.getElementById('theme-fg').value = consoleTheme.foreground;
                 document.getElementById('theme-cursor').value = consoleTheme.cursor;
+                document.getElementById('theme-border').value = consoleTheme.borderColor || '#232c3d';
             }
             // Reset dropdown select index
             document.getElementById('copy-style-select').value = '';
