@@ -55,7 +55,6 @@
             flex-direction: column;
             height: 100%;
             z-index: 10;
-            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
 
@@ -336,7 +335,7 @@
             justify-content: center;
             z-index: 100;
             color: var(--text-secondary);
-            transition: all 0.2s ease, left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             padding: 0;
         }
 
@@ -1747,14 +1746,25 @@
             pane.resizeObserver = resizeObserver;
             resizeObserver.observe(paneDiv);
 
+            let ptyResizeTimeout;
             paneTerm.onResize(size => {
-                if (paneSocket && paneSocket.connected) {
-                    paneSocket.emit('resize', { project: projectName, paneId, cols: size.cols, rows: size.rows });
-                }
+                clearTimeout(ptyResizeTimeout);
+                ptyResizeTimeout = setTimeout(() => {
+                    if (paneSocket && paneSocket.connected) {
+                        paneSocket.emit('resize', { project: projectName, paneId, cols: size.cols, rows: size.rows });
+                    }
+                }, 50);
             });
 
             paneSocket.on('connect', () => {
                 paneSocket.emit('join-session', { project: projectName, paneId });
+                // Instantly fit and synchronize backend PTY size upon successful connection
+                setTimeout(() => {
+                    try {
+                        paneFitAddon.fit();
+                        paneSocket.emit('resize', { project: projectName, paneId, cols: paneTerm.cols, rows: paneTerm.rows });
+                    } catch (e) {}
+                }, 50);
             });
 
             paneSocket.on('pty-output', (msg) => {
