@@ -816,35 +816,37 @@
 
     <!-- Left Sidebar: Workspaces -->
     <div class="sidebar">
-        <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px;">
-            <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; min-width: 0; height: 32px; padding: 6px 10px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
-            <div class="header-actions" style="flex-shrink: 0; gap: 4px;">
-                <button class="action-btn" onclick="openAddModal()" title="Add workspace folder" style="padding: 4px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <div style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; height: 100%;">
+            <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px;">
+                <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; min-width: 0; height: 32px; padding: 6px 10px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
+                <div class="header-actions" style="flex-shrink: 0; gap: 4px;">
+                    <button class="action-btn" onclick="openAddModal()" title="Add workspace folder" style="padding: 4px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    <button class="action-btn" onclick="resetAllSessions()" title="Reset sessions and restart app" style="padding: 4px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="project-list" id="project-list-container">
+                <!-- Project cards injected here -->
+            </div>
+            <!-- Sidebar Footer with settings icon -->
+            <div class="sidebar-footer" style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-sidebar); flex-shrink: 0;">
+                <button type="button" class="action-btn" onclick="openSettingsModal()" title="Settings" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; background: none; border: none; padding: 6px; border-radius: 6px; width: 100%; transition: all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.06)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                </button>
-                <button class="action-btn" onclick="resetAllSessions()" title="Reset sessions and restart app" style="padding: 4px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                    </svg>
+                    <span>Settings</span>
                 </button>
             </div>
-        </div>
-
-        <div class="project-list" id="project-list-container">
-            <!-- Project cards injected here -->
-        </div>
-        <!-- Sidebar Footer with settings icon -->
-        <div class="sidebar-footer" style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-sidebar); flex-shrink: 0;">
-            <button type="button" class="action-btn" onclick="openSettingsModal()" title="Settings" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; background: none; border: none; padding: 6px; border-radius: 6px; width: 100%; transition: all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.06)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-                <span>Settings</span>
-            </button>
         </div>
     </div>
 
@@ -1731,16 +1733,16 @@
                 }
             });
 
-            let resizeTimeout;
+            let resizeRaf;
             const resizeObserver = new ResizeObserver(() => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
+                cancelAnimationFrame(resizeRaf);
+                resizeRaf = requestAnimationFrame(() => {
                     try {
                         paneFitAddon.fit();
                     } catch (e) {
                         // Ignore transient layout fits
                     }
-                }, 100);
+                });
             });
             pane.resizeObserver = resizeObserver;
             resizeObserver.observe(paneDiv);
