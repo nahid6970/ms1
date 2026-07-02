@@ -1579,7 +1579,43 @@
 
                 container.appendChild(card);
             });
+
+            // Adjust category badge widths dynamically to shrink-wrap wrapped text
+            adjustBadgeWidths();
         }
+
+        function adjustBadgeWidths() {
+            const badges = document.querySelectorAll('.category-badge');
+            badges.forEach(badge => {
+                badge.style.width = '';
+                if (badge.offsetHeight > 18) {
+                    const words = badge.innerText.split(/\s+/);
+                    const tempSpan = document.createElement('span');
+                    tempSpan.style.font = window.getComputedStyle(badge).font;
+                    tempSpan.style.fontWeight = window.getComputedStyle(badge).fontWeight;
+                    tempSpan.style.fontSize = window.getComputedStyle(badge).fontSize;
+                    tempSpan.style.textTransform = 'uppercase';
+                    tempSpan.style.visibility = 'hidden';
+                    tempSpan.style.position = 'absolute';
+                    tempSpan.style.whiteSpace = 'nowrap';
+                    
+                    let maxWidth = 0;
+                    document.body.appendChild(tempSpan);
+                    words.forEach(word => {
+                        tempSpan.innerText = word;
+                        const w = tempSpan.offsetWidth;
+                        if (w > maxWidth) {
+                            maxWidth = w;
+                        }
+                    });
+                    document.body.removeChild(tempSpan);
+                    
+                    badge.style.width = (maxWidth + 12) + 'px';
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustBadgeWidths);
 
         async function togglePinProject(project) {
             try {
