@@ -1873,12 +1873,64 @@
                 parent.prepend(tabsContainer);
             }
             
+            const currentProj = projects.find(p => p.name === activeProject);
+            const projectTheme = (currentProj && currentProj.theme) ? currentProj.theme : null;
+            const borderCol = (projectTheme && projectTheme.borderColor) ? projectTheme.borderColor : 'var(--border-color)';
+            const accentCol = (projectTheme && (projectTheme.cursor || projectTheme.borderColor)) ? (projectTheme.cursor || projectTheme.borderColor) : 'var(--accent-color)';
+            
+            tabsContainer.style.borderBottom = `1px solid ${borderCol}`;
             tabsContainer.innerHTML = '';
             
             terminalPanes.forEach((pane, index) => {
                 const tab = document.createElement('div');
                 const isActive = pane.element.classList.contains('active-pane');
                 tab.className = `terminal-tab ${isActive ? 'active' : ''}`;
+                
+                // Base static styles
+                tab.style.display = 'flex';
+                tab.style.alignItems = 'center';
+                tab.style.gap = '8px';
+                tab.style.padding = '6px 12px';
+                tab.style.fontSize = '0.82rem';
+                tab.style.cursor = 'pointer';
+                tab.style.transition = 'all 0.2s ease';
+                tab.style.userSelect = 'none';
+                tab.style.borderStyle = 'solid';
+                tab.style.borderWidth = '1px';
+                
+                if (isActive) {
+                    tab.style.backgroundColor = 'var(--bg-main)';
+                    tab.style.color = accentCol;
+                    tab.style.borderLeftColor = borderCol;
+                    tab.style.borderRightColor = borderCol;
+                    tab.style.borderTopColor = borderCol;
+                    tab.style.borderBottomColor = 'var(--bg-main)';
+                    tab.style.marginBottom = '-1px';
+                    tab.style.fontWeight = '500';
+                } else {
+                    tab.style.backgroundColor = '#121824';
+                    tab.style.color = 'var(--text-secondary)';
+                    tab.style.borderLeftColor = 'var(--border-color)';
+                    tab.style.borderRightColor = 'var(--border-color)';
+                    tab.style.borderTopColor = 'var(--border-color)';
+                    tab.style.borderBottomColor = borderCol;
+                    tab.style.marginBottom = '0';
+                    tab.style.fontWeight = 'normal';
+                }
+                
+                // hover effect
+                tab.onmouseenter = () => {
+                    if (!isActive) {
+                        tab.style.backgroundColor = '#1a2233';
+                        tab.style.color = 'var(--text-primary)';
+                    }
+                };
+                tab.onmouseleave = () => {
+                    if (!isActive) {
+                        tab.style.backgroundColor = '#121824';
+                        tab.style.color = 'var(--text-secondary)';
+                    }
+                };
                 
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'terminal-tab-title';
