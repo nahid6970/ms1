@@ -573,6 +573,13 @@ def api_sessions_reset():
             session.kill()
         active_sessions.clear()
 
+    # Reset layout configuration to default (single terminal pane) for all workspaces
+    projects = load_projects_config()
+    for p in projects:
+        if "layout" in p:
+            del p["layout"]
+    save_projects_config(projects)
+
     restart_current_process()
     return jsonify({
         "projects": scan_projects(),
