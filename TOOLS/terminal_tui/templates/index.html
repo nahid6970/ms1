@@ -925,6 +925,15 @@
         <!-- Terminal View (Hidden until project selected) -->
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
+                <div class="custom-dropdown" id="workspace-selector-dropdown-container" style="position: relative; display: none; margin-right: 8px;">
+                    <button class="action-btn" id="workspace-selector-btn" onclick="toggleWorkspaceSelectorDropdown(event)" title="Select Workspace" style="height: 34px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.85rem; font-weight: 600; white-space: nowrap;">
+                        <span id="selected-workspace-selector-label">Select Workspace...</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="custom-dropdown-content" id="workspace-selector-dropdown-content" style="display: none; position: absolute; left: 0; top: 38px; width: 240px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 4px 0; max-height: 280px; overflow-y: auto;"></div>
+                </div>
                 <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: inline-block;">
                     <h2 id="active-project-name" onclick="toggleProjectNameDropdown(event)" style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; margin: 0;">
                         <span id="active-project-name-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; display: inline-block; vertical-align: middle;">Project Name</span>
@@ -1261,6 +1270,10 @@
                     <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
                 </div>
                 <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
+                    <input type="checkbox" id="settings-show-sidebar-workspaces" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                    <label for="settings-show-sidebar-workspaces" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspaces List in Left Sidebar</label>
+                </div>
+                <div style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
                     <input type="checkbox" id="settings-show-paths" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                     <label for="settings-show-paths" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspace Paths in Sidebar</label>
                 </div>
@@ -1335,6 +1348,7 @@
                 }
                 
                 handleSearch(); // Triggers render with current search filter
+                applySidebarWorkspacesVisibility();
             } catch (err) {
                 console.error("Error fetching projects:", err);
             }
@@ -2110,12 +2124,12 @@
                 if (activeProject === projectName) {
                     activeProject = null;
                     clearTerminalPanes();
-                    document.getElementById('workspace-header').style.display = 'none';
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                 }
 
                 handleSearch();
+                applySidebarWorkspacesVisibility();
             } catch (err) {
                 console.error("Error removing workspace:", err);
             }
@@ -2143,12 +2157,12 @@
                 if (activeProject === projectName) {
                     activeProject = null;
                     clearTerminalPanes();
-                    document.getElementById('workspace-header').style.display = 'none';
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                 }
 
                 handleSearch();
+                applySidebarWorkspacesVisibility();
             } catch (err) {
                 console.error("Error stopping session:", err);
             }
@@ -2553,12 +2567,11 @@
                     saveTerminalLayoutState();
                     document.title = "Terminal Manager";
                     
-                    // Reset UI to initial placeholder (home page) state
-                    document.getElementById('workspace-header').style.display = 'none';
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                     
                     handleSearch();
+                    applySidebarWorkspacesVisibility();
 
                     if (result.restarting) {
                         waitForServerAndReload();
@@ -2888,6 +2901,124 @@
             }
         }
 
+        function toggleWorkspaceSelectorDropdown(event) {
+            if (event) event.stopPropagation();
+            const content = document.getElementById('workspace-selector-dropdown-content');
+            if (!content) return;
+            const isShown = content.style.display === 'block';
+            
+            // Hide other dropdowns
+            const bookmarkContent = document.getElementById('bookmark-dropdown-content');
+            if (bookmarkContent) bookmarkContent.style.display = 'none';
+            const nameContent = document.getElementById('project-name-dropdown-content');
+            if (nameContent) nameContent.style.display = 'none';
+            
+            if (isShown) {
+                content.style.display = 'none';
+            } else {
+                updateWorkspaceSelectorDropdown();
+                content.style.display = 'block';
+            }
+        }
+
+        function updateWorkspaceSelectorDropdown() {
+            const content = document.getElementById('workspace-selector-dropdown-content');
+            if (!content) return;
+            content.innerHTML = '';
+            
+            if (projects.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic;';
+                emptyMsg.innerText = 'No workspaces added';
+                content.appendChild(emptyMsg);
+                return;
+            }
+            
+            projects.forEach(proj => {
+                const opt = document.createElement('div');
+                opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
+                if (proj.name === activeProject) {
+                    opt.style.fontWeight = 'bold';
+                    opt.style.color = 'var(--accent-color)';
+                }
+                opt.onmouseenter = () => opt.style.backgroundColor = 'var(--bg-card-hover)';
+                opt.onmouseleave = () => opt.style.backgroundColor = 'transparent';
+                opt.onclick = () => {
+                    selectProject(proj.name);
+                    content.style.display = 'none';
+                };
+                
+                opt.innerHTML = `
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${proj.name}</span>
+                    ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>' : ''}
+                `;
+                content.appendChild(opt);
+            });
+        }
+
+        function applySidebarWorkspacesVisibility() {
+            const showSidebarList = localStorage.getItem('show-sidebar-workspaces') !== 'false';
+            
+            // 1. Update sidebar visibility
+            const projList = document.getElementById('project-list-container');
+            const searchInput = document.getElementById('search-input');
+            if (projList) {
+                projList.style.display = showSidebarList ? 'block' : 'none';
+            }
+            if (searchInput) {
+                searchInput.style.display = showSidebarList ? 'block' : 'none';
+            }
+            
+            // 2. Update header dropdown visibility
+            const headerDropdown = document.getElementById('workspace-selector-dropdown-container');
+            if (headerDropdown) {
+                headerDropdown.style.display = showSidebarList ? 'none' : 'inline-block';
+            }
+            
+            // 3. Update header container visibility when no project is active
+            const header = document.getElementById('workspace-header');
+            if (header) {
+                if (!activeProject && !showSidebarList) {
+                    header.style.display = 'flex';
+                    // Hide bookmarks/splits and project-specific header widgets
+                    const nameContainer = document.getElementById('project-name-dropdown-container');
+                    if (nameContainer) nameContainer.style.display = 'none';
+                    const branch = document.getElementById('active-project-branch');
+                    if (branch) branch.style.display = 'none';
+                    const pathBtn = document.getElementById('active-project-path-btn');
+                    if (pathBtn) pathBtn.style.display = 'none';
+                    const bookmarks = document.querySelector('.header-bookmarks');
+                    if (bookmarks) bookmarks.style.display = 'none';
+                    
+                    const label = document.getElementById('selected-workspace-selector-label');
+                    if (label) label.innerText = 'Select Workspace...';
+                } else if (!activeProject && showSidebarList) {
+                    header.style.display = 'none';
+                } else {
+                    // Active project is selected
+                    header.style.display = 'flex';
+                    const nameContainer = document.getElementById('project-name-dropdown-container');
+                    if (nameContainer) nameContainer.style.display = 'inline-block';
+                    const branch = document.getElementById('active-project-branch');
+                    if (branch && branch.style.display !== 'none') {
+                        // Keep current state or restore if needed
+                    }
+                    const pathBtn = document.getElementById('active-project-path-btn');
+                    if (pathBtn) {
+                        const currentProj = projects.find(p => p.name === activeProject);
+                        if (currentProj && currentProj.path) {
+                            pathBtn.style.display = 'flex';
+                        }
+                    }
+                    const bookmarks = document.querySelector('.header-bookmarks');
+                    if (bookmarks) bookmarks.style.display = 'flex';
+                    
+                    const label = document.getElementById('selected-workspace-selector-label');
+                    if (label) label.innerText = activeProject;
+                }
+            }
+        }
+
         // Close dropdown when clicking outside
         window.addEventListener('click', (e) => {
             const content = document.getElementById('bookmark-dropdown-content');
@@ -2900,6 +3031,12 @@
             const nameTrigger = document.getElementById('active-project-name');
             if (nameContent && nameTrigger && !nameTrigger.contains(e.target) && !nameContent.contains(e.target)) {
                 nameContent.style.display = 'none';
+            }
+            
+            const wsContent = document.getElementById('workspace-selector-dropdown-content');
+            const wsTrigger = document.getElementById('workspace-selector-btn');
+            if (wsContent && wsTrigger && !wsTrigger.contains(e.target) && !wsContent.contains(e.target)) {
+                wsContent.style.display = 'none';
             }
         });
 
@@ -3526,7 +3663,10 @@
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
             document.getElementById('settings-sidebar-width').value = savedSidebarWidth;
             
-                       const savedShowPaths = localStorage.getItem('show-workspace-paths') !== 'false';
+            const savedShowSidebarWorkspaces = localStorage.getItem('show-sidebar-workspaces') !== 'false';
+            document.getElementById('settings-show-sidebar-workspaces').checked = savedShowSidebarWorkspaces;
+
+            const savedShowPaths = localStorage.getItem('show-workspace-paths') !== 'false';
             document.getElementById('settings-show-paths').checked = savedShowPaths;
             
             const savedShowCategories = localStorage.getItem('show-workspace-categories') !== 'false';
@@ -3556,6 +3696,9 @@
             // Apply sidebar width variable dynamically
             document.documentElement.style.setProperty('--sidebar-width', `${selectedSidebarWidth}px`);
             
+            const selectedShowSidebarWorkspaces = document.getElementById('settings-show-sidebar-workspaces').checked;
+            localStorage.setItem('show-sidebar-workspaces', selectedShowSidebarWorkspaces);
+            
             const selectedShowPaths = document.getElementById('settings-show-paths').checked;
             localStorage.setItem('show-workspace-paths', selectedShowPaths);
             
@@ -3569,6 +3712,7 @@
             } else {
                 document.body.classList.remove('context-menu-actions');
             }
+            applySidebarWorkspacesVisibility();
             
             // Apply font family globally to the entire application body
             document.body.style.fontFamily = selectedFont;
@@ -3635,6 +3779,7 @@
                 activeProject = projectName;
                 startStatsMonitoring();
                 handleSearch();
+                applySidebarWorkspacesVisibility();
                 
                 document.getElementById('no-workspace-placeholder').style.display = 'none';
                 document.getElementById('workspace-header').style.display = 'flex';
@@ -3722,6 +3867,7 @@
             
             loadSystemFonts();
             await fetchProjects();
+            applySidebarWorkspacesVisibility();
             
             const savedActiveProject = localStorage.getItem('active-project');
             if (savedActiveProject) {
