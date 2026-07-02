@@ -213,6 +213,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
             margin-right: 4px; 
             margin-bottom: 2px;
         }
@@ -227,7 +228,32 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            flex: 1 1 auto;
+            min-width: 0;
             pointer-events: none;
+        }
+
+        .category-badge {
+            align-self: flex-start;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            display: inline-flex;
+            flex: 0 0 auto;
+            font-size: 0.62rem;
+            font-weight: 600;
+            justify-content: flex-end;
+            line-height: 1.25;
+            margin-left: auto;
+            max-width: min(112px, 48%);
+            padding: 1px 5px;
+            text-align: right;
+            text-transform: uppercase;
+            vertical-align: middle;
+            white-space: normal;
+            width: min-content;
+            overflow-wrap: break-word;
         }
 
         .branch-badge {
@@ -1479,31 +1505,7 @@
                 if (proj.category) {
                     const badge = document.createElement('span');
                     badge.className = 'category-badge';
-                    badge.style.display = 'inline-flex';
-                    badge.style.flexWrap = 'wrap';
-                    badge.style.justifyContent = 'flex-end';
-                    badge.style.gap = '4px';
-                    badge.style.marginLeft = '8px';
-                    badge.style.verticalAlign = 'middle';
-                    badge.style.textAlign = 'right';
-
-                    const words = proj.category.split(/\s+/);
-                    words.forEach(word => {
-                        if (!word) return;
-                        const wordSpan = document.createElement('span');
-                        wordSpan.innerText = word;
-                        wordSpan.style.fontSize = '0.62rem';
-                        wordSpan.style.fontWeight = '600';
-                        wordSpan.style.textTransform = 'uppercase';
-                        wordSpan.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                        wordSpan.style.border = '1px solid rgba(255, 255, 255, 0.15)';
-                        wordSpan.style.color = 'var(--text-secondary)';
-                        wordSpan.style.borderRadius = '4px';
-                        wordSpan.style.padding = '1px 5px';
-                        wordSpan.style.whiteSpace = 'nowrap';
-                        badge.appendChild(wordSpan);
-                    });
-
+                    badge.innerText = proj.category;
                     titleContainer.appendChild(badge);
                 }
 
