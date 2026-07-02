@@ -1164,6 +1164,10 @@
                     <label for="settings-sidebar-width" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Sidebar Width (px)</label>
                     <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
                 </div>
+                <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="settings-show-paths" checked style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="settings-show-paths" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary);">Show Workspace Paths in Sidebar</label>
+                </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
@@ -1409,6 +1413,15 @@
                 path.innerText = proj.path;
                 if (proj.cardTheme) {
                     path.style.color = proj.cardTheme.pathColor;
+                }
+                
+                const showPathsSetting = localStorage.getItem('show-workspace-paths') !== 'false';
+                if (showPathsSetting) {
+                    path.style.display = 'block';
+                    card.removeAttribute('title');
+                } else {
+                    path.style.display = 'none';
+                    card.title = proj.path;
                 }
                 card.appendChild(path);
 
@@ -2944,6 +2957,9 @@
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
             document.getElementById('settings-sidebar-width').value = savedSidebarWidth;
             
+            const savedShowPaths = localStorage.getItem('show-workspace-paths') !== 'false';
+            document.getElementById('settings-show-paths').checked = savedShowPaths;
+            
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -2964,6 +2980,9 @@
             
             // Apply sidebar width variable dynamically
             document.documentElement.style.setProperty('--sidebar-width', `${selectedSidebarWidth}px`);
+            
+            const selectedShowPaths = document.getElementById('settings-show-paths').checked;
+            localStorage.setItem('show-workspace-paths', selectedShowPaths);
             
             // Apply font family globally to the entire application body
             document.body.style.fontFamily = selectedFont;
@@ -2987,6 +3006,7 @@
                 }
             });
             
+            handleSearch(); // Re-render project list with updated path visibility
             closeSettingsModal();
         }
 
