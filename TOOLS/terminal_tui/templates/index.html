@@ -1757,6 +1757,14 @@
             paneDiv.className = 'terminal-pane active-pane';
             paneDiv.dataset.paneId = paneId;
 
+            // Capture mousedown to close workspace card context menus immediately when terminal is clicked
+            paneDiv.addEventListener('mousedown', () => {
+                const menu = document.getElementById('card-context-menu');
+                if (menu) {
+                    menu.style.display = 'none';
+                }
+            }, true);
+
             const closeBtn = document.createElement('button');
             closeBtn.type = 'button';
             closeBtn.className = 'terminal-pane-close';
