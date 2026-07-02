@@ -1492,24 +1492,7 @@
                     return;
                 }
 
-                const data = await response.json();
-                activeProject = projectName;
-                handleSearch();
-
-                // Toggle placeholders
-                document.getElementById('no-workspace-placeholder').style.display = 'none';
-                document.getElementById('workspace-header').style.display = 'flex';
-                document.getElementById('terminal-wrapper').style.display = 'flex';
-                
-                document.getElementById('active-project-name').innerText = data.name;
-                document.getElementById('active-project-path').innerText = data.path;
-                document.getElementById('active-project-branch').style.display = 'none';
-                document.title = data.name;
-
-                // Retrieve project config details to fetch its theme
-                const currentProjDetails = projects.find(p => p.name === projectName) || data;
-
-                initTerminal(projectName, currentProjDetails.theme);
+                await restoreTerminalLayout(projectName);
                 updateBookmarksDropdown();
                 
                 // Immediately refresh projects to show the green running dot on the card
@@ -1899,6 +1882,9 @@
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                 }
+                
+                localStorage.removeItem(`split-layout-class::${projectName}`);
+                localStorage.removeItem(`terminal-pane-ids::${projectName}`);
 
                 handleSearch();
             } catch (err) {
@@ -2977,22 +2963,20 @@
         function saveTerminalLayoutState() {
             if (!activeProject) {
                 localStorage.removeItem('active-project');
-                localStorage.removeItem('split-layout-class');
-                localStorage.removeItem('terminal-pane-ids');
                 return;
             }
             const parent = document.getElementById('terminal-parent');
             localStorage.setItem('active-project', activeProject);
-            localStorage.setItem('split-layout-class', parent.className);
+            localStorage.setItem(`split-layout-class::${activeProject}`, parent.className);
             
             const paneIds = terminalPanes.map(p => p.paneId);
-            localStorage.setItem('terminal-pane-ids', JSON.stringify(paneIds));
+            localStorage.setItem(`terminal-pane-ids::${activeProject}`, JSON.stringify(paneIds));
         }
 
         async function restoreTerminalLayout(projectName) {
             try {
-                const savedLayoutClass = localStorage.getItem('split-layout-class') || 'split-right';
-                const savedPaneIdsStr = localStorage.getItem('terminal-pane-ids');
+                const savedLayoutClass = localStorage.getItem(`split-layout-class::${projectName}`) || 'split-right';
+                const savedPaneIdsStr = localStorage.getItem(`terminal-pane-ids::${projectName}`);
                 let savedPaneIds = ['main'];
                 if (savedPaneIdsStr) {
                     try {
