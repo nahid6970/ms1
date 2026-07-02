@@ -1479,18 +1479,31 @@
                 if (proj.category) {
                     const badge = document.createElement('span');
                     badge.className = 'category-badge';
-                    badge.innerText = proj.category;
-                    badge.style.fontSize = '0.62rem';
-                    badge.style.fontWeight = '600';
-                    badge.style.textTransform = 'uppercase';
-                    badge.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                    badge.style.border = '1px solid rgba(255, 255, 255, 0.15)';
-                    badge.style.color = 'var(--text-secondary)';
-                    badge.style.borderRadius = '4px';
-                    badge.style.padding = '1px 5px';
+                    badge.style.display = 'inline-flex';
+                    badge.style.flexWrap = 'wrap';
+                    badge.style.justifyContent = 'flex-end';
+                    badge.style.gap = '4px';
                     badge.style.marginLeft = '8px';
-                    badge.style.display = 'inline-block';
                     badge.style.verticalAlign = 'middle';
+                    badge.style.textAlign = 'right';
+
+                    const words = proj.category.split(/\s+/);
+                    words.forEach(word => {
+                        if (!word) return;
+                        const wordSpan = document.createElement('span');
+                        wordSpan.innerText = word;
+                        wordSpan.style.fontSize = '0.62rem';
+                        wordSpan.style.fontWeight = '600';
+                        wordSpan.style.textTransform = 'uppercase';
+                        wordSpan.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                        wordSpan.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+                        wordSpan.style.color = 'var(--text-secondary)';
+                        wordSpan.style.borderRadius = '4px';
+                        wordSpan.style.padding = '1px 5px';
+                        wordSpan.style.whiteSpace = 'nowrap';
+                        badge.appendChild(wordSpan);
+                    });
+
                     titleContainer.appendChild(badge);
                 }
 
