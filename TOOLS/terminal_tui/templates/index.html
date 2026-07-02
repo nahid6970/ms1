@@ -471,7 +471,7 @@
             align-items: center;
             gap: 12px;
             min-width: 0;
-            overflow: hidden;
+            overflow: visible;
             flex: 1;
             margin-right: 16px;
         }
@@ -925,7 +925,15 @@
         <!-- Terminal View (Hidden until project selected) -->
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
-                <h2 id="active-project-name">Project Name</h2>
+                <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: inline-block;">
+                    <h2 id="active-project-name" onclick="toggleProjectNameDropdown(event)" style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; margin: 0;">
+                        <span id="active-project-name-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; display: inline-block; vertical-align: middle;">Project Name</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; color: var(--text-secondary); transition: transform 0.2s;">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </h2>
+                    <div class="custom-dropdown-content" id="project-name-dropdown-content" style="display: none; position: absolute; left: 0; top: 100%; width: 240px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 4px 0; max-height: 280px; overflow-y: auto;"></div>
+                </div>
                 <div class="branch-badge" id="active-project-branch" style="display: none;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="18" cy="18" r="3"/>
@@ -2659,11 +2667,172 @@
         }
 
         // Close dropdown when clicking outside
+        let activeCustomHeaderName = 'Default';
+
+        function toggleProjectNameDropdown(event) {
+            if (event) event.stopPropagation();
+            const content = document.getElementById('project-name-dropdown-content');
+            if (!content) return;
+            const isShown = content.style.display === 'block';
+            
+            // Hide other dropdowns
+            const bookmarkContent = document.getElementById('bookmark-dropdown-content');
+            if (bookmarkContent) bookmarkContent.style.display = 'none';
+            
+            if (isShown) {
+                content.style.display = 'none';
+            } else {
+                updateProjectNameDropdown();
+                content.style.display = 'block';
+            }
+        }
+
+        function updateProjectNameDropdown() {
+            const content = document.getElementById('project-name-dropdown-content');
+            if (!content || !activeProject) return;
+            content.innerHTML = '';
+            
+            const currentProjDetails = projects.find(p => p.name === activeProject) || {};
+            const projNameDefault = currentProjDetails.name || activeProject;
+            
+            // Load custom names list for this project from localStorage
+            let customNames = [];
+            try {
+                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
+            } catch (e) {
+                customNames = [];
+            }
+            
+            // Add "Default" option
+            const defaultOption = document.createElement('div');
+            defaultOption.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between;';
+            defaultOption.onmouseenter = () => defaultOption.style.backgroundColor = 'var(--bg-card-hover)';
+            defaultOption.onmouseleave = () => defaultOption.style.backgroundColor = 'transparent';
+            defaultOption.onclick = () => selectCustomHeaderName('Default');
+            defaultOption.innerHTML = `
+                <span style="font-weight: 500;">Default</span>
+                <span style="font-size: 0.72rem; color: var(--text-secondary); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">(${projNameDefault})</span>
+            `;
+            content.appendChild(defaultOption);
+            
+            // Add Custom Name options
+            customNames.forEach((name, idx) => {
+                const opt = document.createElement('div');
+                opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between;';
+                opt.onmouseenter = () => opt.style.backgroundColor = 'var(--bg-card-hover)';
+                opt.onmouseleave = () => opt.style.backgroundColor = 'transparent';
+                opt.onclick = () => selectCustomHeaderName(name);
+                opt.innerHTML = `
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">${name}</span>
+                    <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteCustomHeaderName(${idx})">✕</button>
+                `;
+                content.appendChild(opt);
+            });
+            
+            // Add separator line
+            const hr = document.createElement('div');
+            hr.style = 'height: 1px; background-color: var(--border-color); margin: 4px 0;';
+            content.appendChild(hr);
+            
+            // Add "+ Add Title" option
+            const addOption = document.createElement('div');
+            addOption.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--accent-color); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; gap: 6px; font-weight: 500;';
+            addOption.onmouseenter = () => addOption.style.backgroundColor = 'var(--bg-card-hover)';
+            addOption.onmouseleave = () => addOption.style.backgroundColor = 'transparent';
+            addOption.onclick = () => addNewCustomHeaderName();
+            addOption.innerHTML = `
+                <span>➕</span>
+                <span>Add Custom Title...</span>
+            `;
+            content.appendChild(addOption);
+        }
+
+        function selectCustomHeaderName(name) {
+            activeCustomHeaderName = name;
+            
+            // Update header displayed text
+            const headerNameEl = document.getElementById('active-project-name-text');
+            if (headerNameEl) {
+                if (name === 'Default') {
+                    const currentProjDetails = projects.find(p => p.name === activeProject) || {};
+                    headerNameEl.innerText = currentProjDetails.name || activeProject;
+                    document.title = currentProjDetails.name || activeProject;
+                } else {
+                    headerNameEl.innerText = name;
+                    document.title = name;
+                }
+            }
+            
+            // Hide dropdown
+            const content = document.getElementById('project-name-dropdown-content');
+            if (content) content.style.display = 'none';
+        }
+
+        function addNewCustomHeaderName() {
+            const newName = prompt("Enter custom title for this session window:");
+            if (!newName || !newName.trim()) return;
+            
+            const trimmed = newName.trim();
+            if (trimmed === 'Default') {
+                alert("Name 'Default' is reserved.");
+                return;
+            }
+            
+            let customNames = [];
+            try {
+                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
+            } catch (e) {
+                customNames = [];
+            }
+            
+            if (customNames.includes(trimmed)) {
+                alert("This title already exists.");
+                return;
+            }
+            
+            customNames.push(trimmed);
+            localStorage.setItem(`custom-names-${activeProject}`, JSON.stringify(customNames));
+            
+            // Select the newly added name
+            selectCustomHeaderName(trimmed);
+            
+            // Update dropdown
+            updateProjectNameDropdown();
+        }
+
+        function deleteCustomHeaderName(index) {
+            let customNames = [];
+            try {
+                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
+            } catch (e) {
+                customNames = [];
+            }
+            
+            const deletedName = customNames[index];
+            customNames.splice(index, 1);
+            localStorage.setItem(`custom-names-${activeProject}`, JSON.stringify(customNames));
+            
+            // If the deleted name was active, revert to Default
+            if (activeCustomHeaderName === deletedName) {
+                selectCustomHeaderName('Default');
+            }
+            
+            // Update dropdown
+            updateProjectNameDropdown();
+        }
+
+        // Close dropdown when clicking outside
         window.addEventListener('click', (e) => {
             const content = document.getElementById('bookmark-dropdown-content');
             const btn = document.getElementById('bookmark-dropdown-btn');
             if (content && btn && !btn.contains(e.target) && !content.contains(e.target)) {
                 content.style.display = 'none';
+            }
+            
+            const nameContent = document.getElementById('project-name-dropdown-content');
+            const nameTrigger = document.getElementById('active-project-name');
+            if (nameContent && nameTrigger && !nameTrigger.contains(e.target) && !nameContent.contains(e.target)) {
+                nameContent.style.display = 'none';
             }
         });
 
@@ -3324,7 +3493,8 @@
                 document.getElementById('workspace-header').style.display = 'flex';
                 document.getElementById('terminal-wrapper').style.display = 'flex';
                 
-                document.getElementById('active-project-name').innerText = currentProjDetails.name || projectName;
+                activeCustomHeaderName = 'Default';
+                document.getElementById('active-project-name-text').innerText = currentProjDetails.name || projectName;
                 
                 const pathBtn = document.getElementById('active-project-path-btn');
                 if (pathBtn) {
