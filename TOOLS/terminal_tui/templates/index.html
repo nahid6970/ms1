@@ -37,6 +37,16 @@
             padding: 0;
         }
 
+        /* Hide HTML5 number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-main);
@@ -1164,9 +1174,9 @@
                     <label for="settings-sidebar-width" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Sidebar Width (px)</label>
                     <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
                 </div>
-                <div class="form-group" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="settings-show-paths" checked style="width: 16px; height: 16px; cursor: pointer;">
-                    <label for="settings-show-paths" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary);">Show Workspace Paths in Sidebar</label>
+                <div class="form-group" style="margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                    <label for="settings-show-paths" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Workspace Paths in Sidebar</label>
+                    <input type="checkbox" id="settings-show-paths" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0;">
                 </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
