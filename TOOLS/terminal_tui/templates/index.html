@@ -2090,17 +2090,19 @@
 
                 if (response.ok) {
                     const originalName = contextProject.name;
+                    const originalPath = contextProject.path;
                     projects = await response.json();
                     closeThemeModal();
                     
-                    // If customized project is active, apply theme immediately without resetting session!
                     if (activeProject === originalName) {
-                        if (originalName !== newName) {
-                            activeProject = newName;
-                        }
+                        const nameChanged = originalName !== newName;
+                        const pathChanged = originalPath !== newPath;
                         
-                        const projDetails = projects.find(p => p.name === newName);
-                        if (projDetails) {
+                        if (nameChanged || pathChanged) {
+                            activeProject = newName;
+                            localStorage.setItem('active-project', newName);
+                            initTerminal(newName, theme);
+                        } else {
                             terminalPanes.forEach(pane => {
                                 pane.term.options.theme = theme;
                                 pane.element.style.borderColor = borderColor;
