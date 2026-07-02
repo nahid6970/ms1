@@ -932,6 +932,12 @@
                         <div id="workspace-selector-options-list" style="overflow-y: auto; flex: 1; padding: 4px 0; max-height: 240px;"></div>
                     </div>
                 </div>
+                <button class="action-btn" id="workspace-quick-theme-btn" onclick="openActiveProjectTheme(event)" title="Workspace settings & theme" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; margin-right: 8px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
                 <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: inline-block;">
                     <h2 id="active-project-name" onclick="toggleProjectNameDropdown(event)" style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; margin: 0;">
                         <span id="active-project-name-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; display: inline-block; vertical-align: middle;">Project Name</span>
@@ -3074,6 +3080,17 @@
             }
         }
 
+        function openActiveProjectTheme(event) {
+            if (event) event.stopPropagation();
+            if (!activeProject) return;
+            
+            const currentProj = projects.find(p => p.name === activeProject);
+            if (currentProj) {
+                contextProject = currentProj;
+                openThemeModal();
+            }
+        }
+
         function toggleWorkspaceSelectorDropdown(event) {
             if (event) event.stopPropagation();
             const content = document.getElementById('workspace-selector-dropdown-content');
@@ -3244,6 +3261,7 @@
             const pathBtn = document.getElementById('active-project-path-btn');
             const projActions = document.getElementById('project-specific-actions');
             const divider = document.getElementById('header-toolbar-divider');
+            const quickThemeBtn = document.getElementById('workspace-quick-theme-btn');
             
             if (!activeProject) {
                 if (nameContainer) nameContainer.style.display = 'none';
@@ -3251,6 +3269,7 @@
                 if (pathBtn) pathBtn.style.display = 'none';
                 if (projActions) projActions.style.display = 'none';
                 if (divider) divider.style.display = 'none';
+                if (quickThemeBtn) quickThemeBtn.style.display = 'none';
                 
                 const label = document.getElementById('selected-workspace-selector-label');
                 if (label) label.innerText = 'Select Workspace...';
@@ -3265,6 +3284,7 @@
                 }
                 if (projActions) projActions.style.display = 'flex';
                 if (divider) divider.style.display = 'block';
+                if (quickThemeBtn) quickThemeBtn.style.display = showSidebarList ? 'none' : 'flex';
                 
                 const label = document.getElementById('selected-workspace-selector-label');
                 if (label) label.innerText = activeProject;
