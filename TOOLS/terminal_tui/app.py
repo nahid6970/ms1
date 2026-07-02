@@ -100,6 +100,11 @@ if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
     Set-PSReadLineOption -HistorySavePath "{history_path}"
 }}
 
+# Custom prompt
+function prompt {{
+    "COMMAND> "
+}}
+
 # Clear screen cleanly to start with a clean prompt and hide startup warnings
 Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
 
@@ -118,6 +123,9 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 if "PROFILE_LOADED_OK" in content:
                     content = content.replace('Write-Host "PROFILE_LOADED_OK"', '')
                     content = content.replace('echo "PROFILE_LOADED_OK"', '')
+                    modified = True
+                if "function prompt" not in content:
+                    content += "\n\n# Custom prompt\nfunction prompt {\n    \"COMMAND> \"\n}\n"
                     modified = True
                 if modified:
                     with open(profile_path, "w", encoding="utf-8") as f:
