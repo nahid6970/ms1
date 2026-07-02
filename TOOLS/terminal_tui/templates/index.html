@@ -1130,6 +1130,10 @@
                         <label for="theme-proj-category" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Category</label>
                         <input type="text" id="theme-proj-category" class="form-input" placeholder="e.g. Tools, Personal, Work" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
                     </div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
+                        <label for="theme-proj-order" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Position</label>
+                        <input type="number" id="theme-proj-order" class="form-input" min="1" step="1" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;" placeholder="e.g. 1">
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 20px; margin-bottom: 14px; align-items: stretch;">
@@ -2233,6 +2237,11 @@
             document.getElementById('theme-proj-path').value = contextProject.path;
             document.getElementById('theme-proj-category').value = contextProject.category || '';
             
+            // Populate workspace position order index
+            const currentOrder = projects.map(p => p.name);
+            const posIdx = currentOrder.indexOf(contextProject.name);
+            document.getElementById('theme-proj-order').value = posIdx !== -1 ? posIdx + 1 : projects.length;
+            
             const theme = contextProject.theme || {
                 background: '#000000',
                 foreground: '#d1d5db',
@@ -2332,6 +2341,15 @@
                     const originalName = contextProject.name;
                     const originalPath = contextProject.path;
                     projects = await response.json();
+                    
+                    const newOrderPos = parseInt(document.getElementById('theme-proj-order').value) || 1;
+                    let order = projects.map(p => p.name);
+                    order = order.filter(n => n !== originalName);
+                    const targetIdx = Math.max(0, Math.min(newOrderPos - 1, order.length));
+                    order.splice(targetIdx, 0, newName);
+                    localStorage.setItem('workspaces-order', JSON.stringify(order));
+                    sortProjectsByCustomOrder();
+                    
                     closeThemeModal();
                     
                     if (activeProject === originalName) {
@@ -2970,16 +2988,16 @@
                     selectProject(proj.name);
                     if (dropdownContent) dropdownContent.style.display = 'none';
                 };
+                opt.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    contextProject = proj;
+                    showCardContextMenu(e, proj);
+                };
                 
                 opt.innerHTML = `
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${proj.name}</span>
-                    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;" onclick="event.stopPropagation()">
-                        ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; display: inline-block;" title="Running session"></span>' : ''}
-                        <div style="display: flex; align-items: center; gap: 2px;">
-                            <button onclick="moveProjectOrder('${proj.name}', 'up', event)" title="Move Up" style="background: none; border: none; padding: 2px 4px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 0.65rem;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">▲</button>
-                            <button onclick="moveProjectOrder('${proj.name}', 'down', event)" title="Move Down" style="background: none; border: none; padding: 2px 4px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 0.65rem;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">▼</button>
-                        </div>
-                    </div>
+                    ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; flex-shrink: 0;" title="Running session"></span>' : ''}
                 `;
                 listEl.appendChild(opt);
             });
@@ -2987,47 +3005,36 @@
 
         function sortProjectsByCustomOrder() {
             const orderStr = localStorage.getItem('workspaces-order');
-            if (!orderStr) return;
-            try {
-                const order = JSON.parse(orderStr);
-                if (Array.isArray(order)) {
-                    projects.sort((a, b) => {
-                        const idxA = order.indexOf(a.name);
-                        const idxB = order.indexOf(b.name);
-                        if (idxA === -1 && idxB === -1) return 0;
-                        if (idxA === -1) return 1;
-                        if (idxB === -1) return -1;
-                        return idxA - idxB;
-                    });
+            let order = [];
+            if (orderStr) {
+                try {
+                    order = JSON.parse(orderStr);
+                } catch (e) {
+                    console.error("Error parsing custom workspaces order:", e);
                 }
-            } catch (e) {
-                console.error("Error parsing custom workspaces order:", e);
-            }
-        }
-
-        function moveProjectOrder(projectName, direction, event) {
-            if (event) event.stopPropagation();
-            
-            let order = projects.map(p => p.name);
-            const idx = order.indexOf(projectName);
-            if (idx === -1) return;
-            
-            if (direction === 'up' && idx > 0) {
-                const temp = order[idx - 1];
-                order[idx - 1] = order[idx];
-                order[idx] = temp;
-            } else if (direction === 'down' && idx < order.length - 1) {
-                const temp = order[idx + 1];
-                order[idx + 1] = order[idx];
-                order[idx] = temp;
             }
             
-            localStorage.setItem('workspaces-order', JSON.stringify(order));
-            sortProjectsByCustomOrder();
-            
-            const query = document.getElementById('workspace-dropdown-search')?.value || '';
-            updateWorkspaceSelectorDropdown(query);
-            handleSearch();
+            projects.sort((a, b) => {
+                // Rule 1: Active (running) projects always go to the top
+                if (a.is_active && !b.is_active) return -1;
+                if (!a.is_active && b.is_active) return 1;
+                
+                // Rule 2: Pinned projects go next
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                
+                // Rule 3: Custom order
+                if (Array.isArray(order) && order.length > 0) {
+                    const idxA = order.indexOf(a.name);
+                    const idxB = order.indexOf(b.name);
+                    if (idxA !== -1 && idxB !== -1) {
+                        return idxA - idxB;
+                    }
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                }
+                return a.name.localeCompare(b.name);
+            });
         }
 
         function applySidebarWorkspacesVisibility() {
