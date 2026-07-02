@@ -1293,6 +1293,10 @@
                     <input type="checkbox" id="settings-context-menu" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                     <label for="settings-context-menu" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0;">Show Actions on Right-Click Context Menu</label>
                 </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 12px 14px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; gap: 12px;">
+                    <label for="settings-dropdown-height" style="font-size: 0.82rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; min-width: 180px;">Dropdown Max Height (px)</label>
+                    <input type="number" id="settings-dropdown-height" class="form-input" min="100" max="800" step="10" style="width: 100px; height: 28px; padding: 4px 8px; font-size: 0.8rem; text-align: center;">
+                </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
@@ -2961,10 +2965,14 @@
             if (!listEl) return;
             listEl.innerHTML = '';
             
+            const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
+            listEl.style.maxHeight = `${savedDropdownHeight}px`;
+            
             const dropdownContent = document.getElementById('workspace-selector-dropdown-content');
             
             const filtered = projects.filter(proj => 
-                proj.name.toLowerCase().includes(filterText)
+                proj.name.toLowerCase().includes(filterText) ||
+                (proj.category && proj.category.toLowerCase().includes(filterText))
             );
             
             if (filtered.length === 0) {
@@ -3782,6 +3790,9 @@
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             document.getElementById('settings-context-menu').checked = savedContextMenu;
             
+            const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
+            document.getElementById('settings-dropdown-height').value = savedDropdownHeight;
+            
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -3819,6 +3830,14 @@
             } else {
                 document.body.classList.remove('context-menu-actions');
             }
+            
+            const selectedDropdownHeight = parseInt(document.getElementById('settings-dropdown-height').value) || 240;
+            localStorage.setItem('workspace-dropdown-height', selectedDropdownHeight);
+            const listEl = document.getElementById('workspace-selector-options-list');
+            if (listEl) {
+                listEl.style.maxHeight = `${selectedDropdownHeight}px`;
+            }
+            
             applySidebarWorkspacesVisibility();
             
             // Apply font family globally to the entire application body
