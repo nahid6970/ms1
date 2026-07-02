@@ -2095,8 +2095,17 @@
                     closeThemeModal();
                     
                     if (activeProject === originalName) {
-                        const nameChanged = originalName !== newName;
-                        const pathChanged = originalPath !== newPath;
+                        const nameChanged = originalName.toLowerCase().trim() !== newName.toLowerCase().trim();
+                        
+                        const normalizeP = (p) => {
+                            if (!p) return "";
+                            let normalized = p.replace(/\\/g, '/').trim();
+                            if (normalized.endsWith('/')) {
+                                normalized = normalized.slice(0, -1);
+                            }
+                            return normalized.toLowerCase();
+                        };
+                        const pathChanged = normalizeP(originalPath) !== normalizeP(newPath);
                         
                         if (nameChanged || pathChanged) {
                             activeProject = newName;

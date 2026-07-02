@@ -485,8 +485,10 @@ def api_projects_customize():
         if any(p["name"].lower() == new_name.lower() for p in projects):
             return jsonify({"error": f"A workspace named '{new_name}' already exists."}), 400
             
-    # If path is changing, check if folder exists
-    path_changed = new_path and new_path != proj["path"]
+    # If path is changing, check if folder exists (normalized comparison)
+    norm_existing_path = os.path.normpath(os.path.abspath(proj["path"])).lower()
+    norm_new_path = os.path.normpath(os.path.abspath(new_path)).lower() if new_path else ""
+    path_changed = bool(norm_new_path and norm_new_path != norm_existing_path)
     if path_changed:
         if not os.path.exists(new_path) or not os.path.isdir(new_path):
             return jsonify({"error": f"The directory path '{new_path}' does not exist."}), 400
