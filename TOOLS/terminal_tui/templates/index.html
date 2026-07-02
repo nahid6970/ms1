@@ -2669,6 +2669,37 @@
         // Close dropdown when clicking outside
         let activeCustomHeaderName = 'Default';
 
+        function getCustomTitlesRegistry() {
+            let registry = [];
+            try {
+                registry = JSON.parse(localStorage.getItem('workspace-custom-titles')) || [];
+            } catch (e) {
+                registry = [];
+            }
+            const migratedKey = 'workspace-custom-titles-migrated';
+            if (!localStorage.getItem(migratedKey)) {
+                projects.forEach(p => {
+                    const oldKey = `custom-names-${p.name}`;
+                    const oldList = JSON.parse(localStorage.getItem(oldKey));
+                    if (Array.isArray(oldList)) {
+                        oldList.forEach(name => {
+                            if (typeof name === 'string') {
+                                registry.push({ project: p.name, name: name, global: false });
+                            }
+                        });
+                        localStorage.removeItem(oldKey);
+                    }
+                });
+                localStorage.setItem(migratedKey, 'true');
+                localStorage.setItem('workspace-custom-titles', JSON.stringify(registry));
+            }
+            return registry;
+        }
+
+        function saveCustomTitlesRegistry(registry) {
+            localStorage.setItem('workspace-custom-titles', JSON.stringify(registry));
+        }
+
         function toggleProjectNameDropdown(event) {
             if (event) event.stopPropagation();
             const content = document.getElementById('project-name-dropdown-content');
@@ -2695,13 +2726,10 @@
             const currentProjDetails = projects.find(p => p.name === activeProject) || {};
             const projNameDefault = currentProjDetails.name || activeProject;
             
-            // Load custom names list for this project from localStorage
-            let customNames = [];
-            try {
-                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
-            } catch (e) {
-                customNames = [];
-            }
+            const registry = getCustomTitlesRegistry();
+            const visibleTitles = registry.filter(item => 
+                item.project === activeProject || item.global === true
+            );
             
             // Add "Default" option
             const defaultOption = document.createElement('div');
@@ -2716,15 +2744,24 @@
             content.appendChild(defaultOption);
             
             // Add Custom Name options
-            customNames.forEach((name, idx) => {
+            visibleTitles.forEach((item) => {
                 const opt = document.createElement('div');
-                opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between;';
+                opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
                 opt.onmouseenter = () => opt.style.backgroundColor = 'var(--bg-card-hover)';
                 opt.onmouseleave = () => opt.style.backgroundColor = 'transparent';
-                opt.onclick = () => selectCustomHeaderName(name);
+                opt.onclick = () => selectCustomHeaderName(item.name);
+                
                 opt.innerHTML = `
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">${name}</span>
-                    <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteCustomHeaderName(${idx})">✕</button>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;" title="${item.name}">${item.name}</span>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        <label class="switch-toggle" onclick="event.stopPropagation();" style="position: relative; display: inline-block; width: 28px; height: 16px; margin: 0; cursor: pointer; flex-shrink: 0;" title="${item.global ? 'Make local (visible only in this workspace)' : 'Make global (visible in all workspaces)'}">
+                            <input type="checkbox" ${item.global ? 'checked' : ''} onchange="toggleCustomHeaderNameGlobal('${item.project}', '${item.name.replace(/'/g, "\\'")}', this.checked)" style="opacity: 0; width: 0; height: 0; position: absolute;">
+                            <span class="slider-round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${item.global ? 'var(--accent-color)' : '#475569'}; transition: 0.2s; border-radius: 16px;">
+                                <span style="position: absolute; content: ''; height: 12px; width: 12px; left: ${item.global ? '14px' : '2px'}; bottom: 2px; background-color: white; transition: 0.2s; border-radius: 50%;"></span>
+                            </span>
+                        </label>
+                        <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteCustomHeaderName('${item.project}', '${item.name.replace(/'/g, "\\'")}')">✕</button>
+                    </div>
                 `;
                 content.appendChild(opt);
             });
@@ -2750,7 +2787,6 @@
         function selectCustomHeaderName(name) {
             activeCustomHeaderName = name;
             
-            // Update header displayed text
             const headerNameEl = document.getElementById('active-project-name-text');
             if (headerNameEl) {
                 if (name === 'Default') {
@@ -2763,7 +2799,6 @@
                 }
             }
             
-            // Hide dropdown
             const content = document.getElementById('project-name-dropdown-content');
             if (content) content.style.display = 'none';
         }
@@ -2778,47 +2813,53 @@
                 return;
             }
             
-            let customNames = [];
-            try {
-                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
-            } catch (e) {
-                customNames = [];
-            }
+            const registry = getCustomTitlesRegistry();
+            const exists = registry.some(item => 
+                item.name.toLowerCase() === trimmed.toLowerCase() &&
+                (item.project === activeProject || item.global)
+            );
             
-            if (customNames.includes(trimmed)) {
-                alert("This title already exists.");
+            if (exists) {
+                alert("This title already exists as a local or global title.");
                 return;
             }
             
-            customNames.push(trimmed);
-            localStorage.setItem(`custom-names-${activeProject}`, JSON.stringify(customNames));
+            registry.push({ project: activeProject, name: trimmed, global: false });
+            saveCustomTitlesRegistry(registry);
             
-            // Select the newly added name
             selectCustomHeaderName(trimmed);
-            
-            // Update dropdown
             updateProjectNameDropdown();
         }
 
-        function deleteCustomHeaderName(index) {
-            let customNames = [];
-            try {
-                customNames = JSON.parse(localStorage.getItem(`custom-names-${activeProject}`)) || [];
-            } catch (e) {
-                customNames = [];
+        function deleteCustomHeaderName(project, name) {
+            const registry = getCustomTitlesRegistry();
+            const idx = registry.findIndex(item => 
+                item.project === project && item.name === name
+            );
+            
+            if (idx >= 0) {
+                registry.splice(idx, 1);
+                saveCustomTitlesRegistry(registry);
+                
+                if (activeCustomHeaderName === name) {
+                    selectCustomHeaderName('Default');
+                }
+                
+                updateProjectNameDropdown();
             }
+        }
+
+        function toggleCustomHeaderNameGlobal(project, name, isGlobal) {
+            const registry = getCustomTitlesRegistry();
+            const item = registry.find(item => 
+                item.project === project && item.name === name
+            );
             
-            const deletedName = customNames[index];
-            customNames.splice(index, 1);
-            localStorage.setItem(`custom-names-${activeProject}`, JSON.stringify(customNames));
-            
-            // If the deleted name was active, revert to Default
-            if (activeCustomHeaderName === deletedName) {
-                selectCustomHeaderName('Default');
+            if (item) {
+                item.global = isGlobal;
+                saveCustomTitlesRegistry(registry);
+                updateProjectNameDropdown();
             }
-            
-            // Update dropdown
-            updateProjectNameDropdown();
         }
 
         // Close dropdown when clicking outside

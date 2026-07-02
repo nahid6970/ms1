@@ -834,6 +834,21 @@
             "process_name_enabled": true,
             "window_class_enabled": true,
             "match_foreground": false
+        },
+        {
+            "action": "SendText(\"/usage\")\nSend(\"{Enter}\")",
+            "category": "Browser",
+            "description": "Save current Gemini chat session",
+            "enabled": true,
+            "hotkey": "^z",
+            "name": "Antigravity (web)",
+            "process_name": "chrome.exe",
+            "window_class": "",
+            "window_title": "antigravity-cli",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "match_foreground": false
         }
     ],
     "exclusion_rules": [
