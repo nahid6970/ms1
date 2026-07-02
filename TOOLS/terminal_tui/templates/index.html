@@ -908,6 +908,54 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
         }
+
+        /* Responsive Mobile Layout adjustments */
+        @media (max-width: 768px) {
+            .workspace-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                height: auto !important;
+                padding: 10px 14px !important;
+                gap: 10px !important;
+            }
+            .workspace-title-info {
+                margin-right: 0 !important;
+                width: 100% !important;
+                justify-content: space-between !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+            }
+            .workspace-header > div:nth-child(2) {
+                width: 100% !important;
+                justify-content: space-between !important;
+                border-top: 1px solid var(--border-color) !important;
+                padding-top: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+            }
+            #header-toolbar-divider {
+                display: none !important;
+            }
+            #workspace-selector-dropdown-content {
+                left: 0 !important;
+                width: calc(100vw - 28px) !important;
+                max-width: 320px !important;
+            }
+            #project-name-dropdown-content {
+                left: 0 !important;
+                width: calc(100vw - 28px) !important;
+                max-width: 320px !important;
+            }
+            #bookmark-dropdown-content {
+                right: 0 !important;
+                width: calc(100vw - 28px) !important;
+                max-width: 340px !important;
+            }
+            .terminal-container-wrapper {
+                padding: 4px !important;
+            }
+        }
     </style>
 </head>
 <body>
