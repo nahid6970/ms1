@@ -711,6 +711,22 @@
             overflow-y: auto !important;
         }
 
+        /* Custom Scrollbar specifically for Terminal Viewport */
+        .terminal-pane .xterm-viewport::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .terminal-pane .xterm-viewport::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .terminal-pane .xterm-viewport::-webkit-scrollbar-thumb {
+            background: var(--terminal-scrollbar-color, var(--border-color)) !important;
+            border-radius: 4px;
+        }
+        .terminal-pane .xterm-viewport::-webkit-scrollbar-thumb:hover {
+            background: var(--terminal-scrollbar-color-hover, var(--text-muted)) !important;
+        }
+
         /* Modal Overlay & Form */
         .modal-overlay {
             position: fixed;
@@ -1238,6 +1254,10 @@
                         <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
                             <label for="theme-border" style="font-size: 0.75rem;">Terminal Border Color</label>
                             <input type="color" id="theme-border" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
+                            <label for="theme-scrollbar" style="font-size: 0.75rem;">Scrollbar Thumb Color</label>
+                            <input type="color" id="theme-scrollbar" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
                         </div>
                     </div>
                     
@@ -2373,27 +2393,27 @@
 
         const themePresets = {
             dracula: {
-                theme: { background: '#282a36', foreground: '#f8f8f2', cursor: '#f1fa8c', borderColor: '#44475a' },
+                theme: { background: '#282a36', foreground: '#f8f8f2', cursor: '#f1fa8c', borderColor: '#44475a', scrollbarColor: '#6272a4' },
                 cardTheme: { bgColor: '#1e1f29', textColor: '#f8f8f2', pathColor: '#6272a4', accentColor: '#bd93f9' }
             },
             nord: {
-                theme: { background: '#2e3440', foreground: '#d8dee9', cursor: '#88c0d0', borderColor: '#3b4252' },
+                theme: { background: '#2e3440', foreground: '#d8dee9', cursor: '#88c0d0', borderColor: '#3b4252', scrollbarColor: '#4c566a' },
                 cardTheme: { bgColor: '#242933', textColor: '#eceff4', pathColor: '#4c566a', accentColor: '#81a1c1' }
             },
             monokai: {
-                theme: { background: '#272822', foreground: '#f8f8f2', cursor: '#f92672', borderColor: '#3e3d32' },
+                theme: { background: '#272822', foreground: '#f8f8f2', cursor: '#f92672', borderColor: '#3e3d32', scrollbarColor: '#75715e' },
                 cardTheme: { bgColor: '#1e1f1c', textColor: '#f8f8f2', pathColor: '#75715e', accentColor: '#a6e22e' }
             },
             solarized: {
-                theme: { background: '#002b36', foreground: '#839496', cursor: '#b58900', borderColor: '#073642' },
+                theme: { background: '#002b36', foreground: '#839496', cursor: '#b58900', borderColor: '#073642', scrollbarColor: '#586e75' },
                 cardTheme: { bgColor: '#001f27', textColor: '#93a1a1', pathColor: '#586e75', accentColor: '#268bd2' }
             },
             onedark: {
-                theme: { background: '#282c34', foreground: '#abb2bf', cursor: '#528bff', borderColor: '#3e4452' },
+                theme: { background: '#282c34', foreground: '#abb2bf', cursor: '#528bff', borderColor: '#3e4452', scrollbarColor: '#5c6370' },
                 cardTheme: { bgColor: '#1e222b', textColor: '#abb2bf', pathColor: '#5c6370', accentColor: '#61afef' }
             },
             cyberpunk: {
-                theme: { background: '#000b19', foreground: '#00ffcc', cursor: '#ff007f', borderColor: '#ff007f' },
+                theme: { background: '#000b19', foreground: '#00ffcc', cursor: '#ff007f', borderColor: '#ff007f', scrollbarColor: '#ff0055' },
                 cardTheme: { bgColor: '#000610', textColor: '#00ffcc', pathColor: '#ff0055', accentColor: '#ffe600' }
             }
         };
@@ -2407,6 +2427,7 @@
             document.getElementById('theme-fg').value = preset.theme.foreground;
             document.getElementById('theme-cursor').value = preset.theme.cursor;
             document.getElementById('theme-border').value = preset.theme.borderColor;
+            document.getElementById('theme-scrollbar').value = preset.theme.scrollbarColor;
             
             document.getElementById('card-bg').value = preset.cardTheme.bgColor;
             document.getElementById('card-fg').value = preset.cardTheme.textColor;
@@ -2420,7 +2441,8 @@
                     preset.theme.background.toLowerCase() === theme.background.toLowerCase() &&
                     preset.theme.foreground.toLowerCase() === theme.foreground.toLowerCase() &&
                     preset.theme.cursor.toLowerCase() === theme.cursor.toLowerCase() &&
-                    preset.theme.borderColor.toLowerCase() === (theme.borderColor || '#232c3d').toLowerCase();
+                    preset.theme.borderColor.toLowerCase() === (theme.borderColor || '#232c3d').toLowerCase() &&
+                    preset.theme.scrollbarColor.toLowerCase() === (theme.scrollbarColor || '#475569').toLowerCase();
                     
                 const matchCard = 
                     preset.cardTheme.bgColor.toLowerCase() === cardTheme.bgColor.toLowerCase() &&
@@ -2450,7 +2472,8 @@
                 background: '#000000',
                 foreground: '#d1d5db',
                 cursor: '#3b82f6',
-                borderColor: '#232c3d'
+                borderColor: '#232c3d',
+                scrollbarColor: '#475569'
             };
             const cardTheme = contextProject.cardTheme || {
                 bgColor: '#161c26',
@@ -2463,6 +2486,7 @@
             document.getElementById('theme-fg').value = theme.foreground;
             document.getElementById('theme-cursor').value = theme.cursor;
             document.getElementById('theme-border').value = theme.borderColor || '#232c3d';
+            document.getElementById('theme-scrollbar').value = theme.scrollbarColor || '#475569';
             
             document.getElementById('card-bg').value = cardTheme.bgColor;
             document.getElementById('card-fg').value = cardTheme.textColor;
@@ -2475,7 +2499,7 @@
 
             // Bind manual picker changes to revert preset selection to 'custom'
             const pickers = [
-                'theme-bg', 'theme-fg', 'theme-cursor', 'theme-border',
+                'theme-bg', 'theme-fg', 'theme-cursor', 'theme-border', 'theme-scrollbar',
                 'card-bg', 'card-fg', 'card-path', 'card-accent'
             ];
             pickers.forEach(id => {
@@ -2526,6 +2550,8 @@
             const cursor = document.getElementById('theme-cursor').value;
             const borderColor = document.getElementById('theme-border').value;
             
+            const scrollbarColor = document.getElementById('theme-scrollbar').value;
+            
             const cardBg = document.getElementById('card-bg').value;
             const cardFg = document.getElementById('card-fg').value;
             const cardPath = document.getElementById('card-path').value;
@@ -2535,7 +2561,8 @@
                 background: bg,
                 foreground: fg,
                 cursor: cursor,
-                borderColor: borderColor
+                borderColor: borderColor,
+                scrollbarColor: scrollbarColor
             };
             const cardTheme = {
                 bgColor: cardBg,
@@ -2602,8 +2629,12 @@
                             initTerminal(newName, theme);
                         } else {
                             terminalPanes.forEach(pane => {
-                                pane.term.options.theme = theme;
-                                pane.element.style.borderColor = borderColor;
+                                pane.term.options.theme = getTerminalTheme(theme);
+                                pane.element.style.borderColor = theme.borderColor;
+                                if (theme.scrollbarColor) {
+                                    pane.element.style.setProperty('--terminal-scrollbar-color', theme.scrollbarColor);
+                                    pane.element.style.setProperty('--terminal-scrollbar-color-hover', theme.scrollbarColor);
+                                }
                             });
                         }
                     }
