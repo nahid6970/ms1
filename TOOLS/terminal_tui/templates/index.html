@@ -1342,6 +1342,7 @@
                 const url = refresh ? '/api/projects?refresh=true' : '/api/projects';
                 const response = await fetch(url);
                 projects = await response.json();
+                sortProjectsByCustomOrder();
                 
                 // Keep active project details updated with latest theme
                 if (activeProject) {
@@ -2972,10 +2973,61 @@
                 
                 opt.innerHTML = `
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${proj.name}</span>
-                    ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>' : ''}
+                    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;" onclick="event.stopPropagation()">
+                        ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; display: inline-block;" title="Running session"></span>' : ''}
+                        <div style="display: flex; align-items: center; gap: 2px;">
+                            <button onclick="moveProjectOrder('${proj.name}', 'up', event)" title="Move Up" style="background: none; border: none; padding: 2px 4px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 0.65rem;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">▲</button>
+                            <button onclick="moveProjectOrder('${proj.name}', 'down', event)" title="Move Down" style="background: none; border: none; padding: 2px 4px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 0.65rem;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-secondary)'">▼</button>
+                        </div>
+                    </div>
                 `;
                 listEl.appendChild(opt);
             });
+        }
+
+        function sortProjectsByCustomOrder() {
+            const orderStr = localStorage.getItem('workspaces-order');
+            if (!orderStr) return;
+            try {
+                const order = JSON.parse(orderStr);
+                if (Array.isArray(order)) {
+                    projects.sort((a, b) => {
+                        const idxA = order.indexOf(a.name);
+                        const idxB = order.indexOf(b.name);
+                        if (idxA === -1 && idxB === -1) return 0;
+                        if (idxA === -1) return 1;
+                        if (idxB === -1) return -1;
+                        return idxA - idxB;
+                    });
+                }
+            } catch (e) {
+                console.error("Error parsing custom workspaces order:", e);
+            }
+        }
+
+        function moveProjectOrder(projectName, direction, event) {
+            if (event) event.stopPropagation();
+            
+            let order = projects.map(p => p.name);
+            const idx = order.indexOf(projectName);
+            if (idx === -1) return;
+            
+            if (direction === 'up' && idx > 0) {
+                const temp = order[idx - 1];
+                order[idx - 1] = order[idx];
+                order[idx] = temp;
+            } else if (direction === 'down' && idx < order.length - 1) {
+                const temp = order[idx + 1];
+                order[idx + 1] = order[idx];
+                order[idx] = temp;
+            }
+            
+            localStorage.setItem('workspaces-order', JSON.stringify(order));
+            sortProjectsByCustomOrder();
+            
+            const query = document.getElementById('workspace-dropdown-search')?.value || '';
+            updateWorkspaceSelectorDropdown(query);
+            handleSearch();
         }
 
         function applySidebarWorkspacesVisibility() {
@@ -3036,26 +3088,35 @@
             }
         }
 
-        // Close dropdown when clicking outside
+        // Close dropdown when clicking outside (using capturing phase for reliability)
         window.addEventListener('click', (e) => {
-            const content = document.getElementById('bookmark-dropdown-content');
-            const btn = document.getElementById('bookmark-dropdown-btn');
-            if (content && btn && !btn.contains(e.target) && !content.contains(e.target)) {
-                content.style.display = 'none';
-            }
-            
-            const nameContent = document.getElementById('project-name-dropdown-content');
-            const nameTrigger = document.getElementById('active-project-name');
-            if (nameContent && nameTrigger && !nameTrigger.contains(e.target) && !nameContent.contains(e.target)) {
-                nameContent.style.display = 'none';
-            }
-            
+            // 1. Close workspace selector dropdown
             const wsContent = document.getElementById('workspace-selector-dropdown-content');
             const wsTrigger = document.getElementById('workspace-selector-btn');
-            if (wsContent && wsTrigger && !wsTrigger.contains(e.target) && !wsContent.contains(e.target)) {
-                wsContent.style.display = 'none';
+            if (wsContent && wsContent.style.display === 'flex') {
+                if (!wsTrigger.contains(e.target) && !wsContent.contains(e.target)) {
+                    wsContent.style.display = 'none';
+                }
             }
-        });
+            
+            // 2. Close project name dropdown
+            const nameContent = document.getElementById('project-name-dropdown-content');
+            const nameTrigger = document.getElementById('active-project-name');
+            if (nameContent && nameContent.style.display === 'block') {
+                if (!nameTrigger.contains(e.target) && !nameContent.contains(e.target)) {
+                    nameContent.style.display = 'none';
+                }
+            }
+            
+            // 3. Close bookmarks dropdown
+            const bookmarkContent = document.getElementById('bookmark-dropdown-content');
+            const bookmarkTrigger = document.getElementById('bookmark-dropdown-btn');
+            if (bookmarkContent && bookmarkContent.style.display === 'block') {
+                if (!bookmarkTrigger.contains(e.target) && !bookmarkContent.contains(e.target)) {
+                    bookmarkContent.style.display = 'none';
+                }
+            }
+        }, true);
 
         function getTerminalBufferText(paneTerm) {
             if (!paneTerm) return "";
