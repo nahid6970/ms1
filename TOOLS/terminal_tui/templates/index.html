@@ -707,6 +707,43 @@
             border-color: rgba(248, 113, 113, 0.4);
         }
 
+        .terminal-pane-scroll-up,
+        .terminal-pane-scroll-down {
+            position: absolute;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 5;
+            font-size: 0.62rem;
+            line-height: 1;
+            transition: all 0.15s ease;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .terminal-pane-scroll-up {
+            top: 36px;
+        }
+
+        .terminal-pane-scroll-down {
+            top: 66px;
+        }
+
+        .terminal-pane-scroll-up:hover,
+        .terminal-pane-scroll-down:hover {
+            background: rgba(31, 41, 55, 0.98);
+            color: var(--text-primary);
+            border-color: var(--accent-color);
+        }
+
         .xterm-viewport {
             overflow-y: auto !important;
         }
@@ -2192,6 +2229,49 @@
             const paneFitAddon = new FitAddon.FitAddon();
             paneTerm.loadAddon(paneFitAddon);
             paneTerm.open(paneDiv);
+
+            // Add Scroll Up/Down buttons for touchscreen displays
+            const upBtn = document.createElement('button');
+            upBtn.type = 'button';
+            upBtn.className = 'terminal-pane-scroll-up';
+            upBtn.title = 'Scroll Up';
+            upBtn.innerText = '▲';
+            paneDiv.appendChild(upBtn);
+
+            const downBtn = document.createElement('button');
+            downBtn.type = 'button';
+            downBtn.className = 'terminal-pane-scroll-down';
+            downBtn.title = 'Scroll Down';
+            downBtn.innerText = '▼';
+            paneDiv.appendChild(downBtn);
+
+            const setupContinuousScroll = (btn, direction) => {
+                let interval = null;
+                const startScrolling = () => {
+                    paneTerm.scrollLines(direction * 2);
+                    if (interval) clearInterval(interval);
+                    interval = setInterval(() => {
+                        paneTerm.scrollLines(direction * 2);
+                    }, 80);
+                };
+                const stopScrolling = () => {
+                    if (interval) {
+                        clearInterval(interval);
+                        interval = null;
+                    }
+                };
+                
+                btn.addEventListener('mousedown', (e) => { e.stopPropagation(); startScrolling(); });
+                btn.addEventListener('mouseup', stopScrolling);
+                btn.addEventListener('mouseleave', stopScrolling);
+                
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); startScrolling(); }, { passive: false });
+                btn.addEventListener('touchend', stopScrolling);
+                btn.addEventListener('touchcancel', stopScrolling);
+            };
+            
+            setupContinuousScroll(upBtn, -1);
+            setupContinuousScroll(downBtn, 1);
 
             // Handle scrollbar idle fade-out after 2 seconds
             const viewport = paneDiv.querySelector('.xterm-viewport');
