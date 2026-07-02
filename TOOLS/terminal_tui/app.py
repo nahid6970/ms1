@@ -286,6 +286,7 @@ def scan_projects():
             )
             
         bookmarks = p.get("bookmarks", [])
+        layout = p.get("layout", {})
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
@@ -293,7 +294,8 @@ def scan_projects():
             "pinned": pinned,
             "theme": theme,
             "cardTheme": card_theme,
-            "bookmarks": bookmarks
+            "bookmarks": bookmarks,
+            "layout": layout
         })
     return projects
 
@@ -545,6 +547,24 @@ def api_projects_reorder():
             
     save_projects_config(reordered_projects)
     return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/layout', methods=['POST'])
+def api_projects_save_layout(project):
+    data = request.json
+    layout_class = data.get("layoutClass")
+    pane_ids = data.get("paneIds")
+    
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+        
+    proj["layout"] = {
+        "layoutClass": layout_class,
+        "paneIds": pane_ids
+    }
+    save_projects_config(projects)
+    return jsonify({"success": True})
 
 @app.route('/api/sessions/reset', methods=['POST'])
 def api_sessions_reset():

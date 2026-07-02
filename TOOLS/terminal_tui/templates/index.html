@@ -1884,9 +1884,6 @@
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
                 }
-                
-                localStorage.removeItem(`split-layout-class::${projectName}`);
-                localStorage.removeItem(`terminal-pane-ids::${projectName}`);
 
                 handleSearch();
             } catch (err) {
@@ -2962,31 +2959,41 @@
             closeSettingsModal();
         }
 
-        function saveTerminalLayoutState() {
+        async function saveTerminalLayoutState() {
             if (!activeProject) {
                 localStorage.removeItem('active-project');
                 return;
             }
             const parent = document.getElementById('terminal-parent');
             localStorage.setItem('active-project', activeProject);
-            localStorage.setItem(`split-layout-class::${activeProject}`, parent.className);
             
+            const layoutClass = parent.className;
             const paneIds = terminalPanes.map(p => p.paneId);
-            localStorage.setItem(`terminal-pane-ids::${activeProject}`, JSON.stringify(paneIds));
+            
+            // Immediately sync layout in memory for real-time consistency
+            const proj = projects.find(p => p.name === activeProject);
+            if (proj) {
+                proj.layout = { layoutClass, paneIds };
+            }
+            
+            try {
+                await fetch(`/api/projects/${activeProject}/layout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ layoutClass, paneIds })
+                });
+            } catch (err) {
+                console.error("Error saving terminal layout to backend:", err);
+            }
         }
 
         async function restoreTerminalLayout(projectName) {
             try {
-                const savedLayoutClass = localStorage.getItem(`split-layout-class::${projectName}`) || 'split-right';
-                const savedPaneIdsStr = localStorage.getItem(`terminal-pane-ids::${projectName}`);
-                let savedPaneIds = ['main'];
-                if (savedPaneIdsStr) {
-                    try {
-                        savedPaneIds = JSON.parse(savedPaneIdsStr);
-                    } catch (e) {
-                        savedPaneIds = ['main'];
-                    }
-                }
+                const currentProjDetails = projects.find(p => p.name === projectName) || {};
+                const layoutConfig = currentProjDetails.layout || {};
+                
+                const savedLayoutClass = layoutConfig.layoutClass || 'split-right';
+                const savedPaneIds = layoutConfig.paneIds || ['main'];
                 
                 activeProject = projectName;
                 handleSearch();
@@ -2995,7 +3002,6 @@
                 document.getElementById('workspace-header').style.display = 'flex';
                 document.getElementById('terminal-wrapper').style.display = 'flex';
                 
-                const currentProjDetails = projects.find(p => p.name === projectName) || {};
                 document.getElementById('active-project-name').innerText = currentProjDetails.name || projectName;
                 document.getElementById('active-project-path').innerText = currentProjDetails.path || '';
                 document.getElementById('active-project-branch').style.display = 'none';
