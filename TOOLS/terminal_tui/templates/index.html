@@ -1166,10 +1166,6 @@
                         <label for="theme-proj-category" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Category</label>
                         <input type="text" id="theme-proj-category" class="form-input" placeholder="e.g. Tools, Personal, Work" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
                     </div>
-                    <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
-                        <label for="theme-proj-order" style="font-size: 0.8rem; font-weight: 500; min-width: 60px;">Position</label>
-                        <input type="number" id="theme-proj-order" class="form-input" min="1" step="1" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;" placeholder="e.g. 1">
-                    </div>
                 </div>
 
                 <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; padding: 6px 10px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px;">
@@ -1377,6 +1373,29 @@
         </div>
     </div>
 
+    <!-- Workspaces Manager Modal Dialog -->
+    <div class="modal-overlay" id="manager-modal">
+        <div class="modal-content" style="width: 500px; max-width: 95%; max-height: 85vh; padding: 20px 24px; display: flex; flex-direction: column;">
+            <div class="modal-header" style="margin-bottom: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600;">Workspaces Manager</h2>
+                    <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">Drag to reorder, pin, customize, or control sessions</div>
+                </div>
+                <button onclick="closeManagerModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">×</button>
+            </div>
+            <!-- Search box inside manager modal -->
+            <div style="margin-bottom: 12px; flex-shrink: 0;">
+                <input type="text" id="manager-search-input" placeholder="Search workspaces..." oninput="renderManagerModalList()" style="width: 100%; height: 32px; padding: 6px 12px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;" autocomplete="off">
+            </div>
+            <div id="manager-project-list-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-height: 0;">
+                <!-- Workspace cards will be rendered dynamically here -->
+            </div>
+            <div class="form-actions" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; display: flex; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeManagerModal()" style="padding: 6px 16px; font-size: 0.8rem;">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
@@ -1410,6 +1429,7 @@
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
                 else if (id === 'settings-modal') closeSettingsModal();
+                else if (id === 'manager-modal') closeManagerModal();
             }
         });
 
@@ -2426,11 +2446,6 @@
             document.getElementById('theme-proj-path').value = contextProject.path;
             document.getElementById('theme-proj-category').value = contextProject.category || '';
             
-            // Populate workspace position order index
-            const currentOrder = projects.map(p => p.name);
-            const posIdx = currentOrder.indexOf(contextProject.name);
-            document.getElementById('theme-proj-order').value = posIdx !== -1 ? posIdx + 1 : projects.length;
-            
             const theme = contextProject.theme || {
                 background: '#000000',
                 foreground: '#d1d5db',
@@ -2550,12 +2565,20 @@
                     const originalPath = contextProject.path;
                     projects = await response.json();
                     
-                    const newOrderPos = parseInt(document.getElementById('theme-proj-order').value) || 1;
                     let order = projects.map(p => p.name);
-                    order = order.filter(n => n !== originalName);
-                    const targetIdx = Math.max(0, Math.min(newOrderPos - 1, order.length));
-                    order.splice(targetIdx, 0, newName);
-                    localStorage.setItem('workspaces-order', JSON.stringify(order));
+                    if (originalName !== newName) {
+                        const orderStr = localStorage.getItem('workspaces-order');
+                        if (orderStr) {
+                            try {
+                                let localOrder = JSON.parse(orderStr);
+                                const idx = localOrder.indexOf(originalName);
+                                if (idx !== -1) {
+                                    localOrder[idx] = newName;
+                                    localStorage.setItem('workspaces-order', JSON.stringify(localOrder));
+                                }
+                            } catch(e) {}
+                        }
+                    }
                     sortProjectsByCustomOrder();
                     
                     closeThemeModal();
@@ -2740,10 +2763,12 @@
         }
 
         // Save reordered projects array order to projects.json config
-        async function saveProjectsOrder() {
-            const container = document.getElementById('project-list-container');
+        async function saveProjectsOrder(sourceContainerId = 'project-list-container') {
+            const container = document.getElementById(sourceContainerId);
+            if (!container) return;
             const cards = [...container.querySelectorAll('.project-card')];
             const newNames = cards.map(c => c.getAttribute('data-name'));
+            if (newNames.length === 0) return;
             
             // Sync local projects array sorting
             const reordered = [];
@@ -2752,6 +2777,9 @@
                 if (p) reordered.push(p);
             });
             projects = reordered;
+            
+            // Also store workspace order in local storage for custom sorting
+            localStorage.setItem('workspaces-order', JSON.stringify(newNames));
 
             try {
                 await fetch('/api/projects/reorder', {
@@ -4291,6 +4319,297 @@
             const savedNotes = localStorage.getItem(`scratchpad-notes-${activeProject}`) || '';
             badge.style.display = savedNotes.trim() ? 'block' : 'none';
         }
+
+        function renderManagerModalList() {
+            const container = document.getElementById('manager-project-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const filterText = document.getElementById('manager-search-input').value.toLowerCase().trim();
+            
+            // Bind drag events once
+            if (!container.dataset.dragBound) {
+                container.dataset.dragBound = 'true';
+                container.ondragover = (e) => {
+                    e.preventDefault();
+                    const draggingCard = document.querySelector('.dragging');
+                    if (!draggingCard) return;
+                    
+                    const afterElement = getDragAfterElement(container, e.clientY);
+                    container.insertBefore(draggingCard, afterElement);
+                };
+            }
+            
+            const filtered = projects.filter(p => 
+                p.name.toLowerCase().includes(filterText) || 
+                p.path.toLowerCase().includes(filterText) ||
+                (p.category && p.category.toLowerCase().includes(filterText))
+            );
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px; font-size: 0.9rem;">
+                        No workspaces found.
+                    </div>
+                `;
+                return;
+            }
+            
+            filtered.forEach((proj, idx) => {
+                const card = document.createElement('div');
+                card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
+                card.style.cursor = 'grab';
+                
+                // Drag and drop reordering
+                card.setAttribute('draggable', 'true');
+                card.setAttribute('data-name', proj.name);
+                
+                card.ondragstart = (e) => {
+                    setTimeout(() => card.classList.add('dragging'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+                
+                card.ondragend = () => {
+                    card.classList.remove('dragging');
+                    saveProjectsOrder('manager-project-list-container');
+                    renderSidebar();
+                    if (typeof handleSearch === 'function') handleSearch();
+                };
+                
+                const isCardActive = activeProject === proj.name;
+                if (proj.cardTheme) {
+                    card.style.backgroundColor = proj.cardTheme.bgColor;
+                    card.style.borderColor = isCardActive ? proj.cardTheme.accentColor : 'var(--border-color)';
+                    card.style.setProperty('--card-accent-color', proj.cardTheme.accentColor);
+                    
+                    card.onmouseenter = () => {
+                        card.style.borderColor = proj.cardTheme.accentColor;
+                    };
+                    card.onmouseleave = () => {
+                        card.style.borderColor = isCardActive ? proj.cardTheme.accentColor : 'var(--border-color)';
+                    };
+                }
+                
+                // Clicking a card loads the project and closes manager modal
+                card.onclick = () => {
+                    selectProject(proj.name);
+                    closeManagerModal();
+                };
+                
+                // Title bar container inside card
+                const titleContainer = document.createElement('div');
+                titleContainer.className = 'project-title-container';
+                titleContainer.style.display = 'flex';
+                titleContainer.style.alignItems = 'center';
+                titleContainer.style.justifyContent = 'space-between';
+                titleContainer.style.width = '100%';
+                
+                const leftSide = document.createElement('div');
+                leftSide.style.display = 'flex';
+                leftSide.style.alignItems = 'center';
+                leftSide.style.gap = '6px';
+                leftSide.style.minWidth = '0';
+                
+                // Running active dot
+                if (proj.is_active) {
+                    const dot = document.createElement('span');
+                    dot.className = 'active-dot';
+                    dot.style.flexShrink = '0';
+                    leftSide.appendChild(dot);
+                }
+                
+                const titleTextSpan = document.createElement('span');
+                titleTextSpan.className = 'project-title-text';
+                titleTextSpan.innerText = proj.name;
+                titleTextSpan.style.fontWeight = '600';
+                titleTextSpan.style.whiteSpace = 'nowrap';
+                titleTextSpan.style.overflow = 'hidden';
+                titleTextSpan.style.textOverflow = 'ellipsis';
+                if (proj.cardTheme) {
+                    titleTextSpan.style.color = proj.cardTheme.textColor;
+                }
+                leftSide.appendChild(titleTextSpan);
+                
+                if (proj.pinned) {
+                    const pin = document.createElement('span');
+                    pin.innerText = '📌';
+                    pin.style.fontSize = '0.75rem';
+                    leftSide.appendChild(pin);
+                }
+                
+                titleContainer.appendChild(leftSide);
+                
+                // Category badge if present
+                if (proj.category) {
+                    const badge = document.createElement('span');
+                    badge.className = 'category-badge';
+                    badge.innerText = proj.category;
+                    badge.style.marginLeft = '8px';
+                    badge.style.flexShrink = '0';
+                    titleContainer.appendChild(badge);
+                }
+                
+                card.appendChild(titleContainer);
+                
+                // Path element
+                const path = document.createElement('div');
+                path.className = 'project-path';
+                path.innerText = proj.path;
+                path.style.fontSize = '0.72rem';
+                path.style.marginTop = '4px';
+                path.style.whiteSpace = 'nowrap';
+                path.style.overflow = 'hidden';
+                path.style.textOverflow = 'ellipsis';
+                if (proj.cardTheme) {
+                    path.style.color = proj.cardTheme.pathColor;
+                }
+                card.appendChild(path);
+                
+                // Repositioning and actions controls container
+                const controlsRow = document.createElement('div');
+                controlsRow.style = 'display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;';
+                
+                // Reposition buttons
+                const repGroup = document.createElement('div');
+                repGroup.style = 'display: flex; align-items: center; gap: 4px;';
+                
+                const upBtn = document.createElement('button');
+                upBtn.type = 'button';
+                upBtn.title = 'Move Up';
+                upBtn.style = 'width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 0.65rem; transition: all 0.15s;';
+                upBtn.innerText = '▲';
+                upBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    moveProjectPosition(proj.name, -1);
+                };
+                upBtn.onmouseenter = () => { upBtn.style.color = 'var(--text-primary)'; upBtn.style.borderColor = 'var(--accent-color)'; };
+                upBtn.onmouseleave = () => { upBtn.style.color = 'var(--text-secondary)'; upBtn.style.borderColor = 'var(--border-color)'; };
+                
+                const downBtn = document.createElement('button');
+                downBtn.type = 'button';
+                downBtn.title = 'Move Down';
+                downBtn.style = 'width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 0.65rem; transition: all 0.15s;';
+                downBtn.innerText = '▼';
+                downBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    moveProjectPosition(proj.name, 1);
+                };
+                downBtn.onmouseenter = () => { downBtn.style.color = 'var(--text-primary)'; downBtn.style.borderColor = 'var(--accent-color)'; };
+                downBtn.onmouseleave = () => { downBtn.style.color = 'var(--text-secondary)'; downBtn.style.borderColor = 'var(--border-color)'; };
+                
+                repGroup.appendChild(upBtn);
+                repGroup.appendChild(downBtn);
+                controlsRow.appendChild(repGroup);
+                
+                // Card Action Dots container
+                const cardActions = document.createElement('div');
+                cardActions.className = 'card-actions';
+                cardActions.style = 'display: flex; gap: 6px;';
+                
+                // Pin Dot
+                const pinDot = document.createElement('button');
+                pinDot.className = `action-dot ${proj.pinned ? 'yellow' : 'grey'}`;
+                pinDot.title = proj.pinned ? 'Unpin Workspace' : 'Pin Workspace';
+                pinDot.onclick = (e) => {
+                    e.stopPropagation();
+                    togglePinProject(proj);
+                    setTimeout(renderManagerModalList, 50);
+                };
+                cardActions.appendChild(pinDot);
+                
+                // Customize Dot
+                const customizeDot = document.createElement('button');
+                customizeDot.className = 'action-dot blue';
+                customizeDot.title = 'Customize Style & Theme';
+                customizeDot.onclick = (e) => {
+                    e.stopPropagation();
+                    contextProject = proj;
+                    openThemeModal();
+                };
+                cardActions.appendChild(customizeDot);
+                
+                // Stop Dot
+                if (proj.is_active) {
+                    const stopDot = document.createElement('button');
+                    stopDot.className = 'action-dot orange';
+                    stopDot.title = 'Stop/Kill Terminal Session';
+                    stopDot.onclick = (e) => {
+                        e.stopPropagation();
+                        stopProjectSession(proj.name);
+                        setTimeout(renderManagerModalList, 50);
+                    };
+                    cardActions.appendChild(stopDot);
+                }
+                
+                // Delete Dot
+                const deleteDot = document.createElement('button');
+                deleteDot.className = 'action-dot red';
+                deleteDot.title = 'Remove Workspace';
+                deleteDot.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteProject(proj.name);
+                    setTimeout(renderManagerModalList, 50);
+                };
+                cardActions.appendChild(deleteDot);
+                
+                controlsRow.appendChild(cardActions);
+                card.appendChild(controlsRow);
+                container.appendChild(card);
+            });
+        }
+        
+        function openManagerModal() {
+            document.getElementById('manager-search-input').value = '';
+            renderManagerModalList();
+            document.getElementById('manager-modal').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('manager-search-input')?.focus();
+            }, 150);
+        }
+        
+        function closeManagerModal() {
+            document.getElementById('manager-modal').classList.remove('show');
+        }
+        
+        function moveProjectPosition(projName, direction) {
+            const index = projects.findIndex(p => p.name === projName);
+            if (index === -1) return;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= projects.length) return;
+            
+            // Swap in projects array
+            const temp = projects[index];
+            projects[index] = projects[targetIndex];
+            projects[targetIndex] = temp;
+            
+            // Sync local storage custom order index array
+            const newNames = projects.map(p => p.name);
+            localStorage.setItem('workspaces-order', JSON.stringify(newNames));
+            
+            // Call backend API to persist reordered list
+            fetch('/api/projects/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ names: newNames })
+            }).catch(err => console.error("Failed to save reordered list:", err));
+            
+            // Re-render
+            renderManagerModalList();
+            renderSidebar();
+            if (typeof handleSearch === 'function') handleSearch();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const manager = document.getElementById('manager-modal');
+                if (manager && manager.classList.contains('show')) {
+                    closeManagerModal();
+                }
+            } else if (e.key === 'F1') {
+                e.preventDefault();
+                openManagerModal();
+            }
+        });
 
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
