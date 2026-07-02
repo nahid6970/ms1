@@ -28,6 +28,7 @@
             --text-muted: #475569;
             --green-active: #10b981;
             --green-glow: rgba(16, 185, 129, 0.3);
+            --sidebar-width: 250px;
         }
 
         * {
@@ -48,7 +49,7 @@
 
         /* Sidebar styling */
         .sidebar {
-            width: 250px;
+            width: var(--sidebar-width, 250px);
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -61,6 +62,10 @@
         .sidebar.collapsed {
             width: 0;
             border-right: none;
+        }
+
+        .sidebar-inner-wrapper {
+            width: var(--sidebar-width, 250px);
         }
 
         .sidebar-header {
@@ -813,7 +818,7 @@
 
     <!-- Left Sidebar: Workspaces -->
     <div class="sidebar">
-        <div style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; height: 100%;">
+        <div class="sidebar-inner-wrapper" style="flex-shrink: 0; display: flex; flex-direction: column; height: 100%;">
             <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px;">
                 <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; min-width: 0; height: 32px; padding: 6px 10px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
                 <div class="header-actions" style="flex-shrink: 0; gap: 4px;">
@@ -1152,6 +1157,10 @@
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label for="settings-font-size" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Terminal Font Size (px)</label>
                     <input type="number" id="settings-font-size" min="8" max="32" value="14" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="settings-sidebar-width" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;">Sidebar Width (px)</label>
+                    <input type="number" id="settings-sidebar-width" min="150" max="600" value="250" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; width: 100%;">
                 </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
@@ -2917,6 +2926,9 @@
             const savedFontSize = parseInt(localStorage.getItem('terminal-font-size')) || 14;
             document.getElementById('settings-font-size').value = savedFontSize;
             
+            const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
+            document.getElementById('settings-sidebar-width').value = savedSidebarWidth;
+            
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -2931,6 +2943,12 @@
             
             const selectedFontSize = parseInt(document.getElementById('settings-font-size').value) || 14;
             localStorage.setItem('terminal-font-size', selectedFontSize);
+            
+            const selectedSidebarWidth = parseInt(document.getElementById('settings-sidebar-width').value) || 250;
+            localStorage.setItem('sidebar-width', selectedSidebarWidth);
+            
+            // Apply sidebar width variable dynamically
+            document.documentElement.style.setProperty('--sidebar-width', `${selectedSidebarWidth}px`);
             
             // Apply font family globally to the entire application body
             document.body.style.fontFamily = selectedFont;
@@ -3057,6 +3075,11 @@
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
+            
+            // Apply custom sidebar width on load
+            const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
+            document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+            
             loadSystemFonts();
             await fetchProjects();
             
