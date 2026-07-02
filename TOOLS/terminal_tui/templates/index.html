@@ -1609,7 +1609,9 @@
 
         function closeTerminalPane(paneId) {
             if (terminalPanes.length <= 1) {
-                alert("At least one terminal pane must remain open.");
+                if (activeProject) {
+                    stopProjectSession(activeProject);
+                }
                 return;
             }
 
