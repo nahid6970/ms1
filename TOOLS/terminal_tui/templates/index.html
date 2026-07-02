@@ -1727,16 +1727,20 @@
                         if (paneSocket && paneSocket.connected) {
                             paneSocket.emit('resize', { project: projectName, paneId, cols: paneTerm.cols, rows: paneTerm.rows });
                         }
-                    }, 300);
+                    }, 100);
                 }
             });
 
+            let resizeTimeout;
             const resizeObserver = new ResizeObserver(() => {
-                try {
-                    paneFitAddon.fit();
-                } catch (e) {
-                    // Ignore transient layout fits
-                }
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    try {
+                        paneFitAddon.fit();
+                    } catch (e) {
+                        // Ignore transient layout fits
+                    }
+                }, 100);
             });
             pane.resizeObserver = resizeObserver;
             resizeObserver.observe(paneDiv);
