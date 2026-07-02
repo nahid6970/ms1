@@ -630,6 +630,61 @@ def api_session(project):
         "path": proj_details["path"]
     })
 
+def get_process_stats(pid):
+    try:
+        import psutil
+        parent = psutil.Process(pid)
+        # Get parent stats
+        cpu_percent = parent.cpu_percent(interval=None)
+        rss = parent.memory_info().rss
+        
+        # Get children recursively
+        try:
+            children = parent.children(recursive=True)
+            for child in children:
+                try:
+                    cpu_percent += child.cpu_percent(interval=None)
+                    rss += child.memory_info().rss
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+        except Exception:
+            pass
+            
+        memory_mb = rss / (1024 * 1024)
+        return {
+            "cpu": round(cpu_percent, 1),
+            "memory": round(memory_mb, 1)
+        }
+    except Exception:
+        return {"cpu": 0.0, "memory": 0.0}
+
+@app.route('/api/session/<project>/stats', methods=['GET'])
+def api_session_stats(project):
+    project_sessions = []
+    with sessions_lock:
+        for key, session in active_sessions.items():
+            if key.lower().startswith(f"{project.lower()}:"):
+                project_sessions.append(session)
+                
+    if not project_sessions:
+        return jsonify({"cpu": 0.0, "memory": 0.0, "panes_count": 0})
+        
+    total_cpu = 0.0
+    total_mem = 0.0
+    
+    for session in project_sessions:
+        if session.pty.isalive():
+            pid = session.pty.pid
+            stats = get_process_stats(pid)
+            total_cpu += stats["cpu"]
+            total_mem += stats["memory"]
+            
+    return jsonify({
+        "cpu": round(total_cpu, 1),
+        "memory": round(total_mem, 1),
+        "panes_count": len(project_sessions)
+    })
+
 @app.route('/api/session/<project>/paste-image', methods=['POST'])
 def api_paste_image(project):
     projects = scan_projects()
