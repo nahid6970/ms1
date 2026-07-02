@@ -881,7 +881,9 @@
                     </svg>
                     <span id="active-project-branch-text">main</span>
                 </div>
-                <div class="workspace-path-bread" id="active-project-path">~/TOOLS/project</div>
+                <button class="action-btn" id="active-project-path-btn" title="Show path" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="copyActiveProjectPath()">
+                    📂
+                </button>
             </div>
             <div class="header-bookmarks" style="display: flex; align-items: center; gap: 8px;">
                 <div class="custom-dropdown" id="bookmark-dropdown-container" style="position: relative; display: inline-block;">
@@ -2917,6 +2919,19 @@
             renderFontOptions(searchInput.value);
         }
 
+        function copyActiveProjectPath() {
+            const pathBtn = document.getElementById('active-project-path-btn');
+            if (pathBtn && pathBtn.title) {
+                navigator.clipboard.writeText(pathBtn.title).then(() => {
+                    const originalHTML = pathBtn.innerHTML;
+                    pathBtn.innerHTML = '✔️';
+                    setTimeout(() => {
+                        pathBtn.innerHTML = originalHTML;
+                    }, 1200);
+                });
+            }
+        }
+
         function openSettingsModal() {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
@@ -3019,7 +3034,17 @@
                 document.getElementById('terminal-wrapper').style.display = 'flex';
                 
                 document.getElementById('active-project-name').innerText = currentProjDetails.name || projectName;
-                document.getElementById('active-project-path').innerText = currentProjDetails.path || '';
+                
+                const pathBtn = document.getElementById('active-project-path-btn');
+                if (pathBtn) {
+                    if (currentProjDetails.path) {
+                        pathBtn.title = currentProjDetails.path;
+                        pathBtn.style.display = 'flex';
+                    } else {
+                        pathBtn.style.display = 'none';
+                    }
+                }
+                
                 document.getElementById('active-project-branch').style.display = 'none';
                 document.title = currentProjDetails.name || projectName;
                 
