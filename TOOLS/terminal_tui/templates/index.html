@@ -1792,7 +1792,7 @@
 
             const parent = document.getElementById('terminal-parent');
             if (terminalPanes.length === 1) {
-                parent.className = 'split-right';
+                parent.className = 'split-tabs';
             }
 
             if (term === pane.term) {
@@ -1824,7 +1824,7 @@
             splitPaneCounter = 1;
             const parent = document.getElementById('terminal-parent');
             parent.innerHTML = '';
-            parent.className = 'split-right';
+            parent.className = 'split-tabs';
             createTerminalPane(projectName, 'main', projectTheme);
             updateTerminalTabs();
         }
@@ -2847,7 +2847,18 @@
         }
 
         function runBookmarkInSplit(cmd) {
-            splitTerminal('right', cmd);
+            const parent = document.getElementById('terminal-parent');
+            let currentLayout = 'right';
+            if (parent) {
+                if (parent.classList.contains('split-bottom')) {
+                    currentLayout = 'bottom';
+                } else if (parent.classList.contains('split-stacked')) {
+                    currentLayout = 'stacked';
+                } else if (parent.classList.contains('split-tabs')) {
+                    currentLayout = 'tabs';
+                }
+            }
+            splitTerminal(currentLayout, cmd);
         }
 
         async function addCurrentCommandAsBookmark() {
@@ -3284,7 +3295,7 @@
                 const currentProjDetails = projects.find(p => p.name === projectName) || {};
                 const layoutConfig = currentProjDetails.layout || {};
                 
-                const savedLayoutClass = layoutConfig.layoutClass || 'split-right';
+                const savedLayoutClass = layoutConfig.layoutClass || 'split-tabs';
                 const savedPaneIds = layoutConfig.paneIds || ['main'];
                 
                 activeProject = projectName;
