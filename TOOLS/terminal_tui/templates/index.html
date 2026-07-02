@@ -723,6 +723,9 @@
             background: var(--terminal-scrollbar-color, var(--border-color)) !important;
             border-radius: 4px;
         }
+        .terminal-pane .xterm-viewport.scrollbar-idle::-webkit-scrollbar-thumb {
+            background: var(--terminal-scrollbar-idle-color, rgba(255,255,255,0.08)) !important;
+        }
         .terminal-pane .xterm-viewport::-webkit-scrollbar-thumb:hover {
             background: var(--terminal-scrollbar-color-hover, var(--text-muted)) !important;
         }
@@ -1258,6 +1261,10 @@
                         <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
                             <label for="theme-scrollbar" style="font-size: 0.75rem;">Scrollbar Thumb Color</label>
                             <input type="color" id="theme-scrollbar" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0;">
+                            <label for="theme-scrollbar-idle" style="font-size: 0.75rem;">Scrollbar Idle Color</label>
+                            <input type="color" id="theme-scrollbar-idle" class="form-input" style="width: 44px; height: 26px; padding: 0; cursor: pointer; border: none; background: transparent;">
                         </div>
                     </div>
                     
@@ -2102,8 +2109,17 @@
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
             
-            if (projectTheme && projectTheme.borderColor) {
-                paneDiv.style.borderColor = projectTheme.borderColor;
+            if (projectTheme) {
+                if (projectTheme.borderColor) {
+                    paneDiv.style.borderColor = projectTheme.borderColor;
+                }
+                if (projectTheme.scrollbarColor) {
+                    paneDiv.style.setProperty('--terminal-scrollbar-color', projectTheme.scrollbarColor);
+                    paneDiv.style.setProperty('--terminal-scrollbar-color-hover', projectTheme.scrollbarColor);
+                }
+                if (projectTheme.scrollbarIdleColor) {
+                    paneDiv.style.setProperty('--terminal-scrollbar-idle-color', projectTheme.scrollbarIdleColor);
+                }
             }
 
             const savedFontSize = parseInt(localStorage.getItem('terminal-font-size')) || 14;
@@ -2118,6 +2134,26 @@
             const paneFitAddon = new FitAddon.FitAddon();
             paneTerm.loadAddon(paneFitAddon);
             paneTerm.open(paneDiv);
+
+            // Handle scrollbar idle fade-out after 2 seconds
+            const viewport = paneDiv.querySelector('.xterm-viewport');
+            if (viewport) {
+                let scrollTimeout = null;
+                const activateScrollbar = () => {
+                    viewport.classList.remove('scrollbar-idle');
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        viewport.classList.add('scrollbar-idle');
+                    }, 2000); // 2 seconds idle timeout
+                };
+                
+                // Initialize in idle state
+                viewport.classList.add('scrollbar-idle');
+                
+                // Light up on scrolling or moving mouse over the pane
+                viewport.addEventListener('scroll', activateScrollbar);
+                paneDiv.addEventListener('mousemove', activateScrollbar);
+            }
 
             const paneSocket = io('/pty');
             const pane = { paneId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null };
@@ -2393,27 +2429,27 @@
 
         const themePresets = {
             dracula: {
-                theme: { background: '#282a36', foreground: '#f8f8f2', cursor: '#f1fa8c', borderColor: '#44475a', scrollbarColor: '#6272a4' },
+                theme: { background: '#282a36', foreground: '#f8f8f2', cursor: '#f1fa8c', borderColor: '#44475a', scrollbarColor: '#6272a4', scrollbarIdleColor: '#1e1f29' },
                 cardTheme: { bgColor: '#1e1f29', textColor: '#f8f8f2', pathColor: '#6272a4', accentColor: '#bd93f9' }
             },
             nord: {
-                theme: { background: '#2e3440', foreground: '#d8dee9', cursor: '#88c0d0', borderColor: '#3b4252', scrollbarColor: '#4c566a' },
+                theme: { background: '#2e3440', foreground: '#d8dee9', cursor: '#88c0d0', borderColor: '#3b4252', scrollbarColor: '#4c566a', scrollbarIdleColor: '#242933' },
                 cardTheme: { bgColor: '#242933', textColor: '#eceff4', pathColor: '#4c566a', accentColor: '#81a1c1' }
             },
             monokai: {
-                theme: { background: '#272822', foreground: '#f8f8f2', cursor: '#f92672', borderColor: '#3e3d32', scrollbarColor: '#75715e' },
+                theme: { background: '#272822', foreground: '#f8f8f2', cursor: '#f92672', borderColor: '#3e3d32', scrollbarColor: '#75715e', scrollbarIdleColor: '#1e1f1c' },
                 cardTheme: { bgColor: '#1e1f1c', textColor: '#f8f8f2', pathColor: '#75715e', accentColor: '#a6e22e' }
             },
             solarized: {
-                theme: { background: '#002b36', foreground: '#839496', cursor: '#b58900', borderColor: '#073642', scrollbarColor: '#586e75' },
+                theme: { background: '#002b36', foreground: '#839496', cursor: '#b58900', borderColor: '#073642', scrollbarColor: '#586e75', scrollbarIdleColor: '#001f27' },
                 cardTheme: { bgColor: '#001f27', textColor: '#93a1a1', pathColor: '#586e75', accentColor: '#268bd2' }
             },
             onedark: {
-                theme: { background: '#282c34', foreground: '#abb2bf', cursor: '#528bff', borderColor: '#3e4452', scrollbarColor: '#5c6370' },
+                theme: { background: '#282c34', foreground: '#abb2bf', cursor: '#528bff', borderColor: '#3e4452', scrollbarColor: '#5c6370', scrollbarIdleColor: '#1e222b' },
                 cardTheme: { bgColor: '#1e222b', textColor: '#abb2bf', pathColor: '#5c6370', accentColor: '#61afef' }
             },
             cyberpunk: {
-                theme: { background: '#000b19', foreground: '#00ffcc', cursor: '#ff007f', borderColor: '#ff007f', scrollbarColor: '#ff0055' },
+                theme: { background: '#000b19', foreground: '#00ffcc', cursor: '#ff007f', borderColor: '#ff007f', scrollbarColor: '#ff0055', scrollbarIdleColor: '#000610' },
                 cardTheme: { bgColor: '#000610', textColor: '#00ffcc', pathColor: '#ff0055', accentColor: '#ffe600' }
             }
         };
@@ -2428,6 +2464,7 @@
             document.getElementById('theme-cursor').value = preset.theme.cursor;
             document.getElementById('theme-border').value = preset.theme.borderColor;
             document.getElementById('theme-scrollbar').value = preset.theme.scrollbarColor;
+            document.getElementById('theme-scrollbar-idle').value = preset.theme.scrollbarIdleColor;
             
             document.getElementById('card-bg').value = preset.cardTheme.bgColor;
             document.getElementById('card-fg').value = preset.cardTheme.textColor;
@@ -2442,7 +2479,8 @@
                     preset.theme.foreground.toLowerCase() === theme.foreground.toLowerCase() &&
                     preset.theme.cursor.toLowerCase() === theme.cursor.toLowerCase() &&
                     preset.theme.borderColor.toLowerCase() === (theme.borderColor || '#232c3d').toLowerCase() &&
-                    preset.theme.scrollbarColor.toLowerCase() === (theme.scrollbarColor || '#475569').toLowerCase();
+                    preset.theme.scrollbarColor.toLowerCase() === (theme.scrollbarColor || '#475569').toLowerCase() &&
+                    preset.theme.scrollbarIdleColor.toLowerCase() === (theme.scrollbarIdleColor || '#2d3748').toLowerCase();
                     
                 const matchCard = 
                     preset.cardTheme.bgColor.toLowerCase() === cardTheme.bgColor.toLowerCase() &&
@@ -2473,7 +2511,8 @@
                 foreground: '#d1d5db',
                 cursor: '#3b82f6',
                 borderColor: '#232c3d',
-                scrollbarColor: '#475569'
+                scrollbarColor: '#475569',
+                scrollbarIdleColor: '#2d3748'
             };
             const cardTheme = contextProject.cardTheme || {
                 bgColor: '#161c26',
@@ -2487,6 +2526,7 @@
             document.getElementById('theme-cursor').value = theme.cursor;
             document.getElementById('theme-border').value = theme.borderColor || '#232c3d';
             document.getElementById('theme-scrollbar').value = theme.scrollbarColor || '#475569';
+            document.getElementById('theme-scrollbar-idle').value = theme.scrollbarIdleColor || '#2d3748';
             
             document.getElementById('card-bg').value = cardTheme.bgColor;
             document.getElementById('card-fg').value = cardTheme.textColor;
@@ -2499,7 +2539,7 @@
 
             // Bind manual picker changes to revert preset selection to 'custom'
             const pickers = [
-                'theme-bg', 'theme-fg', 'theme-cursor', 'theme-border', 'theme-scrollbar',
+                'theme-bg', 'theme-fg', 'theme-cursor', 'theme-border', 'theme-scrollbar', 'theme-scrollbar-idle',
                 'card-bg', 'card-fg', 'card-path', 'card-accent'
             ];
             pickers.forEach(id => {
@@ -2551,6 +2591,7 @@
             const borderColor = document.getElementById('theme-border').value;
             
             const scrollbarColor = document.getElementById('theme-scrollbar').value;
+            const scrollbarIdleColor = document.getElementById('theme-scrollbar-idle').value;
             
             const cardBg = document.getElementById('card-bg').value;
             const cardFg = document.getElementById('card-fg').value;
@@ -2562,7 +2603,8 @@
                 foreground: fg,
                 cursor: cursor,
                 borderColor: borderColor,
-                scrollbarColor: scrollbarColor
+                scrollbarColor: scrollbarColor,
+                scrollbarIdleColor: scrollbarIdleColor
             };
             const cardTheme = {
                 bgColor: cardBg,
@@ -2634,6 +2676,9 @@
                                 if (theme.scrollbarColor) {
                                     pane.element.style.setProperty('--terminal-scrollbar-color', theme.scrollbarColor);
                                     pane.element.style.setProperty('--terminal-scrollbar-color-hover', theme.scrollbarColor);
+                                }
+                                if (theme.scrollbarIdleColor) {
+                                    pane.element.style.setProperty('--terminal-scrollbar-idle-color', theme.scrollbarIdleColor);
                                 }
                             });
                         }

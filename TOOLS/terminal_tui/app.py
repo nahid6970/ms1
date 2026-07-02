@@ -262,7 +262,8 @@ def scan_projects():
             "background": "#000000",
             "foreground": "#d1d5db",
             "cursor": "#3b82f6",
-            "scrollbarColor": "#475569"
+            "scrollbarColor": "#475569",
+            "scrollbarIdleColor": "#2d3748"
         }
         theme = p.get("theme", {})
         for k, v in default_theme.items():
@@ -339,7 +340,8 @@ def api_projects_post():
             "background": "#000000",
             "foreground": "#d1d5db",
             "cursor": "#3b82f6",
-            "scrollbarColor": "#475569"
+            "scrollbarColor": "#475569",
+            "scrollbarIdleColor": "#2d3748"
         },
         "cardTheme": {
             "bgColor": "#161c26",
