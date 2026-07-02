@@ -1466,6 +1466,15 @@
                 const url = refresh ? '/api/projects?refresh=true' : '/api/projects';
                 const response = await fetch(url);
                 projects = await response.json();
+                
+                // Track original server-side index order
+                projects.forEach((proj, index) => {
+                    proj.serverIndex = index;
+                });
+                
+                // Sync local storage custom order list with the server order sequence
+                localStorage.setItem('workspaces-order', JSON.stringify(projects.map(p => p.name)));
+                
                 sortProjectsByCustomOrder();
                 
                 // Keep active project details updated with latest theme
