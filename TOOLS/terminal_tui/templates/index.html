@@ -1617,10 +1617,10 @@
 
             <!-- Past Commits Section -->
             <div style="margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; user-select: none;" onclick="togglePastCommits()" title="Toggle past commits">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span id="past-commits-arrow" style="font-size: 0.7rem; color: var(--text-secondary); transition: transform 0.2s; display:inline-block; transform: rotate(0deg);">▶</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; user-select: none; padding: 6px 8px; border-radius: 6px; transition: background-color 0.15s;" onclick="togglePastCommits()" title="Toggle past commits" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
+                    <div style="display: flex; align-items: center; gap: 8px;">
                         <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); cursor: pointer;">Past Commits</label>
+                        <span id="past-commits-arrow" style="font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.2s; display:inline-flex; align-items:center; transform: rotate(0deg);">›</span>
                     </div>
                     <button onclick="event.stopPropagation(); refreshPastCommits();" id="past-commits-refresh-btn" style="display:none; background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(37,99,235,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Refresh commits">🔄 Refresh</button>
                 </div>
