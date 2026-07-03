@@ -195,10 +195,7 @@ function initializeApp() {
     // Initialize buttons using setMode
     setMode(parseInt(markdownMode));
 
-    // Initialize font size scale
-    setTimeout(() => {
-        applyFontSizeScale();
-    }, 100);
+    // Initialize font size scale (applied via renderTable after data loads)
 
     // Initialize Vrinda font setting
     const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
@@ -9529,6 +9526,7 @@ function renderTable(preserveScroll = true) {
     }
 
     // Update row count display
+    applyFontSizeScale();
     updateRowCountDisplay();
 }
 
