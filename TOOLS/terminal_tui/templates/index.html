@@ -1604,10 +1604,10 @@
             </div>
 
             <!-- Options row -->
-            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px; padding: 10px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-primary); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px; padding: 10px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-primary); user-select: none;" title="Stages all changes including moved/renamed files (git add -A)">
                     <input type="checkbox" id="git-add-all" checked style="width:15px; height:15px; accent-color: var(--accent-color); cursor: pointer;">
-                    Stage all changes <span style="color: var(--text-secondary);">(git add -A, includes moved files)</span>
+                    Stage all changes <span style="color: var(--text-secondary);">(git add -A)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-primary); user-select: none; margin-left: auto;">
                     <input type="checkbox" id="git-do-push" checked style="width:15px; height:15px; accent-color: var(--accent-color); cursor: pointer;">
@@ -5374,20 +5374,20 @@
                     return;
                 }
                 el.innerHTML = commits.map((c, i) => `
-                    <div id="commit-row-${c.hash}" style="padding:8px 12px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:10px; transition: background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
-                        <span style="font-family:'Fira Code',monospace; font-size:0.72rem; color:#38bdf8; min-width:52px; flex-shrink:0;">${c.hash}</span>
+                    <div id="commit-row-${c.hash}" style="padding:7px 10px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:8px; transition: background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
+                        <span style="font-family:'Fira Code',monospace; font-size:0.7rem; color:#38bdf8; min-width:46px; flex-shrink:0;">${c.hash}</span>
                         <div style="flex:1; min-width:0;" id="commit-msg-display-${c.hash}">
-                            <span style="font-size:0.8rem; color:var(--text-primary); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${c.message}">${c.message}</span>
-                            <span style="font-size:0.7rem; color:var(--text-secondary);">${c.author} · ${c.date}</span>
+                            <span style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="${c.message}">${c.message}</span>
+                            <span style="font-size:0.68rem; color:var(--text-secondary); white-space:nowrap;">${c.author} · ${c.date}</span>
                         </div>
-                        <div id="commit-edit-${c.hash}" style="display:none; flex:1; min-width:0; gap:6px; align-items:center;">
-                            <input id="commit-input-${c.hash}" type="text" value="${c.message.replace(/"/g,'&quot;')}" style="flex:1; background-color:var(--bg-main); border:1px solid var(--accent-color); border-radius:6px; padding:4px 8px; color:var(--text-primary); font-size:0.8rem; font-family:'Fira Code',monospace; outline:none; width:100%;" onkeydown="if(event.key==='Enter'){saveCommitRename('${c.hash}')} else if(event.key==='Escape'){cancelCommitEdit('${c.hash}')}">
+                        <div id="commit-edit-${c.hash}" style="display:none; flex:1; min-width:0; align-items:center;">
+                            <input id="commit-input-${c.hash}" type="text" value="${c.message.replace(/"/g,'&quot;')}" style="flex:1; background-color:var(--bg-main); border:1px solid var(--accent-color); border-radius:6px; padding:3px 8px; color:var(--text-primary); font-size:0.78rem; font-family:'Fira Code',monospace; outline:none; width:100%;" onkeydown="if(event.key==='Enter'){saveCommitRename('${c.hash}')} else if(event.key==='Escape'){cancelCommitEdit('${c.hash}')}">
                         </div>
-                        <div style="display:flex; gap:6px; flex-shrink:0; align-items:center;">
-                            <button id="commit-edit-btn-${c.hash}" onclick="startCommitEdit('${c.hash}')" title="Rename commit message" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.7rem; padding:3px 8px; border-radius:5px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.color='var(--text-secondary)'">✏️ Rename</button>
-                            <button id="commit-save-btn-${c.hash}" onclick="saveCommitRename('${c.hash}')" style="display:none; background:var(--accent-color); border:none; color:white; cursor:pointer; font-size:0.7rem; padding:3px 8px; border-radius:5px;">Save</button>
-                            <button id="commit-cancel-btn-${c.hash}" onclick="cancelCommitEdit('${c.hash}')" style="display:none; background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.7rem; padding:3px 8px; border-radius:5px;">Cancel</button>
-                            ${i === 0 ? `<button onclick="pushCommits()" title="Push commits to remote" style="background:none; border:1px solid #22c55e; color:#22c55e; cursor:pointer; font-size:0.7rem; padding:3px 8px; border-radius:5px; transition: all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(34,197,94,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">⬆ Push</button>` : ''}
+                        <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
+                            <button id="commit-edit-btn-${c.hash}" onclick="startCommitEdit('${c.hash}')" title="Rename commit message" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.color='var(--text-secondary)'">✏️</button>
+                            <button id="commit-save-btn-${c.hash}" onclick="saveCommitRename('${c.hash}')" style="display:none; background:var(--accent-color); border:none; color:white; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; white-space:nowrap;">✓</button>
+                            <button id="commit-cancel-btn-${c.hash}" onclick="cancelCommitEdit('${c.hash}')" style="display:none; background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; white-space:nowrap;">✕</button>
+                            ${i === 0 ? `<button onclick="pushCommits()" title="Push commits to remote" style="background:none; border:1px solid #22c55e; color:#22c55e; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(34,197,94,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">⬆</button>` : ''}
                         </div>
                     </div>
                 `).join('');
