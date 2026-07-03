@@ -1126,6 +1126,10 @@
         #manager-project-list-container .project-card {
             padding: 6px 10px !important;
             gap: 1px !important;
+            cursor: grab !important;
+        }
+        #manager-project-list-container .project-card.dragging {
+            cursor: grabbing !important;
         }
         #manager-project-list-container .project-title-container {
             margin-bottom: 0px !important;
@@ -5326,39 +5330,7 @@
                 
                 // Repositioning and actions controls container (more compact)
                 const controlsRow = document.createElement('div');
-                controlsRow.style = 'display: flex; align-items: center; justify-content: space-between; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;';
-                
-                // Reposition buttons
-                const repGroup = document.createElement('div');
-                repGroup.style = 'display: flex; align-items: center; gap: 4px;';
-                
-                const upBtn = document.createElement('button');
-                upBtn.type = 'button';
-                upBtn.title = 'Move Up';
-                upBtn.style = 'width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-secondary); font-size: 0.6rem; transition: all 0.15s;';
-                upBtn.innerText = '▲';
-                upBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    moveProjectPosition(proj.name, -1);
-                };
-                upBtn.onmouseenter = () => { upBtn.style.color = 'var(--text-primary)'; upBtn.style.borderColor = 'var(--accent-color)'; };
-                upBtn.onmouseleave = () => { upBtn.style.color = 'var(--text-secondary)'; upBtn.style.borderColor = 'var(--border-color)'; };
-                
-                const downBtn = document.createElement('button');
-                downBtn.type = 'button';
-                downBtn.title = 'Move Down';
-                downBtn.style = 'width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-secondary); font-size: 0.6rem; transition: all 0.15s;';
-                downBtn.innerText = '▼';
-                downBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    moveProjectPosition(proj.name, 1);
-                };
-                downBtn.onmouseenter = () => { downBtn.style.color = 'var(--text-primary)'; downBtn.style.borderColor = 'var(--accent-color)'; };
-                downBtn.onmouseleave = () => { downBtn.style.color = 'var(--text-secondary)'; downBtn.style.borderColor = 'var(--border-color)'; };
-                
-                repGroup.appendChild(upBtn);
-                repGroup.appendChild(downBtn);
-                controlsRow.appendChild(repGroup);
+                controlsRow.style = 'display: flex; align-items: center; justify-content: flex-end; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;';
                 
                 // Card Action Dots container
                 const cardActions = document.createElement('div');
