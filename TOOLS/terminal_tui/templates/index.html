@@ -1137,6 +1137,17 @@
                             <line x1="12" y1="3" x2="12" y2="21"></line>
                         </svg>
                     </button>
+                    <button class="action-btn" onclick="toggleActivePaneSearch()" title="Find in terminal (Ctrl+F)" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                    <button class="action-btn" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </button>
                     <button class="action-btn" id="scratchpad-toggle-btn" onclick="toggleScratchpad(event)" title="Workspace Notes & Scratchpad" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); position: relative; transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -1524,6 +1535,21 @@
         </div>
     </div>
 
+    <!-- Slide-out File Explorer Panel -->
+    <div id="explorer-panel" style="position: fixed; top: 0; left: -340px; width: 320px; height: 100vh; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); box-shadow: 10px 0 25px rgba(0,0,0,0.5); z-index: 1005; display: flex; flex-direction: column; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+        <div style="padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0;">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-family: 'Outfit', sans-serif;">Workspace Explorer</span>
+                <span id="explorer-path" style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px; font-family: 'Outfit', sans-serif;">/</span>
+            </div>
+            <button onclick="closeExplorer()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; transition: all 0.2s; font-family: sans-serif;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">&times;</button>
+        </div>
+        <div id="explorer-tree-container" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.6;">
+            <!-- Tree list goes here -->
+        </div>
+    </div>
+
+
     <!-- Workspaces Manager Modal Dialog -->
     <div class="modal-overlay" id="manager-modal">
         <div class="modal-content" style="width: 500px; max-width: 95%; max-height: 85vh; padding: 20px 24px; display: flex; flex-direction: column;">
@@ -1550,6 +1576,7 @@
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-search@0.13.0/lib/xterm-addon-search.js"></script>
     <!-- Socket.IO client library -->
     <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
 
@@ -2427,7 +2454,64 @@
                 }
             }, 100);
 
+            // Create search overlay UI inside pane
+            const paneSearchAddon = new SearchAddon.SearchAddon();
+            paneTerm.loadAddon(paneSearchAddon);
+
+            const searchBar = document.createElement('div');
+            searchBar.className = 'terminal-search-bar';
+            searchBar.style = 'position: absolute; top: 6px; left: 40px; display: none; align-items: center; gap: 6px; padding: 4px 8px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 6px; z-index: 15; box-shadow: 0 4px 12px rgba(0,0,0,0.5);';
+            searchBar.innerHTML = `
+                <input type="text" class="terminal-search-input" placeholder="Find..." style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-size: 0.75rem; padding: 2px 6px; outline: none; width: 110px; font-family: sans-serif;">
+                <button type="button" class="search-prev" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.65rem; padding: 2px;" title="Previous (Shift+Enter)">▲</button>
+                <button type="button" class="search-next" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.65rem; padding: 2px;" title="Next (Enter)">▼</button>
+                <button type="button" class="search-close" style="background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.85rem; padding: 2px 4px; line-height: 1;">&times;</button>
+            `;
+            paneDiv.appendChild(searchBar);
+
+            const searchInput = searchBar.querySelector('.terminal-search-input');
+            const doNext = () => {
+                const query = searchInput.value;
+                if (query) paneSearchAddon.findNext(query);
+            };
+            const doPrev = () => {
+                const query = searchInput.value;
+                if (query) paneSearchAddon.findPrevious(query);
+            };
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (e.shiftKey) {
+                        doPrev();
+                    } else {
+                        doNext();
+                    }
+                } else if (e.key === 'Escape') {
+                    searchBar.style.display = 'none';
+                    paneTerm.focus();
+                }
+            });
+
+            searchBar.querySelector('.search-next').onclick = doNext;
+            searchBar.querySelector('.search-prev').onclick = doPrev;
+            searchBar.querySelector('.search-close').onclick = () => {
+                searchBar.style.display = 'none';
+                paneTerm.focus();
+            };
+
             paneTerm.attachCustomKeyEventHandler(e => {
+                if (e.ctrlKey && (e.key === 'f' || e.code === 'KeyF')) {
+                    e.preventDefault();
+                    if (searchBar.style.display === 'none') {
+                        searchBar.style.display = 'flex';
+                        searchInput.focus();
+                        searchInput.select();
+                    } else {
+                        searchBar.style.display = 'none';
+                        paneTerm.focus();
+                    }
+                    return false;
+                }
                 if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
                     if (paneTerm.hasSelection()) {
                         navigator.clipboard.writeText(paneTerm.getSelection());
@@ -3675,6 +3759,15 @@
                     closeScratchpad();
                 }
             }
+
+            // 6. Close file explorer panel
+            const explorerPanel = document.getElementById('explorer-panel');
+            const explorerBtn = document.getElementById('explorer-toggle-btn');
+            if (explorerPanel && explorerPanel.classList.contains('open')) {
+                if (!explorerPanel.contains(e.target) && !explorerBtn.contains(e.target)) {
+                    closeExplorer();
+                }
+            }
         }, true);
 
         function getTerminalBufferText(paneTerm) {
@@ -3750,6 +3843,22 @@
                     if (cpuVal) cpuVal.innerText = `${data.cpu}%`;
                     const ramVal = document.getElementById('monitor-ram-value');
                     if (ramVal) ramVal.innerText = `${data.memory} MB`;
+
+                    // Update Git status indicator branch name
+                    const branchEl = document.getElementById('active-project-branch');
+                    const branchTextEl = document.getElementById('active-project-branch-text');
+                    if (branchEl && branchTextEl) {
+                        if (data.git) {
+                            branchTextEl.innerText = data.git.modifications > 0 
+                                ? `${data.git.branch} (*${data.git.modifications})`
+                                : data.git.branch;
+                            branchEl.style.display = 'flex';
+                            branchEl.setAttribute('data-has-git', 'true');
+                        } else {
+                            branchEl.style.display = 'none';
+                            branchEl.setAttribute('data-has-git', 'false');
+                        }
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching session stats:", err);
@@ -4585,6 +4694,174 @@
             const savedNotes = localStorage.getItem(`scratchpad-notes-${activeProject}`) || '';
             badge.style.display = savedNotes.trim() ? 'block' : 'none';
         }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // In-Terminal search controls & File Explorer Toggle Drawer
+        // ─────────────────────────────────────────────────────────────────────────────
+
+        function toggleActivePaneSearch() {
+            if (!activeProject) return;
+            const activePane = terminalPanes.find(p => p.term === term);
+            if (activePane && activePane.element) {
+                const searchBar = activePane.element.querySelector('.terminal-search-bar');
+                const searchInput = activePane.element.querySelector('.terminal-search-input');
+                if (searchBar && searchInput) {
+                    if (searchBar.style.display === 'none') {
+                        searchBar.style.display = 'flex';
+                        searchInput.focus();
+                        searchInput.select();
+                    } else {
+                        searchBar.style.display = 'none';
+                        activePane.term.focus();
+                    }
+                }
+            }
+        }
+
+        function toggleExplorer(event) {
+            if (event) event.stopPropagation();
+            const panel = document.getElementById('explorer-panel');
+            if (!panel) return;
+            
+            const isOpen = panel.classList.contains('open');
+            if (isOpen) {
+                closeExplorer();
+            } else {
+                panel.classList.add('open');
+                panel.style.left = '0';
+                
+                if (activeProject) {
+                    loadExplorerRoot();
+                }
+            }
+        }
+        
+        function closeExplorer() {
+            const panel = document.getElementById('explorer-panel');
+            if (!panel) return;
+            panel.classList.remove('open');
+            panel.style.left = '-340px';
+        }
+
+        async function loadExplorerRoot() {
+            const container = document.getElementById('explorer-tree-container');
+            const pathLabel = document.getElementById('explorer-path');
+            if (!container || !activeProject) return;
+            
+            container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 12px 10px;">Loading workspace files...</div>';
+            
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files`);
+                if (res.ok) {
+                    const data = await res.json();
+                    pathLabel.innerText = data.current_dir || '/';
+                    renderFileTreeItems(container, data.items, "");
+                } else {
+                    container.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 12px 10px;">Failed to load files.</div>';
+                }
+            } catch (err) {
+                console.error("Error loading explorer root:", err);
+                container.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 12px 10px;">Connection error.</div>';
+            }
+        }
+
+        function renderFileTreeItems(parentContainer, items, parentPath) {
+            parentContainer.innerHTML = '';
+            
+            if (items.length === 0) {
+                const empty = document.createElement('div');
+                empty.style = 'color: var(--text-secondary); font-style: italic; padding-left: 12px; font-size: 0.75rem;';
+                empty.innerText = '(empty folder)';
+                parentContainer.appendChild(empty);
+                return;
+            }
+
+            items.forEach(item => {
+                const itemRow = document.createElement('div');
+                itemRow.style = 'display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; cursor: pointer; border-radius: 4px; transition: background-color 0.15s; font-size: 0.8rem;';
+                itemRow.onmouseenter = () => itemRow.style.backgroundColor = 'var(--bg-card-hover)';
+                itemRow.onmouseleave = () => itemRow.style.backgroundColor = 'transparent';
+
+                const leftArea = document.createElement('div');
+                leftArea.style = 'display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;';
+                
+                const icon = document.createElement('span');
+                icon.style = 'font-size: 0.85rem; flex-shrink: 0;';
+                icon.innerText = item.is_dir ? '📁' : '📄';
+                leftArea.appendChild(icon);
+
+                const nameText = document.createElement('span');
+                nameText.innerText = item.name;
+                nameText.style.color = item.is_dir ? '#38bdf8' : 'var(--text-primary)';
+                nameText.style.overflow = 'hidden';
+                nameText.style.textOverflow = 'ellipsis';
+                leftArea.appendChild(nameText);
+
+                leftArea.title = item.rel_path;
+                itemRow.appendChild(leftArea);
+
+                let subContainer = null;
+                if (item.is_dir) {
+                    subContainer = document.createElement('div');
+                    subContainer.className = 'explorer-sub-tree';
+                    subContainer.style = 'display: none; padding-left: 12px; border-left: 1px dashed var(--border-color); margin-left: 10px; flex-direction: column; gap: 4px;';
+                }
+
+                itemRow.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (item.is_dir) {
+                        if (subContainer.style.display === 'none') {
+                            subContainer.style.display = 'flex';
+                            icon.innerText = '📂';
+                            
+                            subContainer.innerHTML = '<div style="color: var(--text-secondary); padding-left: 12px; font-size: 0.72rem;">Loading...</div>';
+                            try {
+                                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files?subdir=${encodeURIComponent(item.rel_path)}`);
+                                if (res.ok) {
+                                    const subData = await res.json();
+                                    renderFileTreeItems(subContainer, subData.items, item.rel_path);
+                                } else {
+                                    subContainer.innerHTML = '<div style="color: #ef4444; padding-left: 12px; font-size: 0.72rem;">Error.</div>';
+                                }
+                            } catch (err) {
+                                console.error("Error loading sub-directory:", err);
+                                subContainer.innerHTML = '<div style="color: #ef4444; padding-left: 12px; font-size: 0.72rem;">Error.</div>';
+                            }
+                        } else {
+                            subContainer.style.display = 'none';
+                            icon.innerText = '📁';
+                        }
+                    } else {
+                        const relativePath = item.rel_path;
+                        if (activeProject && term) {
+                            navigator.clipboard.writeText(relativePath);
+                            const origColor = nameText.style.color;
+                            nameText.style.color = 'var(--green-active)';
+                            setTimeout(() => { nameText.style.color = origColor; }, 500);
+
+                            if (socket && socket.connected) {
+                                const activePane = terminalPanes.find(p => p.socket === socket);
+                                const paneId = activePane ? activePane.paneId : 'main';
+                                socket.emit('pty-input', {
+                                    project: activeProject,
+                                    paneId: paneId,
+                                    data: relativePath
+                                });
+                            }
+                        }
+                    }
+                };
+
+                const wrapper = document.createElement('div');
+                wrapper.style = 'display: flex; flex-direction: column; width: 100%;';
+                wrapper.appendChild(itemRow);
+                if (subContainer) {
+                    wrapper.appendChild(subContainer);
+                }
+                parentContainer.appendChild(wrapper);
+            });
+        }
+
 
         function renderManagerModalList() {
             const container = document.getElementById('manager-project-list-container');

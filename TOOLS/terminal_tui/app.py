@@ -40,6 +40,52 @@ PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.j
 active_sessions = {}
 sessions_lock = threading.Lock()
 
+def get_git_status(path):
+    if not os.path.isdir(path):
+        return None
+    try:
+        git_dir = os.path.join(path, ".git")
+        if not os.path.exists(git_dir):
+            return None
+        
+        # Get current branch name
+        res_branch = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
+            timeout=2
+        )
+        branch = res_branch.stdout.strip()
+        if not branch:
+            res_branch = subprocess.run(
+                ["git", "symbolic-ref", "--short", "HEAD"],
+                cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
+                timeout=2
+            )
+            branch = res_branch.stdout.strip()
+        
+        if not branch:
+            return None
+            
+        # Get modifications count
+        res_status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
+            timeout=2
+        )
+        status_lines = res_status.stdout.strip().split("\n")
+        mod_count = len([l for l in status_lines if l.strip()])
+        
+        return {
+            "branch": branch,
+            "modifications": mod_count
+        }
+    except Exception:
+        return None
+
+
 
 def get_session_key(project, pane_id=None):
     if not pane_id or pane_id == "main":
@@ -712,11 +758,22 @@ def api_session_stats(project):
     project_sessions = []
     with sessions_lock:
         for key, session in active_sessions.items():
-            if key.lower().startswith(f"{project.lower()}:"):
+            if session_belongs_to_project(key, project):
                 project_sessions.append(session)
                 
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    git_info = None
+    if proj_details:
+        git_info = get_git_status(proj_details["path"])
+        
     if not project_sessions:
-        return jsonify({"cpu": 0.0, "memory": 0.0, "panes_count": 0})
+        return jsonify({
+            "cpu": 0.0,
+            "memory": 0.0,
+            "panes_count": 0,
+            "git": git_info
+        })
         
     total_cpu = 0.0
     total_mem = 0.0
@@ -731,11 +788,48 @@ def api_session_stats(project):
     return jsonify({
         "cpu": round(total_cpu, 1),
         "memory": round(total_mem, 1),
-        "panes_count": len(project_sessions)
+        "panes_count": len(project_sessions),
+        "git": git_info
     })
 
 @app.route('/api/session/<project>/paste-image', methods=['POST'])
 def api_paste_image(project):
+@app.route('/api/project/<project>/files', methods=['GET'])
+def api_project_files(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+        
+    path = proj_details["path"]
+    if not os.path.exists(path) or not os.path.isdir(path):
+        return jsonify({"error": "Directory does not exist"}), 404
+        
+    sub_dir = request.args.get("subdir", "")
+    target_path = os.path.normpath(os.path.join(path, sub_dir))
+    
+    # Prevent directory traversal attacks
+    if not os.path.abspath(target_path).startswith(os.path.abspath(path)):
+         return jsonify({"error": "Unauthorized path access"}), 403
+         
+    try:
+        items = []
+        for name in os.listdir(target_path):
+            if name in [".git", "node_modules", "dist", ".next", ".cache"]:
+                continue
+            full_item_path = os.path.join(target_path, name)
+            is_dir = os.path.isdir(full_item_path)
+            items.append({
+                "name": name,
+                "is_dir": is_dir,
+                "rel_path": os.path.relpath(full_item_path, path).replace("\\", "/")
+            })
+        items.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
+        return jsonify({"items": items, "current_dir": sub_dir.replace("\\", "/")})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)
     if not proj:
