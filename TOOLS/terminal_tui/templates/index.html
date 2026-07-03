@@ -730,28 +730,38 @@
         }
 
         .terminal-pane-scroll-up {
-            top: 66px;
+            top: 96px;
         }
 
         .terminal-pane-scroll-down {
-            top: 96px;
+            top: 126px;
         }
 
         .terminal-pane-esc {
             top: 36px;
         }
 
-        .terminal-pane-arrow-left {
-            top: 126px;
+        .terminal-pane-ctrlc {
+            top: 66px;
         }
 
-        .terminal-pane-arrow-right {
+        .terminal-pane-arrow-left {
             top: 156px;
         }
 
-        .terminal-pane-esc,
-        .terminal-pane-arrow-left,
         .terminal-pane-arrow-right {
+            top: 186px;
+        }
+
+        .terminal-pane-add-btn {
+            top: 216px;
+        }
+
+        .terminal-pane-esc,
+        .terminal-pane-ctrlc,
+        .terminal-pane-arrow-left,
+        .terminal-pane-arrow-right,
+        .terminal-pane-add-btn {
             position: absolute;
             right: 6px;
             width: 24px;
@@ -773,14 +783,23 @@
             touch-action: none;
         }
 
-        .terminal-pane-esc {
+        .terminal-pane-esc,
+        .terminal-pane-ctrlc {
             color: #f87171;
             border-color: rgba(248, 113, 113, 0.3);
         }
 
+        .terminal-pane-add-btn {
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.3);
+            font-size: 0.9rem;
+        }
+
         .terminal-pane-esc:hover,
+        .terminal-pane-ctrlc:hover,
         .terminal-pane-arrow-left:hover,
-        .terminal-pane-arrow-right:hover {
+        .terminal-pane-arrow-right:hover,
+        .terminal-pane-add-btn:hover {
             background: rgba(31, 41, 55, 0.98);
             color: var(--text-primary);
             border-color: var(--accent-color);
@@ -1691,6 +1710,31 @@
         </div>
     </div>
 
+    <!-- Custom Button Modal (for adding custom terminal shortcuts) -->
+    <div class="modal-overlay" id="custom-btn-modal">
+        <div class="modal-content" style="width: 420px; max-width: 95%; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Add Custom Button</h2>
+                <button onclick="closeCustomButtonModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Button Label</label>
+                <input id="custom-btn-label" type="text" placeholder="e.g., Tab, Enter, etc." style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Key Code (hex or escape sequence)</label>
+                <input id="custom-btn-keycode" type="text" placeholder="e.g., \t for Tab, \r for Enter" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--bg-sidebar); border-radius: 6px;">
+                Examples: <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\t</code> = Tab, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\r</code> = Enter, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\x1b[A</code> = Up Arrow
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeCustomButtonModal()" style="padding: 8px 16px; font-size: 0.85rem;">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCustomButton()" style="padding: 8px 20px; font-size: 0.85rem;">Add Button</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
@@ -1727,6 +1771,7 @@
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
+                else if (id === 'custom-btn-modal') closeCustomButtonModal();
             }
         });
 
@@ -2396,6 +2441,16 @@
             escBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b' }); });
             paneDiv.appendChild(escBtn);
 
+            // ── Ctrl+C button (sends interrupt signal)
+            const ctrlCBtn = document.createElement('button');
+            ctrlCBtn.type = 'button';
+            ctrlCBtn.className = 'terminal-pane-ctrlc';
+            ctrlCBtn.title = 'Send Ctrl+C (interrupt/kill running command)';
+            ctrlCBtn.innerText = '^C';
+            ctrlCBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x03' }); });
+            ctrlCBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x03' }); });
+            paneDiv.appendChild(ctrlCBtn);
+
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
             
@@ -2459,6 +2514,22 @@
             rightBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
             rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
             paneDiv.appendChild(rightBtn);
+
+            // ── Add custom button (+ button for adding custom shortcuts)
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'terminal-pane-add-btn';
+            addBtn.title = 'Add custom button';
+            addBtn.innerText = '+';
+            addBtn.addEventListener('click', (e) => { e.stopPropagation(); openCustomButtonModal(paneId); });
+            addBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); openCustomButtonModal(paneId); });
+            paneDiv.appendChild(addBtn);
+
+            // Set pane ID attribute for custom button targeting
+            paneDiv.dataset.paneId = paneId;
+
+            // Restore any saved custom buttons for this project
+            setTimeout(() => restoreCustomButtonsForPane(paneId), 200);
 
             const setupContinuousScroll = (btn, direction) => {
                 let interval = null;
@@ -5384,6 +5455,83 @@
 
         function closeGitModal() {
             document.getElementById('git-modal').classList.remove('show');
+        }
+
+        // ─── Custom Terminal Button Modal ─────────────────────────────────────────
+        let customBtnTargetPaneId = null;
+
+        function openCustomButtonModal(paneId) {
+            customBtnTargetPaneId = paneId;
+            document.getElementById('custom-btn-label').value = '';
+            document.getElementById('custom-btn-keycode').value = '';
+            document.getElementById('custom-btn-modal').classList.add('show');
+            setTimeout(() => document.getElementById('custom-btn-label').focus(), 100);
+        }
+
+        function closeCustomButtonModal() {
+            document.getElementById('custom-btn-modal').classList.remove('show');
+            customBtnTargetPaneId = null;
+        }
+
+        function saveCustomButton() {
+            const label = document.getElementById('custom-btn-label').value.trim();
+            const keycode = document.getElementById('custom-btn-keycode').value;
+            if (!label || !keycode) return;
+
+            // Parse escape sequences in keycode string
+            const parseEscapes = (s) => s
+                .replace(/\\t/g, '\t')
+                .replace(/\\r/g, '\r')
+                .replace(/\\n/g, '\n')
+                .replace(/\\x1b/gi, '\x1b')
+                .replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+                .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+
+            const data = parseEscapes(keycode);
+
+            // Save to localStorage under active project
+            const storageKey = `custom-btns-${activeProject}`;
+            const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            existing.push({ label, data });
+            localStorage.setItem(storageKey, JSON.stringify(existing));
+
+            // Add button to the pane
+            addCustomButtonToPane(customBtnTargetPaneId, label, data, existing.length - 1);
+            closeCustomButtonModal();
+        }
+
+        function addCustomButtonToPane(paneId, label, data, index) {
+            const paneDiv = document.querySelector(`.terminal-pane[data-pane-id="${paneId}"]`);
+            if (!paneDiv) return;
+
+            // Compute top offset: after the + button (216px) + 30px per custom button
+            const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
+            const top = 246 + existingCustom * 30;
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'terminal-pane-custom-btn';
+            btn.title = label;
+            btn.innerText = label.length > 4 ? label.substring(0, 4) : label;
+            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.12); border-radius:6px; background:rgba(15,23,42,0.9); color:var(--text-secondary); cursor:pointer; z-index:5; font-size:0.55rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none;`;
+            btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
+            btn.onmouseleave = () => { btn.style.borderColor = 'rgba(255,255,255,0.12)'; btn.style.color = 'var(--text-secondary)'; };
+
+            const send = () => { if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data }); };
+            btn.addEventListener('click', (e) => { e.stopPropagation(); send(); });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); send(); });
+            paneDiv.appendChild(btn);
+
+            // Also push the + button down
+            const addBtn = paneDiv.querySelector('.terminal-pane-add-btn');
+            if (addBtn) addBtn.style.top = `${top + 30}px`;
+        }
+
+        function restoreCustomButtonsForPane(paneId) {
+            if (!activeProject) return;
+            const storageKey = `custom-btns-${activeProject}`;
+            const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            saved.forEach((item, i) => addCustomButtonToPane(paneId, item.label, item.data, i));
         }
 
         async function runGitCommit() {
