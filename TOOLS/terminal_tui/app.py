@@ -794,42 +794,6 @@ def api_session_stats(project):
 
 @app.route('/api/session/<project>/paste-image', methods=['POST'])
 def api_paste_image(project):
-@app.route('/api/project/<project>/files', methods=['GET'])
-def api_project_files(project):
-    projects = scan_projects()
-    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
-    if not proj_details:
-        return jsonify({"error": "Project not found"}), 404
-        
-    path = proj_details["path"]
-    if not os.path.exists(path) or not os.path.isdir(path):
-        return jsonify({"error": "Directory does not exist"}), 404
-        
-    sub_dir = request.args.get("subdir", "")
-    target_path = os.path.normpath(os.path.join(path, sub_dir))
-    
-    # Prevent directory traversal attacks
-    if not os.path.abspath(target_path).startswith(os.path.abspath(path)):
-         return jsonify({"error": "Unauthorized path access"}), 403
-         
-    try:
-        items = []
-        for name in os.listdir(target_path):
-            if name in [".git", "node_modules", "dist", ".next", ".cache"]:
-                continue
-            full_item_path = os.path.join(target_path, name)
-            is_dir = os.path.isdir(full_item_path)
-            items.append({
-                "name": name,
-                "is_dir": is_dir,
-                "rel_path": os.path.relpath(full_item_path, path).replace("\\", "/")
-            })
-        items.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
-        return jsonify({"items": items, "current_dir": sub_dir.replace("\\", "/")})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)
     if not proj:
@@ -869,6 +833,42 @@ def api_project_files(project):
         })
     except Exception as e:
         return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+
+@app.route('/api/project/<project>/files', methods=['GET'])
+def api_project_files(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+        
+    path = proj_details["path"]
+    if not os.path.exists(path) or not os.path.isdir(path):
+        return jsonify({"error": "Directory does not exist"}), 404
+        
+    sub_dir = request.args.get("subdir", "")
+    target_path = os.path.normpath(os.path.join(path, sub_dir))
+    
+    # Prevent directory traversal attacks
+    if not os.path.abspath(target_path).startswith(os.path.abspath(path)):
+        return jsonify({"error": "Unauthorized path access"}), 403
+         
+    try:
+        items = []
+        for name in os.listdir(target_path):
+            if name in [".git", "node_modules", "dist", ".next", ".cache"]:
+                continue
+            full_item_path = os.path.join(target_path, name)
+            is_dir = os.path.isdir(full_item_path)
+            items.append({
+                "name": name,
+                "is_dir": is_dir,
+                "rel_path": os.path.relpath(full_item_path, path).replace("\\", "/")
+            })
+        items.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
+        return jsonify({"items": items, "current_dir": sub_dir.replace("\\", "/")})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
