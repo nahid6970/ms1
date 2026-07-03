@@ -1095,6 +1095,28 @@
             .terminal-container-wrapper {
                 padding: 4px !important;
             }
+
+            /* Status bar mobile fix - shrink and wrap */
+            #subprocess-monitor {
+                height: auto !important;
+                min-height: 26px !important;
+                flex-wrap: wrap !important;
+                gap: 4px !important;
+                padding: 4px 8px !important;
+                font-size: 0.65rem !important;
+            }
+            #subprocess-monitor > div {
+                gap: 8px !important;
+            }
+            #subprocess-monitor > div:first-child {
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+            }
+            /* Hide "SESSION RUNNING" text and panes count on mobile to save space */
+            #monitor-session-label,
+            #monitor-panes-count {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -1255,7 +1277,7 @@
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
-                        <span>SESSION RUNNING</span>
+                        <span id="monitor-session-label">SESSION RUNNING</span>
                     </span>
                     <span id="monitor-panes-count">Panes: 0</span>
                     <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
