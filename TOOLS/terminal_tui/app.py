@@ -133,7 +133,7 @@ function prompt {{
         if ([string]::IsNullOrEmpty($relative)) {{
             "{prompt_display_name}> "
         }} else {{
-            "{prompt_display_name}\\\\$relative> "
+            "{prompt_display_name}\\$relative> "
         }}
     }} else {{
         "$current> "
