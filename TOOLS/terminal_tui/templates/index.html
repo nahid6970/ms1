@@ -1189,9 +1189,10 @@
                         <span>SESSION RUNNING</span>
                     </span>
                     <span id="monitor-panes-count">Panes: 0</span>
-                    <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; color: #38bdf8; font-weight: 500;">
-                        <span>⎇</span>
-                        <span id="monitor-git-text">main</span>
+                    <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500;">
+                        <span style="color:#38bdf8;">⎇</span>
+                        <span id="monitor-git-branch" style="color:#38bdf8;"></span>
+                        <span id="monitor-git-text" style="display:flex; align-items:center; gap:4px;"></span>
                     </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
@@ -3868,19 +3869,25 @@
 
                     // Update git info in bottom status bar
                     const gitInfoEl = document.getElementById('monitor-git-info');
+                    const gitBranchEl = document.getElementById('monitor-git-branch');
                     const gitTextEl = document.getElementById('monitor-git-text');
                     if (gitInfoEl && gitTextEl) {
                         if (data.git) {
                             const g = data.git;
-                            let parts = [`${g.branch}`];
-                            if (g.modifications > 0) {
-                                parts.push(`${g.modifications} file${g.modifications !== 1 ? 's' : ''} changed`);
-                            }
-                            if (g.insertions > 0) parts.push(`+${g.insertions}`);
-                            if (g.deletions > 0)  parts.push(`-${g.deletions}`);
-                            if (g.staged > 0)     parts.push(`${g.staged} staged`);
-                            if (g.untracked > 0)  parts.push(`${g.untracked} untracked`);
-                            gitTextEl.innerText = parts.join('  ·  ');
+                            if (gitBranchEl) gitBranchEl.innerText = g.branch;
+                            let parts = [];
+                            if (g.modifications > 0)
+                                parts.push(`<span style="color:#94a3b8;">${g.modifications} file${g.modifications !== 1 ? 's' : ''} changed</span>`);
+                            if (g.insertions > 0)
+                                parts.push(`<span style="color:#22c55e;">+${g.insertions}</span>`);
+                            if (g.deletions > 0)
+                                parts.push(`<span style="color:#ef4444;">-${g.deletions}</span>`);
+                            if (g.staged > 0)
+                                parts.push(`<span style="color:#f59e0b;">${g.staged} staged</span>`);
+                            if (g.untracked > 0)
+                                parts.push(`<span style="color:#64748b;">${g.untracked} untracked</span>`);
+                            const separator = `<span style="color:#334155;"> · </span>`;
+                            gitTextEl.innerHTML = parts.length ? separator + parts.join(separator) : '';
                             gitInfoEl.style.display = 'flex';
                         } else {
                             gitInfoEl.style.display = 'none';
