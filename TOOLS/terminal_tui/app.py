@@ -71,7 +71,7 @@ def restart_current_process(delay_seconds=1.0):
 
 
 class TerminalSession:
-    def __init__(self, name, path):
+    def __init__(self, name, path, use_real_dir_name=False):
         self.name = name
         self.path = path
         self.cols = 100
@@ -88,6 +88,12 @@ class TerminalSession:
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
         path_clean = path.replace("/", "\\")
+        
+        if bool(use_real_dir_name):
+            prompt_display_name = os.path.basename(os.path.normpath(path))
+        else:
+            prompt_display_name = name
+            
         system_template = f"""# Custom PowerShell Profile for project: {name}
 # Everything here is loaded when you select this project workspace dashboard.
 
@@ -125,9 +131,9 @@ function prompt {{
             $relative = $relative.Substring(1)
         }}
         if ([string]::IsNullOrEmpty($relative)) {{
-            "{name}> "
+            "{prompt_display_name}> "
         }} else {{
-            "{name}\\\\$relative> "
+            "{prompt_display_name}\\\\$relative> "
         }}
     }} else {{
         "$current> "
@@ -655,6 +661,7 @@ def api_session_stop(project):
 def api_session(project):
     data = request.get_json(silent=True) or {}
     pane_id = data.get("paneId", "main")
+    use_real_dir_name = data.get("useRealDirName", False)
     projects = scan_projects()
     proj_details = next((p for p in projects if p["name"] == project), None)
     if not proj_details:
@@ -663,7 +670,7 @@ def api_session(project):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"])
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name)
             
     return jsonify({
         "status": "connected",
@@ -882,6 +889,7 @@ def ws_disconnect():
 def ws_join_session(data):
     project = data.get('project')
     pane_id = data.get('paneId', 'main')
+    use_real_dir_name = data.get('useRealDirName', False)
     if not project:
         emit('error', {'msg': 'Project name required'})
         return
@@ -895,7 +903,7 @@ def ws_join_session(data):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"])
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name)
         session = active_sessions[session_key]
         session.add_sid(request.sid)
         

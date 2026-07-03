@@ -1493,6 +1493,10 @@
                         <input type="checkbox" id="settings-context-menu" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-context-menu" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Actions on Right-Click Context Menu</label>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-use-real-dir-prompt" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-use-real-dir-prompt" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use folder's actual name in terminal prompt</label>
+                    </div>
                 </div>
 
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
@@ -1969,10 +1973,11 @@
             if (activeProject === projectName) return;
 
             try {
+                const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
                 const response = await fetch(`/api/session/${projectName}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paneId: 'main' })
+                    body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -2375,7 +2380,8 @@
             });
 
             paneSocket.on('connect', () => {
-                paneSocket.emit('join-session', { project: projectName, paneId });
+                const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
+                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir });
                 // Instantly fit and synchronize backend PTY size upon successful connection
                 setTimeout(() => {
                     try {
@@ -4305,6 +4311,9 @@
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             document.getElementById('settings-context-menu').checked = savedContextMenu;
+
+            const savedUseRealDirPrompt = localStorage.getItem('use-real-dir-prompt') === 'true';
+            document.getElementById('settings-use-real-dir-prompt').checked = savedUseRealDirPrompt;
             
             const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
             document.getElementById('settings-dropdown-height').value = savedDropdownHeight;
@@ -4341,6 +4350,10 @@
             
             const selectedContextMenu = document.getElementById('settings-context-menu').checked;
             localStorage.setItem('use-context-menu-actions', selectedContextMenu);
+
+            const selectedUseRealDirPrompt = document.getElementById('settings-use-real-dir-prompt').checked;
+            localStorage.setItem('use-real-dir-prompt', selectedUseRealDirPrompt);
+
             if (selectedContextMenu) {
                 document.body.classList.add('context-menu-actions');
             } else {
@@ -4459,10 +4472,11 @@
                         }
                     }
                     
+                    const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
                     const response = await fetch(`/api/session/${projectName}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paneId: paneId })
+                        body: JSON.stringify({ paneId: paneId, useRealDirName: useRealDir })
                     });
                     
                     if (response.ok) {
