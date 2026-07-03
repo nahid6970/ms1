@@ -84,7 +84,7 @@ def get_git_status(path):
 
         # Get file statuses scoped to this project subfolder
         res_status = subprocess.run(
-            ["git", "status", "--porcelain", "--", pathspec],
+            ["git", "status", "--porcelain", "-uall", "--", pathspec],
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=2
         )
@@ -108,7 +108,6 @@ def get_git_status(path):
                 m_del = re.search(r'(\d+) deletion', diff_out)
                 if m_ins: insertions += int(m_ins.group(1))
                 if m_del: deletions += int(m_del.group(1))
-            if m_del: deletions += int(m_del.group(1))
 
         return {
             "branch": branch,
@@ -859,7 +858,7 @@ def api_git_changed_files(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
-        res = subprocess.run(["git", "status", "--porcelain", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
+        res = subprocess.run(["git", "status", "--porcelain", "-uall", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
         files = []
         for line in res.stdout.splitlines():
             if not line.strip():
