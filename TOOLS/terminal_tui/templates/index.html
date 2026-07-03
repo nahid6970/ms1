@@ -1189,6 +1189,10 @@
                         <span>SESSION RUNNING</span>
                     </span>
                     <span id="monitor-panes-count">Panes: 0</span>
+                    <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; color: #38bdf8; font-weight: 500;">
+                        <span>⎇</span>
+                        <span id="monitor-git-text">main</span>
+                    </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <span style="display: flex; align-items: center; gap: 4px;">
@@ -3697,9 +3701,7 @@
                 if (label) label.innerText = 'Select Workspace...';
             } else {
                 if (nameContainer) nameContainer.style.display = 'inline-block';
-                if (branch && branch.getAttribute('data-has-git') === 'true') {
-                    branch.style.display = 'flex';
-                }
+                // Branch badge visibility is controlled by updateStatsMonitor (git polling)
                 if (pathBtn) {
                     const currentProj = projects.find(p => p.name === activeProject);
                     pathBtn.style.display = (currentProj && currentProj.path) ? 'flex' : 'none';
@@ -3824,6 +3826,10 @@
             if (cpuVal) cpuVal.innerText = '0.0%';
             const ramVal = document.getElementById('monitor-ram-value');
             if (ramVal) ramVal.innerText = '0.0 MB';
+            const branchEl = document.getElementById('active-project-branch');
+            if (branchEl) { branchEl.style.display = 'none'; branchEl.setAttribute('data-has-git', 'false'); }
+            const gitInfoEl = document.getElementById('monitor-git-info');
+            if (gitInfoEl) gitInfoEl.style.display = 'none';
         }
 
         async function updateStatsMonitor() {
@@ -3857,6 +3863,27 @@
                         } else {
                             branchEl.style.display = 'none';
                             branchEl.setAttribute('data-has-git', 'false');
+                        }
+                    }
+
+                    // Update git info in bottom status bar
+                    const gitInfoEl = document.getElementById('monitor-git-info');
+                    const gitTextEl = document.getElementById('monitor-git-text');
+                    if (gitInfoEl && gitTextEl) {
+                        if (data.git) {
+                            const g = data.git;
+                            let parts = [`${g.branch}`];
+                            if (g.modifications > 0) {
+                                parts.push(`${g.modifications} file${g.modifications !== 1 ? 's' : ''} changed`);
+                            }
+                            if (g.insertions > 0) parts.push(`+${g.insertions}`);
+                            if (g.deletions > 0)  parts.push(`-${g.deletions}`);
+                            if (g.staged > 0)     parts.push(`${g.staged} staged`);
+                            if (g.untracked > 0)  parts.push(`${g.untracked} untracked`);
+                            gitTextEl.innerText = parts.join('  ·  ');
+                            gitInfoEl.style.display = 'flex';
+                        } else {
+                            gitInfoEl.style.display = 'none';
                         }
                     }
                 }

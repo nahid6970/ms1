@@ -44,9 +44,8 @@ def get_git_status(path):
     if not os.path.isdir(path):
         return None
     try:
-        git_dir = os.path.join(path, ".git")
-        if not os.path.exists(git_dir):
-            return None
+        # Normalize path to avoid mixed slash issues on Windows
+        path = os.path.normpath(path)
         
         # Get current branch name
         res_branch = subprocess.run(
@@ -68,19 +67,60 @@ def get_git_status(path):
         if not branch:
             return None
             
-        # Get modifications count
+        # Get file statuses
         res_status = subprocess.run(
             ["git", "status", "--porcelain"],
             cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
             timeout=2
         )
-        status_lines = res_status.stdout.strip().split("\n")
-        mod_count = len([l for l in status_lines if l.strip()])
-        
+        status_lines = [l for l in res_status.stdout.strip().split("\n") if l.strip()]
+        mod_count = len(status_lines)
+
+        # Count staged vs unstaged files
+        staged = len([l for l in status_lines if l[0] != '?' and l[0] != ' '])
+        unstaged = len([l for l in status_lines if l[1] != ' '])
+        untracked = len([l for l in status_lines if l.startswith('??')])
+
+        # Get lines added/deleted (unstaged diff)
+        insertions, deletions = 0, 0
+        res_diff = subprocess.run(
+            ["git", "diff", "--shortstat"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
+            timeout=2
+        )
+        diff_out = res_diff.stdout.strip()
+        if diff_out:
+            import re
+            m_ins = re.search(r'(\d+) insertion', diff_out)
+            m_del = re.search(r'(\d+) deletion', diff_out)
+            if m_ins: insertions = int(m_ins.group(1))
+            if m_del: deletions = int(m_del.group(1))
+
+        # Also include staged diff lines
+        res_diff_staged = subprocess.run(
+            ["git", "diff", "--cached", "--shortstat"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
+            timeout=2
+        )
+        diff_staged_out = res_diff_staged.stdout.strip()
+        if diff_staged_out:
+            import re
+            m_ins = re.search(r'(\d+) insertion', diff_staged_out)
+            m_del = re.search(r'(\d+) deletion', diff_staged_out)
+            if m_ins: insertions += int(m_ins.group(1))
+            if m_del: deletions += int(m_del.group(1))
+
         return {
             "branch": branch,
-            "modifications": mod_count
+            "modifications": mod_count,
+            "staged": staged,
+            "unstaged": unstaged,
+            "untracked": untracked,
+            "insertions": insertions,
+            "deletions": deletions,
         }
     except Exception:
         return None
