@@ -952,42 +952,82 @@
                 flex-direction: column !important;
                 align-items: stretch !important;
                 height: auto !important;
-                padding: 10px 14px !important;
-                gap: 10px !important;
+                padding: 6px 10px !important;
+                gap: 6px !important;
             }
             .workspace-title-info {
                 margin-right: 0 !important;
                 width: 100% !important;
-                justify-content: space-between !important;
+                justify-content: flex-start !important;
                 flex-wrap: wrap !important;
                 gap: 6px !important;
+            }
+            /* Make header buttons much more compact on mobile */
+            .workspace-header .action-btn {
+                width: 28px !important;
+                height: 28px !important;
+                padding: 0 !important;
+                margin-right: 0 !important;
+            }
+            /* Exclude composite button items from rigid square sizing */
+            .workspace-header #bookmark-dropdown-btn.action-btn {
+                width: auto !important;
+                padding: 0 6px !important;
+            }
+            .workspace-header #workspace-selector-btn {
+                width: auto !important;
+                height: 28px !important;
+                padding: 0 8px !important;
+                font-size: 0.75rem !important;
+                gap: 4px !important;
+            }
+            #workspace-selector-dropdown-container {
+                margin-right: 2px !important;
+            }
+            .workspace-title-info h2 {
+                font-size: 0.75rem !important;
+                padding: 1px 6px !important;
+                height: 28px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                margin: 0 !important;
+            }
+            #active-project-name-text {
+                max-width: 140px !important;
             }
             .workspace-header > div:nth-child(2) {
                 width: 100% !important;
                 justify-content: space-between !important;
                 border-top: 1px solid var(--border-color) !important;
-                padding-top: 10px !important;
+                padding-top: 6px !important;
                 display: flex !important;
                 align-items: center !important;
-                gap: 8px !important;
+                gap: 6px !important;
+            }
+            #project-specific-actions {
+                gap: 4px !important;
+            }
+            #global-header-actions {
+                gap: 4px !important;
             }
             #header-toolbar-divider {
                 display: none !important;
             }
             #workspace-selector-dropdown-content {
                 left: 0 !important;
-                width: calc(100vw - 28px) !important;
+                width: calc(100vw - 20px) !important;
                 max-width: 320px !important;
             }
             #project-name-dropdown-content {
                 left: 0 !important;
-                width: calc(100vw - 28px) !important;
+                width: calc(100vw - 20px) !important;
                 max-width: 320px !important;
             }
             #bookmark-dropdown-content {
                 left: 0 !important;
                 right: auto !important;
-                width: calc(100vw - 28px) !important;
+                width: calc(100vw - 20px) !important;
                 max-width: 340px !important;
             }
             .terminal-container-wrapper {
