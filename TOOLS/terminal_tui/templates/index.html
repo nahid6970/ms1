@@ -1043,6 +1043,12 @@
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
+                <button class="action-btn" id="workspace-add-btn" onclick="openAddModal()" title="Add workspace folder" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem; margin-right: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
                 <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: inline-block;">
                     <h2 id="active-project-name" onclick="toggleProjectNameDropdown(event)" style="cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; margin: 0;">
                         <span id="active-project-name-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; display: inline-block; vertical-align: middle;">Project Name</span>
@@ -1107,12 +1113,6 @@
                 </div>
                 <div id="header-toolbar-divider" style="width: 1px; height: 20px; background-color: var(--border-color);"></div>
                 <div id="global-header-actions" style="display: flex; align-items: center; gap: 8px;">
-                    <button class="action-btn" onclick="openAddModal()" title="Add workspace folder" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
                     <button class="action-btn" onclick="openSettingsModal()" title="Settings" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
@@ -3541,6 +3541,10 @@
             const headerDropdown = document.getElementById('workspace-selector-dropdown-container');
             if (headerDropdown) {
                 headerDropdown.style.display = showSidebarList ? 'none' : 'inline-block';
+            }
+            const addProjectBtn = document.getElementById('workspace-add-btn');
+            if (addProjectBtn) {
+                addProjectBtn.style.display = showSidebarList ? 'none' : 'flex';
             }
             
             // 3. The workspace-header is ALWAYS visible now since it has global buttons
