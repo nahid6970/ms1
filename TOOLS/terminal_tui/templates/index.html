@@ -5376,8 +5376,9 @@
                 el.innerHTML = commits.map((c, i) => `
                     <div id="commit-row-${c.hash}" style="padding:7px 10px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:8px; transition: background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
                         <span style="font-family:'Fira Code',monospace; font-size:0.7rem; color:#38bdf8; min-width:46px; flex-shrink:0;">${c.hash}</span>
+                        <span style="font-family:'Fira Code',monospace; font-size:0.68rem; color:var(--text-secondary); min-width:65px; flex-shrink:0;">${c.date}</span>
                         <div style="flex:1; min-width:0;" id="commit-msg-display-${c.hash}">
-                            <span style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="${c.message}">${c.message} <span style="color:var(--text-secondary); font-size:0.68rem;">· ${c.author} · ${c.date}</span></span>
+                            <span style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="${c.message}">${c.message}</span>
                         </div>
                         <div id="commit-edit-${c.hash}" style="display:none; flex:1; min-width:0; align-items:center;">
                             <input id="commit-input-${c.hash}" type="text" value="${c.message.replace(/"/g,'&quot;')}" style="flex:1; background-color:var(--bg-main); border:1px solid var(--accent-color); border-radius:6px; padding:3px 8px; color:var(--text-primary); font-size:0.78rem; font-family:'Fira Code',monospace; outline:none; width:100%;" onkeydown="if(event.key==='Enter'){saveCommitRename('${c.hash}')} else if(event.key==='Escape'){cancelCommitEdit('${c.hash}')}">
