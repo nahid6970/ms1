@@ -88,9 +88,13 @@ class TerminalSession:
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
         if not os.path.exists(profile_path):
+            path_clean = path.replace("\\", "/")
             with open(profile_path, "w", encoding="utf-8") as f:
                 f.write(f"""# Custom PowerShell Profile for project: {name}
 # Everything here is loaded when you select this project workspace dashboard.
+
+# Global project root path
+$global:PROJECT_ROOT_PATH = "{path_clean}"
 
 # Force import PSReadLine in case it is disabled due to screen reader detection in PTY
 Import-Module PSReadLine -ErrorAction SilentlyContinue
@@ -100,9 +104,35 @@ if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
     Set-PSReadLineOption -HistorySavePath "{history_path}"
 }}
 
-# Custom prompt
+# Custom cd command to go to project root when no arguments are provided
+if (Get-Alias cd -ErrorAction SilentlyContinue) {{
+    Remove-Item alias:cd -Force -ErrorAction SilentlyContinue
+}}
+function cd {{
+    if ($args.Count -eq 0) {{
+        Set-Location $global:PROJECT_ROOT_PATH
+    }} else {{
+        $target = $args -join " "
+        Set-Location $target
+    }}
+}}
+
+# Custom prompt showing project root and subdirectories
 function prompt {{
-    "COMMAND> "
+    $current = $pwd.Path
+    if ($current.StartsWith($global:PROJECT_ROOT_PATH, [System.StringComparison]::OrdinalIgnoreCase)) {{
+        $relative = $current.Substring($global:PROJECT_ROOT_PATH.Length)
+        if ($relative.StartsWith("\\") -or $relative.StartsWith("/")) {{
+            $relative = $relative.Substring(1)
+        }}
+        if ([string]::IsNullOrEmpty($relative)) {{
+            "{name}> "
+        }} else {{
+            "{name}\\\\$relative> "
+        }}
+    }} else {{
+        "$current> "
+    }}
 }}
 
 # Clear screen cleanly to start with a clean prompt and hide startup warnings
@@ -116,17 +146,52 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             try:
                 with open(profile_path, "r", encoding="utf-8") as f:
                     content = f.read()
+                path_clean = path.replace("\\", "/")
                 modified = False
-                if "Clear-Host" in content:
-                    content = content.replace("Clear-Host", 'Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline')
+                
+                if "$global:PROJECT_ROOT_PATH" not in content:
+                    root_prefix = f'$global:PROJECT_ROOT_PATH = "{path_clean}"\n'
+                    cd_func = """
+if (Get-Alias cd -ErrorAction SilentlyContinue) {
+    Remove-Item alias:cd -Force -ErrorAction SilentlyContinue
+}
+function cd {
+    if ($args.Count -eq 0) {
+        Set-Location $global:PROJECT_ROOT_PATH
+    } else {
+        $target = $args -join " "
+        Set-Location $target
+    }
+}
+"""
+                    content = root_prefix + cd_func + "\n" + content
                     modified = True
-                if "PROFILE_LOADED_OK" in content:
-                    content = content.replace('Write-Host "PROFILE_LOADED_OK"', '')
-                    content = content.replace('echo "PROFILE_LOADED_OK"', '')
+                
+                import re
+                simple_prompt_pattern = r"function prompt\s*\{[^}]*\}"
+                advanced_prompt = f"""function prompt {{
+    $current = $pwd.Path
+    if ($current.StartsWith($global:PROJECT_ROOT_PATH, [System.StringComparison]::OrdinalIgnoreCase)) {{
+        $relative = $current.Substring($global:PROJECT_ROOT_PATH.Length)
+        if ($relative.StartsWith("\\\\") -or $relative.StartsWith("/")) {{
+            $relative = $relative.Substring(1)
+        }}
+        if ([string]::IsNullOrEmpty($relative)) {{
+            "{name}> "
+        }} else {{
+            "{name}\\\\$relative> "
+        }}
+    }} else {{
+        "$current> "
+    }}
+}}"""
+                if re.search(simple_prompt_pattern, content):
+                    content = re.sub(simple_prompt_pattern, advanced_prompt, content)
                     modified = True
-                if "function prompt" not in content:
-                    content += "\n\n# Custom prompt\nfunction prompt {\n    \"COMMAND> \"\n}\n"
+                elif "function prompt" not in content:
+                    content += "\n\n# Custom prompt\n" + advanced_prompt + "\n"
                     modified = True
+                
                 if modified:
                     with open(profile_path, "w", encoding="utf-8") as f:
                         f.write(content)
