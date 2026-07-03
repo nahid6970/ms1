@@ -790,6 +790,20 @@ def get_process_stats(pid):
     except Exception:
         return {"cpu": 0.0, "memory": 0.0}
 
+@app.route('/api/debug/git/<project>', methods=['GET'])
+def api_debug_git(project):
+    import traceback as tb
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "not found"}), 404
+    path = proj["path"]
+    try:
+        result = get_git_status(path)
+        return jsonify({"path": path, "result": result})
+    except Exception:
+        return jsonify({"path": path, "error": tb.format_exc()}), 500
+
 @app.route('/api/session/<project>/stats', methods=['GET'])
 def api_session_stats(project):
     project_sessions = []
