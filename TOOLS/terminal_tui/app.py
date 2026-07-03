@@ -1121,6 +1121,38 @@ def api_git_return_branch(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/discard', methods=['POST'])
+def api_git_discard(project):
+    """Discard all uncommitted changes (git restore . and git clean -fd)"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+
+        # Restore tracked files to last commit state
+        res_restore = subprocess.run(["git", "restore", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        # Also remove untracked files/dirs in this pathspec
+        res_clean = subprocess.run(["git", "clean", "-fd", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+
+        if res_restore.returncode != 0:
+            err = res_restore.stderr.strip() or res_restore.stdout.strip()
+            return jsonify({"error": f"git restore failed: {err}"}), 500
+
+        out = (res_restore.stdout + res_restore.stderr + res_clean.stdout).strip()
+        return jsonify({"success": True, "output": out or "All changes discarded."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 def api_paste_image(project):
