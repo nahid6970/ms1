@@ -906,7 +906,8 @@ def api_git_commit(project):
         pathspec = "." if rel_path == "." else rel_path
 
         if add_all:
-            res_add = subprocess.run(["git", "add", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+            # Use git add -A to stage all changes including new directories
+            res_add = subprocess.run(["git", "add", "-A", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
             if res_add.returncode != 0:
                 return jsonify({"error": f"git add failed: {res_add.stderr.strip()}"}), 500
 
@@ -927,6 +928,123 @@ def api_git_commit(project):
         return jsonify({"success": True, "committed": True, "pushed": False, "output": output})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/commits', methods=['GET'])
+def api_git_past_commits(project):
+    """Get the last 10 commits for this project"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        
+        # Get last 10 commits with format: hash|author|date|message
+        res = subprocess.run(
+            ["git", "log", "--pretty=format:%h|%an|%ar|%s", "-n", "10"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5
+        )
+        
+        if res.returncode != 0:
+            return jsonify({"error": "Failed to get commits"}), 500
+            
+        commits = []
+        for line in res.stdout.strip().split('\n'):
+            if not line.strip():
+                continue
+            parts = line.split('|', 3)
+            if len(parts) == 4:
+                commits.append({
+                    "hash": parts[0],
+                    "author": parts[1],
+                    "date": parts[2],
+                    "message": parts[3]
+                })
+                
+        return jsonify({"commits": commits})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/commit/rename', methods=['POST'])
+def api_git_rename_commit(project):
+    """Rename (amend) the last commit message"""
+    data = request.get_json() or {}
+    commit_hash = data.get("commit_hash", "").strip()
+    new_message = data.get("new_message", "").strip()
+    
+    if not new_message:
+        return jsonify({"error": "New commit message is required"}), 400
+        
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        
+        # Check if commit is the HEAD (most recent unpushed commit)
+        res_head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        head_hash = res_head.stdout.strip()
+        
+        if commit_hash == head_hash:
+            # Amend the last commit
+            res_amend = subprocess.run(
+                ["git", "commit", "--amend", "-m", new_message],
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15
+            )
+            if res_amend.returncode != 0:
+                err = res_amend.stderr.strip() or res_amend.stdout.strip()
+                return jsonify({"error": f"git commit --amend failed: {err}"}), 500
+                
+            return jsonify({"success": True, "message": "Commit message updated successfully"})
+        else:
+            # For older commits, use interactive rebase (more complex, requires user interaction)
+            return jsonify({"error": "Only the most recent commit can be renamed. Use git rebase -i for older commits."}), 400
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/push', methods=['POST'])
+def api_git_push(project):
+    """Push commits to remote"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        
+        res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
+        push_out = (res_push.stdout + res_push.stderr).strip()
+        
+        if res_push.returncode != 0:
+            return jsonify({"success": False, "error": push_out}), 500
+            
+        return jsonify({"success": True, "output": push_out})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 def api_paste_image(project):
