@@ -1189,7 +1189,7 @@
                         <span>SESSION RUNNING</span>
                     </span>
                     <span id="monitor-panes-count">Panes: 0</span>
-                    <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500;">
+                    <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
                         <span style="color:#38bdf8;">⎇</span>
                         <span id="monitor-git-branch" style="color:#38bdf8;"></span>
                         <span id="monitor-git-text" style="display:flex; align-items:center; gap:4px;"></span>
@@ -1578,6 +1578,55 @@
         </div>
     </div>
 
+    <!-- Git Commit & Push Modal -->
+    <div class="modal-overlay" id="git-modal">
+        <div class="modal-content" style="width: 520px; max-width: 95%; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <span style="color:#38bdf8;">⎇</span>
+                        <span id="git-modal-branch">main</span>
+                    </h2>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;" id="git-modal-subtitle">Loading changes...</div>
+                </div>
+                <button onclick="closeGitModal()" style="background:none; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer; line-height:1; padding: 2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+            </div>
+
+            <!-- Changed files list -->
+            <div id="git-changed-files" style="max-height: 160px; overflow-y: auto; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-main);">
+                <div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem;">Loading...</div>
+            </div>
+
+            <!-- Commit message -->
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Commit Message</label>
+                <textarea id="git-commit-msg" rows="3" placeholder="feat: describe your changes..." style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.85rem; resize: vertical; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+            </div>
+
+            <!-- Options row -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding: 10px 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-primary); user-select: none;">
+                    <input type="checkbox" id="git-add-all" checked style="width:15px; height:15px; accent-color: var(--accent-color); cursor: pointer;">
+                    Stage all changes <span style="color: var(--text-secondary);">(git add .)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-primary); user-select: none; margin-left: auto;">
+                    <input type="checkbox" id="git-do-push" checked style="width:15px; height:15px; accent-color: var(--accent-color); cursor: pointer;">
+                    Push after commit
+                </label>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+                <div id="git-status-msg" style="flex:1; font-size: 0.8rem; color: var(--text-secondary);"></div>
+                <button class="btn btn-secondary" onclick="closeGitModal()" style="padding: 8px 16px; font-size: 0.85rem;">Cancel</button>
+                <button class="btn btn-primary" id="git-commit-btn" onclick="runGitCommit()" style="padding: 8px 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                    Commit
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Xterm.js & Fit Addon Script -->
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
@@ -1613,6 +1662,7 @@
                 else if (id === 'bookmark-modal') closeBookmarkModal();
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'manager-modal') closeManagerModal();
+                else if (id === 'git-modal') closeGitModal();
             }
         });
 
@@ -5175,6 +5225,130 @@
             renderSidebar();
             if (typeof handleSearch === 'function') handleSearch();
         }
+
+        // ─── Git Commit & Push Modal ───────────────────────────────────────────────
+
+        async function openGitCommitModal() {
+            if (!activeProject) return;
+            const modal = document.getElementById('git-modal');
+            const branchEl = document.getElementById('git-modal-branch');
+            const subtitleEl = document.getElementById('git-modal-subtitle');
+            const filesEl = document.getElementById('git-changed-files');
+            const msgEl = document.getElementById('git-commit-msg');
+            const statusEl = document.getElementById('git-status-msg');
+            const btn = document.getElementById('git-commit-btn');
+
+            // Reset state
+            msgEl.value = '';
+            statusEl.innerText = '';
+            statusEl.style.color = 'var(--text-secondary)';
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Commit`;
+            filesEl.innerHTML = '<div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem;">Loading changed files...</div>';
+
+            // Set branch from status bar
+            const gitBranchEl = document.getElementById('monitor-git-branch');
+            if (branchEl && gitBranchEl) branchEl.innerText = gitBranchEl.innerText || 'main';
+
+            modal.classList.add('show');
+            msgEl.focus();
+
+            // Fetch changed files
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/files`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const files = data.files || [];
+                    if (files.length === 0) {
+                        filesEl.innerHTML = '<div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem; font-style: italic;">No changed files in this workspace folder.</div>';
+                        subtitleEl.innerText = 'No changes to commit';
+                    } else {
+                        subtitleEl.innerText = `${files.length} file${files.length !== 1 ? 's' : ''} changed`;
+                        filesEl.innerHTML = files.map(f => `
+                            <div style="display:flex; align-items:center; gap:10px; padding: 6px 14px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.78rem;">
+                                <span style="color:${f.color}; font-weight:600; min-width:90px; font-size:0.7rem; text-transform:uppercase;">${f.label}</span>
+                                <span style="color: var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.path}</span>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Failed to load changed files.</div>';
+                }
+            } catch (e) {
+                filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Error loading files.</div>';
+            }
+        }
+
+        function closeGitModal() {
+            document.getElementById('git-modal').classList.remove('show');
+        }
+
+        async function runGitCommit() {
+            const msg = document.getElementById('git-commit-msg').value.trim();
+            const addAll = document.getElementById('git-add-all').checked;
+            const doPush = document.getElementById('git-do-push').checked;
+            const statusEl = document.getElementById('git-status-msg');
+            const btn = document.getElementById('git-commit-btn');
+
+            if (!msg) {
+                document.getElementById('git-commit-msg').style.borderColor = '#ef4444';
+                setTimeout(() => document.getElementById('git-commit-msg').style.borderColor = 'var(--border-color)', 1500);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span style="opacity:0.7;">Running...</span>`;
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = doPush ? 'Committing and pushing...' : 'Committing...';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/commit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg, add_all: addAll, push: doPush })
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = data.error || 'Operation failed.';
+                    btn.disabled = false;
+                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Commit`;
+                    return;
+                }
+
+                if (data.push_error) {
+                    statusEl.style.color = '#f59e0b';
+                    statusEl.innerText = `Committed ✓  Push failed: ${data.push_error}`;
+                } else if (data.pushed) {
+                    statusEl.style.color = '#22c55e';
+                    statusEl.innerText = `Committed & pushed ✓`;
+                } else {
+                    statusEl.style.color = '#22c55e';
+                    statusEl.innerText = `Committed ✓`;
+                }
+
+                btn.innerHTML = '✓ Done';
+                setTimeout(() => closeGitModal(), 1800);
+
+                // Refresh git status in the bar
+                updateStatsMonitor();
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+                btn.disabled = false;
+                btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Commit`;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const gitModal = document.getElementById('git-modal');
+                if (gitModal && gitModal.classList.contains('show')) { closeGitModal(); return; }
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────────────────
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {

@@ -829,7 +829,93 @@ def api_session_stats(project):
         "git": git_info
     })
 
-@app.route('/api/session/<project>/paste-image', methods=['POST'])
+@app.route('/api/project/<project>/git/files', methods=['GET'])
+def api_git_changed_files(project):
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+
+        res = subprocess.run(["git", "status", "--porcelain", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
+        files = []
+        for line in res.stdout.splitlines():
+            if not line.strip():
+                continue
+            xy = line[:2]
+            fname = line[3:].strip().strip('"')
+            index_status = xy[0]
+            work_status  = xy[1]
+            if index_status == '?' and work_status == '?':
+                label, color = "untracked", "#64748b"
+            elif index_status != ' ' and index_status != '?':
+                label, color = "staged", "#f59e0b"
+                if work_status != ' ':
+                    label, color = "modified+staged", "#f59e0b"
+            else:
+                label, color = "modified", "#94a3b8"
+            files.append({"path": fname, "label": label, "color": color})
+        return jsonify({"files": files})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/project/<project>/git/commit', methods=['POST'])
+def api_git_commit(project):
+    data = request.get_json() or {}
+    message = data.get("message", "").strip()
+    add_all  = data.get("add_all", True)
+    do_push  = data.get("push", False)
+
+    if not message:
+        return jsonify({"error": "Commit message is required"}), 400
+
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+
+        if add_all:
+            res_add = subprocess.run(["git", "add", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+            if res_add.returncode != 0:
+                return jsonify({"error": f"git add failed: {res_add.stderr.strip()}"}), 500
+
+        res_commit = subprocess.run(["git", "commit", "-m", message], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        if res_commit.returncode != 0:
+            err = res_commit.stderr.strip() or res_commit.stdout.strip()
+            return jsonify({"error": f"git commit failed: {err}"}), 500
+
+        output = res_commit.stdout.strip()
+
+        if do_push:
+            res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
+            push_out = (res_push.stdout + res_push.stderr).strip()
+            if res_push.returncode != 0:
+                return jsonify({"success": True, "committed": True, "pushed": False, "output": output, "push_error": push_out})
+            return jsonify({"success": True, "committed": True, "pushed": True, "output": output, "push_output": push_out})
+
+        return jsonify({"success": True, "committed": True, "pushed": False, "output": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def api_paste_image(project):
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)
