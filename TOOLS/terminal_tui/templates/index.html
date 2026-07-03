@@ -730,11 +730,60 @@
         }
 
         .terminal-pane-scroll-up {
-            top: 36px;
+            top: 66px;
         }
 
         .terminal-pane-scroll-down {
-            top: 66px;
+            top: 96px;
+        }
+
+        .terminal-pane-esc {
+            top: 36px;
+        }
+
+        .terminal-pane-arrow-left {
+            top: 126px;
+        }
+
+        .terminal-pane-arrow-right {
+            top: 156px;
+        }
+
+        .terminal-pane-esc,
+        .terminal-pane-arrow-left,
+        .terminal-pane-arrow-right {
+            position: absolute;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 5;
+            font-size: 0.58rem;
+            font-weight: 600;
+            line-height: 1;
+            transition: all 0.15s ease;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .terminal-pane-esc {
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+
+        .terminal-pane-esc:hover,
+        .terminal-pane-arrow-left:hover,
+        .terminal-pane-arrow-right:hover {
+            background: rgba(31, 41, 55, 0.98);
+            color: var(--text-primary);
+            border-color: var(--accent-color);
         }
 
         .terminal-pane-scroll-up:hover,
@@ -2337,6 +2386,16 @@
 
             parent.appendChild(paneDiv);
 
+            // ── ESC button (below X, sends Escape key)
+            const escBtn = document.createElement('button');
+            escBtn.type = 'button';
+            escBtn.className = 'terminal-pane-esc';
+            escBtn.title = 'Send ESC (stop running command)';
+            escBtn.innerText = 'ESC';
+            escBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b' }); });
+            escBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b' }); });
+            paneDiv.appendChild(escBtn);
+
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
             
@@ -2380,6 +2439,26 @@
             downBtn.title = 'Scroll Down';
             downBtn.innerText = '▼';
             paneDiv.appendChild(downBtn);
+
+            // ── Left arrow button (move cursor left)
+            const leftBtn = document.createElement('button');
+            leftBtn.type = 'button';
+            leftBtn.className = 'terminal-pane-arrow-left';
+            leftBtn.title = 'Move cursor left';
+            leftBtn.innerText = '◀';
+            leftBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[D' }); });
+            leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[D' }); });
+            paneDiv.appendChild(leftBtn);
+
+            // ── Right arrow button (move cursor right)
+            const rightBtn = document.createElement('button');
+            rightBtn.type = 'button';
+            rightBtn.className = 'terminal-pane-arrow-right';
+            rightBtn.title = 'Move cursor right';
+            rightBtn.innerText = '▶';
+            rightBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
+            rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
+            paneDiv.appendChild(rightBtn);
 
             const setupContinuousScroll = (btn, direction) => {
                 let interval = null;
