@@ -1636,7 +1636,7 @@
         <div style="padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0;">
             <div style="display: flex; flex-direction: column;">
                 <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-family: 'Outfit', sans-serif;">Workspace Explorer</span>
-                <span id="explorer-path" style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px; font-family: 'Outfit', sans-serif;">/</span>
+                <span id="explorer-path" style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px; font-family: 'Outfit', sans-serif; display: none;"></span>
             </div>
             <button onclick="closeExplorer()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; transition: all 0.2s; font-family: sans-serif;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">&times;</button>
         </div>
@@ -5026,7 +5026,13 @@
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files`);
                 if (res.ok) {
                     const data = await res.json();
-                    pathLabel.innerText = data.current_dir || '/';
+                    const dirText = data.current_dir;
+                    if (dirText && dirText !== '' && dirText !== '/') {
+                        pathLabel.innerText = dirText;
+                        pathLabel.style.display = 'block';
+                    } else {
+                        pathLabel.style.display = 'none';
+                    }
                     renderFileTreeItems(container, data.items, "");
                 } else {
                     container.innerHTML = '<div style="color: #ef4444; text-align: center; padding: 12px 10px;">Failed to load files.</div>';
