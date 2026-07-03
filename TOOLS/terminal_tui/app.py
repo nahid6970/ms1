@@ -87,7 +87,7 @@ class TerminalSession:
         profile_path = os.path.join(project_data_dir, "profile.ps1")
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
-        path_clean = path.replace("\\", "/")
+        path_clean = path.replace("/", "\\")
         system_template = f"""# Custom PowerShell Profile for project: {name}
 # Everything here is loaded when you select this project workspace dashboard.
 
@@ -117,10 +117,11 @@ function cd {{
 
 # Custom prompt showing project root and subdirectories
 function prompt {{
-    $current = $pwd.Path
-    if ($current.StartsWith($global:PROJECT_ROOT_PATH, [System.StringComparison]::OrdinalIgnoreCase)) {{
-        $relative = $current.Substring($global:PROJECT_ROOT_PATH.Length)
-        if ($relative.StartsWith("\\\\") -or $relative.StartsWith("/")) {{
+    $current = $pwd.Path.Replace("/", "\\")
+    $root = $global:PROJECT_ROOT_PATH.Replace("/", "\\")
+    if ($current.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {{
+        $relative = $current.Substring($root.Length)
+        if ($relative.StartsWith("\\") -or $relative.StartsWith("/")) {{
             $relative = $relative.Substring(1)
         }}
         if ([string]::IsNullOrEmpty($relative)) {{
@@ -147,11 +148,7 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 with open(profile_path, "r", encoding="utf-8") as f:
                     old_content = f.read()
                 
-                needs_update = ("$global:PROJECT_ROOT_PATH" not in old_content or 
-                                "function prompt" not in old_content or 
-                                "$relative.StartsWith" not in old_content or
-                                "Unexpected token" in old_content or
-                                old_content.count("function prompt") > 1)
+                needs_update = True  # Always update to apply the slash normalization fix
                 
                 if needs_update:
                     user_custom_part = ""
