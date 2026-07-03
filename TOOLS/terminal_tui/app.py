@@ -1048,6 +1048,80 @@ def api_git_push(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/checkout', methods=['POST'])
+def api_git_checkout(project):
+    """Checkout a specific commit (detached HEAD)"""
+    data = request.get_json() or {}
+    commit_hash = data.get("commit_hash", "").strip()
+    
+    if not commit_hash:
+        return jsonify({"error": "Commit hash is required"}), 400
+        
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        
+        res_checkout = subprocess.run(["git", "checkout", commit_hash], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        checkout_out = (res_checkout.stdout + res_checkout.stderr).strip()
+        
+        if res_checkout.returncode != 0:
+            return jsonify({"success": False, "error": checkout_out}), 500
+            
+        return jsonify({"success": True, "output": checkout_out})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/return-branch', methods=['POST'])
+def api_git_return_branch(project):
+    """Return to the latest commit on the current branch"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        
+        # Get current branch name
+        res_branch = subprocess.run(["git", "branch", "--show-current"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        branch = res_branch.stdout.strip()
+        
+        if not branch:
+            # Fallback: try symbolic-ref
+            res_branch = subprocess.run(["git", "symbolic-ref", "--short", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+            branch = res_branch.stdout.strip()
+            
+        if not branch:
+            # If still no branch (detached), checkout main/master as fallback
+            branch = "main"
+        
+        res_checkout = subprocess.run(["git", "checkout", branch], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        checkout_out = (res_checkout.stdout + res_checkout.stderr).strip()
+        
+        if res_checkout.returncode != 0:
+            return jsonify({"success": False, "error": checkout_out}), 500
+            
+        return jsonify({"success": True, "branch": branch, "output": checkout_out})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 def api_paste_image(project):
     projects = scan_projects()

@@ -5384,13 +5384,22 @@
                             <input id="commit-input-${c.hash}" type="text" value="${c.message.replace(/"/g,'&quot;')}" style="flex:1; background-color:var(--bg-main); border:1px solid var(--accent-color); border-radius:6px; padding:3px 8px; color:var(--text-primary); font-size:0.78rem; font-family:'Fira Code',monospace; outline:none; width:100%;" onkeydown="if(event.key==='Enter'){saveCommitRename('${c.hash}')} else if(event.key==='Escape'){cancelCommitEdit('${c.hash}')}">
                         </div>
                         <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
-                            <button id="commit-edit-btn-${c.hash}" onclick="startCommitEdit('${c.hash}')" title="Rename commit message" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.color='var(--text-secondary)'">✏️</button>
+                            ${i === 0 ? `
+                            <button id="commit-edit-btn-${c.hash}" onclick="startCommitEdit('${c.hash}')" title="Rename this commit message" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.color='var(--text-secondary)'">✏️</button>
                             <button id="commit-save-btn-${c.hash}" onclick="saveCommitRename('${c.hash}')" style="display:none; background:var(--accent-color); border:none; color:white; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; white-space:nowrap;">✓</button>
                             <button id="commit-cancel-btn-${c.hash}" onclick="cancelCommitEdit('${c.hash}')" style="display:none; background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; white-space:nowrap;">✕</button>
-                            ${i === 0 ? `<button onclick="pushCommits()" title="Push commits to remote" style="background:none; border:1px solid #22c55e; color:#22c55e; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(34,197,94,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">⬆</button>` : ''}
+                            <button onclick="pushCommits()" title="Push commits to remote" style="background:none; border:1px solid #22c55e; color:#22c55e; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(34,197,94,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">⬆</button>
+                            ` : `
+                            <button onclick="checkoutCommit('${c.hash}')" title="Checkout this commit — view files as they were at this point" style="background:none; border:1px solid #a78bfa; color:#a78bfa; cursor:pointer; font-size:0.72rem; padding:2px 7px; border-radius:4px; transition: all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(167,139,250,0.15)'" onmouseleave="this.style.backgroundColor='transparent'" >⏱ Checkout</button>
+                            `}
                         </div>
                     </div>
-                `).join('');
+                `).join('') + `
+                    <div id="git-checkout-returnbar" style="display:none; padding:8px 12px; background:rgba(167,139,250,0.1); border-top:1px solid #a78bfa; border-radius:0 0 8px 8px; display:none; align-items:center; gap:10px; justify-content:space-between;">
+                        <span style="font-size:0.78rem; color:#a78bfa;">⏱ Viewing past commit — files are in read-only detached state</span>
+                        <button onclick="returnToLatest()" style="background:#a78bfa; border:none; color:white; cursor:pointer; font-size:0.72rem; padding:3px 10px; border-radius:4px; white-space:nowrap;">↩ Return to latest</button>
+                    </div>
+                `;
             } catch (e) {
                 el.innerHTML = `<div style="padding:10px 14px;color:#ef4444;font-size:0.8rem;">Error loading commits.</div>`;
             }
@@ -5480,6 +5489,63 @@
                 } else {
                     statusEl.style.color = '#22c55e';
                     statusEl.innerText = 'Pushed successfully ✓';
+                    refreshPastCommits();
+                    updateStatsMonitor();
+                }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function checkoutCommit(hash) {
+            const statusEl = document.getElementById('git-status-msg');
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Checking out ${hash}...`;
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commit_hash: hash })
+                });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = `Checkout failed: ${data.error || 'Unknown error'}`;
+                } else {
+                    statusEl.style.color = '#a78bfa';
+                    statusEl.innerText = `Checked out ${hash} ✓ — in detached HEAD state`;
+                    // Show return bar
+                    const returnBar = document.getElementById('git-checkout-returnbar');
+                    if (returnBar) returnBar.style.display = 'flex';
+                }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function returnToLatest() {
+            const statusEl = document.getElementById('git-status-msg');
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = 'Returning to latest commit...';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/return-branch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (!res.ok || data.error) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = `Failed: ${data.error || 'Unknown error'}`;
+                } else {
+                    statusEl.style.color = '#22c55e';
+                    statusEl.innerText = `Returned to ${data.branch} ✓`;
+                    // Hide return bar
+                    const returnBar = document.getElementById('git-checkout-returnbar');
+                    if (returnBar) returnBar.style.display = 'none';
                     refreshPastCommits();
                     updateStatsMonitor();
                 }
