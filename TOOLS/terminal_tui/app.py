@@ -22,6 +22,7 @@ if sys.stdout is None or sys.stderr is None:
 
 import json
 import queue
+import re
 import threading
 import subprocess
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
@@ -46,71 +47,67 @@ def get_git_status(path):
     try:
         # Normalize path to avoid mixed slash issues on Windows
         path = os.path.normpath(path)
-        
+        cf = 0x08000000 if sys.platform == "win32" else 0
+
+        # Find the git root so we can scope commands to this project subfolder
+        res_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
+        )
+        if res_root.returncode != 0:
+            return None
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        # Relative path of this project inside the repo (used as pathspec)
+        rel_path = os.path.relpath(path, git_root)
+        # If project IS the repo root, use '.' — otherwise use the relative subfolder
+        pathspec = "." if rel_path == "." else rel_path
+
         # Get current branch name
         res_branch = subprocess.run(
             ["git", "branch", "--show-current"],
-            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
-            timeout=2
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
         )
         branch = res_branch.stdout.strip()
         if not branch:
             res_branch = subprocess.run(
                 ["git", "symbolic-ref", "--short", "HEAD"],
-                cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
-                timeout=2
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=cf, timeout=2
             )
             branch = res_branch.stdout.strip()
-        
+
         if not branch:
             return None
-            
-        # Get file statuses
+
+        # Get file statuses scoped to this project subfolder
         res_status = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
-            timeout=2
+            ["git", "status", "--porcelain", "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
         )
         status_lines = [l for l in res_status.stdout.strip().split("\n") if l.strip()]
         mod_count = len(status_lines)
-
-        # Count staged vs unstaged files
-        staged = len([l for l in status_lines if l[0] != '?' and l[0] != ' '])
-        unstaged = len([l for l in status_lines if l[1] != ' '])
+        staged    = len([l for l in status_lines if l[0] not in ('?', ' ')])
+        unstaged  = len([l for l in status_lines if l[1] != ' '])
         untracked = len([l for l in status_lines if l.startswith('??')])
 
-        # Get lines added/deleted (unstaged diff)
+        # Get lines added/deleted scoped to this project subfolder
         insertions, deletions = 0, 0
-        res_diff = subprocess.run(
-            ["git", "diff", "--shortstat"],
-            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
-            timeout=2
-        )
-        diff_out = res_diff.stdout.strip()
-        if diff_out:
-            import re
-            m_ins = re.search(r'(\d+) insertion', diff_out)
-            m_del = re.search(r'(\d+) deletion', diff_out)
-            if m_ins: insertions = int(m_ins.group(1))
-            if m_del: deletions = int(m_del.group(1))
-
-        # Also include staged diff lines
-        res_diff_staged = subprocess.run(
-            ["git", "diff", "--cached", "--shortstat"],
-            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=0x08000000 if sys.platform == "win32" else 0,
-            timeout=2
-        )
-        diff_staged_out = res_diff_staged.stdout.strip()
-        if diff_staged_out:
-            import re
-            m_ins = re.search(r'(\d+) insertion', diff_staged_out)
-            m_del = re.search(r'(\d+) deletion', diff_staged_out)
-            if m_ins: insertions += int(m_ins.group(1))
+        for extra_flag in [[], ["--cached"]]:
+            res_diff = subprocess.run(
+                ["git", "diff", "--shortstat"] + extra_flag + ["--", pathspec],
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=cf, timeout=2
+            )
+            diff_out = res_diff.stdout.strip()
+            if diff_out:
+                m_ins = re.search(r'(\d+) insertion', diff_out)
+                m_del = re.search(r'(\d+) deletion', diff_out)
+                if m_ins: insertions += int(m_ins.group(1))
+                if m_del: deletions += int(m_del.group(1))
             if m_del: deletions += int(m_del.group(1))
 
         return {
