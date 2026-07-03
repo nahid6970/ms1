@@ -3845,6 +3845,13 @@
                 proj.name.toLowerCase().includes(filterText) ||
                 (proj.category && proj.category.toLowerCase().includes(filterText))
             );
+
+            // Active/running workspaces first
+            filtered.sort((a, b) => {
+                const aScore = a.name === activeProject ? 0 : a.is_active ? 1 : 2;
+                const bScore = b.name === activeProject ? 0 : b.is_active ? 1 : 2;
+                return aScore - bScore;
+            });
             
             if (filtered.length === 0) {
                 const emptyMsg = document.createElement('div');
