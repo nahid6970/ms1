@@ -975,19 +975,18 @@ def api_git_past_commits(project):
 
 @app.route('/api/project/<project>/git/commit/rename', methods=['POST'])
 def api_git_rename_commit(project):
-    """Rename (amend) the last commit message"""
+    """Rename (amend) the most recent commit message"""
     data = request.get_json() or {}
-    commit_hash = data.get("commit_hash", "").strip()
     new_message = data.get("new_message", "").strip()
-    
+
     if not new_message:
         return jsonify({"error": "New commit message is required"}), 400
-        
+
     projects_list = scan_projects()
     proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
     if not proj:
         return jsonify({"error": "Project not found"}), 404
-    
+
     path = os.path.normpath(proj["path"])
     cf = 0x08000000 if sys.platform == "win32" else 0
     try:
@@ -995,25 +994,28 @@ def api_git_rename_commit(project):
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
         git_root = os.path.normpath(res_root.stdout.strip())
-        
-        # Check if commit is the HEAD (most recent unpushed commit)
-        res_head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
-        head_hash = res_head.stdout.strip()
-        
-        if commit_hash == head_hash:
-            # Amend the last commit
-            res_amend = subprocess.run(
-                ["git", "commit", "--amend", "-m", new_message],
-                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15
-            )
-            if res_amend.returncode != 0:
-                err = res_amend.stderr.strip() or res_amend.stdout.strip()
-                return jsonify({"error": f"git commit --amend failed: {err}"}), 500
-                
-            return jsonify({"success": True, "message": "Commit message updated successfully"})
-        else:
-            # For older commits, use interactive rebase (more complex, requires user interaction)
-            return jsonify({"error": "Only the most recent commit can be renamed. Use git rebase -i for older commits."}), 400
+
+        # Get full HEAD hash and check if requested commit hash is a prefix of it
+        res_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        full_head_hash = res_head.stdout.strip()
+
+        commit_hash = data.get("commit_hash", "").strip()
+
+        # Allow rename if commit_hash is a prefix of the full HEAD hash
+        if not full_head_hash.startswith(commit_hash):
+            return jsonify({"error": "Only the most recent (HEAD) commit can be renamed here."}), 400
+
+        res_amend = subprocess.run(
+            ["git", "commit", "--amend", "-m", new_message],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15
+        )
+        if res_amend.returncode != 0:
+            err = res_amend.stderr.strip() or res_amend.stdout.strip()
+            return jsonify({"error": f"git commit --amend failed: {err}"}), 500
+
+        return jsonify({"success": True, "message": "Commit message updated successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
             
     except Exception as e:
         return jsonify({"error": str(e)}), 500
