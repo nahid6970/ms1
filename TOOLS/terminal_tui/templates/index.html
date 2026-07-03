@@ -75,6 +75,7 @@
             background-color: var(--bg-main);
             color: var(--text-primary);
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             line-height: 1.5;
@@ -5860,6 +5861,23 @@
                 openManagerModal();
             }
         });
+
+        // ── Mobile keyboard viewport fix ────────────────────────────────────────
+        // When the mobile keyboard opens, browsers shrink the viewport which
+        // causes the top header and bottom status bar to scroll off screen.
+        // This keeps the app locked to the actual visible area.
+        if (window.visualViewport) {
+            const applyViewportFix = () => {
+                const vv = window.visualViewport;
+                document.body.style.height = vv.height + 'px';
+                document.body.style.top = vv.offsetTop + 'px';
+                document.body.style.left = vv.offsetLeft + 'px';
+                document.body.style.position = 'fixed';
+                document.body.style.width = vv.width + 'px';
+            };
+            window.visualViewport.addEventListener('resize', applyViewportFix);
+            window.visualViewport.addEventListener('scroll', applyViewportFix);
+        }
 
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
