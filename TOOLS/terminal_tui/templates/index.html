@@ -1118,6 +1118,41 @@
                 display: none !important;
             }
         }
+
+        /* Compact Workspaces Manager Modal (F1 window) items */
+        #manager-project-list-container {
+            gap: 6px !important;
+        }
+        #manager-project-list-container .project-card {
+            padding: 6px 10px !important;
+            gap: 1px !important;
+        }
+        #manager-project-list-container .project-title-container {
+            margin-bottom: 0px !important;
+        }
+        #manager-project-list-container .project-title-text {
+            font-size: 0.85rem !important;
+        }
+        #manager-project-list-container .category-badge {
+            font-size: 0.58rem !important;
+            padding: 0px 4px !important;
+        }
+        #manager-project-list-container .project-path {
+            font-size: 0.68rem !important;
+            margin-top: 1px !important;
+        }
+        #manager-project-list-container .card-actions {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            height: auto !important;
+            margin-top: 0 !important;
+            overflow: visible !important;
+            justify-content: flex-end !important;
+        }
+        #manager-project-list-container .action-dot {
+            width: 10px !important;
+            height: 10px !important;
+        }
     </style>
 </head>
 <body>
@@ -1935,6 +1970,13 @@
                 p.path.toLowerCase().includes(searchQuery) ||
                 (p.category && p.category.toLowerCase().includes(searchQuery))
             );
+
+            // Sort so that active (running) projects are always at the top in the sidebar list
+            filtered.sort((a, b) => {
+                if (a.is_active && !b.is_active) return -1;
+                if (!a.is_active && b.is_active) return 1;
+                return 0;
+            });
 
             if (filtered.length === 0) {
                 container.innerHTML = `
@@ -3847,15 +3889,11 @@
             }
             
             projects.sort((a, b) => {
-                // Rule 1: Active (running) projects always go to the top
-                if (a.is_active && !b.is_active) return -1;
-                if (!a.is_active && b.is_active) return 1;
-                
-                // Rule 2: Pinned projects go next
+                // Rule 1: Pinned projects go first
                 if (a.pinned && !b.pinned) return -1;
                 if (!a.pinned && b.pinned) return 1;
                 
-                // Rule 3: Custom order
+                // Rule 2: Custom order
                 if (Array.isArray(order) && order.length > 0) {
                     const idxA = order.indexOf(a.name);
                     const idxB = order.indexOf(b.name);
@@ -5286,9 +5324,9 @@
                 }
                 card.appendChild(path);
                 
-                // Repositioning and actions controls container
+                // Repositioning and actions controls container (more compact)
                 const controlsRow = document.createElement('div');
-                controlsRow.style = 'display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 8px;';
+                controlsRow.style = 'display: flex; align-items: center; justify-content: space-between; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;';
                 
                 // Reposition buttons
                 const repGroup = document.createElement('div');
@@ -5297,7 +5335,7 @@
                 const upBtn = document.createElement('button');
                 upBtn.type = 'button';
                 upBtn.title = 'Move Up';
-                upBtn.style = 'width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 0.65rem; transition: all 0.15s;';
+                upBtn.style = 'width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-secondary); font-size: 0.6rem; transition: all 0.15s;';
                 upBtn.innerText = '▲';
                 upBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -5309,7 +5347,7 @@
                 const downBtn = document.createElement('button');
                 downBtn.type = 'button';
                 downBtn.title = 'Move Down';
-                downBtn.style = 'width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 0.65rem; transition: all 0.15s;';
+                downBtn.style = 'width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-secondary); font-size: 0.6rem; transition: all 0.15s;';
                 downBtn.innerText = '▼';
                 downBtn.onclick = (e) => {
                     e.stopPropagation();
