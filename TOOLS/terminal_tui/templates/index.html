@@ -146,6 +146,11 @@
             border-radius: 0px !important;
         }
 
+        #file-viewer-modal div::-webkit-scrollbar { width: 6px; height: 6px; }
+        #file-viewer-modal div::-webkit-scrollbar-track { background: transparent; }
+        #file-viewer-modal div::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        #file-viewer-modal div::-webkit-scrollbar-corner { background: var(--bg-main); }
+
         /* Search Input */
         .search-container {
             padding: 8px 24px 16px 24px;
@@ -1961,7 +1966,7 @@
                 </div>
             </div>
             <!-- Line numbers + content: single scroll container with table rows for stable selection -->
-            <div style="flex:1; overflow:auto; min-height:0; background:var(--bg-main);">
+            <div style="flex:1; overflow:auto; min-height:0; background:var(--bg-main); scrollbar-width:thin; scrollbar-color:#334155 transparent;">
                 <table id="file-viewer-table" style="border-collapse:collapse; width:100%; font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.6; white-space:pre;">
                     <tbody id="file-viewer-tbody"></tbody>
                 </table>
