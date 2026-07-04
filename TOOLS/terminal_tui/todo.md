@@ -1,11 +1,11 @@
-# Task: Workspace selector btn shows active workspace, project name moved to statusbar
+# Task: Square border on selector btn + settings toggle for workspace theme on btn
 
 ## What was asked
-1. When a workspace is selected, #workspace-selector-btn becomes styled like the active workspace (name + accent color)
-2. #active-project-name (window title selector) moves to statusbar beside snippets button as a compact button
+- Make workspace selector btn have sharp/square border (not rounded)
+- Add settings toggle: apply workspace theme to selector btn (default ON), when OFF use plain style
 
 ## Tasks
-- [X] Move #project-name-dropdown-container from header to statusbar beside snippets button
-- [X] Change #workspace-selector-btn to show active workspace name + cardTheme accent color
-- [X] Update JS that sets active project to update selector button appearance
-- [X] Make selector button expand/pill style when active (not fixed 34x34)
+- [X] Change border-radius on workspace-selector-btn to square (4px)
+- [X] Add settings toggle in settings modal for workspace theme on selector button
+- [X] Load/save toggle in openSettingsModal / handleSaveSettings
+- [X] Apply toggle in updateWorkspaceSelectorBtn: when OFF use plain var() colors

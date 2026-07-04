@@ -1298,7 +1298,7 @@
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
                 <div class="custom-dropdown" id="workspace-selector-dropdown-container" style="position: relative; display: none;">
-                    <button class="action-btn" id="workspace-selector-btn" onclick="toggleWorkspaceSelectorDropdown(event)" title="Select Workspace" style="height: 34px; min-width: 34px; max-width: 220px; padding: 0 10px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.82rem; font-weight: 600; font-family: inherit; transition: all 0.2s; overflow: hidden;">
+                    <button class="action-btn" id="workspace-selector-btn" onclick="toggleWorkspaceSelectorDropdown(event)" title="Select Workspace" style="height: 34px; min-width: 34px; max-width: 220px; padding: 0 10px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary); font-size: 0.82rem; font-weight: 600; font-family: inherit; transition: all 0.2s; overflow: hidden;">
                         <svg id="workspace-selector-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                             <polyline points="2 17 12 22 22 17"></polyline>
@@ -1862,6 +1862,10 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="settings-auto-scroll" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-auto-scroll" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Auto-scroll to bottom on new output</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-selector-btn-theme" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-selector-btn-theme" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Apply workspace theme to selector button</label>
                     </div>
                 </div>
 
@@ -4089,8 +4093,9 @@
             const label = document.getElementById('workspace-selector-label');
             if (!btn || !label) return;
             label.innerText = proj.name || '';
+            const useTheme = localStorage.getItem('selector-btn-theme') !== 'false';
             const ct = proj.cardTheme;
-            if (ct) {
+            if (useTheme && ct) {
                 btn.style.backgroundColor = ct.bgColor;
                 btn.style.color = ct.textColor;
                 btn.style.borderColor = ct.accentColor;
@@ -5442,6 +5447,8 @@
             document.getElementById('settings-cur-badge-size').value   = localStorage.getItem('cur-badge-size')   || '10';
             document.getElementById('settings-cur-badge-radius').value = localStorage.getItem('cur-badge-radius') || '4';
             document.getElementById('settings-cur-badge-bold').checked = localStorage.getItem('cur-badge-bold') !== 'false';
+
+            document.getElementById('settings-selector-btn-theme').checked = localStorage.getItem('selector-btn-theme') !== 'false';
             
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -5502,6 +5509,14 @@
             localStorage.setItem('cur-badge-size',   document.getElementById('settings-cur-badge-size').value || '10');
             localStorage.setItem('cur-badge-radius', document.getElementById('settings-cur-badge-radius').value || '4');
             localStorage.setItem('cur-badge-bold',   document.getElementById('settings-cur-badge-bold').checked);
+
+            localStorage.setItem('selector-btn-theme', document.getElementById('settings-selector-btn-theme').checked);
+
+            // Re-apply selector button with latest setting
+            if (activeProject) {
+                const ap = projects.find(p => p.name === activeProject);
+                if (ap) updateWorkspaceSelectorBtn(ap);
+            }
             
             applySidebarWorkspacesVisibility();
             
