@@ -4093,6 +4093,16 @@
             listEl.style.maxHeight = `${savedDropdownHeight}px`;
             
             const dropdownContent = document.getElementById('workspace-selector-dropdown-content');
+            const showCategories = localStorage.getItem('show-workspace-categories') !== 'false';
+
+            // Returns white or dark color that contrasts against hex bg
+            function contrastDotColor(hex) {
+                if (!hex) return '#ffffff';
+                const c = hex.replace('#','');
+                if (c.length < 6) return '#ffffff';
+                const r = parseInt(c.substring(0,2),16), g = parseInt(c.substring(2,4),16), b = parseInt(c.substring(4,6),16);
+                return (0.299*r + 0.587*g + 0.114*b)/255 > 0.5 ? '#111111' : '#ffffff';
+            }
             
             const filtered = projects.filter(proj => 
                 proj.name.toLowerCase().includes(filterText) ||
@@ -4120,16 +4130,17 @@
 
                 const opt = document.createElement('div');
                 opt.style.cssText = `
-                    padding: 7px 12px; font-size: 0.84rem; cursor: pointer;
+                    position: relative;
+                    padding: 7px 12px 7px 14px; font-size: 0.84rem; cursor: pointer;
                     display: flex; align-items: center; gap: 7px;
                     border-left: 3px solid ${ct ? ct.accentColor : 'transparent'};
                     background-color: ${ct ? ct.bgColor : 'transparent'};
                     color: ${ct ? ct.textColor : 'var(--text-primary)'};
-                    transition: filter 0.12s, background-color 0.12s;
+                    transition: filter 0.12s;
                     ${isCurrent ? `font-weight: 600;` : ''}
                 `;
 
-                opt.onmouseenter = () => opt.style.filter = 'brightness(1.25)';
+                opt.onmouseenter = () => opt.style.filter = 'brightness(1.3)';
                 opt.onmouseleave = () => opt.style.filter = '';
 
                 opt.onclick = () => {
@@ -4143,22 +4154,23 @@
                     showCardContextMenu(e, proj);
                 };
 
-                // ▶ current indicator
-                const arrow = document.createElement('span');
-                arrow.style.cssText = `flex-shrink:0; font-size:0.65rem; width:10px; color:${ct ? ct.accentColor : 'var(--accent-color)'};`;
-                arrow.innerText = isCurrent ? '▶' : '';
-                opt.appendChild(arrow);
+                // ▶ current indicator — absolutely positioned, zero layout impact
+                if (isCurrent) {
+                    const arrow = document.createElement('span');
+                    arrow.style.cssText = `position:absolute; left:0px; top:50%; transform:translateY(-50%); font-size:0.5rem; color:${ct ? ct.textColor : '#fff'}; pointer-events:none; line-height:1;`;
+                    arrow.innerText = '▶';
+                    opt.appendChild(arrow);
+                }
 
-                // Active session dot
+                // Active session dot — contrasting color against the row bg
                 if (proj.is_active) {
+                    const dotColor = contrastDotColor(ct ? ct.bgColor : null);
+                    const glowColor = ct ? ct.accentColor : '#10b981';
                     const dot = document.createElement('span');
-                    // Pick dot color: use accentColor if bg is dark enough, else green
-                    const dotColor = ct ? ct.accentColor : '#10b981';
-                    dot.style.cssText = `width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0; box-shadow: 0 0 5px ${dotColor}80;`;
+                    dot.style.cssText = `width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0; box-shadow: 0 0 5px ${glowColor};`;
                     dot.title = 'Session running';
                     opt.appendChild(dot);
                 } else {
-                    // Placeholder to keep alignment
                     const placeholder = document.createElement('span');
                     placeholder.style.cssText = 'width:7px; flex-shrink:0;';
                     opt.appendChild(placeholder);
@@ -4170,10 +4182,10 @@
                 nameSpan.innerText = proj.name;
                 opt.appendChild(nameSpan);
 
-                // Category badge
-                if (proj.category) {
+                // Category badge — respects show-workspace-categories setting
+                if (showCategories && proj.category) {
                     const badge = document.createElement('span');
-                    badge.style.cssText = `font-size:0.64rem; padding:1px 6px; border-radius:10px; background:${ct ? ct.accentColor + '33' : 'rgba(255,255,255,0.08)'}; color:${ct ? ct.accentColor : 'var(--text-muted)'}; white-space:nowrap; flex-shrink:0;`;
+                    badge.style.cssText = `font-size:0.64rem; padding:1px 6px; border-radius:10px; background:${ct ? ct.accentColor + '33' : 'rgba(255,255,255,0.08)'}; color:${ct ? ct.textColor : 'var(--text-muted)'}; white-space:nowrap; flex-shrink:0;`;
                     badge.innerText = proj.category;
                     opt.appendChild(badge);
                 }
