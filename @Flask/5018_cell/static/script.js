@@ -1611,6 +1611,13 @@ function calculateVisibleToRawMap(rawInput) {
     };
 
     const patterns = [
+        // Pipe tables syntax mapping
+        { regex: /^\|\s*(?:-+|━+)\s*\|(?:\s*(?:-+|━+)\s*\|)*\s*$/gm, keepGroup: -1 },
+        { regex: /\s*\|\s*/g, keepGroup: -1 },
+        { regex: /\^\^/g, keepGroup: -1 },
+        // Image markdown syntax mapping
+        { regex: /!\[([^\]]+)\]\(([^)]+)\)/g, keepGroup: -1 },
+
         { regex: /\[\[(.+?)\]\]/g, keepGroup: 1 },
         { regex: /\{[^}]*\}(.+?)\{\/\}/g, keepGroup: 1 },
         { regex: /\*\*(.+?)\*\*/g, keepGroup: 1 },
@@ -1794,11 +1801,23 @@ function handlePreviewMouseDown(e) {
         console.log('Setting cursor to raw offset:', rawOffset);
         setCaretPosition(preview, rawOffset);
 
-        // Restore scroll position
-        if (tableContainer) {
-            tableContainer.scrollTop = savedScrollTop;
-            tableContainer.scrollLeft = savedScrollLeft;
-        }
+        // Nested requestAnimationFrame to let browser settle layout before measuring
+        requestAnimationFrame(() => {
+            const caretPos = getCaretClientPosition();
+            if (caretPos && caretPos.y > 0) {
+                const drift = caretPos.y - e.clientY;
+                if (tableContainer) {
+                    tableContainer.scrollTop += drift;
+                    tableContainer.scrollLeft = savedScrollLeft;
+                }
+            } else {
+                // Fallback: keep original scroll
+                if (tableContainer) {
+                    tableContainer.scrollTop = savedScrollTop;
+                    tableContainer.scrollLeft = savedScrollLeft;
+                }
+            }
+        });
     });
 }
 
@@ -2019,12 +2038,12 @@ function extractRawText(element) {
             text += node.textContent;
         } else if (node.nodeName === 'BR') {
             text += '\n';
-        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'TR') {
             if (text.length > 0 && !text.endsWith('\n')) {
                 text += '\n';
             }
             node.childNodes.forEach(walk);
-            // Add newline after DIV/P unless it's empty or already ends with newline
+            // Add newline after DIV/P/TR unless it's empty or already ends with newline
             // This ensures table lines and other block elements are properly separated
             if (node.childNodes.length > 0 && !text.endsWith('\n')) {
                 text += '\n';
@@ -2101,7 +2120,7 @@ function getCaretCharacterOffset(element) {
             offset += node.textContent.length;
         } else if (node.nodeName === 'BR') {
             offset += 1;
-        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'TR') {
             // This logic must match extractRawText's newline logic
             // But it's complex because of how DIVs are nested.
             // Simplified: most contenteditable newlines are BR or simple DIV wrap.
@@ -2115,7 +2134,7 @@ function getCaretCharacterOffset(element) {
         }
 
         // After a block element, if we processed it, extractRawText might add a \n
-        if (!stopped && (node.nodeName === 'DIV' || node.nodeName === 'P')) {
+        if (!stopped && (node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'TR')) {
             // offset += 1; // Only if we transition to a new block?
         }
     };
@@ -2172,7 +2191,7 @@ function extractRawTextBeforeCaret(element, range) {
                 return;
             }
 
-            if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+            if (node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'TR') {
                 if (text.length > 0 && !text.endsWith('\n')) text += '\n';
                 for (let child of node.childNodes) {
                     walk(child);
@@ -2282,7 +2301,7 @@ function setCaretPosition(element, offset) {
                     found = true;
                 }
             }
-        } else if (node.nodeName === 'DIV' || node.nodeName === 'P') {
+        } else if (node.nodeName === 'DIV' || node.nodeName === 'P' || node.nodeName === 'TR') {
             // Match extractRawText's newline logic
             if (currentOffset > 0 && !lastCharWasNewline) {
                 if (currentOffset === offset) {
@@ -2680,8 +2699,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             
             preview.innerHTML = highlightedHtml;
 
-            // Adjust height immediately for the newly highlighted syntax content
-            adjustCellHeightForMarkdown(cell);
+            // Adjust height immediately for the newly highlighted syntax content, skipping scroll restore
+            adjustCellHeightForMarkdown(cell, false);
         });
 
         preview.addEventListener('blur', () => {
@@ -2705,6 +2724,10 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 return; // Keep edit mode active
             }
 
+            // Save layout coordinates before re-rendering
+            const cellRectBefore = cell.getBoundingClientRect();
+            const caretPosBefore = getCaretClientPosition();
+
             preview.classList.remove('editing');
             const newRawValue = extractRawText(preview);
             if (newRawValue !== inputElement.value) {
@@ -2713,8 +2736,57 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             }
             preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
 
-            // Recalculate height for the parsed content
-            adjustCellHeightForMarkdown(cell);
+            // Recalculate height for the parsed content, skipping scroll restore to allow our programmatic adjust
+            adjustCellHeightForMarkdown(cell, false);
+
+            // Calculate drift of the exact text/caret position after layout has settled on blur (double-rAF)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const tableContainer = document.querySelector('.table-container');
+                    if (tableContainer) {
+                        if (caretPosBefore && caretPosBefore.y > 0) {
+                            const rawOffset = getCaretCharacterOffset(preview);
+                            const visOffset = findVisibleOffsetFromRaw(newRawValue, rawOffset);
+
+                            // Temporarily place caret at mapped visible offset to measure its new position
+                            const tempSel = window.getSelection();
+                            const originalRanges = [];
+                            for (let i = 0; i < tempSel.rangeCount; i++) {
+                                originalRanges.push(tempSel.getRangeAt(i).cloneRange());
+                            }
+
+                            setCaretPosition(preview, visOffset);
+                            const caretPosAfter = getCaretClientPosition();
+
+                            // Restore selection
+                            tempSel.removeAllRanges();
+                            for (const r of originalRanges) {
+                                tempSel.addRange(r);
+                            }
+
+                            if (caretPosAfter && caretPosAfter.y > 0) {
+                                const drift = caretPosAfter.y - caretPosBefore.y;
+                                if (tableContainer) {
+                                    tableContainer.scrollTop += drift;
+                                }
+                            } else {
+                                const cellRectAfter = cell.getBoundingClientRect();
+                                const cellDrift = cellRectAfter.top - cellRectBefore.top;
+                                if (tableContainer) {
+                                    tableContainer.scrollTop += cellDrift;
+                                }
+                            }
+                        } else {
+                            // Fallback: Cell top anchor
+                            const cellRectAfter = cell.getBoundingClientRect();
+                            const cellDrift = cellRectAfter.top - cellRectBefore.top;
+                            if (tableContainer) {
+                                tableContainer.scrollTop += cellDrift;
+                            }
+                        }
+                    }
+                });
+            });
 
             // Re-draw connectors
             requestAnimationFrame(() => {
@@ -14344,7 +14416,50 @@ window.addEventListener('load', () => {
 
 
 // Adjust cell height to fit both markdown preview and raw text
-function adjustCellHeightForMarkdown(cell) {
+// Helper to measure caretaker/cursor client screen position
+function getCaretClientPosition() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+    let range = sel.getRangeAt(0);
+    let rects = range.getClientRects();
+    if (rects.length > 0) {
+        return { x: rects[0].left, y: rects[0].top };
+    }
+    
+    // Fallback for collapsed selections/empty ranges
+    try {
+        const span = document.createElement('span');
+        span.appendChild(document.createTextNode('\u200B')); // zero-width space
+        range.insertNode(span);
+        const rect = span.getBoundingClientRect();
+        const parent = span.parentNode;
+        parent.removeChild(span);
+        parent.normalize(); // restore text nodes
+        return { x: rect.left, y: rect.top };
+    } catch (e) {
+        return null;
+    }
+}
+
+// Helper to map raw character offset to visible character offset
+function findVisibleOffsetFromRaw(rawInput, rawOffset) {
+    const map = calculateVisibleToRawMap(rawInput);
+    let bestVisibleOffset = 0;
+    let minDiff = Infinity;
+    for (let vis = 0; vis < map.length; vis++) {
+        const raw = map[vis];
+        if (raw !== undefined) {
+            const diff = Math.abs(raw - rawOffset);
+            if (diff < minDiff) {
+                minDiff = diff;
+                bestVisibleOffset = vis;
+            }
+        }
+    }
+    return bestVisibleOffset;
+}
+
+function adjustCellHeightForMarkdown(cell, preserveScroll = true) {
     const input = cell.querySelector('input, textarea');
     const preview = cell.querySelector('.markdown-preview');
     const isMarkdownEnabled = localStorage.getItem('markdownPreviewEnabled') !== 'false';
@@ -14375,7 +14490,7 @@ function adjustCellHeightForMarkdown(cell) {
         }
         
         // Restore container scroll
-        if (tableContainer) {
+        if (tableContainer && preserveScroll) {
             tableContainer.scrollTop = savedScrollTop;
             tableContainer.scrollLeft = savedScrollLeft;
         }
@@ -14428,7 +14543,7 @@ function adjustCellHeightForMarkdown(cell) {
     preview.style.display = originalPreviewDisplay;
 
     // Restore container scroll
-    if (tableContainer) {
+    if (tableContainer && preserveScroll) {
         tableContainer.scrollTop = savedScrollTop;
         tableContainer.scrollLeft = savedScrollLeft;
     }
