@@ -1315,7 +1315,16 @@
                     </h2>
                     <div class="custom-dropdown-content" id="project-name-dropdown-content" style="display: none; position: absolute; left: 0; top: 100%; width: 240px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 4px 0; max-height: 280px; overflow-y: auto;"></div>
                 </div>
-                <button class="action-btn" id="active-project-path-btn" title="Open project folder in Explorer" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="openProjectInExplorer()">
+                <div class="branch-badge" id="active-project-branch" style="display: none;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="18" r="3"/>
+                        <circle cx="6" cy="6" r="3"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <path d="M18 15V9a4 4 0 0 0-4-4H9"/>
+                    </svg>
+                    <span id="active-project-branch-text">main</span>
+                </div>
+                <button class="action-btn" id="active-project-path-btn" title="Show path" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="copyActiveProjectPath()">
                     📂
                 </button>
             </div>
@@ -4164,6 +4173,7 @@
             
             // 4. Update visibility of project-specific widgets based on activeProject
             const nameContainer = document.getElementById('project-name-dropdown-container');
+            const branch = document.getElementById('active-project-branch');
             const pathBtn = document.getElementById('active-project-path-btn');
             const projActions = document.getElementById('project-specific-actions');
             const divider = document.getElementById('header-toolbar-divider');
@@ -4171,6 +4181,7 @@
             
             if (!activeProject) {
                 if (nameContainer) nameContainer.style.display = 'none';
+                if (branch) branch.style.display = 'none';
                 if (pathBtn) pathBtn.style.display = 'none';
                 if (projActions) projActions.style.display = 'none';
                 if (divider) divider.style.display = 'none';
@@ -4329,11 +4340,20 @@
                     const ramVal = document.getElementById('monitor-ram-value');
                     if (ramVal) ramVal.innerText = `${data.memory} MB`;
 
-                    // Branch badge removed from header (visible in status bar only)
-                    // Keep branch text element updated for internal use by git modal
+                    // Update Git status indicator branch name
+                    const branchEl = document.getElementById('active-project-branch');
                     const branchTextEl = document.getElementById('active-project-branch-text');
-                    if (branchTextEl && data.git) {
-                        branchTextEl.innerText = data.git.branch || '';
+                    if (branchEl && branchTextEl) {
+                        if (data.git) {
+                            branchTextEl.innerText = data.git.modifications > 0 
+                                ? `${data.git.branch} (*${data.git.modifications})`
+                                : data.git.branch;
+                            branchEl.style.display = 'flex';
+                            branchEl.setAttribute('data-has-git', 'true');
+                        } else {
+                            branchEl.style.display = 'none';
+                            branchEl.setAttribute('data-has-git', 'false');
+                        }
                     }
 
                     // Update git info in bottom status bar
