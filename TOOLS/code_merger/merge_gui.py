@@ -1667,6 +1667,7 @@ class PrepTab(QWidget):
         self.root_cb = root_cb
         self.files: list[str] = []
         self.file_modes: dict[str, str] = {}
+        self.disabled_files: set[str] = set()
         self.project_root = ""
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
@@ -1748,6 +1749,8 @@ class PrepTab(QWidget):
             if root:
                 parts.append(f"\n## PROJECT ROOT\n\n`{root}`")
             for fp in self.files:
+                if fp in self.disabled_files:
+                    continue  # Skip disabled files
                 try:
                     with open(fp, 'r', encoding='utf-8', errors='replace') as f:
                         content = f.read()
@@ -1813,6 +1816,7 @@ class PrepTab(QWidget):
         data['project_root'] = self.project_root.strip()
         data['minify'] = self.chk_minify.isChecked()
         data['file_modes'] = self.file_modes
+        data['disabled_files'] = list(self.disabled_files)
         try:
             with open(SESSION_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
@@ -1855,6 +1859,7 @@ class PrepTab(QWidget):
                     self.chk_minify.setChecked(data.get('minify', False))
                     self.chk_minify.blockSignals(False)
                     self.file_modes = data.get('file_modes', {})
+                    self.disabled_files = set(data.get('disabled_files', []))
                 for fp in saved:
                     if fp not in self.files and os.path.exists(fp):
                         self.files.append(fp)
@@ -2018,26 +2023,30 @@ class PrepTab(QWidget):
         mode_combo.setCurrentText(current_mode)
         mode_combo.currentTextChanged.connect(lambda mode, f=fp: self._on_file_mode_changed(f, mode))
 
-        btn_rem = QPushButton("✕")
-        btn_rem.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_rem.setFixedWidth(18)
-        btn_rem.setFixedHeight(16)
-        btn_rem.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent; border: 1px solid {CP_DIM}; color: {CP_RED};
-                padding: 0; font-family: 'Consolas'; font-size: 7pt; font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background: {CP_RED}; color: #000; border-color: {CP_RED};
-            }}
-        """)
-        btn_rem.clicked.connect(lambda _, f=fp, it=item: self._remove_file(f, it))
+        # Toggle button: green dot = enabled, grey dot = disabled
+        is_disabled = fp in self.disabled_files
+        btn_toggle = QPushButton("⬤")
+        btn_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_toggle.setFixedWidth(22)
+        btn_toggle.setFixedHeight(18)
+        btn_toggle.setToolTip("Click to disable this file (exclude from prompt)\nRight-click to remove it from the list")
+        self._apply_toggle_style(btn_toggle, not is_disabled)
+        btn_toggle.clicked.connect(lambda _, f=fp, b=btn_toggle, w=widget, lb=lbl, mc=mode_combo: self._toggle_file(f, b, w, lb, mc))
+
+        # Apply initial dimmed state if disabled
+        if is_disabled:
+            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
+            mode_combo.setEnabled(False)
 
         if icon_lbl:
             hl.addWidget(icon_lbl, 0)
         hl.addWidget(lbl, 1)
         hl.addWidget(mode_combo, 0)
-        hl.addWidget(btn_rem, 0)
+        hl.addWidget(btn_toggle, 0)
+
+        # Right-click on the widget row → context menu to remove
+        widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        widget.customContextMenuRequested.connect(lambda pos, f=fp, it=item: self._file_item_context_menu(f, it, pos, widget))
 
         item_height = max(22, EXTENSION_ICON_SIZE + 4, SOURCE_FILES_FONT_SIZE + 10)
         item.setSizeHint(QSize(100, item_height))
@@ -2048,12 +2057,78 @@ class PrepTab(QWidget):
     def _remove_file(self, fp: str, item: QListWidgetItem):
         if fp in self.files:
             self.files.remove(fp)
+        if fp in self.disabled_files:
+            self.disabled_files.discard(fp)
         row = self.file_list.row(item)
         if row >= 0:
             self.file_list.takeItem(row)
         self._update_root()
         self._save_session()
         self.status_cb(f"Removed: {os.path.basename(fp)}")
+
+    def _apply_toggle_style(self, btn: QPushButton, enabled: bool):
+        if enabled:
+            btn.setStyleSheet(f"""
+                QPushButton {{
+                    background: transparent; border: none; color: {CP_GREEN};
+                    padding: 0; font-size: 10pt;
+                }}
+                QPushButton:hover {{ color: #00cc1a; }}
+            """)
+            btn.setToolTip("Enabled — click to disable (exclude from prompt)\nRight-click row to remove from list")
+        else:
+            btn.setStyleSheet(f"""
+                QPushButton {{
+                    background: transparent; border: none; color: {CP_DIM};
+                    padding: 0; font-size: 10pt;
+                }}
+                QPushButton:hover {{ color: {CP_SUB}; }}
+            """)
+            btn.setToolTip("Disabled — file excluded from prompt\nClick to re-enable  |  Right-click row to remove from list")
+
+    def _toggle_file(self, fp: str, btn: QPushButton, widget: QWidget, lbl: QLabel, mode_combo: QComboBox):
+        is_currently_disabled = fp in self.disabled_files
+        if is_currently_disabled:
+            # Re-enable
+            self.disabled_files.discard(fp)
+            self._apply_toggle_style(btn, True)
+            # Restore label colour based on file size
+            try:
+                sz_kb = os.path.getsize(fp) / 1024
+                if sz_kb > 500:
+                    color = CP_RED
+                elif sz_kb > 250:
+                    color = CP_YELLOW
+                else:
+                    color = CP_TEXT
+            except Exception:
+                color = CP_TEXT
+            lbl.setStyleSheet(f"color: {color}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
+            mode_combo.setEnabled(True)
+            self.status_cb(f"Enabled: {os.path.basename(fp)}")
+        else:
+            # Disable
+            self.disabled_files.add(fp)
+            self._apply_toggle_style(btn, False)
+            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
+            mode_combo.setEnabled(False)
+            self.status_cb(f"Disabled: {os.path.basename(fp)}")
+        self._save_session()
+
+    def _file_item_context_menu(self, fp: str, item: QListWidgetItem, pos, widget: QWidget):
+        menu = QMenu(self)
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-family: 'Consolas'; font-size: 9pt;
+            }}
+            QMenu::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; }}
+        """)
+        act_remove = menu.addAction(f"✕  Remove  {os.path.basename(fp)}")
+        act_remove.setForeground(QColor(CP_RED))
+        action = menu.exec(widget.mapToGlobal(pos))
+        if action == act_remove:
+            self._remove_file(fp, item)
 
     def _on_file_mode_changed(self, fp: str, mode: str):
         self.file_modes[fp] = mode
