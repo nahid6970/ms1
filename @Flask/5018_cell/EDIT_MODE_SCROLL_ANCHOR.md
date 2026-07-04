@@ -93,15 +93,59 @@ The same issue happens in reverse when **clicking out** (blur): the cell re-rend
 4. The `preview.onmousedown` assignment (line ~2831) uses property assignment, not `addEventListener` — any listener added with `addEventListener` on mousedown in capture phase will still fire, but be aware of the order
 5. The click Y position (`e.clientY`) is the ground truth for "where the user was looking"
 
-## Suggested Approach for Next Attempt
+## F8 Key — Relevant Technique
 
-The cleanest solution is probably a **global click-anchor mechanism**:
+F8 already uses `document.caretRangeFromPoint(lastMouseX, lastMouseY)` to identify the exact DOM text node and character offset under the mouse cursor. The app also tracks `lastMouseX` / `lastMouseY` globally via a `mousemove` listener.
 
-1. Add a **single `mousedown` listener on `.table-container`** (or `document`) that records `e.clientY` and the element's `scrollTop` at click time — before anything changes
-2. After the focus transition is fully complete (perhaps `setTimeout(..., 0)` which runs after all pending rAFs), compute the drift between current `scrollTop` and the scroll needed to keep the clicked point at `e.clientY`
-3. Apply the correction as the **last thing** — after `handlePreviewMouseDown`'s rAF and after `adjustCellHeightForMarkdown`
+This is directly useful for the scroll anchor feature:
 
-Alternatively, refactor `handlePreviewMouseDown` to accept a target scroll position and apply it as the final step instead of restoring the original scroll.
+**Before the edit mode transition (in `handlePreviewMouseDown` or the `focus` handler):**
+```js
+const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+const targetNode = range?.startContainer; // the exact text node clicked
+const targetElement = targetNode?.parentElement; // its parent element
+const targetRectBefore = targetElement?.getBoundingClientRect();
+const targetTopBefore = targetRectBefore?.top; // screen Y of clicked element
+```
+
+**After the reflow (in a rAF or setTimeout after innerHTML swap + height adjustment):**
+```js
+const targetRectAfter = targetElement?.getBoundingClientRect();
+const drift = targetRectAfter.top - targetTopBefore;
+tableContainer.scrollTop += drift;
+```
+
+**Why this is better than anchoring the cell top:**
+- Instead of anchoring the whole cell's top edge, we anchor the **specific DOM element** (the table row, the paragraph, the span) that the user actually clicked on
+- If the user clicks on text in row 5 of a rendered table, `targetElement` will be the `<td>` of that row — so we track exactly that row's position, not the cell top
+- After the table collapses to `|pipe|` syntax, the `targetElement` no longer exists in the DOM — but we captured its pre-reflow screen position, and we know the cell's new top, so we can still compute the correct scroll offset
+
+**The key challenge:** After `preview.innerHTML` is replaced, the DOM nodes captured by `caretRangeFromPoint` are detached — `getBoundingClientRect()` returns zeros. So we must capture `targetRectBefore.top` **before** the innerHTML swap, and then use `cell.getBoundingClientRect().top` after the swap to compute the relative offset.
+
+**Refined approach:**
+```js
+// In mousedown (before focus):
+const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+const clickedNode = range?.startContainer?.parentElement;
+const cellRect = cell.getBoundingClientRect();
+// How far from the cell top was the clicked element?
+const clickedNodeOffsetInCell = clickedNode 
+    ? clickedNode.getBoundingClientRect().top - cellRect.top 
+    : e.clientY - cellRect.top;
+const clickScreenY = e.clientY;
+
+// After reflow (double-rAF, after adjustCellHeightForMarkdown with preserveScroll=false):
+requestAnimationFrame(() => requestAnimationFrame(() => {
+    // The clicked node is now gone (innerHTML replaced), but we know its offset within the cell
+    // In the new raw view, that offset maps to a proportional position
+    const newCellRect = cell.getBoundingClientRect();
+    const newPointScreenY = newCellRect.top + clickedNodeOffsetInCell;
+    const drift = newPointScreenY - clickScreenY;
+    tableContainer.scrollTop += drift;
+}));
+```
+
+This still needs `handlePreviewMouseDown` to NOT restore scrollTop, and `adjustCellHeightForMarkdown` to NOT restore scrollTop when called from focus/blur.
 
 ---
 
