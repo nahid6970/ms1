@@ -4174,10 +4174,12 @@
                 nameSpan.innerText = proj.name;
                 opt.appendChild(nameSpan);
 
-                // Current indicator — clearly visible badge after name
+                // Current indicator — badge bg = same color as the dot, text = contrast of that
                 if (isCurrent) {
                     const curBadge = document.createElement('span');
-                    curBadge.style.cssText = `font-size:0.6rem; padding:1px 6px; border-radius:4px; background:${ct ? ct.accentColor : 'var(--accent-color)'}; color:${contrastDotColor(ct ? ct.accentColor : '#6366f1')}; font-weight:700; flex-shrink:0; letter-spacing:0.3px;`;
+                    const badgeBg = contrastDotColor(ct ? ct.bgColor : null); // same as dot color
+                    const badgeText = contrastDotColor(badgeBg);              // opposite of badge bg
+                    curBadge.style.cssText = `font-size:0.6rem; padding:1px 6px; border-radius:4px; background:${badgeBg}; color:${badgeText}; font-weight:700; flex-shrink:0; letter-spacing:0.3px;`;
                     curBadge.innerText = 'current';
                     opt.appendChild(curBadge);
                 }
