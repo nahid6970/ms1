@@ -1436,6 +1436,196 @@ def list_system_fonts():
 
     return jsonify(sorted(list(fonts), key=lambda s: s.lower()))
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Scheduled Commands
+# ─────────────────────────────────────────────────────────────────────────────
+
+_scheduled = {}          # { id: {...} }
+_scheduled_lock = threading.Lock()
+_sched_counter = 0
+
+def _next_sched_id():
+    global _sched_counter
+    _sched_counter += 1
+    return str(_sched_counter)
+
+def _run_scheduled(sched_id):
+    with _scheduled_lock:
+        entry = _scheduled.get(sched_id)
+        if not entry or entry["status"] != "pending":
+            return
+        entry["status"] = "running"
+        project = entry["project"]
+        pane_id = entry["pane_id"]
+        command = entry["command"]
+    session_key = get_session_key(project, pane_id)
+    with sessions_lock:
+        session = active_sessions.get(session_key)
+    if session and session.pty.isalive():
+        session.write(command + "\r")
+        with _scheduled_lock:
+            if sched_id in _scheduled:
+                _scheduled[sched_id]["status"] = "done"
+    else:
+        with _scheduled_lock:
+            if sched_id in _scheduled:
+                _scheduled[sched_id]["status"] = "failed"
+
+@app.route('/api/project/<project>/schedule', methods=['POST'])
+def api_schedule_command(project):
+    data = request.get_json(silent=True) or {}
+    command = (data.get("command") or "").strip()
+    pane_id = data.get("pane_id", "main")
+    try:
+        delay = float(data.get("delay_seconds", 10))
+        if delay < 0: delay = 0
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid delay"}), 400
+    if not command:
+        return jsonify({"error": "Command required"}), 400
+
+    import time as _t
+    sched_id = _next_sched_id()
+    run_at = _t.time() + delay
+    timer = threading.Timer(delay, _run_scheduled, args=[sched_id])
+    timer.daemon = True
+    with _scheduled_lock:
+        _scheduled[sched_id] = {
+            "id": sched_id, "project": project, "pane_id": pane_id,
+            "command": command, "delay": delay, "run_at": run_at,
+            "status": "pending", "timer": timer
+        }
+    timer.start()
+    return jsonify({"id": sched_id, "status": "pending", "delay": delay, "command": command})
+
+@app.route('/api/project/<project>/schedule', methods=['GET'])
+def api_list_scheduled(project):
+    import time as _t
+    now = _t.time()
+    with _scheduled_lock:
+        items = [
+            {"id": v["id"], "command": v["command"], "delay": v["delay"],
+             "remaining": max(0.0, round(v["run_at"] - now, 1)), "status": v["status"]}
+            for v in _scheduled.values() if v["project"] == project
+        ]
+    return jsonify({"scheduled": items})
+
+@app.route('/api/project/<project>/schedule/<sched_id>', methods=['DELETE'])
+def api_cancel_scheduled(project, sched_id):
+    with _scheduled_lock:
+        entry = _scheduled.get(sched_id)
+        if not entry or entry["project"] != project:
+            return jsonify({"error": "Not found"}), 404
+        t = entry.get("timer")
+        if t: t.cancel()
+        entry["status"] = "cancelled"
+        del _scheduled[sched_id]
+    return jsonify({"success": True})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Quick Tools — grep & file stats
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/project/<project>/tools/grep', methods=['POST'])
+def api_tools_grep(project):
+    data = request.get_json(silent=True) or {}
+    query = (data.get("query") or "").strip()
+    include_pat = (data.get("include") or "*").strip() or "*"
+    case_sensitive = bool(data.get("case_sensitive", False))
+    max_results = min(int(data.get("max_results", 200)), 500)
+    if not query:
+        return jsonify({"error": "Query required"}), 400
+
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    project_path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        flags = [] if case_sensitive else ["-i"]
+        cmd = ["git", "grep", "-n", "--no-color", "-I"] + flags + ["-e", query, "--", include_pat]
+        res = subprocess.run(cmd, cwd=project_path, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        if res.returncode not in (0, 1):
+            # fallback: findstr
+            fi = "/S /N /P" + ("" if case_sensitive else " /I")
+            res2 = subprocess.run(
+                f'findstr {fi} "{query}" "{project_path}\\*"',
+                shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=cf, timeout=15)
+            raw = res2.stdout.splitlines()
+        else:
+            raw = res.stdout.splitlines()
+
+        results = []
+        for line in raw[:max_results]:
+            parts = line.split(":", 2)
+            if len(parts) >= 3:
+                results.append({"file": parts[0], "line": parts[1], "text": parts[2]})
+            elif len(parts) == 2:
+                results.append({"file": parts[0], "line": parts[1], "text": ""})
+        return jsonify({"results": results, "total": len(raw)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def _human_size(n):
+    for unit in ["B", "KB", "MB", "GB"]:
+        if n < 1024:
+            return f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} TB"
+
+@app.route('/api/project/<project>/tools/stats', methods=['POST'])
+def api_tools_stats(project):
+    data = request.get_json(silent=True) or {}
+    rel = (data.get("path") or "").strip()
+
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    base = os.path.normpath(proj["path"])
+    full = os.path.normpath(os.path.join(base, rel)) if rel else base
+    if not os.path.abspath(full).startswith(os.path.abspath(base)):
+        return jsonify({"error": "Path traversal denied"}), 403
+
+    try:
+        if os.path.isdir(full):
+            files = lines = size = 0
+            for root, dirs, fnames in os.walk(full):
+                dirs[:] = [d for d in dirs if d not in (".git","node_modules","dist","build","__pycache__")]
+                for fn in fnames:
+                    fp = os.path.join(root, fn)
+                    try:
+                        sz = os.path.getsize(fp)
+                        size += sz; files += 1
+                        if sz < 5_000_000:
+                            with open(fp, "r", encoding="utf-8", errors="ignore") as f:
+                                lines += sum(1 for _ in f)
+                    except Exception: pass
+            return jsonify({"type":"directory","path":rel or ".","files":files,"lines":lines,
+                            "size_bytes":size,"size_human":_human_size(size)})
+        else:
+            sz = os.path.getsize(full)
+            lc = wc = cc = 0
+            if sz < 10_000_000:
+                with open(full,"r",encoding="utf-8",errors="ignore") as f:
+                    content = f.read()
+                lc = content.count("\n") + (1 if content and not content.endswith("\n") else 0)
+                wc = len(content.split())
+                cc = len(content)
+            return jsonify({"type":"file","path":rel,"lines":lc,"words":wc,"chars":cc,
+                            "size_bytes":sz,"size_human":_human_size(sz)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     
