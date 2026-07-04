@@ -1525,7 +1525,7 @@
         <!-- Add new snippet -->
         <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); flex-shrink:0;">
             <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:6px;">
-                Format: <code style="background:var(--bg-main); padding:1px 5px; border-radius:3px; color:var(--text-secondary);">command ;; optional description</code>
+                Format: <code style="background:var(--bg-main); padding:1px 5px; border-radius:3px; color:var(--text-secondary);">command ;; description  bg=red  fg=#fff</code>
             </div>
             <div style="display:flex; gap:5px;">
                 <input type="text" id="snippet-add-input" placeholder="e.g.  npm run dev ;; Start dev server" autocomplete="off" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'" onkeydown="if(event.key==='Enter') addSnippet()">
@@ -6000,14 +6000,25 @@
             const raw = document.getElementById('snippet-add-input').value.trim();
             if (!raw) return;
             const snippets = loadSnippets();
-            // Parse: text before ";;" is the command, after is the label
+            // Parse: text before ";;" is the command, after is the label + optional bg=/fg=
             const sepIdx = raw.indexOf(';;');
             const command = (sepIdx !== -1 ? raw.slice(0, sepIdx) : raw).trim();
-            const label   = (sepIdx !== -1 ? raw.slice(sepIdx + 2) : '').trim();
+            let remainder = (sepIdx !== -1 ? raw.slice(sepIdx + 2) : '').trim();
             if (!command) return;
+
+            // Extract bg= and fg= tokens (color name or #hex)
+            const colorToken = /(bg|fg)=(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)/g;
+            let bg = '', fg = '';
+            remainder = remainder.replace(colorToken, (_, key, val) => {
+                if (key === 'bg') bg = val;
+                if (key === 'fg') fg = val;
+                return '';
+            }).trim();
+            const label = remainder;
+
             // Avoid exact duplicates
             if (!snippets.some(s => s.command === command)) {
-                snippets.push({ command, label });
+                snippets.push({ command, label, bg, fg });
                 saveSnippets(snippets);
             }
             document.getElementById('snippet-add-input').value = '';
@@ -6026,9 +6037,18 @@
                 const row = document.createElement('div');
                 row.className = 'snippet-item';
                 row.title = `Click to send: ${s.command}`;
+
+                // Apply bg/fg colors if set
+                if (s.bg) row.style.backgroundColor = s.bg;
+                if (s.fg) {
+                    row.style.color = s.fg;
+                    // propagate fg to command text via CSS variable override
+                    row.style.setProperty('--snippet-fg', s.fg);
+                }
+
                 row.innerHTML = `
-                    <span class="snippet-text">${s.command.replace(/</g,'&lt;')}</span>
-                    ${s.label ? `<span class="snippet-label">${s.label.replace(/</g,'&lt;')}</span>` : ''}
+                    <span class="snippet-text" style="${s.fg ? `color:${s.fg}` : ''}">${s.command.replace(/</g,'&lt;')}</span>
+                    ${s.label ? `<span class="snippet-label" style="${s.fg ? `color:${s.fg}; opacity:0.8` : ''}">${s.label.replace(/</g,'&lt;')}</span>` : ''}
                     <button class="snippet-del" onclick="deleteSnippet(${i}, event)" title="Delete snippet">✕</button>
                 `;
                 row.addEventListener('click', (e) => {
