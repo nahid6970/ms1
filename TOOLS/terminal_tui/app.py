@@ -1248,8 +1248,8 @@ def api_project_file_content(project):
     if not os.path.isfile(target):
         return jsonify({"error": "Not a file"}), 404
     size = os.path.getsize(target)
-    if size > 512 * 1024:  # 512 KB limit
-        return jsonify({"error": "File too large to preview (> 512 KB)"}), 413
+    if size > 5 * 1024 * 1024:  # 5 MB limit
+        return jsonify({"error": "File too large to preview (> 5 MB)"}), 413
     try:
         with open(target, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
