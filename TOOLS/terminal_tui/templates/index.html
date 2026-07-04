@@ -1942,6 +1942,36 @@
         </div>
     </div>
 
+    <!-- File Viewer Modal -->
+    <div id="file-viewer-modal" style="display:none; position:fixed; inset:0; z-index:1100; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+        <div style="width:780px; max-width:95vw; max-height:88vh; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:10px; box-shadow:0 20px 50px rgba(0,0,0,0.7); display:flex; flex-direction:column; overflow:hidden;">
+            <!-- Header -->
+            <div style="padding:12px 16px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:10px;">
+                <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-color); flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span id="file-viewer-filename" style="font-size:0.85rem; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'Fira Code',monospace;"></span>
+                    <span id="file-viewer-size" style="font-size:0.7rem; color:var(--text-secondary); flex-shrink:0;"></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                    <button onclick="copyFileViewerContent()" title="Copy all content" style="background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-secondary); cursor:pointer; padding:3px 8px; font-size:0.72rem; display:flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseenter="this.style.color='var(--text-primary)'; this.style.borderColor='var(--accent-color)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Copy
+                    </button>
+                    <button onclick="closeFileViewer()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; transition:all 0.15s;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">&times;</button>
+                </div>
+            </div>
+            <!-- Line numbers + content -->
+            <div style="flex:1; overflow:auto; display:flex; min-height:0; background:var(--bg-main);">
+                <div id="file-viewer-line-nums" style="padding:12px 8px 12px 12px; text-align:right; color:var(--text-muted,#475569); font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.6; user-select:none; border-right:1px solid var(--border-color); flex-shrink:0; min-width:40px;"></div>
+                <pre id="file-viewer-content" style="margin:0; padding:12px 16px; font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.6; color:var(--text-primary); white-space:pre; flex:1; overflow:visible; tab-size:4;"></pre>
+            </div>
+            <!-- Footer -->
+            <div style="padding:6px 16px; border-top:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; font-size:0.7rem; color:var(--text-secondary);">
+                <span id="file-viewer-lines-info"></span>
+                <span id="file-viewer-encoding">UTF-8</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Workspaces Manager Modal Dialog -->
     <div class="modal-overlay" id="manager-modal">
@@ -2127,6 +2157,7 @@
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
                 else if (id === 'custom-btn-modal') closeCustomButtonModal();
+                else if (id === 'file-viewer-modal') closeFileViewer();
             }
         });
 
@@ -5792,6 +5823,67 @@
             panel.style.left = '-340px';
         }
 
+        async function openFileViewer(relPath, filename) {
+            if (!activeProject) return;
+            const modal = document.getElementById('file-viewer-modal');
+            const contentEl = document.getElementById('file-viewer-content');
+            const lineNumsEl = document.getElementById('file-viewer-line-nums');
+            const filenameEl = document.getElementById('file-viewer-filename');
+            const sizeEl = document.getElementById('file-viewer-size');
+            const linesInfoEl = document.getElementById('file-viewer-lines-info');
+
+            filenameEl.innerText = filename || relPath;
+            sizeEl.innerText = '';
+            contentEl.innerText = 'Loading...';
+            lineNumsEl.innerHTML = '';
+            linesInfoEl.innerText = '';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/file-content?path=${encodeURIComponent(relPath)}`);
+                const data = await res.json();
+                if (!res.ok) {
+                    contentEl.innerText = data.error || 'Failed to load file.';
+                    contentEl.style.color = '#ef4444';
+                    return;
+                }
+                contentEl.style.color = '';
+                const lines = data.content.split('\n');
+                // Render content with basic escaping
+                contentEl.textContent = data.content;
+                // Line numbers
+                lineNumsEl.innerHTML = lines.map((_, i) =>
+                    `<div style="line-height:1.6;">${i + 1}</div>`
+                ).join('');
+                // Info
+                const kb = (data.size / 1024).toFixed(1);
+                sizeEl.innerText = `${kb} KB`;
+                linesInfoEl.innerText = `${lines.length} lines`;
+            } catch (e) {
+                contentEl.innerText = 'Error loading file.';
+                contentEl.style.color = '#ef4444';
+            }
+        }
+
+        function closeFileViewer() {
+            const modal = document.getElementById('file-viewer-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function copyFileViewerContent() {
+            const contentEl = document.getElementById('file-viewer-content');
+            if (!contentEl) return;
+            navigator.clipboard.writeText(contentEl.textContent).then(() => {
+                const btn = document.querySelector('#file-viewer-modal button[onclick="copyFileViewerContent()"]');
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '✓ Copied';
+                    btn.style.color = 'var(--green-active)';
+                    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 1500);
+                }
+            });
+        }
+
         async function loadExplorerRoot() {
             const container = document.getElementById('explorer-tree-container');
             const pathLabel = document.getElementById('explorer-path');
@@ -5854,6 +5946,20 @@
 
                 leftArea.title = item.rel_path;
                 itemRow.appendChild(leftArea);
+
+                // View button (files only)
+                if (!item.is_dir) {
+                    const viewBtn = document.createElement('button');
+                    viewBtn.title = 'View file';
+                    viewBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; opacity:0; transition:opacity 0.15s, color 0.15s; flex-shrink:0;';
+                    viewBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+                    viewBtn.onclick = (e) => { e.stopPropagation(); openFileViewer(item.rel_path, item.name); };
+                    viewBtn.onmouseenter = () => viewBtn.style.color = 'var(--accent-color)';
+                    viewBtn.onmouseleave = () => viewBtn.style.color = 'var(--text-secondary)';
+                    itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; viewBtn.style.opacity = '1'; };
+                    itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; viewBtn.style.opacity = '0'; };
+                    itemRow.appendChild(viewBtn);
+                }
 
                 let subContainer = null;
                 if (item.is_dir) {

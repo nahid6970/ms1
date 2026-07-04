@@ -1232,6 +1232,32 @@ def api_project_files(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/file-content', methods=['GET'])
+def api_project_file_content(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    rel_path = request.args.get("path", "")
+    if not rel_path:
+        return jsonify({"error": "No path provided"}), 400
+    target = os.path.normpath(os.path.join(base_path, rel_path))
+    if not os.path.abspath(target).startswith(base_path):
+        return jsonify({"error": "Unauthorized path"}), 403
+    if not os.path.isfile(target):
+        return jsonify({"error": "Not a file"}), 404
+    size = os.path.getsize(target)
+    if size > 512 * 1024:  # 512 KB limit
+        return jsonify({"error": "File too large to preview (> 512 KB)"}), 413
+    try:
+        with open(target, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+        return jsonify({"content": content, "path": rel_path, "size": size})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
     if 'image' not in request.files:
