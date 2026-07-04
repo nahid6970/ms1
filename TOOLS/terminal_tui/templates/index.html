@@ -4115,14 +4115,23 @@
             }
             
             filtered.forEach(proj => {
+                const isCurrent = proj.name === activeProject;
+                const ct = proj.cardTheme;
+
                 const opt = document.createElement('div');
-                opt.style = 'padding: 8px 14px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; transition: background-color 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
-                if (proj.name === activeProject) {
-                    opt.style.fontWeight = 'bold';
-                    opt.style.color = 'var(--green-active)';
-                }
-                opt.onmouseenter = () => opt.style.backgroundColor = 'var(--bg-card-hover)';
-                opt.onmouseleave = () => opt.style.backgroundColor = 'transparent';
+                opt.style.cssText = `
+                    padding: 7px 12px; font-size: 0.84rem; cursor: pointer;
+                    display: flex; align-items: center; gap: 7px;
+                    border-left: 3px solid ${ct ? ct.accentColor : 'transparent'};
+                    background-color: ${ct ? ct.bgColor : 'transparent'};
+                    color: ${ct ? ct.textColor : 'var(--text-primary)'};
+                    transition: filter 0.12s, background-color 0.12s;
+                    ${isCurrent ? `font-weight: 600;` : ''}
+                `;
+
+                opt.onmouseenter = () => opt.style.filter = 'brightness(1.25)';
+                opt.onmouseleave = () => opt.style.filter = '';
+
                 opt.onclick = () => {
                     selectProject(proj.name);
                     if (dropdownContent) dropdownContent.style.display = 'none';
@@ -4133,11 +4142,50 @@
                     contextProject = proj;
                     showCardContextMenu(e, proj);
                 };
-                
-                opt.innerHTML = `
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${proj.name}</span>
-                    ${proj.is_active ? '<span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; flex-shrink: 0;" title="Running session"></span>' : ''}
-                `;
+
+                // ▶ current indicator
+                const arrow = document.createElement('span');
+                arrow.style.cssText = `flex-shrink:0; font-size:0.65rem; width:10px; color:${ct ? ct.accentColor : 'var(--accent-color)'};`;
+                arrow.innerText = isCurrent ? '▶' : '';
+                opt.appendChild(arrow);
+
+                // Active session dot
+                if (proj.is_active) {
+                    const dot = document.createElement('span');
+                    // Pick dot color: use accentColor if bg is dark enough, else green
+                    const dotColor = ct ? ct.accentColor : '#10b981';
+                    dot.style.cssText = `width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0; box-shadow: 0 0 5px ${dotColor}80;`;
+                    dot.title = 'Session running';
+                    opt.appendChild(dot);
+                } else {
+                    // Placeholder to keep alignment
+                    const placeholder = document.createElement('span');
+                    placeholder.style.cssText = 'width:7px; flex-shrink:0;';
+                    opt.appendChild(placeholder);
+                }
+
+                // Name
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                nameSpan.innerText = proj.name;
+                opt.appendChild(nameSpan);
+
+                // Category badge
+                if (proj.category) {
+                    const badge = document.createElement('span');
+                    badge.style.cssText = `font-size:0.64rem; padding:1px 6px; border-radius:10px; background:${ct ? ct.accentColor + '33' : 'rgba(255,255,255,0.08)'}; color:${ct ? ct.accentColor : 'var(--text-muted)'}; white-space:nowrap; flex-shrink:0;`;
+                    badge.innerText = proj.category;
+                    opt.appendChild(badge);
+                }
+
+                // Pin icon
+                if (proj.pinned) {
+                    const pin = document.createElement('span');
+                    pin.style.cssText = 'font-size:0.7rem; flex-shrink:0;';
+                    pin.innerText = '📌';
+                    opt.appendChild(pin);
+                }
+
                 listEl.appendChild(opt);
             });
         }
