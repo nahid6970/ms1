@@ -1319,6 +1319,16 @@ def api_stream(project):
     return Response(stream_with_context(generate()), mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
+@app.route('/api/open-explorer', methods=['POST'])
+def api_open_explorer():
+    data = request.json or {}
+    path = data.get('path', '')
+    if not path or not os.path.isdir(path):
+        return jsonify({"status": "error", "message": "Invalid path"}), 400
+    import subprocess
+    subprocess.Popen(['explorer.exe', os.path.normpath(path)])
+    return jsonify({"status": "ok"})
+
 @app.route('/shutdown', methods=['POST'])
 def api_shutdown():
     import signal

@@ -1324,7 +1324,7 @@
                     </svg>
                     <span id="active-project-branch-text">main</span>
                 </div>
-                <button class="action-btn" id="active-project-path-btn" title="Show path" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="copyActiveProjectPath()">
+                <button class="action-btn" id="active-project-path-btn" title="Open in Explorer" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="openProjectInExplorer()">
                     📂
                 </button>
             </div>
@@ -4340,7 +4340,7 @@
                     const ramVal = document.getElementById('monitor-ram-value');
                     if (ramVal) ramVal.innerText = `${data.memory} MB`;
 
-                    // Update Git status indicator branch name
+                    // Update Git status indicator branch name (hidden in header — already shown in status bar)
                     const branchEl = document.getElementById('active-project-branch');
                     const branchTextEl = document.getElementById('active-project-branch-text');
                     if (branchEl && branchTextEl) {
@@ -4348,12 +4348,12 @@
                             branchTextEl.innerText = data.git.modifications > 0 
                                 ? `${data.git.branch} (*${data.git.modifications})`
                                 : data.git.branch;
-                            branchEl.style.display = 'flex';
                             branchEl.setAttribute('data-has-git', 'true');
                         } else {
-                            branchEl.style.display = 'none';
                             branchEl.setAttribute('data-has-git', 'false');
                         }
+                        // Always keep hidden — git branch is visible in the status bar
+                        branchEl.style.display = 'none';
                     }
 
                     // Update git info in bottom status bar
@@ -4847,15 +4847,13 @@
             renderFontOptions(searchInput.value);
         }
 
-        function copyActiveProjectPath() {
+        function openProjectInExplorer() {
             const pathBtn = document.getElementById('active-project-path-btn');
-            if (pathBtn && pathBtn.title) {
-                navigator.clipboard.writeText(pathBtn.title).then(() => {
-                    const originalHTML = pathBtn.innerHTML;
-                    pathBtn.innerHTML = '✔️';
-                    setTimeout(() => {
-                        pathBtn.innerHTML = originalHTML;
-                    }, 1200);
+            if (pathBtn && pathBtn.dataset.path) {
+                fetch('/api/open-explorer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: pathBtn.dataset.path })
                 });
             }
         }
@@ -5111,9 +5109,10 @@
                 const pathBtn = document.getElementById('active-project-path-btn');
                 if (pathBtn) {
                     if (currentProjDetails.path) {
-                        pathBtn.title = currentProjDetails.path;
+                        pathBtn.dataset.path = currentProjDetails.path;
                         pathBtn.style.display = 'flex';
                     } else {
+                        pathBtn.dataset.path = '';
                         pathBtn.style.display = 'none';
                     }
                 }
