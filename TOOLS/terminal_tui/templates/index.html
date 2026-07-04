@@ -1864,6 +1864,37 @@
                     </div>
                 </div>
 
+                <!-- Current badge customization -->
+                <div style="margin-bottom: 16px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Current Workspace Badge</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 0.78rem; color: var(--text-secondary); width: 80px; flex-shrink: 0;">Label text</label>
+                            <input type="text" id="settings-cur-badge-text" value="current" maxlength="20"
+                                style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.8rem; outline:none;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 0.78rem; color: var(--text-secondary); width: 80px; flex-shrink: 0;">Font size</label>
+                            <input type="number" id="settings-cur-badge-size" value="10" min="8" max="18" step="1"
+                                style="width:70px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.8rem; outline:none;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size:0.72rem; color:var(--text-muted);">px</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 0.78rem; color: var(--text-secondary); width: 80px; flex-shrink: 0;">Radius</label>
+                            <input type="number" id="settings-cur-badge-radius" value="4" min="0" max="20" step="1"
+                                style="width:70px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.8rem; outline:none;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size:0.72rem; color:var(--text-muted);">px</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-cur-badge-bold" checked style="width:16px; height:16px; cursor:pointer; accent-color:var(--accent-color); margin:0; flex-shrink:0;">
+                            <label for="settings-cur-badge-bold" style="font-size:0.78rem; color:var(--text-primary); cursor:pointer; user-select:none; margin:0;">Bold text</label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Settings</button>
@@ -4095,6 +4126,12 @@
             const dropdownContent = document.getElementById('workspace-selector-dropdown-content');
             const showCategories = localStorage.getItem('show-workspace-categories') !== 'false';
 
+            // Current badge settings
+            const badgeLabel  = localStorage.getItem('cur-badge-text')   || 'current';
+            const badgeSize   = localStorage.getItem('cur-badge-size')   || '10';
+            const badgeRadius = localStorage.getItem('cur-badge-radius') || '4';
+            const badgeBold   = localStorage.getItem('cur-badge-bold')   !== 'false';
+
             // Returns white or dark color that contrasts against hex bg
             function contrastDotColor(hex) {
                 if (!hex) return '#ffffff';
@@ -4177,10 +4214,10 @@
                 // Current indicator — badge bg = same color as the dot, text = contrast of that
                 if (isCurrent) {
                     const curBadge = document.createElement('span');
-                    const badgeBg = contrastDotColor(ct ? ct.bgColor : null); // same as dot color
-                    const badgeText = contrastDotColor(badgeBg);              // opposite of badge bg
-                    curBadge.style.cssText = `font-size:0.6rem; padding:1px 6px; border-radius:4px; background:${badgeBg}; color:${badgeText}; font-weight:700; flex-shrink:0; letter-spacing:0.3px;`;
-                    curBadge.innerText = 'current';
+                    const badgeBg = contrastDotColor(ct ? ct.bgColor : null);
+                    const badgeText = contrastDotColor(badgeBg);
+                    curBadge.style.cssText = `font-size:${badgeSize}px; padding:1px 6px; border-radius:${badgeRadius}px; background:${badgeBg}; color:${badgeText}; font-weight:${badgeBold ? '700' : '400'}; flex-shrink:0; letter-spacing:0.3px;`;
+                    curBadge.innerText = badgeLabel;
                     opt.appendChild(curBadge);
                 }
 
@@ -5381,6 +5418,12 @@
             document.getElementById('settings-dropdown-height').value = savedDropdownHeight;
 
             document.getElementById('settings-auto-scroll').checked = autoScrollEnabled;
+
+            // Current badge settings
+            document.getElementById('settings-cur-badge-text').value   = localStorage.getItem('cur-badge-text')   || 'current';
+            document.getElementById('settings-cur-badge-size').value   = localStorage.getItem('cur-badge-size')   || '10';
+            document.getElementById('settings-cur-badge-radius').value = localStorage.getItem('cur-badge-radius') || '4';
+            document.getElementById('settings-cur-badge-bold').checked = localStorage.getItem('cur-badge-bold') !== 'false';
             
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -5435,6 +5478,12 @@
             if (listEl) {
                 listEl.style.maxHeight = `${selectedDropdownHeight}px`;
             }
+
+            // Current badge settings
+            localStorage.setItem('cur-badge-text',   document.getElementById('settings-cur-badge-text').value.trim() || 'current');
+            localStorage.setItem('cur-badge-size',   document.getElementById('settings-cur-badge-size').value || '10');
+            localStorage.setItem('cur-badge-radius', document.getElementById('settings-cur-badge-radius').value || '4');
+            localStorage.setItem('cur-badge-bold',   document.getElementById('settings-cur-badge-bold').checked);
             
             applySidebarWorkspacesVisibility();
             
