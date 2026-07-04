@@ -2165,17 +2165,6 @@
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
                 else if (id === 'settings-modal') closeSettingsModal();
-            }
-            // File viewer modal click-outside (not a modal-overlay class)
-            if (e.target.id === 'file-viewer-modal') closeFileViewer();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const fv = document.getElementById('file-viewer-modal');
-                if (fv && fv.style.display !== 'none') { closeFileViewer(); return; }
-            }
-        });
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
                 else if (id === 'custom-btn-modal') closeCustomButtonModal();
