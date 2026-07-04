@@ -1790,8 +1790,10 @@ function handlePreviewMouseDown(e) {
 
     // Save scroll position
     const tableContainer = document.querySelector('.table-container');
-    const savedScrollTop = tableContainer ? tableContainer.scrollTop : 0;
     const savedScrollLeft = tableContainer ? tableContainer.scrollLeft : 0;
+    // Capture cell position before focus/reflow for fallback anchor
+    const cellRectBefore = cell.getBoundingClientRect();
+    const cellTopBefore = cellRectBefore.top;
 
     // Focus the preview (this will trigger the focus handler which changes innerHTML)
     preview.focus({ preventScroll: true });
@@ -1803,18 +1805,23 @@ function handlePreviewMouseDown(e) {
 
         // Nested requestAnimationFrame to let browser settle layout before measuring
         requestAnimationFrame(() => {
+            if (tableContainer) {
+                tableContainer.scrollLeft = savedScrollLeft;
+            }
             const caretPos = getCaretClientPosition();
-            if (caretPos && caretPos.y > 0) {
+            if (caretPos && caretPos.y > 0 && caretPos.y < window.innerHeight * 2) {
+                // Primary: put the caret back at the Y position where the user clicked
                 const drift = caretPos.y - e.clientY;
-                if (tableContainer) {
+                if (tableContainer && Math.abs(drift) > 1) {
                     tableContainer.scrollTop += drift;
-                    tableContainer.scrollLeft = savedScrollLeft;
                 }
             } else {
-                // Fallback: keep original scroll
+                // Fallback: anchor the cell's top edge to where it was before the reflow
                 if (tableContainer) {
-                    tableContainer.scrollTop = savedScrollTop;
-                    tableContainer.scrollLeft = savedScrollLeft;
+                    const cellDrift = cell.getBoundingClientRect().top - cellTopBefore;
+                    if (Math.abs(cellDrift) > 1) {
+                        tableContainer.scrollTop += cellDrift;
+                    }
                 }
             }
         });
@@ -2724,9 +2731,9 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                 return; // Keep edit mode active
             }
 
-            // Save layout coordinates before re-rendering
-            const cellRectBefore = cell.getBoundingClientRect();
-            const caretPosBefore = getCaretClientPosition();
+            // Save cell screen position before re-render (used to anchor scroll after)
+            const tableContainerBlur = document.querySelector('.table-container');
+            const cellTopBeforeBlur = cell.getBoundingClientRect().top;
 
             preview.classList.remove('editing');
             const newRawValue = extractRawText(preview);
@@ -2736,57 +2743,19 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             }
             preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
 
-            // Recalculate height for the parsed content, skipping scroll restore to allow our programmatic adjust
+            // Recalculate height for the parsed content, skipping scroll restore
             adjustCellHeightForMarkdown(cell, false);
 
-            // Calculate drift of the exact text/caret position after layout has settled on blur (double-rAF)
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    const tableContainer = document.querySelector('.table-container');
-                    if (tableContainer) {
-                        if (caretPosBefore && caretPosBefore.y > 0) {
-                            const rawOffset = getCaretCharacterOffset(preview);
-                            const visOffset = findVisibleOffsetFromRaw(newRawValue, rawOffset);
-
-                            // Temporarily place caret at mapped visible offset to measure its new position
-                            const tempSel = window.getSelection();
-                            const originalRanges = [];
-                            for (let i = 0; i < tempSel.rangeCount; i++) {
-                                originalRanges.push(tempSel.getRangeAt(i).cloneRange());
-                            }
-
-                            setCaretPosition(preview, visOffset);
-                            const caretPosAfter = getCaretClientPosition();
-
-                            // Restore selection
-                            tempSel.removeAllRanges();
-                            for (const r of originalRanges) {
-                                tempSel.addRange(r);
-                            }
-
-                            if (caretPosAfter && caretPosAfter.y > 0) {
-                                const drift = caretPosAfter.y - caretPosBefore.y;
-                                if (tableContainer) {
-                                    tableContainer.scrollTop += drift;
-                                }
-                            } else {
-                                const cellRectAfter = cell.getBoundingClientRect();
-                                const cellDrift = cellRectAfter.top - cellRectBefore.top;
-                                if (tableContainer) {
-                                    tableContainer.scrollTop += cellDrift;
-                                }
-                            }
-                        } else {
-                            // Fallback: Cell top anchor
-                            const cellRectAfter = cell.getBoundingClientRect();
-                            const cellDrift = cellRectAfter.top - cellRectBefore.top;
-                            if (tableContainer) {
-                                tableContainer.scrollTop += cellDrift;
-                            }
-                        }
+            // Scroll anchor: setTimeout(0) fires after adjustCellHeightForMarkdown and any pending rAFs,
+            // then corrects drift so the cell stays at the same screen position
+            if (tableContainerBlur) {
+                setTimeout(() => {
+                    const drift = cell.getBoundingClientRect().top - cellTopBeforeBlur;
+                    if (Math.abs(drift) > 1) {
+                        tableContainerBlur.scrollTop += drift;
                     }
-                });
-            });
+                }, 0);
+            }
 
             // Re-draw connectors
             requestAnimationFrame(() => {
