@@ -4769,27 +4769,13 @@
             const subcmds = loadSubcmds(bmCmd);
             const shortName = bmCmd.length > 28 ? bmCmd.slice(0, 28) + '…' : bmCmd;
 
-            let itemsHtml = '';
-            if (!subcmds.length) {
-                itemsHtml = `<div style="padding:8px 12px; font-size:0.74rem; color:var(--text-muted); font-style:italic;">No sub-commands yet.</div>`;
-            } else {
-                subcmds.forEach((sc, i) => {
-                    const label = sc.label || sc.cmd;
-                    const safeCmd = sc.cmd.replace(/"/g, '&quot;').replace(/</g, '&lt;');
-                    itemsHtml += `
-                        <div class="subcmd-item" onclick="runSubcmd('${sc.cmd.replace(/'/g, "\\'")}')">
-                            <span class="subcmd-text" title="${safeCmd}">${label.replace(/</g,'&lt;')}</span>
-                            <button class="subcmd-del" onclick="event.stopPropagation(); deleteSubcmd('${bmCmd.replace(/'/g,"\\'")}', ${i})" title="Delete">✕</button>
-                        </div>`;
-                });
-            }
-
+            // Build static shell first
             panel.innerHTML = `
                 <div class="subcmd-panel-header">
                     <span>⚡ Sub-commands</span>
                     <button onclick="closeSubcmdPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem;line-height:1;padding:0 2px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">✕</button>
                 </div>
-                <div id="subcmd-items-list">${itemsHtml}</div>
+                <div id="subcmd-items-list"></div>
                 <div class="subcmd-add-row">
                     <input type="text" id="subcmd-input" placeholder="command or label::command"
                         style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none;"
@@ -4801,7 +4787,72 @@
                 </div>
                 <div style="padding:0 10px 7px; font-size:0.67rem; color:var(--text-muted);">Format: <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">label::command</code> or just <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">command</code></div>
             `;
-            setTimeout(() => { const inp = document.getElementById('subcmd-input'); if(inp) inp.focus(); }, 30);
+
+            // Populate items list with DOM elements for drag support
+            const listEl = panel.querySelector('#subcmd-items-list');
+            if (!subcmds.length) {
+                listEl.innerHTML = `<div style="padding:8px 12px; font-size:0.74rem; color:var(--text-muted); font-style:italic;">No sub-commands yet.</div>`;
+            } else {
+                let scDragSrc = null;
+                subcmds.forEach((sc, i) => {
+                    const label = sc.label || sc.cmd;
+                    const item = document.createElement('div');
+                    item.className = 'subcmd-item';
+                    item.draggable = true;
+                    item.dataset.idx = i;
+                    item.style.cursor = 'default';
+
+                    item.innerHTML = `
+                        <span style="color:var(--text-muted); cursor:grab; font-size:0.85rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.45; line-height:1;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.45'">⠿</span>
+                        <span class="subcmd-text" title="${sc.cmd.replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${label.replace(/</g,'&lt;')}</span>
+                        <button class="subcmd-del" title="Delete">✕</button>
+                    `;
+
+                    // Click to run (but not on del button)
+                    item.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('subcmd-del')) return;
+                        runSubcmd(sc.cmd);
+                    });
+
+                    // Delete
+                    item.querySelector('.subcmd-del').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteSubcmd(bmCmd, i);
+                    });
+
+                    // Drag events
+                    item.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', i);
+                        item.style.opacity = '0.4';
+                        scDragSrc = i;
+                    });
+                    item.addEventListener('dragend', () => {
+                        item.style.opacity = '1';
+                        listEl.querySelectorAll('.subcmd-item').forEach(r => r.style.borderTop = '');
+                    });
+                    item.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        listEl.querySelectorAll('.subcmd-item').forEach(r => r.style.borderTop = '');
+                        if (scDragSrc !== i) item.style.borderTop = '2px solid var(--accent-color)';
+                    });
+                    item.addEventListener('dragleave', () => {
+                        item.style.borderTop = '';
+                    });
+                    item.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        item.style.borderTop = '';
+                        if (scDragSrc === null || scDragSrc === i) return;
+                        reorderSubcmd(bmCmd, scDragSrc, i);
+                    });
+
+                    listEl.appendChild(item);
+                });
+            }
+
+            setTimeout(() => { const inp = panel.querySelector('#subcmd-input'); if(inp) inp.focus(); }, 30);
         }
 
         function addSubcmd(bmCmd) {
@@ -4829,6 +4880,16 @@
         function deleteSubcmd(bmCmd, index) {
             const list = loadSubcmds(bmCmd);
             list.splice(index, 1);
+            saveSubcmds(bmCmd, list);
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel) renderSubcmdPanelContent(panel, bmCmd);
+        }
+
+        function reorderSubcmd(bmCmd, fromIdx, toIdx) {
+            const list = loadSubcmds(bmCmd);
+            if (fromIdx < 0 || toIdx < 0 || fromIdx >= list.length || toIdx >= list.length) return;
+            const [moved] = list.splice(fromIdx, 1);
+            list.splice(toIdx, 0, moved);
             saveSubcmds(bmCmd, list);
             const panel = document.getElementById('active-subcmd-panel');
             if (panel) renderSubcmdPanelContent(panel, bmCmd);
