@@ -2706,8 +2706,8 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             
             preview.innerHTML = highlightedHtml;
 
-            // Adjust height immediately for the newly highlighted syntax content, skipping scroll restore
-            adjustCellHeightForMarkdown(cell, false);
+            // Adjust height normally (with scroll restore) so cell sizing is correct
+            adjustCellHeightForMarkdown(cell);
         });
 
         preview.addEventListener('blur', () => {
@@ -2743,11 +2743,12 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             }
             preview.innerHTML = hasMarkdown ? parseMarkdown(newRawValue, getCellStyle(rowIndex, colIndex)) : applyCustomColorSyntaxesRaw(escapeHtml(newRawValue)).replace(/\n/g, '<br>');
 
-            // Recalculate height for the parsed content, skipping scroll restore
-            adjustCellHeightForMarkdown(cell, false);
+            // Recalculate height normally (with scroll restore) so cell sizing is correct
+            adjustCellHeightForMarkdown(cell);
 
-            // Scroll anchor: setTimeout(0) fires after adjustCellHeightForMarkdown and any pending rAFs,
-            // then corrects drift so the cell stays at the same screen position
+            // Scroll anchor: setTimeout(0) fires after all synchronous work and pending rAFs.
+            // adjustCellHeightForMarkdown restores scroll to the pre-call value, but the cell
+            // may have grown (tables re-expanded). We correct that drift here.
             if (tableContainerBlur) {
                 setTimeout(() => {
                     const drift = cell.getBoundingClientRect().top - cellTopBeforeBlur;
@@ -14503,8 +14504,9 @@ function adjustCellHeightForMarkdown(cell, preserveScroll = true) {
     preview.style.height = maxHeight + 'px';
     preview.style.minHeight = maxHeight + 'px';
 
-    // NEW: Also set height on the parent cell (TD) to prevent absolute overflow
-    cell.style.height = maxHeight + 'px';
+    // Set minHeight on the parent cell (TD) but NOT a hard height —
+    // a fixed height causes content to clip/overflow into adjacent cells when cell shrinks
+    cell.style.height = 'auto';
     cell.style.minHeight = maxHeight + 'px';
 
     // Restore display
