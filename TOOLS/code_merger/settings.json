@@ -70,5 +70,6 @@
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
       "name": "Extension - Tab Saver"
     }
-  ]
+  ],
+  "show_file_mode_controls": false
 }

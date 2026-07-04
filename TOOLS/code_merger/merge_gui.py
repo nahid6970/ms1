@@ -99,6 +99,7 @@ CUSTOM_IGNORED_EXTS = set()
 EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
 EXTENSION_ICON_SIZE = 16
+SHOW_FILE_MODE_CONTROLS = True
 
 try:
     from PyQt6.QtSvg import QSvgRenderer
@@ -134,7 +135,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
     return pixmap
 
 def load_settings():
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     try:
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -146,6 +147,7 @@ def load_settings():
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
+                SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
         elif os.path.exists(SESSION_PATH):
             # Fallback for older format
             with open(SESSION_PATH, 'r', encoding='utf-8') as f:
@@ -157,16 +159,18 @@ def load_settings():
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
+                SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int):
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int, show_file_mode_controls: bool = True):
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
     EXTENSION_ICON_SIZE = icon_size
+    SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
     try:
         data = {}
         if os.path.exists(SETTINGS_PATH):
@@ -178,6 +182,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
+        data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
         with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
@@ -1273,6 +1278,7 @@ class SettingsDialog(QDialog):
         self.icons = dict(EXTENSION_ICONS)
         self.font_size = SOURCE_FILES_FONT_SIZE
         self.icon_size = EXTENSION_ICON_SIZE
+        self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
 
         self._build()
 
@@ -1336,6 +1342,14 @@ class SettingsDialog(QDialog):
         h_icon_settings.addStretch()
 
         v_font.addLayout(h_icon_settings)
+
+        # File mode controls visibility
+        self.chk_show_mode = QCheckBox("Show Full / Outline controls and Minify option in PREP tab")
+        self.chk_show_mode.setChecked(self.show_file_mode_controls)
+        self.chk_show_mode.setStyleSheet(f"color: {CP_TEXT};")
+        self.chk_show_mode.setToolTip("When unchecked, the Full/Outline selector per file and the\nMinify / Set-all toolbar are hidden to save space.")
+        v_font.addWidget(self.chk_show_mode)
+
         v_font.addStretch()
 
         self.tabs.addTab(tab_font, "🅰 DISPLAY SIZES")
@@ -1654,8 +1668,9 @@ class SettingsDialog(QDialog):
         icons = self._get_icon_mappings()
         font_size = self.spin_fs.value()
         icon_size = self.spin_is.value()
+        show_mode = self.chk_show_mode.isChecked()
 
-        save_settings(ignores, icons, font_size, icon_size)
+        save_settings(ignores, icons, font_size, icon_size, show_mode)
         self.accept()
 
 
@@ -2024,6 +2039,7 @@ class PrepTab(QWidget):
         current_mode = self.file_modes.get(fp, 'Full')
         mode_combo.setCurrentText(current_mode)
         mode_combo.currentTextChanged.connect(lambda mode, f=fp: self._on_file_mode_changed(f, mode))
+        mode_combo.setVisible(SHOW_FILE_MODE_CONTROLS)
 
         # Toggle button: green dot = enabled, grey dot = disabled
         is_disabled = fp in self.disabled_files
@@ -2173,8 +2189,11 @@ class PrepTab(QWidget):
         self.search_input.textChanged.connect(self._filter_files)
         vf.addWidget(self.search_input)
 
-        # Bulk actions row
-        bulk_row = QHBoxLayout()
+        # Bulk actions row (shown/hidden via Settings → Show File Mode Controls)
+        self.file_mode_bar = QWidget()
+        self.file_mode_bar.setStyleSheet("background: transparent;")
+        bulk_row = QHBoxLayout(self.file_mode_bar)
+        bulk_row.setContentsMargins(0, 0, 0, 0)
         bulk_row.setSpacing(4)
         
         self.chk_minify = QCheckBox("Minify (save tokens)")
@@ -2213,7 +2232,8 @@ class PrepTab(QWidget):
         
         bulk_row.addWidget(btn_bulk_full)
         bulk_row.addWidget(btn_bulk_out)
-        vf.addLayout(bulk_row)
+        self.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
+        vf.addWidget(self.file_mode_bar)
 
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
@@ -2865,6 +2885,7 @@ class MainWindow(QMainWindow):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.prep_tab._refresh_file_items()
+            self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
             self._set_status(f"Settings saved. Applied new font size ({SOURCE_FILES_FONT_SIZE}pt), icon mappings, and icon size ({EXTENSION_ICON_SIZE}px).")
 
     def _set_status(self, msg: str):
