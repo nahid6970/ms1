@@ -1319,6 +1319,122 @@ def api_stream(project):
     return Response(stream_with_context(generate()), mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
+@app.route('/api/project/<project>/git/branches', methods=['GET'])
+def api_git_branches(project):
+    """List all local and remote branches"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        # Current branch
+        res_cur = subprocess.run(["git", "branch", "--show-current"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        current = res_cur.stdout.strip()
+
+        # All local branches
+        res_branches = subprocess.run(["git", "branch"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
+        branches = []
+        for line in res_branches.stdout.splitlines():
+            name = line.strip().lstrip("* ").strip()
+            if name:
+                branches.append({"name": name, "current": name == current})
+
+        return jsonify({"branches": branches, "current": current})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/branch/create', methods=['POST'])
+def api_git_branch_create(project):
+    """Create a new branch and switch to it"""
+    data = request.get_json() or {}
+    branch_name = data.get("branch_name", "").strip()
+    if not branch_name:
+        return jsonify({"error": "Branch name is required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        res = subprocess.run(["git", "checkout", "-b", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        output = (res.stdout + res.stderr).strip()
+        if res.returncode != 0:
+            return jsonify({"success": False, "error": output}), 500
+        return jsonify({"success": True, "branch": branch_name, "output": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/branch/switch', methods=['POST'])
+def api_git_branch_switch(project):
+    """Switch to an existing branch"""
+    data = request.get_json() or {}
+    branch_name = data.get("branch_name", "").strip()
+    if not branch_name:
+        return jsonify({"error": "Branch name is required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        res = subprocess.run(["git", "checkout", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
+        output = (res.stdout + res.stderr).strip()
+        if res.returncode != 0:
+            return jsonify({"success": False, "error": output}), 500
+        return jsonify({"success": True, "branch": branch_name, "output": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/branch/merge', methods=['POST'])
+def api_git_branch_merge(project):
+    """Merge a branch into the current branch"""
+    data = request.get_json() or {}
+    branch_name = data.get("branch_name", "").strip()
+    if not branch_name:
+        return jsonify({"error": "Branch name is required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        res = subprocess.run(["git", "merge", "--no-ff", branch_name, "-m", f"Merge branch '{branch_name}'"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
+        output = (res.stdout + res.stderr).strip()
+        if res.returncode != 0:
+            return jsonify({"success": False, "error": output}), 500
+        return jsonify({"success": True, "output": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/open-explorer', methods=['POST'])
 def api_open_explorer():
     data = request.json or {}

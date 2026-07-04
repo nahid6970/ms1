@@ -1962,6 +1962,40 @@
                 </div>
             </div>
 
+            <!-- Branch Manager Section -->
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; user-select: none; padding: 6px 8px; border-radius: 6px; transition: background-color 0.15s;" onclick="toggleBranchPanel()" title="Toggle branch manager" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); cursor: pointer;">⎇ Branches</label>
+                        <span id="branch-panel-arrow" style="font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.2s; display:inline-flex; align-items:center; transform: rotate(0deg);">›</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); loadBranches();" id="branch-refresh-btn" style="display:none; background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(37,99,235,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Refresh branches">🔄 Refresh</button>
+                </div>
+                <div id="branch-panel" style="display:none;">
+                    <!-- Create new branch -->
+                    <div style="display:flex; gap:6px; margin-bottom:10px;">
+                        <input type="text" id="new-branch-name" placeholder="new-branch-name" autocomplete="off"
+                            style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
+                            onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
+                            onkeydown="if(event.key==='Enter') createBranch()">
+                        <button onclick="createBranch()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; white-space:nowrap; font-weight:500; display:flex; align-items:center; gap:5px;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            New Branch
+                        </button>
+                    </div>
+                    <!-- Branch status message -->
+                    <div id="branch-status-msg" style="font-size:0.75rem; margin-bottom:8px; min-height:16px;"></div>
+                    <!-- Branch list -->
+                    <div id="branch-list" style="border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); max-height:180px; overflow-y:auto;">
+                        <div style="padding:10px 14px; color:var(--text-secondary); font-size:0.8rem;">Loading...</div>
+                    </div>
+                    <!-- Tip -->
+                    <div style="margin-top:8px; font-size:0.7rem; color:var(--text-muted); line-height:1.5; padding:8px 10px; background:var(--bg-sidebar); border-radius:6px;">
+                        💡 <b>Switch</b> moves you to that branch. <b>Merge → current</b> brings that branch's changes into your current branch (e.g. merge <i>feature</i> → <i>main</i>).
+                    </div>
+                </div>
+            </div>
+
             <!-- Action buttons -->
             <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
                 <div id="git-status-msg" style="flex:1; font-size: 0.8rem; color: var(--text-secondary);"></div>
@@ -5741,6 +5775,17 @@
             if (arrow) arrow.style.transform = 'rotate(0deg)';
             if (refreshBtn) refreshBtn.style.display = 'none';
 
+            // Reset branch panel to collapsed
+            branchPanelOpen = false;
+            const branchPanel = document.getElementById('branch-panel');
+            const branchArrow = document.getElementById('branch-panel-arrow');
+            const branchRefreshBtn = document.getElementById('branch-refresh-btn');
+            const branchStatusMsg = document.getElementById('branch-status-msg');
+            if (branchPanel) branchPanel.style.display = 'none';
+            if (branchArrow) branchArrow.style.transform = 'rotate(0deg)';
+            if (branchRefreshBtn) branchRefreshBtn.style.display = 'none';
+            if (branchStatusMsg) branchStatusMsg.innerText = '';
+
             // Set branch from status bar
             const gitBranchEl = document.getElementById('monitor-git-branch');
             if (branchEl && gitBranchEl) branchEl.innerText = gitBranchEl.innerText || 'main';
@@ -6434,6 +6479,179 @@
                     refreshPastCommits();
                     updateStatsMonitor();
                 }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        let branchPanelOpen = false;
+
+        function toggleBranchPanel() {
+            const panel = document.getElementById('branch-panel');
+            const arrow = document.getElementById('branch-panel-arrow');
+            const refreshBtn = document.getElementById('branch-refresh-btn');
+            branchPanelOpen = !branchPanelOpen;
+            if (branchPanelOpen) {
+                panel.style.display = 'block';
+                arrow.style.transform = 'rotate(90deg)';
+                refreshBtn.style.display = 'inline-block';
+                loadBranches();
+            } else {
+                panel.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+                refreshBtn.style.display = 'none';
+            }
+        }
+
+        async function loadBranches() {
+            if (!activeProject) return;
+            const listEl = document.getElementById('branch-list');
+            listEl.innerHTML = '<div style="padding:10px 14px; color:var(--text-secondary); font-size:0.8rem;">Loading...</div>';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/branches`);
+                if (!res.ok) {
+                    const d = await res.json();
+                    listEl.innerHTML = `<div style="padding:10px 14px;color:#ef4444;font-size:0.8rem;">${d.error || 'Failed to load branches'}</div>`;
+                    return;
+                }
+                const data = await res.json();
+                const branches = data.branches || [];
+                if (!branches.length) {
+                    listEl.innerHTML = '<div style="padding:10px 14px;color:var(--text-secondary);font-size:0.8rem;font-style:italic;">No branches found.</div>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                branches.forEach(b => {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:7px 12px; border-bottom:1px solid var(--border-color); transition:background-color 0.12s;';
+                    row.onmouseenter = () => row.style.backgroundColor = 'var(--bg-sidebar)';
+                    row.onmouseleave = () => row.style.backgroundColor = 'transparent';
+
+                    const isCurrent = b.current;
+                    row.innerHTML = `
+                        <span style="font-family:'Fira Code',monospace; font-size:0.78rem; flex:1; color:${isCurrent ? '#38bdf8' : 'var(--text-primary)'}; font-weight:${isCurrent ? '600' : '400'};">
+                            ${isCurrent ? '● ' : '○ '}${b.name}
+                            ${isCurrent ? '<span style="font-size:0.65rem; color:#38bdf8; margin-left:4px;">(current)</span>' : ''}
+                        </span>
+                        ${!isCurrent ? `
+                        <button onclick="switchBranch('${b.name}')" title="Switch to this branch"
+                            style="padding:3px 9px; font-size:0.72rem; background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); cursor:pointer; white-space:nowrap; transition:all 0.15s;"
+                            onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'"
+                            onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-primary)'">
+                            Switch
+                        </button>
+                        <button onclick="mergeBranch('${b.name}')" title="Merge ${b.name} into current branch"
+                            style="padding:3px 9px; font-size:0.72rem; background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); cursor:pointer; white-space:nowrap; transition:all 0.15s;"
+                            onmouseenter="this.style.borderColor='#22c55e'; this.style.color='#22c55e'"
+                            onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-primary)'">
+                            Merge → current
+                        </button>` : ''}
+                    `;
+                    listEl.appendChild(row);
+                });
+            } catch (e) {
+                listEl.innerHTML = `<div style="padding:10px 14px;color:#ef4444;font-size:0.8rem;">Error: ${e.message}</div>`;
+            }
+        }
+
+        async function createBranch() {
+            const nameInput = document.getElementById('new-branch-name');
+            const statusEl = document.getElementById('branch-status-msg');
+            const name = nameInput.value.trim();
+            if (!name || !activeProject) return;
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Creating branch "${name}"...`;
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/branch/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch_name: name })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = data.error || 'Failed to create branch.';
+                    return;
+                }
+                statusEl.style.color = '#22c55e';
+                statusEl.innerText = `✓ Created & switched to "${name}"`;
+                nameInput.value = '';
+                loadBranches();
+                updateStatsMonitor();
+                // Update the branch shown in the modal header
+                const branchEl = document.getElementById('git-modal-branch');
+                if (branchEl) branchEl.innerText = name;
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function switchBranch(name) {
+            const statusEl = document.getElementById('branch-status-msg');
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Switching to "${name}"...`;
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/branch/switch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch_name: name })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = data.error || 'Failed to switch branch.';
+                    return;
+                }
+                statusEl.style.color = '#22c55e';
+                statusEl.innerText = `✓ Switched to "${name}"`;
+                loadBranches();
+                updateStatsMonitor();
+                const branchEl = document.getElementById('git-modal-branch');
+                if (branchEl) branchEl.innerText = name;
+                // Reload changed files for new branch
+                const filesEl = document.getElementById('git-changed-files');
+                const subtitleEl = document.getElementById('git-modal-subtitle');
+                filesEl.innerHTML = '<div style="padding:10px 14px;color:var(--text-secondary);font-size:0.8rem;">Reloading...</div>';
+                const fres = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/files`);
+                if (fres.ok) {
+                    const fdata = await fres.json();
+                    const files = fdata.files || [];
+                    subtitleEl.innerText = files.length ? `${files.length} file${files.length !== 1 ? 's' : ''} changed` : 'No changes to commit';
+                    filesEl.innerHTML = files.length
+                        ? files.map(f => `<div style="display:flex;align-items:center;gap:10px;padding:6px 14px;border-bottom:1px solid var(--border-color);font-family:'Fira Code',monospace;font-size:0.78rem;"><span style="color:${f.color};font-weight:600;min-width:90px;font-size:0.7rem;text-transform:uppercase;">${f.label}</span><span style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.path}</span></div>`).join('')
+                        : '<div style="padding:10px 14px;color:var(--text-secondary);font-size:0.8rem;font-style:italic;">No changed files.</div>';
+                }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function mergeBranch(name) {
+            const statusEl = document.getElementById('branch-status-msg');
+            const currentBranch = document.getElementById('git-modal-branch')?.innerText || 'current branch';
+            if (!confirm(`Merge "${name}" into "${currentBranch}"?\n\nThis will combine all commits from "${name}" into "${currentBranch}".`)) return;
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Merging "${name}" → "${currentBranch}"...`;
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/branch/merge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch_name: name })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = `Merge failed: ${data.error || 'Unknown error'}`;
+                    return;
+                }
+                statusEl.style.color = '#22c55e';
+                statusEl.innerText = `✓ Merged "${name}" into "${currentBranch}"`;
+                loadBranches();
+                updateStatsMonitor();
+                openGitCommitModal(); // Refresh changed files
             } catch (e) {
                 statusEl.style.color = '#ef4444';
                 statusEl.innerText = 'Connection error.';

@@ -1,13 +1,15 @@
-# Task: Snippet bg/fg color support
+# Task: Branch Management UI in Git Modal
 
-User wants to be able to specify background and foreground colors for snippets using the `;;` syntax:
-- `command ;; description bg=red fg=green`
-- `command ;; description bg=#445869 fg=#998689`
-- Colors can be CSS color names or hex codes
-- Both `bg` and `fg` are optional and independent
+User wants to manage git branches directly from the git modal:
+- Create new branches
+- Switch between branches
+- Merge a branch into the current branch
+- Simple, beginner-friendly UI
 
 ## Tasks
-- [X] Parse `bg=` and `fg=` from the snippet label/description part in `addSnippet()`
-- [X] Store `bg` and `fg` on the snippet object in localStorage
-- [X] Apply colors when rendering snippet rows in `renderSnippetList()`
-- [X] Update the format hint in the popover UI to show the new syntax
+- [X] Add backend route: GET /api/project/<project>/git/branches (list all branches)
+- [X] Add backend route: POST /api/project/<project>/git/branch/create (create + switch to new branch)
+- [X] Add backend route: POST /api/project/<project>/git/branch/switch (switch to existing branch)
+- [X] Add backend route: POST /api/project/<project>/git/branch/merge (merge branch into current)
+- [X] Add "Branches" collapsible section to git modal HTML (below Past Commits)
+- [X] Add JS: loadBranches(), createBranch(), switchBranch(), mergeBranch()
