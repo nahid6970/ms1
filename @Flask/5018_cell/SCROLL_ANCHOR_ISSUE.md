@@ -212,6 +212,35 @@ adjustCellHeightForMarkdown(cell, true, desiredScrollTop);
 
 ---
 
+## Git History
+
+All attempted fixes are preserved in git history. Run the following to inspect them:
+
+```bash
+# See all relevant commits
+git log --oneline
+
+# Key commits to inspect:
+# 7e9c7bfd - 🔧 Fix extractRawText node checking logic (TR rows) + scroll anchor attempt by Google AI Studio
+# 90eb8e7b - fix scroll anchor fallback - cell-top anchor in handlePreviewMouseDown
+# 0f1d8220 - fix cell overflow/bleed - height:auto on td (this one WORKED - keep it)
+# 56ebd607 - fix occasional cell undersize - second-pass rAF in adjustCellHeightForMarkdown
+# 7b60419b - docs: RECENT.md and PROBLEMS_AND_FIXES.md updates
+
+# See full diff of what Google AI Studio changed (the most complete attempt):
+git show 7e9c7bfd
+
+# See diff between current state and before any scroll anchor attempts:
+git diff 631771a9 HEAD -- static/script.js
+
+# See all changes to script.js across recent commits:
+git log --oneline -- static/script.js
+```
+
+**Important:** Commit `0f1d8220` (height:auto on td) fixed the cell overlap/bleed bug and should be kept regardless of what approach is used for scroll anchoring.
+
+---
+
 ## Files to Modify
 
 - `static/script.js`:
