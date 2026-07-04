@@ -335,6 +335,23 @@ def generate_static_html(data, custom_syntaxes):
             color: #333;
         }
 
+        .header-font-size-display {
+            min-width: 32px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #444;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 0 3px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
         .export-info {
             margin-left: auto;
             color: #666;
@@ -2109,6 +2126,9 @@ def generate_static_html(data, custom_syntaxes):
                         `<button onclick="toggleSheetTabs(); renderTable();" title="Toggle Sheet Tabs" class="btn-header-toggle ${tabsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="5" width="14" height="9" rx="1"/><path d="M1 5h4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` +
                         `<button onclick="toggleToolbar(); renderTable();" title="Toggle Toolbar" class="btn-header-toggle ${toolbarVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2.5" rx="0.5"/><rect x="1" y="7" width="14" height="2.5" rx="0.5"/><rect x="1" y="11" width="14" height="2.5" rx="0.5"/></svg></button>` +
                         `<button onclick="toggleSubsheetBar(); renderTable();" title="Toggle Subsheet Bar" class="btn-header-toggle ${subsheetsVisible ? 'active' : ''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 3h5l1.5 2H15v8H1z"/></svg></button>` +
+                        `<button onclick="adjustFontSize(-1)" class="btn-header-toggle" title="Decrease font size" style="font-size:13px;width:20px;height:20px;">−</button>` +
+                        `<span id="fontSizeDisplay" class="header-font-size-display">100%</span>` +
+                        `<button onclick="adjustFontSize(1)" class="btn-header-toggle" title="Increase font size" style="font-size:13px;width:20px;height:20px;">+</button>` +
                         `<span class="header-toggle-group">` +
                         `<button onclick="prevSingleRow()" id="btnPrevRow" title="Previous Row" class="btn-header-toggle" ${prevDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg></button>` +
                         `<button onclick="toggleSingleRowMode()" id="btnSingleRowMode" title="Toggle Single Row View" class="btn-header-toggle ${singleRowActive ? 'active' : ''}" style="display: ${singleRowActive ? 'none' : 'inline-flex'};"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="14" height="4" rx="1"/><line x1="1" y1="3" x2="15" y2="3"/><line x1="1" y1="13" x2="15" y2="13"/></svg></button>` +
@@ -2276,6 +2296,7 @@ def generate_static_html(data, custom_syntaxes):
 
                 tableBody.appendChild(tr);
             });
+            applyFontSizeScale();
         }
 
         function stripMarkdown(text, preserveLinks = false) {
@@ -4381,10 +4402,7 @@ def generate_static_html(data, custom_syntaxes):
                 }
             }
             
-            // Apply saved font size scale
-            setTimeout(() => {
-                applyFontSizeScale();
-            }, 100);
+            // Font size scale is applied via renderTable after data loads
         };
     </script>
 </head>
@@ -4437,11 +4455,7 @@ def generate_static_html(data, custom_syntaxes):
                 </button>
             </div>
 
-            <div class="font-size-control">
-                <button onclick="adjustFontSize(-1)" class="btn-font-size" title="Decrease font size">−</button>
-                <span id="fontSizeDisplay" class="font-size-display">100%</span>
-                <button onclick="adjustFontSize(1)" class="btn-font-size" title="Increase font size">+</button>
-            </div>
+
 
             <button onclick="openSettings()" class="btn-icon-toggle" title="Settings" style="margin-left: 5px;">
                 <span>⚙️</span>
