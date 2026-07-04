@@ -10,3 +10,14 @@
 - Whenever you modify any code or files in the repository, you MUST provide a concise, one-line git commit message at the end of your response, just before calling the notification tool.
 - This commit message should be clearly labeled (e.g., "Commit message: <message>").
 - Do not provide a commit message if no files were modified or for general inquiries.
+
+# Todo.md
+- whenever you are going to modify any code, add any feature etc first make a todo.md file in the project root folder and initially in the md mention what u are asked to do and add the task list like this
+- [] Task 1
+- [] Task 2
+- [] Task 3
+and when you finish any task immediatly add a x inside like
+- [X] Task 1
+- [X] Task 2
+- [] Task 3
+this is bcz when the ai agent fails to complete any task i can continue do it with other agent based on this to do list
