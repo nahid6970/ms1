@@ -1,8 +1,9 @@
-# Task: Add branch delete functionality
+# Task: Bookmark subcommands button
 
-## What was asked
-Add a delete button to each branch row in the branch manager (git modal) so user can delete branches.
+User wants a button on each bookmark row (before the split terminal button) that opens a small panel showing sub-commands for that bookmark. Sub-commands can be added and clicked to run.
 
 ## Tasks
-- [X] Add backend route: DELETE /api/project/<project>/git/branch/delete
-- [X] Add delete button to branch list rows in loadBranches() JS
+- [X] Add CSS for subcommand panel/popover
+- [X] Add subcommand button to each bookmark row in renderBookmarkDropdown()
+- [X] Add JS: openSubcmdPanel(), closeSubcmdPanel(), addSubcmd(), deleteSubcmd(), runSubcmd()
+- [X] Store subcommands in localStorage keyed by bookmark command

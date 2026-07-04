@@ -1244,6 +1244,22 @@
         .snippet-edit  { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; line-height: 1; }
         .snippet-edit:hover { color: var(--accent-color); background: rgba(var(--accent-rgb, 99,102,241),0.12); }
 
+        /* Bookmark subcommand panel */
+        .subcmd-panel {
+            position: absolute; z-index: 2000;
+            background: var(--bg-sidebar); border: 1px solid var(--border-color);
+            border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+            width: 280px; padding: 0; overflow: hidden;
+        }
+        .subcmd-panel-header { padding: 8px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; }
+        .subcmd-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; cursor: pointer; }
+        .subcmd-item:last-child { border-bottom: none; }
+        .subcmd-item:hover { background: var(--bg-card-hover); }
+        .subcmd-text { font-family: 'Fira Code', monospace; font-size: 0.74rem; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .subcmd-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; line-height: 1; }
+        .subcmd-del:hover { color: #f87171; }
+        .subcmd-add-row { display: flex; gap: 5px; padding: 8px 10px; border-top: 1px solid var(--border-color); }
+
         /* Status bar icon buttons */
         .sbicon-btn {
             background: none; border: 1px solid var(--border-color); border-radius: 4px;
@@ -4503,6 +4519,12 @@
                     row.innerHTML = `
                         <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <button type="button" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdPanel(this, '${bm.command.replace(/'/g, "\\'")}')" title="Sub-commands">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                                </svg>
+                            </button>
                             <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bm.command.replace(/'/g, "\\'")}')" title="Run in new split terminal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color);">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -4629,6 +4651,159 @@
                 parent.className = 'split-tabs';
             }
             splitTerminal('tabs', cmd);
+        }
+
+        // ── Bookmark Sub-commands ─────────────────────────────────────────────
+
+        const SUBCMD_KEY = 'bm-subcmds-v1';
+
+        function loadSubcmds(bmCmd) {
+            try { return JSON.parse(localStorage.getItem(SUBCMD_KEY) || '{}')[bmCmd] || []; }
+            catch(e) { return []; }
+        }
+
+        function saveSubcmds(bmCmd, list) {
+            try {
+                const all = JSON.parse(localStorage.getItem(SUBCMD_KEY) || '{}');
+                all[bmCmd] = list;
+                localStorage.setItem(SUBCMD_KEY, JSON.stringify(all));
+            } catch(e) {}
+        }
+
+        let _activeSubcmdPanel = null;
+        let _activeSubcmdCmd = null;
+
+        function toggleSubcmdPanel(btn, bmCmd) {
+            // If same panel is open, close it
+            if (_activeSubcmdPanel && _activeSubcmdCmd === bmCmd) {
+                closeSubcmdPanel();
+                return;
+            }
+            closeSubcmdPanel();
+            _activeSubcmdCmd = bmCmd;
+
+            const panel = document.createElement('div');
+            panel.className = 'subcmd-panel';
+            panel.id = 'active-subcmd-panel';
+            panel.onclick = e => e.stopPropagation();
+
+            renderSubcmdPanelContent(panel, bmCmd);
+
+            // Position below/near the button
+            document.body.appendChild(panel);
+            _activeSubcmdPanel = panel;
+
+            const rect = btn.getBoundingClientRect();
+            const panelW = 280;
+            let left = rect.right - panelW;
+            if (left < 4) left = 4;
+            panel.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+            panel.style.left = left + 'px';
+
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', _subcmdOutside);
+            }, 10);
+        }
+
+        function _subcmdOutside(e) {
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel && !panel.contains(e.target)) {
+                closeSubcmdPanel();
+            }
+        }
+
+        function closeSubcmdPanel() {
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel) panel.remove();
+            _activeSubcmdPanel = null;
+            _activeSubcmdCmd = null;
+            document.removeEventListener('click', _subcmdOutside);
+        }
+
+        function renderSubcmdPanelContent(panel, bmCmd) {
+            const subcmds = loadSubcmds(bmCmd);
+            const shortName = bmCmd.length > 28 ? bmCmd.slice(0, 28) + '…' : bmCmd;
+
+            let itemsHtml = '';
+            if (!subcmds.length) {
+                itemsHtml = `<div style="padding:8px 12px; font-size:0.74rem; color:var(--text-muted); font-style:italic;">No sub-commands yet.</div>`;
+            } else {
+                subcmds.forEach((sc, i) => {
+                    const label = sc.label || sc.cmd;
+                    const safeCmd = sc.cmd.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                    itemsHtml += `
+                        <div class="subcmd-item" onclick="runSubcmd('${sc.cmd.replace(/'/g, "\\'")}')">
+                            <span class="subcmd-text" title="${safeCmd}">${label.replace(/</g,'&lt;')}</span>
+                            <button class="subcmd-del" onclick="event.stopPropagation(); deleteSubcmd('${bmCmd.replace(/'/g,"\\'")}', ${i})" title="Delete">✕</button>
+                        </div>`;
+                });
+            }
+
+            panel.innerHTML = `
+                <div class="subcmd-panel-header">
+                    <span>⚡ Sub-commands</span>
+                    <button onclick="closeSubcmdPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem;line-height:1;padding:0 2px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">✕</button>
+                </div>
+                <div id="subcmd-items-list">${itemsHtml}</div>
+                <div class="subcmd-add-row">
+                    <input type="text" id="subcmd-input" placeholder="command or label::command"
+                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none;"
+                        onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
+                        onkeydown="if(event.key==='Enter'){event.stopPropagation();addSubcmd('${bmCmd.replace(/'/g,"\\'")}')}"
+                        onclick="event.stopPropagation()">
+                    <button onclick="event.stopPropagation(); addSubcmd('${bmCmd.replace(/'/g,"\\'")}' )"
+                        style="padding:4px 9px; background:var(--accent-color); border:none; border-radius:5px; color:white; font-size:0.72rem; cursor:pointer; white-space:nowrap; font-weight:500;">Add</button>
+                </div>
+                <div style="padding:0 10px 7px; font-size:0.67rem; color:var(--text-muted);">Format: <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">label::command</code> or just <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">command</code></div>
+            `;
+            setTimeout(() => { const inp = document.getElementById('subcmd-input'); if(inp) inp.focus(); }, 30);
+        }
+
+        function addSubcmd(bmCmd) {
+            const input = document.getElementById('subcmd-input');
+            if (!input) return;
+            const raw = input.value.trim();
+            if (!raw) return;
+            let label = '', cmd = '';
+            const sepIdx = raw.indexOf('::');
+            if (sepIdx !== -1) {
+                label = raw.slice(0, sepIdx).trim();
+                cmd   = raw.slice(sepIdx + 2).trim();
+            } else {
+                cmd = raw; label = '';
+            }
+            if (!cmd) return;
+            const list = loadSubcmds(bmCmd);
+            list.push({ cmd, label });
+            saveSubcmds(bmCmd, list);
+            // Re-render panel in place
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel) renderSubcmdPanelContent(panel, bmCmd);
+        }
+
+        function deleteSubcmd(bmCmd, index) {
+            const list = loadSubcmds(bmCmd);
+            list.splice(index, 1);
+            saveSubcmds(bmCmd, list);
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel) renderSubcmdPanelContent(panel, bmCmd);
+        }
+
+        function runSubcmd(cmd) {
+            closeSubcmdPanel();
+            if (!activeProject) { alert('Select a workspace first.'); return; }
+            if (socket && socket.connected) {
+                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
+                const paneId = activePane ? activePane.paneId : 'main';
+                socket.emit('pty-input', { project: activeProject, paneId, data: cmd + '\r' });
+            } else {
+                fetch(`/input/${activeProject}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: cmd + '\r' })
+                });
+            }
         }
 
         async function addCurrentCommandAsBookmark() {
