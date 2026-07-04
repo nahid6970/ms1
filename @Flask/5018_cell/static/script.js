@@ -14513,6 +14513,23 @@ function adjustCellHeightForMarkdown(cell, preserveScroll = true) {
     input.style.display = originalInputDisplay;
     preview.style.display = originalPreviewDisplay;
 
+    // Second-pass: after next paint, re-check scrollHeight in case fonts/content
+    // rendered taller than the initial measurement (prevents occasional undersize)
+    requestAnimationFrame(() => {
+        const prevDisplay = preview.style.display;
+        preview.style.display = 'block';
+        void preview.offsetHeight;
+        const actualHeight = Math.ceil(preview.scrollHeight) + 20;
+        preview.style.display = prevDisplay;
+        if (actualHeight > maxHeight) {
+            if (input.tagName === 'TEXTAREA') input.style.height = actualHeight + 'px';
+            input.style.minHeight = actualHeight + 'px';
+            preview.style.height = actualHeight + 'px';
+            preview.style.minHeight = actualHeight + 'px';
+            cell.style.minHeight = actualHeight + 'px';
+        }
+    });
+
     // Restore container scroll
     if (tableContainer && preserveScroll) {
         tableContainer.scrollTop = savedScrollTop;
