@@ -1,15 +1,8 @@
-# Task: Branch Management UI in Git Modal
+# Task: Add branch delete functionality
 
-User wants to manage git branches directly from the git modal:
-- Create new branches
-- Switch between branches
-- Merge a branch into the current branch
-- Simple, beginner-friendly UI
+## What was asked
+Add a delete button to each branch row in the branch manager (git modal) so user can delete branches.
 
 ## Tasks
-- [X] Add backend route: GET /api/project/<project>/git/branches (list all branches)
-- [X] Add backend route: POST /api/project/<project>/git/branch/create (create + switch to new branch)
-- [X] Add backend route: POST /api/project/<project>/git/branch/switch (switch to existing branch)
-- [X] Add backend route: POST /api/project/<project>/git/branch/merge (merge branch into current)
-- [X] Add "Branches" collapsible section to git modal HTML (below Past Commits)
-- [X] Add JS: loadBranches(), createBranch(), switchBranch(), mergeBranch()
+- [X] Add backend route: DELETE /api/project/<project>/git/branch/delete
+- [X] Add delete button to branch list rows in loadBranches() JS

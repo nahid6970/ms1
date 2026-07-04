@@ -6546,6 +6546,12 @@
                             onmouseenter="this.style.borderColor='#22c55e'; this.style.color='#22c55e'"
                             onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-primary)'">
                             Merge → current
+                        </button>
+                        <button onclick="deleteBranch('${b.name}')" title="Delete branch ${b.name}"
+                            style="padding:3px 7px; font-size:0.72rem; background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-muted); cursor:pointer; white-space:nowrap; transition:all 0.15s;"
+                            onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#ef4444'"
+                            onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
+                            🗑
                         </button>` : ''}
                     `;
                     listEl.appendChild(row);
@@ -6652,6 +6658,42 @@
                 loadBranches();
                 updateStatsMonitor();
                 openGitCommitModal(); // Refresh changed files
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function deleteBranch(name, force = false) {
+            const statusEl = document.getElementById('branch-status-msg');
+            if (!force && !confirm(`Delete branch "${name}"?\n\nThis only deletes it if it has already been merged. Use force delete if you want to delete it regardless.`)) return;
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Deleting "${name}"...`;
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/branch/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ branch_name: name, force })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    if (data.not_merged) {
+                        // Offer force delete
+                        if (confirm(`"${name}" has unmerged commits.\n\nForce delete it anyway? This will permanently lose those commits.`)) {
+                            deleteBranch(name, true);
+                        } else {
+                            statusEl.style.color = 'var(--text-secondary)';
+                            statusEl.innerText = 'Delete cancelled.';
+                        }
+                        return;
+                    }
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = data.error || 'Failed to delete branch.';
+                    return;
+                }
+                statusEl.style.color = '#22c55e';
+                statusEl.innerText = `✓ Deleted "${name}"`;
+                loadBranches();
             } catch (e) {
                 statusEl.style.color = '#ef4444';
                 statusEl.innerText = 'Connection error.';

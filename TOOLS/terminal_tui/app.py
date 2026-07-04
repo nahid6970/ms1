@@ -1435,6 +1435,39 @@ def api_git_branch_merge(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/branch/delete', methods=['POST'])
+def api_git_branch_delete(project):
+    """Delete a local branch (must not be the current branch)"""
+    data = request.get_json() or {}
+    branch_name = data.get("branch_name", "").strip()
+    force = data.get("force", False)
+    if not branch_name:
+        return jsonify({"error": "Branch name is required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+
+        flag = "-D" if force else "-d"
+        res = subprocess.run(["git", "branch", flag, branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+        output = (res.stdout + res.stderr).strip()
+        if res.returncode != 0:
+            # If it failed because branch not fully merged, return a specific signal
+            if "not fully merged" in output:
+                return jsonify({"success": False, "error": output, "not_merged": True}), 409
+            return jsonify({"success": False, "error": output}), 500
+        return jsonify({"success": True, "output": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/open-explorer', methods=['POST'])
 def api_open_explorer():
     data = request.json or {}
