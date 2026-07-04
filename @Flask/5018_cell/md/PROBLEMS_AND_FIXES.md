@@ -1,5 +1,38 @@
 # Problems & Fixes Log
 
+## [2026-07-04 12:00] - Cell Overlap/Bleed When Entering Edit Mode
+
+**Problem:** When clicking a cell to enter edit mode in Visual Mode, the cell would occasionally (1-in-10) shrink to a size smaller than its content, causing the `.markdown-preview` div (which is `position: absolute`) to overflow and visually bleed into adjacent rows — making it look like two cells were merged.
+
+**Root Cause:** `adjustCellHeightForMarkdown` was setting `cell.style.height = maxHeight + 'px'` (hard fixed pixel height) on the `<td>`. Since `.markdown-preview` is `position: absolute`, the `td` cannot auto-grow to contain it. When the measured `maxHeight` was smaller than the actual rendered content (due to font/layout not fully settled at measurement time), the cell was undersized and content overflowed. Additionally, the initial `scrollHeight` measurement was sometimes taken before fonts had fully rendered, giving an underestimate.
+
+**Solution:**
+1. Changed `cell.style.height = maxHeight + 'px'` → `cell.style.height = 'auto'` so the td never gets a restrictive fixed height. Only `minHeight` is set as a floor.
+2. Added a second-pass `requestAnimationFrame` inside `adjustCellHeightForMarkdown` that re-measures `preview.scrollHeight` after the next paint. If the actual height is larger than initial estimate, it expands all heights to match.
+
+**Files Modified:** `static/script.js` (`adjustCellHeightForMarkdown`)
+
+---
+
+## [2026-07-04 11:30] - Edit Mode Scroll Jump (Content Shifts on Click-to-Edit)
+
+**Problem:** In Visual Mode, clicking a cell containing tables to enter edit mode caused a large scroll jump. The table collapsed from rendered HTML to raw `|pipe|` syntax, shrinking the cell, and the content the user clicked appeared far from the cursor after the transition. Same issue on exit (blur) when tables re-expanded.
+
+**Root Cause:** Three competing scroll restores were overwriting each other:
+1. `adjustCellHeightForMarkdown` saves `scrollTop` before measuring, restores it after (synchronously)
+2. `handlePreviewMouseDown` saves `scrollTop` before `preview.focus()`, restores it in a `requestAnimationFrame`
+3. Any correction applied in the focus handler was overwritten by #2's rAF
+
+**Solution:**
+- Removed `savedScrollTop` restore from `handlePreviewMouseDown`'s rAF. Instead, after `setCaretPosition()` places the cursor in the edit-mode text, `getCaretClientPosition()` measures where the caret actually is on screen. The drift from `e.clientY` (where user clicked) is computed and `scrollTop` is corrected. Fallback uses cell-top anchor if caret position is unavailable.
+- Blur handler captures `cell.getBoundingClientRect().top` before re-render, then applies drift correction via `setTimeout(0)` which fires after all synchronous work and pending rAFs complete.
+- Added `getCaretClientPosition()` helper (measures caret screen position via Range API / zero-width space insertion fallback).
+- Added `preserveScroll` parameter to `adjustCellHeightForMarkdown` (default `true`) for future use.
+
+**Files Modified:** `static/script.js` (`handlePreviewMouseDown`, blur handler, `adjustCellHeightForMarkdown`, new helpers)
+
+---
+
 ## [2026-06-13 15:11] - Ctrl+Alt Multi-Cursor Edits Not Persisting in Visual Mode
 
 **Problem:** Typing with `Ctrl+Alt+Up/Down` multi-cursor in Visual Mode appeared to work visually but all changes were lost after page refresh.

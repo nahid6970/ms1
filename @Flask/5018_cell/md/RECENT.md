@@ -1,5 +1,51 @@
 # Recent Development Log
 
+## [2026-07-04 12:00] - Edit Mode Scroll Anchor & Cell Overlap Fix
+
+**Session Duration:** 1.5 hours
+
+**What We Accomplished:**
+
+### 🎯 Zoom Controls Moved to Header Row
+- Removed `<div class="font-size-control">` from the toolbar in `index.html` and `export_static.py`
+- Added `−`, `%`, `+` zoom buttons directly into the `header-toggle-container` span in `renderTable()` (same row as toolbar toggle buttons)
+- Added `.header-font-size-display` CSS class for compact display
+- Fixed `applyFontSizeScale()` timing — now called at end of `renderTable()` instead of unreliable 100ms timeout
+
+### ✅ Cell Overlap/Bleed Fix (Critical)
+- **Root cause:** `adjustCellHeightForMarkdown` was setting `cell.style.height = maxHeight + 'px'` (hard fixed height) on the `<td>`. Since `.markdown-preview` is `position: absolute`, the td doesn't auto-grow — so when the cell shrank in edit mode, the preview overflowed into adjacent rows visually.
+- **Fix:** Changed `cell.style.height = maxHeight + 'px'` → `cell.style.height = 'auto'` so the td always sizes naturally, with `minHeight` as the floor.
+- **Second-pass fix:** Added a `requestAnimationFrame` second-pass measurement inside `adjustCellHeightForMarkdown` — if fonts/content rendered taller than the initial `scrollHeight` measurement, the cell expands to fit. This fixed the 1-in-10 occasional undersize.
+
+### 🎯 Edit Mode Scroll Anchor (Enter/Exit without jumping)
+- **Problem:** Clicking a cell to edit caused tables to collapse (raw syntax shorter than rendered HTML), shifting all content. Clicking out caused tables to re-expand, shifting content again.
+- **Root cause investigation:** Three things were fighting each other:
+  1. `adjustCellHeightForMarkdown` saves/restores `scrollTop` synchronously
+  2. `handlePreviewMouseDown` saves/restores `scrollTop` in a `requestAnimationFrame`
+  3. Any correction applied in focus/blur was overwritten by one of the above
+- **Solution:**
+  - `handlePreviewMouseDown`: removed `savedScrollTop` restore from rAF. Added `getCaretClientPosition()` after `setCaretPosition()` — measures where the caret actually is on screen, computes drift from `e.clientY` (where user clicked), applies correction. Fallback uses cell-top anchor.
+  - Blur handler: captures `cell.getBoundingClientRect().top` before re-render, applies drift correction via `setTimeout(0)` after `adjustCellHeightForMarkdown` completes.
+  - Added `getCaretClientPosition()` helper function (measures actual caret screen position via Range API)
+  - Added `findVisibleOffsetFromRaw()` helper for offset mapping
+  - Added `TR` node handling in `extractRawText`, `getCaretCharacterOffset`, `setCaretPosition`, `extractRawTextBeforeCaret`
+
+**Files Modified:**
+- `static/script.js` — `adjustCellHeightForMarkdown` (height:auto fix + second-pass rAF), `handlePreviewMouseDown` (scroll anchor), focus/blur handlers (scroll anchor), new helper functions
+- `static/style.css` — `.header-font-size-display` CSS
+- `templates/index.html` — removed font-size-control div from toolbar
+- `export_static.py` — mirrored all above changes
+- `EDIT_MODE_SCROLL_ANCHOR.md` — feature spec documenting the problem and solution
+
+**Current Status:**
+- ✅ Zoom controls now live in the header row alongside toggle buttons
+- ✅ Cell overlap/bleed on edit mode enter: FIXED (10/10 tests pass)
+- ✅ Scroll anchor on edit mode enter: working (caret stays near click position)
+- ✅ Scroll anchor on edit mode exit: working (cell-top anchor via setTimeout)
+- ✅ TR node handling in caret/text extraction functions
+
+---
+
 ## [2026-06-27 20:05] - Customizable F1 Separators & Drag-Drop Safety
 
 **Session Duration:** 0.5 hours

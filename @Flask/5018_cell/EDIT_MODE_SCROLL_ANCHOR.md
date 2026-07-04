@@ -1,5 +1,7 @@
 # Feature: Edit Mode Scroll Anchor (No Jump on Click-to-Edit)
 
+## Status: ✅ RESOLVED (2026-07-04)
+
 ## Problem Description
 
 In **Visual Mode** (markdown preview enabled), cells can contain rich content — rendered tables, lists, headings, etc. The cell height in preview mode is determined by the rendered HTML.
@@ -155,3 +157,27 @@ This still needs `handlePreviewMouseDown` to NOT restore scrollTop, and `adjustC
   - `handlePreviewMouseDown` (~line 1726) — remove/replace scroll restoration
   - `adjustCellHeightForMarkdown` (~line 14391) — make scroll restoration optional
   - `applyMarkdownFormatting` focus/blur handlers (~line 2660+) — add scroll correction
+
+
+## Final Solution
+
+### Cell Overlap Fix (prerequisite)
+Changed `cell.style.height = maxHeight + 'px'` → `cell.style.height = 'auto'` in `adjustCellHeightForMarkdown`. The `<td>` was getting a hard fixed height which caused the absolutely-positioned `.markdown-preview` to overflow into adjacent rows when undersized. Added a second-pass `requestAnimationFrame` to catch underestimated `scrollHeight` from fonts not yet rendered.
+
+### Scroll Anchor on Focus (enter edit mode)
+In `handlePreviewMouseDown`:
+- Capture `cell.getBoundingClientRect().top` before `preview.focus()` as fallback anchor
+- Remove `savedScrollTop` restore from the rAF (this was the main blocker in all previous attempts)
+- After `setCaretPosition()` places the caret, use `getCaretClientPosition()` (Range API) to measure where the caret actually is on screen
+- `drift = caretPos.y - e.clientY` → `scrollTop += drift` puts the caret back at the click position
+- Fallback: if caret position unavailable, use `cell.top` drift instead
+
+### Scroll Anchor on Blur (exit edit mode)
+In the blur event handler:
+- Capture `cell.getBoundingClientRect().top` before `preview.innerHTML` re-render
+- Let `adjustCellHeightForMarkdown(cell)` run normally (correct sizing + scroll restore)
+- `setTimeout(0)` fires after all synchronous work and pending rAFs — measures `cell.top` drift and corrects `scrollTop`
+
+### Why `setTimeout(0)` not `requestAnimationFrame`
+`setTimeout(0)` is scheduled after all pending `requestAnimationFrame` callbacks in the event loop. This ensures it runs after `handlePreviewMouseDown`'s rAF (which sets caret position) and after `adjustCellHeightForMarkdown`'s synchronous scroll restore.
+
