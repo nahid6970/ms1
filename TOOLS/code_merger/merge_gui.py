@@ -1926,12 +1926,6 @@ class PrepTab(QWidget):
         for fp in enabled + disabled:
             self._add_file_item(fp)
 
-    def _reorder_file_list(self):
-        """Move disabled items to the bottom of the list, rebuilding cleanly."""
-        # Just delegate to _refresh_file_items which already does enabled-first ordering
-        self._refresh_file_items()
-        self._update_file_item_texts()
-
     def _update_root(self):
         if self.root_cb and self.files:
             common = os.path.commonpath(self.files)
@@ -2098,12 +2092,21 @@ class PrepTab(QWidget):
         is_currently_disabled = fp in self.disabled_files
         if is_currently_disabled:
             self.disabled_files.discard(fp)
+            self._apply_toggle_style(btn, True)
+            try:
+                sz_kb = os.path.getsize(fp) / 1024
+                color = CP_RED if sz_kb > 500 else CP_YELLOW if sz_kb > 250 else CP_TEXT
+            except Exception:
+                color = CP_TEXT
+            lbl.setStyleSheet(f"color: {color}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
+            mode_combo.setEnabled(True)
             self.status_cb(f"Enabled: {os.path.basename(fp)}")
         else:
             self.disabled_files.add(fp)
+            self._apply_toggle_style(btn, False)
+            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
+            mode_combo.setEnabled(False)
             self.status_cb(f"Disabled: {os.path.basename(fp)}")
-        # Rebuild the list (enabled first, disabled last) with fresh widgets
-        self._reorder_file_list()
         self._save_session()
 
     def _file_item_context_menu(self, fp: str, item: QListWidgetItem, pos, widget: QWidget):
