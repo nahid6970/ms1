@@ -146,6 +146,10 @@
             border-radius: 0px !important;
         }
 
+        #explorer-toggle-btn { color: #f59e0b !important; }
+        #explorer-toggle-btn:hover { background-color: rgba(245,158,11,0.12) !important; border-color: #f59e0b !important; }
+        #explorer-toggle-btn.active { background-color: rgba(245,158,11,0.18) !important; border-color: #f59e0b !important; box-shadow: 0 0 8px rgba(245,158,11,0.3); }
+
         #file-viewer-modal div::-webkit-scrollbar { width: 6px; height: 6px; }
         #file-viewer-modal div::-webkit-scrollbar-track { background: transparent; }
         #file-viewer-modal div::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -1307,7 +1311,7 @@
         <!-- Terminal View (Hidden until project selected) -->
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
-                <button class="action-btn" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                <button class="action-btn" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f59e0b; transition: all 0.2s;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>
@@ -5808,6 +5812,7 @@
         function toggleExplorer(event) {
             if (event) event.stopPropagation();
             const panel = document.getElementById('explorer-panel');
+            const btn = document.getElementById('explorer-toggle-btn');
             if (!panel) return;
             
             const isOpen = panel.classList.contains('open');
@@ -5816,7 +5821,7 @@
             } else {
                 panel.classList.add('open');
                 panel.style.left = '0';
-                
+                if (btn) btn.classList.add('active');
                 if (activeProject) {
                     loadExplorerRoot();
                 }
@@ -5825,9 +5830,11 @@
         
         function closeExplorer() {
             const panel = document.getElementById('explorer-panel');
+            const btn = document.getElementById('explorer-toggle-btn');
             if (!panel) return;
             panel.classList.remove('open');
             panel.style.left = '-340px';
+            if (btn) btn.classList.remove('active');
         }
 
         async function openFileViewer(relPath, filename) {
