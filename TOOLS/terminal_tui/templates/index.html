@@ -1327,6 +1327,10 @@
                     </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
+                    <button id="autoscroll-toggle-btn" onclick="toggleAutoScroll()" title="Toggle auto-scroll to bottom" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 1px 7px; font-size: 0.68rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                        <span id="autoscroll-icon">⇓</span>
+                        <span id="autoscroll-label">Scroll</span>
+                    </button>
                     <span style="display: flex; align-items: center; gap: 4px;">
                         <span style="color: var(--text-secondary);">CPU:</span>
                         <span id="monitor-cpu-value" style="color: var(--text-primary); font-weight: 600;">0.0%</span>
@@ -1644,6 +1648,10 @@
                         <input type="checkbox" id="settings-use-real-dir-prompt" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-use-real-dir-prompt" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use folder's actual name in terminal prompt</label>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-auto-scroll" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-auto-scroll" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Auto-scroll to bottom on new output</label>
+                    </div>
                 </div>
 
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
@@ -1808,6 +1816,7 @@
     <script>
         let projects = [];
         let activeProject = null;
+        let autoScrollEnabled = localStorage.getItem('auto-scroll-enabled') !== 'false'; // default ON
         let contextProject = null; // Holds the project currently right-clicked
         let editingBookmarkProj = null;
         let editingBookmarkIndex = null;
@@ -2719,7 +2728,7 @@
                     const buffer = paneTerm.buffer.active;
                     const isAtBottom = (buffer.viewportY >= buffer.baseY - 1);
                     paneTerm.write(msg.data, () => {
-                        if (isAtBottom) {
+                        if (isAtBottom || autoScrollEnabled) {
                             paneTerm.scrollToBottom();
                         }
                     });
@@ -4719,6 +4728,32 @@
             menu.appendChild(deleteDot);
         }
 
+        function updateAutoScrollBtn() {
+            const btn = document.getElementById('autoscroll-toggle-btn');
+            const icon = document.getElementById('autoscroll-icon');
+            const label = document.getElementById('autoscroll-label');
+            if (!btn) return;
+            if (autoScrollEnabled) {
+                btn.style.borderColor = '#22c55e';
+                btn.style.color = '#22c55e';
+                if (icon) icon.textContent = '⇓';
+                if (label) label.textContent = 'Scroll';
+                btn.title = 'Auto-scroll ON — click to disable';
+            } else {
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.color = 'var(--text-secondary)';
+                if (icon) icon.textContent = '⇓';
+                if (label) label.textContent = 'Scroll';
+                btn.title = 'Auto-scroll OFF — click to enable';
+            }
+        }
+
+        function toggleAutoScroll() {
+            autoScrollEnabled = !autoScrollEnabled;
+            localStorage.setItem('auto-scroll-enabled', autoScrollEnabled);
+            updateAutoScrollBtn();
+        }
+
         function openSettingsModal() {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
@@ -4748,6 +4783,8 @@
             
             const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
             document.getElementById('settings-dropdown-height').value = savedDropdownHeight;
+
+            document.getElementById('settings-auto-scroll').checked = autoScrollEnabled;
             
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -4784,6 +4821,11 @@
 
             const selectedUseRealDirPrompt = document.getElementById('settings-use-real-dir-prompt').checked;
             localStorage.setItem('use-real-dir-prompt', selectedUseRealDirPrompt);
+
+            const selectedAutoScroll = document.getElementById('settings-auto-scroll').checked;
+            autoScrollEnabled = selectedAutoScroll;
+            localStorage.setItem('auto-scroll-enabled', selectedAutoScroll);
+            updateAutoScrollBtn();
 
             if (selectedContextMenu) {
                 document.body.classList.add('context-menu-actions');
@@ -5967,6 +6009,9 @@
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
+
+            // Init auto-scroll button state
+            updateAutoScrollBtn();
             
             // Apply custom sidebar width on load
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
