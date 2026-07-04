@@ -21,3 +21,4 @@ and when you finish any task immediatly add a x inside like
 - [X] Task 2
 - [] Task 3
 this is bcz when the ai agent fails to complete any task i can continue do it with other agent based on this to do list
+- CRITICAL: Do NOT use the built-in todo_list tool as a substitute. Always create a physical `todo.md` file in the project root. The file must exist on disk.
