@@ -2052,6 +2052,22 @@ class PrepTab(QWidget):
         self._apply_toggle_style(btn_toggle, not is_disabled)
         btn_toggle.clicked.connect(lambda _, f=fp, b=btn_toggle, w=widget, lb=lbl, mc=mode_combo: self._toggle_file(f, b, w, lb, mc))
 
+        # Token estimate label
+        try:
+            sz_bytes = os.path.getsize(fp)
+            tokens = int(sz_bytes / 3.5)
+            if tokens >= 1000:
+                tok_text = f"{tokens/1000:.1f}k"
+            else:
+                tok_text = str(tokens)
+        except Exception:
+            tok_text = "?"
+        tok_lbl = QLabel(tok_text)
+        tok_lbl.setFixedWidth(40)
+        tok_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        tok_lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-family: 'Consolas'; font-size: 8pt;")
+        tok_lbl.setToolTip(f"Estimated token count (file size / 3.5)")
+
         # Apply initial dimmed state if disabled
         if is_disabled:
             lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
@@ -2061,6 +2077,7 @@ class PrepTab(QWidget):
             hl.addWidget(icon_lbl, 0)
         hl.addWidget(lbl, 1)
         hl.addWidget(mode_combo, 0)
+        hl.addWidget(tok_lbl, 0)
         hl.addWidget(btn_toggle, 0)
 
         # Right-click on the widget row → context menu to remove
@@ -2182,6 +2199,16 @@ class PrepTab(QWidget):
         self._apply_sort()
         self._update_sort_buttons()
 
+    def _sort_by_tokens(self):
+        if self._sort_mode == "tokens":
+            self._sort_mode = "tokens_rev"
+        elif self._sort_mode == "tokens_rev":
+            self._sort_mode = "none"
+        else:
+            self._sort_mode = "tokens"
+        self._apply_sort()
+        self._update_sort_buttons()
+
     def _toggle_all(self):
         # If any file is enabled → disable all. If all disabled → enable all.
         if len(self.disabled_files) < len(self.files):
@@ -2201,10 +2228,15 @@ class PrepTab(QWidget):
         def sort_key(fp):
             if self._sort_mode in ("ext", "ext_rev"):
                 return os.path.splitext(fp)[1].lower()
-            else:  # name / name_rev / none → sort by basename for name modes
+            elif self._sort_mode in ("tokens", "tokens_rev"):
+                try:
+                    return os.path.getsize(fp)
+                except Exception:
+                    return 0
+            else:  # name / name_rev
                 return os.path.basename(fp).lower()
 
-        reverse = self._sort_mode in ("ext_rev", "name_rev")
+        reverse = self._sort_mode in ("ext_rev", "name_rev", "tokens_rev")
 
         if self._sort_mode != "none":
             enabled.sort(key=sort_key, reverse=reverse)
@@ -2214,19 +2246,24 @@ class PrepTab(QWidget):
         self._refresh_file_items()
 
     def _update_sort_buttons(self):
-        dim  = f"color: {CP_SUB};"
+        dim    = f"color: {CP_SUB};"
         active = f"color: {CP_CYAN}; text-decoration: underline;"
-        ext_s  = active if self._sort_mode in ("ext",  "ext_rev")  else dim
-        name_s = active if self._sort_mode in ("name", "name_rev") else dim
+        base   = "background: transparent; border: none; font-family: 'Consolas'; font-size: 8pt; font-weight: bold; padding: 0 2px;"
 
-        ext_arrow  = "↑" if self._sort_mode == "ext_rev"  else "↓" if self._sort_mode == "ext"  else "↕"
-        name_arrow = "↑" if self._sort_mode == "name_rev" else "↓" if self._sort_mode == "name" else "↕"
+        ext_s    = active if self._sort_mode in ("ext",    "ext_rev")    else dim
+        name_s   = active if self._sort_mode in ("name",   "name_rev")   else dim
+        tokens_s = active if self._sort_mode in ("tokens", "tokens_rev") else dim
 
-        base = "background: transparent; border: none; font-family: 'Consolas'; font-size: 8pt; font-weight: bold; padding: 0 2px;"
+        ext_arrow    = "↑" if self._sort_mode == "ext_rev"    else "↓" if self._sort_mode == "ext"    else "↕"
+        name_arrow   = "↑" if self._sort_mode == "name_rev"   else "↓" if self._sort_mode == "name"   else "↕"
+        tokens_arrow = "↑" if self._sort_mode == "tokens_rev" else "↓" if self._sort_mode == "tokens" else "↕"
+
         self.btn_col_ext.setText(f"EXT {ext_arrow}")
         self.btn_col_ext.setStyleSheet(f"QPushButton {{ {base} {ext_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
         self.btn_col_name.setText(f"NAME {name_arrow}")
         self.btn_col_name.setStyleSheet(f"QPushButton {{ {base} {name_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
+        self.btn_col_tokens.setText(f"TOKENS {tokens_arrow}")
+        self.btn_col_tokens.setStyleSheet(f"QPushButton {{ {base} {tokens_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
 
     def _build(self):
         layout = QVBoxLayout(self)
@@ -2355,8 +2392,24 @@ class PrepTab(QWidget):
         """)
         self.btn_col_toggle.clicked.connect(self._toggle_all)
 
+        self.btn_col_tokens = QPushButton("TOKENS ↕")
+        self.btn_col_tokens.setFixedHeight(20)
+        self.btn_col_tokens.setFixedWidth(72)
+        self.btn_col_tokens.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_tokens.setToolTip("Sort by estimated token count")
+        self.btn_col_tokens.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0 2px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
+        self.btn_col_tokens.clicked.connect(self._sort_by_tokens)
+
         hh.addWidget(self.btn_col_ext)
         hh.addWidget(self.btn_col_name, 1)
+        hh.addWidget(self.btn_col_tokens)
         hh.addWidget(self.btn_col_toggle)
         vf.addWidget(header_bar)
         # ── end header bar ─────────────────────────────────────
