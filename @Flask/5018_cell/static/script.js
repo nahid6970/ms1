@@ -277,32 +277,52 @@ function adjustFontSize(delta) {
 }
 
 function applyFontSizeScale() {
-    const table = document.getElementById('dataTable');
-    if (table && fontSizeScale !== 1.0) {
-        const cells = table.querySelectorAll('td:not(.row-number) input, td:not(.row-number) textarea');
-        cells.forEach(cell => {
-            const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
-            if (currentFontSize) {
-                cell.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
-                cell.dataset.fontScale = fontSizeScale;
+    // Update display immediately (synchronous)
+    const displayEl = document.getElementById('fontSizeDisplay');
+    if (displayEl) displayEl.textContent = Math.round(fontSizeScale * 100) + '%';
 
-                // Auto-resize textareas if wrap is enabled
-                if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
-                    autoResizeTextarea(cell);
+    // Apply font scale inside rAF so computed styles are valid on freshly-rendered elements
+    requestAnimationFrame(() => {
+        const table = document.getElementById('dataTable');
+        if (!table) return;
+
+        if (fontSizeScale !== 1.0) {
+            const cells = table.querySelectorAll('td:not(.row-number) input, td:not(.row-number) textarea');
+            cells.forEach(cell => {
+                const currentFontSize = parseFloat(window.getComputedStyle(cell).fontSize);
+                if (currentFontSize) {
+                    // Divide out any previously applied scale to get true base font size,
+                    // then multiply by the new scale. This makes the function idempotent —
+                    // calling it multiple times (e.g. from renderTable + switchSheet timeout)
+                    // produces the same result every time.
+                    const prevScale = parseFloat(cell.dataset.fontScale) || 1.0;
+                    const baseFontSize = currentFontSize / prevScale;
+                    cell.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
+                    cell.dataset.fontScale = fontSizeScale;
+
+                    // Auto-resize textareas if wrap is enabled
+                    if (cell.tagName === 'TEXTAREA' && table.classList.contains('wrap-enabled')) {
+                        autoResizeTextarea(cell);
+                    }
                 }
-            }
-        });
+            });
 
-        const previews = table.querySelectorAll('.markdown-preview');
-        previews.forEach(preview => {
-            const currentFontSize = parseFloat(window.getComputedStyle(preview).fontSize);
-            if (currentFontSize) {
-                preview.style.fontSize = (currentFontSize * fontSizeScale) + 'px';
-                preview.dataset.fontScale = fontSizeScale;
-            }
-        });
-    }
-    document.getElementById('fontSizeDisplay').textContent = Math.round(fontSizeScale * 100) + '%';
+            const previews = table.querySelectorAll('.markdown-preview');
+            previews.forEach(preview => {
+                const currentFontSize = parseFloat(window.getComputedStyle(preview).fontSize);
+                if (currentFontSize) {
+                    const prevScale = parseFloat(preview.dataset.fontScale) || 1.0;
+                    const baseFontSize = currentFontSize / prevScale;
+                    preview.style.fontSize = (baseFontSize * fontSizeScale) + 'px';
+                    preview.dataset.fontScale = fontSizeScale;
+                }
+            });
+        } else {
+            // Scale is 1.0 — nothing to do; cells already render at their natural CSS size.
+            // (adjustFontSize handles the transition back to 1.0 correctly when the user
+            // clicks the zoom buttons, so we don't need to clear anything here.)
+        }
+    });
 }
 
 
@@ -6563,11 +6583,6 @@ function switchSheet(index) {
     renderSidebar();
     renderTable(false); // Don't preserve scroll when switching sheets
     autoSaveActiveSheet();
-
-    // Apply font size scale after rendering
-    setTimeout(() => {
-        applyFontSizeScale();
-    }, 0);
 
     // Restore scroll position after rendering (using sheet name as key)
     setTimeout(() => {
