@@ -4513,10 +4513,54 @@
                         openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle);
                     };
 
+                    // Drag-to-reorder (only for owned bookmarks)
+                    if (bm.isOwned) {
+                        row.draggable = true;
+                        row.dataset.bmIdx = idx;
+                        row.dataset.bmProject = bm.project;
+                        row.dataset.bmOrigIndex = bm.index;
+
+                        row.addEventListener('dragstart', (e) => {
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', idx);
+                            row.style.opacity = '0.45';
+                            _bmDragSrcIdx = idx;
+                        });
+                        row.addEventListener('dragend', () => {
+                            row.style.opacity = '1';
+                            // Remove all drop indicators
+                            document.querySelectorAll('.bookmark-item').forEach(r => r.style.borderTop = '');
+                        });
+                        row.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+                            // Visual indicator
+                            document.querySelectorAll('.bookmark-item').forEach(r => r.style.borderTop = '');
+                            if (_bmDragSrcIdx !== idx) row.style.borderTop = '2px solid var(--accent-color)';
+                        });
+                        row.addEventListener('dragleave', () => {
+                            row.style.borderTop = '';
+                        });
+                        row.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            row.style.borderTop = '';
+                            const fromIdx = _bmDragSrcIdx;
+                            const toIdx = idx;
+                            if (fromIdx === toIdx || fromIdx === null) return;
+                            reorderBookmark(uniqueList, fromIdx, toIdx);
+                        });
+                    }
+
                     const displayName = bm.name ? bm.name : bm.command;
                     row.title = `Right click to edit\nCommand: ${bm.command}${bm.windowTitle ? `\nWindow Title: ${bm.windowTitle}` : ''}`;
 
+                    const dragHandle = bm.isOwned
+                        ? `<span class="bm-drag-handle" title="Drag to reorder" style="color:var(--text-muted); cursor:grab; font-size:0.9rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.5;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">⠿</span>`
+                        : '';
+
                     row.innerHTML = `
+                        ${dragHandle}
                         <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                             <button type="button" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdPanel(this, '${bm.command.replace(/'/g, "\\'")}')" title="Sub-commands">
@@ -4875,6 +4919,34 @@
                 }
             } catch (err) {
                 console.error("Error deleting bookmark:", err);
+            }
+        }
+
+        let _bmDragSrcIdx = null;
+
+        async function reorderBookmark(uniqueList, fromDisplayIdx, toDisplayIdx) {
+            // Only reorder owned bookmarks within the same project
+            const from = uniqueList[fromDisplayIdx];
+            const to   = uniqueList[toDisplayIdx];
+            if (!from || !to || !from.isOwned || from.project !== to.project) return;
+
+            try {
+                const res = await fetch(`/api/projects/${encodeURIComponent(from.project)}/bookmarks/${from.index}/edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: from.command,
+                        name: from.name || '',
+                        windowTitle: from.windowTitle || '',
+                        newIndex: to.index
+                    })
+                });
+                if (res.ok) {
+                    projects = await res.json();
+                    updateBookmarksDropdown();
+                }
+            } catch (err) {
+                console.error('Bookmark reorder error:', err);
             }
         }
 

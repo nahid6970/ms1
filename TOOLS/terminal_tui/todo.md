@@ -1,9 +1,9 @@
-# Task: Bookmark subcommands button
+# Task: Drag-to-reorder bookmarks
 
-User wants a button on each bookmark row (before the split terminal button) that opens a small panel showing sub-commands for that bookmark. Sub-commands can be added and clicked to run.
+User wants to drag bookmark rows to reorder them.
 
 ## Tasks
-- [X] Add CSS for subcommand panel/popover
-- [X] Add subcommand button to each bookmark row in renderBookmarkDropdown()
-- [X] Add JS: openSubcmdPanel(), closeSubcmdPanel(), addSubcmd(), deleteSubcmd(), runSubcmd()
-- [X] Store subcommands in localStorage keyed by bookmark command
+- [X] Add drag-and-drop attributes to bookmark rows in renderBookmarkDropdown/updateBookmarksDropdown
+- [X] Add drag event handlers (dragstart, dragover, drop) to reorder bookmarks
+- [X] Call existing /api/projects/<project>/bookmarks/<index>/edit with newIndex to persist order
+- [X] Add visual drag handle icon to each owned bookmark row
