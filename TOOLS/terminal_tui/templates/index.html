@@ -1093,6 +1093,12 @@
                 width: auto !important;
                 padding: 0 6px !important;
             }
+            .workspace-header #workspace-selector-btn.action-btn {
+                width: auto !important;
+                min-width: 80px !important;
+                max-width: 160px !important;
+                padding: 0 8px !important;
+            }
             #workspace-selector-dropdown-container {
                 margin-right: 2px !important;
             }
@@ -1167,6 +1173,10 @@
             #monitor-panes-count,
             #monitor-git-info {
                 display: none !important;
+            }
+            /* Show mobile git dot instead */
+            #monitor-git-dot-mobile {
+                display: inline-block !important;
             }
         }
 
@@ -1477,6 +1487,8 @@
                         <span id="monitor-git-branch" style="color:#38bdf8;"></span>
                         <span id="monitor-git-text" style="display:flex; align-items:center; gap:4px;"></span>
                     </span>
+                    <!-- Mobile-only git status dot: green = clean, red = dirty -->
+                    <span id="monitor-git-dot-mobile" onclick="openGitCommitModal()" title="Git status" style="display:none; width:9px; height:9px; border-radius:50%; background:#10b981; flex-shrink:0; cursor:pointer;"></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <!-- Scheduled Commands icon -->
@@ -4723,10 +4735,14 @@
                     const gitInfoEl = document.getElementById('monitor-git-info');
                     const gitBranchEl = document.getElementById('monitor-git-branch');
                     const gitTextEl = document.getElementById('monitor-git-text');
+                    const gitDotMobile = document.getElementById('monitor-git-dot-mobile');
                     if (gitInfoEl && gitTextEl) {
                         if (data.git) {
                             const g = data.git;
                             if (gitBranchEl) gitBranchEl.innerText = g.branch;
+                            const isDirty = (g.modifications > 0 || g.staged > 0 || g.untracked > 0);
+                            // Mobile dot: green = clean, red = dirty
+                            if (gitDotMobile) gitDotMobile.style.backgroundColor = isDirty ? '#ef4444' : '#10b981';
                             let parts = [];
                             if (g.modifications > 0)
                                 parts.push(`<span style="color:#94a3b8;">${g.modifications} file${g.modifications !== 1 ? 's' : ''} changed</span>`);
@@ -4743,6 +4759,7 @@
                             gitInfoEl.style.display = 'flex';
                         } else {
                             gitInfoEl.style.display = 'none';
+                            if (gitDotMobile) gitDotMobile.style.display = 'none';
                         }
                     }
                 }
