@@ -393,8 +393,9 @@ class AddTimerDialog(QDialog):
         self.rb_text.toggled.connect(self._switch_mode)
         ok_btn.clicked.connect(self._on_ok)
         cancel_btn.clicked.connect(self.reject)
-        self._result_seconds = 0
-        self._result_label   = ""
+        self._result_seconds  = 0
+        self._result_label    = ""
+        self._result_fires_at: float | None = None
 
     def _switch_mode(self, text_active: bool):
         self.text_panel.setVisible(text_active)
@@ -408,6 +409,7 @@ class AddTimerDialog(QDialog):
             if secs < 0:
                 self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
                 return
+            self._result_fires_at = None          # fires_at set on first start
         else:
             target = self.dt_picker.dateTime().toPyDateTime()
             delta  = (target - datetime.now()).total_seconds()
@@ -415,6 +417,7 @@ class AddTimerDialog(QDialog):
                 self.err_lbl.setText("⚠  Selected datetime is in the past.")
                 return
             secs = int(delta)
+            self._result_fires_at = target.timestamp()   # exact epoch
         self._result_seconds = secs
         self._result_label   = label
         self.accept()
@@ -423,7 +426,7 @@ class AddTimerDialog(QDialog):
     def get_timer(parent=None):
         dlg = AddTimerDialog(parent)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            return dlg._result_label, dlg._result_seconds
+            return dlg._result_label, dlg._result_seconds, dlg._result_fires_at
         return None
 
 
@@ -498,7 +501,7 @@ class TimerCard(QFrame):
         self.total_seconds = total_seconds
         self.remaining     = total_seconds
         self.state         = self.STATE_IDLE
-        self.started_at: float | None = None   # wall-clock time when ticker last started
+        self.fires_at: float | None = None   # absolute Unix timestamp when alarm fires
 
         self.setFrameShape(QFrame.Shape.Box)
         self.setMinimumWidth(220)
@@ -665,11 +668,15 @@ class TimerCard(QFrame):
         self._prog_fill.setStyleSheet(f"background: {color};")
 
     def _tick(self):
+        if self.fires_at is not None:
+            self.remaining = max(0, int(self.fires_at - time.time()))
+        else:
+            self.remaining = max(0, self.remaining - 1)
         if self.remaining <= 0:
             self._ticker.stop()
+            self.remaining = 0
             self._fire_alarm()
             return
-        self.remaining -= 1
         self._display.setText(fmt_secs(self.remaining))
         self._update_bar()
         self.state_changed.emit()
@@ -695,8 +702,10 @@ class TimerCard(QFrame):
         if self.state in (self.STATE_IDLE, self.STATE_PAUSED):
             if self.remaining <= 0:
                 self.remaining = self.total_seconds
-            self.state      = self.STATE_RUNNING
-            self.started_at = time.time()
+            self.state = self.STATE_RUNNING
+            # Preserve fires_at if already set (datetime mode); otherwise derive from remaining
+            if self.fires_at is None:
+                self.fires_at = time.time() + self.remaining
             self._ticker.start()
             self._btn_start.setEnabled(False)
             self._btn_pause.setEnabled(True)
@@ -712,8 +721,12 @@ class TimerCard(QFrame):
     def _on_pause(self):
         if self.state == self.STATE_RUNNING:
             self._ticker.stop()
+            # Snapshot the true remaining before clearing fires_at
+            if self.fires_at is not None:
+                self.remaining = max(0, int(self.fires_at - time.time()))
+            self.fires_at   = None
             self.state      = self.STATE_PAUSED
-            self.started_at = None
+            self._display.setText(fmt_secs(self.remaining))
             self._btn_start.setText("")
             self._btn_start.setIcon(icon_play(color="#000"))
             self._btn_start.setEnabled(True)
@@ -725,9 +738,9 @@ class TimerCard(QFrame):
 
     def _on_reset(self):
         self._ticker.stop()
-        self.remaining  = self.total_seconds
-        self.state      = self.STATE_IDLE
-        self.started_at = None
+        self.remaining = self.total_seconds
+        self.state     = self.STATE_IDLE
+        self.fires_at  = None
         self._display.setText(fmt_secs(self.remaining))
         self._display.setStyleSheet(
             f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
@@ -751,11 +764,7 @@ class TimerCard(QFrame):
         self.duplicated.emit(self.card_id)
 
     def _on_edit(self):
-        """Edit this timer's label and/or time while it may be running/paused/idle."""
-        was_running = (self.state == self.STATE_RUNNING)
-        if was_running:
-            self._on_pause()   # pause while dialog is open
-
+        """Edit this timer's label and/or time. Timer keeps running while dialog is open."""
         dlg = QDialog(self)
         dlg.setWindowTitle("EDIT TIMER")
         dlg.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
@@ -855,6 +864,8 @@ class TimerCard(QFrame):
 
         def _apply():
             new_label = lbl_edit.text().strip() or self.label
+            self.label = new_label
+            self._lbl.setText(self.label)
 
             if rb_text.isChecked():
                 raw_time = time_edit.text().strip()
@@ -863,44 +874,40 @@ class TimerCard(QFrame):
                     if new_secs < 0:
                         err_lbl.setText("⚠  Invalid time format.")
                         return
-                    time_changed = True
-                else:
-                    new_secs     = self.total_seconds   # unchanged
-                    time_changed = False
+                    self.total_seconds = new_secs
+                    self.remaining     = new_secs
+                    # Update fires_at so running timer uses the new duration
+                    if self.state == self.STATE_RUNNING:
+                        self.fires_at = time.time() + new_secs
+                    else:
+                        self.fires_at = None
+                    self._display.setText(fmt_secs(self.remaining))
+                # else blank — keep everything unchanged, label already updated above
             else:
                 target = dt_picker.dateTime().toPyDateTime()
                 delta  = (target - datetime.now()).total_seconds()
                 if delta <= 0:
                     err_lbl.setText("⚠  Selected datetime is in the past.")
                     return
-                new_secs     = int(delta)
-                time_changed = True
-
-            # apply changes
-            self.label         = new_label
-            self.total_seconds = new_secs
-
-            if time_changed:
-                # reset remaining to the new full duration
-                self.remaining = new_secs
+                self.total_seconds = int(delta)
+                self.remaining     = int(delta)
+                self.fires_at      = target.timestamp()
                 self._display.setText(fmt_secs(self.remaining))
-            elif self.state == self.STATE_IDLE:
-                self.remaining = new_secs
-                self._display.setText(fmt_secs(self.remaining))
+                # Auto-start if not already running or done
+                if self.state not in (self.STATE_RUNNING, self.STATE_DONE):
+                    self._update_bar()
+                    self.state_changed.emit()
+                    dlg.accept()
+                    self._on_start()
+                    return
 
-            self._lbl.setText(self.label)
             self._update_bar()
             self.state_changed.emit()
             dlg.accept()
 
         ok_btn.clicked.connect(_apply)
         cancel_btn.clicked.connect(dlg.reject)
-
-        result = dlg.exec()
-
-        # Resume if it was running before — whether apply was clicked or cancelled
-        if was_running and self.state == self.STATE_PAUSED:
-            self._on_start()
+        dlg.exec()
 
     # serialization
     def to_dict(self) -> dict:
@@ -908,7 +915,7 @@ class TimerCard(QFrame):
             "id": self.card_id, "label": self.label,
             "total_seconds": self.total_seconds,
             "remaining": self.remaining, "state": self.state,
-            "started_at": self.started_at,
+            "fires_at": self.fires_at,
         }
 
     @classmethod
@@ -918,15 +925,15 @@ class TimerCard(QFrame):
         st = d.get("state")
 
         if st == cls.STATE_RUNNING:
-            # Calculate true remaining based on wall-clock elapsed time
-            started_at = d.get("started_at")
-            if started_at is not None:
-                elapsed    = time.time() - started_at
-                card.remaining = max(0, int(card.remaining - elapsed))
-            # If time already expired while we were closed, fire immediately
+            fires_at = d.get("fires_at")
+            if fires_at is not None:
+                card.fires_at  = fires_at
+                card.remaining = max(0, int(fires_at - time.time()))
+            # If the alarm fired while the app was closed
             if card.remaining <= 0:
-                card.state = cls.STATE_DONE
+                card.fires_at  = None
                 card.remaining = 0
+                card.state     = cls.STATE_DONE
                 card._display.setText("00:00")
                 card._display.setStyleSheet(
                     f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
@@ -940,14 +947,12 @@ class TimerCard(QFrame):
                 card._btn_start.setEnabled(False)
                 card._btn_pause.setEnabled(False)
                 card._update_bar()
-                # Show the popup after the widget is fully set up
                 QTimer.singleShot(300, lambda: AlarmPopup(card.label, card).exec())
             else:
-                # Resume the ticker — set UI to running state
+                # Resume — fires_at is already set, ticker will use it
                 card._display.setText(fmt_secs(card.remaining))
                 card._update_bar()
-                card.state      = cls.STATE_RUNNING
-                card.started_at = time.time()
+                card.state = cls.STATE_RUNNING
                 card._ticker.start()
                 card._btn_start.setEnabled(False)
                 card._btn_pause.setEnabled(True)
@@ -960,7 +965,8 @@ class TimerCard(QFrame):
                 )
 
         elif st == cls.STATE_PAUSED:
-            # Restore as paused — keep the saved remaining, let user resume
+            # Paused — remaining was snapshotted at pause time, fires_at is None
+            card.fires_at = None
             card._display.setText(fmt_secs(card.remaining))
             card._update_bar()
             card.state = cls.STATE_PAUSED
@@ -975,6 +981,8 @@ class TimerCard(QFrame):
             )
 
         elif st == cls.STATE_DONE:
+            card.fires_at  = None
+            card.remaining = 0
             card._display.setText("00:00")
             card._display.setStyleSheet(
                 f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
@@ -991,7 +999,8 @@ class TimerCard(QFrame):
             card._update_bar()
 
         else:
-            # STATE_IDLE — grayed out stopped look
+            # STATE_IDLE — grayed out, ready to start
+            card.fires_at = None
             card._display.setText(fmt_secs(card.remaining))
             card._update_bar()
 
@@ -1138,9 +1147,15 @@ class ColumnWidget(QFrame):
         result = AddTimerDialog.get_timer(self)
         if result is None:
             return
-        label, secs = result
+        label, secs, fires_at = result
         card = TimerCard(str(uuid.uuid4())[:8], label, secs, self)
+        if fires_at is not None:
+            # Datetime mode — set fires_at directly and auto-start
+            card.fires_at = fires_at
+            card.remaining = max(0, int(fires_at - time.time()))
         self.add_card(card)
+        if fires_at is not None:
+            card._on_start()   # auto-start for datetime-picked timers
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
                 self._scroll.verticalScrollBar().maximum()
