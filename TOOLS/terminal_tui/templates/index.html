@@ -7257,6 +7257,15 @@
                     fileList.appendChild(row);
                 });
 
+                // Fit panel width to longest filename
+                const longestDiffName = data.files.reduce((a, b) => a.file.length > b.file.length ? a : b, {file:''}).file;
+                const _cvs = document.createElement('canvas');
+                const _ctx = _cvs.getContext('2d');
+                _ctx.font = '11.52px "Fira Code", monospace';
+                const _tw = _ctx.measureText(longestDiffName).width;
+                const _pw = Math.min(Math.max(Math.ceil(_tw) + 36, 100), 360);
+                fileList.style.width = _pw + 'px';
+
                 // Auto-select first file
                 fileList.firstChild.click();
 
@@ -7389,6 +7398,16 @@
                     };
                     fileList.appendChild(row);
                 });
+
+                // Fit panel width to longest filename
+                const longestName = data.files.reduce((a, b) => a.length > b.length ? a : b, '');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.font = '11.52px "Fira Code", monospace';
+                const textWidth = ctx.measureText(longestName).width;
+                const panelWidth = Math.min(Math.max(Math.ceil(textWidth) + 28, 120), 380);
+                fileList.style.width = panelWidth + 'px';
+
             } catch(e) {
                 document.getElementById('commit-browser-files').innerHTML = `<div style="padding:8px 12px; color:#ef4444; font-size:0.75rem;">Error: ${e.message}</div>`;
             }
