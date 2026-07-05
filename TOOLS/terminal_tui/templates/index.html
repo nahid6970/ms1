@@ -1148,6 +1148,23 @@
                 width: calc(100vw - 20px) !important;
                 max-width: 340px !important;
             }
+            /* Fix statusbar popovers overflowing off-screen on mobile */
+            .statusbar-popover {
+                left: 10px !important;
+                right: 10px !important;
+                width: auto !important;
+                min-width: 0 !important;
+                max-width: calc(100vw - 20px) !important;
+            }
+            /* Fix project-name (window title) dropdown overflowing on mobile */
+            #project-name-dropdown-content {
+                position: fixed !important;
+                right: 10px !important;
+                left: auto !important;
+                bottom: 36px !important;
+                width: calc(100vw - 20px) !important;
+                max-width: 300px !important;
+            }
             .terminal-container-wrapper {
                 padding: 4px !important;
             }
