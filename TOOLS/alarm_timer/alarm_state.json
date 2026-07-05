@@ -35,6 +35,13 @@
           "total_seconds": 5,
           "remaining": 5,
           "state": "idle"
+        },
+        {
+          "id": "102e5ca4",
+          "label": "Timer",
+          "total_seconds": 2358000,
+          "remaining": 2358000,
+          "state": "idle"
         }
       ]
     }

@@ -16,8 +16,51 @@ from PyQt6.QtWidgets import (
     QMessageBox, QDateTimeEdit, QRadioButton,
     QButtonGroup, QDialogButtonBox,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize
+from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
+from PyQt6.QtSvg import QSvgRenderer
+
+# ── SVG icon helper ────────────────────────────────────────
+
+def svg_icon(svg_str: str, size: int = 18) -> QIcon:
+    """Render an inline SVG string into a QIcon."""
+    ba = QByteArray(svg_str.encode())
+    renderer = QSvgRenderer(ba)
+    pm = QPixmap(size, size)
+    pm.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pm)
+    renderer.render(painter)
+    painter.end()
+    return QIcon(pm)
+
+def _svg(path_d: str, color: str, vb: str = "0 0 24 24") -> str:
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}">'
+            f'<path fill="{color}" d="{path_d}"/></svg>')
+
+def icon_play(color: str = "#00ff21", size: int = 16) -> QIcon:
+    return svg_icon(_svg("M8 5v14l11-7z", color), size)
+
+def icon_pause(color: str = "#ff934b", size: int = 16) -> QIcon:
+    return svg_icon(_svg("M6 19h4V5H6v14zm8-14v14h4V5h-4z", color), size)
+
+def icon_reset(color: str = "#E0E0E0", size: int = 16) -> QIcon:
+    return svg_icon(_svg(
+        "M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 "
+        "7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 "
+        "0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+        color), size)
+
+def icon_rename(color: str = "#00F0FF", size: int = 16) -> QIcon:
+    return svg_icon(_svg(
+        "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 "
+        "0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+        color), size)
+
+def icon_delete(color: str = "#FF003C", size: int = 16) -> QIcon:
+    return svg_icon(_svg(
+        "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 "
+        "1H5v2h14V4z",
+        color), size)
 
 # ── Cyberpunk Palette ──────────────────────────────────────
 CP_BG      = "#050505"
@@ -510,9 +553,15 @@ class TimerCard(QFrame):
         btn_row = QHBoxLayout(self._btn_widget)
         btn_row.setContentsMargins(0, 0, 0, 0)
         btn_row.setSpacing(4)
-        self._btn_start = self._mkbtn("▶  START",  CP_GREEN,  "#000")
-        self._btn_pause = self._mkbtn("⏸  PAUSE",  CP_ORANGE, "#000")
-        self._btn_reset = self._mkbtn("↺  RESET",  CP_DIM,    CP_TEXT)
+        self._btn_start = self._mkbtn("", CP_GREEN,  "#000")
+        self._btn_pause = self._mkbtn("", CP_ORANGE, "#000")
+        self._btn_reset = self._mkbtn("", CP_DIM,    CP_TEXT)
+        self._btn_start.setIcon(icon_play(color="#000"))
+        self._btn_pause.setIcon(icon_pause(color="#000"))
+        self._btn_reset.setIcon(icon_reset(color=CP_TEXT))
+        for b in (self._btn_start, self._btn_pause, self._btn_reset):
+            b.setIconSize(QSize(18, 18))
+            b.setFixedSize(36, 32)
         self._btn_pause.setEnabled(False)
         btn_row.addWidget(self._btn_start)
         btn_row.addWidget(self._btn_pause)
@@ -622,7 +671,8 @@ class TimerCard(QFrame):
         if self.state == self.STATE_RUNNING:
             self._ticker.stop()
             self.state = self.STATE_PAUSED
-            self._btn_start.setText("▶  RESUME")
+            self._btn_start.setText("")
+            self._btn_start.setIcon(icon_play(color="#000"))
             self._btn_start.setEnabled(True)
             self._btn_pause.setEnabled(False)
             self._status.setText("⏸ PAUSED")
@@ -639,7 +689,8 @@ class TimerCard(QFrame):
             f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px;"
         )
-        self._btn_start.setText("▶  START")
+        self._btn_start.setText("")
+        self._btn_start.setIcon(icon_play(color="#000"))
         self._btn_start.setEnabled(True)
         self._btn_pause.setEnabled(False)
         self._status.setText("READY")
@@ -669,7 +720,8 @@ class TimerCard(QFrame):
         st = d.get("state")
         if st == cls.STATE_RUNNING:
             card.state = cls.STATE_PAUSED
-            card._btn_start.setText("▶  RESUME")
+            card._btn_start.setText("")
+            card._btn_start.setIcon(icon_play(color="#000"))
             card._status.setText("⏸ PAUSED (was running)")
             card._status.setStyleSheet(f"color: {CP_ORANGE}; font-size: 8pt;")
             card._set_border(CP_ORANGE)
@@ -732,27 +784,27 @@ class ColumnWidget(QFrame):
         )
         self._name_lbl.setToolTip("Click ✏ to rename")
 
-        ren_btn = QPushButton("✏ RENAME")
-        ren_btn.setFixedHeight(26)
+        ren_btn = QPushButton()
+        ren_btn.setFixedSize(28, 28)
+        ren_btn.setIcon(icon_rename(color=CP_CYAN, size=16))
+        ren_btn.setIconSize(QSize(16, 16))
         ren_btn.setStyleSheet(
-            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM};"
-            f" color: {CP_CYAN}; font-size: 8pt; font-weight: bold;"
-            f" padding: 0 6px; }}"
+            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM}; }}"
             f"QPushButton:hover {{ border-color: {CP_CYAN}; background: #252525; }}"
-            f"QPushButton:pressed {{ background: {CP_CYAN}; color: #000; }}"
+            f"QPushButton:pressed {{ background: {CP_CYAN}; }}"
         )
         ren_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         ren_btn.setToolTip("Rename column")
         ren_btn.clicked.connect(self._on_rename)
 
-        del_btn = QPushButton("✖ DEL")
-        del_btn.setFixedHeight(26)
+        del_btn = QPushButton()
+        del_btn.setFixedSize(28, 28)
+        del_btn.setIcon(icon_delete(color=CP_RED, size=16))
+        del_btn.setIconSize(QSize(16, 16))
         del_btn.setStyleSheet(
-            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM};"
-            f" color: {CP_RED}; font-size: 8pt; font-weight: bold;"
-            f" padding: 0 6px; }}"
+            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM}; }}"
             f"QPushButton:hover {{ border-color: {CP_RED}; background: #2a1010; }}"
-            f"QPushButton:pressed {{ background: {CP_RED}; color: #fff; }}"
+            f"QPushButton:pressed {{ background: {CP_RED}; }}"
         )
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.setToolTip("Delete column")
