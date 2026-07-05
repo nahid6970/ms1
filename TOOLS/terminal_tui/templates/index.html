@@ -2112,8 +2112,8 @@
             </div>
 
             <!-- Action buttons -->
-            <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
-                <div id="git-status-msg" style="flex:1; font-size: 0.8rem; color: var(--text-secondary);"></div>
+            <div style="display: flex; flex-direction:column; gap: 6px;">
+                <div style="display:flex; gap: 10px; justify-content: flex-end; align-items: center;">
                 <button class="btn" onclick="discardAllChanges()" style="padding: 8px 14px; font-size: 0.82rem; background: none; border: 1px solid #ef4444; color: #ef4444; transition: all 0.2s; border-radius: 6px; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Discard all uncommitted changes (git restore .)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Discard</button>
                 <button class="btn" onclick="openGitDiffModal('HEAD', '')" style="padding: 8px 14px; font-size: 0.82rem; background: none; border: 1px solid #38bdf8; color: #38bdf8; transition: all 0.2s; border-radius: 6px; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="View current changes vs last commit">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
@@ -2124,6 +2124,8 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
                     Commit
                 </button>
+                </div>
+                <div id="git-status-msg" style="font-size: 0.78rem; color: var(--text-secondary); min-height:16px; text-align:right; padding-right:2px;"></div>
             </div>
         </div>
     </div>
@@ -7650,7 +7652,7 @@
                 tdG.innerHTML = `<svg width="${svgW}" height="50" style="display:block; overflow:visible;">${lines}</svg>`;
 
                 const tdI = document.createElement('td');
-                tdI.style.cssText = 'padding:4px 10px; vertical-align:middle; height:50px; box-sizing:border-box; overflow:hidden;';
+                tdI.style.cssText = 'padding:4px 10px; vertical-align:middle; box-sizing:border-box;';
                 const msg = c.message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 tdI.innerHTML = `
                     <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:1px;line-height:1.2;">
