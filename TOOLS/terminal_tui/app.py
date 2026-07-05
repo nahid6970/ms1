@@ -1230,6 +1230,102 @@ def api_git_checkout(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/tree', methods=['GET'])
+def api_git_tree(project):
+    """List all files at a specific commit (git ls-tree) — no checkout"""
+    commit_hash = request.args.get("hash", "HEAD").strip()
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        rel_path = os.path.relpath(path, git_root).replace("\\", "/")
+        pathspec = rel_path if rel_path != "." else None
+
+        cmd = ["git", "ls-tree", "-r", "--name-only", commit_hash]
+        if pathspec:
+            cmd.append(pathspec)
+        res = subprocess.run(cmd, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+        if res.returncode != 0:
+            return jsonify({"error": res.stderr.strip() or "Failed to list tree"}), 400
+        files = [f for f in res.stdout.strip().split("\n") if f.strip()]
+        # Strip project subfolder prefix for display
+        if pathspec and pathspec != ".":
+            prefix = pathspec.rstrip("/") + "/"
+            files = [f[len(prefix):] if f.startswith(prefix) else f for f in files]
+        return jsonify({"files": files, "hash": commit_hash})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/show', methods=['GET'])
+def api_git_show(project):
+    """Get file content at a specific commit (git show hash:path) — no checkout"""
+    commit_hash = request.args.get("hash", "HEAD").strip()
+    file_path = request.args.get("path", "").strip()
+    if not file_path:
+        return jsonify({"error": "path is required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        rel_path = os.path.relpath(path, git_root).replace("\\", "/")
+        # Build full path spec: project_subdir/file_path
+        full_path_spec = file_path if rel_path == "." else f"{rel_path}/{file_path}"
+        obj_spec = f"{commit_hash}:{full_path_spec}"
+        res = subprocess.run(["git", "show", obj_spec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=10)
+        if res.returncode != 0:
+            return jsonify({"error": res.stderr.strip() or "File not found at this commit"}), 404
+        content = res.stdout
+        size = len(content.encode("utf-8"))
+        lines = content.count("\n")
+        return jsonify({"content": content, "size": size, "lines": lines, "hash": commit_hash, "path": file_path})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/restore-file', methods=['POST'])
+def api_git_restore_file(project):
+    """Restore a specific file to a past commit version (git checkout hash -- path) — no HEAD detach"""
+    data = request.get_json() or {}
+    commit_hash = data.get("hash", "").strip()
+    file_path = data.get("path", "").strip()
+    if not commit_hash or not file_path:
+        return jsonify({"error": "hash and path are required"}), 400
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath(res_root.stdout.strip())
+        rel_path = os.path.relpath(path, git_root).replace("\\", "/")
+        full_path_spec = file_path if rel_path == "." else f"{rel_path}/{file_path}"
+        res = subprocess.run(["git", "checkout", commit_hash, "--", full_path_spec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+        if res.returncode != 0:
+            return jsonify({"error": res.stderr.strip() or "Restore failed"}), 500
+        return jsonify({"success": True, "hash": commit_hash, "path": file_path})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/project/<project>/git/return-branch', methods=['POST'])
 def api_git_return_branch(project):
     """Return to the latest commit on the current branch"""
