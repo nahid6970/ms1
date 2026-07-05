@@ -510,7 +510,7 @@
         {
             "category": "General",
             "description": "",
-            "enabled": false,
+            "enabled": true,
             "name": "Theme Guidlines & Rules",
             "replacement": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
             "trigger": ";theme"
@@ -659,7 +659,7 @@
             "description": "",
             "trigger": ";theme",
             "file_path": "C:\\@delta\\ms1\\md\\THEME_GUIDE.md",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "sync script setting with convex",

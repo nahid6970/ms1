@@ -1,0 +1,42 @@
+{
+  "settings": {
+    "column_width": 280,
+    "alarm_sound": ""
+  },
+  "columns": [
+    {
+      "id": "5b5ce06e",
+      "name": "Kiro",
+      "cards": [
+        {
+          "id": "428db84b",
+          "label": "sdasdasdasdasd",
+          "total_seconds": 90000,
+          "remaining": 90000,
+          "state": "idle"
+        },
+        {
+          "id": "8acd1aab",
+          "label": "asdasdasd",
+          "total_seconds": 9198000,
+          "remaining": 9198000,
+          "state": "idle"
+        },
+        {
+          "id": "9c10ce54",
+          "label": "fghfghfh",
+          "total_seconds": 540000,
+          "remaining": 540000,
+          "state": "idle"
+        },
+        {
+          "id": "20f44ca4",
+          "label": "Timer",
+          "total_seconds": 5,
+          "remaining": 0,
+          "state": "done"
+        }
+      ]
+    }
+  ]
+}
