@@ -7,6 +7,7 @@ import os
 import re
 import json
 import uuid
+import time
 from datetime import datetime, timedelta
 
 from PyQt6.QtWidgets import (
@@ -60,6 +61,12 @@ def icon_delete(color: str = "#FF003C", size: int = 16) -> QIcon:
     return svg_icon(_svg(
         "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 "
         "1H5v2h14V4z",
+        color), size)
+
+def icon_duplicate(color: str = "#00F0FF", size: int = 16) -> QIcon:
+    return svg_icon(_svg(
+        "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 "
+        "1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z",
         color), size)
 
 # ── Cyberpunk Palette ──────────────────────────────────────
@@ -476,6 +483,7 @@ class SettingsDialog(QDialog):
 
 class TimerCard(QFrame):
     removed       = pyqtSignal(str)
+    duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
     STATE_IDLE    = "idle"
@@ -490,6 +498,7 @@ class TimerCard(QFrame):
         self.total_seconds = total_seconds
         self.remaining     = total_seconds
         self.state         = self.STATE_IDLE
+        self.started_at: float | None = None   # wall-clock time when ticker last started
 
         self.setFrameShape(QFrame.Shape.Box)
         self.setMinimumWidth(220)
@@ -525,6 +534,18 @@ class TimerCard(QFrame):
         edit_btn.setToolTip("Edit label & time")
         edit_btn.clicked.connect(self._on_edit)
 
+        dup_btn = QPushButton()
+        dup_btn.setFixedSize(22, 22)
+        dup_btn.setIcon(icon_duplicate(color=CP_CYAN, size=13))
+        dup_btn.setIconSize(QSize(13, 13))
+        dup_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_CYAN}; }}"
+        )
+        dup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        dup_btn.setToolTip("Duplicate timer")
+        dup_btn.clicked.connect(self._on_duplicate)
+
         del_btn = QPushButton()
         del_btn.setFixedSize(22, 22)
         del_btn.setIcon(icon_delete(color=CP_RED, size=13))
@@ -538,6 +559,7 @@ class TimerCard(QFrame):
         del_btn.clicked.connect(self._on_delete)
         top.addWidget(self._lbl, 1)
         top.addWidget(edit_btn, 0)
+        top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
 
         # countdown display
@@ -545,7 +567,7 @@ class TimerCard(QFrame):
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._display.setToolTip("Click to show/hide controls")
         self._display.setStyleSheet(
-            f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
+            f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px;"
         )
 
@@ -558,10 +580,10 @@ class TimerCard(QFrame):
         self._prog_fill.setStyleSheet(f"background: {CP_CYAN};")
 
         # status
-        self._status = QLabel("READY")
+        self._status = QLabel("● STOPPED")
         self._status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._status.setStyleSheet(
-            f"color: {CP_SUBTEXT}; font-size: 8pt; letter-spacing: 1px;"
+            f"color: {CP_DIM}; font-size: 8pt; letter-spacing: 1px;"
         )
 
         # buttons row — hidden until user clicks the card
@@ -636,7 +658,10 @@ class TimerCard(QFrame):
         ratio = max(0.0, self.remaining / self.total_seconds)
         w = int(self._prog_bg.width() * ratio)
         self._prog_fill.setFixedWidth(max(0, w))
-        color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
+        if self.state == self.STATE_IDLE:
+            color = CP_DIM
+        else:
+            color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
         self._prog_fill.setStyleSheet(f"background: {color};")
 
     def _tick(self):
@@ -670,7 +695,8 @@ class TimerCard(QFrame):
         if self.state in (self.STATE_IDLE, self.STATE_PAUSED):
             if self.remaining <= 0:
                 self.remaining = self.total_seconds
-            self.state = self.STATE_RUNNING
+            self.state      = self.STATE_RUNNING
+            self.started_at = time.time()
             self._ticker.start()
             self._btn_start.setEnabled(False)
             self._btn_pause.setEnabled(True)
@@ -686,7 +712,8 @@ class TimerCard(QFrame):
     def _on_pause(self):
         if self.state == self.STATE_RUNNING:
             self._ticker.stop()
-            self.state = self.STATE_PAUSED
+            self.state      = self.STATE_PAUSED
+            self.started_at = None
             self._btn_start.setText("")
             self._btn_start.setIcon(icon_play(color="#000"))
             self._btn_start.setEnabled(True)
@@ -698,19 +725,20 @@ class TimerCard(QFrame):
 
     def _on_reset(self):
         self._ticker.stop()
-        self.remaining = self.total_seconds
-        self.state     = self.STATE_IDLE
+        self.remaining  = self.total_seconds
+        self.state      = self.STATE_IDLE
+        self.started_at = None
         self._display.setText(fmt_secs(self.remaining))
         self._display.setStyleSheet(
-            f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
+            f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px;"
         )
         self._btn_start.setText("")
         self._btn_start.setIcon(icon_play(color="#000"))
         self._btn_start.setEnabled(True)
         self._btn_pause.setEnabled(False)
-        self._status.setText("READY")
-        self._status.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
+        self._status.setText("● STOPPED")
+        self._status.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
         self._set_border(CP_DIM)
         self._update_bar()
         self.state_changed.emit()
@@ -718,6 +746,9 @@ class TimerCard(QFrame):
     def _on_delete(self):
         self._ticker.stop()
         self.removed.emit(self.card_id)
+
+    def _on_duplicate(self):
+        self.duplicated.emit(self.card_id)
 
     def _on_edit(self):
         """Edit this timer's label and/or time while it may be paused/idle."""
@@ -817,28 +848,79 @@ class TimerCard(QFrame):
             "id": self.card_id, "label": self.label,
             "total_seconds": self.total_seconds,
             "remaining": self.remaining, "state": self.state,
+            "started_at": self.started_at,
         }
 
     @classmethod
     def from_dict(cls, d: dict, parent=None) -> "TimerCard":
         card = cls(d["id"], d.get("label", "Timer"), d.get("total_seconds", 0), parent)
         card.remaining = d.get("remaining", card.total_seconds)
-        card._display.setText(fmt_secs(card.remaining))
-        card._update_bar()
         st = d.get("state")
+
         if st == cls.STATE_RUNNING:
+            # Calculate true remaining based on wall-clock elapsed time
+            started_at = d.get("started_at")
+            if started_at is not None:
+                elapsed    = time.time() - started_at
+                card.remaining = max(0, int(card.remaining - elapsed))
+            # If time already expired while we were closed, fire immediately
+            if card.remaining <= 0:
+                card.state = cls.STATE_DONE
+                card.remaining = 0
+                card._display.setText("00:00")
+                card._display.setStyleSheet(
+                    f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
+                    " font-family: 'Consolas'; letter-spacing: 2px;"
+                )
+                card._status.setText("▐ ALARM! (fired while closed)")
+                card._status.setStyleSheet(
+                    f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
+                )
+                card._set_border(CP_RED)
+                card._btn_start.setEnabled(False)
+                card._btn_pause.setEnabled(False)
+                card._update_bar()
+                # Show the popup after the widget is fully set up
+                QTimer.singleShot(300, lambda: AlarmPopup(card.label, card).exec())
+            else:
+                # Resume the ticker — set UI to running state
+                card._display.setText(fmt_secs(card.remaining))
+                card._update_bar()
+                card.state      = cls.STATE_RUNNING
+                card.started_at = time.time()
+                card._ticker.start()
+                card._btn_start.setEnabled(False)
+                card._btn_pause.setEnabled(True)
+                card._status.setText("▶ RUNNING")
+                card._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
+                card._set_border(CP_GREEN)
+                card._display.setStyleSheet(
+                    f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
+                    " font-family: 'Consolas'; letter-spacing: 2px;"
+                )
+
+        elif st == cls.STATE_PAUSED:
+            # Restore as paused — keep the saved remaining, let user resume
+            card._display.setText(fmt_secs(card.remaining))
+            card._update_bar()
             card.state = cls.STATE_PAUSED
-            card._btn_start.setText("")
-            card._btn_start.setIcon(icon_play(color="#000"))
-            card._status.setText("⏸ PAUSED (was running)")
+            card._btn_start.setEnabled(True)
+            card._btn_pause.setEnabled(False)
+            card._status.setText("⏸ PAUSED")
             card._status.setStyleSheet(f"color: {CP_ORANGE}; font-size: 8pt;")
             card._set_border(CP_ORANGE)
+            card._display.setStyleSheet(
+                f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
+                " font-family: 'Consolas'; letter-spacing: 2px;"
+            )
+
         elif st == cls.STATE_DONE:
-            card.state = cls.STATE_DONE
+            card._display.setText("00:00")
             card._display.setStyleSheet(
                 f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px;"
             )
+            card.state = cls.STATE_DONE
             card._status.setText("▐ ALARM!")
             card._status.setStyleSheet(
                 f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
@@ -846,6 +928,13 @@ class TimerCard(QFrame):
             card._set_border(CP_RED)
             card._btn_start.setEnabled(False)
             card._btn_pause.setEnabled(False)
+            card._update_bar()
+
+        else:
+            # STATE_IDLE — grayed out stopped look
+            card._display.setText(fmt_secs(card.remaining))
+            card._update_bar()
+
         return card
 
 
@@ -958,6 +1047,7 @@ class ColumnWidget(QFrame):
         self._card_layout.insertWidget(idx, card)
         self._cards[card.card_id] = card
         card.removed.connect(self._on_card_removed)
+        card.duplicated.connect(self._on_card_duplicated)
         card.state_changed.connect(self.state_changed)
 
     def remove_card(self, card_id: str):
@@ -965,6 +1055,24 @@ class ColumnWidget(QFrame):
         if card:
             self._card_layout.removeWidget(card)
             card.deleteLater()
+
+    def _on_card_duplicated(self, cid: str):
+        src = self._cards.get(cid)
+        if src is None:
+            return
+        new_card = TimerCard(
+            str(uuid.uuid4())[:8],
+            src.label + " (copy)",
+            src.total_seconds,
+            self,
+        )
+        self.add_card(new_card)
+        QTimer.singleShot(50, lambda:
+            self._scroll.verticalScrollBar().setValue(
+                self._scroll.verticalScrollBar().maximum()
+            )
+        )
+        self.state_changed.emit()
 
     def _on_add_timer(self):
         result = AddTimerDialog.get_timer(self)

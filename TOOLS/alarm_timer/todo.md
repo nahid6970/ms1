@@ -1,26 +1,12 @@
-# Alarm Countdown Timer GUI
+# Alarm Timer - Persist Running State Across Restarts
 
-## Task
-Build a multi-column, multi-clock alarm countdown timer with cyberpunk theme.
+## What was asked:
+When the app restarts, running timers should continue counting from where they left off (not reset/pause). Save a wall-clock timestamp when a timer starts so the elapsed time can be calculated on reload.
 
-## Requirements
-- Multiple columns (projects), each with a custom name
-- Multiple countdown timers per column
-- Time input formats: 154h25m20s, 25m55s, 25m, 154h, etc.
-- Date/time picker (calendar widget) as alternative input
-- Alarm popup when countdown finishes
-- Cyberpunk theme from THEME_GUIDE.md
-- Persistent state (save/load columns & timers to JSON)
-- Restart button
-- Settings button
+## Task List
 
-## Tasks
-- [X] Create main app file with cyberpunk theme
-- [X] Build column management (add/rename/delete columns)
-- [X] Build timer card widget (display, start/pause/stop/reset)
-- [X] Implement time string parser (154h25m20s format)
-- [X] Implement calendar/datetime picker dialog
-- [X] Implement alarm popup (blinking, dismissable)
-- [X] Implement persistent JSON save/load
-- [X] Add restart button
-- [X] Final assembly and syntax verification passed
+- [X] Add `started_at` (Unix timestamp) field to TimerCard — set when timer starts/resumes, cleared on pause/reset
+- [X] Update `to_dict` to save `started_at`
+- [X] Update `from_dict` to: if state was RUNNING, compute remaining = saved_remaining - (now - started_at), then auto-resume the ticker
+- [X] Handle edge case: if computed remaining <= 0 on restore, fire the alarm immediately
+- [X] Handle PAUSED state restore: keep the saved remaining (no started_at math needed), restore as paused (orange) so user can resume
