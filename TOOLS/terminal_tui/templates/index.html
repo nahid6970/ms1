@@ -2166,9 +2166,15 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                     <span style="font-size:0.88rem; font-weight:600; color:var(--text-primary);">Browse Commit</span>
                     <code id="commit-browser-hash" style="font-size:0.72rem; color:#a78bfa; font-family:'Fira Code',monospace;"></code>
-                    <span id="commit-browser-msg" style="font-size:0.72rem; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:340px;"></span>
+                    <span id="commit-browser-msg" style="font-size:0.72rem; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;"></span>
                 </div>
-                <button onclick="closeCommitBrowser()" style="background:none;border:none;font-size:1.3rem;color:var(--text-secondary);cursor:pointer;line-height:1;padding:2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <button id="commit-browser-restore-all-btn" onclick="restoreAllFilesFromCommit()" title="Restore ALL files at this commit to your working tree" style="background:none; border:1px solid #a78bfa; border-radius:4px; color:#a78bfa; cursor:pointer; padding:4px 10px; font-size:0.72rem; transition:all 0.15s; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(167,139,250,0.12)'" onmouseleave="this.style.backgroundColor='transparent'">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        Restore all files
+                    </button>
+                    <button onclick="closeCommitBrowser()" style="background:none;border:none;font-size:1.3rem;color:var(--text-secondary);cursor:pointer;line-height:1;padding:2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+                </div>
             </div>
             <!-- Body -->
             <div style="display:flex; flex:1; overflow:hidden; min-height:0;">
@@ -7472,6 +7478,56 @@
                 alert('Error: ' + e.message);
                 btn.innerText = '⏮ Restore file';
                 btn.disabled = false;
+            }
+        }
+
+        async function restoreAllFilesFromCommit() {
+            if (!_browserHash || !activeProject) return;
+            const fileListEl = document.getElementById('commit-browser-files');
+            const rows = fileListEl.querySelectorAll('div[title]');
+            const files = Array.from(rows).map(r => r.title).filter(f => f);
+            if (files.length === 0) {
+                alert('No files loaded yet. Wait for the file list to load first.');
+                return;
+            }
+            if (!confirm(`Restore ALL ${files.length} files from commit ${_browserHash} to your working tree?\n\nThis will overwrite your current versions of these files.`)) return;
+
+            const btn = document.getElementById('commit-browser-restore-all-btn');
+            btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Restoring...`;
+            btn.disabled = true;
+
+            let success = 0, failed = [];
+            for (const f of files) {
+                try {
+                    const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/restore-file`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ hash: _browserHash, path: f })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) success++;
+                    else failed.push(f);
+                } catch(e) {
+                    failed.push(f);
+                }
+            }
+
+            if (failed.length === 0) {
+                btn.innerHTML = `✓ All ${success} restored`;
+                btn.style.borderColor = '#34d399';
+                btn.style.color = '#34d399';
+                setTimeout(() => {
+                    btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Restore all files`;
+                    btn.style.borderColor = '#a78bfa';
+                    btn.style.color = '#a78bfa';
+                    btn.disabled = false;
+                }, 3000);
+            } else {
+                btn.innerHTML = `⚠ ${success} ok, ${failed.length} failed`;
+                btn.style.borderColor = '#f59e0b';
+                btn.style.color = '#f59e0b';
+                btn.disabled = false;
+                console.warn('Failed to restore:', failed);
             }
         }
 
