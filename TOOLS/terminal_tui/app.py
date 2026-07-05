@@ -1015,51 +1015,61 @@ def api_git_graph(project):
 
         commits = []
         stdout = res.stdout or ''
-        # git log --shortstat outputs: <format_line>\n\n <stat_line>\n
-        # Split blocks by double newline
+        # git log --shortstat interleaves commit meta lines (containing \x00) and
+        # stat lines (plain text like " 2 files changed...").
+        # Merge commits produce NO stat line, so we can't rely on \n\n block splitting.
+        # Instead: scan line-by-line. Any line with \x00 is a commit meta line;
+        # any line without \x00 that follows a meta line is the stat for that commit.
         import re as _re
-        blocks = _re.split(r'\n\n+', stdout.strip())
-        for block in blocks:
-            block = block.strip()
-            if not block:
-                continue
-            block_lines = block.split('\n')
-            meta_line = block_lines[0].strip()
-            stat_line = block_lines[1].strip() if len(block_lines) > 1 else ''
-
+        pending_meta = None
+        pending_stat = ''
+        def flush_commit(meta_line, stat_line):
             parts = meta_line.split('\x00')
             if len(parts) < 6:
-                continue
-            short_hash  = (parts[0] if len(parts) > 0 else '').strip()
-            full_hash   = (parts[1] if len(parts) > 1 else '').strip()
-            parents_str = (parts[2] if len(parts) > 2 else '').strip()
-            refs        = (parts[3] if len(parts) > 3 else '').strip()
-            author      = (parts[4] if len(parts) > 4 else '').strip()
-            date        = (parts[5] if len(parts) > 5 else '').strip()
-            message     = (parts[6] if len(parts) > 6 else '').strip()
-            parents = [p.strip() for p in parents_str.split() if p.strip()]
-            ref_list = [r.strip() for r in refs.split(',') if r.strip()]
+                return None
+            short_hash  = parts[0].strip()
+            full_hash   = parts[1].strip() if len(parts) > 1 else ''
+            parents_str = parts[2].strip() if len(parts) > 2 else ''
+            refs        = parts[3].strip() if len(parts) > 3 else ''
+            author      = parts[4].strip() if len(parts) > 4 else ''
+            date        = parts[5].strip() if len(parts) > 5 else ''
+            message     = parts[6].strip() if len(parts) > 6 else ''
             if not short_hash:
-                continue
-
-            # Parse shortstat: " 2 files changed, 10 insertions(+), 3 deletions(-)"
+                return None
+            parents  = [p.strip() for p in parents_str.split() if p.strip()]
+            ref_list = [r.strip() for r in refs.split(',') if r.strip()]
             insertions, deletions = 0, 0
             m_ins = _re.search(r'(\d+) insertion', stat_line)
             m_del = _re.search(r'(\d+) deletion', stat_line)
             if m_ins: insertions = int(m_ins.group(1))
             if m_del: deletions = int(m_del.group(1))
-
-            commits.append({
-                "hash": short_hash,
-                "fullHash": full_hash,
-                "parents": parents,
-                "refs": ref_list,
-                "author": author,
-                "date": date,
-                "message": message,
-                "insertions": insertions,
-                "deletions": deletions
-            })
+            return {
+                "hash": short_hash, "fullHash": full_hash,
+                "parents": parents, "refs": ref_list,
+                "author": author, "date": date, "message": message,
+                "insertions": insertions, "deletions": deletions
+            }
+        for raw_line in stdout.split('\n'):
+            line = raw_line.strip()
+            if not line:
+                continue
+            if '\x00' in line:
+                # New commit meta line — flush previous
+                if pending_meta:
+                    c = flush_commit(pending_meta, pending_stat)
+                    if c:
+                        commits.append(c)
+                pending_meta = line
+                pending_stat = ''
+            else:
+                # Stat line for current pending commit
+                if pending_meta:
+                    pending_stat = line
+        # Flush last
+        if pending_meta:
+            c = flush_commit(pending_meta, pending_stat)
+            if c:
+                commits.append(c)
 
         # Get current branch
         res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=2)

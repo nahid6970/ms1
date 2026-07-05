@@ -7682,33 +7682,45 @@
                 return;
             }
 
+            // --- Lane assignment (single pass, top-to-bottom) ---
+            // slots[i] = fullHash we are waiting for in lane i, or null if free.
+            const slots = [];
             const laneOf = {};
-            const laneActive = [];
+
+            function getFreeSlot() {
+                const i = slots.indexOf(null);
+                return i !== -1 ? i : slots.length;
+            }
+
             commits.forEach(c => {
-                let lane = laneActive.indexOf(c.fullHash);
-                if (lane === -1) {
-                    lane = laneActive.findIndex(x => x === null || x === undefined);
-                    if (lane === -1) lane = laneActive.length;
-                }
+                // Which lane is this commit expected in?
+                let lane = slots.indexOf(c.fullHash);
+                if (lane === -1) lane = getFreeSlot(); // new branch head
                 laneOf[c.fullHash] = lane;
-                laneActive[lane] = null;
-                if (c.parents.length > 0) {
-                    const p0 = c.parents[0];
-                    if (laneActive.indexOf(p0) === -1) laneActive[lane] = p0;
-                }
-                for (let i = 1; i < c.parents.length; i++) {
-                    const pi = c.parents[i];
-                    if (laneActive.indexOf(pi) === -1) {
-                        let fl = laneActive.findIndex(x => x === null || x === undefined);
-                        if (fl === -1) fl = laneActive.length;
-                        laneActive[fl] = pi;
+
+                // Free this slot — commit has been placed
+                slots[lane] = null;
+
+                // Assign slots to parents
+                c.parents.forEach((p, pIdx) => {
+                    if (slots.indexOf(p) !== -1) return; // already tracked by another lane
+                    if (pIdx === 0) {
+                        slots[lane] = p; // first parent continues this lane
+                    } else {
+                        const sl = getFreeSlot();
+                        slots[sl] = p; // merge source gets a free slot
                     }
-                }
+                });
+
+                // Compact trailing nulls so lane count stays minimal
+                while (slots.length > 0 && slots[slots.length - 1] === null) slots.pop();
             });
 
+            // --- Rendering ---
             const table = document.createElement('table');
             table.style.cssText = 'border-collapse:collapse; width:100%;';
-            const currentActive = [];
+            // drawSlots mirrors slots but rebuilt as we render
+            const drawSlots = [];
             const laneSpacing = 16;
             const leftPadding = 12;
 
@@ -7716,18 +7728,13 @@
                 const lane = laneOf[c.fullHash] ?? 0;
                 const color = GRAPH_COLORS[lane % GRAPH_COLORS.length];
                 const isMerge = c.parents.length > 1;
+                const isNewBranch = (drawSlots.indexOf(c.fullHash) === -1);
 
-                // Determine if this commit is starting a new branch (not expected by any child above)
-                const isNewBranch = (currentActive.indexOf(c.fullHash) === -1);
-
+                // SVG width based on currently active lanes
                 let maxLane = lane;
-                currentActive.forEach((h, l) => { if (h) maxLane = Math.max(maxLane, l); });
-                c.parents.forEach(p => {
-                    const pLane = currentActive.indexOf(p);
-                    if (pLane !== -1) maxLane = Math.max(maxLane, pLane);
-                });
+                drawSlots.forEach((h, l) => { if (h != null) maxLane = Math.max(maxLane, l); });
+                const svgW = leftPadding + (maxLane + 1) * laneSpacing + laneSpacing;
 
-                const svgW = leftPadding + (maxLane + 1) * laneSpacing;
                 let badges = '';
                 (c.refs || []).forEach(r => {
                     if (!r) return;
@@ -7746,34 +7753,35 @@
                 });
 
                 let lines = '';
-                // 1. Draw vertical lines for other active branches passing through this row
-                currentActive.forEach((h, l) => {
-                    if (h && l !== lane) {
+
+                // 1. Pass-through lines for every still-active lane except this commit's lane
+                drawSlots.forEach((h, l) => {
+                    if (h != null && l !== lane) {
                         const x = leftPadding + l * laneSpacing;
                         lines += `<line x1="${x}" y1="0" x2="${x}" y2="50" stroke="${GRAPH_COLORS[l % GRAPH_COLORS.length]}" stroke-width="2.5" stroke-linecap="round"/>`;
                     }
                 });
 
-                // 2. Draw vertical line entering this commit dot from top (if not a new branch start)
+                // 2. Incoming line from top (only for continuing branches, not new heads)
                 if (!isNewBranch) {
                     const x = leftPadding + lane * laneSpacing;
                     lines += `<line x1="${x}" y1="0" x2="${x}" y2="25" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`;
                 }
 
-                if (currentActive[lane] === c.fullHash) currentActive[lane] = null;
+                // 3. Free this commit's draw slot
+                if (drawSlots[lane] === c.fullHash) drawSlots[lane] = null;
 
-                // 3. Draw lines leaving this commit dot going down to its parents
+                // 4. Outgoing lines to parents
                 c.parents.forEach((p, pIdx) => {
-                    let pLane = currentActive.indexOf(p);
+                    let pLane = drawSlots.indexOf(p);
                     if (pLane === -1) {
                         if (pIdx === 0) {
                             pLane = lane;
-                            currentActive[lane] = p;
                         } else {
-                            pLane = currentActive.findIndex(x => x === null || x === undefined);
-                            if (pLane === -1) pLane = currentActive.length;
-                            currentActive[pLane] = p;
+                            pLane = drawSlots.indexOf(null);
+                            if (pLane === -1) pLane = drawSlots.length;
                         }
+                        drawSlots[pLane] = p;
                     }
                     const x1 = leftPadding + lane * laneSpacing;
                     const x2 = leftPadding + pLane * laneSpacing;
@@ -7785,7 +7793,10 @@
                     }
                 });
 
-                // 4. Draw the commit dot itself
+                // Root commits (no parents): free the lane so it doesn't linger
+                if (c.parents.length === 0 && drawSlots[lane] === c.fullHash) drawSlots[lane] = null;
+
+                // 5. Commit dot
                 const cx = leftPadding + lane * laneSpacing;
                 if (isMerge) {
                     lines += `<circle cx="${cx}" cy="25" r="5.5" fill="${color}"/>`;
