@@ -2050,7 +2050,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary); cursor: pointer; letter-spacing: 0.02em;">Past Commits</label>
-                        <span id="past-commits-arrow" style="font-size: 0.7rem; color: var(--text-secondary); transition: transform 0.25s ease; display:inline-flex; align-items:center; transform: rotate(0deg);">▸</span>
+                        <span id="past-commits-arrow" style="transition: transform 0.25s ease; display:inline-flex; align-items:center; transform: rotate(0deg);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
                     </div>
                     <button onclick="event.stopPropagation(); refreshPastCommits();" id="past-commits-refresh-btn" style="display:none; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); color: #a78bfa; cursor: pointer; font-size: 0.68rem; padding: 3px 8px; border-radius: 5px; transition: all 0.2s; font-weight: 500;" onmouseenter="this.style.backgroundColor='rgba(167,139,250,0.2)'" onmouseleave="this.style.backgroundColor='rgba(167,139,250,0.1)'" title="Refresh commits">↻ Refresh</button>
                 </div>
@@ -2065,7 +2065,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
                         <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary); cursor: pointer; letter-spacing: 0.02em;">Branches</label>
-                        <span id="branch-panel-arrow" style="font-size: 0.7rem; color: var(--text-secondary); transition: transform 0.25s ease; display:inline-flex; align-items:center; transform: rotate(0deg);">▸</span>
+                        <span id="branch-panel-arrow" style="transition: transform 0.25s ease; display:inline-flex; align-items:center; transform: rotate(0deg);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
                     </div>
                     <button onclick="event.stopPropagation(); loadBranches();" id="branch-refresh-btn" style="display:none; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); color: #34d399; cursor: pointer; font-size: 0.68rem; padding: 3px 8px; border-radius: 5px; transition: all 0.2s; font-weight: 500;" onmouseenter="this.style.backgroundColor='rgba(52,211,153,0.2)'" onmouseleave="this.style.backgroundColor='rgba(52,211,153,0.1)'" title="Refresh branches">↻ Refresh</button>
                 </div>
@@ -2100,7 +2100,7 @@
                     <div style="display:flex; align-items:center; gap:8px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
                         <label style="font-size:0.8rem; font-weight:600; color:var(--text-primary); cursor:pointer; letter-spacing:0.02em;">Graph</label>
-                        <span id="graph-panel-arrow" style="font-size:0.7rem; color:var(--text-secondary); transition:transform 0.25s ease; display:inline-flex; align-items:center; transform:rotate(0deg);">▸</span>
+                        <span id="graph-panel-arrow" style="transition:transform 0.25s ease; display:inline-flex; align-items:center; transform:rotate(0deg);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
                     </div>
                     <button onclick="event.stopPropagation(); loadGitGraph();" id="graph-refresh-btn" style="display:none; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#38bdf8; cursor:pointer; font-size:0.68rem; padding:3px 8px; border-radius:5px; transition:all 0.2s; font-weight:500;" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.2)'" onmouseleave="this.style.backgroundColor='rgba(56,189,248,0.1)'" title="Refresh graph">↻ Refresh</button>
                 </div>
