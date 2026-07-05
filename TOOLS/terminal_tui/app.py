@@ -1133,6 +1133,70 @@ def api_git_push(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/diff', methods=['GET'])
+def api_git_diff(project):
+    """Get git diff. from_ref defaults to HEAD (last commit). to_ref defaults to working tree."""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    from_ref = request.args.get("from", "HEAD")
+    to_ref   = request.args.get("to", "")   # empty = working tree
+
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath((res_root.stdout or '').strip())
+
+        # Build diff command
+        if to_ref:
+            cmd = ["git", "diff", from_ref, to_ref, "--"]
+        else:
+            # diff between from_ref and working tree (includes staged+unstaged)
+            cmd = ["git", "diff", from_ref, "--"]
+
+        res = subprocess.run(cmd, cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=15)
+
+        diff_text = (res.stdout or '')
+
+        # Also get list of changed files with status
+        stat_cmd = ["git", "diff", "--stat", from_ref] if not to_ref else ["git", "diff", "--stat", from_ref, to_ref]
+        res_stat = subprocess.run(stat_cmd, cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10)
+
+        # Parse changed files from name-status
+        ns_cmd = ["git", "diff", "--name-status", from_ref] if not to_ref else ["git", "diff", "--name-status", from_ref, to_ref]
+        res_ns = subprocess.run(ns_cmd, cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10)
+
+        files = []
+        for line in (res_ns.stdout or '').strip().split('\n'):
+            if not line.strip():
+                continue
+            parts = line.split('\t', 1)
+            if len(parts) == 2:
+                status, fname = parts[0].strip(), parts[1].strip()
+                files.append({"status": status, "file": fname})
+
+        return jsonify({
+            "diff": diff_text,
+            "files": files,
+            "from": from_ref,
+            "to": to_ref or "working tree",
+            "stat": (res_stat.stdout or '').strip()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/project/<project>/git/checkout', methods=['POST'])
 def api_git_checkout(project):
     """Checkout a specific commit (detached HEAD)"""
