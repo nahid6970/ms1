@@ -982,6 +982,74 @@ def api_git_past_commits(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/graph', methods=['GET'])
+def api_git_graph(project):
+    """Get git log graph data for visual commit graph"""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=2)
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath((res_root.stdout or '').strip())
+
+        limit = request.args.get("limit", "40")
+        try:
+            limit = min(int(limit), 100)
+        except Exception:
+            limit = 40
+
+        # Get structured log with parents and refs
+        res = subprocess.run(
+            ["git", "log", "--all", f"-n{limit}",
+             "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10
+        )
+        if res.returncode != 0:
+            return jsonify({"error": "Failed to get git log"}), 500
+
+        commits = []
+        stdout = res.stdout or ''
+        for line in stdout.strip().split('\n'):
+            if not line.strip():
+                continue
+            parts = line.split('\x00')
+            if len(parts) < 6:
+                continue
+            short_hash  = (parts[0] if len(parts) > 0 else '').strip()
+            full_hash   = (parts[1] if len(parts) > 1 else '').strip()
+            parents_str = (parts[2] if len(parts) > 2 else '').strip()
+            refs        = (parts[3] if len(parts) > 3 else '').strip()
+            author      = (parts[4] if len(parts) > 4 else '').strip()
+            date        = (parts[5] if len(parts) > 5 else '').strip()
+            message     = (parts[6] if len(parts) > 6 else '').strip()
+            parents = [p.strip() for p in parents_str.split() if p.strip()]
+            ref_list = [r.strip() for r in refs.split(',') if r.strip()]
+            if not short_hash:
+                continue
+            commits.append({
+                "hash": short_hash,
+                "fullHash": full_hash,
+                "parents": parents,
+                "refs": ref_list,
+                "author": author,
+                "date": date,
+                "message": message
+            })
+
+        # Get current branch
+        res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=2)
+        current_branch = (res_branch.stdout or '').strip() if res_branch.returncode == 0 else ""
+
+        return jsonify({"commits": commits, "currentBranch": current_branch})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/project/<project>/git/commit/rename', methods=['POST'])
 def api_git_rename_commit(project):
     """Rename (amend) the most recent commit message"""
