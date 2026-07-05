@@ -1880,6 +1880,10 @@
                         <input type="checkbox" id="settings-selector-btn-theme" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-selector-btn-theme" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Apply workspace theme to selector button</label>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-diff-wrap" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-diff-wrap" style="font-size: 0.8rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Wrap long lines in Diff &amp; Browse viewers</label>
+                    </div>
                 </div>
 
                 <!-- Current badge customization -->
@@ -5589,7 +5593,8 @@
             document.getElementById('settings-cur-badge-bold').checked = localStorage.getItem('cur-badge-bold') !== 'false';
 
             document.getElementById('settings-selector-btn-theme').checked = localStorage.getItem('selector-btn-theme') !== 'false';
-            
+            document.getElementById('settings-diff-wrap').checked = localStorage.getItem('diff-wrap-text') === 'true';
+
             document.getElementById('settings-modal').classList.add('show');
         }
 
@@ -5651,6 +5656,7 @@
             localStorage.setItem('cur-badge-bold',   document.getElementById('settings-cur-badge-bold').checked);
 
             localStorage.setItem('selector-btn-theme', document.getElementById('settings-selector-btn-theme').checked);
+            localStorage.setItem('diff-wrap-text', document.getElementById('settings-diff-wrap').checked);
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -7302,6 +7308,7 @@
 
             const table = document.createElement('table');
             table.style.cssText = 'border-collapse:collapse; width:100%; font-family:"Fira Code",monospace; font-size:0.74rem;';
+            const wrapText = localStorage.getItem('diff-wrap-text') === 'true';
             let lineNumOld = 0, lineNumNew = 0;
 
             fileLines.forEach(line => {
@@ -7333,7 +7340,7 @@
                 tr.innerHTML = `
                     <td style="${numStyle}">${numOldTxt}</td>
                     <td style="${numStyle}">${numNewTxt}</td>
-                    <td style="padding:0 12px;color:${color};white-space:pre;">${line.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>
+                    <td style="padding:0 12px;color:${color};white-space:${wrapText ? 'pre-wrap' : 'pre'};">${line.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>
                 `;
                 table.appendChild(tr);
             });
@@ -7445,6 +7452,7 @@
                 // Render as table with line numbers (same pattern as file viewer)
                 const lines = data.content.split('\n');
                 if (lines[lines.length-1] === '') lines.pop();
+                const wrapBrowse = localStorage.getItem('diff-wrap-text') === 'true';
                 const table = document.createElement('table');
                 table.style.cssText = 'border-collapse:collapse; width:100%; font-family:"Fira Code",monospace; font-size:0.74rem;';
                 lines.forEach((line, i) => {
@@ -7453,7 +7461,7 @@
                     tdN.style.cssText = 'width:1%; white-space:nowrap; padding:0 10px 0 6px; text-align:right; color:#475569; user-select:none; font-size:0.68rem; border-right:1px solid rgba(255,255,255,0.06); vertical-align:top;';
                     tdN.innerText = i + 1;
                     const tdC = document.createElement('td');
-                    tdC.style.cssText = 'padding:0 12px; color:var(--text-primary); white-space:pre; vertical-align:top;';
+                    tdC.style.cssText = `padding:0 12px; color:var(--text-primary); white-space:${wrapBrowse ? 'pre-wrap' : 'pre'}; vertical-align:top;`;
                     tdC.textContent = line;
                     tr.appendChild(tdN);
                     tr.appendChild(tdC);
