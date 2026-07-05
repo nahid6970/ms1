@@ -1684,6 +1684,7 @@ class PrepTab(QWidget):
         self.file_modes: dict[str, str] = {}
         self.disabled_files: set[str] = set()
         self.project_root = ""
+        self._sort_mode: str = "none"   # "none" | "ext" | "name"
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
         self._load_session()
@@ -2051,6 +2052,22 @@ class PrepTab(QWidget):
         self._apply_toggle_style(btn_toggle, not is_disabled)
         btn_toggle.clicked.connect(lambda _, f=fp, b=btn_toggle, w=widget, lb=lbl, mc=mode_combo: self._toggle_file(f, b, w, lb, mc))
 
+        # Token estimate label
+        try:
+            sz_bytes = os.path.getsize(fp)
+            tokens = int(sz_bytes / 3.5)
+            if tokens >= 1000:
+                tok_text = f"{tokens/1000:.1f}k"
+            else:
+                tok_text = str(tokens)
+        except Exception:
+            tok_text = "?"
+        tok_lbl = QLabel(tok_text)
+        tok_lbl.setFixedWidth(40)
+        tok_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        tok_lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-family: 'Consolas'; font-size: 8pt;")
+        tok_lbl.setToolTip(f"Estimated token count (file size / 3.5)")
+
         # Apply initial dimmed state if disabled
         if is_disabled:
             lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
@@ -2060,6 +2077,7 @@ class PrepTab(QWidget):
             hl.addWidget(icon_lbl, 0)
         hl.addWidget(lbl, 1)
         hl.addWidget(mode_combo, 0)
+        hl.addWidget(tok_lbl, 0)
         hl.addWidget(btn_toggle, 0)
 
         # Right-click on the widget row → context menu to remove
@@ -2159,6 +2177,94 @@ class PrepTab(QWidget):
         self._save_session()
         self.status_cb("Set all files to Outline (API Skeleton) mode")
 
+    # ── Header bar actions ────────────────────────────────────────────────────
+
+    def _sort_by_ext(self):
+        if self._sort_mode == "ext":
+            self._sort_mode = "ext_rev"
+        elif self._sort_mode == "ext_rev":
+            self._sort_mode = "none"
+        else:
+            self._sort_mode = "ext"
+        self._apply_sort()
+        self._update_sort_buttons()
+
+    def _sort_by_name(self):
+        if self._sort_mode == "name":
+            self._sort_mode = "name_rev"
+        elif self._sort_mode == "name_rev":
+            self._sort_mode = "none"
+        else:
+            self._sort_mode = "name"
+        self._apply_sort()
+        self._update_sort_buttons()
+
+    def _sort_by_tokens(self):
+        if self._sort_mode == "tokens":
+            self._sort_mode = "tokens_rev"
+        elif self._sort_mode == "tokens_rev":
+            self._sort_mode = "none"
+        else:
+            self._sort_mode = "tokens"
+        self._apply_sort()
+        self._update_sort_buttons()
+
+    def _toggle_all(self):
+        # If any file is enabled → disable all. If all disabled → enable all.
+        if len(self.disabled_files) < len(self.files):
+            self.disabled_files = set(self.files)
+            self.status_cb("All files disabled")
+        else:
+            self.disabled_files.clear()
+            self.status_cb("All files enabled")
+        self._refresh_file_items()
+        self._save_session()
+
+    def _apply_sort(self):
+        """Re-order self.files according to current _sort_mode, then refresh."""
+        enabled  = [fp for fp in self.files if fp not in self.disabled_files]
+        disabled = [fp for fp in self.files if fp in self.disabled_files]
+
+        def sort_key(fp):
+            if self._sort_mode in ("ext", "ext_rev"):
+                return os.path.splitext(fp)[1].lower()
+            elif self._sort_mode in ("tokens", "tokens_rev"):
+                try:
+                    return os.path.getsize(fp)
+                except Exception:
+                    return 0
+            else:  # name / name_rev
+                return os.path.basename(fp).lower()
+
+        reverse = self._sort_mode in ("ext_rev", "name_rev", "tokens_rev")
+
+        if self._sort_mode != "none":
+            enabled.sort(key=sort_key, reverse=reverse)
+            disabled.sort(key=sort_key, reverse=reverse)
+
+        self.files = enabled + disabled
+        self._refresh_file_items()
+
+    def _update_sort_buttons(self):
+        dim    = f"color: {CP_SUB};"
+        active = f"color: {CP_CYAN}; text-decoration: underline;"
+        base   = "background: transparent; border: none; font-family: 'Consolas'; font-size: 8pt; font-weight: bold; padding: 0 2px;"
+
+        ext_s    = active if self._sort_mode in ("ext",    "ext_rev")    else dim
+        name_s   = active if self._sort_mode in ("name",   "name_rev")   else dim
+        tokens_s = active if self._sort_mode in ("tokens", "tokens_rev") else dim
+
+        ext_arrow    = "↑" if self._sort_mode == "ext_rev"    else "↓" if self._sort_mode == "ext"    else "↕"
+        name_arrow   = "↑" if self._sort_mode == "name_rev"   else "↓" if self._sort_mode == "name"   else "↕"
+        tokens_arrow = "↑" if self._sort_mode == "tokens_rev" else "↓" if self._sort_mode == "tokens" else "↕"
+
+        self.btn_col_ext.setText(f"EXT {ext_arrow}")
+        self.btn_col_ext.setStyleSheet(f"QPushButton {{ {base} {ext_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
+        self.btn_col_name.setText(f"NAME {name_arrow}")
+        self.btn_col_name.setStyleSheet(f"QPushButton {{ {base} {name_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
+        self.btn_col_tokens.setText(f"TOKENS {tokens_arrow}")
+        self.btn_col_tokens.setStyleSheet(f"QPushButton {{ {base} {tokens_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
+
     def _build(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)
@@ -2234,6 +2340,79 @@ class PrepTab(QWidget):
         bulk_row.addWidget(btn_bulk_out)
         self.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
         vf.addWidget(self.file_mode_bar)
+
+        # ── Column header bar ──────────────────────────────────
+        header_bar = QWidget()
+        header_bar.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
+        header_bar.setFixedHeight(22)
+        hh = QHBoxLayout(header_bar)
+        hh.setContentsMargins(4, 0, 4, 0)
+        hh.setSpacing(2)
+
+        self.btn_col_ext = QPushButton("EXT ↕")
+        self.btn_col_ext.setFixedHeight(20)
+        self.btn_col_ext.setFixedWidth(52)
+        self.btn_col_ext.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_ext.setToolTip("Sort by file extension")
+        self.btn_col_ext.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0 2px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
+        self.btn_col_ext.clicked.connect(self._sort_by_ext)
+
+        self.btn_col_name = QPushButton("NAME ↕")
+        self.btn_col_name.setFixedHeight(20)
+        self.btn_col_name.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_name.setToolTip("Sort by file name")
+        self.btn_col_name.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0 2px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
+        self.btn_col_name.clicked.connect(self._sort_by_name)
+
+        self.btn_col_toggle = QPushButton("⬤ TOGGLE ALL")
+        self.btn_col_toggle.setFixedHeight(20)
+        self.btn_col_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_toggle.setToolTip("Enable all / Disable all")
+        self.btn_col_toggle.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0 4px;
+            }}
+            QPushButton:hover {{ color: {CP_GREEN}; }}
+        """)
+        self.btn_col_toggle.clicked.connect(self._toggle_all)
+
+        self.btn_col_tokens = QPushButton("TOKENS ↕")
+        self.btn_col_tokens.setFixedHeight(20)
+        self.btn_col_tokens.setFixedWidth(72)
+        self.btn_col_tokens.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_tokens.setToolTip("Sort by estimated token count")
+        self.btn_col_tokens.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
+                padding: 0 2px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
+        self.btn_col_tokens.clicked.connect(self._sort_by_tokens)
+
+        hh.addWidget(self.btn_col_ext)
+        hh.addWidget(self.btn_col_name, 1)
+        hh.addWidget(self.btn_col_tokens)
+        hh.addWidget(self.btn_col_toggle)
+        vf.addWidget(header_bar)
+        # ── end header bar ─────────────────────────────────────
 
         self.file_list = QListWidget()
         self.file_list.setMinimumHeight(200)
