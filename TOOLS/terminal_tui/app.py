@@ -2104,6 +2104,64 @@ def api_tools_stats(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/tools/kill', methods=['POST'])
+def api_tools_kill():
+    """Kill a process by PID or name"""
+    import signal as _signal
+    data = request.get_json(silent=True) or {}
+    target = str(data.get("target", "")).strip()
+    if not target:
+        return jsonify({"error": "No PID or name provided"}), 400
+
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    killed = []
+    errors = []
+
+    # Determine if target is a PID (all digits) or a name
+    if target.isdigit():
+        pid = int(target)
+        try:
+            if sys.platform == "win32":
+                res = subprocess.run(["taskkill", "/F", "/PID", str(pid)],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                     text=True, creationflags=cf)
+                if res.returncode == 0:
+                    killed.append(f"PID {pid}")
+                else:
+                    errors.append(res.stderr.strip() or f"Failed to kill PID {pid}")
+            else:
+                os.kill(pid, _signal.SIGKILL)
+                killed.append(f"PID {pid}")
+        except Exception as e:
+            errors.append(str(e))
+    else:
+        # Kill by name
+        try:
+            if sys.platform == "win32":
+                res = subprocess.run(["taskkill", "/F", "/IM", target],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                     text=True, creationflags=cf)
+                if res.returncode == 0:
+                    killed.append(f'"{target}" (all instances)')
+                else:
+                    errors.append(res.stderr.strip() or f'No process named "{target}" found')
+            else:
+                res = subprocess.run(["pkill", "-9", "-f", target],
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                     text=True)
+                if res.returncode == 0:
+                    killed.append(f'"{target}" (matching processes)')
+                else:
+                    errors.append(f'No process matching "{target}" found')
+        except Exception as e:
+            errors.append(str(e))
+
+    if killed:
+        return jsonify({"success": True, "killed": killed, "errors": errors})
+    else:
+        return jsonify({"success": False, "killed": [], "errors": errors}), 500
+
+
 if __name__ == '__main__':
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     

@@ -1587,6 +1587,7 @@
         <div class="qtools-tabs">
             <div class="qtools-tab active" data-tab="grep"  onclick="switchQTab('grep')">🔍 Grep</div>
             <div class="qtools-tab"        data-tab="stats" onclick="switchQTab('stats')">📊 Stats</div>
+            <div class="qtools-tab"        data-tab="kill"  onclick="switchQTab('kill')">💀 Kill</div>
         </div>
         <!-- Grep panel -->
         <div class="qtools-panel active" id="qpanel-grep" style="max-height:300px; overflow-y:auto;">
@@ -1610,6 +1611,18 @@
             <div id="qt-stats-result" style="margin-top:10px; min-height:40px;">
                 <span style="color:var(--text-muted); font-size:0.75rem;">Enter a path and click Analyse.</span>
             </div>
+        </div>
+        <!-- Kill panel -->
+        <div class="qtools-panel" id="qpanel-kill">
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">Enter a PID (e.g. <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">1234</code>) or process name (e.g. <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">python</code>)</div>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <input type="text" id="qt-kill-target" placeholder="PID or process name…" autocomplete="off"
+                    style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
+                    onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='var(--border-color)'"
+                    onkeydown="if(event.key==='Enter') runQKill()">
+                <button onclick="runQKill()" style="padding:5px 12px; background:#ef4444; border:none; border-radius:6px; color:white; font-size:0.77rem; cursor:pointer; font-weight:600; white-space:nowrap;">Kill</button>
+            </div>
+            <div id="qt-kill-result" style="margin-top:10px; min-height:20px; font-size:0.78rem;"></div>
         </div>
     </div>
 
@@ -6798,6 +6811,28 @@
                     `<div class="qtools-stat-row"><span class="qtools-stat-k">${k}</span><span class="qtools-stat-v">${v}</span></div>`
                 ).join('');
             } catch(err) { resEl.innerHTML = `<div style="color:#ef4444;font-size:0.78rem;">${err.message}</div>`; }
+        }
+
+        async function runQKill() {
+            const target = (document.getElementById('qt-kill-target').value || '').trim();
+            const resEl  = document.getElementById('qt-kill-result');
+            if (!target) { resEl.innerHTML = '<span style="color:#f59e0b;">Enter a PID or process name.</span>'; return; }
+            resEl.innerHTML = '<span style="color:var(--text-muted);">Killing…</span>';
+            try {
+                const res  = await fetch('/api/tools/kill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    resEl.innerHTML = `<span style="color:#22c55e;">✓ Killed: ${data.killed.join(', ')}</span>`
+                        + (data.errors.length ? `<br><span style="color:#f59e0b; font-size:0.72rem;">${data.errors.join('; ')}</span>` : '');
+                    document.getElementById('qt-kill-target').value = '';
+                } else {
+                    resEl.innerHTML = `<span style="color:#ef4444;">✗ ${data.errors.join('; ')}</span>`;
+                }
+            } catch(err) { resEl.innerHTML = `<span style="color:#ef4444;">${err.message}</span>`; }
         }
 
         // ══════════════════════════════════════════════════════════════════════
