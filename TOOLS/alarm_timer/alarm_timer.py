@@ -484,6 +484,7 @@ class TimerCard(QFrame):
         # countdown display
         self._display = QLabel(fmt_secs(self.remaining))
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._display.setToolTip("Click to show/hide controls")
         self._display.setStyleSheet(
             f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px;"
@@ -504,8 +505,10 @@ class TimerCard(QFrame):
             f"color: {CP_SUBTEXT}; font-size: 8pt; letter-spacing: 1px;"
         )
 
-        # buttons
-        btn_row = QHBoxLayout()
+        # buttons row — hidden until user clicks the card
+        self._btn_widget = QWidget()
+        btn_row = QHBoxLayout(self._btn_widget)
+        btn_row.setContentsMargins(0, 0, 0, 0)
         btn_row.setSpacing(4)
         self._btn_start = self._mkbtn("▶  START",  CP_GREEN,  "#000")
         self._btn_pause = self._mkbtn("⏸  PAUSE",  CP_ORANGE, "#000")
@@ -514,6 +517,7 @@ class TimerCard(QFrame):
         btn_row.addWidget(self._btn_start)
         btn_row.addWidget(self._btn_pause)
         btn_row.addWidget(self._btn_reset)
+        self._btn_widget.setVisible(False)   # hidden by default
 
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
@@ -524,11 +528,21 @@ class TimerCard(QFrame):
         root.addWidget(self._prog_bg)
         root.addWidget(self._status)
         root.addWidget(sep)
-        root.addLayout(btn_row)
+        root.addWidget(self._btn_widget)
 
         self._btn_start.clicked.connect(self._on_start)
         self._btn_pause.clicked.connect(self._on_pause)
         self._btn_reset.clicked.connect(self._on_reset)
+
+        # click on display or status toggles the button row
+        self._display.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._display.mousePressEvent = lambda e: self._toggle_controls()
+        self._status.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._status.mousePressEvent  = lambda e: self._toggle_controls()
+
+    def _toggle_controls(self):
+        visible = not self._btn_widget.isVisible()
+        self._btn_widget.setVisible(visible)
 
     def _mkbtn(self, text, bg, fg):
         b = QPushButton(text)
@@ -718,21 +732,27 @@ class ColumnWidget(QFrame):
         )
         self._name_lbl.setToolTip("Click ✏ to rename")
 
-        ren_btn = QPushButton("✏")
-        ren_btn.setFixedSize(24, 24)
+        ren_btn = QPushButton("✏ RENAME")
+        ren_btn.setFixedHeight(26)
         ren_btn.setStyleSheet(
-            f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; }}"
-            f"QPushButton:hover {{ color: {CP_CYAN}; }}"
+            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM};"
+            f" color: {CP_CYAN}; font-size: 8pt; font-weight: bold;"
+            f" padding: 0 6px; }}"
+            f"QPushButton:hover {{ border-color: {CP_CYAN}; background: #252525; }}"
+            f"QPushButton:pressed {{ background: {CP_CYAN}; color: #000; }}"
         )
         ren_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         ren_btn.setToolTip("Rename column")
         ren_btn.clicked.connect(self._on_rename)
 
-        del_btn = QPushButton("✖")
-        del_btn.setFixedSize(24, 24)
+        del_btn = QPushButton("✖ DEL")
+        del_btn.setFixedHeight(26)
         del_btn.setStyleSheet(
-            f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; }}"
-            f"QPushButton:hover {{ color: {CP_RED}; }}"
+            f"QPushButton {{ background: #1e1e1e; border: 1px solid {CP_DIM};"
+            f" color: {CP_RED}; font-size: 8pt; font-weight: bold;"
+            f" padding: 0 6px; }}"
+            f"QPushButton:hover {{ border-color: {CP_RED}; background: #2a1010; }}"
+            f"QPushButton:pressed {{ background: {CP_RED}; color: #fff; }}"
         )
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.setToolTip("Delete column")

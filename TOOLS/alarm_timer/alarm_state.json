@@ -33,8 +33,8 @@
           "id": "20f44ca4",
           "label": "Timer",
           "total_seconds": 5,
-          "remaining": 0,
-          "state": "done"
+          "remaining": 5,
+          "state": "idle"
         }
       ]
     }
