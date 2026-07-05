@@ -1006,7 +1006,8 @@ def api_git_graph(project):
         # Get structured log with parents and refs
         res = subprocess.run(
             ["git", "log", "--all", f"-n{limit}",
-             "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s"],
+             "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s%x00",
+             "--shortstat"],
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10
         )
         if res.returncode != 0:
@@ -1014,10 +1015,19 @@ def api_git_graph(project):
 
         commits = []
         stdout = res.stdout or ''
-        for line in stdout.strip().split('\n'):
-            if not line.strip():
+        # git log --shortstat outputs: <format_line>\n\n <stat_line>\n
+        # Split blocks by double newline
+        import re as _re
+        blocks = _re.split(r'\n\n+', stdout.strip())
+        for block in blocks:
+            block = block.strip()
+            if not block:
                 continue
-            parts = line.split('\x00')
+            block_lines = block.split('\n')
+            meta_line = block_lines[0].strip()
+            stat_line = block_lines[1].strip() if len(block_lines) > 1 else ''
+
+            parts = meta_line.split('\x00')
             if len(parts) < 6:
                 continue
             short_hash  = (parts[0] if len(parts) > 0 else '').strip()
@@ -1031,6 +1041,14 @@ def api_git_graph(project):
             ref_list = [r.strip() for r in refs.split(',') if r.strip()]
             if not short_hash:
                 continue
+
+            # Parse shortstat: " 2 files changed, 10 insertions(+), 3 deletions(-)"
+            insertions, deletions = 0, 0
+            m_ins = _re.search(r'(\d+) insertion', stat_line)
+            m_del = _re.search(r'(\d+) deletion', stat_line)
+            if m_ins: insertions = int(m_ins.group(1))
+            if m_del: deletions = int(m_del.group(1))
+
             commits.append({
                 "hash": short_hash,
                 "fullHash": full_hash,
@@ -1038,7 +1056,9 @@ def api_git_graph(project):
                 "refs": ref_list,
                 "author": author,
                 "date": date,
-                "message": message
+                "message": message,
+                "insertions": insertions,
+                "deletions": deletions
             })
 
         # Get current branch
