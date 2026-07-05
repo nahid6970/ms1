@@ -7257,13 +7257,18 @@
                     fileList.appendChild(row);
                 });
 
-                // Fit panel width to longest filename
-                const longestDiffName = data.files.reduce((a, b) => a.file.length > b.file.length ? a : b, {file:''}).file;
+                // Fit panel width to longest filename (display name only, not full path)
+                const longestDiffName = data.files.reduce((a, b) => {
+                    const an = a.file.split('/').pop();
+                    const bn = b.file.split('/').pop();
+                    return an.length > bn.length ? a : b;
+                }, {file:''}).file.split('/').pop();
                 const _cvs = document.createElement('canvas');
                 const _ctx = _cvs.getContext('2d');
                 _ctx.font = '11.52px "Fira Code", monospace';
                 const _tw = _ctx.measureText(longestDiffName).width;
-                const _pw = Math.min(Math.max(Math.ceil(_tw) + 36, 100), 360);
+                // +36 for status badge (M/A/D) + padding + border
+                const _pw = Math.min(Math.max(Math.ceil(_tw) + 50, 90), 280);
                 fileList.style.width = _pw + 'px';
 
                 // Auto-select first file
