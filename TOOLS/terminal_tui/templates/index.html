@@ -7160,31 +7160,20 @@
                 return;
             }
 
-            // Simple lane assignment: each commit gets a lane based on its branch
-            // Track: for each commit hash, which lane it should be on
-            const laneOf = {};       // full hash -> lane index
-            const laneActive = [];   // lane index -> full hash of "expected next" commit
-            
+            const laneOf = {};
+            const laneActive = [];
             commits.forEach(c => {
-                // Find if this commit is already expected on a lane
                 let lane = laneActive.indexOf(c.fullHash);
                 if (lane === -1) {
-                    // New commit not expected — find free lane or add new
                     lane = laneActive.findIndex(x => x === null || x === undefined);
                     if (lane === -1) lane = laneActive.length;
                 }
                 laneOf[c.fullHash] = lane;
-
-                // Clear this lane — commit consumed it
                 laneActive[lane] = null;
-
-                // Assign parents to lanes
                 if (c.parents.length > 0) {
                     const p0 = c.parents[0];
-                    // First parent continues same lane (if not already assigned)
                     if (laneActive.indexOf(p0) === -1) laneActive[lane] = p0;
                 }
-                // Additional parents (merge sources) get new lanes
                 for (let i = 1; i < c.parents.length; i++) {
                     const pi = c.parents[i];
                     if (laneActive.indexOf(pi) === -1) {
@@ -7197,15 +7186,26 @@
 
             const table = document.createElement('table');
             table.style.cssText = 'border-collapse:collapse; width:100%;';
+            const currentActive = [];
+            const laneSpacing = 16;
+            const leftPadding = 12;
 
             commits.forEach(c => {
                 const lane = laneOf[c.fullHash] ?? 0;
                 const color = GRAPH_COLORS[lane % GRAPH_COLORS.length];
                 const isMerge = c.parents.length > 1;
-                const laneCount = Math.max(lane + 1, 1);
-                const svgW = 14 + lane * 14;
 
-                // Build ref badges
+                // Determine if this commit is starting a new branch (not expected by any child above)
+                const isNewBranch = (currentActive.indexOf(c.fullHash) === -1);
+
+                let maxLane = lane;
+                currentActive.forEach((h, l) => { if (h) maxLane = Math.max(maxLane, l); });
+                c.parents.forEach(p => {
+                    const pLane = currentActive.indexOf(p);
+                    if (pLane !== -1) maxLane = Math.max(maxLane, pLane);
+                });
+
+                const svgW = leftPadding + (maxLane + 1) * laneSpacing;
                 let badges = '';
                 (c.refs || []).forEach(r => {
                     if (!r) return;
@@ -7223,43 +7223,74 @@
                     }
                 });
 
-                // Build lane lines SVG
                 let lines = '';
-                for (let i = 0; i < laneCount; i++) {
-                    if (i !== lane) {
-                        lines += `<line x1="${6+i*14}" y1="0" x2="${6+i*14}" y2="22" stroke="${GRAPH_COLORS[i%GRAPH_COLORS.length]}" stroke-width="2" opacity="0.3"/>`;
+                // 1. Draw vertical lines for other active branches passing through this row
+                currentActive.forEach((h, l) => {
+                    if (h && l !== lane) {
+                        const x = leftPadding + l * laneSpacing;
+                        lines += `<line x1="${x}" y1="0" x2="${x}" y2="50" stroke="${GRAPH_COLORS[l % GRAPH_COLORS.length]}" stroke-width="2.5" stroke-linecap="round"/>`;
                     }
+                });
+
+                // 2. Draw vertical line entering this commit dot from top (if not a new branch start)
+                if (!isNewBranch) {
+                    const x = leftPadding + lane * laneSpacing;
+                    lines += `<line x1="${x}" y1="0" x2="${x}" y2="25" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`;
                 }
-                // Current lane line
-                lines += `<line x1="${6+lane*14}" y1="0" x2="${6+lane*14}" y2="${isMerge?11:22}" stroke="${color}" stroke-width="2"/>`;
-                lines += `<line x1="${6+lane*14}" y1="${isMerge?11:11}" x2="${6+lane*14}" y2="22" stroke="${color}" stroke-width="2"/>`;
-                // Dot
+
+                if (currentActive[lane] === c.fullHash) currentActive[lane] = null;
+
+                // 3. Draw lines leaving this commit dot going down to its parents
+                c.parents.forEach((p, pIdx) => {
+                    let pLane = currentActive.indexOf(p);
+                    if (pLane === -1) {
+                        if (pIdx === 0) {
+                            pLane = lane;
+                            currentActive[lane] = p;
+                        } else {
+                            pLane = currentActive.findIndex(x => x === null || x === undefined);
+                            if (pLane === -1) pLane = currentActive.length;
+                            currentActive[pLane] = p;
+                        }
+                    }
+                    const x1 = leftPadding + lane * laneSpacing;
+                    const x2 = leftPadding + pLane * laneSpacing;
+                    const parentColor = GRAPH_COLORS[pLane % GRAPH_COLORS.length];
+                    if (x1 === x2) {
+                        lines += `<line x1="${x1}" y1="25" x2="${x2}" y2="50" stroke="${parentColor}" stroke-width="2.5" stroke-linecap="round"/>`;
+                    } else {
+                        lines += `<path d="M ${x1} 25 C ${x1} 37, ${x2} 38, ${x2} 50" fill="none" stroke="${parentColor}" stroke-width="2.5" stroke-linecap="round"/>`;
+                    }
+                });
+
+                // 4. Draw the commit dot itself
+                const cx = leftPadding + lane * laneSpacing;
                 if (isMerge) {
-                    lines += `<circle cx="${6+lane*14}" cy="11" r="5" fill="${color}"/>`;
-                    lines += `<circle cx="${6+lane*14}" cy="11" r="2.5" fill="var(--bg-main)"/>`;
+                    lines += `<circle cx="${cx}" cy="25" r="5.5" fill="${color}"/>`;
+                    lines += `<circle cx="${cx}" cy="25" r="2.5" fill="var(--bg-main)"/>`;
                 } else {
-                    lines += `<circle cx="${6+lane*14}" cy="11" r="4" fill="${color}"/>`;
+                    lines += `<circle cx="${cx}" cy="25" r="4.5" fill="${color}"/>`;
                 }
 
                 const tr = document.createElement('tr');
-                tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.04);';
+                tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,0.04); height:50px;';
                 tr.onmouseenter = () => tr.style.backgroundColor = 'rgba(255,255,255,0.05)';
                 tr.onmouseleave = () => tr.style.backgroundColor = '';
 
                 const tdG = document.createElement('td');
-                tdG.style.cssText = `padding:0 4px 0 8px; vertical-align:middle; width:${svgW+8}px; min-width:${svgW+8}px;`;
-                tdG.innerHTML = `<svg width="${svgW}" height="22" style="display:block;">${lines}</svg>`;
+                tdG.style.cssText = `padding:0; vertical-align:middle; width:${svgW}px; min-width:${svgW}px; height:50px; line-height:0;`;
+                tdG.innerHTML = `<svg width="${svgW}" height="50" style="display:block; overflow:visible;">${lines}</svg>`;
 
                 const tdI = document.createElement('td');
-                tdI.style.cssText = 'padding:4px 10px 4px 4px; vertical-align:middle;';
+                tdI.style.cssText = 'padding:4px 10px; vertical-align:middle; height:50px; box-sizing:border-box; overflow:hidden;';
                 const msg = c.message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 tdI.innerHTML = `
-                    <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:1px;">
+                    <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:1px;line-height:1.2;">
                         <code style="color:${color};font-size:0.7rem;font-weight:700;">${c.hash}</code>
                         ${badges}
                     </div>
-                    <div style="color:var(--text-primary);font-size:0.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px;" title="${msg}">${msg}</div>
-                    <div style="color:var(--text-secondary);font-size:0.67rem;margin-top:1px;">${c.author} · ${c.date}</div>
+                    <div style="color:var(--text-primary);font-size:0.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px;line-height:1.2;" title="${msg}">${msg}</div>
+                    <div style="color:var(--text-secondary);font-size:0.67rem;margin-top:1px;line-height:1.1;">${c.author} · ${c.date}</div>
                 `;
 
                 tr.appendChild(tdG);
