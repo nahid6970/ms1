@@ -2184,6 +2184,99 @@ def api_tools_kill():
         return jsonify({"success": False, "killed": [], "errors": errors}), 500
 
 
+@app.route('/api/tools/port', methods=['POST'])
+def api_tools_port():
+    """Check what process is using a port, or list all listening ports"""
+    import re as _re
+    data = request.get_json(silent=True) or {}
+    port_filter = str(data.get("port", "")).strip()
+    cf = 0x08000000 if sys.platform == "win32" else 0
+
+    try:
+        if sys.platform == "win32":
+            res = subprocess.run(
+                ["netstat", "-ano"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding='utf-8', errors='replace', creationflags=cf
+            )
+            lines = (res.stdout or "").splitlines()
+            # Get pid→name map from tasklist
+            tl = subprocess.run(
+                ["tasklist", "/FO", "CSV", "/NH"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding='utf-8', errors='replace', creationflags=cf
+            )
+            pid_names = {}
+            for tline in (tl.stdout or "").splitlines():
+                parts = [p.strip('"') for p in tline.split('","')]
+                if len(parts) >= 2:
+                    pid_names[parts[1]] = parts[0]
+
+            ports = []
+            seen = set()
+            for line in lines:
+                # TCP    0.0.0.0:8080    0.0.0.0:0    LISTENING    1234
+                m = _re.match(r'\s*(TCP|UDP)\s+[\d\.\[\]:*]+:(\d+)\s+[\d\.\[\]:*:*]+\s+(\w+)\s+(\d+)', line)
+                if not m:
+                    # UDP has no state column
+                    m = _re.match(r'\s*(UDP)\s+[\d\.\[\]:*]+:(\d+)\s+[\d\.\[\]:*:*]+\s+(\d+)', line)
+                    if m:
+                        proto, port, pid = m.group(1), m.group(2), m.group(3)
+                        state = 'UDP'
+                    else:
+                        continue
+                else:
+                    proto, port, state, pid = m.group(1), m.group(2), m.group(3), m.group(4)
+
+                if port_filter and port != port_filter:
+                    continue
+                if state not in ('LISTENING', 'UDP') and port_filter == '':
+                    continue  # when listing all, only show listening
+                key = (port, pid)
+                if key in seen:
+                    continue
+                seen.add(key)
+                proc = pid_names.get(pid, 'Unknown')
+                ports.append({"port": port, "state": state, "pid": pid, "process": proc, "proto": proto})
+
+        else:
+            # Linux/Mac — use ss or netstat
+            res = subprocess.run(
+                ["ss", "-tlnup"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, errors='replace'
+            )
+            lines = (res.stdout or "").splitlines()
+            ports = []
+            for line in lines[1:]:  # skip header
+                parts = line.split()
+                if len(parts) < 5:
+                    continue
+                # Local address is parts[4], format 0.0.0.0:PORT or *:PORT
+                addr = parts[4]
+                m = _re.search(r':(\d+)$', addr)
+                if not m:
+                    continue
+                port = m.group(1)
+                if port_filter and port != port_filter:
+                    continue
+                # Extract pid/process from users:(("name",pid=X,...))
+                proc = 'Unknown'
+                pid = '-'
+                if len(parts) > 6:
+                    pm = _re.search(r'"([^"]+)",pid=(\d+)', parts[-1])
+                    if pm:
+                        proc, pid = pm.group(1), pm.group(2)
+                ports.append({"port": port, "state": "LISTENING", "pid": pid, "process": proc, "proto": "TCP"})
+
+        # Sort by port number
+        ports.sort(key=lambda x: int(x["port"]))
+        return jsonify({"ports": ports})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     

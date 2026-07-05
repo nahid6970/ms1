@@ -1588,6 +1588,7 @@
             <div class="qtools-tab active" data-tab="grep"  onclick="switchQTab('grep')">🔍 Grep</div>
             <div class="qtools-tab"        data-tab="stats" onclick="switchQTab('stats')">📊 Stats</div>
             <div class="qtools-tab"        data-tab="kill"  onclick="switchQTab('kill')">💀 Kill</div>
+            <div class="qtools-tab"        data-tab="port"  onclick="switchQTab('port')">🔌 Port</div>
         </div>
         <!-- Grep panel -->
         <div class="qtools-panel active" id="qpanel-grep" style="max-height:300px; overflow-y:auto;">
@@ -1623,6 +1624,18 @@
                 <button onclick="runQKill()" style="padding:5px 12px; background:#ef4444; border:none; border-radius:6px; color:white; font-size:0.77rem; cursor:pointer; font-weight:600; white-space:nowrap;">Kill</button>
             </div>
             <div id="qt-kill-result" style="margin-top:10px; min-height:20px; font-size:0.78rem;"></div>
+        </div>
+        <!-- Port checker panel -->
+        <div class="qtools-panel" id="qpanel-port">
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">Enter a port number to see what process is using it, or leave blank to list all listening ports.</div>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <input type="text" id="qt-port-target" placeholder="Port number (e.g. 8080) or blank for all…" autocomplete="off"
+                    style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
+                    onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
+                    onkeydown="if(event.key==='Enter') runQPort()">
+                <button onclick="runQPort()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.77rem; cursor:pointer; font-weight:600; white-space:nowrap;">Check</button>
+            </div>
+            <div id="qt-port-result" style="margin-top:10px; min-height:20px; font-size:0.78rem; font-family:'Fira Code',monospace; max-height:220px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -6832,6 +6845,41 @@
                 } else {
                     resEl.innerHTML = `<span style="color:#ef4444;">✗ ${data.errors.join('; ')}</span>`;
                 }
+            } catch(err) { resEl.innerHTML = `<span style="color:#ef4444;">${err.message}</span>`; }
+        }
+
+        async function runQPort() {
+            const port  = (document.getElementById('qt-port-target').value || '').trim();
+            const resEl = document.getElementById('qt-port-result');
+            resEl.innerHTML = '<span style="color:var(--text-muted);">Checking…</span>';
+            try {
+                const res  = await fetch('/api/tools/port', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ port })
+                });
+                const data = await res.json();
+                if (data.error) { resEl.innerHTML = `<span style="color:#ef4444;">${data.error}</span>`; return; }
+                const rows = data.ports || [];
+                if (!rows.length) {
+                    resEl.innerHTML = port
+                        ? `<span style="color:#22c55e;">✓ Port ${port} is free — nothing listening.</span>`
+                        : `<span style="color:var(--text-muted);">No listening ports found.</span>`;
+                    return;
+                }
+                resEl.innerHTML = rows.map(r => {
+                    const stateColor = r.state === 'LISTENING' ? '#22c55e' : '#94a3b8';
+                    const pidKill = r.pid && r.pid !== '-'
+                        ? `<span onclick="document.getElementById('qt-kill-target').value='${r.pid}'; switchQTab('kill');" style="color:#ef4444; cursor:pointer; margin-left:8px; font-size:0.68rem;" title="Kill this process">✕ kill</span>`
+                        : '';
+                    return `<div style="padding:4px 0; border-bottom:1px solid var(--border-color); display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <span style="color:#38bdf8; min-width:50px;">:${r.port}</span>
+                        <span style="color:${stateColor}; font-size:0.7rem; min-width:72px;">${r.state}</span>
+                        <span style="color:var(--text-primary); flex:1;">${r.process}</span>
+                        <span style="color:var(--text-muted); font-size:0.7rem;">PID ${r.pid}</span>
+                        ${pidKill}
+                    </div>`;
+                }).join('');
             } catch(err) { resEl.innerHTML = `<span style="color:#ef4444;">${err.message}</span>`; }
         }
 
