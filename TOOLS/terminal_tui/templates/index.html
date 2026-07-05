@@ -160,30 +160,37 @@
         #git-diff-content,
         #git-diff-file-list,
         #commit-browser-content,
-        #commit-browser-files {
+        #commit-browser-files,
+        #file-viewer-scroll {
             overflow: scroll !important;
             scrollbar-width: thin;
-            scrollbar-color: #334155 transparent;
+            scrollbar-color: #475569 #1e293b;
         }
         #git-diff-content::-webkit-scrollbar,
         #git-diff-file-list::-webkit-scrollbar,
         #commit-browser-content::-webkit-scrollbar,
         #commit-browser-files::-webkit-scrollbar,
-        #file-viewer-modal div::-webkit-scrollbar { width: 6px; height: 6px; }
+        #file-viewer-scroll::-webkit-scrollbar,
+        #file-viewer-modal div::-webkit-scrollbar { width: 8px; height: 8px; background: #1e293b; }
         #git-diff-content::-webkit-scrollbar-track,
         #git-diff-file-list::-webkit-scrollbar-track,
         #commit-browser-content::-webkit-scrollbar-track,
-        #commit-browser-files::-webkit-scrollbar-track { background: transparent; }
+        #commit-browser-files::-webkit-scrollbar-track,
+        #file-viewer-scroll::-webkit-scrollbar-track { background: #1e293b; }
         #git-diff-content::-webkit-scrollbar-thumb,
         #git-diff-file-list::-webkit-scrollbar-thumb,
         #commit-browser-content::-webkit-scrollbar-thumb,
-        #commit-browser-files::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        #commit-browser-files::-webkit-scrollbar-thumb,
+        #file-viewer-scroll::-webkit-scrollbar-thumb,
+        #file-viewer-modal div::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; border: 2px solid #1e293b; }
         #git-diff-content::-webkit-scrollbar-thumb:hover,
         #git-diff-file-list::-webkit-scrollbar-thumb:hover,
         #commit-browser-content::-webkit-scrollbar-thumb:hover,
-        #commit-browser-files::-webkit-scrollbar-thumb:hover { background: #475569; }
+        #commit-browser-files::-webkit-scrollbar-thumb:hover,
+        #file-viewer-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
         #git-diff-content::-webkit-scrollbar-corner,
-        #commit-browser-content::-webkit-scrollbar-corner { background: var(--bg-sidebar); }
+        #commit-browser-content::-webkit-scrollbar-corner,
+        #file-viewer-scroll::-webkit-scrollbar-corner { background: #1e293b; }
 
         /* Search Input */
         .search-container {
@@ -2004,7 +2011,7 @@
                 </div>
             </div>
             <!-- Line numbers + content: single scroll container with table rows for stable selection -->
-            <div style="flex:1; overflow:scroll; min-height:0; background:var(--bg-main); scrollbar-width:thin; scrollbar-color:#334155 transparent;">
+            <div id="file-viewer-scroll" style="flex:1; overflow:scroll; min-height:0; background:var(--bg-main);">
                 <table id="file-viewer-table" style="border-collapse:collapse; width:100%; font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.6; white-space:pre;">
                     <tbody id="file-viewer-tbody"></tbody>
                 </table>
@@ -5992,6 +5999,10 @@
                 // Remove trailing empty line if file ends with newline
                 if (lines[lines.length - 1] === '') lines.pop();
 
+                const wrapViewer = localStorage.getItem('diff-wrap-text') === 'true';
+                const tableEl = document.getElementById('file-viewer-table');
+                tableEl.style.whiteSpace = wrapViewer ? 'pre-wrap' : 'pre';
+
                 const fragment = document.createDocumentFragment();
                 lines.forEach((line, i) => {
                     const tr = document.createElement('tr');
@@ -6004,7 +6015,7 @@
                     tdNum.innerText = i + 1;
 
                     const tdCode = document.createElement('td');
-                    tdCode.style.cssText = 'padding:0 16px; white-space:pre; color:var(--text-primary); vertical-align:top; tab-size:4;';
+                    tdCode.style.cssText = `padding:0 16px; white-space:${wrapViewer ? 'pre-wrap' : 'pre'}; color:var(--text-primary); vertical-align:top; tab-size:4;`;
                     tdCode.textContent = line;
 
                     tr.appendChild(tdNum);
