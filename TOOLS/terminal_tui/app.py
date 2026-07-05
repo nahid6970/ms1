@@ -997,17 +997,25 @@ def api_git_graph(project):
             return jsonify({"error": "Not a git repository"}), 400
         git_root = os.path.normpath((res_root.stdout or '').strip())
 
+        # Compute the relative path from git_root to the project directory.
+        # This scopes git log to only commits that touch this project's folder.
+        rel_path = os.path.relpath(path, git_root).replace('\\', '/')
+        # If the project IS the git root, rel_path will be '.' — pass no path filter
+        scope_args = ["--", rel_path] if rel_path != '.' else []
+
         limit = request.args.get("limit", "40")
         try:
             limit = min(int(limit), 100)
         except Exception:
             limit = 40
 
-        # Get structured log with parents and refs
+        # Get structured log with parents and refs, scoped to the project directory.
+        # Note: --all is removed because path filtering + --all across all branches
+        # produces confusing results; we just want the active branch history for this folder.
         res = subprocess.run(
-            ["git", "log", "--all", f"-n{limit}",
+            ["git", "log", f"-n{limit}",
              "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s%x00",
-             "--shortstat"],
+             "--shortstat"] + scope_args,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10
         )
         if res.returncode != 0:
