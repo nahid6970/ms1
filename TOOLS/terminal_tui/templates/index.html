@@ -2045,7 +2045,7 @@
             </div>
 
             <!-- Past Commits Section -->
-            <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 6px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; user-select: none; padding: 6px 8px; border-radius: 6px; transition: background-color 0.15s;" onclick="togglePastCommits()" title="Toggle past commits" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); cursor: pointer;">Past Commits</label>
@@ -2053,13 +2053,13 @@
                     </div>
                     <button onclick="event.stopPropagation(); refreshPastCommits();" id="past-commits-refresh-btn" style="display:none; background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(37,99,235,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Refresh commits">🔄 Refresh</button>
                 </div>
-                <div id="git-past-commits" style="display:none; max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-main);">
+                <div id="git-past-commits" style="display:none; max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-main); margin-top: 8px; margin-bottom: 16px;">
                     <div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem;">Loading past commits...</div>
                 </div>
             </div>
 
             <!-- Branch Manager Section -->
-            <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 6px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; user-select: none; padding: 6px 8px; border-radius: 6px; transition: background-color 0.15s;" onclick="toggleBranchPanel()" title="Toggle branch manager" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); cursor: pointer;">⎇ Branches</label>
@@ -2067,7 +2067,7 @@
                     </div>
                     <button onclick="event.stopPropagation(); loadBranches();" id="branch-refresh-btn" style="display:none; background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(37,99,235,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Refresh branches">🔄 Refresh</button>
                 </div>
-                <div id="branch-panel" style="display:none;">
+                <div id="branch-panel" style="display:none; margin-top: 8px; margin-bottom: 16px;">
                     <!-- Create new branch -->
                     <div style="display:flex; gap:6px; margin-bottom:10px;">
                         <input type="text" id="new-branch-name" placeholder="new-branch-name" autocomplete="off"
@@ -2093,7 +2093,7 @@
             </div>
 
             <!-- Commit Graph Section -->
-            <div style="margin-bottom: 16px;">
+            <div style="margin-bottom: 6px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; cursor:pointer; user-select:none; padding:6px 8px; border-radius:6px; transition:background-color 0.15s;" onclick="toggleGraphPanel()" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <label style="font-size:0.8rem; font-weight:500; color:var(--text-secondary); cursor:pointer;">◈ Graph</label>
@@ -2101,7 +2101,7 @@
                     </div>
                     <button onclick="event.stopPropagation(); loadGitGraph();" id="graph-refresh-btn" style="display:none; background:none; border:none; color:var(--accent-color); cursor:pointer; font-size:0.75rem; padding:2px 6px; border-radius:4px; transition:background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(37,99,235,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Refresh graph">🔄 Refresh</button>
                 </div>
-                <div id="graph-panel" style="display:none;">
+                <div id="graph-panel" style="display:none; margin-top: 8px; margin-bottom: 16px;">
                     <div id="git-graph-container" style="border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); overflow:auto; max-height:280px; font-family:'Fira Code',monospace; font-size:0.76rem; scrollbar-width:thin; scrollbar-color:#334155 transparent;">
                         <div style="padding:10px 14px; color:var(--text-secondary);">Loading graph...</div>
                     </div>
