@@ -57,7 +57,7 @@ def get_git_status(path):
         )
         if res_root.returncode != 0:
             return None
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         # Relative path of this project inside the repo (used as pathspec)
         rel_path = os.path.relpath(path, git_root)
@@ -70,14 +70,14 @@ def get_git_status(path):
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=2
         )
-        branch = res_branch.stdout.strip()
+        branch = (res_branch.stdout or "").strip()
         if not branch:
             res_branch = subprocess.run(
                 ["git", "symbolic-ref", "--short", "HEAD"],
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=2
             )
-            branch = res_branch.stdout.strip()
+            branch = (res_branch.stdout or "").strip()
 
         if not branch:
             return None
@@ -88,7 +88,7 @@ def get_git_status(path):
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=2
         )
-        status_lines = [l for l in res_status.stdout.strip().split("\n") if l.strip()]
+        status_lines = [l for l in (res_status.stdout or "").strip().split("\n") if l.strip()]
         mod_count = len(status_lines)
         staged    = len([l for l in status_lines if l[0] not in ('?', ' ')])
         unstaged  = len([l for l in status_lines if l[1] != ' '])
@@ -102,7 +102,7 @@ def get_git_status(path):
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=2
             )
-            diff_out = res_diff.stdout.strip()
+            diff_out = (res_diff.stdout or "").strip()
             if diff_out:
                 m_ins = re.search(r'(\d+) insertion', diff_out)
                 m_del = re.search(r'(\d+) deletion', diff_out)
@@ -854,7 +854,7 @@ def api_git_changed_files(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
@@ -901,7 +901,7 @@ def api_git_commit(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
@@ -909,14 +909,14 @@ def api_git_commit(project):
             # Use git add -A to stage all changes including new directories
             res_add = subprocess.run(["git", "add", "-A", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
             if res_add.returncode != 0:
-                return jsonify({"error": f"git add failed: {res_add.stderr.strip()}"}), 500
+                return jsonify({"error": f"git add failed: {(res_add.stderr or "").strip()}"}), 500
 
         res_commit = subprocess.run(["git", "commit", "-m", message], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
         if res_commit.returncode != 0:
-            err = res_commit.stderr.strip() or res_commit.stdout.strip()
+            err = (res_commit.stderr or "").strip() or (res_commit.stdout or "").strip()
             return jsonify({"error": f"git commit failed: {err}"}), 500
 
-        output = res_commit.stdout.strip()
+        output = (res_commit.stdout or "").strip()
 
         if do_push:
             res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
@@ -925,7 +925,7 @@ def api_git_commit(project):
                 # Auto-retry with --set-upstream if branch has no upstream yet
                 if "no upstream branch" in push_out or "set-upstream" in push_out:
                     res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
-                    branch_name = res_branch.stdout.strip() if res_branch.returncode == 0 else "HEAD"
+                    branch_name = (res_branch.stdout or "").strip() if res_branch.returncode == 0 else "HEAD"
                     res_push2 = subprocess.run(["git", "push", "--set-upstream", "origin", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
                     push_out2 = (res_push2.stdout + res_push2.stderr).strip()
                     if res_push2.returncode == 0:
@@ -950,10 +950,10 @@ def api_git_past_commits(project):
     path = os.path.normpath(proj["path"])
     cf = 0x08000000 if sys.platform == "win32" else 0
     try:
-        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
+        res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         # Respect the same limit as the graph panel
         limit = request.args.get("limit", "40")
@@ -968,14 +968,14 @@ def api_git_past_commits(project):
 
         res = subprocess.run(
             ["git", "log", "--pretty=format:%h|%an|%ar|%s", "-n", str(limit)] + scope_args,
-            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
         )
         
         if res.returncode != 0:
             return jsonify({"error": "Failed to get commits"}), 500
             
         commits = []
-        for line in res.stdout.strip().split('\n'):
+        for line in (res.stdout or "").strip().split('\n'):
             if not line.strip():
                 continue
             parts = line.split('|', 3)
@@ -1007,22 +1007,20 @@ def api_git_graph(project):
             return jsonify({"error": "Not a git repository"}), 400
         git_root = os.path.normpath((res_root.stdout or '').strip())
 
-        # Compute the relative path from git_root to the project directory.
-        # This scopes git log to only commits that touch this project's folder.
-        rel_path = os.path.relpath(path, git_root).replace('\\', '/')
-        # If the project IS the git root, rel_path will be '.' — pass no path filter
-        scope_args = ["--", rel_path] if rel_path != '.' else []
-
         limit = request.args.get("limit", "40")
         try:
             limit = min(int(limit), 100)
         except Exception:
             limit = 40
 
-        # Get structured log with parents and refs, scoped to the project directory.
-        # --simplify-merges rewrites parent pointers so they only reference commits
-        # that are also in the filtered output — prevents ghost parent slots in the graph.
+        # Scope graph to project subdirectory so unrelated commits don't appear.
+        # Use --simplify-merges so git rewrites parents to only reference commits
+        # in the filtered output — prevents ghost parent slots in the lane algorithm.
+        # --all ensures all branch heads are included.
+        rel_path = os.path.relpath(path, git_root).replace('\\', '/')
+        scope_args = ["--", rel_path] if rel_path != '.' else []
         extra_args = ["--simplify-merges"] if scope_args else []
+
         res = subprocess.run(
             ["git", "log", "--all", f"-n{limit}",
              "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s%x00",
@@ -1119,11 +1117,11 @@ def api_git_rename_commit(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         # Get full HEAD hash and check if requested commit hash is a prefix of it
         res_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
-        full_head_hash = res_head.stdout.strip()
+        full_head_hash = (res_head.stdout or "").strip()
 
         commit_hash = data.get("commit_hash", "").strip()
 
@@ -1136,7 +1134,7 @@ def api_git_rename_commit(project):
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15
         )
         if res_amend.returncode != 0:
-            err = res_amend.stderr.strip() or res_amend.stdout.strip()
+            err = (res_amend.stderr or "").strip() or (res_amend.stdout or "").strip()
             return jsonify({"error": f"git commit --amend failed: {err}"}), 500
 
         return jsonify({"success": True, "message": "Commit message updated successfully"})
@@ -1161,7 +1159,7 @@ def api_git_push(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         
         res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
         push_out = (res_push.stdout + res_push.stderr).strip()
@@ -1169,7 +1167,7 @@ def api_git_push(project):
         if res_push.returncode != 0:
             if "no upstream branch" in push_out or "set-upstream" in push_out:
                 res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
-                branch_name = res_branch.stdout.strip() if res_branch.returncode == 0 else "HEAD"
+                branch_name = (res_branch.stdout or "").strip() if res_branch.returncode == 0 else "HEAD"
                 res_push2 = subprocess.run(["git", "push", "--set-upstream", "origin", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
                 push_out2 = (res_push2.stdout + res_push2.stderr).strip()
                 if res_push2.returncode == 0:
@@ -1266,7 +1264,7 @@ def api_git_checkout(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         
         res_checkout = subprocess.run(["git", "checkout", commit_hash], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
         checkout_out = (res_checkout.stdout + res_checkout.stderr).strip()
@@ -1293,7 +1291,7 @@ def api_git_tree(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         rel_path = os.path.relpath(path, git_root).replace("\\", "/")
         pathspec = rel_path if rel_path != "." else None
 
@@ -1302,8 +1300,8 @@ def api_git_tree(project):
             cmd.append(pathspec)
         res = subprocess.run(cmd, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
         if res.returncode != 0:
-            return jsonify({"error": res.stderr.strip() or "Failed to list tree"}), 400
-        files = [f for f in res.stdout.strip().split("\n") if f.strip()]
+            return jsonify({"error": (res.stderr or "").strip() or "Failed to list tree"}), 400
+        files = [f for f in (res.stdout or "").strip().split("\n") if f.strip()]
         # Strip project subfolder prefix for display
         if pathspec and pathspec != ".":
             prefix = pathspec.rstrip("/") + "/"
@@ -1330,14 +1328,14 @@ def api_git_show(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         rel_path = os.path.relpath(path, git_root).replace("\\", "/")
         # Build full path spec: project_subdir/file_path
         full_path_spec = file_path if rel_path == "." else f"{rel_path}/{file_path}"
         obj_spec = f"{commit_hash}:{full_path_spec}"
         res = subprocess.run(["git", "show", obj_spec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=10)
         if res.returncode != 0:
-            return jsonify({"error": res.stderr.strip() or "File not found at this commit"}), 404
+            return jsonify({"error": (res.stderr or "").strip() or "File not found at this commit"}), 404
         content = res.stdout
         size = len(content.encode("utf-8"))
         lines = content.count("\n")
@@ -1364,12 +1362,12 @@ def api_git_restore_file(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         rel_path = os.path.relpath(path, git_root).replace("\\", "/")
         full_path_spec = file_path if rel_path == "." else f"{rel_path}/{file_path}"
         res = subprocess.run(["git", "checkout", commit_hash, "--", full_path_spec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
         if res.returncode != 0:
-            return jsonify({"error": res.stderr.strip() or "Restore failed"}), 500
+            return jsonify({"error": (res.stderr or "").strip() or "Restore failed"}), 500
         return jsonify({"success": True, "hash": commit_hash, "path": file_path})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1389,16 +1387,16 @@ def api_git_return_branch(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
         
         # Get current branch name
         res_branch = subprocess.run(["git", "branch", "--show-current"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
-        branch = res_branch.stdout.strip()
+        branch = (res_branch.stdout or "").strip()
         
         if not branch:
             # Fallback: try symbolic-ref
             res_branch = subprocess.run(["git", "symbolic-ref", "--short", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
-            branch = res_branch.stdout.strip()
+            branch = (res_branch.stdout or "").strip()
             
         if not branch:
             # If still no branch (detached), checkout main/master as fallback
@@ -1429,7 +1427,7 @@ def api_git_discard(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
@@ -1440,7 +1438,7 @@ def api_git_discard(project):
         res_clean = subprocess.run(["git", "clean", "-fd", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
 
         if res_restore.returncode != 0:
-            err = res_restore.stderr.strip() or res_restore.stdout.strip()
+            err = (res_restore.stderr or "").strip() or (res_restore.stdout or "").strip()
             return jsonify({"error": f"git restore failed: {err}"}), 500
 
         out = (res_restore.stdout + res_restore.stderr + res_clean.stdout).strip()
@@ -1652,11 +1650,11 @@ def api_git_branches(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         # Current branch
         res_cur = subprocess.run(["git", "branch", "--show-current"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
-        current = res_cur.stdout.strip()
+        current = (res_cur.stdout or "").strip()
 
         # All local branches
         res_branches = subprocess.run(["git", "branch"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
@@ -1688,7 +1686,7 @@ def api_git_branch_create(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         res = subprocess.run(["git", "checkout", "-b", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
         output = (res.stdout + res.stderr).strip()
@@ -1716,7 +1714,7 @@ def api_git_branch_switch(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         res = subprocess.run(["git", "checkout", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
         output = (res.stdout + res.stderr).strip()
@@ -1744,7 +1742,7 @@ def api_git_branch_merge(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         res = subprocess.run(["git", "merge", "--no-ff", branch_name, "-m", f"Merge branch '{branch_name}'"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
         output = (res.stdout + res.stderr).strip()
@@ -1773,7 +1771,7 @@ def api_git_branch_delete(project):
         res_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=2)
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
-        git_root = os.path.normpath(res_root.stdout.strip())
+        git_root = os.path.normpath((res_root.stdout or "").strip())
 
         flag = "-D" if force else "-d"
         res = subprocess.run(["git", "branch", flag, branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
@@ -2130,7 +2128,7 @@ def api_tools_kill():
                 if res.returncode == 0:
                     killed.append(f"PID {pid}")
                 else:
-                    errors.append(res.stderr.strip() or f"Failed to kill PID {pid}")
+                    errors.append((res.stderr or "").strip() or f"Failed to kill PID {pid}")
             else:
                 os.kill(pid, _signal.SIGKILL)
                 killed.append(f"PID {pid}")
@@ -2145,7 +2143,7 @@ def api_tools_kill():
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                     text=True, creationflags=cf)
                 matched_pids = []
-                for line in tl.stdout.strip().splitlines():
+                for line in (tl.stdout or "").strip().splitlines():
                     # CSV format: "name.exe","pid","session","session#","mem"
                     parts = [p.strip('"') for p in line.split('","')]
                     if len(parts) >= 2:
@@ -2165,7 +2163,7 @@ def api_tools_kill():
                         if res.returncode == 0:
                             killed.append(f"{proc_name} (PID {proc_pid})")
                         else:
-                            errors.append(res.stderr.strip() or f"Failed to kill PID {proc_pid}")
+                            errors.append((res.stderr or "").strip() or f"Failed to kill PID {proc_pid}")
             except Exception as e:
                 errors.append(str(e))
         else:

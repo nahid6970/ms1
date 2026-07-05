@@ -7761,13 +7761,10 @@
             const slots = [];
             const laneOf = {};
 
-            // Build set of known hashes. Strip parents not in this set — they are
-            // commits outside the current limit window, not ghost slots from path scoping
-            // (backend uses --simplify-merges to handle path-scoped parent rewriting).
+            // Strip parents not in this commit window — they are commits beyond
+            // the -n limit, not visible in this view. Prevents open ghost slots.
             const knownHashes = new Set(commits.map(c => c.fullHash));
-            commits.forEach(c => {
-                c.parents = c.parents.filter(p => knownHashes.has(p));
-            });
+            commits.forEach(c => { c.parents = c.parents.filter(p => knownHashes.has(p)); });
 
             function getFreeSlot() {
                 const i = slots.indexOf(null);
