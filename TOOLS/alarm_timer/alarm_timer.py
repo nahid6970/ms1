@@ -751,46 +751,88 @@ class TimerCard(QFrame):
         self.duplicated.emit(self.card_id)
 
     def _on_edit(self):
-        """Edit this timer's label and/or time while it may be paused/idle."""
+        """Edit this timer's label and/or time while it may be running/paused/idle."""
         was_running = (self.state == self.STATE_RUNNING)
         if was_running:
-            self._on_pause()
+            self._on_pause()   # pause while dialog is open
 
         dlg = QDialog(self)
         dlg.setWindowTitle("EDIT TIMER")
         dlg.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
-        dlg.setMinimumWidth(380)
+        dlg.setMinimumWidth(420)
         dlg.setModal(True)
 
         lay = QVBoxLayout(dlg)
         lay.setContentsMargins(18, 18, 18, 18)
         lay.setSpacing(12)
 
-        grp = QGroupBox("EDIT TIMER")
-        form = QFormLayout(grp)
-
+        # ── label ──
+        lbl_grp  = QGroupBox("TIMER LABEL")
+        lbl_form = QFormLayout(lbl_grp)
         lbl_edit = QLineEdit(self.label)
         lbl_edit.setMinimumHeight(32)
-        form.addRow("Label:", lbl_edit)
+        lbl_form.addRow("Label:", lbl_edit)
 
-        time_edit = QLineEdit()
-        time_edit.setMinimumHeight(32)
-        time_edit.setPlaceholderText(
-            f"current: {fmt_secs(self.total_seconds)}  —  e.g. 1h30m, 45m, 90s"
-        )
-        form.addRow("New time:", time_edit)
+        # ── mode toggle ──
+        mode_grp = QGroupBox("TIME INPUT MODE")
+        mode_h   = QHBoxLayout(mode_grp)
+        rb_text  = QRadioButton("Text  (e.g. 1h30m)")
+        rb_date  = QRadioButton("Pick datetime")
+        rb_text.setChecked(True)
+        bg = QButtonGroup(dlg)
+        bg.addButton(rb_text)
+        bg.addButton(rb_date)
+        mode_h.addWidget(rb_text)
+        mode_h.addWidget(rb_date)
 
+        # ── text panel ──
+        text_panel = QWidget()
+        tp = QVBoxLayout(text_panel)
+        tp.setContentsMargins(0, 0, 0, 0)
         hint = QLabel(
-            "Leave time blank to keep current duration.\n"
-            "Formats: 25d12h / 1h30m / 45m / 90s / bare number = minutes"
+            "Leave blank to keep current duration.  "
+            "Formats: <span style='color:#00F0FF'>1h30m</span> &nbsp;│&nbsp; "
+            "<span style='color:#00F0FF'>45m</span> &nbsp;│&nbsp; "
+            "<span style='color:#00F0FF'>90s</span> &nbsp;│&nbsp; "
+            "<span style='color:#00F0FF'>2.5h</span> &nbsp;│&nbsp; "
+            "<span style='color:#00F0FF'>30</span> (=min)"
         )
-        hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
+        hint.setTextFormat(Qt.TextFormat.RichText)
+        hint.setWordWrap(True)
+        hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        time_edit = QLineEdit()
+        time_edit.setMinimumHeight(34)
+        time_edit.setPlaceholderText(
+            f"current: {fmt_secs(self.total_seconds)}  —  leave blank to keep"
+        )
+        tp.addWidget(hint)
+        tp.addWidget(time_edit)
+
+        # ── date panel ──
+        date_panel = QWidget()
+        dp = QVBoxLayout(date_panel)
+        dp.setContentsMargins(0, 0, 0, 0)
+        dp.addWidget(QLabel("Select the future date & time when alarm fires:"))
+        dt_picker = QDateTimeEdit()
+        dt_picker.setCalendarPopup(True)
+        dt_picker.setDateTime(QDateTime.currentDateTime().addSecs(3600))
+        dt_picker.setDisplayFormat("yyyy-MM-dd  HH:mm:ss")
+        dt_picker.setMinimumHeight(34)
+        dp.addWidget(dt_picker)
+        date_panel.setVisible(False)
+
+        def _switch_mode(text_active: bool):
+            text_panel.setVisible(text_active)
+            date_panel.setVisible(not text_active)
+            dlg.adjustSize()
+
+        rb_text.toggled.connect(_switch_mode)
 
         err_lbl = QLabel("")
         err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
 
-        btn_row = QHBoxLayout()
-        ok_btn  = QPushButton("✔  APPLY")
+        btn_row    = QHBoxLayout()
+        ok_btn     = QPushButton("✔  APPLY")
         ok_btn.setFixedHeight(34)
         ok_btn.setStyleSheet(
             f"QPushButton {{ background: {CP_GREEN}; color: #000;"
@@ -804,32 +846,45 @@ class TimerCard(QFrame):
         btn_row.addWidget(ok_btn)
         btn_row.addWidget(cancel_btn)
 
-        lay.addWidget(grp)
-        lay.addWidget(hint)
+        lay.addWidget(lbl_grp)
+        lay.addWidget(mode_grp)
+        lay.addWidget(text_panel)
+        lay.addWidget(date_panel)
         lay.addWidget(err_lbl)
         lay.addLayout(btn_row)
 
         def _apply():
             new_label = lbl_edit.text().strip() or self.label
-            raw_time  = time_edit.text().strip()
 
-            if raw_time:
-                new_secs = parse_time_string(raw_time)
-                if new_secs < 0:
-                    err_lbl.setText("⚠  Invalid time format.")
-                    return
+            if rb_text.isChecked():
+                raw_time = time_edit.text().strip()
+                if raw_time:
+                    new_secs = parse_time_string(raw_time)
+                    if new_secs < 0:
+                        err_lbl.setText("⚠  Invalid time format.")
+                        return
+                    time_changed = True
+                else:
+                    new_secs     = self.total_seconds   # unchanged
+                    time_changed = False
             else:
-                new_secs = self.total_seconds  # unchanged
+                target = dt_picker.dateTime().toPyDateTime()
+                delta  = (target - datetime.now()).total_seconds()
+                if delta <= 0:
+                    err_lbl.setText("⚠  Selected datetime is in the past.")
+                    return
+                new_secs     = int(delta)
+                time_changed = True
 
-            # apply
+            # apply changes
             self.label         = new_label
             self.total_seconds = new_secs
-            # if idle or paused reset remaining too; if paused keep remaining ratio
-            if self.state in (self.STATE_IDLE, self.STATE_DONE):
+
+            if time_changed:
+                # reset remaining to the new full duration
                 self.remaining = new_secs
                 self._display.setText(fmt_secs(self.remaining))
-            elif self.state == self.STATE_PAUSED and raw_time:
-                # user changed time — reset remaining to full new duration
+            elif self.state == self.STATE_IDLE:
                 self.remaining = new_secs
                 self._display.setText(fmt_secs(self.remaining))
 
@@ -840,7 +895,12 @@ class TimerCard(QFrame):
 
         ok_btn.clicked.connect(_apply)
         cancel_btn.clicked.connect(dlg.reject)
-        dlg.exec()
+
+        result = dlg.exec()
+
+        # Resume if it was running before — whether apply was clicked or cancelled
+        if was_running and self.state == self.STATE_PAUSED:
+            self._on_start()
 
     # serialization
     def to_dict(self) -> dict:
