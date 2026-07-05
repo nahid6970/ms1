@@ -512,16 +512,32 @@ class TimerCard(QFrame):
             f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;"
         )
         self._lbl.setWordWrap(True)
-        del_btn = QPushButton("✖")
+
+        edit_btn = QPushButton()
+        edit_btn.setFixedSize(22, 22)
+        edit_btn.setIcon(icon_rename(color=CP_CYAN, size=13))
+        edit_btn.setIconSize(QSize(13, 13))
+        edit_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_CYAN}; }}"
+        )
+        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        edit_btn.setToolTip("Edit label & time")
+        edit_btn.clicked.connect(self._on_edit)
+
+        del_btn = QPushButton()
         del_btn.setFixedSize(22, 22)
+        del_btn.setIcon(icon_delete(color=CP_RED, size=13))
+        del_btn.setIconSize(QSize(13, 13))
         del_btn.setStyleSheet(
-            f"QPushButton {{ background: transparent; border: none; color: {CP_DIM}; }}"
-            f"QPushButton:hover {{ color: {CP_RED}; }}"
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #2a1010; border: 1px solid {CP_RED}; }}"
         )
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.setToolTip("Delete timer")
         del_btn.clicked.connect(self._on_delete)
         top.addWidget(self._lbl, 1)
+        top.addWidget(edit_btn, 0)
         top.addWidget(del_btn, 0)
 
         # countdown display
@@ -702,6 +718,98 @@ class TimerCard(QFrame):
     def _on_delete(self):
         self._ticker.stop()
         self.removed.emit(self.card_id)
+
+    def _on_edit(self):
+        """Edit this timer's label and/or time while it may be paused/idle."""
+        was_running = (self.state == self.STATE_RUNNING)
+        if was_running:
+            self._on_pause()
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("EDIT TIMER")
+        dlg.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
+        dlg.setMinimumWidth(380)
+        dlg.setModal(True)
+
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(18, 18, 18, 18)
+        lay.setSpacing(12)
+
+        grp = QGroupBox("EDIT TIMER")
+        form = QFormLayout(grp)
+
+        lbl_edit = QLineEdit(self.label)
+        lbl_edit.setMinimumHeight(32)
+        form.addRow("Label:", lbl_edit)
+
+        time_edit = QLineEdit()
+        time_edit.setMinimumHeight(32)
+        time_edit.setPlaceholderText(
+            f"current: {fmt_secs(self.total_seconds)}  —  e.g. 1h30m, 45m, 90s"
+        )
+        form.addRow("New time:", time_edit)
+
+        hint = QLabel(
+            "Leave time blank to keep current duration.\n"
+            "Formats: 25d12h / 1h30m / 45m / 90s / bare number = minutes"
+        )
+        hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
+
+        err_lbl = QLabel("")
+        err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
+
+        btn_row = QHBoxLayout()
+        ok_btn  = QPushButton("✔  APPLY")
+        ok_btn.setFixedHeight(34)
+        ok_btn.setStyleSheet(
+            f"QPushButton {{ background: {CP_GREEN}; color: #000;"
+            f" font-weight: bold; border: none; }}"
+            f"QPushButton:hover {{ background: #00cc1a; }}"
+        )
+        cancel_btn = QPushButton("✖  CANCEL")
+        cancel_btn.setFixedHeight(34)
+        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_row.addWidget(ok_btn)
+        btn_row.addWidget(cancel_btn)
+
+        lay.addWidget(grp)
+        lay.addWidget(hint)
+        lay.addWidget(err_lbl)
+        lay.addLayout(btn_row)
+
+        def _apply():
+            new_label = lbl_edit.text().strip() or self.label
+            raw_time  = time_edit.text().strip()
+
+            if raw_time:
+                new_secs = parse_time_string(raw_time)
+                if new_secs < 0:
+                    err_lbl.setText("⚠  Invalid time format.")
+                    return
+            else:
+                new_secs = self.total_seconds  # unchanged
+
+            # apply
+            self.label         = new_label
+            self.total_seconds = new_secs
+            # if idle or paused reset remaining too; if paused keep remaining ratio
+            if self.state in (self.STATE_IDLE, self.STATE_DONE):
+                self.remaining = new_secs
+                self._display.setText(fmt_secs(self.remaining))
+            elif self.state == self.STATE_PAUSED and raw_time:
+                # user changed time — reset remaining to full new duration
+                self.remaining = new_secs
+                self._display.setText(fmt_secs(self.remaining))
+
+            self._lbl.setText(self.label)
+            self._update_bar()
+            self.state_changed.emit()
+            dlg.accept()
+
+        ok_btn.clicked.connect(_apply)
+        cancel_btn.clicked.connect(dlg.reject)
+        dlg.exec()
 
     # serialization
     def to_dict(self) -> dict:
