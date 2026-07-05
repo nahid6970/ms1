@@ -2155,6 +2155,15 @@
             <div style="display: flex; flex-direction:column; gap: 6px;">
                 <div style="display:flex; gap: 10px; justify-content: flex-end; align-items: center;">
                 <button class="btn" onclick="discardAllChanges()" style="padding: 8px 14px; font-size: 0.82rem; background: none; border: 1px solid #ef4444; color: #ef4444; transition: all 0.2s; border-radius: 6px; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Discard all uncommitted changes (git restore .)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Discard</button>
+                <div style="display:flex; align-items:center; gap:5px; margin-right:auto;">
+                    <select id="graph-limit-select" onchange="onGraphLimitChange()" title="Graph / Commits limit" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-secondary); font-size:0.72rem; padding:3px 6px; cursor:pointer; outline:none;">
+                        <option value="20">20</option>
+                        <option value="40" selected>40</option>
+                        <option value="60">60</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </div>
                 <button class="btn" onclick="openGitDiffModal('HEAD', '')" style="padding: 8px 14px; font-size: 0.82rem; background: none; border: 1px solid #38bdf8; color: #38bdf8; transition: all 0.2s; border-radius: 6px; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="View current changes vs last commit">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
                     Diff
@@ -6494,6 +6503,11 @@
             const statusEl = document.getElementById('git-status-msg');
             const btn = document.getElementById('git-commit-btn');
 
+            // Restore saved graph limit
+            const savedLimit = localStorage.getItem('graph-limit') || '40';
+            const limitSel = document.getElementById('graph-limit-select');
+            if (limitSel) limitSel.value = savedLimit;
+
             // Reset state
             msgEl.value = '';
             statusEl.innerText = '';
@@ -7626,6 +7640,14 @@
             }
         }
 
+        function onGraphLimitChange() {
+            const sel = document.getElementById('graph-limit-select');
+            if (sel) localStorage.setItem('graph-limit', sel.value);
+            // Only reload if graph panel is open
+            const panel = document.getElementById('git-graph-container');
+            if (panel && panel.style.display !== 'none') loadGitGraph();
+        }
+
         async function loadGitGraph() {
             const container = document.getElementById('git-graph-container');
             if (!container) return;
@@ -7634,8 +7656,10 @@
                 return;
             }
             container.innerHTML = '<div style="padding:10px 14px; color:var(--text-secondary); font-size:0.76rem;">Loading graph...</div>';
+            const sel = document.getElementById('graph-limit-select');
+            const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '40');
             try {
-                const url = `/api/project/${encodeURIComponent(activeProject)}/git/graph?limit=40&_=${Date.now()}`;
+                const url = `/api/project/${encodeURIComponent(activeProject)}/git/graph?limit=${limit}&_=${Date.now()}`;
                 const res = await fetch(url);
                 const data = await res.json();
                 if (!res.ok) {
