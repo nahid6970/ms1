@@ -6890,16 +6890,47 @@
 
         const SNIPPETS_KEY = 'terminal-tui-snippets';
 
-        function loadSnippets() {
-            try { return JSON.parse(localStorage.getItem(SNIPPETS_KEY) || '[]'); }
-            catch(e) { return []; }
+        // Load snippets from server; returns a Promise<array>
+        async function loadSnippets() {
+            try {
+                const res = await fetch('/api/snippets');
+                const data = await res.json();
+                return data.snippets || [];
+            } catch(e) { return []; }
         }
 
-        function saveSnippets(list) {
-            localStorage.setItem(SNIPPETS_KEY, JSON.stringify(list));
+        // Save full snippets list to server; returns a Promise
+        async function saveSnippets(list) {
+            try {
+                await fetch('/api/snippets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ snippets: list })
+                });
+            } catch(e) { console.error('Failed to save snippets:', e); }
         }
 
-        function toggleSnippetsPopover(e) {
+        // One-time migration: push any localStorage snippets to server then clear
+        async function migrateLocalSnippets() {
+            const raw = localStorage.getItem(SNIPPETS_KEY);
+            if (!raw) return;
+            try {
+                const local = JSON.parse(raw);
+                if (!Array.isArray(local) || local.length === 0) { localStorage.removeItem(SNIPPETS_KEY); return; }
+                // Merge with server (server wins on duplicates)
+                const server = await loadSnippets();
+                const serverCmds = new Set(server.map(s => s.command));
+                const merged = [...server, ...local.filter(s => !serverCmds.has(s.command))];
+                await saveSnippets(merged);
+                localStorage.removeItem(SNIPPETS_KEY);
+                console.log(`Migrated ${local.length} snippet(s) from localStorage to server.`);
+            } catch(e) { console.error('Snippet migration failed:', e); }
+        }
+
+        // Run migration once on page load
+        migrateLocalSnippets();
+
+        async function toggleSnippetsPopover(e) {
             if (e) e.stopPropagation();
             const pop = document.getElementById('snippets-popover');
             if (pop.classList.contains('show')) {
@@ -6919,10 +6950,10 @@
             document.getElementById('snippets-btn').classList.remove('active');
         }
 
-        function addSnippet() {
+        async function addSnippet() {
             const raw = document.getElementById('snippet-add-input').value.trim();
             if (!raw) return;
-            const snippets = loadSnippets();
+            const snippets = await loadSnippets();
             // Parse: text before ";;" is the command, after is the label + optional bg=/fg=
             const sepIdx = raw.indexOf(';;');
             const command = (sepIdx !== -1 ? raw.slice(0, sepIdx) : raw).trim();
@@ -6942,15 +6973,16 @@
             // Avoid exact duplicates
             if (!snippets.some(s => s.command === command)) {
                 snippets.push({ command, label, bg, fg });
-                saveSnippets(snippets);
+                await saveSnippets(snippets);
             }
             document.getElementById('snippet-add-input').value = '';
             renderSnippetList();
         }
 
-        function renderSnippetList() {
+        async function renderSnippetList() {
             const el = document.getElementById('snippets-list');
-            const snippets = loadSnippets();
+            el.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:12px 0;">Loading…</div>';
+            const snippets = await loadSnippets();
             if (!snippets.length) {
                 el.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:12px 0;">No snippets yet. Add one above.</div>';
                 return;
@@ -7001,17 +7033,17 @@
             closeSnippetsPopover();
         }
 
-        function deleteSnippet(index, e) {
+        async function deleteSnippet(index, e) {
             if (e) e.stopPropagation();
-            const snippets = loadSnippets();
+            const snippets = await loadSnippets();
             snippets.splice(index, 1);
-            saveSnippets(snippets);
+            await saveSnippets(snippets);
             renderSnippetList();
         }
 
-        function editSnippet(index, e) {
+        async function editSnippet(index, e) {
             if (e) e.stopPropagation();
-            const snippets = loadSnippets();
+            const snippets = await loadSnippets();
             const s = snippets[index];
             if (!s) return;
             // Rebuild the raw input string so the user can edit it
@@ -7027,7 +7059,7 @@
             input.focus();
             // Remove the old entry so saving via Add replaces it
             snippets.splice(index, 1);
-            saveSnippets(snippets);
+            await saveSnippets(snippets);
             renderSnippetList();
         }
 

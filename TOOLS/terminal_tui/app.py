@@ -2277,6 +2277,33 @@ def api_tools_port():
         return jsonify({"error": str(e)}), 500
 
 
+SNIPPETS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\snippets.json"
+
+@app.route('/api/snippets', methods=['GET'])
+def api_get_snippets():
+    """Return saved snippets list"""
+    try:
+        if os.path.exists(SNIPPETS_FILE):
+            with open(SNIPPETS_FILE, 'r', encoding='utf-8') as f:
+                return jsonify({"snippets": json.load(f)})
+        return jsonify({"snippets": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/snippets', methods=['POST'])
+def api_save_snippets():
+    """Save full snippets list"""
+    data = request.get_json(silent=True) or {}
+    snippets = data.get("snippets", [])
+    try:
+        os.makedirs(os.path.dirname(SNIPPETS_FILE), exist_ok=True)
+        with open(SNIPPETS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(snippets, f, ensure_ascii=False, indent=2)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     
