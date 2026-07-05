@@ -922,6 +922,15 @@ def api_git_commit(project):
             res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
             push_out = (res_push.stdout + res_push.stderr).strip()
             if res_push.returncode != 0:
+                # Auto-retry with --set-upstream if branch has no upstream yet
+                if "no upstream branch" in push_out or "set-upstream" in push_out:
+                    res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
+                    branch_name = res_branch.stdout.strip() if res_branch.returncode == 0 else "HEAD"
+                    res_push2 = subprocess.run(["git", "push", "--set-upstream", "origin", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
+                    push_out2 = (res_push2.stdout + res_push2.stderr).strip()
+                    if res_push2.returncode == 0:
+                        return jsonify({"success": True, "committed": True, "pushed": True, "output": output, "push_output": push_out2, "note": f"New branch '{branch_name}' pushed with --set-upstream"})
+                    return jsonify({"success": True, "committed": True, "pushed": False, "output": output, "push_error": push_out2})
                 return jsonify({"success": True, "committed": True, "pushed": False, "output": output, "push_error": push_out})
             return jsonify({"success": True, "committed": True, "pushed": True, "output": output, "push_output": push_out})
 
@@ -1041,6 +1050,14 @@ def api_git_push(project):
         push_out = (res_push.stdout + res_push.stderr).strip()
         
         if res_push.returncode != 0:
+            if "no upstream branch" in push_out or "set-upstream" in push_out:
+                res_branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5)
+                branch_name = res_branch.stdout.strip() if res_branch.returncode == 0 else "HEAD"
+                res_push2 = subprocess.run(["git", "push", "--set-upstream", "origin", branch_name], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)
+                push_out2 = (res_push2.stdout + res_push2.stderr).strip()
+                if res_push2.returncode == 0:
+                    return jsonify({"success": True, "output": push_out2, "note": f"New branch '{branch_name}' pushed with --set-upstream"})
+                return jsonify({"success": False, "error": push_out2}), 500
             return jsonify({"success": False, "error": push_out}), 500
             
         return jsonify({"success": True, "output": push_out})
