@@ -2108,6 +2108,7 @@ def api_tools_stats(project):
 def api_tools_kill():
     """Kill a process by PID or name"""
     import signal as _signal
+    import re as _re
     data = request.get_json(silent=True) or {}
     target = str(data.get("target", "")).strip()
     if not target:
@@ -2117,8 +2118,8 @@ def api_tools_kill():
     killed = []
     errors = []
 
-    # Determine if target is a PID (all digits) or a name
     if target.isdigit():
+        # Kill by PID
         pid = int(target)
         try:
             if sys.platform == "win32":
@@ -2136,16 +2137,38 @@ def api_tools_kill():
             errors.append(str(e))
     else:
         # Kill by name
-        try:
-            if sys.platform == "win32":
-                res = subprocess.run(["taskkill", "/F", "/IM", target],
-                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                     text=True, creationflags=cf)
-                if res.returncode == 0:
-                    killed.append(f'"{target}" (all instances)')
+        if sys.platform == "win32":
+            # Use tasklist to find all matching PIDs (case-insensitive, partial match)
+            try:
+                tl = subprocess.run(["tasklist", "/FO", "CSV", "/NH"],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    text=True, creationflags=cf)
+                matched_pids = []
+                for line in tl.stdout.strip().splitlines():
+                    # CSV format: "name.exe","pid","session","session#","mem"
+                    parts = [p.strip('"') for p in line.split('","')]
+                    if len(parts) >= 2:
+                        proc_name = parts[0]
+                        proc_pid  = parts[1]
+                        # Match if target appears anywhere in the process name (case-insensitive)
+                        if target.lower() in proc_name.lower():
+                            matched_pids.append((proc_pid, proc_name))
+
+                if not matched_pids:
+                    errors.append(f'No process matching "{target}" found')
                 else:
-                    errors.append(res.stderr.strip() or f'No process named "{target}" found')
-            else:
+                    for proc_pid, proc_name in matched_pids:
+                        res = subprocess.run(["taskkill", "/F", "/PID", proc_pid],
+                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                             text=True, creationflags=cf)
+                        if res.returncode == 0:
+                            killed.append(f"{proc_name} (PID {proc_pid})")
+                        else:
+                            errors.append(res.stderr.strip() or f"Failed to kill PID {proc_pid}")
+            except Exception as e:
+                errors.append(str(e))
+        else:
+            try:
                 res = subprocess.run(["pkill", "-9", "-f", target],
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                      text=True)
@@ -2153,8 +2176,8 @@ def api_tools_kill():
                     killed.append(f'"{target}" (matching processes)')
                 else:
                     errors.append(f'No process matching "{target}" found')
-        except Exception as e:
-            errors.append(str(e))
+            except Exception as e:
+                errors.append(str(e))
 
     if killed:
         return jsonify({"success": True, "killed": killed, "errors": errors})
