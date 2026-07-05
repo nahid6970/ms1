@@ -7111,7 +7111,9 @@
             const el = document.getElementById('git-past-commits');
             el.innerHTML = '<div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem;">Loading...</div>';
             try {
-                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/commits`);
+                const sel = document.getElementById('graph-limit-select');
+                const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '40');
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/commits?limit=${limit}`);
                 if (!res.ok) {
                     const d = await res.json();
                     el.innerHTML = `<div style="padding:10px 14px;color:#ef4444;font-size:0.8rem;">${d.error || 'Failed to load commits'}</div>`;
@@ -7643,9 +7645,12 @@
         function onGraphLimitChange() {
             const sel = document.getElementById('graph-limit-select');
             if (sel) localStorage.setItem('graph-limit', sel.value);
-            // Only reload if graph panel is open
+            // Reload graph if open
             const panel = document.getElementById('git-graph-container');
             if (panel && panel.style.display !== 'none') loadGitGraph();
+            // Reload past commits if open
+            const pastEl = document.getElementById('git-past-commits');
+            if (pastEl && pastEl.style.display !== 'none') refreshPastCommits();
         }
 
         async function loadGitGraph() {

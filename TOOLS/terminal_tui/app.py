@@ -941,7 +941,7 @@ def api_git_commit(project):
 
 @app.route('/api/project/<project>/git/commits', methods=['GET'])
 def api_git_past_commits(project):
-    """Get the last 10 commits for this project"""
+    """Get recent commits for this project, scoped to its directory"""
     projects_list = scan_projects()
     proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
     if not proj:
@@ -954,10 +954,20 @@ def api_git_past_commits(project):
         if res_root.returncode != 0:
             return jsonify({"error": "Not a git repository"}), 400
         git_root = os.path.normpath(res_root.stdout.strip())
-        
-        # Get last 10 commits with format: hash|author|date|message
+
+        # Respect the same limit as the graph panel
+        limit = request.args.get("limit", "40")
+        try:
+            limit = min(int(limit), 200)
+        except Exception:
+            limit = 40
+
+        # Scope to project subdirectory (same as graph)
+        rel_path = os.path.relpath(path, git_root).replace('\\', '/')
+        scope_args = ["--", rel_path] if rel_path != '.' else []
+
         res = subprocess.run(
-            ["git", "log", "--pretty=format:%h|%an|%ar|%s", "-n", "10"],
+            ["git", "log", "--pretty=format:%h|%an|%ar|%s", "-n", str(limit)] + scope_args,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=5
         )
         
