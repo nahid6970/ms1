@@ -1020,12 +1020,13 @@ def api_git_graph(project):
             limit = 40
 
         # Get structured log with parents and refs, scoped to the project directory.
-        # Note: --all is removed because path filtering + --all across all branches
-        # produces confusing results; we just want the active branch history for this folder.
+        # --simplify-merges rewrites parent pointers so they only reference commits
+        # that are also in the filtered output — prevents ghost parent slots in the graph.
+        extra_args = ["--simplify-merges"] if scope_args else []
         res = subprocess.run(
-            ["git", "log", f"-n{limit}",
+            ["git", "log", "--all", f"-n{limit}",
              "--pretty=format:%h%x00%H%x00%P%x00%D%x00%an%x00%ar%x00%s%x00",
-             "--shortstat"] + scope_args,
+             "--shortstat"] + extra_args + scope_args,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10
         )
         if res.returncode != 0:
