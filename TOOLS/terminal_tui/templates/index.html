@@ -2111,6 +2111,7 @@
                             <th style="padding:10px 12px;">Port</th>
                             <th style="padding:10px 12px;">Process</th>
                             <th style="padding:10px 12px;">PID</th>
+                            <th style="padding:10px 12px; width: 150px;">Notes</th>
                             <th style="padding:10px 12px; text-align:right;">Action</th>
                         </tr>
                     </thead>
@@ -9208,6 +9209,7 @@
 
         // ── Active Ports Monitor ──────────────────────────────────────────────
         let portsList = [];
+        let starredPorts = {};
 
         async function openPortsMonitorModal() {
             document.getElementById('ports-modal').classList.add('show');
@@ -9231,6 +9233,21 @@
                 }
                 
                 portsList = data.ports || [];
+                starredPorts = data.starred || {};
+                
+                // Add offline starred ports
+                const activePortStr = portsList.map(p => String(p.port));
+                for (const port in starredPorts) {
+                    if (!activePortStr.includes(port)) {
+                        portsList.push({
+                            port: parseInt(port),
+                            processName: 'Offline (Saved)',
+                            pid: '-',
+                            state: 'OFFLINE'
+                        });
+                    }
+                }
+                
                 renderPortsTable(portsList);
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="4" style="padding:20px; text-align:center; color:#ef4444;">Connection error.</td></tr>`;
@@ -9238,19 +9255,51 @@
         }
 
         function getStarredPorts() {
-            try { return JSON.parse(localStorage.getItem('starred-ports') || '[]'); } 
-            catch (e) { return []; }
+            return Object.keys(starredPorts);
         }
         
-        function toggleStarPort(port) {
-            let starred = getStarredPorts();
-            if (starred.includes(port)) {
-                starred = starred.filter(p => p !== port);
-            } else {
-                starred.push(port);
+        async function toggleStarPort(port) {
+            const isStarred = getStarredPorts().includes(String(port));
+            const newStarred = !isStarred;
+            let notes = '';
+            
+            if (newStarred) {
+                notes = prompt(`Add a note for port ${port} (optional):`, '') || '';
             }
-            localStorage.setItem('starred-ports', JSON.stringify(starred));
-            filterPortsTable(); // Re-render with new sorting
+            
+            try {
+                const res = await fetch('/api/system/ports/starred', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ port: port, notes: notes, starred: newStarred })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    await refreshPortsList();
+                }
+            } catch (err) {
+                console.error('Error saving starred port:', err);
+            }
+        }
+        
+        async function editPortNote(port) {
+            const currentNote = starredPorts[port] || '';
+            const newNote = prompt(`Edit note for port ${port}:`, currentNote);
+            if (newNote === null) return; // Cancelled
+            
+            try {
+                const res = await fetch('/api/system/ports/starred', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ port: port, notes: newNote, starred: true })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    await refreshPortsList();
+                }
+            } catch (err) {
+                console.error('Error updating note:', err);
+            }
         }
 
         function renderPortsTable(ports) {
@@ -9267,8 +9316,8 @@
             
             // Sort ports: starred first, then by port number
             const sortedPorts = [...ports].sort((a, b) => {
-                const aStar = starred.includes(a.port) ? 1 : 0;
-                const bStar = starred.includes(b.port) ? 1 : 0;
+                const aStar = starred.includes(String(a.port)) ? 1 : 0;
+                const bStar = starred.includes(String(b.port)) ? 1 : 0;
                 if (aStar !== bStar) return bStar - aStar; // Starred comes first
                 return a.port - b.port;
             });
@@ -9289,22 +9338,33 @@
 
                 const shareBtn = isSystem 
                     ? `` 
-                    : `<button onclick="sharePort(${p.port})" style="padding:3px 8px; background:none; border:1px solid #3b82f6; border-radius:0; color:#3b82f6; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s; margin-right: 5px;" onmouseenter="this.style.backgroundColor='rgba(59,130,246,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Funnel</button>`;
+                    : `<button onclick="sharePort(${p.port})" style="padding:3px 8px; background:none; border:1px solid #3b82f6; border-radius:0; color:#3b82f6; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(59,130,246,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Funnel</button>`;
 
-                const killBtn = isSystem 
-                    ? `<span style="color:var(--text-muted); font-size:0.75rem; padding-right:10px;">Protected</span>`
+                const isOffline = p.state === 'OFFLINE';
+                const killBtn = isSystem || isOffline
+                    ? `<span style="color:var(--text-muted); font-size:0.75rem;">${isOffline ? 'Offline' : 'Protected'}</span>`
                     : `<button onclick="killPortProcess('${p.pid}', ${p.port})" style="padding:3px 8px; background:none; border:1px solid #ef4444; border-radius:0; color:#ef4444; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Kill</button>`;
 
-                const isStarred = starred.includes(p.port);
+                const isStarred = starred.includes(String(p.port));
                 const starIcon = isStarred ? '⭐' : '☆';
                 const starColor = isStarred ? '#fbbf24' : 'var(--text-muted)';
                 const starHtml = `<span onclick="toggleStarPort(${p.port})" style="cursor:pointer; color:${starColor}; margin-right:6px; font-size:0.9rem;" title="Bookmark Port">${starIcon}</span>`;
+
+                const notes = starredPorts[String(p.port)] || '';
+                const noteHtml = isStarred 
+                    ? `<div onclick="editPortNote(${p.port})" style="cursor:pointer; font-size:0.75rem; color:var(--text-secondary); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Click to edit notes: ${notes}">${notes || '<i style="opacity:0.5;">Add note...</i>'}</div>`
+                    : `<div style="font-size:0.75rem; color:var(--text-muted); opacity: 0.3;">-</div>`;
 
                 tr.innerHTML = `
                     <td style="padding:10px 12px; ${portStyle} display:flex; align-items:center;">${starHtml}${p.port}</td>
                     <td style="padding:10px 12px; font-family:'Fira Code',monospace; font-size:0.76rem; ${rowClass}">${p.processName}</td>
                     <td style="padding:10px 12px; color:var(--text-secondary);">${p.pid}</td>
-                    <td style="padding:10px 12px; text-align:right;">${shareBtn}${killBtn}</td>
+                    <td style="padding:10px 12px;">${noteHtml}</td>
+                    <td style="padding:10px 12px; text-align:right;">
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">
+                            ${isOffline ? '' : shareBtn}${killBtn}
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });

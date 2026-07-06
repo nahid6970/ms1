@@ -40,6 +40,25 @@ BASE_DIR = r"C:\@delta\ms1\TOOLS"
 PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
 ICONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json"
 SUBCMDS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json"
+STARRED_PORTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\starred_ports.json"
+
+def load_starred_ports():
+    if not os.path.exists(STARRED_PORTS_FILE):
+        return {}
+    try:
+        with open(STARRED_PORTS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading starred ports: {e}")
+        return {}
+
+def save_starred_ports(ports):
+    try:
+        os.makedirs(os.path.dirname(STARRED_PORTS_FILE), exist_ok=True)
+        with open(STARRED_PORTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(ports, f, indent=2)
+    except Exception as e:
+        print(f"Error saving starred ports: {e}")
 
 def load_subcommands():
     if not os.path.exists(SUBCMDS_FILE):
@@ -3249,9 +3268,28 @@ def api_get_system_ports():
                 
         # Sort ports by port number
         ports_list.sort(key=lambda x: x["port"])
-        return jsonify({"ports": ports_list})
+        return jsonify({"ports": ports_list, "starred": load_starred_ports()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/system/ports/starred', methods=['POST'])
+def api_save_starred_port():
+    data = request.json or {}
+    port = str(data.get("port", ""))
+    notes = data.get("notes", "")
+    is_starred = data.get("starred", True)
+    if not port:
+        return jsonify({"error": "Port is required"}), 400
+        
+    starred = load_starred_ports()
+    if is_starred:
+        starred[port] = notes
+    else:
+        if port in starred:
+            del starred[port]
+            
+    save_starred_ports(starred)
+    return jsonify({"success": True, "starred": starred})
 
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():
