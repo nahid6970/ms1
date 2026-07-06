@@ -1,6 +1,7 @@
-# Task: Replace Dropdown with Quick Select UI
+# Task: Integrate Run Script into File Explorer
 
 ## Tasks
-- [X] Removed the custom autocomplete dropdown UI from the Debug Script modal.
-- [X] Added a "Quick Select" section containing script pills (clickable buttons) populated dynamically from the current project files.
-- [X] Replaced the dropdown logic in JavaScript with logic that creates and appends these pills to the Quick Select container.
+- [X] Removed the global "Run Debug Script" modal UI and its button in the sidebar.
+- [X] Added a new `#explorer-run-modal` which mimics the layout of the `#split-select-modal` with card options.
+- [X] Added a "Run" icon (play button) next to the "View" icon (eye button) for each file in the workspace file explorer.
+- [X] Added JavaScript logic so clicking the Run icon opens the new modal, and selecting an execution card mode correctly runs the script in a new terminal tab based on the file extension.

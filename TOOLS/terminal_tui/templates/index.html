@@ -1423,11 +1423,6 @@
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div id="project-specific-actions" style="display: flex; align-items: center; gap: 4px;">
-                    <button class="action-btn" onclick="openDebugScriptModal()" title="Run Debug Script" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #a78bfa; font-size: 0.95rem; transition: background-color 0.2s;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                    </button>
                     <div class="custom-dropdown" id="bookmark-dropdown-container" style="position: relative; display: inline-block;">
                         <button class="action-btn" id="bookmark-dropdown-btn" onclick="toggleBookmarkDropdown(event)" title="Bookmarked Commands" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.85rem;">
                             <span>🔖</span>
@@ -1896,38 +1891,49 @@
         </div>
     </div>
 
-    <!-- Debug Script Modal Dialog -->
-    <div class="modal-overlay" id="debug-script-modal">
-        <div class="modal-content" style="max-width: 460px; padding: 24px;">
-            <div class="modal-header" style="margin-bottom: 16px;">
-                <h2>Run Debug Script</h2>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Run a script (Python, PS1, etc.) directly in the terminal, keeping the shell open even if it crashes to inspect errors.</div>
+    <!-- Explorer Run Script Modal -->
+    <div class="modal-overlay" id="explorer-run-modal">
+        <div class="modal-content" style="max-width: 500px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Run Script</h2>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="explorer-run-filename">Select how you want to run this script</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="closeExplorerRunModal()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1;">✕</button>
             </div>
-            <form id="debug-script-form" onsubmit="handleRunDebugScript(event)">
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="debug-script-cmd" style="font-size: 0.8rem; font-weight: 500;">Command / Script Path</label>
-                    <input type="text" id="debug-script-cmd" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace; width: 100%; box-sizing: border-box;">
-                    
-                    <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">Quick Select:</div>
-                    <div id="debug-script-quick-select" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; padding-right: 4px;">
-                        <!-- JS will populate script pills here -->
-                    </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                <!-- PowerShell Card -->
+                <div class="split-card" onclick="executeExplorerRun('powershell')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #3b82f6;">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">PowerShell</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Keeps open on crash</span>
                 </div>
                 
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label style="font-size: 0.8rem; font-weight: 500;">Shell / Runner Mode</label>
-                    <select id="debug-script-type" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; margin-top: 4px;">
-                        <option value="powershell">PowerShell (Keep open with pause on error)</option>
-                        <option value="cmd">CMD (Keep open with pause on error)</option>
-                        <option value="raw">Raw (Send directly to active terminal)</option>
-                    </select>
+                <!-- CMD Card -->
+                <div class="split-card" onclick="executeExplorerRun('cmd')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #eab308;">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Command Prompt</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Keeps open on crash</span>
                 </div>
-                
-                <div class="form-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 8px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeDebugScriptModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem; background-color: #8b5cf6;">Run Script</button>
+
+                <!-- Raw Card -->
+                <div class="split-card" onclick="executeExplorerRun('raw')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s; grid-column: span 2;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #10b981;">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Raw Execution</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Run directly in new pane without wrappers</span>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -5114,78 +5120,52 @@
             document.getElementById('bookmark-modal').classList.add('show');
             document.getElementById('edit-bookmark-cmd').focus();
         }
-        // ─── Debug Script Runner ──────────────────────────────────────────────────
-        async function openDebugScriptModal() {
-            document.getElementById('debug-script-modal').classList.add('show');
-            setTimeout(() => document.getElementById('debug-script-cmd').focus(), 100);
-            
-            if (activeProject) {
-                try {
-                    const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        const qs = document.getElementById('debug-script-quick-select');
-                        if (!qs) return;
-                        qs.innerHTML = '';
-                        let scriptCount = 0;
-                        if (data && data.items) {
-                            data.items.forEach(f => {
-                                if (!f.is_dir) {
-                                    const ext = f.name.split('.').pop().toLowerCase();
-                                    if (['py', 'ps1', 'sh', 'js', 'bat', 'cmd'].includes(ext)) {
-                                        const val = (ext === 'ps1' || ext === 'bat' || ext === 'cmd') ? `.\\${f.name}` : f.name;
-                                        const pill = document.createElement('button');
-                                        pill.type = 'button';
-                                        pill.textContent = val;
-                                        pill.style.cssText = 'padding: 4px 10px; font-size: 0.78rem; font-family: "Fira Code", monospace; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); cursor: pointer; transition: all 0.2s; white-space: nowrap;';
-                                        pill.onmouseenter = () => { pill.style.backgroundColor = 'var(--bg-card-hover)'; pill.style.borderColor = 'var(--accent-color)'; };
-                                        pill.onmouseleave = () => { pill.style.backgroundColor = 'var(--bg-main)'; pill.style.borderColor = 'var(--border-color)'; };
-                                        pill.onclick = () => {
-                                            document.getElementById('debug-script-cmd').value = val;
-                                            document.getElementById('debug-script-cmd').focus();
-                                        };
-                                        qs.appendChild(pill);
-                                        scriptCount++;
-                                    }
-                                }
-                            });
-                        }
-                        if (scriptCount === 0) {
-                            qs.innerHTML = '<span style="font-size:0.75rem; color:var(--text-muted);">No scripts found in root.</span>';
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to load project files for debug script:", e);
-                }
-            }
+        // ─── Explorer Run Script Modal ────────────────────────────────────────────
+        let currentRunScriptPath = '';
+        
+        function openExplorerRunModal(relPath, filename) {
+            currentRunScriptPath = relPath;
+            document.getElementById('explorer-run-filename').innerText = `Run ${filename}`;
+            document.getElementById('explorer-run-modal').classList.add('show');
+        }
+
+        function closeExplorerRunModal() {
+            document.getElementById('explorer-run-modal').classList.remove('show');
+            currentRunScriptPath = '';
         }
         
         document.addEventListener('click', (e) => {
-            const modal = document.getElementById('debug-script-modal');
+            const modal = document.getElementById('explorer-run-modal');
             if (modal && modal.classList.contains('show') && e.target === modal) {
-                closeDebugScriptModal();
+                closeExplorerRunModal();
             }
         });
 
-        function closeDebugScriptModal() {
-            document.getElementById('debug-script-modal').classList.remove('show');
-            document.getElementById('debug-script-cmd').value = '';
-        }
-
-        function handleRunDebugScript(event) {
-            event.preventDefault();
-            if (!activeProject) {
-                alert("Please select a workspace project first.");
+        function executeExplorerRun(mode) {
+            if (!activeProject || !currentRunScriptPath) {
+                alert("No project or script selected.");
                 return;
             }
-            const cmdInput = document.getElementById('debug-script-cmd').value.trim();
-            if (!cmdInput) return;
             
-            const mode = document.getElementById('debug-script-type').value;
+            let ext = currentRunScriptPath.split('.').pop().toLowerCase();
+            let cmdInput = '';
+            
+            // Format command based on extension
+            if (ext === 'py') {
+                cmdInput = `python "${currentRunScriptPath}"`;
+            } else if (ext === 'ps1' || ext === 'bat' || ext === 'cmd') {
+                cmdInput = `.\\"${currentRunScriptPath}"`;
+            } else if (ext === 'js') {
+                cmdInput = `node "${currentRunScriptPath}"`;
+            } else if (ext === 'sh') {
+                cmdInput = `bash "${currentRunScriptPath}"`;
+            } else {
+                cmdInput = `.\\"${currentRunScriptPath}"`;
+            }
+            
             let finalCmd = cmdInput;
             
             if (mode === 'powershell') {
-                // Use Base64 EncodedCommand to prevent outer shell from parsing/interpolating syntax (like $?)
                 const psCode = `& { ${cmdInput} } ; if (-not $?) { Write-Host 'Script failed. Press enter to continue...'; Read-Host }`;
                 
                 const charCodes = [];
@@ -5202,18 +5182,16 @@
                 
                 finalCmd = `powershell -NoProfile -EncodedCommand ${b64}`;
             } else if (mode === 'cmd') {
-                // Wrapper for cmd
                 finalCmd = `cmd /c "${cmdInput} || pause"`;
             }
             
-            // Run in a new tab so it doesn't interrupt any running agent CLIs in the active pane
             const parent = document.getElementById('terminal-parent');
             if (parent) {
                 parent.className = 'split-tabs';
             }
             splitTerminal('tabs', finalCmd + '\r');
             
-            closeDebugScriptModal();
+            closeExplorerRunModal();
         }
 
         function closeBookmarkModal() {
@@ -6412,18 +6390,36 @@
                 leftArea.title = item.rel_path;
                 itemRow.appendChild(leftArea);
 
-                // View button (files only)
+                // Action buttons (files only)
                 if (!item.is_dir) {
+                    const actionsContainer = document.createElement('div');
+                    actionsContainer.style = 'display:flex; align-items:center; opacity:0; transition:opacity 0.15s; flex-shrink:0;';
+
+                    // Run button
+                    const runBtn = document.createElement('button');
+                    runBtn.title = 'Run script';
+                    runBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s;';
+                    // Play icon
+                    runBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+                    runBtn.onclick = (e) => { e.stopPropagation(); openExplorerRunModal(item.rel_path, item.name); };
+                    runBtn.onmouseenter = () => runBtn.style.color = '#10b981'; // Green hover
+                    runBtn.onmouseleave = () => runBtn.style.color = 'var(--text-secondary)';
+
+                    // View button
                     const viewBtn = document.createElement('button');
                     viewBtn.title = 'View file';
-                    viewBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; opacity:0; transition:opacity 0.15s, color 0.15s; flex-shrink:0;';
+                    viewBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s;';
                     viewBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
                     viewBtn.onclick = (e) => { e.stopPropagation(); openFileViewer(item.rel_path, item.name); };
                     viewBtn.onmouseenter = () => viewBtn.style.color = 'var(--accent-color)';
                     viewBtn.onmouseleave = () => viewBtn.style.color = 'var(--text-secondary)';
-                    itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; viewBtn.style.opacity = '1'; };
-                    itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; viewBtn.style.opacity = '0'; };
-                    itemRow.appendChild(viewBtn);
+
+                    actionsContainer.appendChild(runBtn);
+                    actionsContainer.appendChild(viewBtn);
+
+                    itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; actionsContainer.style.opacity = '1'; };
+                    itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; actionsContainer.style.opacity = '0'; };
+                    itemRow.appendChild(actionsContainer);
                 }
 
                 let subContainer = null;
