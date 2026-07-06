@@ -1430,16 +1430,21 @@
                                 <path d="M6 9l6 6 6-6"/>
                             </svg>
                         </button>
-                        <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; max-height: 320px; overflow-y: auto;">
-                            <!-- Bookmarks will be injected here dynamically -->
+                        <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; flex-direction: column;">
+                            <div id="bookmark-items-list" style="max-height: 280px; overflow-y: auto;">
+                                <!-- Bookmarks will be injected here dynamically -->
+                            </div>
+                            <div id="bookmark-add-row" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border-color);">
+                                <input type="text" id="bookmark-add-input" placeholder="label::command or just command"
+                                    style="flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); padding: 4px 8px; font-size: 0.75rem; font-family: 'Fira Code', monospace; outline: none;"
+                                    onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
+                                    onkeydown="if(event.key==='Enter'){event.stopPropagation(); addBookmarkFromInput()}"
+                                    onclick="event.stopPropagation()">
+                                <button onclick="event.stopPropagation(); addBookmarkFromInput()"
+                                    style="padding: 4px 9px; background: var(--accent-color); border: none; border-radius: 5px; color: white; font-size: 0.72rem; cursor: pointer; white-space: nowrap; font-weight: 500;">Add</button>
+                            </div>
                         </div>
                     </div>
-                    <button class="action-btn" onclick="addCurrentCommandAsBookmark()" title="Bookmark current command" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
                     <button class="action-btn" onclick="exportActiveTerminalLog()" title="Download Terminal Logs" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -4236,8 +4241,25 @@
         function toggleBookmarkDropdown(event) {
             event.stopPropagation();
             const content = document.getElementById('bookmark-dropdown-content');
-            if (content.style.display === 'none' || !content.style.display) {
-                content.style.display = 'block';
+            const isOpening = (content.style.display === 'none' || !content.style.display);
+            if (isOpening) {
+                content.style.display = 'flex';
+                // Prefill add bookmark input with current command
+                const inputEl = document.getElementById('bookmark-add-input');
+                if (inputEl) {
+                    let detected = "";
+                    if (term) {
+                        const buffer = term.buffer.active;
+                        const lineIndex = buffer.viewportY + buffer.cursorY;
+                        const line = buffer.getLine(lineIndex);
+                        if (line) {
+                            detected = line.translateToString(true).trim();
+                            const promptRegex = /^PS\s+[A-Za-z]:\\[^>]*>\s*/i;
+                            detected = detected.replace(promptRegex, "");
+                        }
+                    }
+                    inputEl.value = detected;
+                }
             } else {
                 content.style.display = 'none';
             }
@@ -4933,9 +4955,9 @@
         }
 
         function updateBookmarksDropdown() {
-            const content = document.getElementById('bookmark-dropdown-content');
-            if (!content) return;
-            content.innerHTML = '';
+            const listEl = document.getElementById('bookmark-items-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
             
             if (!activeProject) return;
             
@@ -4976,7 +4998,7 @@
             });
             
             if (uniqueList.length === 0) {
-                content.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
+                listEl.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
             } else {
                 uniqueList.forEach((bm, idx) => {
                     const row = document.createElement('div');
@@ -5093,7 +5115,7 @@
                             <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteBookmark('${bm.project}', ${bm.index})">❌</button>
                         </div>
                     `;
-                    content.appendChild(row);
+                    listEl.appendChild(row);
                 });
             }
         }
@@ -5516,25 +5538,24 @@
             }
         }
 
-        async function addCurrentCommandAsBookmark() {
+        async function addBookmarkFromInput() {
             if (!activeProject) return;
+            const inputEl = document.getElementById('bookmark-add-input');
+            if (!inputEl) return;
             
-            let detected = "";
-            if (term) {
-                const buffer = term.buffer.active;
-                const lineIndex = buffer.viewportY + buffer.cursorY;
-                const line = buffer.getLine(lineIndex);
-                if (line) {
-                    detected = line.translateToString(true).trim();
-                    const promptRegex = /^PS\s+[A-Za-z]:\\[^>]*>\s*/i;
-                    detected = detected.replace(promptRegex, "");
-                }
+            const rawVal = inputEl.value.trim();
+            if (!rawVal) return;
+            
+            let name = "";
+            let command = rawVal;
+            
+            if (rawVal.includes("::")) {
+                const parts = rawVal.split("::");
+                name = parts[0].trim();
+                command = parts.slice(1).join("::").trim();
             }
             
-            const cmd = prompt("Add bookmark command:", detected);
-            if (cmd === null) return; // Cancelled
-            const trimmed = cmd.trim();
-            if (!trimmed) {
+            if (!command) {
                 alert("Command cannot be empty");
                 return;
             }
@@ -5543,11 +5564,12 @@
                 const response = await fetch(`/api/projects/${activeProject}/bookmarks`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: trimmed })
+                    body: JSON.stringify({ command: command, name: name })
                 });
                 
                 if (response.ok) {
                     projects = await response.json();
+                    inputEl.value = '';
                     updateBookmarksDropdown();
                 } else {
                     const data = await response.json();

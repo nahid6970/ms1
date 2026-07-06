@@ -507,6 +507,7 @@ def api_projects_delete(project):
 def api_add_bookmark(project):
     data = request.json
     command = data.get("command", "").strip()
+    name = data.get("name", "").strip()
     window_title = data.get("windowTitle", "").strip()
     if not command:
         return jsonify({"error": "Command is required"}), 400
@@ -525,7 +526,7 @@ def api_add_bookmark(project):
             exists = True
             break
     if not exists:
-        proj["bookmarks"].append({"command": command, "global": False, "windowTitle": window_title})
+        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
