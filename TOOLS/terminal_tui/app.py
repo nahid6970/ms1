@@ -1549,6 +1549,31 @@ def api_project_file_content(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/file-delete', methods=['POST'])
+def api_project_file_delete(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    rel_path = request.json.get("path", "")
+    if not rel_path:
+        return jsonify({"error": "No path provided"}), 400
+    target = os.path.normpath(os.path.join(base_path, rel_path))
+    if not os.path.abspath(target).startswith(base_path):
+        return jsonify({"error": "Unauthorized path"}), 403
+    if not os.path.exists(target):
+        return jsonify({"error": "File or directory does not exist"}), 404
+    
+    try:
+        import shutil
+        if os.path.isdir(target):
+            shutil.rmtree(target)
+        else:
+            os.remove(target)
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():

@@ -5194,6 +5194,29 @@
             closeExplorerRunModal();
         }
 
+        async function deleteExplorerFile(relPath, filename) {
+            if (!activeProject) return;
+            if (!confirm(`Are you sure you want to delete "${filename}"?\n\nPath: ${relPath}`)) return;
+            
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/file-delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: relPath })
+                });
+                
+                if (response.ok) {
+                    refreshFileTree();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to delete file.");
+                }
+            } catch (err) {
+                console.error("Error deleting file:", err);
+                alert("Error deleting file.");
+            }
+        }
+
         function closeBookmarkModal() {
             document.getElementById('bookmark-modal').classList.remove('show');
             editingBookmarkProj = null;
@@ -6414,8 +6437,18 @@
                     viewBtn.onmouseenter = () => viewBtn.style.color = 'var(--accent-color)';
                     viewBtn.onmouseleave = () => viewBtn.style.color = 'var(--text-secondary)';
 
+                    // Delete button
+                    const delBtn = document.createElement('button');
+                    delBtn.title = 'Delete file';
+                    delBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s; margin-left:2px;';
+                    delBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                    delBtn.onclick = (e) => { e.stopPropagation(); deleteExplorerFile(item.rel_path, item.name); };
+                    delBtn.onmouseenter = () => delBtn.style.color = '#ef4444'; // Red hover
+                    delBtn.onmouseleave = () => delBtn.style.color = 'var(--text-secondary)';
+
                     actionsContainer.appendChild(runBtn);
                     actionsContainer.appendChild(viewBtn);
+                    actionsContainer.appendChild(delBtn);
 
                     itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; actionsContainer.style.opacity = '1'; };
                     itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; actionsContainer.style.opacity = '0'; };
