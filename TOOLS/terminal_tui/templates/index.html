@@ -6979,6 +6979,8 @@
             renderSnippetList();
         }
 
+        let snippetDragSrc = null;
+
         async function renderSnippetList() {
             const el = document.getElementById('snippets-list');
             el.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:12px 0;">Loading…</div>';
@@ -6991,6 +6993,8 @@
             snippets.forEach((s, i) => {
                 const row = document.createElement('div');
                 row.className = 'snippet-item';
+                row.draggable = true;
+                row.dataset.idx = i;
                 row.title = `Click to send: ${s.command}`;
 
                 // Apply bg/fg colors if set
@@ -7002,6 +7006,7 @@
                 }
 
                 row.innerHTML = `
+                    <span class="snippet-drag-handle" style="color:var(--text-muted); cursor:grab; font-size:0.85rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.45; line-height:1;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.45'">⠿</span>
                     <span class="snippet-text" style="${s.fg ? `color:${s.fg}` : ''}">${s.command.replace(/</g,'&lt;')}</span>
                     ${s.label ? `<span class="snippet-label" style="${s.fg ? `color:${s.fg}; opacity:0.8` : ''}">${s.label.replace(/</g,'&lt;')}</span>` : ''}
                     <button class="snippet-edit" onclick="editSnippet(${i}, event)" title="Edit snippet">
@@ -7010,11 +7015,49 @@
                     <button class="snippet-del" onclick="deleteSnippet(${i}, event)" title="Delete snippet">✕</button>
                 `;
                 row.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('snippet-del')) return;
+                    if (e.target.classList.contains('snippet-del') || e.target.closest('.snippet-edit') || e.target.classList.contains('snippet-drag-handle')) return;
                     sendSnippetToTerminal(s.command);
                 });
+
+                // Drag events
+                row.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', i);
+                    row.style.opacity = '0.4';
+                    snippetDragSrc = i;
+                });
+                row.addEventListener('dragend', () => {
+                    row.style.opacity = '1';
+                    el.querySelectorAll('.snippet-item').forEach(r => r.style.borderTop = '');
+                });
+                row.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    el.querySelectorAll('.snippet-item').forEach(r => r.style.borderTop = '');
+                    if (snippetDragSrc !== i) row.style.borderTop = '2px solid var(--accent-color)';
+                });
+                row.addEventListener('dragleave', () => {
+                    row.style.borderTop = '';
+                });
+                row.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    row.style.borderTop = '';
+                    if (snippetDragSrc === null || snippetDragSrc === i) return;
+                    reorderSnippet(snippetDragSrc, i);
+                });
+
                 el.appendChild(row);
             });
+        }
+
+        async function reorderSnippet(fromIdx, toIdx) {
+            const snippets = await loadSnippets();
+            if (fromIdx < 0 || toIdx < 0 || fromIdx >= snippets.length || toIdx >= snippets.length) return;
+            const [moved] = snippets.splice(fromIdx, 1);
+            snippets.splice(toIdx, 0, moved);
+            await saveSnippets(snippets);
+            renderSnippetList();
         }
 
         function sendSnippetToTerminal(command) {
