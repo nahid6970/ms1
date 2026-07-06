@@ -998,7 +998,7 @@ def api_git_past_commits(project):
         # Respect the same limit as the graph panel
         limit = request.args.get("limit", "40")
         try:
-            limit = min(int(limit), 200)
+            limit = min(int(limit), 1000)
         except Exception:
             limit = 40
 
@@ -1049,7 +1049,7 @@ def api_git_graph(project):
 
         limit = request.args.get("limit", "40")
         try:
-            limit = min(int(limit), 100)
+            limit = min(int(limit), 1000)
         except Exception:
             limit = 40
 
