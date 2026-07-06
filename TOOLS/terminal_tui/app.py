@@ -1575,6 +1575,84 @@ def api_project_file_delete(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/file-write', methods=['POST'])
+def api_project_file_write(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    filename = request.json.get("filename", "").strip()
+    content = request.json.get("content", "")
+    if not filename:
+        return jsonify({"error": "No filename provided"}), 400
+    target = os.path.normpath(os.path.join(base_path, filename))
+    if not os.path.abspath(target).startswith(base_path):
+        return jsonify({"error": "Unauthorized path"}), 403
+    if os.path.exists(target):
+        return jsonify({"error": "File already exists"}), 409
+    try:
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(content)
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/project/<project>/paste-clipboard', methods=['POST'])
+def api_project_paste_clipboard(project):
+    import shutil
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    
+    try:
+        cf = 0x08000000 if sys.platform == "win32" else 0
+        # Use PowerShell to get file paths from clipboard
+        ps_cmd = (
+            'Add-Type -AssemblyName System.Windows.Forms; '
+            '$files = [System.Windows.Forms.Clipboard]::GetFileDropList(); '
+            'if ($files.Count -eq 0) { Write-Error "NO_FILES"; exit 1 } '
+            '$files | ForEach-Object { $_ }'
+        )
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_cmd],
+            capture_output=True, text=True, timeout=10,
+            creationflags=cf
+        )
+        if result.returncode != 0:
+            return jsonify({"error": "No files found in clipboard."}), 400
+        
+        file_paths = [p.strip() for p in result.stdout.strip().split('\n') if p.strip()]
+        if not file_paths:
+            return jsonify({"error": "No files found in clipboard."}), 400
+        
+        copied = 0
+        for src in file_paths:
+            src = os.path.normpath(src)
+            if not os.path.exists(src):
+                continue
+            dest = os.path.join(base_path, os.path.basename(src))
+            if os.path.isdir(src):
+                if os.path.exists(dest):
+                    # Merge into existing dir
+                    shutil.copytree(src, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copytree(src, dest)
+            else:
+                shutil.copy2(src, dest)
+            copied += 1
+        
+        if copied == 0:
+            return jsonify({"error": "No valid files to paste."}), 400
+        return jsonify({"status": "success", "count": copied})
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Clipboard read timed out."}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
     if 'image' not in request.files:

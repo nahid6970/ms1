@@ -2117,6 +2117,12 @@
         <div id="explorer-tree-container" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.6;">
             <!-- Tree list goes here -->
         </div>
+        <div id="explorer-paste-bar" style="padding: 8px 12px; border-top: 1px solid var(--border-color); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+            <button onclick="pasteClipboardFiles()" title="Paste copied files from clipboard into this project" style="width: 100%; padding: 6px 12px; font-size: 0.78rem; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; font-family: 'Fira Code', monospace;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                Paste Files
+            </button>
+        </div>
     </div>
 
     <!-- File Viewer Modal -->
@@ -6378,6 +6384,26 @@
             }
         }
 
+        async function pasteClipboardFiles() {
+            if (!activeProject) { alert("No project selected."); return; }
+            
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/paste-clipboard`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    loadExplorerRoot();
+                } else {
+                    alert(data.error || "Failed to paste files.");
+                }
+            } catch (err) {
+                console.error("Paste clipboard error:", err);
+                alert("Error pasting files from clipboard.");
+            }
+        }
+
         function renderFileTreeItems(parentContainer, items, parentPath) {
             parentContainer.innerHTML = '';
             
@@ -6413,22 +6439,22 @@
                 leftArea.title = item.rel_path;
                 itemRow.appendChild(leftArea);
 
-                // Action buttons (files only)
-                if (!item.is_dir) {
-                    const actionsContainer = document.createElement('div');
-                    actionsContainer.style = 'display:flex; align-items:center; opacity:0; transition:opacity 0.15s; flex-shrink:0;';
+                // Action buttons container (for all items)
+                const actionsContainer = document.createElement('div');
+                actionsContainer.style = 'display:flex; align-items:center; opacity:0; transition:opacity 0.15s; flex-shrink:0;';
 
-                    // Run button
+                if (!item.is_dir) {
+                    // Run button (files only)
                     const runBtn = document.createElement('button');
                     runBtn.title = 'Run script';
                     runBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s;';
-                    // Play icon
                     runBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
                     runBtn.onclick = (e) => { e.stopPropagation(); openExplorerRunModal(item.rel_path, item.name); };
-                    runBtn.onmouseenter = () => runBtn.style.color = '#10b981'; // Green hover
+                    runBtn.onmouseenter = () => runBtn.style.color = '#10b981';
                     runBtn.onmouseleave = () => runBtn.style.color = 'var(--text-secondary)';
+                    actionsContainer.appendChild(runBtn);
 
-                    // View button
+                    // View button (files only)
                     const viewBtn = document.createElement('button');
                     viewBtn.title = 'View file';
                     viewBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s;';
@@ -6436,24 +6462,22 @@
                     viewBtn.onclick = (e) => { e.stopPropagation(); openFileViewer(item.rel_path, item.name); };
                     viewBtn.onmouseenter = () => viewBtn.style.color = 'var(--accent-color)';
                     viewBtn.onmouseleave = () => viewBtn.style.color = 'var(--text-secondary)';
-
-                    // Delete button
-                    const delBtn = document.createElement('button');
-                    delBtn.title = 'Delete file';
-                    delBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s; margin-left:2px;';
-                    delBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
-                    delBtn.onclick = (e) => { e.stopPropagation(); deleteExplorerFile(item.rel_path, item.name); };
-                    delBtn.onmouseenter = () => delBtn.style.color = '#ef4444'; // Red hover
-                    delBtn.onmouseleave = () => delBtn.style.color = 'var(--text-secondary)';
-
-                    actionsContainer.appendChild(runBtn);
                     actionsContainer.appendChild(viewBtn);
-                    actionsContainer.appendChild(delBtn);
-
-                    itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; actionsContainer.style.opacity = '1'; };
-                    itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; actionsContainer.style.opacity = '0'; };
-                    itemRow.appendChild(actionsContainer);
                 }
+
+                // Delete button (files AND folders)
+                const delBtn = document.createElement('button');
+                delBtn.title = item.is_dir ? 'Delete folder' : 'Delete file';
+                delBtn.style.cssText = 'background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:2px 4px; border-radius:3px; display:flex; align-items:center; transition:color 0.15s; margin-left:2px;';
+                delBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteExplorerFile(item.rel_path, item.name); };
+                delBtn.onmouseenter = () => delBtn.style.color = '#ef4444';
+                delBtn.onmouseleave = () => delBtn.style.color = 'var(--text-secondary)';
+                actionsContainer.appendChild(delBtn);
+
+                itemRow.onmouseenter = () => { itemRow.style.backgroundColor = 'var(--bg-card-hover)'; actionsContainer.style.opacity = '1'; };
+                itemRow.onmouseleave = () => { itemRow.style.backgroundColor = 'transparent'; actionsContainer.style.opacity = '0'; };
+                itemRow.appendChild(actionsContainer);
 
                 let subContainer = null;
                 if (item.is_dir) {
