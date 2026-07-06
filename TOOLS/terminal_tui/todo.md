@@ -1,4 +1,4 @@
-# Task: Add Inline Bookmark Input Field
+# Task: Add Inline Bookmark Input Field & Fix Close-on-Outside-Click
 
 ## Tasks
 - [X] Added a file deletion API endpoint `POST /api/project/<project>/file-delete` in `app.py`.
@@ -9,3 +9,4 @@
 - [X] Updated the backend `/api/projects/<project>/bookmarks` POST endpoint to accept and save a custom name parameter.
 - [X] Added `addBookmarkFromInput()` JS function to handle inline bookmark creation, supporting `label::command` formatting.
 - [X] Updated `toggleBookmarkDropdown` to prefill the inline bookmark input field with the active command from the terminal.
+- [X] Fixed the close-on-outside-click handler for the bookmark dropdown by checking for the `flex` display value.

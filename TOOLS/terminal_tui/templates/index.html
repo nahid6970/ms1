@@ -4787,7 +4787,7 @@
             // 3. Close bookmarks dropdown
             const bookmarkContent = document.getElementById('bookmark-dropdown-content');
             const bookmarkTrigger = document.getElementById('bookmark-dropdown-btn');
-            if (bookmarkContent && bookmarkContent.style.display === 'block') {
+            if (bookmarkContent && (bookmarkContent.style.display === 'block' || bookmarkContent.style.display === 'flex')) {
                 if (!bookmarkTrigger.contains(e.target) && !bookmarkContent.contains(e.target)) {
                     bookmarkContent.style.display = 'none';
                 }
