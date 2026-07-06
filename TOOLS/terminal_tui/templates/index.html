@@ -2046,8 +2046,9 @@
             </div>
             <form id="bookmark-edit-form" onsubmit="handleSaveBookmark(event)">
                 <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="edit-bookmark-cmd" style="font-size: 0.8rem; font-weight: 500;">Command</label>
-                    <input type="text" id="edit-bookmark-cmd" class="form-input" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
+                    <label for="edit-bookmark-cmd" style="font-size: 0.8rem; font-weight: 500;">Command (supports multi-line macros)</label>
+                    <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="4" style="padding: 8px 12px; font-size: 0.82rem; font-family: 'Fira Code', monospace; resize: vertical; min-height: 80px; width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none;"></textarea>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">💡 Write multiple commands sequentially. Use <code>#wait 2000</code> to insert a delay (e.g. wait 2 seconds).</div>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-bookmark-name" style="font-size: 0.8rem; font-weight: 500;">Display Name (Alias)</label>
@@ -3489,7 +3490,7 @@
 
                 if (initialCommand) {
                     setTimeout(() => {
-                        paneSocket.emit('pty-input', { project: projectName, paneId, data: initialCommand + "\r" });
+                        executeCommandMacro(projectName, paneId, initialCommand, paneSocket);
                     }, 400);
                 }
             });
@@ -5494,31 +5495,56 @@
             }
         }
 
+        async function executeCommandMacro(projectName, paneId, cmd, targetSocket = null) {
+            if (!cmd) return;
+            const lines = cmd.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            const sendInput = async (dataStr) => {
+                const s = targetSocket || (socket && socket.connected ? socket : null);
+                if (s && s.connected) {
+                    s.emit('pty-input', {
+                        project: projectName,
+                        paneId: paneId,
+                        data: dataStr + "\r"
+                    });
+                } else {
+                    try {
+                        await fetch(`/input/${projectName}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ data: dataStr + "\r" })
+                        });
+                    } catch (err) {
+                        console.error("Error running macro command:", err);
+                    }
+                }
+            };
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const waitMatch = line.match(/^\[wait\s+(\d+)\]/i) || line.match(/^#wait\s+(\d+)/i);
+                if (waitMatch) {
+                    const ms = parseInt(waitMatch[1]);
+                    await new Promise(resolve => setTimeout(resolve, ms));
+                } else {
+                    await sendInput(line);
+                    if (i < lines.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+            }
+        }
+
         async function runBookmarkedCommand(cmd, windowTitle = "") {
             if (!cmd || !activeProject) return;
             
             // Hide dropdown
             document.getElementById('bookmark-dropdown-content').style.display = 'none';
             
-            if (socket && socket.connected) {
-                const activePane = terminalPanes.find(p => p.socket === socket);
-                const paneId = activePane ? activePane.paneId : 'main';
-                socket.emit('pty-input', {
-                    project: activeProject,
-                    paneId: paneId,
-                    data: cmd + "\r"
-                });
-            } else {
-                try {
-                    await fetch(`/input/${activeProject}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: cmd + "\r" })
-                    });
-                } catch (err) {
-                    console.error("Error running bookmarked command:", err);
-                }
-            }
+            const activePane = terminalPanes.find(p => p.socket === socket);
+            const paneId = activePane ? activePane.paneId : 'main';
+            
+            await executeCommandMacro(activeProject, paneId, cmd, socket);
         }
 
         function runBookmarkInSplit(cmd) {
