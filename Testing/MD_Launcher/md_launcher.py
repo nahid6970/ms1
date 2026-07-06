@@ -276,6 +276,8 @@ class MDRow(QWidget):
     def mouseMoveEvent(self, event):
         if not (event.buttons() & Qt.LeftButton): return
         if (event.pos() - self._drag_start).manhattanLength() < QApplication.startDragDistance(): return
+        # Copy path to clipboard so even if drop fails, user can paste
+        QApplication.clipboard().setText(os.path.abspath(self.file_path))
         drag = QDrag(self)
         mime = QMimeData()
         mime.setUrls([QUrl.fromLocalFile(os.path.abspath(self.file_path))])
