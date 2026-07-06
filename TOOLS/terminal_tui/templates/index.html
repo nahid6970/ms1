@@ -2586,7 +2586,7 @@
     <div class="modal-overlay" id="custom-btn-modal">
         <div class="modal-content" style="width: 420px; max-width: 95%; padding: 24px;">
             <div class="modal-header" style="margin-bottom: 16px;">
-                <h2 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Add Custom Button</h2>
+                <h2 id="custom-btn-modal-title" style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Add Custom Button</h2>
                 <button onclick="closeCustomButtonModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
             </div>
             <div style="margin-bottom: 14px;">
@@ -2600,9 +2600,12 @@
             <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--bg-sidebar); border-radius: 6px;">
                 Examples: <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\t</code> = Tab, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\r</code> = Enter, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\x1b[A</code> = Up Arrow
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="closeCustomButtonModal()" style="padding: 8px 16px; font-size: 0.85rem;">Cancel</button>
-                <button class="btn btn-primary" onclick="saveCustomButton()" style="padding: 8px 20px; font-size: 0.85rem;">Add Button</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button id="custom-btn-delete" class="btn" onclick="deleteCustomButton()" style="padding: 8px 16px; font-size: 0.85rem; background: #ef4444; border-color: #ef4444; color: white; display: none;">Delete</button>
+                <div style="display: flex; gap: 10px; margin-left: auto;">
+                    <button class="btn btn-secondary" onclick="closeCustomButtonModal()" style="padding: 8px 16px; font-size: 0.85rem;">Cancel</button>
+                    <button id="custom-btn-save" class="btn btn-primary" onclick="saveCustomButton()" style="padding: 8px 20px; font-size: 0.85rem;">Add Button</button>
+                </div>
             </div>
         </div>
     </div>
@@ -7976,10 +7979,32 @@
         // ─── Custom Terminal Button Modal ─────────────────────────────────────────
         let customBtnTargetPaneId = null;
 
-        function openCustomButtonModal(paneId) {
+        function openCustomButtonModal(paneId, editIndex = null) {
             customBtnTargetPaneId = paneId;
-            document.getElementById('custom-btn-label').value = '';
-            document.getElementById('custom-btn-keycode').value = '';
+            customBtnEditIndex = editIndex;
+            
+            let initialLabel = '';
+            let initialData = '';
+            
+            if (editIndex !== null && activeProject) {
+                const storageKey = `custom-btns-${activeProject}`;
+                const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                if (existing[editIndex]) {
+                    initialLabel = existing[editIndex].label;
+                    initialData = existing[editIndex].raw_data || existing[editIndex].data;
+                }
+            }
+            
+            document.getElementById('custom-btn-label').value = initialLabel;
+            document.getElementById('custom-btn-keycode').value = initialData;
+            
+            const isEditing = editIndex !== null;
+            document.getElementById('custom-btn-modal-title').innerText = isEditing ? 'Edit Custom Button' : 'Add Custom Button';
+            document.getElementById('custom-btn-save').innerText = isEditing ? 'Save Changes' : 'Add Button';
+            
+            const delBtn = document.getElementById('custom-btn-delete');
+            if (delBtn) delBtn.style.display = isEditing ? 'inline-block' : 'none';
+
             document.getElementById('custom-btn-modal').classList.add('show');
             setTimeout(() => document.getElementById('custom-btn-label').focus(), 100);
         }
@@ -7987,6 +8012,18 @@
         function closeCustomButtonModal() {
             document.getElementById('custom-btn-modal').classList.remove('show');
             customBtnTargetPaneId = null;
+            customBtnEditIndex = null;
+        }
+
+        function deleteCustomButton() {
+            if (customBtnEditIndex === null || !activeProject) return;
+            const storageKey = `custom-btns-${activeProject}`;
+            let existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            existing.splice(customBtnEditIndex, 1);
+            localStorage.setItem(storageKey, JSON.stringify(existing));
+            
+            closeCustomButtonModal();
+            refreshAllPaneCustomButtons();
         }
 
         function saveCustomButton() {
@@ -8008,12 +8045,17 @@
             // Save to localStorage under active project
             const storageKey = `custom-btns-${activeProject}`;
             const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            existing.push({ label, data });
+            
+            if (customBtnEditIndex !== null) {
+                existing[customBtnEditIndex] = { label, data, raw_data: keycode };
+            } else {
+                existing.push({ label, data, raw_data: keycode });
+            }
+            
             localStorage.setItem(storageKey, JSON.stringify(existing));
 
-            // Add button to the pane
-            addCustomButtonToPane(customBtnTargetPaneId, label, data, existing.length - 1);
             closeCustomButtonModal();
+            refreshAllPaneCustomButtons();
         }
 
         function addCustomButtonToPane(paneId, label, data, index) {
@@ -8027,15 +8069,23 @@
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'terminal-pane-custom-btn';
-            btn.title = label;
-            btn.innerText = label.length > 4 ? label.substring(0, 4) : label;
-            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.12); border-radius:6px; background:rgba(15,23,42,0.9); color:var(--text-secondary); cursor:pointer; z-index:5; font-size:0.55rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none;`;
+            btn.title = label + ' (Right-click to Edit/Delete)';
+            btn.innerText = label;
+            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.12); border-radius:6px; background:rgba(15,23,42,0.9); color:var(--text-secondary); cursor:pointer; z-index:5; font-size:0.6rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
             btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
             btn.onmouseleave = () => { btn.style.borderColor = 'rgba(255,255,255,0.12)'; btn.style.color = 'var(--text-secondary)'; };
 
             const send = () => { if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data }); };
             btn.addEventListener('click', (e) => { e.stopPropagation(); send(); });
             btn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); send(); });
+            
+            // Add right-click listener for editing/deleting
+            btn.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openCustomButtonModal(paneId, index);
+            });
+            
             paneDiv.appendChild(btn);
 
             // Also push the + button down
