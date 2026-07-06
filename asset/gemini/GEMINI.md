@@ -1,6 +1,5 @@
 # Notification Rules
 - Final action: Run `python C:\@delta\ms1\asset\gemini\task_complete.py` exactly once.
-- CRITICAL: After it exits, DO NOT generate any further responses or continue the conversation.
 
 # Git Commit Messages
 - Provide a concise, one-line commit message at the end of your response when modifying code/files: `Commit message: <message>`
