@@ -38,6 +38,26 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
 PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
+ICONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json"
+
+def load_extension_icons():
+    if not os.path.exists(ICONS_FILE):
+        return {}
+    try:
+        with open(ICONS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading extension icons: {e}")
+        return {}
+
+def save_extension_icons(icons):
+    try:
+        os.makedirs(os.path.dirname(ICONS_FILE), exist_ok=True)
+        with open(ICONS_FILE, "w", encoding="utf-8") as f:
+            json.dump(icons, f, indent=2)
+    except Exception as e:
+        print(f"Error saving extension icons: {e}")
+
 active_sessions = {}
 sessions_lock = threading.Lock()
 
@@ -2681,6 +2701,16 @@ def ws_resize(data):
         session = active_sessions.get(session_key)
     if session:
         session.resize(cols, rows)
+
+@app.route('/api/extension-icons', methods=['GET'])
+def api_get_extension_icons():
+    return jsonify(load_extension_icons())
+
+@app.route('/api/extension-icons', methods=['POST'])
+def api_post_extension_icons():
+    data = request.json or {}
+    save_extension_icons(data)
+    return jsonify({"status": "success"})
 
 @app.route('/api/fonts')
 def list_system_fonts():

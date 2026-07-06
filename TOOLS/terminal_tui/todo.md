@@ -1,4 +1,4 @@
-# Task: Custom File Extension Icons in File Explorer
+# Task: Custom File Extension Icons in File Explorer (JSON Backend Storage)
 
 ## Tasks
 - [X] Added a file deletion API endpoint `POST /api/project/<project>/file-delete` in `app.py`.
@@ -17,4 +17,6 @@
 - [X] Added a "Configure Icons" section and button in Global Settings modal.
 - [X] Created the `extension-icons-modal` overlay allowing users to map file extensions to custom SVGs (supporting comma separation for multiple extensions mapped to the same SVG).
 - [X] Implemented JS functions `openExtensionIconsModal`, `closeExtensionIconsModal`, `renderExtensionIconsList`, `addExtensionIconMapping`, and `deleteExtensionIconMapping`.
-- [X] Updated `renderFileTreeItems` to check the mapped SVG icons in `localStorage` and render them in the file explorer.
+- [X] Added `GET /api/extension-icons` and `POST /api/extension-icons` API routes in `app.py` to save the mappings in a backend JSON file: `C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json`.
+- [X] Migrated frontend icons lookup to request from backend JSON file on startup and write to it dynamically.
+- [X] Updated `renderFileTreeItems` to check the mapped SVG icons in `extensionIconsMap` and render them in the file explorer.

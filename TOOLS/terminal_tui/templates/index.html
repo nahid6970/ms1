@@ -2559,6 +2559,19 @@
         let contextProject = null; // Holds the project currently right-clicked
         let editingBookmarkProj = null;
         let editingBookmarkIndex = null;
+        let extensionIconsMap = {};
+
+        async function loadExtensionIconsMap() {
+            try {
+                const res = await fetch('/api/extension-icons');
+                if (res.ok) {
+                    extensionIconsMap = await res.json();
+                }
+            } catch (err) {
+                console.error("Error loading extension icons map:", err);
+            }
+        }
+
         let term = null;
         let fitAddon = null;
         let socket = null;
@@ -6151,14 +6164,7 @@
             if (!listEl) return;
             listEl.innerHTML = '';
             
-            let iconsMap = {};
-            try {
-                iconsMap = JSON.parse(localStorage.getItem('file-extension-icons')) || {};
-            } catch (e) {
-                iconsMap = {};
-            }
-            
-            const entries = Object.entries(iconsMap);
+            const entries = Object.entries(extensionIconsMap || {});
             if (entries.length === 0) {
                 listEl.innerHTML = '<div style="padding: 16px; color: var(--text-secondary); text-align: center; font-size: 0.8rem; font-style: italic;">No custom icons configured.</div>';
                 return;
@@ -6206,7 +6212,7 @@
             });
         }
 
-        function addExtensionIconMapping() {
+        async function addExtensionIconMapping() {
             const extInput = document.getElementById('new-ext-input');
             const svgInput = document.getElementById('new-svg-input');
             if (!extInput || !svgInput) return;
@@ -6237,42 +6243,54 @@
                 return;
             }
             
-            let iconsMap = {};
-            try {
-                iconsMap = JSON.parse(localStorage.getItem('file-extension-icons')) || {};
-            } catch (e) {
-                iconsMap = {};
-            }
-            
             extensionsList.forEach(ext => {
-                iconsMap[ext] = svgCode;
+                extensionIconsMap[ext] = svgCode;
             });
             
-            localStorage.setItem('file-extension-icons', JSON.stringify(iconsMap));
-            
-            extInput.value = '';
-            svgInput.value = '';
-            renderExtensionIconsList();
-            
-            if (typeof loadExplorerRoot === 'function') {
-                loadExplorerRoot();
+            try {
+                const res = await fetch('/api/extension-icons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(extensionIconsMap)
+                });
+                
+                if (res.ok) {
+                    extInput.value = '';
+                    svgInput.value = '';
+                    renderExtensionIconsList();
+                    if (typeof loadExplorerRoot === 'function') {
+                        loadExplorerRoot();
+                    }
+                } else {
+                    alert("Failed to save mappings to backend.");
+                }
+            } catch (err) {
+                console.error("Error saving extension icons:", err);
+                alert("Error saving extension icons.");
             }
         }
 
-        function deleteExtensionIconMapping(ext) {
-            let iconsMap = {};
+        async function deleteExtensionIconMapping(ext) {
+            delete extensionIconsMap[ext];
+            
             try {
-                iconsMap = JSON.parse(localStorage.getItem('file-extension-icons')) || {};
-            } catch (e) {
-                iconsMap = {};
-            }
-            
-            delete iconsMap[ext];
-            localStorage.setItem('file-extension-icons', JSON.stringify(iconsMap));
-            renderExtensionIconsList();
-            
-            if (typeof loadExplorerRoot === 'function') {
-                loadExplorerRoot();
+                const res = await fetch('/api/extension-icons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(extensionIconsMap)
+                });
+                
+                if (res.ok) {
+                    renderExtensionIconsList();
+                    if (typeof loadExplorerRoot === 'function') {
+                        loadExplorerRoot();
+                    }
+                } else {
+                    alert("Failed to delete mapping on backend.");
+                }
+            } catch (err) {
+                console.error("Error deleting extension icon mapping:", err);
+                alert("Error deleting extension icon mapping.");
             }
         }
 
@@ -6770,12 +6788,9 @@
                     const extMatch = item.name.match(/\.[^.]+$/);
                     const ext = extMatch ? extMatch[0].toLowerCase() : "";
                     if (ext) {
-                        try {
-                            const iconsMap = JSON.parse(localStorage.getItem('file-extension-icons')) || {};
-                            if (iconsMap[ext]) {
-                                customSvg = iconsMap[ext];
-                            }
-                        } catch (e) {}
+                        if (extensionIconsMap && extensionIconsMap[ext]) {
+                            customSvg = extensionIconsMap[ext];
+                        }
                     }
                 }
                 
@@ -9106,6 +9121,7 @@
             }
             
             loadSystemFonts();
+            await loadExtensionIconsMap();
             await fetchProjects();
             applySidebarWorkspacesVisibility();
             
