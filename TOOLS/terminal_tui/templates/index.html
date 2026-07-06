@@ -1788,8 +1788,8 @@
 
     <!-- Framework Initializer Modal Dialog -->
     <div class="modal-overlay" id="framework-select-modal">
-        <div class="modal-content" style="max-width: 540px; padding: 24px;">
-            <div class="modal-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-content" style="width: 780px; max-width: 95vw; max-height: 90vh; padding: 24px; display: flex; flex-direction: column;">
+            <div class="modal-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
                 <div>
                     <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Initialize Frontend Framework</h2>
                     <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Select a framework to generate basic starter files in the active workspace root.</div>
@@ -1797,44 +1797,79 @@
                 <button type="button" class="btn btn-secondary" onclick="closeFrameworkSelectModal()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1;">✕</button>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 20px; overflow-y: auto; padding: 4px;">
                 <!-- React Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('react')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div class="split-card" onclick="confirmFrameworkInit('react')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">⚛️</span>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">React</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">React + Vite starter template</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">React</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">React + Vite starter template</span>
                 </div>
                 
                 <!-- Vue Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('vue')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div class="split-card" onclick="confirmFrameworkInit('vue')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🟢</span>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Vue 3</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Vue 3 + Vite SFC starter</span>
-                </div>
-
-                <!-- AngularJS Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('angularjs')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
-                    <span style="font-size: 1.5rem;">🔴</span>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">AngularJS</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">AngularJS 1.x play CDN starter</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Vue 3</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Vue 3 + Vite SFC starter</span>
                 </div>
 
                 <!-- Svelte Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('svelte')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div class="split-card" onclick="confirmFrameworkInit('svelte')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🔥</span>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Svelte</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Svelte + Vite starter template</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Svelte</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Svelte + Vite starter template</span>
                 </div>
 
-                <!-- Tailwind CSS Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('tailwind_html')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s; grid-column: span 2;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <!-- Next.js Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('nextjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">▲</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Next.js</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Next.js App Router basic structure</span>
+                </div>
+
+                <!-- Angular Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('angular')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🅰️</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Angular 17+</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Modern standalone Angular app setup</span>
+                </div>
+
+                <!-- SolidJS Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('solidjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">💙</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">SolidJS</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">SolidJS + Vite starter template</span>
+                </div>
+
+                <!-- Preact Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('preact')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">⚛️</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Preact</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Preact + Vite lightweight app template</span>
+                </div>
+
+                <!-- Alpine.js Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('alpinejs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">❄️</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Alpine.js</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Alpine.js play CDN starter layout</span>
+                </div>
+
+                <!-- AngularJS Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('angularjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🔴</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">AngularJS 1.x</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">AngularJS 1.x play CDN starter</span>
+                </div>
+
+                <!-- Tailwind HTML Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('tailwind_html')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🎨</span>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Tailwind HTML</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Tailwind CSS play CDN basic layout template</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Tailwind HTML</span>
+                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Tailwind CSS play CDN basic layout template</span>
                 </div>
             </div>
             
-            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <div style="display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0;">
                 <button type="button" class="btn btn-secondary" onclick="closeFrameworkSelectModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
             </div>
         </div>

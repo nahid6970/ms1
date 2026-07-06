@@ -1973,6 +1973,338 @@ export default app""",
   </body>
 </html>"""
         }
+    elif framework == "nextjs":
+        templates = {
+            "package.json": """{
+  "name": "nextjs-starter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}""",
+            "app/layout.js": """export const metadata = {
+  title: 'Next.js App',
+  description: 'Created with Next.js Starter',
+}
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body style={{ margin: 0, padding: 0, boxSizing: 'border-box', background: '#09090b', color: '#fafafa', fontFamily: 'sans-serif' }}>
+        {children}
+      </body>
+    </html>
+  )
+}""",
+            "app/page.js": """export default function Home() {
+  return (
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '16px' }}>
+      <h1 style={{ fontSize: '3rem', margin: 0, fontWeight: '800' }}>Next.js App Router</h1>
+      <p style={{ color: '#a1a1aa' }}>Get started by editing <code>app/page.js</code></p>
+    </main>
+  )
+}"""
+        }
+    elif framework == "solidjs":
+        templates = {
+            "package.json": """{
+  "name": "solid-starter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "solid-js": "^1.7.6"
+  },
+  "devDependencies": {
+    "vite": "^4.3.9",
+    "vite-plugin-solid": "^2.7.0"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import solidPlugin from 'vite-plugin-solid'
+
+export default defineConfig({
+  plugins: [solidPlugin()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SolidJS Starter</title>
+  </head>
+  <body style="margin: 0; background: #13141f; color: #fff; font-family: sans-serif;">
+    <div id="app"></div>
+    <script type="module" src="/src/index.jsx"></script>
+  </body>
+</html>""",
+            "src/index.jsx": """import { render } from 'solid-js/web'
+import App from './App'
+
+render(() => <App />, document.getElementById('app'))""",
+            "src/App.jsx": """import { createSignal } from 'solid-js'
+
+function App() {
+  const [count, setCount] = createSignal(0)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh', gap: '20px' }}>
+      <h1 style={{ color: '#446b9e', fontSize: '3rem', margin: 0 }}>SolidJS + Vite</h1>
+      <p style={{ fontSize: '1.2rem', color: '#888' }}>Get started by editing <code>src/App.jsx</code></p>
+      <button 
+        onClick={() => setCount(count() + 1)}
+        style={{ padding: '10px 20px', fontSize: '1rem', background: '#446b9e', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        Count is {count()}
+      </button>
+    </div>
+  )
+}
+
+export default App"""
+        }
+    elif framework == "preact":
+        templates = {
+            "package.json": """{
+  "name": "preact-starter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "^10.15.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "vite": "^4.3.9"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import preact from '@preact/preset-vite'
+
+export default defineConfig({
+  plugins: [preact()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preact Starter</title>
+  </head>
+  <body style="margin: 0; background: #191919; color: #f3f3f3; font-family: sans-serif;">
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>""",
+            "src/main.jsx": """import { render } from 'preact'
+import App from './App.jsx'
+
+render(<App />, document.body)""",
+            "src/App.jsx": """import { useState } from 'preact/hooks'
+
+export default function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh', gap: '20px' }}>
+      <h1 style={{ color: '#673ab8', fontSize: '3rem', margin: 0 }}>Preact + Vite</h1>
+      <p style={{ fontSize: '1.2rem', color: '#888' }}>Get started by editing <code>src/App.jsx</code></p>
+      <button 
+        onClick={() => setCount(count + 1)}
+        style={{ padding: '10px 20px', fontSize: '1rem', background: '#673ab8', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        Count is {count}
+      </button>
+    </div>
+  )
+}"""
+        }
+    elif framework == "alpinejs":
+        templates = {
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alpine.js Play CDN Starter</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body style="margin: 0; background: #0f172a; color: #f8fafc; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; gap: 20px;">
+    <div x-data="{ count: 0, title: 'Alpine.js' }" style="text-align: center; display: flex; flex-direction: column; gap: 16px; align-items: center;">
+      <h1 x-text="title" style="color: #77c1d4; font-size: 3rem; margin: 0;"></h1>
+      <p style="font-size: 1.2rem; color: #94a3b8;">Get started by editing <code>index.html</code></p>
+      <button @click="count++" style="padding: 10px 20px; font-size: 1rem; background: #77c1d4; border: none; border-radius: 8px; color: #0f172a; font-weight: bold; cursor: pointer;">
+        Count is <span x-text="count"></span>
+      </button>
+    </div>
+  </body>
+</html>"""
+        }
+    elif framework == "angular":
+        templates = {
+            "package.json": """{
+  "name": "angular-starter",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development"
+  },
+  "dependencies": {
+    "@angular/animations": "^17.0.0",
+    "@angular/common": "^17.0.0",
+    "@angular/compiler": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/forms": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/platform-browser-dynamic": "^17.0.0",
+    "@angular/router": "^17.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.5.0",
+    "zone.js": "~0.14.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.0.0",
+    "@angular/cli": "^17.0.0",
+    "@angular/compiler-cli": "^17.0.0",
+    "typescript": "~5.2.2"
+  }
+}""",
+            "tsconfig.json": """{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": ["ES2022", "dom"]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}""",
+            "angular.json": """{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "angular-starter": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/angular-starter",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.app.json",
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
+            "scripts": []
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "angular-starter:build:production"
+            },
+            "development": {
+              "buildTarget": "angular-starter:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}""",
+            "tsconfig.app.json": """{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "files": ["src/main.ts"],
+  "include": ["src/**/*.d.ts"]
+}""",
+            "src/index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Angular Modern Starter</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body style="margin: 0; background: #1a1a2e; color: #fff; font-family: sans-serif;">
+    <app-root></app-root>
+  </body>
+</html>""",
+            "src/styles.css": """/* Global styles */""",
+            "src/main.ts": """import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent).catch(err => console.error(err));""",
+            "src/app/app.component.ts": """import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  template: `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; gap: 20px;">
+      <h1 style="color: #c3002f; font-size: 3rem; margin: 0;">Angular 17+</h1>
+      <p style="font-size: 1.2rem; color: #aaa;">Get started by editing <code>src/app/app.component.ts</code></p>
+      <button (click)="increment()" style="padding: 10px 20px; font-size: 1rem; background: #c3002f; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer;">
+        Count is {{ count }}
+      </button>
+    </div>
+  `
+})
+export class AppComponent {
+  count = 0;
+  increment() {
+    this.count++;
+  }
+}"""
+        }
     else:
         return jsonify({"error": "Unknown framework template"}), 400
 
