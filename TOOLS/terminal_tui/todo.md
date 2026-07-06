@@ -1,4 +1,4 @@
-# Task: Fix PowerShell Syntax Error for Debug Script Runner
+# Task: Make Debug Script Runner Execute in a New Pane
 
 ## Tasks
-- [X] Use `-EncodedCommand` with Base64 encoding in the `powershell` wrapper mode to prevent the outer shell from interpolating `$?` and other syntax characters.
+- [X] Update the `handleRunDebugScript` JavaScript function to use `splitTerminal('tabs', ...)` instead of `socket.emit` so that launching a debug script opens in a new tab, preventing interference with running agent CLIs in the active pane.

@@ -5227,17 +5227,12 @@
                 finalCmd = `cmd /c "${cmdInput} || pause"`;
             }
             
-            if (socket && socket.connected) {
-                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
-                const paneId = activePane ? activePane.paneId : 'main';
-                socket.emit('pty-input', { project: activeProject, paneId, data: finalCmd + '\r' });
-            } else {
-                fetch(`/input/${activeProject}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: finalCmd + '\r' })
-                }).catch(err => console.error('Debug script send error:', err));
+            // Run in a new tab so it doesn't interrupt any running agent CLIs in the active pane
+            const parent = document.getElementById('terminal-parent');
+            if (parent) {
+                parent.className = 'split-tabs';
             }
+            splitTerminal('tabs', finalCmd + '\r');
             
             closeDebugScriptModal();
         }
