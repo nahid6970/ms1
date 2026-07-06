@@ -1,4 +1,6 @@
-# Task: Save Uploaded Screenshots to Temporary Folder
+# Task: Adjust Status Bar Elements (Temp Path, Hide Scroll Text, CPU/RAM Icons)
 
 ## Tasks
-- [X] Modify backend paste-image route to save files to the system temporary directory instead of the project directory to prevent dirtying git repositories
+- [X] Change screenshots saving directory in app.py to C:\Users\nahid\AppData\Local\Temp\screenshot_temp
+- [X] Remove "Scroll" text from the autoscroll toggle button in the status bar (just show the icon)
+- [X] Replace CPU and RAM text labels with icons in the status bar

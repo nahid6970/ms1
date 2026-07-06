@@ -1607,8 +1607,8 @@ def api_project_paste_image(project):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{name_part}_{timestamp}{ext_part}"
     
-    # Save it to a generic temp folder under system temp directory to avoid polluting project directories (e.g. git)
-    target_dir = os.path.join(tempfile.gettempdir(), "terminal_tui_images")
+    # Save it to target folder C:\Users\nahid\AppData\Local\Temp\screenshot_temp
+    target_dir = r"C:\Users\nahid\AppData\Local\Temp\screenshot_temp"
     
     os.makedirs(target_dir, exist_ok=True)
     dest_path = os.path.join(target_dir, filename)

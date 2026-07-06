@@ -1533,16 +1533,15 @@
                         </button>
                         <div class="custom-dropdown-content" id="project-name-dropdown-content" style="display: none; position: absolute; right: 0; bottom: 28px; width: 240px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 4px 0; max-height: 280px; overflow-y: auto;"></div>
                     </div>
-                    <button id="autoscroll-toggle-btn" onclick="toggleAutoScroll()" title="Toggle auto-scroll to bottom" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 1px 7px; font-size: 0.68rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                    <button id="autoscroll-toggle-btn" onclick="toggleAutoScroll()" title="Toggle auto-scroll to bottom" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 1px 5px; font-size: 0.68rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
                         <span id="autoscroll-icon">⇓</span>
-                        <span id="autoscroll-label">Scroll</span>
                     </button>
-                    <span style="display: flex; align-items: center; gap: 4px;">
-                        <span style="color: var(--text-secondary);">CPU:</span>
+                    <span style="display: flex; align-items: center; gap: 4px;" title="CPU Usage">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>
                         <span id="monitor-cpu-value" style="color: var(--text-primary); font-weight: 600;">0.0%</span>
                     </span>
-                    <span style="display: flex; align-items: center; gap: 4px;">
-                        <span style="color: var(--text-secondary);">RAM:</span>
+                    <span style="display: flex; align-items: center; gap: 4px;" title="RAM Usage">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"/><path d="M6 6h12M6 10h12M6 14h12M6 18h12"/></svg>
                         <span id="monitor-ram-value" style="color: var(--text-primary); font-weight: 600;">0.0 MB</span>
                     </span>
                 </div>
@@ -5698,19 +5697,16 @@
         function updateAutoScrollBtn() {
             const btn = document.getElementById('autoscroll-toggle-btn');
             const icon = document.getElementById('autoscroll-icon');
-            const label = document.getElementById('autoscroll-label');
             if (!btn) return;
             if (autoScrollEnabled) {
                 btn.style.borderColor = '#22c55e';
                 btn.style.color = '#22c55e';
                 if (icon) icon.textContent = '⇓';
-                if (label) label.textContent = 'Scroll';
                 btn.title = 'Auto-scroll ON — click to disable';
             } else {
                 btn.style.borderColor = 'var(--border-color)';
                 btn.style.color = 'var(--text-secondary)';
                 if (icon) icon.textContent = '⇓';
-                if (label) label.textContent = 'Scroll';
                 btn.title = 'Auto-scroll OFF — click to enable';
             }
         }
