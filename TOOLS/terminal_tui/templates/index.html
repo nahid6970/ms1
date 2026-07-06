@@ -9260,6 +9260,10 @@
                 const isSystem = p.processName.toLowerCase() === 'system' || p.pid === '4';
                 const rowClass = isSystem ? 'color:var(--text-muted);' : 'color:var(--text-primary);';
 
+                const shareBtn = isSystem 
+                    ? `` 
+                    : `<button onclick="sharePort(${p.port})" style="padding:3px 8px; background:none; border:1px solid #3b82f6; border-radius:0; color:#3b82f6; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s; margin-right: 5px;" onmouseenter="this.style.backgroundColor='rgba(59,130,246,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Share (Tunnel)</button>`;
+
                 const killBtn = isSystem 
                     ? `<span style="color:var(--text-muted); font-size:0.75rem; padding-right:10px;">Protected</span>`
                     : `<button onclick="killPortProcess('${p.pid}', ${p.port})" style="padding:3px 8px; background:none; border:1px solid #ef4444; border-radius:0; color:#ef4444; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Kill</button>`;
@@ -9268,7 +9272,7 @@
                     <td style="padding:10px 12px; ${portStyle}">${p.port}</td>
                     <td style="padding:10px 12px; font-family:'Fira Code',monospace; font-size:0.76rem; ${rowClass}">${p.processName}</td>
                     <td style="padding:10px 12px; color:var(--text-secondary);">${p.pid}</td>
-                    <td style="padding:10px 12px; text-align:right;">${killBtn}</td>
+                    <td style="padding:10px 12px; text-align:right;">${shareBtn}${killBtn}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -9312,6 +9316,14 @@
             } catch (err) {
                 alert('Connection error.');
             }
+        }
+        function sharePort(port) {
+            if (!activeProject) {
+                alert("Please select a workspace project first to use the terminal.");
+                return;
+            }
+            closePortsMonitorModal();
+            splitTerminal('right', `npx -y localtunnel --port ${port}`);
         }
 
         window.onload = async () => {
