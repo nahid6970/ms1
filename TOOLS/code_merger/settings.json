@@ -51,6 +51,10 @@
       "name": "Tool - Image Mover"
     },
     {
+      "path": "C:\\@delta\\ms1\\TOOLS\\alarm_timer",
+      "name": "Tool - Alarm Countodwn Timer"
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Tool - Code Manager"
     },
