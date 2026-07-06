@@ -802,11 +802,18 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    def __init__(self, card_id: str, label: str, fires_at: float, parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, parent=None):
         super().__init__(parent)
         self.card_id  = card_id
         self.label    = label
         self.fires_at = fires_at
+        
+        now = time.time()
+        if created_at <= 0.0 or created_at >= fires_at:
+            self.created_at = now
+        else:
+            self.created_at = created_at
+            
         self.fired    = False
 
         self.setFrameShape(QFrame.Shape.Box)
@@ -883,6 +890,14 @@ class TimerCard(QFrame):
             " font-family: 'Consolas'; letter-spacing: 2px;"
         )
 
+        # thin progress bar
+        self._prog_bg = QWidget()
+        self._prog_bg.setFixedHeight(4)
+        self._prog_bg.setStyleSheet(f"background: {CP_DIM};")
+        self._prog_fill = QWidget(self._prog_bg)
+        self._prog_fill.setFixedHeight(4)
+        self._prog_fill.setStyleSheet(f"background: {CP_CYAN};")
+
         # status
         self._status = QLabel("● STOPPED")
         self._status.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -892,12 +907,34 @@ class TimerCard(QFrame):
 
         root.addLayout(top)
         root.addWidget(self._display)
+        root.addWidget(self._prog_bg)
         root.addWidget(self._status)
 
     def _set_border(self, color: str):
         self.setStyleSheet(
             f"TimerCard {{ border: 1px solid {color}; background: {CP_PANEL}; }}"
         )
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._update_bar()
+
+    def _update_bar(self):
+        now = time.time()
+        if self.fires_at <= now:
+            self._prog_fill.setFixedWidth(0)
+            return
+        
+        duration = self.fires_at - self.created_at
+        if duration <= 0:
+            duration = 1.0
+        
+        ratio = max(0.0, min(1.0, (self.fires_at - now) / duration))
+        w = int(self._prog_bg.width() * ratio)
+        self._prog_fill.setFixedWidth(max(0, w))
+        
+        color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
+        self._prog_fill.setStyleSheet(f"background: {color};")
 
     def _tick(self):
         now = time.time()
@@ -912,6 +949,7 @@ class TimerCard(QFrame):
                 f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
             )
             self._set_border(CP_RED)
+            self._prog_fill.setFixedWidth(0)
             
             if not self.fired:
                 self.fired = True
@@ -927,6 +965,7 @@ class TimerCard(QFrame):
             self._status.setText("▶ RUNNING")
             self._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
             self._set_border(CP_GREEN)
+            self._update_bar()
 
     def _on_delete(self):
         self._ticker.stop()
@@ -958,6 +997,10 @@ class TimerCard(QFrame):
         new_label, new_fires_at = result
         self.label = new_label
         self._lbl.setText(self.label)
+        
+        if abs(new_fires_at - self.fires_at) > 0.01:
+            self.created_at = time.time()
+            
         self.fires_at = new_fires_at
         self.fired = False
         self._tick()
@@ -969,6 +1012,7 @@ class TimerCard(QFrame):
             "id": self.card_id,
             "label": self.label,
             "fires_at": self.fires_at,
+            "created_at": self.created_at,
         }
 
     @classmethod
@@ -976,7 +1020,8 @@ class TimerCard(QFrame):
         card_id = d["id"]
         label = d.get("label", "Timer")
         fires_at = d.get("fires_at", 0.0)
-        return cls(card_id, label, fires_at, parent)
+        created_at = d.get("created_at", 0.0)
+        return cls(card_id, label, fires_at, created_at, parent)
 
 
 # ── ColumnWidget ───────────────────────────────────────────
@@ -1104,6 +1149,7 @@ class ColumnWidget(QFrame):
             str(uuid.uuid4())[:8],
             src.label + " (copy)",
             src.fires_at,
+            time.time(),
             self,
         )
         self.add_card(new_card)
@@ -1123,7 +1169,7 @@ class ColumnWidget(QFrame):
         if result is None:
             return
         label, fires_at = result
-        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, self)
+        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, time.time(), self)
         self.add_card(card)
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
