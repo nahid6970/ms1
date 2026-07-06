@@ -1,7 +1,7 @@
-# Task: Add File Picker for Debug Script Runner
+# Task: Improve File Picker UI for Debug Script Runner
 
 ## Tasks
-- [X] Add an API endpoint in app.py to list files in the active project directory (if not already existing) or utilize an existing one.
-- [X] Add a datalist to the Debug Script Runner modal input field in index.html.
-- [X] When opening the modal, fetch the file list of the active project and populate the datalist.
-- [X] Update the JS logic to populate this datalist.
+- [X] Remove the native HTML `<datalist>` as it renders with light/system styling that clashes with the dark theme.
+- [X] Create a custom, styled dropdown `<div>` for the script files autocomplete.
+- [X] Update JS to filter and populate the custom dropdown when the user focuses or types in the input.
+- [X] Add click handlers to the dropdown items to set the input value.

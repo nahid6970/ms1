@@ -1904,10 +1904,10 @@
                 <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Run a script (Python, PS1, etc.) directly in the terminal, keeping the shell open even if it crashes to inspect errors.</div>
             </div>
             <form id="debug-script-form" onsubmit="handleRunDebugScript(event)">
-                <div class="form-group" style="margin-bottom: 14px;">
+                <div class="form-group" style="margin-bottom: 14px; position: relative;">
                     <label for="debug-script-cmd" style="font-size: 0.8rem; font-weight: 500;">Command / Script Path</label>
-                    <input type="text" id="debug-script-cmd" list="debug-script-files" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace;">
-                    <datalist id="debug-script-files"></datalist>
+                    <input type="text" id="debug-script-cmd" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace; width: 100%; box-sizing: border-box;" oninput="filterDebugScripts()" onfocus="filterDebugScripts()">
+                    <div id="debug-script-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; margin-top: 4px;"></div>
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 14px;">
@@ -5111,6 +5111,8 @@
             document.getElementById('edit-bookmark-cmd').focus();
         }
         // ─── Debug Script Runner ──────────────────────────────────────────────────
+        let _debugScriptOptions = [];
+        
         async function openDebugScriptModal() {
             document.getElementById('debug-script-modal').classList.add('show');
             setTimeout(() => document.getElementById('debug-script-cmd').focus(), 100);
@@ -5120,31 +5122,75 @@
                     const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files`);
                     if (res.ok) {
                         const data = await res.json();
-                        const datalist = document.getElementById('debug-script-files');
-                        datalist.innerHTML = '';
+                        _debugScriptOptions = [];
                         if (data && data.items) {
-                            // Extract scripts (.py, .ps1, .sh, .js, .bat, .cmd)
                             data.items.forEach(f => {
                                 if (!f.is_dir) {
                                     const ext = f.name.split('.').pop().toLowerCase();
                                     if (['py', 'ps1', 'sh', 'js', 'bat', 'cmd'].includes(ext)) {
-                                        const opt = document.createElement('option');
-                                        opt.value = (ext === 'ps1' || ext === 'bat' || ext === 'cmd') ? `.\\${f.name}` : `python ${f.name}`;
-                                        datalist.appendChild(opt);
+                                        const val = (ext === 'ps1' || ext === 'bat' || ext === 'cmd') ? `.\\${f.name}` : `python ${f.name}`;
+                                        _debugScriptOptions.push(val);
                                     }
                                 }
                             });
                         }
+                        filterDebugScripts();
                     }
                 } catch (e) {
-                    console.error("Failed to load project files for debug script datalist:", e);
+                    console.error("Failed to load project files for debug script:", e);
                 }
             }
         }
 
+        function filterDebugScripts() {
+            const inputVal = document.getElementById('debug-script-cmd').value.toLowerCase();
+            const dropdown = document.getElementById('debug-script-dropdown');
+            if (!dropdown) return;
+            dropdown.innerHTML = '';
+            
+            const filtered = _debugScriptOptions.filter(opt => opt.toLowerCase().includes(inputVal));
+            
+            if (filtered.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            filtered.forEach(opt => {
+                const div = document.createElement('div');
+                div.textContent = opt;
+                div.style.padding = '8px 12px';
+                div.style.cursor = 'pointer';
+                div.style.fontSize = '0.85rem';
+                div.style.color = 'var(--text-primary)';
+                div.style.transition = 'background-color 0.1s';
+                div.onmouseenter = () => div.style.backgroundColor = 'var(--bg-card-hover)';
+                div.onmouseleave = () => div.style.backgroundColor = 'transparent';
+                div.onmousedown = (e) => {
+                    e.preventDefault(); 
+                    document.getElementById('debug-script-cmd').value = opt;
+                    dropdown.style.display = 'none';
+                };
+                dropdown.appendChild(div);
+            });
+            
+            dropdown.style.display = 'block';
+        }
+        
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('debug-script-dropdown');
+            const input = document.getElementById('debug-script-cmd');
+            if (dropdown && dropdown.style.display === 'block') {
+                if (e.target !== input && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            }
+        });
+
         function closeDebugScriptModal() {
             document.getElementById('debug-script-modal').classList.remove('show');
             document.getElementById('debug-script-cmd').value = '';
+            const dropdown = document.getElementById('debug-script-dropdown');
+            if (dropdown) dropdown.style.display = 'none';
         }
 
         function handleRunDebugScript(event) {
