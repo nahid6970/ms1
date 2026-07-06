@@ -1423,6 +1423,11 @@
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div id="project-specific-actions" style="display: flex; align-items: center; gap: 4px;">
+                    <button class="action-btn" onclick="openDebugScriptModal()" title="Run Debug Script" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #a78bfa; font-size: 0.95rem; transition: background-color 0.2s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </button>
                     <div class="custom-dropdown" id="bookmark-dropdown-container" style="position: relative; display: inline-block;">
                         <button class="action-btn" id="bookmark-dropdown-btn" onclick="toggleBookmarkDropdown(event)" title="Bookmarked Commands" style="height: 34px; padding: 0 8px; display: flex; align-items: center; gap: 4px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.85rem;">
                             <span>🔖</span>
@@ -1886,6 +1891,36 @@
                     <button type="button" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="resetThemeToDefault()">Reset Defaults</button>
                     <button type="button" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="closeThemeModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Debug Script Modal Dialog -->
+    <div class="modal-overlay" id="debug-script-modal">
+        <div class="modal-content" style="max-width: 460px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2>Run Debug Script</h2>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Run a script (Python, PS1, etc.) directly in the terminal, keeping the shell open even if it crashes to inspect errors.</div>
+            </div>
+            <form id="debug-script-form" onsubmit="handleRunDebugScript(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="debug-script-cmd" style="font-size: 0.8rem; font-weight: 500;">Command / Script Path</label>
+                    <input type="text" id="debug-script-cmd" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 0.8rem; font-weight: 500;">Shell / Runner Mode</label>
+                    <select id="debug-script-type" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer; margin-top: 4px;">
+                        <option value="powershell">PowerShell (Keep open with pause on error)</option>
+                        <option value="cmd">CMD (Keep open with pause on error)</option>
+                        <option value="raw">Raw (Send directly to active terminal)</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeDebugScriptModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem; background-color: #8b5cf6;">Run Script</button>
                 </div>
             </form>
         </div>
@@ -5074,6 +5109,51 @@
             document.getElementById('bookmark-modal').classList.add('show');
             document.getElementById('edit-bookmark-cmd').focus();
         }
+        // ─── Debug Script Runner ──────────────────────────────────────────────────
+        function openDebugScriptModal() {
+            document.getElementById('debug-script-modal').classList.add('show');
+            setTimeout(() => document.getElementById('debug-script-cmd').focus(), 100);
+        }
+
+        function closeDebugScriptModal() {
+            document.getElementById('debug-script-modal').classList.remove('show');
+            document.getElementById('debug-script-cmd').value = '';
+        }
+
+        function handleRunDebugScript(event) {
+            event.preventDefault();
+            if (!activeProject) {
+                alert("Please select a workspace project first.");
+                return;
+            }
+            const cmdInput = document.getElementById('debug-script-cmd').value.trim();
+            if (!cmdInput) return;
+            
+            const mode = document.getElementById('debug-script-type').value;
+            let finalCmd = cmdInput;
+            
+            if (mode === 'powershell') {
+                // Wrapper to pause if the script exits with an error code
+                finalCmd = `powershell -NoProfile -Command "& { ${cmdInput.replace(/"/g, '\\"')} } ; if (-not $?) { Write-Host 'Script failed. Press enter to continue...'; Read-Host }"`;
+            } else if (mode === 'cmd') {
+                // Wrapper for cmd
+                finalCmd = `cmd /c "${cmdInput} || pause"`;
+            }
+            
+            if (socket && socket.connected) {
+                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
+                const paneId = activePane ? activePane.paneId : 'main';
+                socket.emit('pty-input', { project: activeProject, paneId, data: finalCmd + '\r' });
+            } else {
+                fetch(`/input/${activeProject}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: finalCmd + '\r' })
+                }).catch(err => console.error('Debug script send error:', err));
+            }
+            
+            closeDebugScriptModal();
+        }
 
         function closeBookmarkModal() {
             document.getElementById('bookmark-modal').classList.remove('show');
@@ -7226,6 +7306,8 @@
                 if (diffModal && diffModal.classList.contains('show')) { closeGitDiffModal(); return; }
                 const browserModal = document.getElementById('commit-browser-modal');
                 if (browserModal && browserModal.classList.contains('show')) { closeCommitBrowser(); return; }
+                const debugModal = document.getElementById('debug-script-modal');
+                if (debugModal && debugModal.classList.contains('show')) { closeDebugScriptModal(); return; }
             }
         });
 
