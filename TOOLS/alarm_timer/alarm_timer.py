@@ -218,6 +218,42 @@ def parse_time_string(s: str) -> int:
     return total if total > 0 else -1
 
 
+def parse_datetime_string(s: str, now: datetime | None = None) -> datetime | None:
+    """Parse pasted date/time strings like '17:42 on 22 Jul' into a future datetime."""
+    now = now or datetime.now()
+    raw = re.sub(r"\s+", " ", s.strip())
+    if not raw:
+        return None
+
+    normalized = re.sub(r"\s+on\s+", " ", raw, flags=re.IGNORECASE)
+    normalized = normalized.replace(",", "")
+
+    patterns = [
+        "%H:%M %d %b %Y",
+        "%H:%M %d %B %Y",
+        "%d %b %H:%M %Y",
+        "%d %B %H:%M %Y",
+        "%H:%M %d %b",
+        "%H:%M %d %B",
+        "%d %b %H:%M",
+        "%d %B %H:%M",
+    ]
+
+    for fmt in patterns:
+        try:
+            parsed = datetime.strptime(normalized, fmt)
+        except ValueError:
+            continue
+
+        if "%Y" not in fmt:
+            parsed = parsed.replace(year=now.year)
+            if parsed <= now:
+                parsed = parsed.replace(year=now.year + 1)
+        return parsed
+
+    return None
+
+
 def fmt_secs(total: int) -> str:
     total = max(0, total)
     h, rem = divmod(total, 3600)
@@ -324,12 +360,15 @@ class AddTimerDialog(QDialog):
         mode_grp = QGroupBox("INPUT MODE")
         mode_h   = QHBoxLayout(mode_grp)
         self.rb_text = QRadioButton("Text  (e.g. 1h30m)")
+        self.rb_paste = QRadioButton("Paste datetime")
         self.rb_date = QRadioButton("Pick datetime")
         self.rb_text.setChecked(True)
         bg = QButtonGroup(self)
         bg.addButton(self.rb_text)
+        bg.addButton(self.rb_paste)
         bg.addButton(self.rb_date)
         mode_h.addWidget(self.rb_text)
+        mode_h.addWidget(self.rb_paste)
         mode_h.addWidget(self.rb_date)
 
         # text panel
@@ -351,6 +390,16 @@ class AddTimerDialog(QDialog):
         self.time_edit.setMinimumHeight(34)
         tp.addWidget(hint)
         tp.addWidget(self.time_edit)
+
+        self.paste_panel = QWidget()
+        pp = QVBoxLayout(self.paste_panel)
+        pp.setContentsMargins(0, 0, 0, 0)
+        pp.addWidget(QLabel("Paste a date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
+        self.paste_edit = QLineEdit()
+        self.paste_edit.setPlaceholderText("e.g. 17:42 on 22 Jul")
+        self.paste_edit.setMinimumHeight(34)
+        pp.addWidget(self.paste_edit)
+        self.paste_panel.setVisible(False)
 
         # date panel
         self.date_panel = QWidget()
@@ -386,6 +435,7 @@ class AddTimerDialog(QDialog):
         lay.addWidget(lbl_grp)
         lay.addWidget(mode_grp)
         lay.addWidget(self.text_panel)
+        lay.addWidget(self.paste_panel)
         lay.addWidget(self.date_panel)
         lay.addWidget(self.err_lbl)
         lay.addLayout(btn_row)
@@ -399,6 +449,7 @@ class AddTimerDialog(QDialog):
 
     def _switch_mode(self, text_active: bool):
         self.text_panel.setVisible(text_active)
+        self.paste_panel.setVisible(self.rb_paste.isChecked())
         self.date_panel.setVisible(not text_active)
         self.adjustSize()
 
@@ -410,6 +461,17 @@ class AddTimerDialog(QDialog):
                 self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
                 return
             self._result_fires_at = None          # fires_at set on first start
+        elif self.rb_paste.isChecked():
+            target = parse_datetime_string(self.paste_edit.text())
+            if target is None:
+                self.err_lbl.setText("⚠  Invalid datetime. Try: 17:42 on 22 Jul")
+                return
+            delta = (target - datetime.now()).total_seconds()
+            if delta <= 0:
+                self.err_lbl.setText("⚠  Parsed datetime is in the past.")
+                return
+            secs = int(delta)
+            self._result_fires_at = target.timestamp()
         else:
             target = self.dt_picker.dateTime().toPyDateTime()
             delta  = (target - datetime.now()).total_seconds()
@@ -786,12 +848,15 @@ class TimerCard(QFrame):
         mode_grp = QGroupBox("TIME INPUT MODE")
         mode_h   = QHBoxLayout(mode_grp)
         rb_text  = QRadioButton("Text  (e.g. 1h30m)")
+        rb_paste = QRadioButton("Paste datetime")
         rb_date  = QRadioButton("Pick datetime")
         rb_text.setChecked(True)
         bg = QButtonGroup(dlg)
         bg.addButton(rb_text)
+        bg.addButton(rb_paste)
         bg.addButton(rb_date)
         mode_h.addWidget(rb_text)
+        mode_h.addWidget(rb_paste)
         mode_h.addWidget(rb_date)
 
         # ── text panel ──
@@ -817,6 +882,16 @@ class TimerCard(QFrame):
         tp.addWidget(hint)
         tp.addWidget(time_edit)
 
+        paste_panel = QWidget()
+        pp = QVBoxLayout(paste_panel)
+        pp.setContentsMargins(0, 0, 0, 0)
+        pp.addWidget(QLabel("Paste a date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
+        paste_edit = QLineEdit()
+        paste_edit.setMinimumHeight(34)
+        paste_edit.setPlaceholderText("e.g. 17:42 on 22 Jul")
+        pp.addWidget(paste_edit)
+        paste_panel.setVisible(False)
+
         # ── date panel ──
         date_panel = QWidget()
         dp = QVBoxLayout(date_panel)
@@ -832,6 +907,7 @@ class TimerCard(QFrame):
 
         def _switch_mode(text_active: bool):
             text_panel.setVisible(text_active)
+            paste_panel.setVisible(rb_paste.isChecked())
             date_panel.setVisible(not text_active)
             dlg.adjustSize()
 
@@ -858,6 +934,7 @@ class TimerCard(QFrame):
         lay.addWidget(lbl_grp)
         lay.addWidget(mode_grp)
         lay.addWidget(text_panel)
+        lay.addWidget(paste_panel)
         lay.addWidget(date_panel)
         lay.addWidget(err_lbl)
         lay.addLayout(btn_row)
@@ -883,6 +960,29 @@ class TimerCard(QFrame):
                         self.fires_at = None
                     self._display.setText(fmt_secs(self.remaining))
                 # else blank — keep everything unchanged, label already updated above
+            elif rb_paste.isChecked():
+                raw_dt = paste_edit.text().strip()
+                if not raw_dt:
+                    err_lbl.setText("⚠  Paste a datetime like: 17:42 on 22 Jul")
+                    return
+                target = parse_datetime_string(raw_dt)
+                if target is None:
+                    err_lbl.setText("⚠  Invalid datetime format.")
+                    return
+                delta = (target - datetime.now()).total_seconds()
+                if delta <= 0:
+                    err_lbl.setText("⚠  Parsed datetime is in the past.")
+                    return
+                self.total_seconds = int(delta)
+                self.remaining     = int(delta)
+                self.fires_at      = target.timestamp()
+                self._display.setText(fmt_secs(self.remaining))
+                if self.state not in (self.STATE_RUNNING, self.STATE_DONE):
+                    self._update_bar()
+                    self.state_changed.emit()
+                    dlg.accept()
+                    self._on_start()
+                    return
             else:
                 target = dt_picker.dateTime().toPyDateTime()
                 delta  = (target - datetime.now()).total_seconds()
