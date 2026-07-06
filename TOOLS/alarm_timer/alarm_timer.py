@@ -750,7 +750,7 @@ class SettingsDialog(QDialog):
                 f"QPushButton {{ background: transparent; color: {CP_CYAN}; border: 1px solid {CP_CYAN}; font-weight: bold; }}"
                 f"QPushButton:hover {{ background: {CP_CYAN}; color: black; }}"
             )
-            ren_b.clicked.connect(lambda checked, i=idx: self._rename_pattern(i))
+            ren_b.clicked.connect(lambda checked, i=idx: self._edit_pattern(i))
             
             del_b = QPushButton("✖")
             del_b.setFixedSize(22, 22)
@@ -767,14 +767,13 @@ class SettingsDialog(QDialog):
             
             self.pat_list_lay.insertWidget(self.pat_list_lay.count() - 1, row)
 
-    def _rename_pattern(self, idx: int):
+    def _edit_pattern(self, idx: int):
         if 0 <= idx < len(self._custom_pats):
-            old_name = self._custom_pats[idx]["name"]
-            new_name, ok = QInputDialog.getText(
-                self, "Rename Mode", "Enter new name for this mode:", text=old_name
-            )
-            if ok and new_name.strip():
-                self._custom_pats[idx]["name"] = new_name.strip()
+            pat = self._custom_pats[idx]
+            dlg = EditPatternDialog(pat["name"], pat["pattern"], self)
+            if dlg.exec() == QDialog.DialogCode.Accepted:
+                self._custom_pats[idx]["name"] = dlg.result_name
+                self._custom_pats[idx]["pattern"] = dlg.result_pattern
                 self._refresh_patterns()
 
     def _add_pattern(self):
@@ -813,6 +812,70 @@ class SettingsDialog(QDialog):
 
     def get_settings(self) -> dict:
         return self._s
+
+
+# ── Edit Pattern Dialog ────────────────────────────────────
+
+class EditPatternDialog(QDialog):
+    def __init__(self, name: str, pattern: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EDIT PATTERN MODE")
+        self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
+        self.setMinimumWidth(380)
+        self.setModal(True)
+        
+        self.result_name = name
+        self.result_pattern = pattern
+        
+        lay = QVBoxLayout(self)
+        lay.setSpacing(12)
+        lay.setContentsMargins(18, 18, 18, 18)
+        
+        grp = QGroupBox("PATTERN DETAILS")
+        form = QFormLayout(grp)
+        
+        self.name_edit = QLineEdit(name)
+        self.name_edit.setPlaceholderText("e.g. Compact Date")
+        self.name_edit.setMinimumHeight(30)
+        
+        self.pat_edit = QLineEdit(pattern)
+        self.pat_edit.setPlaceholderText("e.g. %H:%M %d/%m/%y")
+        self.pat_edit.setMinimumHeight(30)
+        
+        form.addRow("Mode Name:", self.name_edit)
+        form.addRow("Format Pattern:", self.pat_edit)
+        lay.addWidget(grp)
+        
+        self.err_lbl = QLabel("")
+        self.err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 8pt;")
+        lay.addWidget(self.err_lbl)
+        
+        btns = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok |
+            QDialogButtonBox.StandardButton.Cancel
+        )
+        btns.accepted.connect(self._validate_and_accept)
+        btns.rejected.connect(self.reject)
+        lay.addWidget(btns)
+        
+    def _validate_and_accept(self):
+        name = self.name_edit.text().strip()
+        pattern = self.pat_edit.text().strip()
+        
+        if not name or not pattern:
+            self.err_lbl.setText("⚠ Fields cannot be empty.")
+            return
+        
+        try:
+            datetime.now().strftime(pattern)
+        except Exception as exc:
+            self.err_lbl.setText(f"⚠ Invalid pattern format: {exc}")
+            return
+        
+        self.result_name = name
+        self.result_pattern = pattern
+        self.accept()
+
 
 
 # ── TimerCard ──────────────────────────────────────────────
