@@ -1086,7 +1086,9 @@ class TimerCard(QFrame):
             
             if not self.fired:
                 self.fired = True
-                AlarmPopup(self.label, self).exec()
+                p = self.parent()
+                if p and hasattr(p, "sort_cards"):
+                    p.sort_cards()
         else:
             self.fired = False
             rem = int(self.fires_at - now)
@@ -1267,6 +1269,16 @@ class ColumnWidget(QFrame):
         card.removed.connect(self._on_card_removed)
         card.duplicated.connect(self._on_card_duplicated)
         card.state_changed.connect(self.state_changed)
+        card.state_changed.connect(self.sort_cards)
+        self.sort_cards()
+
+    def sort_cards(self):
+        cards = list(self._cards.values())
+        now = time.time()
+        cards.sort(key=lambda c: (0 if c.fires_at <= now else 1, c.fires_at))
+        for i, card in enumerate(cards):
+            self._card_layout.removeWidget(card)
+            self._card_layout.insertWidget(i, card)
 
     def remove_card(self, card_id: str):
         card = self._cards.pop(card_id, None)
