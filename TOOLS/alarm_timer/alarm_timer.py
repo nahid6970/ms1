@@ -503,20 +503,9 @@ class TimerDialog(QDialog):
         widget = QWidget()
         tp = QVBoxLayout(widget)
         tp.setContentsMargins(0, 0, 0, 0)
-        hint = QLabel(
-            "Formats: <span style='color:#00F0FF'>25d35h66m9s</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>2h30m20s</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>45m</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>90s</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>1.5h</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>30</span> (=min)"
-        )
-        hint.setTextFormat(Qt.TextFormat.RichText)
-        hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
         self.time_edit = QLineEdit()
         self.time_edit.setPlaceholderText("e.g. 25d12h or 1h30m or 45m or 90s")
         self.time_edit.setMinimumHeight(34)
-        tp.addWidget(hint)
         tp.addWidget(self.time_edit)
         return widget
 
