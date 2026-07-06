@@ -2621,12 +2621,24 @@
         let projects = [];
         let activeProject = null;
         let autoScrollEnabled = localStorage.getItem('auto-scroll-enabled') !== 'false'; // default ON
-        let allCustomBtns = {};
+        let allCustomBtns = [];
 
         async function loadCustomBtnsFromServer() {
             try {
                 const res = await fetch('/api/custom_buttons');
-                allCustomBtns = await res.json() || {};
+                const loaded = await res.json() || [];
+                if (!Array.isArray(loaded)) {
+                    // Migrate from project-specific object to global array
+                    let merged = [];
+                    for (const k in loaded) {
+                        if (Array.isArray(loaded[k])) {
+                            merged.push(...loaded[k]);
+                        }
+                    }
+                    allCustomBtns = merged;
+                } else {
+                    allCustomBtns = loaded;
+                }
             } catch (e) { console.error('Error loading custom btns', e); }
         }
 
@@ -8005,8 +8017,8 @@
             let initialLabel = '';
             let initialData = '';
             
-            if (editIndex !== null && activeProject) {
-                const existing = allCustomBtns[activeProject] || [];
+            if (editIndex !== null) {
+                const existing = allCustomBtns || [];
                 if (existing[editIndex]) {
                     initialLabel = existing[editIndex].rawLabel || existing[editIndex].label;
                     if (existing[editIndex].bg && !existing[editIndex].rawLabel) {
@@ -8037,10 +8049,8 @@
         }
 
         async function deleteCustomButton() {
-            if (customBtnEditIndex === null || !activeProject) return;
-            let existing = allCustomBtns[activeProject] || [];
-            existing.splice(customBtnEditIndex, 1);
-            allCustomBtns[activeProject] = existing;
+            if (customBtnEditIndex === null) return;
+            allCustomBtns.splice(customBtnEditIndex, 1);
             await saveCustomBtnsToServer();
             
             closeCustomButtonModal();
@@ -8077,7 +8087,7 @@
 
             const data = parseEscapes(keycode);
 
-            let existing = allCustomBtns[activeProject] || [];
+            let existing = allCustomBtns || [];
             
             const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg };
             if (customBtnEditIndex !== null) {
@@ -8086,7 +8096,7 @@
                 existing.push(btnConfig);
             }
             
-            allCustomBtns[activeProject] = existing;
+            allCustomBtns = existing;
             await saveCustomBtnsToServer();
 
             closeCustomButtonModal();
@@ -8138,8 +8148,7 @@
         }
 
         function restoreCustomButtonsForPane(paneId) {
-            if (!activeProject) return;
-            const saved = allCustomBtns[activeProject] || [];
+            const saved = allCustomBtns || [];
             
             // Backwards compatibility for older saved buttons
             saved.forEach((item, i) => {
