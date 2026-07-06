@@ -1,4 +1,4 @@
-# Task: Expand Framework List in Initializer
+# Task: Custom File Extension Icons in File Explorer
 
 ## Tasks
 - [X] Added a file deletion API endpoint `POST /api/project/<project>/file-delete` in `app.py`.
@@ -14,3 +14,7 @@
 - [X] Added a custom framework selection modal `framework-select-modal` supporting React, Vue 3, Svelte, Next.js, SolidJS, Preact, Alpine.js, modern Angular, AngularJS 1.x, and Tailwind HTML templates.
 - [X] Expanded backend API endpoint `/api/project/<project>/init-framework` in `app.py` to create the essential starter files for all 10 frameworks.
 - [X] Linked the modal selection to the backend endpoint and set up the explorer tree to auto-refresh on successful initialization.
+- [X] Added a "Configure Icons" section and button in Global Settings modal.
+- [X] Created the `extension-icons-modal` overlay allowing users to map file extensions to custom SVGs (supporting comma separation for multiple extensions mapped to the same SVG).
+- [X] Implemented JS functions `openExtensionIconsModal`, `closeExtensionIconsModal`, `renderExtensionIconsList`, `addExtensionIconMapping`, and `deleteExtensionIconMapping`.
+- [X] Updated `renderFileTreeItems` to check the mapped SVG icons in `localStorage` and render them in the file explorer.
