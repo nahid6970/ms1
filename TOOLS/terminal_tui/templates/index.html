@@ -4625,7 +4625,7 @@
         }
 
         // Close dropdown when clicking outside (using capturing phase on mousedown for absolute reliability)
-        window.addEventListener('mousedown', (e) => {
+        window.addEventListener('pointerdown', (e) => {
             // 1. Close workspace selector dropdown
             const wsContent = document.getElementById('workspace-selector-dropdown-content');
             const wsTrigger = document.getElementById('workspace-selector-btn');
@@ -5134,7 +5134,7 @@
 
             // Close on outside click
             setTimeout(() => {
-                document.addEventListener('click', _subcmdOutside);
+                window.addEventListener('pointerdown', _subcmdOutside, true);
             }, 10);
         }
 
@@ -5150,7 +5150,7 @@
             if (panel) panel.remove();
             _activeSubcmdPanel = null;
             _activeSubcmdCmd = null;
-            document.removeEventListener('click', _subcmdOutside);
+            window.removeEventListener('pointerdown', _subcmdOutside, true);
         }
 
         function renderSubcmdPanelContent(panel, bmCmd) {
@@ -7138,10 +7138,10 @@
                 if (pop && !pop.contains(e.target) && btn && !btn.contains(e.target)) {
                     closeFn();
                 } else if (pop && pop.classList.contains('show')) {
-                    document.addEventListener('click', handler, { once: true, capture: true });
+                    window.addEventListener('pointerdown', handler, { once: true, capture: true });
                 }
             };
-            setTimeout(() => document.addEventListener('click', handler, { once: true, capture: true }), 0);
+            setTimeout(() => window.addEventListener('pointerdown', handler, { once: true, capture: true }), 0);
         }
 
         // Also close popovers on Escape
