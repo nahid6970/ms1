@@ -284,9 +284,16 @@ def parse_custom_pattern(s: str, pattern: str, now: datetime | None = None) -> d
 
 def fmt_secs(total: int) -> str:
     total = max(0, total)
-    h, rem = divmod(total, 3600)
+    d, rem = divmod(total, 86400)
+    h, rem = divmod(rem, 3600)
     m, s   = divmod(rem, 60)
-    return f"{h:02d}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
+    
+    if d > 0:
+        return f"{d:02d}:{h:02d}:{m:02d}:{s:02d}"
+    elif h > 0:
+        return f"{h:02d}:{m:02d}:{s:02d}"
+    else:
+        return f"{m:02d}:{s:02d}"
 
 
 # ── Alarm Popup ────────────────────────────────────────────
