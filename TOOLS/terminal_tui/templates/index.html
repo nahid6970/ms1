@@ -9237,6 +9237,22 @@
             }
         }
 
+        function getStarredPorts() {
+            try { return JSON.parse(localStorage.getItem('starred-ports') || '[]'); } 
+            catch (e) { return []; }
+        }
+        
+        function toggleStarPort(port) {
+            let starred = getStarredPorts();
+            if (starred.includes(port)) {
+                starred = starred.filter(p => p !== port);
+            } else {
+                starred.push(port);
+            }
+            localStorage.setItem('starred-ports', JSON.stringify(starred));
+            filterPortsTable(); // Re-render with new sorting
+        }
+
         function renderPortsTable(ports) {
             const tbody = document.getElementById('ports-table-body');
             tbody.innerHTML = '';
@@ -9247,7 +9263,17 @@
                 return;
             }
             
-            ports.forEach(p => {
+            const starred = getStarredPorts();
+            
+            // Sort ports: starred first, then by port number
+            const sortedPorts = [...ports].sort((a, b) => {
+                const aStar = starred.includes(a.port) ? 1 : 0;
+                const bStar = starred.includes(b.port) ? 1 : 0;
+                if (aStar !== bStar) return bStar - aStar; // Starred comes first
+                return a.port - b.port;
+            });
+            
+            sortedPorts.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = '1px solid var(--border-color)';
                 tr.style.transition = 'background-color 0.15s';
@@ -9269,8 +9295,13 @@
                     ? `<span style="color:var(--text-muted); font-size:0.75rem; padding-right:10px;">Protected</span>`
                     : `<button onclick="killPortProcess('${p.pid}', ${p.port})" style="padding:3px 8px; background:none; border:1px solid #ef4444; border-radius:0; color:#ef4444; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Kill</button>`;
 
+                const isStarred = starred.includes(p.port);
+                const starIcon = isStarred ? '⭐' : '☆';
+                const starColor = isStarred ? '#fbbf24' : 'var(--text-muted)';
+                const starHtml = `<span onclick="toggleStarPort(${p.port})" style="cursor:pointer; color:${starColor}; margin-right:6px; font-size:0.9rem;" title="Bookmark Port">${starIcon}</span>`;
+
                 tr.innerHTML = `
-                    <td style="padding:10px 12px; ${portStyle}">${p.port}</td>
+                    <td style="padding:10px 12px; ${portStyle} display:flex; align-items:center;">${starHtml}${p.port}</td>
                     <td style="padding:10px 12px; font-family:'Fira Code',monospace; font-size:0.76rem; ${rowClass}">${p.processName}</td>
                     <td style="padding:10px 12px; color:var(--text-secondary);">${p.pid}</td>
                     <td style="padding:10px 12px; text-align:right;">${shareBtn}${killBtn}</td>
