@@ -41,6 +41,25 @@ PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.j
 ICONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json"
 SUBCMDS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json"
 STARRED_PORTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\starred_ports.json"
+CUSTOM_BUTTONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\custom_buttons.json"
+
+def load_custom_buttons():
+    if not os.path.exists(CUSTOM_BUTTONS_FILE):
+        return {}
+    try:
+        with open(CUSTOM_BUTTONS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading custom buttons: {e}")
+        return {}
+
+def save_custom_buttons(data):
+    try:
+        os.makedirs(os.path.dirname(CUSTOM_BUTTONS_FILE), exist_ok=True)
+        with open(CUSTOM_BUTTONS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving custom buttons: {e}")
 
 def load_starred_ports():
     if not os.path.exists(STARRED_PORTS_FILE):
@@ -3290,6 +3309,15 @@ def api_save_starred_port():
             
     save_starred_ports(starred)
     return jsonify({"success": True, "starred": starred})
+
+@app.route('/api/custom_buttons', methods=['GET', 'POST'])
+def api_custom_buttons():
+    if request.method == 'GET':
+        return jsonify(load_custom_buttons())
+    else:
+        data = request.json or {}
+        save_custom_buttons(data)
+        return jsonify({"success": True})
 
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():

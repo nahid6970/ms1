@@ -2621,6 +2621,24 @@
         let projects = [];
         let activeProject = null;
         let autoScrollEnabled = localStorage.getItem('auto-scroll-enabled') !== 'false'; // default ON
+        let allCustomBtns = {};
+
+        async function loadCustomBtnsFromServer() {
+            try {
+                const res = await fetch('/api/custom_buttons');
+                allCustomBtns = await res.json() || {};
+            } catch (e) { console.error('Error loading custom btns', e); }
+        }
+
+        async function saveCustomBtnsToServer() {
+            try {
+                await fetch('/api/custom_buttons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(allCustomBtns)
+                });
+            } catch (e) { console.error('Error saving custom btns', e); }
+        }
         let contextProject = null; // Holds the project currently right-clicked
         let editingBookmarkProj = null;
         let editingBookmarkIndex = null;
@@ -2684,6 +2702,7 @@
 
         // Fetch project workspaces from Flask server
         async function fetchProjects(refresh = false) {
+            await loadCustomBtnsFromServer();
             try {
                 const url = refresh ? '/api/projects?refresh=true' : '/api/projects';
                 const response = await fetch(url);
@@ -7987,8 +8006,7 @@
             let initialData = '';
             
             if (editIndex !== null && activeProject) {
-                const storageKey = `custom-btns-${activeProject}`;
-                const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                const existing = allCustomBtns[activeProject] || [];
                 if (existing[editIndex]) {
                     initialLabel = existing[editIndex].rawLabel || existing[editIndex].label;
                     if (existing[editIndex].bg && !existing[editIndex].rawLabel) {
@@ -8018,18 +8036,18 @@
             customBtnEditIndex = null;
         }
 
-        function deleteCustomButton() {
+        async function deleteCustomButton() {
             if (customBtnEditIndex === null || !activeProject) return;
-            const storageKey = `custom-btns-${activeProject}`;
-            let existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            let existing = allCustomBtns[activeProject] || [];
             existing.splice(customBtnEditIndex, 1);
-            localStorage.setItem(storageKey, JSON.stringify(existing));
+            allCustomBtns[activeProject] = existing;
+            await saveCustomBtnsToServer();
             
             closeCustomButtonModal();
             refreshAllPaneCustomButtons();
         }
 
-        function saveCustomButton() {
+        async function saveCustomButton() {
             let rawLabel = document.getElementById('custom-btn-label').value.trim();
             const keycode = document.getElementById('custom-btn-keycode').value;
             if (!rawLabel || !keycode) return;
@@ -8059,9 +8077,7 @@
 
             const data = parseEscapes(keycode);
 
-            // Save to localStorage under active project
-            const storageKey = `custom-btns-${activeProject}`;
-            const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            let existing = allCustomBtns[activeProject] || [];
             
             const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg };
             if (customBtnEditIndex !== null) {
@@ -8070,7 +8086,8 @@
                 existing.push(btnConfig);
             }
             
-            localStorage.setItem(storageKey, JSON.stringify(existing));
+            allCustomBtns[activeProject] = existing;
+            await saveCustomBtnsToServer();
 
             closeCustomButtonModal();
             refreshAllPaneCustomButtons();
@@ -8122,8 +8139,7 @@
 
         function restoreCustomButtonsForPane(paneId) {
             if (!activeProject) return;
-            const storageKey = `custom-btns-${activeProject}`;
-            const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const saved = allCustomBtns[activeProject] || [];
             
             // Backwards compatibility for older saved buttons
             saved.forEach((item, i) => {
