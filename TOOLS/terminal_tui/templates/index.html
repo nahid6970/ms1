@@ -9323,7 +9323,7 @@
                 return;
             }
             closePortsMonitorModal();
-            splitTerminal('right', `npx -y localtunnel --port ${port}`);
+            splitTerminal('right', `tailscale funnel ${port}`);
         }
 
         window.onload = async () => {
