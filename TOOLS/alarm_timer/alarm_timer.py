@@ -949,7 +949,7 @@ class TimerCard(QFrame):
             
         self.fired    = False
 
-        self.setFrameShape(QFrame.Shape.Box)
+        self.setFrameShape(QFrame.Shape.NoFrame)
         self.setMinimumWidth(220)
         self._set_border(CP_DIM)
         self._build_ui()
@@ -970,7 +970,7 @@ class TimerCard(QFrame):
         top = QHBoxLayout()
         self._lbl = QLabel(self.label)
         self._lbl.setStyleSheet(
-            f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;"
+            f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt; background: transparent; border: none;"
         )
         self._lbl.setWordWrap(True)
 
@@ -1020,7 +1020,7 @@ class TimerCard(QFrame):
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._display.setStyleSheet(
             f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
-            " font-family: 'Consolas'; letter-spacing: 2px;"
+            " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
         )
 
         # thin progress bar
@@ -1067,7 +1067,7 @@ class TimerCard(QFrame):
             self._display.setText("00:00")
             self._display.setStyleSheet(
                 f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
-                " font-family: 'Consolas'; letter-spacing: 2px;"
+                " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
             self._set_border(CP_RED)
             self._prog_fill.setFixedWidth(0)
@@ -1083,7 +1083,7 @@ class TimerCard(QFrame):
             self._display.setText(fmt_secs(rem))
             self._display.setStyleSheet(
                 f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
-                " font-family: 'Consolas'; letter-spacing: 2px;"
+                " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
             self._set_border(CP_GREEN)
             self._update_bar()
