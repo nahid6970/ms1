@@ -1542,7 +1542,7 @@
                     </span>
                     <span style="display: flex; align-items: center; gap: 4px;" title="RAM Usage">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary);"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"/><path d="M6 6h12M6 10h12M6 14h12M6 18h12"/></svg>
-                        <span id="monitor-ram-value" style="color: var(--text-primary); font-weight: 600;">0.0 MB</span>
+                        <span id="monitor-ram-value" style="color: var(--text-primary); font-weight: 600;">0</span>
                     </span>
                 </div>
             </div>
@@ -4777,7 +4777,7 @@
             const cpuVal = document.getElementById('monitor-cpu-value');
             if (cpuVal) cpuVal.innerText = '0.0%';
             const ramVal = document.getElementById('monitor-ram-value');
-            if (ramVal) ramVal.innerText = '0.0 MB';
+            if (ramVal) ramVal.innerText = '0';
             const branchEl = document.getElementById('active-project-branch');
             if (branchEl) { branchEl.style.display = 'none'; branchEl.setAttribute('data-has-git', 'false'); }
             const gitInfoEl = document.getElementById('monitor-git-info');
@@ -4800,7 +4800,10 @@
                     const cpuVal = document.getElementById('monitor-cpu-value');
                     if (cpuVal) cpuVal.innerText = `${data.cpu}%`;
                     const ramVal = document.getElementById('monitor-ram-value');
-                    if (ramVal) ramVal.innerText = `${data.memory} MB`;
+                    if (ramVal) {
+                        const numericMem = parseFloat(data.memory) || 0;
+                        ramVal.innerText = Math.round(numericMem);
+                    }
 
                     // Update Git status indicator branch name (hidden in header — already shown in status bar)
                     const branchEl = document.getElementById('active-project-branch');
