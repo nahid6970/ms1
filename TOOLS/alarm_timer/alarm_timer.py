@@ -1226,15 +1226,12 @@ class MainWindow(QMainWindow):
         self._btn_add_col  = self._tbtn("＋  COLUMN",  CP_CYAN, "#000")
         self._btn_settings = self._tbtn("⚙  SETTINGS", CP_DIM,  CP_TEXT)
         self._btn_restart  = self._tbtn("↺  RESTART",  CP_DIM,  CP_TEXT)
-        self._btn_save     = self._tbtn("💾  SAVE",     CP_DIM,  CP_TEXT)
 
         self._btn_add_col.clicked.connect(self._on_add_col)
         self._btn_settings.clicked.connect(self._on_settings)
         self._btn_restart.clicked.connect(self._on_restart)
-        self._btn_save.clicked.connect(self._save)
 
-        for b in (self._btn_add_col, self._btn_settings,
-                  self._btn_restart, self._btn_save):
+        for b in (self._btn_add_col, self._btn_settings, self._btn_restart):
             tbl.addWidget(b)
 
         # horizontal scroll for columns
@@ -1328,11 +1325,7 @@ class MainWindow(QMainWindow):
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def _on_changed(self):
-        if not hasattr(self, "_db") or not self._db.isActive():
-            self._db = QTimer(self)
-            self._db.setSingleShot(True)
-            self._db.timeout.connect(self._save)
-        self._db.start(2000)
+        self._save()
 
     def _save(self):
         data = {
