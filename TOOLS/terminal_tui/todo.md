@@ -1,6 +1,4 @@
-# Task: Add Screenshot Upload Feature for Mobile & Desktop
+# Task: Save Uploaded Screenshots to Temporary Folder
 
 ## Tasks
-- [X] Add a new screenshot upload/capture button beside #sched-btn in the status bar
-- [X] Implement mobile file input handler and desktop clipboard drop/paste/file select to store images temporarily
-- [X] Implement backend api route to handle saving temporary images to device's disk under temp path
+- [X] Modify backend paste-image route to save files to the system temporary directory instead of the project directory to prevent dirtying git repositories
