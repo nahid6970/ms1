@@ -4454,8 +4454,11 @@
                         const line = buffer.getLine(lineIndex);
                         if (line) {
                             detected = line.translateToString(true).trim();
-                            const promptRegex = /^PS\s+[A-Za-z]:\\[^>]*>\s*/i;
-                            detected = detected.replace(promptRegex, "");
+                            if (detected.endsWith('>')) {
+                                detected = "";
+                            } else {
+                                detected = detected.replace(/^[^>]*>\s*/, "");
+                            }
                         }
                     }
                     inputEl.value = detected;

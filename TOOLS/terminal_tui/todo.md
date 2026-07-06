@@ -1,4 +1,4 @@
-# Task: Migrate Bookmark Subcommands to JSON Backend
+# Task: Robust Prompt Path Removal in Bookmark Add Input
 
 ## Tasks
 - [X] Added a file deletion API endpoint `POST /api/project/<project>/file-delete` in `app.py`.
@@ -22,3 +22,4 @@
 - [X] Updated `renderFileTreeItems` to check the mapped SVG icons in `extensionIconsMap` and render them in the file explorer.
 - [X] Created backend routes `GET /api/subcommands` and `POST /api/subcommands` storing subcommands data in a persistent backend file: `C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json`.
 - [X] Migrated `loadSubcmds` and `saveSubcmds` in frontend to sync subcommand sets directly with the JSON backend, enabling access on mobile and external devices.
+- [X] Fixed prompt detection in `toggleBookmarkDropdown` to use a robust regular expression that strips up to the first `>` character, preventing directory remnants (like `ms1>`) from prefilling.
