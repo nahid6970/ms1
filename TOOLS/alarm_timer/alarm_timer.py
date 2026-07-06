@@ -706,6 +706,18 @@ class SettingsDialog(QDialog):
         self.new_pat = QLineEdit()
         self.new_pat.setPlaceholderText("Pattern (e.g., %d %b)")
         
+        # Help Button next to pattern field
+        self.help_btn = QPushButton("ⓘ")
+        self.help_btn.setFixedSize(24, 24)
+        self.help_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.help_btn.setToolTip("Click for format guide")
+        self.help_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: 1px solid {CP_CYAN}; "
+            f"color: {CP_CYAN}; border-radius: 12px; font-weight: bold; font-size: 10pt; }}"
+            f"QPushButton:hover {{ background: {CP_CYAN}; color: black; }}"
+        )
+        self.help_btn.clicked.connect(self._show_help)
+
         add_btn = QPushButton("＋ ADD")
         add_btn.setFixedSize(60, 28)
         add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -717,6 +729,7 @@ class SettingsDialog(QDialog):
         
         add_form.addWidget(self.new_name, 2)
         add_form.addWidget(self.new_pat, 3)
+        add_form.addWidget(self.help_btn, 0)
         add_form.addWidget(add_btn, 1)
         pat_v.addLayout(add_form)
         
@@ -735,6 +748,34 @@ class SettingsDialog(QDialog):
         lay.addWidget(btns)
 
         self._refresh_patterns()
+
+    def _show_help(self):
+        help_text = (
+            "<h3>⏰ FORMAT CODE REFERENCE GUIDE</h3>"
+            "<p>When creating or editing custom patterns in Settings, use these standard <b>%</b> codes:</p>"
+            "<ul>"
+            "<li><b>%H</b> : 24-hour hour with leading zero (00-23)</li>"
+            "<li><b>%I</b> : 12-hour hour with leading zero (01-12)</li>"
+            "<li><b>%M</b> : Minute with leading zero (00-59)  <i>(Note: Capital M!)</i></li>"
+            "<li><b>%d</b> : Day of month with leading zero (01-31)</li>"
+            "<li><b>%b</b> : Short month name (e.g., Jan, Feb, Jul)</li>"
+            "<li><b>%B</b> : Full month name (e.g., January, July)</li>"
+            "<li><b>%m</b> : Month number with leading zero (01-12)</li>"
+            "<li><b>%y</b> : Two-digit year (e.g., 26)</li>"
+            "<li><b>%Y</b> : Four-digit year (e.g., 2026)</li>"
+            "<li><b>%p</b> : AM/PM indicator (e.g., AM, PM)</li>"
+            "</ul>"
+            "<p><b>Relative Input Examples:</b><br>"
+            "• <code>1h30m</code> (1 hour, 30 minutes)<br>"
+            "• <code>45m</code> (45 minutes)<br>"
+            "• <code>30</code> (default is minutes)</p>"
+        )
+        msg = QMessageBox(self)
+        msg.setWindowTitle("FORMAT REFERENCE")
+        msg.setTextFormat(Qt.TextFormat.RichText)
+        msg.setText(help_text)
+        msg.setStyleSheet(GLOBAL_QSS + f"QMessageBox {{ background: {CP_BG}; }}")
+        msg.exec()
 
     def _refresh_patterns(self):
         while self.pat_list_lay.count() > 1:
