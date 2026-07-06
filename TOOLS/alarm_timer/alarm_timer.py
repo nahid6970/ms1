@@ -743,6 +743,15 @@ class SettingsDialog(QDialog):
             lbl.setTextFormat(Qt.TextFormat.RichText)
             lbl.setStyleSheet(f"color: {CP_TEXT}; font-size: 9.5pt;")
             
+            ren_b = QPushButton("✏")
+            ren_b.setFixedSize(22, 22)
+            ren_b.setCursor(Qt.CursorShape.PointingHandCursor)
+            ren_b.setStyleSheet(
+                f"QPushButton {{ background: transparent; color: {CP_CYAN}; border: 1px solid {CP_CYAN}; font-weight: bold; }}"
+                f"QPushButton:hover {{ background: {CP_CYAN}; color: black; }}"
+            )
+            ren_b.clicked.connect(lambda checked, i=idx: self._rename_pattern(i))
+            
             del_b = QPushButton("✖")
             del_b.setFixedSize(22, 22)
             del_b.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -753,9 +762,20 @@ class SettingsDialog(QDialog):
             del_b.clicked.connect(lambda checked, i=idx: self._delete_pattern(i))
             
             row_h.addWidget(lbl, 1)
+            row_h.addWidget(ren_b, 0)
             row_h.addWidget(del_b, 0)
             
             self.pat_list_lay.insertWidget(self.pat_list_lay.count() - 1, row)
+
+    def _rename_pattern(self, idx: int):
+        if 0 <= idx < len(self._custom_pats):
+            old_name = self._custom_pats[idx]["name"]
+            new_name, ok = QInputDialog.getText(
+                self, "Rename Mode", "Enter new name for this mode:", text=old_name
+            )
+            if ok and new_name.strip():
+                self._custom_pats[idx]["name"] = new_name.strip()
+                self._refresh_patterns()
 
     def _add_pattern(self):
         name = self.new_name.text().strip()
