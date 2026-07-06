@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QScrollArea, QDialog,
     QFormLayout, QGroupBox, QFrame, QSizePolicy, QInputDialog,
     QMessageBox, QDateTimeEdit, QRadioButton,
-    QButtonGroup, QDialogButtonBox,
+    QButtonGroup, QDialogButtonBox, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
@@ -193,6 +193,17 @@ QRadioButton::indicator:checked {{
 }}
 """
 
+# ── Defaults ───────────────────────────────────────────────
+DEFAULT_SETTINGS = {
+    "column_width": 280,
+    "alarm_sound": "",
+    "custom_patterns": [
+        {"name": "Standard (HH:mm on dd MMM)", "pattern": "%H:%M on %d %b"},
+        {"name": "Compact (HH:mm dd/MM/yy)", "pattern": "%H:%M %d/%m/%y"},
+        {"name": "Date only (yyyy-MM-dd)", "pattern": "%Y-%m-%d"}
+    ]
+}
+
 # ── Helpers ────────────────────────────────────────────────
 
 def parse_time_string(s: str) -> int:
@@ -252,6 +263,23 @@ def parse_datetime_string(s: str, now: datetime | None = None) -> datetime | Non
         return parsed
 
     return None
+
+
+def parse_custom_pattern(s: str, pattern: str, now: datetime | None = None) -> datetime | None:
+    """Parse a date/time string based on a custom strptime pattern."""
+    now = now or datetime.now()
+    raw = re.sub(r"\s+", " ", s.strip())
+    if not raw:
+        return None
+    try:
+        parsed = datetime.strptime(raw, pattern)
+        if "%Y" not in pattern and "%y" not in pattern:
+            parsed = parsed.replace(year=now.year)
+            if parsed <= now:
+                parsed = parsed.replace(year=now.year + 1)
+        return parsed
+    except ValueError:
+        return None
 
 
 def fmt_secs(total: int) -> str:
@@ -338,15 +366,19 @@ class AlarmPopup(QDialog):
 # ── Extensible Timer Dialog (Add / Edit) ───────────────────
 
 class TimerDialog(QDialog):
-    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, parent=None):
+    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, settings: dict | None = None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
-        self.setMinimumWidth(450)
+        self.setMinimumWidth(500)
         self.setModal(True)
+        
+        self._settings = settings or DEFAULT_SETTINGS
+        self._custom_patterns = self._settings.get("custom_patterns", [])
         
         self._result_label = label_val
         self._result_fires_at = fires_at_val
+        self.custom_edits = {}
         
         lay = QVBoxLayout(self)
         lay.setSpacing(12)
@@ -364,23 +396,11 @@ class TimerDialog(QDialog):
         mode_grp = QGroupBox("INPUT MODE")
         mode_layout = QVBoxLayout(mode_grp)
         
-        radio_row = QHBoxLayout()
-        self.bg = QButtonGroup(self)
+        # Header row with help button
+        hdr_row = QHBoxLayout()
+        hdr_row.addWidget(QLabel("Select an input mode:"))
+        hdr_row.addStretch(1)
         
-        self.modes_config = [
-            ("text", "Relative text", self._create_text_panel),
-            ("paste", "Paste datetime", self._create_paste_panel),
-            ("picker", "Pick datetime", self._create_picker_panel)
-        ]
-        
-        self.radio_buttons = {}
-        for mode_id, mode_label, _ in self.modes_config:
-            rb = QRadioButton(mode_label)
-            self.bg.addButton(rb)
-            radio_row.addWidget(rb)
-            self.radio_buttons[mode_id] = rb
-            
-        # Pattern help UI info icon
         self.help_btn = QPushButton("ⓘ")
         self.help_btn.setFixedSize(24, 24)
         self.help_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -391,9 +411,38 @@ class TimerDialog(QDialog):
             f"QPushButton:hover {{ background: {CP_CYAN}; color: black; }}"
         )
         self.help_btn.clicked.connect(self._show_help)
-        radio_row.addWidget(self.help_btn)
+        hdr_row.addWidget(self.help_btn)
+        mode_layout.addLayout(hdr_row)
         
-        mode_layout.addLayout(radio_row)
+        # Grid layout for radio buttons to support dynamic list elegantly
+        radio_grid = QGridLayout()
+        self.bg = QButtonGroup(self)
+        
+        self.modes_config = [
+            ("text", "Relative text", self._create_text_panel),
+            ("picker", "Pick datetime", self._create_picker_panel)
+        ]
+        
+        for idx, pat in enumerate(self._custom_patterns):
+            mode_id = f"custom_{idx}"
+            self.modes_config.append((
+                mode_id,
+                pat["name"],
+                lambda idx=idx, pat=pat: self._create_custom_panel(idx, pat)
+            ))
+            
+        self.radio_buttons = {}
+        cols = 2
+        for i, (mode_id, mode_label, _) in enumerate(self.modes_config):
+            rb = QRadioButton(mode_label)
+            self.bg.addButton(rb)
+            self.radio_buttons[mode_id] = rb
+            
+            row_idx = i // cols
+            col_idx = i % cols
+            radio_grid.addWidget(rb, row_idx, col_idx)
+            
+        mode_layout.addLayout(radio_grid)
         lay.addWidget(mode_grp)
         
         # Panels container
@@ -472,10 +521,11 @@ class TimerDialog(QDialog):
         return widget
 
     def _create_paste_panel(self) -> QWidget:
+        # Backward compatibility / fallback
         widget = QWidget()
         pp = QVBoxLayout(widget)
         pp.setContentsMargins(0, 0, 0, 0)
-        pp.addWidget(QLabel("Paste a date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
+        pp.addWidget(QLabel("Paste standard date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
         self.paste_edit = QLineEdit()
         self.paste_edit.setPlaceholderText("e.g. 17:42 on 22 Jul")
         self.paste_edit.setMinimumHeight(34)
@@ -500,10 +550,32 @@ class TimerDialog(QDialog):
         dp.addWidget(self.dt_picker)
         return widget
 
+    def _create_custom_panel(self, idx: int, pat: dict) -> QWidget:
+        widget = QWidget()
+        lp = QVBoxLayout(widget)
+        lp.setContentsMargins(0, 0, 0, 0)
+        
+        desc = QLabel(f"Input date/time matching pattern: <span style='color:{CP_CYAN}'><b>{pat['pattern']}</b></span>")
+        desc.setTextFormat(Qt.TextFormat.RichText)
+        
+        edit = QLineEdit()
+        edit.setMinimumHeight(34)
+        try:
+            sample = datetime.now().strftime(pat["pattern"])
+        except Exception:
+            sample = "matching format"
+        edit.setPlaceholderText(f"e.g., {sample}")
+        
+        lp.addWidget(desc)
+        lp.addWidget(edit)
+        
+        self.custom_edits[f"custom_{idx}"] = edit
+        return widget
+
     def _show_help(self):
         help_text = (
             "<h3>⏰ FORMAT & PLACEHOLDER GUIDE</h3>"
-            "<p>When pasting or picking date/times, the following placeholders/rules apply:</p>"
+            "<p>When pasting or picking date/times, the following placeholders apply:</p>"
             "<ul>"
             "<li><b>HH</b> : 24-hour hour with leading zero (00-23)</li>"
             "<li><b>hh</b> : 12-hour hour with leading zero (01-12)</li>"
@@ -517,11 +589,7 @@ class TimerDialog(QDialog):
             "<p><b>Relative Input Examples:</b><br>"
             "• <code>1h30m</code> (1 hour, 30 minutes)<br>"
             "• <code>45m</code> (45 minutes)<br>"
-            "• <code>2d</code> (2 days)<br>"
             "• <code>30</code> (default is minutes)</p>"
-            "<p><b>Paste Examples:</b><br>"
-            "• <code>17:42 on 22 Jul</code><br>"
-            "• <code>12:00 25 Dec 2026</code></p>"
         )
         msg = QMessageBox(self)
         msg.setWindowTitle("FORMAT REFERENCE")
@@ -532,8 +600,13 @@ class TimerDialog(QDialog):
 
     def _on_ok(self):
         label = self.label_edit.text().strip() or "Timer"
-        
-        if self.radio_buttons["text"].isChecked():
+        active_mode = None
+        for mode_id, rb in self.radio_buttons.items():
+            if rb.isChecked():
+                active_mode = mode_id
+                break
+                
+        if active_mode == "text":
             raw = self.time_edit.text().strip()
             if not raw and self._result_fires_at is not None:
                 fires_at = self._result_fires_at
@@ -543,14 +616,24 @@ class TimerDialog(QDialog):
                     self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
                     return
                 fires_at = time.time() + secs
-        elif self.radio_buttons["paste"].isChecked():
-            raw_paste = self.paste_edit.text().strip()
-            if not raw_paste and self._result_fires_at is not None:
+        elif active_mode == "picker":
+            target = self.dt_picker.dateTime().toPyDateTime()
+            delta = (target - datetime.now()).total_seconds()
+            if delta <= 0:
+                self.err_lbl.setText("⚠  Selected datetime is in the past.")
+                return
+            fires_at = target.timestamp()
+        elif active_mode.startswith("custom_"):
+            edit = self.custom_edits.get(active_mode)
+            raw_input = edit.text().strip() if edit else ""
+            if not raw_input and self._result_fires_at is not None:
                 fires_at = self._result_fires_at
             else:
-                target = parse_datetime_string(raw_paste)
+                idx = int(active_mode.split("_")[1])
+                pat = self._custom_patterns[idx]
+                target = parse_custom_pattern(raw_input, pat["pattern"])
                 if target is None:
-                    self.err_lbl.setText("⚠  Invalid datetime. Try: 17:42 on 22 Jul")
+                    self.err_lbl.setText(f"⚠  Input does not match pattern: {pat['pattern']}")
                     return
                 delta = (target - datetime.now()).total_seconds()
                 if delta <= 0:
@@ -558,20 +641,16 @@ class TimerDialog(QDialog):
                     return
                 fires_at = target.timestamp()
         else:
-            target = self.dt_picker.dateTime().toPyDateTime()
-            delta = (target - datetime.now()).total_seconds()
-            if delta <= 0:
-                self.err_lbl.setText("⚠  Selected datetime is in the past.")
-                return
-            fires_at = target.timestamp()
+            self.err_lbl.setText("⚠  Please select an input mode.")
+            return
             
         self._result_fires_at = fires_at
         self._result_label = label
         self.accept()
 
     @staticmethod
-    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, parent=None):
-        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, parent)
+    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, settings: dict | None = None, parent=None):
+        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, settings, parent)
         if dlg.exec() == QDialog.DialogCode.Accepted:
             return dlg._result_label, dlg._result_fires_at
         return None
@@ -584,14 +663,16 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("⚙  SETTINGS")
         self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
-        self.setMinimumWidth(360)
+        self.setMinimumWidth(480)
         self.setModal(True)
         self._s = dict(settings)
+        self._custom_pats = [dict(p) for p in self._s.get("custom_patterns", [])]
 
         lay = QVBoxLayout(self)
         lay.setContentsMargins(18, 18, 18, 18)
         lay.setSpacing(14)
 
+        # General Group
         grp  = QGroupBox("GENERAL")
         form = QFormLayout(grp)
 
@@ -602,11 +683,50 @@ class SettingsDialog(QDialog):
         self.snd = QLineEdit(self._s.get("alarm_sound", ""))
         self.snd.setPlaceholderText("optional .wav path")
         form.addRow("Alarm sound:", self.snd)
-
         lay.addWidget(grp)
-        note = QLabel("More settings can be added here.")
-        note.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        lay.addWidget(note)
+
+        # Custom Patterns Group
+        pat_grp = QGroupBox("CUSTOM DATE/TIME PATTERNS")
+        pat_v = QVBoxLayout(pat_grp)
+        
+        self.pat_scroll = QScrollArea()
+        self.pat_scroll.setWidgetResizable(True)
+        self.pat_scroll.setFixedHeight(160)
+        
+        self.pat_container = QWidget()
+        self.pat_list_lay = QVBoxLayout(self.pat_container)
+        self.pat_list_lay.setContentsMargins(4, 4, 4, 4)
+        self.pat_list_lay.setSpacing(6)
+        self.pat_list_lay.addStretch(1)
+        self.pat_scroll.setWidget(self.pat_container)
+        pat_v.addWidget(self.pat_scroll)
+        
+        # Form to add a new pattern
+        add_form = QHBoxLayout()
+        self.new_name = QLineEdit()
+        self.new_name.setPlaceholderText("Name (e.g., Short Date)")
+        self.new_pat = QLineEdit()
+        self.new_pat.setPlaceholderText("Pattern (e.g., %d %b)")
+        
+        add_btn = QPushButton("＋ ADD")
+        add_btn.setFixedSize(60, 28)
+        add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        add_btn.setStyleSheet(
+            f"QPushButton {{ background: {CP_CYAN}; color: black; border: none; font-weight: bold; }}"
+            f"QPushButton:hover {{ background: #00ccff; }}"
+        )
+        add_btn.clicked.connect(self._add_pattern)
+        
+        add_form.addWidget(self.new_name, 2)
+        add_form.addWidget(self.new_pat, 3)
+        add_form.addWidget(add_btn, 1)
+        pat_v.addLayout(add_form)
+        
+        self.pat_err_lbl = QLabel("")
+        self.pat_err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 8pt;")
+        pat_v.addWidget(self.pat_err_lbl)
+        
+        lay.addWidget(pat_grp)
 
         btns = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok |
@@ -616,12 +736,70 @@ class SettingsDialog(QDialog):
         btns.rejected.connect(self.reject)
         lay.addWidget(btns)
 
+        self._refresh_patterns()
+
+    def _refresh_patterns(self):
+        while self.pat_list_lay.count() > 1:
+            item = self.pat_list_lay.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+                
+        for idx, pat in enumerate(self._custom_pats):
+            row = QWidget()
+            row_h = QHBoxLayout(row)
+            row_h.setContentsMargins(4, 4, 4, 4)
+            row_h.setSpacing(8)
+            
+            lbl = QLabel(f"<b>{pat['name']}</b> &nbsp;│&nbsp; <span style='color:{CP_CYAN}'>{pat['pattern']}</span>")
+            lbl.setTextFormat(Qt.TextFormat.RichText)
+            lbl.setStyleSheet(f"color: {CP_TEXT}; font-size: 9.5pt;")
+            
+            del_b = QPushButton("✖")
+            del_b.setFixedSize(22, 22)
+            del_b.setCursor(Qt.CursorShape.PointingHandCursor)
+            del_b.setStyleSheet(
+                f"QPushButton {{ background: transparent; color: {CP_RED}; border: 1px solid {CP_RED}; font-weight: bold; }}"
+                f"QPushButton:hover {{ background: {CP_RED}; color: black; }}"
+            )
+            del_b.clicked.connect(lambda checked, i=idx: self._delete_pattern(i))
+            
+            row_h.addWidget(lbl, 1)
+            row_h.addWidget(del_b, 0)
+            
+            self.pat_list_lay.insertWidget(self.pat_list_lay.count() - 1, row)
+
+    def _add_pattern(self):
+        name = self.new_name.text().strip()
+        pattern = self.new_pat.text().strip()
+        self.pat_err_lbl.setText("")
+        
+        if not name or not pattern:
+            self.pat_err_lbl.setText("⚠ Name and pattern cannot be empty.")
+            return
+            
+        try:
+            datetime.now().strftime(pattern)
+        except Exception as exc:
+            self.pat_err_lbl.setText(f"⚠ Invalid pattern format: {exc}")
+            return
+            
+        self._custom_pats.append({"name": name, "pattern": pattern})
+        self.new_name.clear()
+        self.new_pat.clear()
+        self._refresh_patterns()
+
+    def _delete_pattern(self, idx: int):
+        if 0 <= idx < len(self._custom_pats):
+            self._custom_pats.pop(idx)
+            self._refresh_patterns()
+
     def _ok(self):
         try:
             self._s["column_width"] = max(180, int(self.col_w.text()))
         except ValueError:
             pass
         self._s["alarm_sound"] = self.snd.text().strip()
+        self._s["custom_patterns"] = self._custom_pats
         self.accept()
 
     def get_settings(self) -> dict:
@@ -770,12 +948,21 @@ class TimerCard(QFrame):
 
     def _on_edit(self):
         """Edit this timer's label and/or time."""
+        settings = None
+        p = self.parent()
+        while p:
+            if hasattr(p, "_settings"):
+                settings = p._settings
+                break
+            p = p.parent()
+            
         result = TimerDialog.get_timer(
             "EDIT TIMER",
             "✔  APPLY",
             self.label,
             self.fires_at,
-            self
+            settings=settings,
+            parent=self
         )
         if result is None:
             return
@@ -939,7 +1126,11 @@ class ColumnWidget(QFrame):
         self.state_changed.emit()
 
     def _on_add_timer(self):
-        result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", parent=self)
+        settings = None
+        if hasattr(self.parent(), "_settings"):
+            settings = self.parent()._settings
+            
+        result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", settings=settings, parent=self)
         if result is None:
             return
         label, fires_at = result
@@ -995,7 +1186,6 @@ class ColumnWidget(QFrame):
 # ── MainWindow ─────────────────────────────────────────────
 
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "alarm_state.json")
-DEFAULT_SETTINGS = {"column_width": 280, "alarm_sound": ""}
 
 
 class MainWindow(QMainWindow):
@@ -1177,7 +1367,13 @@ class MainWindow(QMainWindow):
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self._settings.update(data.get("settings", {}))
+            
+            loaded_settings = data.get("settings", {})
+            for k, v in DEFAULT_SETTINGS.items():
+                if k not in loaded_settings:
+                    loaded_settings[k] = v
+                    
+            self._settings.update(loaded_settings)
             cw = self._settings.get("column_width", 280)
             for cd in data.get("columns", []):
                 self._add_col_widget(
