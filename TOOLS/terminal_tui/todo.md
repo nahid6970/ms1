@@ -1,7 +1,4 @@
-# Task: Improve File Picker UI for Debug Script Runner
+# Task: Fix PowerShell Syntax Error for Debug Script Runner
 
 ## Tasks
-- [X] Remove the native HTML `<datalist>` as it renders with light/system styling that clashes with the dark theme.
-- [X] Create a custom, styled dropdown `<div>` for the script files autocomplete.
-- [X] Update JS to filter and populate the custom dropdown when the user focuses or types in the input.
-- [X] Add click handlers to the dropdown items to set the input value.
+- [X] Use `-EncodedCommand` with Base64 encoding in the `powershell` wrapper mode to prevent the outer shell from interpolating `$?` and other syntax characters.

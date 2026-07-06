@@ -5206,8 +5206,22 @@
             let finalCmd = cmdInput;
             
             if (mode === 'powershell') {
-                // Wrapper to pause if the script exits with an error code
-                finalCmd = `powershell -NoProfile -Command "& { ${cmdInput.replace(/"/g, '\\"')} } ; if (-not $?) { Write-Host 'Script failed. Press enter to continue...'; Read-Host }"`;
+                // Use Base64 EncodedCommand to prevent outer shell from parsing/interpolating syntax (like $?)
+                const psCode = `& { ${cmdInput} } ; if (-not $?) { Write-Host 'Script failed. Press enter to continue...'; Read-Host }`;
+                
+                const charCodes = [];
+                for (let i = 0; i < psCode.length; i++) {
+                    const code = psCode.charCodeAt(i);
+                    charCodes.push(code & 0xFF, (code >> 8) & 0xFF);
+                }
+                const bytes = new Uint8Array(charCodes);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const b64 = btoa(binary);
+                
+                finalCmd = `powershell -NoProfile -EncodedCommand ${b64}`;
             } else if (mode === 'cmd') {
                 // Wrapper for cmd
                 finalCmd = `cmd /c "${cmdInput} || pause"`;
