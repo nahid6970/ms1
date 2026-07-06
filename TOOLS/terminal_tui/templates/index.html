@@ -1513,6 +1513,10 @@
                     <button id="screenshot-upload-btn" class="sbicon-btn" onclick="document.getElementById('screenshot-file-input').click()" title="Upload Screenshot / Image" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.4);">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </button>
+                    <!-- Mobile input helper button -->
+                    <button id="mobile-keyboard-btn" class="sbicon-btn" onclick="toggleMobileInputTray(event)" title="Mobile Keyboard Helper" style="color: #06b6d4; border-color: rgba(6, 182, 212, 0.4);">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M18 12h.01M10 12h.01M14 12h.01M7 16h10"/></svg>
+                    </button>
                     <!-- Scheduled Commands icon -->
                     <button id="sched-btn" class="sbicon-btn" onclick="toggleSchedPopover(event)" title="Scheduled Commands" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.4);">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1640,6 +1644,24 @@
                 <button onclick="runQPort()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.77rem; cursor:pointer; font-weight:600; white-space:nowrap;">Check</button>
             </div>
             <div id="qt-port-result" style="margin-top:10px; min-height:20px; font-size:0.78rem; font-family:'Fira Code',monospace; max-height:220px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- ═══ Mobile Keyboard Input Helper Popover ═════════════════════════════ -->
+    <div id="mobile-input-popover" class="statusbar-popover" style="right:12px; width:380px; max-width:96vw;">
+        <div class="sbpop-header">
+            <span>⌨️ Mobile Input Helper</span>
+            <button class="sbpop-close" onclick="closeMobileInputTray()">✕</button>
+        </div>
+        <div style="padding:12px 14px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:0.7rem; color:var(--text-secondary);">Type & edit with native cursor features (spacebar-swipe, text selection). Press Enter or click Send to submit.</div>
+            <div style="display:flex; gap:6px;">
+                <textarea id="mobile-input-textarea" placeholder="Type command here..." style="flex:1; height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.85rem; font-family:'Fira Code',monospace; outline:none; resize:none;" onkeydown="handleMobileInputKeydown(event)"></textarea>
+            </div>
+            <div style="display:flex; gap:6px; justify-content:flex-end;">
+                <button onclick="clearMobileInput()" style="padding:5px 12px; font-size:0.78rem; background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-muted); cursor:pointer;">Clear</button>
+                <button onclick="sendMobileInput()" style="padding:5px 16px; font-size:0.78rem; background:#06b6d4; border:none; border-radius:5px; color:white; cursor:pointer; font-weight:500;">Send</button>
+            </div>
         </div>
     </div>
 
@@ -7173,6 +7195,7 @@
             closeSchedPopover();
             closeQToolsPopover();
             closeSnippetsPopover();
+            closeMobileInputTray();
         }
 
         function _popoverOutside(popId, btnId, closeFn) {
@@ -7194,15 +7217,82 @@
                 const pop1 = document.getElementById('sched-popover');
                 const pop2 = document.getElementById('qtools-popover');
                 const pop3 = document.getElementById('snippets-popover');
+                const pop4 = document.getElementById('mobile-input-popover');
                 if (pop1 && pop1.classList.contains('show')) { closeSchedPopover(); return; }
                 if (pop2 && pop2.classList.contains('show')) { closeQToolsPopover(); return; }
                 if (pop3 && pop3.classList.contains('show')) { closeSnippetsPopover(); return; }
+                if (pop4 && pop4.classList.contains('show')) { closeMobileInputTray(); return; }
                 const diffModal = document.getElementById('git-diff-modal');
                 if (diffModal && diffModal.classList.contains('show')) { closeGitDiffModal(); return; }
                 const browserModal = document.getElementById('commit-browser-modal');
                 if (browserModal && browserModal.classList.contains('show')) { closeCommitBrowser(); return; }
             }
         });
+
+        // ── Mobile Keyboard Input Popover Helpers ───────────────────────────
+        function toggleMobileInputTray(e) {
+            if (e) e.stopPropagation();
+            const pop = document.getElementById('mobile-input-popover');
+            if (pop.classList.contains('show')) {
+                closeMobileInputTray();
+            } else {
+                closeAllStatusPopovers();
+                pop.classList.add('show');
+                document.getElementById('mobile-keyboard-btn').classList.add('active');
+                
+                const txt = document.getElementById('mobile-input-textarea');
+                if (txt) {
+                    txt.focus();
+                }
+                
+                _popoverOutside('mobile-input-popover', 'mobile-keyboard-btn', closeMobileInputTray);
+            }
+        }
+
+        function closeMobileInputTray() {
+            const pop = document.getElementById('mobile-input-popover');
+            const btn = document.getElementById('mobile-keyboard-btn');
+            if (pop) pop.classList.remove('show');
+            if (btn) btn.classList.remove('active');
+        }
+
+        function clearMobileInput() {
+            const txt = document.getElementById('mobile-input-textarea');
+            if (txt) txt.value = '';
+        }
+
+        function sendMobileInput() {
+            if (!activeProject) {
+                alert("Please select a workspace project first.");
+                return;
+            }
+            const txt = document.getElementById('mobile-input-textarea');
+            if (!txt) return;
+            const command = txt.value;
+            if (!command) return;
+
+            if (socket && socket.connected) {
+                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
+                const paneId = activePane ? activePane.paneId : 'main';
+                socket.emit('pty-input', { project: activeProject, paneId, data: command + '\r' });
+            } else {
+                fetch(`/input/${activeProject}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: command + '\r' })
+                }).catch(err => console.error('Mobile Input Tray send error:', err));
+            }
+            
+            txt.value = '';
+            closeMobileInputTray();
+        }
+
+        function handleMobileInputKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMobileInput();
+            }
+        }
 
         // ─── Custom Terminal Button Modal ─────────────────────────────────────────
         let customBtnTargetPaneId = null;
