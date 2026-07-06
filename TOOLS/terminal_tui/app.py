@@ -1654,6 +1654,338 @@ def api_project_paste_clipboard(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/init-framework', methods=['POST'])
+def api_project_init_framework(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    
+    framework = request.json.get("framework", "").strip().lower()
+    if not framework:
+        return jsonify({"error": "No framework selected"}), 400
+
+    templates = {}
+    
+    if framework == "react":
+        templates = {
+            "package.json": """{
+  "name": "react-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "vite": "^4.4.5"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Starter</title>
+  </head>
+  <body style="margin: 0; background: #0f172a; color: #f8fafc; font-family: sans-serif;">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>""",
+            "src/main.jsx": """import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)""",
+            "src/index.css": """body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}""",
+            "src/App.jsx": """import { useState } from 'react'
+
+function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh', gap: '20px' }}>
+      <h1 style={{ color: '#61dafb', fontSize: '3rem', margin: 0 }}>React + Vite</h1>
+      <p style={{ fontSize: '1.2rem', color: '#94a3b8' }}>Get started by editing <code>src/App.jsx</code></p>
+      <button 
+        onClick={() => setCount((count) => count + 1)}
+        style={{ padding: '10px 20px', fontSize: '1rem', background: '#61dafb', border: 'none', borderRadius: '8px', color: '#0f172a', fontWeight: 'bold', cursor: 'pointer', transition: 'transform 0.1s' }}
+        onMouseDown={(e) => e.target.style.transform = 'scale(0.95)'}
+        onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
+      >
+        Count is {count}
+      </button>
+    </div>
+  )
+}
+
+export default App"""
+        }
+    elif framework == "vue":
+        templates = {
+            "package.json": """{
+  "name": "vue-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.3.9"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue Starter</title>
+  </head>
+  <body style="margin: 0; background: #1e1e24; color: #e1e1e6; font-family: sans-serif;">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>""",
+            "src/main.js": """import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App).mount('#app')""",
+            "src/App.vue": """<template>
+  <div class="container">
+    <h1 class="title">Vue 3 + Vite</h1>
+    <p class="subtitle">Get started by editing <code>src/App.vue</code></p>
+    <button class="btn" @click="count++">Count is {{ count }}</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const count = ref(0)
+</script>
+
+<style scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  gap: 20px;
+}
+.title {
+  color: #42b883;
+  font-size: 3rem;
+  margin: 0;
+}
+.subtitle {
+  font-size: 1.2rem;
+  color: #888;
+}
+.btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background: #42b883;
+  border: none;
+  border-radius: 8px;
+  color: #1a1a1a;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>"""
+        }
+    elif framework == "angularjs":
+        templates = {
+            "index.html": """<!DOCTYPE html>
+<html lang="en" ng-app="app">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AngularJS 1.x Starter</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  </head>
+  <body ng-controller="MainController" style="margin: 0; background: #0f172a; color: #f8fafc; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; gap: 20px;">
+    <h1 style="color: #dd1b16; fontSize: '3rem'; margin: 0;">AngularJS 1.x</h1>
+    <p style="fontSize: '1.2rem'; color: '#94a3b8';">{{ greeting }}</p>
+    <button ng-click="increment()" style="padding: 10px 20px; font-size: 1rem; background: #dd1b16; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+      Count is {{ count }}
+    </button>
+    <script src="/app.js"></script>
+  </body>
+</html>""",
+            "app.js": """angular.module('app', [])
+.controller('MainController', ['$scope', function($scope) {
+  $scope.greeting = 'Get started by editing index.html and app.js';
+  $scope.count = 0;
+  $scope.increment = function() {
+    $scope.count++;
+  };
+}]);"""
+        }
+    elif framework == "svelte":
+        templates = {
+            "package.json": """{
+  "name": "svelte-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "svelte": "^4.0.5",
+    "vite": "^4.4.5"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+
+export default defineConfig({
+  plugins: [svelte()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Svelte Starter</title>
+  </head>
+  <body style="margin: 0; background: #1a1a24; color: #fff; font-family: sans-serif;">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>""",
+            "src/main.js": """import App from './App.svelte'
+
+const app = new App({
+  target: document.getElementById('app'),
+})
+
+export default app""",
+            "src/App.svelte": """<script>
+  let count = 0;
+</script>
+
+<main class="container">
+  <h1 class="title">Svelte + Vite</h1>
+  <p class="subtitle">Get started by editing <code>src/App.svelte</code></p>
+  <button class="btn" on:click={() => count++}>Count is {count}</button>
+</main>
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    gap: 20px;
+  }
+  .title {
+    color: #ff3e00;
+    font-size: 3rem;
+    margin: 0;
+  }
+  .subtitle {
+    font-size: 1.2rem;
+    color: #888;
+  }
+  .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: #ff3e00;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+  }
+</style>"""
+        }
+    elif framework == "tailwind_html":
+        templates = {
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tailwind Play CDN Starter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
+    <div class="max-w-md w-full bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl p-8 flex flex-col items-center text-center gap-6">
+      <div class="h-16 w-16 bg-sky-500/10 rounded-full flex items-center justify-center text-sky-400 text-3xl font-bold">
+        ⚡
+      </div>
+      <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">Tailwind CSS</h1>
+      <p class="text-slate-400 text-sm leading-relaxed">
+        This template uses the Tailwind Play CDN. Get started by modifying <code class="bg-slate-950 px-2 py-1 rounded text-pink-400 font-mono text-xs">index.html</code>.
+      </p>
+      <button class="w-full bg-sky-500 hover:bg-sky-400 active:scale-[0.98] transition text-slate-950 font-bold py-3 px-6 rounded-xl shadow-lg shadow-sky-500/20">
+        Get Started
+      </button>
+    </div>
+  </body>
+</html>"""
+        }
+    else:
+        return jsonify({"error": "Unknown framework template"}), 400
+
+    try:
+        for rel_file, content in templates.items():
+            file_path = os.path.join(base_path, rel_file)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
+        return jsonify({"status": "success", "files": list(templates.keys())})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
     if 'image' not in request.files:

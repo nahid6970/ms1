@@ -1445,6 +1445,12 @@
                             </div>
                         </div>
                     </div>
+                    <button class="action-btn" onclick="openFrameworkSelectModal()" title="Initialize Frontend Framework" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
                     <button class="action-btn" onclick="exportActiveTerminalLog()" title="Download Terminal Logs" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -1776,6 +1782,60 @@
             
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
                 <button type="button" class="btn btn-secondary" onclick="closeSplitSelectModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Framework Initializer Modal Dialog -->
+    <div class="modal-overlay" id="framework-select-modal">
+        <div class="modal-content" style="max-width: 540px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Initialize Frontend Framework</h2>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Select a framework to generate basic starter files in the active workspace root.</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="closeFrameworkSelectModal()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1;">✕</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                <!-- React Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('react')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">⚛️</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">React</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">React + Vite starter template</span>
+                </div>
+                
+                <!-- Vue Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('vue')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🟢</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Vue 3</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Vue 3 + Vite SFC starter</span>
+                </div>
+
+                <!-- AngularJS Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('angularjs')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🔴</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">AngularJS</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">AngularJS 1.x play CDN starter</span>
+                </div>
+
+                <!-- Svelte Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('svelte')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🔥</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Svelte</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Svelte + Vite starter template</span>
+                </div>
+
+                <!-- Tailwind CSS Card -->
+                <div class="split-card" onclick="confirmFrameworkInit('tailwind_html')" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s; grid-column: span 2;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                    <span style="font-size: 1.5rem;">🎨</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Tailwind HTML</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">Tailwind CSS play CDN basic layout template</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="btn btn-secondary" onclick="closeFrameworkSelectModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
             </div>
         </div>
     </div>
@@ -2442,6 +2502,7 @@
                 const id = e.target.id;
                 if (id === 'add-modal') closeAddModal();
                 else if (id === 'split-select-modal') closeSplitSelectModal();
+                else if (id === 'framework-select-modal') closeFrameworkSelectModal();
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
                 else if (id === 'settings-modal') closeSettingsModal();
@@ -3473,6 +3534,44 @@
 
         function closeSplitSelectModal() {
             document.getElementById('split-select-modal').classList.remove('show');
+        }
+
+        function openFrameworkSelectModal() {
+            if (!activeProject) {
+                alert("Please select a workspace project first.");
+                return;
+            }
+            document.getElementById('framework-select-modal').classList.add('show');
+        }
+
+        function closeFrameworkSelectModal() {
+            document.getElementById('framework-select-modal').classList.remove('show');
+        }
+
+        async function confirmFrameworkInit(framework) {
+            closeFrameworkSelectModal();
+            if (!activeProject) return;
+            
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/init-framework`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ framework: framework })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    alert(`Initialized ${framework} successfully! Generated files:\n` + data.files.join("\n"));
+                    if (typeof loadExplorerRoot === 'function') {
+                        loadExplorerRoot();
+                    }
+                } else {
+                    alert(data.error || `Failed to initialize ${framework}`);
+                }
+            } catch (err) {
+                console.error(`Error initializing ${framework}:`, err);
+                alert(`Error initializing ${framework}`);
+            }
         }
 
         function confirmSplitLayout(direction) {
