@@ -5206,7 +5206,7 @@
                 });
                 
                 if (response.ok) {
-                    refreshFileTree();
+                    loadExplorerRoot();
                 } else {
                     const data = await response.json();
                     alert(data.error || "Failed to delete file.");
