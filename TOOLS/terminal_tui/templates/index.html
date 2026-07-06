@@ -1906,7 +1906,8 @@
             <form id="debug-script-form" onsubmit="handleRunDebugScript(event)">
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="debug-script-cmd" style="font-size: 0.8rem; font-weight: 500;">Command / Script Path</label>
-                    <input type="text" id="debug-script-cmd" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace;">
+                    <input type="text" id="debug-script-cmd" list="debug-script-files" class="form-input" placeholder="e.g. python debug_test.py or .\test.ps1" required autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem; font-family: 'Fira Code', monospace;">
+                    <datalist id="debug-script-files"></datalist>
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 14px;">
@@ -5110,9 +5111,35 @@
             document.getElementById('edit-bookmark-cmd').focus();
         }
         // ─── Debug Script Runner ──────────────────────────────────────────────────
-        function openDebugScriptModal() {
+        async function openDebugScriptModal() {
             document.getElementById('debug-script-modal').classList.add('show');
             setTimeout(() => document.getElementById('debug-script-cmd').focus(), 100);
+            
+            if (activeProject) {
+                try {
+                    const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/files`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const datalist = document.getElementById('debug-script-files');
+                        datalist.innerHTML = '';
+                        if (data && data.items) {
+                            // Extract scripts (.py, .ps1, .sh, .js, .bat, .cmd)
+                            data.items.forEach(f => {
+                                if (!f.is_dir) {
+                                    const ext = f.name.split('.').pop().toLowerCase();
+                                    if (['py', 'ps1', 'sh', 'js', 'bat', 'cmd'].includes(ext)) {
+                                        const opt = document.createElement('option');
+                                        opt.value = (ext === 'ps1' || ext === 'bat' || ext === 'cmd') ? `.\\${f.name}` : `python ${f.name}`;
+                                        datalist.appendChild(opt);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to load project files for debug script datalist:", e);
+                }
+            }
         }
 
         function closeDebugScriptModal() {

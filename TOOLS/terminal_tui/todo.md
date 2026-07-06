@@ -1,7 +1,7 @@
-# Task: Add Debug Script Runner
+# Task: Add File Picker for Debug Script Runner
 
 ## Tasks
-- [X] Add a new button before `#bookmark-dropdown-btn` in the header for "Run Debug Script".
-- [X] Create a modal or popover for the Debug Script Runner where the user can specify a script path/command.
-- [X] Add a JS function to run the script. To prevent auto-closing on error, wrap the execution in a shell construct that pauses or catches the error (e.g., `& { <command> } ; if (!$?) { pause }` for PowerShell, or just run it in the active shell pane so it naturally stays open).
-- [X] Optionally add useful features like a file picker or predefined script types.
+- [X] Add an API endpoint in app.py to list files in the active project directory (if not already existing) or utilize an existing one.
+- [X] Add a datalist to the Debug Script Runner modal input field in index.html.
+- [X] When opening the modal, fetch the file list of the active project and populate the datalist.
+- [X] Update the JS logic to populate this datalist.
