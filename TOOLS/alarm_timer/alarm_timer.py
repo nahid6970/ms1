@@ -1182,8 +1182,12 @@ class ColumnWidget(QFrame):
 
     def _on_add_timer(self):
         settings = None
-        if hasattr(self.parent(), "_settings"):
-            settings = self.parent()._settings
+        p = self.parent()
+        while p:
+            if hasattr(p, "_settings"):
+                settings = p._settings
+                break
+            p = p.parent()
             
         result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", settings=settings, parent=self)
         if result is None:
