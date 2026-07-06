@@ -1,4 +1,4 @@
-# Task: Remove python prefix from Debug Script Dropdown
+# Task: Add Click-Outside-to-Close for Debug Script Modal
 
 ## Tasks
-- [X] Updated `openDebugScriptModal` to populate the custom dropdown with just the raw filename for `.py`, `.js`, and `.sh` files, instead of prepending the `python` command name.
+- [X] Added logic to close the Debug Script modal when the user clicks on the `.modal-overlay` outside the modal content.

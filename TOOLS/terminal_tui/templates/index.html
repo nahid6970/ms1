@@ -5184,6 +5184,11 @@
                     dropdown.style.display = 'none';
                 }
             }
+            
+            const modal = document.getElementById('debug-script-modal');
+            if (modal && modal.classList.contains('show') && e.target === modal) {
+                closeDebugScriptModal();
+            }
         });
 
         function closeDebugScriptModal() {
