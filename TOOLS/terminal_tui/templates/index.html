@@ -2081,7 +2081,7 @@
 
     <!-- Active Ports & Services Monitor Modal Dialog -->
     <div class="modal-overlay" id="ports-modal">
-        <div class="modal-content" style="width: 580px; max-width: 95vw; padding: 24px; display:flex; flex-direction:column; max-height:85vh; border-radius: 0;">
+        <div class="modal-content" style="min-width: 580px; width: auto; max-width: 95vw; padding: 24px; display:flex; flex-direction:column; max-height:85vh; border-radius: 0;">
             <div class="modal-header" style="margin-bottom: 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
                 <div>
                     <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
@@ -2111,8 +2111,8 @@
                             <th style="padding:10px 12px;">Port</th>
                             <th style="padding:10px 12px;">Process</th>
                             <th style="padding:10px 12px;">PID</th>
-                            <th style="padding:10px 12px; width: 150px;">Notes</th>
                             <th style="padding:10px 12px; text-align:right;">Action</th>
+                            <th style="padding:10px 12px; text-align:right;">Notes</th>
                         </tr>
                     </thead>
                     <tbody id="ports-table-body">
@@ -9352,19 +9352,19 @@
 
                 const notes = starredPorts[String(p.port)] || '';
                 const noteHtml = isStarred 
-                    ? `<div onclick="editPortNote(${p.port})" style="cursor:pointer; font-size:0.75rem; color:var(--text-secondary); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Click to edit notes: ${notes}">${notes || '<i style="opacity:0.5;">Add note...</i>'}</div>`
+                    ? `<div onclick="editPortNote(${p.port})" style="cursor:pointer; font-size:0.75rem; color:var(--text-secondary); word-break: break-word;" title="Click to edit notes">${notes || '<i style="opacity:0.5;">Add note...</i>'}</div>`
                     : `<div style="font-size:0.75rem; color:var(--text-muted); opacity: 0.3;">-</div>`;
 
                 tr.innerHTML = `
                     <td style="padding:10px 12px; ${portStyle} display:flex; align-items:center;">${starHtml}${p.port}</td>
                     <td style="padding:10px 12px; font-family:'Fira Code',monospace; font-size:0.76rem; ${rowClass}">${p.processName}</td>
                     <td style="padding:10px 12px; color:var(--text-secondary);">${p.pid}</td>
-                    <td style="padding:10px 12px;">${noteHtml}</td>
                     <td style="padding:10px 12px; text-align:right;">
                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">
                             ${isOffline ? '' : shareBtn}${killBtn}
                         </div>
                     </td>
+                    <td style="padding:10px 12px; text-align:right;">${noteHtml}</td>
                 `;
                 tbody.appendChild(tr);
             });
