@@ -1031,17 +1031,9 @@ class TimerCard(QFrame):
         self._prog_fill.setFixedHeight(4)
         self._prog_fill.setStyleSheet(f"background: {CP_CYAN};")
 
-        # status
-        self._status = QLabel("● STOPPED")
-        self._status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._status.setStyleSheet(
-            f"color: {CP_DIM}; font-size: 8pt; letter-spacing: 1px;"
-        )
-
         root.addLayout(top)
         root.addWidget(self._display)
         root.addWidget(self._prog_bg)
-        root.addWidget(self._status)
 
     def _set_border(self, color: str):
         self.setStyleSheet(
@@ -1077,10 +1069,6 @@ class TimerCard(QFrame):
                 f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px;"
             )
-            self._status.setText("▐ ALARM!")
-            self._status.setStyleSheet(
-                f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
-            )
             self._set_border(CP_RED)
             self._prog_fill.setFixedWidth(0)
             
@@ -1097,8 +1085,6 @@ class TimerCard(QFrame):
                 f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px;"
             )
-            self._status.setText("▶ RUNNING")
-            self._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
             self._set_border(CP_GREEN)
             self._update_bar()
 
