@@ -1585,6 +1585,49 @@ def api_temp_image():
     except Exception as e:
         return jsonify({"error": f"Failed to save temporary image: {str(e)}"}), 500
 
+@app.route('/api/session/<project>/paste-image', methods=['POST'])
+def api_project_paste_image(project):
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file sent"}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+
+    import datetime
+    import tempfile
+
+    original_filename = os.path.basename(file.filename)
+    name_part, ext_part = os.path.splitext(original_filename)
+    if not name_part:
+        name_part = "pasted_image"
+    if not ext_part:
+        ext_part = ".png"
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{name_part}_{timestamp}{ext_part}"
+    
+    # We want to save it under the project folder if valid, or a generic temp folder.
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if proj_details:
+        target_dir = os.path.abspath(proj_details["path"])
+    else:
+        target_dir = os.path.join(tempfile.gettempdir(), "terminal_tui_images")
+    
+    os.makedirs(target_dir, exist_ok=True)
+    dest_path = os.path.join(target_dir, filename)
+    try:
+        file.save(dest_path)
+        return jsonify({
+            "status": "success",
+            "path": dest_path.replace("\\", "/"),
+            "filename": filename
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
+
+
 @app.route('/input/<project>', methods=['POST'])
 def api_input(project):
     with sessions_lock:

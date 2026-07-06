@@ -1,8 +1,6 @@
-# Task: Redesign Global Settings Modal
+# Task: Add Screenshot Upload Feature for Mobile & Desktop
 
 ## Tasks
-- [X] Widen settings modal
-- [X] Organize numeric settings and badge settings into compact horizontal rows
-- [X] Arrange checkboxes into a neat 2-column grid to reduce overall height
-- [X] Increase modal width to 720px to prevent items sticking out
-- [X] Prevent text wrapping on numeric input labels to keep them on a single line
+- [X] Add a new screenshot upload/capture button beside #sched-btn in the status bar
+- [X] Implement mobile file input handler and desktop clipboard drop/paste/file select to store images temporarily
+- [X] Implement backend api route to handle saving temporary images to device's disk under temp path
