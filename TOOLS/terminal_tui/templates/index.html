@@ -1654,13 +1654,13 @@
             <button class="sbpop-close" onclick="closeMobileInputTray()">✕</button>
         </div>
         <div style="padding:12px 14px; display:flex; flex-direction:column; gap:8px;">
-            <div style="font-size:0.7rem; color:var(--text-secondary);">Type & edit with native cursor features (spacebar-swipe, text selection). Press Enter or click Send to submit.</div>
+            <div style="font-size:0.7rem; color:var(--text-secondary);">Type & edit with native cursor features (spacebar-swipe, text selection). Press Enter or click Insert to write to terminal buffer.</div>
             <div style="display:flex; gap:6px;">
-                <textarea id="mobile-input-textarea" placeholder="Type command here..." style="flex:1; height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.85rem; font-family:'Fira Code',monospace; outline:none; resize:none;" onkeydown="handleMobileInputKeydown(event)"></textarea>
+                <textarea id="mobile-input-textarea" placeholder="Type text to insert..." style="flex:1; height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.85rem; font-family:'Fira Code',monospace; outline:none; resize:none;" onkeydown="handleMobileInputKeydown(event)"></textarea>
             </div>
             <div style="display:flex; gap:6px; justify-content:flex-end;">
                 <button onclick="clearMobileInput()" style="padding:5px 12px; font-size:0.78rem; background:none; border:1px solid var(--border-color); border-radius:5px; color:var(--text-muted); cursor:pointer;">Clear</button>
-                <button onclick="sendMobileInput()" style="padding:5px 16px; font-size:0.78rem; background:#06b6d4; border:none; border-radius:5px; color:white; cursor:pointer; font-weight:500;">Send</button>
+                <button onclick="sendMobileInput()" style="padding:5px 16px; font-size:0.78rem; background:#06b6d4; border:none; border-radius:5px; color:white; cursor:pointer; font-weight:500;">Insert</button>
             </div>
         </div>
     </div>
@@ -7274,12 +7274,12 @@
             if (socket && socket.connected) {
                 const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
                 const paneId = activePane ? activePane.paneId : 'main';
-                socket.emit('pty-input', { project: activeProject, paneId, data: command + '\r' });
+                socket.emit('pty-input', { project: activeProject, paneId, data: command });
             } else {
                 fetch(`/input/${activeProject}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: command + '\r' })
+                    body: JSON.stringify({ data: command })
                 }).catch(err => console.error('Mobile Input Tray send error:', err));
             }
             
