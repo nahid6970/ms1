@@ -39,6 +39,25 @@ PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
 PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
 ICONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json"
+SUBCMDS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json"
+
+def load_subcommands():
+    if not os.path.exists(SUBCMDS_FILE):
+        return {}
+    try:
+        with open(SUBCMDS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading subcommands: {e}")
+        return {}
+
+def save_subcommands(subcmds):
+    try:
+        os.makedirs(os.path.dirname(SUBCMDS_FILE), exist_ok=True)
+        with open(SUBCMDS_FILE, "w", encoding="utf-8") as f:
+            json.dump(subcmds, f, indent=2)
+    except Exception as e:
+        print(f"Error saving subcommands: {e}")
 
 def load_extension_icons():
     if not os.path.exists(ICONS_FILE):
@@ -2710,6 +2729,16 @@ def api_get_extension_icons():
 def api_post_extension_icons():
     data = request.json or {}
     save_extension_icons(data)
+    return jsonify({"status": "success"})
+
+@app.route('/api/subcommands', methods=['GET'])
+def api_get_subcommands():
+    return jsonify(load_subcommands())
+
+@app.route('/api/subcommands', methods=['POST'])
+def api_post_subcommands():
+    data = request.json or {}
+    save_subcommands(data)
     return jsonify({"status": "success"})
 
 @app.route('/api/fonts')

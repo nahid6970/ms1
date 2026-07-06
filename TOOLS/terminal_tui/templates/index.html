@@ -2560,6 +2560,7 @@
         let editingBookmarkProj = null;
         let editingBookmarkIndex = null;
         let extensionIconsMap = {};
+        let bookmarkSubcmdsMap = {};
 
         async function loadExtensionIconsMap() {
             try {
@@ -2569,6 +2570,17 @@
                 }
             } catch (err) {
                 console.error("Error loading extension icons map:", err);
+            }
+        }
+
+        async function loadSubcmdsMap() {
+            try {
+                const res = await fetch('/api/subcommands');
+                if (res.ok) {
+                    bookmarkSubcmdsMap = await res.json();
+                }
+            } catch (err) {
+                console.error("Error loading subcommands map:", err);
             }
         }
 
@@ -5514,19 +5526,21 @@
 
         // ── Bookmark Sub-commands ─────────────────────────────────────────────
 
-        const SUBCMD_KEY = 'bm-subcmds-v1';
-
         function loadSubcmds(bmCmd) {
-            try { return JSON.parse(localStorage.getItem(SUBCMD_KEY) || '{}')[bmCmd] || []; }
-            catch(e) { return []; }
+            return bookmarkSubcmdsMap[bmCmd] || [];
         }
 
-        function saveSubcmds(bmCmd, list) {
+        async function saveSubcmds(bmCmd, list) {
+            bookmarkSubcmdsMap[bmCmd] = list;
             try {
-                const all = JSON.parse(localStorage.getItem(SUBCMD_KEY) || '{}');
-                all[bmCmd] = list;
-                localStorage.setItem(SUBCMD_KEY, JSON.stringify(all));
-            } catch(e) {}
+                await fetch('/api/subcommands', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookmarkSubcmdsMap)
+                });
+            } catch(e) {
+                console.error("Error saving subcommands:", e);
+            }
         }
 
         let _activeSubcmdPanel = null;
@@ -9122,6 +9136,7 @@
             
             loadSystemFonts();
             await loadExtensionIconsMap();
+            await loadSubcmdsMap();
             await fetchProjects();
             applySidebarWorkspacesVisibility();
             

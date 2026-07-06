@@ -1,4 +1,4 @@
-# Task: Custom File Extension Icons in File Explorer (JSON Backend Storage)
+# Task: Migrate Bookmark Subcommands to JSON Backend
 
 ## Tasks
 - [X] Added a file deletion API endpoint `POST /api/project/<project>/file-delete` in `app.py`.
@@ -20,3 +20,5 @@
 - [X] Added `GET /api/extension-icons` and `POST /api/extension-icons` API routes in `app.py` to save the mappings in a backend JSON file: `C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json`.
 - [X] Migrated frontend icons lookup to request from backend JSON file on startup and write to it dynamically.
 - [X] Updated `renderFileTreeItems` to check the mapped SVG icons in `extensionIconsMap` and render them in the file explorer.
+- [X] Created backend routes `GET /api/subcommands` and `POST /api/subcommands` storing subcommands data in a persistent backend file: `C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json`.
+- [X] Migrated `loadSubcmds` and `saveSubcmds` in frontend to sync subcommand sets directly with the JSON backend, enabling access on mobile and external devices.
