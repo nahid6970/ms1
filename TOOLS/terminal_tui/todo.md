@@ -1,4 +1,4 @@
-# Task: Make Debug Script Runner Execute in a New Pane
+# Task: Remove python prefix from Debug Script Dropdown
 
 ## Tasks
-- [X] Update the `handleRunDebugScript` JavaScript function to use `splitTerminal('tabs', ...)` instead of `socket.emit` so that launching a debug script opens in a new tab, preventing interference with running agent CLIs in the active pane.
+- [X] Updated `openDebugScriptModal` to populate the custom dropdown with just the raw filename for `.py`, `.js`, and `.sh` files, instead of prepending the `python` command name.
