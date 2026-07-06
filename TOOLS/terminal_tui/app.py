@@ -3319,6 +3319,65 @@ def api_custom_buttons():
         save_custom_buttons(data)
         return jsonify({"success": True})
 
+@app.route('/api/ai-command', methods=['POST'])
+def api_ai_command():
+    req = request.json or {}
+    prompt = req.get('prompt', '')
+    api_key = req.get('api_key', '')
+    if not api_key:
+        api_key = os.environ.get('GEMINI_API_KEY', '')
+    if not api_key:
+        return jsonify({"error": "Gemini API key is missing. Please provide it in settings or the prompt."}), 400
+    
+    import requests
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    
+    system_instruction = (
+        "You are a command line expert and shell copilot assistant. The user wants to run a terminal command. "
+        "Your job is to write the exact, single command line string to run. "
+        "Rule 1: Return ONLY the exact command text to execute. "
+        "Rule 2: Do NOT write any conversational text, explanations, or warnings. "
+        "Rule 3: Do NOT wrap the command in markdown code blocks or backticks. Return the raw string. "
+        "Rule 4: Keep it secure, correct, and single-line if possible."
+    )
+    
+    headers = {'Content-Type': 'application/json'}
+    payload = {
+        "contents": [{
+            "parts": [{"text": f"System: {system_instruction}\nUser prompt: {prompt}"}]
+        }]
+    }
+    
+    try:
+        res = requests.post(url, json=payload, headers=headers, timeout=15)
+        res_data = res.json()
+        if res.status_code != 200:
+            error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
+            return jsonify({"error": error_msg}), res.status_code
+        
+        candidates = res_data.get('candidates', [])
+        if not candidates:
+            return jsonify({"error": "No response from Gemini API"}), 500
+        
+        cmd = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+        # Clean markdown wrappers
+        if cmd.startswith('```'):
+            lines = cmd.split('\n')
+            if len(lines) > 1:
+                if lines[0].startswith('```'):
+                    lines = lines[1:]
+                if lines[-1].startswith('```'):
+                    lines = lines[:-1]
+                cmd = '\n'.join(lines).strip()
+            else:
+                cmd = cmd.replace('`', '')
+        elif cmd.startswith('`') and cmd.endswith('`'):
+            cmd = cmd.strip('`')
+            
+        return jsonify({"command": cmd})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():
     """Kill process by PID"""

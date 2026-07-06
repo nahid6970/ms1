@@ -1550,6 +1550,10 @@
                     <button id="snippets-btn" class="sbicon-btn" onclick="toggleSnippetsPopover(event)" title="Snippets — send saved text to terminal" style="color: #f472b6; border-color: rgba(244, 114, 182, 0.4);">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </button>
+                    <!-- AI Copilot Button -->
+                    <button id="ai-copilot-btn" class="sbicon-btn" onclick="toggleAICopilotPopover(event)" title="AI Copilot (Ctrl+I)" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.4);">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+                    </button>
                     <!-- Window title selector (moved from header) -->
                     <div class="custom-dropdown" id="project-name-dropdown-container" style="position: relative; display: none;">
                         <button id="active-project-name" class="sbicon-btn" onclick="toggleProjectNameDropdown(event)" title="Set window title" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">
@@ -1705,6 +1709,39 @@
         <!-- Snippet list -->
         <div class="sbpop-body" id="snippets-list" style="min-height:40px; padding:8px 10px;">
             <div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:12px 0;">No snippets yet. Add one above.</div>
+        </div>
+    </div>
+
+    <!-- ═══ AI Command Assistant (Shell Copilot) Popover ════════════════════════ -->
+    <div id="ai-copilot-popover" class="statusbar-popover" style="right:84px; width:380px;">
+        <div class="sbpop-header">
+            <span>🤖 AI Command Assistant</span>
+            <button class="sbpop-close" onclick="closeAICopilotPopover()">✕</button>
+        </div>
+        <div style="padding:12px; flex-shrink:0;">
+            <!-- API Key field if not saved -->
+            <div id="ai-api-key-container" style="margin-bottom:10px; display:none;">
+                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Gemini API Key (Google AI Studio)</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="password" id="ai-api-key-input" placeholder="AIzaSy..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <button onclick="saveGeminiAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
+                </div>
+            </div>
+            
+            <div id="ai-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span>✨ Gemini API Key configured</span>
+                <button onclick="clearGeminiAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+            </div>
+
+            <!-- Prompt input -->
+            <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Ask Gemini to write a command</label>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <textarea id="ai-prompt-input" placeholder="e.g. Find all .log files and delete them..." style="height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.8rem; outline:none; resize:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'" onkeydown="handleAIPromptKeydown(event)"></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span id="ai-copilot-status" style="font-size:0.7rem; color:var(--text-muted);"></span>
+                    <button id="ai-copilot-submit" onclick="generateAICommand()" style="padding:5px 16px; background:#a855f7; border:none; border-radius:6px; color:white; font-size:0.8rem; cursor:pointer; font-weight:500;">Generate Command</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -7907,6 +7944,7 @@
             closeQToolsPopover();
             closeSnippetsPopover();
             closeMobileInputTray();
+            closeAICopilotPopover();
         }
 
         function _popoverOutside(popId, btnId, closeFn) {
@@ -7929,16 +7967,139 @@
                 const pop2 = document.getElementById('qtools-popover');
                 const pop3 = document.getElementById('snippets-popover');
                 const pop4 = document.getElementById('mobile-input-popover');
+                const pop5 = document.getElementById('ai-copilot-popover');
                 if (pop1 && pop1.classList.contains('show')) { closeSchedPopover(); return; }
                 if (pop2 && pop2.classList.contains('show')) { closeQToolsPopover(); return; }
                 if (pop3 && pop3.classList.contains('show')) { closeSnippetsPopover(); return; }
                 if (pop4 && pop4.classList.contains('show')) { closeMobileInputTray(); return; }
+                if (pop5 && pop5.classList.contains('show')) { closeAICopilotPopover(); return; }
                 const diffModal = document.getElementById('git-diff-modal');
                 if (diffModal && diffModal.classList.contains('show')) { closeGitDiffModal(); return; }
                 const browserModal = document.getElementById('commit-browser-modal');
                 if (browserModal && browserModal.classList.contains('show')) { closeCommitBrowser(); return; }
                 const debugModal = document.getElementById('debug-script-modal');
                 if (debugModal && debugModal.classList.contains('show')) { closeDebugScriptModal(); return; }
+            }
+        });
+
+        // ── AI Command Assistant (Shell Copilot) Helpers ────────────────────
+        function toggleAICopilotPopover(e) {
+            if (e) e.stopPropagation();
+            const pop = document.getElementById('ai-copilot-popover');
+            if (pop.classList.contains('show')) {
+                closeAICopilotPopover();
+            } else {
+                closeAllStatusPopovers();
+                pop.classList.add('show');
+                document.getElementById('ai-copilot-btn').classList.add('active');
+                
+                const savedKey = localStorage.getItem('gemini-api-key') || '';
+                if (savedKey) {
+                    document.getElementById('ai-api-key-container').style.display = 'none';
+                    document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
+                } else {
+                    document.getElementById('ai-api-key-container').style.display = 'block';
+                    document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+                }
+                
+                const promptIn = document.getElementById('ai-prompt-input');
+                if (promptIn) {
+                    promptIn.value = '';
+                    setTimeout(() => promptIn.focus(), 100);
+                }
+                
+                _popoverOutside('ai-copilot-popover', 'ai-copilot-btn', closeAICopilotPopover);
+            }
+        }
+
+        function closeAICopilotPopover() {
+            const pop = document.getElementById('ai-copilot-popover');
+            const btn = document.getElementById('ai-copilot-btn');
+            if (pop) pop.classList.remove('show');
+            if (btn) btn.classList.remove('active');
+            document.getElementById('ai-copilot-status').innerText = '';
+        }
+
+        function saveGeminiAPIKey() {
+            const val = document.getElementById('ai-api-key-input').value.trim();
+            if (!val) return;
+            localStorage.setItem('gemini-api-key', val);
+            document.getElementById('ai-api-key-container').style.display = 'none';
+            document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
+            document.getElementById('ai-prompt-input').focus();
+        }
+
+        function clearGeminiAPIKey() {
+            localStorage.removeItem('gemini-api-key');
+            document.getElementById('ai-api-key-input').value = '';
+            document.getElementById('ai-api-key-container').style.display = 'block';
+            document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+            document.getElementById('ai-api-key-input').focus();
+        }
+
+        function handleAIPromptKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateAICommand();
+            }
+        }
+
+        async function generateAICommand() {
+            const prompt = document.getElementById('ai-prompt-input').value.trim();
+            if (!prompt) return;
+            
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            const statusEl = document.getElementById('ai-copilot-status');
+            const submitBtn = document.getElementById('ai-copilot-submit');
+            
+            statusEl.innerText = 'Thinking...';
+            statusEl.style.color = 'var(--text-muted)';
+            submitBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/ai-command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, api_key: apiKey })
+                });
+                
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to generate command');
+                }
+                
+                closeAICopilotPopover();
+                
+                const command = data.command;
+                const activePaneEl = document.querySelector('.terminal-pane.active-pane');
+                const paneId = activePaneEl ? activePaneEl.dataset.paneId : 'main';
+                
+                if (activeProject) {
+                    if (socket && socket.connected) {
+                        socket.emit('pty-input', { project: activeProject, paneId, data: command });
+                    } else {
+                        fetch(`/input/${activeProject}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ data: command })
+                        }).catch(err => console.error('AI Copilot send error:', err));
+                    }
+                } else {
+                    alert('Generated command: ' + command + '\n\n(Select a workspace project first)');
+                }
+            } catch (e) {
+                statusEl.innerText = e.message;
+                statusEl.style.color = '#ef4444';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Add keyboard shortcut Ctrl+I
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'i') {
+                e.preventDefault();
+                toggleAICopilotPopover();
             }
         });
 
