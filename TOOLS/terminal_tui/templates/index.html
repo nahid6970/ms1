@@ -2590,7 +2590,7 @@
                 <button onclick="closeCustomButtonModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
             </div>
             <div style="margin-bottom: 14px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Button Label</label>
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Button Label (append <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">;; bg=red fg=#fff</code> for colors)</label>
                 <input id="custom-btn-label" type="text" placeholder="e.g., Tab, Enter, etc." style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
             <div style="margin-bottom: 14px;">
@@ -7990,7 +7990,10 @@
                 const storageKey = `custom-btns-${activeProject}`;
                 const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
                 if (existing[editIndex]) {
-                    initialLabel = existing[editIndex].label;
+                    initialLabel = existing[editIndex].rawLabel || existing[editIndex].label;
+                    if (existing[editIndex].bg && !existing[editIndex].rawLabel) {
+                         initialLabel += ` ;; bg=${existing[editIndex].bg} fg=${existing[editIndex].fg || ''}`.trim();
+                    }
                     initialData = existing[editIndex].raw_data || existing[editIndex].data;
                 }
             }
@@ -8027,9 +8030,23 @@
         }
 
         function saveCustomButton() {
-            const label = document.getElementById('custom-btn-label').value.trim();
+            let rawLabel = document.getElementById('custom-btn-label').value.trim();
             const keycode = document.getElementById('custom-btn-keycode').value;
-            if (!label || !keycode) return;
+            if (!rawLabel || !keycode) return;
+
+            let bg = '', fg = '';
+            let label = rawLabel;
+            const sepIdx = rawLabel.indexOf(';;');
+            if (sepIdx !== -1) {
+                label = rawLabel.slice(0, sepIdx).trim();
+                let remainder = rawLabel.slice(sepIdx + 2).trim();
+                const colorToken = /(bg|fg)=(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)/g;
+                remainder = remainder.replace(colorToken, (_, key, val) => {
+                    if (key === 'bg') bg = val;
+                    if (key === 'fg') fg = val;
+                    return '';
+                }).trim();
+            }
 
             // Parse escape sequences in keycode string
             const parseEscapes = (s) => s
@@ -8046,10 +8063,11 @@
             const storageKey = `custom-btns-${activeProject}`;
             const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
             
+            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg };
             if (customBtnEditIndex !== null) {
-                existing[customBtnEditIndex] = { label, data, raw_data: keycode };
+                existing[customBtnEditIndex] = btnConfig;
             } else {
-                existing.push({ label, data, raw_data: keycode });
+                existing.push(btnConfig);
             }
             
             localStorage.setItem(storageKey, JSON.stringify(existing));
@@ -8058,7 +8076,7 @@
             refreshAllPaneCustomButtons();
         }
 
-        function addCustomButtonToPane(paneId, label, data, index) {
+        function addCustomButtonToPane(paneId, btnConfig, index) {
             const paneDiv = document.querySelector(`.terminal-pane[data-pane-id="${paneId}"]`);
             if (!paneDiv) return;
 
@@ -8066,16 +8084,25 @@
             const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
             const top = 246 + existingCustom * 30;
 
+            const bgStr = btnConfig.bg ? `background:${btnConfig.bg}; border:1px solid ${btnConfig.bg};` : 'background:rgba(15,23,42,0.9); border:1px solid rgba(255,255,255,0.12);';
+            const fgStr = btnConfig.fg ? `color:${btnConfig.fg} !important;` : 'color:var(--text-secondary);';
+
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'terminal-pane-custom-btn';
-            btn.title = label + ' (Right-click to Edit/Delete)';
-            btn.innerText = label;
-            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.12); border-radius:6px; background:rgba(15,23,42,0.9); color:var(--text-secondary); cursor:pointer; z-index:5; font-size:0.6rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
-            btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
-            btn.onmouseleave = () => { btn.style.borderColor = 'rgba(255,255,255,0.12)'; btn.style.color = 'var(--text-secondary)'; };
+            btn.title = btnConfig.label + ' (Right-click to Edit/Delete)';
+            btn.innerText = btnConfig.label;
+            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:6px; ${bgStr} ${fgStr} cursor:pointer; z-index:5; font-size:0.6rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
+            
+            if (!btnConfig.bg) {
+                btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
+                btn.onmouseleave = () => { btn.style.borderColor = 'rgba(255,255,255,0.12)'; btn.style.color = 'var(--text-secondary)'; };
+            } else {
+                btn.onmouseenter = () => { btn.style.filter = 'brightness(1.2)'; };
+                btn.onmouseleave = () => { btn.style.filter = 'none'; };
+            }
 
-            const send = () => { if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data }); };
+            const send = () => { if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: btnConfig.data }); };
             btn.addEventListener('click', (e) => { e.stopPropagation(); send(); });
             btn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); send(); });
             
@@ -8097,7 +8124,12 @@
             if (!activeProject) return;
             const storageKey = `custom-btns-${activeProject}`;
             const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            saved.forEach((item, i) => addCustomButtonToPane(paneId, item.label, item.data, i));
+            
+            // Backwards compatibility for older saved buttons
+            saved.forEach((item, i) => {
+                const btnConfig = item.label !== undefined ? item : { label: item.label, data: item.data };
+                addCustomButtonToPane(paneId, btnConfig, i);
+            });
         }
 
         async function runGitCommit() {
