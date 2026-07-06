@@ -1048,8 +1048,10 @@ class TimerCard(QFrame):
         now = time.time()
         if self.fires_at <= now:
             self._prog_fill.setFixedWidth(0)
+            self._prog_bg.setVisible(False)
             return
         
+        self._prog_bg.setVisible(True)
         duration = self.fires_at - self.created_at
         if duration <= 0:
             duration = 1.0
@@ -1071,6 +1073,7 @@ class TimerCard(QFrame):
             )
             self._set_border(CP_RED)
             self._prog_fill.setFixedWidth(0)
+            self._prog_bg.setVisible(False)
             
             if not self.fired:
                 self.fired = True
