@@ -335,45 +335,124 @@ class AlarmPopup(QDialog):
         super().closeEvent(e)
 
 
-# ── Add Timer Dialog ───────────────────────────────────────
+# ── Extensible Timer Dialog (Add / Edit) ───────────────────
 
-class AddTimerDialog(QDialog):
-    def __init__(self, parent=None):
+class TimerDialog(QDialog):
+    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("ADD TIMER")
+        self.setWindowTitle(title)
         self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
-        self.setMinimumWidth(420)
+        self.setMinimumWidth(450)
         self.setModal(True)
-
+        
+        self._result_label = label_val
+        self._result_fires_at = fires_at_val
+        
         lay = QVBoxLayout(self)
         lay.setSpacing(12)
         lay.setContentsMargins(18, 18, 18, 18)
-
-        # label
-        lbl_grp  = QGroupBox("TIMER LABEL")
+        
+        # 1. Label Section
+        lbl_grp = QGroupBox("TIMER LABEL")
         lbl_form = QFormLayout(lbl_grp)
-        self.label_edit = QLineEdit()
+        self.label_edit = QLineEdit(label_val)
         self.label_edit.setPlaceholderText("e.g. Sprint deadline, Study session…")
         lbl_form.addRow("Label:", self.label_edit)
-
-        # mode
+        lay.addWidget(lbl_grp)
+        
+        # 2. Input Mode Selection
         mode_grp = QGroupBox("INPUT MODE")
-        mode_h   = QHBoxLayout(mode_grp)
-        self.rb_text = QRadioButton("Text  (e.g. 1h30m)")
-        self.rb_paste = QRadioButton("Paste datetime")
-        self.rb_date = QRadioButton("Pick datetime")
-        self.rb_text.setChecked(True)
-        bg = QButtonGroup(self)
-        bg.addButton(self.rb_text)
-        bg.addButton(self.rb_paste)
-        bg.addButton(self.rb_date)
-        mode_h.addWidget(self.rb_text)
-        mode_h.addWidget(self.rb_paste)
-        mode_h.addWidget(self.rb_date)
+        mode_layout = QVBoxLayout(mode_grp)
+        
+        radio_row = QHBoxLayout()
+        self.bg = QButtonGroup(self)
+        
+        self.modes_config = [
+            ("text", "Relative text", self._create_text_panel),
+            ("paste", "Paste datetime", self._create_paste_panel),
+            ("picker", "Pick datetime", self._create_picker_panel)
+        ]
+        
+        self.radio_buttons = {}
+        for mode_id, mode_label, _ in self.modes_config:
+            rb = QRadioButton(mode_label)
+            self.bg.addButton(rb)
+            radio_row.addWidget(rb)
+            self.radio_buttons[mode_id] = rb
+            
+        # Pattern help UI info icon
+        self.help_btn = QPushButton("ⓘ")
+        self.help_btn.setFixedSize(24, 24)
+        self.help_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.help_btn.setToolTip("Click for format guide")
+        self.help_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: 1px solid {CP_CYAN}; "
+            f"color: {CP_CYAN}; border-radius: 12px; font-weight: bold; font-size: 10pt; }}"
+            f"QPushButton:hover {{ background: {CP_CYAN}; color: black; }}"
+        )
+        self.help_btn.clicked.connect(self._show_help)
+        radio_row.addWidget(self.help_btn)
+        
+        mode_layout.addLayout(radio_row)
+        lay.addWidget(mode_grp)
+        
+        # Panels container
+        self.panels = {}
+        for mode_id, _, builder_func in self.modes_config:
+            panel = builder_func()
+            lay.addWidget(panel)
+            self.panels[mode_id] = panel
+            panel.setVisible(False)
+            
+        # Select default mode based on fires_at_val
+        if fires_at_val is not None:
+            self.radio_buttons["picker"].setChecked(True)
+            self._switch_mode("picker")
+        else:
+            self.radio_buttons["text"].setChecked(True)
+            self._switch_mode("text")
+            
+        # Connect toggles
+        for mode_id, rb in self.radio_buttons.items():
+            rb.toggled.connect(self._make_toggle_callback(mode_id))
+            
+        # Error Label
+        self.err_lbl = QLabel("")
+        self.err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
+        lay.addWidget(self.err_lbl)
+        
+        # Bottom Buttons
+        btn_row = QHBoxLayout()
+        ok_btn = QPushButton(ok_text)
+        ok_btn.setFixedHeight(36)
+        ok_btn.setStyleSheet(
+            f"QPushButton {{ background: {CP_GREEN}; color: #000;"
+            f" font-weight: bold; border: none; }}"
+            f"QPushButton:hover {{ background: #00cc1a; }}"
+        )
+        cancel_btn = QPushButton("✖ CANCEL")
+        cancel_btn.setFixedHeight(36)
+        
+        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_row.addWidget(ok_btn)
+        btn_row.addWidget(cancel_btn)
+        lay.addLayout(btn_row)
+        
+        ok_btn.clicked.connect(self._on_ok)
+        cancel_btn.clicked.connect(self.reject)
 
-        # text panel
-        self.text_panel = QWidget()
-        tp = QVBoxLayout(self.text_panel)
+    def _make_toggle_callback(self, mode_id):
+        return lambda checked: self._switch_mode(mode_id) if checked else None
+
+    def _switch_mode(self, active_mode_id):
+        for mode_id, panel in self.panels.items():
+            panel.setVisible(mode_id == active_mode_id)
+        self.adjustSize()
+
+    def _create_text_panel(self) -> QWidget:
+        widget = QWidget()
+        tp = QVBoxLayout(widget)
         tp.setContentsMargins(0, 0, 0, 0)
         hint = QLabel(
             "Formats: <span style='color:#00F0FF'>25d35h66m9s</span> &nbsp;│&nbsp; "
@@ -386,109 +465,115 @@ class AddTimerDialog(QDialog):
         hint.setTextFormat(Qt.TextFormat.RichText)
         hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
         self.time_edit = QLineEdit()
-        self.time_edit.setPlaceholderText("e.g.  25d12h  or  1h30m  or  45m  or  90s")
+        self.time_edit.setPlaceholderText("e.g. 25d12h or 1h30m or 45m or 90s")
         self.time_edit.setMinimumHeight(34)
         tp.addWidget(hint)
         tp.addWidget(self.time_edit)
+        return widget
 
-        self.paste_panel = QWidget()
-        pp = QVBoxLayout(self.paste_panel)
+    def _create_paste_panel(self) -> QWidget:
+        widget = QWidget()
+        pp = QVBoxLayout(widget)
         pp.setContentsMargins(0, 0, 0, 0)
         pp.addWidget(QLabel("Paste a date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
         self.paste_edit = QLineEdit()
         self.paste_edit.setPlaceholderText("e.g. 17:42 on 22 Jul")
         self.paste_edit.setMinimumHeight(34)
         pp.addWidget(self.paste_edit)
-        self.paste_panel.setVisible(False)
+        return widget
 
-        # date panel
-        self.date_panel = QWidget()
-        dp = QVBoxLayout(self.date_panel)
+    def _create_picker_panel(self) -> QWidget:
+        widget = QWidget()
+        dp = QVBoxLayout(widget)
         dp.setContentsMargins(0, 0, 0, 0)
         dp.addWidget(QLabel("Select the future date & time when alarm fires:"))
         self.dt_picker = QDateTimeEdit()
         self.dt_picker.setCalendarPopup(True)
-        self.dt_picker.setDateTime(QDateTime.currentDateTime().addSecs(3600))
+        
+        if self._result_fires_at is not None:
+            self.dt_picker.setDateTime(QDateTime.fromSecsSinceEpoch(int(self._result_fires_at)))
+        else:
+            self.dt_picker.setDateTime(QDateTime.currentDateTime().addSecs(3600))
+            
         self.dt_picker.setDisplayFormat("yyyy-MM-dd  HH:mm:ss")
         self.dt_picker.setMinimumHeight(34)
         dp.addWidget(self.dt_picker)
-        self.date_panel.setVisible(False)
+        return widget
 
-        self.err_lbl = QLabel("")
-        self.err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
-
-        btn_row   = QHBoxLayout()
-        ok_btn    = QPushButton("✔  ADD TIMER")
-        ok_btn.setFixedHeight(36)
-        ok_btn.setStyleSheet(
-            f"QPushButton {{ background: {CP_GREEN}; color: #000;"
-            f" font-weight: bold; border: none; }}"
-            f"QPushButton:hover {{ background: #00cc1a; }}"
+    def _show_help(self):
+        help_text = (
+            "<h3>⏰ FORMAT & PLACEHOLDER GUIDE</h3>"
+            "<p>When pasting or picking date/times, the following placeholders/rules apply:</p>"
+            "<ul>"
+            "<li><b>HH</b> : 24-hour hour with leading zero (00-23)</li>"
+            "<li><b>hh</b> : 12-hour hour with leading zero (01-12)</li>"
+            "<li><b>mm</b> : minute with leading zero (00-59)</li>"
+            "<li><b>dd</b> : day of month with leading zero (01-31)</li>"
+            "<li><b>MMM</b> : short month name (e.g. Jan, Feb, Jul)</li>"
+            "<li><b>MMMM</b> : full month name (e.g. July, December)</li>"
+            "<li><b>yy</b> : two-digit year (e.g. 26)</li>"
+            "<li><b>yyyy</b> : four-digit year (e.g. 2026)</li>"
+            "</ul>"
+            "<p><b>Relative Input Examples:</b><br>"
+            "• <code>1h30m</code> (1 hour, 30 minutes)<br>"
+            "• <code>45m</code> (45 minutes)<br>"
+            "• <code>2d</code> (2 days)<br>"
+            "• <code>30</code> (default is minutes)</p>"
+            "<p><b>Paste Examples:</b><br>"
+            "• <code>17:42 on 22 Jul</code><br>"
+            "• <code>12:00 25 Dec 2026</code></p>"
         )
-        cancel_btn = QPushButton("✖  CANCEL")
-        cancel_btn.setFixedHeight(36)
-        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_row.addWidget(ok_btn)
-        btn_row.addWidget(cancel_btn)
-
-        lay.addWidget(lbl_grp)
-        lay.addWidget(mode_grp)
-        lay.addWidget(self.text_panel)
-        lay.addWidget(self.paste_panel)
-        lay.addWidget(self.date_panel)
-        lay.addWidget(self.err_lbl)
-        lay.addLayout(btn_row)
-
-        self.rb_text.toggled.connect(self._switch_mode)
-        ok_btn.clicked.connect(self._on_ok)
-        cancel_btn.clicked.connect(self.reject)
-        self._result_seconds  = 0
-        self._result_label    = ""
-        self._result_fires_at: float | None = None
-
-    def _switch_mode(self, text_active: bool):
-        self.text_panel.setVisible(text_active)
-        self.paste_panel.setVisible(self.rb_paste.isChecked())
-        self.date_panel.setVisible(not text_active)
-        self.adjustSize()
+        msg = QMessageBox(self)
+        msg.setWindowTitle("FORMAT REFERENCE")
+        msg.setTextFormat(Qt.TextFormat.RichText)
+        msg.setText(help_text)
+        msg.setStyleSheet(GLOBAL_QSS + f"QMessageBox {{ background: {CP_BG}; }}")
+        msg.exec()
 
     def _on_ok(self):
         label = self.label_edit.text().strip() or "Timer"
-        if self.rb_text.isChecked():
-            secs = parse_time_string(self.time_edit.text())
-            if secs < 0:
-                self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
-                return
-            self._result_fires_at = None          # fires_at set on first start
-        elif self.rb_paste.isChecked():
-            target = parse_datetime_string(self.paste_edit.text())
-            if target is None:
-                self.err_lbl.setText("⚠  Invalid datetime. Try: 17:42 on 22 Jul")
-                return
-            delta = (target - datetime.now()).total_seconds()
-            if delta <= 0:
-                self.err_lbl.setText("⚠  Parsed datetime is in the past.")
-                return
-            secs = int(delta)
-            self._result_fires_at = target.timestamp()
+        
+        if self.radio_buttons["text"].isChecked():
+            raw = self.time_edit.text().strip()
+            if not raw and self._result_fires_at is not None:
+                fires_at = self._result_fires_at
+            else:
+                secs = parse_time_string(raw)
+                if secs < 0:
+                    self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
+                    return
+                fires_at = time.time() + secs
+        elif self.radio_buttons["paste"].isChecked():
+            raw_paste = self.paste_edit.text().strip()
+            if not raw_paste and self._result_fires_at is not None:
+                fires_at = self._result_fires_at
+            else:
+                target = parse_datetime_string(raw_paste)
+                if target is None:
+                    self.err_lbl.setText("⚠  Invalid datetime. Try: 17:42 on 22 Jul")
+                    return
+                delta = (target - datetime.now()).total_seconds()
+                if delta <= 0:
+                    self.err_lbl.setText("⚠  Parsed datetime is in the past.")
+                    return
+                fires_at = target.timestamp()
         else:
             target = self.dt_picker.dateTime().toPyDateTime()
-            delta  = (target - datetime.now()).total_seconds()
+            delta = (target - datetime.now()).total_seconds()
             if delta <= 0:
                 self.err_lbl.setText("⚠  Selected datetime is in the past.")
                 return
-            secs = int(delta)
-            self._result_fires_at = target.timestamp()   # exact epoch
-        self._result_seconds = secs
-        self._result_label   = label
+            fires_at = target.timestamp()
+            
+        self._result_fires_at = fires_at
+        self._result_label = label
         self.accept()
 
     @staticmethod
-    def get_timer(parent=None):
-        dlg = AddTimerDialog(parent)
+    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, parent=None):
+        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, parent)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            return dlg._result_label, dlg._result_seconds, dlg._result_fires_at
+            return dlg._result_label, dlg._result_fires_at
         return None
 
 
@@ -543,7 +628,6 @@ class SettingsDialog(QDialog):
         return self._s
 
 
-
 # ── TimerCard ──────────────────────────────────────────────
 
 class TimerCard(QFrame):
@@ -551,19 +635,12 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    STATE_IDLE    = "idle"
-    STATE_RUNNING = "running"
-    STATE_PAUSED  = "paused"
-    STATE_DONE    = "done"
-
-    def __init__(self, card_id: str, label: str, total_seconds: int, parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, parent=None):
         super().__init__(parent)
-        self.card_id       = card_id
-        self.label         = label
-        self.total_seconds = total_seconds
-        self.remaining     = total_seconds
-        self.state         = self.STATE_IDLE
-        self.fires_at: float | None = None   # absolute Unix timestamp when alarm fires
+        self.card_id  = card_id
+        self.label    = label
+        self.fires_at = fires_at
+        self.fired    = False
 
         self.setFrameShape(QFrame.Shape.Box)
         self.setMinimumWidth(220)
@@ -573,13 +650,16 @@ class TimerCard(QFrame):
         self._ticker = QTimer(self)
         self._ticker.setInterval(1000)
         self._ticker.timeout.connect(self._tick)
+        self._ticker.start()
+
+        QTimer.singleShot(100, self._tick)
 
     def _build_ui(self):
         root = QVBoxLayout(self)
         root.setContentsMargins(10, 10, 10, 10)
         root.setSpacing(6)
 
-        # top row: label + delete
+        # top row: label + edit + duplicate + delete
         top = QHBoxLayout()
         self._lbl = QLabel(self.label)
         self._lbl.setStyleSheet(
@@ -622,27 +702,19 @@ class TimerCard(QFrame):
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.setToolTip("Delete timer")
         del_btn.clicked.connect(self._on_delete)
+        
         top.addWidget(self._lbl, 1)
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
 
         # countdown display
-        self._display = QLabel(fmt_secs(self.remaining))
+        self._display = QLabel("00:00")
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._display.setToolTip("Click to show/hide controls")
         self._display.setStyleSheet(
             f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px;"
         )
-
-        # thin progress bar
-        self._prog_bg = QWidget()
-        self._prog_bg.setFixedHeight(4)
-        self._prog_bg.setStyleSheet(f"background: {CP_DIM};")
-        self._prog_fill = QWidget(self._prog_bg)
-        self._prog_fill.setFixedHeight(4)
-        self._prog_fill.setStyleSheet(f"background: {CP_CYAN};")
 
         # status
         self._status = QLabel("● STOPPED")
@@ -651,172 +723,43 @@ class TimerCard(QFrame):
             f"color: {CP_DIM}; font-size: 8pt; letter-spacing: 1px;"
         )
 
-        # buttons row — hidden until user clicks the card
-        self._btn_widget = QWidget()
-        btn_row = QHBoxLayout(self._btn_widget)
-        btn_row.setContentsMargins(0, 0, 0, 0)
-        btn_row.setSpacing(4)
-        self._btn_start = self._mkbtn("", CP_GREEN,  "#000")
-        self._btn_pause = self._mkbtn("", CP_ORANGE, "#000")
-        self._btn_reset = self._mkbtn("", CP_DIM,    CP_TEXT)
-        self._btn_start.setIcon(icon_play(color="#000"))
-        self._btn_pause.setIcon(icon_pause(color="#000"))
-        self._btn_reset.setIcon(icon_reset(color=CP_TEXT))
-        for b in (self._btn_start, self._btn_pause, self._btn_reset):
-            b.setIconSize(QSize(18, 18))
-            b.setFixedSize(36, 32)
-        self._btn_pause.setEnabled(False)
-        btn_row.addWidget(self._btn_start)
-        btn_row.addWidget(self._btn_pause)
-        btn_row.addWidget(self._btn_reset)
-        self._btn_widget.setVisible(False)   # hidden by default
-
-        sep = QFrame()
-        sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet(f"color: {CP_DIM};")
-
         root.addLayout(top)
         root.addWidget(self._display)
-        root.addWidget(self._prog_bg)
         root.addWidget(self._status)
-        root.addWidget(sep)
-        root.addWidget(self._btn_widget)
-
-        self._btn_start.clicked.connect(self._on_start)
-        self._btn_pause.clicked.connect(self._on_pause)
-        self._btn_reset.clicked.connect(self._on_reset)
-
-        # click on display or status toggles the button row
-        self._display.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._display.mousePressEvent = lambda e: self._toggle_controls()
-        self._status.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._status.mousePressEvent  = lambda e: self._toggle_controls()
-
-    def _toggle_controls(self):
-        visible = not self._btn_widget.isVisible()
-        self._btn_widget.setVisible(visible)
-
-    def _mkbtn(self, text, bg, fg):
-        b = QPushButton(text)
-        b.setFixedHeight(28)
-        b.setStyleSheet(
-            f"QPushButton {{ background: {bg}; color: {fg}; border: none;"
-            f" font-size: 8pt; font-weight: bold; font-family: Consolas; }}"
-            f"QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}"
-            f"QPushButton:disabled {{ background: #222; color: #444; border: none; }}"
-        )
-        b.setCursor(Qt.CursorShape.PointingHandCursor)
-        return b
 
     def _set_border(self, color: str):
         self.setStyleSheet(
             f"TimerCard {{ border: 1px solid {color}; background: {CP_PANEL}; }}"
         )
 
-    def resizeEvent(self, e):
-        super().resizeEvent(e)
-        self._update_bar()
-
-    def _update_bar(self):
-        if self.total_seconds <= 0:
-            return
-        ratio = max(0.0, self.remaining / self.total_seconds)
-        w = int(self._prog_bg.width() * ratio)
-        self._prog_fill.setFixedWidth(max(0, w))
-        if self.state == self.STATE_IDLE:
-            color = CP_DIM
-        else:
-            color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
-        self._prog_fill.setStyleSheet(f"background: {color};")
-
     def _tick(self):
-        if self.fires_at is not None:
-            self.remaining = max(0, int(self.fires_at - time.time()))
+        now = time.time()
+        if now >= self.fires_at:
+            self._display.setText("00:00")
+            self._display.setStyleSheet(
+                f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
+                " font-family: 'Consolas'; letter-spacing: 2px;"
+            )
+            self._status.setText("▐ ALARM!")
+            self._status.setStyleSheet(
+                f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
+            )
+            self._set_border(CP_RED)
+            
+            if not self.fired:
+                self.fired = True
+                AlarmPopup(self.label, self).exec()
         else:
-            self.remaining = max(0, self.remaining - 1)
-        if self.remaining <= 0:
-            self._ticker.stop()
-            self.remaining = 0
-            self._fire_alarm()
-            return
-        self._display.setText(fmt_secs(self.remaining))
-        self._update_bar()
-        self.state_changed.emit()
-
-    def _fire_alarm(self):
-        self.state = self.STATE_DONE
-        self._display.setText("00:00")
-        self._display.setStyleSheet(
-            f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
-            " font-family: 'Consolas'; letter-spacing: 2px;"
-        )
-        self._status.setText("▐ ALARM!")
-        self._status.setStyleSheet(
-            f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
-        )
-        self._set_border(CP_RED)
-        self._btn_start.setEnabled(False)
-        self._btn_pause.setEnabled(False)
-        self.state_changed.emit()
-        AlarmPopup(self.label, self).exec()
-
-    def _on_start(self):
-        if self.state in (self.STATE_IDLE, self.STATE_PAUSED):
-            if self.remaining <= 0:
-                self.remaining = self.total_seconds
-            self.state = self.STATE_RUNNING
-            # Preserve fires_at if already set (datetime mode); otherwise derive from remaining
-            if self.fires_at is None:
-                self.fires_at = time.time() + self.remaining
-            self._ticker.start()
-            self._btn_start.setEnabled(False)
-            self._btn_pause.setEnabled(True)
-            self._status.setText("▶ RUNNING")
-            self._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
-            self._set_border(CP_GREEN)
+            self.fired = False
+            rem = int(self.fires_at - now)
+            self._display.setText(fmt_secs(rem))
             self._display.setStyleSheet(
                 f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px;"
             )
-            self.state_changed.emit()
-
-    def _on_pause(self):
-        if self.state == self.STATE_RUNNING:
-            self._ticker.stop()
-            # Snapshot the true remaining before clearing fires_at
-            if self.fires_at is not None:
-                self.remaining = max(0, int(self.fires_at - time.time()))
-            self.fires_at   = None
-            self.state      = self.STATE_PAUSED
-            self._display.setText(fmt_secs(self.remaining))
-            self._btn_start.setText("")
-            self._btn_start.setIcon(icon_play(color="#000"))
-            self._btn_start.setEnabled(True)
-            self._btn_pause.setEnabled(False)
-            self._status.setText("⏸ PAUSED")
-            self._status.setStyleSheet(f"color: {CP_ORANGE}; font-size: 8pt;")
-            self._set_border(CP_ORANGE)
-            self.state_changed.emit()
-
-    def _on_reset(self):
-        self._ticker.stop()
-        self.remaining = self.total_seconds
-        self.state     = self.STATE_IDLE
-        self.fires_at  = None
-        self._display.setText(fmt_secs(self.remaining))
-        self._display.setStyleSheet(
-            f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
-            " font-family: 'Consolas'; letter-spacing: 2px;"
-        )
-        self._btn_start.setText("")
-        self._btn_start.setIcon(icon_play(color="#000"))
-        self._btn_start.setEnabled(True)
-        self._btn_pause.setEnabled(False)
-        self._status.setText("● STOPPED")
-        self._status.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
-        self._set_border(CP_DIM)
-        self._update_bar()
-        self.state_changed.emit()
+            self._status.setText("▶ RUNNING")
+            self._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
+            self._set_border(CP_GREEN)
 
     def _on_delete(self):
         self._ticker.stop()
@@ -826,286 +769,38 @@ class TimerCard(QFrame):
         self.duplicated.emit(self.card_id)
 
     def _on_edit(self):
-        """Edit this timer's label and/or time. Timer keeps running while dialog is open."""
-        dlg = QDialog(self)
-        dlg.setWindowTitle("EDIT TIMER")
-        dlg.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
-        dlg.setMinimumWidth(420)
-        dlg.setModal(True)
-
-        lay = QVBoxLayout(dlg)
-        lay.setContentsMargins(18, 18, 18, 18)
-        lay.setSpacing(12)
-
-        # ── label ──
-        lbl_grp  = QGroupBox("TIMER LABEL")
-        lbl_form = QFormLayout(lbl_grp)
-        lbl_edit = QLineEdit(self.label)
-        lbl_edit.setMinimumHeight(32)
-        lbl_form.addRow("Label:", lbl_edit)
-
-        # ── mode toggle ──
-        mode_grp = QGroupBox("TIME INPUT MODE")
-        mode_h   = QHBoxLayout(mode_grp)
-        rb_text  = QRadioButton("Text  (e.g. 1h30m)")
-        rb_paste = QRadioButton("Paste datetime")
-        rb_date  = QRadioButton("Pick datetime")
-        rb_text.setChecked(True)
-        bg = QButtonGroup(dlg)
-        bg.addButton(rb_text)
-        bg.addButton(rb_paste)
-        bg.addButton(rb_date)
-        mode_h.addWidget(rb_text)
-        mode_h.addWidget(rb_paste)
-        mode_h.addWidget(rb_date)
-
-        # ── text panel ──
-        text_panel = QWidget()
-        tp = QVBoxLayout(text_panel)
-        tp.setContentsMargins(0, 0, 0, 0)
-        hint = QLabel(
-            "Leave blank to keep current duration.  "
-            "Formats: <span style='color:#00F0FF'>1h30m</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>45m</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>90s</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>2.5h</span> &nbsp;│&nbsp; "
-            "<span style='color:#00F0FF'>30</span> (=min)"
+        """Edit this timer's label and/or time."""
+        result = TimerDialog.get_timer(
+            "EDIT TIMER",
+            "✔  APPLY",
+            self.label,
+            self.fires_at,
+            self
         )
-        hint.setTextFormat(Qt.TextFormat.RichText)
-        hint.setWordWrap(True)
-        hint.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
-        time_edit = QLineEdit()
-        time_edit.setMinimumHeight(34)
-        time_edit.setPlaceholderText(
-            f"current: {fmt_secs(self.total_seconds)}  —  leave blank to keep"
-        )
-        tp.addWidget(hint)
-        tp.addWidget(time_edit)
-
-        paste_panel = QWidget()
-        pp = QVBoxLayout(paste_panel)
-        pp.setContentsMargins(0, 0, 0, 0)
-        pp.addWidget(QLabel("Paste a date/time like: <span style='color:#00F0FF'>17:42 on 22 Jul</span>"))
-        paste_edit = QLineEdit()
-        paste_edit.setMinimumHeight(34)
-        paste_edit.setPlaceholderText("e.g. 17:42 on 22 Jul")
-        pp.addWidget(paste_edit)
-        paste_panel.setVisible(False)
-
-        # ── date panel ──
-        date_panel = QWidget()
-        dp = QVBoxLayout(date_panel)
-        dp.setContentsMargins(0, 0, 0, 0)
-        dp.addWidget(QLabel("Select the future date & time when alarm fires:"))
-        dt_picker = QDateTimeEdit()
-        dt_picker.setCalendarPopup(True)
-        dt_picker.setDateTime(QDateTime.currentDateTime().addSecs(3600))
-        dt_picker.setDisplayFormat("yyyy-MM-dd  HH:mm:ss")
-        dt_picker.setMinimumHeight(34)
-        dp.addWidget(dt_picker)
-        date_panel.setVisible(False)
-
-        def _switch_mode(text_active: bool):
-            text_panel.setVisible(text_active)
-            paste_panel.setVisible(rb_paste.isChecked())
-            date_panel.setVisible(not text_active)
-            dlg.adjustSize()
-
-        rb_text.toggled.connect(_switch_mode)
-
-        err_lbl = QLabel("")
-        err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
-
-        btn_row    = QHBoxLayout()
-        ok_btn     = QPushButton("✔  APPLY")
-        ok_btn.setFixedHeight(34)
-        ok_btn.setStyleSheet(
-            f"QPushButton {{ background: {CP_GREEN}; color: #000;"
-            f" font-weight: bold; border: none; }}"
-            f"QPushButton:hover {{ background: #00cc1a; }}"
-        )
-        cancel_btn = QPushButton("✖  CANCEL")
-        cancel_btn.setFixedHeight(34)
-        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_row.addWidget(ok_btn)
-        btn_row.addWidget(cancel_btn)
-
-        lay.addWidget(lbl_grp)
-        lay.addWidget(mode_grp)
-        lay.addWidget(text_panel)
-        lay.addWidget(paste_panel)
-        lay.addWidget(date_panel)
-        lay.addWidget(err_lbl)
-        lay.addLayout(btn_row)
-
-        def _apply():
-            new_label = lbl_edit.text().strip() or self.label
-            self.label = new_label
-            self._lbl.setText(self.label)
-
-            if rb_text.isChecked():
-                raw_time = time_edit.text().strip()
-                if raw_time:
-                    new_secs = parse_time_string(raw_time)
-                    if new_secs < 0:
-                        err_lbl.setText("⚠  Invalid time format.")
-                        return
-                    self.total_seconds = new_secs
-                    self.remaining     = new_secs
-                    # Update fires_at so running timer uses the new duration
-                    if self.state == self.STATE_RUNNING:
-                        self.fires_at = time.time() + new_secs
-                    else:
-                        self.fires_at = None
-                    self._display.setText(fmt_secs(self.remaining))
-                # else blank — keep everything unchanged, label already updated above
-            elif rb_paste.isChecked():
-                raw_dt = paste_edit.text().strip()
-                if not raw_dt:
-                    err_lbl.setText("⚠  Paste a datetime like: 17:42 on 22 Jul")
-                    return
-                target = parse_datetime_string(raw_dt)
-                if target is None:
-                    err_lbl.setText("⚠  Invalid datetime format.")
-                    return
-                delta = (target - datetime.now()).total_seconds()
-                if delta <= 0:
-                    err_lbl.setText("⚠  Parsed datetime is in the past.")
-                    return
-                self.total_seconds = int(delta)
-                self.remaining     = int(delta)
-                self.fires_at      = target.timestamp()
-                self._display.setText(fmt_secs(self.remaining))
-                if self.state not in (self.STATE_RUNNING, self.STATE_DONE):
-                    self._update_bar()
-                    self.state_changed.emit()
-                    dlg.accept()
-                    self._on_start()
-                    return
-            else:
-                target = dt_picker.dateTime().toPyDateTime()
-                delta  = (target - datetime.now()).total_seconds()
-                if delta <= 0:
-                    err_lbl.setText("⚠  Selected datetime is in the past.")
-                    return
-                self.total_seconds = int(delta)
-                self.remaining     = int(delta)
-                self.fires_at      = target.timestamp()
-                self._display.setText(fmt_secs(self.remaining))
-                # Auto-start if not already running or done
-                if self.state not in (self.STATE_RUNNING, self.STATE_DONE):
-                    self._update_bar()
-                    self.state_changed.emit()
-                    dlg.accept()
-                    self._on_start()
-                    return
-
-            self._update_bar()
-            self.state_changed.emit()
-            dlg.accept()
-
-        ok_btn.clicked.connect(_apply)
-        cancel_btn.clicked.connect(dlg.reject)
-        dlg.exec()
+        if result is None:
+            return
+        new_label, new_fires_at = result
+        self.label = new_label
+        self._lbl.setText(self.label)
+        self.fires_at = new_fires_at
+        self.fired = False
+        self._tick()
+        self.state_changed.emit()
 
     # serialization
     def to_dict(self) -> dict:
         return {
-            "id": self.card_id, "label": self.label,
-            "total_seconds": self.total_seconds,
-            "remaining": self.remaining, "state": self.state,
+            "id": self.card_id,
+            "label": self.label,
             "fires_at": self.fires_at,
         }
 
     @classmethod
     def from_dict(cls, d: dict, parent=None) -> "TimerCard":
-        card = cls(d["id"], d.get("label", "Timer"), d.get("total_seconds", 0), parent)
-        card.remaining = d.get("remaining", card.total_seconds)
-        st = d.get("state")
-
-        if st == cls.STATE_RUNNING:
-            fires_at = d.get("fires_at")
-            if fires_at is not None:
-                card.fires_at  = fires_at
-                card.remaining = max(0, int(fires_at - time.time()))
-            # If the alarm fired while the app was closed
-            if card.remaining <= 0:
-                card.fires_at  = None
-                card.remaining = 0
-                card.state     = cls.STATE_DONE
-                card._display.setText("00:00")
-                card._display.setStyleSheet(
-                    f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
-                    " font-family: 'Consolas'; letter-spacing: 2px;"
-                )
-                card._status.setText("▐ ALARM! (fired while closed)")
-                card._status.setStyleSheet(
-                    f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
-                )
-                card._set_border(CP_RED)
-                card._btn_start.setEnabled(False)
-                card._btn_pause.setEnabled(False)
-                card._update_bar()
-                QTimer.singleShot(300, lambda: AlarmPopup(card.label, card).exec())
-            else:
-                # Resume — fires_at is already set, ticker will use it
-                card._display.setText(fmt_secs(card.remaining))
-                card._update_bar()
-                card.state = cls.STATE_RUNNING
-                card._ticker.start()
-                card._btn_start.setEnabled(False)
-                card._btn_pause.setEnabled(True)
-                card._status.setText("▶ RUNNING")
-                card._status.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
-                card._set_border(CP_GREEN)
-                card._display.setStyleSheet(
-                    f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
-                    " font-family: 'Consolas'; letter-spacing: 2px;"
-                )
-
-        elif st == cls.STATE_PAUSED:
-            # Paused — remaining was snapshotted at pause time, fires_at is None
-            card.fires_at = None
-            card._display.setText(fmt_secs(card.remaining))
-            card._update_bar()
-            card.state = cls.STATE_PAUSED
-            card._btn_start.setEnabled(True)
-            card._btn_pause.setEnabled(False)
-            card._status.setText("⏸ PAUSED")
-            card._status.setStyleSheet(f"color: {CP_ORANGE}; font-size: 8pt;")
-            card._set_border(CP_ORANGE)
-            card._display.setStyleSheet(
-                f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
-                " font-family: 'Consolas'; letter-spacing: 2px;"
-            )
-
-        elif st == cls.STATE_DONE:
-            card.fires_at  = None
-            card.remaining = 0
-            card._display.setText("00:00")
-            card._display.setStyleSheet(
-                f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
-                " font-family: 'Consolas'; letter-spacing: 2px;"
-            )
-            card.state = cls.STATE_DONE
-            card._status.setText("▐ ALARM!")
-            card._status.setStyleSheet(
-                f"color: {CP_RED}; font-size: 8pt; font-weight: bold;"
-            )
-            card._set_border(CP_RED)
-            card._btn_start.setEnabled(False)
-            card._btn_pause.setEnabled(False)
-            card._update_bar()
-
-        else:
-            # STATE_IDLE — grayed out, ready to start
-            card.fires_at = None
-            card._display.setText(fmt_secs(card.remaining))
-            card._update_bar()
-
-        return card
-
+        card_id = d["id"]
+        label = d.get("label", "Timer")
+        fires_at = d.get("fires_at", 0.0)
+        return cls(card_id, label, fires_at, parent)
 
 
 # ── ColumnWidget ───────────────────────────────────────────
@@ -1232,7 +927,7 @@ class ColumnWidget(QFrame):
         new_card = TimerCard(
             str(uuid.uuid4())[:8],
             src.label + " (copy)",
-            src.total_seconds,
+            src.fires_at,
             self,
         )
         self.add_card(new_card)
@@ -1244,18 +939,12 @@ class ColumnWidget(QFrame):
         self.state_changed.emit()
 
     def _on_add_timer(self):
-        result = AddTimerDialog.get_timer(self)
+        result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", parent=self)
         if result is None:
             return
-        label, secs, fires_at = result
-        card = TimerCard(str(uuid.uuid4())[:8], label, secs, self)
-        if fires_at is not None:
-            # Datetime mode — set fires_at directly and auto-start
-            card.fires_at = fires_at
-            card.remaining = max(0, int(fires_at - time.time()))
+        label, fires_at = result
+        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, self)
         self.add_card(card)
-        if fires_at is not None:
-            card._on_start()   # auto-start for datetime-picked timers
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
                 self._scroll.verticalScrollBar().maximum()
@@ -1301,7 +990,6 @@ class ColumnWidget(QFrame):
         for cd in d.get("cards", []):
             col.add_card(TimerCard.from_dict(cd, col))
         return col
-
 
 
 # ── MainWindow ─────────────────────────────────────────────
