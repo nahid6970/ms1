@@ -8578,8 +8578,7 @@
             // Check if response looks like code/script and is not wrapped in backticks
             let formattedText = text;
             const hasBackticks = text.includes('```');
-            const looksLikeCode = /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker )/m.test(text) || 
-                                 (text.split('\n').length > 2 && text.includes('    ')); // has indentation and multiple lines
+            const looksLikeCode = /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker |function |const |let |var )/m.test(text);
             
             if (looksLikeCode && !hasBackticks) {
                 formattedText = '```\n' + text + '\n```';
