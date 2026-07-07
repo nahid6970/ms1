@@ -3471,6 +3471,7 @@ def api_ai_command():
     )
     
     import requests
+    rate_limits = None
     
     if provider == 'groq':
         if not model:
@@ -3502,6 +3503,14 @@ def api_ai_command():
                 return jsonify({"error": error_msg}), res.status_code
             
             cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            rate_limits = {
+                "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
+                "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
+                "limit_requests": res.headers.get("x-ratelimit-limit-requests", ""),
+                "limit_tokens": res.headers.get("x-ratelimit-limit-tokens", ""),
+                "reset_requests": res.headers.get("x-ratelimit-reset-requests", ""),
+                "reset_tokens": res.headers.get("x-ratelimit-reset-tokens", "")
+            }
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     else:
@@ -3542,7 +3551,6 @@ def api_ai_command():
     import re
     cmd = re.sub(r'<think>.*?</think>', '', cmd, flags=re.DOTALL).strip()
     cmd = re.sub(r'<think>.*', '', cmd, flags=re.DOTALL).strip() # Open think tag fallback
-
         
     # Clean markdown wrappers (shared logic for both)
     if cmd.startswith('```'):
@@ -3558,7 +3566,7 @@ def api_ai_command():
     elif cmd.startswith('`') and cmd.endswith('`'):
         cmd = cmd.strip('`')
         
-    return jsonify({"command": cmd})
+    return jsonify({"command": cmd, "rate_limits": rate_limits})
 
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():

@@ -1772,6 +1772,19 @@
                 </details>
             </div>
 
+            <!-- Usage / Rate Limit Stats -->
+            <div id="ai-usage-container" style="display:none; margin-bottom:10px; padding:8px; background:var(--bg-sidebar); border:1px dashed var(--border-color); border-radius:6px; font-size:0.7rem; color:var(--text-muted); flex-direction:column; gap:4px;">
+                <div style="font-weight:600; color:var(--text-secondary); text-transform:uppercase; font-size:0.62rem; letter-spacing:0.5px; margin-bottom:2px;">Rate Limit Status</div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Requests Left:</span>
+                    <span id="ai-usage-requests" style="font-weight:600; color:var(--text-primary);">-</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Tokens Left:</span>
+                    <span id="ai-usage-tokens" style="font-weight:600; color:var(--text-primary);">-</span>
+                </div>
+            </div>
+
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <textarea id="ai-prompt-input" placeholder="e.g. Find all .log files and delete them..." style="height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.8rem; outline:none; resize:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'" onkeydown="handleAIPromptKeydown(event)"></textarea>
                 <div style="display:flex; justify-content:flex-end; align-items:center;">
@@ -8410,6 +8423,7 @@
                 if (providerSelect) providerSelect.value = savedProvider;
                 
                 handleAIProviderChange();
+                updateRateLimitsUI();
 
                 const savedSystem = localStorage.getItem('ai-system-prompt') || '';
                 const systemInput = document.getElementById('ai-system-input');
@@ -8422,6 +8436,39 @@
                 }
                 
                 _popoverOutside('ai-copilot-popover', 'ai-copilot-btn', closeAICopilotPopover);
+            }
+        }
+
+        function updateRateLimitsUI() {
+            const provider = document.getElementById('ai-provider-select').value;
+            const container = document.getElementById('ai-usage-container');
+            if (!container) return;
+
+            if (provider !== 'groq') {
+                container.style.display = 'none';
+                return;
+            }
+
+            const cached = localStorage.getItem('ai-rate-limits-groq');
+            if (cached) {
+                const data = JSON.parse(cached);
+                const reqEl = document.getElementById('ai-usage-requests');
+                const tokEl = document.getElementById('ai-usage-tokens');
+                
+                if (reqEl && data.remaining_requests && data.limit_requests) {
+                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
+                } else if (reqEl) {
+                    reqEl.innerText = '-';
+                }
+                
+                if (tokEl && data.remaining_tokens && data.limit_tokens) {
+                    tokEl.innerText = `${data.remaining_tokens} / ${data.limit_tokens} (reset: ${data.reset_tokens})`;
+                } else if (tokEl) {
+                    tokEl.innerText = '-';
+                }
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
             }
         }
 
@@ -8453,6 +8500,8 @@
                     document.getElementById('groq-api-key-saved-msg').style.display = 'none';
                 }
             }
+
+            updateRateLimitsUI();
 
             const modelSelect = document.getElementById('ai-model-select');
             modelSelect.innerHTML = '';
@@ -8590,6 +8639,14 @@
                 const data = await res.json();
                 if (!res.ok) {
                     throw new Error(data.error || 'Failed to generate command');
+                }
+                
+                if (data.rate_limits) {
+                    localStorage.setItem('ai-rate-limits-groq', JSON.stringify(data.rate_limits));
+                    updateRateLimitsUI();
+                } else {
+                    localStorage.removeItem('ai-rate-limits-groq');
+                    updateRateLimitsUI();
                 }
                 
                 closeAICopilotPopover();
