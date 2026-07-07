@@ -3291,6 +3291,30 @@ def api_get_system_ports():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/ai_personas', methods=['GET', 'POST'])
+def api_ai_personas():
+    if request.method == 'GET':
+        return jsonify(load_ai_personas())
+    else:
+        data = request.json or []
+        save_ai_personas(data)
+        return jsonify({"success": True})
+
+@app.route('/api/voice-record', methods=['POST'])
+def api_voice_record():
+    try:
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        with sr.Microphone() as source:
+            # Quick ambient adjustment
+            recognizer.adjust_for_ambient_noise(source, duration=0.2)
+            # Listen to mic (one phrase mode, max 20 seconds phrase limit, 10s wait timeout)
+            audio = recognizer.listen(source, timeout=10, phrase_time_limit=20)
+            text = recognizer.recognize_google(audio, language="en-US")
+            return jsonify({"text": text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/system/ports/starred', methods=['POST'])
 def api_save_starred_port():
     data = request.json or {}
