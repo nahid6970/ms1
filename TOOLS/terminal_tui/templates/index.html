@@ -1787,6 +1787,10 @@
                     <span>Tokens Left:</span>
                     <span id="ai-usage-tokens" style="font-weight:600; color:var(--text-primary);">-</span>
                 </div>
+                <div id="ai-usage-time-container" style="display:none; justify-content:space-between; margin-top:2px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">
+                    <span>Last Checked:</span>
+                    <span id="ai-usage-time" style="font-weight:500; color:var(--text-primary);">-</span>
+                </div>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -8487,11 +8491,13 @@
             const cached = localStorage.getItem(`ai-rate-limits-groq-${model}`);
             const reqEl = document.getElementById('ai-usage-requests');
             const tokEl = document.getElementById('ai-usage-tokens');
+            const timeEl = document.getElementById('ai-usage-time');
+            const timeContainer = document.getElementById('ai-usage-time-container');
 
             if (cached) {
                 const data = JSON.parse(cached);
                 if (reqEl && data.remaining_requests && data.limit_requests) {
-                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})` + (data.timestamp ? ` [as of ${data.timestamp}]` : '');
+                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
                 } else if (reqEl) {
                     reqEl.innerText = '-';
                 }
@@ -8501,9 +8507,17 @@
                 } else if (tokEl) {
                     tokEl.innerText = '-';
                 }
+
+                if (timeEl && timeContainer && data.timestamp) {
+                    timeEl.innerText = data.timestamp;
+                    timeContainer.style.display = 'flex';
+                } else if (timeContainer) {
+                    timeContainer.style.display = 'none';
+                }
             } else {
                 if (reqEl) reqEl.innerText = 'Not queried yet';
                 if (tokEl) tokEl.innerText = 'Not queried yet';
+                if (timeContainer) timeContainer.style.display = 'none';
             }
             container.style.display = 'flex';
         }
