@@ -210,6 +210,7 @@ def parse_time_string(s: str) -> int:
     """Parse 25d35h66m9s / 154h25m20s / 25m / 90s / 30 (bare = minutes).
     Supports d (days), h (hours), m (minutes), s (seconds). Returns seconds or -1."""
     s = s.strip().lower()
+    s = s.replace(" ", "")  # strip internal spaces to support e.g. "15h 25m"
     if not s:
         return -1
     try:
@@ -373,7 +374,7 @@ class AlarmPopup(QDialog):
 # ── Extensible Timer Dialog (Add / Edit) ───────────────────
 
 class TimerDialog(QDialog):
-    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, settings: dict | None = None, parent=None):
+    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
@@ -385,6 +386,8 @@ class TimerDialog(QDialog):
         
         self._result_label = label_val
         self._result_fires_at = fires_at_val
+        self._result_input_mode = input_mode_val
+        self._result_input_value = input_value_val
         self.custom_edits = {}
         
         lay = QVBoxLayout(self)
@@ -460,8 +463,19 @@ class TimerDialog(QDialog):
             self.panels[mode_id] = panel
             panel.setVisible(False)
             
-        # Select default mode based on fires_at_val
-        if fires_at_val is not None:
+        # Populate values if available before switching modes
+        if input_mode_val == "text":
+            self.time_edit.setText(input_value_val)
+        elif input_mode_val.startswith("custom_"):
+            edit = self.custom_edits.get(input_mode_val)
+            if edit:
+                edit.setText(input_value_val)
+
+        # Select default mode based on input_mode_val or fires_at_val
+        if input_mode_val in self.radio_buttons:
+            self.radio_buttons[input_mode_val].setChecked(True)
+            self._switch_mode(input_mode_val)
+        elif fires_at_val is not None:
             self.radio_buttons["picker"].setChecked(True)
             self._switch_mode("picker")
         else:
@@ -604,6 +618,7 @@ class TimerDialog(QDialog):
                 active_mode = mode_id
                 break
                 
+        input_val = ""
         if active_mode == "text":
             raw = self.time_edit.text().strip()
             if not raw and self._result_fires_at is not None:
@@ -614,6 +629,7 @@ class TimerDialog(QDialog):
                     self.err_lbl.setText("⚠  Invalid format. Try: 1h30m, 45m, 90s, 2.5h …")
                     return
                 fires_at = time.time() + secs
+            input_val = raw
         elif active_mode == "picker":
             target = self.dt_picker.dateTime().toPyDateTime()
             delta = (target - datetime.now()).total_seconds()
@@ -621,6 +637,7 @@ class TimerDialog(QDialog):
                 self.err_lbl.setText("⚠  Selected datetime is in the past.")
                 return
             fires_at = target.timestamp()
+            input_val = ""
         elif active_mode.startswith("custom_"):
             edit = self.custom_edits.get(active_mode)
             raw_input = edit.text().strip() if edit else ""
@@ -638,19 +655,22 @@ class TimerDialog(QDialog):
                     self.err_lbl.setText("⚠  Parsed datetime is in the past.")
                     return
                 fires_at = target.timestamp()
+            input_val = raw_input
         else:
             self.err_lbl.setText("⚠  Please select an input mode.")
             return
             
         self._result_fires_at = fires_at
         self._result_label = label
+        self._result_input_mode = active_mode
+        self._result_input_value = input_val
         self.accept()
 
     @staticmethod
-    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, settings: dict | None = None, parent=None):
-        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, settings, parent)
+    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, parent=None):
+        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, input_mode_val, input_value_val, settings, parent)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            return dlg._result_label, dlg._result_fires_at
+            return dlg._result_label, dlg._result_fires_at, dlg._result_input_mode, dlg._result_input_value
         return None
 
 
@@ -935,11 +955,13 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", parent=None):
         super().__init__(parent)
         self.card_id  = card_id
         self.label    = label
         self.fires_at = fires_at
+        self.input_mode = input_mode
+        self.input_value = input_value
         
         now = time.time()
         if created_at <= 0.0 or created_at >= fires_at:
@@ -1113,14 +1135,18 @@ class TimerCard(QFrame):
             "✔  APPLY",
             self.label,
             self.fires_at,
+            self.input_mode,
+            self.input_value,
             settings=settings,
             parent=self
         )
         if result is None:
             return
-        new_label, new_fires_at = result
+        new_label, new_fires_at, new_input_mode, new_input_value = result
         self.label = new_label
         self._lbl.setText(self.label)
+        self.input_mode = new_input_mode
+        self.input_value = new_input_value
         
         if abs(new_fires_at - self.fires_at) > 0.01:
             self.created_at = time.time()
@@ -1137,6 +1163,8 @@ class TimerCard(QFrame):
             "label": self.label,
             "fires_at": self.fires_at,
             "created_at": self.created_at,
+            "input_mode": self.input_mode,
+            "input_value": self.input_value,
         }
 
     @classmethod
@@ -1145,7 +1173,9 @@ class TimerCard(QFrame):
         label = d.get("label", "Timer")
         fires_at = d.get("fires_at", 0.0)
         created_at = d.get("created_at", 0.0)
-        return cls(card_id, label, fires_at, created_at, parent)
+        input_mode = d.get("input_mode", "text")
+        input_value = d.get("input_value", "")
+        return cls(card_id, label, fires_at, created_at, input_mode, input_value, parent)
 
 
 # ── ColumnWidget ───────────────────────────────────────────
@@ -1284,6 +1314,8 @@ class ColumnWidget(QFrame):
             src.label + " (copy)",
             src.fires_at,
             time.time(),
+            src.input_mode,
+            src.input_value,
             self,
         )
         self.add_card(new_card)
@@ -1306,8 +1338,8 @@ class ColumnWidget(QFrame):
         result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", settings=settings, parent=self)
         if result is None:
             return
-        label, fires_at = result
-        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, time.time(), self)
+        label, fires_at, input_mode, input_value = result
+        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, time.time(), input_mode, input_value, self)
         self.add_card(card)
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
