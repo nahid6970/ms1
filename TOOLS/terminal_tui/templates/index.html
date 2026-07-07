@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
         (function() {
@@ -43,6 +44,43 @@
         /* Prevent Sidebar layout flash of unstyled content (FOUC) */
         html.hide-sidebar-layout {
             --sidebar-width: 0px !important;
+        }
+
+        #ai-chat-history table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.72rem;
+        }
+        #ai-chat-history th, #ai-chat-history td {
+            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            text-align: left;
+        }
+        #ai-chat-history th {
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+        #ai-chat-history h1, #ai-chat-history h2, #ai-chat-history h3 {
+            margin: 8px 0 4px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        #ai-chat-history pre {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin: 6px 0;
+            overflow-x: auto;
+        }
+        #ai-chat-history pre code {
+            font-family: Consolas, monospace;
+            font-size: 0.72rem;
+            color: #f43f5e;
+            white-space: pre-wrap;
+            display: block;
         }
         html.hide-sidebar-layout .sidebar {
             display: none !important;
@@ -2328,17 +2366,28 @@
                 <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
                     <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Voice Recording Settings</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                         <div style="display: flex; align-items: center; gap: 8px;">
+                             <input type="checkbox" id="settings-voice-continuous" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                             <label for="settings-voice-continuous" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Continuous Voice Recording</label>
+                         </div>
+                         <div style="display: flex; align-items: center; gap: 8px;">
+                             <input type="checkbox" id="settings-voice-use-python" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                             <label for="settings-voice-use-python" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use Python Voice Engine (Non-Chrome)</label>
+                         </div>
+                         <div style="display: flex; align-items: center; gap: 8px;">
+                             <input type="checkbox" id="settings-voice-manual-stop" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                             <label for="settings-voice-manual-stop" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Manual Stop Recording (Click to stop)</label>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Section: AI Copilot Settings -->
+                <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">AI Copilot Settings</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="settings-voice-continuous" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                            <label for="settings-voice-continuous" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Continuous Voice Recording</label>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="settings-voice-use-python" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                            <label for="settings-voice-use-python" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use Python Voice Engine (Non-Chrome)</label>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="settings-voice-manual-stop" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                            <label for="settings-voice-manual-stop" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Manual Stop Recording (Click to stop)</label>
+                            <input type="checkbox" id="settings-ai-rich-markdown" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-ai-rich-markdown" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Enable Rich Markdown Rendering</label>
                         </div>
                     </div>
                 </div>
@@ -6416,6 +6465,7 @@
             document.getElementById('settings-voice-continuous').checked = localStorage.getItem('voice-continuous') === 'true';
             document.getElementById('settings-voice-use-python').checked = localStorage.getItem('voice-use-python') === 'true';
             document.getElementById('settings-voice-manual-stop').checked = localStorage.getItem('voice-manual-stop') === 'true';
+            document.getElementById('settings-ai-rich-markdown').checked = localStorage.getItem('ai-rich-markdown') !== 'false';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -6628,6 +6678,7 @@
             localStorage.setItem('voice-continuous', document.getElementById('settings-voice-continuous').checked);
             localStorage.setItem('voice-use-python', document.getElementById('settings-voice-use-python').checked);
             localStorage.setItem('voice-manual-stop', document.getElementById('settings-voice-manual-stop').checked);
+            localStorage.setItem('ai-rich-markdown', document.getElementById('settings-ai-rich-markdown').checked);
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -8522,6 +8573,15 @@
         }
 
         function renderMarkdown(text) {
+            const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
+            if (richEnabled && typeof marked !== 'undefined') {
+                try {
+                    return marked.parse(text);
+                } catch (e) {
+                    console.error("marked parsing failed, falling back", e);
+                }
+            }
+
             let html = escapeHtml(text);
             
             // Code blocks
