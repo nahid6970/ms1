@@ -8574,15 +8574,26 @@
 
         function renderMarkdown(text) {
             const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
+            
+            // Check if response looks like code/script and is not wrapped in backticks
+            let formattedText = text;
+            const hasBackticks = text.includes('```');
+            const looksLikeCode = /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker )/m.test(text) || 
+                                 (text.split('\n').length > 2 && text.includes('    ')); // has indentation and multiple lines
+            
+            if (looksLikeCode && !hasBackticks) {
+                formattedText = '```\n' + text + '\n```';
+            }
+
             if (richEnabled && typeof marked !== 'undefined') {
                 try {
-                    return marked.parse(text);
+                    return marked.parse(formattedText);
                 } catch (e) {
                     console.error("marked parsing failed, falling back", e);
                 }
             }
 
-            let html = escapeHtml(text);
+            let html = escapeHtml(formattedText);
             
             // Code blocks
             html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
