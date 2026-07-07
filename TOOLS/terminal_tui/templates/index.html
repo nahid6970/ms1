@@ -1123,7 +1123,7 @@
         @media (max-width: 768px) {
             .workspace-header {
                 flex-direction: column !important;
-                align-items: stretch !important;
+                align-items: center !important;
                 height: auto !important;
                 padding: 6px 10px !important;
                 gap: 6px !important;
@@ -1131,7 +1131,7 @@
             .workspace-title-info {
                 margin-right: 0 !important;
                 width: 100% !important;
-                justify-content: flex-start !important;
+                justify-content: center !important;
                 flex-wrap: wrap !important;
                 gap: 6px !important;
             }
@@ -1179,9 +1179,15 @@
             }
             #project-specific-actions {
                 gap: 4px !important;
+                justify-content: center !important;
             }
             #global-header-actions {
                 gap: 4px !important;
+                justify-content: center !important;
+            }
+            #workspace-header > div:not(.workspace-title-info) {
+                width: 100% !important;
+                justify-content: center !important;
             }
             #header-toolbar-divider {
                 display: none !important;
