@@ -1805,6 +1805,7 @@
                 <select id="ai-provider-select" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIProviderChange()">
                     <option value="gemini">Google Gemini</option>
                     <option value="groq">Groq Console</option>
+                    <option value="morph">Morph LLM</option>
                 </select>
                 <select id="ai-model-select" style="flex:2; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIModelChange()">
                 </select>
@@ -1837,6 +1838,19 @@
             <div id="groq-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
                 <span>⚡ Groq API Key configured</span>
                 <button onclick="clearGroqAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+            </div>
+
+            <!-- Morph API Key Container -->
+            <div id="morph-api-key-container" style="margin-bottom:10px; display:none;">
+                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Morph API Key (morphllm.com/dashboard/api-keys)</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="password" id="morph-api-key-input" placeholder="sk-..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <button onclick="saveMorphAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
+                </div>
+            </div>
+            <div id="morph-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
+                <span>🔷 Morph API Key configured</span>
+                <button onclick="clearMorphAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
             </div>
 
             <!-- System Prompt -->
@@ -9005,26 +9019,33 @@
             
             const geminiKey = localStorage.getItem('gemini-api-key') || '';
             const groqKey = localStorage.getItem('groq-api-key') || '';
-            
+            const morphKey = localStorage.getItem('morph-api-key') || '';
+
+            // Hide all key containers first
+            document.getElementById('ai-api-key-container').style.display = 'none';
+            document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+            document.getElementById('groq-api-key-container').style.display = 'none';
+            document.getElementById('groq-api-key-saved-msg').style.display = 'none';
+            document.getElementById('morph-api-key-container').style.display = 'none';
+            document.getElementById('morph-api-key-saved-msg').style.display = 'none';
+
             if (provider === 'gemini') {
-                document.getElementById('groq-api-key-container').style.display = 'none';
-                document.getElementById('groq-api-key-saved-msg').style.display = 'none';
                 if (geminiKey) {
-                    document.getElementById('ai-api-key-container').style.display = 'none';
                     document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
                 } else {
                     document.getElementById('ai-api-key-container').style.display = 'block';
-                    document.getElementById('ai-api-key-saved-msg').style.display = 'none';
                 }
-            } else {
-                document.getElementById('ai-api-key-container').style.display = 'none';
-                document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+            } else if (provider === 'groq') {
                 if (groqKey) {
-                    document.getElementById('groq-api-key-container').style.display = 'none';
                     document.getElementById('groq-api-key-saved-msg').style.display = 'flex';
                 } else {
                     document.getElementById('groq-api-key-container').style.display = 'block';
-                    document.getElementById('groq-api-key-saved-msg').style.display = 'none';
+                }
+            } else if (provider === 'morph') {
+                if (morphKey) {
+                    document.getElementById('morph-api-key-saved-msg').style.display = 'flex';
+                } else {
+                    document.getElementById('morph-api-key-container').style.display = 'block';
                 }
             }
 
@@ -9051,6 +9072,23 @@
                     modelSelect.appendChild(opt);
                 });
                 const savedModel = localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+                modelSelect.value = savedModel;
+            } else if (provider === 'morph') {
+                const models = [
+                    { val: 'morph-qwen35-397b', label: 'Qwen 3.5 397B (~180 tok/s)' },
+                    { val: 'morph-glm52-744b', label: 'GLM 5.2 744B (~80 tok/s)' },
+                    { val: 'morph-minimax3-428b', label: 'MiniMax M3 428B (~90 tok/s)' },
+                    { val: 'morph-minimax27-230b', label: 'MiniMax M2.7 230B (~90 tok/s)' },
+                    { val: 'morph-dsv4flash', label: 'DeepSeek V4 Flash (~150 tok/s)' },
+                    { val: 'morph-qwen36-27b', label: 'Qwen 3.6 27B (~100 tok/s)' },
+                ];
+                models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.val;
+                    opt.textContent = m.label;
+                    modelSelect.appendChild(opt);
+                });
+                const savedModel = localStorage.getItem('ai-model-morph') || 'morph-qwen35-397b';
                 modelSelect.value = savedModel;
             } else {
                 const models = [
@@ -9082,6 +9120,8 @@
             const model = document.getElementById('ai-model-select').value;
             if (provider === 'gemini') {
                 localStorage.setItem('ai-model-gemini', model);
+            } else if (provider === 'morph') {
+                localStorage.setItem('ai-model-morph', model);
             } else {
                 localStorage.setItem('ai-model-groq', model);
             }
@@ -9103,6 +9143,23 @@
             document.getElementById('groq-api-key-container').style.display = 'block';
             document.getElementById('groq-api-key-saved-msg').style.display = 'none';
             document.getElementById('groq-api-key-input').focus();
+        }
+
+        function saveMorphAPIKey() {
+            const val = document.getElementById('morph-api-key-input').value.trim();
+            if (!val) return;
+            localStorage.setItem('morph-api-key', val);
+            document.getElementById('morph-api-key-container').style.display = 'none';
+            document.getElementById('morph-api-key-saved-msg').style.display = 'flex';
+            document.getElementById('ai-prompt-input').focus();
+        }
+
+        function clearMorphAPIKey() {
+            localStorage.removeItem('morph-api-key');
+            document.getElementById('morph-api-key-input').value = '';
+            document.getElementById('morph-api-key-container').style.display = 'block';
+            document.getElementById('morph-api-key-saved-msg').style.display = 'none';
+            document.getElementById('morph-api-key-input').focus();
         }
 
         function closeAICopilotPopover() {
@@ -9144,6 +9201,8 @@
             const provider = document.getElementById('ai-provider-select').value;
             const apiKey = provider === 'gemini' 
                 ? (localStorage.getItem('gemini-api-key') || '')
+                : provider === 'morph'
+                ? (localStorage.getItem('morph-api-key') || '')
                 : (localStorage.getItem('groq-api-key') || '');
             const model = document.getElementById('ai-model-select').value;
             const system_instruction = document.getElementById('ai-system-input').value.trim();

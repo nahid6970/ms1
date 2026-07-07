@@ -3515,6 +3515,41 @@ def api_ai_command():
             }
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+    elif provider == 'morph':
+        if not model:
+            model = 'morph-qwen35-397b'
+        if not api_key:
+            api_key = os.environ.get('MORPH_API_KEY', '')
+        if not api_key:
+            return jsonify({"error": "Morph API key is missing. Please provide it in settings."}), 400
+
+        messages = [{"role": "system", "content": system_instruction}]
+        for h in history:
+            messages.append({"role": h["role"], "content": h["content"]})
+        if prompt:
+            messages.append({"role": "user", "content": prompt})
+
+        url = "https://api.morphllm.com/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.1,
+            "max_tokens": 1024
+        }
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=30)
+            res_data = res.json()
+            if res.status_code != 200:
+                error_msg = res_data.get('error', {}).get('message', 'Failed to call Morph API')
+                return jsonify({"error": error_msg}), res.status_code
+
+            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     else:
         # Gemini provider
         if not model:
