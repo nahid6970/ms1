@@ -3463,12 +3463,10 @@ def api_ai_command():
     history = req.get('history', [])
     
     system_instruction = custom_system if custom_system else (
-        "You are a command line expert and shell copilot assistant. The user wants to run a terminal command. "
-        "Your job is to write the exact, single command line string to run. "
-        "Rule 1: Return ONLY the exact command text to execute. "
-        "Rule 2: Do NOT write any conversational text, explanations, or warnings. "
-        "Rule 3: Do NOT wrap the command in markdown code blocks or backticks. Return the raw string. "
-        "Rule 4: Keep it secure, correct, and single-line if possible."
+        "You are an AI assistant and command line helper. "
+        "Help the user with terminal commands, coding, and general tasks. "
+        "If the user asks for a terminal command to execute, output the exact command text. "
+        "Avoid unnecessary conversational filler when outputting commands."
     )
     
     import requests
