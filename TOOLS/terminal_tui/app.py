@@ -3457,16 +3457,9 @@ def api_ai_command():
     req = request.json or {}
     prompt = req.get('prompt', '')
     api_key = req.get('api_key', '')
-    model = req.get('model', 'gemini-2.5-flash')
+    provider = req.get('provider', 'gemini')
+    model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
-    
-    if not api_key:
-        api_key = os.environ.get('GEMINI_API_KEY', '')
-    if not api_key:
-        return jsonify({"error": "Gemini API key is missing. Please provide it in settings or the prompt."}), 400
-    
-    import requests
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     
     system_instruction = custom_system if custom_system else (
         "You are a command line expert and shell copilot assistant. The user wants to run a terminal command. "
@@ -3477,45 +3470,89 @@ def api_ai_command():
         "Rule 4: Keep it secure, correct, and single-line if possible."
     )
     
-    headers = {'Content-Type': 'application/json'}
-    payload = {
-        "contents": [{
-            "parts": [{"text": prompt}]
-        }],
-        "systemInstruction": {
-            "parts": [{"text": system_instruction}]
-        }
-    }
+    import requests
     
-    try:
-        res = requests.post(url, json=payload, headers=headers, timeout=15)
-        res_data = res.json()
-        if res.status_code != 200:
-            error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
-            return jsonify({"error": error_msg}), res.status_code
+    if provider == 'groq':
+        if not model:
+            model = 'llama-3.3-70b-versatile'
+        if not api_key:
+            api_key = os.environ.get('GROQ_API_KEY', '')
+        if not api_key:
+            return jsonify({"error": "Groq API key is missing. Please provide it in settings."}), 400
         
-        candidates = res_data.get('candidates', [])
-        if not candidates:
-            return jsonify({"error": "No response from Gemini API"}), 500
-        
-        cmd = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
-        # Clean markdown wrappers
-        if cmd.startswith('```'):
-            lines = cmd.split('\n')
-            if len(lines) > 1:
-                if lines[0].startswith('```'):
-                    lines = lines[1:]
-                if lines[-1].startswith('```'):
-                    lines = lines[:-1]
-                cmd = '\n'.join(lines).strip()
-            else:
-                cmd = cmd.replace('`', '')
-        elif cmd.startswith('`') and cmd.endswith('`'):
-            cmd = cmd.strip('`')
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.1,
+            "max_tokens": 150
+        }
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=15)
+            res_data = res.json()
+            if res.status_code != 200:
+                error_msg = res_data.get('error', {}).get('message', 'Failed to call Groq API')
+                return jsonify({"error": error_msg}), res.status_code
             
-        return jsonify({"command": cmd})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    else:
+        # Gemini provider
+        if not model:
+            model = 'gemini-2.5-flash'
+        if not api_key:
+            api_key = os.environ.get('GEMINI_API_KEY', '')
+        if not api_key:
+            return jsonify({"error": "Gemini API key is missing. Please provide it in settings or the prompt."}), 400
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }],
+            "systemInstruction": {
+                "parts": [{"text": system_instruction}]
+            }
+        }
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=15)
+            res_data = res.json()
+            if res.status_code != 200:
+                error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
+                return jsonify({"error": error_msg}), res.status_code
+            
+            candidates = res_data.get('candidates', [])
+            if not candidates:
+                return jsonify({"error": "No response from Gemini API"}), 500
+            
+            cmd = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # Clean markdown wrappers (shared logic for both)
+    if cmd.startswith('```'):
+        lines = cmd.split('\n')
+        if len(lines) > 1:
+            if lines[0].startswith('```'):
+                lines = lines[1:]
+            if lines[-1].startswith('```'):
+                lines = lines[:-1]
+            cmd = '\n'.join(lines).strip()
+        else:
+            cmd = cmd.replace('`', '')
+    elif cmd.startswith('`') and cmd.endswith('`'):
+        cmd = cmd.strip('`')
+        
+    return jsonify({"command": cmd})
 
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():

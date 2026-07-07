@@ -1724,7 +1724,16 @@
             <button class="sbpop-close" onclick="closeAICopilotPopover()">✕</button>
         </div>
         <div style="padding:12px; flex-shrink:0;">
-            <!-- API Key field if not saved -->
+            <!-- Provider Selector -->
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                <label style="font-size:0.7rem; color:var(--text-muted); font-weight:500;">AI Provider</label>
+                <select id="ai-provider-select" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIProviderChange()">
+                    <option value="gemini">Google Gemini</option>
+                    <option value="groq">Groq Console</option>
+                </select>
+            </div>
+
+            <!-- Gemini API Key Container -->
             <div id="ai-api-key-container" style="margin-bottom:10px; display:none;">
                 <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Gemini API Key (Google AI Studio)</label>
                 <div style="display:flex; gap:6px;">
@@ -1732,26 +1741,29 @@
                     <button onclick="saveGeminiAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
                 </div>
             </div>
-            
-            <div id="ai-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div id="ai-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
                 <span>✨ Gemini API Key configured</span>
                 <button onclick="clearGeminiAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+            </div>
+
+            <!-- Groq API Key Container -->
+            <div id="groq-api-key-container" style="margin-bottom:10px; display:none;">
+                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Groq API Key (console.groq.com)</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="password" id="groq-api-key-input" placeholder="gsk_..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <button onclick="saveGroqAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
+                </div>
+            </div>
+            <div id="groq-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
+                <span>⚡ Groq API Key configured</span>
+                <button onclick="clearGroqAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
             </div>
 
             <!-- Model and System Prompt Settings -->
             <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px; padding:8px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <label style="font-size:0.7rem; color:var(--text-muted); font-weight:500;">Gemini Model</label>
-                    <select id="ai-model-select" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="localStorage.setItem('ai-model', this.value)">
-                        <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
-                        <option value="gemini-3.5-pro">Gemini 3.5 Pro</option>
-                        <option value="gemini-3.1-flash">Gemini 3.1 Flash</option>
-                        <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    <label style="font-size:0.7rem; color:var(--text-muted); font-weight:500;">Model</label>
+                    <select id="ai-model-select" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIModelChange()">
                     </select>
                 </div>
                 <details style="margin-top:4px;">
@@ -8393,19 +8405,11 @@
                 pop.classList.add('show');
                 document.getElementById('ai-copilot-btn').classList.add('active');
                 
-                const savedKey = localStorage.getItem('gemini-api-key') || '';
-                if (savedKey) {
-                    document.getElementById('ai-api-key-container').style.display = 'none';
-                    document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
-                } else {
-                    document.getElementById('ai-api-key-container').style.display = 'block';
-                    document.getElementById('ai-api-key-saved-msg').style.display = 'none';
-                }
-
-                // Load custom model and system prompt values from storage
-                const savedModel = localStorage.getItem('ai-model') || 'gemini-2.5-flash';
-                const modelSelect = document.getElementById('ai-model-select');
-                if (modelSelect) modelSelect.value = savedModel;
+                const savedProvider = localStorage.getItem('ai-provider') || 'gemini';
+                const providerSelect = document.getElementById('ai-provider-select');
+                if (providerSelect) providerSelect.value = savedProvider;
+                
+                handleAIProviderChange();
 
                 const savedSystem = localStorage.getItem('ai-system-prompt') || '';
                 const systemInput = document.getElementById('ai-system-input');
@@ -8419,6 +8423,102 @@
                 
                 _popoverOutside('ai-copilot-popover', 'ai-copilot-btn', closeAICopilotPopover);
             }
+        }
+
+        function handleAIProviderChange() {
+            const provider = document.getElementById('ai-provider-select').value;
+            localStorage.setItem('ai-provider', provider);
+            
+            const geminiKey = localStorage.getItem('gemini-api-key') || '';
+            const groqKey = localStorage.getItem('groq-api-key') || '';
+            
+            if (provider === 'gemini') {
+                document.getElementById('groq-api-key-container').style.display = 'none';
+                document.getElementById('groq-api-key-saved-msg').style.display = 'none';
+                if (geminiKey) {
+                    document.getElementById('ai-api-key-container').style.display = 'none';
+                    document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
+                } else {
+                    document.getElementById('ai-api-key-container').style.display = 'block';
+                    document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+                }
+            } else {
+                document.getElementById('ai-api-key-container').style.display = 'none';
+                document.getElementById('ai-api-key-saved-msg').style.display = 'none';
+                if (groqKey) {
+                    document.getElementById('groq-api-key-container').style.display = 'none';
+                    document.getElementById('groq-api-key-saved-msg').style.display = 'flex';
+                } else {
+                    document.getElementById('groq-api-key-container').style.display = 'block';
+                    document.getElementById('groq-api-key-saved-msg').style.display = 'none';
+                }
+            }
+
+            const modelSelect = document.getElementById('ai-model-select');
+            modelSelect.innerHTML = '';
+            if (provider === 'gemini') {
+                const models = [
+                    { val: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+                    { val: 'gemini-3.5-pro', label: 'Gemini 3.5 Pro' },
+                    { val: 'gemini-3.1-flash', label: 'Gemini 3.1 Flash' },
+                    { val: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro' },
+                    { val: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                    { val: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+                    { val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                    { val: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+                    { val: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+                ];
+                models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.val;
+                    opt.textContent = m.label;
+                    modelSelect.appendChild(opt);
+                });
+                const savedModel = localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+                modelSelect.value = savedModel;
+            } else {
+                const models = [
+                    { val: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+                    { val: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B' },
+                    { val: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
+                    { val: 'gemma2-9b-it', label: 'Gemma 2 9B' }
+                ];
+                models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.val;
+                    opt.textContent = m.label;
+                    modelSelect.appendChild(opt);
+                });
+                const savedModel = localStorage.getItem('ai-model-groq') || 'llama-3.3-70b-versatile';
+                modelSelect.value = savedModel;
+            }
+        }
+
+        function handleAIModelChange() {
+            const provider = document.getElementById('ai-provider-select').value;
+            const model = document.getElementById('ai-model-select').value;
+            if (provider === 'gemini') {
+                localStorage.setItem('ai-model-gemini', model);
+            } else {
+                localStorage.setItem('ai-model-groq', model);
+            }
+        }
+
+        function saveGroqAPIKey() {
+            const val = document.getElementById('groq-api-key-input').value.trim();
+            if (!val) return;
+            localStorage.setItem('groq-api-key', val);
+            document.getElementById('groq-api-key-container').style.display = 'none';
+            document.getElementById('groq-api-key-saved-msg').style.display = 'flex';
+            document.getElementById('ai-prompt-input').focus();
+        }
+
+        function clearGroqAPIKey() {
+            localStorage.removeItem('groq-api-key');
+            document.getElementById('groq-api-key-input').value = '';
+            document.getElementById('groq-api-key-container').style.display = 'block';
+            document.getElementById('groq-api-key-saved-msg').style.display = 'none';
+            document.getElementById('groq-api-key-input').focus();
         }
 
         function closeAICopilotPopover() {
@@ -8456,7 +8556,10 @@
             const prompt = document.getElementById('ai-prompt-input').value.trim();
             if (!prompt) return;
             
-            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            const provider = document.getElementById('ai-provider-select').value;
+            const apiKey = provider === 'gemini' 
+                ? (localStorage.getItem('gemini-api-key') || '')
+                : (localStorage.getItem('groq-api-key') || '');
             const model = document.getElementById('ai-model-select').value;
             const system_instruction = document.getElementById('ai-system-input').value.trim();
             const submitBtn = document.getElementById('ai-copilot-submit');
@@ -8474,7 +8577,7 @@
                 const res = await fetch('/api/ai-command', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, api_key: apiKey, model, system_instruction })
+                    body: JSON.stringify({ prompt, api_key: apiKey, provider, model, system_instruction })
                 });
                 
                 const data = await res.json();
