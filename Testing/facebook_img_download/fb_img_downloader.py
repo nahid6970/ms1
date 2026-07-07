@@ -36,13 +36,16 @@ class DownloaderThread(QThread):
     progress_signal = pyqtSignal(int)
     finished_signal = pyqtSignal(int, str)
 
-    def __init__(self, url, output_dir, max_images, headless):
+    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images):
         super().__init__()
         self.url = url
         self.output_dir = output_dir
         self.max_images = max_images
         self.headless = headless
+        self.make_pdf = make_pdf
+        self.delete_images = delete_images
         self.is_running = True
+        self.is_paused = False
 
     def _get_current_image(self, driver):
         """Extract the highest-quality scontent/fbcdn image URL from the current view."""
@@ -167,6 +170,14 @@ class DownloaderThread(QThread):
             self.log_signal.emit(f"Opening URL: {self.url}")
             driver.get(self.url)
             time.sleep(5)
+            
+            # Press ESC to dismiss any unexpected popups
+            try:
+                from selenium.webdriver.common.action_chains import ActionChains
+                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                time.sleep(1)
+            except:
+                pass
 
             # Dismiss any login/cookie popups
             for label in ["Dismiss", "Not now", "Decline optional cookies"]:
@@ -182,7 +193,12 @@ class DownloaderThread(QThread):
             if "/photo" not in driver.current_url:
                 self.log_signal.emit("Post detected. Entering gallery mode...")
                 try:
-                    photo_links = driver.find_elements(By.XPATH, "//a[img][(contains(@href, '/photo') or contains(@href, 'fbid=') or contains(@href, '/photos/')) and not(contains(@href, 'login'))]")
+                    # User provided explicit XPath
+                    explicit_xpath = "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/div/div/div[1]/a/div[1]/div[1]/div/img"
+                    photo_links = driver.find_elements(By.XPATH, explicit_xpath)
+                    
+                    if not photo_links:
+                        photo_links = driver.find_elements(By.XPATH, "//a[img][(contains(@href, '/photo') or contains(@href, 'fbid=') or contains(@href, '/photos/')) and not(contains(@href, 'login'))]")
                     if not photo_links:
                         photo_links = driver.find_elements(By.XPATH, "//a[img[contains(@src,'scontent') or contains(@src,'fbcdn')] and not(contains(@href, 'login'))]")
                     
@@ -208,6 +224,12 @@ class DownloaderThread(QThread):
             no_new_streak = 0  # consecutive cycles with no new image
 
             while count < self.max_images and self.is_running:
+                while self.is_paused and self.is_running:
+                    time.sleep(1)
+                
+                if not self.is_running:
+                    break
+                
                 try:
                     src = self._get_current_image(driver)
 
@@ -280,7 +302,7 @@ class DownloaderThread(QThread):
             driver.quit()
             
             pdf_path = ""
-            if downloaded_files:
+            if downloaded_files and self.make_pdf:
                 self.log_signal.emit("Creating PDF from downloaded images...")
                 try:
                     from PIL import Image
@@ -298,6 +320,13 @@ class DownloaderThread(QThread):
                         pdf_path = os.path.join(self.output_dir, f"facebook_images_{int(time.time())}.pdf")
                         image_list[0].save(pdf_path, "PDF", resolution=100.0, save_all=True, append_images=image_list[1:])
                         self.log_signal.emit(f"PDF saved: {pdf_path}")
+                        
+                        if self.delete_images:
+                            for f in downloaded_files:
+                                try:
+                                    os.remove(f)
+                                except Exception as e:
+                                    self.log_signal.emit(f"Failed to delete {f}: {e}")
                 except Exception as e:
                     self.log_signal.emit(f"Failed to create PDF: {e}")
 
@@ -341,7 +370,10 @@ class FacebookDownloaderApp(QMainWindow):
             "target_url": "https://www.facebook.com/share/p/1QoccunqqZ/",
             "output_dir": os.path.join(os.getcwd(), "downloads"),
             "max_images": 100,
-            "headless": False
+            "headless": False,
+            "make_pdf": True,
+            "delete_images": False,
+            "copy_clipboard": True
         }
         try:
             if os.path.exists(self.settings_file):
@@ -367,6 +399,9 @@ class FacebookDownloaderApp(QMainWindow):
             self.settings["output_dir"] = self.output_dir
             self.settings["max_images"] = self.max_images_spin.value()
             self.settings["headless"] = self.headless_cb.isChecked()
+            self.settings["make_pdf"] = self.make_pdf_cb.isChecked()
+            self.settings["delete_images"] = self.delete_images_cb.isChecked()
+            self.settings["copy_clipboard"] = self.copy_cb.isChecked()
             
             with open(self.settings_file, 'w') as f:
                 json.dump(self.settings, f, indent=4)
@@ -492,14 +527,32 @@ class FacebookDownloaderApp(QMainWindow):
         self.max_images_spin.setValue(self.settings.get("max_images", 100))
         self.max_images_spin.valueChanged.connect(self.save_settings)
         
-        self.headless_cb = QCheckBox("Headless Mode (Background)")
+        self.headless_cb = QCheckBox("Headless")
         self.headless_cb.setChecked(self.settings.get("headless", False))
         self.headless_cb.toggled.connect(self.save_settings)
+        
+        self.make_pdf_cb = QCheckBox("Make PDF")
+        self.make_pdf_cb.setChecked(self.settings.get("make_pdf", True))
+        self.make_pdf_cb.toggled.connect(self.save_settings)
+        
+        self.delete_images_cb = QCheckBox("Delete Images")
+        self.delete_images_cb.setChecked(self.settings.get("delete_images", False))
+        self.delete_images_cb.toggled.connect(self.save_settings)
+        
+        self.copy_cb = QCheckBox("Copy Clipboard")
+        self.copy_cb.setChecked(self.settings.get("copy_clipboard", True))
+        self.copy_cb.toggled.connect(self.save_settings)
+
+        toggles_layout = QHBoxLayout()
+        toggles_layout.addWidget(self.headless_cb)
+        toggles_layout.addWidget(self.make_pdf_cb)
+        toggles_layout.addWidget(self.delete_images_cb)
+        toggles_layout.addWidget(self.copy_cb)
 
         input_layout.addRow("TARGET URL:", self.url_input)
         input_layout.addRow("OUTPUT DIR:", dir_layout)
         input_layout.addRow("MAX IMAGES:", self.max_images_spin)
-        input_layout.addRow("EXECUTION:", self.headless_cb)
+        input_layout.addRow("EXECUTION:", toggles_layout)
         input_grp.setLayout(input_layout)
         main_layout.addWidget(input_grp)
 
@@ -509,6 +562,10 @@ class FacebookDownloaderApp(QMainWindow):
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
         self.action_btn.clicked.connect(self.toggle_action)
         
+        self.pause_btn = QPushButton("⏸ PAUSE")
+        self.pause_btn.setEnabled(False)
+        self.pause_btn.clicked.connect(self.toggle_pause)
+        
         self.restart_btn = QPushButton("↺ RESTART")
         self.restart_btn.clicked.connect(self.restart_app)
         
@@ -516,6 +573,7 @@ class FacebookDownloaderApp(QMainWindow):
         self.settings_btn.clicked.connect(self.show_settings)
 
         ctrl_layout.addWidget(self.action_btn, 3)
+        ctrl_layout.addWidget(self.pause_btn, 2)
         ctrl_layout.addWidget(self.restart_btn, 1)
         ctrl_layout.addWidget(self.settings_btn, 1)
         main_layout.addLayout(ctrl_layout)
@@ -569,8 +627,22 @@ class FacebookDownloaderApp(QMainWindow):
             self.dl_thread.stop()
             self.action_btn.setEnabled(False)
             self.action_btn.setText("⏳ STOPPING...")
+            self.pause_btn.setEnabled(False)
         else:
             self.start_download()
+
+    def toggle_pause(self):
+        if hasattr(self, 'dl_thread') and self.dl_thread.isRunning():
+            if self.dl_thread.is_paused:
+                self.dl_thread.is_paused = False
+                self.pause_btn.setText("⏸ PAUSE")
+                self.pause_btn.setStyleSheet("")
+                self.log("Process resumed.")
+            else:
+                self.dl_thread.is_paused = True
+                self.pause_btn.setText("▶ RESUME")
+                self.pause_btn.setStyleSheet(f"background-color: {CP_YELLOW}; color: black;")
+                self.log("Process paused.")
 
     def start_download(self):
         url = self.url_input.text().strip()
@@ -596,6 +668,9 @@ class FacebookDownloaderApp(QMainWindow):
 
         self.action_btn.setText("■ STOP DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-size: 11pt;")
+        self.pause_btn.setEnabled(True)
+        self.pause_btn.setText("⏸ PAUSE")
+        self.pause_btn.setStyleSheet("")
         self.progress_bar.setValue(0)
         self.log("Initializing extraction process...")
 
@@ -603,7 +678,9 @@ class FacebookDownloaderApp(QMainWindow):
             url, 
             self.output_dir, 
             self.max_images_spin.value(),
-            self.headless_cb.isChecked()
+            self.headless_cb.isChecked(),
+            self.make_pdf_cb.isChecked(),
+            self.delete_images_cb.isChecked()
         )
         self.dl_thread.log_signal.connect(self.log)
         self.dl_thread.progress_signal.connect(self.progress_bar.setValue)
@@ -614,20 +691,26 @@ class FacebookDownloaderApp(QMainWindow):
         self.action_btn.setEnabled(True)
         self.action_btn.setText("▶ START DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
+        self.pause_btn.setEnabled(False)
+        self.pause_btn.setText("⏸ PAUSE")
+        self.pause_btn.setStyleSheet("")
         self.log(f"Process ended. {count} images saved to {self.output_dir}")
         
         msg = f"Successfully downloaded {count} images."
         if pdf_path and os.path.exists(pdf_path):
-            try:
-                from PyQt6.QtCore import QUrl, QMimeData
-                from PyQt6.QtGui import QGuiApplication
-                mime_data = QMimeData()
-                mime_data.setUrls([QUrl.fromLocalFile(pdf_path)])
-                QGuiApplication.clipboard().setMimeData(mime_data)
-                self.log(f"PDF copied to clipboard.")
-                msg += "\nPDF generated and copied to clipboard."
-            except Exception as e:
-                self.log(f"Failed to copy PDF to clipboard: {e}")
+            if self.copy_cb.isChecked():
+                try:
+                    from PyQt6.QtCore import QUrl, QMimeData
+                    from PyQt6.QtGui import QGuiApplication
+                    mime_data = QMimeData()
+                    mime_data.setUrls([QUrl.fromLocalFile(pdf_path)])
+                    QGuiApplication.clipboard().setMimeData(mime_data)
+                    self.log(f"PDF copied to clipboard.")
+                    msg += "\nPDF generated and copied to clipboard."
+                except Exception as e:
+                    self.log(f"Failed to copy PDF to clipboard: {e}")
+            else:
+                msg += "\nPDF generated."
         
         QMessageBox.information(self, "Finished", msg)
 
