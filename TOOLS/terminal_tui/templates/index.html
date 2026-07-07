@@ -2444,6 +2444,13 @@
                                 onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
                             <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label for="settings-ai-popover-width" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Width</label>
+                            <input type="number" id="settings-ai-popover-width" min="280" max="900" step="10" value="380"
+                                style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
+                        </div>
                     </div>
                 </div>
 
@@ -6585,6 +6592,7 @@
             document.getElementById('settings-voice-manual-stop').checked = localStorage.getItem('voice-manual-stop') === 'true';
             document.getElementById('settings-ai-rich-markdown').checked = localStorage.getItem('ai-rich-markdown') !== 'false';
             document.getElementById('settings-ai-popover-height').value = localStorage.getItem('ai-popover-height') || '600';
+            document.getElementById('settings-ai-popover-width').value = localStorage.getItem('ai-popover-width') || '380';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -6801,6 +6809,9 @@
             const aiPopH = parseInt(document.getElementById('settings-ai-popover-height').value) || 600;
             localStorage.setItem('ai-popover-height', aiPopH);
             document.documentElement.style.setProperty('--ai-popover-max-height', aiPopH + 'px');
+            const aiPopW = parseInt(document.getElementById('settings-ai-popover-width').value) || 380;
+            localStorage.setItem('ai-popover-width', aiPopW);
+            document.getElementById('ai-copilot-popover').style.width = aiPopW + 'px';
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -11022,6 +11033,8 @@
 
             const savedAiPopH = parseInt(localStorage.getItem('ai-popover-height')) || 600;
             document.documentElement.style.setProperty('--ai-popover-max-height', savedAiPopH + 'px');
+            const savedAiPopW = parseInt(localStorage.getItem('ai-popover-width')) || 380;
+            document.getElementById('ai-copilot-popover').style.width = savedAiPopW + 'px';
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             if (savedContextMenu) {
