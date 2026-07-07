@@ -9,3 +9,4 @@
 - [X] Add a processing status indicator (`⏳`) directly on recording buttons.
 - [X] Group toggle options into structured visual sections inside the Settings modal.
 - [X] Add Gemini Model select dropdown and optional system prompt input inside the AI Copilot Popover.
+- [X] Support public Gemini 3.5 Flash/Pro and 3.1 Flash/Pro models.
