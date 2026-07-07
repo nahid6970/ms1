@@ -2252,6 +2252,10 @@
                         <input type="checkbox" id="settings-diff-wrap" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-diff-wrap" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Wrap long lines in Diff &amp; Browse</label>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-voice-continuous" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-voice-continuous" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Continuous Voice Recording</label>
+                    </div>
                 </div>
 
                 <!-- Current badge customization -->
@@ -6324,6 +6328,7 @@
 
             document.getElementById('settings-selector-btn-theme').checked = localStorage.getItem('selector-btn-theme') !== 'false';
             document.getElementById('settings-diff-wrap').checked = localStorage.getItem('diff-wrap-text') === 'true';
+            document.getElementById('settings-voice-continuous').checked = localStorage.getItem('voice-continuous') === 'true';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -6533,6 +6538,7 @@
 
             localStorage.setItem('selector-btn-theme', document.getElementById('settings-selector-btn-theme').checked);
             localStorage.setItem('diff-wrap-text', document.getElementById('settings-diff-wrap').checked);
+            localStorage.setItem('voice-continuous', document.getElementById('settings-voice-continuous').checked);
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -8006,7 +8012,8 @@
             }
             
             const rec = new SpeechRecognition();
-            rec.continuous = false;
+            const continuous = localStorage.getItem('voice-continuous') === 'true';
+            rec.continuous = continuous;
             rec.lang = 'en-US';
             rec.interimResults = false;
             
@@ -8021,11 +8028,21 @@
             };
             
             rec.onresult = (event) => {
-                const text = event.results[0][0].transcript;
+                let text = '';
+                if (continuous) {
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            text += event.results[i][0].transcript + ' ';
+                        }
+                    }
+                } else {
+                    text = event.results[0][0].transcript;
+                }
+                
                 const input = document.getElementById(inputId);
                 if (input && text) {
                     const startText = input.value.trim();
-                    input.value = startText ? startText + ' ' + text : text;
+                    input.value = startText ? startText + ' ' + text.trim() : text.trim();
                 }
             };
             
@@ -8048,32 +8065,28 @@
         }
 
         function toggleAIMic() {
-            if (!aiRecognition) {
-                aiRecognition = initVoiceRecognition('ai-prompt-input', 'ai-mic-btn', () => { aiRecording = false; });
-            }
-            if (!aiRecognition) return;
-            
             if (aiRecording) {
-                aiRecognition.stop();
+                if (aiRecognition) aiRecognition.stop();
                 aiRecording = false;
             } else {
-                aiRecognition.start();
-                aiRecording = true;
+                aiRecognition = initVoiceRecognition('ai-prompt-input', 'ai-mic-btn', () => { aiRecording = false; });
+                if (aiRecognition) {
+                    aiRecognition.start();
+                    aiRecording = true;
+                }
             }
         }
 
         function toggleMobileMic() {
-            if (!mobileRecognition) {
-                mobileRecognition = initVoiceRecognition('mobile-input-textarea', 'mobile-mic-btn', () => { mobileRecording = false; });
-            }
-            if (!mobileRecognition) return;
-            
             if (mobileRecording) {
-                mobileRecognition.stop();
+                if (mobileRecognition) mobileRecognition.stop();
                 mobileRecording = false;
             } else {
-                mobileRecognition.start();
-                mobileRecording = true;
+                mobileRecognition = initVoiceRecognition('mobile-input-textarea', 'mobile-mic-btn', () => { mobileRecording = false; });
+                if (mobileRecognition) {
+                    mobileRecognition.start();
+                    mobileRecording = true;
+                }
             }
         }
 
@@ -8089,9 +8102,13 @@
                 return;
             }
             
-            if (!globalVoiceRecognition) {
+            if (globalVoiceRecording) {
+                if (globalVoiceRecognition) globalVoiceRecognition.stop();
+                globalVoiceRecording = false;
+            } else {
                 globalVoiceRecognition = new SpeechRecognition();
-                globalVoiceRecognition.continuous = false;
+                const continuous = localStorage.getItem('voice-continuous') === 'true';
+                globalVoiceRecognition.continuous = continuous;
                 globalVoiceRecognition.lang = 'en-US';
                 globalVoiceRecognition.interimResults = false;
                 
@@ -8106,18 +8123,28 @@
                 };
                 
                 globalVoiceRecognition.onresult = (event) => {
-                    const text = event.results[0][0].transcript;
+                    let text = '';
+                    if (continuous) {
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                                text += event.results[i][0].transcript + ' ';
+                            }
+                        }
+                    } else {
+                        text = event.results[0][0].transcript;
+                    }
+                    
                     if (text && activeProject) {
                         const activePaneEl = document.querySelector('.terminal-pane.active-pane');
                         const paneId = activePaneEl ? activePaneEl.dataset.paneId : 'main';
                         
                         if (socket && socket.connected) {
-                            socket.emit('pty-input', { project: activeProject, paneId, data: text });
+                            socket.emit('pty-input', { project: activeProject, paneId, data: text.trim() });
                         } else {
                             fetch(`/input/${activeProject}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ data: text })
+                                body: JSON.stringify({ data: text.trim() })
                             }).catch(err => console.error('Voice send error:', err));
                         }
                     }
@@ -8137,12 +8164,7 @@
                     }
                     globalVoiceRecording = false;
                 };
-            }
-            
-            if (globalVoiceRecording) {
-                globalVoiceRecognition.stop();
-                globalVoiceRecording = false;
-            } else {
+                
                 globalVoiceRecognition.start();
                 globalVoiceRecording = true;
             }
