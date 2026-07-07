@@ -8491,7 +8491,7 @@
             if (cached) {
                 const data = JSON.parse(cached);
                 if (reqEl && data.remaining_requests && data.limit_requests) {
-                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
+                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})` + (data.timestamp ? ` [as of ${data.timestamp}]` : '');
                 } else if (reqEl) {
                     reqEl.innerText = '-';
                 }
@@ -8594,6 +8594,7 @@
             } else {
                 localStorage.setItem('ai-model-groq', model);
             }
+            updateRateLimitsUI();
         }
 
         function saveGroqAPIKey() {
@@ -8678,7 +8679,11 @@
                 }
                 
                 if (data.rate_limits) {
-                    localStorage.setItem(`ai-rate-limits-groq-${model}`, JSON.stringify(data.rate_limits));
+                    const limitsWithTime = {
+                        ...data.rate_limits,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    localStorage.setItem(`ai-rate-limits-groq-${model}`, JSON.stringify(limitsWithTime));
                     updateRateLimitsUI();
                 }
                 
