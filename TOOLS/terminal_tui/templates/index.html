@@ -2848,6 +2848,23 @@
                 </div>
             </div>
 
+            <!-- Border styling row -->
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Border</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <!-- Border color -->
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('custom-btn-border-color').click()">
+                        <input id="custom-btn-border-color" type="color" value="#334155" title="Border color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Color</span>
+                    </div>
+                    <!-- Border thickness -->
+                    <input id="custom-btn-border-width" type="number" min="0" max="8" value="" placeholder="px" title="Border thickness (px)" style="width: 58px; height: 34px; padding: 0 8px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.82rem; outline: none; text-align: center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'" placeholder="thick">
+                    <!-- Border radius -->
+                    <input id="custom-btn-border-radius" type="number" min="0" max="999" value="" placeholder="r px" title="Border radius (px)" style="width: 62px; height: 34px; padding: 0 8px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.82rem; outline: none; text-align: center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <span style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap;">radius</span>
+                </div>
+            </div>
+
             <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--bg-sidebar); border-radius: 6px;">
                 Examples: <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\t</code> = Tab, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\r</code> = Enter, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\x1b[A</code> = Up Arrow
             </div>
@@ -9363,6 +9380,9 @@
             let initialFontSize = '';
             let initialBold = false;
             let initialItalic = false;
+            let initialBorderColor = '#334155';
+            let initialBorderWidth = '';
+            let initialBorderRadius = '';
             if (editIndex !== null) {
                 const existing = allCustomBtns || [];
                 if (existing[editIndex]) {
@@ -9370,6 +9390,9 @@
                     initialFontSize = existing[editIndex].fontSize || '';
                     initialBold = existing[editIndex].bold || false;
                     initialItalic = existing[editIndex].italic || false;
+                    initialBorderColor = existing[editIndex].borderColor || '#334155';
+                    initialBorderWidth = existing[editIndex].borderWidth || '';
+                    initialBorderRadius = existing[editIndex].borderRadius || '';
                 }
             }
             customBtnSelectedFont = initialFontFamily;
@@ -9379,6 +9402,9 @@
             document.getElementById('custom-btn-font-size').value = initialFontSize;
             setCustomBtnBold(initialBold);
             setCustomBtnItalic(initialItalic);
+            document.getElementById('custom-btn-border-color').value = initialBorderColor;
+            document.getElementById('custom-btn-border-width').value = initialBorderWidth;
+            document.getElementById('custom-btn-border-radius').value = initialBorderRadius;
 
             const isEditing = editIndex !== null;
             document.getElementById('custom-btn-modal-title').innerText = isEditing ? 'Edit Custom Button' : 'Add Custom Button';
@@ -9442,8 +9468,11 @@
             const fontSize = document.getElementById('custom-btn-font-size').value.trim();
             const bold = document.getElementById('custom-btn-bold-btn').dataset.active === 'true';
             const italic = document.getElementById('custom-btn-italic-btn').dataset.active === 'true';
+            const borderColor = document.getElementById('custom-btn-border-color').value || '';
+            const borderWidth = document.getElementById('custom-btn-border-width').value.trim();
+            const borderRadius = document.getElementById('custom-btn-border-radius').value.trim();
 
-            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg, fontFamily, fontSize, bold, italic };
+            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg, fontFamily, fontSize, bold, italic, borderColor, borderWidth, borderRadius };
             if (customBtnEditIndex !== null) {
                 existing[customBtnEditIndex] = btnConfig;
             } else {
@@ -9465,23 +9494,28 @@
             const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
             const top = 246 + existingCustom * 30;
 
-            const bgStr = btnConfig.bg ? `background:${btnConfig.bg}; border:1px solid ${btnConfig.bg};` : 'background:rgba(15,23,42,0.9); border:1px solid rgba(255,255,255,0.12);';
+            const bgStr = btnConfig.bg ? `background:${btnConfig.bg};` : 'background:rgba(15,23,42,0.9);';
             const fgStr = btnConfig.fg ? `color:${btnConfig.fg} !important;` : 'color:var(--text-secondary);';
             const fontFamilyStr = btnConfig.fontFamily ? `font-family:${btnConfig.fontFamily};` : '';
             const fontSizeStr = btnConfig.fontSize ? `font-size:${btnConfig.fontSize}px;` : 'font-size:0.6rem;';
             const fontWeightStr = btnConfig.bold ? 'font-weight:700;' : 'font-weight:600;';
             const fontStyleStr = btnConfig.italic ? 'font-style:italic;' : '';
+            // Border: custom values take priority, then bg-derived fallback
+            const bColor = btnConfig.borderColor || (btnConfig.bg ? btnConfig.bg : 'rgba(255,255,255,0.12)');
+            const bWidth = btnConfig.borderWidth ? `${btnConfig.borderWidth}px` : '1px';
+            const bRadius = btnConfig.borderRadius !== undefined && btnConfig.borderRadius !== '' ? `${btnConfig.borderRadius}px` : '6px';
+            const borderStr = `border:${bWidth} solid ${bColor}; border-radius:${bRadius};`;
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'terminal-pane-custom-btn';
             btn.title = btnConfig.label + ' (Right-click to Edit/Delete)';
             btn.innerText = btnConfig.label;
-            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:6px; ${bgStr} ${fgStr} cursor:pointer; z-index:5; ${fontSizeStr} ${fontWeightStr} ${fontStyleStr} ${fontFamilyStr} line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
+            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; ${borderStr} ${bgStr} ${fgStr} cursor:pointer; z-index:5; ${fontSizeStr} ${fontWeightStr} ${fontStyleStr} ${fontFamilyStr} line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
             
-            if (!btnConfig.bg) {
+            if (!btnConfig.bg && !btnConfig.borderColor) {
                 btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
-                btn.onmouseleave = () => { btn.style.borderColor = 'rgba(255,255,255,0.12)'; btn.style.color = 'var(--text-secondary)'; };
+                btn.onmouseleave = () => { btn.style.borderColor = bColor; btn.style.color = 'var(--text-secondary)'; };
             } else {
                 btn.onmouseenter = () => { btn.style.filter = 'brightness(1.2)'; };
                 btn.onmouseleave = () => { btn.style.filter = 'none'; };
