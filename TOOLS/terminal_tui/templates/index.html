@@ -1790,6 +1790,9 @@
                 </select>
                 <select id="ai-model-select" style="flex:2; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIModelChange()">
                 </select>
+                <button id="ai-usage-toggle-btn" onclick="toggleAIUsagePanel()" title="Rate limit stats" style="display:none; flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); width:26px; height:26px; cursor:pointer; padding:0; align-items:center; justify-content:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </button>
             </div>
 
             <!-- Gemini API Key Container -->
@@ -8840,22 +8843,36 @@
             'allam-2-7b': { rpm: 30, rpd: '7K', tpm: '6K', tpd: '500K' }
         };
 
+        function toggleAIUsagePanel() {
+            const container = document.getElementById('ai-usage-container');
+            const btn = document.getElementById('ai-usage-toggle-btn');
+            if (!container) return;
+            const isVisible = container.style.display === 'flex';
+            container.style.display = isVisible ? 'none' : 'flex';
+            if (btn) btn.style.color = isVisible ? 'var(--text-muted)' : 'var(--accent-color)';
+        }
+
         function updateRateLimitsUI() {
             const provider = document.getElementById('ai-provider-select').value;
             const container = document.getElementById('ai-usage-container');
-            if (!container) return;
+            const toggleBtn = document.getElementById('ai-usage-toggle-btn');
 
             if (provider !== 'groq') {
-                container.style.display = 'none';
+                if (container) container.style.display = 'none';
+                if (toggleBtn) toggleBtn.style.display = 'none';
                 return;
             }
 
             const modelSelect = document.getElementById('ai-model-select');
             const model = modelSelect ? modelSelect.value : '';
             if (!model) {
-                container.style.display = 'none';
+                if (container) container.style.display = 'none';
+                if (toggleBtn) toggleBtn.style.display = 'none';
                 return;
             }
+
+            // Show the toggle button now that groq + model is selected
+            if (toggleBtn) toggleBtn.style.display = 'flex';
 
             // Populate Specs dynamically from constant JSON specs
             const spec = GROQ_MODEL_SPECS[model];
@@ -8898,7 +8915,7 @@
                 if (tokEl) tokEl.innerText = 'Not queried yet';
                 if (timeContainer) timeContainer.style.display = 'none';
             }
-            container.style.display = 'flex';
+            // Panel visibility is controlled by toggleAIUsagePanel() — don't force-show here
         }
 
         function handleAIProviderChange() {
