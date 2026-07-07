@@ -14,3 +14,4 @@
 - [X] Expand Groq models dropdown to match the custom chat completions models in the Groq console (excluding Whisper).
 - [X] Implement advanced parsing to clean `<think>` blocks, reasoning steps, and system instruction echoes from the generated command string.
 - [X] Remove restrictive custom line filtering code rules from clean_ai_command output formatting to preserve legitimate command symbols.
+- [X] Increase max_tokens limit to 1024 for Groq model payloads to accommodate reasoning/thinking sequences fully.

@@ -3492,7 +3492,7 @@ def api_ai_command():
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.1,
-            "max_tokens": 150
+            "max_tokens": 1024
         }
         try:
             res = requests.post(url, json=payload, headers=headers, timeout=15)
