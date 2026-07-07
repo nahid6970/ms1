@@ -3565,20 +3565,6 @@ def api_ai_command():
     cmd = re.sub(r'<think>.*?</think>', '', cmd, flags=re.DOTALL).strip()
     cmd = re.sub(r'<think>.*', '', cmd, flags=re.DOTALL).strip() # Open think tag fallback
         
-    # Clean markdown wrappers (shared logic for both)
-    if cmd.startswith('```'):
-        lines = cmd.split('\n')
-        if len(lines) > 1:
-            if lines[0].startswith('```'):
-                lines = lines[1:]
-            if lines[-1].startswith('```'):
-                lines = lines[:-1]
-            cmd = '\n'.join(lines).strip()
-        else:
-            cmd = cmd.replace('`', '')
-    elif cmd.startswith('`') and cmd.endswith('`'):
-        cmd = cmd.strip('`')
-        
     return jsonify({"command": cmd, "rate_limits": rate_limits})
 
 @app.route('/api/system/ports/kill', methods=['POST'])
