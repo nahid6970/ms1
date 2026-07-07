@@ -12,3 +12,5 @@
 - [X] Support public Gemini 3.5 Flash/Pro and 3.1 Flash/Pro models.
 - [X] Integrate Groq Console support with custom API key handling, provider switcher, and Groq models (Llama 3.3, Llama 3.1, Mixtral, Gemma 2).
 - [X] Expand Groq models dropdown to match the custom chat completions models in the Groq console (excluding Whisper).
+- [X] Implement advanced parsing to clean `<think>` blocks, reasoning steps, and system instruction echoes from the generated command string.
+- [X] Remove restrictive custom line filtering code rules from clean_ai_command output formatting to preserve legitimate command symbols.

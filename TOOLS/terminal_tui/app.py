@@ -3538,6 +3538,12 @@ def api_ai_command():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    # Clean thinking tags, CoT reasoning, and rule echoes
+    import re
+    cmd = re.sub(r'<think>.*?</think>', '', cmd, flags=re.DOTALL).strip()
+    cmd = re.sub(r'<think>.*', '', cmd, flags=re.DOTALL).strip() # Open think tag fallback
+
+        
     # Clean markdown wrappers (shared logic for both)
     if cmd.startswith('```'):
         lines = cmd.split('\n')
