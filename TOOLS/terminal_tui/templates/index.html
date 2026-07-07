@@ -8085,6 +8085,11 @@
             if (manualStop) {
                 // If already recording, stop it
                 if (pythonRecordingActive[btnId]) {
+                    const orig = pythonOriginalStyles[btnId];
+                    btn.innerHTML = '⏳';
+                    btn.style.background = '#64748b';
+                    btn.style.borderColor = '#64748b';
+                    btn.title = 'Processing...';
                     try {
                         const res = await fetch('/api/voice-record/stop', {
                             method: 'POST',
@@ -8099,8 +8104,8 @@
                     } catch (err) {
                         console.error("Python Voice Stop Error:", err);
                     } finally {
-                        const orig = pythonOriginalStyles[btnId];
                         if (orig) {
+                            btn.innerHTML = orig.html;
                             btn.style.background = orig.bg;
                             btn.style.borderColor = orig.border;
                             btn.style.color = orig.color;
@@ -8116,7 +8121,8 @@
                     bg: btn.style.background,
                     border: btn.style.borderColor,
                     color: btn.style.color,
-                    title: btn.title
+                    title: btn.title,
+                    html: btn.innerHTML
                 };
 
                 btn.style.background = '#ef4444';
@@ -8149,6 +8155,7 @@
                 const originalBorder = btn.style.borderColor;
                 const originalColor = btn.style.color;
                 const originalTitle = btn.title;
+                const originalHtml = btn.innerHTML;
 
                 btn.style.background = '#ef4444';
                 btn.style.borderColor = '#ef4444';
@@ -8161,6 +8168,13 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({})
                     });
+                    
+                    // Show processing style as soon as recording stop/silence is detected and processing begins
+                    btn.innerHTML = '⏳';
+                    btn.style.background = '#64748b';
+                    btn.style.borderColor = '#64748b';
+                    btn.title = 'Processing...';
+
                     const data = await res.json();
                     if (data.error) {
                         throw new Error(data.error);
@@ -8171,6 +8185,7 @@
                 } catch (err) {
                     console.error("Python Voice Error:", err);
                 } finally {
+                    btn.innerHTML = originalHtml;
                     btn.style.background = originalBg;
                     btn.style.borderColor = originalBorder;
                     btn.style.color = originalColor;

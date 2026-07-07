@@ -6,3 +6,4 @@
 - [X] Adjust microphone and AI button status bar positions and make Copilot popover buttons icon-only.
 - [X] Change CPU monitor display style to blue.
 - [X] Move status effects directly to buttons and remove the dedicated status message label.
+- [X] Add a processing status indicator (`⏳`) directly on recording buttons.
