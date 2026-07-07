@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
     
     <script>
         (function() {
@@ -75,8 +75,18 @@
             padding: 8px 10px; margin: 6px 0; overflow-x: auto;
         }
         #ai-chat-history .ai-md pre code {
-            background: none; padding: 0; color: #f43f5e;
+            background: none; padding: 0; color: #e2c08d;
             white-space: pre-wrap; display: block; font-size: 0.72rem;
+        }
+        /* GFM task list checkboxes */
+        #ai-chat-history .ai-md ul.contains-task-list,
+        #ai-chat-history .ai-md .task-list-item { list-style: none; margin-left: 0; }
+        #ai-chat-history .ai-md .task-list-item input[type="checkbox"] {
+            margin-right: 6px; accent-color: var(--accent-color); cursor: default; pointer-events: none;
+        }
+        /* Images */
+        #ai-chat-history .ai-md img {
+            max-width: 100%; border-radius: 4px; margin: 4px 0; display: block;
         }
         #ai-chat-history .ai-md table {
             width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.72rem;
@@ -8578,23 +8588,36 @@
                 .replace(/'/g, "&#039;");
         }
 
+        // Configure marked.js once after page load
+        (function initMarked() {
+            if (typeof window.marked === 'undefined') return;
+            try {
+                window.marked.use({
+                    gfm: true,
+                    breaks: true,
+                    pedantic: false
+                });
+            } catch(e) {
+                console.warn('[AI Copilot] marked.use() failed:', e);
+            }
+        })();
+
         function renderMarkdown(text) {
             const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
 
             if (richEnabled) {
                 try {
-                    // marked v15 CDN: window.marked = { parse, marked, Marked, ... }
                     const m = window.marked;
                     if (m) {
-                        // Try direct .parse() first (marked v5+)
+                        // marked v5+ / v15: direct .parse()
                         if (typeof m.parse === 'function') {
-                            return m.parse(text, { breaks: true, gfm: true });
+                            return m.parse(text);
                         }
-                        // Try m.marked.parse() (some UMD builds)
+                        // Some UMD builds expose m.marked.parse()
                         if (m.marked && typeof m.marked.parse === 'function') {
-                            return m.marked.parse(text, { breaks: true, gfm: true });
+                            return m.marked.parse(text);
                         }
-                        // Try calling marked directly (marked v0-v4)
+                        // marked v0-v4: callable directly
                         if (typeof m === 'function') {
                             return m(text, { breaks: true, gfm: true });
                         }
@@ -8607,66 +8630,144 @@
                 }
             }
 
-            // Fallback parser that supports headers, bold, horizontal rules, lists, and code blocks
+            // ── Fallback parser (when marked.js unavailable or rich-md disabled) ──
             let lines = text.split('\n');
             let htmlLines = [];
             let inCodeBlock = false;
+            let codeLang = '';
             let codeContent = [];
+            let inTable = false;
+            let tableRows = [];
+
+            const flushTable = () => {
+                if (!tableRows.length) return;
+                let tableHtml = '<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:0.72rem;">';
+                tableRows.forEach((row, ri) => {
+                    const cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
+                    const tag = ri === 0 ? 'th' : 'td';
+                    const style = ri === 0
+                        ? 'border:1px solid var(--border-color);padding:5px 8px;background:rgba(255,255,255,0.06);font-weight:600;'
+                        : 'border:1px solid var(--border-color);padding:5px 8px;';
+                    tableHtml += '<tr>' + cells.map(c => `<${tag} style="${style}">${formatInlineMarkdown(c)}</${tag}>`).join('') + '</tr>';
+                });
+                tableHtml += '</table>';
+                htmlLines.push(tableHtml);
+                tableRows = [];
+                inTable = false;
+            };
 
             for (let line of lines) {
-                if (line.trim().startsWith('```')) {
+                // Fenced code block toggle
+                const fenceMatch = line.match(/^```(\w*)$/);
+                if (fenceMatch) {
                     if (inCodeBlock) {
                         inCodeBlock = false;
-                        htmlLines.push(`<pre style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:4px; padding:6px 8px; margin:6px 0; overflow-x:auto;"><code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; white-space:pre-wrap; display:block;">${escapeHtml(codeContent.join('\n'))}</code></pre>`);
+                        htmlLines.push(`<pre style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:4px;padding:6px 8px;margin:6px 0;overflow-x:auto;"><code style="font-family:Consolas,monospace;font-size:0.72rem;color:#e2c08d;white-space:pre-wrap;display:block;">${escapeHtml(codeContent.join('\n'))}</code></pre>`);
                         codeContent = [];
+                        codeLang = '';
                     } else {
                         inCodeBlock = true;
+                        codeLang = fenceMatch[1] || '';
+                        if (inTable) flushTable();
                     }
                     continue;
                 }
+                if (inCodeBlock) { codeContent.push(line); continue; }
 
-                if (inCodeBlock) {
-                    codeContent.push(line);
+                // Table detection (lines with | pipes)
+                if (line.includes('|')) {
+                    // Skip separator rows like |---|---|
+                    if (/^\s*\|?[\s\-:]+\|/.test(line)) { inTable = true; continue; }
+                    inTable = true;
+                    tableRows.push(line.replace(/^\||\|$/g, ''));
                     continue;
+                } else if (inTable) {
+                    flushTable();
                 }
 
                 let escapedLine = escapeHtml(line);
 
                 // Horizontal Rule
-                if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
-                    htmlLines.push('<hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">');
+                if (/^(\-\-\-|\*\*\*|___)/.test(line.trim())) {
+                    htmlLines.push('<hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:10px 0;">');
                     continue;
                 }
 
-                // Headers
-                let headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
+                // Headers h1-h6
+                let headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
                 if (headerMatch) {
                     let level = headerMatch[1].length;
-                    let content = headerMatch[2];
-                    content = formatInlineMarkdown(content);
-                    htmlLines.push(`<h${level} style="margin:8px 0 4px 0; font-size:${0.9 - (level*0.05)}rem; font-weight:600; color:var(--text-secondary);">${content}</h${level}>`);
+                    let content = formatInlineMarkdown(escapeHtml(headerMatch[2]));
+                    const sizes = ['1rem','0.92rem','0.86rem','0.8rem','0.76rem','0.74rem'];
+                    htmlLines.push(`<h${level} style="margin:8px 0 4px;font-size:${sizes[level-1]};font-weight:${level<=2?700:600};color:${level<=2?'var(--text-primary)':'var(--text-secondary)'};">${content}</h${level}>`);
                     continue;
                 }
 
-                // Bullet Lists
-                let listMatch = line.match(/^(\*|-)\s+(.*)$/);
+                // GFM Task list items  - [ ] or - [x]
+                let taskMatch = line.match(/^(\s*)[-*]\s+\[([ xX])\]\s+(.*)$/);
+                if (taskMatch) {
+                    const checked = taskMatch[2].toLowerCase() === 'x' ? 'checked' : '';
+                    const content = formatInlineMarkdown(escapeHtml(taskMatch[3]));
+                    htmlLines.push(`<div style="display:flex;align-items:baseline;gap:6px;margin:2px 0;font-size:0.75rem;"><input type="checkbox" ${checked} disabled style="flex-shrink:0;accent-color:var(--accent-color);margin-top:2px;">${content}</div>`);
+                    continue;
+                }
+
+                // Bullet list items
+                let listMatch = line.match(/^(\s*)[-*]\s+(.*)$/);
                 if (listMatch) {
-                    let content = formatInlineMarkdown(listMatch[2]);
-                    htmlLines.push(`<li style="margin-left:12px; list-style-type:disc; font-size:0.75rem;">${content}</li>`);
+                    let content = formatInlineMarkdown(escapeHtml(listMatch[2]));
+                    htmlLines.push(`<li style="margin-left:${12 + listMatch[1].length * 8}px;list-style-type:disc;font-size:0.75rem;">${content}</li>`);
                     continue;
                 }
 
-                // Normal line formatting
-                htmlLines.push(formatInlineMarkdown(escapedLine));
+                // Numbered list items
+                let numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+                if (numMatch) {
+                    let content = formatInlineMarkdown(escapeHtml(numMatch[3]));
+                    htmlLines.push(`<li style="margin-left:${16 + numMatch[1].length * 8}px;list-style-type:decimal;font-size:0.75rem;">${content}</li>`);
+                    continue;
+                }
+
+                // Blockquote
+                let bqMatch = line.match(/^>\s?(.*)$/);
+                if (bqMatch) {
+                    let content = formatInlineMarkdown(escapeHtml(bqMatch[1]));
+                    htmlLines.push(`<blockquote style="border-left:3px solid var(--accent-color);margin:6px 0;padding:4px 10px;background:rgba(37,99,235,0.06);border-radius:0 4px 4px 0;color:var(--text-secondary);">${content}</blockquote>`);
+                    continue;
+                }
+
+                // Empty line paragraph break
+                if (line.trim() === '') {
+                    htmlLines.push('<div style="height:4px;"></div>');
+                    continue;
+                }
+
+                // Normal line
+                htmlLines.push(`<p style="margin:2px 0;">${formatInlineMarkdown(escapedLine)}</p>`);
             }
 
-            return htmlLines.join('<br>');
+            if (inTable) flushTable();
+            return htmlLines.join('\n');
         }
 
         function formatInlineMarkdown(text) {
-            let formatted = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-            formatted = formatted.replace(/`([^`]+)`/g, '<code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; padding:1px 4px; background:rgba(0,0,0,0.2); border-radius:3px;">$1</code>');
-            return formatted;
+            // Bold + italic: ***text***
+            let out = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+            // Bold: **text** or __text__
+            out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            out = out.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+            // Italic: *text* or _text_
+            out = out.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            out = out.replace(/_([^_]+)_/g, '<em>$1</em>');
+            // Strikethrough: ~~text~~
+            out = out.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+            // Images: ![alt](url)
+            out = out.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:4px;margin:2px 0;display:inline-block;">');
+            // Links: [text](url)
+            out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:var(--accent-color);text-decoration:underline;" target="_blank" rel="noopener">$1</a>');
+            // Inline code: `code`
+            out = out.replace(/`([^`]+)`/g, '<code style="font-family:Consolas,monospace;font-size:0.72rem;color:#f43f5e;padding:1px 4px;background:rgba(0,0,0,0.2);border-radius:3px;">$1</code>');
+            return out;
         }
 
         function clearAIChat() {
