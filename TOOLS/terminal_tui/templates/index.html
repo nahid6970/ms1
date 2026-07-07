@@ -8575,12 +8575,21 @@
         function renderMarkdown(text) {
             const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
             
-            // Check if response looks like code/script and is not wrapped in backticks
             let formattedText = text;
             const hasBackticks = text.includes('```');
-            const looksLikeCode = /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker |function |const |let |var )/m.test(text);
+            const hasMarkdownHeaders = /^#+\s+/m.test(text);
+            const hasMarkdownTables = /\|/m.test(text);
+            const hasMarkdownLists = /^(\*|-|\d+\.)\s+/m.test(text);
+            const hasMarkdownBold = /\*\*/.test(text);
             
-            if (looksLikeCode && !hasBackticks) {
+            const looksLikeCode = !hasBackticks && 
+                                  !hasMarkdownHeaders && 
+                                  !hasMarkdownTables && 
+                                  !hasMarkdownLists && 
+                                  !hasMarkdownBold &&
+                                  /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker |function |const |let |var )/m.test(text);
+            
+            if (looksLikeCode) {
                 formattedText = '```\n' + text + '\n```';
             }
 
