@@ -8490,6 +8490,7 @@
                                 <code style="font-family:Consolas,monospace; font-size:0.75rem; color:#f43f5e; display:block; word-break:break-all;">${escapeHtml(msg.content)}</code>
                                 <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
                                     ${msg.model ? `<span style="color:var(--text-muted); font-size:0.65rem; margin-right:auto; font-weight:500;">🤖 ${msg.model}</span>` : ''}
+                                    <button onclick="regenerateAIChatCommand(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Regenerate this response">🔄 Retry</button>
                                     <button onclick="copyAIChatCommand(this, ${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Copy to clipboard">📋 Copy</button>
                                     <button onclick="runAIChatCommand(${idx})" style="background:none; border:none; color:#10b981; cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Execute in terminal">▶️ Run</button>
                                 </div>
@@ -8517,6 +8518,15 @@
         function clearAIChat() {
             aiChatHistory = [];
             renderAIChatHistory();
+        }
+
+        function regenerateAIChatCommand(idx) {
+            if (idx <= 0) return;
+            const prompt = aiChatHistory[idx - 1].content;
+            // Remove the assistant response and user prompt from history
+            aiChatHistory = aiChatHistory.slice(0, idx - 1);
+            document.getElementById('ai-prompt-input').value = prompt;
+            generateAICommand();
         }
 
         function copyAIChatCommand(btn, idx) {
