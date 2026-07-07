@@ -979,6 +979,18 @@
             transform: scale(1);
         }
 
+        /* Ports modal: hide Notes column on small screens */
+        @media (max-width: 540px) {
+            #ports-modal .modal-content {
+                min-width: unset !important;
+                width: 98vw !important;
+            }
+            #ports-modal th:last-child,
+            #ports-modal td:last-child {
+                display: none !important;
+            }
+        }
+
         .modal-header {
             margin-bottom: 20px;
         }
@@ -10651,9 +10663,11 @@
                     : `<button onclick="killPortProcess('${p.pid}', ${p.port})" style="padding:3px 8px; background:none; border:1px solid #ef4444; border-radius:0; color:#ef4444; font-size:0.7rem; cursor:pointer; font-weight:500; transition:all 0.2s;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.15)'" onmouseleave="this.style.backgroundColor='transparent'">Kill</button>`;
 
                 const isStarred = starred.includes(String(p.port));
-                const starIcon = isStarred ? '⭐' : '☆';
                 const starColor = isStarred ? '#fbbf24' : 'var(--text-muted)';
-                const starHtml = `<span onclick="toggleStarPort(${p.port})" style="cursor:pointer; color:${starColor}; margin-right:6px; font-size:0.9rem;" title="Bookmark Port">${starIcon}</span>`;
+                const starSvg = isStarred
+                    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+                    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+                const starHtml = `<span onclick="toggleStarPort(${p.port})" style="cursor:pointer; color:${starColor}; margin-right:6px; display:inline-flex; align-items:center; flex-shrink:0;" title="Bookmark Port">${starSvg}</span>`;
 
                 const notes = starredPorts[String(p.port)] || '';
                 const noteHtml = isStarred 
