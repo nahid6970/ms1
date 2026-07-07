@@ -8488,11 +8488,17 @@
                         <div style="display:flex; justify-content:flex-start; align-items:flex-start; gap:6px;">
                             <div style="flex:1; max-width:85%; background:var(--bg-sidebar); border:1px solid var(--border-color); padding:8px 10px; border-radius:12px 12px 12px 2px; position:relative;">
                                 <code style="font-family:Consolas,monospace; font-size:0.75rem; color:#f43f5e; display:block; word-break:break-all;">${escapeHtml(msg.content)}</code>
-                                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
+                                <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
                                     ${msg.model ? `<span style="color:var(--text-muted); font-size:0.65rem; margin-right:auto; font-weight:500;">🤖 ${msg.model}</span>` : ''}
-                                    <button onclick="regenerateAIChatCommand(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Regenerate this response">🔄 Retry</button>
-                                    <button onclick="copyAIChatCommand(this, ${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Copy to clipboard">📋 Copy</button>
-                                    <button onclick="runAIChatCommand(${idx})" style="background:none; border:none; color:#10b981; cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Execute in terminal">▶️ Run</button>
+                                    <button onclick="regenerateAIChatCommand(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Regenerate/Retry" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none';">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                    </button>
+                                    <button onclick="copyAIChatCommand(this, ${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Copy to Clipboard" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none';">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    </button>
+                                    <button onclick="runAIChatCommand(${idx})" style="background:none; border:none; color:#10b981; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Execute in Terminal PTY" onmouseover="this.style.background='rgba(16, 185, 129, 0.1)';" onmouseout="this.style.background='none';">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -8532,12 +8538,13 @@
         function copyAIChatCommand(btn, idx) {
             const cmd = aiChatHistory[idx].content;
             navigator.clipboard.writeText(cmd).then(() => {
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✨ Copied!';
+                const originalColor = btn.style.color;
+                const originalTitle = btn.title;
                 btn.style.color = '#10b981';
+                btn.title = 'Copied!';
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.color = 'var(--text-muted)';
+                    btn.style.color = originalColor;
+                    btn.title = originalTitle;
                 }, 1500);
             });
         }
