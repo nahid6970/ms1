@@ -3300,6 +3300,115 @@ def api_ai_personas():
         save_ai_personas(data)
         return jsonify({"success": True})
 
+import threading
+import io
+import wave
+
+class PythonVoiceRecorder:
+    def __init__(self):
+        self.frames = []
+        self.recording = False
+        self.thread = None
+        self.audio_interface = None
+        self.stream = None
+
+    def start(self):
+        if self.recording:
+            return
+        self.frames = []
+        self.recording = True
+        self.thread = threading.Thread(target=self._record)
+        self.thread.daemon = True
+        self.thread.start()
+
+    def _record(self):
+        try:
+            import pyaudio
+            CHUNK, FORMAT, CHANNELS, RATE = 512, pyaudio.paInt16, 1, 16000
+            self.audio_interface = pyaudio.PyAudio()
+            self.stream = self.audio_interface.open(
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK
+            )
+            while self.recording:
+                data = self.stream.read(CHUNK, exception_on_overflow=False)
+                self.frames.append(data)
+        except Exception as e:
+            print("Error recording in thread:", e)
+        finally:
+            self.cleanup()
+
+    def stop(self):
+        if not self.recording:
+            return ""
+        self.recording = False
+        if self.thread:
+            self.thread.join(timeout=2)
+        
+        if not self.frames:
+            return ""
+            
+        try:
+            import speech_recognition as sr
+            import pyaudio
+            FORMAT, CHANNELS, RATE = pyaudio.paInt16, 1, 16000
+            sample_width = 2
+            
+            buf = io.BytesIO()
+            with wave.open(buf, 'wb') as wf:
+                wf.setnchannels(CHANNELS)
+                wf.setsampwidth(sample_width)
+                wf.setframerate(RATE)
+                wf.writeframes(b''.join(self.frames))
+            buf.seek(0)
+            
+            recognizer = sr.Recognizer()
+            with sr.AudioFile(buf) as source:
+                audio = recognizer.record(source)
+            text = recognizer.recognize_google(audio, language="en-US")
+            return text
+        except Exception as e:
+            print("Error transcribing:", e)
+            return ""
+        finally:
+            self.frames = []
+
+    def cleanup(self):
+        try:
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+        except:
+            pass
+        try:
+            if self.audio_interface:
+                self.audio_interface.terminate()
+        except:
+            pass
+        self.stream = None
+        self.audio_interface = None
+
+global_voice_recorder = PythonVoiceRecorder()
+
+@app.route('/api/voice-record/start', methods=['POST'])
+def api_voice_record_start():
+    try:
+        global_voice_recorder.start()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice-record/stop', methods=['POST'])
+def api_voice_record_stop():
+    try:
+        text = global_voice_recorder.stop()
+        return jsonify({"text": text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/voice-record', methods=['POST'])
 def api_voice_record():
     try:

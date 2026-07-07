@@ -2260,6 +2260,10 @@
                         <input type="checkbox" id="settings-voice-use-python" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                         <label for="settings-voice-use-python" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use Python Voice Engine (Non-Chrome)</label>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="settings-voice-manual-stop" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                        <label for="settings-voice-manual-stop" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Manual Stop Recording (Click to stop)</label>
+                    </div>
                 </div>
 
                 <!-- Current badge customization -->
@@ -6334,6 +6338,7 @@
             document.getElementById('settings-diff-wrap').checked = localStorage.getItem('diff-wrap-text') === 'true';
             document.getElementById('settings-voice-continuous').checked = localStorage.getItem('voice-continuous') === 'true';
             document.getElementById('settings-voice-use-python').checked = localStorage.getItem('voice-use-python') === 'true';
+            document.getElementById('settings-voice-manual-stop').checked = localStorage.getItem('voice-manual-stop') === 'true';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -6545,6 +6550,7 @@
             localStorage.setItem('diff-wrap-text', document.getElementById('settings-diff-wrap').checked);
             localStorage.setItem('voice-continuous', document.getElementById('settings-voice-continuous').checked);
             localStorage.setItem('voice-use-python', document.getElementById('settings-voice-use-python').checked);
+            localStorage.setItem('voice-manual-stop', document.getElementById('settings-voice-manual-stop').checked);
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -8070,54 +8076,146 @@
             return rec;
         }
 
+        let pythonRecordingActive = {};
+        let pythonOriginalStyles = {};
+
         async function recordVoiceWithPython(inputId, btnId, insertCallback) {
             const btn = document.getElementById(btnId);
             if (!btn) return;
-            const originalBg = btn.style.background;
-            const originalBorder = btn.style.borderColor;
-            const originalColor = btn.style.color;
-            const originalTitle = btn.title;
-
-            btn.style.background = '#ef4444';
-            btn.style.borderColor = '#ef4444';
-            btn.style.color = '#fff';
-            btn.title = 'Recording voice (Python)...';
-
-            // Also update status if we have a status element
+            
+            const manualStop = localStorage.getItem('voice-manual-stop') === 'true';
             const statusEl = document.getElementById('ai-copilot-status');
-            if (inputId === 'ai-prompt-input' && statusEl) {
-                statusEl.innerText = 'Listening (Python)...';
-                statusEl.style.color = 'var(--text-muted)';
-            }
 
-            try {
-                const res = await fetch('/api/voice-record', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-                const data = await res.json();
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                if (data.text) {
-                    insertCallback(data.text);
+            if (manualStop) {
+                // If already recording, stop it
+                if (pythonRecordingActive[btnId]) {
                     if (inputId === 'ai-prompt-input' && statusEl) {
-                        statusEl.innerText = 'Processed.';
-                        statusEl.style.color = 'var(--accent-color)';
+                        statusEl.innerText = 'Processing...';
+                        statusEl.style.color = 'var(--text-muted)';
+                    }
+                    try {
+                        const res = await fetch('/api/voice-record/stop', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({})
+                        });
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error);
+                        if (data.text) {
+                            insertCallback(data.text);
+                            if (inputId === 'ai-prompt-input' && statusEl) {
+                                statusEl.innerText = 'Processed.';
+                                statusEl.style.color = 'var(--accent-color)';
+                            }
+                        } else {
+                            if (inputId === 'ai-prompt-input' && statusEl) statusEl.innerText = '';
+                        }
+                    } catch (err) {
+                        console.error("Python Voice Stop Error:", err);
+                        if (inputId === 'ai-prompt-input' && statusEl) {
+                            statusEl.innerText = 'Error processing';
+                            statusEl.style.color = '#ef4444';
+                        }
+                    } finally {
+                        const orig = pythonOriginalStyles[btnId];
+                        if (orig) {
+                            btn.style.background = orig.bg;
+                            btn.style.borderColor = orig.border;
+                            btn.style.color = orig.color;
+                            btn.title = orig.title;
+                        }
+                        pythonRecordingActive[btnId] = false;
+                    }
+                    return;
+                }
+
+                // Otherwise, start recording
+                pythonOriginalStyles[btnId] = {
+                    bg: btn.style.background,
+                    border: btn.style.borderColor,
+                    color: btn.style.color,
+                    title: btn.title
+                };
+
+                btn.style.background = '#ef4444';
+                btn.style.borderColor = '#ef4444';
+                btn.style.color = '#fff';
+                btn.title = 'Recording (Click to Stop)...';
+
+                if (inputId === 'ai-prompt-input' && statusEl) {
+                    statusEl.innerText = 'Listening (Python - Manual)...';
+                    statusEl.style.color = 'var(--text-muted)';
+                }
+
+                try {
+                    const res = await fetch('/api/voice-record/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error);
+                    pythonRecordingActive[btnId] = true;
+                } catch (err) {
+                    console.error("Python Voice Start Error:", err);
+                    const orig = pythonOriginalStyles[btnId];
+                    if (orig) {
+                        btn.style.background = orig.bg;
+                        btn.style.borderColor = orig.border;
+                        btn.style.color = orig.color;
+                        btn.title = orig.title;
+                    }
+                    if (inputId === 'ai-prompt-input' && statusEl) {
+                        statusEl.innerText = 'Failed to start mic';
+                        statusEl.style.color = '#ef4444';
                     }
                 }
-            } catch (err) {
-                console.error("Python Voice Error:", err);
+            } else {
+                // Auto stop/One-phrase mode (legacy behavior)
+                const originalBg = btn.style.background;
+                const originalBorder = btn.style.borderColor;
+                const originalColor = btn.style.color;
+                const originalTitle = btn.title;
+
+                btn.style.background = '#ef4444';
+                btn.style.borderColor = '#ef4444';
+                btn.style.color = '#fff';
+                btn.title = 'Recording voice (Python)...';
+
                 if (inputId === 'ai-prompt-input' && statusEl) {
-                    statusEl.innerText = 'Timeout / Error';
-                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = 'Listening (Python)...';
+                    statusEl.style.color = 'var(--text-muted)';
                 }
-            } finally {
-                btn.style.background = originalBg;
-                btn.style.borderColor = originalBorder;
-                btn.style.color = originalColor;
-                btn.title = originalTitle;
+
+                try {
+                    const res = await fetch('/api/voice-record', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const data = await res.json();
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    if (data.text) {
+                        insertCallback(data.text);
+                        if (inputId === 'ai-prompt-input' && statusEl) {
+                            statusEl.innerText = 'Processed.';
+                            statusEl.style.color = 'var(--accent-color)';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Python Voice Error:", err);
+                    if (inputId === 'ai-prompt-input' && statusEl) {
+                        statusEl.innerText = 'Timeout / Error';
+                        statusEl.style.color = '#ef4444';
+                    }
+                } finally {
+                    btn.style.background = originalBg;
+                    btn.style.borderColor = originalBorder;
+                    btn.style.color = originalColor;
+                    btn.title = originalTitle;
+                }
             }
         }
 
