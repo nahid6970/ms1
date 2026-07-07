@@ -10578,11 +10578,7 @@
         async function toggleStarPort(port) {
             const isStarred = getStarredPorts().includes(String(port));
             const newStarred = !isStarred;
-            let notes = '';
-            
-            if (newStarred) {
-                notes = prompt(`Add a note for port ${port} (optional):`, '') || '';
-            }
+            const notes = newStarred ? (starredPorts[String(port)] || '') : '';
             
             try {
                 const res = await fetch('/api/system/ports/starred', {
