@@ -1776,6 +1776,10 @@
             <div id="ai-usage-container" style="display:none; margin-bottom:10px; padding:8px; background:var(--bg-sidebar); border:1px dashed var(--border-color); border-radius:6px; font-size:0.7rem; color:var(--text-muted); flex-direction:column; gap:4px;">
                 <div style="font-weight:600; color:var(--text-secondary); text-transform:uppercase; font-size:0.62rem; letter-spacing:0.5px; margin-bottom:2px;">Rate Limit Status</div>
                 <div style="display:flex; justify-content:space-between;">
+                    <span>Model Limit Specs:</span>
+                    <span id="ai-usage-specs" style="font-weight:600; color:var(--text-primary);">-</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
                     <span>Requests Left:</span>
                     <span id="ai-usage-requests" style="font-weight:600; color:var(--text-primary);">-</span>
                 </div>
@@ -8439,6 +8443,20 @@
             }
         }
 
+        const GROQ_MODEL_SPECS = {
+            'llama-3.3-70b-versatile': { rpm: 30, rpd: '1K', tpm: '12K', tpd: '100K' },
+            'llama-3.1-8b-instant': { rpm: 30, rpd: '14.4K', tpm: '6K', tpd: '500K' },
+            'meta-llama/llama-4-scout-17b-16e-instruct': { rpm: 30, rpd: '1K', tpm: '30K', tpd: '500K' },
+            'qwen/qwen3.6-27b': { rpm: 30, rpd: '1K', tpm: '8K', tpd: '200K' },
+            'qwen/qwen3-32b': { rpm: 60, rpd: '1K', tpm: '6K', tpd: '500K' },
+            'openai/gpt-oss-120b': { rpm: 30, rpd: '1K', tpm: '8K', tpd: '200K' },
+            'openai/gpt-oss-20b': { rpm: 30, rpd: '1K', tpm: '8K', tpd: '200K' },
+            'openai/gpt-oss-safeguard-20b': { rpm: 30, rpd: '1K', tpm: '8K', tpd: '200K' },
+            'groq/compound': { rpm: 30, rpd: '250', tpm: '70K', tpd: '-' },
+            'groq/compound-mini': { rpm: 30, rpd: '250', tpm: '70K', tpd: '-' },
+            'allam-2-7b': { rpm: 30, rpd: '7K', tpm: '6K', tpd: '500K' }
+        };
+
         function updateRateLimitsUI() {
             const provider = document.getElementById('ai-provider-select').value;
             const container = document.getElementById('ai-usage-container');
@@ -8449,12 +8467,29 @@
                 return;
             }
 
-            const cached = localStorage.getItem('ai-rate-limits-groq');
+            const modelSelect = document.getElementById('ai-model-select');
+            const model = modelSelect ? modelSelect.value : '';
+            if (!model) {
+                container.style.display = 'none';
+                return;
+            }
+
+            // Populate Specs dynamically from constant JSON specs
+            const spec = GROQ_MODEL_SPECS[model];
+            const specEl = document.getElementById('ai-usage-specs');
+            if (specEl && spec) {
+                specEl.innerText = `RPD: ${spec.rpd} | TPM: ${spec.tpm}`;
+            } else if (specEl) {
+                specEl.innerText = '-';
+            }
+
+            // Load model-specific rate limits from storage
+            const cached = localStorage.getItem(`ai-rate-limits-groq-${model}`);
+            const reqEl = document.getElementById('ai-usage-requests');
+            const tokEl = document.getElementById('ai-usage-tokens');
+
             if (cached) {
                 const data = JSON.parse(cached);
-                const reqEl = document.getElementById('ai-usage-requests');
-                const tokEl = document.getElementById('ai-usage-tokens');
-                
                 if (reqEl && data.remaining_requests && data.limit_requests) {
                     reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
                 } else if (reqEl) {
@@ -8466,10 +8501,11 @@
                 } else if (tokEl) {
                     tokEl.innerText = '-';
                 }
-                container.style.display = 'flex';
             } else {
-                container.style.display = 'none';
+                if (reqEl) reqEl.innerText = 'Not queried yet';
+                if (tokEl) tokEl.innerText = 'Not queried yet';
             }
+            container.style.display = 'flex';
         }
 
         function handleAIProviderChange() {
@@ -8642,10 +8678,7 @@
                 }
                 
                 if (data.rate_limits) {
-                    localStorage.setItem('ai-rate-limits-groq', JSON.stringify(data.rate_limits));
-                    updateRateLimitsUI();
-                } else {
-                    localStorage.removeItem('ai-rate-limits-groq');
+                    localStorage.setItem(`ai-rate-limits-groq-${model}`, JSON.stringify(data.rate_limits));
                     updateRateLimitsUI();
                 }
                 
