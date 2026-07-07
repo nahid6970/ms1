@@ -11,3 +11,4 @@
 - [X] Add Gemini Model select dropdown and optional system prompt input inside the AI Copilot Popover.
 - [X] Support public Gemini 3.5 Flash/Pro and 3.1 Flash/Pro models.
 - [X] Integrate Groq Console support with custom API key handling, provider switcher, and Groq models (Llama 3.3, Llama 3.1, Mixtral, Gemma 2).
+- [X] Expand Groq models dropdown to match the custom chat completions models in the Groq console (excluding Whisper).
