@@ -3460,6 +3460,7 @@ def api_ai_command():
     provider = req.get('provider', 'gemini')
     model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
+    history = req.get('history', [])
     
     system_instruction = custom_system if custom_system else (
         "You are a command line expert and shell copilot assistant. The user wants to run a terminal command. "
@@ -3481,6 +3482,12 @@ def api_ai_command():
         if not api_key:
             return jsonify({"error": "Groq API key is missing. Please provide it in settings."}), 400
         
+        messages = [{"role": "system", "content": system_instruction}]
+        for h in history:
+            messages.append({"role": h["role"], "content": h["content"]})
+        if prompt:
+            messages.append({"role": "user", "content": prompt})
+            
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
@@ -3488,10 +3495,7 @@ def api_ai_command():
         }
         payload = {
             "model": model,
-            "messages": [
-                {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt}
-            ],
+            "messages": messages,
             "temperature": 0.1,
             "max_tokens": 1024
         }
@@ -3522,12 +3526,23 @@ def api_ai_command():
         if not api_key:
             return jsonify({"error": "Gemini API key is missing. Please provide it in settings or the prompt."}), 400
         
+        contents = []
+        for h in history:
+            role = "user" if h["role"] == "user" else "model"
+            contents.append({
+                "role": role,
+                "parts": [{"text": h["content"]}]
+            })
+        if prompt:
+            contents.append({
+                "role": "user",
+                "parts": [{"text": prompt}]
+            })
+            
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         headers = {'Content-Type': 'application/json'}
         payload = {
-            "contents": [{
-                "parts": [{"text": prompt}]
-            }],
+            "contents": contents,
             "systemInstruction": {
                 "parts": [{"text": system_instruction}]
             }
