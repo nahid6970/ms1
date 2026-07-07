@@ -8488,7 +8488,8 @@
                         <div style="display:flex; justify-content:flex-start; align-items:flex-start; gap:6px;">
                             <div style="flex:1; max-width:85%; background:var(--bg-sidebar); border:1px solid var(--border-color); padding:8px 10px; border-radius:12px 12px 12px 2px; position:relative;">
                                 <code style="font-family:Consolas,monospace; font-size:0.75rem; color:#f43f5e; display:block; word-break:break-all;">${escapeHtml(msg.content)}</code>
-                                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px;">
+                                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
+                                    ${msg.model ? `<span style="color:var(--text-muted); font-size:0.65rem; margin-right:auto; font-weight:500;">🤖 ${msg.model}</span>` : ''}
                                     <button onclick="copyAIChatCommand(this, ${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Copy to clipboard">📋 Copy</button>
                                     <button onclick="runAIChatCommand(${idx})" style="background:none; border:none; color:#10b981; cursor:pointer; font-size:0.7rem; display:flex; align-items:center; gap:2px; padding:2px;" title="Execute in terminal">▶️ Run</button>
                                 </div>
@@ -8819,7 +8820,7 @@
                 }
                 
                 const command = data.command;
-                aiChatHistory.push({ role: 'assistant', content: command });
+                aiChatHistory.push({ role: 'assistant', content: command, model: model });
                 renderAIChatHistory();
             } catch (err) {
                 console.error("AI Copilot Error:", err);
