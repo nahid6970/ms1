@@ -1802,14 +1802,34 @@
         <div style="padding:12px; flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:0;">
             <!-- Provider + Model on one row -->
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
-                <select id="ai-provider-select" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIProviderChange()">
+                <!-- Provider custom dropdown -->
+                <div style="position:relative; flex:1;" id="ai-provider-dd-container">
+                    <div id="ai-provider-dd-trigger" onclick="toggleAIProviderDropdown()" style="height:30px; padding:0 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:4px; user-select:none;">
+                        <span id="ai-provider-dd-label" style="font-size:0.74rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;"></span>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="ai-provider-dd-menu" style="display:none; position:absolute; top:calc(100% + 3px); left:0; right:0; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; z-index:2000; box-shadow:0 8px 20px rgba(0,0,0,0.5); overflow:hidden;">
+                        <div data-val="gemini" onclick="selectAIProvider('gemini')" class="ai-dd-opt" style="padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer; display:flex; align-items:center; gap:7px;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='transparent'"><span style="font-size:0.8rem;">✦</span> Google Gemini</div>
+                        <div data-val="groq" onclick="selectAIProvider('groq')" class="ai-dd-opt" style="padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer; display:flex; align-items:center; gap:7px;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='transparent'"><span style="font-size:0.8rem;">⚡</span> Groq Console</div>
+                        <div data-val="morph" onclick="selectAIProvider('morph')" class="ai-dd-opt" style="padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer; display:flex; align-items:center; gap:7px;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='transparent'"><span style="font-size:0.8rem;">🔷</span> Morph LLM</div>
+                    </div>
+                </div>
+                <!-- Model custom dropdown -->
+                <div style="position:relative; flex:2;" id="ai-model-dd-container">
+                    <div id="ai-model-dd-trigger" onclick="toggleAIModelDropdown()" style="height:30px; padding:0 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:4px; user-select:none;">
+                        <span id="ai-model-dd-label" style="font-size:0.74rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;"></span>
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="ai-model-dd-menu" style="display:none; position:absolute; top:calc(100% + 3px); left:0; right:0; min-width:200px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; z-index:2000; box-shadow:0 8px 20px rgba(0,0,0,0.5); overflow-y:auto; max-height:220px;"></div>
+                </div>
+                <!-- hidden real selects kept for backward compat -->
+                <select id="ai-provider-select" style="display:none;" onchange="handleAIProviderChange()">
                     <option value="gemini">Google Gemini</option>
                     <option value="groq">Groq Console</option>
                     <option value="morph">Morph LLM</option>
                 </select>
-                <select id="ai-model-select" style="flex:2; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIModelChange()">
-                </select>
-                <button id="ai-usage-toggle-btn" onclick="toggleAIUsagePanel()" title="Rate limit stats" style="display:none; flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); width:26px; height:26px; cursor:pointer; padding:0; align-items:center; justify-content:center;">
+                <select id="ai-model-select" style="display:none;" onchange="handleAIModelChange()"></select>
+                <button id="ai-usage-toggle-btn" onclick="toggleAIUsagePanel()" title="Rate limit stats" style="display:none; flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:30px; height:30px; cursor:pointer; padding:0; align-items:center; justify-content:center;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </button>
             </div>
@@ -8620,7 +8640,14 @@
                 const savedProvider = localStorage.getItem('ai-provider') || 'gemini';
                 const providerSelect = document.getElementById('ai-provider-select');
                 if (providerSelect) providerSelect.value = savedProvider;
-                
+                // Sync custom provider trigger label
+                document.getElementById('ai-provider-dd-label').textContent =
+                    (AI_PROVIDER_ICONS[savedProvider] || '') + '  ' + (AI_PROVIDER_LABELS[savedProvider] || savedProvider);
+                document.querySelectorAll('#ai-provider-dd-menu .ai-dd-opt').forEach(o => {
+                    o.style.color = o.dataset.val === savedProvider ? 'var(--accent-color)' : 'var(--text-primary)';
+                    o.style.fontWeight = o.dataset.val === savedProvider ? '600' : '400';
+                });
+
                 handleAIProviderChange();
                 updateRateLimitsUI();
 
@@ -9024,6 +9051,92 @@
             // Panel visibility is controlled by toggleAIUsagePanel() — don't force-show here
         }
 
+        // ── AI provider / model custom dropdowns ──────────────────────────────
+        const AI_PROVIDER_LABELS = { gemini: 'Google Gemini', groq: 'Groq Console', morph: 'Morph LLM' };
+        const AI_PROVIDER_ICONS  = { gemini: '✦', groq: '⚡', morph: '🔷' };
+
+        function toggleAIProviderDropdown() {
+            const menu = document.getElementById('ai-provider-dd-menu');
+            const isOpen = menu.style.display === 'block';
+            closeAIDropdowns();
+            if (!isOpen) {
+                menu.style.display = 'block';
+                setTimeout(() => document.addEventListener('click', _aiProviderOutside), 0);
+            }
+        }
+        function _aiProviderOutside(e) {
+            if (!document.getElementById('ai-provider-dd-container').contains(e.target)) {
+                document.getElementById('ai-provider-dd-menu').style.display = 'none';
+                document.removeEventListener('click', _aiProviderOutside);
+            }
+        }
+
+        function selectAIProvider(val) {
+            document.getElementById('ai-provider-select').value = val;
+            document.getElementById('ai-provider-dd-label').textContent = AI_PROVIDER_ICONS[val] + '  ' + AI_PROVIDER_LABELS[val];
+            document.getElementById('ai-provider-dd-menu').style.display = 'none';
+            document.removeEventListener('click', _aiProviderOutside);
+            document.querySelectorAll('#ai-provider-dd-menu .ai-dd-opt').forEach(o => {
+                o.style.color = o.dataset.val === val ? 'var(--accent-color)' : 'var(--text-primary)';
+                o.style.fontWeight = o.dataset.val === val ? '600' : '400';
+            });
+            handleAIProviderChange();
+        }
+
+        function toggleAIModelDropdown() {
+            const menu = document.getElementById('ai-model-dd-menu');
+            const isOpen = menu.style.display === 'block';
+            closeAIDropdowns();
+            if (!isOpen) {
+                menu.style.display = 'block';
+                setTimeout(() => document.addEventListener('click', _aiModelOutside), 0);
+            }
+        }
+        function _aiModelOutside(e) {
+            if (!document.getElementById('ai-model-dd-container').contains(e.target)) {
+                document.getElementById('ai-model-dd-menu').style.display = 'none';
+                document.removeEventListener('click', _aiModelOutside);
+            }
+        }
+
+        function selectAIModel(val, label) {
+            document.getElementById('ai-model-select').value = val;
+            document.getElementById('ai-model-dd-label').textContent = label;
+            document.getElementById('ai-model-dd-menu').style.display = 'none';
+            document.removeEventListener('click', _aiModelOutside);
+            document.querySelectorAll('#ai-model-dd-menu .ai-dd-opt').forEach(o => {
+                o.style.color = o.dataset.val === val ? 'var(--accent-color)' : 'var(--text-primary)';
+                o.style.fontWeight = o.dataset.val === val ? '600' : '400';
+            });
+            handleAIModelChange();
+        }
+
+        function closeAIDropdowns() {
+            document.getElementById('ai-provider-dd-menu').style.display = 'none';
+            document.getElementById('ai-model-dd-menu').style.display = 'none';
+        }
+
+        function syncAIModelDropdown() {
+            const sel = document.getElementById('ai-model-select');
+            const menu = document.getElementById('ai-model-dd-menu');
+            menu.innerHTML = '';
+            Array.from(sel.options).forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'ai-dd-opt';
+                div.dataset.val = opt.value;
+                div.style.cssText = 'padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer;';
+                div.textContent = opt.text;
+                const isSelected = opt.value === sel.value;
+                if (isSelected) { div.style.color = 'var(--accent-color)'; div.style.fontWeight = '600'; }
+                div.onmouseenter = () => { div.style.background = 'rgba(255,255,255,0.06)'; };
+                div.onmouseleave = () => { div.style.background = 'transparent'; };
+                div.onclick = () => selectAIModel(opt.value, opt.text);
+                menu.appendChild(div);
+            });
+            document.getElementById('ai-model-dd-label').textContent = sel.options[sel.selectedIndex]?.text || '';
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         function handleAIProviderChange() {
             const provider = document.getElementById('ai-provider-select').value;
             localStorage.setItem('ai-provider', provider);
@@ -9124,6 +9237,7 @@
                 const savedModel = localStorage.getItem('ai-model-groq') || 'llama-3.3-70b-versatile';
                 modelSelect.value = savedModel;
             }
+            syncAIModelDropdown();
         }
 
         function handleAIModelChange() {
