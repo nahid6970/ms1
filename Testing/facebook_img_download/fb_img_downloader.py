@@ -34,7 +34,7 @@ CP_SUBTEXT = "#808080"
 class DownloaderThread(QThread):
     log_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
-    finished_signal = pyqtSignal(int)
+    finished_signal = pyqtSignal(int, str)
 
     def __init__(self, url, output_dir, max_images, headless):
         super().__init__()
@@ -204,6 +204,7 @@ class DownloaderThread(QThread):
                     self.log_signal.emit(f"Gallery entry error: {e}")
 
             downloaded_urls = set()
+            downloaded_files = []
             no_new_streak = 0  # consecutive cycles with no new image
 
             while count < self.max_images and self.is_running:
@@ -222,10 +223,14 @@ class DownloaderThread(QThread):
                             filepath = os.path.join(self.output_dir, filename)
                             ct = self._download_with_cookies(full_url, driver, filepath)
                             # Rename with correct extension if needed
+                            final_filepath = filepath
                             if "png" in ct:
-                                os.rename(filepath, filepath.replace(".jpg", ".png"))
+                                final_filepath = filepath.replace(".jpg", ".png")
+                                os.rename(filepath, final_filepath)
                             elif "webp" in ct:
-                                os.rename(filepath, filepath.replace(".jpg", ".webp"))
+                                final_filepath = filepath.replace(".jpg", ".webp")
+                                os.rename(filepath, final_filepath)
+                            downloaded_files.append(final_filepath)
                             self.progress_signal.emit(int((count / self.max_images) * 100))
                         except Exception as e:
                             self.log_signal.emit(f"Download error: {e}")
@@ -273,12 +278,35 @@ class DownloaderThread(QThread):
                     break
 
             driver.quit()
+            
+            pdf_path = ""
+            if downloaded_files:
+                self.log_signal.emit("Creating PDF from downloaded images...")
+                try:
+                    from PIL import Image
+                    image_list = []
+                    for f in downloaded_files:
+                        try:
+                            img = Image.open(f)
+                            if img.mode != 'RGB':
+                                img = img.convert('RGB')
+                            image_list.append(img)
+                        except Exception as e:
+                            self.log_signal.emit(f"Skipping {f} for PDF: {e}")
+                    
+                    if image_list:
+                        pdf_path = os.path.join(self.output_dir, f"facebook_images_{int(time.time())}.pdf")
+                        image_list[0].save(pdf_path, "PDF", resolution=100.0, save_all=True, append_images=image_list[1:])
+                        self.log_signal.emit(f"PDF saved: {pdf_path}")
+                except Exception as e:
+                    self.log_signal.emit(f"Failed to create PDF: {e}")
+
             self.log_signal.emit(f"Task completed. Total images downloaded: {count}")
 
         except Exception as e:
             self.log_signal.emit(f"CRITICAL ERROR: {e}")
 
-        self.finished_signal.emit(count)
+        self.finished_signal.emit(count, pdf_path)
 
     def stop(self):
         self.is_running = False
@@ -582,12 +610,26 @@ class FacebookDownloaderApp(QMainWindow):
         self.dl_thread.finished_signal.connect(self.download_finished)
         self.dl_thread.start()
 
-    def download_finished(self, count):
+    def download_finished(self, count, pdf_path):
         self.action_btn.setEnabled(True)
         self.action_btn.setText("▶ START DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
         self.log(f"Process ended. {count} images saved to {self.output_dir}")
-        QMessageBox.information(self, "Finished", f"Successfully downloaded {count} images.")
+        
+        msg = f"Successfully downloaded {count} images."
+        if pdf_path and os.path.exists(pdf_path):
+            try:
+                from PyQt6.QtCore import QUrl, QMimeData
+                from PyQt6.QtGui import QGuiApplication
+                mime_data = QMimeData()
+                mime_data.setUrls([QUrl.fromLocalFile(pdf_path)])
+                QGuiApplication.clipboard().setMimeData(mime_data)
+                self.log(f"PDF copied to clipboard.")
+                msg += "\nPDF generated and copied to clipboard."
+            except Exception as e:
+                self.log(f"Failed to copy PDF to clipboard: {e}")
+        
+        QMessageBox.information(self, "Finished", msg)
 
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
