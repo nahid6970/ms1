@@ -8574,31 +8574,13 @@
 
         function renderMarkdown(text) {
             const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
-            
-            let formattedText = text;
-            const hasBackticks = text.includes('```');
-            const hasMarkdownHeaders = /^#+\s+/m.test(text);
-            const hasMarkdownTables = /\|/m.test(text);
-            const hasMarkdownLists = /^(\*|-|\d+\.)\s+/m.test(text);
-            const hasMarkdownBold = /\*\*/.test(text);
-            
-            const looksLikeCode = !hasBackticks && 
-                                  !hasMarkdownHeaders && 
-                                  !hasMarkdownTables && 
-                                  !hasMarkdownLists && 
-                                  !hasMarkdownBold &&
-                                  /^(def |import |class |if __name__ |#!\/|npm |pip |git |docker |function |const |let |var )/m.test(text);
-            
-            if (looksLikeCode) {
-                formattedText = '```\n' + text + '\n```';
-            }
 
             if (richEnabled && typeof marked !== 'undefined') {
                 try {
                     if (typeof marked.parse === 'function') {
-                        return marked.parse(formattedText);
+                        return marked.parse(text);
                     } else if (typeof marked === 'function') {
-                        return marked(formattedText);
+                        return marked(text);
                     }
                 } catch (e) {
                     console.error("marked parsing failed, falling back", e);
@@ -8606,7 +8588,7 @@
             }
 
             // Fallback parser that supports headers, bold, horizontal rules, lists, and code blocks
-            let lines = formattedText.split('\n');
+            let lines = text.split('\n');
             let htmlLines = [];
             let inCodeBlock = false;
             let codeContent = [];

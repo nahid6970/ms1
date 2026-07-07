@@ -3465,8 +3465,8 @@ def api_ai_command():
     system_instruction = custom_system if custom_system else (
         "You are an AI assistant and command line helper. "
         "Help the user with terminal commands, coding, and general tasks. "
-        "If the user asks for a terminal command to execute, output the exact command text. "
-        "Avoid unnecessary conversational filler when outputting commands."
+        "If the user asks for a command, return the command. "
+        "Always use standard Markdown formatting. Wrap code blocks, scripts, or multi-line command listings in triple backticks (e.g. ```bash ... ```) so they render beautifully."
     )
     
     import requests
