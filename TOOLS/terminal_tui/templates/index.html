@@ -8595,29 +8595,76 @@
 
             if (richEnabled && typeof marked !== 'undefined') {
                 try {
-                    return marked.parse(formattedText);
+                    if (typeof marked.parse === 'function') {
+                        return marked.parse(formattedText);
+                    } else if (typeof marked === 'function') {
+                        return marked(formattedText);
+                    }
                 } catch (e) {
                     console.error("marked parsing failed, falling back", e);
                 }
             }
 
-            let html = escapeHtml(formattedText);
-            
-            // Code blocks
-            html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
-                return `<pre style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:4px; padding:6px 8px; margin:6px 0; overflow-x:auto;"><code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; white-space:pre-wrap; display:block;">${code.trim()}</code></pre>`;
-            });
-            
-            // Inline code
-            html = html.replace(/`([^`]+)`/g, '<code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; padding:1px 4px; background:rgba(0,0,0,0.2); border-radius:3px;">$1</code>');
-            
-            // Bold
-            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-            
-            // Line breaks
-            html = html.replace(/\n/g, '<br>');
-            
-            return html;
+            // Fallback parser that supports headers, bold, horizontal rules, lists, and code blocks
+            let lines = formattedText.split('\n');
+            let htmlLines = [];
+            let inCodeBlock = false;
+            let codeContent = [];
+
+            for (let line of lines) {
+                if (line.trim().startsWith('```')) {
+                    if (inCodeBlock) {
+                        inCodeBlock = false;
+                        htmlLines.push(`<pre style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:4px; padding:6px 8px; margin:6px 0; overflow-x:auto;"><code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; white-space:pre-wrap; display:block;">${escapeHtml(codeContent.join('\n'))}</code></pre>`);
+                        codeContent = [];
+                    } else {
+                        inCodeBlock = true;
+                    }
+                    continue;
+                }
+
+                if (inCodeBlock) {
+                    codeContent.push(line);
+                    continue;
+                }
+
+                let escapedLine = escapeHtml(line);
+
+                // Horizontal Rule
+                if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
+                    htmlLines.push('<hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">');
+                    continue;
+                }
+
+                // Headers
+                let headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
+                if (headerMatch) {
+                    let level = headerMatch[1].length;
+                    let content = headerMatch[2];
+                    content = formatInlineMarkdown(content);
+                    htmlLines.push(`<h${level} style="margin:8px 0 4px 0; font-size:${0.9 - (level*0.05)}rem; font-weight:600; color:var(--text-secondary);">${content}</h${level}>`);
+                    continue;
+                }
+
+                // Bullet Lists
+                let listMatch = line.match(/^(\*|-)\s+(.*)$/);
+                if (listMatch) {
+                    let content = formatInlineMarkdown(listMatch[2]);
+                    htmlLines.push(`<li style="margin-left:12px; list-style-type:disc; font-size:0.75rem;">${content}</li>`);
+                    continue;
+                }
+
+                // Normal line formatting
+                htmlLines.push(formatInlineMarkdown(escapedLine));
+            }
+
+            return htmlLines.join('<br>');
+        }
+
+        function formatInlineMarkdown(text) {
+            let formatted = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/`([^`]+)`/g, '<code style="font-family:Consolas,monospace; font-size:0.72rem; color:#f43f5e; padding:1px 4px; background:rgba(0,0,0,0.2); border-radius:3px;">$1</code>');
+            return formatted;
         }
 
         function clearAIChat() {
