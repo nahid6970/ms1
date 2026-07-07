@@ -2814,12 +2814,31 @@
                 <button onclick="closeCustomButtonModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
             </div>
             <div style="margin-bottom: 14px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Button Label (append <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">;; bg=red fg=#fff</code> for colors)</label>
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Button Label</label>
                 <input id="custom-btn-label" type="text" placeholder="e.g., Tab, Enter, etc." style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
             <div style="margin-bottom: 14px;">
                 <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Key Code (hex or escape sequence)</label>
                 <input id="custom-btn-keycode" type="text" placeholder="e.g., \t for Tab, \r for Enter" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+
+            <!-- Colors row -->
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Colors</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <!-- Background color -->
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('custom-btn-bg-color').click()">
+                        <input id="custom-btn-bg-color" type="color" value="#0f172a" title="Background color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Background</span>
+                    </div>
+                    <!-- Foreground color -->
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('custom-btn-fg-color').click()">
+                        <input id="custom-btn-fg-color" type="color" value="#94a3b8" title="Text color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Text</span>
+                    </div>
+                    <!-- Reset colors -->
+                    <button type="button" onclick="resetCustomBtnColors()" title="Reset to default colors" style="height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:0.75rem; white-space:nowrap; flex-shrink:0;">Reset</button>
+                </div>
             </div>
 
             <!-- Font styling row -->
@@ -9264,6 +9283,29 @@
         // ─── Custom Terminal Button Modal ─────────────────────────────────────────
         let customBtnSelectedFont = '';
 
+        // Convert any CSS color string to a #rrggbb hex value for use in <input type="color">
+        function toHexColor(color) {
+            if (!color) return null;
+            if (/^#[0-9a-fA-F]{6}$/.test(color)) return color;
+            if (/^#[0-9a-fA-F]{3}$/.test(color)) {
+                const [, r, g, b] = color.match(/^#(.)(.)(.)$/);
+                return '#' + r+r + g+g + b+b;
+            }
+            // Use canvas to resolve named colors / rgb()
+            try {
+                const ctx = document.createElement('canvas').getContext('2d');
+                ctx.fillStyle = color;
+                const c = ctx.fillStyle; // browser normalizes to #rrggbb
+                if (/^#[0-9a-fA-F]{6}$/.test(c)) return c;
+            } catch(e) {}
+            return null;
+        }
+
+        function resetCustomBtnColors() {
+            document.getElementById('custom-btn-bg-color').value = '#0f172a';
+            document.getElementById('custom-btn-fg-color').value = '#94a3b8';
+        }
+
         function toggleCustomBtnFontDropdown() {
             const dropdown = document.getElementById('custom-btn-font-dropdown');
             const search = document.getElementById('custom-btn-font-search');
@@ -9364,10 +9406,7 @@
             if (editIndex !== null) {
                 const existing = allCustomBtns || [];
                 if (existing[editIndex]) {
-                    initialLabel = existing[editIndex].rawLabel || existing[editIndex].label;
-                    if (existing[editIndex].bg && !existing[editIndex].rawLabel) {
-                         initialLabel += ` ;; bg=${existing[editIndex].bg} fg=${existing[editIndex].fg || ''}`.trim();
-                    }
+                    initialLabel = existing[editIndex].label || existing[editIndex].rawLabel || '';
                     initialData = existing[editIndex].raw_data || existing[editIndex].data;
                 }
             }
@@ -9375,7 +9414,10 @@
             document.getElementById('custom-btn-label').value = initialLabel;
             document.getElementById('custom-btn-keycode').value = initialData;
             
-            // Populate font fields
+            // Populate color pickers
+            let initialBg = '#0f172a';
+            let initialFg = '#94a3b8';
+            // Populate font + border fields
             let initialFontFamily = '';
             let initialFontSize = '';
             let initialBold = false;
@@ -9386,6 +9428,8 @@
             if (editIndex !== null) {
                 const existing = allCustomBtns || [];
                 if (existing[editIndex]) {
+                    if (existing[editIndex].bg) initialBg = toHexColor(existing[editIndex].bg) || initialBg;
+                    if (existing[editIndex].fg) initialFg = toHexColor(existing[editIndex].fg) || initialFg;
                     initialFontFamily = existing[editIndex].fontFamily || '';
                     initialFontSize = existing[editIndex].fontSize || '';
                     initialBold = existing[editIndex].bold || false;
@@ -9395,6 +9439,8 @@
                     initialBorderRadius = existing[editIndex].borderRadius || '';
                 }
             }
+            document.getElementById('custom-btn-bg-color').value = initialBg;
+            document.getElementById('custom-btn-fg-color').value = initialFg;
             customBtnSelectedFont = initialFontFamily;
             document.getElementById('custom-btn-font-label').textContent = initialFontFamily
                 ? initialFontFamily.replace(/'/g, '').split(',')[0].trim()
@@ -9433,23 +9479,12 @@
         }
 
         async function saveCustomButton() {
-            let rawLabel = document.getElementById('custom-btn-label').value.trim();
+            const label = document.getElementById('custom-btn-label').value.trim();
             const keycode = document.getElementById('custom-btn-keycode').value;
-            if (!rawLabel || !keycode) return;
+            if (!label || !keycode) return;
 
-            let bg = '', fg = '';
-            let label = rawLabel;
-            const sepIdx = rawLabel.indexOf(';;');
-            if (sepIdx !== -1) {
-                label = rawLabel.slice(0, sepIdx).trim();
-                let remainder = rawLabel.slice(sepIdx + 2).trim();
-                const colorToken = /(bg|fg)=(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)/g;
-                remainder = remainder.replace(colorToken, (_, key, val) => {
-                    if (key === 'bg') bg = val;
-                    if (key === 'fg') fg = val;
-                    return '';
-                }).trim();
-            }
+            const bg = document.getElementById('custom-btn-bg-color').value || '';
+            const fg = document.getElementById('custom-btn-fg-color').value || '';
 
             // Parse escape sequences in keycode string
             const parseEscapes = (s) => s
@@ -9472,7 +9507,7 @@
             const borderWidth = document.getElementById('custom-btn-border-width').value.trim();
             const borderRadius = document.getElementById('custom-btn-border-radius').value.trim();
 
-            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg, fontFamily, fontSize, bold, italic, borderColor, borderWidth, borderRadius };
+            const btnConfig = { label, data, raw_data: keycode, bg, fg, fontFamily, fontSize, bold, italic, borderColor, borderWidth, borderRadius };
             if (customBtnEditIndex !== null) {
                 existing[customBtnEditIndex] = btnConfig;
             } else {
