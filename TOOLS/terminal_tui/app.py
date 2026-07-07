@@ -3457,15 +3457,18 @@ def api_ai_command():
     req = request.json or {}
     prompt = req.get('prompt', '')
     api_key = req.get('api_key', '')
+    model = req.get('model', 'gemini-2.5-flash')
+    custom_system = req.get('system_instruction', '').strip()
+    
     if not api_key:
         api_key = os.environ.get('GEMINI_API_KEY', '')
     if not api_key:
         return jsonify({"error": "Gemini API key is missing. Please provide it in settings or the prompt."}), 400
     
     import requests
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     
-    system_instruction = (
+    system_instruction = custom_system if custom_system else (
         "You are a command line expert and shell copilot assistant. The user wants to run a terminal command. "
         "Your job is to write the exact, single command line string to run. "
         "Rule 1: Return ONLY the exact command text to execute. "
@@ -3477,8 +3480,11 @@ def api_ai_command():
     headers = {'Content-Type': 'application/json'}
     payload = {
         "contents": [{
-            "parts": [{"text": f"System: {system_instruction}\nUser prompt: {prompt}"}]
-        }]
+            "parts": [{"text": prompt}]
+        }],
+        "systemInstruction": {
+            "parts": [{"text": system_instruction}]
+        }
     }
     
     try:
