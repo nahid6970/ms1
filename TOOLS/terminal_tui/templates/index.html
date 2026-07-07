@@ -1745,8 +1745,8 @@
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span id="ai-copilot-status" style="font-size:0.7rem; color:var(--text-muted);"></span>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button id="ai-mic-btn" onclick="toggleAIMic()" style="padding:5px 12px; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; font-weight:500;">🎤 Speak</button>
-                        <button id="ai-copilot-submit" onclick="generateAICommand()" style="padding:5px 16px; background:#a855f7; border:none; border-radius:6px; color:white; font-size:0.8rem; cursor:pointer; font-weight:500;">Generate Command</button>
+                        <button id="ai-mic-btn" onclick="toggleAIMic()" style="padding:5px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-secondary); font-size:0.95rem; cursor:pointer;" title="Speak/Record">🎤</button>
+                        <button id="ai-copilot-submit" onclick="generateAICommand()" style="padding:5px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:#a855f7; border:none; border-radius:6px; color:white; font-size:0.95rem; cursor:pointer;" title="Generate Command">⚡</button>
                     </div>
                 </div>
             </div>
@@ -8143,7 +8143,7 @@
                 btn.title = 'Recording (Click to Stop)...';
 
                 if (inputId === 'ai-prompt-input' && statusEl) {
-                    statusEl.innerText = 'Listening (Python - Manual)...';
+                    statusEl.innerText = 'Listening...';
                     statusEl.style.color = 'var(--text-muted)';
                 }
 
@@ -8183,7 +8183,7 @@
                 btn.title = 'Recording voice (Python)...';
 
                 if (inputId === 'ai-prompt-input' && statusEl) {
-                    statusEl.innerText = 'Listening (Python)...';
+                    statusEl.innerText = 'Listening...';
                     statusEl.style.color = 'var(--text-muted)';
                 }
 
