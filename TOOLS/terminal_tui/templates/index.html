@@ -2216,50 +2216,68 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-show-sidebar-workspaces" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-show-sidebar-workspaces" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspaces in Sidebar</label>
+                <!-- Section: Sidebar & Layout -->
+                <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Sidebar &amp; Layout</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-show-sidebar-workspaces" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-show-sidebar-workspaces" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspaces in Sidebar</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-show-paths" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-show-paths" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Paths in Sidebar</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-show-categories" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-show-categories" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Category Tags</label>
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-show-paths" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-show-paths" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Paths in Sidebar</label>
+                </div>
+
+                <!-- Section: Terminal & Editor Behavior -->
+                <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Terminal &amp; Editor Behavior</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-context-menu" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-context-menu" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Right-Click Actions</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-use-real-dir-prompt" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-use-real-dir-prompt" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use folder's actual name in prompt</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-auto-scroll" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-auto-scroll" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Auto-scroll to bottom</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-selector-btn-theme" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-selector-btn-theme" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Apply theme to selector button</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-diff-wrap" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-diff-wrap" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Wrap long lines in Diff &amp; Browse</label>
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-show-categories" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-show-categories" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Category Tags</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-context-menu" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-context-menu" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Right-Click Actions</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-use-real-dir-prompt" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-use-real-dir-prompt" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use folder's actual name in prompt</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-auto-scroll" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-auto-scroll" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Auto-scroll to bottom</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-selector-btn-theme" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-selector-btn-theme" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Apply theme to selector button</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-diff-wrap" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-diff-wrap" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Wrap long lines in Diff &amp; Browse</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-voice-continuous" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-voice-continuous" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Continuous Voice Recording</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-voice-use-python" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-voice-use-python" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use Python Voice Engine (Non-Chrome)</label>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="settings-voice-manual-stop" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                        <label for="settings-voice-manual-stop" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Manual Stop Recording (Click to stop)</label>
+                </div>
+
+                <!-- Section: Voice Recording Settings -->
+                <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Voice Recording Settings</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-voice-continuous" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-voice-continuous" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Continuous Voice Recording</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-voice-use-python" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-voice-use-python" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Use Python Voice Engine (Non-Chrome)</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-voice-manual-stop" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-voice-manual-stop" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Manual Stop Recording (Click to stop)</label>
+                        </div>
                     </div>
                 </div>
 

@@ -7,3 +7,4 @@
 - [X] Change CPU monitor display style to blue.
 - [X] Move status effects directly to buttons and remove the dedicated status message label.
 - [X] Add a processing status indicator (`⏳`) directly on recording buttons.
+- [X] Group toggle options into structured visual sections inside the Settings modal.
