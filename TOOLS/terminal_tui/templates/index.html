@@ -1305,6 +1305,7 @@
             overflow: hidden;
             min-width: 320px;
             max-width: 96vw;
+            max-height: min(var(--ai-popover-max-height, 600px), calc(100dvh - 50px));
         }
         .statusbar-popover.show { display: flex; }
         .sbpop-header {
@@ -1780,7 +1781,7 @@
             </div>
             <button class="sbpop-close" onclick="closeAICopilotPopover()">✕</button>
         </div>
-        <div style="padding:12px; flex-shrink:0;">
+        <div style="padding:12px; flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:0;">
             <!-- Provider + Model on one row -->
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
                 <select id="ai-provider-select" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.75rem; outline:none; cursor:pointer;" onchange="handleAIProviderChange()">
@@ -1847,7 +1848,7 @@
             </div>
 
             <!-- Chat history box -->
-            <div id="ai-chat-history" style="display:none; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding:8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; margin-bottom:10px;">
+            <div id="ai-chat-history" style="display:none; flex-direction:column; gap:8px; flex:1; min-height:80px; max-height:300px; overflow-y:auto; padding:8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; margin-bottom:10px;">
             </div>
 
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -2396,10 +2397,17 @@
                 <!-- Section: AI Copilot Settings -->
                 <div style="margin-bottom: 14px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
                     <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">AI Copilot Settings</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="settings-ai-rich-markdown" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
-                            <label for="settings-ai-rich-markdown" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Enable Rich Markdown Rendering</label>
+                            <label for="settings-ai-rich-markdown" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Rich Markdown</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label for="settings-ai-popover-height" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Max Height</label>
+                            <input type="number" id="settings-ai-popover-height" min="300" max="1200" step="50" value="600"
+                                style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
                         </div>
                     </div>
                 </div>
@@ -6478,6 +6486,7 @@
             document.getElementById('settings-voice-use-python').checked = localStorage.getItem('voice-use-python') === 'true';
             document.getElementById('settings-voice-manual-stop').checked = localStorage.getItem('voice-manual-stop') === 'true';
             document.getElementById('settings-ai-rich-markdown').checked = localStorage.getItem('ai-rich-markdown') !== 'false';
+            document.getElementById('settings-ai-popover-height').value = localStorage.getItem('ai-popover-height') || '600';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -6691,6 +6700,9 @@
             localStorage.setItem('voice-use-python', document.getElementById('settings-voice-use-python').checked);
             localStorage.setItem('voice-manual-stop', document.getElementById('settings-voice-manual-stop').checked);
             localStorage.setItem('ai-rich-markdown', document.getElementById('settings-ai-rich-markdown').checked);
+            const aiPopH = parseInt(document.getElementById('settings-ai-popover-height').value) || 600;
+            localStorage.setItem('ai-popover-height', aiPopH);
+            document.documentElement.style.setProperty('--ai-popover-max-height', aiPopH + 'px');
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -10698,6 +10710,9 @@
             // Apply custom sidebar width on load
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
             document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+
+            const savedAiPopH = parseInt(localStorage.getItem('ai-popover-height')) || 600;
+            document.documentElement.style.setProperty('--ai-popover-max-height', savedAiPopH + 'px');
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             if (savedContextMenu) {
