@@ -2821,6 +2821,33 @@
                 <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Key Code (hex or escape sequence)</label>
                 <input id="custom-btn-keycode" type="text" placeholder="e.g., \t for Tab, \r for Enter" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.85rem; outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
+
+            <!-- Font styling row -->
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Font</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <!-- Font Family picker -->
+                    <div class="custom-dropdown" id="custom-btn-font-container" style="position: relative; flex: 1;">
+                        <div id="custom-btn-font-trigger" onclick="toggleCustomBtnFontDropdown()" style="height: 34px; padding: 0 10px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; font-size: 0.82rem; color: var(--text-primary);">
+                            <span id="custom-btn-font-label" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">Default</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.6; margin-left:6px;"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                        <div id="custom-btn-font-dropdown" style="display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background-color:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:8px; z-index:1010; flex-direction:column; max-height:200px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+                            <div style="padding:6px; border-bottom:1px solid var(--border-color); display:flex;">
+                                <input type="text" id="custom-btn-font-search" placeholder="Search fonts..." oninput="filterCustomBtnFontOptions()" style="width:100%; height:28px; padding:4px 8px; font-size:0.8rem; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); outline:none;" autocomplete="off">
+                            </div>
+                            <div id="custom-btn-font-list" style="overflow-y:auto; flex:1; padding:4px 0; max-height:150px;"></div>
+                        </div>
+                    </div>
+                    <!-- Font size -->
+                    <input id="custom-btn-font-size" type="number" min="6" max="32" value="" placeholder="px" title="Font size (px)" style="width: 58px; height: 34px; padding: 0 8px; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.82rem; outline: none; text-align: center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <!-- Bold toggle -->
+                    <button id="custom-btn-bold-btn" type="button" onclick="toggleCustomBtnBold()" title="Bold" style="width:34px; height:34px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:0.9rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s;">B</button>
+                    <!-- Italic toggle -->
+                    <button id="custom-btn-italic-btn" type="button" onclick="toggleCustomBtnItalic()" title="Italic" style="width:34px; height:34px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:0.9rem; font-style:italic; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s;"><i>I</i></button>
+                </div>
+            </div>
+
             <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px; padding: 8px; background: var(--bg-sidebar); border-radius: 6px;">
                 Examples: <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\t</code> = Tab, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\r</code> = Enter, <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px;">\x1b[A</code> = Up Arrow
             </div>
@@ -9218,7 +9245,97 @@
         }
 
         // ─── Custom Terminal Button Modal ─────────────────────────────────────────
+        let customBtnSelectedFont = '';
+
+        function toggleCustomBtnFontDropdown() {
+            const dropdown = document.getElementById('custom-btn-font-dropdown');
+            const search = document.getElementById('custom-btn-font-search');
+            const isOpen = dropdown.style.display === 'flex';
+            if (isOpen) {
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.style.display = 'flex';
+                search.value = '';
+                renderCustomBtnFontOptions('');
+                search.focus();
+                setTimeout(() => document.addEventListener('click', handleCustomBtnFontOutsideClick), 0);
+            }
+        }
+
+        function handleCustomBtnFontOutsideClick(e) {
+            const container = document.getElementById('custom-btn-font-container');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('custom-btn-font-dropdown').style.display = 'none';
+                document.removeEventListener('click', handleCustomBtnFontOutsideClick);
+            }
+        }
+
+        function filterCustomBtnFontOptions() {
+            renderCustomBtnFontOptions(document.getElementById('custom-btn-font-search').value);
+        }
+
+        function renderCustomBtnFontOptions(filterText = '') {
+            const list = document.getElementById('custom-btn-font-list');
+            if (!list) return;
+            list.innerHTML = '';
+            const lower = filterText.toLowerCase();
+            // Include "Default" option at top
+            const fonts = ['Default', ...systemFonts].filter(f => f.toLowerCase().includes(lower));
+            fonts.forEach(font => {
+                const fontVal = font === 'Default' ? '' :
+                    (font.includes(' ') ? `'${font}', monospace` : `${font}, monospace`);
+                const isSelected = customBtnSelectedFont === fontVal;
+                const div = document.createElement('div');
+                div.className = `custom-option${isSelected ? ' selected' : ''}`;
+                div.setAttribute('data-value', fontVal);
+                div.style.fontFamily = fontVal || 'inherit';
+                div.onclick = () => {
+                    customBtnSelectedFont = fontVal;
+                    document.getElementById('custom-btn-font-label').textContent = font;
+                    document.getElementById('custom-btn-font-dropdown').style.display = 'none';
+                    document.removeEventListener('click', handleCustomBtnFontOutsideClick);
+                };
+                div.innerHTML = `<span>${font}</span>${isSelected ? '<span style="font-size:0.8rem;">✓</span>' : ''}`;
+                list.appendChild(div);
+            });
+            if (fonts.length === 0) {
+                const noResult = document.createElement('div');
+                noResult.style.cssText = 'padding:10px 14px; font-size:0.82rem; color:var(--text-secondary); text-align:center;';
+                noResult.textContent = 'No matching fonts';
+                list.appendChild(noResult);
+            }
+        }
+
+        function setCustomBtnBold(active) {
+            const btn = document.getElementById('custom-btn-bold-btn');
+            if (!btn) return;
+            btn.dataset.active = String(active);
+            btn.style.background = active ? 'var(--accent-color)' : 'var(--bg-main)';
+            btn.style.color = active ? '#fff' : 'var(--text-secondary)';
+            btn.style.borderColor = active ? 'var(--accent-color)' : 'var(--border-color)';
+        }
+
+        function setCustomBtnItalic(active) {
+            const btn = document.getElementById('custom-btn-italic-btn');
+            if (!btn) return;
+            btn.dataset.active = String(active);
+            btn.style.background = active ? 'var(--accent-color)' : 'var(--bg-main)';
+            btn.style.color = active ? '#fff' : 'var(--text-secondary)';
+            btn.style.borderColor = active ? 'var(--accent-color)' : 'var(--border-color)';
+        }
+
+        function toggleCustomBtnBold() {
+            const btn = document.getElementById('custom-btn-bold-btn');
+            setCustomBtnBold(btn.dataset.active !== 'true');
+        }
+
+        function toggleCustomBtnItalic() {
+            const btn = document.getElementById('custom-btn-italic-btn');
+            setCustomBtnItalic(btn.dataset.active !== 'true');
+        }
+
         let customBtnTargetPaneId = null;
+        let customBtnEditIndex = null;
 
         function openCustomButtonModal(paneId, editIndex = null) {
             customBtnTargetPaneId = paneId;
@@ -9241,6 +9358,28 @@
             document.getElementById('custom-btn-label').value = initialLabel;
             document.getElementById('custom-btn-keycode').value = initialData;
             
+            // Populate font fields
+            let initialFontFamily = '';
+            let initialFontSize = '';
+            let initialBold = false;
+            let initialItalic = false;
+            if (editIndex !== null) {
+                const existing = allCustomBtns || [];
+                if (existing[editIndex]) {
+                    initialFontFamily = existing[editIndex].fontFamily || '';
+                    initialFontSize = existing[editIndex].fontSize || '';
+                    initialBold = existing[editIndex].bold || false;
+                    initialItalic = existing[editIndex].italic || false;
+                }
+            }
+            customBtnSelectedFont = initialFontFamily;
+            document.getElementById('custom-btn-font-label').textContent = initialFontFamily
+                ? initialFontFamily.replace(/'/g, '').split(',')[0].trim()
+                : 'Default';
+            document.getElementById('custom-btn-font-size').value = initialFontSize;
+            setCustomBtnBold(initialBold);
+            setCustomBtnItalic(initialItalic);
+
             const isEditing = editIndex !== null;
             document.getElementById('custom-btn-modal-title').innerText = isEditing ? 'Edit Custom Button' : 'Add Custom Button';
             document.getElementById('custom-btn-save').innerText = isEditing ? 'Save Changes' : 'Add Button';
@@ -9299,7 +9438,12 @@
 
             let existing = allCustomBtns || [];
             
-            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg };
+            const fontFamily = customBtnSelectedFont || '';
+            const fontSize = document.getElementById('custom-btn-font-size').value.trim();
+            const bold = document.getElementById('custom-btn-bold-btn').dataset.active === 'true';
+            const italic = document.getElementById('custom-btn-italic-btn').dataset.active === 'true';
+
+            const btnConfig = { label, rawLabel, data, raw_data: keycode, bg, fg, fontFamily, fontSize, bold, italic };
             if (customBtnEditIndex !== null) {
                 existing[customBtnEditIndex] = btnConfig;
             } else {
@@ -9323,13 +9467,17 @@
 
             const bgStr = btnConfig.bg ? `background:${btnConfig.bg}; border:1px solid ${btnConfig.bg};` : 'background:rgba(15,23,42,0.9); border:1px solid rgba(255,255,255,0.12);';
             const fgStr = btnConfig.fg ? `color:${btnConfig.fg} !important;` : 'color:var(--text-secondary);';
+            const fontFamilyStr = btnConfig.fontFamily ? `font-family:${btnConfig.fontFamily};` : '';
+            const fontSizeStr = btnConfig.fontSize ? `font-size:${btnConfig.fontSize}px;` : 'font-size:0.6rem;';
+            const fontWeightStr = btnConfig.bold ? 'font-weight:700;' : 'font-weight:600;';
+            const fontStyleStr = btnConfig.italic ? 'font-style:italic;' : '';
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'terminal-pane-custom-btn';
             btn.title = btnConfig.label + ' (Right-click to Edit/Delete)';
             btn.innerText = btnConfig.label;
-            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:6px; ${bgStr} ${fgStr} cursor:pointer; z-index:5; font-size:0.6rem; font-weight:600; line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
+            btn.style.cssText = `position:absolute; right:6px; top:${top}px; width:auto; min-width:24px; padding:0 8px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:6px; ${bgStr} ${fgStr} cursor:pointer; z-index:5; ${fontSizeStr} ${fontWeightStr} ${fontStyleStr} ${fontFamilyStr} line-height:1; transition:all 0.15s ease; user-select:none; touch-action:none; white-space:nowrap;`;
             
             if (!btnConfig.bg) {
                 btn.onmouseenter = () => { btn.style.borderColor = 'var(--accent-color)'; btn.style.color = 'var(--text-primary)'; };
