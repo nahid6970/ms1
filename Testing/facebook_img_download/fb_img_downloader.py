@@ -45,18 +45,29 @@ class DownloaderThread(QThread):
         self.is_running = True
 
     def _get_current_image(self, driver):
-        """Extract the highest-quality scontent image URL from the current view."""
+        """Extract the highest-quality scontent/fbcdn image URL from the current view."""
         selectors = [
             "//div[@role='dialog']//img[@data-visualcompletion='media-vc-image']",
             "//img[@data-visualcompletion='media-vc-image']",
-            "//div[@role='dialog']//img[contains(@src,'scontent')]",
-            "//div[@role='main']//img[contains(@src,'scontent')]",
+            "//div[@role='dialog']//img[contains(@src,'scontent') or contains(@src,'fbcdn')]",
+            "//div[@role='main']//img[contains(@src,'scontent') or contains(@src,'fbcdn')]",
+            "//img[contains(@src,'scontent') or contains(@src,'fbcdn')]",
         ]
         
         for selector in selectors:
             elements = driver.find_elements(By.XPATH, selector)
             for img in elements:
                 try:
+                    # Ignore tiny images (icons, profile thumbnails, trackers)
+                    w_val = img.get_attribute("width")
+                    h_val = img.get_attribute("height")
+                    if w_val and h_val:
+                        try:
+                            if int(w_val) < 200 or int(h_val) < 200:
+                                continue
+                        except ValueError:
+                            pass
+
                     # Try srcset first as it contains all available resolutions
                     srcset = img.get_attribute("srcset")
                     if srcset:
@@ -76,7 +87,9 @@ class DownloaderThread(QThread):
 
                     # Fallback to src
                     src = img.get_attribute("src")
-                    if src and "scontent" in src:
+                    if src and ("scontent" in src or "fbcdn" in src):
+                        if any(x in src for x in ["/rsrc.php", "emoji", "/cp/", "rsrc="]):
+                            continue
                         return src
                 except:
                     continue
@@ -116,13 +129,39 @@ class DownloaderThread(QThread):
             options = Options()
             if self.headless:
                 options.add_argument("--headless=new")
-            options.add_argument("--disable-gpu")
+                options.add_argument("--disable-gpu")
+                options.add_argument("--disable-software-rasterizer")
+                options.add_argument("--window-position=-2400,-2400")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--window-size=1920,1080")
             options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
+            # Force using Google Chrome by specifying binary location if found in standard paths
+            chrome_paths = [
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            ]
+            local_app_data = os.environ.get("LOCALAPPDATA")
+            if local_app_data:
+                chrome_paths.append(os.path.join(local_app_data, r"Google\Chrome\Application\chrome.exe"))
+            user_profile = os.environ.get("USERPROFILE")
+            if user_profile:
+                chrome_paths.append(os.path.join(user_profile, r"AppData\Local\Google\Chrome\Application\chrome.exe"))
+
+            chrome_binary = None
+            for path in chrome_paths:
+                if os.path.exists(path):
+                    chrome_binary = path
+                    break
+
             self.log_signal.emit("Initializing WebDriver...")
+            if chrome_binary:
+                options.binary_location = chrome_binary
+                self.log_signal.emit(f"Using Google Chrome binary at: {chrome_binary}")
+            else:
+                self.log_signal.emit("Google Chrome binary not found in standard paths, falling back to default Selenium search.")
+
             driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
             self.log_signal.emit(f"Opening URL: {self.url}")
@@ -130,7 +169,7 @@ class DownloaderThread(QThread):
             time.sleep(5)
 
             # Dismiss any login/cookie popups
-            for label in ["Close", "close", "Dismiss", "Not now", "Decline optional cookies"]:
+            for label in ["Dismiss", "Not now", "Decline optional cookies"]:
                 for el in driver.find_elements(By.XPATH, f"//div[@aria-label='{label}'] | //button[@aria-label='{label}']"):
                     try:
                         if el.is_displayed():
@@ -143,12 +182,24 @@ class DownloaderThread(QThread):
             if "/photo" not in driver.current_url:
                 self.log_signal.emit("Post detected. Entering gallery mode...")
                 try:
-                    photo_links = driver.find_elements(By.XPATH, "//a[contains(@href, '/photo')]")
+                    photo_links = driver.find_elements(By.XPATH, "//a[img][(contains(@href, '/photo') or contains(@href, 'fbid=') or contains(@href, '/photos/')) and not(contains(@href, 'login'))]")
+                    if not photo_links:
+                        photo_links = driver.find_elements(By.XPATH, "//a[img[contains(@src,'scontent') or contains(@src,'fbcdn')] and not(contains(@href, 'login'))]")
+                    
                     if photo_links:
+                        self.log_signal.emit("Found photo link. Clicking to enter theater/gallery mode...")
                         driver.execute_script("arguments[0].click();", photo_links[0])
-                        time.sleep(4)
+                        time.sleep(5)
                     else:
-                        self.log_signal.emit("No photo links found.")
+                        self.log_signal.emit("No photo links found by XPath. Trying keyboard (TABx5 + ENTER) fallback...")
+                        from selenium.webdriver.common.action_chains import ActionChains
+                        for _ in range(5):
+                            ActionChains(driver).send_keys(Keys.TAB).perform()
+                            time.sleep(0.3)
+                        ActionChains(driver).send_keys(Keys.ENTER).perform()
+                        time.sleep(0.5)
+                        ActionChains(driver).send_keys(Keys.ENTER).perform()
+                        time.sleep(5)
                 except Exception as e:
                     self.log_signal.emit(f"Gallery entry error: {e}")
 
@@ -202,18 +253,14 @@ class DownloaderThread(QThread):
                         if navigated:
                             break
 
-                    # 2. Fallback: send Right arrow key to the active element / body
+                    # 2. Fallback: send Right arrow key globally via ActionChains
                     if not navigated:
                         try:
-                            active = driver.switch_to.active_element
-                            active.send_keys(Keys.ARROW_RIGHT)
+                            from selenium.webdriver.common.action_chains import ActionChains
+                            ActionChains(driver).send_keys(Keys.ARROW_RIGHT).perform()
                             navigated = True
                         except:
-                            try:
-                                driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ARROW_RIGHT)
-                                navigated = True
-                            except:
-                                pass
+                            pass
 
                     if not navigated:
                         self.log_signal.emit("Cannot navigate further. End of gallery.")
@@ -303,7 +350,7 @@ class FacebookDownloaderApp(QMainWindow):
             QMainWindow, QDialog {{
                 background-color: {CP_BG};
             }}
-            QWidget {{
+            QLabel, QCheckBox, QGroupBox, QLineEdit, QSpinBox, QPushButton, QPlainTextEdit, QProgressBar, QDialog {{
                 color: {CP_TEXT};
                 font-family: 'Consolas';
                 font-size: 10pt;
