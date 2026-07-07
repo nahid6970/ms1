@@ -8582,15 +8582,28 @@
             const richEnabled = localStorage.getItem('ai-rich-markdown') !== 'false';
 
             if (richEnabled) {
-                // Try marked.js library (CDN loaded)
-                const m = window.marked;
-                if (m) {
-                    try {
-                        if (typeof m.parse === 'function') return m.parse(text);
-                        if (typeof m === 'function') return m(text);
-                    } catch (e) {
-                        console.error('marked.js error:', e);
+                try {
+                    // marked v15 CDN: window.marked = { parse, marked, Marked, ... }
+                    const m = window.marked;
+                    if (m) {
+                        // Try direct .parse() first (marked v5+)
+                        if (typeof m.parse === 'function') {
+                            return m.parse(text, { breaks: true, gfm: true });
+                        }
+                        // Try m.marked.parse() (some UMD builds)
+                        if (m.marked && typeof m.marked.parse === 'function') {
+                            return m.marked.parse(text, { breaks: true, gfm: true });
+                        }
+                        // Try calling marked directly (marked v0-v4)
+                        if (typeof m === 'function') {
+                            return m(text, { breaks: true, gfm: true });
+                        }
+                        console.warn('[AI Copilot] marked loaded but no parse function found. Keys:', Object.keys(m));
+                    } else {
+                        console.warn('[AI Copilot] marked.js not loaded (window.marked is undefined)');
                     }
+                } catch (e) {
+                    console.error('[AI Copilot] marked.js error:', e);
                 }
             }
 
