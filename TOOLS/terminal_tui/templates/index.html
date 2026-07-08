@@ -9453,6 +9453,7 @@
         let activeFilterTab = 'gemini';
 
         function openAIModelSettingsModal() {
+            closeAICopilotPopover();
             activeFilterTab = document.getElementById('ai-provider-select').value || 'gemini';
             document.getElementById('ai-model-filter-modal').classList.add('show');
             const searchInput = document.getElementById('ai-model-filter-search');
