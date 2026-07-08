@@ -3552,7 +3552,7 @@ def api_ai_command():
             "max_tokens": 1024
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=15)
+            res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
             if res.status_code != 200:
                 error_msg = res_data.get('error', {}).get('message', 'Failed to call Groq API')
@@ -3600,7 +3600,7 @@ def api_ai_command():
             "max_tokens": 1024
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=30)
+            res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
             if res.status_code != 200:
                 error_msg = res_data.get('error', {}).get('message', 'Failed to call Morph API')
@@ -3653,7 +3653,7 @@ def api_ai_command():
             }
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=15)
+            res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
             if res.status_code != 200:
                 error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')

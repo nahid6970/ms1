@@ -1,7 +1,5 @@
 # Tasks
-- [x] Replace old custom system prompt details textarea with a new dropdown select, a plus (+) button, and a settings/edit button in `#ai-copilot-popover`
-- [x] Create `#ai-system-prompt-modal` dialog layout in HTML for adding, viewing, editing, and deleting multiple prompts
-- [x] Implement javascript CRUD operations (`getCustomSystemPrompts`, `saveCustomSystemPrompts`, `saveCustomPrompt`, `deleteCustomPrompt`)
-- [x] Implement migration function `migrateOldSystemPrompt()` to preserve user's existing system prompt as a default entry named "Saved Prompt"
-- [x] Update submit query functions to dynamically inject the selected system prompt text
-- [x] Test and push updates to github
+- [x] Increase API request timeout to 60 seconds for Groq (line 3555) in `app.py`
+- [x] Increase API request timeout to 60 seconds for Morph (line 3603) in `app.py`
+- [x] Increase API request timeout to 60 seconds for Gemini (line 3656) in `app.py`
+- [ ] Test and push updates to github
