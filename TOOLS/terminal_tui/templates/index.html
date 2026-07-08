@@ -10369,6 +10369,7 @@
             const geminiKey = localStorage.getItem('gemini-api-key') || '';
             const groqKey = localStorage.getItem('groq-api-key') || '';
             const morphKey = localStorage.getItem('morph-api-key') || '';
+            const openrouterKey = localStorage.getItem('openrouter-api-key') || '';
 
             // Hide all key containers first
             document.getElementById('ai-api-key-container').style.display = 'none';
@@ -10377,6 +10378,8 @@
             document.getElementById('groq-api-key-saved-msg').style.display = 'none';
             document.getElementById('morph-api-key-container').style.display = 'none';
             document.getElementById('morph-api-key-saved-msg').style.display = 'none';
+            document.getElementById('openrouter-api-key-container').style.display = 'none';
+            document.getElementById('openrouter-api-key-saved-msg').style.display = 'none';
 
             if (provider === 'gemini') {
                 if (geminiKey) {
@@ -10395,6 +10398,12 @@
                     document.getElementById('morph-api-key-saved-msg').style.display = 'flex';
                 } else {
                     document.getElementById('morph-api-key-container').style.display = 'block';
+                }
+            } else if (provider === 'openrouter') {
+                if (openrouterKey) {
+                    document.getElementById('openrouter-api-key-saved-msg').style.display = 'flex';
+                } else {
+                    document.getElementById('openrouter-api-key-container').style.display = 'block';
                 }
             }
 
