@@ -284,28 +284,8 @@ function cd {{
     }}
 }}
 
-# Track command execution time (simple & PTY-safe: timestamp when prompt renders)
-$global:__LastPromptTime = $null
-
-# Custom prompt showing project root, subdirectories, and execution time
+# Custom prompt showing project root and subdirectories
 function prompt {{
-    $now = Get-Date
-    $durationStr = ""
-    if ($global:__LastPromptTime -ne $null) {{
-        $elapsed = $now - $global:__LastPromptTime
-        $ms = [int]$elapsed.TotalMilliseconds
-        if ($ms -ge 1000) {{
-            if ($elapsed.TotalSeconds -lt 60) {{
-                $durationStr = " [{0:0.0}s]" -f $elapsed.TotalSeconds
-            }} elseif ($elapsed.TotalMinutes -lt 60) {{
-                $durationStr = " [{0}m {1}s]" -f [int]$elapsed.Minutes, $elapsed.Seconds
-            }} else {{
-                $durationStr = " [{0}h {1}m]" -f [int]$elapsed.Hours, $elapsed.Minutes
-            }}
-        }}
-    }}
-    $global:__LastPromptTime = Get-Date
-
     $current = $pwd.Path.Replace("/", "\\")
     $root = $global:PROJECT_ROOT_PATH.Replace("/", "\\")
     if ($current.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {{
@@ -314,12 +294,12 @@ function prompt {{
             $relative = $relative.Substring(1)
         }}
         if ([string]::IsNullOrEmpty($relative)) {{
-            "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m {prompt_display_name}> "
+            "{prompt_display_name}> "
         }} else {{
-            "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m {prompt_display_name}\\$relative> "
+            "{prompt_display_name}\\$relative> "
         }}
     }} else {{
-        "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m $current> "
+        "$current> "
     }}
 }}
 
@@ -451,48 +431,51 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 pass
 
 _PROJECTS_CACHE = None
+_PROJECTS_CACHE_LOCK = threading.Lock()
 
 def load_projects_config():
     global _PROJECTS_CACHE
-    if _PROJECTS_CACHE is not None:
-        return _PROJECTS_CACHE
-
-    if os.path.exists(PROJECTS_FILE):
-        try:
-            with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
-                projs = json.load(f)
-                # Sanitize bookmarks to be dicts
-                for p in projs:
-                    if "bookmarks" not in p:
-                        p["bookmarks"] = []
-                    else:
-                        sanitized = []
-                        for bm in p["bookmarks"]:
-                            if isinstance(bm, str):
-                                sanitized.append({"command": bm, "global": False, "windowTitle": ""})
-                            elif isinstance(bm, dict):
-                                sanitized.append({
-                                    "command": bm.get("command", ""),
-                                    "global": bm.get("global", False),
-                                    "name": bm.get("name", ""),
-                                    "windowTitle": bm.get("windowTitle", "")
-                                })
-                        p["bookmarks"] = sanitized
+    with _PROJECTS_CACHE_LOCK:
+        if _PROJECTS_CACHE is not None:
+            return _PROJECTS_CACHE
+            
+        if os.path.exists(PROJECTS_FILE):
+            try:
+                with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+                    projs = json.load(f)
+                    # Sanitize bookmarks to be dicts
+                    for p in projs:
+                        if "bookmarks" not in p:
+                            p["bookmarks"] = []
+                        else:
+                            sanitized = []
+                            for bm in p["bookmarks"]:
+                                if isinstance(bm, str):
+                                    sanitized.append({"command": bm, "global": False, "windowTitle": ""})
+                                elif isinstance(bm, dict):
+                                    sanitized.append({
+                                        "command": bm.get("command", ""),
+                                        "global": bm.get("global", False),
+                                        "name": bm.get("name", ""),
+                                        "windowTitle": bm.get("windowTitle", "")
+                                    })
+                            p["bookmarks"] = sanitized
                 _PROJECTS_CACHE = projs
                 return projs
-        except Exception as e:
-            print(f"Error reading projects config: {e}")
-    _PROJECTS_CACHE = []
-    return _PROJECTS_CACHE
+            except Exception as e:
+                print(f"Error reading projects config: {e}")
+        _PROJECTS_CACHE = []
+        return _PROJECTS_CACHE
 
 def save_projects_config(projects):
     global _PROJECTS_CACHE
-    try:
-        with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(projects, f, indent=2)
-        _PROJECTS_CACHE = projects
-    except Exception as e:
-        print(f"Error saving projects config: {e}")
+    with _PROJECTS_CACHE_LOCK:
+        try:
+            with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(projects, f, indent=2)
+            _PROJECTS_CACHE = projects
+        except Exception as e:
+            print(f"Error saving projects config: {e}")
 
 def scan_projects():
     config_projects = load_projects_config()
