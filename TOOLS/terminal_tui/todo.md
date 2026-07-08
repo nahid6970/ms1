@@ -1,4 +1,6 @@
 # Tasks
-- [x] Add the links anchor element container to `#ai-model-filter-modal` layout in HTML (`index.html`)
-- [x] Update `switchAIFilterTab(provider)` to dynamically update the href and text of the rate limits link
-- [x] Test and push updates to github
+- [x] Replace text/emoji icons in `#ai-provider-dd-menu` options with premium custom inline SVGs in HTML (`index.html`)
+- [x] Replace text/emoji icons in model visibility modal tabs with the matching inline SVGs in HTML (`index.html`)
+- [x] Update `AI_PROVIDER_ICONS` constant definition in JavaScript to contain SVG string representations
+- [x] Change `.textContent` assignments for `ai-provider-dd-label` to `.innerHTML` in `selectAIProvider` and initial load handlers
+- [ ] Test and push updates to github
