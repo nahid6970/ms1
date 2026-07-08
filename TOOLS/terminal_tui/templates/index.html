@@ -1885,12 +1885,21 @@
                 <button onclick="clearMorphAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
             </div>
 
-            <!-- System Prompt -->
-            <div style="margin-bottom:10px; padding:8px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px;">
-                <details>
-                    <summary style="font-size:0.7rem; color:var(--text-muted); cursor:pointer; user-select:none; font-weight:500;">Custom System Prompt</summary>
-                    <textarea id="ai-system-input" placeholder="e.g. You are a Linux terminal expert. Output only the command." style="width:100%; height:45px; margin-top:6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:4px 6px; font-size:0.72rem; outline:none; resize:none;" onchange="localStorage.setItem('ai-system-prompt', this.value)"></textarea>
-                </details>
+            <!-- System Prompt Selector & Actions -->
+            <div style="margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                <div style="position:relative; flex:1;">
+                    <select id="ai-system-prompt-select" onchange="handleSystemPromptChange()" style="width:100%; height:30px; padding:0 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:0.74rem; outline:none; cursor:pointer;">
+                        <option value="">(No System Prompt)</option>
+                    </select>
+                </div>
+                <!-- Plus Button -->
+                <button onclick="openAISystemPromptModal(true)" title="Add custom system prompt" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <!-- Settings/Edit Button -->
+                <button onclick="openAISystemPromptModal(false)" title="Manage system prompts" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
             </div>
 
             <!-- Usage / Rate Limit Stats -->
@@ -2398,6 +2407,34 @@
                     <button class="btn btn-secondary" onclick="toggleAllModelsFilter(false)" style="padding: 4px 10px; font-size: 0.72rem; height: 28px;">Hide All</button>
                 </div>
                 <button class="btn btn-primary" onclick="closeAIModelFilterModal()" style="padding: 6px 16px; font-size: 0.8rem; height: 32px; background-color: var(--accent-color); border: none; border-radius: 6px; color: white; cursor: pointer;">Save & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Custom System Prompts Manager Modal ═════════════════════════════ -->
+    <div id="ai-system-prompt-modal" class="modal-backdrop" style="z-index:3000;">
+        <div class="modal-content" style="width: 480px; max-width: 90vw; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+                <h2 style="font-size: 1.05rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">📝 System Prompts Manager</h2>
+                <button onclick="closeAISystemPromptModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">×</button>
+            </div>
+
+            <!-- Form to Add/Edit a Prompt -->
+            <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+                <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;" id="prompt-form-title">Create New Prompt</div>
+                <input type="hidden" id="edit-prompt-id" value="">
+                <input type="text" id="prompt-name-input" placeholder="Prompt Name (e.g. Linux Expert)" style="width: 100%; box-sizing: border-box; padding: 6px 10px; font-size: 0.75rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
+                <textarea id="prompt-text-input" placeholder="System prompt instructions..." style="width: 100%; height: 70px; box-sizing: border-box; padding: 6px 10px; font-size: 0.75rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; resize: none;"></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button id="cancel-prompt-edit-btn" onclick="resetPromptForm()" style="display: none; padding: 4px 10px; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); font-size: 0.72rem; cursor: pointer;">Cancel</button>
+                    <button onclick="saveCustomPrompt()" style="padding: 4px 12px; background: var(--accent-color); border: none; border-radius: 6px; color: white; font-size: 0.72rem; cursor: pointer; font-weight: 500;">Save Prompt</button>
+                </div>
+            </div>
+
+            <!-- List of Saved Prompts -->
+            <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; flex-shrink: 0;">Saved Prompts</div>
+            <div id="saved-prompts-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 2px;">
+                <!-- Dynamically populated -->
             </div>
         </div>
     </div>
@@ -8724,9 +8761,8 @@
                 updateRateLimitsUI();
                 syncAIUsageFromServer();
 
-                const savedSystem = localStorage.getItem('ai-system-prompt') || '';
-                const systemInput = document.getElementById('ai-system-input');
-                if (systemInput) systemInput.value = savedSystem;
+                migrateOldSystemPrompt();
+                populateSystemPromptsDropdown();
                 
                 renderAIChatHistory();
 
@@ -9835,6 +9871,191 @@
             }
         }
 
+        function getCustomSystemPrompts() {
+            try {
+                return JSON.parse(localStorage.getItem('ai-system-prompts') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function saveCustomSystemPrompts(list) {
+            localStorage.setItem('ai-system-prompts', JSON.stringify(list));
+        }
+
+        function migrateOldSystemPrompt() {
+            const oldPrompt = localStorage.getItem('ai-system-prompt') || '';
+            const promptsList = localStorage.getItem('ai-system-prompts');
+            if (oldPrompt.trim() && !promptsList) {
+                const newId = 'sp-migrated';
+                const list = [{ id: newId, name: 'Saved Prompt', text: oldPrompt }];
+                localStorage.setItem('ai-system-prompts', JSON.stringify(list));
+                localStorage.setItem('ai-active-system-prompt-id', newId);
+                localStorage.removeItem('ai-system-prompt');
+            }
+        }
+
+        function populateSystemPromptsDropdown() {
+            const select = document.getElementById('ai-system-prompt-select');
+            if (!select) return;
+            select.innerHTML = '<option value="">(No System Prompt)</option>';
+            
+            const list = getCustomSystemPrompts();
+            list.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                select.appendChild(opt);
+            });
+            
+            const activeId = localStorage.getItem('ai-active-system-prompt-id') || '';
+            if (list.some(p => p.id === activeId)) {
+                select.value = activeId;
+            } else {
+                select.value = '';
+                localStorage.setItem('ai-active-system-prompt-id', '');
+            }
+        }
+
+        function handleSystemPromptChange() {
+            const select = document.getElementById('ai-system-prompt-select');
+            if (select) {
+                localStorage.setItem('ai-active-system-prompt-id', select.value);
+            }
+        }
+
+        function openAISystemPromptModal(focusNew = false) {
+            closeAICopilotPopover();
+            document.getElementById('ai-system-prompt-modal').classList.add('show');
+            resetPromptForm();
+            renderSavedPromptsList();
+            if (focusNew) {
+                setTimeout(() => {
+                    const input = document.getElementById('prompt-name-input');
+                    if (input) input.focus();
+                }, 100);
+            }
+        }
+
+        function closeAISystemPromptModal() {
+            document.getElementById('ai-system-prompt-modal').classList.remove('show');
+        }
+
+        function renderSavedPromptsList() {
+            const container = document.getElementById('saved-prompts-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const list = getCustomSystemPrompts();
+            if (list.length === 0) {
+                container.innerHTML = '<div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:16px;">No saved system prompts</div>';
+                return;
+            }
+            
+            list.forEach(p => {
+                const item = document.createElement('div');
+                item.style.cssText = 'background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; padding:8px; display:flex; flex-direction:column; gap:4px; margin-bottom: 4px;';
+                
+                const header = document.createElement('div');
+                header.style.cssText = 'display:flex; justify-content:space-between; align-items:center;';
+                
+                const nameEl = document.createElement('span');
+                nameEl.style.cssText = 'font-weight:600; font-size:0.75rem; color:var(--text-primary);';
+                nameEl.textContent = p.name;
+                header.appendChild(nameEl);
+                
+                const actions = document.createElement('div');
+                actions.style.cssText = 'display:flex; gap:6px;';
+                
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '✏️';
+                editBtn.title = 'Edit prompt';
+                editBtn.style.cssText = 'background:none; border:none; cursor:pointer; font-size:0.72rem; padding:2px;';
+                editBtn.onclick = () => loadPromptForEdit(p.id, p.name, p.text);
+                actions.appendChild(editBtn);
+                
+                // Delete button
+                const delBtn = document.createElement('button');
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = 'Delete prompt';
+                delBtn.style.cssText = 'background:none; border:none; cursor:pointer; font-size:0.72rem; padding:2px;';
+                delBtn.onclick = () => deleteCustomPrompt(p.id);
+                actions.appendChild(delBtn);
+                
+                header.appendChild(actions);
+                item.appendChild(header);
+                
+                const textEl = document.createElement('div');
+                textEl.style.cssText = 'font-size:0.7rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:420px;';
+                textEl.textContent = p.text;
+                item.appendChild(textEl);
+                
+                container.appendChild(item);
+            });
+        }
+
+        function loadPromptForEdit(id, name, text) {
+            document.getElementById('edit-prompt-id').value = id;
+            document.getElementById('prompt-name-input').value = name;
+            document.getElementById('prompt-text-input').value = text;
+            document.getElementById('prompt-form-title').textContent = 'Edit Prompt';
+            document.getElementById('cancel-prompt-edit-btn').style.display = 'inline-block';
+            document.getElementById('prompt-name-input').focus();
+        }
+
+        function resetPromptForm() {
+            document.getElementById('edit-prompt-id').value = '';
+            document.getElementById('prompt-name-input').value = '';
+            document.getElementById('prompt-text-input').value = '';
+            document.getElementById('prompt-form-title').textContent = 'Create New Prompt';
+            document.getElementById('cancel-prompt-edit-btn').style.display = 'none';
+        }
+
+        function saveCustomPrompt() {
+            const idVal = document.getElementById('edit-prompt-id').value;
+            const nameVal = document.getElementById('prompt-name-input').value.trim();
+            const textVal = document.getElementById('prompt-text-input').value.trim();
+            
+            if (!nameVal || !textVal) {
+                alert('Please enter both prompt name and text.');
+                return;
+            }
+            
+            let list = getCustomSystemPrompts();
+            if (idVal) {
+                list = list.map(p => p.id === idVal ? { id: idVal, name: nameVal, text: textVal } : p);
+            } else {
+                const newId = 'sp-' + Date.now();
+                list.push({ id: newId, name: nameVal, text: textVal });
+                if (list.length === 1) {
+                    localStorage.setItem('ai-active-system-prompt-id', newId);
+                }
+            }
+            
+            saveCustomSystemPrompts(list);
+            resetPromptForm();
+            renderSavedPromptsList();
+            populateSystemPromptsDropdown();
+        }
+
+        function deleteCustomPrompt(id) {
+            if (!confirm('Are you sure you want to delete this prompt?')) return;
+            
+            let list = getCustomSystemPrompts();
+            list = list.filter(p => p.id !== id);
+            saveCustomSystemPrompts(list);
+            
+            const activeId = localStorage.getItem('ai-active-system-prompt-id') || '';
+            if (activeId === id) {
+                localStorage.setItem('ai-active-system-prompt-id', '');
+            }
+            
+            resetPromptForm();
+            renderSavedPromptsList();
+            populateSystemPromptsDropdown();
+        }
+
         function selectAIProvider(val) {
             document.getElementById('ai-provider-select').value = val;
             document.getElementById('ai-provider-dd-label').innerHTML = AI_PROVIDER_ICONS[val] + '  ' + AI_PROVIDER_LABELS[val];
@@ -10085,7 +10306,18 @@
                 ? (localStorage.getItem('morph-api-key') || '')
                 : (localStorage.getItem('groq-api-key') || '');
             const model = document.getElementById('ai-model-select').value;
-            const system_instruction = document.getElementById('ai-system-input').value.trim();
+            
+            // Get active system prompt instruction text dynamically
+            let system_instruction = '';
+            const activePromptId = localStorage.getItem('ai-active-system-prompt-id') || '';
+            if (activePromptId) {
+                try {
+                    const prompts = JSON.parse(localStorage.getItem('ai-system-prompts') || '[]');
+                    const found = prompts.find(p => p.id === activePromptId);
+                    if (found) system_instruction = found.text;
+                } catch(e) {}
+            }
+            
             const submitBtn = document.getElementById('ai-copilot-submit');
             
             const originalBg = submitBtn.style.background;
