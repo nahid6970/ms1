@@ -2412,7 +2412,7 @@
     </div>
 
     <!-- ═══ Custom System Prompts Manager Modal ═════════════════════════════ -->
-    <div id="ai-system-prompt-modal" class="modal-backdrop" style="z-index:3000;">
+    <div id="ai-system-prompt-modal" class="modal-overlay" style="z-index:3000;">
         <div class="modal-content" style="width: 480px; max-width: 90vw; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
                 <h2 style="font-size: 1.05rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">📝 System Prompts Manager</h2>
@@ -3133,6 +3133,7 @@
                 else if (id === 'ports-modal') closePortsMonitorModal();
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
+                else if (id === 'ai-system-prompt-modal') closeAISystemPromptModal();
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
                 else if (id === 'custom-btn-modal') closeCustomButtonModal();

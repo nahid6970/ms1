@@ -1,5 +1,4 @@
 # Tasks
-- [x] Increase API request timeout to 60 seconds for Groq (line 3555) in `app.py`
-- [x] Increase API request timeout to 60 seconds for Morph (line 3603) in `app.py`
-- [x] Increase API request timeout to 60 seconds for Gemini (line 3656) in `app.py`
+- [x] Change modal class name from `modal-backdrop` to `modal-overlay` for screen centering of the system prompt manager modal
+- [x] Register `ai-system-prompt-modal` in global overlay click handler to enable clicking outside to close
 - [x] Test and push updates to github
