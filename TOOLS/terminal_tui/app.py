@@ -239,8 +239,11 @@ class TerminalSession:
         self.history = ""
         self.history_lock = threading.Lock()
         
-        # Ensure project-specific data directory exists in C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data\<project>
-        project_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", name)
+        # Ensure project-specific data directory exists
+        # Use a sanitized path instead of name to ensure stability when renaming projects
+        import re
+        safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
+        project_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
         os.makedirs(project_data_dir, exist_ok=True)
         
         profile_path = os.path.join(project_data_dir, "profile.ps1")
@@ -426,13 +429,21 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             except Exception:
                 pass
 
+_PROJECTS_CACHE = None
+_PROJECTS_CACHE_LOCK = threading.Lock()
+
 def load_projects_config():
-    if os.path.exists(PROJECTS_FILE):
-        try:
-            with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
-                projs = json.load(f)
-                # Sanitize bookmarks to be dicts
-                for p in projs:
+    global _PROJECTS_CACHE
+    with _PROJECTS_CACHE_LOCK:
+        if _PROJECTS_CACHE is not None:
+            return _PROJECTS_CACHE
+            
+        if os.path.exists(PROJECTS_FILE):
+            try:
+                with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+                    projs = json.load(f)
+                    # Sanitize bookmarks to be dicts
+                    for p in projs:
                     if "bookmarks" not in p:
                         p["bookmarks"] = []
                     else:
@@ -448,17 +459,22 @@ def load_projects_config():
                                     "windowTitle": bm.get("windowTitle", "")
                                 })
                         p["bookmarks"] = sanitized
+                _PROJECTS_CACHE = projs
                 return projs
-        except Exception as e:
-            print(f"Error reading projects config: {e}")
-    return []
+            except Exception as e:
+                print(f"Error reading projects config: {e}")
+        _PROJECTS_CACHE = []
+        return _PROJECTS_CACHE
 
 def save_projects_config(projects):
-    try:
-        with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(projects, f, indent=2)
-    except Exception as e:
-        print(f"Error saving projects config: {e}")
+    global _PROJECTS_CACHE
+    with _PROJECTS_CACHE_LOCK:
+        try:
+            with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(projects, f, indent=2)
+            _PROJECTS_CACHE = projects
+        except Exception as e:
+            print(f"Error saving projects config: {e}")
 
 def scan_projects():
     config_projects = load_projects_config()
