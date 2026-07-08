@@ -9082,6 +9082,45 @@
             if (btn) btn.style.color = isVisible ? 'var(--text-muted)' : 'var(--accent-color)';
         }
 
+        setInterval(() => {
+            const container = document.getElementById('ai-usage-container');
+            if (container && container.style.display === 'flex') {
+                updateRateLimitsUI();
+            }
+        }, 1000);
+
+        function parseResetTimeToSeconds(str) {
+            if (!str) return 0;
+            let totalSec = 0;
+            const hMatch = str.match(/(\d+)h/);
+            const mMatch = str.match(/(\d+)m/);
+            const sMatch = str.match(/([\d\.]+)s/);
+            
+            if (hMatch) totalSec += parseInt(hMatch[1]) * 3600;
+            if (mMatch) totalSec += parseInt(mMatch[1]) * 60;
+            if (sMatch) totalSec += parseFloat(sMatch[1]);
+            
+            if (!hMatch && !mMatch && !sMatch) {
+                totalSec = parseFloat(str) || 0;
+            }
+            return totalSec;
+        }
+
+        function formatSecondsToResetTime(sec) {
+            if (sec <= 0) return '0s';
+            if (sec >= 3600) {
+                const h = Math.floor(sec / 3600);
+                const m = Math.floor((sec % 3600) / 60);
+                return `${h}h${m}m`;
+            }
+            if (sec >= 60) {
+                const m = Math.floor(sec / 60);
+                const s = (sec % 60).toFixed(1);
+                return `${m}m${s}s`;
+            }
+            return `${sec.toFixed(1)}s`;
+        }
+
         function recordRequestUsage(provider, model, tokenCount) {
             const historyKey = `ai-usage-history-${provider}-${model}`;
             let history = [];
@@ -9207,30 +9246,50 @@
             const limitRPD = spec ? (typeof spec.rpd === 'number' ? spec.rpd : parseInt(spec.rpd) || 0) : 0;
             const usage = getCalculatedUsage(provider, model);
 
+            const historyKey = `ai-usage-history-${provider}-${model}`;
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(historyKey)) || [];
+            } catch(e) {
+                history = [];
+            }
+            const oneMinAgo = Date.now() - 60000;
+            const activeLogs = history.filter(item => item.timestamp > oneMinAgo);
+            const oldestLogTime = activeLogs.length > 0 ? activeLogs[0].timestamp : null;
+            const clientResetSec = oldestLogTime ? Math.max(0, (oldestLogTime + 60000 - Date.now()) / 1000) : 0;
+
             if (cached) {
                 const data = JSON.parse(cached);
+                const elapsedMs = data.timestamp ? (Date.now() - data.timestamp) : 0;
+                const elapsedSec = elapsedMs / 1000;
+
                 if (reqEl && data.remaining_requests && data.limit_requests) {
-                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
+                    const originalResetSec = parseResetTimeToSeconds(data.reset_requests);
+                    const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${formatSecondsToResetTime(remainingResetSec)})`;
                 } else if (reqEl && limitRPM > 0) {
                     const left = Math.max(0, limitRPM - usage.requestsLastMin);
-                    reqEl.innerText = `${left} / ${limitRPM} (client-tracked)`;
+                    reqEl.innerText = `${left} / ${limitRPM} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
                 } else if (reqEl) {
                     reqEl.innerText = '-';
                 }
                 
                 if (tokEl && data.remaining_tokens && data.limit_tokens) {
-                    tokEl.innerText = `${data.remaining_tokens} / ${data.limit_tokens} (reset: ${data.reset_tokens})`;
+                    const originalResetSec = parseResetTimeToSeconds(data.reset_tokens);
+                    const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    tokEl.innerText = `${data.remaining_tokens} / ${data.limit_tokens} (reset: ${formatSecondsToResetTime(remainingResetSec)})`;
                 } else if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
                     const left = Math.max(0, limitTPM - usage.tokensLastMin);
                     const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
                     const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
-                    tokEl.innerText = `${leftStr} / ${limitStr} (client-tracked)`;
+                    tokEl.innerText = `${leftStr} / ${limitStr} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
                 } else if (tokEl) {
                     tokEl.innerText = '-';
                 }
 
                 if (timeEl && timeContainer && data.timestamp) {
-                    timeEl.innerText = data.timestamp;
+                    const displayTime = isNaN(data.timestamp) ? data.timestamp : new Date(data.timestamp).toLocaleTimeString();
+                    timeEl.innerText = displayTime;
                     timeContainer.style.display = 'flex';
                 } else if (timeContainer) {
                     timeContainer.style.display = 'none';
@@ -9238,7 +9297,7 @@
             } else {
                 if (reqEl && limitRPM > 0) {
                     const left = Math.max(0, limitRPM - usage.requestsLastMin);
-                    reqEl.innerText = `${left} / ${limitRPM} (client-tracked)`;
+                    reqEl.innerText = `${left} / ${limitRPM} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
                 } else if (reqEl) {
                     reqEl.innerText = 'Not queried yet';
                 }
@@ -9247,7 +9306,7 @@
                     const left = Math.max(0, limitTPM - usage.tokensLastMin);
                     const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
                     const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
-                    tokEl.innerText = `${leftStr} / ${limitStr} (client-tracked)`;
+                    tokEl.innerText = `${leftStr} / ${limitStr} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
                 } else if (tokEl) {
                     tokEl.innerText = 'Not queried yet';
                 }
@@ -9774,7 +9833,7 @@
                 if (data.rate_limits) {
                     const limitsWithTime = {
                         ...data.rate_limits,
-                        timestamp: new Date().toLocaleTimeString()
+                        timestamp: Date.now()
                     };
                     localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(limitsWithTime));
                 }
