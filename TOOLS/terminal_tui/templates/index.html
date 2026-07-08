@@ -1889,19 +1889,19 @@
                 <div style="font-weight:600; color:var(--text-secondary); text-transform:uppercase; font-size:0.62rem; letter-spacing:0.5px; margin-bottom:2px;">Rate Limit Status</div>
                 <div style="display:flex; justify-content:space-between;">
                     <span>Model Limit Specs:</span>
-                    <span id="ai-usage-specs" style="font-weight:600; color:var(--accent-color);">-</span>
+                    <span id="ai-usage-specs" style="font-weight:600; color:var(--text-primary);">-</span>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
                     <span>Requests Left:</span>
-                    <span id="ai-usage-requests" style="font-weight:600; color: #3b82f6;">-</span>
+                    <span id="ai-usage-requests" style="font-weight:600; color:var(--text-primary);">-</span>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
                     <span>Tokens Left:</span>
-                    <span id="ai-usage-tokens" style="font-weight:600; color: #10b981;">-</span>
+                    <span id="ai-usage-tokens" style="font-weight:600; color:var(--text-primary);">-</span>
                 </div>
                 <div id="ai-usage-time-container" style="display:none; justify-content:space-between; margin-top:2px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.65rem; color:var(--text-muted);">
                     <span>Last Checked:</span>
-                    <span id="ai-usage-time" style="font-weight:500; color: #f59e0b;">-</span>
+                    <span id="ai-usage-time" style="font-weight:500; color:var(--text-primary);">-</span>
                 </div>
             </div>
 
@@ -9225,9 +9225,9 @@
             const specEl = document.getElementById('ai-usage-specs');
             if (specEl && spec) {
                 if (spec.rpd) {
-                    specEl.innerText = `RPM: ${spec.rpm} | TPM: ${spec.tpm} | RPD: ${spec.rpd}`;
+                    specEl.innerHTML = `RPM: <span style="color: #3b82f6;">${spec.rpm}</span> | TPM: <span style="color: #10b981;">${spec.tpm}</span> | RPD: <span style="color: #f59e0b;">${spec.rpd}</span>`;
                 } else {
-                    specEl.innerText = `RPM: ${spec.rpm} | TPM: ${spec.tpm}`;
+                    specEl.innerHTML = `RPM: <span style="color: #3b82f6;">${spec.rpm}</span> | TPM: <span style="color: #10b981;">${spec.tpm}</span>`;
                 }
             } else if (specEl) {
                 specEl.innerText = '-';
@@ -9266,10 +9266,10 @@
                 if (reqEl && data.remaining_requests && data.limit_requests) {
                     const originalResetSec = parseResetTimeToSeconds(data.reset_requests);
                     const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
-                    reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${formatSecondsToResetTime(remainingResetSec)})`;
+                    reqEl.innerHTML = `<span style="color: #3b82f6;">${data.remaining_requests}</span> / ${data.limit_requests} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (reqEl && limitRPM > 0) {
                     const left = Math.max(0, limitRPM - usage.requestsLastMin);
-                    reqEl.innerText = `${left} / ${limitRPM} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
+                    reqEl.innerHTML = `<span style="color: #3b82f6;">${left}</span> / ${limitRPM} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(clientResetSec)}</span> client-tracked)`;
                 } else if (reqEl) {
                     reqEl.innerText = '-';
                 }
@@ -9277,19 +9277,19 @@
                 if (tokEl && data.remaining_tokens && data.limit_tokens) {
                     const originalResetSec = parseResetTimeToSeconds(data.reset_tokens);
                     const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
-                    tokEl.innerText = `${data.remaining_tokens} / ${data.limit_tokens} (reset: ${formatSecondsToResetTime(remainingResetSec)})`;
+                    tokEl.innerHTML = `<span style="color: #10b981;">${data.remaining_tokens}</span> / ${data.limit_tokens} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
                     const left = Math.max(0, limitTPM - usage.tokensLastMin);
                     const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
                     const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
-                    tokEl.innerText = `${leftStr} / ${limitStr} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
+                    tokEl.innerHTML = `<span style="color: #10b981;">${leftStr}</span> / ${limitStr} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(clientResetSec)}</span> client-tracked)`;
                 } else if (tokEl) {
                     tokEl.innerText = '-';
                 }
 
                 if (timeEl && timeContainer && data.timestamp) {
                     const displayTime = isNaN(data.timestamp) ? data.timestamp : new Date(data.timestamp).toLocaleTimeString();
-                    timeEl.innerText = displayTime;
+                    timeEl.innerHTML = `<span style="color: #f59e0b;">${displayTime}</span>`;
                     timeContainer.style.display = 'flex';
                 } else if (timeContainer) {
                     timeContainer.style.display = 'none';
@@ -9297,7 +9297,7 @@
             } else {
                 if (reqEl && limitRPM > 0) {
                     const left = Math.max(0, limitRPM - usage.requestsLastMin);
-                    reqEl.innerText = `${left} / ${limitRPM} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
+                    reqEl.innerHTML = `<span style="color: #3b82f6;">${left}</span> / ${limitRPM} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(clientResetSec)}</span> client-tracked)`;
                 } else if (reqEl) {
                     reqEl.innerText = 'Not queried yet';
                 }
@@ -9306,7 +9306,7 @@
                     const left = Math.max(0, limitTPM - usage.tokensLastMin);
                     const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
                     const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
-                    tokEl.innerText = `${leftStr} / ${limitStr} (reset: ${formatSecondsToResetTime(clientResetSec)} client-tracked)`;
+                    tokEl.innerHTML = `<span style="color: #10b981;">${leftStr}</span> / ${limitStr} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(clientResetSec)}</span> client-tracked)`;
                 } else if (tokEl) {
                     tokEl.innerText = 'Not queried yet';
                 }
