@@ -264,10 +264,11 @@ $global:PROJECT_ROOT_PATH = "{path_clean}"
 
 # Force import PSReadLine in case it is disabled due to screen reader detection in PTY
 Import-Module PSReadLine -ErrorAction SilentlyContinue
-
-# Set custom project command history file
+# Set custom project command history file and enable partial history search
 if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {{
     Set-PSReadLineOption -HistorySavePath "{history_path}"
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 }}
 
 # Custom cd command to go to project root when no arguments are provided
