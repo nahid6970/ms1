@@ -10842,15 +10842,47 @@
             const sel = document.getElementById('ai-model-select');
             const menu = document.getElementById('ai-model-dd-menu');
             menu.innerHTML = '';
+            
+            const provider = document.getElementById('ai-provider-select').value;
+            const speeds = getModelSpeeds();
+            const providerSpeeds = speeds[provider] || {};
+            
             const bookmarks = getBookmarkedModels();
             Array.from(sel.options).forEach(opt => {
                 const div = document.createElement('div');
                 div.className = 'ai-dd-opt';
                 div.dataset.val = opt.value;
-                div.style.cssText = 'padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer;';
+                div.style.cssText = 'padding:6px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer; display:flex; justify-content:space-between; align-items:center;';
                 
                 const isBookmarked = bookmarks.includes(opt.value);
-                div.textContent = (isBookmarked ? '★ ' : '') + opt.text;
+                const labelSpan = document.createElement('span');
+                labelSpan.textContent = (isBookmarked ? '★ ' : '') + opt.text;
+                div.appendChild(labelSpan);
+                
+                const speed = providerSpeeds[opt.value] || 'Medium';
+                if (speed !== 'None') {
+                    const tag = document.createElement('span');
+                    tag.textContent = speed;
+                    tag.style.fontSize = '0.62rem';
+                    tag.style.padding = '1px 5px';
+                    tag.style.borderRadius = '3px';
+                    tag.style.fontWeight = '700';
+                    tag.style.marginLeft = '8px';
+                    tag.style.textTransform = 'uppercase';
+                    tag.style.flexShrink = '0';
+                    
+                    if (speed === 'Fast') {
+                        tag.style.background = 'rgba(96, 165, 250, 0.15)';
+                        tag.style.color = '#60a5fa';
+                    } else if (speed === 'Medium') {
+                        tag.style.background = 'rgba(245, 158, 11, 0.15)';
+                        tag.style.color = '#f59e0b';
+                    } else if (speed === 'Slow') {
+                        tag.style.background = 'rgba(248, 113, 113, 0.15)';
+                        tag.style.color = '#f87171';
+                    }
+                    div.appendChild(tag);
+                }
                 
                 const isSelected = opt.value === sel.value;
                 if (isSelected) { div.style.color = 'var(--accent-color)'; div.style.fontWeight = '600'; }
