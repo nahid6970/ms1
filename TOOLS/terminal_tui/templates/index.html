@@ -2474,19 +2474,13 @@
             
             <!-- System Prompt Buttons Styling Customizer -->
             <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
-                <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Prompt Buttons Styling</div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px;">
+                <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Prompt Buttons Styling</div>
+                
+                <!-- Shared Style Row -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px; margin-bottom: 4px;">
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">BG Color</label>
-                        <input type="color" id="prompt-style-bg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Text Color</label>
-                        <input type="color" id="prompt-style-fg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Color</label>
-                        <input type="color" id="prompt-style-border-color" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Radius</label>
+                        <input type="text" id="prompt-style-border-radius" placeholder="6px" style="width:100%; box-sizing:border-box; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 8px; outline:none; height:26px;" oninput="savePromptButtonsStyle()">
                     </div>
                     <div>
                         <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Width</label>
@@ -2498,16 +2492,48 @@
                         </select>
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Radius</label>
-                        <input type="text" id="prompt-style-border-radius" placeholder="6px" style="width:100%; box-sizing:border-box; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 8px; outline:none; height:26px;" oninput="savePromptButtonsStyle()">
-                    </div>
-                    <div>
                         <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Font Family</label>
                         <select id="prompt-style-font-family" style="width:100%; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 6px; outline:none; height:26px; cursor:pointer;" onchange="savePromptButtonsStyle()">
                             <option value="sans-serif">Sans-serif</option>
                             <option value="monospace">Monospace</option>
                             <option value="serif">Serif</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- Active vs Inactive State Style -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <!-- Active State column -->
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <div style="font-size: 0.68rem; font-weight: 600; color: var(--accent-color); text-transform: uppercase;">Active State</div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">BG Color</label>
+                            <input type="color" id="prompt-style-bg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Text Color</label>
+                            <input type="color" id="prompt-style-fg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Border Color</label>
+                            <input type="color" id="prompt-style-border-color" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
+                    </div>
+                    <!-- Inactive State column -->
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <div style="font-size: 0.68rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Inactive State</div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">BG Color</label>
+                            <input type="color" id="prompt-style-inactive-bg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Text Color</label>
+                            <input type="color" id="prompt-style-inactive-fg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.62rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Border Color</label>
+                            <input type="color" id="prompt-style-inactive-border-color" class="styled-color-picker" onchange="savePromptButtonsStyle()">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -10145,6 +10171,9 @@
                 bg: document.getElementById('prompt-style-bg').value,
                 fg: document.getElementById('prompt-style-fg').value,
                 borderColor: document.getElementById('prompt-style-border-color').value,
+                inactiveBg: document.getElementById('prompt-style-inactive-bg').value,
+                inactiveFg: document.getElementById('prompt-style-inactive-fg').value,
+                inactiveBorderColor: document.getElementById('prompt-style-inactive-border-color').value,
                 borderWidth: document.getElementById('prompt-style-border-width').value,
                 borderRadius: document.getElementById('prompt-style-border-radius').value || '6px',
                 fontFamily: document.getElementById('prompt-style-font-family').value
@@ -10158,6 +10187,9 @@
             document.getElementById('prompt-style-bg').value = style.bg || '#3b82f6';
             document.getElementById('prompt-style-fg').value = style.fg || '#ffffff';
             document.getElementById('prompt-style-border-color').value = style.borderColor || '#3b82f6';
+            document.getElementById('prompt-style-inactive-bg').value = style.inactiveBg || '#0f131a';
+            document.getElementById('prompt-style-inactive-fg').value = style.inactiveFg || '#64748b';
+            document.getElementById('prompt-style-inactive-border-color').value = style.inactiveBorderColor || '#232c3d';
             document.getElementById('prompt-style-border-width').value = style.borderWidth || '1px';
             document.getElementById('prompt-style-border-radius').value = style.borderRadius || '6px';
             document.getElementById('prompt-style-font-family').value = style.fontFamily || 'sans-serif';
@@ -10177,24 +10209,26 @@
             const customBorderColor = btnStyle.borderColor || '#3b82f6';
             const customBorderWidth = btnStyle.borderWidth || '1px';
             const customBorderRadius = btnStyle.borderRadius || '6px';
+            
+            const inactiveBg = btnStyle.inactiveBg || '#0f131a';
+            const inactiveFg = btnStyle.inactiveFg || '#64748b';
+            const inactiveBorderColor = btnStyle.inactiveBorderColor || '#232c3d';
+            
             const fontFamily = btnStyle.fontFamily || 'sans-serif';
             
             const applyCustomStyle = (btn, isActive) => {
                 btn.style.fontFamily = fontFamily;
+                btn.style.borderRadius = customBorderRadius;
+                btn.style.borderWidth = customBorderWidth;
+                btn.style.borderStyle = customBorderWidth === '0px' ? 'none' : 'solid';
                 if (isActive) {
                     btn.style.backgroundColor = customBg;
                     btn.style.color = customFg;
                     btn.style.borderColor = customBorderColor;
-                    btn.style.borderWidth = customBorderWidth;
-                    btn.style.borderStyle = customBorderWidth === '0px' ? 'none' : 'solid';
-                    btn.style.borderRadius = customBorderRadius;
                 } else {
-                    btn.style.backgroundColor = 'transparent';
-                    btn.style.color = 'var(--text-muted)';
-                    btn.style.borderColor = 'var(--border-color)';
-                    btn.style.borderWidth = '1px';
-                    btn.style.borderStyle = 'solid';
-                    btn.style.borderRadius = customBorderRadius;
+                    btn.style.backgroundColor = inactiveBg;
+                    btn.style.color = inactiveFg;
+                    btn.style.borderColor = inactiveBorderColor;
                 }
             };
             
