@@ -87,3 +87,17 @@ Read this file only when relevant to the current task. When reading, reference t
 - Renamed `PROJECT.md` → `md/ARCHITECTURE.md` as the detailed architecture reference
 
 *Next session: Consider adding keyboard shortcuts doc, further UI polish*
+
+---
+
+## [2026-07-08] - Mobile Overlay Bug Fix
+**What We Accomplished:**
+- Identified and fixed mobile layout rendering bug where the top header and bottom status bar disappeared or were covered by a black/blurry layer.
+- Root Cause: Multiple hidden `.modal-overlay` elements with high z-index (3000) and `backdrop-filter: blur(8px)` remained in the layout (`display: flex`) and triggered mobile GPU rendering/compositing bugs, rendering them opaque.
+- Solution: Updated `.modal-overlay` CSS to use `visibility: hidden;` and transitioned it along with `opacity` to completely exclude inactive modals from the rendering tree.
+- Updated documentation (`md/PROBLEMS_AND_FIXES.md` and `md/RECENT.md`).
+
+**Files Modified:**
+- `templates/index.html` — updated modal-overlay transition and visibility
+- `md/PROBLEMS_AND_FIXES.md` — logged bug and solution
+- `md/RECENT.md` — logged development session

@@ -35,3 +35,12 @@ Unexpected token 'True' in expression or statement.
 **Root Cause:** The dropdown options were being formatted with the runner prefix before being displayed.
 **Solution:** Changed to show raw filenames only (e.g., `myscript.py`, `.\\test.ps1`). The runner prefix is added only at execution time based on the selected mode.
 **Files Modified:** `templates/index.html` — `filterDebugScripts()` / `openDebugScriptModal()`
+
+---
+
+## [2026-07-08 21:00] - Mobile Layout Disappears / Covered by Black UI Overlay
+**Problem:** On mobile browsers (Safari/Chrome), the top header and bottom status bar completely disappeared or were covered by a black/blurry layer after recent commits.
+**Root Cause:** Hidden modal overlays (`.modal-overlay`) with high z-index (like `ai-model-tester-modal` and `ai-system-prompt-modal` at `z-index: 3000`) had `display: flex` and were only hidden via `opacity: 0; pointer-events: none;`. A rendering/compositing bug on mobile GPUs causes the `backdrop-filter: blur(8px)` and/or the background overlay to still render and composite on top of all other page elements, blocking the entire screen.
+**Solution:** Added `visibility: hidden;` to `.modal-overlay` and transitioned it in CSS (`transition: opacity 0.25s ease, visibility 0.25s ease;`), toggling it to `visibility: visible;` in `.modal-overlay.show`. This completely excludes the hidden overlays from the render tree, resolving the GPU compositing bug.
+**Files Modified:** `templates/index.html` — `.modal-overlay` / `.modal-overlay.show` styles
+
