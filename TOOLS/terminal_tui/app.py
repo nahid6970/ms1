@@ -353,10 +353,12 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         
     def _read_loop(self):
         import time
+        idle_loops = 0
         while self.pty.isalive():
             try:
                 data = self.pty.read(blocking=False)
                 if data:
+                    idle_loops = 0
                     with self.history_lock:
                         self.history += data
                         if len(self.history) > 100000:
@@ -372,7 +374,11 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                         except Exception:
                             pass
                 else:
-                    time.sleep(0.005)
+                    idle_loops += 1
+                    if idle_loops < 20:
+                        time.sleep(0.005) # fast polling for 0.1s after last output
+                    else:
+                        time.sleep(0.05)  # slow polling to save CPU when idle
             except Exception:
                 break
         self.output_queue.put(None)
