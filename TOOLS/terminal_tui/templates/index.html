@@ -10123,6 +10123,40 @@
             _modelTesterAbort = true;
         }
 
+        function _isModelHidden(modelVal) {
+            const provider = activeFilterTab || 'gemini';
+            const hidden = getHiddenModels();
+            return (hidden[provider] || []).includes(modelVal);
+        }
+
+        function _toggleTesterModelVisibility(modelVal) {
+            const provider = activeFilterTab || 'gemini';
+            const hidden = getHiddenModels();
+            if (!hidden[provider]) hidden[provider] = [];
+            const idx = hidden[provider].indexOf(modelVal);
+            if (idx >= 0) {
+                hidden[provider].splice(idx, 1);
+            } else {
+                hidden[provider].push(modelVal);
+            }
+            saveHiddenModels(hidden);
+            // Update the eye icon in-place
+            const card = document.querySelector(`#model-tester-results [data-model="${modelVal}"]`);
+            if (card) {
+                const eyeBtn = card.querySelector('.tester-eye-btn');
+                if (eyeBtn) {
+                    const isNowHidden = hidden[provider].includes(modelVal);
+                    eyeBtn.innerHTML = isNowHidden ? '🚫' : '👁️';
+                    eyeBtn.title = isNowHidden ? 'Model hidden — click to show' : 'Model visible — click to hide';
+                    eyeBtn.style.opacity = isNowHidden ? '0.5' : '1';
+                }
+            }
+            // Sync filter modal list if open
+            if (typeof renderFilterModelsList === 'function') renderFilterModelsList();
+            // Sync the model dropdown in copilot
+            if (typeof handleAIProviderChange === 'function') handleAIProviderChange();
+        }
+
         function _renderTesterCard(model, status, detail, timeMs) {
             const statusColors = {
                 pending: { bg: 'rgba(100,116,139,0.12)', border: '#475569', icon: '⏳', color: '#94a3b8' },
@@ -10135,10 +10169,18 @@
             const detailEscaped = (detail || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const truncatedDetail = detailEscaped.length > 200 ? detailEscaped.substring(0, 200) + '…' : detailEscaped;
 
+            const isHidden = _isModelHidden(model.val);
+            const eyeIcon = isHidden ? '🚫' : '👁️';
+            const eyeTitle = isHidden ? 'Model hidden — click to show' : 'Model visible — click to hide';
+            const eyeOpacity = isHidden ? '0.5' : '1';
+
             return `<div data-model="${model.val}" style="background:${s.bg}; border:1px solid ${s.border}; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; gap:3px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:600; font-size:0.75rem; color:var(--text-primary);">${s.icon} ${model.label}</span>
-                    <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : timeStr}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : timeStr}</span>
+                        <button class="tester-eye-btn" onclick="_toggleTesterModelVisibility('${model.val}')" title="${eyeTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${eyeOpacity};">${eyeIcon}</button>
+                    </div>
                 </div>
                 ${truncatedDetail ? `<div style="font-size:0.7rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${truncatedDetail}</div>` : ''}
             </div>`;
