@@ -1,5 +1,5 @@
 # Tasks
-- [x] Increase `#ai-model-filter-modal` width to `600px` in HTML structure (`index.html`)
-- [x] Define `getModelSpec` helper in `index.html` to resolve RPM, RPD, TPM, and TPD spec limits
-- [x] Rewrite `renderFilterModelsList()` to format the models inside a styled HTML table with columns for Visibility, Name, RPM, RPD, TPM, and TPD
-- [x] Test and push updates to github
+- [x] Add `#ai-model-filter-search` input field to `#ai-model-filter-modal` below the tabs in HTML (`index.html`)
+- [x] Update `renderFilterModelsList()` in Javascript to filter models by the query typed into the search box
+- [x] Clear the search box input value when switching tabs or opening the modal
+- [ ] Test and push updates to github
