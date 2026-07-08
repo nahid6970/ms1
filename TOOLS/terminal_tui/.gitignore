@@ -1,6 +1,8 @@
 # Log files
+ai_usage.json
 app.log
 *.log
+
 
 # Local image drops and screenshots
 *.png
