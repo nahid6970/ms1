@@ -444,21 +444,21 @@ def load_projects_config():
                     projs = json.load(f)
                     # Sanitize bookmarks to be dicts
                     for p in projs:
-                    if "bookmarks" not in p:
-                        p["bookmarks"] = []
-                    else:
-                        sanitized = []
-                        for bm in p["bookmarks"]:
-                            if isinstance(bm, str):
-                                sanitized.append({"command": bm, "global": False, "windowTitle": ""})
-                            elif isinstance(bm, dict):
-                                sanitized.append({
-                                    "command": bm.get("command", ""),
-                                    "global": bm.get("global", False),
-                                    "name": bm.get("name", ""),
-                                    "windowTitle": bm.get("windowTitle", "")
-                                })
-                        p["bookmarks"] = sanitized
+                        if "bookmarks" not in p:
+                            p["bookmarks"] = []
+                        else:
+                            sanitized = []
+                            for bm in p["bookmarks"]:
+                                if isinstance(bm, str):
+                                    sanitized.append({"command": bm, "global": False, "windowTitle": ""})
+                                elif isinstance(bm, dict):
+                                    sanitized.append({
+                                        "command": bm.get("command", ""),
+                                        "global": bm.get("global", False),
+                                        "name": bm.get("name", ""),
+                                        "windowTitle": bm.get("windowTitle", "")
+                                    })
+                            p["bookmarks"] = sanitized
                 _PROJECTS_CACHE = projs
                 return projs
             except Exception as e:
