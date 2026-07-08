@@ -3,4 +3,4 @@
 - [x] Define global state variables `activeSortCol` and `activeSortDir` in `index.html`
 - [x] Implement robust sorting logic for names, visibilities, and spec values (including parsing K/M/Unlimited) inside `renderFilterModelsList()`
 - [x] Render sort indicators (▲/▼) in table headers and make headers clickable
-- [ ] Test and push updates to github
+- [x] Test and push updates to github
