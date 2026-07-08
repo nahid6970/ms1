@@ -284,41 +284,27 @@ function cd {{
     }}
 }}
 
-# Track command execution time
-$global:__CmdStartTime = $null
-$global:__LastCmdDuration = $null
+# Track command execution time (simple & PTY-safe: timestamp when prompt renders)
+$global:__LastPromptTime = $null
 
-$ExecutionContext.InvokeCommand.PreCommandLookupAction = {{
-    param($commandName, $commandLookupEventArgs)
-    $global:__CmdStartTime = [System.Diagnostics.Stopwatch]::StartNew()
-}}
-
-# Capture duration after each command
-function Set-LastCommandDuration {{
-    if ($global:__CmdStartTime -ne $null) {{
-        $global:__CmdStartTime.Stop()
-        $global:__LastCmdDuration = $global:__CmdStartTime.Elapsed
-        $global:__CmdStartTime = $null
-    }}
-}}
-
-$null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -Action {{ Set-LastCommandDuration }} -SupportEvent -ErrorAction SilentlyContinue
-Set-PSReadLineOption -PromptText "" -ErrorAction SilentlyContinue
-
-# Helper to format duration nicely
-function Format-Duration ($elapsed) {{
-    if ($elapsed -eq $null) {{ return "" }}
-    $ms = [int]$elapsed.TotalMilliseconds
-    if ($ms -lt 1000) {{ return "" }}
-    if ($elapsed.TotalSeconds -lt 60) {{ return " [{0:0.0}s]" -f $elapsed.TotalSeconds }}
-    if ($elapsed.TotalMinutes -lt 60) {{ return " [{0}m {1}s]" -f [int]$elapsed.Minutes, $elapsed.Seconds }}
-    return " [{0}h {1}m]" -f [int]$elapsed.Hours, $elapsed.Minutes
-}}
-
-# Custom prompt showing project root and subdirectories + execution time
+# Custom prompt showing project root, subdirectories, and execution time
 function prompt {{
-    $durationStr = Format-Duration $global:__LastCmdDuration
-    $global:__LastCmdDuration = $null
+    $now = Get-Date
+    $durationStr = ""
+    if ($global:__LastPromptTime -ne $null) {{
+        $elapsed = $now - $global:__LastPromptTime
+        $ms = [int]$elapsed.TotalMilliseconds
+        if ($ms -ge 1000) {{
+            if ($elapsed.TotalSeconds -lt 60) {{
+                $durationStr = " [{0:0.0}s]" -f $elapsed.TotalSeconds
+            }} elseif ($elapsed.TotalMinutes -lt 60) {{
+                $durationStr = " [{0}m {1}s]" -f [int]$elapsed.Minutes, $elapsed.Seconds
+            }} else {{
+                $durationStr = " [{0}h {1}m]" -f [int]$elapsed.Hours, $elapsed.Minutes
+            }}
+        }}
+    }}
+    $global:__LastPromptTime = Get-Date
 
     $current = $pwd.Path.Replace("/", "\\")
     $root = $global:PROJECT_ROOT_PATH.Replace("/", "\\")
