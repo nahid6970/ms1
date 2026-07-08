@@ -38,5 +38,13 @@
         "prompt_tokens": 150,
         "completion_tokens": 1024,
         "total_tokens": 1174
+    },
+    {
+        "timestamp": "2026-07-08T05:41:50.278789Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 1024,
+        "total_tokens": 1174
     }
 ]
