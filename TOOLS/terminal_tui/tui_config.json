@@ -61,13 +61,7 @@
         "pathColor": "#163055",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Terminal TUI",
