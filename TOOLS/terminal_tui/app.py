@@ -3606,11 +3606,17 @@ def api_ai_command():
         }
         try:
             res = requests.post(url, json=payload, headers=headers, timeout=60)
-            res_data = res.json()
+            try:
+                res_data = res.json()
+            except Exception:
+                return jsonify({"error": f"Morph returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
             if res.status_code != 200:
-                err_obj = res_data.get('error', 'Failed to call Morph API')
-                error_msg = err_obj.get('message', str(err_obj)) if isinstance(err_obj, dict) else str(err_obj)
-                return jsonify({"error": error_msg}), res.status_code
+                err_obj = res_data.get('error', res_data)
+                if isinstance(err_obj, dict):
+                    error_msg = err_obj.get('message', str(err_obj))
+                else:
+                    error_msg = str(err_obj)
+                return jsonify({"error": f"Morph API ({res.status_code}): {error_msg}"}), res.status_code
 
             cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
             rate_limits = {
