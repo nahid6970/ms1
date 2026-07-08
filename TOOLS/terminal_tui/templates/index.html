@@ -41,6 +41,24 @@
             --sidebar-width: 250px;
         }
 
+        /* Color input styled chips */
+        input[type="color"].styled-color-picker {
+            -webkit-appearance: none;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            width: 100%;
+            height: 26px;
+            cursor: pointer;
+        }
+        input[type="color"].styled-color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"].styled-color-picker::-webkit-color-swatch {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
         /* Prevent Sidebar layout flash of unstyled content (FOUC) */
         html.hide-sidebar-layout {
             --sidebar-width: 0px !important;
@@ -2455,24 +2473,24 @@
             </div>
             
             <!-- System Prompt Buttons Styling Customizer -->
-            <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
-                <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Prompt Buttons Styling</div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+                <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Prompt Buttons Styling</div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px;">
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">BG Color</label>
-                        <input type="color" id="prompt-style-bg" style="width:100%; height:24px; padding:0; background:none; border:none; cursor:pointer;" onchange="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">BG Color</label>
+                        <input type="color" id="prompt-style-bg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Text Color</label>
-                        <input type="color" id="prompt-style-fg" style="width:100%; height:24px; padding:0; background:none; border:none; cursor:pointer;" onchange="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Text Color</label>
+                        <input type="color" id="prompt-style-fg" class="styled-color-picker" onchange="savePromptButtonsStyle()">
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Border Color</label>
-                        <input type="color" id="prompt-style-border-color" style="width:100%; height:24px; padding:0; background:none; border:none; cursor:pointer;" onchange="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Color</label>
+                        <input type="color" id="prompt-style-border-color" class="styled-color-picker" onchange="savePromptButtonsStyle()">
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Border Width</label>
-                        <select id="prompt-style-border-width" style="width:100%; font-size:0.7rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:2px;" onchange="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Width</label>
+                        <select id="prompt-style-border-width" style="width:100%; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 6px; outline:none; height:26px; cursor:pointer;" onchange="savePromptButtonsStyle()">
                             <option value="0px">None</option>
                             <option value="1px">1px</option>
                             <option value="2px">2px</option>
@@ -2480,16 +2498,15 @@
                         </select>
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Border Radius</label>
-                        <input type="text" id="prompt-style-border-radius" placeholder="6px" style="width:100%; box-sizing:border-box; font-size:0.7rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:2px 6px;" oninput="savePromptButtonsStyle()">
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Border Radius</label>
+                        <input type="text" id="prompt-style-border-radius" placeholder="6px" style="width:100%; box-sizing:border-box; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 8px; outline:none; height:26px;" oninput="savePromptButtonsStyle()">
                     </div>
                     <div>
-                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 2px;">Font Style</label>
-                        <select id="prompt-style-font-style" style="width:100%; font-size:0.7rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:2px;" onchange="savePromptButtonsStyle()">
-                            <option value="normal">Normal</option>
-                            <option value="bold">Bold</option>
-                            <option value="italic">Italic</option>
-                            <option value="bold italic">Bold Italic</option>
+                        <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Font Family</label>
+                        <select id="prompt-style-font-family" style="width:100%; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 6px; outline:none; height:26px; cursor:pointer;" onchange="savePromptButtonsStyle()">
+                            <option value="sans-serif">Sans-serif</option>
+                            <option value="monospace">Monospace</option>
+                            <option value="serif">Serif</option>
                         </select>
                     </div>
                 </div>
@@ -10130,7 +10147,7 @@
                 borderColor: document.getElementById('prompt-style-border-color').value,
                 borderWidth: document.getElementById('prompt-style-border-width').value,
                 borderRadius: document.getElementById('prompt-style-border-radius').value || '6px',
-                fontStyle: document.getElementById('prompt-style-font-style').value
+                fontFamily: document.getElementById('prompt-style-font-family').value
             };
             localStorage.setItem('ai-system-prompt-btn-style', JSON.stringify(style));
             populateSystemPromptsDropdown();
@@ -10143,7 +10160,7 @@
             document.getElementById('prompt-style-border-color').value = style.borderColor || '#3b82f6';
             document.getElementById('prompt-style-border-width').value = style.borderWidth || '1px';
             document.getElementById('prompt-style-border-radius').value = style.borderRadius || '6px';
-            document.getElementById('prompt-style-font-style').value = style.fontStyle || 'normal';
+            document.getElementById('prompt-style-font-family').value = style.fontFamily || 'sans-serif';
         }
 
         function populateSystemPromptsDropdown() {
@@ -10160,12 +10177,10 @@
             const customBorderColor = btnStyle.borderColor || '#3b82f6';
             const customBorderWidth = btnStyle.borderWidth || '1px';
             const customBorderRadius = btnStyle.borderRadius || '6px';
-            const fStyle = btnStyle.fontStyle || 'normal';
-            
-            const isBold = fStyle.includes('bold');
-            const isItalic = fStyle.includes('italic');
+            const fontFamily = btnStyle.fontFamily || 'sans-serif';
             
             const applyCustomStyle = (btn, isActive) => {
+                btn.style.fontFamily = fontFamily;
                 if (isActive) {
                     btn.style.backgroundColor = customBg;
                     btn.style.color = customFg;
@@ -10173,8 +10188,6 @@
                     btn.style.borderWidth = customBorderWidth;
                     btn.style.borderStyle = customBorderWidth === '0px' ? 'none' : 'solid';
                     btn.style.borderRadius = customBorderRadius;
-                    btn.style.fontWeight = isBold ? 'bold' : 'normal';
-                    btn.style.fontStyle = isItalic ? 'italic' : 'normal';
                 } else {
                     btn.style.backgroundColor = 'transparent';
                     btn.style.color = 'var(--text-muted)';
@@ -10182,8 +10195,6 @@
                     btn.style.borderWidth = '1px';
                     btn.style.borderStyle = 'solid';
                     btn.style.borderRadius = customBorderRadius;
-                    btn.style.fontWeight = 'normal';
-                    btn.style.fontStyle = 'normal';
                 }
             };
             
