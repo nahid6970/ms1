@@ -358,5 +358,325 @@
         "prompt_tokens": 82,
         "completion_tokens": 3,
         "total_tokens": 85
+    },
+    {
+        "timestamp": "2026-07-08T08:07:33.598039Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 81,
+        "total_tokens": 231
+    },
+    {
+        "timestamp": "2026-07-08T08:07:34.560318Z",
+        "provider": "groq",
+        "model": "qwen/qwen3.6-27b",
+        "prompt_tokens": 91,
+        "completion_tokens": 176,
+        "total_tokens": 267
+    },
+    {
+        "timestamp": "2026-07-08T08:07:35.648010Z",
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T08:07:36.708611Z",
+        "provider": "groq",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T08:07:41.847580Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "prompt_tokens": 150,
+        "completion_tokens": 68,
+        "total_tokens": 218
+    },
+    {
+        "timestamp": "2026-07-08T08:07:43.726300Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 40,
+        "total_tokens": 190
+    },
+    {
+        "timestamp": "2026-07-08T08:07:46.074891Z",
+        "provider": "groq",
+        "model": "groq/compound",
+        "prompt_tokens": 1121,
+        "completion_tokens": 168,
+        "total_tokens": 1289
+    },
+    {
+        "timestamp": "2026-07-08T08:07:49.127354Z",
+        "provider": "groq",
+        "model": "qwen/qwen3-32b",
+        "prompt_tokens": 89,
+        "completion_tokens": 461,
+        "total_tokens": 550
+    },
+    {
+        "timestamp": "2026-07-08T08:07:50.046698Z",
+        "provider": "groq",
+        "model": "allam-2-7b",
+        "prompt_tokens": 106,
+        "completion_tokens": 5,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T08:07:51.004888Z",
+        "provider": "groq",
+        "model": "llama-3.1-8b-instant",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T08:09:14.534871Z",
+        "provider": "groq",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T08:09:15.984028Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 109,
+        "total_tokens": 259
+    },
+    {
+        "timestamp": "2026-07-08T08:09:17.639503Z",
+        "provider": "groq",
+        "model": "groq/compound",
+        "prompt_tokens": 1120,
+        "completion_tokens": 117,
+        "total_tokens": 1237
+    },
+    {
+        "timestamp": "2026-07-08T08:09:18.785622Z",
+        "provider": "groq",
+        "model": "qwen/qwen3.6-27b",
+        "prompt_tokens": 91,
+        "completion_tokens": 176,
+        "total_tokens": 267
+    },
+    {
+        "timestamp": "2026-07-08T08:09:19.948844Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "prompt_tokens": 150,
+        "completion_tokens": 63,
+        "total_tokens": 213
+    },
+    {
+        "timestamp": "2026-07-08T08:09:22.365055Z",
+        "provider": "groq",
+        "model": "llama-3.1-8b-instant",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T08:09:23.588682Z",
+        "provider": "groq",
+        "model": "allam-2-7b",
+        "prompt_tokens": 106,
+        "completion_tokens": 5,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T08:09:25.029716Z",
+        "provider": "groq",
+        "model": "qwen/qwen3-32b",
+        "prompt_tokens": 89,
+        "completion_tokens": 228,
+        "total_tokens": 317
+    },
+    {
+        "timestamp": "2026-07-08T08:09:26.094196Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 43,
+        "total_tokens": 193
+    },
+    {
+        "timestamp": "2026-07-08T08:09:26.587021Z",
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T08:09:27.925474Z",
+        "provider": "groq",
+        "model": "groq/compound-mini",
+        "prompt_tokens": 594,
+        "completion_tokens": 53,
+        "total_tokens": 647
+    },
+    {
+        "timestamp": "2026-07-08T08:09:57.683381Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:10:09.757438Z",
+        "provider": "gemini",
+        "model": "gemma-4-31b-it",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 148
+    },
+    {
+        "timestamp": "2026-07-08T08:10:11.880847Z",
+        "provider": "gemini",
+        "model": "gemini-flash-latest",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 165
+    },
+    {
+        "timestamp": "2026-07-08T08:10:13.559690Z",
+        "provider": "gemini",
+        "model": "gemini-flash-lite-latest",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:10:28.284353Z",
+        "provider": "gemini",
+        "model": "gemini-3-flash-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 178
+    },
+    {
+        "timestamp": "2026-07-08T08:10:31.250815Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:10:32.669202Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:10:39.516939Z",
+        "provider": "gemini",
+        "model": "gemini-3.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 160
+    },
+    {
+        "timestamp": "2026-07-08T08:10:45.965177Z",
+        "provider": "gemini",
+        "model": "gemini-robotics-er-1.6-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 205
+    },
+    {
+        "timestamp": "2026-07-08T08:11:52.024273Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 102
+    },
+    {
+        "timestamp": "2026-07-08T08:12:04.493539Z",
+        "provider": "gemini",
+        "model": "gemma-4-31b-it",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 137
+    },
+    {
+        "timestamp": "2026-07-08T08:12:06.900227Z",
+        "provider": "gemini",
+        "model": "gemini-flash-latest",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 195
+    },
+    {
+        "timestamp": "2026-07-08T08:12:08.357643Z",
+        "provider": "gemini",
+        "model": "gemini-flash-lite-latest",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:12:18.017724Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash-lite",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:12:23.262816Z",
+        "provider": "gemini",
+        "model": "gemini-3-flash-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 378
+    },
+    {
+        "timestamp": "2026-07-08T08:12:26.396099Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:12:27.464333Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T08:12:34.426810Z",
+        "provider": "gemini",
+        "model": "gemini-3.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 170
+    },
+    {
+        "timestamp": "2026-07-08T08:12:42.288648Z",
+        "provider": "gemini",
+        "model": "gemini-robotics-er-1.6-preview",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 414
     }
 ]

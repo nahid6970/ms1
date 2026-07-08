@@ -3534,7 +3534,9 @@ def api_ai_command():
         if not api_key:
             return jsonify({"error": "Groq API key is missing. Please provide it in settings."}), 400
         
-        messages = [{"role": "system", "content": system_instruction}]
+        messages = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
         for h in history:
             messages.append({"role": h["role"], "content": h["content"]})
         if prompt:
@@ -3555,7 +3557,8 @@ def api_ai_command():
             res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
             if res.status_code != 200:
-                error_msg = res_data.get('error', {}).get('message', 'Failed to call Groq API')
+                err_obj = res_data.get('error', 'Failed to call Groq API')
+                error_msg = err_obj.get('message', str(err_obj)) if isinstance(err_obj, dict) else str(err_obj)
                 return jsonify({"error": error_msg}), res.status_code
             
             cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
@@ -3582,7 +3585,9 @@ def api_ai_command():
         if not api_key:
             return jsonify({"error": "Morph API key is missing. Please provide it in settings."}), 400
 
-        messages = [{"role": "system", "content": system_instruction}]
+        messages = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
         for h in history:
             messages.append({"role": h["role"], "content": h["content"]})
         if prompt:
@@ -3603,7 +3608,8 @@ def api_ai_command():
             res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
             if res.status_code != 200:
-                error_msg = res_data.get('error', {}).get('message', 'Failed to call Morph API')
+                err_obj = res_data.get('error', 'Failed to call Morph API')
+                error_msg = err_obj.get('message', str(err_obj)) if isinstance(err_obj, dict) else str(err_obj)
                 return jsonify({"error": error_msg}), res.status_code
 
             cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
