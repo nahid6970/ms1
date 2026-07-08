@@ -278,7 +278,18 @@ class TerminalSession:
         # Use a sanitized path instead of name to ensure stability when renaming projects
         import re
         safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
-        project_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
+        project_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Project_data", safe_path)
+        
+        # Migrate existing Project_data from backup directory if it exists there but not locally
+        backup_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
+        if not os.path.exists(project_data_dir) and os.path.exists(backup_data_dir):
+            try:
+                import shutil
+                shutil.copytree(backup_data_dir, project_data_dir)
+                print(f"Migrated Project_data for {safe_path} from backup database folder.")
+            except Exception as e:
+                print(f"Error migrating Project_data for {safe_path}: {e}")
+                
         os.makedirs(project_data_dir, exist_ok=True)
         
         profile_path = os.path.join(project_data_dir, "profile.ps1")

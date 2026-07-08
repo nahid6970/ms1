@@ -68,3 +68,11 @@ Unexpected token 'True' in expression or statement.
 **Solution:** Changed `CONFIG_FILE` path to point to the local project root (`tui_config.json`). Enhanced startup migration logic to: (1) check for the backup folder's `tui_config.json` and copy/migrate it locally, or (2) fallback to migrating from the original 6 separate JSON files. Added `tui_config.json` to `.gitignore` to prevent committing local workspace state.
 **Files Modified:** `app.py` — Updated CONFIG_FILE path and migrate_existing_configs, `.gitignore` — added tui_config.json
 
+---
+
+## [2026-07-09 00:04] - Relocation of Project_data to Main Project Directory
+**Problem:** Project-specific workspace metadata (PowerShell profiles, command history) was stored externally inside the backup directory (`C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data\`).
+**Root Cause:** Initial layout path placed `Project_data` inside the database backup location, making it dependent on an external directory path structure.
+**Solution:** Relocated `Project_data` directory to the local main project root. Added copy-on-initialization migration logic in the backend to check for the backup folder's existing project data folder and migrate it locally if it doesn't already exist.
+**Files Modified:** `app.py` — Updated `project_data_dir` path and added copy-on-init migration logic
+

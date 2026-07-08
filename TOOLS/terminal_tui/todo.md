@@ -1,6 +1,5 @@
 # Tasks
-- [x] Update CONFIG_FILE constant in app.py to point to the main project directory
-- [x] Update migration logic to check for the database backup directory's tui_config.json and migrate it
-- [x] Add tui_config.json to .gitignore
+- [x] Update project_data_dir path in app.py to point to local main project directory
+- [x] Add Project_data migration logic to copy existing profiles/histories on session initialization
 - [x] Verify execution and correctness
 - [x] Document updates in md/RECENT.md and md/PROBLEMS_AND_FIXES.md
