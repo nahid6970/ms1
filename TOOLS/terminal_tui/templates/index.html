@@ -2371,6 +2371,13 @@
                 <input id="ai-model-filter-search" type="text" placeholder="🔍 Search models..." oninput="renderFilterModelsList()" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 0.8rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
 
+            <!-- Documentation link for active provider -->
+            <div id="ai-provider-docs-link-container" style="margin-bottom: 12px; font-size: 0.72rem; display: flex; align-items: center; gap: 6px; padding: 0 4px; flex-shrink: 0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <span style="color:var(--text-secondary);">Documentation:</span>
+                <a id="ai-provider-docs-link" href="#" target="_blank" style="color: var(--accent-color); text-decoration: underline; font-weight: 500;"></a>
+            </div>
+
             <!-- Scrollable list of models for the selected provider -->
             <div id="ai-filter-models-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; min-height: 150px;">
                 <!-- Dynamically populated via JS -->
@@ -9487,6 +9494,21 @@
                     }
                 }
             });
+
+            // Update documentation link
+            const linkEl = document.getElementById('ai-provider-docs-link');
+            if (linkEl) {
+                if (provider === 'gemini') {
+                    linkEl.href = 'https://aistudio.google.com/rate-limit';
+                    linkEl.textContent = 'Google AI Studio Rate Limits';
+                } else if (provider === 'groq') {
+                    linkEl.href = 'https://console.groq.com/docs/rate-limits';
+                    linkEl.textContent = 'Groq Console Rate Limits';
+                } else if (provider === 'morph') {
+                    linkEl.href = 'https://www.morphllm.com/dashboard/playground/fast-code';
+                    linkEl.textContent = 'Morph Fast Code Playground';
+                }
+            }
 
             renderFilterModelsList();
             fetchDynamicModels(provider);

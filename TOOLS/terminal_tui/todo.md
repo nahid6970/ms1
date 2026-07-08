@@ -1,8 +1,4 @@
 # Tasks
-- [x] Define global helper functions `getBookmarkedModels()` and `saveBookmarkedModels()`
-- [x] Replace text "Visible" in table header with an Eye SVG icon in `renderFilterModelsList()`
-- [x] Implement custom SVG Eye / Eye-off visibility toggles in the visibility table rows
-- [x] Add a clickable Star SVG column for Bookmarks in `renderFilterModelsList()`
-- [x] Implement secondary sorting logic: always sort bookmarked models to the top of the table
-- [x] Update `updateAIModelDropdown()` and `syncAIModelDropdown()` to sort bookmarked models to the top of the dropdown list and prefix them with star icons
-- [x] Test and push updates to github
+- [x] Add the links anchor element container to `#ai-model-filter-modal` layout in HTML (`index.html`)
+- [x] Update `switchAIFilterTab(provider)` to dynamically update the href and text of the rate limits link
+- [ ] Test and push updates to github
