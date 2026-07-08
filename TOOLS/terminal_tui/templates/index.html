@@ -7270,6 +7270,18 @@
             // Immediately sync layout in memory for real-time consistency
             const proj = projects.find(p => p.name === activeProject);
             if (proj) {
+                const hasNoSavedLayout = !proj.layout || !proj.layout.layoutClass;
+                
+                // If it already matches, don't POST to backend
+                if (!hasNoSavedLayout && 
+                    proj.layout.layoutClass === layoutClass && 
+                    JSON.stringify(proj.layout.paneIds) === JSON.stringify(paneIds)) {
+                    return;
+                }
+                // If it is the default layout and project has no layout, don't POST to backend
+                if (hasNoSavedLayout && layoutClass === 'split-right' && paneIds.length === 1 && paneIds[0] === 'main') {
+                    return;
+                }
                 proj.layout = { layoutClass, paneIds };
             }
             

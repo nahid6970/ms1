@@ -76,3 +76,14 @@ Unexpected token 'True' in expression or statement.
 **Solution:** Relocated `Project_data` directory to the local main project root. Added copy-on-initialization migration logic in the backend to check for the backup folder's existing project data folder and migrate it locally if it doesn't already exist.
 **Files Modified:** `app.py` — Updated `project_data_dir` path and added copy-on-init migration logic
 
+---
+
+## [2026-07-09 00:20] - Git Constantly Shows `tui_config.json` Modified
+**Problem:** Whenever the user works on the project, Git shows `tui_config.json` as modified even when the user hasn't made any manual configuration changes.
+**Root Cause:** On page load or session init, the frontend called `saveTerminalLayoutState()` which unconditionally sent a POST request to `/api/projects/<project>/layout` with the current layout (even if it was the default layout). The backend then wrote the configuration file back to disk on every layout POST request, even if there was no actual change, causing the modification timestamp and formatting to trigger a Git diff.
+**Solution:** 
+1. Updated `saveTerminalLayoutState` in `templates/index.html` to skip the REST API request if the active project's layout already matches the new state, or if no layout is saved yet and the new state is the default layout.
+2. Updated `set_config_val` in `app.py` to check if the new configuration value is identical to the cached version, skipping file write operations if no data changes have occurred.
+**Files Modified:** `templates/index.html` — `saveTerminalLayoutState` function; `app.py` — `set_config_val` function.
+
+

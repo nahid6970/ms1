@@ -112,3 +112,19 @@ Read this file only when relevant to the current task. When reading, reference t
 - `.gitignore` — added tui_config.json to ignored files
 - `md/PROBLEMS_AND_FIXES.md` — logged bugs and solutions
 - `md/RECENT.md` — logged development session
+
+---
+
+## [2026-07-09] - Prevent Redundant Config Saves & Fix Git Modifications
+**What We Accomplished:**
+- Prevented `tui_config.json` from showing as modified in Git when working on the project without changing settings.
+- Added a layout validation check in `saveTerminalLayoutState` in `templates/index.html` to avoid POSTing layout changes if the active project's layout is identical to the current configuration, or if it is the default single-pane layout on startup.
+- Updated `set_config_val` in `app.py` to compare new configurations with the cached values (`_CONFIG_CACHE`) using Python's deep equality check, skipping disk I/O when configuration contents are unchanged.
+- Ensured `tui_config.json` remains tracked in Git so the user can commit it to GitHub.
+
+**Files Modified:**
+- `templates/index.html` — updated `saveTerminalLayoutState()`
+- `app.py` — updated `set_config_val()`
+- `md/PROBLEMS_AND_FIXES.md` — documented problem and fix details
+- `md/RECENT.md` — updated recent development logs
+

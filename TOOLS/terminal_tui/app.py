@@ -77,6 +77,8 @@ def set_config_val(key, val):
     with _CONFIG_LOCK:
         if _CONFIG_CACHE is None:
             _CONFIG_CACHE = _load_raw_config()
+        if _CONFIG_CACHE.get(key) == val:
+            return
         import copy
         _CONFIG_CACHE[key] = copy.deepcopy(val)
         _save_raw_config(_CONFIG_CACHE)
