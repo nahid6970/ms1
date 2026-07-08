@@ -86,5 +86,69 @@
         "prompt_tokens": 80,
         "completion_tokens": 325,
         "total_tokens": 568
+    },
+    {
+        "timestamp": "2026-07-08T06:56:55.152037Z",
+        "provider": "gemini",
+        "model": "gemma-4-26b-a4b-it",
+        "prompt_tokens": 33,
+        "completion_tokens": 8,
+        "total_tokens": 448
+    },
+    {
+        "timestamp": "2026-07-08T06:58:57.030921Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash-lite",
+        "prompt_tokens": 620,
+        "completion_tokens": 9,
+        "total_tokens": 629
+    },
+    {
+        "timestamp": "2026-07-08T06:59:14.241937Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash-lite",
+        "prompt_tokens": 494,
+        "completion_tokens": 13,
+        "total_tokens": 507
+    },
+    {
+        "timestamp": "2026-07-08T07:00:39.330256Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash-lite",
+        "prompt_tokens": 46,
+        "completion_tokens": 4,
+        "total_tokens": 50
+    },
+    {
+        "timestamp": "2026-07-08T07:02:13.419183Z",
+        "provider": "gemini",
+        "model": "gemini-3.5-flash",
+        "prompt_tokens": 62,
+        "completion_tokens": 4,
+        "total_tokens": 300
+    },
+    {
+        "timestamp": "2026-07-08T07:02:28.238432Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 62,
+        "completion_tokens": 7,
+        "total_tokens": 69
+    },
+    {
+        "timestamp": "2026-07-08T07:32:12.637234Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 46,
+        "completion_tokens": 4,
+        "total_tokens": 50
+    },
+    {
+        "timestamp": "2026-07-08T07:40:48.663769Z",
+        "provider": "groq",
+        "model": "groq/compound-mini",
+        "prompt_tokens": 1396,
+        "completion_tokens": 1415,
+        "total_tokens": 2811
     }
 ]

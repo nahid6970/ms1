@@ -3647,11 +3647,19 @@ def api_ai_command():
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         headers = {'Content-Type': 'application/json'}
         payload = {
-            "contents": contents,
-            "systemInstruction": {
-                "parts": [{"text": system_instruction}]
-            }
+            "contents": contents
         }
+        if system_instruction:
+            if "gemma" in model.lower():
+                # Prepend to the first user message for Gemma since it doesn't support systemInstruction parameter
+                for item in contents:
+                    if item.get("role") == "user":
+                        item["parts"][0]["text"] = f"[System Instruction]\n{system_instruction}\n\n{item['parts'][0]['text']}"
+                        break
+            else:
+                payload["systemInstruction"] = {
+                    "parts": [{"text": system_instruction}]
+                }
         try:
             res = requests.post(url, json=payload, headers=headers, timeout=60)
             res_data = res.json()
