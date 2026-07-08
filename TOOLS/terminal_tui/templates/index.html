@@ -9858,7 +9858,7 @@
                     <th onclick="handleSort('visible')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by visibility">${eyeSvg}${getHeaderIndicator('visible')}</th>
                     <th onclick="handleSort('bookmark')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by bookmarked status">${starSvg}${getHeaderIndicator('bookmark')}</th>
                     <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
-                    <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:80px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
+                    <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:95px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpm')" onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;" title="Right-click to bulk set RPM">RPM${getHeaderIndicator('rpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpd')" onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Right-click to bulk set RPD">RPD${getHeaderIndicator('rpd')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpm')" onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPM">TPM${getHeaderIndicator('tpm')}</th>
@@ -9946,7 +9946,7 @@
                 const currentSpeed = providerSpeeds[m.val] || 'Medium';
 
                 const tdSpeed = document.createElement('td');
-                tdSpeed.style.cssText = 'padding:4px 6px; text-align:center;';
+                tdSpeed.style.cssText = 'padding:4px 4px; text-align:center;';
                 
                 const select = document.createElement('select');
                 const updateSelectColor = (val) => {
@@ -9961,7 +9961,7 @@
                     }
                 };
 
-                select.style.cssText = 'background:var(--bg-main) url("data:image/svg+xml;utf8,<svg fill=\'%23a1a1aa\' height=\'10\' viewBox=\'0 0 24 24\' width=\'10\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>") no-repeat right 6px center; border:1px solid var(--border-color); border-radius:6px; font-size:0.7rem; padding:2px 18px 2px 6px; outline:none; cursor:pointer; width:100%; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center;';
+                select.style.cssText = 'background:var(--bg-main) url("data:image/svg+xml;utf8,<svg fill=\'%23a1a1aa\' height=\'10\' viewBox=\'0 0 24 24\' width=\'10\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>") no-repeat right 4px center; border:1px solid var(--border-color); border-radius:6px; font-size:0.7rem; padding:2px 14px 2px 4px; outline:none; cursor:pointer; width:100%; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center;';
                 updateSelectColor(currentSpeed);
                 
                 ['Fast', 'Medium', 'Slow'].forEach(optVal => {
