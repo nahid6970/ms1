@@ -9740,6 +9740,32 @@
             renderFilterModelsList();
         }
 
+        function handleSpecHeaderRightClick(e, specName) {
+            e.preventDefault();
+            const val = prompt(`Enter value to set for all models' ${specName.toUpperCase()}:`);
+            if (val === null) return;
+            const newVal = val.trim() || '-';
+
+            const provider = activeFilterTab || 'gemini';
+            const models = getMergedAIModels(provider);
+            
+            let overrides = {};
+            try {
+                overrides = JSON.parse(localStorage.getItem('ai-model-spec-overrides') || '{}');
+            } catch(err) {}
+            
+            if (!overrides[provider]) overrides[provider] = {};
+
+            models.forEach(m => {
+                if (!overrides[provider][m.val]) overrides[provider][m.val] = {};
+                overrides[provider][m.val][specName] = newVal;
+            });
+
+            localStorage.setItem('ai-model-spec-overrides', JSON.stringify(overrides));
+            renderFilterModelsList();
+            updateRateLimitsUI();
+        }
+
         function renderFilterModelsList() {
             const container = document.getElementById('ai-filter-models-list');
             if (!container) return;
@@ -9833,10 +9859,10 @@
                     <th onclick="handleSort('bookmark')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by bookmarked status">${starSvg}${getHeaderIndicator('bookmark')}</th>
                     <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
                     <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:80px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
-                    <th onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;">RPM${getHeaderIndicator('rpm')}</th>
-                    <th onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;">RPD${getHeaderIndicator('rpd')}</th>
-                    <th onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;">TPM${getHeaderIndicator('tpm')}</th>
-                    <th onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;">TPD${getHeaderIndicator('tpd')}</th>
+                    <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpm')" onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;" title="Right-click to bulk set RPM">RPM${getHeaderIndicator('rpm')}</th>
+                    <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpd')" onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Right-click to bulk set RPD">RPD${getHeaderIndicator('rpd')}</th>
+                    <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpm')" onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPM">TPM${getHeaderIndicator('tpm')}</th>
+                    <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpd')" onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPD">TPD${getHeaderIndicator('tpd')}</th>
                 </tr>
             `;
             table.appendChild(thead);
@@ -9861,13 +9887,20 @@
                 tdVisible.onclick = () => {
                     const hidden = getHiddenModels();
                     if (!hidden[activeFilterTab]) hidden[activeFilterTab] = [];
-                    if (isVisible) {
-                        if (!hidden[activeFilterTab].includes(m.val)) hidden[activeFilterTab].push(m.val);
+                    const isCurrentlyVisible = !hidden[activeFilterTab].includes(m.val);
+                    if (isCurrentlyVisible) {
+                        hidden[activeFilterTab].push(m.val);
                     } else {
                         hidden[activeFilterTab] = hidden[activeFilterTab].filter(v => v !== m.val);
                     }
                     saveHiddenModels(hidden);
-                    renderFilterModelsList();
+                    
+                    const isNowVisible = !hidden[activeFilterTab].includes(m.val);
+                    tdVisible.innerHTML = isNowVisible ? `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Visible (Click to hide)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    ` : `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Hidden (Click to show)"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    `;
                     handleAIProviderChange();
                 };
                 tr.appendChild(tdVisible);
@@ -9883,13 +9916,20 @@
                 `;
                 tdBookmark.onclick = () => {
                     let bList = getBookmarkedModels();
-                    if (isBookmarked) {
+                    const isCurrentlyBookmarked = bList.includes(m.val);
+                    if (isCurrentlyBookmarked) {
                         bList = bList.filter(v => v !== m.val);
                     } else {
                         if (!bList.includes(m.val)) bList.push(m.val);
                     }
                     saveBookmarkedModels(bList);
-                    renderFilterModelsList();
+                    
+                    const isNowBookmarked = bList.includes(m.val);
+                    tdBookmark.innerHTML = isNowBookmarked ? `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Unbookmark model"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ` : `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Bookmark model"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    `;
                     updateAIModelDropdown(activeFilterTab);
                 };
                 tr.appendChild(tdBookmark);

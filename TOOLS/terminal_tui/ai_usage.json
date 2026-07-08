@@ -1630,5 +1630,61 @@
         "prompt_tokens": 95,
         "completion_tokens": 91,
         "total_tokens": 186
+    },
+    {
+        "timestamp": "2026-07-08T09:31:58.939319Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 83
+    },
+    {
+        "timestamp": "2026-07-08T09:32:18.871317Z",
+        "provider": "gemini",
+        "model": "gemini-flash-latest",
+        "prompt_tokens": 80,
+        "completion_tokens": 3,
+        "total_tokens": 251
+    },
+    {
+        "timestamp": "2026-07-08T09:33:22.146066Z",
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:33:25.349183Z",
+        "provider": "groq",
+        "model": "groq/compound",
+        "prompt_tokens": 1120,
+        "completion_tokens": 195,
+        "total_tokens": 1315
+    },
+    {
+        "timestamp": "2026-07-08T09:33:26.550026Z",
+        "provider": "groq",
+        "model": "allam-2-7b",
+        "prompt_tokens": 106,
+        "completion_tokens": 5,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:33:27.366547Z",
+        "provider": "groq",
+        "model": "llama-3.1-8b-instant",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:33:29.670920Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "prompt_tokens": 150,
+        "completion_tokens": 68,
+        "total_tokens": 218
     }
 ]
