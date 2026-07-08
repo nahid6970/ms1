@@ -78,5 +78,13 @@
         "prompt_tokens": 472,
         "completion_tokens": 77,
         "total_tokens": 549
+    },
+    {
+        "timestamp": "2026-07-08T06:08:32.009341Z",
+        "provider": "gemini",
+        "model": "gemini-2.5-flash",
+        "prompt_tokens": 80,
+        "completion_tokens": 325,
+        "total_tokens": 568
     }
 ]
