@@ -10024,9 +10024,9 @@
                     <th onclick="handleSort('bookmark')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by bookmarked status">${starSvg}${getHeaderIndicator('bookmark')}</th>
                     <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
                     <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:95px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
+                    <th onclick="handleSort('pct')" style="${thStyleBase} text-align:center; width:45px;" title="Remaining Requests %">%${getHeaderIndicator('pct')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpm')" onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;" title="Right-click to bulk set RPM">RPM${getHeaderIndicator('rpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpd')" onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Right-click to bulk set RPD">RPD${getHeaderIndicator('rpd')}</th>
-                    <th onclick="handleSort('pct')" style="${thStyleBase} text-align:center; width:45px;" title="Remaining Requests %">%${getHeaderIndicator('pct')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpm')" onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPM">TPM${getHeaderIndicator('tpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpd')" onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPD">TPD${getHeaderIndicator('tpd')}</th>
                 </tr>
@@ -10154,21 +10154,7 @@
                 
                 tdSpeed.appendChild(select);
                 tr.appendChild(tdSpeed);
-
-                const tdRPM = document.createElement('td');
-                tdRPM.style.cssText = 'padding:6px 8px; text-align:center; color: #3b82f6; font-weight: 500;';
-                const valRPM = spec.rpm || '-';
-                tdRPM.textContent = valRPM;
-                makeSpecCellEditable(tdRPM, activeFilterTab, m.val, 'rpm', valRPM);
-                tr.appendChild(tdRPM);
-
-                const tdRPD = document.createElement('td');
-                tdRPD.style.cssText = 'padding:6px 8px; text-align:center; color: #f59e0b; font-weight: 500;';
-                const valRPD = spec.rpd || '-';
-                tdRPD.textContent = valRPD;
-                makeSpecCellEditable(tdRPD, activeFilterTab, m.val, 'rpd', valRPD);
-                tr.appendChild(tdRPD);
-
+                
                 // Add % usage tag cell
                 const tdPct = document.createElement('td');
                 tdPct.style.cssText = 'padding:6px 8px; text-align:center; font-weight:700; font-size:0.68rem;';
@@ -10194,6 +10180,20 @@
                     tdPct.style.color = 'var(--text-muted)';
                 }
                 tr.appendChild(tdPct);
+
+                const tdRPM = document.createElement('td');
+                tdRPM.style.cssText = 'padding:6px 8px; text-align:center; color: #3b82f6; font-weight: 500;';
+                const valRPM = spec.rpm || '-';
+                tdRPM.textContent = valRPM;
+                makeSpecCellEditable(tdRPM, activeFilterTab, m.val, 'rpm', valRPM);
+                tr.appendChild(tdRPM);
+
+                const tdRPD = document.createElement('td');
+                tdRPD.style.cssText = 'padding:6px 8px; text-align:center; color: #f59e0b; font-weight: 500;';
+                const valRPD = spec.rpd || '-';
+                tdRPD.textContent = valRPD;
+                makeSpecCellEditable(tdRPD, activeFilterTab, m.val, 'rpd', valRPD);
+                tr.appendChild(tdRPD);
 
                 const tdTPM = document.createElement('td');
                 tdTPM.style.cssText = 'padding:6px 8px; text-align:center; color: #10b981; font-weight: 500;';
