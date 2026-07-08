@@ -451,51 +451,48 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 pass
 
 _PROJECTS_CACHE = None
-_PROJECTS_CACHE_LOCK = threading.Lock()
 
 def load_projects_config():
     global _PROJECTS_CACHE
-    with _PROJECTS_CACHE_LOCK:
-        if _PROJECTS_CACHE is not None:
-            return _PROJECTS_CACHE
-            
-        if os.path.exists(PROJECTS_FILE):
-            try:
-                with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
-                    projs = json.load(f)
-                    # Sanitize bookmarks to be dicts
-                    for p in projs:
-                        if "bookmarks" not in p:
-                            p["bookmarks"] = []
-                        else:
-                            sanitized = []
-                            for bm in p["bookmarks"]:
-                                if isinstance(bm, str):
-                                    sanitized.append({"command": bm, "global": False, "windowTitle": ""})
-                                elif isinstance(bm, dict):
-                                    sanitized.append({
-                                        "command": bm.get("command", ""),
-                                        "global": bm.get("global", False),
-                                        "name": bm.get("name", ""),
-                                        "windowTitle": bm.get("windowTitle", "")
-                                    })
-                            p["bookmarks"] = sanitized
+    if _PROJECTS_CACHE is not None:
+        return _PROJECTS_CACHE
+
+    if os.path.exists(PROJECTS_FILE):
+        try:
+            with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+                projs = json.load(f)
+                # Sanitize bookmarks to be dicts
+                for p in projs:
+                    if "bookmarks" not in p:
+                        p["bookmarks"] = []
+                    else:
+                        sanitized = []
+                        for bm in p["bookmarks"]:
+                            if isinstance(bm, str):
+                                sanitized.append({"command": bm, "global": False, "windowTitle": ""})
+                            elif isinstance(bm, dict):
+                                sanitized.append({
+                                    "command": bm.get("command", ""),
+                                    "global": bm.get("global", False),
+                                    "name": bm.get("name", ""),
+                                    "windowTitle": bm.get("windowTitle", "")
+                                })
+                        p["bookmarks"] = sanitized
                 _PROJECTS_CACHE = projs
                 return projs
-            except Exception as e:
-                print(f"Error reading projects config: {e}")
-        _PROJECTS_CACHE = []
-        return _PROJECTS_CACHE
+        except Exception as e:
+            print(f"Error reading projects config: {e}")
+    _PROJECTS_CACHE = []
+    return _PROJECTS_CACHE
 
 def save_projects_config(projects):
     global _PROJECTS_CACHE
-    with _PROJECTS_CACHE_LOCK:
-        try:
-            with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
-                json.dump(projects, f, indent=2)
-            _PROJECTS_CACHE = projects
-        except Exception as e:
-            print(f"Error saving projects config: {e}")
+    try:
+        with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(projects, f, indent=2)
+        _PROJECTS_CACHE = projects
+    except Exception as e:
+        print(f"Error saving projects config: {e}")
 
 def scan_projects():
     config_projects = load_projects_config()
