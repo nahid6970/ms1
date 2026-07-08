@@ -87,7 +87,8 @@
         /* Remove width/height limits of AI Copilot Popover */
         #ai-copilot-popover {
             max-width: none !important;
-            max-height: var(--ai-popover-max-height, 600px) !important;
+            height: var(--ai-popover-max-height, 600px) !important;
+            min-height: var(--ai-popover-max-height, 600px) !important;
         }
         #ai-chat-history .ai-md blockquote {
             border-left: 3px solid var(--accent-color); margin: 6px 0; padding: 4px 10px;
@@ -120,7 +121,7 @@
             max-width: 100%; border-radius: 4px; margin: 4px 0; display: block;
         }
         #ai-chat-history .ai-md table {
-            width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.72rem;
+            width: 100%; border-collapse: collapse; margin: 8px 0; font-size: inherit;
         }
         #ai-chat-history .ai-md th, #ai-chat-history .ai-md td {
             border: 1px solid var(--border-color); padding: 6px 8px; text-align: left;
@@ -2757,7 +2758,7 @@
                             <label for="settings-ai-rich-markdown" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Rich Markdown</label>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <label for="settings-ai-popover-height" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Max Height</label>
+                            <label for="settings-ai-popover-height" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Min Height</label>
                             <input type="number" id="settings-ai-popover-height" step="50" value="600"
                                 style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
                                 onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
