@@ -9510,6 +9510,7 @@
                 o.style.fontWeight = o.dataset.val === val ? '600' : '400';
             });
             handleAIProviderChange();
+            fetchDynamicModels(val);
         }
 
         function toggleAIModelDropdown() {
@@ -9639,7 +9640,6 @@
             }
 
             syncAIModelDropdown();
-            fetchDynamicModels(provider);
         }
 
         function handleAIModelChange() {
