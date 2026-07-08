@@ -1,6 +1,6 @@
 # Tasks
-- [x] Create UI icon in `#ai-copilot-popover` to open model visibility settings modal
-- [x] Create Model Visibility settings modal with tabs/sections for Gemini, Groq, and Morph models
-- [x] Implement localStorage persistence for hidden model configurations
-- [x] Update `handleAIProviderChange` in `index.html` to filter out hidden models
-- [x] Ensure fallback mechanism if the previously selected model becomes hidden
+- [x] Implement local caching for dynamic models (`DYNAMIC_AI_MODELS` and `getMergedAIModels`)
+- [x] Add `fetchDynamicModels` background fetching function for Gemini, Groq, and Morph APIs
+- [x] Update `handleAIProviderChange` to use `getMergedAIModels` instead of `ALL_AI_MODELS`
+- [x] Update API key save functions to trigger background fetching
+- [x] Integrate background fetching on provider/tab changes

@@ -9153,6 +9153,80 @@
             localStorage.setItem('ai-hidden-models', JSON.stringify(hidden));
         }
 
+        let DYNAMIC_AI_MODELS = {};
+        try {
+            DYNAMIC_AI_MODELS = JSON.parse(localStorage.getItem('ai-dynamic-models')) || {};
+        } catch(e) {
+            DYNAMIC_AI_MODELS = {};
+        }
+
+        function getMergedAIModels(provider) {
+            const staticList = ALL_AI_MODELS[provider] || [];
+            const dynamicList = DYNAMIC_AI_MODELS[provider];
+            if (dynamicList && dynamicList.length > 0) {
+                return dynamicList;
+            }
+            return staticList;
+        }
+
+        async function fetchDynamicModels(provider) {
+            const geminiKey = localStorage.getItem('gemini-api-key') || '';
+            const groqKey = localStorage.getItem('groq-api-key') || '';
+            const morphKey = localStorage.getItem('morph-api-key') || '';
+
+            try {
+                let fetched = [];
+                if (provider === 'gemini' && geminiKey) {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.models) {
+                            fetched = data.models
+                                .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                                .map(m => {
+                                    const val = m.name.replace(/^models\//, '');
+                                    return { val: val, label: m.displayName || val };
+                                });
+                        }
+                    }
+                } else if (provider === 'groq' && groqKey) {
+                    const res = await fetch('https://api.groq.com/openai/v1/models', {
+                        headers: { 'Authorization': `Bearer ${groqKey}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.data) {
+                            fetched = data.data.map(m => ({ val: m.id, label: m.id }));
+                        }
+                    }
+                } else if (provider === 'morph' && morphKey) {
+                    const res = await fetch('https://api.morphllm.com/v1/models', {
+                        headers: { 'Authorization': `Bearer ${morphKey}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.data) {
+                            fetched = data.data.map(m => ({ val: m.id, label: m.id }));
+                        }
+                    }
+                }
+
+                if (fetched.length > 0) {
+                    DYNAMIC_AI_MODELS[provider] = fetched;
+                    localStorage.setItem('ai-dynamic-models', JSON.stringify(DYNAMIC_AI_MODELS));
+                    // Re-render the dropdowns & filter list if we are currently looking at this provider
+                    if (document.getElementById('ai-provider-select').value === provider) {
+                        handleAIProviderChange();
+                    }
+                    if (document.getElementById('ai-model-filter-modal').classList.contains('show') && activeFilterTab === provider) {
+                        renderFilterModelsList();
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch dynamic models for ' + provider, err);
+            }
+        }
+
         let activeFilterTab = 'gemini';
 
         function openAIModelSettingsModal() {
@@ -9187,6 +9261,7 @@
             });
 
             renderFilterModelsList();
+            fetchDynamicModels(provider);
         }
 
         function renderFilterModelsList() {
@@ -9194,7 +9269,7 @@
             if (!container) return;
             container.innerHTML = '';
             
-            const models = ALL_AI_MODELS[activeFilterTab] || [];
+            const models = getMergedAIModels(activeFilterTab);
             const hiddenObj = getHiddenModels();
             const hiddenList = hiddenObj[activeFilterTab] || [];
 
@@ -9244,7 +9319,7 @@
 
         function toggleAllModelsFilter(showAll) {
             const hidden = getHiddenModels();
-            const models = ALL_AI_MODELS[activeFilterTab] || [];
+            const models = getMergedAIModels(activeFilterTab);
             
             if (showAll) {
                 hidden[activeFilterTab] = [];
@@ -9382,10 +9457,10 @@
             const hiddenList = hiddenObj[provider] || [];
             
             // Filter models: exclude those that are in hiddenList
-            const availableModels = (ALL_AI_MODELS[provider] || []).filter(m => !hiddenList.includes(m.val));
+            const availableModels = getMergedAIModels(provider).filter(m => !hiddenList.includes(m.val));
             
             // If all models are hidden, we fall back to showing all to avoid an empty dropdown
-            const finalModels = availableModels.length > 0 ? availableModels : (ALL_AI_MODELS[provider] || []);
+            const finalModels = availableModels.length > 0 ? availableModels : getMergedAIModels(provider);
 
             finalModels.forEach(m => {
                 const opt = document.createElement('option');
@@ -9410,6 +9485,7 @@
             }
 
             syncAIModelDropdown();
+            fetchDynamicModels(provider);
         }
 
         function handleAIModelChange() {
@@ -9432,6 +9508,7 @@
             document.getElementById('groq-api-key-container').style.display = 'none';
             document.getElementById('groq-api-key-saved-msg').style.display = 'flex';
             document.getElementById('ai-prompt-input').focus();
+            fetchDynamicModels('groq');
         }
 
         function clearGroqAPIKey() {
@@ -9449,6 +9526,7 @@
             document.getElementById('morph-api-key-container').style.display = 'none';
             document.getElementById('morph-api-key-saved-msg').style.display = 'flex';
             document.getElementById('ai-prompt-input').focus();
+            fetchDynamicModels('morph');
         }
 
         function clearMorphAPIKey() {
@@ -9473,6 +9551,7 @@
             document.getElementById('ai-api-key-container').style.display = 'none';
             document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
             document.getElementById('ai-prompt-input').focus();
+            fetchDynamicModels('gemini');
         }
 
         function clearGeminiAPIKey() {
