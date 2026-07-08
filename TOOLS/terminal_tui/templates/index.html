@@ -9920,6 +9920,18 @@
             const hiddenObj = getHiddenModels();
             const hiddenList = hiddenObj[activeFilterTab] || [];
 
+            const parseLimitVal = (val) => {
+                if (!val) return 0;
+                if (typeof val === 'number') return val;
+                const clean = String(val).toUpperCase().trim();
+                if (clean === 'UNLIMITED' || clean === '-') return Infinity;
+                const num = parseFloat(clean);
+                if (isNaN(num)) return 0;
+                if (clean.includes('K')) return num * 1000;
+                if (clean.includes('M')) return num * 1000000;
+                return num;
+            };
+
             // Sort filtered models
             filteredModels.sort((a, b) => {
                 const bookmarks = getBookmarkedModels();
@@ -9937,6 +9949,22 @@
                 if (activeSortCol === 'bookmark') {
                     valA = isBookmarkedA ? 1 : 0;
                     valB = isBookmarkedB ? 1 : 0;
+                } else if (activeSortCol === 'pct') {
+                    const specA = getModelSpec(activeFilterTab, a.val) || {};
+                    const usageA = getCalculatedUsage(activeFilterTab, a.val);
+                    const specB = getModelSpec(activeFilterTab, b.val) || {};
+                    const usageB = getCalculatedUsage(activeFilterTab, b.val);
+                    
+                    const getPctVal = (spec, usage) => {
+                        const limitRPD = parseLimitVal(spec.rpd);
+                        if (limitRPD && limitRPD !== Infinity && limitRPD > 0) {
+                            const used = usage.requestsLastDay || 0;
+                            return Math.max(0, Math.min(100, Math.round(((limitRPD - used) / limitRPD) * 100)));
+                        }
+                        return -1;
+                    };
+                    valA = getPctVal(specA, usageA);
+                    valB = getPctVal(specB, usageB);
                 } else if (activeSortCol === 'visible') {
                     valA = !hiddenList.includes(a.val) ? 1 : 0;
                     valB = !hiddenList.includes(b.val) ? 1 : 0;
@@ -9998,6 +10026,7 @@
                     <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:95px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpm')" onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;" title="Right-click to bulk set RPM">RPM${getHeaderIndicator('rpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpd')" onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Right-click to bulk set RPD">RPD${getHeaderIndicator('rpd')}</th>
+                    <th onclick="handleSort('pct')" style="${thStyleBase} text-align:center; width:45px;" title="Remaining Requests %">%${getHeaderIndicator('pct')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpm')" onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPM">TPM${getHeaderIndicator('tpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpd')" onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPD">TPD${getHeaderIndicator('tpd')}</th>
                 </tr>
@@ -10139,6 +10168,32 @@
                 tdRPD.textContent = valRPD;
                 makeSpecCellEditable(tdRPD, activeFilterTab, m.val, 'rpd', valRPD);
                 tr.appendChild(tdRPD);
+
+                // Add % usage tag cell
+                const tdPct = document.createElement('td');
+                tdPct.style.cssText = 'padding:6px 8px; text-align:center; font-weight:700; font-size:0.68rem;';
+                const limitRPD = parseLimitVal(spec.rpd);
+                const usage = getCalculatedUsage(activeFilterTab, m.val);
+                const customSignToggle = localStorage.getItem('ai-custom-fallback-sign-toggle') === 'true';
+                const customSignText = localStorage.getItem('ai-custom-fallback-sign-text') || '∞';
+                const defaultSign = customSignToggle ? customSignText : '∞';
+                
+                if (limitRPD && limitRPD !== Infinity && limitRPD > 0) {
+                    const used = usage.requestsLastDay || 0;
+                    const pct = Math.max(0, Math.min(100, Math.round(((limitRPD - used) / limitRPD) * 100)));
+                    tdPct.textContent = `${pct}%`;
+                    if (pct > 50) {
+                        tdPct.style.color = '#10b981';
+                    } else if (pct >= 10) {
+                        tdPct.style.color = '#f59e0b';
+                    } else {
+                        tdPct.style.color = '#f87171';
+                    }
+                } else {
+                    tdPct.textContent = defaultSign;
+                    tdPct.style.color = 'var(--text-muted)';
+                }
+                tr.appendChild(tdPct);
 
                 const tdTPM = document.createElement('td');
                 tdTPM.style.cssText = 'padding:6px 8px; text-align:center; color: #10b981; font-weight: 500;';
