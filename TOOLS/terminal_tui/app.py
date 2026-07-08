@@ -3792,6 +3792,68 @@ def api_ai_usage():
         return jsonify({"error": str(e)}), 500
     return jsonify([])
 
+@app.route('/api/ai-usage/set-requests', methods=['POST'])
+def api_set_requests():
+    import json
+    from datetime import datetime, timedelta
+    req = request.json or {}
+    provider = req.get('provider')
+    model = req.get('model')
+    count = req.get('count')
+    if provider is None or model is None or count is None:
+        return jsonify({"error": "provider, model, and count are required"}), 400
+    
+    try:
+        count = int(count)
+    except ValueError:
+        return jsonify({"error": "count must be an integer"}), 400
+
+    usage_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_usage.json')
+    try:
+        if os.path.exists(usage_file):
+            with open(usage_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            data = []
+    except Exception:
+        data = []
+
+    now_utc = datetime.utcnow()
+    one_day_ago = now_utc - timedelta(days=1)
+    
+    retained_data = []
+    for record in data:
+        rec_time_str = record.get("timestamp", "")
+        is_match = record.get("provider") == provider and record.get("model") == model
+        if is_match:
+            try:
+                clean_time = rec_time_str[:-1] if rec_time_str.endswith('Z') else rec_time_str
+                rec_dt = datetime.fromisoformat(clean_time)
+                if rec_dt > one_day_ago:
+                    continue
+            except Exception:
+                pass
+        retained_data.append(record)
+
+    for i in range(count):
+        record_time = (now_utc - timedelta(seconds=i*5)).isoformat() + 'Z'
+        mock_rec = {
+            "timestamp": record_time,
+            "provider": provider,
+            "model": model,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0
+        }
+        retained_data.append(mock_rec)
+
+    try:
+        with open(usage_file, 'w', encoding='utf-8') as f:
+            json.dump(retained_data, f, indent=4)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():
     """Kill process by PID"""

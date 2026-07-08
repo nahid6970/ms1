@@ -9823,20 +9823,35 @@
                 td.appendChild(input);
                 input.focus();
                 
-                function saveValue() {
+                async function saveValue() {
                     const newVal = parseInt(input.value) || 0;
                     td.innerHTML = '';
                     td.textContent = newVal;
                     
-                    const historyKey = `ai-usage-history-${provider}-${modelVal}`;
-                    let history = [];
-                    if (newVal > 0) {
-                        const now = Date.now();
-                        for (let i = 0; i < newVal; i++) {
-                            history.push({ timestamp: now - i * 1000, tokens: 0 });
+                    try {
+                        const res = await fetch('/api/ai-usage/set-requests', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                provider: provider,
+                                model: modelVal,
+                                count: newVal
+                            })
+                        });
+                        if (res.ok) {
+                            const historyKey = `ai-usage-history-${provider}-${modelVal}`;
+                            let history = [];
+                            if (newVal > 0) {
+                                const now = Date.now();
+                                for (let i = 0; i < newVal; i++) {
+                                    history.push({ timestamp: now - i * 1000, tokens: 0 });
+                                }
+                            }
+                            localStorage.setItem(historyKey, JSON.stringify(history));
                         }
+                    } catch(err) {
+                        console.error("Failed to sync used requests to server", err);
                     }
-                    localStorage.setItem(historyKey, JSON.stringify(history));
                     
                     updateRateLimitsUI();
                     syncAIModelDropdown();
