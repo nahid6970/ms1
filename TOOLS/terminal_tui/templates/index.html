@@ -2390,10 +2390,15 @@
             </div>
 
             <!-- Documentation link for active provider -->
-            <div id="ai-provider-docs-link-container" style="margin-bottom: 12px; font-size: 0.72rem; display: flex; align-items: center; gap: 6px; padding: 0 4px; flex-shrink: 0;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                <span style="color:var(--text-secondary);">Documentation:</span>
-                <a id="ai-provider-docs-link" href="#" target="_blank" style="color: var(--accent-color); text-decoration: underline; font-weight: 500;"></a>
+            <div id="ai-provider-docs-link-container" style="margin-bottom: 12px; font-size: 0.72rem; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 4px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    <span style="color:var(--text-secondary);">Documentation:</span>
+                    <a id="ai-provider-docs-link" href="#" target="_blank" style="color: var(--accent-color); text-decoration: underline; font-weight: 500;"></a>
+                </div>
+                <button onclick="openAIModelTesterModal()" title="Run batch diagnostics test on all models of this provider" style="padding: 4px 8px; background: rgba(59, 130, 246, 0.12); border: 1px solid var(--accent-color); border-radius: 4px; color: var(--accent-color); font-size: 0.68rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;" onmouseenter="this.style.background='var(--accent-color)'; this.style.color='#ffffff'" onmouseleave="this.style.background='rgba(59, 130, 246, 0.12)'; this.style.color='var(--accent-color)'">
+                    🧪 Test All Models
+                </button>
             </div>
 
             <!-- Scrollable list of models for the selected provider -->
@@ -2435,6 +2440,41 @@
             <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; flex-shrink: 0;">Saved Prompts</div>
             <div id="saved-prompts-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 2px;">
                 <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ AI Model Batch Tester Modal ═════════════════════════════════════ -->
+    <div id="ai-model-tester-modal" class="modal-overlay" style="z-index:3000;">
+        <div class="modal-content" style="width: 620px; max-width: 95vw; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+                <div>
+                    <h2 style="font-size: 1.05rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">🧪 Model Batch Tester</h2>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px;" id="model-tester-subtitle">Send a test prompt to all models of a provider</div>
+                </div>
+                <button onclick="closeAIModelTesterModal()" style="background: none; border: none; font-size: 1.4rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">×</button>
+            </div>
+
+            <!-- Test Input Area -->
+            <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;">
+                <textarea id="model-tester-prompt" placeholder="Enter a test prompt... (e.g. What is 2+2?)" style="width: 100%; height: 50px; box-sizing: border-box; padding: 8px 10px; font-size: 0.75rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; resize: none;"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 0.68rem; color: var(--text-muted);" id="model-tester-status">Ready</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="model-tester-stop-btn" onclick="stopModelBatchTest()" style="display: none; padding: 5px 12px; background: #ef4444; border: none; border-radius: 6px; color: white; font-size: 0.72rem; cursor: pointer; font-weight: 500;">⏹ Stop</button>
+                        <button id="model-tester-run-btn" onclick="runModelBatchTest()" style="padding: 5px 14px; background: var(--accent-color); border: none; border-radius: 6px; color: white; font-size: 0.72rem; cursor: pointer; font-weight: 600;">▶ Run Test</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Area -->
+            <div style="font-weight: 600; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+                <span>Results</span>
+                <span id="model-tester-counter" style="font-weight: 400; text-transform: none;"></span>
+            </div>
+            <div id="model-tester-results" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 2px; min-height: 120px;">
+                <div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:24px;">Enter a prompt and click "Run Test" to begin</div>
             </div>
         </div>
     </div>
@@ -3134,6 +3174,7 @@
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
                 else if (id === 'ai-system-prompt-modal') closeAISystemPromptModal();
+                else if (id === 'ai-model-tester-modal') closeAIModelTesterModal();
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
                 else if (id === 'custom-btn-modal') closeCustomButtonModal();
@@ -10055,6 +10096,151 @@
             resetPromptForm();
             renderSavedPromptsList();
             populateSystemPromptsDropdown();
+        }
+
+        // ── AI Model Batch Tester ──────────────────────────────────────────
+        let _modelTesterAbort = false;
+        let _modelTesterRunning = false;
+
+        function openAIModelTesterModal() {
+            const provider = activeFilterTab || 'gemini';
+            document.getElementById('model-tester-subtitle').textContent =
+                `Testing models for: ${AI_PROVIDER_LABELS[provider] || provider}`;
+            document.getElementById('ai-model-tester-modal').classList.add('show');
+            const promptInput = document.getElementById('model-tester-prompt');
+            if (promptInput && !promptInput.value.trim()) {
+                promptInput.value = 'Reply with exactly: TEST_OK';
+            }
+            setTimeout(() => promptInput.focus(), 100);
+        }
+
+        function closeAIModelTesterModal() {
+            _modelTesterAbort = true;
+            document.getElementById('ai-model-tester-modal').classList.remove('show');
+        }
+
+        function stopModelBatchTest() {
+            _modelTesterAbort = true;
+        }
+
+        function _renderTesterCard(model, status, detail, timeMs) {
+            const statusColors = {
+                pending: { bg: 'rgba(100,116,139,0.12)', border: '#475569', icon: '⏳', color: '#94a3b8' },
+                running: { bg: 'rgba(59,130,246,0.12)', border: '#3b82f6', icon: '⏳', color: '#60a5fa' },
+                success: { bg: 'rgba(16,185,129,0.1)', border: '#10b981', icon: '✅', color: '#34d399' },
+                error:   { bg: 'rgba(239,68,68,0.1)', border: '#ef4444', icon: '❌', color: '#f87171' }
+            };
+            const s = statusColors[status] || statusColors.pending;
+            const timeStr = timeMs != null ? `${(timeMs / 1000).toFixed(2)}s` : '';
+            const detailEscaped = (detail || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const truncatedDetail = detailEscaped.length > 200 ? detailEscaped.substring(0, 200) + '…' : detailEscaped;
+
+            return `<div data-model="${model.val}" style="background:${s.bg}; border:1px solid ${s.border}; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; gap:3px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:600; font-size:0.75rem; color:var(--text-primary);">${s.icon} ${model.label}</span>
+                    <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : timeStr}</span>
+                </div>
+                ${truncatedDetail ? `<div style="font-size:0.7rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${truncatedDetail}</div>` : ''}
+            </div>`;
+        }
+
+        async function runModelBatchTest() {
+            if (_modelTesterRunning) return;
+
+            const provider = activeFilterTab || 'gemini';
+            const prompt = document.getElementById('model-tester-prompt').value.trim();
+            if (!prompt) {
+                alert('Please enter a test prompt.');
+                return;
+            }
+
+            const apiKey = provider === 'gemini'
+                ? (localStorage.getItem('gemini-api-key') || '')
+                : provider === 'morph'
+                ? (localStorage.getItem('morph-api-key') || '')
+                : (localStorage.getItem('groq-api-key') || '');
+
+            if (!apiKey) {
+                alert(`No API key configured for ${AI_PROVIDER_LABELS[provider]}. Please set it in the AI Copilot settings.`);
+                return;
+            }
+
+            const models = getMergedAIModels(provider);
+            if (!models || models.length === 0) {
+                alert('No models found for this provider.');
+                return;
+            }
+
+            _modelTesterAbort = false;
+            _modelTesterRunning = true;
+
+            const runBtn = document.getElementById('model-tester-run-btn');
+            const stopBtn = document.getElementById('model-tester-stop-btn');
+            const statusEl = document.getElementById('model-tester-status');
+            const counterEl = document.getElementById('model-tester-counter');
+            const resultsEl = document.getElementById('model-tester-results');
+
+            runBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-flex';
+
+            // Render all cards as pending
+            resultsEl.innerHTML = models.map(m => _renderTesterCard(m, 'pending', '', null)).join('');
+
+            let passed = 0, failed = 0;
+
+            for (let i = 0; i < models.length; i++) {
+                if (_modelTesterAbort) break;
+
+                const model = models[i];
+                statusEl.textContent = `Testing ${i + 1} of ${models.length}: ${model.label}...`;
+                counterEl.textContent = `${passed} ✅  ${failed} ❌  (${i}/${models.length})`;
+
+                // Update this card to "running"
+                const cardEl = resultsEl.querySelector(`[data-model="${model.val}"]`);
+                if (cardEl) {
+                    cardEl.outerHTML = _renderTesterCard(model, 'running', '', null);
+                }
+
+                const startTime = performance.now();
+                try {
+                    const res = await fetch('/api/ai-command', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            api_key: apiKey,
+                            provider: provider,
+                            model: model.val,
+                            system_instruction: '',
+                            history: []
+                        })
+                    });
+                    const elapsed = performance.now() - startTime;
+                    const data = await res.json();
+
+                    const updatedCard = resultsEl.querySelector(`[data-model="${model.val}"]`);
+                    if (!res.ok) {
+                        failed++;
+                        if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', data.error || `HTTP ${res.status}`, elapsed);
+                    } else {
+                        passed++;
+                        const reply = data.command || data.text || '(empty response)';
+                        if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'success', reply, elapsed);
+                    }
+                } catch (err) {
+                    const elapsed = performance.now() - startTime;
+                    failed++;
+                    const updatedCard = resultsEl.querySelector(`[data-model="${model.val}"]`);
+                    if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', err.message, elapsed);
+                }
+            }
+
+            const totalTested = passed + failed;
+            counterEl.textContent = `${passed} ✅  ${failed} ❌  (${totalTested}/${models.length})`;
+            statusEl.textContent = _modelTesterAbort ? 'Stopped by user' : 'Complete';
+            runBtn.style.display = 'inline-flex';
+            stopBtn.style.display = 'none';
+            _modelTesterRunning = false;
         }
 
         function selectAIProvider(val) {
