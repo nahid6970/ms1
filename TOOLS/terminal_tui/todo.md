@@ -1,5 +1,6 @@
 # Tasks
-- [x] Add `makeSpecCellEditable()` helper in `index.html` to support inline click-to-edit values
-- [x] Update `getModelSpec()` helper in `index.html` to apply localStorage overrides
-- [x] Connect `makeSpecCellEditable` to RPM, RPD, TPM, and TPD table cells inside `renderFilterModelsList()`
-- [x] Test and push updates to github
+- [x] Implement sticky CSS styles for table headers in `renderFilterModelsList()`
+- [x] Define global state variables `activeSortCol` and `activeSortDir` in `index.html`
+- [x] Implement robust sorting logic for names, visibilities, and spec values (including parsing K/M/Unlimited) inside `renderFilterModelsList()`
+- [x] Render sort indicators (▲/▼) in table headers and make headers clickable
+- [ ] Test and push updates to github

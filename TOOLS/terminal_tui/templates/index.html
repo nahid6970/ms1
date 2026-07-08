@@ -9559,6 +9559,19 @@
             return spec;
         }
 
+        let activeSortCol = 'name';
+        let activeSortDir = 'asc';
+
+        function handleSort(colName) {
+            if (activeSortCol === colName) {
+                activeSortDir = activeSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                activeSortCol = colName;
+                activeSortDir = 'asc';
+            }
+            renderFilterModelsList();
+        }
+
         function renderFilterModelsList() {
             const container = document.getElementById('ai-filter-models-list');
             if (!container) return;
@@ -9567,7 +9580,7 @@
             const models = getMergedAIModels(activeFilterTab);
             const searchInput = document.getElementById('ai-model-filter-search');
             const searchQuery = (searchInput ? searchInput.value : '').toLowerCase().trim();
-            const filteredModels = models.filter(m => 
+            let filteredModels = models.filter(m => 
                 !searchQuery || 
                 m.label.toLowerCase().includes(searchQuery) || 
                 m.val.toLowerCase().includes(searchQuery)
@@ -9576,23 +9589,62 @@
             const hiddenObj = getHiddenModels();
             const hiddenList = hiddenObj[activeFilterTab] || [];
 
+            // Sort filtered models
+            filteredModels.sort((a, b) => {
+                let valA, valB;
+                if (activeSortCol === 'visible') {
+                    valA = !hiddenList.includes(a.val) ? 1 : 0;
+                    valB = !hiddenList.includes(b.val) ? 1 : 0;
+                } else if (activeSortCol === 'name') {
+                    valA = a.label.toLowerCase();
+                    valB = b.label.toLowerCase();
+                } else {
+                    const specA = getModelSpec(activeFilterTab, a.val)[activeSortCol];
+                    const specB = getModelSpec(activeFilterTab, b.val)[activeSortCol];
+                    
+                    const getNumericValue = (val) => {
+                        if (!val || val === '-') return -1;
+                        if (val === 'Unlimited') return Infinity;
+                        let num = parseFloat(val);
+                        if (isNaN(num)) return -1;
+                        if (String(val).toUpperCase().includes('M')) return num * 1000000;
+                        if (String(val).toUpperCase().includes('K')) return num * 1000;
+                        return num;
+                    };
+                    valA = getNumericValue(specA);
+                    valB = getNumericValue(specB);
+                }
+
+                if (valA === valB) return 0;
+                let comparison = valA > valB ? 1 : -1;
+                return activeSortDir === 'asc' ? comparison : -comparison;
+            });
+
             if (filteredModels.length === 0) {
                 container.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--text-muted); padding:16px;">No matching models found</div>';
                 return;
             }
 
             const table = document.createElement('table');
-            table.style.cssText = 'width:100%; border-collapse:collapse; font-size:0.75rem; color:var(--text-primary);';
+            table.style.cssText = 'width:100%; border-collapse:collapse; font-size:0.75rem; color:var(--text-primary); position:relative;';
 
             const thead = document.createElement('thead');
+            thead.style.cssText = 'position: sticky; top: 0; z-index: 100; background: var(--bg-sidebar);';
+
+            const thStyleBase = 'padding:8px; font-weight:600; color:var(--text-secondary); cursor:pointer; user-select:none; transition: color 0.15s; position: sticky; top: 0; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-color);';
+            const getHeaderIndicator = (colId) => {
+                if (activeSortCol !== colId) return '';
+                return activeSortDir === 'asc' ? ' ▲' : ' ▼';
+            };
+
             thead.innerHTML = `
-                <tr style="border-bottom:1px solid var(--border-color); text-align:left; background: var(--bg-sidebar);">
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary); text-align:center; width:60px;">Visible</th>
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary);">Model Name</th>
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary); text-align:center; width:50px;">RPM</th>
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary); text-align:center; width:55px;">RPD</th>
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary); text-align:center; width:60px;">TPM</th>
-                    <th style="padding:8px; font-weight:600; color:var(--text-secondary); text-align:center; width:60px;">TPD</th>
+                <tr style="background: var(--bg-sidebar);">
+                    <th onclick="handleSort('visible')" style="${thStyleBase} text-align:center; width:60px;">Visible${getHeaderIndicator('visible')}</th>
+                    <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
+                    <th onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;">RPM${getHeaderIndicator('rpm')}</th>
+                    <th onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;">RPD${getHeaderIndicator('rpd')}</th>
+                    <th onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;">TPM${getHeaderIndicator('tpm')}</th>
+                    <th onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;">TPD${getHeaderIndicator('tpd')}</th>
                 </tr>
             `;
             table.appendChild(thead);
