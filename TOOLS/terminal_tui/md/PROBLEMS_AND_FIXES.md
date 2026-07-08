@@ -52,3 +52,11 @@ Unexpected token 'True' in expression or statement.
 **Solution:** Added the `multiple` attribute to the input file element, and updated `handleScreenshotFileSelect` to map files to concurrent upload promises, await them with `Promise.all`, and write the resulting space-separated, quoted paths to the active terminal input.
 **Files Modified:** `templates/index.html` — screenshot-file-input element & handleScreenshotFileSelect JS function
 
+---
+
+## [2026-07-08 23:57] - Performance Overhead from Loading Multiple JSON Configuration Files
+**Problem:** The application had to load and parse six separate JSON configuration files (projects, extension icons, subcommands, starred ports, custom buttons, snippets), causing unnecessary disk I/O and potential performance bottlenecks.
+**Root Cause:** The configuration system was fragmented across multiple files, each read and written independently on demand.
+**Solution:** Consolidated all six JSON configuration files into a single unified config file (`tui_config.json`). Added automated backward-compatible migration logic on startup to merge existing old configuration files if `tui_config.json` doesn't exist, and implemented thread-safe in-memory configuration caching to make subsequent reads near-instantaneous.
+**Files Modified:** `app.py` — Config variables, helpers, and endpoints refactored
+

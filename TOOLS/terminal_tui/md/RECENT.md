@@ -90,16 +90,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
-## [2026-07-08] - Mobile Overlay Bug Fix & Multiple Screenshot Upload
+## [2026-07-08] - Mobile Overlay Bug Fix, Multiple Screenshot Upload & Config Consolidation
 **What We Accomplished:**
 - Identified and fixed mobile layout rendering bug where the top header and bottom status bar disappeared or were covered by a black/blurry layer.
 - Root Cause: Multiple hidden `.modal-overlay` elements with high z-index (3000) and `backdrop-filter: blur(8px)` remained in the layout (`display: flex`) and triggered mobile GPU rendering/compositing bugs, rendering them opaque.
 - Solution: Updated `.modal-overlay` CSS to use `visibility: hidden;` and transitioned it along with `opacity` to completely exclude inactive modals from the rendering tree.
 - Resolved screenshot upload limitation where only one image could be selected/uploaded at a time.
 - Added `multiple` attribute to `screenshot-file-input` and updated JS handler to upload files concurrently using `Promise.all` and join the resulting paths with spaces.
+- Consolidated six individual JSON configuration files (`projects.json`, `extension_icons.json`, `subcommands.json`, `starred_ports.json`, `custom_buttons.json`, `snippets.json`) into a single unified configuration file `tui_config.json`.
+- Implemented backward-compatible startup migration logic in the backend to merge existing JSON configurations into `tui_config.json`.
+- Added thread-safe, in-memory caching for the unified configuration values to minimize disk reads and optimize TUI responsiveness.
 - Updated documentation (`md/PROBLEMS_AND_FIXES.md` and `md/RECENT.md`).
 
 **Files Modified:**
 - `templates/index.html` — updated modal-overlay transition/visibility and added multiple screenshot upload support
+- `app.py` — refactored config paths, helpers, and endpoints to use unified tui_config.json
 - `md/PROBLEMS_AND_FIXES.md` — logged bugs and solutions
 - `md/RECENT.md` — logged development session

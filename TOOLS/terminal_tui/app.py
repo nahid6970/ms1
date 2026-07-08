@@ -37,83 +37,105 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
-PROJECTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json"
-ICONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json"
-SUBCMDS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json"
-STARRED_PORTS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\starred_ports.json"
-CUSTOM_BUTTONS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\custom_buttons.json"
+CONFIG_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\tui_config.json"
+
+_CONFIG_CACHE = None
+_CONFIG_LOCK = threading.Lock()
+
+def _load_raw_config():
+    if not os.path.exists(CONFIG_FILE):
+        return {}
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading unified config: {e}")
+        return {}
+
+def _save_raw_config(config_data):
+    try:
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving unified config: {e}")
+
+def get_config_val(key, default_factory=dict):
+    global _CONFIG_CACHE
+    with _CONFIG_LOCK:
+        if _CONFIG_CACHE is None:
+            _CONFIG_CACHE = _load_raw_config()
+        val = _CONFIG_CACHE.get(key)
+        if val is None:
+            val = default_factory()
+            _CONFIG_CACHE[key] = val
+        import copy
+        return copy.deepcopy(val)
+
+def set_config_val(key, val):
+    global _CONFIG_CACHE
+    with _CONFIG_LOCK:
+        if _CONFIG_CACHE is None:
+            _CONFIG_CACHE = _load_raw_config()
+        import copy
+        _CONFIG_CACHE[key] = copy.deepcopy(val)
+        _save_raw_config(_CONFIG_CACHE)
+
+def migrate_existing_configs():
+    if not os.path.exists(CONFIG_FILE):
+        config_data = {}
+        old_files = {
+            "projects": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json", list),
+            "extension_icons": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\extension_icons.json", dict),
+            "subcommands": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\subcommands.json", dict),
+            "starred_ports": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\starred_ports.json", dict),
+            "custom_buttons": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\custom_buttons.json", dict),
+            "snippets": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\snippets.json", list)
+        }
+        
+        migrated = False
+        for key, (old_path, default_type) in old_files.items():
+            if os.path.exists(old_path):
+                try:
+                    with open(old_path, "r", encoding="utf-8") as f:
+                        config_data[key] = json.load(f)
+                    migrated = True
+                except Exception as e:
+                    print(f"Migration error for {key} from {old_path}: {e}")
+                    config_data[key] = default_type()
+            else:
+                config_data[key] = default_type()
+                
+        if migrated:
+            print("Migrating old configuration files to unified config...")
+            _save_raw_config(config_data)
+
+# Run migration on startup
+migrate_existing_configs()
 
 def load_custom_buttons():
-    if not os.path.exists(CUSTOM_BUTTONS_FILE):
-        return {}
-    try:
-        with open(CUSTOM_BUTTONS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error loading custom buttons: {e}")
-        return {}
+    return get_config_val("custom_buttons", dict)
 
 def save_custom_buttons(data):
-    try:
-        os.makedirs(os.path.dirname(CUSTOM_BUTTONS_FILE), exist_ok=True)
-        with open(CUSTOM_BUTTONS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print(f"Error saving custom buttons: {e}")
+    set_config_val("custom_buttons", data)
 
 def load_starred_ports():
-    if not os.path.exists(STARRED_PORTS_FILE):
-        return {}
-    try:
-        with open(STARRED_PORTS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error loading starred ports: {e}")
-        return {}
+    return get_config_val("starred_ports", dict)
 
 def save_starred_ports(ports):
-    try:
-        os.makedirs(os.path.dirname(STARRED_PORTS_FILE), exist_ok=True)
-        with open(STARRED_PORTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(ports, f, indent=2)
-    except Exception as e:
-        print(f"Error saving starred ports: {e}")
+    set_config_val("starred_ports", ports)
 
 def load_subcommands():
-    if not os.path.exists(SUBCMDS_FILE):
-        return {}
-    try:
-        with open(SUBCMDS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error loading subcommands: {e}")
-        return {}
+    return get_config_val("subcommands", dict)
 
 def save_subcommands(subcmds):
-    try:
-        os.makedirs(os.path.dirname(SUBCMDS_FILE), exist_ok=True)
-        with open(SUBCMDS_FILE, "w", encoding="utf-8") as f:
-            json.dump(subcmds, f, indent=2)
-    except Exception as e:
-        print(f"Error saving subcommands: {e}")
+    set_config_val("subcommands", subcmds)
 
 def load_extension_icons():
-    if not os.path.exists(ICONS_FILE):
-        return {}
-    try:
-        with open(ICONS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error loading extension icons: {e}")
-        return {}
+    return get_config_val("extension_icons", dict)
 
 def save_extension_icons(icons):
-    try:
-        os.makedirs(os.path.dirname(ICONS_FILE), exist_ok=True)
-        with open(ICONS_FILE, "w", encoding="utf-8") as f:
-            json.dump(icons, f, indent=2)
-    except Exception as e:
-        print(f"Error saving extension icons: {e}")
+    set_config_val("extension_icons", icons)
 
 active_sessions = {}
 sessions_lock = threading.Lock()
@@ -430,52 +452,29 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             except Exception:
                 pass
 
-_PROJECTS_CACHE = None
-_PROJECTS_CACHE_LOCK = threading.Lock()
-
 def load_projects_config():
-    global _PROJECTS_CACHE
-    with _PROJECTS_CACHE_LOCK:
-        if _PROJECTS_CACHE is not None:
-            return _PROJECTS_CACHE
-            
-        if os.path.exists(PROJECTS_FILE):
-            try:
-                with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
-                    projs = json.load(f)
-                    # Sanitize bookmarks to be dicts
-                    for p in projs:
-                        if "bookmarks" not in p:
-                            p["bookmarks"] = []
-                        else:
-                            sanitized = []
-                            for bm in p["bookmarks"]:
-                                if isinstance(bm, str):
-                                    sanitized.append({"command": bm, "global": False, "windowTitle": ""})
-                                elif isinstance(bm, dict):
-                                    sanitized.append({
-                                        "command": bm.get("command", ""),
-                                        "global": bm.get("global", False),
-                                        "name": bm.get("name", ""),
-                                        "windowTitle": bm.get("windowTitle", "")
-                                    })
-                            p["bookmarks"] = sanitized
-                _PROJECTS_CACHE = projs
-                return projs
-            except Exception as e:
-                print(f"Error reading projects config: {e}")
-        _PROJECTS_CACHE = []
-        return _PROJECTS_CACHE
+    projs = get_config_val("projects", list)
+    # Sanitize bookmarks to be dicts
+    for p in projs:
+        if "bookmarks" not in p:
+            p["bookmarks"] = []
+        else:
+            sanitized = []
+            for bm in p["bookmarks"]:
+                if isinstance(bm, str):
+                    sanitized.append({"command": bm, "global": False, "windowTitle": ""})
+                elif isinstance(bm, dict):
+                    sanitized.append({
+                        "command": bm.get("command", ""),
+                        "global": bm.get("global", False),
+                        "name": bm.get("name", ""),
+                        "windowTitle": bm.get("windowTitle", "")
+                    })
+            p["bookmarks"] = sanitized
+    return projs
 
 def save_projects_config(projects):
-    global _PROJECTS_CACHE
-    with _PROJECTS_CACHE_LOCK:
-        try:
-            with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
-                json.dump(projects, f, indent=2)
-            _PROJECTS_CACHE = projects
-        except Exception as e:
-            print(f"Error saving projects config: {e}")
+    set_config_val("projects", projects)
 
 def scan_projects():
     config_projects = load_projects_config()
@@ -3203,16 +3202,12 @@ def api_tools_port():
         return jsonify({"error": str(e)}), 500
 
 
-SNIPPETS_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\snippets.json"
-
 @app.route('/api/snippets', methods=['GET'])
 def api_get_snippets():
     """Return saved snippets list"""
     try:
-        if os.path.exists(SNIPPETS_FILE):
-            with open(SNIPPETS_FILE, 'r', encoding='utf-8') as f:
-                return jsonify({"snippets": json.load(f)})
-        return jsonify({"snippets": []})
+        snippets = get_config_val("snippets", list)
+        return jsonify({"snippets": snippets})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -3222,9 +3217,7 @@ def api_save_snippets():
     data = request.get_json(silent=True) or {}
     snippets = data.get("snippets", [])
     try:
-        os.makedirs(os.path.dirname(SNIPPETS_FILE), exist_ok=True)
-        with open(SNIPPETS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(snippets, f, ensure_ascii=False, indent=2)
+        set_config_val("snippets", snippets)
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
