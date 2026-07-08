@@ -9220,12 +9220,7 @@
             if (toggleBtn) toggleBtn.style.display = 'flex';
 
             // Populate Specs dynamically from constant JSON specs
-            let spec = null;
-            if (provider === 'groq') {
-                spec = GROQ_MODEL_SPECS[model];
-            } else if (provider === 'gemini') {
-                spec = GEMINI_MODEL_SPECS[model];
-            }
+            let spec = getModelSpec(provider, model);
             
             const specEl = document.getElementById('ai-usage-specs');
             if (specEl && spec) {
@@ -9496,6 +9491,55 @@
             fetchDynamicModels(provider);
         }
 
+        function makeSpecCellEditable(td, provider, modelVal, specName, currentValue) {
+            td.style.cursor = 'pointer';
+            td.title = 'Click to edit';
+            td.onclick = function(e) {
+                if (td.querySelector('input')) return;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue === '-' ? '' : currentValue;
+                input.style.cssText = 'width: 100%; box-sizing: border-box; text-align: center; font-size: 0.72rem; padding: 2px; background: var(--bg-sidebar); border: 1px solid var(--accent-color); border-radius: 4px; color: var(--text-primary); outline: none;';
+                
+                td.textContent = '';
+                td.appendChild(input);
+                input.focus();
+                
+                function saveValue() {
+                    const newVal = input.value.trim() || '-';
+                    td.innerHTML = '';
+                    td.textContent = newVal;
+                    
+                    let overrides = {};
+                    try {
+                        overrides = JSON.parse(localStorage.getItem('ai-model-spec-overrides') || '{}');
+                    } catch(err) {}
+                    
+                    if (!overrides[provider]) overrides[provider] = {};
+                    if (!overrides[provider][modelVal]) overrides[provider][modelVal] = {};
+                    
+                    overrides[provider][modelVal][specName] = newVal;
+                    localStorage.setItem('ai-model-spec-overrides', JSON.stringify(overrides));
+                    
+                    makeSpecCellEditable(td, provider, modelVal, specName, newVal);
+                    updateRateLimitsUI();
+                }
+                
+                input.onkeydown = function(evt) {
+                    if (evt.key === 'Enter') {
+                        saveValue();
+                    } else if (evt.key === 'Escape') {
+                        td.innerHTML = '';
+                        td.textContent = currentValue;
+                        makeSpecCellEditable(td, provider, modelVal, specName, currentValue);
+                    }
+                };
+                
+                input.onblur = saveValue;
+            };
+        }
+
         function getModelSpec(provider, modelVal) {
             let spec = null;
             if (provider === 'groq') {
@@ -9503,7 +9547,15 @@
             } else if (provider === 'gemini') {
                 spec = GEMINI_MODEL_SPECS[modelVal];
             }
-            return spec || { rpm: '-', rpd: '-', tpm: '-', tpd: '-' };
+            spec = spec ? {...spec} : { rpm: '-', rpd: '-', tpm: '-', tpd: '-' };
+
+            try {
+                const overrides = JSON.parse(localStorage.getItem('ai-model-spec-overrides') || '{}');
+                if (overrides[provider] && overrides[provider][modelVal]) {
+                    Object.assign(spec, overrides[provider][modelVal]);
+                }
+            } catch(e) {}
+            return spec;
         }
 
         function renderFilterModelsList() {
@@ -9582,22 +9634,30 @@
 
                 const tdRPM = document.createElement('td');
                 tdRPM.style.cssText = 'padding:6px 8px; text-align:center; color: #3b82f6; font-weight: 500;';
-                tdRPM.textContent = spec.rpm || '-';
+                const valRPM = spec.rpm || '-';
+                tdRPM.textContent = valRPM;
+                makeSpecCellEditable(tdRPM, activeFilterTab, m.val, 'rpm', valRPM);
                 tr.appendChild(tdRPM);
 
                 const tdRPD = document.createElement('td');
                 tdRPD.style.cssText = 'padding:6px 8px; text-align:center; color: #f59e0b; font-weight: 500;';
-                tdRPD.textContent = spec.rpd || '-';
+                const valRPD = spec.rpd || '-';
+                tdRPD.textContent = valRPD;
+                makeSpecCellEditable(tdRPD, activeFilterTab, m.val, 'rpd', valRPD);
                 tr.appendChild(tdRPD);
 
                 const tdTPM = document.createElement('td');
                 tdTPM.style.cssText = 'padding:6px 8px; text-align:center; color: #10b981; font-weight: 500;';
-                tdTPM.textContent = spec.tpm || '-';
+                const valTPM = spec.tpm || '-';
+                tdTPM.textContent = valTPM;
+                makeSpecCellEditable(tdTPM, activeFilterTab, m.val, 'tpm', valTPM);
                 tr.appendChild(tdTPM);
 
                 const tdTPD = document.createElement('td');
                 tdTPD.style.cssText = 'padding:6px 8px; text-align:center; color: #ef4444; font-weight: 500;';
-                tdTPD.textContent = spec.tpd || '-';
+                const valTPD = spec.tpd || '-';
+                tdTPD.textContent = valTPD;
+                makeSpecCellEditable(tdTPD, activeFilterTab, m.val, 'tpd', valTPD);
                 tr.appendChild(tdTPD);
 
                 tbody.appendChild(tr);
