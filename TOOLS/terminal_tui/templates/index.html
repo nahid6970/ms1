@@ -2491,13 +2491,25 @@
                             <option value="3px">3px</option>
                         </select>
                     </div>
-                    <div>
+                    <div style="position: relative;">
                         <label style="font-size: 0.65rem; color: var(--text-muted); display:block; margin-bottom: 3px;">Font Family</label>
-                        <select id="prompt-style-font-family" style="width:100%; font-size:0.75rem; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:3px 6px; outline:none; height:26px; cursor:pointer;" onchange="savePromptButtonsStyle()">
-                            <option value="sans-serif">Sans-serif</option>
-                            <option value="monospace">Monospace</option>
-                            <option value="serif">Serif</option>
-                        </select>
+                        <div class="custom-select-container" id="prompt-font-select-container" style="position: relative; width: 100%;">
+                            <div class="custom-select-trigger" id="prompt-font-select-trigger" onclick="togglePromptFontDropdown()" style="padding: 3px 8px; font-size: 0.75rem; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; height: 26px; box-sizing: border-box;">
+                                <span id="prompt-selected-font-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:85px;">sans-serif</span>
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="prompt-font-select-arrow" style="transition: transform 0.2s;">
+                                    <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="custom-select-dropdown" id="prompt-font-dropdown-list" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; z-index: 3010; display: none; flex-direction: column; max-height: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 140px;">
+                                <div style="padding: 4px; border-bottom: 1px solid var(--border-color); display: flex;">
+                                    <input type="text" id="prompt-font-search-input" placeholder="Search fonts..." oninput="filterPromptFontOptions()" style="width: 100%; height: 24px; padding: 2px 6px; font-size: 0.72rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); outline: none;" autocomplete="off">
+                                </div>
+                                <div id="prompt-font-options-list" style="overflow-y: auto; flex: 1; padding: 2px 0;">
+                                    <!-- Options dynamically injected -->
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="prompt-style-font-family" value="sans-serif">
                     </div>
                 </div>
 
@@ -10192,7 +10204,114 @@
             document.getElementById('prompt-style-inactive-border-color').value = style.inactiveBorderColor || '#232c3d';
             document.getElementById('prompt-style-border-width').value = style.borderWidth || '1px';
             document.getElementById('prompt-style-border-radius').value = style.borderRadius || '6px';
-            document.getElementById('prompt-style-font-family').value = style.fontFamily || 'sans-serif';
+            
+            selectedPromptFontValue = style.fontFamily || 'sans-serif';
+            document.getElementById('prompt-style-font-family').value = selectedPromptFontValue;
+            let cleanLabel = selectedPromptFontValue.replace(/'/g, "").replace(/"/g, "").split(",")[0].trim();
+            document.getElementById('prompt-selected-font-label').textContent = cleanLabel;
+        }
+
+        let selectedPromptFontValue = 'sans-serif';
+
+        function togglePromptFontDropdown() {
+            const container = document.getElementById('prompt-font-select-container');
+            const dropdown = document.getElementById('prompt-font-dropdown-list');
+            const searchInput = document.getElementById('prompt-font-search-input');
+            
+            const isOpen = container.classList.contains('open');
+            if (isOpen) {
+                closePromptFontDropdown();
+            } else {
+                container.classList.add('open');
+                dropdown.style.display = 'flex';
+                searchInput.value = '';
+                renderPromptFontOptions();
+                searchInput.focus();
+                
+                setTimeout(() => {
+                    document.addEventListener('click', handlePromptFontOutsideClick);
+                }, 0);
+            }
+        }
+
+        function closePromptFontDropdown() {
+            const container = document.getElementById('prompt-font-select-container');
+            const dropdown = document.getElementById('prompt-font-dropdown-list');
+            if (container) container.classList.remove('open');
+            if (dropdown) dropdown.style.display = 'none';
+            document.removeEventListener('click', handlePromptFontOutsideClick);
+        }
+
+        function handlePromptFontOutsideClick(e) {
+            const container = document.getElementById('prompt-font-select-container');
+            if (container && !container.contains(e.target)) {
+                closePromptFontDropdown();
+            }
+        }
+
+        function filterPromptFontOptions() {
+            const searchInput = document.getElementById('prompt-font-search-input');
+            renderPromptFontOptions(searchInput.value);
+        }
+
+        function renderPromptFontOptions(filterText = '') {
+            const listContainer = document.getElementById('prompt-font-options-list');
+            if (!listContainer) return;
+            
+            listContainer.innerHTML = '';
+            
+            const lowerFilter = filterText.toLowerCase();
+            const baseFonts = ['sans-serif', 'monospace', 'serif', 'cursive', 'fantasy'];
+            const allFonts = Array.from(new Set([...baseFonts, ...(typeof systemFonts !== 'undefined' ? systemFonts : [])]));
+            
+            const filteredFonts = allFonts.filter(font => font.toLowerCase().includes(lowerFilter));
+            
+            filteredFonts.forEach(font => {
+                let fontVal = font;
+                if (font.includes(' ') && !font.startsWith("'") && !font.startsWith('"')) {
+                    fontVal = `'${font}'`;
+                }
+                
+                const isSelected = (fontVal === selectedPromptFontValue);
+                
+                const optionDiv = document.createElement('div');
+                optionDiv.style.cssText = 'padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-radius: 4px; color: var(--text-primary); transition: all 0.15s; margin: 2px 4px;';
+                optionDiv.onclick = () => selectPromptFont(fontVal);
+                
+                optionDiv.innerHTML = `
+                    <span style="font-family: ${fontVal};">${font}</span>
+                    ${isSelected ? '<span style="font-size: 0.7rem; color: var(--accent-color);">✓</span>' : ''}
+                `;
+                
+                optionDiv.onmouseenter = () => optionDiv.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                optionDiv.onmouseleave = () => optionDiv.style.backgroundColor = isSelected ? 'rgba(37, 99, 235, 0.12)' : 'transparent';
+                if (isSelected) {
+                    optionDiv.style.backgroundColor = 'rgba(37, 99, 235, 0.12)';
+                }
+                
+                listContainer.appendChild(optionDiv);
+            });
+            
+            if (filteredFonts.length === 0) {
+                const noResult = document.createElement('div');
+                noResult.style.padding = '8px 10px';
+                noResult.style.fontSize = '0.7rem';
+                noResult.style.color = 'var(--text-secondary)';
+                noResult.style.textAlign = 'center';
+                noResult.textContent = 'No matching fonts';
+                listContainer.appendChild(noResult);
+            }
+        }
+
+        function selectPromptFont(fontVal) {
+            selectedPromptFontValue = fontVal;
+            document.getElementById('prompt-style-font-family').value = fontVal;
+            
+            let cleanLabel = fontVal.replace(/'/g, "").replace(/"/g, "").split(",")[0].trim();
+            document.getElementById('prompt-selected-font-label').textContent = cleanLabel;
+            
+            closePromptFontDropdown();
+            savePromptButtonsStyle();
         }
 
         function populateSystemPromptsDropdown() {
