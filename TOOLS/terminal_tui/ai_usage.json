@@ -1278,5 +1278,45 @@
         "prompt_tokens": 4,
         "completion_tokens": 0,
         "total_tokens": 4
+    },
+    {
+        "timestamp": "2026-07-08T09:13:24.328400Z",
+        "provider": "openrouter",
+        "model": "tencent/hy3:free",
+        "prompt_tokens": 89,
+        "completion_tokens": 21,
+        "total_tokens": 110
+    },
+    {
+        "timestamp": "2026-07-08T09:13:28.757743Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs-2.1:free",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:13:31.754749Z",
+        "provider": "openrouter",
+        "model": "cohere/north-mini-code:free",
+        "prompt_tokens": 76,
+        "completion_tokens": 42,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:13:34.243087Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3.5-content-safety:free",
+        "prompt_tokens": 469,
+        "completion_tokens": 112,
+        "total_tokens": 581
+    },
+    {
+        "timestamp": "2026-07-08T09:14:11.600959Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 23,
+        "total_tokens": 118
     }
 ]

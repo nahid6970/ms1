@@ -10161,7 +10161,9 @@
                 const ignoreBtn = card.querySelector('.tester-ignore-btn');
                 if (ignoreBtn) {
                     const isNowIgnored = ignored[provider].includes(modelVal);
-                    ignoreBtn.innerHTML = isNowIgnored ? '⏸️' : '▶️';
+                    const svgPlay = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+                    const svgPause = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+                    ignoreBtn.innerHTML = isNowIgnored ? svgPause : svgPlay;
                     ignoreBtn.title = isNowIgnored ? 'Model skipped in tests — click to include' : 'Model included in tests — click to skip';
                     ignoreBtn.style.opacity = isNowIgnored ? '0.5' : '1';
                 }
@@ -10220,8 +10222,11 @@
             const eyeTitle = isHidden ? 'Model hidden globally — click to show' : 'Model visible globally — click to hide';
             const eyeOpacity = isHidden ? '0.5' : '1';
 
+            const svgPlay = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:block;"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+            const svgPause = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:block;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
             const isIgnored = _isModelTesterIgnored(model.val);
-            const ignoreIcon = isIgnored ? '⏸️' : '▶️';
+            const ignoreIcon = isIgnored ? svgPause : svgPlay;
             const ignoreTitle = isIgnored ? 'Model skipped in tests — click to include' : 'Model included in tests — click to skip';
             const ignoreOpacity = isIgnored ? '0.5' : '1';
 
