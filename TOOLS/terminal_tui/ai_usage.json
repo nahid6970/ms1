@@ -1766,5 +1766,93 @@
         "prompt_tokens": 150,
         "completion_tokens": 41,
         "total_tokens": 191
+    },
+    {
+        "timestamp": "2026-07-08T09:41:29.052614Z",
+        "provider": "groq",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:41:30.116368Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 115,
+        "total_tokens": 265
+    },
+    {
+        "timestamp": "2026-07-08T09:41:30.894136Z",
+        "provider": "groq",
+        "model": "llama-3.1-8b-instant",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:41:32.515302Z",
+        "provider": "groq",
+        "model": "allam-2-7b",
+        "prompt_tokens": 106,
+        "completion_tokens": 5,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:41:33.981950Z",
+        "provider": "groq",
+        "model": "groq/compound-mini",
+        "prompt_tokens": 594,
+        "completion_tokens": 42,
+        "total_tokens": 636
+    },
+    {
+        "timestamp": "2026-07-08T09:41:36.433618Z",
+        "provider": "groq",
+        "model": "groq/compound",
+        "prompt_tokens": 1097,
+        "completion_tokens": 266,
+        "total_tokens": 1363
+    },
+    {
+        "timestamp": "2026-07-08T09:41:37.741499Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "prompt_tokens": 150,
+        "completion_tokens": 69,
+        "total_tokens": 219
+    },
+    {
+        "timestamp": "2026-07-08T09:41:38.847753Z",
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:41:40.543955Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 40,
+        "total_tokens": 190
+    },
+    {
+        "timestamp": "2026-07-08T09:41:41.830924Z",
+        "provider": "groq",
+        "model": "qwen/qwen3.6-27b",
+        "prompt_tokens": 91,
+        "completion_tokens": 174,
+        "total_tokens": 265
+    },
+    {
+        "timestamp": "2026-07-08T09:41:43.731048Z",
+        "provider": "groq",
+        "model": "qwen/qwen3-32b",
+        "prompt_tokens": 89,
+        "completion_tokens": 135,
+        "total_tokens": 224
     }
 ]

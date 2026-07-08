@@ -9723,8 +9723,9 @@
             if (cleanVal === 'fast') finalVal = 'Fast';
             else if (cleanVal === 'medium') finalVal = 'Medium';
             else if (cleanVal === 'slow') finalVal = 'Slow';
+            else if (cleanVal === 'none') finalVal = 'None';
             else {
-                alert("Invalid speed value. Please use Fast, Medium, or Slow.");
+                alert("Invalid speed value. Please use Fast, Medium, Slow, or None.");
                 return;
             }
 
@@ -9964,12 +9965,12 @@
                 select.style.cssText = 'background:var(--bg-main) url("data:image/svg+xml;utf8,<svg fill=\'%23a1a1aa\' height=\'10\' viewBox=\'0 0 24 24\' width=\'10\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>") no-repeat right 4px center; border:1px solid var(--border-color); border-radius:6px; font-size:0.7rem; padding:2px 14px 2px 4px; outline:none; cursor:pointer; width:100%; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center;';
                 updateSelectColor(currentSpeed);
                 
-                ['Fast', 'Medium', 'Slow'].forEach(optVal => {
+                ['Fast', 'Medium', 'Slow', 'None'].forEach(optVal => {
                     const opt = document.createElement('option');
                     opt.value = optVal;
                     opt.textContent = optVal;
                     opt.style.background = 'var(--bg-sidebar)';
-                    opt.style.color = optVal === 'Fast' ? '#60a5fa' : optVal === 'Medium' ? '#f59e0b' : '#f87171';
+                    opt.style.color = optVal === 'Fast' ? '#60a5fa' : optVal === 'Medium' ? '#f59e0b' : optVal === 'Slow' ? '#f87171' : 'var(--text-secondary)';
                     if (optVal === currentSpeed) {
                         opt.selected = true;
                     }
@@ -10368,7 +10369,7 @@
             const providerSpeeds = speeds[provider] || {};
             const currentSpeed = providerSpeeds[model.val] || 'Medium';
 
-            const speedColors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171' };
+            const speedColors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171', None: 'var(--text-secondary)' };
             const speedColor = speedColors[currentSpeed] || 'var(--text-primary)';
 
             const speedSelectHtml = `
@@ -10378,13 +10379,14 @@
                     if (!updatedSpeeds['${provider}']) updatedSpeeds['${provider}'] = {};
                     updatedSpeeds['${provider}']['${model.val}'] = val;
                     saveModelSpeeds(updatedSpeeds);
-                    const colors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171' };
+                    const colors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171', None: 'var(--text-secondary)' };
                     this.style.color = colors[val] || 'var(--text-primary)';
                     if (typeof renderFilterModelsList === 'function') renderFilterModelsList();
                 " style="background:var(--bg-main) url(&quot;data:image/svg+xml;utf8,<svg fill='%23a1a1aa' height='8' viewBox='0 0 24 24' width='8' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>&quot;) no-repeat right 3px center; border:1px solid var(--border-color); border-radius:4px; font-size:0.64rem; padding:1px 11px 1px 3px; outline:none; cursor:pointer; width:58px; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center; color:${speedColor}; margin-right:4px;">
                     <option value="Fast" style="background:var(--bg-sidebar); color:#60a5fa;" ${currentSpeed === 'Fast' ? 'selected' : ''}>Fast</option>
                     <option value="Medium" style="background:var(--bg-sidebar); color:#f59e0b;" ${currentSpeed === 'Medium' ? 'selected' : ''}>Med</option>
                     <option value="Slow" style="background:var(--bg-sidebar); color:#f87171;" ${currentSpeed === 'Slow' ? 'selected' : ''}>Slow</option>
+                    <option value="None" style="background:var(--bg-sidebar); color:var(--text-secondary);" ${currentSpeed === 'None' ? 'selected' : ''}>None</option>
                 </select>
             `;
 
