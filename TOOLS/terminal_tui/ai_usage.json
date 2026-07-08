@@ -1526,5 +1526,101 @@
         "prompt_tokens": 98,
         "completion_tokens": 76,
         "total_tokens": 174
+    },
+    {
+        "timestamp": "2026-07-08T09:18:53.892654Z",
+        "provider": "openrouter",
+        "model": "tencent/hy3:free",
+        "prompt_tokens": 89,
+        "completion_tokens": 22,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:18:55.609795Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs-2.1:free",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:18:58.254545Z",
+        "provider": "openrouter",
+        "model": "cohere/north-mini-code:free",
+        "prompt_tokens": 76,
+        "completion_tokens": 42,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:19:00.897010Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3.5-content-safety:free",
+        "prompt_tokens": 469,
+        "completion_tokens": 115,
+        "total_tokens": 584
+    },
+    {
+        "timestamp": "2026-07-08T09:19:02.619206Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 23,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:19:04.274321Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs.2:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 31,
+        "total_tokens": 129
+    },
+    {
+        "timestamp": "2026-07-08T09:19:10.313569Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-m.1:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 41,
+        "total_tokens": 139
+    },
+    {
+        "timestamp": "2026-07-08T09:19:19.144516Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 25,
+        "total_tokens": 120
+    },
+    {
+        "timestamp": "2026-07-08T09:19:54.355177Z",
+        "provider": "openrouter",
+        "model": "openrouter/free",
+        "prompt_tokens": 153,
+        "completion_tokens": 834,
+        "total_tokens": 987
+    },
+    {
+        "timestamp": "2026-07-08T09:19:58.994009Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 51,
+        "total_tokens": 146
+    },
+    {
+        "timestamp": "2026-07-08T09:20:37.878125Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "prompt_tokens": 4,
+        "completion_tokens": 0,
+        "total_tokens": 4
+    },
+    {
+        "timestamp": "2026-07-08T09:22:01.431596Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "prompt_tokens": 4,
+        "completion_tokens": 0,
+        "total_tokens": 4
     }
 ]

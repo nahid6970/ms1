@@ -9317,7 +9317,7 @@
             const container = document.getElementById('ai-usage-container');
             const toggleBtn = document.getElementById('ai-usage-toggle-btn');
 
-            if (provider !== 'groq' && provider !== 'gemini') {
+            if (provider !== 'groq' && provider !== 'gemini' && provider !== 'openrouter') {
                 if (container) container.style.display = 'none';
                 if (toggleBtn) toggleBtn.style.display = 'none';
                 return;
@@ -9675,6 +9675,8 @@
                 spec = GROQ_MODEL_SPECS[modelVal];
             } else if (provider === 'gemini') {
                 spec = GEMINI_MODEL_SPECS[modelVal];
+            } else if (provider === 'openrouter') {
+                spec = { rpm: 'Unlimited', rpd: 50, tpm: 'Unlimited', tpd: 'Unlimited' };
             }
             spec = spec ? {...spec} : { rpm: '-', rpd: '-', tpm: '-', tpd: '-' };
 
