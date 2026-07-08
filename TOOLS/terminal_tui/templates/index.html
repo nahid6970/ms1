@@ -9110,15 +9110,15 @@
             if (sec <= 0) return '0s';
             if (sec >= 3600) {
                 const h = Math.floor(sec / 3600);
-                const m = Math.floor((sec % 3600) / 60);
+                const m = Math.round((sec % 3600) / 60);
                 return `${h}h${m}m`;
             }
             if (sec >= 60) {
                 const m = Math.floor(sec / 60);
-                const s = (sec % 60).toFixed(1);
+                const s = Math.round(sec % 60);
                 return `${m}m${s}s`;
             }
-            return `${sec.toFixed(1)}s`;
+            return `${Math.round(sec)}s`;
         }
 
         function recordRequestUsage(provider, model, tokenCount) {
