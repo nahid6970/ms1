@@ -6,32 +6,40 @@ This document provides a comprehensive summary of all changes, implementations, 
 
 ## 🛠️ Features Implemented & Enhanced
 
-### 1. Model Speed Selector & Categorization
+### 1. Settings Dashboard with Sub-Window Navigation
+- **SVG Icon Tabs Bar**: Added a row of 7 large, clean, animated vector SVG buttons at the top of the global settings modal, allowing users to toggle between individual settings pages instead of navigating a single giant vertical form.
+- **Sections**: Created separate sub-windows for General & Typography, Sidebar & Layout, Terminal & Editor Behavior, Voice Recording Settings, AI Copilot Settings, and Current Workspace Badge.
+- **Direct Icon Mapping Link**: Hooked the 7th tab button (Custom Extension Icons) to directly trigger the Extension Icons Modal window for immediate file mapping configurations.
+
+### 2. Chat Font Sizing & Relative Markdown Scaling
+- **Chat Font Size setting**: Added a settings input to dynamically scale `#ai-chat-history` text size.
+- **Relative EM Sizing**: Converted hardcoded font-sizes on headings (`h1`-`h6`), inline code tags, and code blocks (`pre code`) inside the markdown rendering stylesheet from absolute `rem` values to relative `em` percentages. This allows all formatted AI output text to scale perfectly along with the user's custom font size.
+- **Table Support**: Removed the hardcoded `0.72rem` font size on markdown tables, setting it to `inherit` so table headers and contents match the font-size chosen in settings.
+
+### 3. Dynamic Chat & Popover Sizing
+- **Dynamic Growth Height**: Configured `#ai-copilot-popover` to stretch dynamically as the chat thread expands, capped up to the user-defined **Max Height** setting or the top boundary of the browser window (`calc(100vh - 50px)`). Once it hits the boundary, `#ai-chat-history` scrolls internally.
+- **Blue Border Outline**: Added a sleek `1.5px solid var(--accent-color)` themed border outline around the active copilot popover window.
+
+### 4. Visibility Settings Table Columns & Width Adjustment
+- **Increased Modal Width**: Expanded the width of `#ai-model-filter-modal` to `850px` (with `95vw` max-width), providing plenty of room for all spec columns (RPD, Used, RPM, TPD, TPM, Speed, and %) and entirely eliminating horizontal scrollbars.
+- **Used RPD Edits**: Enabled manual used requests cell edits (`makeUsedRequestsCellEditable`) which posts transaction logs to the backend to rewrite local usage statistics.
+
+### 5. Model Speed Selector & Categorization
 - Added speed categories (`Fast`, `Medium`, `Slow`, `None`) inside the AI Model Visibility Settings modal (`#ai-model-filter-modal`), the Batch Tester modal, and bulk configuration controls.
 - Kept neutral grey text styles for models categorized with a speed of `None`.
 
-### 2. Daily Usage Percentage (`%`) Indicators
+### 6. Daily Usage Percentage (`%`) Indicators
 - Replaced normal text labels with color-coded remaining usage percentage tags based on **RPD (Requests Per Day)**.
-  - **Green** (`#10b981` / `rgba(16, 185, 129, 0.15)` bg) $\rightarrow$ usage $> 50\%$.
-  - **Yellow** (`#f59e0b` / `rgba(245, 158, 11, 0.15)` bg) $\rightarrow$ usage between $10\%$ and $50\%$.
-  - **Red** (`#f87171` / `rgba(248, 113, 113, 0.15)` bg) $\rightarrow$ usage $< 10\%$.
 - Calculated dynamic values by parsing specifications like `14.4K`, `1.5K`, or numbers, and subtracting the daily request logs count from `localStorage` usage history.
 - Built a clean, crisp **vector SVG icon** to render the default infinity (`∞`) sign when no RPD limit is set.
 - Extended the selected model trigger label (`#ai-model-dd-trigger`) to render the selected model name alongside its current remaining usage `%` and speed tags.
 
-### 3. Custom Fallback & Direction Settings
+### 7. Custom Fallback & Direction Settings
 - Added custom settings in the Settings Form (`#settings-form`):
   - **Custom Fallback Usage Sign Toggle & Textbox**: Lets users define a custom sign (e.g. `None`, `N/A`) instead of the default `∞` vector symbol.
   - **Show AI Dropdowns Above Trigger**: Class-driven styling `.ai-dropdown-reverse` that forces the provider/model dropdown options menu to slide up *above* the trigger element instead of downwards.
 
-### 4. Visibility Settings Table Columns
-- Added a **Used** (Used RPD) requests column immediately following the `RPD` spec column.
-- Added a `%` remaining percentage column immediately following the `Speed` column.
-- Configured sorting handlers for both `%` (`pct`) and `Used` (`used_rpd`) columns.
-- Rearranged spec columns layout to match the sequence: `RPD` $\rightarrow$ `Used` $\rightarrow$ `RPM` $\rightarrow$ `TPD` $\rightarrow$ `TPM`.
-- Built a new **Used daily requests editable helper** (`makeUsedRequestsCellEditable`) that sends a POST request to the python backend to rewrite usage log history on cell changes, refreshing stats instantly.
-
-### 5. Persistent System Prompt buttons
+### 8. Persistent System Prompt buttons
 - Replaced the old system prompt select dropdown with gracefully wrapping buttons.
 - Added complete custom styling controls in `#ai-system-prompt-modal` to configure individual style attributes for both **Active** and **Inactive** button states:
   - Background (BG) & Foreground (FG) color chips.
