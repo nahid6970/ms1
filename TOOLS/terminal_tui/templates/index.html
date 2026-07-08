@@ -9806,6 +9806,54 @@
                 
                 input.onblur = saveValue;
             };
+        function makeUsedRequestsCellEditable(td, provider, modelVal, currentValue) {
+            td.style.cursor = 'pointer';
+            td.title = 'Click to edit used requests count';
+            td.onclick = function(e) {
+                if (td.querySelector('input')) return;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '0';
+                input.value = currentValue;
+                input.style.cssText = 'width: 100%; box-sizing: border-box; text-align: center; font-size: 0.72rem; padding: 2px; background: var(--bg-sidebar); border: 1px solid var(--accent-color); border-radius: 4px; color: var(--text-primary); outline: none;';
+                
+                td.textContent = '';
+                td.appendChild(input);
+                input.focus();
+                
+                function saveValue() {
+                    const newVal = parseInt(input.value) || 0;
+                    td.innerHTML = '';
+                    td.textContent = newVal;
+                    
+                    const historyKey = `ai-usage-history-${provider}-${modelVal}`;
+                    let history = [];
+                    if (newVal > 0) {
+                        const now = Date.now();
+                        for (let i = 0; i < newVal; i++) {
+                            history.push({ timestamp: now - i * 1000, tokens: 0 });
+                        }
+                    }
+                    localStorage.setItem(historyKey, JSON.stringify(history));
+                    
+                    updateRateLimitsUI();
+                    syncAIModelDropdown();
+                    renderFilterModelsList();
+                }
+                
+                input.onkeydown = function(evt) {
+                    if (evt.key === 'Enter') {
+                        saveValue();
+                    } else if (evt.key === 'Escape') {
+                        td.innerHTML = '';
+                        td.textContent = currentValue;
+                        makeUsedRequestsCellEditable(td, provider, modelVal, currentValue);
+                    }
+                };
+                
+                input.onblur = saveValue;
+            };
         }
 
         function getModelSpec(provider, modelVal) {
@@ -9968,6 +10016,11 @@
                     };
                     valA = getPctVal(specA, usageA);
                     valB = getPctVal(specB, usageB);
+                } else if (activeSortCol === 'used_rpd') {
+                    const usageA = getCalculatedUsage(activeFilterTab, a.val);
+                    const usageB = getCalculatedUsage(activeFilterTab, b.val);
+                    valA = usageA.requestsLastDay || 0;
+                    valB = usageB.requestsLastDay || 0;
                 } else if (activeSortCol === 'visible') {
                     valA = !hiddenList.includes(a.val) ? 1 : 0;
                     valB = !hiddenList.includes(b.val) ? 1 : 0;
@@ -10029,6 +10082,7 @@
                     <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:95px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
                     <th onclick="handleSort('pct')" style="${thStyleBase} text-align:center; width:45px;" title="Remaining Requests %">%${getHeaderIndicator('pct')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpd')" onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Right-click to bulk set RPD">RPD${getHeaderIndicator('rpd')}</th>
+                    <th onclick="handleSort('used_rpd')" style="${thStyleBase} text-align:center; width:55px;" title="Used daily requests. Click to edit">Used${getHeaderIndicator('used_rpd')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'rpm')" onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;" title="Right-click to bulk set RPM">RPM${getHeaderIndicator('rpm')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpd')" onclick="handleSort('tpd')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPD">TPD${getHeaderIndicator('tpd')}</th>
                     <th oncontextmenu="handleSpecHeaderRightClick(event, 'tpm')" onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;" title="Right-click to bulk set TPM">TPM${getHeaderIndicator('tpm')}</th>
@@ -10190,6 +10244,13 @@
                 tdRPD.textContent = valRPD;
                 makeSpecCellEditable(tdRPD, activeFilterTab, m.val, 'rpd', valRPD);
                 tr.appendChild(tdRPD);
+
+                const tdUsedRPD = document.createElement('td');
+                tdUsedRPD.style.cssText = 'padding:6px 8px; text-align:center; color: var(--text-secondary); font-weight: 500;';
+                const valUsedRPD = usage.requestsLastDay || 0;
+                tdUsedRPD.textContent = valUsedRPD;
+                makeUsedRequestsCellEditable(tdUsedRPD, activeFilterTab, m.val, valUsedRPD);
+                tr.appendChild(tdUsedRPD);
 
                 const tdRPM = document.createElement('td');
                 tdRPM.style.cssText = 'padding:6px 8px; text-align:center; color: #3b82f6; font-weight: 500;';
