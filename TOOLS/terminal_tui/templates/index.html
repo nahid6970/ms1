@@ -10204,6 +10204,8 @@
                 ? (localStorage.getItem('gemini-api-key') || '')
                 : provider === 'morph'
                 ? (localStorage.getItem('morph-api-key') || '')
+                : provider === 'openrouter'
+                ? (localStorage.getItem('openrouter-api-key') || '')
                 : (localStorage.getItem('groq-api-key') || '');
 
             if (!apiKey) {
@@ -10564,6 +10566,8 @@
                 ? (localStorage.getItem('gemini-api-key') || '')
                 : provider === 'morph'
                 ? (localStorage.getItem('morph-api-key') || '')
+                : provider === 'openrouter'
+                ? (localStorage.getItem('openrouter-api-key') || '')
                 : (localStorage.getItem('groq-api-key') || '');
             const model = document.getElementById('ai-model-select').value;
             
