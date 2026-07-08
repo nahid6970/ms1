@@ -10127,6 +10127,47 @@
             _modelTesterAbort = true;
         }
 
+        function getTesterIgnoredModels() {
+            try {
+                return JSON.parse(localStorage.getItem('ai-tester-ignored-models')) || { gemini: [], groq: [], morph: [], openrouter: [] };
+            } catch(e) {
+                return { gemini: [], groq: [], morph: [], openrouter: [] };
+            }
+        }
+
+        function saveTesterIgnoredModels(ignored) {
+            localStorage.setItem('ai-tester-ignored-models', JSON.stringify(ignored));
+        }
+
+        function _isModelTesterIgnored(modelVal) {
+            const provider = activeFilterTab || 'gemini';
+            const ignored = getTesterIgnoredModels();
+            return (ignored[provider] || []).includes(modelVal);
+        }
+
+        function _toggleTesterModelIgnore(modelVal) {
+            const provider = activeFilterTab || 'gemini';
+            const ignored = getTesterIgnoredModels();
+            if (!ignored[provider]) ignored[provider] = [];
+            const idx = ignored[provider].indexOf(modelVal);
+            if (idx >= 0) {
+                ignored[provider].splice(idx, 1);
+            } else {
+                ignored[provider].push(modelVal);
+            }
+            saveTesterIgnoredModels(ignored);
+            const card = document.querySelector(`#model-tester-results [data-model="${modelVal}"]`);
+            if (card) {
+                const ignoreBtn = card.querySelector('.tester-ignore-btn');
+                if (ignoreBtn) {
+                    const isNowIgnored = ignored[provider].includes(modelVal);
+                    ignoreBtn.innerHTML = isNowIgnored ? '⏸️' : '▶️';
+                    ignoreBtn.title = isNowIgnored ? 'Model skipped in tests — click to include' : 'Model included in tests — click to skip';
+                    ignoreBtn.style.opacity = isNowIgnored ? '0.5' : '1';
+                }
+            }
+        }
+
         function _isModelHidden(modelVal) {
             const provider = activeFilterTab || 'gemini';
             const hidden = getHiddenModels();
@@ -10166,7 +10207,8 @@
                 pending: { bg: 'rgba(100,116,139,0.12)', border: '#475569', icon: '⏳', color: '#94a3b8' },
                 running: { bg: 'rgba(59,130,246,0.12)', border: '#3b82f6', icon: '⏳', color: '#60a5fa' },
                 success: { bg: 'rgba(16,185,129,0.1)', border: '#10b981', icon: '✅', color: '#34d399' },
-                error:   { bg: 'rgba(239,68,68,0.1)', border: '#ef4444', icon: '❌', color: '#f87171' }
+                error:   { bg: 'rgba(239,68,68,0.1)', border: '#ef4444', icon: '❌', color: '#f87171' },
+                skipped: { bg: 'rgba(100,116,139,0.05)', border: '#334155', icon: '⏭️', color: '#64748b' }
             };
             const s = statusColors[status] || statusColors.pending;
             const timeStr = timeMs != null ? `${(timeMs / 1000).toFixed(2)}s` : '';
@@ -10175,15 +10217,23 @@
 
             const isHidden = _isModelHidden(model.val);
             const eyeIcon = isHidden ? '🚫' : '👁️';
-            const eyeTitle = isHidden ? 'Model hidden — click to show' : 'Model visible — click to hide';
+            const eyeTitle = isHidden ? 'Model hidden globally — click to show' : 'Model visible globally — click to hide';
             const eyeOpacity = isHidden ? '0.5' : '1';
+
+            const isIgnored = _isModelTesterIgnored(model.val);
+            const ignoreIcon = isIgnored ? '⏸️' : '▶️';
+            const ignoreTitle = isIgnored ? 'Model skipped in tests — click to include' : 'Model included in tests — click to skip';
+            const ignoreOpacity = isIgnored ? '0.5' : '1';
 
             return `<div data-model="${model.val}" style="background:${s.bg}; border:1px solid ${s.border}; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; gap:3px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:600; font-size:0.75rem; color:var(--text-primary);">${s.icon} ${model.label}</span>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : timeStr}</span>
-                        <button class="tester-eye-btn" onclick="_toggleTesterModelVisibility('${model.val}')" title="${eyeTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${eyeOpacity};">${eyeIcon}</button>
+                        <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : status === 'skipped' ? 'Skipped' : timeStr}</span>
+                        <div style="display:flex; gap:4px;">
+                            <button class="tester-ignore-btn" onclick="_toggleTesterModelIgnore('${model.val}')" title="${ignoreTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${ignoreOpacity};">${ignoreIcon}</button>
+                            <button class="tester-eye-btn" onclick="_toggleTesterModelVisibility('${model.val}')" title="${eyeTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${eyeOpacity};">${eyeIcon}</button>
+                        </div>
                     </div>
                 </div>
                 ${truncatedDetail ? `<div style="font-size:0.7rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${truncatedDetail}</div>` : ''}
@@ -10240,6 +10290,15 @@
                 if (_modelTesterAbort) break;
 
                 const model = models[i];
+
+                if (_isModelTesterIgnored(model.val)) {
+                    const cardEl = resultsEl.querySelector(`[data-model="${model.val}"]`);
+                    if (cardEl) {
+                        cardEl.outerHTML = _renderTesterCard(model, 'skipped', 'Skipped by user', null);
+                    }
+                    continue;
+                }
+
                 statusEl.textContent = `Testing ${i + 1} of ${models.length}: ${model.label}...`;
                 counterEl.textContent = `${passed} ✅  ${failed} ❌  (${i}/${models.length})`;
 
