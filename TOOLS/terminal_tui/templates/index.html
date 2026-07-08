@@ -9949,12 +9949,27 @@
                 tdSpeed.style.cssText = 'padding:4px 6px; text-align:center;';
                 
                 const select = document.createElement('select');
-                select.style.cssText = 'background:var(--bg-main); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; font-size:0.7rem; padding:2px 4px; outline:none; cursor:pointer; width:100%;';
+                const updateSelectColor = (val) => {
+                    if (val === 'Fast') {
+                        select.style.color = '#60a5fa';
+                    } else if (val === 'Medium') {
+                        select.style.color = '#f59e0b';
+                    } else if (val === 'Slow') {
+                        select.style.color = '#f87171';
+                    } else {
+                        select.style.color = 'var(--text-primary)';
+                    }
+                };
+
+                select.style.cssText = 'background:var(--bg-main) url("data:image/svg+xml;utf8,<svg fill=\'%23a1a1aa\' height=\'10\' viewBox=\'0 0 24 24\' width=\'10\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>") no-repeat right 6px center; border:1px solid var(--border-color); border-radius:6px; font-size:0.7rem; padding:2px 18px 2px 6px; outline:none; cursor:pointer; width:100%; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center;';
+                updateSelectColor(currentSpeed);
                 
                 ['Fast', 'Medium', 'Slow'].forEach(optVal => {
                     const opt = document.createElement('option');
                     opt.value = optVal;
                     opt.textContent = optVal;
+                    opt.style.background = 'var(--bg-sidebar)';
+                    opt.style.color = optVal === 'Fast' ? '#60a5fa' : optVal === 'Medium' ? '#f59e0b' : '#f87171';
                     if (optVal === currentSpeed) {
                         opt.selected = true;
                     }
@@ -9966,6 +9981,7 @@
                     if (!updatedSpeeds[activeFilterTab]) updatedSpeeds[activeFilterTab] = {};
                     updatedSpeeds[activeFilterTab][m.val] = select.value;
                     saveModelSpeeds(updatedSpeeds);
+                    updateSelectColor(select.value);
                 };
                 
                 tdSpeed.appendChild(select);
