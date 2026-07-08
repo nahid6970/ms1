@@ -3634,6 +3634,63 @@ def api_ai_command():
             }
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+    elif provider == 'openrouter':
+        if not model:
+            model = 'google/gemma-2-9b-it:free'
+        if not api_key:
+            api_key = os.environ.get('OPENROUTER_API_KEY', '')
+        if not api_key:
+            return jsonify({"error": "OpenRouter API key is missing. Please provide it in settings."}), 400
+
+        messages = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
+        for h in history:
+            messages.append({"role": h["role"], "content": h["content"]})
+        if prompt:
+            messages.append({"role": "user", "content": prompt})
+
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.1,
+            "max_tokens": 1024
+        }
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=60)
+            try:
+                res_data = res.json()
+            except Exception:
+                return jsonify({"error": f"OpenRouter returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
+            if res.status_code != 200:
+                err_obj = res_data.get('error', res_data)
+                if isinstance(err_obj, dict):
+                    error_msg = err_obj.get('message', str(err_obj))
+                else:
+                    error_msg = str(err_obj)
+                return jsonify({"error": f"OpenRouter API ({res.status_code}): {error_msg}"}), res.status_code
+
+            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            rate_limits = {
+                "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
+                "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
+                "limit_requests": res.headers.get("x-ratelimit-limit-requests", ""),
+                "limit_tokens": res.headers.get("x-ratelimit-limit-tokens", ""),
+                "reset_requests": res.headers.get("x-ratelimit-reset-requests", ""),
+                "reset_tokens": res.headers.get("x-ratelimit-reset-tokens", "")
+            }
+            usage_metadata = {
+                "promptTokenCount": res_data.get("usage", {}).get("prompt_tokens", 0),
+                "candidatesTokenCount": res_data.get("usage", {}).get("completion_tokens", 0),
+                "totalTokenCount": res_data.get("usage", {}).get("total_tokens", 0)
+            }
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     else:
         # Gemini provider
         if not model:
