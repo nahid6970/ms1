@@ -1686,5 +1686,85 @@
         "prompt_tokens": 150,
         "completion_tokens": 68,
         "total_tokens": 218
+    },
+    {
+        "timestamp": "2026-07-08T09:40:02.262788Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 63,
+        "total_tokens": 213
+    },
+    {
+        "timestamp": "2026-07-08T09:40:02.883853Z",
+        "provider": "groq",
+        "model": "allam-2-7b",
+        "prompt_tokens": 106,
+        "completion_tokens": 5,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:40:04.418107Z",
+        "provider": "groq",
+        "model": "groq/compound-mini",
+        "prompt_tokens": 594,
+        "completion_tokens": 75,
+        "total_tokens": 669
+    },
+    {
+        "timestamp": "2026-07-08T09:40:05.931606Z",
+        "provider": "groq",
+        "model": "llama-3.1-8b-instant",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:40:07.277659Z",
+        "provider": "groq",
+        "model": "qwen/qwen3-32b",
+        "prompt_tokens": 89,
+        "completion_tokens": 191,
+        "total_tokens": 280
+    },
+    {
+        "timestamp": "2026-07-08T09:40:08.551286Z",
+        "provider": "groq",
+        "model": "qwen/qwen3.6-27b",
+        "prompt_tokens": 91,
+        "completion_tokens": 176,
+        "total_tokens": 267
+    },
+    {
+        "timestamp": "2026-07-08T09:40:13.253882Z",
+        "provider": "groq",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:40:14.612393Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "prompt_tokens": 150,
+        "completion_tokens": 68,
+        "total_tokens": 218
+    },
+    {
+        "timestamp": "2026-07-08T09:40:15.704735Z",
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "prompt_tokens": 111,
+        "completion_tokens": 3,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:40:18.882083Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b",
+        "prompt_tokens": 150,
+        "completion_tokens": 41,
+        "total_tokens": 191
     }
 ]

@@ -10363,11 +10363,37 @@
             const ignoreTitle = isIgnored ? 'Model skipped in tests — click to include' : 'Model included in tests — click to skip';
             const ignoreOpacity = isIgnored ? '0.5' : '1';
 
+            const speeds = getModelSpeeds();
+            const provider = activeFilterTab || 'gemini';
+            const providerSpeeds = speeds[provider] || {};
+            const currentSpeed = providerSpeeds[model.val] || 'Medium';
+
+            const speedColors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171' };
+            const speedColor = speedColors[currentSpeed] || 'var(--text-primary)';
+
+            const speedSelectHtml = `
+                <select onchange="
+                    const val = this.value;
+                    const updatedSpeeds = getModelSpeeds();
+                    if (!updatedSpeeds['${provider}']) updatedSpeeds['${provider}'] = {};
+                    updatedSpeeds['${provider}']['${model.val}'] = val;
+                    saveModelSpeeds(updatedSpeeds);
+                    const colors = { Fast: '#60a5fa', Medium: '#f59e0b', Slow: '#f87171' };
+                    this.style.color = colors[val] || 'var(--text-primary)';
+                    if (typeof renderFilterModelsList === 'function') renderFilterModelsList();
+                " style="background:var(--bg-main) url(&quot;data:image/svg+xml;utf8,<svg fill='%23a1a1aa' height='8' viewBox='0 0 24 24' width='8' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>&quot;) no-repeat right 3px center; border:1px solid var(--border-color); border-radius:4px; font-size:0.64rem; padding:1px 11px 1px 3px; outline:none; cursor:pointer; width:58px; appearance:none; -webkit-appearance:none; font-weight:600; text-align-last: center; color:${speedColor}; margin-right:4px;">
+                    <option value="Fast" style="background:var(--bg-sidebar); color:#60a5fa;" ${currentSpeed === 'Fast' ? 'selected' : ''}>Fast</option>
+                    <option value="Medium" style="background:var(--bg-sidebar); color:#f59e0b;" ${currentSpeed === 'Medium' ? 'selected' : ''}>Med</option>
+                    <option value="Slow" style="background:var(--bg-sidebar); color:#f87171;" ${currentSpeed === 'Slow' ? 'selected' : ''}>Slow</option>
+                </select>
+            `;
+
             return `<div data-model="${model.val}" style="background:${s.bg}; border:1px solid ${s.border}; border-radius:6px; padding:8px 10px; display:flex; flex-direction:column; gap:3px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:600; font-size:0.75rem; color:var(--text-primary);">${s.icon} ${model.label}</span>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:0.68rem; color:${s.color}; font-weight:500;">${status === 'running' ? 'Testing...' : status === 'pending' ? 'Waiting' : status === 'skipped' ? 'Skipped' : timeStr}</span>
+                        ${speedSelectHtml}
                         <div style="display:flex; gap:4px;">
                             <button class="tester-ignore-btn" onclick="_toggleTesterModelIgnore('${model.val}')" title="${ignoreTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${ignoreOpacity}; color:#fff;">${ignoreIcon}</button>
                             <button class="tester-eye-btn" onclick="_toggleTesterModelVisibility('${model.val}')" title="${eyeTitle}" style="background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; opacity:${eyeOpacity};">${eyeIcon}</button>
