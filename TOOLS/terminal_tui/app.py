@@ -284,8 +284,42 @@ function cd {{
     }}
 }}
 
-# Custom prompt showing project root and subdirectories
+# Track command execution time
+$global:__CmdStartTime = $null
+$global:__LastCmdDuration = $null
+
+$ExecutionContext.InvokeCommand.PreCommandLookupAction = {{
+    param($commandName, $commandLookupEventArgs)
+    $global:__CmdStartTime = [System.Diagnostics.Stopwatch]::StartNew()
+}}
+
+# Capture duration after each command
+function Set-LastCommandDuration {{
+    if ($global:__CmdStartTime -ne $null) {{
+        $global:__CmdStartTime.Stop()
+        $global:__LastCmdDuration = $global:__CmdStartTime.Elapsed
+        $global:__CmdStartTime = $null
+    }}
+}}
+
+$null = Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -Action {{ Set-LastCommandDuration }} -SupportEvent -ErrorAction SilentlyContinue
+Set-PSReadLineOption -PromptText "" -ErrorAction SilentlyContinue
+
+# Helper to format duration nicely
+function Format-Duration ($elapsed) {{
+    if ($elapsed -eq $null) {{ return "" }}
+    $ms = [int]$elapsed.TotalMilliseconds
+    if ($ms -lt 1000) {{ return "" }}
+    if ($elapsed.TotalSeconds -lt 60) {{ return " [{0:0.0}s]" -f $elapsed.TotalSeconds }}
+    if ($elapsed.TotalMinutes -lt 60) {{ return " [{0}m {1}s]" -f [int]$elapsed.Minutes, $elapsed.Seconds }}
+    return " [{0}h {1}m]" -f [int]$elapsed.Hours, $elapsed.Minutes
+}}
+
+# Custom prompt showing project root and subdirectories + execution time
 function prompt {{
+    $durationStr = Format-Duration $global:__LastCmdDuration
+    $global:__LastCmdDuration = $null
+
     $current = $pwd.Path.Replace("/", "\\")
     $root = $global:PROJECT_ROOT_PATH.Replace("/", "\\")
     if ($current.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {{
@@ -294,12 +328,12 @@ function prompt {{
             $relative = $relative.Substring(1)
         }}
         if ([string]::IsNullOrEmpty($relative)) {{
-            "{prompt_display_name}> "
+            "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m {prompt_display_name}> "
         }} else {{
-            "{prompt_display_name}\\$relative> "
+            "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m {prompt_display_name}\\$relative> "
         }}
     }} else {{
-        "$current> "
+        "$([char]0x1b)[90m$durationStr$([char]0x1b)[0m $current> "
     }}
 }}
 
