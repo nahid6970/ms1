@@ -9265,7 +9265,12 @@
 
                 if (reqEl && data.remaining_requests && data.limit_requests) {
                     const originalResetSec = parseResetTimeToSeconds(data.reset_requests);
-                    const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    let remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    if (parseInt(data.limit_requests) > 100) {
+                        const nowTime = new Date();
+                        const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
+                        remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                    }
                     reqEl.innerHTML = `<span style="color: #3b82f6;">${data.remaining_requests}</span> / ${data.limit_requests} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (reqEl && limitRPM > 0) {
                     const left = Math.max(0, limitRPM - usage.requestsLastMin);
@@ -9276,7 +9281,12 @@
                 
                 if (tokEl && data.remaining_tokens && data.limit_tokens) {
                     const originalResetSec = parseResetTimeToSeconds(data.reset_tokens);
-                    const remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    let remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
+                    if (parseInt(data.limit_tokens) > 50000) {
+                        const nowTime = new Date();
+                        const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
+                        remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                    }
                     tokEl.innerHTML = `<span style="color: #10b981;">${data.remaining_tokens}</span> / ${data.limit_tokens} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
                     const left = Math.max(0, limitTPM - usage.tokensLastMin);

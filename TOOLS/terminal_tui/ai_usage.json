@@ -46,5 +46,37 @@
         "prompt_tokens": 150,
         "completion_tokens": 1024,
         "total_tokens": 1174
+    },
+    {
+        "timestamp": "2026-07-08T05:45:10.704488Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 153,
+        "completion_tokens": 223,
+        "total_tokens": 376
+    },
+    {
+        "timestamp": "2026-07-08T05:45:37.653160Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 152,
+        "completion_tokens": 198,
+        "total_tokens": 350
+    },
+    {
+        "timestamp": "2026-07-08T05:45:53.548706Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 298,
+        "completion_tokens": 195,
+        "total_tokens": 493
+    },
+    {
+        "timestamp": "2026-07-08T05:46:29.305320Z",
+        "provider": "groq",
+        "model": "openai/gpt-oss-safeguard-20b",
+        "prompt_tokens": 472,
+        "completion_tokens": 77,
+        "total_tokens": 549
     }
 ]
