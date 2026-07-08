@@ -1318,5 +1318,213 @@
         "prompt_tokens": 95,
         "completion_tokens": 23,
         "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:15:06.728600Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "prompt_tokens": 4,
+        "completion_tokens": 0,
+        "total_tokens": 4
+    },
+    {
+        "timestamp": "2026-07-08T09:15:27.733499Z",
+        "provider": "openrouter",
+        "model": "tencent/hy3:free",
+        "prompt_tokens": 89,
+        "completion_tokens": 22,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:15:28.814006Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs-2.1:free",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:15:31.559172Z",
+        "provider": "openrouter",
+        "model": "cohere/north-mini-code:free",
+        "prompt_tokens": 76,
+        "completion_tokens": 38,
+        "total_tokens": 114
+    },
+    {
+        "timestamp": "2026-07-08T09:15:34.759692Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3.5-content-safety:free",
+        "prompt_tokens": 469,
+        "completion_tokens": 116,
+        "total_tokens": 585
+    },
+    {
+        "timestamp": "2026-07-08T09:15:36.825556Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 23,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:16:06.114691Z",
+        "provider": "openrouter",
+        "model": "tencent/hy3:free",
+        "prompt_tokens": 89,
+        "completion_tokens": 22,
+        "total_tokens": 111
+    },
+    {
+        "timestamp": "2026-07-08T09:16:07.415573Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs-2.1:free",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:16:10.121177Z",
+        "provider": "openrouter",
+        "model": "cohere/north-mini-code:free",
+        "prompt_tokens": 76,
+        "completion_tokens": 37,
+        "total_tokens": 113
+    },
+    {
+        "timestamp": "2026-07-08T09:16:13.007823Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3.5-content-safety:free",
+        "prompt_tokens": 469,
+        "completion_tokens": 163,
+        "total_tokens": 632
+    },
+    {
+        "timestamp": "2026-07-08T09:16:16.498216Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 23,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:16:18.188536Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs.2:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 34,
+        "total_tokens": 132
+    },
+    {
+        "timestamp": "2026-07-08T09:16:21.344590Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-m.1:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 68,
+        "total_tokens": 166
+    },
+    {
+        "timestamp": "2026-07-08T09:16:31.429733Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 26,
+        "total_tokens": 121
+    },
+    {
+        "timestamp": "2026-07-08T09:16:32.974653Z",
+        "provider": "openrouter",
+        "model": "openrouter/free",
+        "prompt_tokens": 94,
+        "completion_tokens": 4,
+        "total_tokens": 98
+    },
+    {
+        "timestamp": "2026-07-08T09:16:36.779782Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 47,
+        "total_tokens": 142
+    },
+    {
+        "timestamp": "2026-07-08T09:16:37.998249Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "prompt_tokens": 94,
+        "completion_tokens": 4,
+        "total_tokens": 98
+    },
+    {
+        "timestamp": "2026-07-08T09:16:45.184314Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-nano-9b-v2:free",
+        "prompt_tokens": 92,
+        "completion_tokens": 219,
+        "total_tokens": 311
+    },
+    {
+        "timestamp": "2026-07-08T09:16:49.552649Z",
+        "provider": "openrouter",
+        "model": "openai/gpt-oss-20b:free",
+        "prompt_tokens": 153,
+        "completion_tokens": 78,
+        "total_tokens": 231
+    },
+    {
+        "timestamp": "2026-07-08T09:17:04.822844Z",
+        "provider": "openrouter",
+        "model": "tencent/hy3:free",
+        "prompt_tokens": 89,
+        "completion_tokens": 21,
+        "total_tokens": 110
+    },
+    {
+        "timestamp": "2026-07-08T09:17:05.981489Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs-2.1:free",
+        "prompt_tokens": 91,
+        "completion_tokens": 3,
+        "total_tokens": 94
+    },
+    {
+        "timestamp": "2026-07-08T09:17:07.664870Z",
+        "provider": "openrouter",
+        "model": "cohere/north-mini-code:free",
+        "prompt_tokens": 76,
+        "completion_tokens": 39,
+        "total_tokens": 115
+    },
+    {
+        "timestamp": "2026-07-08T09:17:10.069202Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3.5-content-safety:free",
+        "prompt_tokens": 469,
+        "completion_tokens": 111,
+        "total_tokens": 580
+    },
+    {
+        "timestamp": "2026-07-08T09:17:12.152868Z",
+        "provider": "openrouter",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "prompt_tokens": 95,
+        "completion_tokens": 23,
+        "total_tokens": 118
+    },
+    {
+        "timestamp": "2026-07-08T09:17:13.727530Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-xs.2:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 34,
+        "total_tokens": 132
+    },
+    {
+        "timestamp": "2026-07-08T09:17:18.472828Z",
+        "provider": "openrouter",
+        "model": "poolside/laguna-m.1:free",
+        "prompt_tokens": 98,
+        "completion_tokens": 76,
+        "total_tokens": 174
     }
 ]
