@@ -2,7 +2,7 @@
   "search_roots": {
     "C:\\@delta\\ms1": true,
     "C:\\@delta\\db": true,
-    "C:\\@delta\\msBackups": false,
+    "C:\\@delta\\msBackups": true,
     "C:\\Users\\nahid\\Pictures": false,
     "D:\\": true
   },
