@@ -44,3 +44,11 @@ Unexpected token 'True' in expression or statement.
 **Solution:** Added `visibility: hidden;` to `.modal-overlay` and transitioned it in CSS (`transition: opacity 0.25s ease, visibility 0.25s ease;`), toggling it to `visibility: visible;` in `.modal-overlay.show`. This completely excludes the hidden overlays from the render tree, resolving the GPU compositing bug.
 **Files Modified:** `templates/index.html` — `.modal-overlay` / `.modal-overlay.show` styles
 
+---
+
+## [2026-07-08 21:05] - Upload Button Only Allows Selecting One Image at a Time
+**Problem:** The screenshot/image upload button (`#screenshot-upload-btn`) only allowed selecting and uploading a single image at a time.
+**Root Cause:** The underlying `<input type="file" id="screenshot-file-input">` element lacked the `multiple` HTML attribute, and the `handleScreenshotFileSelect(event)` javascript handler only processed `event.target.files[0]`.
+**Solution:** Added the `multiple` attribute to the input file element, and updated `handleScreenshotFileSelect` to map files to concurrent upload promises, await them with `Promise.all`, and write the resulting space-separated, quoted paths to the active terminal input.
+**Files Modified:** `templates/index.html` — screenshot-file-input element & handleScreenshotFileSelect JS function
+

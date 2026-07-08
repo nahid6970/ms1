@@ -90,14 +90,16 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
-## [2026-07-08] - Mobile Overlay Bug Fix
+## [2026-07-08] - Mobile Overlay Bug Fix & Multiple Screenshot Upload
 **What We Accomplished:**
 - Identified and fixed mobile layout rendering bug where the top header and bottom status bar disappeared or were covered by a black/blurry layer.
 - Root Cause: Multiple hidden `.modal-overlay` elements with high z-index (3000) and `backdrop-filter: blur(8px)` remained in the layout (`display: flex`) and triggered mobile GPU rendering/compositing bugs, rendering them opaque.
 - Solution: Updated `.modal-overlay` CSS to use `visibility: hidden;` and transitioned it along with `opacity` to completely exclude inactive modals from the rendering tree.
+- Resolved screenshot upload limitation where only one image could be selected/uploaded at a time.
+- Added `multiple` attribute to `screenshot-file-input` and updated JS handler to upload files concurrently using `Promise.all` and join the resulting paths with spaces.
 - Updated documentation (`md/PROBLEMS_AND_FIXES.md` and `md/RECENT.md`).
 
 **Files Modified:**
-- `templates/index.html` — updated modal-overlay transition and visibility
-- `md/PROBLEMS_AND_FIXES.md` — logged bug and solution
+- `templates/index.html` — updated modal-overlay transition/visibility and added multiple screenshot upload support
+- `md/PROBLEMS_AND_FIXES.md` — logged bugs and solutions
 - `md/RECENT.md` — logged development session
