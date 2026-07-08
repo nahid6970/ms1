@@ -37,7 +37,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\TOOLS"
-CONFIG_FILE = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\tui_config.json"
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json')
 
 _CONFIG_CACHE = None
 _CONFIG_LOCK = threading.Lock()
@@ -83,6 +83,19 @@ def set_config_val(key, val):
 
 def migrate_existing_configs():
     if not os.path.exists(CONFIG_FILE):
+        # 1. Try to migrate from backup folder's unified config
+        backup_unified_path = r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\tui_config.json"
+        if os.path.exists(backup_unified_path):
+            try:
+                print("Migrating unified config from backup database folder to local workspace...")
+                with open(backup_unified_path, "r", encoding="utf-8") as f:
+                    config_data = json.load(f)
+                _save_raw_config(config_data)
+                return
+            except Exception as e:
+                print(f"Error migrating from unified backup config: {e}")
+
+        # 2. Otherwise try to migrate from 6 old separate config files
         config_data = {}
         old_files = {
             "projects": (r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\projects.json", list),
@@ -107,7 +120,7 @@ def migrate_existing_configs():
                 config_data[key] = default_type()
                 
         if migrated:
-            print("Migrating old configuration files to unified config...")
+            print("Migrating old configuration files to unified config in local workspace...")
             _save_raw_config(config_data)
 
 # Run migration on startup

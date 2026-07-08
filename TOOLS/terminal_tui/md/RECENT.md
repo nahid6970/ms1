@@ -99,11 +99,14 @@ Read this file only when relevant to the current task. When reading, reference t
 - Added `multiple` attribute to `screenshot-file-input` and updated JS handler to upload files concurrently using `Promise.all` and join the resulting paths with spaces.
 - Consolidated six individual JSON configuration files (`projects.json`, `extension_icons.json`, `subcommands.json`, `starred_ports.json`, `custom_buttons.json`, `snippets.json`) into a single unified configuration file `tui_config.json`.
 - Implemented backward-compatible startup migration logic in the backend to merge existing JSON configurations into `tui_config.json`.
+- Relocated the unified `tui_config.json` configuration file to the local main project directory and added it to `.gitignore` to prevent tracking local configurations in git.
+- Updated migration logic to check for both the database backup unified configuration or the original six JSON files to perform a seamless transition.
 - Added thread-safe, in-memory caching for the unified configuration values to minimize disk reads and optimize TUI responsiveness.
 - Updated documentation (`md/PROBLEMS_AND_FIXES.md` and `md/RECENT.md`).
 
 **Files Modified:**
 - `templates/index.html` — updated modal-overlay transition/visibility and added multiple screenshot upload support
-- `app.py` — refactored config paths, helpers, and endpoints to use unified tui_config.json
+- `app.py` — refactored config paths, helpers, and endpoints to use unified tui_config.json in project root
+- `.gitignore` — added tui_config.json to ignored files
 - `md/PROBLEMS_AND_FIXES.md` — logged bugs and solutions
 - `md/RECENT.md` — logged development session

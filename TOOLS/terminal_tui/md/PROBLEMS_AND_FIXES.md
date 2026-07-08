@@ -60,3 +60,11 @@ Unexpected token 'True' in expression or statement.
 **Solution:** Consolidated all six JSON configuration files into a single unified config file (`tui_config.json`). Added automated backward-compatible migration logic on startup to merge existing old configuration files if `tui_config.json` doesn't exist, and implemented thread-safe in-memory configuration caching to make subsequent reads near-instantaneous.
 **Files Modified:** `app.py` — Config variables, helpers, and endpoints refactored
 
+---
+
+## [2026-07-09 00:02] - Relocation of Unified Configuration to Main Project Directory
+**Problem:** The consolidated config file `tui_config.json` was originally saved in the external backup database directory (`C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\`), which separates config from the project root.
+**Root Cause:** Initial design placed it alongside original backups, but placing it in the main project directory makes the app more self-contained.
+**Solution:** Changed `CONFIG_FILE` path to point to the local project root (`tui_config.json`). Enhanced startup migration logic to: (1) check for the backup folder's `tui_config.json` and copy/migrate it locally, or (2) fallback to migrating from the original 6 separate JSON files. Added `tui_config.json` to `.gitignore` to prevent committing local workspace state.
+**Files Modified:** `app.py` — Updated CONFIG_FILE path and migrate_existing_configs, `.gitignore` — added tui_config.json
+
