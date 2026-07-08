@@ -3475,6 +3475,36 @@ def api_custom_buttons():
         save_custom_buttons(data)
         return jsonify({"success": True})
 
+def log_ai_usage(provider, model, prompt_tokens, completion_tokens, total_tokens):
+    import json
+    from datetime import datetime
+    usage_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_usage.json')
+    
+    try:
+        if os.path.exists(usage_file):
+            with open(usage_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            data = []
+    except Exception:
+        data = []
+        
+    record = {
+        "timestamp": datetime.utcnow().isoformat() + 'Z',
+        "provider": provider,
+        "model": model,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": total_tokens
+    }
+    data.append(record)
+    
+    try:
+        with open(usage_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print("Failed to save ai_usage.json:", e)
+
 @app.route('/api/ai-command', methods=['POST'])
 def api_ai_command():
     req = request.json or {}
@@ -3494,6 +3524,7 @@ def api_ai_command():
     
     import requests
     rate_limits = None
+    usage_metadata = None
     
     if provider == 'groq':
         if not model:
@@ -3536,6 +3567,11 @@ def api_ai_command():
                 "reset_requests": res.headers.get("x-ratelimit-reset-requests", ""),
                 "reset_tokens": res.headers.get("x-ratelimit-reset-tokens", "")
             }
+            usage_metadata = {
+                "promptTokenCount": res_data.get("usage", {}).get("prompt_tokens", 0),
+                "candidatesTokenCount": res_data.get("usage", {}).get("completion_tokens", 0),
+                "totalTokenCount": res_data.get("usage", {}).get("total_tokens", 0)
+            }
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     elif provider == 'morph':
@@ -3571,6 +3607,19 @@ def api_ai_command():
                 return jsonify({"error": error_msg}), res.status_code
 
             cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            rate_limits = {
+                "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
+                "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
+                "limit_requests": res.headers.get("x-ratelimit-limit-requests", ""),
+                "limit_tokens": res.headers.get("x-ratelimit-limit-tokens", ""),
+                "reset_requests": res.headers.get("x-ratelimit-reset-requests", ""),
+                "reset_tokens": res.headers.get("x-ratelimit-reset-tokens", "")
+            }
+            usage_metadata = {
+                "promptTokenCount": res_data.get("usage", {}).get("prompt_tokens", 0),
+                "candidatesTokenCount": res_data.get("usage", {}).get("completion_tokens", 0),
+                "totalTokenCount": res_data.get("usage", {}).get("total_tokens", 0)
+            }
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     else:
@@ -3615,6 +3664,15 @@ def api_ai_command():
                 return jsonify({"error": "No response from Gemini API"}), 500
             
             cmd = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+            rate_limits = {
+                "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", res.headers.get("x-ratelimit-remaining", "")),
+                "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
+                "limit_requests": res.headers.get("x-ratelimit-limit-requests", res.headers.get("x-ratelimit-limit", "")),
+                "limit_tokens": res.headers.get("x-ratelimit-limit-tokens", ""),
+                "reset_requests": res.headers.get("x-ratelimit-reset-requests", res.headers.get("x-ratelimit-reset", "")),
+                "reset_tokens": res.headers.get("x-ratelimit-reset-tokens", "")
+            }
+            usage_metadata = res_data.get("usageMetadata", {})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -3622,8 +3680,40 @@ def api_ai_command():
     import re
     cmd = re.sub(r'<think>.*?</think>', '', cmd, flags=re.DOTALL).strip()
     cmd = re.sub(r'<think>.*', '', cmd, flags=re.DOTALL).strip() # Open think tag fallback
+
+    # Log usage stats to ai_usage.json
+    try:
+        prompt_tokens = 0
+        completion_tokens = 0
+        total_tokens = 0
+        if usage_metadata:
+            prompt_tokens = usage_metadata.get('promptTokenCount', 0) or 0
+            completion_tokens = usage_metadata.get('candidatesTokenCount', 0) or 0
+            total_tokens = usage_metadata.get('totalTokenCount', 0) or 0
         
-    return jsonify({"command": cmd, "rate_limits": rate_limits})
+        if total_tokens == 0:
+            prompt_tokens = len(prompt.split()) if prompt else 0
+            completion_tokens = len(cmd.split()) if cmd else 0
+            total_tokens = prompt_tokens + completion_tokens
+
+        log_ai_usage(provider, model, prompt_tokens, completion_tokens, total_tokens)
+    except Exception as ex:
+        print("Error logging AI usage:", ex)
+        
+    return jsonify({"command": cmd, "rate_limits": rate_limits, "usage_metadata": usage_metadata})
+
+@app.route('/api/ai-usage', methods=['GET'])
+def api_ai_usage():
+    import json
+    usage_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_usage.json')
+    try:
+        if os.path.exists(usage_file):
+            with open(usage_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    return jsonify([])
 
 @app.route('/api/system/ports/kill', methods=['POST'])
 def api_kill_process_by_pid():

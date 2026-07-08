@@ -8701,6 +8701,7 @@
 
                 handleAIProviderChange();
                 updateRateLimitsUI();
+                syncAIUsageFromServer();
 
                 const savedSystem = localStorage.getItem('ai-system-prompt') || '';
                 const systemInput = document.getElementById('ai-system-input');
@@ -9027,6 +9028,51 @@
             'allam-2-7b': { rpm: 30, rpd: '7K', tpm: '6K', tpd: '500K' }
         };
 
+        const GEMINI_MODEL_SPECS = {
+            'gemini-2.5-flash': { rpm: 5, rpd: 20, tpm: '250K' },
+            'gemini-3.5-flash': { rpm: 5, rpd: 20, tpm: '250K' },
+            'gemini-3.1-flash-lite': { rpm: 15, rpd: 500, tpm: '250K' },
+            'antigravity': { rpm: 60, rpd: 100, tpm: '100K' },
+            'deep-research-pro-preview': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-2-flash': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-2-flash-lite': { rpm: 0, rpd: 0, tpm: '0' },
+            'computer-use-preview': { rpm: 0, rpd: 0, tpm: '0' },
+            'nano-banana': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-2.5-flash-lite': { rpm: 10, rpd: 20, tpm: '250K' },
+            'gemini-2.5-flash-tts': { rpm: 3, rpd: 10, tpm: '10K' },
+            'gemini-2.5-pro': { rpm: 2, rpd: 50, tpm: '32K' },
+            'gemini-2.5-pro-tts': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-3-flash': { rpm: 5, rpd: 20, tpm: '250K' },
+            'nano-banana-pro': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-3.1-pro': { rpm: 2, rpd: 50, tpm: '32K' },
+            'nano-banana-2': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-3.1-flash-lite-image': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-3.1-flash-tts': { rpm: 3, rpd: 10, tpm: '10K' },
+            'gemini-embedding-1': { rpm: 100, rpd: '1K', tpm: '30K' },
+            'gemini-embedding-2': { rpm: 100, rpd: '1K', tpm: '30K' },
+            'gemini-omni-flash': { rpm: 0, rpd: 0, tpm: '0' },
+            'gemini-robotics-er-1.5-preview': { rpm: 10, rpd: 20, tpm: '250K' },
+            'gemini-robotics-er-1.6-preview': { rpm: 5, rpd: 20, tpm: '250K' },
+            'gemma-4-26b': { rpm: 15, rpd: '1.5K', tpm: 'Unlimited' },
+            'gemma-4-31b': { rpm: 15, rpd: '1.5K', tpm: 'Unlimited' },
+            'imagen-4-fast-generate': { rpm: '-', rpd: 25, tpm: '-' },
+            'imagen-4-generate': { rpm: '-', rpd: 25, tpm: '-' },
+            'imagen-4-ultra-generate': { rpm: '-', rpd: 25, tpm: '-' },
+            'lyria-3-clip': { rpm: 0, rpd: 0, tpm: '0' },
+            'lyria-3-pro': { rpm: 0, rpd: 0, tpm: '0' },
+            'veo-3-fast-generate': { rpm: 0, rpd: 0, tpm: '-' },
+            'veo-3-generate': { rpm: 0, rpd: 0, tpm: '-' },
+            'veo-3-lite-generate': { rpm: 0, rpd: 0, tpm: '-' },
+            'gemini-2.5-flash-native-audio-dialog': { rpm: 'Unlimited', rpd: 'Unlimited', tpm: '1M' },
+            'gemini-3-flash-live': { rpm: 'Unlimited', rpd: 'Unlimited', tpm: '65K' },
+            'gemini-3.5-live-translate': { rpm: 'Unlimited', rpd: 'Unlimited', tpm: '20K' },
+            'gemini-3.5-pro': { rpm: 2, rpd: 50, tpm: '32K' },
+            'gemini-3.1-flash': { rpm: 15, rpd: 1500, tpm: '1M' },
+            'gemini-2.0-flash': { rpm: 15, rpd: 1500, tpm: '1M' },
+            'gemini-1.5-flash': { rpm: 15, rpd: 1500, tpm: '1M' },
+            'gemini-1.5-pro': { rpm: 2, rpd: 50, tpm: '32K' }
+        };
+
         function toggleAIUsagePanel() {
             const container = document.getElementById('ai-usage-container');
             const btn = document.getElementById('ai-usage-toggle-btn');
@@ -9036,12 +9082,83 @@
             if (btn) btn.style.color = isVisible ? 'var(--text-muted)' : 'var(--accent-color)';
         }
 
+        function recordRequestUsage(provider, model, tokenCount) {
+            const historyKey = `ai-usage-history-${provider}-${model}`;
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(historyKey)) || [];
+            } catch(e) {
+                history = [];
+            }
+
+            history.push({
+                timestamp: Date.now(),
+                tokens: tokenCount || 0
+            });
+
+            // Clean up history older than 24 hours (86,400,000 ms)
+            const now = Date.now();
+            history = history.filter(item => now - item.timestamp < 86400000);
+            localStorage.setItem(historyKey, JSON.stringify(history));
+        }
+
+        function getCalculatedUsage(provider, model) {
+            const historyKey = `ai-usage-history-${provider}-${model}`;
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(historyKey)) || [];
+            } catch(e) {
+                history = [];
+            }
+
+            const now = Date.now();
+            const oneMinAgo = now - 60000;
+            const oneDayAgo = now - 86400000;
+
+            const requestsLastMin = history.filter(item => item.timestamp > oneMinAgo).length;
+            const tokensLastMin = history.filter(item => item.timestamp > oneMinAgo).reduce((sum, item) => sum + item.tokens, 0);
+            const requestsLastDay = history.filter(item => item.timestamp > oneDayAgo).length;
+
+            return {
+                requestsLastMin,
+                tokensLastMin,
+                requestsLastDay
+            };
+        }
+
+        async function syncAIUsageFromServer() {
+            try {
+                const res = await fetch('/api/ai-usage');
+                if (res.ok) {
+                    const data = await res.json();
+                    const grouped = {};
+                    data.forEach(item => {
+                        const key = `ai-usage-history-${item.provider}-${item.model}`;
+                        if (!grouped[key]) grouped[key] = [];
+                        const ts = new Date(item.timestamp).getTime();
+                        grouped[key].push({
+                            timestamp: ts,
+                            tokens: item.total_tokens || 0
+                        });
+                    });
+
+                    Object.keys(grouped).forEach(key => {
+                        localStorage.setItem(key, JSON.stringify(grouped[key]));
+                    });
+
+                    updateRateLimitsUI();
+                }
+            } catch (err) {
+                console.error("Failed to sync AI usage from server", err);
+            }
+        }
+
         function updateRateLimitsUI() {
             const provider = document.getElementById('ai-provider-select').value;
             const container = document.getElementById('ai-usage-container');
             const toggleBtn = document.getElementById('ai-usage-toggle-btn');
 
-            if (provider !== 'groq') {
+            if (provider !== 'groq' && provider !== 'gemini') {
                 if (container) container.style.display = 'none';
                 if (toggleBtn) toggleBtn.style.display = 'none';
                 return;
@@ -9055,35 +9172,59 @@
                 return;
             }
 
-            // Show the toggle button now that groq + model is selected
+            // Show the toggle button
             if (toggleBtn) toggleBtn.style.display = 'flex';
 
             // Populate Specs dynamically from constant JSON specs
-            const spec = GROQ_MODEL_SPECS[model];
+            let spec = null;
+            if (provider === 'groq') {
+                spec = GROQ_MODEL_SPECS[model];
+            } else if (provider === 'gemini') {
+                spec = GEMINI_MODEL_SPECS[model];
+            }
+            
             const specEl = document.getElementById('ai-usage-specs');
             if (specEl && spec) {
-                specEl.innerText = `RPD: ${spec.rpd} | TPM: ${spec.tpm}`;
+                if (spec.rpd) {
+                    specEl.innerText = `RPM: ${spec.rpm} | TPM: ${spec.tpm} | RPD: ${spec.rpd}`;
+                } else {
+                    specEl.innerText = `RPM: ${spec.rpm} | TPM: ${spec.tpm}`;
+                }
             } else if (specEl) {
                 specEl.innerText = '-';
             }
 
             // Load model-specific rate limits from storage
-            const cached = localStorage.getItem(`ai-rate-limits-groq-${model}`);
+            const cached = localStorage.getItem(`ai-rate-limits-${provider}-${model}`);
             const reqEl = document.getElementById('ai-usage-requests');
             const tokEl = document.getElementById('ai-usage-tokens');
             const timeEl = document.getElementById('ai-usage-time');
             const timeContainer = document.getElementById('ai-usage-time-container');
 
+            // Parse specs limits
+            const limitRPM = spec ? (typeof spec.rpm === 'number' ? spec.rpm : parseInt(spec.rpm) || 0) : 0;
+            const limitTPM = spec && spec.tpm ? (spec.tpm === 'Unlimited' ? Infinity : (parseInt(spec.tpm) * (String(spec.tpm).includes('K') ? 1000 : String(spec.tpm).includes('M') ? 1000000 : 1)) || 0) : 0;
+            const limitRPD = spec ? (typeof spec.rpd === 'number' ? spec.rpd : parseInt(spec.rpd) || 0) : 0;
+            const usage = getCalculatedUsage(provider, model);
+
             if (cached) {
                 const data = JSON.parse(cached);
                 if (reqEl && data.remaining_requests && data.limit_requests) {
                     reqEl.innerText = `${data.remaining_requests} / ${data.limit_requests} (reset: ${data.reset_requests})`;
+                } else if (reqEl && limitRPM > 0) {
+                    const left = Math.max(0, limitRPM - usage.requestsLastMin);
+                    reqEl.innerText = `${left} / ${limitRPM} (client-tracked)`;
                 } else if (reqEl) {
                     reqEl.innerText = '-';
                 }
                 
                 if (tokEl && data.remaining_tokens && data.limit_tokens) {
                     tokEl.innerText = `${data.remaining_tokens} / ${data.limit_tokens} (reset: ${data.reset_tokens})`;
+                } else if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
+                    const left = Math.max(0, limitTPM - usage.tokensLastMin);
+                    const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
+                    const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
+                    tokEl.innerText = `${leftStr} / ${limitStr} (client-tracked)`;
                 } else if (tokEl) {
                     tokEl.innerText = '-';
                 }
@@ -9095,11 +9236,24 @@
                     timeContainer.style.display = 'none';
                 }
             } else {
-                if (reqEl) reqEl.innerText = 'Not queried yet';
-                if (tokEl) tokEl.innerText = 'Not queried yet';
+                if (reqEl && limitRPM > 0) {
+                    const left = Math.max(0, limitRPM - usage.requestsLastMin);
+                    reqEl.innerText = `${left} / ${limitRPM} (client-tracked)`;
+                } else if (reqEl) {
+                    reqEl.innerText = 'Not queried yet';
+                }
+                
+                if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
+                    const left = Math.max(0, limitTPM - usage.tokensLastMin);
+                    const leftStr = left >= 1000 ? (left / 1000).toFixed(1) + 'K' : left;
+                    const limitStr = limitTPM >= 1000 ? (limitTPM / 1000).toFixed(0) + 'K' : limitTPM;
+                    tokEl.innerText = `${leftStr} / ${limitStr} (client-tracked)`;
+                } else if (tokEl) {
+                    tokEl.innerText = 'Not queried yet';
+                }
+                
                 if (timeContainer) timeContainer.style.display = 'none';
             }
-            // Panel visibility is controlled by toggleAIUsagePanel() — don't force-show here
         }
 
         // ── AI provider / model custom dropdowns ──────────────────────────────
@@ -9622,9 +9776,13 @@
                         ...data.rate_limits,
                         timestamp: new Date().toLocaleTimeString()
                     };
-                    localStorage.setItem(`ai-rate-limits-groq-${model}`, JSON.stringify(limitsWithTime));
-                    updateRateLimitsUI();
+                    localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(limitsWithTime));
                 }
+
+                // Track client side usage metadata fallback
+                const tokensUsed = data.usage_metadata ? (data.usage_metadata.totalTokenCount || 0) : 0;
+                recordRequestUsage(provider, model, tokensUsed);
+                syncAIUsageFromServer();
                 
                 const command = data.command;
                 aiChatHistory.push({ role: 'assistant', content: command, model: model });

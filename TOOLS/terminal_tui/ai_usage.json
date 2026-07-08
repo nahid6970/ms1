@@ -1,0 +1,18 @@
+[
+    {
+        "timestamp": "2026-07-08T05:28:35.838108Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 75,
+        "completion_tokens": 17,
+        "total_tokens": 92
+    },
+    {
+        "timestamp": "2026-07-08T05:30:15.729181Z",
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "prompt_tokens": 74,
+        "completion_tokens": 29,
+        "total_tokens": 103
+    }
+]
