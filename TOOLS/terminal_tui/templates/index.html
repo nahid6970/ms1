@@ -83,6 +83,12 @@
             top: auto !important;
             bottom: calc(100% + 3px) !important;
         }
+
+        /* Remove width/height limits of AI Copilot Popover */
+        #ai-copilot-popover {
+            max-width: none !important;
+            max-height: none !important;
+        }
         #ai-chat-history .ai-md blockquote {
             border-left: 3px solid var(--accent-color); margin: 6px 0; padding: 4px 10px;
             background: rgba(37,99,235,0.06); border-radius: 0 4px 4px 0; color: var(--text-secondary);
@@ -2724,17 +2730,24 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <label for="settings-ai-popover-height" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Max Height</label>
-                            <input type="number" id="settings-ai-popover-height" min="300" max="1200" step="50" value="600"
+                            <input type="number" id="settings-ai-popover-height" step="50" value="600"
                                 style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
                                 onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
                             <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <label for="settings-ai-popover-width" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Width</label>
-                            <input type="number" id="settings-ai-popover-width" min="280" max="900" step="10" value="380"
+                            <input type="number" id="settings-ai-popover-width" step="10" value="380"
                                 style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
                                 onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
                             <span style="font-size: 0.72rem; color: var(--text-muted); ">px</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label for="settings-ai-chat-font-size" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Chat Font Size</label>
+                            <input type="number" id="settings-ai-chat-font-size" step="1" value="12"
+                                style="width: 54px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
                         </div>
                     </div>
                     <!-- Custom Fallback Sign Settings -->
@@ -6913,6 +6926,8 @@
             document.getElementById('settings-ai-custom-fallback-sign-text').value = localStorage.getItem('ai-custom-fallback-sign-text') || '∞';
             
             document.getElementById('settings-ai-dropdown-reverse').checked = localStorage.getItem('ai-dropdown-reverse') === 'true';
+            
+            document.getElementById('settings-ai-chat-font-size').value = localStorage.getItem('ai-chat-font-size') || '12';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -7143,6 +7158,11 @@
                 if (isReversed) popoverEl.classList.add('ai-dropdown-reverse');
                 else popoverEl.classList.remove('ai-dropdown-reverse');
             }
+            
+            const aiChatFS = document.getElementById('settings-ai-chat-font-size').value || '12';
+            localStorage.setItem('ai-chat-font-size', aiChatFS);
+            const chatHistoryEl = document.getElementById('ai-chat-history');
+            if (chatHistoryEl) chatHistoryEl.style.fontSize = aiChatFS + 'px';
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -13264,6 +13284,10 @@
                 if (isReversed) popoverEl.classList.add('ai-dropdown-reverse');
                 else popoverEl.classList.remove('ai-dropdown-reverse');
             }
+            
+            const savedChatFontSize = localStorage.getItem('ai-chat-font-size') || '12';
+            const chatHistoryEl = document.getElementById('ai-chat-history');
+            if (chatHistoryEl) chatHistoryEl.style.fontSize = savedChatFontSize + 'px';
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             if (savedContextMenu) {
