@@ -9492,6 +9492,17 @@
             fetchDynamicModels(provider);
         }
 
+        function getBookmarkedModels() {
+            try {
+                return JSON.parse(localStorage.getItem('ai-bookmarked-models') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+        function saveBookmarkedModels(list) {
+            localStorage.setItem('ai-bookmarked-models', JSON.stringify(list));
+        }
+
         function makeSpecCellEditable(td, provider, modelVal, specName, currentValue) {
             td.style.cursor = 'pointer';
             td.title = 'Click to edit';
@@ -9591,8 +9602,22 @@
 
             // Sort filtered models
             filteredModels.sort((a, b) => {
+                const bookmarks = getBookmarkedModels();
+                const isBookmarkedA = bookmarks.includes(a.val);
+                const isBookmarkedB = bookmarks.includes(b.val);
+                
+                // If sorting by columns other than 'bookmark', bookmarked models ALWAYS float to the top
+                if (activeSortCol !== 'bookmark') {
+                    if (isBookmarkedA !== isBookmarkedB) {
+                        return isBookmarkedA ? -1 : 1;
+                    }
+                }
+
                 let valA, valB;
-                if (activeSortCol === 'visible') {
+                if (activeSortCol === 'bookmark') {
+                    valA = isBookmarkedA ? 1 : 0;
+                    valB = isBookmarkedB ? 1 : 0;
+                } else if (activeSortCol === 'visible') {
                     valA = !hiddenList.includes(a.val) ? 1 : 0;
                     valB = !hiddenList.includes(b.val) ? 1 : 0;
                 } else if (activeSortCol === 'name') {
@@ -9637,9 +9662,13 @@
                 return activeSortDir === 'asc' ? ' ▲' : ' ▼';
             };
 
+            const eyeSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+            const starSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+
             thead.innerHTML = `
                 <tr style="background: var(--bg-sidebar);">
-                    <th onclick="handleSort('visible')" style="${thStyleBase} text-align:center; width:60px;">Visible${getHeaderIndicator('visible')}</th>
+                    <th onclick="handleSort('visible')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by visibility">${eyeSvg}${getHeaderIndicator('visible')}</th>
+                    <th onclick="handleSort('bookmark')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by bookmarked status">${starSvg}${getHeaderIndicator('bookmark')}</th>
                     <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
                     <th onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;">RPM${getHeaderIndicator('rpm')}</th>
                     <th onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;">RPD${getHeaderIndicator('rpd')}</th>
@@ -9658,26 +9687,49 @@
                 tr.onmouseenter = () => tr.style.backgroundColor = 'rgba(255,255,255,0.02)';
                 tr.onmouseleave = () => tr.style.backgroundColor = 'transparent';
 
+                const isVisible = !hiddenList.includes(m.val);
                 const tdVisible = document.createElement('td');
-                tdVisible.style.cssText = 'padding:6px 8px; text-align:center;';
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = !hiddenList.includes(m.val);
-                checkbox.style.cssText = 'width:15px; height:15px; cursor:pointer; accent-color:var(--accent-color); margin:0;';
-                checkbox.onchange = (e) => {
+                tdVisible.style.cssText = 'padding:6px 8px; text-align:center; cursor:pointer;';
+                tdVisible.innerHTML = isVisible ? `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Visible (Click to hide)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                ` : `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Hidden (Click to show)"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                `;
+                tdVisible.onclick = () => {
                     const hidden = getHiddenModels();
                     if (!hidden[activeFilterTab]) hidden[activeFilterTab] = [];
-                    if (e.target.checked) {
-                        hidden[activeFilterTab] = hidden[activeFilterTab].filter(v => v !== m.val);
+                    if (isVisible) {
+                        if (!hidden[activeFilterTab].includes(m.val)) hidden[activeFilterTab].push(m.val);
                     } else {
-                        if (!hidden[activeFilterTab].includes(m.val)) {
-                            hidden[activeFilterTab].push(m.val);
-                        }
+                        hidden[activeFilterTab] = hidden[activeFilterTab].filter(v => v !== m.val);
                     }
                     saveHiddenModels(hidden);
+                    renderFilterModelsList();
+                    handleAIProviderChange();
                 };
-                tdVisible.appendChild(checkbox);
                 tr.appendChild(tdVisible);
+
+                const bookmarks = getBookmarkedModels();
+                const isBookmarked = bookmarks.includes(m.val);
+                const tdBookmark = document.createElement('td');
+                tdBookmark.style.cssText = 'padding:6px 8px; text-align:center; cursor:pointer;';
+                tdBookmark.innerHTML = isBookmarked ? `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Unbookmark model"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                ` : `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Bookmark model"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                `;
+                tdBookmark.onclick = () => {
+                    let bList = getBookmarkedModels();
+                    if (isBookmarked) {
+                        bList = bList.filter(v => v !== m.val);
+                    } else {
+                        if (!bList.includes(m.val)) bList.push(m.val);
+                    }
+                    saveBookmarkedModels(bList);
+                    renderFilterModelsList();
+                    updateAIModelDropdown(activeFilterTab);
+                };
+                tr.appendChild(tdBookmark);
 
                 const tdName = document.createElement('td');
                 tdName.style.cssText = 'padding:6px 8px; font-weight:500; font-family:monospace; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
@@ -9798,12 +9850,16 @@
             const sel = document.getElementById('ai-model-select');
             const menu = document.getElementById('ai-model-dd-menu');
             menu.innerHTML = '';
+            const bookmarks = getBookmarkedModels();
             Array.from(sel.options).forEach(opt => {
                 const div = document.createElement('div');
                 div.className = 'ai-dd-opt';
                 div.dataset.val = opt.value;
                 div.style.cssText = 'padding:7px 10px; font-size:0.74rem; color:var(--text-primary); cursor:pointer;';
-                div.textContent = opt.text;
+                
+                const isBookmarked = bookmarks.includes(opt.value);
+                div.textContent = (isBookmarked ? '★ ' : '') + opt.text;
+                
                 const isSelected = opt.value === sel.value;
                 if (isSelected) { div.style.color = 'var(--accent-color)'; div.style.fontWeight = '600'; }
                 div.onmouseenter = () => { div.style.background = 'rgba(255,255,255,0.06)'; };
@@ -9811,7 +9867,9 @@
                 div.onclick = () => selectAIModel(opt.value, opt.text);
                 menu.appendChild(div);
             });
-            document.getElementById('ai-model-dd-label').textContent = sel.options[sel.selectedIndex]?.text || '';
+            const activeOpt = sel.options[sel.selectedIndex];
+            const activeIsBookmarked = activeOpt ? bookmarks.includes(activeOpt.value) : false;
+            document.getElementById('ai-model-dd-label').textContent = (activeIsBookmarked ? '★ ' : '') + (activeOpt?.text || '');
         }
         // ─────────────────────────────────────────────────────────────────────
 
@@ -9864,6 +9922,15 @@
             
             // If all models are hidden, we fall back to showing all to avoid an empty dropdown
             const finalModels = availableModels.length > 0 ? availableModels : getMergedAIModels(provider);
+
+            const bookmarks = getBookmarkedModels();
+            // Sort bookmarked models to the top
+            finalModels.sort((a, b) => {
+                const isBookmarkedA = bookmarks.includes(a.val);
+                const isBookmarkedB = bookmarks.includes(b.val);
+                if (isBookmarkedA === isBookmarkedB) return 0;
+                return isBookmarkedA ? -1 : 1;
+            });
 
             finalModels.forEach(m => {
                 const opt = document.createElement('option');
