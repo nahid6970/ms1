@@ -76,6 +76,13 @@
         #ai-chat-history .ai-md em { font-style: italic; }
         #ai-chat-history .ai-md del { text-decoration: line-through; color: var(--text-muted); }
         #ai-chat-history .ai-md hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0; }
+
+        /* Reverse Dropdowns above trigger */
+        .ai-dropdown-reverse #ai-provider-dd-menu,
+        .ai-dropdown-reverse #ai-model-dd-menu {
+            top: auto !important;
+            bottom: calc(100% + 3px) !important;
+        }
         #ai-chat-history .ai-md blockquote {
             border-left: 3px solid var(--accent-color); margin: 6px 0; padding: 4px 10px;
             background: rgba(37,99,235,0.06); border-radius: 0 4px 4px 0; color: var(--text-secondary);
@@ -2738,6 +2745,13 @@
                             <input type="text" id="settings-ai-custom-fallback-sign-text" value="∞" maxlength="10"
                                 style="width: 60px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
                                 onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        </div>
+                    </div>
+                    <!-- Dropdown Direction Settings -->
+                    <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-ai-dropdown-reverse" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-ai-dropdown-reverse" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show AI Dropdowns Above Trigger</label>
                         </div>
                     </div>
                 </div>
@@ -6894,6 +6908,8 @@
             
             document.getElementById('settings-ai-custom-fallback-sign-toggle').checked = localStorage.getItem('ai-custom-fallback-sign-toggle') === 'true';
             document.getElementById('settings-ai-custom-fallback-sign-text').value = localStorage.getItem('ai-custom-fallback-sign-text') || '∞';
+            
+            document.getElementById('settings-ai-dropdown-reverse').checked = localStorage.getItem('ai-dropdown-reverse') === 'true';
 
             document.getElementById('settings-modal').classList.add('show');
         }
@@ -7116,6 +7132,14 @@
             
             localStorage.setItem('ai-custom-fallback-sign-toggle', document.getElementById('settings-ai-custom-fallback-sign-toggle').checked);
             localStorage.setItem('ai-custom-fallback-sign-text', document.getElementById('settings-ai-custom-fallback-sign-text').value.trim());
+            
+            const isReversed = document.getElementById('settings-ai-dropdown-reverse').checked;
+            localStorage.setItem('ai-dropdown-reverse', isReversed);
+            const popoverEl = document.getElementById('ai-copilot-popover');
+            if (popoverEl) {
+                if (isReversed) popoverEl.classList.add('ai-dropdown-reverse');
+                else popoverEl.classList.remove('ai-dropdown-reverse');
+            }
 
             // Re-apply selector button with latest setting
             if (activeProject) {
@@ -13011,6 +13035,13 @@
             document.documentElement.style.setProperty('--ai-popover-max-height', savedAiPopH + 'px');
             const savedAiPopW = parseInt(localStorage.getItem('ai-popover-width')) || 380;
             document.getElementById('ai-copilot-popover').style.width = savedAiPopW + 'px';
+            
+            const isReversed = localStorage.getItem('ai-dropdown-reverse') === 'true';
+            const popoverEl = document.getElementById('ai-copilot-popover');
+            if (popoverEl) {
+                if (isReversed) popoverEl.classList.add('ai-dropdown-reverse');
+                else popoverEl.classList.remove('ai-dropdown-reverse');
+            }
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             if (savedContextMenu) {
