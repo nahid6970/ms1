@@ -1854,8 +1854,11 @@
                 </div>
                 <!-- Model custom dropdown -->
                 <div style="position:relative; flex:2;" id="ai-model-dd-container">
-                    <div id="ai-model-dd-trigger" onclick="toggleAIModelDropdown()" style="height:30px; padding:0 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:4px; user-select:none;">
-                        <span id="ai-model-dd-label" style="font-size:0.74rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;"></span>
+                    <div id="ai-model-dd-trigger" onclick="toggleAIModelDropdown()" style="height:30px; padding:0 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:6px; user-select:none;">
+                        <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:0; overflow:hidden;">
+                            <span id="ai-model-dd-label" style="font-size:0.74rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
+                            <span id="ai-model-dd-tags-container" style="display:flex; align-items:center; gap:4px; flex-shrink:0;"></span>
+                        </div>
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
                     </div>
                     <div id="ai-model-dd-menu" style="display:none; position:absolute; top:calc(100% + 3px); left:0; right:0; min-width:200px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; z-index:2000; box-shadow:0 8px 20px rgba(0,0,0,0.5); overflow-y:auto; max-height:220px;"></div>
@@ -10921,7 +10924,11 @@
 
         function selectAIModel(val, label) {
             document.getElementById('ai-model-select').value = val;
-            document.getElementById('ai-model-dd-label').textContent = label;
+            const bookmarks = getBookmarkedModels();
+            const isBookmarked = bookmarks.includes(val);
+            document.getElementById('ai-model-dd-label').textContent = (isBookmarked ? '★ ' : '') + label;
+            updateAIModelSelectedTags(val);
+            
             document.getElementById('ai-model-dd-menu').style.display = 'none';
             document.removeEventListener('click', _aiModelOutside);
             document.querySelectorAll('#ai-model-dd-menu .ai-dd-opt').forEach(o => {
@@ -10934,6 +10941,88 @@
         function closeAIDropdowns() {
             document.getElementById('ai-provider-dd-menu').style.display = 'none';
             document.getElementById('ai-model-dd-menu').style.display = 'none';
+        }
+
+        function updateAIModelSelectedTags(val) {
+            const container = document.getElementById('ai-model-dd-tags-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (!val) return;
+            
+            const provider = document.getElementById('ai-provider-select').value;
+            const speeds = getModelSpeeds();
+            const providerSpeeds = speeds[provider] || {};
+            const speed = providerSpeeds[val] || 'Medium';
+            
+            const spec = getModelSpec(provider, val) || {};
+            const usage = getCalculatedUsage(provider, val);
+            
+            const parseLimitVal = (v) => {
+                if (!v) return 0;
+                if (typeof v === 'number') return v;
+                const clean = String(v).toUpperCase().trim();
+                if (clean === 'UNLIMITED' || clean === '-') return Infinity;
+                const num = parseFloat(clean);
+                if (isNaN(num)) return 0;
+                if (clean.includes('K')) return num * 1000;
+                if (clean.includes('M')) return num * 1000000;
+                return num;
+            };
+            
+            const customSignToggle = localStorage.getItem('ai-custom-fallback-sign-toggle') === 'true';
+            const customSignText = localStorage.getItem('ai-custom-fallback-sign-text') || '∞';
+            const defaultSign = customSignToggle ? customSignText : '∞';
+            
+            const limitRPD = parseLimitVal(spec.rpd);
+            
+            let pctText = defaultSign;
+            let pctColor = 'var(--text-muted)';
+            let pctBg = 'rgba(255,255,255,0.05)';
+            
+            if (limitRPD && limitRPD !== Infinity && limitRPD > 0) {
+                const used = usage.requestsLastDay || 0;
+                const pct = Math.max(0, Math.min(100, Math.round(((limitRPD - used) / limitRPD) * 100)));
+                pctText = `${pct}%`;
+                if (pct > 50) {
+                    pctColor = '#10b981';
+                    pctBg = 'rgba(16, 185, 129, 0.15)';
+                } else if (pct >= 10) {
+                    pctColor = '#f59e0b';
+                    pctBg = 'rgba(245, 158, 11, 0.15)';
+                } else {
+                    pctColor = '#f87171';
+                    pctBg = 'rgba(248, 113, 113, 0.15)';
+                }
+            }
+            
+            const useTag = document.createElement('span');
+            useTag.style.cssText = `font-size:0.58rem; padding:0.5px 4px; border-radius:3px; font-weight:700; background:${pctBg}; color:${pctColor}; text-transform:uppercase; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;`;
+            if (pctText === '∞') {
+                useTag.style.padding = '2px 4px';
+                useTag.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/></svg>`;
+            } else {
+                useTag.textContent = pctText;
+            }
+            container.appendChild(useTag);
+            
+            if (speed !== 'None') {
+                const sTag = document.createElement('span');
+                sTag.textContent = speed;
+                sTag.style.cssText = `font-size:0.58rem; padding:0.5px 4px; border-radius:3px; font-weight:700; text-transform:uppercase; flex-shrink:0;`;
+                
+                if (speed === 'Fast') {
+                    sTag.style.background = 'rgba(96, 165, 250, 0.15)';
+                    sTag.style.color = '#60a5fa';
+                } else if (speed === 'Medium') {
+                    sTag.style.background = 'rgba(245, 158, 11, 0.15)';
+                    sTag.style.color = '#f59e0b';
+                } else if (speed === 'Slow') {
+                    sTag.style.background = 'rgba(248, 113, 113, 0.15)';
+                    sTag.style.color = '#f87171';
+                }
+                container.appendChild(sTag);
+            }
         }
 
         function syncAIModelDropdown() {
@@ -11047,6 +11136,7 @@
             const activeOpt = sel.options[sel.selectedIndex];
             const activeIsBookmarked = activeOpt ? bookmarks.includes(activeOpt.value) : false;
             document.getElementById('ai-model-dd-label').textContent = (activeIsBookmarked ? '★ ' : '') + (activeOpt?.text || '');
+            updateAIModelSelectedTags(activeOpt ? activeOpt.value : '');
         }
         // ─────────────────────────────────────────────────────────────────────
 
