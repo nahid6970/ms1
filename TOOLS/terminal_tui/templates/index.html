@@ -9702,6 +9702,44 @@
             renderFilterModelsList();
         }
 
+        function getModelSpeeds() {
+            try {
+                return JSON.parse(localStorage.getItem('ai-model-speeds') || '{}');
+            } catch(e) {
+                return {};
+            }
+        }
+
+        function saveModelSpeeds(speeds) {
+            localStorage.setItem('ai-model-speeds', JSON.stringify(speeds));
+        }
+
+        function handleSpeedHeaderRightClick(e) {
+            e.preventDefault();
+            const val = prompt("Enter speed to set for all models of this provider (Fast, Medium, Slow):");
+            if (!val) return;
+            const cleanVal = val.trim().toLowerCase();
+            let finalVal = '';
+            if (cleanVal === 'fast') finalVal = 'Fast';
+            else if (cleanVal === 'medium') finalVal = 'Medium';
+            else if (cleanVal === 'slow') finalVal = 'Slow';
+            else {
+                alert("Invalid speed value. Please use Fast, Medium, or Slow.");
+                return;
+            }
+
+            const provider = activeFilterTab || 'gemini';
+            const models = getMergedAIModels(provider);
+            const speeds = getModelSpeeds();
+            if (!speeds[provider]) speeds[provider] = {};
+            
+            models.forEach(m => {
+                speeds[provider][m.val] = finalVal;
+            });
+            saveModelSpeeds(speeds);
+            renderFilterModelsList();
+        }
+
         function renderFilterModelsList() {
             const container = document.getElementById('ai-filter-models-list');
             if (!container) return;
@@ -9739,6 +9777,11 @@
                 } else if (activeSortCol === 'visible') {
                     valA = !hiddenList.includes(a.val) ? 1 : 0;
                     valB = !hiddenList.includes(b.val) ? 1 : 0;
+                } else if (activeSortCol === 'speed') {
+                    const speeds = getModelSpeeds();
+                    const providerSpeeds = speeds[activeFilterTab] || {};
+                    valA = (providerSpeeds[a.val] || 'Medium').toLowerCase();
+                    valB = (providerSpeeds[b.val] || 'Medium').toLowerCase();
                 } else if (activeSortCol === 'name') {
                     valA = a.label.toLowerCase();
                     valB = b.label.toLowerCase();
@@ -9789,6 +9832,7 @@
                     <th onclick="handleSort('visible')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by visibility">${eyeSvg}${getHeaderIndicator('visible')}</th>
                     <th onclick="handleSort('bookmark')" style="${thStyleBase} text-align:center; width:50px;" title="Sort by bookmarked status">${starSvg}${getHeaderIndicator('bookmark')}</th>
                     <th onclick="handleSort('name')" style="${thStyleBase} text-align:left;">Model Name${getHeaderIndicator('name')}</th>
+                    <th oncontextmenu="handleSpeedHeaderRightClick(event)" onclick="handleSort('speed')" style="${thStyleBase} text-align:center; width:80px;" title="Right-click to bulk set Speed">Speed${getHeaderIndicator('speed')}</th>
                     <th onclick="handleSort('rpm')" style="${thStyleBase} text-align:center; width:50px;">RPM${getHeaderIndicator('rpm')}</th>
                     <th onclick="handleSort('rpd')" style="${thStyleBase} text-align:center; width:55px;">RPD${getHeaderIndicator('rpd')}</th>
                     <th onclick="handleSort('tpm')" style="${thStyleBase} text-align:center; width:60px;">TPM${getHeaderIndicator('tpm')}</th>
@@ -9855,6 +9899,37 @@
                 tdName.textContent = m.label;
                 tdName.title = m.val;
                 tr.appendChild(tdName);
+
+                // Speed dropdown column
+                const speeds = getModelSpeeds();
+                const providerSpeeds = speeds[activeFilterTab] || {};
+                const currentSpeed = providerSpeeds[m.val] || 'Medium';
+
+                const tdSpeed = document.createElement('td');
+                tdSpeed.style.cssText = 'padding:4px 6px; text-align:center;';
+                
+                const select = document.createElement('select');
+                select.style.cssText = 'background:var(--bg-main); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; font-size:0.7rem; padding:2px 4px; outline:none; cursor:pointer; width:100%;';
+                
+                ['Fast', 'Medium', 'Slow'].forEach(optVal => {
+                    const opt = document.createElement('option');
+                    opt.value = optVal;
+                    opt.textContent = optVal;
+                    if (optVal === currentSpeed) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+                
+                select.onchange = () => {
+                    const updatedSpeeds = getModelSpeeds();
+                    if (!updatedSpeeds[activeFilterTab]) updatedSpeeds[activeFilterTab] = {};
+                    updatedSpeeds[activeFilterTab][m.val] = select.value;
+                    saveModelSpeeds(updatedSpeeds);
+                };
+                
+                tdSpeed.appendChild(select);
+                tr.appendChild(tdSpeed);
 
                 const tdRPM = document.createElement('td');
                 tdRPM.style.cssText = 'padding:6px 8px; text-align:center; color: #3b82f6; font-weight: 500;';
