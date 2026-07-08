@@ -9428,38 +9428,9 @@
         };
 
         const ALL_AI_MODELS = {
-            gemini: [
-                { val: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-                { val: 'gemini-3.5-pro', label: 'Gemini 3.5 Pro' },
-                { val: 'gemini-3.1-flash', label: 'Gemini 3.1 Flash' },
-                { val: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro' },
-                { val: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-                { val: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-                { val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
-                { val: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
-                { val: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
-            ],
-            morph: [
-                { val: 'morph-qwen35-397b', label: 'Qwen 3.5 397B (~180 tok/s)' },
-                { val: 'morph-glm52-744b', label: 'GLM 5.2 744B (~80 tok/s)' },
-                { val: 'morph-minimax3-428b', label: 'MiniMax M3 428B (~90 tok/s)' },
-                { val: 'morph-minimax27-230b', label: 'MiniMax M2.7 230B (~90 tok/s)' },
-                { val: 'morph-dsv4flash', label: 'DeepSeek V4 Flash (~150 tok/s)' },
-                { val: 'morph-qwen36-27b', label: 'Qwen 3.6 27B (~100 tok/s)' }
-            ],
-            groq: [
-                { val: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile' },
-                { val: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant' },
-                { val: 'meta-llama/llama-4-scout-17b-16e-instruct', label: 'Llama 4 Scout 17B' },
-                { val: 'qwen/qwen3.6-27b', label: 'Qwen 3.6 27B' },
-                { val: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
-                { val: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
-                { val: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B' },
-                { val: 'openai/gpt-oss-safeguard-20b', label: 'GPT-OSS Safeguard 20B' },
-                { val: 'groq/compound', label: 'Groq Compound' },
-                { val: 'groq/compound-mini', label: 'Groq Compound Mini' },
-                { val: 'allam-2-7b', label: 'Allam 2 7B' }
-            ]
+            gemini: [],
+            morph: [],
+            groq: []
         };
 
         function getHiddenModels() {
@@ -9482,12 +9453,11 @@
         }
 
         function getMergedAIModels(provider) {
-            const staticList = ALL_AI_MODELS[provider] || [];
             const dynamicList = DYNAMIC_AI_MODELS[provider];
             if (dynamicList && dynamicList.length > 0) {
                 return dynamicList;
             }
-            return staticList;
+            return [];
         }
 
         async function fetchDynamicModels(provider) {
@@ -9520,14 +9490,12 @@
                             fetched = data.data.map(m => ({ val: m.id, label: m.id }));
                         }
                     }
-                } else if (provider === 'morph' && morphKey) {
-                    const res = await fetch('https://api.morphllm.com/v1/models', {
-                        headers: { 'Authorization': `Bearer ${morphKey}` }
-                    });
+                } else if (provider === 'morph') {
+                    const res = await fetch('https://www.morphllm.com/api/models/json');
                     if (res.ok) {
                         const data = await res.json();
                         if (data && data.data) {
-                            fetched = data.data.map(m => ({ val: m.id, label: m.id }));
+                            fetched = data.data.map(m => ({ val: m.id, label: m.name || m.id }));
                         }
                     }
                 }
