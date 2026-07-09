@@ -460,7 +460,7 @@ function createRawVisibleOffsetMap(raw) {
     return visibleToRaw;
 }
 
-function findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
+function findRawWordMatches(raw, visibleWord) {
     if (!raw || !visibleWord) return null;
 
     const stripped = stripMarkdown(raw);
@@ -482,8 +482,7 @@ function findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibl
             candidates.push({
                 start: index,
                 end: index + visibleWord.length,
-                visibleStart: candidateVisibleStart,
-                visibleDistance: Math.abs(candidateVisibleStart - approximateVisibleStart)
+                visibleStart: candidateVisibleStart
             });
         }
 
@@ -491,14 +490,44 @@ function findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibl
     }
 
     if (candidates.length === 0) return null;
-    candidates.sort((a, b) => a.visibleDistance - b.visibleDistance);
     return candidates;
 }
 
 function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
-    const matches = findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibleStart);
+    const matches = findRawWordMatches(raw, visibleWord);
     if (!matches || matches.length === 0) return null;
+    matches.sort((a, b) => Math.abs(a.visibleStart - approximateVisibleStart) - Math.abs(b.visibleStart - approximateVisibleStart));
     return { start: matches[0].start, end: matches[0].end };
+}
+
+function getRenderedWordOccurrences(root, visibleWord, boundaryRegex) {
+    if (!root || !visibleWord) return [];
+    const occurrences = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+
+    while ((node = walker.nextNode())) {
+        const text = node.textContent || '';
+        let index = text.indexOf(visibleWord);
+        while (index !== -1) {
+            const before = index > 0 ? text[index - 1] : '';
+            const afterIndex = index + visibleWord.length;
+            const after = afterIndex < text.length ? text[afterIndex] : '';
+            const isStartBoundary = !before || boundaryRegex.test(before);
+            const isEndBoundary = !after || boundaryRegex.test(after);
+
+            if (isStartBoundary && isEndBoundary) {
+                const range = document.createRange();
+                range.setStart(node, index);
+                range.setEnd(node, afterIndex);
+                occurrences.push({ node, startOffset: index, endOffset: afterIndex, range });
+            }
+
+            index = text.indexOf(visibleWord, index + Math.max(visibleWord.length, 1));
+        }
+    }
+
+    return occurrences;
 }
 
 function clearF10SelectionHighlight() {
@@ -635,7 +664,7 @@ function showF10MatchLabels(selection) {
     overlay.className = 'f10-match-overlay';
 
     selection.matches.forEach((match, index) => {
-        const range = getPreviewRangeForRawSelection(liveInput, match.start, match.end);
+        const range = match.previewRange || getPreviewRangeForRawSelection(liveInput, match.start, match.end);
         if (!range) return;
         const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
         const rect = rects[rects.length - 1] || range.getBoundingClientRect();
@@ -645,7 +674,7 @@ function showF10MatchLabels(selection) {
         badge.className = 'f10-match-badge';
         badge.textContent = `v${index + 1}`;
         badge.style.left = (rect.right - cellRect.left + 2) + 'px';
-        badge.style.top = (rect.top - cellRect.top - 8) + 'px';
+        badge.style.top = (rect.top - cellRect.top + Math.max(0, rect.height - 12)) + 'px';
         overlay.appendChild(badge);
     });
 
@@ -1065,16 +1094,29 @@ function getHoverFormatterSelection() {
         const previewRange = document.createRange();
         previewRange.setStart(node, localStart);
         previewRange.setEnd(node, localEnd);
-        const rawMatches = findRawWordMatchesNearVisibleOffset(rawValue, visibleWord, visibleStart);
+        const renderedMatches = getRenderedWordOccurrences(root, visibleWord, boundaryRegex);
+        const rawMatches = findRawWordMatches(rawValue, visibleWord);
+        const selectedIndex = renderedMatches.findIndex(match =>
+            match.node === node &&
+            match.startOffset === localStart &&
+            match.endOffset === localEnd
+        );
+
         if (rawMatches && rawMatches.length > 0) {
-            const rawMatch = rawMatches[0];
+            const matchIndex = selectedIndex >= 0 && selectedIndex < rawMatches.length ? selectedIndex : 0;
+            const rawMatch = rawMatches[matchIndex];
+            const matches = rawMatches.map((match, index) => ({
+                ...match,
+                previewRange: renderedMatches[index]?.range || null
+            }));
             return {
                 input,
                 start: rawMatch.start,
                 end: rawMatch.end,
-                previewRange,
+                previewRange: renderedMatches[matchIndex]?.range || previewRange,
                 rawText: rawValue.substring(rawMatch.start, rawMatch.end),
-                matches: rawMatches
+                matches,
+                selectedMatchIndex: matchIndex
             };
         }
 
@@ -1459,7 +1501,7 @@ function handleKeyboardShortcuts(e) {
             sameAnchor
                 ? 'F10 span ready. Press F3 to format.'
                 : (hoverPick.matches && hoverPick.matches.length > 1
-                    ? `F10 word ready. Use v1-v${hoverPick.matches.length} at the end to pick a duplicate.`
+                    ? `F10 word ready: v${(hoverPick.selectedMatchIndex ?? 0) + 1}. Use v1-v${hoverPick.matches.length} to pick a duplicate.`
                     : 'F10 word ready. Press F3 to format.'),
             'info'
         );
