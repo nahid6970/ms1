@@ -36,7 +36,7 @@ class DownloaderThread(QThread):
     progress_signal = pyqtSignal(int)
     finished_signal = pyqtSignal(int, str)
 
-    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images):
+    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False):
         super().__init__()
         self.url = url
         self.output_dir = output_dir
@@ -44,6 +44,7 @@ class DownloaderThread(QThread):
         self.headless = headless
         self.make_pdf = make_pdf
         self.delete_images = delete_images
+        self.auto_detect = auto_detect
         self.is_running = True
         self.is_paused = False
 
@@ -222,6 +223,7 @@ class DownloaderThread(QThread):
             downloaded_urls = set()
             downloaded_files = []
             no_new_streak = 0  # consecutive cycles with no new image
+            first_image_url = None  # used for auto-detect loop detection
 
             while count < self.max_images and self.is_running:
                 while self.is_paused and self.is_running:
@@ -234,11 +236,20 @@ class DownloaderThread(QThread):
                     src = self._get_current_image(driver)
 
                     if src and src not in downloaded_urls:
+                        # Auto-detect: remember the first image URL
+                        if first_image_url is None:
+                            first_image_url = src
+                            if self.auto_detect:
+                                self.log_signal.emit(f"AUTO-DETECT: First image fingerprinted. Will stop when gallery loops back.")
+
                         full_url = self._upgrade_url_quality(src)
                         downloaded_urls.add(src)
                         no_new_streak = 0
                         count += 1
-                        self.log_signal.emit(f"[{count}] Downloading full-quality image...")
+                        if self.auto_detect:
+                            self.log_signal.emit(f"[{count}] Downloading full-quality image...")
+                        else:
+                            self.log_signal.emit(f"[{count}/{self.max_images}] Downloading full-quality image...")
 
                         try:
                             filename = f"fb_image_{count:03d}_{int(time.time())}.jpg"
@@ -253,9 +264,20 @@ class DownloaderThread(QThread):
                                 final_filepath = filepath.replace(".jpg", ".webp")
                                 os.rename(filepath, final_filepath)
                             downloaded_files.append(final_filepath)
-                            self.progress_signal.emit(int((count / self.max_images) * 100))
+                            if not self.auto_detect:
+                                self.progress_signal.emit(int((count / self.max_images) * 100))
                         except Exception as e:
                             self.log_signal.emit(f"Download error: {e}")
+                    elif src and src in downloaded_urls:
+                        # Auto-detect: if we see the first image again, the gallery has looped
+                        if self.auto_detect and src == first_image_url and count > 0:
+                            self.log_signal.emit(f"AUTO-DETECT: Gallery looped back to first image. All {count} images captured.")
+                            self.progress_signal.emit(100)
+                            break
+                        no_new_streak += 1
+                        if no_new_streak > 8:
+                            self.log_signal.emit("No new images after multiple attempts. End of gallery.")
+                            break
                     else:
                         no_new_streak += 1
                         if no_new_streak > 8:
@@ -373,7 +395,8 @@ class FacebookDownloaderApp(QMainWindow):
             "headless": False,
             "make_pdf": True,
             "delete_images": False,
-            "copy_clipboard": True
+            "copy_clipboard": True,
+            "auto_detect": True
         }
         try:
             if os.path.exists(self.settings_file):
@@ -402,6 +425,7 @@ class FacebookDownloaderApp(QMainWindow):
             self.settings["make_pdf"] = self.make_pdf_cb.isChecked()
             self.settings["delete_images"] = self.delete_images_cb.isChecked()
             self.settings["copy_clipboard"] = self.copy_cb.isChecked()
+            self.settings["auto_detect"] = self.auto_detect_cb.isChecked()
             
             with open(self.settings_file, 'w') as f:
                 json.dump(self.settings, f, indent=4)
@@ -522,10 +546,24 @@ class FacebookDownloaderApp(QMainWindow):
         dir_layout.addWidget(self.browse_btn)
         dir_layout.addWidget(self.open_btn)
 
+        self.auto_detect_cb = QCheckBox("Auto Detect")
+        self.auto_detect_cb.setChecked(self.settings.get("auto_detect", True))
+        self.auto_detect_cb.setToolTip("Automatically detect total images by cycling through the gallery until it loops back to the first image.")
+        self.auto_detect_cb.toggled.connect(self.on_auto_detect_toggled)
+        self.auto_detect_cb.toggled.connect(self.save_settings)
+
         self.max_images_spin = QSpinBox()
         self.max_images_spin.setRange(1, 5000)
         self.max_images_spin.setValue(self.settings.get("max_images", 100))
         self.max_images_spin.valueChanged.connect(self.save_settings)
+
+        # Build the MAX IMAGES row with auto-detect toggle inline
+        max_images_layout = QHBoxLayout()
+        max_images_layout.addWidget(self.max_images_spin)
+        max_images_layout.addWidget(self.auto_detect_cb)
+        
+        # Apply initial auto-detect state
+        self.on_auto_detect_toggled(self.auto_detect_cb.isChecked())
         
         self.headless_cb = QCheckBox("Headless")
         self.headless_cb.setChecked(self.settings.get("headless", False))
@@ -551,7 +589,7 @@ class FacebookDownloaderApp(QMainWindow):
 
         input_layout.addRow("TARGET URL:", self.url_input)
         input_layout.addRow("OUTPUT DIR:", dir_layout)
-        input_layout.addRow("MAX IMAGES:", self.max_images_spin)
+        input_layout.addRow("MAX IMAGES:", max_images_layout)
         input_layout.addRow("EXECUTION:", toggles_layout)
         input_grp.setLayout(input_layout)
         main_layout.addWidget(input_grp)
@@ -644,19 +682,35 @@ class FacebookDownloaderApp(QMainWindow):
                 self.pause_btn.setStyleSheet(f"background-color: {CP_YELLOW}; color: black;")
                 self.log("Process paused.")
 
+    def on_auto_detect_toggled(self, checked):
+        """Enable/disable the max images spinbox based on auto-detect state."""
+        self.max_images_spin.setEnabled(not checked)
+        if checked:
+            self.max_images_spin.setStyleSheet(f"color: {CP_SUBTEXT};")
+        else:
+            self.max_images_spin.setStyleSheet(f"color: {CP_CYAN};")
+
     def start_download(self):
         url = self.url_input.text().strip()
         if not url:
             QMessageBox.critical(self, "Error", "Target URL is required.")
             return
 
-        # Prompt for Max Images
-        val, ok = QInputDialog.getInt(self, "DOWNLOAD LIMIT", "Enter max images to download:", 
-                                     value=self.max_images_spin.value(), min=1, max=5000)
-        if not ok:
-            return
+        auto_detect = self.auto_detect_cb.isChecked()
+
+        if auto_detect:
+            # No prompt needed — auto-detect will stop when gallery loops
+            max_images = 5000  # high ceiling; auto-detect will stop earlier
+            self.log("AUTO-DETECT mode enabled. Will download all images until gallery loops.")
+        else:
+            # Prompt for Max Images
+            val, ok = QInputDialog.getInt(self, "DOWNLOAD LIMIT", "Enter max images to download:", 
+                                         value=self.max_images_spin.value(), min=1, max=5000)
+            if not ok:
+                return
+            self.max_images_spin.setValue(val)
+            max_images = val
         
-        self.max_images_spin.setValue(val)
         self.save_settings()
 
         if not os.path.exists(self.output_dir):
@@ -677,10 +731,11 @@ class FacebookDownloaderApp(QMainWindow):
         self.dl_thread = DownloaderThread(
             url, 
             self.output_dir, 
-            self.max_images_spin.value(),
+            max_images,
             self.headless_cb.isChecked(),
             self.make_pdf_cb.isChecked(),
-            self.delete_images_cb.isChecked()
+            self.delete_images_cb.isChecked(),
+            auto_detect=auto_detect
         )
         self.dl_thread.log_signal.connect(self.log)
         self.dl_thread.progress_signal.connect(self.progress_bar.setValue)
