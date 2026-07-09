@@ -10613,11 +10613,16 @@
                     globalSystemPrompts = data.prompts || [];
                 }
                 
-                res = await fetch('/api/active-system-prompt-id');
-                if (res.ok) {
-                    let data = await res.json();
-                    globalActiveSystemPromptId = data.active_id || "";
-                }
+                // Force active system prompt to None ("") on startup/refresh
+                globalActiveSystemPromptId = "";
+                localStorage.setItem('ai-active-system-prompt-id', '');
+                try {
+                    await fetch('/api/active-system-prompt-id', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ active_id: '' })
+                    });
+                } catch(e) {}
                 
                 res = await fetch('/api/system-prompt-btn-style');
                 if (res.ok) {
@@ -10625,16 +10630,11 @@
                 }
                 
                 const localPrompts = JSON.parse(localStorage.getItem('ai-system-prompts') || '[]');
-                const localActiveId = localStorage.getItem('ai-active-system-prompt-id') || '';
                 const localStyle = JSON.parse(localStorage.getItem('ai-system-prompt-btn-style') || '{}');
                 
                 let needsUpload = false;
                 if (globalSystemPrompts.length === 0 && localPrompts.length > 0) {
                     globalSystemPrompts = localPrompts;
-                    needsUpload = true;
-                }
-                if (!globalActiveSystemPromptId && localActiveId) {
-                    globalActiveSystemPromptId = localActiveId;
                     needsUpload = true;
                 }
                 if (Object.keys(globalSystemPromptBtnStyle).length === 0 && Object.keys(localStyle).length > 0) {
@@ -10644,7 +10644,6 @@
                 
                 if (needsUpload) {
                     await saveCustomSystemPrompts(globalSystemPrompts);
-                    await saveActiveSystemPromptId(globalActiveSystemPromptId);
                     await uploadPromptButtonsStyle(globalSystemPromptBtnStyle);
                 }
             } catch(e) {
