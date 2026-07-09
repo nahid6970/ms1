@@ -22,6 +22,7 @@ let lastMouseY = 0;
 let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
 let f10FormatterAnchor = null;
 let f10HighlightOverlay = null;
+let f10MatchOverlay = null;
 let f10ActiveIndicator = null;
 let f10DraftOverlay = null;
 
@@ -459,7 +460,7 @@ function createRawVisibleOffsetMap(raw) {
     return visibleToRaw;
 }
 
-function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
+function findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
     if (!raw || !visibleWord) return null;
 
     const stripped = stripMarkdown(raw);
@@ -481,7 +482,8 @@ function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart)
             candidates.push({
                 start: index,
                 end: index + visibleWord.length,
-                distance: Math.abs(candidateVisibleStart - approximateVisibleStart)
+                visibleStart: candidateVisibleStart,
+                visibleDistance: Math.abs(candidateVisibleStart - approximateVisibleStart)
             });
         }
 
@@ -489,8 +491,14 @@ function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart)
     }
 
     if (candidates.length === 0) return null;
-    candidates.sort((a, b) => a.distance - b.distance);
-    return { start: candidates[0].start, end: candidates[0].end };
+    candidates.sort((a, b) => a.visibleDistance - b.visibleDistance);
+    return candidates;
+}
+
+function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
+    const matches = findRawWordMatchesNearVisibleOffset(raw, visibleWord, approximateVisibleStart);
+    if (!matches || matches.length === 0) return null;
+    return { start: matches[0].start, end: matches[0].end };
 }
 
 function clearF10SelectionHighlight() {
@@ -498,6 +506,11 @@ function clearF10SelectionHighlight() {
         f10HighlightOverlay.remove();
     }
     f10HighlightOverlay = null;
+
+    if (f10MatchOverlay && f10MatchOverlay.isConnected) {
+        f10MatchOverlay.remove();
+    }
+    f10MatchOverlay = null;
 
     if (f10DraftOverlay && f10DraftOverlay.isConnected) {
         f10DraftOverlay.remove();
@@ -604,6 +617,45 @@ function showF10SelectionHighlight(selection) {
     }
 }
 
+function showF10MatchLabels(selection) {
+    if (f10MatchOverlay && f10MatchOverlay.isConnected) {
+        f10MatchOverlay.remove();
+    }
+    f10MatchOverlay = null;
+
+    const liveInput = getF10CurrentInput(selection);
+    if (!selection || !liveInput || !selection.matches || selection.matches.length <= 1) return;
+
+    const cell = liveInput.closest('td[data-row][data-col]');
+    const preview = cell ? cell.querySelector('.markdown-preview') : null;
+    if (!cell || !preview || preview.classList.contains('editing')) return;
+
+    const cellRect = cell.getBoundingClientRect();
+    const overlay = document.createElement('div');
+    overlay.className = 'f10-match-overlay';
+
+    selection.matches.forEach((match, index) => {
+        const range = getPreviewRangeForRawSelection(liveInput, match.start, match.end);
+        if (!range) return;
+        const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+        const rect = rects[rects.length - 1] || range.getBoundingClientRect();
+        if (!rect || rect.height === 0) return;
+
+        const badge = document.createElement('div');
+        badge.className = 'f10-match-badge';
+        badge.textContent = `v${index + 1}`;
+        badge.style.left = (rect.right - cellRect.left + 2) + 'px';
+        badge.style.top = (rect.top - cellRect.top - 8) + 'px';
+        overlay.appendChild(badge);
+    });
+
+    if (overlay.childNodes.length > 0) {
+        cell.style.position = 'relative';
+        cell.appendChild(overlay);
+        f10MatchOverlay = overlay;
+    }
+}
+
 function showF10DraftOverlay() {
     if (f10DraftOverlay && f10DraftOverlay.isConnected) {
         f10DraftOverlay.remove();
@@ -655,8 +707,24 @@ function setF10DraftText(text) {
 
 function commitF10Draft() {
     if (!f10FormatterAnchor || f10FormatterAnchor.draftText === undefined) return false;
-    const draftText = f10FormatterAnchor.draftText;
-    const start = f10FormatterAnchor.start;
+    let draftText = f10FormatterAnchor.draftText;
+    const versionMatch = draftText.match(/\s*v(\d+)$/i);
+    let start = f10FormatterAnchor.start;
+    let end = f10FormatterAnchor.end;
+
+    if (versionMatch && f10FormatterAnchor.matches && f10FormatterAnchor.matches.length > 0) {
+        const matchIndex = parseInt(versionMatch[1], 10) - 1;
+        const pickedMatch = f10FormatterAnchor.matches[matchIndex];
+        if (!pickedMatch) {
+            showToast(`F10 match ${versionMatch[1]} does not exist`, 'warning');
+            return true;
+        }
+        draftText = draftText.slice(0, versionMatch.index).trimEnd();
+        start = pickedMatch.start;
+        end = pickedMatch.end;
+    }
+
+    f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
     const applied = applyF10RawEdit(draftText, start + draftText.length, start + draftText.length);
     if (applied) clearF10SelectionMode();
     return applied;
@@ -748,6 +816,7 @@ function refreshF10SelectionAfterRender() {
             f10FormatterAnchor.end
         );
         showF10SelectionHighlight(f10FormatterAnchor);
+        showF10MatchLabels(f10FormatterAnchor);
         showF10DraftOverlay();
         updateF10ActiveIndicator();
     });
@@ -996,25 +1065,16 @@ function getHoverFormatterSelection() {
         const previewRange = document.createRange();
         previewRange.setStart(node, localStart);
         previewRange.setEnd(node, localEnd);
-        const map = calculateVisibleToRawMap(rawValue);
-        let start = map[Math.min(visibleStart, map.length - 1)];
-        let end = map[Math.min(visibleEnd, map.length - 1)];
-
-        if (start !== undefined && end !== undefined && start < end) {
-            const mappedText = rawValue.substring(start, end);
-            if (mappedText === visibleWord || stripMarkdown(mappedText) === visibleWord) {
-                return { input, start, end, previewRange, rawText: mappedText };
-            }
-        }
-
-        const rawMatch = findRawWordNearVisibleOffset(rawValue, visibleWord, visibleStart);
-        if (rawMatch) {
+        const rawMatches = findRawWordMatchesNearVisibleOffset(rawValue, visibleWord, visibleStart);
+        if (rawMatches && rawMatches.length > 0) {
+            const rawMatch = rawMatches[0];
             return {
                 input,
                 start: rawMatch.start,
                 end: rawMatch.end,
                 previewRange,
-                rawText: rawValue.substring(rawMatch.start, rawMatch.end)
+                rawText: rawValue.substring(rawMatch.start, rawMatch.end),
+                matches: rawMatches
             };
         }
 
@@ -1389,11 +1449,20 @@ function handleKeyboardShortcuts(e) {
             start,
             end,
             previewRange,
-            rawText: hoverPick.input.value.substring(start, end)
+            rawText: hoverPick.input.value.substring(start, end),
+            matches: sameAnchor ? null : hoverPick.matches
         };
         showF10SelectionHighlight(f10FormatterAnchor);
+        showF10MatchLabels(f10FormatterAnchor);
         updateF10ActiveIndicator();
-        showToast(sameAnchor ? 'F10 span ready. Press F3 to format.' : 'F10 word ready. Press F3 to format.', 'info');
+        showToast(
+            sameAnchor
+                ? 'F10 span ready. Press F3 to format.'
+                : (hoverPick.matches && hoverPick.matches.length > 1
+                    ? `F10 word ready. Use v1-v${hoverPick.matches.length} at the end to pick a duplicate.`
+                    : 'F10 word ready. Press F3 to format.'),
+            'info'
+        );
         return;
     }
 

@@ -2574,6 +2574,27 @@ td input::-moz-selection {
     box-shadow: 0 2px 8px rgba(31, 111, 235, 0.25);
 }
 
+.f10-match-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+}
+
+.f10-match-badge {
+    position: absolute;
+    background: #111827;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 999px;
+    padding: 1px 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+    box-shadow: 0 2px 6px rgba(17, 24, 39, 0.3);
+}
+
 .f10-active-indicator {
     position: fixed;
     top: 8px;

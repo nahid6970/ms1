@@ -20,7 +20,7 @@
 - Added a fixed top `F10` indicator while a hover selection is active.
 - Text keys, Backspace, Delete, Shift+Enter, and Tab now update a temporary preview overlay without entering contentEditable edit mode.
 - Enter commits the draft overlay to the stored raw selection; Escape cancels F10 mode.
-- Duplicate raw text matches are ranked by the visible position nearest the mouse-selected preview word, so repeated terms should update the occurrence under the cursor.
+- Duplicate raw text matches now show `v1`, `v2`, etc. badges; ending the draft with a badge code such as `v2` commits to that numbered match and removes the code from the inserted text.
 - Each edit updates the hidden source value, re-renders the markdown preview, and redraws the overlay highlight from the updated raw offsets.
 
 **Files Modified:**
@@ -35,7 +35,7 @@
 - ✅ F3 opens Quick Formatter for the stored F10 span
 - ✅ Highlight remains visual only and does not rewrite the rendered cell
 - ✅ F10 active mode supports draft overlay edits without entering edit mode
-- ✅ F10 duplicate text matching prefers the occurrence nearest the mouse cursor
+- ✅ F10 duplicate text matching can be disambiguated with visible `v1`, `v2`, etc. badges
 
 ---
 
