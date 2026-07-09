@@ -514,6 +514,11 @@ class FacebookDownloaderApp(QMainWindow):
                 background: {CP_YELLOW};
                 border-color: {CP_YELLOW};
             }}
+            QSpinBox::up-button, QSpinBox::down-button {{
+                width: 0px;
+                height: 0px;
+                border: none;
+            }}
         """)
 
     def init_ui(self):
@@ -555,6 +560,7 @@ class FacebookDownloaderApp(QMainWindow):
         self.max_images_spin = QSpinBox()
         self.max_images_spin.setRange(1, 5000)
         self.max_images_spin.setValue(self.settings.get("max_images", 100))
+        self.max_images_spin.setFixedWidth(80)
         self.max_images_spin.valueChanged.connect(self.save_settings)
 
         # Build the MAX IMAGES row with auto-detect toggle inline
