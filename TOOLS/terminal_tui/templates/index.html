@@ -10820,7 +10820,7 @@
             document.getElementById('cancel-prompt-edit-btn').style.display = 'none';
         }
 
-        function saveCustomPrompt() {
+        async function saveCustomPrompt() {
             const idVal = document.getElementById('edit-prompt-id').value;
             const nameVal = document.getElementById('prompt-name-input').value.trim();
             const textVal = document.getElementById('prompt-text-input').value.trim();
