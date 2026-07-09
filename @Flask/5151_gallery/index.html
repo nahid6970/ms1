@@ -1005,29 +1005,7 @@
       transition: background-color 0.2s, box-shadow 0.2s;
     }
 
-    .storage-dot.cloudinary { background-color: var(--color-cloudinary, #007bff); }
-    .storage-dot.convex { background-color: var(--color-convex, #dc3545); }
-    .storage-dot.mega { 
-      background-color: var(--color-mega, #ff0000); 
-      box-shadow: 0 0 4px var(--color-mega-glow, rgba(255,0,0,0.5)); 
-    }
-
-    #megaStatusBadge {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid transparent;
-    }
-    #megaStatusBadge.connected { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
-    #megaStatusBadge.disconnected { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
-    #megaStatusBadge .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    #megaStatusBadge.connected .status-dot { background: #10b981; }
-    #megaStatusBadge.disconnected .status-dot { background: #ef4444; }
-    #megaFolderSelect { background: #24282e; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 13px; }
+    .storage-dot.local { background-color: var(--color-local, #dc3545); }
 
     
     @media (max-width: 640px) {
@@ -1293,11 +1271,6 @@
               <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/>
             </svg>
           </button>
-          <button id="bulkMoveStorageBtn" class="icon-btn" onclick="openStoragePickerPopup(event, null)" title="Move selected to storage" style="display: none; background: #22c55e;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>
-            </svg>
-          </button>
           <button id="downloadFolderBtn" class="icon-btn" onclick="downloadFolder()" title="Download Folder" style="display: none; background: #28a745;">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1528,67 +1501,27 @@
       <div class="tab-buttons">
         <button class="tab-btn active" id="tabBtnStorage" onclick="switchTab('storage')">Storage</button>
         <button class="tab-btn" id="tabBtnTheme" onclick="switchTab('theme')">Theme</button>
-        <button class="tab-btn" id="tabBtnMega" onclick="switchTab('mega')">MEGA</button>
       </div>
       
       <!-- Storage Tab -->
       <div id="tabContentStorage" class="tab-content active">
         <div class="type-picker-block" style="margin-bottom: 20px;">
-          <label style="color: #999; font-size: 13px; margin-bottom: 8px; display: block;">Default Storage Provider</label>
+          <label style="color: #999; font-size: 13px; margin-bottom: 8px; display: block;">Storage Provider</label>
           <div class="type-picker-row">
             <label class="type-chip">
-              <input type="radio" name="storageTypeRadio" value="cloudinary" onchange="updateStorageType()">
-              <span class="type-chip-body">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5 0-2.4-1.9-4.3-4.3-4.5-.3-2.6-2.5-4.5-5.2-4.5-2 0-3.8 1.1-4.7 2.8-.8-.3-1.6-.5-2.5-.5-2.8 0-5 2.2-5 5s2.2 5 5 5h12.2z" fill="currentColor"/></svg>
-                <span>Cloudinary</span>
-              </span>
-            </label>
-
-            <label class="type-chip">
-              <input type="radio" name="storageTypeRadio" value="convex" onchange="updateStorageType()">
+              <input type="radio" name="storageTypeRadio" value="convex" checked>
               <span class="type-chip-body">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-4.97 0-9 1.57-9 3.5s4.03 3.5 9 3.5 9-1.57 9-3.5-4.03-3.5-9-3.5zm0 15c-4.97 0-9-1.57-9-3.5V17c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-2.5c0 1.93-4.03 3.5-9 3.5zm0-5c-4.97 0-9-1.57-9-3.5V12c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-2.5c0 1.93-4.03 3.5-9 3.5z" fill="currentColor"/></svg>
                 <span>Local Storage</span>
-              </span>
-            </label>
-
-            <label class="type-chip">
-              <input type="radio" name="storageTypeRadio" value="mega" onchange="updateStorageType()">
-              <span class="type-chip-body">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/></svg>
-                <span>MEGA</span>
               </span>
             </label>
           </div>
         </div>
-
-        <div class="type-picker-block">
-          <label style="color: #999; font-size: 13px; margin-bottom: 8px; display: block;">PDF Export Storage Provider</label>
-          <div class="type-picker-row">
-            <label class="type-chip">
-              <input type="radio" name="pdfStorageTypeRadio" value="cloudinary" onchange="updatePdfStorageType()">
-              <span class="type-chip-body">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5 0-2.4-1.9-4.3-4.3-4.5-.3-2.6-2.5-4.5-5.2-4.5-2 0-3.8 1.1-4.7 2.8-.8-.3-1.6-.5-2.5-.5-2.8 0-5 2.2-5 5s2.2 5 5 5h12.2z" fill="currentColor"/></svg>
-                <span>Cloudinary</span>
-              </span>
-            </label>
-
-            <label class="type-chip">
-              <input type="radio" name="pdfStorageTypeRadio" value="convex" onchange="updatePdfStorageType()">
-              <span class="type-chip-body">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-4.97 0-9 1.57-9 3.5s4.03 3.5 9 3.5 9-1.57 9-3.5-4.03-3.5-9-3.5zm0 15c-4.97 0-9-1.57-9-3.5V17c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-2.5c0 1.93-4.03 3.5-9 3.5zm0-5c-4.97 0-9-1.57-9-3.5V12c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-2.5c0 1.93-4.03 3.5-9 3.5z" fill="currentColor"/></svg>
-                <span>Local Storage</span>
-              </span>
-            </label>
-
-            <label class="type-chip">
-              <input type="radio" name="pdfStorageTypeRadio" value="mega" onchange="updatePdfStorageType()">
-              <span class="type-chip-body">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" fill="currentColor"/></svg>
-                <span>MEGA</span>
-              </span>
-            </label>
-          </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="color: #999; font-size: 12px;">Current App Folder</label>
+          <select id="settingsFolderSelect" onchange="updateSettingsFolder()" style="flex: 1; background: #24282e; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 13px;">
+            <option value="">No Folder Selected</option>
+          </select>
         </div>
       </div>
 
@@ -1596,14 +1529,7 @@
       <div id="tabContentTheme" class="tab-content">
         <div>
           <label style="color: #999; font-size: 13px; margin-bottom: 12px; display: block;">UI Theme Colors</label>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="color: #ccc; font-size: 11px;">Cloudinary</label>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="color" id="colorCloudinary" oninput="updateColorPreview('cloudinary')" style="width: 32px; height: 32px; padding: 0; border: none; background: transparent; cursor: pointer;">
-                <span id="previewCloudinary" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Preview</span>
-              </div>
-            </div>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
             <div style="display: flex; flex-direction: column; gap: 4px;">
               <label style="color: #ccc; font-size: 11px;">Local Storage</label>
               <div style="display: flex; gap: 8px; align-items: center;">
@@ -1611,55 +1537,8 @@
                 <span id="previewConvex" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Preview</span>
               </div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="color: #ccc; font-size: 11px;">MEGA</label>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="color" id="colorMega" oninput="updateColorPreview('mega')" style="width: 32px; height: 32px; padding: 0; border: none; background: transparent; cursor: pointer;">
-                <span id="previewMega" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Preview</span>
-              </div>
-            </div>
           </div>
           <button onclick="saveThemeColors()" style="background: #555; border-radius: 0; margin-top: 12px; width: 100%;">Save Theme Colors</button>
-        </div>
-      </div>
-
-      <!-- MEGA Tab -->
-      <div id="tabContentMega" class="tab-content">
-        <div id="megaConfig" style="display: flex; flex-direction: column; gap: 12px;">
-          <div id="megaSettingsStatus" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
-            <span id="megaSettingsStatusDot" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;"></span>
-            <span id="megaSettingsStatusText"></span>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="color: #999; font-size: 12px;">Current App Folder</label>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <select id="settingsFolderSelect" onchange="updateSettingsFolder()" style="flex: 1; background: #24282e; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 13px;">
-                <option value="">No Folder Selected</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="color: #999; font-size: 12px;">MEGA Email</label>
-            <input type="email" id="megaEmail" placeholder="email@example.com" style="background: #24282e; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px;">
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="color: #999; font-size: 12px;">MEGA Password</label>
-            <input type="password" id="megaPassword" placeholder="••••••••" style="background: #24282e; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px;">
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="color: #999; font-size: 12px;">Upload Subfolder</label>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <select id="megaFolderSelect" style="flex: 1;">
-                <option value="">Root (no subfolder)</option>
-              </select>
-              <button onclick="fetchMegaFolders()" id="megaFetchBtn" style="background: #555; border-radius: 0; white-space: nowrap; flex-shrink: 0;">Fetch Folders</button>
-            </div>
-            <span id="megaFolderFetchStatus" style="font-size: 11px; color: #888;"></span>
-          </div>
-
-          <button onclick="saveMegaSettings()" style="background: #4CAF50; border-radius: 0;">Save MEGA Config</button>
         </div>
       </div>
     </div>
@@ -1669,80 +1548,42 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://unpkg.com/megajs@1/dist/main.browser-umd.js"></script>
-
   <script type="module">
-    // REPLACE WITH YOUR CLOUDINARY CREDENTIALS
-    const CLOUDINARY_CLOUD_NAME = "dwc7hjiub";
-    const CLOUDINARY_UPLOAD_PRESET = "myGallery";
     const FOLDER_STORAGE_KEY = "image-share.currentFolderId";
     const SORT_STORAGE_KEY = "image-share.sortOrder";
     const DEFAULT_PAGE_TITLE = document.title;
     
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-    // Mock Convex API and Client structure for clean migration Compatibility
-    const api = {
-      images: {
-        updateSettings: "images/updateSettings",
-        generateUploadUrl: "images/generateUploadUrl",
-        saveStorageImage: "images/saveStorageImage",
-        add: "images/add",
-        updateImageStorage: "images/updateImageStorage",
-        togglePin: "images/togglePin",
-        clear: "images/clear",
-        createFolder: "images/createFolder",
-        removeFolder: "images/removeFolder",
-        updateFolder: "images/updateFolder",
-        reorderFolders: "images/reorderFolders",
-        toggleHideFromAll: "images/toggleHideFromAll",
-        setFolderPassword: "images/setFolderPassword",
-        toggleSharing: "images/toggleSharing",
-        renameImage: "images/renameImage",
-        moveToFolder: "images/moveToFolder",
-        remove: "images/remove",
-        getSettings: "images/getSettings"
-      }
-    };
-    window._convexApi = api;
+    // Simple fetch helpers replacing the Convex client
+    async function apiGet(path) {
+      const res = await fetch(`/api/${path}`);
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      return res.json();
+    }
 
-    const client = {
-      query: async (path, args) => {
-        const endpoint = `/api/${path.replace('.', '/')}`;
-        const res = await fetch(endpoint);
-        if (!res.ok) {
-          throw new Error(`HTTP error ${res.status}`);
-        }
-        return await res.json();
-      },
-      mutation: async (path, args) => {
-        const endpoint = `/api/${path.replace('.', '/')}`;
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(args)
-        });
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `HTTP error ${res.status}`);
-        }
-        const result = await res.json();
-        await reloadData();
-        return result;
+    async function apiPost(path, args) {
+      const res = await fetch(`/api/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP error ${res.status}`);
       }
-    };
-    window._convexClient = client;
+      const result = await res.json();
+      await reloadData();
+      return result;
+    }
 
     async function reloadData() {
       await loadFolders();
       await loadImages();
     }
 
-    let storageType = "convex"; // represents Local Storage mapping
-    let pdfStorageType = "convex";
-    let megaSettings = { email: '', password: '', subfolder: '' };
-    let megaStorage = null;
-    let uiColors = { cloudinary: '#0369a1', convex: '#ec4899', mega: '#ef4444' };
+    let storageType = "convex"; // Local Storage
+    let uiColors = { convex: '#ec4899' };
 
     window.switchTab = function(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -1830,16 +1671,8 @@
 
     let _persistDebounce = null;
     let _lastPersistedState = null;
-    // Only dirty-check the fields that are noisy (not currentFolderId — that must sync cross-device)
     function _settingsStateKey() {
-      return JSON.stringify({
-        storageType,
-        megaEmail: megaSettings.email,
-        megaPassword: megaSettings.password,
-        megaSubfolder: megaSettings.subfolder,
-        colors: uiColors,
-        sortOrder,
-      });
+      return JSON.stringify({ colors: uiColors, sortOrder });
     }
     async function persistUiState() {
       clearTimeout(_persistDebounce);
@@ -1850,11 +1683,7 @@
         _lastPersistedState = key;
         _lastPersistedFolderId = currentFolderId === null ? null : currentFolderId;
         try {
-          await client.mutation(api.images.updateSettings, {
-            storageType,
-            megaEmail: megaSettings.email,
-            megaPassword: megaSettings.password,
-            megaSubfolder: megaSettings.subfolder,
+          await apiPost('images/updateSettings', {
             colors: uiColors,
             sortOrder,
             currentFolderId: currentFolderId === null ? null : currentFolderId,
@@ -1878,18 +1707,10 @@
     };
 
     window.saveThemeColors = async function() {
-      const cloudinary = document.getElementById('colorCloudinary').value;
       const convex = document.getElementById('colorConvex').value;
-      const mega = document.getElementById('colorMega').value;
-      uiColors = { cloudinary, convex, mega };
+      uiColors = { convex };
 
-      await client.mutation(api.images.updateSettings, {
-        storageType,
-        megaEmail: megaSettings.email,
-        megaPassword: megaSettings.password,
-        megaSubfolder: megaSettings.subfolder,
-        colors: uiColors
-      });
+      await apiPost('images/updateSettings', { colors: uiColors });
 
       updateActiveStorageBadge();
       await showAlert('Theme colors saved!');
@@ -1902,55 +1723,19 @@
       // Update CSS Variables for global storage dots
       const root = document.documentElement;
       Object.keys(uiColors).forEach(provider => {
-        const hex = uiColors[provider];
-        root.style.setProperty(`--color-${provider}`, hex);
-        if (provider === 'mega') {
-          root.style.setProperty(`--color-mega-glow`, getVariantColor(hex, 0.5));
-        }
+        root.style.setProperty(`--color-${provider}`, uiColors[provider]);
       });
 
-      const mainColor = uiColors[storageType] || uiColors.cloudinary;
-      
+      const mainColor = uiColors.convex;
       badge.style.background = getVariantColor(mainColor, 0.12);
       badge.style.borderColor = getVariantColor(mainColor, 0.35);
       badge.style.color = mainColor;
     }
 
 
-    function updateMegaSettingsStatus() {
-      const el = document.getElementById('megaSettingsStatus');
-      const dot = document.getElementById('megaSettingsStatusDot');
-      const txt = document.getElementById('megaSettingsStatusText');
-      if (!el) return;
-      const hasCredentials = !!(megaSettings.email && megaSettings.password);
-      if (hasCredentials) {
-        el.style.background = '#1a3a2a';
-        el.style.border = '1px solid #2d6a4f';
-        dot.style.background = '#10b981';
-        txt.style.color = '#6ee7b7';
-        txt.textContent = 'Connected' + (megaSettings.subfolder ? ' \u2192 ' + megaSettings.subfolder : '');
-      } else {
-        el.style.background = '#3a1a1a';
-        el.style.border = '1px solid #6a2d2d';
-        dot.style.background = '#ef4444';
-        txt.style.color = '#fca5a5';
-        txt.textContent = 'Not configured \u2013 enter credentials below';
-      }
-    }
-
-
-
     window.openSettings = function() {
-      const radios = document.getElementsByName('storageTypeRadio');
-      for (const radio of radios) {
-        if (radio.value === storageType) radio.checked = true;
-      }
-      const pdfRadios = document.getElementsByName('pdfStorageTypeRadio');
-      for (const radio of pdfRadios) {
-        if (radio.value === pdfStorageType) radio.checked = true;
-      }
-      updateMegaConfigVisibility();
-      ['cloudinary', 'convex', 'mega'].forEach(p => updateColorPreview(p));
+      updateSettingsFolderSelect();
+      updateColorPreview('convex');
       document.getElementById('settingsModal').classList.remove('hidden');
     };
 
@@ -1960,138 +1745,22 @@
       handleFolderAction(folderId);
     };
 
-    function updateMegaConfigVisibility() {
-      const config = document.getElementById('megaConfig');
-      if (!config) return;
-      config.style.display = 'flex';
-
-      // Populate Settings Folder Select
+    function updateSettingsFolderSelect() {
       const sfs = document.getElementById('settingsFolderSelect');
-      if (sfs) {
-        const flattenSfs = (parentId, depth) =>
-          folders.filter(f => (f.parentId || null) === (parentId || null))
-            .flatMap(f => [{ id: f._id, name: f.name, _depth: depth }, ...flattenSfs(f._id, depth + 1)]);
-        const options = [
-          { id: "", name: "No Folder Selected", _depth: 0 },
-          { id: "none", name: "No folder (images only)", _depth: 0 },
-          ...flattenSfs(null, 0)
-        ];
-        sfs.innerHTML = options.map(o => `<option value="${o.id}" ${currentFolderId === (o.id === "" ? null : o.id) ? "selected" : ""}>${'  '.repeat(o._depth)}${o._depth ? '› ' : ''}${escapeHtml(o.name)}</option>`).join("");
-      }
-
-      if (storageType === 'mega') {
-        document.getElementById('megaEmail').value = megaSettings.email || '';
-        document.getElementById('megaPassword').value = megaSettings.password || '';
-        const sel = document.getElementById('megaFolderSelect');
-        if (megaSettings.subfolder) {
-          const found = Array.from(sel.options).some(o => o.value === megaSettings.subfolder);
-          if (!found) sel.add(new Option(megaSettings.subfolder, megaSettings.subfolder));
-          sel.value = megaSettings.subfolder;
-        } else {
-          sel.value = '';
-        }
-        updateMegaSettingsStatus();
-      }
+      if (!sfs) return;
+      const flattenSfs = (parentId, depth) =>
+        folders.filter(f => (f.parentId || null) === (parentId || null))
+          .flatMap(f => [{ id: f._id, name: f.name, _depth: depth }, ...flattenSfs(f._id, depth + 1)]);
+      const options = [
+        { id: "", name: "No Folder Selected", _depth: 0 },
+        { id: "none", name: "No folder (images only)", _depth: 0 },
+        ...flattenSfs(null, 0)
+      ];
+      sfs.innerHTML = options.map(o => `<option value="${o.id}" ${currentFolderId === (o.id === "" ? null : o.id) ? "selected" : ""}>${'  '.repeat(o._depth)}${o._depth ? '› ' : ''}${escapeHtml(o.name)}</option>`).join("");
     }
 
     window.closeSettings = function() {
       document.getElementById('settingsModal').classList.add('hidden');
-    };
-
-    window.updateStorageType = async function() {
-      const radios = document.getElementsByName('storageTypeRadio');
-      let newType = storageType;
-      for (const radio of radios) {
-        if (radio.checked) newType = radio.value;
-      }
-      if (newType !== storageType) {
-        storageType = newType;
-        updateMegaConfigVisibility();
-        updateActiveStorageBadge();
-        await client.mutation(api.images.updateSettings, {
-          storageType: newType,
-          megaEmail: megaSettings.email,
-          megaPassword: megaSettings.password,
-          megaSubfolder: megaSettings.subfolder,
-          colors: uiColors
-        });
-      }
-    };
-
-    window.updatePdfStorageType = async function() {
-      const radios = document.getElementsByName('pdfStorageTypeRadio');
-      let newType = pdfStorageType;
-      for (const radio of radios) {
-        if (radio.checked) newType = radio.value;
-      }
-      if (newType !== pdfStorageType) {
-        pdfStorageType = newType;
-        await client.mutation(api.images.updateSettings, {
-          storageType: storageType,
-          pdfStorageType: newType,
-          megaEmail: megaSettings.email,
-          megaPassword: megaSettings.password,
-          megaSubfolder: megaSettings.subfolder,
-          colors: uiColors
-        });
-      }
-    };
-
-    window.saveMegaSettings = async function() {
-      const email = document.getElementById('megaEmail').value;
-      const password = document.getElementById('megaPassword').value;
-      const subfolder = document.getElementById('megaFolderSelect').value;
-      megaSettings = { email, password, subfolder };
-      megaStorage = null;
-      await client.mutation(api.images.updateSettings, {
-        storageType: storageType,
-        megaEmail: email,
-        megaPassword: password,
-        megaSubfolder: subfolder,
-        colors: uiColors
-      });
-      updateActiveStorageBadge();
-      updateMegaSettingsStatus();
-      await showAlert('MEGA Settings Saved');
-    };
-
-    window.fetchMegaFolders = async function() {
-      const email = document.getElementById('megaEmail').value.trim();
-      const password = document.getElementById('megaPassword').value.trim();
-      const statusEl = document.getElementById('megaFolderFetchStatus');
-      const btn = document.getElementById('megaFetchBtn');
-      const sel = document.getElementById('megaFolderSelect');
-      if (!email || !password) {
-        statusEl.textContent = 'Enter email and password first.';
-        statusEl.style.color = '#f87171';
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = 'Connecting\u2026';
-      statusEl.textContent = '';
-      try {
-        const MegaStorage = window.mega && window.mega.Storage;
-        if (!MegaStorage) throw new Error('megajs library not loaded');
-        if (megaStorage) { try { megaStorage.close(); } catch(_) {} megaStorage = null; }
-        megaStorage = new MegaStorage({ email, password, autologin: false });
-        await new Promise((resolve, reject) => {
-          megaStorage.login((err) => err ? reject(err) : resolve());
-        });
-        const rootChildren = megaStorage.root && megaStorage.root.children ? megaStorage.root.children : [];
-        const folderNodes = rootChildren.filter(n => n.directory);
-        sel.innerHTML = '<option value="">Root (no subfolder)</option>';
-        folderNodes.forEach(node => sel.add(new Option(node.name, node.name)));
-        if (megaSettings.subfolder) sel.value = megaSettings.subfolder;
-        statusEl.textContent = 'Found ' + folderNodes.length + ' folder(s).';
-        statusEl.style.color = '#6ee7b7';
-      } catch (err) {
-        statusEl.textContent = 'Failed: ' + (err.message || String(err));
-        statusEl.style.color = '#f87171';
-        megaStorage = null;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Fetch Folders';
-      }
     };
 
     async function loadSettings() {
@@ -2107,32 +1776,15 @@
         const stateChanged = isFirstSettings || settingsKey !== _lastSettingsKey;
         _lastSettingsKey = settingsKey;
 
-        storageType = settings.storageType;
-        pdfStorageType = settings.pdfStorageType || settings.storageType;
-        megaSettings = {
-          email: settings.megaEmail || '',
-          password: settings.megaPassword || '',
-          subfolder: settings.megaSubfolder || ''
-        };
         remoteSortOrder = remoteSort;
         if (settings.currentFolderId !== undefined) {
           remoteFolderId = remoteFolder;
         }
         if (settings.colors) {
-          uiColors = settings.colors;
-          document.getElementById('colorCloudinary').value = uiColors.cloudinary;
+          uiColors = { convex: settings.colors.convex || '#ec4899' };
           document.getElementById('colorConvex').value = uiColors.convex;
-          document.getElementById('colorMega').value = uiColors.mega;
         }
 
-        const radios = document.getElementsByName('storageTypeRadio');
-        for (const radio of radios) {
-          if (radio.value === storageType) radio.checked = true;
-        }
-        const pdfRadios = document.getElementsByName('pdfStorageTypeRadio');
-        for (const radio of pdfRadios) {
-          if (radio.value === pdfStorageType) radio.checked = true;
-        }
         updateActiveStorageBadge();
         if (stateChanged) applyPersistedUiState();
         if (isFirstSettings) {
@@ -2140,8 +1792,8 @@
           _lastPersistedFolderId = remoteFolder === null ? null : remoteFolder;
         }
         if (!document.getElementById('settingsModal').classList.contains('hidden')) {
-          updateMegaConfigVisibility();
-          ['cloudinary', 'convex', 'mega'].forEach(p => updateColorPreview(p));
+          updateSettingsFolderSelect();
+          updateColorPreview('convex');
         }
       } catch (err) {
         console.error("Failed to load settings:", err);
@@ -2153,59 +1805,6 @@
       setInterval(loadSettings, 4000);
     };
     let _lastSettingsKey = null;
-
-    const megaPreviews = new Map();
-
-    async function getMegaBlobUrl(url, filename) {
-      if (megaPreviews.has(url)) return megaPreviews.get(url);
-
-      try {
-        const File = window.mega && window.mega.File;
-        if (!File) throw new Error('MEGA library not loaded');
-        const file = File.fromURL(url);
-        await new Promise((resolve, reject) => {
-          file.loadAttributes((err, file) => err ? reject(err) : resolve(file));
-        });
-
-        const data = await new Promise((resolve, reject) => {
-          const stream = file.download();
-          const chunks = [];
-          stream.on('data', chunk => chunks.push(chunk));
-          stream.on('end', () => {
-            const ext = filename?.toLowerCase().split('.').pop();
-            let mimeType = 'application/octet-stream';
-            if (ext === 'pdf') mimeType = 'application/pdf';
-            else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) mimeType = `image/${ext === 'jpg' ? 'jpeg' : (ext === 'svg' ? 'svg+xml' : ext)}`;
-            
-            resolve(new Blob(chunks, { type: mimeType }));
-          });
-          stream.on('error', reject);
-        });
-
-        const blobUrl = URL.createObjectURL(data);
-        megaPreviews.set(url, blobUrl);
-        return blobUrl;
-      } catch (err) {
-        console.error('Failed to load MEGA file:', err);
-        return null;
-      }
-    }
-
-    async function loadMegaPreview(url, imgElement, filename) {
-      const blobUrl = await getMegaBlobUrl(url, filename);
-      if (blobUrl) imgElement.src = blobUrl;
-    }
-
-    function loadAllMegaPreviews() {
-      document.querySelectorAll('img[data-mega-url]').forEach(img => {
-        const url = img.getAttribute('data-mega-url');
-        const filename = img.alt;
-        if (url) {
-          loadMegaPreview(url, img, filename);
-          img.removeAttribute('data-mega-url');
-        }
-      });
-    }
 
         function readStoredFolderId() {
       const stored = window.localStorage.getItem(FOLDER_STORAGE_KEY);
@@ -2298,7 +1897,7 @@
           if (previousFolderId !== currentFolderId) {
             storeCurrentFolderId(currentFolderId);
             renderFolderBar();
-            updateMegaConfigVisibility();
+            updateSettingsFolderSelect();
             subscribeToImages();
             if (window._lastImages) renderImages(window._lastImages);
           }
@@ -2473,68 +2072,19 @@
           status.style.color = '#f59e0b';
           return true;
         }
-        if (storageType === "convex") {
-          const postUrl = await client.mutation(api.images.generateUploadUrl);
-          const result = await fetch(postUrl, {
-            method: "POST",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          const { storageId } = await result.json();
-          await client.mutation(api.images.saveStorageImage, {
-            storageId,
-            filename: file.name,
-            fileSize: Number(file.size),
-            folderId: (currentFolderId === 'none' || currentFolderId === 'shared') ? undefined : (currentFolderId || undefined)
-          });
-        } else if (storageType === "mega") {
-          const MegaStorage = window.mega && window.mega.Storage;
-          if (!MegaStorage) throw new Error('megajs library not loaded');
-          if (!megaSettings.email || !megaSettings.password) throw new Error('MEGA credentials not configured');
-
-          if (!megaStorage) {
-            megaStorage = new MegaStorage({ email: megaSettings.email, password: megaSettings.password, autologin: false });
-            await new Promise((resolve, reject) => megaStorage.login((err) => err ? reject(err) : resolve()));
-          }
-
-          let targetNode = megaStorage.root;
-          if (megaSettings.subfolder) {
-            const found = (megaStorage.root.children || []).find(n => n.directory && n.name === megaSettings.subfolder);
-            if (found) targetNode = found;
-          }
-
-          const buffer = await file.arrayBuffer();
-          const uploadedFile = await new Promise((resolve, reject) => {
-            const upload = targetNode.upload({ name: file.name, size: file.size }, new Uint8Array(buffer));
-            upload.on('complete', resolve);
-            upload.on('error', reject);
-          });
-
-          const link = await new Promise((resolve, reject) => uploadedFile.link((err, url) => err ? reject(err) : resolve(url)));
-
-          await client.mutation(api.images.add, {
-            url: link,
-            filename: file.name,
-            fileSize: Number(file.size),
-            folderId: (currentFolderId === 'none' || currentFolderId === 'shared') ? undefined : (currentFolderId || undefined)
-          });
-        } else {
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-          formData.append('folder', 'myGallery');
-          const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
-            method: 'POST',
-            body: formData
-          });
-          const data = await res.json();
-          await client.mutation(api.images.add, {
-            url: data.secure_url,
-            filename: file.name,
-            fileSize: Number(file.size),
-            folderId: (currentFolderId === 'none' || currentFolderId === 'shared') ? undefined : (currentFolderId || undefined)
-          });
-        }
+        const postUrl = await apiPost('images/generateUploadUrl', {});
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        const { storageId } = await result.json();
+        await apiPost('images/saveStorageImage', {
+          storageId,
+          filename: file.name,
+          fileSize: Number(file.size),
+          folderId: (currentFolderId === 'none' || currentFolderId === 'shared') ? undefined : (currentFolderId || undefined)
+        });
         return true;
       } catch (error) {
         console.error('Upload failed:', error);
@@ -2632,19 +2182,11 @@
         for (let i = 0; i < imgs.length; i++) {
           const imgData = imgs[i];
           const filename = imgData.filename || `file-${i}`;
-          const isMega = imgData.url && imgData.url.includes('mega.nz');
 
           status.textContent = `Fetching file ${i + 1} of ${imgs.length}...`;
 
-          let blob;
-          if (isMega) {
-            const blobUrl = await getMegaBlobUrl(imgData.url, filename);
-            const res = await fetch(blobUrl);
-            blob = await res.blob();
-          } else {
-            const res = await fetch(imgData.url);
-            blob = await res.blob();
-          }
+          const res = await fetch(imgData.url);
+          const blob = await res.blob();
           zip.file(filename, blob);
         }
 
@@ -2673,7 +2215,7 @@
         await window.deleteSelectedImages();
       } else {
         if (!await showConfirm('Delete this image?', true)) return;
-        await client.mutation(api.images.remove, { id });
+        await apiPost('images/remove', { id });
       }
     };
 
@@ -2682,142 +2224,21 @@
       if (!await showConfirm(`Delete ${selectedImageIds.size} selected image(s)?`, true)) return;
       await Promise.all(
         Array.from(selectedImageIds).map(id =>
-          client.mutation(api.images.remove, { id })
+          apiPost('images/remove', { id })
         )
       );
       selectedImageIds.clear();
       renderSelectionState();
     };
 
-    // ── Storage Picker ──────────────────────────────────────────────
-    let _storagePickerIds = []; // one or many image IDs
-
-    window.openStoragePickerPopup = function(event, imageId) {
-      event.stopPropagation();
-      _storagePickerIds = imageId ? [imageId] : Array.from(selectedImageIds);
-      const popup = document.getElementById('storagePickerPopup');
-      popup.style.display = 'block';
-      const rect = event.currentTarget.getBoundingClientRect();
-      const pw = popup.offsetWidth || 160;
-      let left = rect.left;
-      let top = rect.bottom + 6;
-      if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
-      if (top + popup.offsetHeight > window.innerHeight - 8) top = rect.top - popup.offsetHeight - 6;
-      popup.style.left = Math.max(6, left) + 'px';
-      popup.style.top = Math.max(6, top) + 'px';
-    };
-
-    window.closeStoragePickerPopup = function() {
-      document.getElementById('storagePickerPopup').style.display = 'none';
-    };
-
-    document.addEventListener('click', e => {
-      if (!document.getElementById('storagePickerPopup').contains(e.target)) closeStoragePickerPopup();
-    });
-
-    window.confirmStorageMove = async function(targetStorage) {
-      closeStoragePickerPopup();
-      if (!_storagePickerIds.length) return;
-      const ids = [..._storagePickerIds];
-      _storagePickerIds = [];
-
-      const status = document.getElementById('status');
-      let done = 0;
-      for (const id of ids) {
-        const img = window._lastImages?.find(i => i._id === id);
-        if (!img) continue;
-
-        // Detect current storage
-        const isMega = img.url?.includes('mega.nz');
-        const isConvex = !!img.storageId;
-        const currentStorage = isConvex ? 'convex' : (isMega ? 'mega' : 'cloudinary');
-        if (currentStorage === targetStorage) { done++; continue; }
-
-        status.textContent = `Moving ${done + 1}/${ids.length}: ${img.filename}...`;
-        status.style.color = '#007bff';
-
-        try {
-          // 1. Download file as blob from current storage
-          let blob;
-          if (isMega) {
-            const blobUrl = await getMegaBlobUrl(img.url, img.filename);
-            if (!blobUrl) throw new Error('Failed to decrypt MEGA file');
-            blob = await fetch(blobUrl).then(r => r.blob());
-          } else {
-            blob = await fetch(img.url).then(r => r.blob());
-          }
-          const file = new File([blob], img.filename, { type: blob.type });
-
-          // 2. Upload to target storage, get new URL
-          let newUrl = null;
-          let newStorageId = undefined;
-
-          if (targetStorage === 'convex') {
-            const postUrl = await client.mutation(api.images.generateUploadUrl);
-            const res = await fetch(postUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: blob });
-            const { storageId } = await res.json();
-            newStorageId = storageId;
-            // newUrl left null — mutation resolves it from storageId
-          } else if (targetStorage === 'mega') {
-            const MegaStorage = window.mega?.Storage;
-            if (!MegaStorage || !megaSettings.email || !megaSettings.password) throw new Error('MEGA not configured');
-            if (!megaStorage) {
-              megaStorage = new MegaStorage({ email: megaSettings.email, password: megaSettings.password, autologin: false });
-              await new Promise((resolve, reject) => megaStorage.login(err => err ? reject(err) : resolve()));
-            }
-            let targetNode = megaStorage.root;
-            if (megaSettings.subfolder) {
-              const found = (megaStorage.root.children || []).find(n => n.directory && n.name === megaSettings.subfolder);
-              if (found) targetNode = found;
-            }
-            const buf = await blob.arrayBuffer();
-            const uploaded = await new Promise((resolve, reject) => {
-              const up = targetNode.upload({ name: file.name, size: file.size }, new Uint8Array(buf));
-              up.on('complete', resolve); up.on('error', reject);
-            });
-            newUrl = await new Promise((resolve, reject) => uploaded.link((err, url) => err ? reject(err) : resolve(url)));
-          } else {
-            // Cloudinary
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            formData.append('folder', 'myGallery');
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
-            const data = await res.json();
-            newUrl = data.secure_url;
-          }
-
-          // 3. Update DB record (also deletes old Convex file if needed)
-          await client.mutation(api.images.updateImageStorage, {
-            id: img._id,
-            ...(newUrl ? { url: newUrl } : {}),
-            ...(newStorageId ? { storageId: newStorageId } : {}),
-          });
-
-          done++;
-        } catch (err) {
-          console.error(`Failed to move ${img.filename}:`, err);
-          status.textContent = `Failed: ${img.filename} — ${err.message}`;
-          status.style.color = '#dc3545';
-          await new Promise(r => setTimeout(r, 2000));
-        }
-      }
-
-      selectedImageIds.clear();
-      renderSelectionState();
-      status.textContent = `Moved ${done} file${done !== 1 ? 's' : ''} successfully!`;
-      status.style.color = '#28a745';
-      setTimeout(() => status.textContent = '', 3000);
-    };
-
     window.togglePin = async function(id) {
-      await client.mutation(api.images.togglePin, { id });
+      await apiPost('images/togglePin', { id });
     };
     
     window.clearAll = async function() {
       const scope = currentFolderId === null ? 'all images' : 'all images in this folder';
       if (!await showConfirm(`Delete ${scope}?`, true)) return;
-      await client.mutation(api.images.clear, { folderId: currentFolderId || undefined });
+      await apiPost('images/clear', { folderId: currentFolderId || undefined });
     };
     
     let _lbIndex = 0;
@@ -2898,10 +2319,7 @@
         const filename = `export-${Date.now()}.pdf`;
         const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
         
-        const prevStorageType = storageType;
-        storageType = pdfStorageType;
         const success = await performUpload(pdfFile);
-        storageType = prevStorageType;
         
         if (success) {
           status.textContent = 'PDF Exported & Uploaded!';
@@ -2938,28 +2356,12 @@
       const lb = document.getElementById('lightbox');
       const lbImg = document.getElementById('lightboxImg');
       const isPdf = img.filename?.toLowerCase().endsWith('.pdf');
-      const isMega = img.url && img.url.includes('mega.nz');
 
       // Clean up previous iframe if any
       const existingIframe = lb.querySelector('iframe');
       if (existingIframe) existingIframe.remove();
 
-      let displayUrl = img.url;
-      if (isMega) {
-        const status = document.getElementById('status');
-        if (status) {
-            status.textContent = 'Decrypting MEGA file...';
-            status.style.color = '#007bff';
-        }
-        displayUrl = await getMegaBlobUrl(img.url, img.filename);
-        if (status) {
-            status.textContent = '';
-        }
-        if (!displayUrl) {
-            await showAlert('Failed to decrypt MEGA file.');
-            return;
-        }
-      }
+      const displayUrl = img.url;
 
       if (isPdf) {
         lbImg.style.display = 'none';
@@ -2996,22 +2398,7 @@
       const img = sorted[_lbIndex];
       if (!img) return;
 
-      let url = img.url;
-      const isMega = !!(url && url.includes('mega.nz'));
-      if (isMega) {
-        const status = document.getElementById('status');
-        if (status) {
-          status.textContent = 'Decrypting MEGA file...';
-          status.style.color = '#007bff';
-        }
-        url = await getMegaBlobUrl(img.url, img.filename);
-        if (status) status.textContent = '';
-        if (!url) {
-          await showAlert('Failed to decrypt MEGA file.');
-          return;
-        }
-      }
-      window.open(url, '_blank');
+      window.open(img.url, '_blank');
     };
 
     window.closeLightbox = function() {
@@ -3226,7 +2613,6 @@
       ];
 
       document.getElementById('exportPdfBtn').style.display = selectionCount ? '' : 'none';
-      document.getElementById('bulkMoveStorageBtn').style.display = selectionCount ? '' : 'none';
       folderBar.innerHTML = chips.join('');
       requestAnimationFrame(() => {
         if (folderPanel) {
@@ -3316,7 +2702,7 @@
       renderFolderBar();
 
       // Persist to backend
-      await client.mutation(api.images.reorderFolders, {
+      await apiPost('images/reorderFolders', {
         folderIds: newFolders.map(f => f._id)
       });
     };
@@ -3360,7 +2746,7 @@
       closeFolderContextMenu();
       const name = await showDialog('Folder name?');
       if (!name || !name.trim()) return;
-      await client.mutation(api.images.createFolder, { name: name.trim() });
+      await apiPost('images/createFolder', { name: name.trim() });
     };
 
     window.createSubfolderFromMenu = async function() {
@@ -3370,7 +2756,7 @@
       closeFolderContextMenu();
       const name = await showDialog(`Subfolder of "${parent?.name || 'this folder'}"?`);
       if (!name || !name.trim()) return;
-      await client.mutation(api.images.createFolder, { name: name.trim(), parentId });
+      await apiPost('images/createFolder', { name: name.trim(), parentId });
     };
 
     window.deleteFolder = async function(id) {
@@ -3391,7 +2777,7 @@
       }
 
       if (!await showConfirm(`Delete folder "${name}"? Images in it will be moved to No folder.`, true)) return;
-      await client.mutation(api.images.removeFolder, { id, password });
+      await apiPost('images/removeFolder', { id, password });
       if (currentFolderId === id) {
         currentFolderId = null;
         storeCurrentFolderId(currentFolderId);
@@ -3439,7 +2825,7 @@
 
     window.toggleHideFromAllFromMenu = async function() {
       if (!folderContextMenuId) return;
-      await client.mutation(api.images.toggleHideFromAll, { id: folderContextMenuId });
+      await apiPost('images/toggleHideFromAll', { id: folderContextMenuId });
       closeFolderContextMenu();
     };
 
@@ -3459,7 +2845,7 @@
         return;
       }
 
-      await client.mutation(api.images.updateFolder, {
+      await apiPost('images/updateFolder', {
         id: folder._id,
         name: nextName.trim(),
         position: folder.position ?? 0,
@@ -3543,7 +2929,7 @@
       const bg = document.getElementById('folderBgColorInput').value;
       const fg = document.getElementById('folderFgColorInput').value;
       const border = document.getElementById('folderBorderColorInput').value;
-      await client.mutation(api.images.updateFolder, {
+      await apiPost('images/updateFolder', {
         id: _colorFolderId,
         name: folder.name,
         position: folder.position ?? 0,
@@ -3585,7 +2971,7 @@
         return;
       }
 
-      await client.mutation(api.images.setFolderPassword, {
+      await apiPost('images/setFolderPassword', {
         id: folder._id,
         password: nextPassword,
       });
@@ -3609,7 +2995,7 @@
         closeFolderContextMenu(); return;
       }
 
-      await client.mutation(api.images.setFolderPassword, {
+      await apiPost('images/setFolderPassword', {
         id: folder._id,
         password: undefined,
       });
@@ -3671,7 +3057,7 @@
       const img = window._lastImages.find(i => i._id === imageContextMenuId);
       if (!img) return;
 
-      await client.mutation(api.images.toggleSharing, { id: img._id, isShared: true });
+      await apiPost('images/toggleSharing', { id: img._id, isShared: true });
       closeImageContextMenu();
 
       // Copy link to clipboard
@@ -3688,7 +3074,7 @@
       const img = window._lastImages.find(i => i._id === imageContextMenuId);
       if (!img) return;
 
-      await client.mutation(api.images.toggleSharing, { id: img._id, isShared: false });
+      await apiPost('images/toggleSharing', { id: img._id, isShared: false });
       closeImageContextMenu();
       await showAlert('Sharing removed.');
     };
@@ -3700,22 +3086,7 @@
 
       closeImageContextMenu();
 
-      let url = img.url;
-      const isMega = !!(url && url.includes('mega.nz'));
-      if (isMega) {
-        const status = document.getElementById('status');
-        if (status) {
-          status.textContent = 'Decrypting MEGA file...';
-          status.style.color = '#007bff';
-        }
-        url = await getMegaBlobUrl(img.url, img.filename);
-        if (status) status.textContent = '';
-        if (!url) {
-          await showAlert('Failed to decrypt MEGA file.');
-          return;
-        }
-      }
-      window.open(url, '_blank');
+      window.open(img.url, '_blank');
     };
 
     window.renameImageFromMenu = async function() {
@@ -3730,7 +3101,7 @@
         return;
       }
 
-      await client.mutation(api.images.renameImage, {
+      await apiPost('images/renameImage', {
         id: img._id,
         filename: nextName.trim(),
       });
@@ -3745,7 +3116,7 @@
       }
     };
 
-    window.onConvexFileDragStart = function(e, url, filename, mimeType) {
+    window.onFileDragStart = function(e, url, filename, mimeType) {
       e.stopPropagation();
       e.dataTransfer.effectAllowed = 'copy';
       e.dataTransfer.setData('text/uri-list', url);
@@ -3759,7 +3130,7 @@
       if (selectedImageIds.size > 1 && selectedImageIds.has(imageId)) {
         await moveSelectedImages(folderId);
       } else {
-        await client.mutation(api.images.moveToFolder, { imageId, folderId });
+        await apiPost('images/moveToFolder', { imageId, folderId });
       }
     };
 
@@ -3767,7 +3138,7 @@
       if (!selectedImageIds.size) return;
       await Promise.all(
         Array.from(selectedImageIds).map(imageId =>
-          client.mutation(api.images.moveToFolder, { imageId, folderId: targetFolderId })
+          apiPost('images/moveToFolder', { imageId, folderId: targetFolderId })
         )
       );
 
@@ -3917,29 +3288,24 @@
         </div>` : '';
       
       gallery.innerHTML = breadcrumbHtml + subfolderHtml + sorted.map((img, i) => {
-        const isMega = !!(img.url && img.url.includes('mega.nz'));
         const isPdf = img.filename?.toLowerCase().endsWith('.pdf');
         
         let displayUrl = img.url;
         if (isPdf) {
           displayUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M10 4 L50 4 L70 24 L70 72 Q70 76 66 76 L14 76 Q10 76 10 72 Z' fill='%23fee2e2' stroke='%23e11d48' stroke-width='2'/%3E%3Cpath d='M50 4 L50 24 L70 24' fill='%23fca5a5' stroke='%23e11d48' stroke-width='2'/%3E%3Crect x='8' y='50' width='64' height='20' rx='3' fill='%23e11d48'/%3E%3Ctext x='40' y='64' font-family='Arial,sans-serif' font-size='13' font-weight='bold' fill='white' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E";
-        } else if (isMega) {
-          displayUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E";
         }
 
-        const isConvex = !!img.storageId;
         const fileMime = isPdf ? 'application/pdf' : (img.filename?.match(/\.(png)$/i) ? 'image/png' : (img.filename?.match(/\.(gif)$/i) ? 'image/gif' : 'image/jpeg'));
 
         return `
         <div
           class="image-card ${selectedImageIds.has(img._id) ? 'selected' : ''} ${img.pinned ? 'pinned' : ''}"
           data-id="${img._id}"
-          ${isConvex ? `draggable="true" ondragstart="onConvexFileDragStart(event, '${img.url}', '${escapeHtml(img.filename)}', '${fileMime}')"` : ''}
+          draggable="true" ondragstart="onFileDragStart(event, '${img.url}', '${escapeHtml(img.filename)}', '${fileMime}')"
           onmouseenter="selectImageByHover('${img._id}')"
           oncontextmenu="openImageContextMenu(event, '${img._id}')"
         >
           <img 
-            ${isMega && !isPdf ? `data-mega-url="${img.url}"` : ''} 
             src="${displayUrl}"
             alt="${escapeHtml(img.filename)}" 
             onclick="handleImageClick(event, ${i})"
@@ -3954,12 +3320,11 @@
               ${getFolderOptions(img.folderId)}
             </select>
             <button class="action-dot blue" onclick="openFolderPickerPopup(event,'${img._id}','${img.folderId||''}')" title="Move to folder"></button>
-            <button class="action-dot green" onclick="openStoragePickerPopup(event,'${img._id}')" title="Move to storage"></button>
             <button class="danger delete-btn action-dot red" onclick="deleteImage('${img._id}')" title="Delete"></button>
           </div>
           <div class="image-info">
             <p>
-              <span class="storage-dot ${img.storageId ? 'convex' : (img.url.includes('mega') ? 'mega' : 'cloudinary')}" title="${img.storageId ? 'Local Storage' : (img.url.includes('mega') ? 'MEGA' : 'Cloudinary')}"></span>
+              <span class="storage-dot local" title="Local Storage"></span>
               <strong>${escapeHtml(img.filename)}</strong>
             </p>
             <div class="meta-row">
@@ -3971,7 +3336,6 @@
       `;
       }).join('');
 
-      loadAllMegaPreviews();
       renderSelectionState();
     }
 
@@ -3995,7 +3359,7 @@
           loadImages();
         }
         renderFolderBar();
-        updateMegaConfigVisibility();
+        updateSettingsFolderSelect();
         if (window._lastImages) {
           clearTimeout(window._folderRenderDebounce);
           window._folderRenderDebounce = setTimeout(() => renderImages(window._lastImages), 80);
@@ -4073,20 +3437,6 @@
 
   <!-- Folder Picker Popup -->
   <div id="folderPickerPopup" style="display:none;position:fixed;z-index:5000;background:white;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:170px;padding:8px;max-height:320px;overflow:hidden;">
-  </div>
-
-  <!-- Storage Picker Popup -->
-  <div id="storagePickerPopup" style="display:none;position:fixed;z-index:5000;background:#1e2228;border:1px solid #3a3f47;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.45);padding:8px;min-width:160px;">
-    <div style="font-size:11px;color:#888;padding:4px 8px 6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Move to Storage</div>
-    <button onclick="confirmStorageMove('cloudinary')" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;background:transparent;color:#dbe2ea;border:none;border-radius:8px;font-size:13px;cursor:pointer;" onmouseover="this.style.background='#2b3138'" onmouseout="this.style.background='transparent'">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--color-cloudinary,#0369a1);flex-shrink:0;display:inline-block;"></span> Cloudinary
-    </button>
-    <button onclick="confirmStorageMove('convex')" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;background:transparent;color:#dbe2ea;border:none;border-radius:8px;font-size:13px;cursor:pointer;" onmouseover="this.style.background='#2b3138'" onmouseout="this.style.background='transparent'">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--color-convex,#ec4899);flex-shrink:0;display:inline-block;"></span> Convex
-    </button>
-    <button onclick="confirmStorageMove('mega')" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;background:transparent;color:#dbe2ea;border:none;border-radius:8px;font-size:13px;cursor:pointer;" onmouseover="this.style.background='#2b3138'" onmouseout="this.style.background='transparent'">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--color-mega,#ef4444);flex-shrink:0;display:inline-block;"></span> MEGA
-    </button>
   </div>
 
   <!-- Lightbox -->

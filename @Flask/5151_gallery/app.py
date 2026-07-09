@@ -95,11 +95,6 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS settings (
         id INTEGER PRIMARY KEY DEFAULT 1,
-        storageType TEXT DEFAULT 'convex',
-        pdfStorageType TEXT DEFAULT 'convex',
-        megaEmail TEXT DEFAULT '',
-        megaPassword TEXT DEFAULT '',
-        megaSubfolder TEXT DEFAULT '',
         sortOrder TEXT DEFAULT 'newest',
         currentFolderId TEXT,
         colors TEXT,
@@ -112,13 +107,11 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM settings")
     if cursor.fetchone()[0] == 0:
         default_colors = json.dumps({
-            "cloudinary": "#0369a1",
-            "convex": "#ec4899",
-            "mega": "#ef4444"
+            "convex": "#ec4899"
         })
         cursor.execute("""
-        INSERT INTO settings (id, storageType, pdfStorageType, colors)
-        VALUES (1, 'convex', 'convex', ?)
+        INSERT INTO settings (id, colors)
+        VALUES (1, ?)
         """, (default_colors,))
     conn.commit()
     conn.close()
@@ -196,11 +189,7 @@ def get_settings():
     if settings.get("colors"):
         settings["colors"] = json.loads(settings["colors"])
     else:
-        settings["colors"] = {
-            "cloudinary": "#0369a1",
-            "convex": "#ec4899",
-            "mega": "#ef4444"
-        }
+        settings["colors"] = {"convex": "#ec4899"}
     settings["paintRecolorActive"] = bool(settings["paintRecolorActive"])
     return jsonify(settings)
 
@@ -214,8 +203,7 @@ def update_settings():
     params = []
     
     fields = [
-        "storageType", "pdfStorageType", "megaEmail", "megaPassword",
-        "megaSubfolder", "sortOrder", "currentFolderId", "paintRecolorActive"
+        "sortOrder", "currentFolderId", "paintRecolorActive"
     ]
     
     for field in fields:
