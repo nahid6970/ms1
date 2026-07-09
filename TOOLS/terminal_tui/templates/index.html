@@ -11477,7 +11477,6 @@
         function toggleMasterToolCheckbox(checked) {
             document.querySelectorAll('.ai-tool-sub').forEach(cb => {
                 cb.checked = checked;
-                cb.disabled = !checked;
             });
             const input = document.getElementById('tavily-api-key-input');
             if (input) input.disabled = !checked;
@@ -11536,6 +11535,21 @@
             }
         }
         function updateToolState() {
+            const masterCb = document.getElementById('ai-tool-master');
+            let anyChecked = false;
+            document.querySelectorAll('.ai-tool-sub').forEach(cb => {
+                if (cb.checked) anyChecked = true;
+            });
+            if (masterCb) {
+                masterCb.checked = anyChecked;
+            }
+            
+            const webSearchCb = document.getElementById('ai-tool-websearch');
+            const masterChecked = masterCb ? masterCb.checked : false;
+            if (webSearchCb) {
+                toggleWebSearchField(webSearchCb.checked && masterChecked);
+            }
+            
             saveAIToolsConfig();
         }
         function saveAIToolsConfig() {
@@ -11567,7 +11581,6 @@
                             if (config.tools && config.tools[toolName] !== undefined) {
                                 cb.checked = config.tools[toolName];
                             }
-                            cb.disabled = !config.master;
                         });
                         
                         const webSearchCb = document.getElementById('ai-tool-websearch');
