@@ -2399,10 +2399,10 @@
             </div>
             
             <!-- API Keys and Documentation for active provider -->
-            <div style="margin-bottom: 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 0 4px; flex-shrink: 0;">
+            <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 4px; flex-shrink: 0;">
                 
                 <!-- Documentation link -->
-                <div id="ai-provider-docs-link-container" style="font-size: 0.72rem; display: flex; align-items: center; gap: 6px; padding-bottom: 6px;">
+                <div id="ai-provider-docs-link-container" style="font-size: 0.72rem; display: flex; align-items: center; gap: 6px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     <span style="color:var(--text-secondary);">Documentation:</span>
                     <a id="ai-provider-docs-link" href="#" target="_blank" style="color: var(--accent-color); text-decoration: underline; font-weight: 500;"></a>
@@ -11593,7 +11593,11 @@
 
         function saveGroqAPIKey() {
             const val = document.getElementById('groq-api-key-input').value.trim();
-            if (!val) return;
+            if (!val) {
+                localStorage.removeItem('groq-api-key');
+                document.getElementById('ai-prompt-input').focus();
+                return;
+            }
             localStorage.setItem('groq-api-key', val);
             document.getElementById('groq-api-key-container').style.display = 'none';
             document.getElementById('groq-api-key-saved-msg').style.display = 'flex';
@@ -11602,8 +11606,8 @@
         }
 
         function clearGroqAPIKey() {
-            localStorage.removeItem('groq-api-key');
-            document.getElementById('groq-api-key-input').value = '';
+            const currentKey = localStorage.getItem('groq-api-key') || '';
+            document.getElementById('groq-api-key-input').value = currentKey;
             document.getElementById('groq-api-key-container').style.display = 'block';
             document.getElementById('groq-api-key-saved-msg').style.display = 'none';
             document.getElementById('groq-api-key-input').focus();
@@ -11611,7 +11615,11 @@
 
         function saveMorphAPIKey() {
             const val = document.getElementById('morph-api-key-input').value.trim();
-            if (!val) return;
+            if (!val) {
+                localStorage.removeItem('morph-api-key');
+                document.getElementById('ai-prompt-input').focus();
+                return;
+            }
             localStorage.setItem('morph-api-key', val);
             document.getElementById('morph-api-key-container').style.display = 'none';
             document.getElementById('morph-api-key-saved-msg').style.display = 'flex';
@@ -11620,8 +11628,8 @@
         }
 
         function clearMorphAPIKey() {
-            localStorage.removeItem('morph-api-key');
-            document.getElementById('morph-api-key-input').value = '';
+            const currentKey = localStorage.getItem('morph-api-key') || '';
+            document.getElementById('morph-api-key-input').value = currentKey;
             document.getElementById('morph-api-key-container').style.display = 'block';
             document.getElementById('morph-api-key-saved-msg').style.display = 'none';
             document.getElementById('morph-api-key-input').focus();
@@ -11629,7 +11637,11 @@
 
         function saveOpenRouterAPIKey() {
             const val = document.getElementById('openrouter-api-key-input').value.trim();
-            if (!val) return;
+            if (!val) {
+                localStorage.removeItem('openrouter-api-key');
+                document.getElementById('ai-prompt-input').focus();
+                return;
+            }
             localStorage.setItem('openrouter-api-key', val);
             document.getElementById('openrouter-api-key-container').style.display = 'none';
             document.getElementById('openrouter-api-key-saved-msg').style.display = 'flex';
@@ -11638,8 +11650,8 @@
         }
 
         function clearOpenRouterAPIKey() {
-            localStorage.removeItem('openrouter-api-key');
-            document.getElementById('openrouter-api-key-input').value = '';
+            const currentKey = localStorage.getItem('openrouter-api-key') || '';
+            document.getElementById('openrouter-api-key-input').value = currentKey;
             document.getElementById('openrouter-api-key-container').style.display = 'block';
             document.getElementById('openrouter-api-key-saved-msg').style.display = 'none';
             document.getElementById('openrouter-api-key-input').focus();
@@ -11654,7 +11666,11 @@
 
         function saveGeminiAPIKey() {
             const val = document.getElementById('ai-api-key-input').value.trim();
-            if (!val) return;
+            if (!val) {
+                localStorage.removeItem('gemini-api-key');
+                document.getElementById('ai-prompt-input').focus();
+                return;
+            }
             localStorage.setItem('gemini-api-key', val);
             document.getElementById('ai-api-key-container').style.display = 'none';
             document.getElementById('ai-api-key-saved-msg').style.display = 'flex';
@@ -11663,8 +11679,8 @@
         }
 
         function clearGeminiAPIKey() {
-            localStorage.removeItem('gemini-api-key');
-            document.getElementById('ai-api-key-input').value = '';
+            const currentKey = localStorage.getItem('gemini-api-key') || '';
+            document.getElementById('ai-api-key-input').value = currentKey;
             document.getElementById('ai-api-key-container').style.display = 'block';
             document.getElementById('ai-api-key-saved-msg').style.display = 'none';
             document.getElementById('ai-api-key-input').focus();
