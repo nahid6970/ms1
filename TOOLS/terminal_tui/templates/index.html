@@ -9187,12 +9187,31 @@
                         </div>
                     `;
                 } else {
+                    const TOOL_ICONS = {
+                        read_file: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Read File"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+                        list_directory: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="List Directory"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+                        get_system_info: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="System Info"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+                        web_search: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Web Search"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
+                    };
+                    
+                    const renderToolsUsed = (tools) => {
+                        if (!tools || !tools.length) return '';
+                        let html = `<span style="display:inline-flex; align-items:center; gap:4px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(255,255,255,0.08);">`;
+                        tools.forEach(t => {
+                            if (TOOL_ICONS[t]) {
+                                html += `<span title="Used tool: ${t}" style="display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:4px;">${TOOL_ICONS[t]}</span>`;
+                            }
+                        });
+                        html += `</span>`;
+                        return html;
+                    };
+
                     msgDiv.innerHTML = `
                         <div style="display:flex; justify-content:flex-start; align-items:flex-start; gap:6px;">
                             <div style="flex:1; max-width:85%; background:var(--bg-sidebar); border:1px solid var(--border-color); padding:8px 10px; border-radius:12px 12px 12px 2px; position:relative; word-break:break-word;">
                                 <div class="ai-md" style="font-family:inherit; font-size:inherit; color:var(--text-primary); line-height:1.5;">${renderMarkdown(msg.content)}</div>
                                 <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
-                                    ${msg.model ? `<span style="color:#22d3ee; font-size:0.65rem; margin-right:auto; font-weight:600;">🤖 ${msg.model}</span>` : ''}
+                                    ${msg.model ? `<span style="color:#22d3ee; font-size:0.65rem; margin-right:auto; font-weight:600; display:inline-flex; align-items:center;">🤖 ${msg.model}${renderToolsUsed(msg.tools_used)}</span>` : ''}
                                     <button onclick="regenerateAIChatCommand(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Regenerate/Retry" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none';">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                                     </button>
@@ -12062,7 +12081,7 @@
                 syncAIUsageFromServer();
                 
                 const command = data.command;
-                aiChatHistory.push({ role: 'assistant', content: command, model: model });
+                aiChatHistory.push({ role: 'assistant', content: command, model: model, tools_used: data.tools_used || [] });
                 saveAIChatHistory();
                 renderAIChatHistory();
             } catch (err) {

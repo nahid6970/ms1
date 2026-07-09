@@ -3576,6 +3576,7 @@ def api_ai_command():
     import ai_tools
     rate_limits = None
     usage_metadata = None
+    tools_used = []
     
     if provider == 'groq':
         if not model:
@@ -3632,6 +3633,7 @@ def api_ai_command():
                     except:
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    tools_used.append(func_name)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3714,6 +3716,7 @@ def api_ai_command():
                     except:
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    tools_used.append(func_name)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3796,6 +3799,7 @@ def api_ai_command():
                     except:
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    tools_used.append(func_name)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3888,6 +3892,7 @@ def api_ai_command():
                     fname = fc['name']
                     fargs = fc.get('args', {})
                     res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key)
+                    tools_used.append(fname)
                     tool_responses.append({
                         "functionResponse": {
                             "name": fname,
@@ -3935,7 +3940,7 @@ def api_ai_command():
     except Exception as ex:
         print("Error logging AI usage:", ex)
         
-    return jsonify({"command": cmd, "rate_limits": rate_limits, "usage_metadata": usage_metadata})
+    return jsonify({"command": cmd, "rate_limits": rate_limits, "usage_metadata": usage_metadata, "tools_used": list(set(tools_used))})
 
 @app.route('/api/ai-usage', methods=['GET'])
 def api_ai_usage():
