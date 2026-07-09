@@ -2418,9 +2418,11 @@
                             <button onclick="saveGeminiAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="ai-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
-                        <span>✨ Gemini API Key configured</span>
-                        <button onclick="clearGeminiAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                    <div id="ai-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                        <button onclick="clearGeminiAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            API Key
+                        </button>
                     </div>
                     <!-- Groq API Key -->
                     <div id="groq-api-key-container" style="display:none;">
@@ -2430,9 +2432,11 @@
                             <button onclick="saveGroqAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="groq-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
-                        <span>⚡ Groq API Key configured</span>
-                        <button onclick="clearGroqAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                    <div id="groq-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                        <button onclick="clearGroqAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            API Key
+                        </button>
                     </div>
                     <!-- Morph API Key -->
                     <div id="morph-api-key-container" style="display:none;">
@@ -2442,9 +2446,11 @@
                             <button onclick="saveMorphAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="morph-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
-                        <span>🔷 Morph API Key configured</span>
-                        <button onclick="clearMorphAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                    <div id="morph-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                        <button onclick="clearMorphAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            API Key
+                        </button>
                     </div>
                     <!-- OpenRouter API Key -->
                     <div id="openrouter-api-key-container" style="display:none;">
@@ -2454,9 +2460,11 @@
                             <button onclick="saveOpenRouterAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="openrouter-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
-                        <span>🌐 OpenRouter API Key configured</span>
-                        <button onclick="clearOpenRouterAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                    <div id="openrouter-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                        <button onclick="clearOpenRouterAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            API Key
+                        </button>
                     </div>
                 </div>
 
