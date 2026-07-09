@@ -11999,15 +11999,6 @@
             const promptInput = document.getElementById('ai-prompt-input');
             if (rePromptIdx !== null) {
                 prompt = aiChatHistory[rePromptIdx].content;
-                
-                const priorHistory = aiChatHistory.slice(0, rePromptIdx);
-                aiChatHistory[rePromptIdx].metadata = {
-                    system_prompt: system_instruction,
-                    tools: toolsEnabled,
-                    provider: provider,
-                    model: model,
-                    history_len: priorHistory.length
-                };
             } else {
                 prompt = promptInput.value.trim();
                 if (!prompt) return;
