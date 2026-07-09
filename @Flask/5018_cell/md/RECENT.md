@@ -16,9 +16,11 @@
 - The highlight uses the already-rendered cell text and does not rewrite preview HTML or force contentEditable focus.
 - This keeps the cell in preview mode while making the selected word span obvious before applying syntax.
 
-### ⌨️ F10 active mode live editing
+### ⌨️ F10 active mode draft overlay
 - Added a fixed top `F10` indicator while a hover selection is active.
-- Text keys, Backspace, Delete, Enter, Tab, and Arrow keys can now edit or move the F10 raw selection without entering contentEditable edit mode.
+- Text keys, Backspace, Delete, Shift+Enter, and Tab now update a temporary preview overlay without entering contentEditable edit mode.
+- Enter commits the draft overlay to the stored raw selection; Escape cancels F10 mode.
+- Duplicate raw text matches are ranked by the visible position nearest the mouse-selected preview word, so repeated terms should update the occurrence under the cursor.
 - Each edit updates the hidden source value, re-renders the markdown preview, and redraws the overlay highlight from the updated raw offsets.
 
 **Files Modified:**
@@ -32,7 +34,8 @@
 - ✅ F10 on a second word extends the selected span
 - ✅ F3 opens Quick Formatter for the stored F10 span
 - ✅ Highlight remains visual only and does not rewrite the rendered cell
-- ✅ F10 active mode supports live keyboard edits without entering edit mode
+- ✅ F10 active mode supports draft overlay edits without entering edit mode
+- ✅ F10 duplicate text matching prefers the occurrence nearest the mouse cursor
 
 ---
 

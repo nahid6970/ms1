@@ -23,6 +23,7 @@ let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerVa
 let f10FormatterAnchor = null;
 let f10HighlightOverlay = null;
 let f10ActiveIndicator = null;
+let f10DraftOverlay = null;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -476,11 +477,11 @@ function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart)
         const isEndBoundary = !after || /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/.test(after);
 
         if (isStartBoundary && isEndBoundary) {
-            const visibleBefore = stripMarkdown(raw.slice(0, index));
+            const candidateVisibleStart = findVisibleOffsetFromRaw(raw, index);
             candidates.push({
                 start: index,
                 end: index + visibleWord.length,
-                distance: Math.abs(visibleBefore.length - approximateVisibleStart)
+                distance: Math.abs(candidateVisibleStart - approximateVisibleStart)
             });
         }
 
@@ -497,6 +498,11 @@ function clearF10SelectionHighlight() {
         f10HighlightOverlay.remove();
     }
     f10HighlightOverlay = null;
+
+    if (f10DraftOverlay && f10DraftOverlay.isConnected) {
+        f10DraftOverlay.remove();
+    }
+    f10DraftOverlay = null;
 }
 
 function updateF10ActiveIndicator() {
@@ -517,9 +523,12 @@ function updateF10ActiveIndicator() {
     }
 
     f10FormatterAnchor.input = liveInput;
-    const selectedText = liveInput.value.substring(f10FormatterAnchor.start, f10FormatterAnchor.end);
+    const selectedText = f10FormatterAnchor.draftText !== undefined
+        ? f10FormatterAnchor.draftText
+        : liveInput.value.substring(f10FormatterAnchor.start, f10FormatterAnchor.end);
     const label = selectedText ? selectedText.replace(/\s+/g, ' ').trim() : 'cursor';
-    f10ActiveIndicator.textContent = `F10 ${label.slice(0, 24)}${label.length > 24 ? '...' : ''}`;
+    const mode = f10FormatterAnchor.draftText !== undefined ? 'F10 draft' : 'F10';
+    f10ActiveIndicator.textContent = `${mode} ${label.slice(0, 24)}${label.length > 24 ? '...' : ''}`;
 }
 
 function clearF10SelectionMode() {
@@ -593,6 +602,64 @@ function showF10SelectionHighlight(selection) {
     if (typeof liveInput.setSelectionRange === 'function') {
         liveInput.setSelectionRange(selection.start, selection.end);
     }
+}
+
+function showF10DraftOverlay() {
+    if (f10DraftOverlay && f10DraftOverlay.isConnected) {
+        f10DraftOverlay.remove();
+    }
+    f10DraftOverlay = null;
+
+    if (!f10FormatterAnchor || f10FormatterAnchor.draftText === undefined) return;
+
+    const liveInput = getF10CurrentInput();
+    const range = f10FormatterAnchor.previewRange;
+    if (!liveInput || !range || !range.startContainer.isConnected) return;
+
+    const cell = liveInput.closest('td[data-row][data-col]');
+    if (!cell) return;
+
+    const cellRect = cell.getBoundingClientRect();
+    let rect = range.getBoundingClientRect();
+    if (!rect || rect.height === 0) {
+        const rects = Array.from(range.getClientRects()).filter(r => r.height > 0);
+        rect = rects[0];
+    }
+    if (!rect) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'f10-draft-overlay';
+    overlay.textContent = f10FormatterAnchor.draftText || '';
+    overlay.style.left = (rect.left - cellRect.left) + 'px';
+    overlay.style.top = (rect.top - cellRect.top) + 'px';
+    overlay.style.minWidth = Math.max(rect.width, 8) + 'px';
+    overlay.style.minHeight = rect.height + 'px';
+    const previewStyle = window.getComputedStyle(range.startContainer.parentElement || cell);
+    overlay.style.fontFamily = previewStyle.fontFamily;
+    overlay.style.fontSize = previewStyle.fontSize;
+    overlay.style.fontWeight = previewStyle.fontWeight;
+    overlay.style.lineHeight = previewStyle.lineHeight;
+
+    cell.style.position = 'relative';
+    cell.appendChild(overlay);
+    f10DraftOverlay = overlay;
+}
+
+function setF10DraftText(text) {
+    if (!f10FormatterAnchor) return false;
+    f10FormatterAnchor = { ...f10FormatterAnchor, draftText: text };
+    showF10DraftOverlay();
+    updateF10ActiveIndicator();
+    return true;
+}
+
+function commitF10Draft() {
+    if (!f10FormatterAnchor || f10FormatterAnchor.draftText === undefined) return false;
+    const draftText = f10FormatterAnchor.draftText;
+    const start = f10FormatterAnchor.start;
+    const applied = applyF10RawEdit(draftText, start + draftText.length, start + draftText.length);
+    if (applied) clearF10SelectionMode();
+    return applied;
 }
 
 function createRangeFromVisibleOffsets(root, startOffset, endOffset) {
@@ -681,6 +748,7 @@ function refreshF10SelectionAfterRender() {
             f10FormatterAnchor.end
         );
         showF10SelectionHighlight(f10FormatterAnchor);
+        showF10DraftOverlay();
         updateF10ActiveIndicator();
     });
 }
@@ -810,12 +878,6 @@ function handleF10ActiveKey(e) {
     if (e.key === 'F10' || e.key === 'F3') return false;
     if (e.ctrlKey || e.metaKey || e.altKey) return false;
 
-    const value = input.value || '';
-    let start = Math.max(0, Math.min(f10FormatterAnchor.start, value.length));
-    let end = Math.max(start, Math.min(f10FormatterAnchor.end, value.length));
-    let replacement = null;
-    let nextStart = start;
-    let nextEnd = start;
     const consume = () => {
         e.preventDefault();
         e.stopPropagation();
@@ -825,6 +887,18 @@ function handleF10ActiveKey(e) {
     if (e.key === 'Escape') {
         consume();
         clearF10SelectionMode();
+        return true;
+    }
+
+    const hasDraft = f10FormatterAnchor.draftText !== undefined;
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+        consume();
+        return hasDraft ? commitF10Draft() : true;
+    }
+
+    if (hasDraft && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        consume();
         return true;
     }
 
@@ -848,34 +922,27 @@ function handleF10ActiveKey(e) {
         return moveF10SelectionVertical(1, e.shiftKey);
     }
 
+    let draftText = hasDraft ? f10FormatterAnchor.draftText : '';
     if (e.key === 'Backspace') {
         consume();
-        if (start === end && start > 0) start -= 1;
-        replacement = '';
-        nextStart = nextEnd = start;
+        draftText = hasDraft ? draftText.slice(0, -1) : '';
     } else if (e.key === 'Delete') {
         consume();
-        if (start === end && end < value.length) end += 1;
-        replacement = '';
-        nextStart = nextEnd = start;
-    } else if (e.key === 'Enter') {
+        draftText = '';
+    } else if (e.key === 'Enter' && e.shiftKey) {
         consume();
-        replacement = '\n';
-        nextStart = nextEnd = start + 1;
+        draftText += '\n';
     } else if (e.key === 'Tab') {
         consume();
-        replacement = '\t';
-        nextStart = nextEnd = start + 1;
+        draftText += '\t';
     } else if (e.key.length === 1) {
         consume();
-        replacement = e.key;
-        nextStart = nextEnd = start + e.key.length;
+        draftText += e.key;
+    } else {
+        return false;
     }
 
-    if (replacement === null) return false;
-
-    f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
-    return applyF10RawEdit(replacement, nextStart, nextEnd);
+    return setF10DraftText(draftText);
 }
 
 function mergeF10PreviewRanges(anchorRange, hoverRange) {

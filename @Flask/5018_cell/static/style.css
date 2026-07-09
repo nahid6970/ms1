@@ -2560,6 +2560,20 @@ td input::-moz-selection {
     border-radius: 2px;
 }
 
+.f10-draft-overlay {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    box-sizing: border-box;
+    background: #fff7cc;
+    color: #111827;
+    border: 1px solid #1f6feb;
+    border-radius: 3px;
+    padding: 0 2px;
+    white-space: pre-wrap;
+    box-shadow: 0 2px 8px rgba(31, 111, 235, 0.25);
+}
+
 .f10-active-indicator {
     position: fixed;
     top: 8px;

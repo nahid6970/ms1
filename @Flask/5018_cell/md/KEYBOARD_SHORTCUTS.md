@@ -25,7 +25,7 @@ Complete guide to all keyboard shortcuts available in the application.
 |----------|-------------|
 | **F3** | Open Quick Markdown Formatter (with text selected) |
 | **F8** | Search word under cursor/selection and copy to clipboard |
-| **F10** | Mark hovered word span for F3 formatting or live keyboard editing without entering edit mode |
+| **F10** | Mark hovered word span for F3 formatting or draft text preview without entering edit mode |
 | **F9** | Swap two words separated by space/comma (with text selected) |
 | **Ctrl+S** | Save data (manual save) |
 | **Alt+N** | Quick add row |
@@ -61,7 +61,7 @@ When text is selected, press F3 to open the formatter with these options:
 - **🔄 Find & Replace Syntax** - Replace syntax patterns in entire cell
 - **🔍➡️ Find & Replace Text** - Simple text search and replace in cell
 - **🛠️ Syntax Inspector** - Inspect nested syntaxes and reorder them
-- **F10** - Hover-select one word, then another word in the same cell to mark the full span for F3; while active, text keys, Backspace/Delete, Enter/Tab, and arrows edit or move the raw selection without entering edit mode
+- **F10** - Hover-select one word, then another word in the same cell to mark the full span for F3; while active, text keys, Backspace/Delete, Shift+Enter, and Tab update a temporary draft overlay, Enter commits it, Escape cancels it, and arrows move the selection before a draft starts
 
 ---
 
