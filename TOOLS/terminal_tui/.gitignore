@@ -27,6 +27,7 @@ __pycache__/
 # Local workspace specific files (moved to backup)
 projects.json
 Project_data/
+tui_config.json
 
 # Temporary/backup files
 *.bak
