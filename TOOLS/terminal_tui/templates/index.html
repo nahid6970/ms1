@@ -1962,6 +1962,13 @@
                                     <span>System Info</span>
                                     <input type="checkbox" class="ai-tool-sub" data-tool="get_system_info" onchange="updateToolState()" checked style="accent-color:var(--accent-color); cursor:pointer;">
                                 </label>
+                                <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); cursor:pointer; user-select:none; padding-left:4px;">
+                                    <span>Web Search</span>
+                                    <input type="checkbox" id="ai-tool-websearch" class="ai-tool-sub" data-tool="web_search" onchange="toggleWebSearchField(this.checked); updateToolState();" checked style="accent-color:var(--accent-color); cursor:pointer;">
+                                </label>
+                                <div id="tavily-key-container" style="display:flex; flex-direction:column; gap:2px; margin-top:2px; padding-left:4px;">
+                                    <input type="password" id="tavily-api-key-input" placeholder="Tavily API Key (tvly-...)" oninput="saveTavilyAPIKey()" style="width:100%; box-sizing:border-box; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.62rem; outline:none; height:20px;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -11352,7 +11359,29 @@
                 cb.checked = checked;
                 cb.disabled = !checked;
             });
+            const input = document.getElementById('tavily-api-key-input');
+            if (input) input.disabled = !checked;
+            
+            const webSearchCb = document.getElementById('ai-tool-websearch');
+            if (webSearchCb) toggleWebSearchField(webSearchCb.checked && checked);
+            
             saveAIToolsConfig();
+        }
+        function toggleWebSearchField(checked) {
+            const container = document.getElementById('tavily-key-container');
+            const input = document.getElementById('tavily-api-key-input');
+            const masterCb = document.getElementById('ai-tool-master');
+            const isMaster = masterCb ? masterCb.checked : true;
+            if (container) {
+                container.style.display = (checked && isMaster) ? 'flex' : 'none';
+            }
+            if (input) {
+                input.disabled = !checked || !isMaster;
+            }
+        }
+        function saveTavilyAPIKey() {
+            const key = document.getElementById('tavily-api-key-input').value.trim();
+            localStorage.setItem('tavily-api-key', key);
         }
         function updateToolState() {
             saveAIToolsConfig();
@@ -11370,6 +11399,10 @@
         function initAIToolsConfig() {
             try {
                 const saved = localStorage.getItem('ai-tools-config');
+                const tavilyKey = localStorage.getItem('tavily-api-key') || '';
+                const keyInput = document.getElementById('tavily-api-key-input');
+                if (keyInput) keyInput.value = tavilyKey;
+
                 if (saved) {
                     const config = JSON.parse(saved);
                     const masterCb = document.getElementById('ai-tool-master');
@@ -11382,6 +11415,11 @@
                             }
                             cb.disabled = !config.master;
                         });
+                        
+                        const webSearchCb = document.getElementById('ai-tool-websearch');
+                        if (webSearchCb) {
+                            toggleWebSearchField(webSearchCb.checked);
+                        }
                     }
                 }
             } catch (e) {
@@ -11877,7 +11915,8 @@
                         model: model,
                         system_instruction: system_instruction,
                         history: priorHistory, // Send all prior messages as history context
-                        tools_enabled: toolsEnabled
+                        tools_enabled: toolsEnabled,
+                        tavily_api_key: localStorage.getItem('tavily-api-key') || ''
                     })
                 });
                 

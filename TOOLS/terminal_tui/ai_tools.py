@@ -3,8 +3,9 @@ import platform
 import sys
 import datetime
 import json
+import requests
 
-def execute_tool(tool_name, arguments):
+def execute_tool(tool_name, arguments, tavily_api_key=None):
     """Executes a local tool and returns the result as a string."""
     try:
         if tool_name == "read_file":
@@ -45,6 +46,34 @@ def execute_tool(tool_name, arguments):
                 f"Current Working Directory: {os.getcwd()}"
             ]
             return "\n".join(info)
+
+        elif tool_name == "web_search":
+            query = arguments.get('query')
+            if not query:
+                return "Error: query argument is required."
+            if not tavily_api_key:
+                return "Error: Tavily API Key is not configured. Please set it in AI Tools Config (🛠️)."
+            
+            url = "https://api.tavily.com/search"
+            payload = {
+                "api_key": tavily_api_key,
+                "query": query,
+                "search_depth": "basic",
+                "max_results": 5
+            }
+            res = requests.post(url, json=payload, timeout=15)
+            if res.status_code != 200:
+                return f"Error from Tavily API (HTTP {res.status_code}): {res.text}"
+            
+            data = res.json()
+            results = data.get('results', [])
+            if not results:
+                return "No search results found."
+            
+            formatted = []
+            for r in results:
+                formatted.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content']}\n")
+            return "\n".join(formatted)
             
     except Exception as e:
         return f"Error executing {tool_name}: {str(e)}"
@@ -96,6 +125,23 @@ OPENAI_TOOLS = [
                 "properties": {}
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Searches the web for real-time information, latest documentation, or troubleshooting guides.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The search query, e.g., 'Python flask socketio emit to specific client'"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
     }
 ]
 
@@ -129,5 +175,26 @@ GEMINI_TOOLS = [{"functionDeclarations": [
             "type": "OBJECT",
             "properties": {}
         }
+    },
+    {
+        "name": "web_search",
+        "description": "Searches the web for real-time information, latest documentation, or troubleshooting guides.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "query": {"type": "STRING", "description": "The search query."}
+            },
+            "required": ["query"]
+        }
     }
 ]}]
+
+def get_enabled_openai_tools(enabled_list):
+    tools = [t for t in OPENAI_TOOLS if t['function']['name'] in enabled_list]
+    return tools if tools else None
+
+def get_enabled_gemini_tools(enabled_list):
+    declarations = [d for d in GEMINI_TOOLS[0]['functionDeclarations'] if d['name'] in enabled_list]
+    if not declarations:
+        return None
+    return [{"functionDeclarations": declarations}]

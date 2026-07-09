@@ -3562,6 +3562,8 @@ def api_ai_command():
     model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
     history = req.get('history', [])
+    tools_enabled = req.get('tools_enabled', [])
+    tavily_api_key = req.get('tavily_api_key', '')
     
     system_instruction = custom_system if custom_system else (
         "You are an AI assistant and command line helper. "
@@ -3596,14 +3598,16 @@ def api_ai_command():
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
+        enabled_tools = ai_tools.get_enabled_openai_tools(tools_enabled)
         payload = {
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024,
-            "tools": ai_tools.OPENAI_TOOLS,
-            "tool_choice": "auto"
+            "max_tokens": 1024
         }
+        if enabled_tools:
+            payload["tools"] = enabled_tools
+            payload["tool_choice"] = "auto"
         try:
             for _ in range(4):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
@@ -3627,7 +3631,7 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
-                    result_str = ai_tools.execute_tool(func_name, args)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3670,14 +3674,16 @@ def api_ai_command():
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
+        enabled_tools = ai_tools.get_enabled_openai_tools(tools_enabled)
         payload = {
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024,
-            "tools": ai_tools.OPENAI_TOOLS,
-            "tool_choice": "auto"
+            "max_tokens": 1024
         }
+        if enabled_tools:
+            payload["tools"] = enabled_tools
+            payload["tool_choice"] = "auto"
         try:
             for _ in range(4):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
@@ -3707,7 +3713,7 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
-                    result_str = ai_tools.execute_tool(func_name, args)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3750,14 +3756,16 @@ def api_ai_command():
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
+        enabled_tools = ai_tools.get_enabled_openai_tools(tools_enabled)
         payload = {
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024,
-            "tools": ai_tools.OPENAI_TOOLS,
-            "tool_choice": "auto"
+            "max_tokens": 1024
         }
+        if enabled_tools:
+            payload["tools"] = enabled_tools
+            payload["tool_choice"] = "auto"
         try:
             for _ in range(4):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
@@ -3787,7 +3795,7 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
-                    result_str = ai_tools.execute_tool(func_name, args)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3831,12 +3839,14 @@ def api_ai_command():
                 "parts": [{"text": prompt}]
             })
             
+        enabled_tools = ai_tools.get_enabled_gemini_tools(tools_enabled)
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         headers = {'Content-Type': 'application/json'}
         payload = {
-            "contents": contents,
-            "tools": ai_tools.GEMINI_TOOLS
+            "contents": contents
         }
+        if enabled_tools:
+            payload["tools"] = enabled_tools
         if system_instruction:
             if "gemma" in model.lower():
                 # Prepend to the first user message for Gemma since it doesn't support systemInstruction parameter
@@ -3877,7 +3887,7 @@ def api_ai_command():
                     fc = tc['functionCall']
                     fname = fc['name']
                     fargs = fc.get('args', {})
-                    res_str = ai_tools.execute_tool(fname, fargs)
+                    res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key)
                     tool_responses.append({
                         "functionResponse": {
                             "name": fname,
