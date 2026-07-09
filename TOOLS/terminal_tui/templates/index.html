@@ -1837,8 +1837,7 @@
         </div>
     </div>
 
-    <!-- ═══ AI Command Assistant (Shell Copilot) Popover ════════════════════════ -->
-    <div id="ai-copilot-popover" class="statusbar-popover" style="right:84px; width:380px; overflow:visible;">
+    <div id="ai-copilot-popover" class="statusbar-popover" style="right:84px; width:380px; overflow:visible; border-radius:0px !important;">
         <!-- Global tooltip for message metadata -->
         <div id="ai-global-tooltip" style="display:none; position:absolute; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; padding:8px; font-size:0.64rem; color:var(--text-secondary); box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:4000; text-align:left; pointer-events:none; width:200px; line-height:1.4;"></div>
         <div class="sbpop-header" style="display:flex; justify-content:space-between; align-items:center;">
@@ -11378,6 +11377,7 @@
                 <div style="margin-bottom:4px; max-height:80px; overflow-y:auto; word-break:break-all;"><span style="color:#e2e8f0; font-weight:600;">Prompt:</span> <span style="color:var(--text-muted); font-style:italic;">"${escapeHtml(msg.content)}"</span></div>
                 <div style="margin-bottom:4px;"><span style="color:#3b82f6; font-weight:600;">Provider:</span> <span style="color:var(--text-primary);">${escapeHtml(meta.provider)}</span></div>
                 <div style="margin-bottom:4px;"><span style="color:#22d3ee; font-weight:600;">Model:</span> <span style="color:var(--text-primary); font-family:monospace; font-size:0.58rem;">${escapeHtml(meta.model)}</span></div>
+                <div style="margin-bottom:4px;"><span style="color:#eab308; font-weight:600;">History:</span> <span style="color:var(--text-primary);">${meta.history_len || 0} messages</span></div>
                 <div style="margin-bottom:4px; max-height:80px; overflow-y:auto;"><span style="color:#a855f7; font-weight:600;">System:</span> <span style="color:var(--text-secondary); white-space:pre-wrap;">${meta.system_prompt ? escapeHtml(meta.system_prompt) : '(None)'}</span></div>
                 <div style="margin-bottom:4px;"><span style="color:#10b981; font-weight:600;">Tools:</span> <span style="color:var(--text-secondary);">${meta.tools && meta.tools.length ? escapeHtml(meta.tools.join(', ')) : '(None)'}</span></div>
                 ${usageHtml}
@@ -11942,11 +11942,14 @@
             const promptInput = document.getElementById('ai-prompt-input');
             if (rePromptIdx !== null) {
                 prompt = aiChatHistory[rePromptIdx].content;
+                
+                const priorHistory = aiChatHistory.slice(0, rePromptIdx);
                 aiChatHistory[rePromptIdx].metadata = {
                     system_prompt: system_instruction,
                     tools: toolsEnabled,
                     provider: provider,
-                    model: model
+                    model: model,
+                    history_len: priorHistory.length
                 };
             } else {
                 prompt = promptInput.value.trim();
@@ -11996,6 +11999,10 @@
             submitBtn.title = 'Thinking...';
             submitBtn.disabled = true;
 
+            const priorHistory = rePromptIdx !== null 
+                ? aiChatHistory.slice(0, rePromptIdx) 
+                : aiChatHistory.slice(0, -1);
+
             if (rePromptIdx === null) {
                 // Push user message to history, render, and clear prompt
                 aiChatHistory.push({ 
@@ -12005,17 +12012,14 @@
                         system_prompt: system_instruction,
                         tools: toolsEnabled,
                         provider: provider,
-                        model: model
+                        model: model,
+                        history_len: priorHistory.length
                     }
                 });
                 saveAIChatHistory();
                 renderAIChatHistory();
                 promptInput.value = '';
             }
-            
-            const priorHistory = rePromptIdx !== null 
-                ? aiChatHistory.slice(0, rePromptIdx) 
-                : aiChatHistory.slice(0, -1);
             
             try {
                 const res = await fetch('/api/ai-command', {
