@@ -638,6 +638,27 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
+    },
+    {
+      "name": "Facebook img",
+      "path": "C:\\@delta\\ms1\\Testing\\facebook_img_download",
+      "category": "Tool",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
     }
   ],
   "extension_icons": {

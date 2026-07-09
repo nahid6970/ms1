@@ -264,6 +264,14 @@
             "hotkey": "RAlt & Space",
             "name": "Remove Spaces and White spaces",
             "enabled": false
+        },
+        {
+            "name": "Terminal TUI Start/Stop",
+            "category": "General",
+            "description": "",
+            "hotkey": "!t",
+            "action": "ToggleTerminalApp() {\n    targetScript := \"C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py\"\n    targetTitle := \"MyUniqueTUITitle\" ; Matches what you set in Python\n\n    if (WinExist(targetTitle)) {\n        ; If window exists, close it\n        WinClose(targetTitle)\n        MsgBox(\"Terminal TUI stopped.\", \"Status\", \"Iconi T2\")\n    } else {\n        ; If not running, start it\n        try {\n            ; Note: Use 'Run' without Hide if you want to see the terminal, \n            ; otherwise keep \"Hide\"\n            Run('python \"' targetScript '\"') \n            MsgBox(\"Terminal TUI started.\", \"Status\", \"Iconi T1\")\n        } catch as e {\n            MsgBox(\"Failed to start script: \" . e.Message, \"Error\", \"Icon16\")\n        }\n    }\n}",
+            "enabled": true
         }
     ],
     "launcher_shortcuts": [
