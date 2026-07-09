@@ -2547,6 +2547,19 @@ td input::-moz-selection {
     border-radius: 2px;
 }
 
+.f10-selection-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.f10-selection-marker {
+    position: absolute;
+    background: rgba(33, 150, 243, 0.35);
+    border-radius: 2px;
+}
+
 /* Text highlight overlay for search */
 .text-highlight-overlay {
     position: absolute;

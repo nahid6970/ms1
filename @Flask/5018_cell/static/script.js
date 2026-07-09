@@ -21,6 +21,7 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
 let f10FormatterAnchor = null;
+let f10HighlightOverlay = null;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -479,6 +480,68 @@ function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart)
     return { start: candidates[0].start, end: candidates[0].end };
 }
 
+function clearF10SelectionHighlight() {
+    if (f10HighlightOverlay && f10HighlightOverlay.isConnected) {
+        f10HighlightOverlay.remove();
+    }
+    f10HighlightOverlay = null;
+}
+
+function showF10SelectionHighlight(selection) {
+    clearF10SelectionHighlight();
+    if (!selection || !selection.input || !selection.input.isConnected) return;
+
+    if (selection.previewRange &&
+        selection.previewRange.startContainer.isConnected &&
+        selection.previewRange.endContainer.isConnected) {
+        const cell = selection.input.closest('td[data-row][data-col]');
+        if (!cell) return;
+
+        const cellRect = cell.getBoundingClientRect();
+        const overlay = document.createElement('div');
+        overlay.className = 'f10-selection-overlay';
+
+        const rects = Array.from(selection.previewRange.getClientRects())
+            .filter(rect => rect.width > 0 && rect.height > 0);
+
+        rects.forEach(rect => {
+            const marker = document.createElement('div');
+            marker.className = 'f10-selection-marker';
+            marker.style.left = (rect.left - cellRect.left) + 'px';
+            marker.style.top = (rect.top - cellRect.top) + 'px';
+            marker.style.width = rect.width + 'px';
+            marker.style.height = rect.height + 'px';
+            overlay.appendChild(marker);
+        });
+
+        if (overlay.childNodes.length > 0) {
+            cell.style.position = 'relative';
+            cell.appendChild(overlay);
+            f10HighlightOverlay = overlay;
+        }
+        return;
+    }
+
+    if (typeof selection.input.setSelectionRange === 'function') {
+        selection.input.setSelectionRange(selection.start, selection.end);
+    }
+}
+
+function mergeF10PreviewRanges(anchorRange, hoverRange) {
+    if (!anchorRange || !hoverRange) return null;
+    if (!anchorRange.startContainer.isConnected || !hoverRange.startContainer.isConnected) return null;
+
+    const merged = document.createRange();
+    if (anchorRange.compareBoundaryPoints(Range.START_TO_START, hoverRange) <= 0) {
+        merged.setStart(anchorRange.startContainer, anchorRange.startOffset);
+        merged.setEnd(hoverRange.endContainer, hoverRange.endOffset);
+    } else {
+        merged.setStart(hoverRange.startContainer, hoverRange.startOffset);
+        merged.setEnd(anchorRange.endContainer, anchorRange.endOffset);
+    }
+    return merged;
+}
+
 function getHoverFormatterSelection() {
     const range = getCaretRangeAtPoint(lastMouseX, lastMouseY);
     if (!range) return null;
@@ -512,9 +575,12 @@ function getHoverFormatterSelection() {
         const visibleStart = getTextOffsetWithinElement(root, node, localStart);
         const visibleEnd = getTextOffsetWithinElement(root, node, localEnd);
         const visibleWord = text.substring(localStart, localEnd);
+        const previewRange = document.createRange();
+        previewRange.setStart(node, localStart);
+        previewRange.setEnd(node, localEnd);
         const rawMatch = findRawWordNearVisibleOffset(rawValue, visibleWord, visibleStart);
         if (rawMatch) {
-            return { input, start: rawMatch.start, end: rawMatch.end };
+            return { input, start: rawMatch.start, end: rawMatch.end, previewRange };
         }
 
         const map = createRawVisibleOffsetMap(rawValue);
@@ -522,7 +588,7 @@ function getHoverFormatterSelection() {
         const end = map[Math.min(visibleEnd, map.length - 1)];
         if (start === undefined || end === undefined || start >= end) return null;
 
-        return { input, start, end };
+        return { input, start, end, previewRange };
     }
 
     if (root === input) {
@@ -685,6 +751,7 @@ function handleKeyboardShortcuts(e) {
         e.preventDefault();
         if (f10FormatterAnchor) {
             if (!f10FormatterAnchor.input || !f10FormatterAnchor.input.isConnected) {
+                clearF10SelectionHighlight();
                 f10FormatterAnchor = null;
                 showToast('F10 selection expired', 'warning');
                 return;
@@ -867,6 +934,7 @@ function handleKeyboardShortcuts(e) {
 
         let start = hoverPick.start;
         let end = hoverPick.end;
+        let previewRange = hoverPick.previewRange || null;
         const sameAnchor = f10FormatterAnchor &&
             f10FormatterAnchor.input === hoverPick.input &&
             f10FormatterAnchor.start !== hoverPick.start;
@@ -874,9 +942,12 @@ function handleKeyboardShortcuts(e) {
         if (sameAnchor) {
             start = Math.min(f10FormatterAnchor.start, hoverPick.start);
             end = Math.max(f10FormatterAnchor.end, hoverPick.end);
+            previewRange = mergeF10PreviewRanges(f10FormatterAnchor.previewRange, hoverPick.previewRange);
         }
 
-        f10FormatterAnchor = { input: hoverPick.input, start, end };
+        clearF10SelectionHighlight();
+        f10FormatterAnchor = { input: hoverPick.input, start, end, previewRange };
+        showF10SelectionHighlight(f10FormatterAnchor);
         showToast(sameAnchor ? 'F10 span ready. Press F3 to format.' : 'F10 word ready. Press F3 to format.', 'info');
         return;
     }
@@ -10616,6 +10687,7 @@ function closeQuickFormatter() {
     formatter.style.display = 'none';
     quickFormatterTarget = null;
     selectedFormats = [];
+    clearF10SelectionHighlight();
     f10FormatterAnchor = null;
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
 
