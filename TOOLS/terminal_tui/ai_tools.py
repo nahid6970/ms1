@@ -98,3 +98,36 @@ OPENAI_TOOLS = [
         }
     }
 ]
+
+GEMINI_TOOLS = [{"functionDeclarations": [
+    {
+        "name": "read_file",
+        "description": "Reads the contents of a local file.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING", "description": "Absolute or relative path to the file to read."}
+            },
+            "required": ["filepath"]
+        }
+    },
+    {
+        "name": "list_directory",
+        "description": "Lists the files and folders in a local directory.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "path": {"type": "STRING", "description": "Path to the directory, e.g. ./ or C:/path/to/folder"}
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "get_system_info",
+        "description": "Gets the current system OS, Python version, current working directory, and local time.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {}
+        }
+    }
+]}]

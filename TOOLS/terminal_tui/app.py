@@ -3834,7 +3834,8 @@ def api_ai_command():
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         headers = {'Content-Type': 'application/json'}
         payload = {
-            "contents": contents
+            "contents": contents,
+            "tools": ai_tools.GEMINI_TOOLS
         }
         if system_instruction:
             if "gemma" in model.lower():
@@ -3848,17 +3849,46 @@ def api_ai_command():
                     "parts": [{"text": system_instruction}]
                 }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=60)
-            res_data = res.json()
-            if res.status_code != 200:
-                error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
-                return jsonify({"error": error_msg}), res.status_code
-            
-            candidates = res_data.get('candidates', [])
-            if not candidates:
-                return jsonify({"error": "No response from Gemini API"}), 500
-            
-            cmd = candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+            for _ in range(4):
+                res = requests.post(url, json=payload, headers=headers, timeout=60)
+                res_data = res.json()
+                if res.status_code != 200:
+                    error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
+                    return jsonify({"error": error_msg}), res.status_code
+                
+                candidates = res_data.get('candidates', [])
+                if not candidates:
+                    return jsonify({"error": "No response from Gemini API"}), 500
+                
+                content_obj = candidates[0].get('content', {})
+                parts = content_obj.get('parts', [])
+                
+                tool_calls = [p for p in parts if 'functionCall' in p]
+                if not tool_calls:
+                    cmd = parts[0].get('text', '').strip() if parts and 'text' in parts[0] else ''
+                    break
+                
+                # Append assistant's function call message
+                payload["contents"].append(content_obj)
+                
+                # Execute tools and prepare response
+                tool_responses = []
+                for tc in tool_calls:
+                    fc = tc['functionCall']
+                    fname = fc['name']
+                    fargs = fc.get('args', {})
+                    res_str = ai_tools.execute_tool(fname, fargs)
+                    tool_responses.append({
+                        "functionResponse": {
+                            "name": fname,
+                            "response": {"result": res_str}
+                        }
+                    })
+                
+                payload["contents"].append({
+                    "role": "function",
+                    "parts": tool_responses
+                })
             rate_limits = {
                 "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", res.headers.get("x-ratelimit-remaining", "")),
                 "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
