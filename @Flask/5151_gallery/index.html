@@ -3874,16 +3874,12 @@
       localStorage.setItem(RECOLOR_ACTIVE_KEY, active ? 'true' : 'false');
 
       try {
-        const cl = window._convexClient;
-        const api = window._convexApi;
-        const settings = await cl.query(api.images.getSettings);
-        await cl.mutation(api.images.updateSettings, {
-          storageType: settings.storageType || 'cloudinary',
+        await apiPost('images/updateSettings', {
           paintRecolorActive: active,
           paintRecolorRules: rulesStr
         });
       } catch (err) {
-        console.error('Failed to save recolor settings to Convex', err);
+        console.error('Failed to save recolor settings', err);
       }
     };
 
@@ -4101,17 +4097,15 @@
         container.style.height = 'auto';
       }
       
-      // Load recolor settings from Convex with LocalStorage cache fallback
+      // Load recolor settings
       let active = false;
       let savedRulesStr = null;
       try {
-        const cl = window._convexClient;
-        const api = window._convexApi;
-        const settings = await cl.query(api.images.getSettings);
+        const settings = await apiGet('settings');
         active = !!settings.paintRecolorActive;
         savedRulesStr = settings.paintRecolorRules || null;
       } catch (err) {
-        console.error('Failed to load recolor settings from Convex, loading cache', err);
+        console.error('Failed to load recolor settings, using cache', err);
         active = localStorage.getItem(RECOLOR_ACTIVE_KEY) === 'true';
         savedRulesStr = localStorage.getItem(RECOLOR_RULES_KEY);
       }
@@ -4155,7 +4149,11 @@
       
       try {
         if (isPdf) {
-          const loadingTask = pdfjsLib.getDocument(url);
+          // Pre-fetch PDF bytes to avoid intermittent XHR failures inside pdf.js
+          const pdfResponse = await fetch(url);
+          if (!pdfResponse.ok) throw new Error(`HTTP ${pdfResponse.status} fetching PDF`);
+          const pdfData = await pdfResponse.arrayBuffer();
+          const loadingTask = pdfjsLib.getDocument({ data: pdfData });
           const pdf = await loadingTask.promise;
           const numPages = pdf.numPages;
           const pages = [];
@@ -5310,9 +5308,7 @@
           mimeType = 'image/jpeg';
         }
 
-        const cl = window._convexClient;
-        const api = window._convexApi;
-        const uploadUrl = await cl.mutation(api.images.generateUploadUrl);
+        const uploadUrl = await apiPost('images/generateUploadUrl', {});
         const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': mimeType }, body: blob });
         const { storageId } = await res.json();
         let filenameToSave = _paintFilename;
@@ -5331,7 +5327,7 @@
         }
         
         // Pass blob.size to fileSize mutation argument to prevent it from displaying as N/A in the gallery!
-        const newId = await cl.mutation(api.images.saveStorageImage, { 
+        const newId = await apiPost('images/saveStorageImage', { 
           storageId, 
           filename: filenameToSave, 
           fileSize: blob.size, 
@@ -5339,7 +5335,7 @@
         });
         
         if (!isSaveAs) {
-          await cl.mutation(api.images.remove, { id: _paintId });
+          await apiPost('images/remove', { id: _paintId });
         }
         
         // Update active editor session variables so that subsequent operations save to the new record
