@@ -16,16 +16,23 @@
 - The highlight uses the already-rendered cell text and does not rewrite preview HTML or force contentEditable focus.
 - This keeps the cell in preview mode while making the selected word span obvious before applying syntax.
 
+### ⌨️ F10 active mode live editing
+- Added a fixed top `F10` indicator while a hover selection is active.
+- Text keys, Backspace, Delete, Enter, Tab, and Arrow keys can now edit or move the F10 raw selection without entering contentEditable edit mode.
+- Each edit updates the hidden source value, re-renders the markdown preview, and redraws the overlay highlight from the updated raw offsets.
+
 **Files Modified:**
 - `static/script.js` — F10 hover word detection, two-step span tracking, formatter hookup, non-editing overlay highlight
 - `static/style.css` — F10 overlay highlight styles
 - `md/KEYBOARD_SHORTCUTS.md` — documented F10 behavior
+- `templates/index.html` — documented F10 in the in-app keyboard shortcuts modal
 
 **Current Status:**
 - ✅ F10 marks a hovered word without entering edit mode
 - ✅ F10 on a second word extends the selected span
 - ✅ F3 opens Quick Formatter for the stored F10 span
 - ✅ Highlight remains visual only and does not rewrite the rendered cell
+- ✅ F10 active mode supports live keyboard edits without entering edit mode
 
 ---
 

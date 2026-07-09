@@ -22,6 +22,7 @@ let lastMouseY = 0;
 let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
 let f10FormatterAnchor = null;
 let f10HighlightOverlay = null;
+let f10ActiveIndicator = null;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -386,6 +387,17 @@ function getTextOffsetWithinElement(root, targetNode, targetOffset) {
     return offset;
 }
 
+function getRenderedTextOffset(root, targetNode, targetOffset) {
+    try {
+        const range = document.createRange();
+        range.selectNodeContents(root);
+        range.setEnd(targetNode, targetOffset);
+        return range.toString().length;
+    } catch (error) {
+        return getTextOffsetWithinElement(root, targetNode, targetOffset);
+    }
+}
+
 function getMarkdownMarkerLengthAt(raw, index) {
     const rest = raw.slice(index);
     const pairedMarkers = ['**', '@@', '__', '~~', '==', '!!', '??', '##', '_.', '._', '[[', ']]', '{{{', '}}}', '```'];
@@ -487,29 +499,85 @@ function clearF10SelectionHighlight() {
     f10HighlightOverlay = null;
 }
 
+function updateF10ActiveIndicator() {
+    const liveInput = getF10CurrentInput();
+    if (!f10FormatterAnchor || !liveInput) {
+        if (f10ActiveIndicator) {
+            f10ActiveIndicator.remove();
+            f10ActiveIndicator = null;
+        }
+        return;
+    }
+
+    if (!f10ActiveIndicator) {
+        f10ActiveIndicator = document.createElement('div');
+        f10ActiveIndicator.className = 'f10-active-indicator';
+        f10ActiveIndicator.title = 'F10 selection mode active';
+        document.body.appendChild(f10ActiveIndicator);
+    }
+
+    f10FormatterAnchor.input = liveInput;
+    const selectedText = liveInput.value.substring(f10FormatterAnchor.start, f10FormatterAnchor.end);
+    const label = selectedText ? selectedText.replace(/\s+/g, ' ').trim() : 'cursor';
+    f10ActiveIndicator.textContent = `F10 ${label.slice(0, 24)}${label.length > 24 ? '...' : ''}`;
+}
+
+function clearF10SelectionMode() {
+    clearF10SelectionHighlight();
+    f10FormatterAnchor = null;
+    updateF10ActiveIndicator();
+}
+
+function getF10CurrentInput(anchor = f10FormatterAnchor) {
+    if (!anchor) return null;
+    if (anchor.input && anchor.input.isConnected) return anchor.input;
+
+    if (anchor.rowIndex === undefined || anchor.colIndex === undefined) return null;
+    const table = document.getElementById('dataTable');
+    const cell = table?.querySelector(`td[data-row="${anchor.rowIndex}"][data-col="${anchor.colIndex}"]`);
+    return cell ? cell.querySelector('input, textarea') : null;
+}
+
 function showF10SelectionHighlight(selection) {
     clearF10SelectionHighlight();
-    if (!selection || !selection.input || !selection.input.isConnected) return;
+    const liveInput = getF10CurrentInput(selection);
+    if (!selection || !liveInput) return;
 
     if (selection.previewRange &&
         selection.previewRange.startContainer.isConnected &&
         selection.previewRange.endContainer.isConnected) {
-        const cell = selection.input.closest('td[data-row][data-col]');
+        const cell = liveInput.closest('td[data-row][data-col]');
         if (!cell) return;
 
         const cellRect = cell.getBoundingClientRect();
         const overlay = document.createElement('div');
         overlay.className = 'f10-selection-overlay';
 
-        const rects = Array.from(selection.previewRange.getClientRects())
+        let rects = Array.from(selection.previewRange.getClientRects())
             .filter(rect => rect.width > 0 && rect.height > 0);
+        if (rects.length === 0) {
+            const caretRect = selection.previewRange.getBoundingClientRect();
+            if (caretRect.height > 0) rects = [caretRect];
+        }
+        if (rects.length === 0) {
+            const preview = cell.querySelector('.markdown-preview');
+            const fallbackRect = preview?.getBoundingClientRect();
+            if (fallbackRect) {
+                rects = [{
+                    left: fallbackRect.left + 8,
+                    top: fallbackRect.top + 6,
+                    width: 2,
+                    height: parseFloat(window.getComputedStyle(preview).lineHeight) || 18
+                }];
+            }
+        }
 
         rects.forEach(rect => {
             const marker = document.createElement('div');
             marker.className = 'f10-selection-marker';
             marker.style.left = (rect.left - cellRect.left) + 'px';
             marker.style.top = (rect.top - cellRect.top) + 'px';
-            marker.style.width = rect.width + 'px';
+            marker.style.width = Math.max(rect.width, 2) + 'px';
             marker.style.height = rect.height + 'px';
             overlay.appendChild(marker);
         });
@@ -522,9 +590,292 @@ function showF10SelectionHighlight(selection) {
         return;
     }
 
-    if (typeof selection.input.setSelectionRange === 'function') {
-        selection.input.setSelectionRange(selection.start, selection.end);
+    if (typeof liveInput.setSelectionRange === 'function') {
+        liveInput.setSelectionRange(selection.start, selection.end);
     }
+}
+
+function createRangeFromVisibleOffsets(root, startOffset, endOffset) {
+    const range = document.createRange();
+    let currentOffset = 0;
+    let startSet = false;
+    let endSet = false;
+
+    const setPoint = (node, nodeOffset, isStart) => {
+        if (isStart) {
+            range.setStart(node, nodeOffset);
+            startSet = true;
+        } else {
+            range.setEnd(node, nodeOffset);
+            endSet = true;
+        }
+    };
+
+    const walk = (node) => {
+        if (endSet) return;
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            const length = node.textContent.length;
+            if (!startSet && currentOffset + length >= startOffset) {
+                setPoint(node, Math.max(0, startOffset - currentOffset), true);
+            }
+            if (!endSet && currentOffset + length >= endOffset) {
+                setPoint(node, Math.max(0, endOffset - currentOffset), false);
+            }
+            currentOffset += length;
+            return;
+        }
+
+        if (node.nodeName === 'BR') {
+            if (!startSet && currentOffset >= startOffset) setPoint(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node), true);
+            currentOffset += 1;
+            if (!endSet && currentOffset >= endOffset) setPoint(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node) + 1, false);
+            return;
+        }
+
+        for (const child of node.childNodes) {
+            walk(child);
+            if (endSet) return;
+        }
+    };
+
+    walk(root);
+
+    if (!startSet) {
+        range.selectNodeContents(root);
+        range.collapse(false);
+    }
+    if (!endSet) {
+        range.setEnd(range.startContainer, range.startOffset);
+    }
+
+    return range;
+}
+
+function getPreviewRangeForRawSelection(input, start, end) {
+    input = getF10CurrentInput({ input }) || input;
+    if (!input) return null;
+    const cell = input.closest('td[data-row][data-col]');
+    const preview = cell ? cell.querySelector('.markdown-preview') : null;
+    if (!preview || preview.classList.contains('editing')) return null;
+
+    const raw = input.value || '';
+    const visibleStart = findVisibleOffsetFromRaw(raw, start);
+    const visibleEnd = findVisibleOffsetFromRaw(raw, end);
+    return createRangeFromVisibleOffsets(preview, visibleStart, Math.max(visibleStart, visibleEnd));
+}
+
+function refreshF10SelectionAfterRender() {
+    if (!f10FormatterAnchor || !getF10CurrentInput()) {
+        clearF10SelectionMode();
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        const liveInput = getF10CurrentInput();
+        if (!f10FormatterAnchor || !liveInput) return;
+        f10FormatterAnchor.input = liveInput;
+        f10FormatterAnchor.previewRange = getPreviewRangeForRawSelection(
+            liveInput,
+            f10FormatterAnchor.start,
+            f10FormatterAnchor.end
+        );
+        showF10SelectionHighlight(f10FormatterAnchor);
+        updateF10ActiveIndicator();
+    });
+}
+
+function applyF10RawEdit(replacement, newStart, newEnd) {
+    const anchor = f10FormatterAnchor;
+    const input = getF10CurrentInput(anchor);
+    if (!anchor || !input) return false;
+
+    const value = input.value || '';
+    const start = Math.max(0, Math.min(anchor.start, value.length));
+    const end = Math.max(start, Math.min(anchor.end, value.length));
+    if (start !== end && anchor.rawText !== undefined && value.substring(start, end) !== anchor.rawText) {
+        clearF10SelectionMode();
+        showToast('F10 selection changed. Select it again.', 'warning');
+        return true;
+    }
+    const nextValue = value.substring(0, start) + replacement + value.substring(end);
+
+    input.value = nextValue;
+    f10FormatterAnchor = {
+        ...anchor,
+        input,
+        start: newStart,
+        end: newEnd,
+        rawText: ''
+    };
+
+    const cell = input.closest('td[data-row][data-col]');
+    if (cell) {
+        const rowIndex = parseInt(cell.dataset.row);
+        const colIndex = parseInt(cell.dataset.col);
+        if (!isNaN(rowIndex) && !isNaN(colIndex)) {
+            updateCell(rowIndex, colIndex, nextValue);
+        } else {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    } else {
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    refreshF10SelectionAfterRender();
+    return true;
+}
+
+function moveF10Selection(delta, extend = false) {
+    const input = getF10CurrentInput();
+    if (!f10FormatterAnchor || !input) return false;
+    f10FormatterAnchor.input = input;
+    const length = input.value.length;
+    let start = f10FormatterAnchor.start;
+    let end = f10FormatterAnchor.end;
+
+    if (extend) {
+        end = Math.max(0, Math.min(length, end + delta));
+        if (end < start) [start, end] = [end, start];
+    } else if (start !== end) {
+        const pos = delta < 0 ? start : end;
+        start = end = pos;
+    } else {
+        start = end = Math.max(0, Math.min(length, start + delta));
+    }
+
+    f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
+    f10FormatterAnchor.rawText = input.value.substring(start, end);
+    f10FormatterAnchor.previewRange = getPreviewRangeForRawSelection(f10FormatterAnchor.input, start, end);
+    showF10SelectionHighlight(f10FormatterAnchor);
+    updateF10ActiveIndicator();
+    return true;
+}
+
+function moveF10SelectionVertical(direction, extend = false) {
+    const input = getF10CurrentInput();
+    if (!f10FormatterAnchor || !input) return false;
+    f10FormatterAnchor.input = input;
+
+    const value = input.value || '';
+    const lineStarts = [0];
+    for (let i = 0; i < value.length; i++) {
+        if (value[i] === '\n') lineStarts.push(i + 1);
+    }
+
+    const currentPos = direction < 0 ? f10FormatterAnchor.start : f10FormatterAnchor.end;
+    let lineIndex = lineStarts.findIndex((lineStart, index) => {
+        const nextStart = lineStarts[index + 1] ?? (value.length + 1);
+        return currentPos >= lineStart && currentPos < nextStart;
+    });
+
+    if (lineIndex === -1) lineIndex = lineStarts.length - 1;
+    const currentLineStart = lineStarts[lineIndex];
+    const column = currentPos - currentLineStart;
+    const targetLineIndex = Math.max(0, Math.min(lineStarts.length - 1, lineIndex + direction));
+    const targetLineStart = lineStarts[targetLineIndex];
+    const targetLineEnd = (lineStarts[targetLineIndex + 1] ?? (value.length + 1)) - 1;
+    const targetPos = Math.max(targetLineStart, Math.min(targetLineStart + column, targetLineEnd));
+
+    if (extend) {
+        const start = Math.min(f10FormatterAnchor.start, targetPos);
+        const end = Math.max(f10FormatterAnchor.start, targetPos);
+        f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
+    } else {
+        f10FormatterAnchor = { ...f10FormatterAnchor, start: targetPos, end: targetPos };
+    }
+
+    f10FormatterAnchor.rawText = input.value.substring(f10FormatterAnchor.start, f10FormatterAnchor.end);
+    f10FormatterAnchor.previewRange = getPreviewRangeForRawSelection(
+        f10FormatterAnchor.input,
+        f10FormatterAnchor.start,
+        f10FormatterAnchor.end
+    );
+    showF10SelectionHighlight(f10FormatterAnchor);
+    updateF10ActiveIndicator();
+    return true;
+}
+
+function handleF10ActiveKey(e) {
+    if (!f10FormatterAnchor) return false;
+    const input = getF10CurrentInput();
+    if (!input) {
+        clearF10SelectionMode();
+        return false;
+    }
+    f10FormatterAnchor.input = input;
+
+    const formatter = document.getElementById('quickFormatter');
+    if (formatter && formatter.style.display === 'block') return false;
+    if (e.key === 'F10' || e.key === 'F3') return false;
+    if (e.ctrlKey || e.metaKey || e.altKey) return false;
+
+    const value = input.value || '';
+    let start = Math.max(0, Math.min(f10FormatterAnchor.start, value.length));
+    let end = Math.max(start, Math.min(f10FormatterAnchor.end, value.length));
+    let replacement = null;
+    let nextStart = start;
+    let nextEnd = start;
+    const consume = () => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+    };
+
+    if (e.key === 'Escape') {
+        consume();
+        clearF10SelectionMode();
+        return true;
+    }
+
+    if (e.key === 'ArrowLeft') {
+        consume();
+        return moveF10Selection(-1, e.shiftKey);
+    }
+
+    if (e.key === 'ArrowRight') {
+        consume();
+        return moveF10Selection(1, e.shiftKey);
+    }
+
+    if (e.key === 'ArrowUp') {
+        consume();
+        return moveF10SelectionVertical(-1, e.shiftKey);
+    }
+
+    if (e.key === 'ArrowDown') {
+        consume();
+        return moveF10SelectionVertical(1, e.shiftKey);
+    }
+
+    if (e.key === 'Backspace') {
+        consume();
+        if (start === end && start > 0) start -= 1;
+        replacement = '';
+        nextStart = nextEnd = start;
+    } else if (e.key === 'Delete') {
+        consume();
+        if (start === end && end < value.length) end += 1;
+        replacement = '';
+        nextStart = nextEnd = start;
+    } else if (e.key === 'Enter') {
+        consume();
+        replacement = '\n';
+        nextStart = nextEnd = start + 1;
+    } else if (e.key === 'Tab') {
+        consume();
+        replacement = '\t';
+        nextStart = nextEnd = start + 1;
+    } else if (e.key.length === 1) {
+        consume();
+        replacement = e.key;
+        nextStart = nextEnd = start + e.key.length;
+    }
+
+    if (replacement === null) return false;
+
+    f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
+    return applyF10RawEdit(replacement, nextStart, nextEnd);
 }
 
 function mergeF10PreviewRanges(anchorRange, hoverRange) {
@@ -572,23 +923,35 @@ function getHoverFormatterSelection() {
         while (localEnd < text.length && !boundaryRegex.test(text[localEnd])) localEnd++;
         if (localStart >= localEnd) return null;
 
-        const visibleStart = getTextOffsetWithinElement(root, node, localStart);
-        const visibleEnd = getTextOffsetWithinElement(root, node, localEnd);
+        const visibleStart = getRenderedTextOffset(root, node, localStart);
+        const visibleEnd = getRenderedTextOffset(root, node, localEnd);
         const visibleWord = text.substring(localStart, localEnd);
         const previewRange = document.createRange();
         previewRange.setStart(node, localStart);
         previewRange.setEnd(node, localEnd);
-        const rawMatch = findRawWordNearVisibleOffset(rawValue, visibleWord, visibleStart);
-        if (rawMatch) {
-            return { input, start: rawMatch.start, end: rawMatch.end, previewRange };
+        const map = calculateVisibleToRawMap(rawValue);
+        let start = map[Math.min(visibleStart, map.length - 1)];
+        let end = map[Math.min(visibleEnd, map.length - 1)];
+
+        if (start !== undefined && end !== undefined && start < end) {
+            const mappedText = rawValue.substring(start, end);
+            if (mappedText === visibleWord || stripMarkdown(mappedText) === visibleWord) {
+                return { input, start, end, previewRange, rawText: mappedText };
+            }
         }
 
-        const map = createRawVisibleOffsetMap(rawValue);
-        const start = map[Math.min(visibleStart, map.length - 1)];
-        const end = map[Math.min(visibleEnd, map.length - 1)];
-        if (start === undefined || end === undefined || start >= end) return null;
+        const rawMatch = findRawWordNearVisibleOffset(rawValue, visibleWord, visibleStart);
+        if (rawMatch) {
+            return {
+                input,
+                start: rawMatch.start,
+                end: rawMatch.end,
+                previewRange,
+                rawText: rawValue.substring(rawMatch.start, rawMatch.end)
+            };
+        }
 
-        return { input, start, end, previewRange };
+        return null;
     }
 
     if (root === input) {
@@ -609,6 +972,10 @@ function handleKeyboardShortcuts(e) {
     // Ignore events from popup textarea to prevent interference
     if (e.target && e.target.classList && e.target.classList.contains('recent-edit-textarea')) {
         return; // Let the popup handle its own events
+    }
+
+    if (handleF10ActiveKey(e)) {
+        return false;
     }
 
     // Tab key handling in cells
@@ -750,14 +1117,15 @@ function handleKeyboardShortcuts(e) {
     if (e.key === 'F3') {
         e.preventDefault();
         if (f10FormatterAnchor) {
-            if (!f10FormatterAnchor.input || !f10FormatterAnchor.input.isConnected) {
-                clearF10SelectionHighlight();
-                f10FormatterAnchor = null;
+            const liveInput = getF10CurrentInput();
+            if (!liveInput) {
+                clearF10SelectionMode();
                 showToast('F10 selection expired', 'warning');
                 return;
             }
 
-            showQuickFormatter(f10FormatterAnchor.input, {
+            f10FormatterAnchor.input = liveInput;
+            showQuickFormatter(liveInput, {
                 isContentEditable: false,
                 start: f10FormatterAnchor.start,
                 end: f10FormatterAnchor.end,
@@ -946,8 +1314,18 @@ function handleKeyboardShortcuts(e) {
         }
 
         clearF10SelectionHighlight();
-        f10FormatterAnchor = { input: hoverPick.input, start, end, previewRange };
+        const anchorCell = hoverPick.input.closest('td[data-row][data-col]');
+        f10FormatterAnchor = {
+            input: hoverPick.input,
+            rowIndex: anchorCell ? parseInt(anchorCell.dataset.row) : undefined,
+            colIndex: anchorCell ? parseInt(anchorCell.dataset.col) : undefined,
+            start,
+            end,
+            previewRange,
+            rawText: hoverPick.input.value.substring(start, end)
+        };
         showF10SelectionHighlight(f10FormatterAnchor);
+        updateF10ActiveIndicator();
         showToast(sameAnchor ? 'F10 span ready. Press F3 to format.' : 'F10 word ready. Press F3 to format.', 'info');
         return;
     }
@@ -10687,8 +11065,7 @@ function closeQuickFormatter() {
     formatter.style.display = 'none';
     quickFormatterTarget = null;
     selectedFormats = [];
-    clearF10SelectionHighlight();
-    f10FormatterAnchor = null;
+    clearF10SelectionMode();
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
 
     // Save timestamp to prevent immediate blur from exiting edit mode
@@ -10855,7 +11232,7 @@ function applyQuickFormat(prefix, suffix, event) {
     if (shouldRefocus) {
         input.focus();
     }
-    f10FormatterAnchor = null;
+    clearF10SelectionMode();
 
     closeQuickFormatter();
     showToast('Format applied', 'success');
@@ -11989,7 +12366,7 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (shouldRefocus) {
         input.focus();
     }
-    f10FormatterAnchor = null;
+    clearF10SelectionMode();
 
     closeQuickFormatter();
     showToast(`Applied ${totalFormats} formats`, 'success');

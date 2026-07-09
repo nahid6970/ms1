@@ -2560,6 +2560,25 @@ td input::-moz-selection {
     border-radius: 2px;
 }
 
+.f10-active-indicator {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    background: #1f6feb;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.35);
+    pointer-events: none;
+}
+
 /* Text highlight overlay for search */
 .text-highlight-overlay {
     position: absolute;
