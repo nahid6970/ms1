@@ -2469,6 +2469,11 @@
                 </button>
             </div>
 
+            <!-- Search bar to filter models -->
+            <div style="margin-bottom: 12px; flex-shrink: 0;">
+                <input id="ai-model-filter-search" type="text" placeholder="🔍 Search models..." oninput="renderFilterModelsList()" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 0.8rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+
             <!-- Scrollable list of models for the selected provider -->
             <div id="ai-filter-models-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; min-height: 150px;">
                 <!-- Dynamically populated via JS -->
