@@ -9164,7 +9164,14 @@
                     let infoIconHtml = '';
                     if (msg.metadata) {
                         const meta = msg.metadata;
-                        const tooltipText = `Provider: ${meta.provider}\nModel: ${meta.model}\nSystem Prompt: ${meta.system_prompt || '(None)'}\nTools: ${meta.tools && meta.tools.length ? meta.tools.join(', ') : '(None)'}`;
+                        const tooltipHtml = `
+                            <div style="margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px; font-weight:600; color:var(--text-primary); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px;">Payload Info</div>
+                            <div style="margin-bottom:4px; max-height:80px; overflow-y:auto; word-break:break-all;"><span style="color:#e2e8f0; font-weight:600;">Prompt:</span> <span style="color:var(--text-muted); font-style:italic;">"${escapeHtml(msg.content)}"</span></div>
+                            <div style="margin-bottom:4px;"><span style="color:#3b82f6; font-weight:600;">Provider:</span> <span style="color:var(--text-primary);">${escapeHtml(meta.provider)}</span></div>
+                            <div style="margin-bottom:4px;"><span style="color:#22d3ee; font-weight:600;">Model:</span> <span style="color:var(--text-primary); font-family:monospace; font-size:0.58rem;">${escapeHtml(meta.model)}</span></div>
+                            <div style="margin-bottom:4px; max-height:80px; overflow-y:auto;"><span style="color:#a855f7; font-weight:600;">System:</span> <span style="color:var(--text-secondary); white-space:pre-wrap;">${meta.system_prompt ? escapeHtml(meta.system_prompt) : '(None)'}</span></div>
+                            <div><span style="color:#10b981; font-weight:600;">Tools:</span> <span style="color:var(--text-secondary);">${meta.tools && meta.tools.length ? escapeHtml(meta.tools.join(', ')) : '(None)'}</span></div>
+                        `;
                         
                         infoIconHtml = `
                             <div class="msg-info-tooltip-container" style="position:relative; display:inline-block; margin-top:4px; flex-shrink:0;">
@@ -9173,7 +9180,7 @@
                                     <line x1="12" y1="16" x2="12" y2="12"></line>
                                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                 </svg>
-                                <div class="msg-info-tooltip" style="display:none; position:absolute; right:0; top:calc(100% + 4px); width:200px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; padding:8px; font-size:0.64rem; color:var(--text-secondary); box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:3000; text-align:left; pointer-events:none; white-space:pre-wrap; line-height:1.4;">${escapeHtml(tooltipText)}</div>
+                                <div class="msg-info-tooltip" style="display:none; position:absolute; right:0; bottom:calc(100% + 6px); width:200px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; padding:8px; font-size:0.64rem; color:var(--text-secondary); box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:3000; text-align:left; pointer-events:none; white-space:normal; line-height:1.4;">${tooltipHtml}</div>
                             </div>
                         `;
                     }
