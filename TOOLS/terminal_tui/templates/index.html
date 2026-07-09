@@ -9069,6 +9069,26 @@
         }
 
         let aiChatHistory = [];
+        try {
+            const storedHistory = localStorage.getItem('ai-chat-history');
+            if (storedHistory) {
+                aiChatHistory = JSON.parse(storedHistory);
+            }
+        } catch (e) {
+            console.error("Failed to load AI chat history from localStorage:", e);
+        }
+
+        function saveAIChatHistory() {
+            try {
+                // Keep only the last 100 messages (50 turns) to prevent infinite growth and performance/context overhead
+                if (aiChatHistory.length > 100) {
+                    aiChatHistory = aiChatHistory.slice(aiChatHistory.length - 100);
+                }
+                localStorage.setItem('ai-chat-history', JSON.stringify(aiChatHistory));
+            } catch (e) {
+                console.error("Failed to save AI chat history to localStorage:", e);
+            }
+        }
 
         function renderAIChatHistory() {
             const chatBox = document.getElementById('ai-chat-history');
@@ -9317,6 +9337,7 @@
 
         function clearAIChat() {
             aiChatHistory = [];
+            saveAIChatHistory();
             renderAIChatHistory();
         }
 
@@ -9325,6 +9346,7 @@
             const prompt = aiChatHistory[idx - 1].content;
             // Remove the assistant response and user prompt from history
             aiChatHistory = aiChatHistory.slice(0, idx - 1);
+            saveAIChatHistory();
             document.getElementById('ai-prompt-input').value = prompt;
             generateAICommand();
         }
@@ -11622,6 +11644,7 @@
 
             // Push user message to history, render, and clear prompt
             aiChatHistory.push({ role: 'user', content: prompt });
+            saveAIChatHistory();
             renderAIChatHistory();
             promptInput.value = '';
             
@@ -11659,10 +11682,12 @@
                 
                 const command = data.command;
                 aiChatHistory.push({ role: 'assistant', content: command, model: model });
+                saveAIChatHistory();
                 renderAIChatHistory();
             } catch (err) {
                 console.error("AI Copilot Error:", err);
                 aiChatHistory.push({ role: 'assistant', content: `Error: ${err.message}` });
+                saveAIChatHistory();
                 renderAIChatHistory();
             } finally {
                 submitBtn.innerText = originalText;
