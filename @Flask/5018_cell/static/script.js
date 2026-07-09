@@ -20,6 +20,7 @@ let lastFocusedCell = null; // Track last focused cell for context-aware operati
 let lastMouseX = 0;
 let lastMouseY = 0;
 let lastTextReplacerValues = JSON.parse(localStorage.getItem('lastTextReplacerValues')) || { find: '', replace: '', caseSensitive: false };
+let f10FormatterAnchor = null;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -326,6 +327,217 @@ function applyFontSizeScale() {
 }
 
 
+function getCaretRangeAtPoint(x, y) {
+    if (document.caretRangeFromPoint) {
+        return document.caretRangeFromPoint(x, y);
+    }
+
+    if (document.caretPositionFromPoint) {
+        const pos = document.caretPositionFromPoint(x, y);
+        if (pos) {
+            const range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+            range.setEnd(pos.offsetNode, pos.offset);
+            return range;
+        }
+    }
+
+    return null;
+}
+
+function getTextOffsetWithinElement(root, targetNode, targetOffset) {
+    let offset = 0;
+    let found = false;
+
+    const walk = (node) => {
+        if (found) return;
+
+        if (node === targetNode) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                offset += targetOffset;
+            } else {
+                for (let i = 0; i < targetOffset && i < node.childNodes.length; i++) {
+                    walk(node.childNodes[i]);
+                    if (found) return;
+                }
+            }
+            found = true;
+            return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            offset += node.textContent.length;
+            return;
+        }
+
+        if (node.nodeName === 'BR') {
+            offset += 1;
+            return;
+        }
+
+        for (const child of node.childNodes) {
+            walk(child);
+            if (found) return;
+        }
+    };
+
+    walk(root);
+    return offset;
+}
+
+function getMarkdownMarkerLengthAt(raw, index) {
+    const rest = raw.slice(index);
+    const pairedMarkers = ['**', '@@', '__', '~~', '==', '!!', '??', '##', '_.', '._', '[[', ']]', '{{{', '}}}', '```'];
+
+    for (const marker of pairedMarkers) {
+        if (rest.startsWith(marker)) return marker.length;
+    }
+
+    if (rest.startsWith('{/}')) return 3;
+    const styleMatch = rest.match(/^\{(?:(?:fg|bg):[^}]+)(?:;(?:fg|bg):[^}]+)?\}/);
+    if (styleMatch) return styleMatch[0].length;
+
+    const titleParamMatch = rest.match(/^:::[A-Za-z0-9_#.-]+:::/);
+    if (titleParamMatch) return titleParamMatch[0].length;
+    if (rest.startsWith(':::')) return 3;
+
+    const variableSizeMatch = rest.match(/^#[\d.]+#/);
+    if (variableSizeMatch) return variableSizeMatch[0].length;
+    const borderBoxMatch = rest.match(/^#[A-Z]+#/);
+    if (borderBoxMatch) return borderBoxMatch[0].length;
+    if (rest.startsWith('#/#')) return 3;
+
+    const strokeMatch = rest.match(/^ŝŝ[\d.]+:/);
+    if (strokeMatch) return strokeMatch[0].length;
+    if (rest.startsWith('ŝŝ')) return 2;
+
+    if (typeof customColorSyntaxes !== 'undefined' && Array.isArray(customColorSyntaxes)) {
+        const customMarker = customColorSyntaxes
+            .map(syntax => syntax && syntax.marker)
+            .filter(Boolean)
+            .find(marker => rest.startsWith(marker));
+        if (customMarker) return customMarker.length;
+    }
+
+    return 0;
+}
+
+function createRawVisibleOffsetMap(raw) {
+    const visibleToRaw = [];
+    let visibleIndex = 0;
+
+    for (let i = 0; i < raw.length;) {
+        const markerLength = getMarkdownMarkerLengthAt(raw, i);
+        if (markerLength > 0) {
+            i += markerLength;
+            continue;
+        }
+
+        visibleToRaw[visibleIndex] = i;
+        visibleToRaw[visibleIndex + 1] = i + 1;
+        visibleIndex++;
+        i++;
+    }
+
+    if (visibleToRaw.length === 0) {
+        visibleToRaw.push(raw.length);
+    }
+    return visibleToRaw;
+}
+
+function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart) {
+    if (!raw || !visibleWord) return null;
+
+    const stripped = stripMarkdown(raw);
+    if (!stripped) return null;
+
+    const candidates = [];
+    let searchFrom = 0;
+    while (searchFrom < raw.length) {
+        const index = raw.indexOf(visibleWord, searchFrom);
+        if (index === -1) break;
+
+        const before = index > 0 ? raw[index - 1] : '';
+        const after = index + visibleWord.length < raw.length ? raw[index + visibleWord.length] : '';
+        const isStartBoundary = !before || /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/.test(before);
+        const isEndBoundary = !after || /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/.test(after);
+
+        if (isStartBoundary && isEndBoundary) {
+            const visibleBefore = stripMarkdown(raw.slice(0, index));
+            candidates.push({
+                start: index,
+                end: index + visibleWord.length,
+                distance: Math.abs(visibleBefore.length - approximateVisibleStart)
+            });
+        }
+
+        searchFrom = index + Math.max(visibleWord.length, 1);
+    }
+
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => a.distance - b.distance);
+    return { start: candidates[0].start, end: candidates[0].end };
+}
+
+function getHoverFormatterSelection() {
+    const range = getCaretRangeAtPoint(lastMouseX, lastMouseY);
+    if (!range) return null;
+
+    const node = range.startContainer;
+    const element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+    const cell = element && element.closest ? element.closest('td[data-row][data-col]') : null;
+    if (!cell || !cell.closest('#dataTable')) return null;
+
+    const input = cell.querySelector('input, textarea');
+    if (!input || typeof input.value !== 'string') return null;
+
+    const preview = cell.querySelector('.markdown-preview');
+    const root = preview && preview.contains(node) ? preview : input;
+    const rawValue = input.value;
+    const boundaryRegex = /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/;
+
+    if (node.nodeType === Node.TEXT_NODE && root !== input) {
+        const text = node.textContent || '';
+        let localOffset = Math.min(range.startOffset, text.length);
+        if (localOffset > 0 && (localOffset === text.length || boundaryRegex.test(text[localOffset])) && !boundaryRegex.test(text[localOffset - 1])) {
+            localOffset--;
+        }
+
+        let localStart = localOffset;
+        while (localStart > 0 && !boundaryRegex.test(text[localStart - 1])) localStart--;
+        let localEnd = localOffset;
+        while (localEnd < text.length && !boundaryRegex.test(text[localEnd])) localEnd++;
+        if (localStart >= localEnd) return null;
+
+        const visibleStart = getTextOffsetWithinElement(root, node, localStart);
+        const visibleEnd = getTextOffsetWithinElement(root, node, localEnd);
+        const visibleWord = text.substring(localStart, localEnd);
+        const rawMatch = findRawWordNearVisibleOffset(rawValue, visibleWord, visibleStart);
+        if (rawMatch) {
+            return { input, start: rawMatch.start, end: rawMatch.end };
+        }
+
+        const map = createRawVisibleOffsetMap(rawValue);
+        const start = map[Math.min(visibleStart, map.length - 1)];
+        const end = map[Math.min(visibleEnd, map.length - 1)];
+        if (start === undefined || end === undefined || start >= end) return null;
+
+        return { input, start, end };
+    }
+
+    if (root === input) {
+        const cursor = input.selectionStart || 0;
+        let start = cursor;
+        while (start > 0 && !boundaryRegex.test(rawValue[start - 1])) start--;
+        let end = cursor;
+        while (end < rawValue.length && !boundaryRegex.test(rawValue[end])) end++;
+        if (start < end) return { input, start, end };
+    }
+
+    return null;
+}
+
+
 
 function handleKeyboardShortcuts(e) {
     // Ignore events from popup textarea to prevent interference
@@ -471,6 +683,22 @@ function handleKeyboardShortcuts(e) {
     // F3 to open quick markdown formatter
     if (e.key === 'F3') {
         e.preventDefault();
+        if (f10FormatterAnchor) {
+            if (!f10FormatterAnchor.input || !f10FormatterAnchor.input.isConnected) {
+                f10FormatterAnchor = null;
+                showToast('F10 selection expired', 'warning');
+                return;
+            }
+
+            showQuickFormatter(f10FormatterAnchor.input, {
+                isContentEditable: false,
+                start: f10FormatterAnchor.start,
+                end: f10FormatterAnchor.end,
+                noRefocus: true
+            });
+            return;
+        }
+
         const activeElement = document.activeElement;
 
         // Open for contenteditable (WYSIWYG mode) - no selection required
@@ -625,6 +853,32 @@ function handleKeyboardShortcuts(e) {
                 searchInput.focus();
             }
         }
+    }
+
+    // F10 marks the word under the mouse for F3 formatting without entering edit mode.
+    // Press F10 on one word, then F10 on another word in the same cell to mark the full span.
+    if (e.key === 'F10') {
+        e.preventDefault();
+        const hoverPick = getHoverFormatterSelection();
+        if (!hoverPick) {
+            showToast('Hover over a cell word first', 'warning');
+            return;
+        }
+
+        let start = hoverPick.start;
+        let end = hoverPick.end;
+        const sameAnchor = f10FormatterAnchor &&
+            f10FormatterAnchor.input === hoverPick.input &&
+            f10FormatterAnchor.start !== hoverPick.start;
+
+        if (sameAnchor) {
+            start = Math.min(f10FormatterAnchor.start, hoverPick.start);
+            end = Math.max(f10FormatterAnchor.end, hoverPick.end);
+        }
+
+        f10FormatterAnchor = { input: hoverPick.input, start, end };
+        showToast(sameAnchor ? 'F10 span ready. Press F3 to format.' : 'F10 word ready. Press F3 to format.', 'info');
+        return;
     }
 
     // F9 to swap two words containing a separator in the middle
@@ -10240,7 +10494,7 @@ let quickFormatterScrollPosition = 0; // Save scroll position
 let selectedFormats = []; // Track selected formats for multi-apply
 let lastQuickFormatterAction = 0; // Timestamp of last F3 action
 
-function showQuickFormatter(inputElement) {
+function showQuickFormatter(inputElement, forcedSelection = null) {
     quickFormatterTarget = inputElement;
 
     // Save current scroll position
@@ -10249,8 +10503,11 @@ function showQuickFormatter(inputElement) {
         quickFormatterScrollPosition = tableContainer.scrollTop;
     }
 
+    if (forcedSelection) {
+        quickFormatterSelection = forcedSelection;
+    }
     // Handle contenteditable (WYSIWYG mode)
-    if (inputElement.isContentEditable) {
+    else if (inputElement.isContentEditable) {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0);
@@ -10331,8 +10588,8 @@ function updateSelectionStats(inputElement) {
     } else {
         // Handle input/textarea (legacy mode)
         selectedText = inputElement.value.substring(
-            inputElement.selectionStart,
-            inputElement.selectionEnd
+            quickFormatterSelection.start,
+            quickFormatterSelection.end
         );
     }
 
@@ -10359,6 +10616,7 @@ function closeQuickFormatter() {
     formatter.style.display = 'none';
     quickFormatterTarget = null;
     selectedFormats = [];
+    f10FormatterAnchor = null;
     document.removeEventListener('click', closeQuickFormatterOnClickOutside);
 
     // Save timestamp to prevent immediate blur from exiting edit mode
@@ -10506,6 +10764,7 @@ function applyQuickFormat(prefix, suffix, event) {
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
+    const shouldRefocus = !quickFormatterSelection.noRefocus;
 
     // Insert the markdown syntax
     const newText = input.value.substring(0, start) +
@@ -10521,7 +10780,10 @@ function applyQuickFormat(prefix, suffix, event) {
     // Set cursor position after the inserted text
     const newCursorPos = start + prefix.length + selectedText.length + suffix.length;
     input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
+    if (shouldRefocus) {
+        input.focus();
+    }
+    f10FormatterAnchor = null;
 
     closeQuickFormatter();
     showToast('Format applied', 'success');
@@ -11636,6 +11898,7 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     let selectedText = input.value.substring(start, end);
+    const shouldRefocus = !quickFormatterSelection.noRefocus;
 
     // Insert the markdown syntax
     const newText = input.value.substring(0, start) +
@@ -11651,7 +11914,10 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
     // Set cursor position after the inserted text
     const newCursorPos = start + allPrefixes.length + selectedText.length + allSuffixes.length;
     input.setSelectionRange(newCursorPos, newCursorPos);
-    input.focus();
+    if (shouldRefocus) {
+        input.focus();
+    }
+    f10FormatterAnchor = null;
 
     closeQuickFormatter();
     showToast(`Applied ${totalFormats} formats`, 'success');
