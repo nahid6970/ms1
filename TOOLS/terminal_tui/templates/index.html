@@ -1856,72 +1856,6 @@
                 </select>
                 <select id="ai-model-select" style="display:none;" onchange="handleAIModelChange()"></select>
 
-            <!-- Gemini API Key Container -->
-            <div id="ai-api-key-container" style="margin-bottom:10px; display:none;">
-                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Gemini API Key (Google AI Studio)</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="password" id="ai-api-key-input" placeholder="AIzaSy..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <button onclick="saveGeminiAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
-                </div>
-            </div>
-            <div id="ai-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
-                <span>✨ Gemini API Key configured</span>
-                <button onclick="clearGeminiAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
-            </div>
-
-            <!-- Groq API Key Container -->
-            <div id="groq-api-key-container" style="margin-bottom:10px; display:none;">
-                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Groq API Key (console.groq.com)</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="password" id="groq-api-key-input" placeholder="gsk_..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <button onclick="saveGroqAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
-                </div>
-            </div>
-            <div id="groq-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
-                <span>⚡ Groq API Key configured</span>
-                <button onclick="clearGroqAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
-            </div>
-
-            <!-- Morph API Key Container -->
-            <div id="morph-api-key-container" style="margin-bottom:10px; display:none;">
-                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">Morph API Key (morphllm.com/dashboard/api-keys)</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="password" id="morph-api-key-input" placeholder="sk-..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <button onclick="saveMorphAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
-                </div>
-            </div>
-            <div id="morph-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
-                <span>🔷 Morph API Key configured</span>
-                <button onclick="clearMorphAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
-            </div>
-
-            <!-- OpenRouter API Key Container -->
-            <div id="openrouter-api-key-container" style="margin-bottom:10px; display:none;">
-                <label style="font-size:0.7rem; color:var(--text-muted); display:block; margin-bottom:4px;">OpenRouter API Key (openrouter.ai/keys)</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="password" id="openrouter-api-key-input" placeholder="sk-or-..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <button onclick="saveOpenRouterAPIKey()" style="padding:4px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.75rem; cursor:pointer; font-weight:500;">Save</button>
-                </div>
-            </div>
-            <div id="openrouter-api-key-saved-msg" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; display:none; justify-content:space-between; align-items:center;">
-                <span>🌐 OpenRouter API Key configured</span>
-                <button onclick="clearOpenRouterAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
-            </div>
-
-            <!-- System Prompt Selector & Actions -->
-            <div style="margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                <div id="ai-system-prompt-buttons-container" style="display:flex; flex-wrap:wrap; gap:6px; flex:1; max-height:80px; overflow-y:auto; padding:2px 0;">
-                </div>
-                <!-- Plus Button -->
-                <button onclick="openAISystemPromptModal(true)" title="Add custom system prompt" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-                <!-- Settings/Edit Button -->
-                <button onclick="openAISystemPromptModal(false)" title="Manage system prompts" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                </button>
-            </div>
-
             <!-- Usage / Rate Limit Stats -->
             <div id="ai-usage-container" style="display:none; margin-bottom:10px; padding:8px; background:var(--bg-sidebar); border:1px dashed var(--border-color); border-radius:6px; font-size:0.7rem; color:var(--text-muted); flex-direction:column; gap:4px;">
                 <div style="font-weight:600; color:var(--text-secondary); text-transform:uppercase; font-size:0.62rem; letter-spacing:0.5px; margin-bottom:2px;">Rate Limit Status</div>
@@ -1945,6 +1879,20 @@
 
             <!-- Chat history box -->
             <div id="ai-chat-history" style="display:none; flex-direction:column; gap:8px; flex:1; min-height:80px; max-height:300px; overflow-y:auto; padding:8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; margin-bottom:10px;">
+            </div>
+
+            <!-- System Prompt Selector & Actions (moved above input) -->
+            <div style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <div id="ai-system-prompt-buttons-container" style="display:flex; flex-wrap:wrap; gap:6px; flex:1; max-height:80px; overflow-y:auto; padding:2px 0;">
+                </div>
+                <!-- Plus Button -->
+                <button onclick="openAISystemPromptModal(true)" title="Add custom system prompt" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:28px; height:28px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <!-- Settings/Edit Button -->
+                <button onclick="openAISystemPromptModal(false)" title="Manage system prompts" style="flex-shrink:0; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-muted); width:28px; height:28px; cursor:pointer; display:flex; align-items:center; justify-content:center;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -2448,8 +2396,59 @@
                 <button id="ai-filter-tab-openrouter" onclick="switchAIFilterTab('openrouter')" style="flex: 1; padding: 6px 10px; font-size: 0.8rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; outline: none; transition: all 0.2s;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg> O.Router
                 </button>
-            </div>
             
+            <!-- API Key Configuration (per-provider, shown/hidden by tab) -->
+            <div id="ai-modal-api-keys-container" style="margin-bottom: 12px; flex-shrink: 0;">
+                <!-- Gemini API Key -->
+                <div id="ai-api-key-container" style="display:none;">
+                    <label style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:4px;">🔑 Gemini API Key (Google AI Studio)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="password" id="ai-api-key-input" placeholder="AIzaSy..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        <button onclick="saveGeminiAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
+                    </div>
+                </div>
+                <div id="ai-api-key-saved-msg" style="font-size:0.72rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
+                    <span>✨ Gemini API Key configured</span>
+                    <button onclick="clearGeminiAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.72rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                </div>
+                <!-- Groq API Key -->
+                <div id="groq-api-key-container" style="display:none;">
+                    <label style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:4px;">🔑 Groq API Key (console.groq.com)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="password" id="groq-api-key-input" placeholder="gsk_..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        <button onclick="saveGroqAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
+                    </div>
+                </div>
+                <div id="groq-api-key-saved-msg" style="font-size:0.72rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
+                    <span>⚡ Groq API Key configured</span>
+                    <button onclick="clearGroqAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.72rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                </div>
+                <!-- Morph API Key -->
+                <div id="morph-api-key-container" style="display:none;">
+                    <label style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:4px;">🔑 Morph API Key (morphllm.com/dashboard/api-keys)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="password" id="morph-api-key-input" placeholder="sk-..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        <button onclick="saveMorphAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
+                    </div>
+                </div>
+                <div id="morph-api-key-saved-msg" style="font-size:0.72rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
+                    <span>🔷 Morph API Key configured</span>
+                    <button onclick="clearMorphAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.72rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                </div>
+                <!-- OpenRouter API Key -->
+                <div id="openrouter-api-key-container" style="display:none;">
+                    <label style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:4px;">🔑 OpenRouter API Key (openrouter.ai/keys)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="password" id="openrouter-api-key-input" placeholder="sk-or-..." style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                        <button onclick="saveOpenRouterAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
+                    </div>
+                </div>
+                <div id="openrouter-api-key-saved-msg" style="font-size:0.72rem; color:var(--text-muted); display:none; justify-content:space-between; align-items:center;">
+                    <span>🌐 OpenRouter API Key configured</span>
+                    <button onclick="clearOpenRouterAPIKey()" style="background:none; border:none; color:#ef4444; font-size:0.72rem; cursor:pointer; padding:0; text-decoration:underline;">Change</button>
+                </div>
+            </div>
+
             <!-- Search bar to filter models -->
             <div style="margin-bottom: 12px; flex-shrink: 0;">
                 <input id="ai-model-filter-search" type="text" placeholder="🔍 Search models..." oninput="renderFilterModelsList()" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 0.8rem; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
@@ -9912,6 +9911,26 @@
 
             renderFilterModelsList();
             fetchDynamicModels(provider);
+
+            // Show/hide API key sections based on active provider tab
+            const keyMap = {
+                gemini: { container: 'ai-api-key-container', saved: 'ai-api-key-saved-msg', storageKey: 'gemini-api-key' },
+                groq: { container: 'groq-api-key-container', saved: 'groq-api-key-saved-msg', storageKey: 'groq-api-key' },
+                morph: { container: 'morph-api-key-container', saved: 'morph-api-key-saved-msg', storageKey: 'morph-api-key' },
+                openrouter: { container: 'openrouter-api-key-container', saved: 'openrouter-api-key-saved-msg', storageKey: 'openrouter-api-key' }
+            };
+            Object.entries(keyMap).forEach(([p, ids]) => {
+                const containerEl = document.getElementById(ids.container);
+                const savedEl = document.getElementById(ids.saved);
+                if (p === provider) {
+                    const hasKey = !!localStorage.getItem(ids.storageKey);
+                    if (containerEl) containerEl.style.display = hasKey ? 'none' : 'block';
+                    if (savedEl) savedEl.style.display = hasKey ? 'flex' : 'none';
+                } else {
+                    if (containerEl) containerEl.style.display = 'none';
+                    if (savedEl) savedEl.style.display = 'none';
+                }
+            });
         }
 
         function getBookmarkedModels() {
