@@ -4,7 +4,16 @@ import json
 import uuid
 import time
 import shutil
+import mimetypes
 from flask import Flask, request, jsonify, send_file, send_from_directory
+
+# Force correct MIME type associations to prevent corrupted Windows registry settings from breaking files
+mimetypes.init()
+mimetypes.add_type('application/pdf', '.pdf')
+mimetypes.add_type('image/png', '.png')
+mimetypes.add_type('image/jpeg', '.jpg')
+mimetypes.add_type('image/jpeg', '.jpeg')
+mimetypes.add_type('image/gif', '.gif')
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
@@ -133,7 +142,16 @@ def serve_file(storage_id):
         try:
             for f in os.listdir(UPLOAD_FOLDER):
                 if f.startswith(f"{storage_id}_"):
-                    return send_from_directory(UPLOAD_FOLDER, f)
+                    mimetype = None
+                    if f.lower().endswith('.pdf'):
+                        mimetype = 'application/pdf'
+                    elif f.lower().endswith('.png'):
+                        mimetype = 'image/png'
+                    elif f.lower().endswith('.jpg') or f.lower().endswith('.jpeg'):
+                        mimetype = 'image/jpeg'
+                    elif f.lower().endswith('.gif'):
+                        mimetype = 'image/gif'
+                    return send_from_directory(UPLOAD_FOLDER, f, mimetype=mimetype)
         except Exception as e:
             return str(e), 500
         return "File not found", 404
@@ -145,7 +163,16 @@ def serve_file(storage_id):
         if os.path.exists(folder_path):
             for f in os.listdir(folder_path):
                 if f.startswith(f"{storage_id}_"):
-                    return send_from_directory(folder_path, f)
+                    mimetype = None
+                    if f.lower().endswith('.pdf'):
+                        mimetype = 'application/pdf'
+                    elif f.lower().endswith('.png'):
+                        mimetype = 'image/png'
+                    elif f.lower().endswith('.jpg') or f.lower().endswith('.jpeg'):
+                        mimetype = 'image/jpeg'
+                    elif f.lower().endswith('.gif'):
+                        mimetype = 'image/gif'
+                    return send_from_directory(folder_path, f, mimetype=mimetype)
     except Exception as e:
         return str(e), 500
         
@@ -450,12 +477,14 @@ def upload_raw():
     temp_filename = f"temp_{file_id}"
     temp_path = os.path.join(UPLOAD_FOLDER, temp_filename)
     
+    # Use request.get_data() to retrieve entire raw binary upload body reliably
+    data = request.get_data()
+    if not data:
+        # Fallback stream read if request.get_data() is unavailable
+        data = request.stream.read()
+        
     with open(temp_path, "wb") as f:
-        while True:
-            chunk = request.stream.read(4096)
-            if not chunk:
-                break
-            f.write(chunk)
+        f.write(data)
             
     return jsonify({"storageId": file_id})
 
