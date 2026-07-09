@@ -3590,6 +3590,7 @@ def api_ai_command():
     rate_limits = None
     usage_metadata = None
     tools_used = []
+    cmd = ""
     
     if provider == 'groq':
         if not model:
