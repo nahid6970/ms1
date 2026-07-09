@@ -3553,7 +3553,20 @@ def log_ai_usage(provider, model, prompt_tokens, completion_tokens, total_tokens
     except Exception as e:
         print("Failed to save ai_usage.json:", e)
 
+def json_error_handler(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+    return decorated_function
+
 @app.route('/api/ai-command', methods=['POST'])
+@json_error_handler
 def api_ai_command():
     req = request.json or {}
     prompt = req.get('prompt', '')

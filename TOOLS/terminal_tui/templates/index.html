@@ -12079,7 +12079,12 @@
                     })
                 });
                 
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (e) {
+                    throw new Error(`Server returned invalid response (Status: ${res.status}).`);
+                }
                 if (!res.ok) {
                     throw new Error(data.error || 'Failed to generate command');
                 }
