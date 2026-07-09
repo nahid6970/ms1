@@ -731,8 +731,8 @@
     },
     {
       "label": "",
-      "data": "Commit & Push the changes to github and also commit when i say to commit\r",
-      "raw_data": "Commit & Push the changes to github and also commit when i say to commit\\r",
+      "data": "Commit & Push the changes to github and also commit when i explicitly say to commit\r",
+      "raw_data": "Commit & Push the changes to github and also commit when i explicitly say to commit\\r",
       "bg": "#ffffff",
       "fg": "#000000",
       "fontFamily": "'JetBrainsMono NFP Regular', monospace",
