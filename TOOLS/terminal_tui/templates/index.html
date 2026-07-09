@@ -9161,14 +9161,32 @@
                 msgDiv.style.lineHeight = '1.4';
                 
                 if (msg.role === 'user') {
+                    let infoIconHtml = '';
+                    if (msg.metadata) {
+                        const meta = msg.metadata;
+                        const tooltipText = `Provider: ${meta.provider}\nModel: ${meta.model}\nSystem Prompt: ${meta.system_prompt || '(None)'}\nTools: ${meta.tools && meta.tools.length ? meta.tools.join(', ') : '(None)'}`;
+                        
+                        infoIconHtml = `
+                            <div class="msg-info-tooltip-container" style="position:relative; display:inline-block; margin-top:4px; flex-shrink:0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:help; opacity:0.6; display:block;" onmouseover="this.style.opacity='1'; this.nextElementSibling.style.display='block';" onmouseout="this.style.opacity='0.6'; this.nextElementSibling.style.display='none';">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <div class="msg-info-tooltip" style="display:none; position:absolute; right:0; top:calc(100% + 4px); width:200px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; padding:8px; font-size:0.64rem; color:var(--text-secondary); box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:3000; text-align:left; pointer-events:none; white-space:pre-wrap; line-height:1.4;">${escapeHtml(tooltipText)}</div>
+                            </div>
+                        `;
+                    }
+                    
                     msgDiv.innerHTML = `
                         <div class="user-msg-container" style="display:flex; justify-content:flex-end; align-items:flex-start; gap:6px; position:relative; width:100%;">
                             <button onclick="editUserChatMessage(${idx})" class="edit-msg-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:none; align-items:center; justify-content:center; padding:4px; border-radius:4px; margin-top:2px;" title="Edit message">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
-                            <div style="max-width:85%; background:var(--accent-color); color:white; padding:6px 10px; border-radius:12px 12px 2px 12px; word-break:break-word;">
+                            <div style="max-width:80%; background:var(--accent-color); color:white; padding:6px 10px; border-radius:12px 12px 2px 12px; word-break:break-word;">
                                 ${escapeHtml(msg.content)}
                             </div>
+                            ${infoIconHtml}
                         </div>
                     `;
                 } else {
@@ -11883,6 +11901,12 @@
             const promptInput = document.getElementById('ai-prompt-input');
             if (rePromptIdx !== null) {
                 prompt = aiChatHistory[rePromptIdx].content;
+                aiChatHistory[rePromptIdx].metadata = {
+                    system_prompt: system_instruction,
+                    tools: toolsEnabled,
+                    provider: provider,
+                    model: model
+                };
             } else {
                 prompt = promptInput.value.trim();
                 if (!prompt) return;
@@ -11933,7 +11957,16 @@
 
             if (rePromptIdx === null) {
                 // Push user message to history, render, and clear prompt
-                aiChatHistory.push({ role: 'user', content: prompt });
+                aiChatHistory.push({ 
+                    role: 'user', 
+                    content: prompt,
+                    metadata: {
+                        system_prompt: system_instruction,
+                        tools: toolsEnabled,
+                        provider: provider,
+                        model: model
+                    }
+                });
                 saveAIChatHistory();
                 renderAIChatHistory();
                 promptInput.value = '';
