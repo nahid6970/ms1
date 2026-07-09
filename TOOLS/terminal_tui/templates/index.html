@@ -96,6 +96,13 @@
             min-height: 80px !important;
             max-height: none !important;
         }
+        .user-msg-container:hover .edit-msg-btn {
+            display: inline-flex !important;
+        }
+        .edit-msg-btn:hover {
+            color: var(--text-primary) !important;
+            background: rgba(255,255,255,0.08) !important;
+        }
         #ai-chat-history .ai-md blockquote {
             border-left: 3px solid var(--accent-color); margin: 6px 0; padding: 4px 10px;
             background: rgba(37,99,235,0.06); border-radius: 0 4px 4px 0; color: var(--text-secondary);
@@ -9109,7 +9116,10 @@
                 
                 if (msg.role === 'user') {
                     msgDiv.innerHTML = `
-                        <div style="display:flex; justify-content:flex-end;">
+                        <div class="user-msg-container" style="display:flex; justify-content:flex-end; align-items:flex-start; gap:6px; position:relative; width:100%;">
+                            <button onclick="editUserChatMessage(${idx})" class="edit-msg-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:none; align-items:center; justify-content:center; padding:4px; border-radius:4px; margin-top:2px;" title="Edit message">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
                             <div style="max-width:85%; background:var(--accent-color); color:white; padding:6px 10px; border-radius:12px 12px 2px 12px; word-break:break-word;">
                                 ${escapeHtml(msg.content)}
                             </div>
@@ -9142,6 +9152,52 @@
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
             }, 50);
+        }
+
+        function editUserChatMessage(idx) {
+            const chatBox = document.getElementById('ai-chat-history');
+            if (!chatBox) return;
+
+            const msgDivs = chatBox.children;
+            if (idx >= msgDivs.length) return;
+            const targetDiv = msgDivs[idx];
+            
+            const currentContent = aiChatHistory[idx].content;
+
+            targetDiv.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:6px; width:100%; padding:4px 0;">
+                    <textarea id="edit-chat-textarea-${idx}" style="width:100%; min-height:60px; background:var(--bg-sidebar); border:1px solid var(--accent-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.8rem; font-family:inherit; outline:none; resize:vertical; box-sizing:border-box;">${escapeHtml(currentContent)}</textarea>
+                    <div style="display:flex; justify-content:flex-end; gap:6px; align-items:center;">
+                        <button onclick="renderAIChatHistory()" style="padding:4px 10px; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); font-size:0.72rem; cursor:pointer; font-weight:500;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">Cancel</button>
+                        <button onclick="submitEditedUserChatMessage(${idx})" style="padding:4px 12px; background:var(--accent-color); border:none; border-radius:4px; color:white; font-size:0.72rem; cursor:pointer; font-weight:500;">Save & Submit</button>
+                    </div>
+                </div>
+            `;
+            
+            const txt = document.getElementById(`edit-chat-textarea-${idx}`);
+            if (txt) {
+                txt.focus();
+                txt.setSelectionRange(txt.value.length, txt.value.length);
+                txt.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitEditedUserChatMessage(idx);
+                    }
+                });
+            }
+        }
+
+        function submitEditedUserChatMessage(idx) {
+            const txt = document.getElementById(`edit-chat-textarea-${idx}`);
+            if (!txt) return;
+            const newContent = txt.value.trim();
+            if (!newContent) return;
+
+            aiChatHistory[idx].content = newContent;
+            aiChatHistory = aiChatHistory.slice(0, idx + 1);
+            saveAIChatHistory();
+            renderAIChatHistory();
+            generateAICommand(idx);
         }
 
         function escapeHtml(text) {
@@ -11605,10 +11661,15 @@
             }
         }
 
-        async function generateAICommand() {
+        async function generateAICommand(rePromptIdx = null) {
+            let prompt = '';
             const promptInput = document.getElementById('ai-prompt-input');
-            const prompt = promptInput.value.trim();
-            if (!prompt) return;
+            if (rePromptIdx !== null) {
+                prompt = aiChatHistory[rePromptIdx].content;
+            } else {
+                prompt = promptInput.value.trim();
+                if (!prompt) return;
+            }
             
             const provider = document.getElementById('ai-provider-select').value;
             const apiKey = provider === 'gemini' 
@@ -11642,11 +11703,17 @@
             submitBtn.title = 'Thinking...';
             submitBtn.disabled = true;
 
-            // Push user message to history, render, and clear prompt
-            aiChatHistory.push({ role: 'user', content: prompt });
-            saveAIChatHistory();
-            renderAIChatHistory();
-            promptInput.value = '';
+            if (rePromptIdx === null) {
+                // Push user message to history, render, and clear prompt
+                aiChatHistory.push({ role: 'user', content: prompt });
+                saveAIChatHistory();
+                renderAIChatHistory();
+                promptInput.value = '';
+            }
+            
+            const priorHistory = rePromptIdx !== null 
+                ? aiChatHistory.slice(0, rePromptIdx) 
+                : aiChatHistory.slice(0, -1);
             
             try {
                 const res = await fetch('/api/ai-command', {
@@ -11658,7 +11725,7 @@
                         provider: provider,
                         model: model,
                         system_instruction: system_instruction,
-                        history: aiChatHistory.slice(0, -1) // Send all prior messages as history context
+                        history: priorHistory // Send all prior messages as history context
                     })
                 });
                 
@@ -11694,7 +11761,9 @@
                 submitBtn.style.background = originalBg;
                 submitBtn.title = originalTitle;
                 submitBtn.disabled = false;
-                promptInput.focus();
+                if (rePromptIdx === null) {
+                    promptInput.focus();
+                }
             }
         }
 
