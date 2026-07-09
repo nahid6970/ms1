@@ -80,10 +80,22 @@ Unexpected token 'True' in expression or statement.
 
 ## [2026-07-09 00:20] - Git Constantly Shows `tui_config.json` Modified
 **Problem:** Whenever the user works on the project, Git shows `tui_config.json` as modified even when the user hasn't made any manual configuration changes.
-**Root Cause:** On page load or session init, the frontend called `saveTerminalLayoutState()` which unconditionally sent a POST request to `/api/projects/<project>/layout` with the current layout (even if it was the default layout). The backend then wrote the configuration file back to disk on every layout POST request, even if there was no actual change, causing the modification timestamp and formatting to trigger a Git diff.
+**Root Cause:** On page load or session init, the frontend called `saveTerminalLayoutState()` which unconditionally sent a POST request to `/api/projects/<project>/layout` with the new layout. The backend then wrote the configuration file back to disk, causing Git tracking noise.
 **Solution:** 
 1. Updated `saveTerminalLayoutState` in `templates/index.html` to skip the REST API request if the active project's layout already matches the new state, or if no layout is saved yet and the new state is the default layout.
 2. Updated `set_config_val` in `app.py` to check if the new configuration value is identical to the cached version, skipping file write operations if no data changes have occurred.
+3. Untracked `tui_config.json` in Git using `git rm --cached` so that local changes to `tui_config.json` are completely ignored by Git.
 **Files Modified:** `templates/index.html` — `saveTerminalLayoutState` function; `app.py` — `set_config_val` function.
+
+---
+
+## [2026-07-09 08:10] - Relocate Custom AI Prompts and Button Styles to tui_config.json
+**Problem:** Custom AI system prompts, the active system prompt ID selection, and system prompt button styles were stored in Chrome's browser `localStorage`, making them non-persistent across different browsers, devices, or clear-site-data actions.
+**Root Cause:** The system prompts feature was initially implemented solely on the client side, separating prompt state from the main backend configuration JSON file.
+**Solution:** 
+1. Created new GET/POST backend endpoints in `app.py` (`/api/system-prompts`, `/api/active-system-prompt-id`, and `/api/system-prompt-btn-style`) to read and write these settings directly to the consolidated `tui_config.json`.
+2. Updated the frontend JavaScript in `templates/index.html` to fetch the configuration state from the server on page load and maintain the state in memory.
+3. Implemented a client-side auto-migration check during page initialization to seamlessly upload any existing prompt data from `localStorage` to `tui_config.json` if the server config is empty.
+**Files Modified:** `app.py` — added prompt config endpoints; `templates/index.html` — updated system prompt storage helpers, dropdown population, and submission logic.
 
 

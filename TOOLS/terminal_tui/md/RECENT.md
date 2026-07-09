@@ -115,16 +115,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
-## [2026-07-09] - Prevent Redundant Config Saves & Fix Git Modifications
+## [2026-07-09] - Prevent Redundant Config Saves & Relocate System Prompts to Config File
 **What We Accomplished:**
 - Prevented `tui_config.json` from showing as modified in Git when working on the project without changing settings.
-- Added a layout validation check in `saveTerminalLayoutState` in `templates/index.html` to avoid POSTing layout changes if the active project's layout is identical to the current configuration, or if it is the default single-pane layout on startup.
-- Updated `set_config_val` in `app.py` to compare new configurations with the cached values (`_CONFIG_CACHE`) using Python's deep equality check, skipping disk I/O when configuration contents are unchanged.
-- Ensured `tui_config.json` remains tracked in Git so the user can commit it to GitHub.
+- Added a layout validation check in `saveTerminalLayoutState` in `templates/index.html` to avoid POSTing layout changes if the active project's layout is identical to the current configuration.
+- Updated `set_config_val` in `app.py` to compare new configurations with the cached values (`_CONFIG_CACHE`), skipping disk I/O when configuration contents are unchanged.
+- Untracked `tui_config.json` globally in Git using `git rm --cached` so that local updates are completely ignored by Git while retaining the local configuration file.
+- Relocated AI system prompts, the active system prompt ID selection, and system prompt button styles from browser `localStorage` to the consolidated `tui_config.json` configuration file.
+- Created GET/POST backend endpoints in `app.py` (`/api/system-prompts`, `/api/active-system-prompt-id`, and `/api/system-prompt-btn-style`) to read and write these settings.
+- Updated the frontend JavaScript in `templates/index.html` to fetch configuration state from the server on page load and maintain the state in memory, with auto-migration from `localStorage` to `tui_config.json` if the server config is empty.
 
 **Files Modified:**
-- `templates/index.html` — updated `saveTerminalLayoutState()`
-- `app.py` — updated `set_config_val()`
+- `templates/index.html` — updated `saveTerminalLayoutState()`, prompt storage helpers, dropdown population, and Copilot submission logic
+- `app.py` — updated `set_config_val()` and added prompt config API endpoints
 - `md/PROBLEMS_AND_FIXES.md` — documented problem and fix details
 - `md/RECENT.md` — updated recent development logs
 

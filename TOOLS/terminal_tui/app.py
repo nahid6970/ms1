@@ -3494,6 +3494,35 @@ def api_custom_buttons():
         save_custom_buttons(data)
         return jsonify({"success": True})
 
+@app.route('/api/system-prompts', methods=['GET', 'POST'])
+def api_system_prompts():
+    if request.method == 'GET':
+        return jsonify({"prompts": get_config_val("ai_system_prompts", list)})
+    else:
+        data = request.json or {}
+        prompts = data.get("prompts", [])
+        set_config_val("ai_system_prompts", prompts)
+        return jsonify({"success": True})
+
+@app.route('/api/active-system-prompt-id', methods=['GET', 'POST'])
+def api_active_system_prompt_id():
+    if request.method == 'GET':
+        return jsonify({"active_id": get_config_val("ai_active_system_prompt_id", str)})
+    else:
+        data = request.json or {}
+        active_id = data.get("active_id", "")
+        set_config_val("ai_active_system_prompt_id", active_id)
+        return jsonify({"success": True})
+
+@app.route('/api/system-prompt-btn-style', methods=['GET', 'POST'])
+def api_system_prompt_btn_style():
+    if request.method == 'GET':
+        return jsonify(get_config_val("ai_system_prompt_btn_style", dict))
+    else:
+        data = request.json or {}
+        set_config_val("ai_system_prompt_btn_style", data)
+        return jsonify({"success": True})
+
 def log_ai_usage(provider, model, prompt_tokens, completion_tokens, total_tokens):
     import json
     from datetime import datetime

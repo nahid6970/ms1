@@ -1,5 +1,6 @@
 # Tasks
-- [x] Update project_data_dir path in app.py to point to local main project directory
-- [x] Add Project_data migration logic to copy existing profiles/histories on session initialization
+- [x] Create backend API routes in app.py to GET/POST system prompts, active ID, and button styles
+- [x] Update frontend JavaScript in templates/index.html to use global variables and async server sync
+- [x] Implement client-side auto-migration from localStorage to the server on page load
 - [x] Verify execution and correctness
 - [x] Document updates in md/RECENT.md and md/PROBLEMS_AND_FIXES.md
