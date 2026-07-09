@@ -74,12 +74,41 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
             for r in results:
                 formatted.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content']}\n")
             return "\n".join(formatted)
+
+        elif tool_name == "run_shell_command":
+            command = arguments.get('command')
+            if not command:
+                return "Error: command argument is required."
+            
+            import subprocess
+            try:
+                # Runs command in system shell (e.g. cmd.exe on Windows, bash on Unix)
+                res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=15)
+                out = res.stdout or ""
+                err = res.stderr or ""
+                
+                combined = ""
+                if out:
+                    combined += out
+                if err:
+                    if combined:
+                        combined += "\n"
+                    combined += f"Stderr:\n{err}"
+                
+                if not combined.strip():
+                    return f"Command completed with exit code {res.returncode} (No output)."
+                
+                if len(combined) > 8000:
+                    return combined[:8000] + "\n\n... (Output truncated because it is too large)"
+                return combined
+            except subprocess.TimeoutExpired:
+                return "Error: Command execution timed out after 15 seconds."
             
     except Exception as e:
         return f"Error executing {tool_name}: {str(e)}"
         
     return f"Unknown tool: {tool_name}"
-
+ 
 OPENAI_TOOLS = [
     {
         "type": "function",
@@ -142,9 +171,26 @@ OPENAI_TOOLS = [
                 "required": ["query"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_shell_command",
+            "description": "Executes a shell command on the host machine and returns stdout/stderr. Use to run compile, build, test, or lookup commands.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The shell command to execute, e.g. 'dir', 'git status', 'python test.py'"
+                    }
+                },
+                "required": ["command"]
+            }
+        }
     }
 ]
-
+ 
 GEMINI_TOOLS = [{"functionDeclarations": [
     {
         "name": "read_file",
@@ -185,6 +231,17 @@ GEMINI_TOOLS = [{"functionDeclarations": [
                 "query": {"type": "STRING", "description": "The search query."}
             },
             "required": ["query"]
+        }
+    },
+    {
+        "name": "run_shell_command",
+        "description": "Executes a shell command on the host machine and returns stdout/stderr.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "command": {"type": "STRING", "description": "The shell command to execute."}
+            },
+            "required": ["command"]
         }
     }
 ]}]

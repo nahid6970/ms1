@@ -1966,6 +1966,10 @@
                                     <span>Web Search</span>
                                     <input type="checkbox" id="ai-tool-websearch" class="ai-tool-sub" data-tool="web_search" onchange="toggleWebSearchField(this.checked); updateToolState();" checked style="accent-color:var(--accent-color); cursor:pointer;">
                                 </label>
+                                <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); cursor:pointer; user-select:none; padding-left:4px;">
+                                    <span>Run Command</span>
+                                    <input type="checkbox" class="ai-tool-sub" data-tool="run_shell_command" onchange="updateToolState()" checked style="accent-color:var(--accent-color); cursor:pointer;">
+                                </label>
                                 <div id="tavily-key-container" style="display:flex; gap:4px; margin-top:2px; padding-left:4px; align-items:center;">
                                     <input type="password" id="tavily-api-key-input" placeholder="Tavily API Key (tvly-...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.62rem; outline:none; height:20px;">
                                     <button onclick="saveTavilyAPIKey()" style="padding:3px 8px; background:var(--accent-color); border:none; border-radius:4px; color:white; font-size:0.62rem; cursor:pointer; font-weight:500; height:20px; display:flex; align-items:center;">Save</button>
@@ -9176,7 +9180,8 @@
                         read_file: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Read File"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
                         list_directory: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="List Directory"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
                         get_system_info: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="System Info"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
-                        web_search: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Web Search"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
+                        web_search: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Web Search"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+                        run_shell_command: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Run Command"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
                     };
                     
                     const renderToolsUsed = (tools) => {
