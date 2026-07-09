@@ -9695,8 +9695,14 @@
                     let remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
                     if (parseInt(data.limit_requests) > 100) {
                         const nowTime = new Date();
-                        const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
-                        remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                        if (provider === 'gemini') {
+                            const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(nowTime).split(':');
+                            const h = parseInt(parts[0]) % 24;
+                            remainingResetSec = Math.max(0, (23 - h) * 3600 + (59 - parseInt(parts[1])) * 60 + (60 - parseInt(parts[2])));
+                        } else {
+                            const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
+                            remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                        }
                     }
                     reqEl.innerHTML = `<span style="color: #3b82f6;">${data.remaining_requests}</span> / ${data.limit_requests} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (reqEl && limitRPM > 0) {
@@ -9711,8 +9717,14 @@
                     let remainingResetSec = Math.max(0, originalResetSec - elapsedSec);
                     if (parseInt(data.limit_tokens) > 50000) {
                         const nowTime = new Date();
-                        const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
-                        remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                        if (provider === 'gemini') {
+                            const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(nowTime).split(':');
+                            const h = parseInt(parts[0]) % 24;
+                            remainingResetSec = Math.max(0, (23 - h) * 3600 + (59 - parseInt(parts[1])) * 60 + (60 - parseInt(parts[2])));
+                        } else {
+                            const utcMidnight = new Date(Date.UTC(nowTime.getUTCFullYear(), nowTime.getUTCMonth(), nowTime.getUTCDate() + 1, 0, 0, 0));
+                            remainingResetSec = Math.max(0, (utcMidnight - nowTime) / 1000);
+                        }
                     }
                     tokEl.innerHTML = `<span style="color: #10b981;">${data.remaining_tokens}</span> / ${data.limit_tokens} (reset: <span style="color: #f59e0b;">${formatSecondsToResetTime(remainingResetSec)}</span>)`;
                 } else if (tokEl && limitTPM > 0 && limitTPM !== Infinity) {
