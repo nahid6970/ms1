@@ -21,7 +21,7 @@
 - Text keys, Backspace, Delete, Shift+Enter, and Tab now update a temporary preview overlay without entering contentEditable edit mode.
 - Enter commits the draft overlay to the stored raw selection; Escape cancels F10 mode.
 - Duplicate visible text matches now show `v1`, `v2`, etc. badges placed from the rendered preview DOM, so badges appear beside the actual visible occurrences.
-- The F10 toast reports the selected match number, and ending the draft with a badge code such as `v2` commits to that numbered match and removes the code from the inserted text.
+- F10 selection uses the fixed blue `F10` indicator as its status UI; duplicate badge codes such as `v2` commit to that numbered match and are removed from the inserted text.
 - Each edit updates the hidden source value, re-renders the markdown preview, and redraws the overlay highlight from the updated raw offsets.
 
 **Files Modified:**

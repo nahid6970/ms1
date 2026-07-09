@@ -1497,14 +1497,6 @@ function handleKeyboardShortcuts(e) {
         showF10SelectionHighlight(f10FormatterAnchor);
         showF10MatchLabels(f10FormatterAnchor);
         updateF10ActiveIndicator();
-        showToast(
-            sameAnchor
-                ? 'F10 span ready. Press F3 to format.'
-                : (hoverPick.matches && hoverPick.matches.length > 1
-                    ? `F10 word ready: v${(hoverPick.selectedMatchIndex ?? 0) + 1}. Use v1-v${hoverPick.matches.length} to pick a duplicate.`
-                    : 'F10 word ready. Press F3 to format.'),
-            'info'
-        );
         return;
     }
 
