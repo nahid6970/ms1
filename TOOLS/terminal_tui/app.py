@@ -3571,6 +3571,7 @@ def api_ai_command():
     )
     
     import requests
+    import ai_tools
     rate_limits = None
     usage_metadata = None
     
@@ -3599,17 +3600,40 @@ def api_ai_command():
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024
+            "max_tokens": 1024,
+            "tools": ai_tools.OPENAI_TOOLS,
+            "tool_choice": "auto"
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=60)
-            res_data = res.json()
-            if res.status_code != 200:
-                err_obj = res_data.get('error', 'Failed to call Groq API')
-                error_msg = err_obj.get('message', str(err_obj)) if isinstance(err_obj, dict) else str(err_obj)
-                return jsonify({"error": error_msg}), res.status_code
-            
-            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            for _ in range(4):
+                res = requests.post(url, json=payload, headers=headers, timeout=60)
+                res_data = res.json()
+                if res.status_code != 200:
+                    err_obj = res_data.get('error', 'Failed to call Groq API')
+                    error_msg = err_obj.get('message', str(err_obj)) if isinstance(err_obj, dict) else str(err_obj)
+                    return jsonify({"error": error_msg}), res.status_code
+                
+                message = res_data.get('choices', [{}])[0].get('message', {})
+                tool_calls = message.get('tool_calls')
+                if not tool_calls:
+                    cmd = (message.get('content') or '').strip()
+                    break
+                
+                payload["messages"].append(message)
+                for tc in tool_calls:
+                    tc_id = tc.get("id")
+                    func_name = tc.get("function", {}).get("name")
+                    try:
+                        args = json.loads(tc.get("function", {}).get("arguments", "{}"))
+                    except:
+                        args = {}
+                    result_str = ai_tools.execute_tool(func_name, args)
+                    payload["messages"].append({
+                        "role": "tool",
+                        "tool_call_id": tc_id,
+                        "name": func_name,
+                        "content": result_str
+                    })
             rate_limits = {
                 "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
                 "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
@@ -3650,23 +3674,46 @@ def api_ai_command():
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024
+            "max_tokens": 1024,
+            "tools": ai_tools.OPENAI_TOOLS,
+            "tool_choice": "auto"
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=60)
-            try:
-                res_data = res.json()
-            except Exception:
-                return jsonify({"error": f"Morph returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
-            if res.status_code != 200:
-                err_obj = res_data.get('error', res_data)
-                if isinstance(err_obj, dict):
-                    error_msg = err_obj.get('message', str(err_obj))
-                else:
-                    error_msg = str(err_obj)
-                return jsonify({"error": f"Morph API ({res.status_code}): {error_msg}"}), res.status_code
+            for _ in range(4):
+                res = requests.post(url, json=payload, headers=headers, timeout=60)
+                try:
+                    res_data = res.json()
+                except Exception:
+                    return jsonify({"error": f"Morph returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
+                if res.status_code != 200:
+                    err_obj = res_data.get('error', res_data)
+                    if isinstance(err_obj, dict):
+                        error_msg = err_obj.get('message', str(err_obj))
+                    else:
+                        error_msg = str(err_obj)
+                    return jsonify({"error": f"Morph API ({res.status_code}): {error_msg}"}), res.status_code
 
-            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+                message = res_data.get('choices', [{}])[0].get('message', {})
+                tool_calls = message.get('tool_calls')
+                if not tool_calls:
+                    cmd = (message.get('content') or '').strip()
+                    break
+                
+                payload["messages"].append(message)
+                for tc in tool_calls:
+                    tc_id = tc.get("id")
+                    func_name = tc.get("function", {}).get("name")
+                    try:
+                        args = json.loads(tc.get("function", {}).get("arguments", "{}"))
+                    except:
+                        args = {}
+                    result_str = ai_tools.execute_tool(func_name, args)
+                    payload["messages"].append({
+                        "role": "tool",
+                        "tool_call_id": tc_id,
+                        "name": func_name,
+                        "content": result_str
+                    })
             rate_limits = {
                 "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
                 "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
@@ -3707,23 +3754,46 @@ def api_ai_command():
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "max_tokens": 1024
+            "max_tokens": 1024,
+            "tools": ai_tools.OPENAI_TOOLS,
+            "tool_choice": "auto"
         }
         try:
-            res = requests.post(url, json=payload, headers=headers, timeout=60)
-            try:
-                res_data = res.json()
-            except Exception:
-                return jsonify({"error": f"OpenRouter returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
-            if res.status_code != 200:
-                err_obj = res_data.get('error', res_data)
-                if isinstance(err_obj, dict):
-                    error_msg = err_obj.get('message', str(err_obj))
-                else:
-                    error_msg = str(err_obj)
-                return jsonify({"error": f"OpenRouter API ({res.status_code}): {error_msg}"}), res.status_code
+            for _ in range(4):
+                res = requests.post(url, json=payload, headers=headers, timeout=60)
+                try:
+                    res_data = res.json()
+                except Exception:
+                    return jsonify({"error": f"OpenRouter returned non-JSON (HTTP {res.status_code}): {res.text[:300]}"}), res.status_code
+                if res.status_code != 200:
+                    err_obj = res_data.get('error', res_data)
+                    if isinstance(err_obj, dict):
+                        error_msg = err_obj.get('message', str(err_obj))
+                    else:
+                        error_msg = str(err_obj)
+                    return jsonify({"error": f"OpenRouter API ({res.status_code}): {error_msg}"}), res.status_code
 
-            cmd = res_data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+                message = res_data.get('choices', [{}])[0].get('message', {})
+                tool_calls = message.get('tool_calls')
+                if not tool_calls:
+                    cmd = (message.get('content') or '').strip()
+                    break
+                
+                payload["messages"].append(message)
+                for tc in tool_calls:
+                    tc_id = tc.get("id")
+                    func_name = tc.get("function", {}).get("name")
+                    try:
+                        args = json.loads(tc.get("function", {}).get("arguments", "{}"))
+                    except:
+                        args = {}
+                    result_str = ai_tools.execute_tool(func_name, args)
+                    payload["messages"].append({
+                        "role": "tool",
+                        "tool_call_id": tc_id,
+                        "name": func_name,
+                        "content": result_str
+                    })
             rate_limits = {
                 "remaining_requests": res.headers.get("x-ratelimit-remaining-requests", ""),
                 "remaining_tokens": res.headers.get("x-ratelimit-remaining-tokens", ""),
