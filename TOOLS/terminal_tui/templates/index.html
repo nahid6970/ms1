@@ -11368,13 +11368,19 @@
             if (!msg || !msg.metadata) return;
             
             const meta = msg.metadata;
+            const usage = meta.usage || {};
+            const usageHtml = usage.totalTokenCount ? `
+                <div style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;"><span style="color:#fb7185; font-weight:600;">Tokens:</span> <span style="color:var(--text-secondary);">${usage.promptTokenCount || 0} in / ${usage.candidatesTokenCount || 0} out (${usage.totalTokenCount} total)</span></div>
+            ` : '';
+
             const tooltipHtml = `
                 <div style="margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px; font-weight:600; color:var(--text-primary); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px;">Payload Info</div>
                 <div style="margin-bottom:4px; max-height:80px; overflow-y:auto; word-break:break-all;"><span style="color:#e2e8f0; font-weight:600;">Prompt:</span> <span style="color:var(--text-muted); font-style:italic;">"${escapeHtml(msg.content)}"</span></div>
                 <div style="margin-bottom:4px;"><span style="color:#3b82f6; font-weight:600;">Provider:</span> <span style="color:var(--text-primary);">${escapeHtml(meta.provider)}</span></div>
                 <div style="margin-bottom:4px;"><span style="color:#22d3ee; font-weight:600;">Model:</span> <span style="color:var(--text-primary); font-family:monospace; font-size:0.58rem;">${escapeHtml(meta.model)}</span></div>
                 <div style="margin-bottom:4px; max-height:80px; overflow-y:auto;"><span style="color:#a855f7; font-weight:600;">System:</span> <span style="color:var(--text-secondary); white-space:pre-wrap;">${meta.system_prompt ? escapeHtml(meta.system_prompt) : '(None)'}</span></div>
-                <div><span style="color:#10b981; font-weight:600;">Tools:</span> <span style="color:var(--text-secondary);">${meta.tools && meta.tools.length ? escapeHtml(meta.tools.join(', ')) : '(None)'}</span></div>
+                <div style="margin-bottom:4px;"><span style="color:#10b981; font-weight:600;">Tools:</span> <span style="color:var(--text-secondary);">${meta.tools && meta.tools.length ? escapeHtml(meta.tools.join(', ')) : '(None)'}</span></div>
+                ${usageHtml}
             `;
             
             tooltip.innerHTML = tooltipHtml;
@@ -12030,6 +12036,12 @@
                 const data = await res.json();
                 if (!res.ok) {
                     throw new Error(data.error || 'Failed to generate command');
+                }
+                
+                // Update user message metadata with actual token usage
+                const userMsgIdx = rePromptIdx !== null ? rePromptIdx : (aiChatHistory.length - 1);
+                if (aiChatHistory[userMsgIdx] && aiChatHistory[userMsgIdx].metadata) {
+                    aiChatHistory[userMsgIdx].metadata.usage = data.usage_metadata;
                 }
                 
                 if (data.rate_limits) {
