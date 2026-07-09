@@ -1,5 +1,34 @@
 # Recent Development Log
 
+## [2026-07-09 20:49] - F10 Hover Formatter Selection Highlight
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### 🎯 F10 hover selection for F3 formatting
+- Added an F10 shortcut that picks the word under the mouse in the rendered cell preview and stores it as the active F3 formatting target.
+- Pressing F10 on a second word in the same cell extends the stored span from the first word through the second word.
+- F3 now opens the Quick Formatter for that stored F10 span, so formatting can be applied without entering edit mode first.
+
+### 🎨 F10 visual highlight without edit mode
+- Replaced the earlier selection approach with a non-interactive overlay highlight drawn over the rendered preview.
+- The highlight uses the already-rendered cell text and does not rewrite preview HTML or force contentEditable focus.
+- This keeps the cell in preview mode while making the selected word span obvious before applying syntax.
+
+**Files Modified:**
+- `static/script.js` — F10 hover word detection, two-step span tracking, formatter hookup, non-editing overlay highlight
+- `static/style.css` — F10 overlay highlight styles
+- `md/KEYBOARD_SHORTCUTS.md` — documented F10 behavior
+
+**Current Status:**
+- ✅ F10 marks a hovered word without entering edit mode
+- ✅ F10 on a second word extends the selected span
+- ✅ F3 opens Quick Formatter for the stored F10 span
+- ✅ Highlight remains visual only and does not rewrite the rendered cell
+
+---
+
 ## [2026-07-04 12:00] - Edit Mode Scroll Anchor & Cell Overlap Fix
 
 **Session Duration:** 1.5 hours
