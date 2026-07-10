@@ -100,16 +100,7 @@ def main():
     env["CommonProgramFiles(x86)"] = str(commonfiles_dir)
     env["CommonProgramW6432"] = str(commonfiles_dir)
 
-    # Isolate Temp folder
-    temp_dir = profile_dir / "Temp"
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    env["TEMP"] = str(temp_dir)
-    env["TMP"] = str(temp_dir)
 
-    # Isolate Public folder
-    public_dir = profile_dir / "Public"
-    public_dir.mkdir(parents=True, exist_ok=True)
-    env["PUBLIC"] = str(public_dir)
 
     # Launch browser with its normal default profile (no isolation — keeps extensions like Bitwarden)
     if args.browser:
