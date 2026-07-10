@@ -12257,7 +12257,19 @@
                 renderAIChatHistory();
             } catch (err) {
                 console.error("AI Copilot Error:", err);
-                aiChatHistory.push({ role: 'assistant', content: `Error: ${err.message}` });
+                aiChatHistory.push({ 
+                    role: 'assistant', 
+                    content: `Error: ${err.message}`,
+                    model: model,
+                    metadata: {
+                        prompt: prompt,
+                        system_prompt: system_instruction,
+                        tools: toolsEnabled,
+                        provider: provider,
+                        model: model,
+                        history_len: priorHistory.length
+                    }
+                });
                 saveAIChatHistory();
                 renderAIChatHistory();
             } finally {
