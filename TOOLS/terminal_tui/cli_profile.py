@@ -35,6 +35,7 @@ def main():
     parser.add_argument("profile_name", help="The name of the profile to use or create (e.g., 'work', 'personal').")
     parser.add_argument("--shell", choices=["cmd", "pwsh", "powershell"], default="pwsh", help="The shell to launch (default: pwsh).")
     parser.add_argument("--browser", choices=list(BROWSER_PATHS.keys()), help="Also launch a browser using its default profile (no isolation).")
+    parser.add_argument("--isolate-browser", action="store_true", help="Isolate the browser profile too (will force a clean browser session).")
 
     args = parser.parse_args()
     profile_name = args.profile_name
@@ -65,6 +66,19 @@ def main():
     env["APPDATA"] = str(appdata_roaming)
     env["HOME"] = str(profile_dir)
     env["XDG_CONFIG_HOME"] = str(appdata_roaming)
+    
+    # Ensure home directories for Codex and Gemini exist
+    codex_home = profile_dir / ".codex"
+    gemini_home = profile_dir / ".gemini"
+    codex_home.mkdir(parents=True, exist_ok=True)
+    gemini_home.mkdir(parents=True, exist_ok=True)
+    
+    env["CODEX_HOME"] = str(codex_home)
+    env["GEMINI_HOME"] = str(gemini_home)
+
+    if args.isolate_browser:
+        env["LOCALAPPDATA"] = str(appdata_local)
+        env["XDG_DATA_HOME"] = str(appdata_local)
 
     # Isolate ProgramData in case tools try to do machine-wide saves
     programdata_dir = profile_dir / "ProgramData"
@@ -78,6 +92,24 @@ def main():
     env["ProgramFiles"] = str(programfiles_dir)
     env["ProgramFiles(x86)"] = str(programfiles_dir)
     env["ProgramW6432"] = str(programfiles_dir)
+    
+    # Isolate Common Files folders
+    commonfiles_dir = programfiles_dir / "Common"
+    commonfiles_dir.mkdir(parents=True, exist_ok=True)
+    env["CommonProgramFiles"] = str(commonfiles_dir)
+    env["CommonProgramFiles(x86)"] = str(commonfiles_dir)
+    env["CommonProgramW6432"] = str(commonfiles_dir)
+
+    # Isolate Temp folder
+    temp_dir = profile_dir / "Temp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    env["TEMP"] = str(temp_dir)
+    env["TMP"] = str(temp_dir)
+
+    # Isolate Public folder
+    public_dir = profile_dir / "Public"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    env["PUBLIC"] = str(public_dir)
 
     # Launch browser with its normal default profile (no isolation — keeps extensions like Bitwarden)
     if args.browser:

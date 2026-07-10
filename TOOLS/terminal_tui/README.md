@@ -52,6 +52,14 @@ You can specify which shell you want to launch using the `--shell` flag:
   python cli_profile.py work --shell pwsh
   ```
 
+### 3. Isolating the Browser (`--isolate-browser`)
+By default, browsers triggered by your CLI tools (like login URLs) will launch using your default browser settings so that extensions (like Bitwarden) and saved logins remain available. 
+
+If you want to force a completely clean, isolated browser session (e.g. to test a clean sign-up flow), add the `--isolate-browser` flag:
+```powershell
+python cli_profile.py work --isolate-browser
+```
+
 ---
 
 ## Where Are My Files Saved?
