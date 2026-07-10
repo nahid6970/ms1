@@ -214,16 +214,58 @@ class ProfileWorker(QThread):
 
 
 # ---------------------------------------------------------------------------
+# WORKER THREAD — streams output of a single command
+# ---------------------------------------------------------------------------
+class CommandWorker(QThread):
+    log    = pyqtSignal(str)
+    finished = pyqtSignal(bool)
+
+    def __init__(self, command: str, env: dict, cwd: str):
+        super().__init__()
+        self.command = command
+        self.env     = env
+        self.cwd     = cwd
+
+    def run(self):
+        try:
+            proc = subprocess.Popen(
+                self.command,
+                shell=True,
+                env=self.env,
+                cwd=self.cwd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            for line in proc.stdout:
+                self.log.emit(line.rstrip())
+            proc.wait()
+            if proc.returncode != 0:
+                self.log.emit(f"[!] Exit code: {proc.returncode}")
+            self.finished.emit(proc.returncode == 0)
+        except Exception as e:
+            self.log.emit(f"[✗] {e}")
+            self.finished.emit(False)
+
+
+# ---------------------------------------------------------------------------
 # MAIN WINDOW
 # ---------------------------------------------------------------------------
 class ProfileLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CLI PROFILE LAUNCHER")
-        self.setMinimumSize(560, 440)
-        self.resize(620, 480)
+        self.setMinimumSize(560, 540)
+        self.resize(680, 600)
         self.setStyleSheet(GLOBAL_QSS)
-        self._worker = None
+        self._worker     = None
+        self._cmd_worker = None
+        self._active_env = None   # set when profile is activated
+        self._active_cwd = None
+        self._cmd_history: list[str] = []
+        self._hist_idx = -1
         self._build_ui()
 
     def _build_ui(self):
@@ -326,7 +368,7 @@ class ProfileLauncher(QMainWindow):
 
         self.log_output = QPlainTextEdit()
         self.log_output.setReadOnly(True)
-        self.log_output.setMinimumHeight(120)
+        self.log_output.setMinimumHeight(140)
         self.log_output.setStyleSheet(f"""
             QPlainTextEdit {{
                 background-color: {CP_PANEL};
@@ -343,6 +385,73 @@ class ProfileLauncher(QMainWindow):
         log_grp.setLayout(log_layout)
         root.addWidget(log_grp)
 
+        # ── COMMAND RUNNER ───────────────────────────────────────────────
+        cmd_grp = QGroupBox("COMMAND RUNNER  [ activate a profile first ]")
+        cmd_grp.setObjectName("cmd_grp")
+        cmd_layout = QVBoxLayout()
+        cmd_layout.setContentsMargins(8, 12, 8, 8)
+        cmd_layout.setSpacing(6)
+
+        cmd_row = QHBoxLayout()
+        cmd_row.setSpacing(6)
+
+        self.cmd_input = QLineEdit()
+        self.cmd_input.setPlaceholderText("e.g.  aws s3 ls   |   gh auth status   |   dir")
+        self.cmd_input.setEnabled(False)
+        self.cmd_input.returnPressed.connect(self._run_command)
+        self.cmd_input.installEventFilter(self)   # ↑↓ history navigation
+
+        self.run_btn = QPushButton("▶  RUN")
+        self.run_btn.setMinimumHeight(30)
+        self.run_btn.setEnabled(False)
+        self.run_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.run_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_GREEN};
+                color: {CP_GREEN};
+                font-weight: bold;
+                padding: 4px 14px;
+            }}
+            QPushButton:hover {{
+                border: 1px solid {CP_YELLOW};
+                color: {CP_YELLOW};
+            }}
+            QPushButton:pressed {{
+                background-color: {CP_GREEN};
+                color: black;
+            }}
+            QPushButton:disabled {{
+                background-color: #1a1a1a;
+                color: {CP_DIM};
+                border: 1px solid #1e1e1e;
+            }}
+        """)
+        self.run_btn.clicked.connect(self._run_command)
+
+        # Activate button — bakes the profile env without opening a shell window
+        self.activate_btn = QPushButton("⚡  ACTIVATE")
+        self.activate_btn.setMinimumHeight(30)
+        self.activate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.activate_btn.setToolTip("Set up profile env vars for the command runner without opening a shell window")
+        self.activate_btn.clicked.connect(self._activate_profile)
+
+        cmd_row.addWidget(self.cmd_input, stretch=5)
+        cmd_row.addWidget(self.run_btn, stretch=1)
+        cmd_layout.addLayout(cmd_row)
+
+        activate_row = QHBoxLayout()
+        activate_row.setSpacing(6)
+        self.active_label = QLabel("◌  No profile activated")
+        self.active_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
+        activate_row.addWidget(self.active_label)
+        activate_row.addStretch()
+        activate_row.addWidget(self.activate_btn)
+        cmd_layout.addLayout(activate_row)
+
+        cmd_grp.setLayout(cmd_layout)
+        root.addWidget(cmd_grp)
+
         # ── STATUS BAR ───────────────────────────────────────────────────
         self.status_label = QLabel("● READY")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
@@ -358,12 +467,115 @@ class ProfileLauncher(QMainWindow):
 
     def _log(self, msg: str):
         self.log_output.appendPlainText(msg)
+        self.log_output.verticalScrollBar().setValue(
+            self.log_output.verticalScrollBar().maximum()
+        )
 
     def _clear_log(self):
         self.log_output.clear()
 
     def _restart(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    # ── Activate profile (env only, no shell window) ─────────────────────
+
+    def _activate_profile(self):
+        profile_name = self.profile_input.text().strip()
+        if not profile_name:
+            self._log("[!] Enter a profile name first.")
+            return
+        if any(c in profile_name for c in r'\/:*?"<>|'):
+            self._log("[!] Profile name contains invalid characters.")
+            return
+
+        profiles_base_dir = Path.home() / "CLI_Profiles"
+        profile_dir = profiles_base_dir / profile_name
+        appdata_roaming = profile_dir / "AppData" / "Roaming"
+        appdata_local   = profile_dir / "AppData" / "Local"
+        programdata_dir = profile_dir / "ProgramData"
+
+        appdata_roaming.mkdir(parents=True, exist_ok=True)
+        appdata_local.mkdir(parents=True, exist_ok=True)
+        programdata_dir.mkdir(parents=True, exist_ok=True)
+
+        env = os.environ.copy()
+        env["USERPROFILE"]     = str(profile_dir)
+        env["HOMEDRIVE"]       = profile_dir.drive
+        env["HOMEPATH"]        = str(profile_dir)[len(profile_dir.drive):]
+        env["APPDATA"]         = str(appdata_roaming)
+        env["LOCALAPPDATA"]    = str(appdata_local)
+        env["HOME"]            = str(profile_dir)
+        env["XDG_CONFIG_HOME"] = str(appdata_roaming)
+        env["XDG_DATA_HOME"]   = str(appdata_local)
+        env["PROGRAMDATA"]     = str(programdata_dir)
+        env["ALLUSERSPROFILE"] = str(programdata_dir)
+
+        self._active_env = env
+        self._active_cwd = str(profile_dir)
+
+        self.cmd_input.setEnabled(True)
+        self.run_btn.setEnabled(True)
+        self.active_label.setText(f"◉  Active: {profile_name}  →  {profile_dir}")
+        self.active_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
+        self._log(f"[⚡] Profile '{profile_name}' activated for command runner.")
+        self._log(f"     CWD: {profile_dir}")
+        self.cmd_input.setFocus()
+
+    # ── Run a command ────────────────────────────────────────────────────
+
+    def _run_command(self):
+        if self._cmd_worker and self._cmd_worker.isRunning():
+            self._log("[!] A command is already running.")
+            return
+
+        cmd = self.cmd_input.text().strip()
+        if not cmd:
+            return
+
+        # Add to history (avoid consecutive duplicates)
+        if not self._cmd_history or self._cmd_history[-1] != cmd:
+            self._cmd_history.append(cmd)
+        self._hist_idx = -1
+
+        self.cmd_input.clear()
+        self._log(f"\n> {cmd}")
+
+        self.run_btn.setEnabled(False)
+        self.cmd_input.setEnabled(False)
+
+        self._cmd_worker = CommandWorker(cmd, self._active_env, self._active_cwd)
+        self._cmd_worker.log.connect(self._log)
+        self._cmd_worker.finished.connect(self._on_cmd_finished)
+        self._cmd_worker.start()
+
+    def _on_cmd_finished(self, success: bool):
+        self.run_btn.setEnabled(True)
+        self.cmd_input.setEnabled(True)
+        self.cmd_input.setFocus()
+
+    # ── ↑↓ command history in the input field ───────────────────────────
+
+    def eventFilter(self, obj, event):
+        from PyQt6.QtCore import QEvent
+        from PyQt6.QtGui import QKeyEvent
+        if obj is self.cmd_input and event.type() == QEvent.Type.KeyPress:
+            key = event.key()
+            if key == Qt.Key.Key_Up and self._cmd_history:
+                if self._hist_idx == -1:
+                    self._hist_idx = len(self._cmd_history) - 1
+                elif self._hist_idx > 0:
+                    self._hist_idx -= 1
+                self.cmd_input.setText(self._cmd_history[self._hist_idx])
+                return True
+            if key == Qt.Key.Key_Down and self._cmd_history:
+                if self._hist_idx == -1 or self._hist_idx >= len(self._cmd_history) - 1:
+                    self._hist_idx = -1
+                    self.cmd_input.clear()
+                else:
+                    self._hist_idx += 1
+                    self.cmd_input.setText(self._cmd_history[self._hist_idx])
+                return True
+        return super().eventFilter(obj, event)
 
     # ── Launch ──────────────────────────────────────────────────────────────
 
