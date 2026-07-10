@@ -9206,6 +9206,16 @@
                                         <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Show Payload Info" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)'; showAIGlobalTooltip(event, ${idx});" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none'; hideAIGlobalTooltip();">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                         </button>
+                                        <div class="ai-limit-dropdown-container" style="position:relative; display:inline-block;">
+                                            <button onclick="toggleAILimitDropdown(event, ${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Set Rate Limit State (Simulation)" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none';">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                            </button>
+                                            <div id="ai-limit-menu-${idx}" class="ai-limit-dropdown-menu" style="display:none; position:absolute; bottom:100%; right:0; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:4500; min-width:130px; padding:4px; flex-direction:column; gap:2px;">
+                                                <button onclick="triggerMockLimit(${idx}, 'RPM')" style="background:none; border:none; color:var(--text-primary); text-align:left; width:100%; padding:6px 8px; font-size:0.65rem; cursor:pointer; border-radius:4px; font-weight:500;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='none';">Mock RPM Limit</button>
+                                                <button onclick="triggerMockLimit(${idx}, 'RPD')" style="background:none; border:none; color:var(--text-primary); text-align:left; width:100%; padding:6px 8px; font-size:0.65rem; cursor:pointer; border-radius:4px; font-weight:500;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='none';">Mock RPD Limit</button>
+                                                <button onclick="clearMockLimits(${idx})" style="background:none; border:none; color:#f43f5e; text-align:left; width:100%; padding:6px 8px; font-size:0.65rem; cursor:pointer; border-radius:4px; font-weight:600; border-top:1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(244,63,94,0.1)';" onmouseout="this.style.background='none';">Clear Limits</button>
+                                            </div>
+                                        </div>
                                     ` : ''}
                                     <button onclick="regenerateAIChatCommand(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Regenerate/Retry" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none';">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -11415,6 +11425,116 @@
         function hideAIGlobalTooltip() {
             const tooltip = document.getElementById('ai-global-tooltip');
             if (tooltip) tooltip.style.display = 'none';
+        }
+        
+        function showAIPolishedRateLimitWarning(limitType, seconds) {
+            const promptInput = document.getElementById('ai-prompt-input');
+            const submitBtn = document.getElementById('ai-copilot-submit');
+            if (!promptInput || !submitBtn) return;
+            
+            promptInput.disabled = true;
+            submitBtn.disabled = true;
+            
+            const originalPlaceholder = promptInput.placeholder;
+            const originalBg = submitBtn.style.background;
+            const originalText = submitBtn.innerText;
+            
+            if (limitType === 'RPD') {
+                promptInput.placeholder = `Daily quota reached (RPD). Resets tomorrow.`;
+                submitBtn.innerText = `🔒 Lock`;
+                submitBtn.style.background = '#f43f5e';
+                return;
+            }
+            
+            let timeLeft = Math.ceil(seconds);
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    promptInput.disabled = false;
+                    promptInput.placeholder = originalPlaceholder;
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = originalBg;
+                    submitBtn.innerText = originalText;
+                } else {
+                    promptInput.placeholder = `Rate limit reached (${limitType}). Cooldown: ${timeLeft}s...`;
+                    submitBtn.innerText = `⏳ ${timeLeft}s`;
+                    submitBtn.style.background = '#ef4444';
+                }
+            }, 1000);
+            
+            promptInput.placeholder = `Rate limit reached (${limitType}). Cooldown: ${timeLeft}s...`;
+            submitBtn.innerText = `⏳ ${timeLeft}s`;
+            submitBtn.style.background = '#ef4444';
+        }
+        
+        function toggleAILimitDropdown(e, idx) {
+            e.stopPropagation();
+            const openMenu = document.getElementById(`ai-limit-menu-${idx}`);
+            if (!openMenu) return;
+            const isShowing = openMenu.style.display === 'flex';
+            
+            document.querySelectorAll('.ai-limit-dropdown-menu').forEach(m => m.style.display = 'none');
+            
+            if (!isShowing) {
+                openMenu.style.display = 'flex';
+                const closeHandler = (event) => {
+                    if (!openMenu.contains(event.target)) {
+                        openMenu.style.display = 'none';
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeHandler), 0);
+            }
+        }
+        
+        function triggerMockLimit(idx, type) {
+            const msg = aiChatHistory[idx];
+            if (!msg) return;
+            
+            const provider = msg.metadata ? msg.metadata.provider : 'gemini';
+            const model = msg.model || 'gemini-2.5-flash';
+            
+            if (type === 'RPD') {
+                const cachedLimits = {
+                    timestamp: Date.now(),
+                    limit_requests: "Max",
+                    remaining_requests: "0",
+                    reset_requests: "Tomorrow"
+                };
+                localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(cachedLimits));
+                syncAIUsageFromServer();
+            }
+            
+            showAIPolishedRateLimitWarning(type, type === 'RPM' ? 60 : 86400);
+            
+            const menu = document.getElementById(`ai-limit-menu-${idx}`);
+            if (menu) menu.style.display = 'none';
+        }
+        
+        function clearMockLimits(idx) {
+            const msg = aiChatHistory[idx];
+            if (!msg) return;
+            const provider = msg.metadata ? msg.metadata.provider : 'gemini';
+            const model = msg.model || 'gemini-2.5-flash';
+            localStorage.removeItem(`ai-rate-limits-${provider}-${model}`);
+            
+            const promptInput = document.getElementById('ai-prompt-input');
+            const submitBtn = document.getElementById('ai-copilot-submit');
+            if (promptInput) {
+                promptInput.disabled = false;
+                promptInput.placeholder = "Ask AI Copilot for a command...";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.background = '';
+                submitBtn.innerText = 'Send';
+            }
+            
+            syncAIUsageFromServer();
+            
+            const menu = document.getElementById(`ai-limit-menu-${idx}`);
+            if (menu) menu.style.display = 'none';
         }
 
         function updateAIToolsButtonVisuals() {

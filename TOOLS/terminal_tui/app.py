@@ -3882,7 +3882,36 @@ def api_ai_command():
                 res_data = res.json()
                 if res.status_code != 200:
                     error_msg = res_data.get('error', {}).get('message', 'Failed to call Gemini API')
-                    return jsonify({"error": error_msg}), res.status_code
+                    
+                    quota_limit = ""
+                    for detail in res_data.get('error', {}).get('details', []):
+                        if detail.get('@type') == 'type.googleapis.com/google.rpc.ErrorInfo':
+                            quota_limit = detail.get('metadata', {}).get('quota_limit', '')
+                            break
+                            
+                    rate_limit_info = None
+                    if res.status_code == 429:
+                        limit_type = "UNKNOWN"
+                        if "Minute" in quota_limit and "Requests" in quota_limit:
+                            limit_type = "RPM"
+                        elif "Minute" in quota_limit and "Tokens" in quota_limit:
+                            limit_type = "TPM"
+                        elif "Day" in quota_limit:
+                            limit_type = "RPD"
+                        
+                        rate_limit_info = {
+                            "status": "rate_limit_exceeded",
+                            "limit_type": limit_type,
+                            "quota_limit": quota_limit,
+                            "retry_after": 60
+                        }
+                        if limit_type == "RPD":
+                            rate_limit_info["retry_after"] = 86400
+                            
+                    response_payload = {"error": error_msg}
+                    if rate_limit_info:
+                        response_payload["rate_limit_info"] = rate_limit_info
+                    return jsonify(response_payload), res.status_code
                 
                 candidates = res_data.get('candidates', [])
                 if not candidates:
