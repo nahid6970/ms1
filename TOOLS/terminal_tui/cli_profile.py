@@ -73,6 +73,24 @@ def main():
     codex_home.mkdir(parents=True, exist_ok=True)
     gemini_home.mkdir(parents=True, exist_ok=True)
     
+    # Link main .codex files (except login and lock files) to keep settings, memories, and skills synced
+    main_codex = Path.home() / ".codex"
+    if main_codex.exists():
+        for item in main_codex.iterdir():
+            if item.name in ("auth.json",) or item.name.endswith("-shm") or item.name.endswith("-wal"):
+                continue
+            target_link = codex_home / item.name
+            if not target_link.exists():
+                if item.is_dir():
+                    # Create Directory Junction (works without Admin privileges)
+                    subprocess.run(["cmd.exe", "/c", "mklink", "/j", str(target_link), str(item)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    # Create Hard Link (works without Admin privileges on the same drive)
+                    try:
+                        os.link(str(item), str(target_link))
+                    except OSError:
+                        pass
+    
     env["CODEX_HOME"] = str(codex_home)
     env["GEMINI_HOME"] = str(gemini_home)
 
