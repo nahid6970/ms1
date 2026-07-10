@@ -11911,7 +11911,7 @@
             const meta = msg.metadata;
             const usage = meta.usage || {};
             const usageHtml = usage.totalTokenCount ? `
-                <div style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;"><span style="color:#e2e8f0; font-weight:600;">Tokens:</span> <span style="color:#eab308; font-weight:600;">${usage.promptTokenCount || 0}</span> <span style="color:var(--text-muted);">+</span> <span style="color:#10b981; font-weight:600;">${usage.candidatesTokenCount || 0}</span> <span style="color:var(--text-muted);">=</span> <span style="color:#ef4444; font-weight:600;">${usage.totalTokenCount}</span></div>
+                <div style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;"><span style="color:#e2e8f0; font-weight:600;">Tokens:</span> <span style="color:#eab308; font-weight:600;">${usage.promptTokenCount || 0}</span> <span style="color:var(--text-muted);">+</span> <span style="color:#10b981; font-weight:600;">${usage.candidatesTokenCount || 0}</span> <span style="color:var(--text-muted);">=</span> <span style="color:#38bdf8; font-weight:600;">${usage.totalTokenCount}</span></div>
             ` : '';
 
             const tooltipHtml = `
