@@ -5,10 +5,10 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLineEdit, QComboBox, QPlainTextEdit, QLabel,
-    QGroupBox, QFormLayout, QSizePolicy
+    QGroupBox, QFormLayout, QSizePolicy, QSplitter
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QColor, QPalette
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QEvent
+from PyQt6.QtGui import QFont, QColor, QPalette, QKeyEvent
 
 # ---------------------------------------------------------------------------
 # CYBERPUNK THEME PALETTE
@@ -46,10 +46,6 @@ GLOBAL_QSS = f"""
     QComboBox::drop-down {{
         border: none;
         width: 20px;
-    }}
-    QComboBox::down-arrow {{
-        width: 10px;
-        height: 10px;
     }}
     QComboBox QAbstractItemView {{
         background-color: {CP_PANEL};
@@ -96,6 +92,10 @@ GLOBAL_QSS = f"""
         color: {CP_TEXT};
         background-color: transparent;
     }}
+    QSplitter::handle {{
+        background-color: {CP_DIM};
+        height: 2px;
+    }}
     QScrollBar:vertical {{
         background: {CP_BG};
         width: 10px;
@@ -116,7 +116,7 @@ GLOBAL_QSS = f"""
 # KNOWN BROWSER PATHS
 # ---------------------------------------------------------------------------
 BROWSER_PATHS = {
-    "none": None,
+    "none": [],
     "chrome": [
         Path(os.environ.get("PROGRAMFILES", "C:/Program Files")) / "Google/Chrome/Application/chrome.exe",
         Path(os.environ.get("PROGRAMFILES(X86)", "C:/Program Files (x86)")) / "Google/Chrome/Application/chrome.exe",
@@ -128,97 +128,40 @@ BROWSER_PATHS = {
 }
 
 # ---------------------------------------------------------------------------
-# WORKER THREAD — runs the shell so the GUI stays responsive
+# HELPERS
 # ---------------------------------------------------------------------------
-class ProfileWorker(QThread):
-    log = pyqtSignal(str)
-    finished = pyqtSignal(bool)  # True = success
+def build_profile_env(profile_name: str) -> tuple[dict, str]:
+    """Build isolated env vars for the given profile. Returns (env, cwd)."""
+    profiles_base_dir = Path.home() / "CLI_Profiles"
+    profile_dir       = profiles_base_dir / profile_name
+    appdata_roaming   = profile_dir / "AppData" / "Roaming"
+    appdata_local     = profile_dir / "AppData" / "Local"
+    programdata_dir   = profile_dir / "ProgramData"
 
-    def __init__(self, profile_name: str, shell: str, browser: str):
-        super().__init__()
-        self.profile_name = profile_name
-        self.shell = shell
-        self.browser = browser
+    for d in (appdata_roaming, appdata_local, programdata_dir):
+        d.mkdir(parents=True, exist_ok=True)
 
-    def run(self):
-        try:
-            profile_name = self.profile_name
-            profiles_base_dir = Path.home() / "CLI_Profiles"
-            profile_dir = profiles_base_dir / profile_name
-            appdata_roaming = profile_dir / "AppData" / "Roaming"
-            appdata_local   = profile_dir / "AppData" / "Local"
+    env = os.environ.copy()
+    env["USERPROFILE"]     = str(profile_dir)
+    env["HOMEDRIVE"]       = profile_dir.drive
+    env["HOMEPATH"]        = str(profile_dir)[len(profile_dir.drive):]
+    env["APPDATA"]         = str(appdata_roaming)
+    env["LOCALAPPDATA"]    = str(appdata_local)
+    env["HOME"]            = str(profile_dir)
+    env["XDG_CONFIG_HOME"] = str(appdata_roaming)
+    env["XDG_DATA_HOME"]   = str(appdata_local)
+    env["PROGRAMDATA"]     = str(programdata_dir)
+    env["ALLUSERSPROFILE"] = str(programdata_dir)
 
-            appdata_roaming.mkdir(parents=True, exist_ok=True)
-            appdata_local.mkdir(parents=True, exist_ok=True)
-
-            self.log.emit(f"[+] Profile: {profile_name}")
-            self.log.emit(f"[+] Path:    {profile_dir}")
-
-            env = os.environ.copy()
-            env["USERPROFILE"]   = str(profile_dir)
-            env["HOMEDRIVE"]     = profile_dir.drive
-            env["HOMEPATH"]      = str(profile_dir)[len(profile_dir.drive):]
-            env["APPDATA"]       = str(appdata_roaming)
-            env["LOCALAPPDATA"]  = str(appdata_local)
-            env["HOME"]          = str(profile_dir)
-            env["XDG_CONFIG_HOME"] = str(appdata_roaming)
-            env["XDG_DATA_HOME"]   = str(appdata_local)
-
-            programdata_dir = profile_dir / "ProgramData"
-            programdata_dir.mkdir(parents=True, exist_ok=True)
-            env["PROGRAMDATA"]    = str(programdata_dir)
-            env["ALLUSERSPROFILE"] = str(programdata_dir)
-
-            # Launch browser (no isolation — keeps default profile + extensions)
-            if self.browser != "none":
-                candidates = BROWSER_PATHS.get(self.browser, [])
-                exe = next((p for p in candidates if p and p.exists()), None)
-                if exe:
-                    self.log.emit(f"[+] Launching {self.browser.capitalize()} (default profile)...")
-                    subprocess.Popen(
-                        [str(exe)],
-                        creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-                    )
-                else:
-                    self.log.emit(f"[!] Browser '{self.browser}' not found — skipping.")
-
-            # Launch shell
-            self.log.emit(f"[+] Launching shell: {self.shell}")
-            if self.shell == "cmd":
-                subprocess.run(
-                    ["cmd.exe", "/k", f"title Profile: {profile_name}"],
-                    env=env, cwd=str(profile_dir)
-                )
-            elif self.shell == "powershell":
-                subprocess.run(
-                    ["powershell.exe", "-NoExit", "-Command",
-                     f"$Host.UI.RawUI.WindowTitle = 'Profile: {profile_name}'"],
-                    env=env, cwd=str(profile_dir)
-                )
-            else:
-                subprocess.run(
-                    ["pwsh.exe", "-NoExit", "-Command",
-                     f"$Host.UI.RawUI.WindowTitle = 'Profile: {profile_name}'"],
-                    env=env, cwd=str(profile_dir)
-                )
-
-            self.log.emit(f"[✓] Shell session for '{profile_name}' closed.")
-            self.finished.emit(True)
-
-        except FileNotFoundError as e:
-            self.log.emit(f"[✗] Shell not found: {e}")
-            self.finished.emit(False)
-        except Exception as e:
-            self.log.emit(f"[✗] Error: {e}")
-            self.finished.emit(False)
+    return env, str(profile_dir)
 
 
 # ---------------------------------------------------------------------------
-# WORKER THREAD — streams output of a single command
+# WORKER — streams a single command's output
 # ---------------------------------------------------------------------------
 class CommandWorker(QThread):
-    log    = pyqtSignal(str)
-    finished = pyqtSignal(bool)
+    log      = pyqtSignal(str)
+    finished = pyqtSignal(int)   # exit code
 
     def __init__(self, command: str, env: dict, cwd: str):
         super().__init__()
@@ -242,9 +185,59 @@ class CommandWorker(QThread):
             for line in proc.stdout:
                 self.log.emit(line.rstrip())
             proc.wait()
-            if proc.returncode != 0:
-                self.log.emit(f"[!] Exit code: {proc.returncode}")
-            self.finished.emit(proc.returncode == 0)
+            self.finished.emit(proc.returncode)
+        except Exception as e:
+            self.log.emit(f"[✗] {e}")
+            self.finished.emit(1)
+
+
+# ---------------------------------------------------------------------------
+# WORKER — opens a shell window
+# ---------------------------------------------------------------------------
+class ShellWorker(QThread):
+    log      = pyqtSignal(str)
+    finished = pyqtSignal(bool)
+
+    def __init__(self, profile_name: str, shell: str, browser: str):
+        super().__init__()
+        self.profile_name = profile_name
+        self.shell        = shell
+        self.browser      = browser
+
+    def run(self):
+        try:
+            env, cwd = build_profile_env(self.profile_name)
+
+            if self.browser != "none":
+                candidates = BROWSER_PATHS.get(self.browser, [])
+                exe = next((p for p in candidates if p and p.exists()), None)
+                if exe:
+                    self.log.emit(f"[+] Opening {self.browser.capitalize()} (your default profile)...")
+                    subprocess.Popen(
+                        [str(exe)],
+                        creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+                    )
+                else:
+                    self.log.emit(f"[!] {self.browser} not found — skipping browser.")
+
+            self.log.emit(f"[+] Shell window: {self.shell}")
+            if self.shell == "cmd":
+                subprocess.run(["cmd.exe", "/k", f"title Profile: {self.profile_name}"],
+                               env=env, cwd=cwd)
+            elif self.shell == "powershell":
+                subprocess.run(["powershell.exe", "-NoExit", "-Command",
+                                f"$Host.UI.RawUI.WindowTitle = 'Profile: {self.profile_name}'"],
+                               env=env, cwd=cwd)
+            else:
+                subprocess.run(["pwsh.exe", "-NoExit", "-Command",
+                                f"$Host.UI.RawUI.WindowTitle = 'Profile: {self.profile_name}'"],
+                               env=env, cwd=cwd)
+
+            self.log.emit(f"[✓] Shell closed.")
+            self.finished.emit(True)
+        except FileNotFoundError as e:
+            self.log.emit(f"[✗] Shell not found: {e}")
+            self.finished.emit(False)
         except Exception as e:
             self.log.emit(f"[✗] {e}")
             self.finished.emit(False)
@@ -257,213 +250,185 @@ class ProfileLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CLI PROFILE LAUNCHER")
-        self.setMinimumSize(560, 540)
-        self.resize(680, 600)
+        self.setMinimumSize(620, 580)
+        self.resize(740, 660)
         self.setStyleSheet(GLOBAL_QSS)
-        self._worker     = None
-        self._cmd_worker = None
-        self._active_env = None   # set when profile is activated
-        self._active_cwd = None
-        self._cmd_history: list[str] = []
-        self._hist_idx = -1
+
+        self._cmd_worker:   CommandWorker | None = None
+        self._shell_worker: ShellWorker   | None = None
+        self._active_env:   dict | None          = None
+        self._active_cwd:   str  | None          = None
+        self._active_name:  str                  = ""
+        self._history:      list[str]            = []
+        self._hist_idx:     int                  = -1
+
         self._build_ui()
 
+    # ── UI ──────────────────────────────────────────────────────────────────
     def _build_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
-        root.setContentsMargins(16, 16, 16, 16)
-        root.setSpacing(10)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(8)
 
-        # ── HEADER ──────────────────────────────────────────────────────────
-        header = QLabel("◈  CLI  PROFILE  LAUNCHER  ◈")
-        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        header.setStyleSheet(f"color: {CP_YELLOW}; font-size: 13pt; font-weight: bold; letter-spacing: 3px;")
-        root.addWidget(header)
+        # Header
+        hdr = QLabel("◈  CLI  PROFILE  LAUNCHER  ◈")
+        hdr.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hdr.setStyleSheet(f"color:{CP_YELLOW}; font-size:13pt; font-weight:bold; letter-spacing:3px;")
+        root.addWidget(hdr)
 
-        divider = QLabel("─" * 80)
-        divider.setStyleSheet(f"color: {CP_DIM}; font-size: 7pt;")
-        divider.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        root.addWidget(divider)
+        div = QLabel("─" * 90)
+        div.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        div.setStyleSheet(f"color:{CP_DIM}; font-size:7pt;")
+        root.addWidget(div)
 
-        # ── CONFIG GROUP ─────────────────────────────────────────────────────
-        grp = QGroupBox("PROFILE CONFIG")
-        form = QFormLayout()
-        form.setSpacing(10)
-        form.setContentsMargins(12, 16, 12, 12)
+        # ── Profile config (compact) ─────────────────────────────────────
+        cfg_grp = QGroupBox("PROFILE")
+        cfg_row = QHBoxLayout()
+        cfg_row.setContentsMargins(10, 14, 10, 10)
+        cfg_row.setSpacing(10)
 
-        # Profile name
+        cfg_row.addWidget(self._lbl("NAME:"))
         self.profile_input = QLineEdit()
-        self.profile_input.setPlaceholderText("e.g. work, personal, client-x")
+        self.profile_input.setPlaceholderText("work / personal / client-x")
         self.profile_input.setClearButtonEnabled(True)
-        form.addRow(self._label("PROFILE NAME:"), self.profile_input)
+        self.profile_input.setMinimumWidth(160)
+        cfg_row.addWidget(self.profile_input, stretch=3)
 
-        # Shell selector
+        cfg_row.addWidget(self._lbl("SHELL:"))
         self.shell_combo = QComboBox()
         self.shell_combo.addItems(["pwsh", "cmd", "powershell"])
         self.shell_combo.setCursor(Qt.CursorShape.PointingHandCursor)
-        form.addRow(self._label("SHELL:"), self.shell_combo)
+        cfg_row.addWidget(self.shell_combo, stretch=1)
 
-        # Browser selector
+        cfg_row.addWidget(self._lbl("BROWSER:"))
         self.browser_combo = QComboBox()
         self.browser_combo.addItems(["none", "chrome", "helium"])
         self.browser_combo.setCursor(Qt.CursorShape.PointingHandCursor)
-        form.addRow(self._label("BROWSER:"), self.browser_combo)
+        cfg_row.addWidget(self.browser_combo, stretch=1)
 
-        grp.setLayout(form)
-        root.addWidget(grp)
+        cfg_grp.setLayout(cfg_row)
+        root.addWidget(cfg_grp)
 
-        # ── LAUNCH BUTTON ─────────────────────────────────────────────────
-        btn_row = QHBoxLayout()
-        btn_row.setSpacing(8)
+        # ── Command runner ───────────────────────────────────────────────
+        cmd_grp = QGroupBox("RUN COMMAND")
+        cmd_outer = QVBoxLayout()
+        cmd_outer.setContentsMargins(10, 14, 10, 10)
+        cmd_outer.setSpacing(8)
 
-        self.launch_btn = QPushButton("▶  LAUNCH PROFILE")
-        self.launch_btn.setMinimumHeight(38)
-        self.launch_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.launch_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_DIM};
-                border: 1px solid {CP_CYAN};
-                color: {CP_CYAN};
-                padding: 8px 16px;
-                font-weight: bold;
-                font-size: 11pt;
+        # Input row
+        cmd_row = QHBoxLayout()
+        cmd_row.setSpacing(6)
+
+        self.prompt_label = QLabel("$")
+        self.prompt_label.setStyleSheet(f"color:{CP_GREEN}; font-size:13pt; font-weight:bold; background:transparent;")
+        cmd_row.addWidget(self.prompt_label)
+
+        self.cmd_input = QLineEdit()
+        self.cmd_input.setPlaceholderText("codex  |  gemini  |  aws s3 ls  |  gh auth status  ...")
+        self.cmd_input.setMinimumHeight(34)
+        self.cmd_input.setStyleSheet(f"""
+            QLineEdit {{
+                background-color:{CP_PANEL}; color:{CP_GREEN};
+                border:1px solid {CP_DIM}; padding:4px 8px; font-size:11pt;
             }}
-            QPushButton:hover {{
-                background-color: #1a1a1a;
-                border: 1px solid {CP_YELLOW};
-                color: {CP_YELLOW};
-            }}
-            QPushButton:pressed {{
-                background-color: {CP_CYAN};
-                color: black;
-            }}
-            QPushButton:disabled {{
-                background-color: #1a1a1a;
-                color: {CP_DIM};
-                border: 1px solid #1e1e1e;
-            }}
+            QLineEdit:focus {{ border:1px solid {CP_GREEN}; }}
         """)
-        self.launch_btn.clicked.connect(self._launch)
+        self.cmd_input.returnPressed.connect(self._run_command)
+        self.cmd_input.installEventFilter(self)
+        cmd_row.addWidget(self.cmd_input, stretch=1)
 
-        clear_btn = QPushButton("⌫  CLEAR LOG")
-        clear_btn.setMinimumHeight(38)
-        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        clear_btn.clicked.connect(self._clear_log)
+        self.run_btn = QPushButton("▶  RUN")
+        self.run_btn.setMinimumHeight(34)
+        self.run_btn.setMinimumWidth(90)
+        self.run_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.run_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color:{CP_DIM}; border:1px solid {CP_GREEN};
+                color:{CP_GREEN}; font-weight:bold; font-size:11pt;
+            }}
+            QPushButton:hover {{ border:1px solid {CP_YELLOW}; color:{CP_YELLOW}; }}
+            QPushButton:pressed {{ background-color:{CP_GREEN}; color:black; }}
+            QPushButton:disabled {{ background-color:#1a1a1a; color:{CP_DIM}; border:1px solid #1e1e1e; }}
+        """)
+        self.run_btn.clicked.connect(self._run_command)
+        cmd_row.addWidget(self.run_btn)
 
-        restart_btn = QPushButton("↺  RESTART")
-        restart_btn.setMinimumHeight(38)
-        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        restart_btn.clicked.connect(self._restart)
+        cmd_outer.addLayout(cmd_row)
 
-        btn_row.addWidget(self.launch_btn, stretch=3)
-        btn_row.addWidget(clear_btn, stretch=1)
-        btn_row.addWidget(restart_btn, stretch=1)
-        root.addLayout(btn_row)
+        # Status row
+        status_row = QHBoxLayout()
+        self.active_label = QLabel("◌  No profile active  —  enter name above and click ACTIVATE")
+        self.active_label.setStyleSheet(f"color:{CP_DIM}; font-size:8pt;")
+        status_row.addWidget(self.active_label, stretch=1)
 
-        # ── LOG OUTPUT ───────────────────────────────────────────────────
-        log_grp = QGroupBox("OUTPUT LOG")
+        self.activate_btn = QPushButton("⚡ ACTIVATE")
+        self.activate_btn.setMinimumHeight(28)
+        self.activate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.activate_btn.setToolTip("Load profile env vars so RUN uses them (no shell window)")
+        self.activate_btn.clicked.connect(self._activate)
+        status_row.addWidget(self.activate_btn)
+
+        self.shell_btn = QPushButton("⧉ OPEN SHELL")
+        self.shell_btn.setMinimumHeight(28)
+        self.shell_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.shell_btn.setToolTip("Open an isolated shell window for this profile")
+        self.shell_btn.clicked.connect(self._open_shell)
+        status_row.addWidget(self.shell_btn)
+
+        cmd_outer.addLayout(status_row)
+        cmd_grp.setLayout(cmd_outer)
+        root.addWidget(cmd_grp)
+
+        # ── Output log ───────────────────────────────────────────────────
+        log_grp = QGroupBox("OUTPUT")
         log_layout = QVBoxLayout()
         log_layout.setContentsMargins(8, 12, 8, 8)
 
         self.log_output = QPlainTextEdit()
         self.log_output.setReadOnly(True)
-        self.log_output.setMinimumHeight(140)
+        self.log_output.setMinimumHeight(240)
         self.log_output.setStyleSheet(f"""
             QPlainTextEdit {{
-                background-color: {CP_PANEL};
-                color: {CP_GREEN};
-                border: 1px solid {CP_DIM};
-                font-family: 'Consolas';
-                font-size: 9pt;
-                padding: 6px;
+                background-color:{CP_PANEL}; color:{CP_GREEN};
+                border:1px solid {CP_DIM}; font-family:'Consolas'; font-size:9pt; padding:6px;
             }}
         """)
-        self.log_output.setPlaceholderText("// awaiting launch...")
-
+        self.log_output.setPlaceholderText("// output appears here...")
         log_layout.addWidget(self.log_output)
         log_grp.setLayout(log_layout)
-        root.addWidget(log_grp)
+        root.addWidget(log_grp, stretch=1)
 
-        # ── COMMAND RUNNER ───────────────────────────────────────────────
-        cmd_grp = QGroupBox("COMMAND RUNNER  [ activate a profile first ]")
-        cmd_grp.setObjectName("cmd_grp")
-        cmd_layout = QVBoxLayout()
-        cmd_layout.setContentsMargins(8, 12, 8, 8)
-        cmd_layout.setSpacing(6)
-
-        cmd_row = QHBoxLayout()
-        cmd_row.setSpacing(6)
-
-        self.cmd_input = QLineEdit()
-        self.cmd_input.setPlaceholderText("e.g.  aws s3 ls   |   gh auth status   |   dir")
-        self.cmd_input.setEnabled(False)
-        self.cmd_input.returnPressed.connect(self._run_command)
-        self.cmd_input.installEventFilter(self)   # ↑↓ history navigation
-
-        self.run_btn = QPushButton("▶  RUN")
-        self.run_btn.setMinimumHeight(30)
-        self.run_btn.setEnabled(False)
-        self.run_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.run_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_DIM};
-                border: 1px solid {CP_GREEN};
-                color: {CP_GREEN};
-                font-weight: bold;
-                padding: 4px 14px;
-            }}
-            QPushButton:hover {{
-                border: 1px solid {CP_YELLOW};
-                color: {CP_YELLOW};
-            }}
-            QPushButton:pressed {{
-                background-color: {CP_GREEN};
-                color: black;
-            }}
-            QPushButton:disabled {{
-                background-color: #1a1a1a;
-                color: {CP_DIM};
-                border: 1px solid #1e1e1e;
-            }}
-        """)
-        self.run_btn.clicked.connect(self._run_command)
-
-        # Activate button — bakes the profile env without opening a shell window
-        self.activate_btn = QPushButton("⚡  ACTIVATE")
-        self.activate_btn.setMinimumHeight(30)
-        self.activate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.activate_btn.setToolTip("Set up profile env vars for the command runner without opening a shell window")
-        self.activate_btn.clicked.connect(self._activate_profile)
-
-        cmd_row.addWidget(self.cmd_input, stretch=5)
-        cmd_row.addWidget(self.run_btn, stretch=1)
-        cmd_layout.addLayout(cmd_row)
-
-        activate_row = QHBoxLayout()
-        activate_row.setSpacing(6)
-        self.active_label = QLabel("◌  No profile activated")
-        self.active_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
-        activate_row.addWidget(self.active_label)
-        activate_row.addStretch()
-        activate_row.addWidget(self.activate_btn)
-        cmd_layout.addLayout(activate_row)
-
-        cmd_grp.setLayout(cmd_layout)
-        root.addWidget(cmd_grp)
-
-        # ── STATUS BAR ───────────────────────────────────────────────────
+        # ── Bottom bar ────────────────────────────────────────────────────
+        bot = QHBoxLayout()
         self.status_label = QLabel("● READY")
-        self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
-        self.status_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        root.addWidget(self.status_label)
+        self.status_label.setStyleSheet(f"color:{CP_GREEN}; font-size:8pt;")
+        bot.addWidget(self.status_label)
+        bot.addStretch()
+
+        clear_btn = QPushButton("⌫ CLEAR")
+        clear_btn.setMinimumHeight(26)
+        clear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        clear_btn.clicked.connect(self.log_output.clear)
+
+        restart_btn = QPushButton("↺ RESTART")
+        restart_btn.setMinimumHeight(26)
+        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        restart_btn.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
+
+        bot.addWidget(clear_btn)
+        bot.addWidget(restart_btn)
+        root.addLayout(bot)
+
+        # Focus
+        self.profile_input.setFocus()
 
     # ── Helpers ─────────────────────────────────────────────────────────────
-
-    def _label(self, text: str) -> QLabel:
-        lbl = QLabel(text)
-        lbl.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold; background: transparent;")
-        return lbl
+    def _lbl(self, text: str) -> QLabel:
+        l = QLabel(text)
+        l.setStyleSheet(f"color:{CP_TEXT}; font-weight:bold; background:transparent;")
+        return l
 
     def _log(self, msg: str):
         self.log_output.appendPlainText(msg)
@@ -471,152 +436,124 @@ class ProfileLauncher(QMainWindow):
             self.log_output.verticalScrollBar().maximum()
         )
 
-    def _clear_log(self):
-        self.log_output.clear()
+    def _set_status(self, text: str, color: str):
+        self.status_label.setText(text)
+        self.status_label.setStyleSheet(f"color:{color}; font-size:8pt;")
 
-    def _restart(self):
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+    def _validate_name(self) -> str | None:
+        name = self.profile_input.text().strip()
+        if not name:
+            self._log("[!] Enter a profile name.")
+            return None
+        if any(c in name for c in r'\/:*?"<>|'):
+            self._log("[!] Profile name has invalid characters.")
+            return None
+        return name
 
-    # ── Activate profile (env only, no shell window) ─────────────────────
-
-    def _activate_profile(self):
-        profile_name = self.profile_input.text().strip()
-        if not profile_name:
-            self._log("[!] Enter a profile name first.")
+    # ── Activate ────────────────────────────────────────────────────────────
+    def _activate(self):
+        name = self._validate_name()
+        if not name:
             return
-        if any(c in profile_name for c in r'\/:*?"<>|'):
-            self._log("[!] Profile name contains invalid characters.")
-            return
-
-        profiles_base_dir = Path.home() / "CLI_Profiles"
-        profile_dir = profiles_base_dir / profile_name
-        appdata_roaming = profile_dir / "AppData" / "Roaming"
-        appdata_local   = profile_dir / "AppData" / "Local"
-        programdata_dir = profile_dir / "ProgramData"
-
-        appdata_roaming.mkdir(parents=True, exist_ok=True)
-        appdata_local.mkdir(parents=True, exist_ok=True)
-        programdata_dir.mkdir(parents=True, exist_ok=True)
-
-        env = os.environ.copy()
-        env["USERPROFILE"]     = str(profile_dir)
-        env["HOMEDRIVE"]       = profile_dir.drive
-        env["HOMEPATH"]        = str(profile_dir)[len(profile_dir.drive):]
-        env["APPDATA"]         = str(appdata_roaming)
-        env["LOCALAPPDATA"]    = str(appdata_local)
-        env["HOME"]            = str(profile_dir)
-        env["XDG_CONFIG_HOME"] = str(appdata_roaming)
-        env["XDG_DATA_HOME"]   = str(appdata_local)
-        env["PROGRAMDATA"]     = str(programdata_dir)
-        env["ALLUSERSPROFILE"] = str(programdata_dir)
-
-        self._active_env = env
-        self._active_cwd = str(profile_dir)
-
-        self.cmd_input.setEnabled(True)
-        self.run_btn.setEnabled(True)
-        self.active_label.setText(f"◉  Active: {profile_name}  →  {profile_dir}")
-        self.active_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
-        self._log(f"[⚡] Profile '{profile_name}' activated for command runner.")
-        self._log(f"     CWD: {profile_dir}")
+        env, cwd = build_profile_env(name)
+        self._active_env  = env
+        self._active_cwd  = cwd
+        self._active_name = name
+        self.active_label.setText(f"◉  {name}  →  {cwd}")
+        self.active_label.setStyleSheet(f"color:{CP_GREEN}; font-size:8pt;")
+        self._log(f"[⚡] Activated: {name}")
+        self._log(f"     Path: {cwd}")
         self.cmd_input.setFocus()
 
-    # ── Run a command ────────────────────────────────────────────────────
+    # ── Open shell window ───────────────────────────────────────────────────
+    def _open_shell(self):
+        name = self._validate_name()
+        if not name:
+            return
+        if self._shell_worker and self._shell_worker.isRunning():
+            self._log("[!] A shell is already open.")
+            return
+        shell   = self.shell_combo.currentText()
+        browser = self.browser_combo.currentText()
+        self._log(f"\n[⧉] Opening shell for '{name}'  ({shell})...")
+        self._shell_worker = ShellWorker(name, shell, browser)
+        self._shell_worker.log.connect(self._log)
+        self._shell_worker.finished.connect(lambda ok: self._set_status("● READY", CP_GREEN))
+        self._set_status("● SHELL OPEN", CP_YELLOW)
+        self._shell_worker.start()
 
+    # ── Run command ─────────────────────────────────────────────────────────
     def _run_command(self):
         if self._cmd_worker and self._cmd_worker.isRunning():
-            self._log("[!] A command is already running.")
+            self._log("[!] Already running a command.")
             return
+
+        # Auto-activate if no profile is loaded yet
+        if not self._active_env:
+            name = self._validate_name()
+            if not name:
+                return
+            self._activate()
 
         cmd = self.cmd_input.text().strip()
         if not cmd:
             return
 
-        # Add to history (avoid consecutive duplicates)
-        if not self._cmd_history or self._cmd_history[-1] != cmd:
-            self._cmd_history.append(cmd)
+        if not self._history or self._history[-1] != cmd:
+            self._history.append(cmd)
         self._hist_idx = -1
-
         self.cmd_input.clear()
-        self._log(f"\n> {cmd}")
 
+        # Open browser alongside the first command if selected
+        browser = self.browser_combo.currentText()
+        if browser != "none":
+            candidates = BROWSER_PATHS.get(browser, [])
+            exe = next((p for p in candidates if p and p.exists()), None)
+            if exe:
+                self._log(f"[+] Opening {browser.capitalize()}...")
+                subprocess.Popen(
+                    [str(exe)],
+                    creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+                )
+            # Reset browser to none so it only opens once per run
+            self.browser_combo.setCurrentText("none")
+
+        self._log(f"\n$ {cmd}")
         self.run_btn.setEnabled(False)
-        self.cmd_input.setEnabled(False)
+        self._set_status("● RUNNING", CP_YELLOW)
 
         self._cmd_worker = CommandWorker(cmd, self._active_env, self._active_cwd)
         self._cmd_worker.log.connect(self._log)
-        self._cmd_worker.finished.connect(self._on_cmd_finished)
+        self._cmd_worker.finished.connect(self._on_cmd_done)
         self._cmd_worker.start()
 
-    def _on_cmd_finished(self, success: bool):
+    def _on_cmd_done(self, code: int):
         self.run_btn.setEnabled(True)
-        self.cmd_input.setEnabled(True)
         self.cmd_input.setFocus()
+        if code == 0:
+            self._set_status("● READY", CP_GREEN)
+        else:
+            self._set_status(f"● EXIT {code}", CP_RED)
 
-    # ── ↑↓ command history in the input field ───────────────────────────
-
+    # ── ↑↓ history ──────────────────────────────────────────────────────────
     def eventFilter(self, obj, event):
-        from PyQt6.QtCore import QEvent
-        from PyQt6.QtGui import QKeyEvent
         if obj is self.cmd_input and event.type() == QEvent.Type.KeyPress:
             key = event.key()
-            if key == Qt.Key.Key_Up and self._cmd_history:
-                if self._hist_idx == -1:
-                    self._hist_idx = len(self._cmd_history) - 1
-                elif self._hist_idx > 0:
-                    self._hist_idx -= 1
-                self.cmd_input.setText(self._cmd_history[self._hist_idx])
+            if key == Qt.Key.Key_Up and self._history:
+                self._hist_idx = (len(self._history) - 1
+                                  if self._hist_idx == -1
+                                  else max(0, self._hist_idx - 1))
+                self.cmd_input.setText(self._history[self._hist_idx])
                 return True
-            if key == Qt.Key.Key_Down and self._cmd_history:
-                if self._hist_idx == -1 or self._hist_idx >= len(self._cmd_history) - 1:
+            if key == Qt.Key.Key_Down and self._history:
+                if self._hist_idx == -1 or self._hist_idx >= len(self._history) - 1:
                     self._hist_idx = -1
                     self.cmd_input.clear()
                 else:
                     self._hist_idx += 1
-                    self.cmd_input.setText(self._cmd_history[self._hist_idx])
+                    self.cmd_input.setText(self._history[self._hist_idx])
                 return True
         return super().eventFilter(obj, event)
-
-    # ── Launch ──────────────────────────────────────────────────────────────
-
-    def _launch(self):
-        profile_name = self.profile_input.text().strip()
-        if not profile_name:
-            self._log("[!] Profile name cannot be empty.")
-            self.status_label.setText("● ERROR: no profile name")
-            self.status_label.setStyleSheet(f"color: {CP_RED}; font-size: 8pt;")
-            return
-
-        # Sanitize: no spaces or path separators
-        if any(c in profile_name for c in r'\/:*?"<>|'):
-            self._log("[!] Profile name contains invalid characters.")
-            return
-
-        shell   = self.shell_combo.currentText()
-        browser = self.browser_combo.currentText()
-
-        self._log(f"\n{'─'*48}")
-        self._log(f"  Activating profile: {profile_name}")
-        self._log(f"  Shell: {shell}  |  Browser: {browser}")
-        self._log(f"{'─'*48}")
-
-        self.launch_btn.setEnabled(False)
-        self.status_label.setText("● RUNNING")
-        self.status_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 8pt;")
-
-        self._worker = ProfileWorker(profile_name, shell, browser)
-        self._worker.log.connect(self._log)
-        self._worker.finished.connect(self._on_finished)
-        self._worker.start()
-
-    def _on_finished(self, success: bool):
-        self.launch_btn.setEnabled(True)
-        if success:
-            self.status_label.setText("● READY")
-            self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-size: 8pt;")
-        else:
-            self.status_label.setText("● ERROR")
-            self.status_label.setStyleSheet(f"color: {CP_RED}; font-size: 8pt;")
 
 
 # ---------------------------------------------------------------------------
@@ -626,7 +563,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
-    # Dark palette baseline so native widgets inherit correctly
     palette = QPalette()
     palette.setColor(QPalette.ColorRole.Window,          QColor(CP_BG))
     palette.setColor(QPalette.ColorRole.WindowText,      QColor(CP_TEXT))
