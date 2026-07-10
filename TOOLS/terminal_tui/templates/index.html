@@ -1900,7 +1900,7 @@
                 <textarea id="ai-prompt-input" placeholder="e.g. Find all .log files and delete them..." style="height:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.8rem; outline:none; resize:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'" onkeydown="handleAIPromptKeydown(event)"></textarea>
                 <div style="display:flex; align-items:center; gap:5px;">
                     <!-- Provider custom dropdown -->
-                    <div style="position:relative; flex:1; min-width:0;" id="ai-provider-dd-container">
+                    <div style="position:relative; flex:1 1 0px; min-width:0;" id="ai-provider-dd-container">
                         <div id="ai-provider-dd-trigger" onclick="toggleAIProviderDropdown()" style="height:30px; padding:0 6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:3px; user-select:none;">
                             <span id="ai-provider-dd-label" style="font-size:0.7rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;"></span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
@@ -1925,7 +1925,7 @@
                         </div>
                     </div>
                     <!-- Account Label custom dropdown -->
-                    <div style="position:relative; flex:1; min-width:0;" id="ai-acc-label-dd-container">
+                    <div style="position:relative; flex:1 1 0px; min-width:0;" id="ai-acc-label-dd-container">
                         <div id="ai-acc-label-dd-trigger" onclick="toggleAIAccountLabelDropdown()" style="height:30px; padding:0 6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:3px; user-select:none;" title="Switch Account Profile">
                             <span id="ai-acc-label-dd-label" style="font-size:0.7rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">Default</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
@@ -1935,7 +1935,7 @@
                         </div>
                     </div>
                     <!-- Model custom dropdown -->
-                    <div style="position:relative; flex:2; min-width:0;" id="ai-model-dd-container">
+                    <div style="position:relative; flex:2 1 0px; min-width:0;" id="ai-model-dd-container">
                         <div id="ai-model-dd-trigger" onclick="toggleAIModelDropdown()" style="height:30px; padding:0 6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:4px; user-select:none;">
                             <div style="display:flex; align-items:center; gap:4px; flex:1; min-width:0; overflow:hidden;">
                                 <span id="ai-model-dd-label" style="font-size:0.7rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
