@@ -2531,6 +2531,13 @@
                     </div>
                 </div>
 
+                <!-- Account Label Selector -->
+                <div id="ai-modal-label-selector" style="display:none; align-items:center; gap:6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; opacity:0.7;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    <select id="ai-modal-label-select" onchange="switchModalAccountLabel(this.value)" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); font-size:0.7rem; padding:3px 6px; outline:none; cursor:pointer; max-width:120px;">
+                    </select>
+                </div>
+
                 <button onclick="openAIModelTesterModal()" title="Run batch diagnostics test on all models of this provider" style="padding: 6px 10px; background: rgba(59, 130, 246, 0.12); border: 1px solid var(--accent-color); border-radius: 6px; color: var(--accent-color); font-size: 0.72rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; padding-bottom: 6px;" onmouseenter="this.style.background='var(--accent-color)'; this.style.color='#ffffff'" onmouseleave="this.style.background='rgba(59, 130, 246, 0.12)'; this.style.color='var(--accent-color)'">
                     🧪 Test All Models
                 </button>
@@ -10107,6 +10114,48 @@
                     if (savedEl) savedEl.style.display = 'none';
                 }
             });
+
+            // Populate account label selector for this provider
+            populateModalLabelSelector(provider);
+        }
+
+        function populateModalLabelSelector(provider) {
+            const selectorContainer = document.getElementById('ai-modal-label-selector');
+            const selectEl = document.getElementById('ai-modal-label-select');
+            if (!selectorContainer || !selectEl) return;
+
+            const accounts = JSON.parse(localStorage.getItem('ai-accounts-list') || '[]');
+            const providerAccounts = accounts.filter(a => a.provider === provider);
+
+            if (providerAccounts.length === 0) {
+                selectorContainer.style.display = 'none';
+                return;
+            }
+
+            selectorContainer.style.display = 'flex';
+            const currentKey = localStorage.getItem(`${provider}-api-key`) || '';
+            selectEl.innerHTML = '';
+
+            providerAccounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.api_key;
+                opt.textContent = acc.name || 'Unnamed';
+                if (acc.api_key === currentKey) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function switchModalAccountLabel(apiKey) {
+            if (!activeFilterTab || !apiKey) return;
+            const provider = activeFilterTab;
+            localStorage.setItem(`${provider}-api-key`, apiKey);
+
+            // Refresh the model list table to show usage for the new account
+            renderFilterModelsList();
+            // Refresh the usage stats panel and the bottom-bar label dropdown
+            updateRateLimitsUI();
+            refreshAIProviderLabels();
+            populateAIAccountLabelDropdown();
         }
 
         function getBookmarkedModels() {
