@@ -9706,7 +9706,8 @@
         }
 
         function recordRequestUsage(provider, model, tokenCount) {
-            const historyKey = `ai-usage-history-${provider}-${model}`;
+            const activeLabel = getActiveAccountLabel(provider) || 'default';
+            const historyKey = `ai-usage-history-${provider}-${activeLabel}-${model}`;
             let history = [];
             try {
                 history = JSON.parse(localStorage.getItem(historyKey)) || [];
@@ -9726,7 +9727,8 @@
         }
 
         function getCalculatedUsage(provider, model) {
-            const historyKey = `ai-usage-history-${provider}-${model}`;
+            const activeLabel = getActiveAccountLabel(provider) || 'default';
+            const historyKey = `ai-usage-history-${provider}-${activeLabel}-${model}`;
             let history = [];
             try {
                 history = JSON.parse(localStorage.getItem(historyKey)) || [];
