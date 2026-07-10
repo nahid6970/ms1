@@ -11911,7 +11911,7 @@
             const meta = msg.metadata;
             const usage = meta.usage || {};
             const usageHtml = usage.totalTokenCount ? `
-                <div style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;"><span style="color:#fb7185; font-weight:600;">Tokens:</span> <span style="color:var(--text-secondary);">${usage.promptTokenCount || 0} in / ${usage.candidatesTokenCount || 0} out (${usage.totalTokenCount} total)</span></div>
+                <div style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;"><span style="color:#e2e8f0; font-weight:600;">Tokens:</span> <span style="color:#eab308; font-weight:600;">${usage.promptTokenCount || 0}</span> <span style="color:var(--text-muted);">+</span> <span style="color:#10b981; font-weight:600;">${usage.candidatesTokenCount || 0}</span> <span style="color:var(--text-muted);">=</span> <span style="color:#ef4444; font-weight:600;">${usage.totalTokenCount}</span></div>
             ` : '';
 
             const tooltipHtml = `
@@ -11931,11 +11931,22 @@
             const popover = document.getElementById('ai-copilot-popover');
             const popoverRect = popover.getBoundingClientRect();
             const triggerRect = e.currentTarget.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
             
-            const left = triggerRect.left - popoverRect.left - 206; // 200px width + 6px gap
-            let top = triggerRect.top - popoverRect.top - 40; // align slightly above trigger
+            let left = triggerRect.left - popoverRect.left - (tooltipRect.width + 6);
+            let top = triggerRect.top - popoverRect.top - 40;
             
-            if (top < 45) top = 45; // prevent overlapping header
+            // Prevent going above header
+            if (top < 45) top = 45;
+            
+            // Prevent going below popover bottom
+            const maxTop = popoverRect.height - tooltipRect.height - 10;
+            if (top > maxTop) top = maxTop;
+            
+            // Prevent going off left edge
+            if (triggerRect.left - tooltipRect.width - 6 < 0) {
+                left = triggerRect.right - popoverRect.left + 6;
+            }
             
             tooltip.style.left = `${left}px`;
             tooltip.style.top = `${top}px`;
