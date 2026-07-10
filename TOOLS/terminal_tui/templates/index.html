@@ -11429,47 +11429,6 @@
             if (tooltip) tooltip.style.display = 'none';
         }
         
-        function showAIPolishedRateLimitWarning(limitType, seconds) {
-            const promptInput = document.getElementById('ai-prompt-input');
-            const submitBtn = document.getElementById('ai-copilot-submit');
-            if (!promptInput || !submitBtn) return;
-            
-            promptInput.disabled = true;
-            submitBtn.disabled = true;
-            
-            const originalPlaceholder = promptInput.placeholder;
-            const originalBg = submitBtn.style.background;
-            const originalText = submitBtn.innerText;
-            
-            if (limitType === 'RPD') {
-                promptInput.placeholder = `Daily quota reached (RPD). Resets tomorrow.`;
-                submitBtn.innerText = `🔒 Lock`;
-                submitBtn.style.background = '#f43f5e';
-                return;
-            }
-            
-            let timeLeft = Math.ceil(seconds);
-            const interval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    promptInput.disabled = false;
-                    promptInput.placeholder = originalPlaceholder;
-                    submitBtn.disabled = false;
-                    submitBtn.style.background = originalBg;
-                    submitBtn.innerText = originalText;
-                } else {
-                    promptInput.placeholder = `Rate limit reached (${limitType}). Cooldown: ${timeLeft}s...`;
-                    submitBtn.innerText = `⏳ ${timeLeft}s`;
-                    submitBtn.style.background = '#ef4444';
-                }
-            }, 1000);
-            
-            promptInput.placeholder = `Rate limit reached (${limitType}). Cooldown: ${timeLeft}s...`;
-            submitBtn.innerText = `⏳ ${timeLeft}s`;
-            submitBtn.style.background = '#ef4444';
-        }
-        
         function toggleAILimitDropdown(e, idx) {
             e.stopPropagation();
             const openMenu = document.getElementById(`ai-limit-menu-${idx}`);
@@ -11497,18 +11456,14 @@
             const provider = msg.metadata ? msg.metadata.provider : 'gemini';
             const model = msg.model || 'gemini-2.5-flash';
             
-            if (type === 'RPD') {
-                const cachedLimits = {
-                    timestamp: Date.now(),
-                    limit_requests: "Max",
-                    remaining_requests: "0",
-                    reset_requests: "Tomorrow"
-                };
-                localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(cachedLimits));
-                syncAIUsageFromServer();
-            }
-            
-            showAIPolishedRateLimitWarning(type, type === 'RPM' ? 60 : 86400);
+            const cachedLimits = {
+                timestamp: Date.now(),
+                limit_requests: type === 'RPD' ? "Max" : "15",
+                remaining_requests: "0",
+                reset_requests: type === 'RPD' ? "Tomorrow" : "60s"
+            };
+            localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(cachedLimits));
+            syncAIUsageFromServer();
             
             const menu = document.getElementById(`ai-limit-menu-${idx}`);
             if (menu) menu.style.display = 'none';
@@ -11520,18 +11475,6 @@
             const provider = msg.metadata ? msg.metadata.provider : 'gemini';
             const model = msg.model || 'gemini-2.5-flash';
             localStorage.removeItem(`ai-rate-limits-${provider}-${model}`);
-            
-            const promptInput = document.getElementById('ai-prompt-input');
-            const submitBtn = document.getElementById('ai-copilot-submit');
-            if (promptInput) {
-                promptInput.disabled = false;
-                promptInput.placeholder = "Ask AI Copilot for a command...";
-            }
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.style.background = '';
-                submitBtn.innerText = 'Send';
-            }
             
             syncAIUsageFromServer();
             
@@ -12217,6 +12160,17 @@
                     throw new Error(`Server returned invalid response (Status: ${res.status}).`);
                 }
                 if (!res.ok) {
+                    if (res.status === 429 && data.rate_limit_info) {
+                        const info = data.rate_limit_info;
+                        const cachedLimits = {
+                            timestamp: Date.now(),
+                            limit_requests: info.limit_type === 'RPD' ? "Max" : "15",
+                            remaining_requests: "0",
+                            reset_requests: info.limit_type === 'RPD' ? "Tomorrow" : "60s"
+                        };
+                        localStorage.setItem(`ai-rate-limits-${provider}-${model}`, JSON.stringify(cachedLimits));
+                        syncAIUsageFromServer();
+                    }
                     throw new Error(data.error || 'Failed to generate command');
                 }
                 
