@@ -9164,15 +9164,9 @@
                 const savedProvider = localStorage.getItem('ai-provider') || 'gemini';
                 const providerSelect = document.getElementById('ai-provider-select');
                 if (providerSelect) providerSelect.value = savedProvider;
-                // Sync custom provider trigger label
-                document.getElementById('ai-provider-dd-label').innerHTML =
-                    (AI_PROVIDER_ICONS[savedProvider] || '') + '  ' + (AI_PROVIDER_LABELS[savedProvider] || savedProvider);
-                document.querySelectorAll('#ai-provider-dd-menu .ai-dd-opt').forEach(o => {
-                    o.style.color = o.dataset.val === savedProvider ? 'var(--accent-color)' : 'var(--text-primary)';
-                    o.style.fontWeight = o.dataset.val === savedProvider ? '600' : '400';
-                });
-
+                
                 handleAIProviderChange();
+                refreshAIProviderLabels();
                 updateRateLimitsUI();
                 syncAIUsageFromServer();
 
@@ -11126,6 +11120,50 @@
             populateSystemPromptsDropdown();
         }
 
+        function getActiveAccountLabel(provider) {
+            const currentKey = localStorage.getItem(`${provider}-api-key`);
+            if (!currentKey) return '';
+            const accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const acc = accounts.find(a => a.provider === provider && a.api_key === currentKey);
+            return acc ? acc.name : '';
+        }
+
+        function refreshAIProviderLabels() {
+            const baseLabels = {
+                gemini: 'Google',
+                groq: 'Groq',
+                morph: 'Morph LLM',
+                openrouter: 'OpenRouter'
+            };
+            
+            const providerNames = ['gemini', 'groq', 'morph', 'openrouter'];
+            const displayLabels = {};
+            providerNames.forEach(p => {
+                const base = baseLabels[p];
+                const activeLabel = getActiveAccountLabel(p);
+                displayLabels[p] = activeLabel ? `${base} (${activeLabel})` : base;
+            });
+            
+            const activeProvider = localStorage.getItem('ai-provider') || 'gemini';
+            const labelEl = document.getElementById('ai-provider-dd-label');
+            if (labelEl) {
+                labelEl.innerHTML = (AI_PROVIDER_ICONS[activeProvider] || '') + '  ' + (displayLabels[activeProvider] || activeProvider);
+            }
+            
+            document.querySelectorAll('#ai-provider-dd-menu .ai-dd-opt').forEach(opt => {
+                const p = opt.getAttribute('data-val');
+                if (p && displayLabels[p]) {
+                    const svg = opt.querySelector('svg');
+                    opt.innerHTML = '';
+                    if (svg) opt.appendChild(svg);
+                    opt.appendChild(document.createTextNode(' ' + displayLabels[p]));
+                    
+                    opt.style.color = p === activeProvider ? 'var(--accent-color)' : 'var(--text-primary)';
+                    opt.style.fontWeight = p === activeProvider ? '600' : '400';
+                }
+            });
+        }
+
         // Derived key function using PBKDF2
         async function deriveAESKey(password, salt) {
             const encoder = new TextEncoder();
@@ -11409,6 +11447,7 @@
             if (container) container.style.display = 'none';
             
             renderAIAccountsList();
+            refreshAIProviderLabels();
             alert(`Switched active account to: ${acc.name}`);
         }
 
@@ -11694,14 +11733,11 @@
 
         function selectAIProvider(val) {
             document.getElementById('ai-provider-select').value = val;
-            document.getElementById('ai-provider-dd-label').innerHTML = AI_PROVIDER_ICONS[val] + '  ' + AI_PROVIDER_LABELS[val];
             document.getElementById('ai-provider-dd-menu').style.display = 'none';
             document.removeEventListener('click', _aiProviderOutside);
-            document.querySelectorAll('#ai-provider-dd-menu .ai-dd-opt').forEach(o => {
-                o.style.color = o.dataset.val === val ? 'var(--accent-color)' : 'var(--text-primary)';
-                o.style.fontWeight = o.dataset.val === val ? '600' : '400';
-            });
+            
             handleAIProviderChange();
+            refreshAIProviderLabels();
             fetchDynamicModels(val);
         }
 
@@ -12007,6 +12043,7 @@
                     }
                 }
                 updateAIToolsButtonVisuals();
+                refreshAIProviderLabels();
             } catch (e) {
                 console.error("Error loading tool config:", e);
             }
