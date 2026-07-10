@@ -1924,6 +1924,16 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Account Label custom dropdown -->
+                    <div style="position:relative; flex:1; min-width:0;" id="ai-acc-label-dd-container">
+                        <div id="ai-acc-label-dd-trigger" onclick="toggleAIAccountLabelDropdown()" style="height:30px; padding:0 6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:3px; user-select:none;" title="Switch Account Profile">
+                            <span id="ai-acc-label-dd-label" style="font-size:0.7rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">Default</span>
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                        <div id="ai-acc-label-dd-menu" style="display:none; position:absolute; bottom:calc(100% + 3px); left:0; right:0; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; z-index:2000; box-shadow:0 8px 20px rgba(0,0,0,0.5); overflow-y:auto; max-height:160px;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
                     <!-- Model custom dropdown -->
                     <div style="position:relative; flex:2; min-width:0;" id="ai-model-dd-container">
                         <div id="ai-model-dd-trigger" onclick="toggleAIModelDropdown()" style="height:30px; padding:0 6px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:4px; user-select:none;">
@@ -11162,6 +11172,70 @@
                     opt.style.fontWeight = p === activeProvider ? '600' : '400';
                 }
             });
+
+            populateAIAccountLabelDropdown();
+        }
+
+        function populateAIAccountLabelDropdown() {
+            const provider = document.getElementById('ai-provider-select').value;
+            const container = document.getElementById('ai-acc-label-dd-menu');
+            const triggerLabel = document.getElementById('ai-acc-label-dd-label');
+            if (!container || !triggerLabel) return;
+            
+            let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const filtered = accounts.filter(a => a.provider === provider);
+            
+            const currentKey = localStorage.getItem(`${provider}-api-key`);
+            const activeAcc = filtered.find(a => a.api_key === currentKey);
+            
+            if (activeAcc) {
+                triggerLabel.textContent = activeAcc.name;
+                triggerLabel.style.color = 'var(--text-primary)';
+            } else {
+                triggerLabel.textContent = currentKey ? 'Pasted Key' : 'No Key';
+                triggerLabel.style.color = 'var(--text-muted)';
+            }
+            
+            let html = '';
+            if (filtered.length === 0) {
+                html += `<div style="padding:6px 10px; font-size:0.68rem; color:var(--text-muted); text-align:center;">No profiles</div>`;
+            } else {
+                filtered.forEach(acc => {
+                    const isActive = activeAcc && activeAcc.id === acc.id;
+                    html += `
+                        <div onclick="selectAIAccountFromDropdown('${acc.id}')" class="ai-dd-opt" style="padding:7px 10px; font-size:0.74rem; color:${isActive ? 'var(--accent-color)' : 'var(--text-primary)'}; font-weight:${isActive ? '600' : '400'}; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='transparent'">
+                            ${escapeHtml(acc.name)}
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        function selectAIAccountFromDropdown(id) {
+            useAIAccount(id);
+            const menu = document.getElementById('ai-acc-label-dd-menu');
+            if (menu) menu.style.display = 'none';
+            document.removeEventListener('click', _aiAccountLabelOutside);
+        }
+
+        function toggleAIAccountLabelDropdown() {
+            const menu = document.getElementById('ai-acc-label-dd-menu');
+            const isOpen = menu.style.display === 'block';
+            closeAIDropdowns();
+            if (!isOpen) {
+                populateAIAccountLabelDropdown();
+                menu.style.display = 'block';
+                setTimeout(() => document.addEventListener('click', _aiAccountLabelOutside), 0);
+            }
+        }
+
+        function _aiAccountLabelOutside(e) {
+            if (!document.getElementById('ai-acc-label-dd-container').contains(e.target)) {
+                const menu = document.getElementById('ai-acc-label-dd-menu');
+                if (menu) menu.style.display = 'none';
+                document.removeEventListener('click', _aiAccountLabelOutside);
+            }
         }
 
         // Derived key function using PBKDF2
@@ -12052,6 +12126,8 @@
         function closeAIDropdowns() {
             document.getElementById('ai-provider-dd-menu').style.display = 'none';
             document.getElementById('ai-model-dd-menu').style.display = 'none';
+            const accMenu = document.getElementById('ai-acc-label-dd-menu');
+            if (accMenu) accMenu.style.display = 'none';
             const toolsMenu = document.getElementById('ai-tools-dd-menu');
             if (toolsMenu) toolsMenu.style.display = 'none';
         }
