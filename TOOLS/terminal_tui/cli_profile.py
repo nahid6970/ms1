@@ -63,10 +63,8 @@ def main():
     env["HOMEDRIVE"] = profile_dir.drive
     env["HOMEPATH"] = str(profile_dir)[len(profile_dir.drive):]
     env["APPDATA"] = str(appdata_roaming)
-    env["LOCALAPPDATA"] = str(appdata_local)
     env["HOME"] = str(profile_dir)
     env["XDG_CONFIG_HOME"] = str(appdata_roaming)
-    env["XDG_DATA_HOME"] = str(appdata_local)
 
     # Isolate ProgramData in case tools try to do machine-wide saves
     programdata_dir = profile_dir / "ProgramData"
