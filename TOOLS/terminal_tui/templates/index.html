@@ -2462,10 +2462,13 @@
                             <button onclick="saveGeminiAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="ai-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                    <div id="ai-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
                         <button onclick="clearGeminiAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             API Key
+                        </button>
+                        <button onclick="openAIAccountsManager('gemini')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Gemini Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </button>
                     </div>
                     <!-- Groq API Key -->
@@ -2475,10 +2478,13 @@
                             <button onclick="saveGroqAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="groq-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                    <div id="groq-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
                         <button onclick="clearGroqAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             API Key
+                        </button>
+                        <button onclick="openAIAccountsManager('groq')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Groq Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </button>
                     </div>
                     <!-- Morph API Key -->
@@ -2488,10 +2494,13 @@
                             <button onclick="saveMorphAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="morph-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                    <div id="morph-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
                         <button onclick="clearMorphAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             API Key
+                        </button>
+                        <button onclick="openAIAccountsManager('morph')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Morph Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </button>
                     </div>
                     <!-- OpenRouter API Key -->
@@ -2501,10 +2510,13 @@
                             <button onclick="saveOpenRouterAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
                         </div>
                     </div>
-                    <div id="openrouter-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center;">
+                    <div id="openrouter-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
                         <button onclick="clearOpenRouterAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             API Key
+                        </button>
+                        <button onclick="openAIAccountsManager('openrouter')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage OpenRouter Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </button>
                     </div>
                 </div>
@@ -2671,6 +2683,60 @@
             </div>
             <div id="model-tester-results" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 2px; min-height: 120px;">
                 <div style="text-align:center; font-size:0.75rem; color:var(--text-muted); padding:24px;">Enter a prompt and click "Run Test" to begin</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Accounts Manager Modal -->
+    <div id="ai-accounts-modal" class="modal-overlay" style="z-index:3000;">
+        <div class="modal-content" style="width: 480px; max-width: 90vw; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">API Accounts Manager</h3>
+                <button type="button" class="btn btn-secondary" onclick="closeAIAccountsManager()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1; border: 1px solid var(--border-color); background: none; color: var(--text-secondary);">✕</button>
+            </div>
+            
+            <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+                <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">Provider:</label>
+                <select id="ai-acc-provider-select" onchange="renderAIAccountsList()" style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 4px 8px; font-size: 0.72rem; outline: none; flex: 1;">
+                    <option value="gemini">Gemini</option>
+                    <option value="groq">Groq</option>
+                    <option value="morph">Morph</option>
+                    <option value="openrouter">OpenRouter</option>
+                </select>
+            </div>
+
+            <!-- List of Saved Accounts -->
+            <div style="font-weight: 600; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Saved Accounts</div>
+            <div id="ai-accounts-list-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; background: rgba(0,0,0,0.1); border-radius: 6px; border: 1px solid var(--border-color); min-height: 120px; max-height: 200px; margin-bottom: 12px;">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Add Account Form -->
+            <div style="font-weight: 600; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Add New Account</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 16px;">
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <input type="text" id="ai-acc-label-input" placeholder="Account Label (e.g. Work API, Personal)" style="flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 5px 8px; font-size: 0.72rem; outline: none;">
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <input type="password" id="ai-acc-key-input" placeholder="API Key" style="flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 5px 8px; font-size: 0.72rem; outline: none;">
+                    <button onclick="addAIAccount()" style="padding: 5px 12px; background: var(--accent-color); border: none; border-radius: 6px; color: white; font-size: 0.72rem; cursor: pointer; font-weight: 600;">Add</button>
+                </div>
+            </div>
+
+            <!-- Import/Export Section -->
+            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; display: flex; gap: 8px; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.68rem; color: var(--text-muted);">Secure Backup (AES-GCM Encrypted)</div>
+                <div style="display: flex; gap: 6px;">
+                    <button onclick="exportAIAccounts()" style="padding: 5px 10px; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 0.72rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.borderColor='var(--accent-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Export
+                    </button>
+                    <button onclick="triggerImportAIAccounts()" style="padding: 5px 10px; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 0.72rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.borderColor='var(--accent-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Import
+                    </button>
+                    <input type="file" id="ai-acc-import-file" onchange="importAIAccounts(event)" style="display: none;" accept=".enc,.json">
+                </div>
             </div>
         </div>
     </div>
@@ -11058,6 +11124,292 @@
             resetPromptForm();
             renderSavedPromptsList();
             populateSystemPromptsDropdown();
+        }
+
+        // Derived key function using PBKDF2
+        async function deriveAESKey(password, salt) {
+            const encoder = new TextEncoder();
+            const passwordKey = await window.crypto.subtle.importKey(
+                "raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]
+            );
+            return await window.crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                passwordKey,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        // Encrypt plain string
+        async function encryptData(plaintext, password) {
+            const encoder = new TextEncoder();
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const aesKey = await deriveAESKey(password, salt);
+            
+            const ciphertext = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                aesKey,
+                encoder.encode(plaintext)
+            );
+            
+            const encryptedBytes = new Uint8Array(ciphertext);
+            const packageBytes = new Uint8Array(salt.length + iv.length + encryptedBytes.length);
+            packageBytes.set(salt, 0);
+            packageBytes.set(iv, salt.length);
+            packageBytes.set(encryptedBytes, salt.length + iv.length);
+            
+            return btoa(String.fromCharCode.apply(null, packageBytes));
+        }
+
+        // Decrypt package string
+        async function decryptData(base64Package, password) {
+            const decoder = new TextDecoder();
+            const packageBytes = new Uint8Array(
+                atob(base64Package).split("").map(c => c.charCodeAt(0))
+            );
+            
+            const salt = packageBytes.slice(0, 16);
+            const iv = packageBytes.slice(16, 28);
+            const ciphertext = packageBytes.slice(28);
+            
+            const aesKey = await deriveAESKey(password, salt);
+            const decrypted = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                aesKey,
+                ciphertext
+            );
+            
+            return decoder.decode(decrypted);
+        }
+
+        async function exportAIAccounts() {
+            const password = prompt("Enter a password to lock and encrypt your API keys export file:");
+            if (!password) return;
+            
+            const accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            if (accounts.length === 0) {
+                const geminiKey = localStorage.getItem('gemini-api-key') || '';
+                const groqKey = localStorage.getItem('groq-api-key') || '';
+                const openrouterKey = localStorage.getItem('openrouter-api-key') || '';
+                const morphKey = localStorage.getItem('morph-api-key') || '';
+                
+                if (geminiKey) accounts.push({ id: 'active-gemini', name: 'Gemini Active', provider: 'gemini', api_key: geminiKey });
+                if (groqKey) accounts.push({ id: 'active-groq', name: 'Groq Active', provider: 'groq', api_key: groqKey });
+                if (openrouterKey) accounts.push({ id: 'active-openrouter', name: 'OpenRouter Active', provider: 'openrouter', api_key: openrouterKey });
+                if (morphKey) accounts.push({ id: 'active-morph', name: 'Morph Active', provider: 'morph', api_key: morphKey });
+            }
+            
+            if (accounts.length === 0) {
+                alert("No accounts or keys found to export.");
+                return;
+            }
+
+            try {
+                const plaintext = JSON.stringify(accounts);
+                const encryptedBase64 = await encryptData(plaintext, password);
+                
+                const blob = new Blob([encryptedBase64], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "ai_accounts_backup.enc";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error("Encryption export failed:", e);
+                alert("Failed to export: " + e.message);
+            }
+        }
+
+        function triggerImportAIAccounts() {
+            document.getElementById('ai-acc-import-file').click();
+        }
+
+        async function importAIAccounts(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                const encryptedBase64 = evt.target.result.trim();
+                const password = prompt("Enter the password to decrypt and import the accounts:");
+                if (!password) return;
+                
+                try {
+                    const decrypted = await decryptData(encryptedBase64, password);
+                    const importedAccounts = JSON.parse(decrypted);
+                    
+                    if (!Array.isArray(importedAccounts)) {
+                        throw new Error("Invalid backup file structure.");
+                    }
+                    
+                    let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+                    
+                    importedAccounts.forEach(imp => {
+                        const idx = accounts.findIndex(a => a.id === imp.id);
+                        if (idx !== -1) {
+                            accounts[idx] = imp;
+                        } else {
+                            accounts.push(imp);
+                        }
+                    });
+                    
+                    localStorage.setItem('ai-accounts-list', JSON.stringify(accounts));
+                    alert(`Successfully imported and merged ${importedAccounts.length} accounts!`);
+                    
+                    renderAIAccountsList();
+                    initAIToolsConfig();
+                    
+                } catch (err) {
+                    console.error("Decryption failed:", err);
+                    alert("Import failed: Incorrect password or corrupted backup file.");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function openAIAccountsManager(provider = 'gemini') {
+            const modal = document.getElementById('ai-accounts-modal');
+            if (modal) {
+                modal.classList.add('show');
+                const select = document.getElementById('ai-acc-provider-select');
+                if (select) {
+                    select.value = provider;
+                }
+                renderAIAccountsList();
+            }
+        }
+
+        function closeAIAccountsManager() {
+            const modal = document.getElementById('ai-accounts-modal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function renderAIAccountsList() {
+            const provider = document.getElementById('ai-acc-provider-select').value;
+            const container = document.getElementById('ai-accounts-list-container');
+            if (!container) return;
+            
+            let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const filtered = accounts.filter(a => a.provider === provider);
+            
+            const activeId = localStorage.getItem(`ai-active-account-id-${provider}`);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; font-size:0.7rem; color:var(--text-muted); padding:16px;">No saved accounts for this provider. Add one below!</div>`;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(acc => {
+                const isActive = activeId === acc.id || localStorage.getItem(`${provider}-api-key`) === acc.api_key;
+                const maskedKey = acc.api_key ? acc.api_key.substring(0, 6) + '...' + acc.api_key.substring(acc.api_key.length - 4) : '';
+                return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:rgba(255,255,255,0.02); border:1px solid ${isActive ? 'var(--accent-color)' : 'var(--border-color)'}; border-radius:6px; gap:8px;">
+                        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                            <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                ${escapeHtml(acc.name)} ${isActive ? '<span style="color:var(--accent-color); font-size:0.62rem; margin-left:4px;">(Active)</span>' : ''}
+                            </span>
+                            <span style="font-size:0.62rem; color:var(--text-muted); font-family:monospace;">${maskedKey}</span>
+                        </div>
+                        <div style="display:flex; gap:4px;">
+                            ${!isActive ? `
+                                <button onclick="useAIAccount('${acc.id}')" style="padding:3px 8px; background:var(--accent-color); border:none; border-radius:4px; color:white; font-size:0.65rem; cursor:pointer; font-weight:500;">Activate</button>
+                            ` : ''}
+                            <button onclick="deleteAIAccount('${acc.id}')" style="padding:3px 6px; background:rgba(239, 68, 68, 0.15); border:1px solid #ef4444; color:#ef4444; border-radius:4px; font-size:0.65rem; cursor:pointer;" title="Delete account">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addAIAccount() {
+            const provider = document.getElementById('ai-acc-provider-select').value;
+            const labelInput = document.getElementById('ai-acc-label-input');
+            const keyInput = document.getElementById('ai-acc-key-input');
+            
+            const label = labelInput.value.trim();
+            const key = keyInput.value.trim();
+            
+            if (!label || !key) {
+                alert("Please enter both an account label and API key.");
+                return;
+            }
+            
+            let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const newAcc = {
+                id: 'acc-' + Date.now(),
+                name: label,
+                provider: provider,
+                api_key: key
+            };
+            
+            accounts.push(newAcc);
+            localStorage.setItem('ai-accounts-list', JSON.stringify(accounts));
+            
+            labelInput.value = '';
+            keyInput.value = '';
+            
+            const filtered = accounts.filter(a => a.provider === provider);
+            if (filtered.length === 1) {
+                useAIAccount(newAcc.id);
+            } else {
+                renderAIAccountsList();
+            }
+        }
+
+        function deleteAIAccount(id) {
+            if (!confirm("Are you sure you want to delete this account?")) return;
+            
+            let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+            
+            accounts = accounts.filter(a => a.id !== id);
+            localStorage.setItem('ai-accounts-list', JSON.stringify(accounts));
+            
+            const activeId = localStorage.getItem(`ai-active-account-id-${acc.provider}`);
+            if (activeId === id) {
+                localStorage.removeItem(`ai-active-account-id-${acc.provider}`);
+                localStorage.removeItem(`${acc.provider}-api-key`);
+                
+                const savedMsg = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-saved-msg`);
+                const container = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-container`);
+                if (savedMsg) savedMsg.style.display = 'none';
+                if (container) {
+                    container.style.display = 'block';
+                    const keyInput = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-input`);
+                    if (keyInput) keyInput.value = '';
+                }
+            }
+            
+            renderAIAccountsList();
+        }
+
+        function useAIAccount(id) {
+            let accounts = JSON.parse(localStorage.getItem('ai-accounts-list')) || [];
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+            
+            localStorage.setItem(`${acc.provider}-api-key`, acc.api_key);
+            localStorage.setItem(`ai-active-account-id-${acc.provider}`, id);
+            
+            const providerKeyInput = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-input`);
+            if (providerKeyInput) providerKeyInput.value = acc.api_key;
+            
+            fetchDynamicModels(acc.provider);
+            
+            const savedMsg = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-saved-msg`);
+            const container = document.getElementById(`${acc.provider === 'gemini' ? 'ai' : acc.provider}-api-key-container`);
+            if (savedMsg) savedMsg.style.display = 'flex';
+            if (container) container.style.display = 'none';
+            
+            renderAIAccountsList();
+            alert(`Switched active account to: ${acc.name}`);
         }
 
         // ── AI Model Batch Tester ──────────────────────────────────────────
