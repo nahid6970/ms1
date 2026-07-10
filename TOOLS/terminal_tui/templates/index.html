@@ -9758,7 +9758,8 @@
                     const data = await res.json();
                     const grouped = {};
                     data.forEach(item => {
-                        const key = `ai-usage-history-${item.provider}-${item.model}`;
+                        const accLabel = getActiveAccountLabel(item.provider) || 'default';
+                        const key = `ai-usage-history-${item.provider}-${accLabel}-${item.model}`;
                         if (!grouped[key]) grouped[key] = [];
                         const ts = new Date(item.timestamp).getTime();
                         grouped[key].push({
@@ -9827,7 +9828,8 @@
             const limitRPD = spec ? (typeof spec.rpd === 'number' ? spec.rpd : parseInt(spec.rpd) || 0) : 0;
             const usage = getCalculatedUsage(provider, model);
 
-            const historyKey = `ai-usage-history-${provider}-${model}`;
+            const activeLabel = getActiveAccountLabel(provider) || 'default';
+            const historyKey = `ai-usage-history-${provider}-${activeLabel}-${model}`;
             let history = [];
             try {
                 history = JSON.parse(localStorage.getItem(historyKey)) || [];
@@ -10198,7 +10200,8 @@
                             })
                         });
                         if (res.ok) {
-                            const historyKey = `ai-usage-history-${provider}-${modelVal}`;
+                            const accLabel = getActiveAccountLabel(provider) || 'default';
+                            const historyKey = `ai-usage-history-${provider}-${accLabel}-${modelVal}`;
                             let history = [];
                             if (newVal > 0) {
                                 const now = Date.now();
