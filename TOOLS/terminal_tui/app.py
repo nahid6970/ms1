@@ -49,6 +49,10 @@ def _custom_normpath(path):
             m = re.match(r'^[a-zA-Z]:/', path_str)
             if m:
                 path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
+        # Clean up any previously-mangled paths (e.g. /home/nahid/Users/nahid -> /home/nahid)
+        mangled_prefix = home + '/Users/' + username
+        if path_str.startswith(mangled_prefix):
+            path_str = path_str.replace(mangled_prefix, home, 1)
     return _original_normpath(path_str)
 
 os.path.normpath = _custom_normpath
