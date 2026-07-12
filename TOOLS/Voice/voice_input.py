@@ -895,6 +895,8 @@ class VoiceApp(QMainWindow):
         self.voice_thread.start()
 
     def _start_continuous(self):
+        self._session_id += 1
+        session_id = self._session_id
         self._live_recording = True
         self._stop_requested = False
         self._set_status(CP_RED)
@@ -902,8 +904,8 @@ class VoiceApp(QMainWindow):
         self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
         self._continuous_thread = ContinuousThread(
             self.get_active_language, self.config.get("phrase_time_limit", 10))
-        self._continuous_thread.result.connect(self.on_result)
-        self._continuous_thread.error.connect(lambda error, sid=self._session_id: self.on_error(sid, error))
+        self._continuous_thread.result.connect(lambda text, sid=session_id: self.on_result(sid, text))
+        self._continuous_thread.error.connect(lambda error, sid=session_id: self.on_error(sid, error))
         self._continuous_thread.finished.connect(self._on_continuous_finished)
         self._continuous_thread.start()
 
