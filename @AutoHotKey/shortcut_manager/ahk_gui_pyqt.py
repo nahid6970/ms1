@@ -3057,6 +3057,85 @@ class AHKShortcutEditor(QMainWindow):
                 escaped = escaped.replace('"', '`"')
                 return escaped
 
+            def split_startup_script(action_code: str):
+                lines = action_code.splitlines()
+                init_lines = []
+                def_lines = []
+                in_definitions = False
+                brace_depth = 0
+                
+                for line in lines:
+                    stripped = line.strip()
+                    if in_definitions:
+                        def_lines.append(line)
+                        continue
+                        
+                    # Comments and blank lines go to initialization
+                    if not stripped or stripped.startswith(';'):
+                        init_lines.append(line)
+                        continue
+                    
+                    initial_brace_depth = brace_depth
+                    
+                    # Parse character-by-character to track brace depth and ignore braces in strings/comments
+                    in_string = False
+                    string_char = None
+                    is_escaped = False
+                    line_comment = False
+                    
+                    for i, char in enumerate(line):
+                        if line_comment:
+                            break
+                        if is_escaped:
+                            is_escaped = False
+                            continue
+                        if char == '`': # AHK v2 escape character
+                            is_escaped = True
+                            continue
+                        if char in ('"', "'"):
+                            if not in_string:
+                                in_string = True
+                                string_char = char
+                            elif string_char == char:
+                                in_string = False
+                        elif not in_string:
+                            if char == ';':
+                                # Semi-colon is comment if at start or preceded by space/tab
+                                if i == 0 or line[i-1] in (' ', '\t'):
+                                    line_comment = True
+                                    break
+                            elif char == '{':
+                                brace_depth += 1
+                            elif char == '}':
+                                brace_depth = max(0, brace_depth - 1)
+                                
+                    # If we were at top-level (brace depth 0) at the start of this line, check for hotkeys/hotstrings/returns
+                    if initial_brace_depth == 0:
+                        is_hotkey_or_hotstring = False
+                        if stripped.startswith(':'):
+                            # Hotstrings usually start with a colon (e.g., :X:trigger::, ::trigger::)
+                            is_hotkey_or_hotstring = True
+                        elif '::' in stripped:
+                            parts = stripped.split('::', 1)
+                            before = parts[0]
+                            # Make sure it's not an assignment or inside quotes
+                            if '=' not in before and '"' not in before and "'" not in before and ':=' not in before:
+                                is_hotkey_or_hotstring = True
+                                
+                        is_return_or_exit = False
+                        lower_stripped = stripped.lower()
+                        if lower_stripped in ('return', 'exit') or lower_stripped.startswith(('return ', 'return\t', 'exit ', 'exit\t')):
+                            is_return_or_exit = True
+                            
+                        if is_hotkey_or_hotstring or is_return_or_exit:
+                            in_definitions = True
+                            def_lines.append(line)
+                            continue
+                            
+                    init_lines.append(line)
+                    
+                return '\n'.join(init_lines), '\n'.join(def_lines)
+
             # Add helper function for fast pasting
             output_lines.extend([
                 "Paste(text) {",
@@ -3243,16 +3322,38 @@ class AHKShortcutEditor(QMainWindow):
 
             # Add Background/Startup Scripts at the top (Auto-execute section)
             enabled_startup = [s for s in self.startup_scripts if s.get('enabled', True)]
+            startup_definitions = []
+            
             if enabled_startup:
-                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS ===")
+                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS (INITIALIZATION) ===")
                 for shortcut in enabled_startup:
+                    action = shortcut.get('action', '')
+                    action = action.replace(',,,', ',,')
+                    
+                    init_part, def_part = split_startup_script(action)
+                    
+                    # Add initialization part if not empty
+                    if init_part.strip():
+                        output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                        if shortcut.get('description'):
+                            output_lines.append(f";! {shortcut.get('description')}")
+                        output_lines.append(init_part)
+                        output_lines.append("")
+                        
+                    # Save definition/hotkey part if not empty
+                    if def_part.strip():
+                        startup_definitions.append((shortcut, def_part))
+
+            append_exclusion_checker()
+
+            # Add Background/Startup Scripts Hotkeys & Definitions (after the auto-execute section)
+            if startup_definitions:
+                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS (DEFINITIONS & HOTKEYS) ===")
+                for shortcut, def_part in startup_definitions:
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
                         output_lines.append(f";! {shortcut.get('description')}")
-
-                    action = shortcut.get('action', '')
-                    action = action.replace(',,,', ',,')
-
+                        
                     context_mode = shortcut.get('context_mode', 'none')
                     window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
                     process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
@@ -3268,13 +3369,11 @@ class AHKShortcutEditor(QMainWindow):
                             guard = "!" + guard
                         output_lines.append(f"#HotIf {guard}")
 
-                    output_lines.append(action)
+                    output_lines.append(def_part)
 
                     if has_context:
                         output_lines.append("#HotIf")
                     output_lines.append("")
-
-            append_exclusion_checker()
 
             # Build exclusion map: which hotkeys are excluded (empty set = all)
             enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
