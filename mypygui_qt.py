@@ -1921,7 +1921,7 @@ class StatusBar(QMainWindow):
         self._last_timer_type = None # "alarm" or "shutdown"
         self._last_timer_mins = 0
         
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.ToolTip)
         self.setWindowTitle("MyPyGUI_StatusBar_Panel")
         if os.name != 'nt':
             self.setWindowRole("panel")
@@ -1944,9 +1944,9 @@ class StatusBar(QMainWindow):
         always_on_top = sb.get("always_on_top", True)
         # Apply always-on-top flag
         if is_docked:
-            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window
+            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip
         else:
-            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip
             
         if always_on_top:
             flags |= Qt.WindowType.WindowStaysOnTopHint
