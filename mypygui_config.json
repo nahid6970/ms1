@@ -96,7 +96,7 @@
             "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"",
             "src": "C:/@delta/msBackups",
             "dst": "gu:/msBackups",
-            "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
+            "log": "C:/Users/nahid6970/script_output/rclone/msBackups_check.log",
             "label": "󱘲",
             "id": "msBackups",
             "text": "",
@@ -109,30 +109,30 @@
             "cmd": "rclone check src dst --fast-list --size-only",
             "src": "D:/software",
             "dst": "gu:/software",
-            "log": "C:/Users/nahid/script_output/rclone/software_check.log",
+            "log": "C:/Users/nahid6970/script_output/rclone/software_check.log",
             "label": ""
         },
         "song": {
             "cmd": "rclone check src dst --fast-list --size-only",
             "src": "D:/song",
             "dst": "gu:/song",
-            "log": "C:/Users/nahid/script_output/rclone/song_check.log",
+            "log": "C:/Users/nahid6970/script_output/rclone/song_check.log",
             "label": ""
         },
         "ms1": {
             "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"",
             "src": "C:/@delta/ms1/",
             "dst": "o0:/ms1/",
-            "log": "C:/Users/nahid/script_output/rclone/ms1_check.log",
+            "log": "C:/Users/nahid6970/script_output/rclone/ms1_check.log",
             "label": "ms1",
             "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"node_modules/**\" --exclude \"__pycache__/**\"  --log-level INFO",
             "right_click_cmd": "rclone sync dst src -P --fast-list"
         },
         "Photos": {
             "cmd": "rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"",
-            "src": "C:/Users/nahid/Pictures/",
+            "src": "C:/Users/nahid6970/Pictures/",
             "dst": "gu:/Pictures/",
-            "log": "C:/Users/nahid/script_output/rclone/Pictures_check.log",
+            "log": "C:/Users/nahid6970/script_output/rclone/Pictures_check.log",
             "label": "",
             "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
             "right_click_cmd": "rclone sync dst src -P --fast-list",
@@ -987,7 +987,8 @@
     ],
     "rclone_settings": {
         "interval_min": 5,
-        "simultaneous": false
+        "simultaneous": false,
+        "enabled": false
     },
     "static_bindings": {
         "uptime": {
@@ -1459,7 +1460,7 @@
         "height": 39,
         "x": "center",
         "y": 990,
-        "docked": false,
+        "docked": true,
         "always_on_top": false
     },
     "fav_apps": [
@@ -2326,7 +2327,7 @@
         }
     ],
     "default_font": [
-        "JetBrainsMono Nerd Font Propo",
+        "Arial",
         15,
         "normal"
     ],
@@ -2483,7 +2484,7 @@
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "explorer C:\\Users\\nahid"
+                    "cmd": "explorer C:\\Users\\nahid6970"
                 }
             },
             "font": [

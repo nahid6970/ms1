@@ -201,7 +201,13 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_
 def load_config():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            content = f.read()
+            user_profile = os.environ.get("USERPROFILE", "").replace("\\", "/")
+            if user_profile:
+                content = content.replace("C:/Users/nahid", user_profile)
+                content = content.replace("C:\\\\Users\\\\nahid", user_profile.replace("/", "\\\\"))
+                content = content.replace("C:\\Users\\nahid", user_profile.replace("/", "\\"))
+            return json.loads(content)
     except Exception as e:
         print(f"Error loading config: {e}")
         return {}
@@ -1536,10 +1542,23 @@ def _update_toggle_color_cb(toggle_lbl):
         toggle_lbl.setStyleSheet(new_ss)
     else: toggle_lbl.setStyleSheet(f"color: {agg}; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
 
+_rclone_checks_started = False
+
 def check_and_update_rclone(cfg, toggle_lbl):
+    rclone_cfg = load_config().get("rclone_settings", {})
+    if not rclone_cfg.get("enabled", True):
+        global _rclone_checks_started
+        _rclone_checks_started = False
+        return
+
     def run():
         try:
             actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+            log_file = cfg.get("log")
+            if log_file:
+                log_dir = os.path.dirname(log_file)
+                if log_dir:
+                    os.makedirs(log_dir, exist_ok=True)
             with open(cfg["log"], "w") as f: subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f, creationflags=subprocess.CREATE_NO_WINDOW)
             with open(cfg["log"], "r", encoding="utf-8", errors="ignore") as f: content = f.read()
             rclone_status[cfg.get("id", cfg["label"])] = CP_GREEN if "ERROR" not in content else CP_RED
@@ -1551,7 +1570,12 @@ def check_and_update_rclone(cfg, toggle_lbl):
     threading.Thread(target=run, daemon=True).start()
 
 def _schedule_rclone_check(cfg, toggle_lbl):
-    interval_ms = int(load_config().get("rclone_settings", {}).get("interval_min", 10)) * 60000
+    rclone_cfg = load_config().get("rclone_settings", {})
+    if not rclone_cfg.get("enabled", True):
+        global _rclone_checks_started
+        _rclone_checks_started = False
+        return
+    interval_ms = int(rclone_cfg.get("interval_min", 10)) * 60000
     QTimer.singleShot(interval_ms, lambda: check_and_update_rclone(cfg, toggle_lbl))
 
 
@@ -1765,7 +1789,18 @@ class StatusBar(QMainWindow):
         form_def.addRow("SIZE / WT", df_row)
         left_col.addWidget(grp_def)
         
-        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2); rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True}); interval_le, simul_chk = QLineEdit(str(rc.get("interval_min", 10))), QCheckBox("Run simultaneously"); interval_le.setFixedWidth(60); simul_chk.setChecked(bool(rc.get("simultaneous", True))); form2.addRow("INTERVAL (min)", interval_le); form2.addRow("", simul_chk); left_col.addWidget(grp2)
+        grp2 = QGroupBox("RCLONE CHECKS"); form2 = QFormLayout(); grp2.setLayout(form2)
+        rc = load_config().get("rclone_settings", {"interval_min": 10, "simultaneous": True, "enabled": True})
+        rclone_enabled_chk = QCheckBox("Enable Rclone Checks")
+        rclone_enabled_chk.setChecked(bool(rc.get("enabled", True)))
+        interval_le = QLineEdit(str(rc.get("interval_min", 10)))
+        interval_le.setFixedWidth(60)
+        simul_chk = QCheckBox("Run simultaneously")
+        simul_chk.setChecked(bool(rc.get("simultaneous", True)))
+        form2.addRow("", rclone_enabled_chk)
+        form2.addRow("INTERVAL (min)", interval_le)
+        form2.addRow("", simul_chk)
+        left_col.addWidget(grp2)
 
         grp_sw = QGroupBox("SETTINGS PANEL SIZE"); form_sw = QFormLayout(); grp_sw.setLayout(form_sw)
         sw_le, sh_le = QLineEdit(str(sw)), QLineEdit(str(sh))
@@ -1859,8 +1894,12 @@ class StatusBar(QMainWindow):
                 cfg["settings_panel_width"] = int(sw_le.text())
                 cfg["settings_panel_height"] = int(sh_le.text())
                 cfg["default_font"] = [df_family.currentText(), int(df_size.text()), df_weight.currentText()]
-                cfg["rclone_settings"] = {"interval_min": int(interval_le.text()), "simultaneous": simul_chk.isChecked()}
-                cfg["popup_y_offset"] = int(popup_y_le.text())
+                cfg["rclone_settings"] = {
+                    "interval_min": int(interval_le.text()),
+                    "simultaneous": simul_chk.isChecked(),
+                    "enabled": rclone_enabled_chk.isChecked()
+                }
+                cfg["popup_y_offset"] = int(popup_y_offset_le.text()) if "popup_y_offset_le" in locals() else int(popup_y_le.text())
                 
                 # Statusbar Geo
                 x_val = sb_x_le.text().strip()
@@ -1886,6 +1925,12 @@ class StatusBar(QMainWindow):
                 }
                 
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
+                
+                if rclone_enabled_chk.isChecked():
+                    self._rclone_toggle.show()
+                    self._trigger_rclone_checks_if_enabled()
+                else:
+                    self._rclone_toggle.hide()
             except ValueError as e:
                 QMessageBox.warning(dlg, "Error", f"Invalid input: {e}")
         
@@ -1998,6 +2043,9 @@ class StatusBar(QMainWindow):
         self._rclone_toggle = IconLabel("\uef2c", _rc_cfg); _apply_static_style(self._rclone_toggle, "rclone_toggle")
         if not _rc_cfg: self._rclone_toggle.setStyleSheet("color: white; font-family: 'JetBrainsMono NFP'; font-size: 20pt; font-weight: bold;")
         self._rclone_toggle.mousePressEvent = lambda e: (self._toggle_rclone_popup() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("rclone_toggle"))
+        rclone_enabled = load_config().get("rclone_settings", {}).get("enabled", True)
+        if not rclone_enabled:
+            self._rclone_toggle.hide()
         rl.addWidget(self._rclone_toggle); self._build_git(rl)
         
         self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {})); _bind_static(self.download_lb, "download", "sniffnet"); rl.addWidget(self.download_lb)
@@ -2064,23 +2112,30 @@ class StatusBar(QMainWindow):
         self._apply_uptime_style(color)
         self._timer_seconds -= 1
 
+    def _trigger_rclone_checks_if_enabled(self):
+        global _rclone_checks_started
+        rclone_cfg = self._config.get("rclone_settings", {})
+        if rclone_cfg.get("enabled", True) and not _rclone_checks_started:
+            _rclone_checks_started = True
+            commands = self._config.get("rclone_commands", {})
+            if rclone_cfg.get("simultaneous", True):
+                for key, cfg in commands.items():
+                    if "id" not in cfg: cfg["id"] = key
+                    check_and_update_rclone(cfg, self._rclone_toggle)
+            else:
+                def _seq(rem):
+                    if not rem: return
+                    k, c = rem[0]
+                    if "id" not in c: c["id"] = k
+                    check_and_update_rclone(c, self._rclone_toggle); QTimer.singleShot(100, lambda: _seq(rem[1:]))
+                _seq(list(commands.items()))
+
     def _start_timers(self):
         self._uptime_timer = QTimer(self); self._uptime_timer.timeout.connect(self._update_uptime); self._uptime_timer.start(1000)
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
-        commands, rclone_cfg = self._config.get("rclone_commands", {}), self._config.get("rclone_settings", {"simultaneous": True})
-        if rclone_cfg.get("simultaneous", True):
-            for key, cfg in commands.items():
-                if "id" not in cfg: cfg["id"] = key
-                check_and_update_rclone(cfg, self._rclone_toggle)
-        else:
-            def _seq(rem):
-                if not rem: return
-                k, c = rem[0]
-                if "id" not in c: c["id"] = k
-                check_and_update_rclone(c, self._rclone_toggle); QTimer.singleShot(100, lambda: _seq(rem[1:]))
-            _seq(list(commands.items()))
+        self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
         if not self._timer_active: self.uptime_label.setText(format_uptime())
