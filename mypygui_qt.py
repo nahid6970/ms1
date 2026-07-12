@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # mypygui_qt.py — PyQt6 rewrite of the Windows taskbar status bar
 
 import ctypes
@@ -5,6 +6,9 @@ import json
 import os
 import subprocess
 import sys
+if os.name != 'nt':
+    subprocess.CREATE_NO_WINDOW = 0
+    subprocess.CREATE_NEW_CONSOLE = 0
 import threading
 import time
 import re
@@ -76,7 +80,10 @@ class _RcloneSignal(QObject):
     run_next = pyqtSignal(dict, object) # (cfg, toggle_lbl)
 _rclone_sig = None  # initialized after QApplication exists
 
-from ctypes import wintypes
+if os.name == 'nt':
+    from ctypes import wintypes
+else:
+    wintypes = None
 
 # AppBar Constants
 ABM_NEW = 0x00000000
@@ -86,17 +93,23 @@ ABM_SETPOS = 0x00000003
 ABE_TOP = 1
 WM_USER = 0x0400
 
-class APPBARDATA(ctypes.Structure):
-    _fields_ = [
-        ("cbSize", wintypes.DWORD),
-        ("hWnd", wintypes.HWND),
-        ("uCallbackMessage", wintypes.UINT),
-        ("uEdge", wintypes.UINT),
-        ("rc", wintypes.RECT),
-        ("lParam", wintypes.LPARAM),
-    ]
+if os.name == 'nt':
+    class APPBARDATA(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.DWORD),
+            ("hWnd", wintypes.HWND),
+            ("uCallbackMessage", wintypes.UINT),
+            ("uEdge", wintypes.UINT),
+            ("rc", wintypes.RECT),
+            ("lParam", wintypes.LPARAM),
+        ]
+else:
+    class APPBARDATA(object):
+        pass
 
 def register_appbar(hwnd):
+    if os.name != 'nt':
+        return
     abd = APPBARDATA()
     abd.cbSize = ctypes.sizeof(APPBARDATA)
     abd.hWnd = hwnd
@@ -104,12 +117,16 @@ def register_appbar(hwnd):
     ctypes.windll.shell32.SHAppBarMessage(ABM_NEW, ctypes.byref(abd))
 
 def unregister_appbar(hwnd):
+    if os.name != 'nt':
+        return
     abd = APPBARDATA()
     abd.cbSize = ctypes.sizeof(APPBARDATA)
     abd.hWnd = hwnd
     ctypes.windll.shell32.SHAppBarMessage(ABM_REMOVE, ctypes.byref(abd))
 
 def set_appbar_position(hwnd, width, height):
+    if os.name != 'nt':
+        return
     screen_geo = QApplication.primaryScreen().geometry()
     sw, sh = screen_geo.width(), screen_geo.height()
     abd = APPBARDATA()
@@ -195,6 +212,116 @@ DIALOG_QSS = f"""
 
 DEFAULT_FONT_FALLBACK = ["JetBrainsMono NFP", 16, "bold"]
 
+def normalize_path(path):
+    if not path:
+        return path
+    if os.name != 'nt':
+        home = os.path.expanduser("~")
+        path = path.replace("C:\\Users\\nahid", home)
+        path = path.replace("C:/Users/nahid", home)
+        path = path.replace("C:\\@delta", os.path.join(home, "@delta"))
+        path = path.replace("C:/@delta", os.path.join(home, "@delta"))
+        path = path.replace("\\", "/")
+        if path.startswith("C:"):
+            path = path.replace("C:", home, 1)
+        elif path.startswith("D:"):
+            path = path.replace("D:", home, 1)
+    return path
+
+def normalize_config_paths(obj):
+    if isinstance(obj, dict):
+        return {k: normalize_config_paths(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [normalize_config_paths(x) for x in obj]
+    elif isinstance(obj, str):
+        if "\\" in obj or ("/" in obj and ("Users/" in obj or "C:/" in obj or "D:/" in obj or "@delta/" in obj)):
+            return normalize_path(obj)
+        return obj
+    return obj
+
+def denormalize_path(path):
+    if not path:
+        return path
+    if os.name != 'nt':
+        home = os.path.expanduser("~")
+        if path.startswith(home):
+            path = path.replace(home, "C:\\Users\\nahid", 1)
+        path = path.replace("/", "\\")
+    return path
+
+def denormalize_config_paths(obj):
+    if isinstance(obj, dict):
+        return {k: denormalize_config_paths(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [denormalize_config_paths(x) for x in obj]
+    elif isinstance(obj, str):
+        if "/" in obj and not obj.startswith("http"):
+            return denormalize_path(obj)
+        return obj
+    return obj
+
+def open_path(path):
+    try:
+        if os.name == 'nt':
+            os.startfile(path)
+        else:
+            subprocess.Popen(['xdg-open', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        logging.error(f"Failed to open path {path}: {e}")
+
+def run_in_terminal(command, cwd=None, title="Terminal"):
+    if os.name == 'nt':
+        if "lazygit" in command:
+            subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=cwd, shell=True)
+        elif "edit " in command:
+            subprocess.Popen(["powershell", "-NoExit", "-Command", command], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        else:
+            subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='{title}' ; {command}}}"], shell=True, cwd=cwd)
+    else:
+        import shutil
+        terminals = [
+            ["gnome-terminal", "--", "bash", "-c"],
+            ["konsole", "-e", "bash", "-c"],
+            ["xfce4-terminal", "-e", "bash", "-c"],
+            ["kitty", "bash", "-c"],
+            ["alacritty", "-e", "bash", "-c"],
+            ["xterm", "-e", "bash", "-c"]
+        ]
+        
+        cleaned_cmd = command
+        if cleaned_cmd.startswith("& {") and cleaned_cmd.endswith("}"):
+            inner = cleaned_cmd[3:-1]
+            parts = inner.split(";")
+            bash_parts = []
+            for p in parts:
+                p = p.strip()
+                if "$host.UI.RawUI.WindowTitle" in p:
+                    continue
+                if p:
+                    bash_parts.append(p)
+            cleaned_cmd = " && ".join(bash_parts)
+        
+        if cleaned_cmd.startswith("edit "):
+            log_file = cleaned_cmd[5:].strip('"')
+            cleaned_cmd = f"xdg-open '{log_file}'"
+            try:
+                subprocess.Popen(['xdg-open', log_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return
+            except Exception:
+                pass
+            cleaned_cmd = f"nano '{log_file}'"
+
+        for term in terminals:
+            if shutil.which(term[0]):
+                if shutil.which("pwsh") and (".ps1" in cleaned_cmd or "gitter" in cleaned_cmd):
+                    subprocess.Popen(term + [f"pwsh -NoExit -Command \"{cleaned_cmd}\""], cwd=cwd)
+                else:
+                    keep_open = "; exec bash" if "lazygit" not in cleaned_cmd else ""
+                    subprocess.Popen(term + [f"{cleaned_cmd}{keep_open}"], cwd=cwd)
+                return
+        logging.warning("No terminal emulator found. Running in background.")
+        subprocess.Popen(cleaned_cmd, shell=True, cwd=cwd)
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
@@ -202,18 +329,24 @@ def load_config():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             content = f.read()
-            user_profile = os.environ.get("USERPROFILE", "").replace("\\", "/")
-            if user_profile:
-                content = content.replace("C:/Users/nahid", user_profile)
-                content = content.replace("C:\\\\Users\\\\nahid", user_profile.replace("/", "\\\\"))
-                content = content.replace("C:\\Users\\nahid", user_profile.replace("/", "\\"))
-            return json.loads(content)
+            if os.name == 'nt':
+                user_profile = os.environ.get("USERPROFILE", "").replace("\\", "/")
+                if user_profile:
+                    content = content.replace("C:/Users/nahid", user_profile)
+                    content = content.replace("C:\\\\Users\\\\nahid", user_profile.replace("/", "\\\\"))
+                    content = content.replace("C:\\Users\\nahid", user_profile.replace("/", "\\"))
+            config = json.loads(content)
+            if os.name != 'nt':
+                config = normalize_config_paths(config)
+            return config
     except Exception as e:
         print(f"Error loading config: {e}")
         return {}
 
 def save_config(config):
     try:
+        if os.name != 'nt':
+            config = denormalize_config_paths(config)
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
     except Exception as e:
@@ -530,30 +663,64 @@ class IconLabel(QLabel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def run_command(command, admin=False, hide=False, no_exit=True):
-    executable = "pwsh"
-    if admin:
+    if os.name == 'nt':
+        executable = "pwsh"
+        if admin:
+            try:
+                args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
+                ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
+            except Exception as e:
+                print(f"Admin run_command failed: {e}")
+            return
+
+        cmd_args = [executable]
+        if no_exit:
+            cmd_args.append("-NoExit")
+        cmd_args.extend(["-Command", command])
+
+        flags = 0
+        if hide:
+            flags |= subprocess.CREATE_NO_WINDOW
+        else:
+            flags |= subprocess.CREATE_NEW_CONSOLE
+
         try:
-            args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
+            subprocess.Popen(cmd_args, creationflags=flags)
         except Exception as e:
-            print(f"Admin run_command failed: {e}")
-        return
-
-    cmd_args = [executable]
-    if no_exit:
-        cmd_args.append("-NoExit")
-    cmd_args.extend(["-Command", command])
-
-    flags = 0
-    if hide:
-        flags |= subprocess.CREATE_NO_WINDOW
+            print(f"run_command failed: {e}")
     else:
-        flags |= subprocess.CREATE_NEW_CONSOLE
+        import shutil
+        shell_exec = "pwsh" if shutil.which("pwsh") else "bash"
+        if admin:
+            if shutil.which("pkexec"):
+                cmd_args = ["pkexec", shell_exec]
+                if shell_exec == "pwsh":
+                    if no_exit:
+                        cmd_args.append("-NoExit")
+                    cmd_args.extend(["-Command", command])
+                else:
+                    cmd_args.extend(["-c", command])
+                try:
+                    subprocess.Popen(cmd_args)
+                except Exception as e:
+                    print(f"Admin (pkexec) run_command failed: {e}")
+                return
+            else:
+                run_in_terminal(f"sudo {command}", title="Admin Command")
+                return
 
-    try:
-        subprocess.Popen(cmd_args, creationflags=flags)
-    except Exception as e:
-        print(f"run_command failed: {e}")
+        if hide:
+            cmd_args = [shell_exec]
+            if shell_exec == "pwsh":
+                cmd_args.extend(["-Command", command])
+            else:
+                cmd_args.extend(["-c", command])
+            try:
+                subprocess.Popen(cmd_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as e:
+                print(f"run_command failed: {e}")
+        else:
+            run_in_terminal(command, title="Command")
 
 def handle_action(action_cfg):
     if not action_cfg:
@@ -566,18 +733,33 @@ def handle_action(action_cfg):
     
     # If admin and not already handled by run_command, handle here
     if admin and atype not in ["run_command"]:
-        try:
-            ctypes.windll.shell32.ShellExecuteW(
-                None, "runas",
-                sys.executable if atype == "python" else "cmd.exe",
-                f"/c {cmd}" if atype != "python" else cmd,
-                cwd, 0 if hide else 1
-            )
-        except Exception as e:
-            print(f"Admin launch failed: {e}")
+        if os.name == 'nt':
+            try:
+                ctypes.windll.shell32.ShellExecuteW(
+                    None, "runas",
+                    sys.executable if atype == "python" else "cmd.exe",
+                    f"/c {cmd}" if atype != "python" else cmd,
+                    cwd, 0 if hide else 1
+                )
+            except Exception as e:
+                print(f"Admin launch failed: {e}")
+        else:
+            import shutil
+            if shutil.which("pkexec"):
+                cmd_args = ["pkexec"]
+                if atype == "python":
+                    cmd_args.extend([sys.executable, cmd])
+                else:
+                    cmd_args.extend(["bash", "-c", cmd])
+                try:
+                    subprocess.Popen(cmd_args, cwd=cwd)
+                except Exception as e:
+                    print(f"Admin (pkexec) launch failed: {e}")
+            else:
+                run_in_terminal(f"sudo {cmd}", cwd=cwd, title="Admin Launch")
         return
 
-    flags = subprocess.CREATE_NO_WINDOW if hide else 0
+    flags = subprocess.CREATE_NO_WINDOW if (hide and os.name == 'nt') else 0
     if atype == "url":
         import webbrowser; webbrowser.open(cmd); return
     if atype == "subprocess":
@@ -603,12 +785,18 @@ def _app_restart():
 def force_shutdown():
     r = QMessageBox.question(None, "Shutdown", "Are you sure you want to shutdown?")
     if r == QMessageBox.StandardButton.Yes:
-        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+        if os.name == 'nt':
+            subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+        else:
+            subprocess.run(["shutdown", "-h", "now"])
 
 def force_restart():
     r = QMessageBox.question(None, "Restart", "Are you sure you want to restart?")
     if r == QMessageBox.StandardButton.Yes:
-        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+        if os.name == 'nt':
+            subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+        else:
+            subprocess.run(["reboot"])
 
 def calculate_time_to_appear(t0):
     print(f"Time taken to appear: {time.time() - t0:.2f} seconds")
@@ -635,17 +823,25 @@ def get_active_drives():
             for p in psutil.disk_partitions(all=False):
                 if not p.mountpoint:
                     continue
-                opts = p.opts.lower()
-                if 'fixed' in opts or 'removable' in opts:
-                    try:
-                        psutil.disk_usage(p.mountpoint)
-                        drives.append(p.mountpoint)
-                    except Exception:
-                        continue
+                if os.name == 'nt':
+                    opts = p.opts.lower()
+                    if 'fixed' in opts or 'removable' in opts:
+                        try:
+                            psutil.disk_usage(p.mountpoint)
+                            drives.append(p.mountpoint)
+                        except Exception:
+                            continue
+                else:
+                    if p.device.startswith('/dev/'):
+                        try:
+                            psutil.disk_usage(p.mountpoint)
+                            drives.append(p.mountpoint)
+                        except Exception:
+                            continue
         except Exception:
             pass
         if not drives:
-            drives = ['C:\\']
+            drives = ['C:\\'] if os.name == 'nt' else ['/']
         _drive_cache["drives"] = drives
         _drive_cache["last_check"] = now
     return _drive_cache["drives"]
@@ -1383,7 +1579,8 @@ def _apply_static_style(widget, key):
     widget.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; {border_css} border-radius: {border_radius}px; padding-left: {px_l}px; padding-right: {px_r}px; padding-top: {py_t}px; padding-bottom: {py_b}px; margin-left: {m_l}px; margin-right: {m_r}px; margin-top: {m_t}px; margin-bottom: {m_b}px;")
 
 def _bind_static(lbl, key, default_cmd):
-    cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})
+    default_cmd_normalized = normalize_path(default_cmd)
+    cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd_normalized}})
     
     def mousePressEvent(event):
         event.accept()
@@ -1428,8 +1625,7 @@ def _bind_drive(lbl, key, drive_index):
             handle_action(cfg[bkey])
         else:
             if btn == Qt.MouseButton.LeftButton and not (mods & Qt.KeyboardModifier.ControlModifier):
-                import subprocess
-                subprocess.Popen(f'explorer "{drive_path}"', shell=True)
+                open_path(drive_path)
                 
     lbl.mousePressEvent = mousePressEvent
     lbl.mouseReleaseEvent = mouseReleaseEvent
@@ -1505,8 +1701,26 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 def git_backup(repos):
-    commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
-    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"], shell=True)
+    import shutil
+    has_pwsh = shutil.which("pwsh") is not None
+    commands_list = []
+    for r in repos:
+        repo_path = normalize_path(r['path'])
+        if os.name == 'nt' or has_pwsh:
+            script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.ps1")
+            commands_list.append(script_path)
+        else:
+            script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.sh")
+            if not os.path.exists(script_path):
+                script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.ps1")
+            commands_list.append(script_path)
+
+    if os.name == 'nt' or has_pwsh:
+        commands = " ; ".join(commands_list)
+        run_in_terminal(f"{commands} ; cd ~", title="GiTSync")
+    else:
+        commands = " && ".join([f"bash '{cmd}'" if cmd.endswith('.sh') else f"pwsh -Command '{cmd}'" for cmd in commands_list])
+        run_in_terminal(f"{commands} ; cd ~", title="GiTSync")
 
 def delete_git_lock_files(repos):
     for repo in repos:
@@ -1526,7 +1740,7 @@ def apply_git_style(lbl, cfg):
 
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
-LOG_DIR = r"C:\Users\nahid\script_output\rclone"
+LOG_DIR = normalize_path(r"C:\Users\nahid\script_output\rclone")
 try:
     os.makedirs(LOG_DIR, exist_ok=True)
 except Exception:
@@ -1702,7 +1916,15 @@ class StatusBar(QMainWindow):
             if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("uptime"); return
             
             if btn == Qt.MouseButton.LeftButton:
-                subprocess.Popen("timedate.cpl", shell=True)
+                if os.name == 'nt':
+                    subprocess.Popen("timedate.cpl", shell=True)
+                else:
+                    for cmd in ["gnome-control-center datetime", "systemsettings datetime", "kcmshell5 clock", "systemsettings5 clock"]:
+                        try:
+                            subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            break
+                        except Exception:
+                            pass
             elif btn == Qt.MouseButton.RightButton:
                 self._show_timer_menu()
                 
@@ -1983,11 +2205,11 @@ class StatusBar(QMainWindow):
                     mods, btn = event.modifiers(), event.button()
                     if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
                     if btn == Qt.MouseButton.LeftButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(f'explorer "{path}"', shell=True)
-                        else: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd '{path}' ; gitter}}"], shell=True)
+                        if mods & Qt.KeyboardModifier.ControlModifier: open_path(path)
+                        else: run_in_terminal(f"cd '{path}' ; gitter", cwd=path, title="GiTSync")
                     elif btn == Qt.MouseButton.RightButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
-                        else: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
+                        if mods & Qt.KeyboardModifier.ControlModifier: run_in_terminal(f"cd '{path}' ; git restore .", cwd=path, title="Git Restore")
+                        else: run_in_terminal("lazygit", cwd=path, title="lazygit")
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
         del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
@@ -2017,7 +2239,7 @@ class StatusBar(QMainWindow):
                             if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
                             handle_action(action)
                     else:
-                        try: subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{c["log"]}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                        try: run_in_terminal(f'edit "{c["log"]}"', title="Edit Log")
                         except Exception as ex: print(f"Error opening log: {ex}")
                 return click
             lbl.mousePressEvent = _make_rclone_click(cfg); row.addWidget(lbl)
