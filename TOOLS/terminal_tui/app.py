@@ -27,7 +27,102 @@ import threading
 import subprocess
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
-from winpty import PTY
+
+# ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
+_original_normpath = os.path.normpath
+
+def _custom_normpath(path):
+    if not path:
+        return ""
+    path_str = str(path)
+    if os.name != 'nt':
+        # Replace backslashes with forward slashes
+        path_str = path_str.replace('\\', '/')
+        # If it starts with a Windows drive letter (e.g. C:/), translate it to user home directory
+        m = re.match(r'^[a-zA-Z]:/', path_str)
+        if m:
+            home = os.path.expanduser('~')
+            path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
+    return _original_normpath(path_str)
+
+os.path.normpath = _custom_normpath
+
+# ── CROSS-PLATFORM PTY ────────────────────────────────────────────────────────
+if os.name == 'nt':
+    from winpty import PTY
+else:
+    import struct
+    class PTY:
+        def __init__(self, cols=100, rows=30):
+            self.cols = cols
+            self.rows = rows
+            self.pid = None
+            self.fd = None
+
+        def spawn(self, appname, cmdline=None, cwd=None, env=None):
+            import pty
+            import fcntl
+            import shutil
+            
+            pid, fd = pty.fork()
+            if pid == 0:
+                if cwd and os.path.isdir(cwd):
+                    os.chdir(cwd)
+                shell = '/bin/bash'
+                args = [shell]
+                if cmdline:
+                    if 'powershell' in cmdline or 'pwsh' in cmdline:
+                        pwsh_path = shutil.which('pwsh')
+                        if pwsh_path:
+                            shell = pwsh_path
+                            args = [shell, '-NoProfile', '-NoExit']
+                child_env = os.environ.copy()
+                if env:
+                    child_env.update(env)
+                os.execve(shell, args, child_env)
+            else:
+                self.pid = pid
+                self.fd = fd
+                fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+                fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+                self.set_size(self.cols, self.rows)
+
+        def isalive(self):
+            if self.pid is None:
+                return False
+            try:
+                pid, status = os.waitpid(self.pid, os.WNOHANG)
+                return pid == 0
+            except OSError:
+                return False
+
+        def read(self, blocking=False):
+            if self.fd is None:
+                return ""
+            try:
+                d = os.read(self.fd, 4096)
+                return d.decode('utf-8', errors='replace')
+            except (BlockingIOError, OSError):
+                return ""
+
+        def write(self, data):
+            if self.fd is None:
+                return
+            if isinstance(data, str):
+                data = data.encode('utf-8')
+            try:
+                os.write(self.fd, data)
+            except OSError:
+                pass
+
+        def set_size(self, cols, rows):
+            self.cols = cols
+            self.rows = rows
+            if self.fd is not None:
+                import fcntl
+                import termios
+                s = struct.pack('HHHH', rows, cols, 0, 0)
+                fcntl.ioctl(self.fd, termios.TIOCSWINSZ, s)
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -36,8 +131,8 @@ app.config['SECRET_KEY'] = 'terminal-tui-secret-key'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
-BASE_DIR = r"C:\@delta\ms1\TOOLS"
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json')
+BASE_DIR = os.path.normpath(r"C:\@delta\ms1\TOOLS")
+CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json'))
 
 _CONFIG_CACHE = None
 _CONFIG_LOCK = threading.Lock()
@@ -269,7 +364,7 @@ def restart_current_process(delay_seconds=1.0):
 class TerminalSession:
     def __init__(self, name, path, use_real_dir_name=False):
         self.name = name
-        self.path = path
+        self.path = os.path.normpath(path)
         self.cols = 100
         self.rows = 30
         self.pty = PTY(self.cols, self.rows)
@@ -279,11 +374,11 @@ class TerminalSession:
         # Ensure project-specific data directory exists
         # Use a sanitized path instead of name to ensure stability when renaming projects
         import re
-        safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
+        safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', self.path).strip('_')
         project_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Project_data", safe_path)
         
         # Migrate existing Project_data from backup directory if it exists there but not locally
-        backup_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
+        backup_data_dir = os.path.normpath(os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path))
         if not os.path.exists(project_data_dir) and os.path.exists(backup_data_dir):
             try:
                 import shutil
@@ -297,7 +392,7 @@ class TerminalSession:
         profile_path = os.path.join(project_data_dir, "profile.ps1")
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
-        path_clean = path.replace("/", "\\")
+        path_clean = self.path.replace("/", "\\") if os.name == 'nt' else self.path
         
         if bool(use_real_dir_name):
             prompt_display_name = os.path.basename(os.path.normpath(path))
@@ -388,13 +483,13 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             except Exception as e:
                 print(f"Error migrating profile: {e}")
         
-        # Spawn PowerShell with custom profile, bypassing main user profile
-        # Wrap in curly braces script block to handle spaces/parentheses in path correctly
-        profile_path_clean = profile_path.replace("\\", "/")
-        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
-        
-        # Spawn PowerShell
-        self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
+        # Spawn shell
+        if os.name == 'nt':
+            profile_path_clean = profile_path.replace("\\", "/")
+            cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
+            self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=self.path)
+        else:
+            self.pty.spawn("bash", cwd=self.path)
         
         self.connected_sids = set()
         self.sids_lock = threading.Lock()
@@ -482,6 +577,8 @@ def load_projects_config():
     projs = get_config_val("projects", list)
     # Sanitize bookmarks to be dicts
     for p in projs:
+        if "path" in p:
+            p["path"] = os.path.normpath(p["path"])
         if "bookmarks" not in p:
             p["bookmarks"] = []
         else:
