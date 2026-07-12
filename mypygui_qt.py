@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 # mypygui_qt.py — PyQt6 rewrite of the Windows taskbar status bar
 
+import os
+import sys
+# Force X11/XCB backend on Linux to enable absolute positioning and docking
+if sys.platform.startswith('linux'):
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+
 import ctypes
 import json
-import os
 import subprocess
-import sys
 if os.name != 'nt':
     subprocess.CREATE_NO_WINDOW = 0
     subprocess.CREATE_NEW_CONSOLE = 0
@@ -1876,6 +1880,8 @@ class StatusBar(QMainWindow):
         flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
         if always_on_top:
             flags |= Qt.WindowType.WindowStaysOnTopHint
+        if os.name != 'nt':
+            flags |= Qt.WindowType.BypassWindowManagerHint
         self.setWindowFlags(flags)
         self.show()  # setWindowFlags hides the window; re-show it
         
@@ -2080,6 +2086,19 @@ class StatusBar(QMainWindow):
         dock_chk = QCheckBox("DOCK (APPBAR)"); dock_chk.setChecked(_sb_cfg.get("docked", False))
         aot_chk = QCheckBox("ALWAYS ON TOP"); aot_chk.setChecked(_sb_cfg.get("always_on_top", True))
         
+        def toggle_dock_inputs():
+            is_checked = dock_chk.isChecked()
+            sb_x_le.setDisabled(is_checked)
+            sb_y_le.setDisabled(is_checked)
+            sb_w_le.setDisabled(is_checked)
+            if is_checked:
+                sb_x_le.setText("0")
+                sb_y_le.setText("0")
+                screen_geo = QApplication.primaryScreen().geometry()
+                sb_w_le.setText(str(screen_geo.width()))
+        dock_chk.toggled.connect(toggle_dock_inputs)
+        toggle_dock_inputs()
+        
         for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
         for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(70)
 
@@ -2124,20 +2143,29 @@ class StatusBar(QMainWindow):
                 cfg["popup_y_offset"] = int(popup_y_offset_le.text()) if "popup_y_offset_le" in locals() else int(popup_y_le.text())
                 
                 # Statusbar Geo
+                is_docked_val = dock_chk.isChecked()
+                w_val = int(sb_w_le.text())
+                y_val = int(sb_y_le.text())
                 x_val = sb_x_le.text().strip()
-                if x_val.lower() != "center":
-                    try: x_val = int(x_val)
-                    except: x_val = "center"
+                
+                if is_docked_val:
+                    x_val = 0
+                    y_val = 0
+                    w_val = QApplication.primaryScreen().geometry().width()
+                else:
+                    if x_val.lower() != "center":
+                        try: x_val = int(x_val)
+                        except: x_val = "center"
                 
                 cfg["statusbar"] = {
                     "bg": sb_bg_le.text() or CP_BG,
                     "border_color": sb_border_le.text() or CP_RED,
                     "border_px": int(sb_bpx_le.text()),
-                    "width": int(sb_w_le.text()),
+                    "width": w_val,
                     "height": int(sb_h_le.text()),
                     "x": x_val,
-                    "y": int(sb_y_le.text()),
-                    "docked": dock_chk.isChecked(),
+                    "y": y_val,
+                    "docked": is_docked_val,
                     "always_on_top": aot_chk.isChecked()
                 }
                 

@@ -1456,10 +1456,10 @@
         "bg": "#1D1D1D",
         "border_color": "lightgreen",
         "border_px": 2,
-        "width": 1800,
+        "width": 1920,
         "height": 39,
-        "x": "center",
-        "y": 990,
+        "x": 0,
+        "y": 0,
         "docked": true,
         "always_on_top": false
     },
