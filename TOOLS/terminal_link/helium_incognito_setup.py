@@ -3,7 +3,8 @@ import os
 import winreg
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-                             QGroupBox, QFormLayout, QTextEdit, QMessageBox, QDialog)
+                             QGroupBox, QFormLayout, QTextEdit, QMessageBox, QDialog,
+                             QComboBox)
 from PyQt6.QtCore import Qt
 
 # CYBERPUNK THEME PALETTE
@@ -40,12 +41,13 @@ class SettingsDialog(QDialog):
         btn.clicked.connect(self.accept)
         layout.addWidget(lbl)
         layout.addWidget(btn)
+        layout.addWidget(btn)
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Helium Incognito Setup Utility")
-        self.resize(750, 480)
+        self.resize(750, 520)
         
         # Apply Global Theme
         self.setStyleSheet(f"""
@@ -57,6 +59,30 @@ class App(QMainWindow):
             }}
             QLineEdit:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
             
+            QComboBox {{
+                background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-weight: bold;
+            }}
+            QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
+            QComboBox::drop-down {{
+                border: 0px;
+            }}
+            QComboBox::down-arrow {{
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid {CP_CYAN};
+                width: 0;
+                height: 0;
+                margin-right: 10px;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                selection-background-color: {CP_DIM};
+                selection-color: {CP_YELLOW};
+                border: 1px solid {CP_CYAN};
+            }}
+
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 10px 18px; font-weight: bold;
             }}
@@ -99,6 +125,9 @@ class App(QMainWindow):
         status_layout.setHorizontalSpacing(20)
         status_layout.setVerticalSpacing(12)
         
+        self.browser_combo = QComboBox()
+        self.browser_combo.setCursor(Qt.CursorShape.PointingHandCursor)
+        
         self.progid_label = QLabel("Detecting...")
         self.progid_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
         
@@ -109,6 +138,7 @@ class App(QMainWindow):
         self.cmd_view.setReadOnly(True)
         self.cmd_view.setFixedHeight(60)
         
+        status_layout.addRow("Select Browser:", self.browser_combo)
         status_layout.addRow("Browser ProgID:", self.progid_label)
         status_layout.addRow("Incognito Mode:", self.incognito_status_label)
         status_layout.addRow("Launch Command:", self.cmd_view)
@@ -178,6 +208,12 @@ class App(QMainWindow):
         
         layout.addLayout(footer_layout)
 
+        # Populate and connect combobox
+        self.browsers_list = self.get_installed_browsers()
+        for b in self.browsers_list:
+            self.browser_combo.addItem(b["name"], b)
+        self.browser_combo.currentIndexChanged.connect(self.refresh_status)
+
         # Initial Refresh
         self.refresh_status()
 
@@ -188,6 +224,73 @@ class App(QMainWindow):
                 return prog_id
         except OSError:
             return None
+
+    def get_installed_browsers(self):
+        browsers = []
+        # Add a default entry for System Default
+        default_progid = self.get_http_progid()
+        default_name = f"System Default ({default_progid})" if default_progid else "System Default"
+        browsers.append({"name": default_name, "prog_id": default_progid, "is_default": True})
+
+        # Known common fallbacks to ensure they are available even if scanning has issues
+        common_browsers = {
+            "ChromeHTML": "Google Chrome",
+            "MSEdgeHTM": "Microsoft Edge",
+            "FirefoxHTML": "Mozilla Firefox",
+            "BraveHTML": "Brave Browser",
+            "OperaStable": "Opera Browser"
+        }
+
+        found_progids = set()
+        if default_progid:
+            found_progids.add(default_progid)
+
+        # Registry locations for browsers
+        reg_paths = [
+            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Clients\StartMenuInternet"),
+            (winreg.HKEY_CURRENT_USER, r"SOFTWARE\Clients\StartMenuInternet")
+        ]
+
+        for hkey, base_path in reg_paths:
+            try:
+                with winreg.OpenKey(hkey, base_path) as key:
+                    info = winreg.QueryInfoKey(key)
+                    for i in range(info[0]): # subkeys count
+                        subkey_name = winreg.EnumKey(key, i)
+                        try:
+                            # Try to get the friendly name
+                            with winreg.OpenKey(hkey, fr"{base_path}\{subkey_name}") as subkey:
+                                friendly_name, _ = winreg.QueryValueEx(subkey, "")
+                            
+                            # Try to get the ProgID from Capabilities
+                            assoc_path = fr"{base_path}\{subkey_name}\Capabilities\URLAssociations"
+                            with winreg.OpenKey(hkey, assoc_path) as assoc_key:
+                                prog_id, _ = winreg.QueryValueEx(assoc_key, "http")
+                                if prog_id and prog_id not in found_progids:
+                                    browsers.append({"name": friendly_name, "prog_id": prog_id, "is_default": False})
+                                    found_progids.add(prog_id)
+                        except OSError:
+                            continue
+            except OSError:
+                continue
+
+        # Add common fallbacks if not already found/added
+        for prog_id, name in common_browsers.items():
+            if prog_id not in found_progids:
+                if self.get_progid_command(prog_id):
+                    browsers.append({"name": name, "prog_id": prog_id, "is_default": False})
+                    found_progids.add(prog_id)
+
+        return browsers
+
+    def get_selected_progid(self):
+        idx = self.browser_combo.currentIndex()
+        if idx < 0:
+            return self.get_http_progid()
+        data = self.browser_combo.itemData(idx)
+        if data and data.get("is_default"):
+            return self.get_http_progid()
+        return data.get("prog_id") if data else self.get_http_progid()
 
     def get_progid_command(self, prog_id):
         try:
@@ -230,7 +333,7 @@ class App(QMainWindow):
             return "--incognito"
 
     def refresh_status(self):
-        prog_id = self.get_http_progid()
+        prog_id = self.get_selected_progid()
         if not prog_id:
             self.progid_label.setText("Not Found")
             self.incognito_status_label.setText("UNKNOWN")
@@ -273,9 +376,9 @@ class App(QMainWindow):
             return False
 
     def enable_incognito(self):
-        prog_id = self.get_http_progid()
+        prog_id = self.get_selected_progid()
         if not prog_id:
-            QMessageBox.warning(self, "Warning", "Could not identify system default browser ProgID.")
+            QMessageBox.warning(self, "Warning", "Could not identify selected browser ProgID.")
             return
 
         cmd_str = self.get_progid_command(prog_id)
@@ -301,9 +404,9 @@ class App(QMainWindow):
             self.refresh_status()
 
     def disable_incognito(self):
-        prog_id = self.get_http_progid()
+        prog_id = self.get_selected_progid()
         if not prog_id:
-            QMessageBox.warning(self, "Warning", "Could not identify system default browser ProgID.")
+            QMessageBox.warning(self, "Warning", "Could not identify selected browser ProgID.")
             return
 
         cmd_str = self.get_progid_command(prog_id)
