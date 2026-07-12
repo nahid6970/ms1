@@ -875,7 +875,7 @@
             "bindings": {
                 "Button-1": {
                     "type": "python",
-                    "hide": false,
+                    "hide": true,
                     "admin": false,
                     "in_terminal": false,
                     "cmd": "C:\\Users\\nahid\\@delta\\ms1\\TOOLS\\Voice\\voice_input.py"
