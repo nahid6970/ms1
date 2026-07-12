@@ -377,10 +377,16 @@ def run_in_terminal(command, cwd=None, title="Terminal"):
         for term in terminals:
             if shutil.which(term[0]):
                 if shutil.which("pwsh") and (".ps1" in cleaned_cmd or "gitter" in cleaned_cmd):
-                    subprocess.Popen(term + [f"pwsh -NoExit -Command \"{cleaned_cmd}\""], cwd=cwd)
+                    cmd_str = f"pwsh -NoExit -Command \"{cleaned_cmd}\""
+                    if cwd:
+                        cmd_str = f"cd '{cwd}' && {cmd_str}"
+                    subprocess.Popen(term + [cmd_str], cwd=cwd)
                 else:
                     keep_open = "; exec bash" if "lazygit" not in cleaned_cmd else ""
-                    subprocess.Popen(term + [f"{cleaned_cmd}{keep_open}"], cwd=cwd)
+                    cmd_str = f"{cleaned_cmd}{keep_open}"
+                    if cwd:
+                        cmd_str = f"cd '{cwd}' && {cmd_str}"
+                    subprocess.Popen(term + [cmd_str], cwd=cwd)
                 return
         logging.warning("No terminal emulator found. Running in background.")
         subprocess.Popen(cleaned_cmd, shell=True, cwd=cwd)
