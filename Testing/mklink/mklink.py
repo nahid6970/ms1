@@ -364,7 +364,7 @@ class SymlinkManager(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Cyberpunk Symlink Manager")
-        self.resize(1000, 600)
+        self.resize(1300, 600)
         
         self.data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "links.json")
         self.links = self.load_data()
