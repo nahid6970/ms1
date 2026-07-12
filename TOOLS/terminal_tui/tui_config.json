@@ -2,7 +2,7 @@
   "projects": [
     {
       "name": "Default",
-      "path": "/home/nahid/Users/nahid",
+      "path": "/home/nahid",
       "pinned": false,
       "theme": {
         "background": "#0b140f",
@@ -185,7 +185,7 @@
     {
       "name": "Terminal Link",
       "path": "/home/nahid/@delta/ms1/TOOLS/terminal_link",
-      "category": "Tool + Incognito Mode",
+      "category": "Tool",
       "pinned": false,
       "theme": {
         "background": "#000000",
