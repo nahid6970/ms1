@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 install_deps.py — Parse a Python script and install only the third-party
 imports that are actually used, via `uv pip install --system`.
@@ -206,6 +207,9 @@ def main():
                 print(f"  skip (present): {mod}")
                 continue
             pkg = resolve_pkg(mod)
+            if sys.platform != "win32" and pkg in {"pywin32", "windows-curses", "pywinpty"}:
+                print(f"  skip (Windows-only package): {pkg}")
+                continue
             to_install.append(pkg)
 
         to_install = sorted(set(to_install))
