@@ -52,9 +52,11 @@
         }
     ],
     "defaults": {
-        "": "EDIT",
+        "": "Notepad++",
         ".py": "Notepad++",
-        ".json": "Notepad++",
-        ".md": "Notepad++"
+        ".md": "Notepad++",
+        ".json": "Notepads",
+        ".txt": "Notepad++",
+        ".fsasdad": "Notepad++"
     }
 }

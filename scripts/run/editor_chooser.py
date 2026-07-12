@@ -3,7 +3,7 @@ import sys
 import subprocess
 import json
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-                             QLabel, QPushButton, QGridLayout, QFrame)
+                             QLabel, QPushButton, QGridLayout, QFrame, QMessageBox)
 from PyQt6.QtCore import Qt, QSize, pyqtSignal
 from PyQt6.QtGui import QFont, QCursor, QColor
 
@@ -383,38 +383,29 @@ class EditorChooser(QWidget):
         current = defaults.get(self.file_ext, None)
         if current:
             self.default_status_label.setText(f"Default: {current.upper()}")
-            self.toggle_default_btn.setText("[X] DEFAULT")
-            self.set_default_mode = True
-            self.toggle_default_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: transparent;
-                    color: {CP_YELLOW};
-                    border: 1px solid {CP_YELLOW};
-                    font-family: 'Consolas';
-                    font-weight: bold;
-                    font-size: 8pt;
-                    padding: 4px;
-                }}
-            """)
         else:
             self.default_status_label.setText("Default: None")
-            self.toggle_default_btn.setText("[ ] DEFAULT")
-            self.set_default_mode = False
-            self.toggle_default_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: transparent;
-                    color: {CP_DIM};
-                    border: 1px solid {CP_DIM};
-                    font-family: 'Consolas';
-                    font-weight: bold;
-                    font-size: 8pt;
-                    padding: 4px;
-                }}
-                QPushButton:hover {{
-                    border-color: {CP_YELLOW};
-                    color: {CP_YELLOW};
-                }}
-            """)
+        
+        self.default_status_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
+        
+        # Always start with default mode disabled (OFF)
+        self.set_default_mode = False
+        self.toggle_default_btn.setText("[ ] DEFAULT")
+        self.toggle_default_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: transparent;
+                color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                font-family: 'Consolas';
+                font-weight: bold;
+                font-size: 8pt;
+                padding: 4px;
+            }}
+            QPushButton:hover {{
+                border-color: {CP_YELLOW};
+                color: {CP_YELLOW};
+            }}
+        """)
 
     def toggle_default_mode(self):
         self.set_default_mode = not self.set_default_mode
@@ -438,8 +429,6 @@ class EditorChooser(QWidget):
                     padding: 4px;
                 }}
             """)
-
-
 
 
     def set_windows_default_association(self, ext, editor_name):
@@ -469,7 +458,6 @@ class EditorChooser(QWidget):
                     exe_path = p
                     break
         elif editor == "zed":
-            # Typical Zed installation paths
             local_app_data = os.environ.get("LocalAppData", "")
             possible_paths = [
                 os.path.join(local_app_data, "Programs", "zed", "Zed.exe"),
@@ -491,7 +479,10 @@ class EditorChooser(QWidget):
             # 1. Register our custom ProgID
             prog_key = f"Software\\Classes\\{prog_id}"
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, prog_key) as key:
-                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, f"EditorChooser {clean_ext.upper()} Handler")
+                friendly_name = f"EditorChooser {clean_ext.upper()} Handler"
+                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, friendly_name)
+                winreg.SetValueEx(key, "FriendlyAppName", 0, winreg.REG_SZ, friendly_name)
+
                 
             # 2. Set DefaultIcon to match the chosen editor's executable
             icon_key = f"Software\\Classes\\{prog_id}\\DefaultIcon"
@@ -506,20 +497,34 @@ class EditorChooser(QWidget):
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, cmd_key) as key:
                 winreg.SetValueEx(key, "", 0, winreg.REG_SZ, cmd_str)
                 
-            # 4. Notify the shell to refresh icons and associations
+            # 4. Add to OpenWithProgids so it shows up in Open With menu
+            try:
+                openwith_path = f"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\{ext}\\OpenWithProgids"
+                with winreg.CreateKey(winreg.HKEY_CURRENT_USER, openwith_path) as key:
+                    winreg.SetValueEx(key, prog_id, 0, winreg.REG_NONE, b"")
+            except Exception as e:
+                pass
+                
+            # 5. Notify the shell to refresh icons and associations
             SHCNE_ASSOCCHANGED = 0x08000000
             SHCNF_IDLIST = 0
             ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
-            return True
-        except Exception as e:
-            print(f"Error setting registry association: {e}")
-            return False
+            return True, ""
 
+        except Exception as e:
+            return False, str(e)
 
     def handle_action(self, editor_name):
         if self.set_default_mode:
             # Set custom ProgID association in registry to get the editor's icon
-            self.set_windows_default_association(self.file_ext, editor_name)
+            success, err_msg = self.set_windows_default_association(self.file_ext, editor_name)
+            if not success:
+                QMessageBox.warning(self, "Registry Error", f"Failed to register Windows 'Open with' option:\n{err_msg}")
+            else:
+                # Automatically launch the Windows "Open With" dialog for the user so they don't have to search
+                import subprocess
+                first_file = self.file_paths[0]
+                subprocess.Popen(f'rundll32.exe shell32.dll,OpenAs_RunDLL "{first_file}"', shell=True)
             
             # Keep local reference in JSON config
             config = load_config()
@@ -530,6 +535,9 @@ class EditorChooser(QWidget):
             
         open_with_editor(self.file_paths, editor_name)
         self.close()
+
+
+
 
         
     def restart_script(self):
