@@ -27,7 +27,7 @@ class EnvVariableManager(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("ENV VARIABLE MANAGER v1.0")
-        self.resize(1200, 700)
+        self.resize(1450, 700)
         
         # Apply Cyberpunk Theme
         self.apply_theme()
