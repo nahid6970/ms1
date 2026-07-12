@@ -6,8 +6,9 @@ Usage: python install_deps.py <script.py>
 """
 
 import ast
-import sys
 import os
+
+import sys
 import subprocess
 import importlib.util
 
@@ -113,8 +114,10 @@ def is_installed(module: str, script_dir: str = None) -> bool:
     """Check if a module is installed globally or exists locally in the script's directory."""
     # 1. Check local directory (so we don't try to pip install local files/folders)
     if script_dir:
+        # Check for module.py
         if os.path.exists(os.path.join(script_dir, f"{module}.py")):
             return True
+        # Check for module/ directory
         if os.path.isdir(os.path.join(script_dir, module)):
             return True
 
@@ -123,6 +126,8 @@ def is_installed(module: str, script_dir: str = None) -> bool:
     try:
         if importlib.util.find_spec(check) is None:
             return False
+        # We don't necessarily need to __import__ it, find_spec is usually enough 
+        # to know if it's available.
         return True
     except Exception:
         return False
@@ -191,8 +196,8 @@ def main():
     used_names = get_used_names(tree)
 
     third_party = {m for m in imported if m not in STDLIB}
+
     script_dir = os.path.dirname(os.path.abspath(script))
-    failed = []
 
     if clean:
         clean_unused_imports(script, tree, used_names)
@@ -214,6 +219,7 @@ def main():
             print("Nothing to install.")
         else:
             print(f"\nInstalling: {', '.join(to_install)}")
+            failed = []
             for pkg in to_install:
                 print(f"  installing {pkg}...")
                 proc = subprocess.run(["uv", "pip", "install", "--system", pkg])
@@ -223,29 +229,25 @@ def main():
             if failed:
                 print(f"\nFAILED to install: {', '.join(failed)}")
                 if "pyaudio" in failed and sys.platform == "win32":
-                    print("\nTIP: 'pyaudio' requires 'Microsoft Visual C++ Build Tools' on Windows.")
-                    print("Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/")
+                    print("\nTIP: 'pyaudio' often requires Microsoft Visual C++ Build Tools on Windows.")
+                    print("Try downloading a pre-compiled wheel if available for your Python version.")
             else:
                 print("All packages installed successfully.")
 
     if run:
-        # Warning for experimental Python versions
-        if sys.version_info.major == 3 and sys.version_info.minor >= 14:
-            print(f"\nNOTICE: You are using Python {sys.version_info.major}.{sys.version_info.minor} (Alpha/Dev).")
+        # If we are on an experimental Python version (like 3.14), wheels are often missing.
+        if sys.version_info.major == 3 and sys.version_info.minor >= 13:
             if failed:
-                print("Note: Pre-compiled binaries (wheels) rarely exist for this Python version yet.")
-
-        if failed:
-            print(f"\n[!] WARNING: Running script with MISSING dependencies: {', '.join(failed)}")
-            print("[!] This is 'ok' for now, but features using these modules will crash.")
-            print("[!] To fix this, you must install 'Microsoft C++ Build Tools' to compile from source.")
+                print(f"\nNOTICE: You are using Python {sys.version_info.major}.{sys.version_info.minor}.")
+                print("Many packages (like 'pyaudio') do not have pre-compiled wheels for this version yet.")
+                print("They must be built from source, which requires 'Microsoft C++ Build Tools'.")
 
         print(f"\nRunning {script} ...\n")
         result = subprocess.run([sys.executable, script])
         
         if result.returncode != 0 and failed:
             print(f"\n[!] Script exited with error ({result.returncode}).")
-            print(f"[!] This is likely because the following modules are missing: {', '.join(failed)}")
+            print(f"[!] This may be because the following dependencies failed to install: {', '.join(failed)}")
 
 
 if __name__ == "__main__":
