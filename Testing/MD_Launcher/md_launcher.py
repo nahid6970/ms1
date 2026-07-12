@@ -1,10 +1,13 @@
+#!/usr/bin/env python3
 import sys
 import os
 import json
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+import subprocess
+import platform
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QComboBox, QFontComboBox)
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
-from PyQt5.QtGui import QFont, QDrag, QFontDatabase
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QUrl
+from PyQt6.QtGui import QFont, QDrag
 
 CP_BG = "#050505"
 CP_PANEL = "#111111"
@@ -17,14 +20,35 @@ CP_SUBTEXT = "#808080"
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "md_launcher_config.json")
 
+def normalize_path(path):
+    if os.name != 'nt':
+        if path.upper().startswith("C:"):
+            home = os.path.expanduser('~')
+            path = home + path[2:]
+        path = path.replace("\\", "/")
+    return os.path.normpath(path)
+
+def open_path(path):
+    if hasattr(os, 'startfile'):
+        os.startfile(path)
+    elif platform.system() == 'Darwin':
+        subprocess.call(('open', path))
+    else:
+        subprocess.call(('xdg-open', path))
+
 def load_config():
     default = {"folders": ["C:/@delta/ms1/md"], "win_w": 600, "win_h": 400}
+    default["folders"] = [normalize_path(f) for f in default["folders"]]
     try:
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
                 data = json.load(f)
                 if "md_folder" in data and "folders" not in data:
                     data["folders"] = [data["md_folder"]]
+                if "folders" in data:
+                    data["folders"] = [normalize_path(f) for f in data["folders"]]
+                if "md_folder" in data:
+                    data["md_folder"] = normalize_path(data["md_folder"])
                 return {**default, **data}
     except: pass
     return default
@@ -44,7 +68,7 @@ class SettingsDialog(QDialog):
     applied = pyqtSignal(bool)
 
     def __init__(self, config, parent=None):
-        super().__init__(parent, Qt.WindowStaysOnTopHint)
+        super().__init__(parent, Qt.WindowType.WindowStaysOnTopHint)
         self.config = config
         self.setWindowTitle("Settings")
         self.setModal(False)
@@ -99,7 +123,7 @@ class SettingsDialog(QDialog):
         self._refresh_folders()
 
         add_btn = QPushButton("+ Add Folder")
-        add_btn.setCursor(Qt.PointingHandCursor)
+        add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         add_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_CYAN}; border: none; text-align: left; padding: 2px 0; font-family: Consolas; font-size: 9pt; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
         add_btn.clicked.connect(self._add_folder)
         layout.addWidget(add_btn)
@@ -142,12 +166,12 @@ class SettingsDialog(QDialog):
         # --- Apply / Close ---
         btn_row = QHBoxLayout()
         apply_btn = QPushButton("Apply")
-        apply_btn.setCursor(Qt.PointingHandCursor)
+        apply_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         apply_btn.setStyleSheet(BTN_STYLE)
         apply_btn.clicked.connect(self._apply)
 
         close_btn = QPushButton("Close")
-        close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         close_btn.setStyleSheet(BTN_STYLE)
         close_btn.clicked.connect(self.close)
 
@@ -197,7 +221,7 @@ class SettingsDialog(QDialog):
 
             rm = QPushButton("✕")
             rm.setFixedSize(20, 20)
-            rm.setCursor(Qt.PointingHandCursor)
+            rm.setCursor(Qt.CursorShape.PointingHandCursor)
             rm.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; }} QPushButton:hover {{ color: {CP_RED}; }}")
             rm.clicked.connect(lambda _, f=folder: self._remove_folder(f))
 
@@ -246,7 +270,7 @@ class MDRow(QWidget):
         self.file_name = os.path.basename(file_path)
         self.setFixedHeight(height)
         self.setObjectName("row")
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 0, 12, 0)
@@ -269,12 +293,12 @@ class MDRow(QWidget):
     def set_selected(self, s): self._set_style(s)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self._drag_start = event.pos()
             self.clicked.emit()
 
     def mouseMoveEvent(self, event):
-        if not (event.buttons() & Qt.LeftButton): return
+        if not (event.buttons() & Qt.MouseButton.LeftButton): return
         if (event.pos() - self._drag_start).manhattanLength() < QApplication.startDragDistance(): return
         # Copy path to clipboard so even if drop fails, user can paste
         QApplication.clipboard().setText(os.path.abspath(self.file_path))
@@ -282,7 +306,7 @@ class MDRow(QWidget):
         mime = QMimeData()
         mime.setUrls([QUrl.fromLocalFile(os.path.abspath(self.file_path))])
         drag.setMimeData(mime)
-        drag.exec_(Qt.CopyAction)
+        drag.exec(Qt.DropAction.CopyAction)
 
 
 class MDLauncher(QMainWindow):
@@ -296,8 +320,8 @@ class MDLauncher(QMainWindow):
         self._settings_dialog = None
         self._initial_scan_done = False
 
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         screen = QApplication.primaryScreen().geometry()
         w = self.config.get("win_w", 600)
@@ -330,7 +354,7 @@ class MDLauncher(QMainWindow):
 
         settings_btn = QPushButton("⚙")
         settings_btn.setFixedSize(36, 36)
-        settings_btn.setCursor(Qt.PointingHandCursor)
+        settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         settings_btn.setStyleSheet(f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; font-size: 14px; }} QPushButton:hover {{ color: {CP_YELLOW}; }}")
         settings_btn.clicked.connect(self.open_settings)
 
@@ -341,8 +365,8 @@ class MDLauncher(QMainWindow):
         # Scroll area
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.scroll.setStyleSheet(f"""
             QScrollArea {{ background: transparent; border: none; }}
             QScrollBar:vertical {{ background: transparent; width: 6px; margin: 0; }}
@@ -447,15 +471,15 @@ class MDLauncher(QMainWindow):
         QApplication.quit()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             self.close()
-        elif event.key() == Qt.Key_Down:
+        elif event.key() == Qt.Key.Key_Down:
             self.set_index(self.current_idx + 1)
-        elif event.key() == Qt.Key_Up:
+        elif event.key() == Qt.Key.Key_Up:
             self.set_index(self.current_idx - 1)
-        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        elif event.key() in (Qt.Key.Key_Return, Qt.Key_Enter):
             if self.rows:
-                os.startfile(self.rows[self.current_idx].file_path)
+                open_path(self.rows[self.current_idx].file_path)
                 self.close()
 
 
@@ -466,4 +490,4 @@ if __name__ == "__main__":
     launcher.show()
     launcher.activateWindow()
     launcher.raise_()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
