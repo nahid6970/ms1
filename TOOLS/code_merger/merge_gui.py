@@ -26,11 +26,17 @@ def _custom_normpath(path):
     if os.name != 'nt':
         # Replace backslashes with forward slashes
         path_str = path_str.replace('\\', '/')
-        # If it starts with a Windows drive letter (e.g. C:/), translate it to user home directory
-        m = re.match(r'^[a-zA-Z]:/', path_str)
-        if m:
-            home = os.path.expanduser('~')
-            path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
+        # If it starts with C:/Users/<username> (case-insensitive), replace it with the Linux user's home directory
+        home = os.path.expanduser('~')
+        username = os.path.basename(home)
+        pattern = r'^[a-zA-Z]:/[uU]sers/' + re.escape(username)
+        if re.match(pattern, path_str):
+            path_str = re.sub(pattern, home, path_str)
+        else:
+            # Otherwise, translate the drive letter to home directory (e.g. C:/ -> /home/username/)
+            m = re.match(r'^[a-zA-Z]:/', path_str)
+            if m:
+                path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
     return _original_normpath(path_str)
 
 os.path.normpath = _custom_normpath

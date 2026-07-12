@@ -2,7 +2,7 @@
   "projects": [
     {
       "name": "Default",
-      "path": "C:\\Users\\nahid",
+      "path": "/home/nahid/Users/nahid",
       "pinned": false,
       "theme": {
         "background": "#0b140f",
@@ -23,28 +23,7 @@
     },
     {
       "name": "MS1",
-      "path": "C:\\@delta\\ms1",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#0b140f",
-        "foreground": "#c8d5ce",
-        "cursor": "#ea3a1f",
-        "borderColor": "#ffffff",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffffff",
-        "textColor": "#000000",
-        "pathColor": "#163055",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": []
-    },
-    {
-      "name": "db",
-      "path": "C:\\@delta\\db",
+      "path": "/home/nahid/@delta/ms1",
       "category": "",
       "pinned": false,
       "theme": {
@@ -65,7 +44,7 @@
     },
     {
       "name": "Terminal TUI",
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui",
+      "path": "/home/nahid/@delta/ms1/TOOLS/terminal_tui",
       "pinned": false,
       "theme": {
         "background": "#12080d",
@@ -123,7 +102,7 @@
     },
     {
       "name": "Code Merger",
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "path": "/home/nahid/@delta/ms1/TOOLS/code_merger",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -144,7 +123,7 @@
     },
     {
       "name": "Github Manager",
-      "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
+      "path": "/home/nahid/@delta/ms1/TOOLS/Github/gitManager",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -163,8 +142,29 @@
       "bookmarks": []
     },
     {
+      "name": "db",
+      "path": "/home/nahid/@delta/db",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
+    },
+    {
       "name": "mklink",
-      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "path": "/home/nahid/@delta/ms1/Testing/mklink",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -184,7 +184,7 @@
     },
     {
       "name": "Terminal Link",
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_link",
+      "path": "/home/nahid/@delta/ms1/TOOLS/terminal_link",
       "category": "Tool + Incognito Mode",
       "pinned": false,
       "theme": {
@@ -205,7 +205,7 @@
     },
     {
       "name": "Drop Down Files",
-      "path": "C:\\@delta\\ms1\\Testing\\MD_Launcher",
+      "path": "/home/nahid/@delta/ms1/Testing/MD_Launcher",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -225,7 +225,7 @@
     },
     {
       "name": "Alarm Countdown Timer",
-      "path": "C:\\@delta\\ms1\\TOOLS\\alarm_timer",
+      "path": "/home/nahid/@delta/ms1/TOOLS/alarm_timer",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -245,7 +245,7 @@
     },
     {
       "name": "mycell - 5018",
-      "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
+      "path": "/home/nahid/@delta/ms1/@Flask/5018_cell",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -266,7 +266,7 @@
     },
     {
       "name": "TV Show - 5011",
-      "path": "C:\\@delta\\ms1\\@Flask\\5011_tv_show",
+      "path": "/home/nahid/@delta/ms1/@Flask/5011_tv_show",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -287,7 +287,7 @@
     },
     {
       "name": "Movies - 5013",
-      "path": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker",
+      "path": "/home/nahid/@delta/ms1/@Flask/5013_movie_tracker",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -308,7 +308,7 @@
     },
     {
       "name": "Valorant Stats VLR",
-      "path": "C:\\@delta\\db\\vlr",
+      "path": "/home/nahid/@delta/db/vlr",
       "category": "",
       "pinned": false,
       "theme": {
@@ -329,7 +329,7 @@
     },
     {
       "name": "Gallery",
-      "path": "C:\\@delta\\db\\@Convex\\image-share",
+      "path": "/home/nahid/@delta/db/@Convex/image-share",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -350,7 +350,7 @@
     },
     {
       "name": "GameArr",
-      "path": "C:\\@delta\\db\\@Convex\\gameARR-convex",
+      "path": "/home/nahid/@delta/db/@Convex/gameARR-convex",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -371,7 +371,7 @@
     },
     {
       "name": "myhome",
-      "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
+      "path": "/home/nahid/@delta/db/@Convex/myhome-convex",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -392,7 +392,7 @@
     },
     {
       "name": "Shortcut Manager",
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
+      "path": "/home/nahid/@delta/ms1/@AutoHotKey/shortcut_manager",
       "category": "Tool - Autohotkey - AHK",
       "pinned": false,
       "theme": {
@@ -413,7 +413,7 @@
     },
     {
       "name": "Button Generator",
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
+      "path": "/home/nahid/@delta/ms1/@AutoHotKey/Button_Generator",
       "category": "Tool - Autohotkey - AHK",
       "pinned": false,
       "theme": {
@@ -434,7 +434,7 @@
     },
     {
       "name": "Element Copy",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\Element_Copy",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/Element_Copy",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -455,7 +455,7 @@
     },
     {
       "name": "Script Loader",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/script_loader",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -476,7 +476,7 @@
     },
     {
       "name": "Tab Saver",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/tab_saver",
       "category": "Convex Extension",
       "pinned": false,
       "theme": {
@@ -497,7 +497,7 @@
     },
     {
       "name": "SideBar",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\SideBar",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/SideBar",
       "category": "Convex Extension",
       "pinned": false,
       "theme": {
@@ -518,7 +518,7 @@
     },
     {
       "name": "Automate",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/Automation",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -539,7 +539,7 @@
     },
     {
       "name": "Highlight",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\highlight",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/highlight",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -560,7 +560,7 @@
     },
     {
       "name": "ImageChecker",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\image_checker",
+      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/image_checker",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -581,7 +581,7 @@
     },
     {
       "name": "AI Model List",
-      "path": "C:\\@delta\\db\\ai_model_list",
+      "path": "/home/nahid/@delta/db/ai_model_list",
       "category": "Flask",
       "pinned": false,
       "theme": {
@@ -601,7 +601,7 @@
     },
     {
       "name": "fungame",
-      "path": "C:\\@delta\\db\\fungame",
+      "path": "/home/nahid/@delta/db/fungame",
       "category": "",
       "pinned": false,
       "theme": {
@@ -621,7 +621,7 @@
     },
     {
       "name": "AI Instruction",
-      "path": "C:\\@delta\\ms1\\asset\\gemini",
+      "path": "/home/nahid/@delta/ms1/asset/gemini",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -641,7 +641,7 @@
     },
     {
       "name": "Facebook img",
-      "path": "C:\\@delta\\ms1\\Testing\\facebook_img_download",
+      "path": "/home/nahid/@delta/ms1/Testing/facebook_img_download",
       "category": "Tool",
       "pinned": false,
       "theme": {
