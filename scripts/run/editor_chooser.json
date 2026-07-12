@@ -52,8 +52,9 @@
         }
     ],
     "defaults": {
-        ".json": "Notepad++",
         "": "EDIT",
-        ".md": "EDIT"
+        ".py": "Notepad++",
+        ".json": "Notepad++",
+        ".md": "Notepad++"
     }
 }

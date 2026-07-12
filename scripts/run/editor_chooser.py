@@ -506,17 +506,7 @@ class EditorChooser(QWidget):
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, cmd_key) as key:
                 winreg.SetValueEx(key, "", 0, winreg.REG_SZ, cmd_str)
                 
-            # 4. Associate the file extension with our ProgID
-            ext_key = f"Software\\Classes\\{ext}"
-            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, ext_key) as key:
-                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, prog_id)
-                
-            # 5. Add to Explorer's OpenWithProgids
-            openwith_path = f"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\{ext}\\OpenWithProgids"
-            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, openwith_path) as key:
-                winreg.SetValueEx(key, prog_id, 0, winreg.REG_NONE, b"")
-                
-            # 6. Notify the shell to refresh icons and associations
+            # 4. Notify the shell to refresh icons and associations
             SHCNE_ASSOCCHANGED = 0x08000000
             SHCNF_IDLIST = 0
             ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
@@ -524,6 +514,7 @@ class EditorChooser(QWidget):
         except Exception as e:
             print(f"Error setting registry association: {e}")
             return False
+
 
     def handle_action(self, editor_name):
         if self.set_default_mode:
