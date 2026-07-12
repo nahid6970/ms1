@@ -931,7 +931,7 @@
                     "hide": false,
                     "admin": false,
                     "in_terminal": true,
-                    "cmd": "pacman -Qq | fzf --preview 'pacman -Qi {}' --layout=reverse --bind 'enter:execute(sudo pacman -Rns {})'"
+                    "cmd": "pacman -Qnq | fzf --preview 'pacman -Qi {}' --layout=reverse --bind 'enter:execute(sudo pacman -Rns {})'"
                 }
             },
             "border_color": "",
@@ -977,7 +977,7 @@
                     "hide": false,
                     "admin": false,
                     "in_terminal": true,
-                    "cmd": "yay -Qq | fzf --preview 'yay -Qi {}' --layout=reverse --bind 'enter:execute(yay -Rns {})'"
+                    "cmd": "yay -Qmq | fzf --preview 'yay -Qi {}' --layout=reverse --bind 'enter:execute(yay -Rns {})'"
                 }
             },
             "border_color": "",
