@@ -691,8 +691,14 @@ def get_gpu_usage():
     gpu_usage = device.getCurrentUsage()
     return gpu_usage
 def get_disk_info():
-    disk_c_usage = psutil.disk_usage('C:').percent
-    disk_d_usage = psutil.disk_usage('D:').percent
+    try:
+        disk_c_usage = psutil.disk_usage('C:').percent
+    except Exception:
+        disk_c_usage = 0.0
+    try:
+        disk_d_usage = psutil.disk_usage('D:').percent
+    except Exception:
+        disk_d_usage = 0.0
     return disk_c_usage, disk_d_usage
 def get_net_speed():
     net_io = psutil.net_io_counters()

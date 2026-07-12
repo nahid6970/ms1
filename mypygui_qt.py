@@ -619,8 +619,36 @@ def get_gpu_usage():
     except Exception:
         return 0
 
+_drive_cache = {"drives": [], "last_check": 0.0}
+
+def get_active_drives():
+    now = time.time()
+    if now - _drive_cache["last_check"] > 10.0 or not _drive_cache["drives"]:
+        drives = []
+        try:
+            for p in psutil.disk_partitions(all=False):
+                if not p.mountpoint:
+                    continue
+                opts = p.opts.lower()
+                if 'fixed' in opts or 'removable' in opts:
+                    try:
+                        psutil.disk_usage(p.mountpoint)
+                        drives.append(p.mountpoint)
+                    except Exception:
+                        continue
+        except Exception:
+            pass
+        if not drives:
+            drives = ['C:\\']
+        _drive_cache["drives"] = drives
+        _drive_cache["last_check"] = now
+    return _drive_cache["drives"]
+
 def get_disk_info():
-    return psutil.disk_usage('C:').percent, psutil.disk_usage('D:').percent
+    drives = get_active_drives()
+    dc = psutil.disk_usage(drives[0]).percent if len(drives) > 0 else 0.0
+    dd = psutil.disk_usage(drives[1]).percent if len(drives) > 1 else 0.0
+    return dc, dd
 
 _net_last = {"sent": 0, "recv": 0}
 
@@ -1367,6 +1395,41 @@ def _bind_static(lbl, key, default_cmd):
     lbl.mouseReleaseEvent = mouseReleaseEvent
     lbl.setCursor(Qt.CursorShape.PointingHandCursor); _apply_static_style(lbl, key)
 
+def _bind_drive(lbl, key, drive_index):
+    def mousePressEvent(event):
+        event.accept()
+
+    def mouseReleaseEvent(event, _key=key, _lbl=lbl, _idx=drive_index):
+        if not _lbl.rect().contains(event.pos()): return
+        mods, btn = event.modifiers(), event.button()
+        if mods & Qt.KeyboardModifier.ShiftModifier:
+            _open_static_edit(_key)
+            return
+        
+        drives = get_active_drives()
+        if len(drives) <= _idx:
+            return
+        drive_path = drives[_idx]
+        
+        cfg = load_config().get("static_bindings", {}).get(_key, {})
+        bkey = None
+        if btn == Qt.MouseButton.LeftButton:
+            bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
+        elif btn == Qt.MouseButton.RightButton:
+            bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
+            
+        if bkey and bkey in cfg:
+            handle_action(cfg[bkey])
+        else:
+            if btn == Qt.MouseButton.LeftButton and not (mods & Qt.KeyboardModifier.ControlModifier):
+                import subprocess
+                subprocess.Popen(f'explorer "{drive_path}"', shell=True)
+                
+    lbl.mousePressEvent = mousePressEvent
+    lbl.mouseReleaseEvent = mouseReleaseEvent
+    lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+    _apply_static_style(lbl, key)
+
 
 # ─── CPU core bar widget ──────────────────────────────────────────────────────
 BAR_WIDTH, BAR_HEIGHT = 8, 25
@@ -1943,8 +2006,8 @@ class StatusBar(QMainWindow):
         self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
         self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
         self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {})); _bind_static(self.lb_ram, "ram", "taskmgr"); rl.addWidget(self.lb_ram)
-        self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_static(self.lb_duc, "drive_c", "explorer C:\\"); rl.addWidget(self.lb_duc)
-        self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_static(self.lb_dud, "drive_d", "explorer D:\\"); rl.addWidget(self.lb_dud)
+        self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_drive(self.lb_duc, "drive_c", 0); rl.addWidget(self.lb_duc)
+        self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_drive(self.lb_dud, "drive_d", 1); rl.addWidget(self.lb_dud)
         _st_cfg = load_config().get("static_bindings", {}).get("settings", {}); settings_bt = IconLabel("⚙", _st_cfg); _apply_static_style(settings_bt, "settings")
         if not _st_cfg: settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
         settings_bt.mousePressEvent = lambda e: (self._open_unified_settings() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("settings")); rl.addWidget(settings_bt)
@@ -2023,7 +2086,26 @@ class StatusBar(QMainWindow):
         if not self._timer_active: self.uptime_label.setText(format_uptime())
     def _update_info(self):
         cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
-        self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.setText(f"{gpu}%"); self.lb_duc.setText(f"\uf0a0  {dc}%"); self.lb_dud.setText(f"\uf0a0  {dd}%"); self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
+        self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.setText(f"{gpu}%")
+        self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
+        
+        drives = get_active_drives()
+        num_drives = len(drives)
+        
+        if num_drives >= 1:
+            self.lb_duc.setText(f"\uf0a0  {dc}%")
+            self.lb_duc.setToolTip(f"Drive {drives[0]} ({dc}%)")
+            self.lb_duc.show()
+        else:
+            self.lb_duc.hide()
+            
+        if num_drives >= 2:
+            self.lb_dud.setText(f"\uf0a0  {dd}%")
+            self.lb_dud.setToolTip(f"Drive {drives[1]} ({dd}%)")
+            self.lb_dud.show()
+        else:
+            self.lb_dud.hide()
+            
         cpu_f, ram_f, dc_f, dd_f, up_f, dn_f = float(cpu), float(ram), float(dc), float(dd), float(up), float(down)
         self.lb_cpu.setStyleSheet(f"color: {'black' if cpu_f > 80 else '#1b8af1'}; background: {'#14bcff' if cpu_f > 80 else CP_BG}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #1b8af1;")
         self.lb_ram.setStyleSheet(f"color: {'black' if ram_f > 80 else '#f08d0c'}; background: {'#ff934b' if ram_f > 80 else CP_BG}; font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold; border: 1px solid #f08d0c;")
