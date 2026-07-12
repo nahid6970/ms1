@@ -1,9 +1,28 @@
+#!/usr/bin/env python3
 import sys
 import json
 import os
 import ctypes
 import subprocess
 import shutil
+import re
+
+def normalize_path(path):
+    if not path:
+        return path
+    if os.name != 'nt':
+        # Convert backslashes to forward slashes
+        path = path.replace('\\', '/')
+        # Translate Windows user profile prefix to home directory
+        user_home = os.path.expanduser('~')
+        path = re.sub(r'^[a-zA-Z]:/Users/[^/]+', user_home, path)
+        # Translate remaining drive letters to home or root
+        path = re.sub(r'^[a-zA-Z]:/', user_home + '/', path)
+        path = re.sub(r'^[a-zA-Z]:', user_home, path)
+    else:
+        path = os.path.normpath(path)
+    return path
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
                              QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu, QCheckBox)
@@ -426,6 +445,9 @@ class SymlinkManager(QMainWindow):
                             # Clean up old keys if desired, though not strictly necessary
                             for k in ["target", "fake", "type"]:
                                 if k in entry: del entry[k]
+                        for item in entry.get("items", []):
+                            item["target"] = normalize_path(item["target"])
+                            item["fake"] = normalize_path(item["fake"])
                     return data
             except:
                 return []
@@ -450,6 +472,8 @@ class SymlinkManager(QMainWindow):
         self.status_bar.setText(f"Added new entry: {name}")
 
     def is_junction(self, path):
+        if os.name != 'nt':
+            return os.path.islink(path)
         try:
             FILE_ATTRIBUTE_REPARSE_POINT = 0x0400
             attrs = ctypes.windll.kernel32.GetFileAttributesW(path)
@@ -562,9 +586,17 @@ class SymlinkManager(QMainWindow):
         target = os.path.normpath(target)
         fake = os.path.normpath(fake)
         try:
-            # We use explorer /select to highlight the file/folder in its parent
-            subprocess.Popen(f'explorer /select,"{target}"')
-            subprocess.Popen(f'explorer /select,"{fake}"')
+            if os.name == 'nt':
+                # We use explorer /select to highlight the file/folder in its parent
+                subprocess.Popen(f'explorer /select,"{target}"')
+                subprocess.Popen(f'explorer /select,"{fake}"')
+            else:
+                for path in [target, fake]:
+                    if hasattr(os, 'startfile'):
+                        os.startfile(path)
+                    else:
+                        open_path = path if os.path.isdir(path) else os.path.dirname(path)
+                        subprocess.Popen(['xdg-open', open_path])
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open folders:\n{str(e)}")
 
@@ -629,26 +661,33 @@ class SymlinkManager(QMainWindow):
                         shutil.copy2(target, fake)
                     success_count += 1
                 else:
-                    if link_type == "folder":
-                        cmd = f'mklink /J "{fake}" "{target}"'
-                    else:
-                        cmd = f'mklink "{fake}" "{target}"'
-                    
-                    result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
-                    
-                    if result.returncode == 0:
-                        success_count += 1
-                    else:
-                        err = result.stderr.strip() or result.stdout.strip()
-                        if "privilege" in err.lower() or "access is denied" in err.lower():
-                            params = f'/c {cmd}'
-                            ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
-                            if ret > 32:
-                                success_count += 1
-                            else:
-                                error_logs.append(f"Elevation failed for: {fake}")
+                    if os.name == 'nt':
+                        if link_type == "folder":
+                            cmd = f'mklink /J "{fake}" "{target}"'
                         else:
-                            error_logs.append(f"Cmd failed for {fake}: {err}")
+                            cmd = f'mklink "{fake}" "{target}"'
+                        
+                        result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
+                        
+                        if result.returncode == 0:
+                            success_count += 1
+                        else:
+                            err = result.stderr.strip() or result.stdout.strip()
+                            if "privilege" in err.lower() or "access is denied" in err.lower():
+                                params = f'/c {cmd}'
+                                ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
+                                if ret > 32:
+                                    success_count += 1
+                                else:
+                                    error_logs.append(f"Elevation failed for: {fake}")
+                            else:
+                                error_logs.append(f"Cmd failed for {fake}: {err}")
+                    else:
+                        try:
+                            os.symlink(target, fake)
+                            success_count += 1
+                        except Exception as sym_err:
+                            error_logs.append(f"Symlink creation failed for {fake}: {str(sym_err)}")
             except Exception as e:
                 error_logs.append(f"Unexpected error for {fake}: {str(e)}")
         
