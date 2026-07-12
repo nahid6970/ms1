@@ -874,15 +874,17 @@
             "id": "btn_1777992525",
             "bindings": {
                 "Button-1": {
-                    "type": "subprocess",
+                    "type": "python",
                     "hide": false,
                     "admin": false,
+                    "in_terminal": false,
                     "cmd": "C:\\Users\\nahid\\@delta\\ms1\\TOOLS\\Voice\\voice_input.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
+                    "in_terminal": false,
                     "cmd": "C:\\Users\\nahid\\@delta\\ms1\\TOOLS\\volume_mixer\\volume_mixer.py"
                 }
             },

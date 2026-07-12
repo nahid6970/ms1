@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import json
 import webbrowser
@@ -24,7 +25,11 @@ def paste_text(text, preserve_clipboard=False):
     previous_clipboard = pyperclip.paste() if preserve_clipboard else None
     pyperclip.copy(text)
     import time; time.sleep(0.1)
-    import pyautogui; pyautogui.hotkey('ctrl', 'v')
+    from pynput.keyboard import Controller, Key
+    keyboard = Controller()
+    with keyboard.pressed(Key.ctrl):
+        keyboard.press('v')
+        keyboard.release('v')
     if preserve_clipboard and previous_clipboard is not None:
         pyperclip.copy(previous_clipboard)
 
@@ -726,6 +731,26 @@ class VoiceApp(QMainWindow):
                     return None
 
         def on_press(key):
+            import os
+            if os.name != 'nt':
+                from pynput.keyboard import Key, KeyCode
+                if hotkey_name.startswith("RightAlt") and (key == Key.alt_gr or key == Key.alt_r):
+                    self._hotkey_mod_pressed = True
+                elif hotkey_name.startswith("RightCtrl") and key == Key.ctrl_r:
+                    self._hotkey_mod_pressed = True
+                elif hotkey_name.startswith("Alt") and key in (Key.alt, Key.alt_l, Key.alt_r, Key.alt_gr):
+                    self._hotkey_mod_pressed = True
+
+                if self._hotkey_mod_pressed:
+                    if "Space" in hotkey_name and key == Key.space:
+                        self.toggle_record_requested.emit()
+                    elif "H" in hotkey_name and hasattr(key, 'char') and key.char == 'h':
+                        self.toggle_record_requested.emit()
+
+                if key == Key.space:
+                    self.space_press_requested.emit()
+                return
+
             kv = _vk(key)
             if mod_vk is not None and kv == mod_vk:
                 self._hotkey_mod_pressed = True
@@ -735,6 +760,17 @@ class VoiceApp(QMainWindow):
                 self.space_press_requested.emit()
 
         def on_release(key):
+            import os
+            if os.name != 'nt':
+                from pynput.keyboard import Key
+                if hotkey_name.startswith("RightAlt") and (key == Key.alt_gr or key == Key.alt_r):
+                    self._hotkey_mod_pressed = False
+                elif hotkey_name.startswith("RightCtrl") and key == Key.ctrl_r:
+                    self._hotkey_mod_pressed = False
+                elif hotkey_name.startswith("Alt") and key in (Key.alt, Key.alt_l, Key.alt_r, Key.alt_gr):
+                    self._hotkey_mod_pressed = False
+                return
+
             if mod_vk is not None and _vk(key) == mod_vk:
                 self._hotkey_mod_pressed = False
 
@@ -833,8 +869,10 @@ class VoiceApp(QMainWindow):
 
     def _erase_stop_space(self):
         try:
-            import pyautogui
-            pyautogui.press("backspace")
+            from pynput.keyboard import Controller, Key
+            keyboard = Controller()
+            keyboard.press(Key.backspace)
+            keyboard.release(Key.backspace)
         except Exception:
             pass
 
