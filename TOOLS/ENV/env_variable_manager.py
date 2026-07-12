@@ -1895,12 +1895,57 @@ class EnvVariableManager(QMainWindow):
             return
             
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
             
             # Basic validation
             if "user_env" not in config and "system_env" not in config and "aliases" not in config and "context_menu" not in config and "scripts" not in config:
                 raise ValueError("Invalid configuration file format.")
+                
+            # Detect old user profiles in backup
+            current_user = os.path.basename(os.path.expanduser("~"))
+            import re
+            
+            def detect_profiles(data):
+                found = set()
+                pattern = re.compile(r'C:\\Users\\([^\\]+)', re.IGNORECASE)
+                def scan(item):
+                    if isinstance(item, dict):
+                        for v in item.values(): scan(v)
+                    elif isinstance(item, list):
+                        for v in item: scan(v)
+                    elif isinstance(item, str):
+                        for match in pattern.findall(item):
+                            # Exclude common system names if match
+                            if match.lower() not in ["public", "default", "all users"]:
+                                found.add(match.lower())
+                scan(data)
+                return found
+                
+            old_profiles = detect_profiles(config)
+            old_profiles.discard(current_user.lower())
+            
+            if old_profiles:
+                def replace_paths(item, old, new):
+                    if isinstance(item, dict):
+                        return {k: replace_paths(v, old, new) for k, v in item.items()}
+                    elif isinstance(item, list):
+                        return [replace_paths(v, old, new) for v in item]
+                    elif isinstance(item, str):
+                        escaped_old = re.escape(f"C:\\Users\\{old}")
+                        new_path = f"C:\\Users\\{new}"
+                        # Replace both backslash and forward slash styles if present
+                        item_replaced = re.sub(escaped_old, new_path, item, flags=re.IGNORECASE)
+                        escaped_old_fwd = re.escape(f"C:/Users/{old}")
+                        new_path_fwd = f"C:/Users/{new}"
+                        return re.sub(escaped_old_fwd, new_path_fwd, item_replaced, flags=re.IGNORECASE)
+                    return item
+                    
+                for old_p in old_profiles:
+                    config = replace_paths(config, old_p, current_user)
+                self.set_status(f"Automatically remapped old profile paths to current user: {current_user}", CP_GREEN)
+
+
             
             reply = QMessageBox.question(self, "Confirm Import", 
                                         "This will overwrite existing environment variables, aliases, context menu entries, and scripts. Continue?",

@@ -57,6 +57,7 @@
         ".md": "Notepad++",
         ".json": "EDIT",
         ".txt": "Notepad++",
-        ".fsasdad": "Notepad++"
+        ".fsasdad": "Notepad++",
+        ".ps1": "Notepad++"
     }
 }
