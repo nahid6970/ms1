@@ -43,6 +43,27 @@
       "bookmarks": []
     },
     {
+      "name": "db",
+      "path": "/home/nahid/@delta/db",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
+    },
+    {
       "name": "Terminal TUI",
       "path": "/home/nahid/@delta/ms1/TOOLS/terminal_tui",
       "pinned": false,
@@ -137,27 +158,6 @@
         "bgColor": "#161c26",
         "textColor": "#f1f5f9",
         "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": []
-    },
-    {
-      "name": "db",
-      "path": "/home/nahid/@delta/db",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#0b140f",
-        "foreground": "#c8d5ce",
-        "cursor": "#ea3a1f",
-        "borderColor": "#ffffff",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffffff",
-        "textColor": "#000000",
-        "pathColor": "#163055",
         "accentColor": "#2563eb"
       },
       "bookmarks": []
@@ -393,7 +393,7 @@
     {
       "name": "Shortcut Manager",
       "path": "/home/nahid/@delta/ms1/@AutoHotKey/shortcut_manager",
-      "category": "Tool - Autohotkey - AHK",
+      "category": "AHK",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -414,7 +414,7 @@
     {
       "name": "Button Generator",
       "path": "/home/nahid/@delta/ms1/@AutoHotKey/Button_Generator",
-      "category": "Tool - Autohotkey - AHK",
+      "category": "AHK",
       "pinned": false,
       "theme": {
         "background": "#000000",
