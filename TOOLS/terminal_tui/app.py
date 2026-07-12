@@ -3358,83 +3358,121 @@ def api_save_snippets():
 
 @app.route('/api/system/ports', methods=['GET'])
 def api_get_system_ports():
-    """Get active listening ports and their associated processes on Windows"""
+    """Get active listening ports and their associated processes on Windows and Linux"""
     cf = 0x08000000 if sys.platform == "win32" else 0
     try:
-        # Get active TCP listening connections
-        res_netstat = subprocess.run(
-            ["netstat", "-ano", "-p", "tcp"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
-        )
-        
-        # Get mapping of PID -> Process Name using tasklist
-        res_tasklist = subprocess.run(
-            ["tasklist", "/fo", "csv", "/nh"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
-        )
-        
-        # Parse tasklist into a pid_to_name map
-        pid_to_name = {}
-        for line in (res_tasklist.stdout or "").strip().split("\n"):
-            line = line.strip()
-            if not line:
-                continue
-            parts = [p.strip('"') for p in line.split('","')]
-            if len(parts) >= 2:
-                p_name, p_pid = parts[0], parts[1]
-                pid_to_name[p_pid] = p_name
-
-        # Parse netstat output
         ports_list = []
-        seen = set() # Avoid duplicate entries
-        
-        for line in (res_netstat.stdout or "").strip().split("\n"):
-            line = line.strip()
-            # We look for lines containing "LISTENING"
-            if "LISTENING" not in line:
-                continue
+        if sys.platform == "win32":
+            # Get active TCP listening connections
+            res_netstat = subprocess.run(
+                ["netstat", "-ano", "-p", "tcp"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
+            )
             
-            # e.g. TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1044
-            parts = re.split(r'\s+', line)
-            if len(parts) >= 5:
-                proto = parts[0]
-                local_addr = parts[1]
-                state = parts[3]
-                pid = parts[4]
-                
-                # Extract port from local address (handle IPv6 bracket notation [::]:port vs 0.0.0.0:port)
-                port = ""
-                if local_addr.startswith("["):
-                    # IPv6
-                    r_idx = local_addr.rfind(":")
-                    if r_idx != -1:
-                        port = local_addr[r_idx+1:]
-                else:
-                    # IPv4
-                    r_idx = local_addr.rfind(":")
-                    if r_idx != -1:
-                        port = local_addr[r_idx+1:]
-                
-                if not port:
+            # Get mapping of PID -> Process Name using tasklist
+            res_tasklist = subprocess.run(
+                ["tasklist", "/fo", "csv", "/nh"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
+            )
+            
+            # Parse tasklist into a pid_to_name map
+            pid_to_name = {}
+            for line in (res_tasklist.stdout or "").strip().split("\n"):
+                line = line.strip()
+                if not line:
                     continue
+                parts = [p.strip('"') for p in line.split('","')]
+                if len(parts) >= 2:
+                    p_name, p_pid = parts[0], parts[1]
+                    pid_to_name[p_pid] = p_name
+
+            # Parse netstat output
+            seen = set() # Avoid duplicate entries
+            for line in (res_netstat.stdout or "").strip().split("\n"):
+                line = line.strip()
+                # We look for lines containing "LISTENING"
+                if "LISTENING" not in line:
+                    continue
+                
+                # e.g. TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1044
+                parts = re.split(r'\s+', line)
+                if len(parts) >= 5:
+                    proto = parts[0]
+                    local_addr = parts[1]
+                    state = parts[3]
+                    pid = parts[4]
+                    
+                    # Extract port from local address
+                    port = ""
+                    if local_addr.startswith("["):
+                        r_idx = local_addr.rfind(":")
+                        if r_idx != -1:
+                            port = local_addr[r_idx+1:]
+                    else:
+                        r_idx = local_addr.rfind(":")
+                        if r_idx != -1:
+                            port = local_addr[r_idx+1:]
+                    
+                    if not port:
+                        continue
+                    
+                    key = (port, pid)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    
+                    proc_name = pid_to_name.get(pid, "Unknown")
+                    ports_list.append({
+                        "protocol": proto,
+                        "localAddress": local_addr,
+                        "port": int(port),
+                        "pid": pid,
+                        "processName": proc_name,
+                        "state": state
+                    })
+        else:
+            # Linux version using ss -tlnup
+            res = subprocess.run(
+                ["ss", "-tlnup"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, errors='replace', timeout=5
+            )
+            seen = set()
+            lines = (res.stdout or "").splitlines()
+            for line in lines[1:]:
+                parts = line.split()
+                if len(parts) < 5:
+                    continue
+                state = parts[1]
+                local_addr = parts[4]
+                r_idx = local_addr.rfind(":")
+                if r_idx == -1:
+                    continue
+                port = local_addr[r_idx+1:]
+                
+                proc_name = 'Unknown'
+                pid = '-'
+                if len(parts) >= 7:
+                    m = re.search(r'"([^"]+)",pid=(\d+)', parts[-1])
+                    if m:
+                        proc_name, pid = m.group(1), m.group(2)
                 
                 key = (port, pid)
                 if key in seen:
                     continue
                 seen.add(key)
                 
-                proc_name = pid_to_name.get(pid, "Unknown")
                 ports_list.append({
-                    "protocol": proto,
+                    "protocol": "TCP",
                     "localAddress": local_addr,
                     "port": int(port),
                     "pid": pid,
                     "processName": proc_name,
                     "state": state
                 })
-                
+
         # Sort ports by port number
         ports_list.sort(key=lambda x: x["port"])
         return jsonify({"ports": ports_list, "starred": load_starred_ports()})
