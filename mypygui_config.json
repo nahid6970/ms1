@@ -1004,6 +1004,52 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "left"
+        },
+        {
+            "text": "F",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "btn_1783875146",
+            "bindings": {
+                "Button-1": {
+                    "type": "bash",
+                    "hide": false,
+                    "admin": false,
+                    "in_terminal": true,
+                    "cmd": "flatpak remote-ls --app --columns=application,name | fzf --with-nth=2.. --preview 'flatpak search {1}' --layout=reverse --bind 'enter:execute(flatpak install -y {1})'"
+                },
+                "Button-3": {
+                    "type": "bash",
+                    "hide": false,
+                    "admin": false,
+                    "in_terminal": true,
+                    "cmd": "flatpak list --app --columns=application,name | fzf --with-nth=2.. --preview 'flatpak info {1}' --layout=reverse --bind 'enter:execute(flatpak uninstall -y {1})'"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "Adwaita Mono",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "buttons_right": [
