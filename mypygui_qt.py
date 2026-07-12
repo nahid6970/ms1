@@ -3,7 +3,7 @@
 
 import os
 import sys
-# Force X11/XCB backend on Linux to enable absolute positioning and docking
+# Force X11/XCB backend on Linux to enable absolute positioning and docking via XWayland
 if sys.platform.startswith('linux'):
     os.environ["QT_QPA_PLATFORM"] = "xcb"
 
@@ -272,6 +272,65 @@ def open_path(path):
             subprocess.Popen(['xdg-open', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception as e:
         logging.error(f"Failed to open path {path}: {e}")
+
+def set_x11_struts(win_id, height):
+    if os.name == 'nt' or QApplication.platformName() != "xcb":
+        return
+    try:
+        import ctypes
+        x11 = ctypes.cdll.LoadLibrary("libX11.so.6")
+        
+        x11.XOpenDisplay.restype = ctypes.c_void_p
+        x11.XOpenDisplay.argtypes = [ctypes.c_char_p]
+        display = x11.XOpenDisplay(None)
+        if not display:
+            return
+        
+        x11.XInternAtom.restype = ctypes.c_ulong
+        x11.XInternAtom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+        
+        atom_strut = x11.XInternAtom(display, b"_NET_WM_STRUT", 0)
+        atom_strut_partial = x11.XInternAtom(display, b"_NET_WM_STRUT_PARTIAL", 0)
+        atom_cardinal = x11.XInternAtom(display, b"CARDINAL", 0)
+        atom_type = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE", 0)
+        atom_atom = x11.XInternAtom(display, b"ATOM", 0)
+        
+        screen_geo = QApplication.primaryScreen().geometry()
+        sw = screen_geo.width()
+        
+        strut_data = (ctypes.c_long * 4)(0, 0, height, 0)
+        strut_partial_data = (ctypes.c_long * 12)(0, 0, height, 0, 0, 0, 0, 0, 0, sw - 1, 0, 0)
+        
+        x11.XChangeProperty.argtypes = [
+            ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong,
+            ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_int
+        ]
+        
+        # Set struts
+        x11.XChangeProperty(display, win_id, atom_strut, atom_cardinal, 32, 0, ctypes.byref(strut_data), 4)
+        x11.XChangeProperty(display, win_id, atom_strut_partial, atom_cardinal, 32, 0, ctypes.byref(strut_partial_data), 12)
+        
+        # Set window type to DOCK so Wayland compositors (like KWin) reserve space automatically
+        if height > 0:
+            atom_dock = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE_DOCK", 0)
+            type_data = (ctypes.c_ulong * 1)(atom_dock)
+            x11.XChangeProperty(display, win_id, atom_type, atom_atom, 32, 0, ctypes.byref(type_data), 1)
+        else:
+            atom_normal = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE_NORMAL", 0)
+            type_data = (ctypes.c_ulong * 1)(atom_normal)
+            x11.XChangeProperty(display, win_id, atom_type, atom_atom, 32, 0, ctypes.byref(type_data), 1)
+        
+        x11.XFlush.restype = ctypes.c_int
+        x11.XFlush.argtypes = [ctypes.c_void_p]
+        x11.XFlush(display)
+        
+        x11.XCloseDisplay.restype = ctypes.c_int
+        x11.XCloseDisplay.argtypes = [ctypes.c_void_p]
+        x11.XCloseDisplay(display)
+    except Exception as e:
+        print(f"Failed to set X11 struts: {e}")
+
+
 
 def run_in_terminal(command, cwd=None, title="Terminal"):
     if os.name == 'nt':
@@ -1857,6 +1916,9 @@ class StatusBar(QMainWindow):
         self._last_timer_mins = 0
         
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
+        if os.name != 'nt':
+            self.setWindowRole("panel")
         self._config = load_config()
         self._apply_geometry()
         border_frame = QFrame(); border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
@@ -1874,17 +1936,19 @@ class StatusBar(QMainWindow):
         sb = self._config.get("statusbar", {})
         is_docked = sb.get("docked", False)
         always_on_top = sb.get("always_on_top", True)
-        hwnd = int(self.winId())
-
         # Apply always-on-top flag
-        flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+        if is_docked:
+            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window
+        else:
+            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+            
         if always_on_top:
             flags |= Qt.WindowType.WindowStaysOnTopHint
-        if os.name != 'nt':
+        if os.name != 'nt' and not is_docked:
             flags |= Qt.WindowType.BypassWindowManagerHint
         self.setWindowFlags(flags)
-        self.show()  # setWindowFlags hides the window; re-show it
         
+        hwnd = int(self.winId())
         screen_geo = QApplication.primaryScreen().geometry()
         sw = screen_geo.width()
         
@@ -1895,8 +1959,14 @@ class StatusBar(QMainWindow):
             self.move(0, 0)
             register_appbar(hwnd)
             set_appbar_position(hwnd, w, h)
+            set_x11_struts(hwnd, h)
+            if self.windowHandle():
+                self.windowHandle().setProperty("kwin_strut_top", h)
         else:
             unregister_appbar(hwnd)
+            set_x11_struts(hwnd, 0)
+            if self.windowHandle():
+                self.windowHandle().setProperty("kwin_strut_top", 0)
             w, h = int(sb.get("width", 1920)), int(sb.get("height", 39))
             self.setFixedSize(w, h)
             x = sb.get("x", "center")
@@ -1904,9 +1974,16 @@ class StatusBar(QMainWindow):
             else: x = int(x)
             y = int(sb.get("y", 990))
             self.move(x, y)
+            
+        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
+        self.show()  # Now show the window after all geometry and hints are applied
+        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
 
     def closeEvent(self, event):
         unregister_appbar(int(self.winId()))
+        set_x11_struts(int(self.winId()), 0)
+        if self.windowHandle():
+            self.windowHandle().setProperty("kwin_strut_top", 0)
         super().closeEvent(event)
 
     def _build_left(self):
