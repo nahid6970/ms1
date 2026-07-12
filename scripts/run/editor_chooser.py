@@ -44,6 +44,15 @@ def load_config():
         ]
     }
 
+def save_config(config):
+    """Save editor configuration to JSON"""
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=4)
+    except Exception as e:
+        print(f"Error saving config: {e}")
+
+
 def open_with_editor(file_paths, editor):
     """Open file(s) with selected editor"""
     editor = editor.lower()
@@ -191,6 +200,14 @@ class EditorChooser(QWidget):
         super().__init__()
         self.file_paths = file_paths
         self.buttons = []
+        
+        self.set_default_mode = False
+        self.first_file = self.file_paths[0]
+        if os.path.isdir(self.first_file):
+            self.file_ext = "folder"
+        else:
+            self.file_ext = os.path.splitext(self.first_file)[1].lower()
+
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
@@ -200,6 +217,8 @@ class EditorChooser(QWidget):
         # Focus the first button by default
         if self.buttons:
             self.buttons[0].setFocus()
+
+
         
     def init_ui(self):
         # Main Border Frame
@@ -319,9 +338,24 @@ class EditorChooser(QWidget):
         
         layout.addLayout(viewers_grid)
         
+        # Default and Status Layout
+        bottom_layout = QHBoxLayout()
+        self.default_status_label = QLabel()
+        self.update_default_status_label()
+        bottom_layout.addWidget(self.default_status_label)
+        
+        bottom_layout.addStretch()
+        
+        self.toggle_default_btn = CyberButton("SET DEFAULT: OFF", CP_DIM, hover_bg=CP_BG, hover_text=CP_YELLOW)
+        self.toggle_default_btn.setFixedWidth(180)
+        self.toggle_default_btn.clicked.connect(self.toggle_default_mode)
+        bottom_layout.addWidget(self.toggle_default_btn)
+        
+        layout.addLayout(bottom_layout)
+        
         # Status Bar
-        layout.addStretch()
-        status_label = QLabel("SYSTEM READY...")
+        layout.addSpacing(10)
+        status_label = QLabel("SYSTEM READY... (HOLD SHIFT TO BYPASS AUTO-DEFAULT)")
         status_label.setStyleSheet(f"color: {CP_DIM}; font-size: 8pt;")
         layout.addWidget(status_label)
         
@@ -329,6 +363,7 @@ class EditorChooser(QWidget):
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
         outer_layout.addWidget(self.main_frame)
+
         
     def center_window(self):
         self.adjustSize()
@@ -337,13 +372,58 @@ class EditorChooser(QWidget):
         y = (screen.height() - self.height()) // 2
         self.move(x, y)
         
+    def update_default_status_label(self):
+        config = load_config()
+        defaults = config.get("defaults", {})
+        current = defaults.get(self.file_ext, "None")
+        self.default_status_label.setText(f"Default for {self.file_ext}: {current}")
+        self.default_status_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+
+    def toggle_default_mode(self):
+        self.set_default_mode = not self.set_default_mode
+        if self.set_default_mode:
+            self.toggle_default_btn.setText("SET DEFAULT: ON")
+            self.toggle_default_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_YELLOW};
+                    color: {CP_BG};
+                    border: 1px solid {CP_YELLOW};
+                    padding: 10px;
+                    font-family: 'Consolas';
+                    font-weight: bold;
+                    font-size: 11pt;
+                    border-radius: 0px;
+                }}
+            """)
+        else:
+            self.toggle_default_btn.setText("SET DEFAULT: OFF")
+            self.toggle_default_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_BG};
+                    color: {CP_TEXT};
+                    border: 1px solid {CP_DIM};
+                    padding: 10px;
+                    font-family: 'Consolas';
+                    font-weight: bold;
+                    font-size: 11pt;
+                    border-radius: 0px;
+                }}
+            """)
+
     def handle_action(self, editor_name):
+        if self.set_default_mode:
+            config = load_config()
+            if "defaults" not in config:
+                config["defaults"] = {}
+            config["defaults"][self.file_ext] = editor_name
+            save_config(config)
         open_with_editor(self.file_paths, editor_name)
         self.close()
         
     def restart_script(self):
         """Restart the current script"""
         os.execl(sys.executable, sys.executable, *sys.argv)
+
 
     def keyPressEvent(self, event):
         current_widget = self.focusWidget()
@@ -413,10 +493,28 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1:
         file_paths = sys.argv[1:]
+        
+        # Check if Shift is held down to bypass default behavior
+        import ctypes
+        is_shift_down = (ctypes.windll.user32.GetKeyState(0x10) & 0x8000) != 0
+        
+        first_file = file_paths[0]
+        if os.path.isdir(first_file):
+            file_ext = "folder"
+        else:
+            file_ext = os.path.splitext(first_file)[1].lower()
+            
+        config = load_config()
+        defaults = config.get("defaults", {})
+        
+        if file_ext and file_ext in defaults and not is_shift_down:
+            open_with_editor(file_paths, defaults[file_ext])
+            sys.exit(0)
+            
         window = EditorChooser(file_paths)
         window.show()
         window.activateWindow()
         window.raise_()
         sys.exit(app.exec())
     else:
-        print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
+        print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
