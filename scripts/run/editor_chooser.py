@@ -378,53 +378,13 @@ class EditorChooser(QWidget):
         self.move(x, y)
         
     def update_default_status_label(self):
-        import winreg
-        current = "None"
-        try:
-            # Query the user classes association
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{self.file_ext}") as key:
-                prog_id = winreg.QueryValue(key, "")
-                if prog_id:
-                    if prog_id.startswith("EditorChooser.Assoc."):
-                        current = prog_id.replace("EditorChooser.Assoc.", "").upper()
-                    else:
-                        current = prog_id
-        except Exception:
-            try:
-                # Query the system association
-                with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, self.file_ext) as key:
-                    prog_id = winreg.QueryValue(key, "")
-                    if prog_id:
-                        current = prog_id
-            except Exception:
-                pass
-        
-        self.default_status_label.setText(f"System Default: {current}")
-        self.default_status_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
-        
-        # Reset toggle state
-        self.set_default_mode = False
-        self.toggle_default_btn.setText("[ ] DEFAULT")
-        self.toggle_default_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: transparent;
-                color: {CP_DIM};
-                border: 1px solid {CP_DIM};
-                font-family: 'Consolas';
-                font-weight: bold;
-                font-size: 8pt;
-                padding: 4px;
-            }}
-            QPushButton:hover {{
-                border-color: {CP_YELLOW};
-                color: {CP_YELLOW};
-            }}
-        """)
-
-    def toggle_default_mode(self):
-        self.set_default_mode = not self.set_default_mode
-        if self.set_default_mode:
+        config = load_config()
+        defaults = config.get("defaults", {})
+        current = defaults.get(self.file_ext, None)
+        if current:
+            self.default_status_label.setText(f"Default: {current.upper()}")
             self.toggle_default_btn.setText("[X] DEFAULT")
+            self.set_default_mode = True
             self.toggle_default_btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: transparent;
@@ -437,92 +397,126 @@ class EditorChooser(QWidget):
                 }}
             """)
         else:
+            self.default_status_label.setText("Default: None")
+            self.toggle_default_btn.setText("[ ] DEFAULT")
+            self.set_default_mode = False
+            self.toggle_default_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: transparent;
+                    color: {CP_DIM};
+                    border: 1px solid {CP_DIM};
+                    font-family: 'Consolas';
+                    font-weight: bold;
+                    font-size: 8pt;
+                    padding: 4px;
+                }}
+                QPushButton:hover {{
+                    border-color: {CP_YELLOW};
+                    color: {CP_YELLOW};
+                }}
+            """)
+
+    def toggle_default_mode(self):
+        self.set_default_mode = not self.set_default_mode
+        if not self.set_default_mode:
             # Clear default
-            import winreg
-            import ctypes
-            try:
-                # Set HKCU\Software\Classes\.ext value to empty or delete it
-                winreg.DeleteKey(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{self.file_ext}")
-            except Exception:
-                pass
-            try:
-                SHCNE_ASSOCCHANGED = 0x08000000
-                SHCNF_IDLIST = 0
-                ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
-            except Exception:
-                pass
-                
+            config = load_config()
+            if "defaults" in config and self.file_ext in config["defaults"]:
+                del config["defaults"][self.file_ext]
+                save_config(config)
             self.update_default_status_label()
+        else:
+            self.toggle_default_btn.setText("[X] DEFAULT")
+            self.toggle_default_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: transparent;
+                    color: {CP_YELLOW};
+                    border: 1px solid {CP_YELLOW};
+                    font-family: 'Consolas';
+                    font-weight: bold;
+                    font-size: 8pt;
+                    padding: 4px;
+                }}
+            """)
+
 
 
 
     def set_windows_default_association(self, ext, editor_name):
-        """Set global Windows default association for the extension"""
+        """Set custom ProgID for the extension, mapping to our chooser script but using the editor's icon"""
         import winreg
         import ctypes
         editor = editor_name.lower()
-        cmd_str = None
         
-        if editor == "nvim":
-            cmd_str = 'cmd.exe /c start cmd /k nvim -p "%1"'
-        elif editor == "edit":
-            cmd_str = 'cmd.exe /c start cmd /k edit "%1"'
-        elif editor == "notepad++":
-            npp_path = "notepad++"
+        # Determine the editor's executable path for the icon
+        exe_path = None
+        if editor == "notepad++":
             possible_paths = [
                 os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Notepad++", "notepad++.exe"),
                 os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Notepad++", "notepad++.exe")
             ]
             for p in possible_paths:
                 if os.path.exists(p):
-                    npp_path = p
+                    exe_path = p
                     break
-            cmd_str = f'"{npp_path}" "%1"'
-        elif editor == "notepads":
-            cmd_str = 'cmd.exe /c notepads "%1"'
         elif editor == "vscode":
-            cmd_str = 'cmd.exe /c code "%1"'
+            local_app_data = os.environ.get("LocalAppData", "")
+            possible_paths = [
+                os.path.join(local_app_data, "Programs", "Microsoft VS Code", "Code.exe")
+            ]
+            for p in possible_paths:
+                if os.path.exists(p):
+                    exe_path = p
+                    break
         elif editor == "zed":
-            cmd_str = 'cmd.exe /c zed "%1"'
-        elif editor == "antigravity":
-            cmd_str = 'cmd.exe /c antigravity "%1"'
-        elif editor == "chrome":
-            cmd_str = 'cmd.exe /c start chrome "%1"'
-        elif editor == "photos":
-            cmd_str = 'cmd.exe /c start ms-photos:viewer?fileName="%1"'
-        elif editor == "cyber_editor":
-            cyber_path = r"C:\@delta\ms1\TOOLS\Editor\cyber_editor.py"
-            cmd_str = f'pythonw.exe "{cyber_path}" "%1"'
-        elif editor == "emacs":
-            cmd_str = 'cmd.exe /c runemacs "%1"'
-            
-        if not cmd_str:
-            return False
+            # Typical Zed installation paths
+            local_app_data = os.environ.get("LocalAppData", "")
+            possible_paths = [
+                os.path.join(local_app_data, "Programs", "zed", "Zed.exe"),
+                os.path.join(local_app_data, "zed", "Zed.exe")
+            ]
+            for p in possible_paths:
+                if os.path.exists(p):
+                    exe_path = p
+                    break
+                    
+        # Fallback to pythonw.exe if no editor exe path found
+        if not exe_path:
+            exe_path = sys.executable
             
         try:
-            prog_id = f"EditorChooser.Assoc.{editor}"
+            clean_ext = ext.replace(".", "")
+            prog_id = f"EditorChooser.{clean_ext}"
             
-            # 1. Register ProgID open command in Classes
-            key_path = f"Software\\Classes\\{prog_id}\\shell\\open\\command"
-            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+            # 1. Register our custom ProgID
+            prog_key = f"Software\\Classes\\{prog_id}"
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, prog_key) as key:
+                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, f"EditorChooser {clean_ext.upper()} Handler")
+                
+            # 2. Set DefaultIcon to match the chosen editor's executable
+            icon_key = f"Software\\Classes\\{prog_id}\\DefaultIcon"
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, icon_key) as key:
+                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, f'"{exe_path}",0')
+                
+            # 3. Set the open command to run this script
+            script_path = os.path.abspath(__file__)
+            pythonw_path = sys.executable.lower().replace("python.exe", "pythonw.exe")
+            cmd_str = f'"{pythonw_path}" "{script_path}" "%1"'
+            cmd_key = f"Software\\Classes\\{prog_id}\\shell\\open\\command"
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, cmd_key) as key:
                 winreg.SetValueEx(key, "", 0, winreg.REG_SZ, cmd_str)
                 
-            # 2. Register ProgID friendly name
-            prog_key_path = f"Software\\Classes\\{prog_id}"
-            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, prog_key_path) as key:
-                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, f"EditorChooser {editor_name}")
-                
-            # 3. Associate extension with ProgID in Classes
-            ext_key_path = f"Software\\Classes\\{ext}"
-            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, ext_key_path) as key:
+            # 4. Associate the file extension with our ProgID
+            ext_key = f"Software\\Classes\\{ext}"
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, ext_key) as key:
                 winreg.SetValueEx(key, "", 0, winreg.REG_SZ, prog_id)
                 
-            # 4. Add to Explorer FileExts OpenWithProgids to make it prompt/suggest
+            # 5. Add to Explorer's OpenWithProgids
             openwith_path = f"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\{ext}\\OpenWithProgids"
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, openwith_path) as key:
                 winreg.SetValueEx(key, prog_id, 0, winreg.REG_NONE, b"")
                 
-            # 5. Notify shell of change
+            # 6. Notify the shell to refresh icons and associations
             SHCNE_ASSOCCHANGED = 0x08000000
             SHCNF_IDLIST = 0
             ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
@@ -533,10 +527,10 @@ class EditorChooser(QWidget):
 
     def handle_action(self, editor_name):
         if self.set_default_mode:
-            # Set global Windows Registry association
+            # Set custom ProgID association in registry to get the editor's icon
             self.set_windows_default_association(self.file_ext, editor_name)
             
-            # Also keep local reference in JSON config
+            # Keep local reference in JSON config
             config = load_config()
             if "defaults" not in config:
                 config["defaults"] = {}
@@ -550,6 +544,7 @@ class EditorChooser(QWidget):
     def restart_script(self):
         """Restart the current script"""
         os.execl(sys.executable, sys.executable, *sys.argv)
+
 
 
     def keyPressEvent(self, event):
@@ -620,6 +615,27 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1:
         file_paths = sys.argv[1:]
+        
+        # Check if we should force-show the chooser UI (e.g. from AHK shortcut)
+        force_chooser = False
+        if "--chooser" in file_paths:
+            force_chooser = True
+            file_paths.remove("--chooser")
+            
+        first_file = file_paths[0]
+        if os.path.isdir(first_file):
+            file_ext = "folder"
+        else:
+            file_ext = os.path.splitext(first_file)[1].lower()
+            
+        config = load_config()
+        defaults = config.get("defaults", {})
+        
+        # If there is a default set and we are not forcing the chooser, open it directly!
+        if file_ext and file_ext in defaults and not force_chooser:
+            open_with_editor(file_paths, defaults[file_ext])
+            sys.exit(0)
+            
         window = EditorChooser(file_paths)
         window.show()
         window.activateWindow()
@@ -627,4 +643,5 @@ if __name__ == "__main__":
         sys.exit(app.exec())
     else:
         print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
+
 
