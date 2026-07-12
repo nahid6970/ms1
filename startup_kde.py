@@ -4,8 +4,6 @@ import os
 import json
 import subprocess
 import time
-import urllib.request
-import difflib
 import shlex
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
@@ -17,14 +15,11 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 from PyQt6.QtSvg import QSvgRenderer
 
 # Constants
-CONFIG_DIR = os.path.expanduser("~/.config/startup_manager")
-JSON_FILE = os.path.join(CONFIG_DIR, "startup_items.json")
-SETTINGS_FILE = os.path.join(CONFIG_DIR, "settings.json")
-DEFAULT_SH = os.path.join(CONFIG_DIR, "startup.sh")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_FILE = os.path.join(SCRIPT_DIR, "startup_items.json")
+SETTINGS_FILE = os.path.join(SCRIPT_DIR, "settings.json")
+DEFAULT_SH = os.path.join(SCRIPT_DIR, "startup.sh")
 AUTOSTART_DIR = os.path.expanduser("~/.config/autostart")
-
-CONVEX_URL = "https://different-gnat-734.convex.cloud"
-SCRIPT_NAME = "startup_manager_linux"
 
 # Cyberpunk Palette
 CP_BG = "#050505"           # Main Background (almost black)
@@ -46,12 +41,7 @@ SVGS = {
     "KEY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M21 2l-9.6 9.6"></path><path d="M15.5 7.5l2 2 3.5-3.5"></path></svg>',
     "CLOCK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
     "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
-    "CLOUD_UP": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l-4-4-4 4M12 12v9"></path><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>',
-    "CLOUD_DOWN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 17l4 4 4-4M12 12v9"></path><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>',
-    "UPLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
-    "DOWNLOAD": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
-    "LAYERS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
-    "DIFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>'
+    "LAYERS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -505,275 +495,6 @@ class ScanResultsDialog(QDialog):
             visible = text in item['name'].lower() or text in path_val.lower()
             cb.setVisible(visible)
 
-class DiffDialog(QDialog):
-    def __init__(self, local_data, remote_data, title="SYSTEM // DIFF_VIEW", parent=None):
-        super().__init__(parent)
-        self.setWindowTitle(title)
-        self.resize(900, 700)
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}")
-        
-        layout = QVBoxLayout(self)
-        
-        header = QLabel("COMPARISON: REMOTE (RED) vs LOCAL (GREEN)")
-        header.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
-        header.setStyleSheet(f"color: {CP_YELLOW}; padding: 5px;")
-        layout.addWidget(header)
-
-        self.scroll = QScrollArea()
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet(f"""
-            QScrollArea {{ border: 1px solid {CP_DIM}; background-color: {CP_PANEL}; }}
-            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; }}
-        """)
-        
-        content = QWidget()
-        content.setStyleSheet(f"background-color: {CP_PANEL};")
-        vbox = QVBoxLayout(content)
-        vbox.setSpacing(0)
-        vbox.setContentsMargins(5, 5, 5, 5)
-
-        def fix(obj):
-            if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
-            if isinstance(obj, list): return [fix(i) for i in obj]
-            if isinstance(obj, float) and obj.is_integer(): return int(obj)
-            return obj
-
-        local_str = json.dumps(fix(local_data), indent=2, sort_keys=True).splitlines()
-        remote_str = json.dumps(fix(remote_data), indent=2, sort_keys=True).splitlines()
-        
-        diff = list(difflib.unified_diff(remote_str, local_str, fromfile='Backup', tofile='Local', lineterm=''))
-        
-        if not diff:
-            lbl = QLabel("No differences detected.")
-            lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: 'Consolas'; padding: 10px;")
-            vbox.addWidget(lbl)
-        else:
-            for line in diff:
-                lbl = QLabel(line)
-                lbl.setFont(QFont("Consolas", 9))
-                if line.startswith('+'):
-                    lbl.setStyleSheet("background-color: #12261e; color: #3fb950; padding: 1px 4px;")
-                elif line.startswith('-'):
-                    lbl.setStyleSheet("background-color: #2c1619; color: #f85149; padding: 1px 4px;")
-                elif line.startswith('@@'):
-                    lbl.setStyleSheet(f"background-color: #0d1117; color: {CP_CYAN}; padding: 1px 4px;")
-                else:
-                    lbl.setStyleSheet(f"color: {CP_TEXT}; padding: 1px 4px;")
-                vbox.addWidget(lbl)
-        
-        vbox.addStretch()
-        self.scroll.setWidget(content)
-        layout.addWidget(self.scroll)
-        
-        close = CyberButton("CLOSE PROTOCOL", color=CP_DIM, is_outlined=True)
-        close.clicked.connect(self.accept)
-        layout.addWidget(close)
-
-class ConvexLabelDialog(QDialog):
-    def __init__(self, parent=None, convex_call_fn=None, config_data=None):
-        super().__init__(parent)
-        self.setWindowTitle("BACKUP LABEL")
-        self.setFixedWidth(420)
-        self._convex_call = convex_call_fn
-        self._config_data = config_data or []
-        self._remote_data = None
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }} QLabel {{ color: {CP_TEXT}; }} QLineEdit {{ background: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 5px; font-family: Consolas; }}")
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Enter a label for this backup:"))
-        self.inp = QLineEdit()
-        self.inp.setPlaceholderText("e.g. before v2 update")
-        layout.addWidget(self.inp)
-
-        self.status_lbl = QLabel("")
-        self.status_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_lbl.setStyleSheet("font-family: Consolas; font-size: 9pt; padding: 4px;")
-        layout.addWidget(self.status_lbl)
-
-        btns = QHBoxLayout()
-        ok = CyberButton("BACKUP", color=CP_CYAN)
-        ok.clicked.connect(self.accept)
-        self.check_btn = CyberButton("CHECK", color=CP_YELLOW, is_outlined=True)
-        self.check_btn.clicked.connect(self._check_sync)
-        
-        self.diff_btn = CyberButton("SHOW DIFF", color=CP_YELLOW, is_outlined=True)
-        self.diff_btn.clicked.connect(self._show_diff)
-        self.diff_btn.hide()
-
-        cancel = CyberButton("CANCEL", color=CP_DIM, is_outlined=True)
-        cancel.clicked.connect(self.reject)
-        
-        btns.addWidget(ok); btns.addWidget(self.check_btn); btns.addWidget(self.diff_btn); btns.addWidget(cancel)
-        layout.addLayout(btns)
-
-    def _show_diff(self):
-        if self._remote_data is not None:
-            DiffDialog(self._config_data, self._remote_data, parent=self).exec()
-
-    def _check_sync(self):
-        if not self._convex_call:
-            self.status_lbl.setText("No connection available.")
-            return
-        try:
-            self.check_btn.setEnabled(False)
-            self.status_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: Consolas; font-size: 9pt; padding: 4px;")
-            self.status_lbl.setText("Checking...")
-            QApplication.processEvents()
-            result = self._convex_call("query", {"path": "functions:list", "args": {"scriptName": SCRIPT_NAME}})
-            backups = result.get("value", [])
-            if not backups:
-                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
-                self.status_lbl.setText("⚠ No backups found — backup recommended!")
-                return
-            latest = max(backups, key=lambda b: b["createdAt"])
-            remote_raw = self._convex_call("query", {"path": "functions:get", "args": {"id": latest["id"]}}).get("value", [])
-            
-            def fix(obj):
-                if isinstance(obj, dict): return {k: fix(v) for k, v in obj.items()}
-                if isinstance(obj, list): return [fix(i) for i in obj]
-                if isinstance(obj, float) and obj.is_integer(): return int(obj)
-                return obj
-            
-            self._remote_data = fix(remote_raw)
-            dirty = json.dumps(self._config_data, sort_keys=True) != json.dumps(self._remote_data, sort_keys=True)
-            
-            if dirty:
-                self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
-                self.status_lbl.setText(f"⚠ OUT OF SYNC with '{latest['label']}' — backup recommended!")
-                self.diff_btn.show()
-            else:
-                self.status_lbl.setStyleSheet(f"color: {CP_GREEN}; font-family: Consolas; font-size: 9pt; padding: 4px;")
-                self.status_lbl.setText(f"✔ In sync with '{latest['label']}' — no backup needed.")
-                self.diff_btn.hide()
-        except Exception as e:
-            self.status_lbl.setStyleSheet(f"color: {CP_RED}; font-family: Consolas; font-size: 9pt; padding: 4px;")
-            self.status_lbl.setText(f"Error: {e}")
-        finally:
-            self.check_btn.setEnabled(True)
-
-    @staticmethod
-    def get_label(parent=None, convex_call_fn=None, config_data=None):
-        dlg = ConvexLabelDialog(parent, convex_call_fn=convex_call_fn, config_data=config_data)
-        ok = dlg.exec() == QDialog.DialogCode.Accepted
-        return dlg.inp.text(), ok
-
-class RestoreDialog(QDialog):
-    def __init__(self, backups, convex_call_fn, local_data=None, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("RESTORE FROM BACKUP")
-        self.setFixedWidth(550)
-        self.selected_id = None
-        self._convex_call = convex_call_fn
-        self._backups = list(backups)
-        self._local_data = local_data
-        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_YELLOW}; }} QLabel {{ color: {CP_TEXT}; }} QPushButton {{ background: {CP_DIM}; color: white; padding: 6px 14px; border: 1px solid {CP_DIM}; }} QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}")
-        self._layout = QVBoxLayout(self)
-        self._layout.addWidget(QLabel("Select a backup to restore:"))
-        
-        self.search_input = CyberInput("FILTER_BACKUPS://...", self)
-        self.search_input.textChanged.connect(self.filter_backups)
-        self._layout.addWidget(self.search_input)
-
-        self._scroll = QScrollArea()
-        self._scroll.setWidgetResizable(True)
-        self._scroll.setStyleSheet("background: transparent; border: 1px solid #3a3a3a;")
-        self._scroll.setFixedHeight(300)
-        self._layout.addWidget(self._scroll)
-        cancel = QPushButton("CANCEL")
-        cancel.clicked.connect(self.reject)
-        self._layout.addWidget(cancel)
-        self._rows = []
-        self._render_list()
-
-    def _render_list(self):
-        import datetime
-        inner = QWidget()
-        inner.setStyleSheet(f"background: {CP_PANEL};")
-        vbox = QVBoxLayout(inner)
-        vbox.setSpacing(4)
-        vbox.setContentsMargins(4, 4, 4, 4)
-        self._rows.clear()
-        for b in self._backups:
-            dt = datetime.datetime.fromtimestamp(b["createdAt"] / 1000).strftime("%Y-%m-%d %I:%M %p")
-            
-            row_widget = QWidget()
-            row = QHBoxLayout(row_widget)
-            row.setSpacing(4)
-            row.setContentsMargins(0, 0, 0, 0)
-
-            btn = QPushButton(f"  {dt}  ->  {b['label']}")
-            btn.setStyleSheet(f"text-align: left; padding: 8px; background: {CP_BG}; color: {CP_TEXT}; border: 1px solid #2a2a2a; font-family: 'Consolas'; font-size: 10pt; font-weight: bold;")
-            btn.clicked.connect(lambda checked, bid=b["id"]: self._select(bid))
-
-            diff_btn = QPushButton()
-            diff_btn.setFixedSize(32, 32)
-            diff_btn.setToolTip("Compare with local config")
-            diff_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
-
-            renderer_diff = QSvgRenderer(QByteArray(SVGS["DIFF"].replace('currentColor', CP_YELLOW).encode()))
-            pix_diff = QPixmap(22, 22)
-            pix_diff.fill(Qt.GlobalColor.transparent)
-            painter_diff = QPainter(pix_diff)
-            renderer_diff.render(painter_diff)
-            painter_diff.end()
-            diff_btn.setIcon(QIcon(pix_diff))
-            diff_btn.clicked.connect(lambda checked, bid=b["id"]: self._diff(bid))
-
-            del_btn = QPushButton()
-            del_btn.setFixedSize(32, 32)
-            del_btn.setToolTip("Delete this backup")
-            del_btn.setStyleSheet("background: transparent; border: 1px solid #2a2a2a; padding: 3px;")
-
-            renderer = QSvgRenderer(QByteArray(SVGS["TRASH"].replace('currentColor', CP_RED).encode()))
-            pix = QPixmap(22, 22)
-            pix.fill(Qt.GlobalColor.transparent)
-            painter = QPainter(pix)
-            renderer.render(painter)
-            painter.end()
-            del_btn.setIcon(QIcon(pix))
-            del_btn.clicked.connect(lambda checked, bid=b["id"]: self._delete(bid))
-
-            row.addWidget(btn)
-            row.addWidget(diff_btn)
-            row.addWidget(del_btn)
-            vbox.addWidget(row_widget)
-            self._rows.append((row_widget, b, dt))
-        vbox.addStretch()
-        self._scroll.setWidget(inner)
-
-    def filter_backups(self, text):
-        text = text.lower()
-        for widget, b, dt in self._rows:
-            visible = text in b['label'].lower() or text in dt.lower()
-            widget.setVisible(visible)
-
-    def _select(self, bid):
-        self.selected_id = bid
-        self.accept()
-
-    def _diff(self, backup_id):
-        try:
-            data = self._convex_call("query", {
-                "path": "functions:get",
-                "args": {"id": backup_id}
-            }).get("value")
-            if data:
-                DiffDialog(self._local_data, data, parent=self).exec()
-        except Exception as e:
-            QMessageBox.critical(self, "DIFF FAILED", str(e))
-
-    def _delete(self, backup_id):
-        if QMessageBox.question(self, "DELETE BACKUP", "Permanently delete this backup?") == QMessageBox.StandardButton.Yes:
-            try:
-                self._convex_call("mutation", {
-                    "path": "functions:deleteBackup",
-                    "args": {"id": backup_id}
-                })
-                self._backups = [b for b in self._backups if b["id"] != backup_id]
-                self._render_list()
-            except Exception as e:
-                QMessageBox.critical(self, "DELETE FAILED", str(e))
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -782,13 +503,11 @@ class MainWindow(QMainWindow):
         self.items = []
         self.widgets_map = {}
         
-        # Default modes and paths
         self.current_mode = "AUTOSTART" # "AUTOSTART" or "SCRIPT"
         self.sh_file_path = DEFAULT_SH
         self.sort_by = "Name"
         self.sort_order = "ASC"
         
-        os.makedirs(CONFIG_DIR, exist_ok=True)
         os.makedirs(AUTOSTART_DIR, exist_ok=True)
         
         self.load_items()
@@ -797,13 +516,11 @@ class MainWindow(QMainWindow):
         self.update_status("SYSTEM ONLINE")
 
     def setup_ui(self):
-        # Palette setup
         palette = QPalette()
         palette.setColor(QPalette.ColorRole.Window, QColor(CP_BG))
         palette.setColor(QPalette.ColorRole.WindowText, QColor(CP_TEXT))
         self.setPalette(palette)
         
-        # Central widget
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
@@ -816,17 +533,6 @@ class MainWindow(QMainWindow):
         self.title_lbl.setFont(QFont("Consolas", 14, QFont.Weight.Bold))
         self.title_lbl.setStyleSheet(f"color: {CP_YELLOW}; letter-spacing: 2px;")
         header_layout.addWidget(self.title_lbl)
-        
-        header_layout.addStretch()
-        
-        # Backup / Restore / Sync
-        backup_btn = CyberButton("BACKUP", color=CP_CYAN, is_outlined=True, svg_data=SVGS["CLOUD_UP"])
-        backup_btn.clicked.connect(self.backup_to_convex)
-        restore_btn = CyberButton("RESTORE", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["CLOUD_DOWN"])
-        restore_btn.clicked.connect(self.restore_from_convex)
-        header_layout.addWidget(backup_btn)
-        header_layout.addWidget(restore_btn)
-        
         main_layout.addLayout(header_layout)
 
         # Toolbar
@@ -843,7 +549,6 @@ class MainWindow(QMainWindow):
         add_btn.clicked.connect(self.add_item)
         row1_layout.addWidget(add_btn)
 
-        # Scan button menu
         scan_btn = CyberButton("SCAN SYSTEM", color=CP_CYAN, is_outlined=True, svg_data=SVGS["REFRESH"])
         scan_menu = QMenu(self)
         scan_menu.setFont(QFont("Consolas", 9))
@@ -860,7 +565,6 @@ class MainWindow(QMainWindow):
         scan_btn.setMenu(scan_menu)
         row1_layout.addWidget(scan_btn)
 
-        # Folder sync menu
         folder_btn = CyberButton("SYSTEM DIRS", color=CP_CYAN, is_outlined=True, svg_data=SVGS["FOLDER"])
         folder_menu = QMenu(self)
         folder_menu.setFont(QFont("Consolas", 9))
@@ -879,7 +583,6 @@ class MainWindow(QMainWindow):
 
         row1_layout.addStretch()
 
-        # Mode toggle
         mode_label = QLabel("MODE:")
         mode_label.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
         mode_label.setStyleSheet(f"color: {CP_SUBTEXT};")
@@ -889,7 +592,6 @@ class MainWindow(QMainWindow):
         self.mode_btn.clicked.connect(self.toggle_mode)
         row1_layout.addWidget(self.mode_btn)
 
-        # Script actions (visible in SCRIPT mode)
         self.script_actions_widget = QWidget()
         script_act_layout = QHBoxLayout(self.script_actions_widget)
         script_act_layout.setContentsMargins(0, 0, 0, 0)
@@ -939,7 +641,6 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(toolbar_container)
 
-        # Splitter for list views
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(2)
         splitter.setStyleSheet(f"""
@@ -952,7 +653,6 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(splitter, stretch=1)
 
-        # Footer Status bar
         self.status_label = QLabel("SYSTEM READY")
         self.status_label.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
         self.status_label.setStyleSheet(f"color: {CP_CYAN}; padding: 5px; border-top: 1px solid {CP_DIM};")
@@ -1126,7 +826,6 @@ class MainWindow(QMainWindow):
         self.filter_items(self.search_input.text())
 
     def check_autostart_active(self, item):
-        # Active if a desktop entry file exists and does NOT contain Hidden=true
         filename = f"{item['name'].lower().replace(' ', '_')}.desktop"
         path = os.path.join(AUTOSTART_DIR, filename)
         if os.path.exists(path):
@@ -1146,7 +845,6 @@ class MainWindow(QMainWindow):
             path = os.path.join(AUTOSTART_DIR, filename)
             try:
                 if should_enable:
-                    # Write .desktop file
                     exec_cmd = item.get("sh_command", "")
                     if not exec_cmd and item.get("paths"):
                         exec_cmd = item["paths"][0]
@@ -1166,9 +864,7 @@ X-KDE-AutostartScript=true
                     with open(path, 'w', encoding='utf-8') as f:
                         f.write(content)
                 else:
-                    # Disable it
                     if os.path.exists(path):
-                        # Simply delete it or set Hidden=true
                         os.remove(path)
                 
                 self.widgets_map[item["name"]].set_active(should_enable)
@@ -1176,7 +872,6 @@ X-KDE-AutostartScript=true
             except Exception as e:
                 self.update_status(f"AUTOSTART ERROR: {str(e)}")
         else:
-            # SCRIPT MODE
             item["script_enabled"] = should_enable 
             self.save_items()
             self.generate_sh()
@@ -1214,7 +909,6 @@ X-KDE-AutostartScript=true
                 f.write(content)
             os.chmod(self.sh_file_path, 0o755)
 
-            # Ensure script itself starts up via .desktop file
             script_desktop = os.path.join(AUTOSTART_DIR, "startup_manager_script.desktop")
             if enabled_count > 0:
                 with open(script_desktop, 'w', encoding='utf-8') as f:
@@ -1303,7 +997,6 @@ X-KDE-AutostartScript=true
             self.update_status("AUTOSTART DIRECTORY OPENED")
 
     def open_kde_settings(self):
-        # Open KDE autostart system settings panel if possible
         try:
             subprocess.Popen(["kcmshell6", "kcm_autostart"])
         except:
@@ -1331,7 +1024,6 @@ X-KDE-AutostartScript=true
                 if f.endswith(".desktop"):
                     filepath = os.path.join(d, f)
                     try:
-                        # Simple desktop file parser
                         with open(filepath, 'r', encoding='utf-8', errors='ignore') as file_obj:
                             lines = file_obj.readlines()
                         
@@ -1393,7 +1085,6 @@ X-KDE-AutostartScript=true
         found_items = []
         names = {i["name"].lower() for i in self.items}
 
-        # Check systemd user and system services
         commands = [
             ("systemctl --user list-unit-files --type=service --no-legend", "User"),
             ("systemctl list-unit-files --type=service --no-legend", "System")
@@ -1409,11 +1100,9 @@ X-KDE-AutostartScript=true
                             unit_name = parts[0]
                             state = parts[1]
                             
-                            # Only suggest if enabled or user might want to control it
                             if state == "enabled":
                                 if unit_name.lower() in names: continue
                                 
-                                # Command to manage this service
                                 sh_cmd = f"systemctl {'--user' if scope == 'User' else ''} start {unit_name}"
                                 
                                 found_items.append({
@@ -1451,60 +1140,6 @@ X-KDE-AutostartScript=true
     def update_status(self, text):
         self.status_label.setText(text)
         QTimer.singleShot(3000, lambda: self.status_label.setText("SYSTEM READY"))
-
-    def _fix_floats(self, obj):
-        if isinstance(obj, dict):
-            return {k: self._fix_floats(v) for k, v in obj.items()}
-        if isinstance(obj, list):
-            return [self._fix_floats(i) for i in obj]
-        if isinstance(obj, float) and obj.is_integer():
-            return int(obj)
-        return obj
-
-    def _convex_call(self, endpoint, payload):
-        url = f"{CONVEX_URL.rstrip('/')}/api/{endpoint}"
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-
-    def backup_to_convex(self):
-        label, ok = ConvexLabelDialog.get_label(self, convex_call_fn=self._convex_call, config_data=self.items)
-        if not ok or not label.strip(): return
-        try:
-            self._convex_call("mutation", {
-                "path": "functions:save",
-                "args": {"scriptName": SCRIPT_NAME, "label": label.strip(), "data": self.items}
-            })
-            QMessageBox.information(self, "BACKUP", f'Config backed up: "{label.strip()}"')
-        except Exception as e:
-            QMessageBox.critical(self, "BACKUP FAILED", str(e))
-
-    def restore_from_convex(self):
-        try:
-            result = self._convex_call("query", {
-                "path": "functions:list",
-                "args": {"scriptName": SCRIPT_NAME}
-            })
-            backups = result.get("value", [])
-            if not backups:
-                QMessageBox.information(self, "RESTORE", "No backups found.")
-                return
-
-            dlg = RestoreDialog(backups, self._convex_call, local_data=self.items, parent=self)
-            if dlg.exec() == QDialog.DialogCode.Accepted and dlg.selected_id:
-                data = self._convex_call("query", {
-                    "path": "functions:get",
-                    "args": {"id": dlg.selected_id}
-                }).get("value")
-
-                if data:
-                    self.items = self._fix_floats(data)
-                    self.save_items()
-                    self.populate_lists()
-                    QMessageBox.information(self, "RESTORE", "Restored successfully.")
-        except Exception as e:
-            QMessageBox.critical(self, "RESTORE FAILED", str(e))
 
 def make_app_icon():
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><path d="M32 6 C22 6 14 18 14 30 L14 38 L20 44 L20 52 L26 52 L26 46 L38 46 L38 52 L44 52 L44 44 L50 38 L50 30 C50 18 42 6 32 6Z" fill="#FCEE0A"/><circle cx="32" cy="26" r="6" fill="#050505"/><path d="M20 44 L16 54 L26 50Z" fill="#FF003C"/><path d="M44 44 L48 54 L38 50Z" fill="#FF003C"/><circle cx="32" cy="26" r="3" fill="#00F0FF"/></svg>'
