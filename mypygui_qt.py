@@ -2298,6 +2298,26 @@ class StatusBar(QMainWindow):
     def _bl_next(self):
         if self._bl_offset + self._bl_page_size < len(load_config().get("buttons_left", [])): self._bl_offset += self._bl_page_size; self._bl_render()
 
+    def _run_gitter_sync(self, path):
+        text, ok = QInputDialog.getText(
+            self, "Git Commit",
+            "Enter commit message (default: Automatic):",
+            QLineEdit.EchoMode.Normal, ""
+        )
+        if not ok:
+            return  # Abort if cancelled
+        
+        msg = text.strip()
+        if not msg:
+            msg = "Automatic"
+            
+        if os.name == 'nt':
+            cmd = f"git add -A ; git commit -m '{msg}' ; git push"
+        else:
+            cmd = f"git add -A && git commit -m \"{msg}\" && git push"
+            
+        run_in_terminal(cmd, cwd=path, title="GiTSync")
+
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
@@ -2311,7 +2331,7 @@ class StatusBar(QMainWindow):
                     if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
                     if btn == Qt.MouseButton.LeftButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: open_path(path)
-                        else: run_in_terminal(f"cd '{path}' ; gitter", cwd=path, title="GiTSync")
+                        else: self._run_gitter_sync(path)
                     elif btn == Qt.MouseButton.RightButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: run_in_terminal(f"cd '{path}' ; git restore .", cwd=path, title="Git Restore")
                         else: run_in_terminal("lazygit", cwd=path, title="lazygit")
