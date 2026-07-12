@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from flask import Flask, render_template, request, jsonify
 import json
 import os
@@ -15,11 +16,21 @@ def add_header(response):
     response.headers['Expires'] = '-1'
     return response
 
-DATA_FILE = r'C:\@delta\ms1\@Flask\5018_cell\data.json'
-STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
-CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json'
-QUICK_TEXTS_FILE = r'C:\@delta\ms1\@Flask\5018_cell\quick_texts.json'
-SETTINGS_FILE = r'C:\@delta\db\5018_cell\setting.json'
+def normalize_path(path):
+    if os.name != 'nt':
+        if path.lower().startswith('c:\\') or path.lower().startswith('c:/'):
+            home = os.path.expanduser('~')
+            rel_path = path[3:].replace('\\', '/')
+            return os.path.join(home, rel_path)
+        else:
+            return path.replace('\\', '/')
+    return path
+
+DATA_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\data.json')
+STATE_FILE = normalize_path(r'C:\@delta\output\5018_output\sheet_active.json')
+CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json')
+QUICK_TEXTS_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\quick_texts.json')
+SETTINGS_FILE = normalize_path(r'C:\@delta\db\5018_cell\setting.json')
 
 def load_data():
     data = {
@@ -310,13 +321,20 @@ def save_settings():
 
 @app.route('/api/open-file', methods=['POST'])
 def open_file():
-    import subprocess, os
+    import subprocess, os, sys
     path = request.json.get('path', '')
     # Strip file:/// prefix
     if path.startswith('file:///'):
-        path = path[8:].replace('/', os.sep)
+        path = path[8:]
+    path = normalize_path(path)
     if os.path.exists(path):
-        os.startfile(path)
+        if hasattr(os, 'startfile'):
+            os.startfile(path)
+        else:
+            if sys.platform == 'darwin':
+                subprocess.run(['open', path], check=False)
+            else:
+                subprocess.run(['xdg-open', path], check=False)
         return jsonify({'success': True})
     return jsonify({'success': False, 'error': 'File not found'}), 404
 

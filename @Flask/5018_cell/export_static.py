@@ -18,11 +18,21 @@ import json
 import os
 from datetime import datetime
 
+def normalize_path(path):
+    if os.name != 'nt':
+        if path.lower().startswith('c:\\') or path.lower().startswith('c:/'):
+            home = os.path.expanduser('~')
+            rel_path = path[3:].replace('\\', '/')
+            return os.path.join(home, rel_path)
+        else:
+            return path.replace('\\', '/')
+    return path
+
 # Paths
-DATA_FILE = r'C:\@delta\ms1\@Flask\5018_cell\data.json'
-STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
-CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json'
-OUTPUT_FILE = r'C:\@delta\db\5000_myhome\mycell.html'
+DATA_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\data.json')
+STATE_FILE = normalize_path(r'C:\@delta\output\5018_output\sheet_active.json')
+CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json')
+OUTPUT_FILE = normalize_path(r'C:\@delta\db\5000_myhome\mycell.html')
 
 def load_data():
     """Load data from JSON file and state file"""
