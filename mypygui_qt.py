@@ -799,6 +799,7 @@ def handle_action(action_cfg):
     cwd    = action_cfg.get("cwd")
     admin  = action_cfg.get("admin", False)
     hide   = action_cfg.get("hide", False)
+    in_term = action_cfg.get("in_terminal", False)
     
     # If admin and not already handled by run_command, handle here
     if admin and atype not in ["run_command"]:
@@ -837,6 +838,11 @@ def handle_action(action_cfg):
         run_command(cmd, admin=admin, hide=hide)
     elif atype == "python":
         subprocess.Popen([sys.executable, cmd], cwd=cwd, creationflags=flags)
+    elif atype == "bash":
+        if in_term:
+            run_in_terminal(cmd, cwd=cwd, title="Bash Command")
+        else:
+            subprocess.Popen(["bash", "-c", cmd], cwd=cwd, creationflags=flags)
     elif atype == "function":
         func_name = action_cfg.get("func")
         if func_name == "restart":      _app_restart()
@@ -1226,15 +1232,16 @@ def open_edit_gui(item_cfg, category, index=None):
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
         cmd_le   = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
-        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url", "popup"])
+        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "bash", "function", "url", "popup"])
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
+        in_term_chk = QCheckBox("In Terminal"); in_term_chk.setChecked(bcfg.get("in_terminal", False))
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
-        chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addStretch()
+        chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addWidget(in_term_chk); chk_layout.addStretch()
         form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
         right_layout.addWidget(grp)
-        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
+        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, "in_terminal": in_term_chk}
 
     # Dedicated POPUP SETTINGS section
     grp_pop = QGroupBox("POPUP SETTINGS"); pop_lay = QVBoxLayout(); pop_lay.setSpacing(8); grp_pop.setLayout(pop_lay)
@@ -1328,7 +1335,7 @@ def open_edit_gui(item_cfg, category, index=None):
             cmd = inputs["cmd"].text()
             if not cmd: continue
             b_type = inputs["type"].currentText()
-            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
+            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked(), "in_terminal": inputs["in_terminal"].isChecked()}
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
             if b_type == "popup":
