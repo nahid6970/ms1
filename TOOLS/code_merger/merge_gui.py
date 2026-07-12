@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import os
 import re
@@ -14,6 +15,25 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
+
+# ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
+_original_normpath = os.path.normpath
+
+def _custom_normpath(path):
+    if not path:
+        return ""
+    path_str = str(path)
+    if os.name != 'nt':
+        # Replace backslashes with forward slashes
+        path_str = path_str.replace('\\', '/')
+        # If it starts with a Windows drive letter (e.g. C:/), translate it to user home directory
+        m = re.match(r'^[a-zA-Z]:/', path_str)
+        if m:
+            home = os.path.expanduser('~')
+            path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
+    return _original_normpath(path_str)
+
+os.path.normpath = _custom_normpath
 
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
@@ -943,7 +963,7 @@ class RecentPopup(QFrame):
             btn_open = QPushButton("📂")
             btn_open.setObjectName("open")
             btn_open.setFixedWidth(28)
-            btn_open.setToolTip("Open project folder in File Explorer")
+            btn_open.setToolTip("Open project folder in File Manager")
             btn_open.clicked.connect(lambda _, p=path: (self.close(), self._open_explorer(p)))
 
             btn_load_all = QPushButton("🔄")
@@ -1103,9 +1123,12 @@ class RecentPopup(QFrame):
         try:
             if hasattr(os, 'startfile'):
                 os.startfile(p)
+            elif sys.platform.startswith('darwin'):
+                import subprocess
+                subprocess.Popen(['open', p])
             else:
                 import subprocess
-                subprocess.Popen(['explorer', p])
+                subprocess.Popen(['xdg-open', p])
         except Exception:
             pass
 
