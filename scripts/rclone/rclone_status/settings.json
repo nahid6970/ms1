@@ -8,6 +8,8 @@
     "icon_l": "\uf100",
     "icon_r": "\uf101",
     "icon_size": 50,
+    "color_l": "#F71E49",
+    "color_r": "#56D32C",
     "minimize_to_tray": true,
     "dialog_width": 550,
     "settings_win_width": 480,

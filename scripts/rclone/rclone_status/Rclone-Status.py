@@ -6,7 +6,7 @@ import subprocess
 import threading
 import time
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, colorchooser
 import json
 from PIL import Image, ImageTk
 import sys
@@ -250,16 +250,44 @@ class ProjectActionWindow(tk.Toplevel):
 
 def open_settings():
     win = tk.Toplevel(ROOT)
-    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 480)
+    container = setup_custom_window(win, "GLOBAL_SETTINGS", 480, 520)
     body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=25, pady=20)
 
-    def dual_field(label, val1, val2):
+    def color_pick_field(label, icon_val, color_val):
         f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
         tk.Label(f, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 8, "bold")).pack(anchor="w")
         row = tk.Frame(f, bg=CP_BG); row.pack(fill="x", pady=2)
-        e1 = CyberEntry(row, width=8); e1.insert(0, val1); e1.pack(side="left")
-        e2 = CyberEntry(row); e2.insert(0, val2); e2.pack(side="left", fill="x", expand=True, padx=(10, 0))
-        return e1, e2
+        
+        # Icon char entry
+        e_icon = CyberEntry(row, width=5); e_icon.insert(0, icon_val); e_icon.pack(side="left")
+        
+        # Color hex entry
+        e_color = CyberEntry(row, width=12); e_color.insert(0, color_val); e_color.pack(side="left", padx=(10, 0))
+        
+        # Color Preview Square
+        preview = tk.Frame(row, width=24, height=24, bg=color_val, bd=1, relief="solid", highlightthickness=1, highlightbackground=CP_DIM)
+        preview.pack(side="left", padx=(10, 0))
+        preview.pack_propagate(False)
+
+        def pick_color():
+            _, hex_c = colorchooser.askcolor(initialcolor=e_color.get(), title=f"Select {label}")
+            if hex_c:
+                e_color.delete(0, "end"); e_color.insert(0, hex_c.upper())
+                preview.configure(bg=hex_c)
+
+        # Eyedropper Button
+        pick_btn = HoverButton(row, text="\uf1fb", font=("JetBrainsMono NFP", 10), width=3, command=pick_color, default_color=CP_PANEL)
+        pick_btn.pack(side="left", padx=(5, 0))
+
+        # Auto-update preview on typing
+        def sync_preview(*args):
+            val = e_color.get()
+            if len(val) == 7 and val.startswith("#"):
+                try: preview.configure(bg=val)
+                except: pass
+        e_color.bind("<KeyRelease>", sync_preview)
+
+        return e_icon, e_color
 
     def s_field(label, val):
         f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
@@ -267,8 +295,8 @@ def open_settings():
         e = CyberEntry(f); e.insert(0, val); e.pack(fill="x", pady=2)
         return e
 
-    l_icon_e, l_color_e = dual_field("LEFT_ICON & COLOR (HEX)", app_settings["icon_l"], app_settings.get("color_l", "#ff934b"))
-    r_icon_e, r_color_e = dual_field("RIGHT_ICON & COLOR (HEX)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
+    l_icon_e, l_color_e = color_pick_field("LEFT_CHANNEL (ICON | COLOR)", app_settings["icon_l"], app_settings.get("color_l", "#ff934b"))
+    r_icon_e, r_color_e = color_pick_field("RIGHT_CHANNEL (ICON | COLOR)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
 
@@ -280,9 +308,9 @@ def open_settings():
             app_settings["check_interval"] = int(interval_e.get())
             save_settings(app_settings); win.destroy()
         except ValueError:
-            messagebox.showerror("Error", "Invalid numeric value in Size or Interval.")
+            messagebox.showerror("Error", "Invalid numeric value.")
     
-    HoverButton(body, text="SAVE_SETTINGS", command=save_stg, hover_color=CP_GREEN).pack(fill="x", pady=20)
+    HoverButton(body, text="APPLY_CHANGES", command=save_stg, hover_color=CP_GREEN, pady=8).pack(fill="x", pady=20)
 
 def edit_command(key):
     is_edit = key is not None
