@@ -50,7 +50,8 @@ def load_settings():
     default = {
         "width": None, "height": 39, "x": 100, "y": 100, 
         "check_interval": 600, "topmost": True,
-        "icon_l": "\uf100", "icon_r": "\uf101" #  and 
+        "icon_l": "\uf100", "icon_r": "\uf101",
+        "icon_size": 22
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -129,10 +130,10 @@ class ProjectActionWindow(tk.Toplevel):
         content.pack(fill="both", expand=True, padx=25, pady=10)
 
         path_group = tk.LabelFrame(content, text=" I/O_CHANNELS ", bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 9, "bold"), bd=1, relief="solid", labelanchor="nw")
-        path_group.pack(fill="x", pady=10, ipady=15)
+        path_group.pack(fill="x", pady=5, ipady=5)
 
         inner = tk.Frame(path_group, bg=CP_BG)
-        inner.pack(fill="x", padx=15, pady=10)
+        inner.pack(fill="x", padx=15, pady=5)
 
         self.side_a_ent = CyberEntry(inner)
         self.side_a_ent.insert(0, self.cfg["src"])
@@ -140,7 +141,7 @@ class ProjectActionWindow(tk.Toplevel):
 
         # Styled Switcher using settings icons
         self.arrow_btn = HoverButton(inner, text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"], 
-                                     font=("JetBrainsMono NFP", 22), width=3, height=1, 
+                                     font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)), width=3, height=1, 
                                      default_color=CP_PANEL, hover_color=CP_CYAN, hover_fg="black")
         self.arrow_btn.default_fg = CP_CYAN if self.direction == "L2R" else CP_ORANGE
         self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
@@ -152,7 +153,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.side_b_ent.pack(side="left", fill="x", expand=True)
 
         mode_outer = tk.Frame(content, bg=CP_BG)
-        mode_outer.pack(fill="x", pady=15)
+        mode_outer.pack(fill="x", pady=5)
         
         mode_frame = tk.Frame(mode_outer, bg=CP_BG)
         mode_frame.pack(anchor="center") 
@@ -202,7 +203,8 @@ class ProjectActionWindow(tk.Toplevel):
 
     def toggle_direction(self):
         self.direction = "R2L" if self.direction == "L2R" else "L2R"
-        self.arrow_btn.config(text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"])
+        self.arrow_btn.config(text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"],
+                              font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)))
         if self.direction == "L2R":
             self.arrow_btn.default_fg = CP_CYAN
             self.arrow_btn.configure(fg=CP_CYAN)
@@ -239,7 +241,7 @@ class ProjectActionWindow(tk.Toplevel):
 
 def open_settings():
     win = tk.Toplevel(ROOT)
-    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 400)
+    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 480)
     body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=25, pady=20)
 
     def s_field(label, val):
@@ -250,10 +252,12 @@ def open_settings():
 
     l_icon_e = s_field("LEFT_ICON_CHAR ()", app_settings["icon_l"])
     r_icon_e = s_field("RIGHT_ICON_CHAR ()", app_settings["icon_r"])
+    size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
 
     def save_stg():
         app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
+        app_settings["icon_size"] = int(size_e.get())
         app_settings["check_interval"] = int(interval_e.get())
         save_settings(app_settings); win.destroy()
     

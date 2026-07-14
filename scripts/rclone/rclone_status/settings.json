@@ -4,8 +4,11 @@
     "x": 188,
     "y": 929,
     "check_interval": 600,
-    "minimize_to_tray": true,
     "topmost": false,
+    "icon_l": "\uf100",
+    "icon_r": "\uf101",
+    "icon_size": 50,
+    "minimize_to_tray": true,
     "dialog_width": 550,
     "settings_win_width": 480,
     "settings_win_height": 700
