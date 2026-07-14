@@ -654,11 +654,6 @@ class SymlinkManager(QMainWindow):
 
             # Create
             try:
-                # Ensure parent directory exists
-                parent_dir = os.path.dirname(fake)
-                if parent_dir and not os.path.exists(parent_dir):
-                    os.makedirs(parent_dir, exist_ok=True)
-
                 if copy_mode:
                     if os.path.isdir(target):
                         shutil.copytree(target, fake, dirs_exist_ok=True)
