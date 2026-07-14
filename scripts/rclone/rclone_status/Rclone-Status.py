@@ -23,12 +23,9 @@ CP_YELLOW = "#FCEE0A"
 CP_CYAN = "#00F0FF"         
 CP_RED = "#FF003C"          
 CP_GREEN = "#00ff21"        
+CP_ORANGE = "#ff934b"       
 CP_DIM = "#3a3a3a"          
 CP_TEXT = "#E0E0E0"         
-
-# SVG Resources - Using pure white stroke for maximum contrast
-ARROW_RIGHT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
-ARROW_LEFT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
 
 JSON_PATH = os.path.join(os.path.dirname(__file__), "commands.json")
 SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
@@ -50,7 +47,11 @@ def save_commands(cmds):
     except: pass
 
 def load_settings():
-    default = {"width": None, "height": 39, "x": 100, "y": 100, "check_interval": 600, "topmost": True}
+    default = {
+        "width": None, "height": 39, "x": 100, "y": 100, 
+        "check_interval": 600, "topmost": True,
+        "icon_l": "\uf100", "icon_r": "\uf101" #  and 
+    }
     if os.path.exists(SETTINGS_PATH):
         try:
             with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
@@ -68,14 +69,6 @@ commands = load_commands()
 app_settings = load_settings()
 pending_checks = 0
 check_lock = threading.Lock()
-
-def get_svg_image(svg_data, size=(40, 40)):
-    if cairosvg:
-        try:
-            png_data = cairosvg.svg2png(bytestring=svg_data.encode('utf-8'), output_width=size[0], output_height=size[1])
-            return ImageTk.PhotoImage(Image.open(BytesIO(png_data)))
-        except: pass
-    return None
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
@@ -128,10 +121,6 @@ class ProjectActionWindow(tk.Toplevel):
         self.direction = cfg.get("last_dir", "L2R")
         self.op_mode = cfg.get("last_op", "sync")
         
-        # Reference images on self to prevent garbage collection
-        self.img_r = get_svg_image(ARROW_RIGHT_SVG)
-        self.img_l = get_svg_image(ARROW_LEFT_SVG)
-        
         self.container = setup_custom_window(self, f"TASK_RUNNER: {key.upper()}", 900, 600)
         self.init_ui()
 
@@ -139,7 +128,6 @@ class ProjectActionWindow(tk.Toplevel):
         content = tk.Frame(self.container, bg=CP_BG)
         content.pack(fill="both", expand=True, padx=25, pady=10)
 
-        # Path Group
         path_group = tk.LabelFrame(content, text=" I/O_CHANNELS ", bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 9, "bold"), bd=1, relief="solid", labelanchor="nw")
         path_group.pack(fill="x", pady=10, ipady=15)
 
@@ -150,31 +138,34 @@ class ProjectActionWindow(tk.Toplevel):
         self.side_a_ent.insert(0, self.cfg["src"])
         self.side_a_ent.pack(side="left", fill="x", expand=True)
 
-        # Use text fallback if SVG fails to load
-        self.arrow_btn = tk.Button(inner, bg=CP_BG, activebackground=CP_BG, bd=0, command=self.toggle_direction, cursor="hand2")
-        if self.img_r:
-            self.arrow_btn.config(image=self.img_r if self.direction=="L2R" else self.img_l)
-        else:
-            self.arrow_btn.config(text="==>" if self.direction=="L2R" else "<==", fg=CP_CYAN, font=("Consolas", 18, "bold"))
-        self.arrow_btn.pack(side="left", padx=20)
+        # Styled Switcher using settings icons
+        self.arrow_btn = HoverButton(inner, text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"], 
+                                     font=("JetBrainsMono NFP", 22), width=3, height=1, 
+                                     default_color=CP_PANEL, hover_color=CP_CYAN, hover_fg="black")
+        self.arrow_btn.default_fg = CP_CYAN if self.direction == "L2R" else CP_ORANGE
+        self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
+        self.arrow_btn.config(command=self.toggle_direction)
+        self.arrow_btn.pack(side="left", padx=25)
 
         self.side_b_ent = CyberEntry(inner, justify="right")
         self.side_b_ent.insert(0, self.cfg["dst"])
         self.side_b_ent.pack(side="left", fill="x", expand=True)
 
-        # Mode Selection (Cyber Highlight)
-        mode_frame = tk.Frame(content, bg=CP_BG)
-        mode_frame.pack(fill="x", pady=5)
+        mode_outer = tk.Frame(content, bg=CP_BG)
+        mode_outer.pack(fill="x", pady=15)
+        
+        mode_frame = tk.Frame(mode_outer, bg=CP_BG)
+        mode_frame.pack(anchor="center") 
+        
         self.mode_btns = {}
         for m in ["sync", "copy", "check"]:
-            btn = HoverButton(mode_frame, text=m.upper(), width=12)
+            btn = HoverButton(mode_frame, text=m.upper(), width=14, pady=5)
             btn.config(command=lambda mode=m: self.set_mode(mode))
-            btn.pack(side="left", padx=5)
+            btn.pack(side="left", padx=10)
             self.mode_btns[m] = btn
         
-        self.set_mode(self.op_mode) # Initialize highlighted state
+        self.set_mode(self.op_mode)
 
-        # Options
         opt_group = tk.LabelFrame(content, text=" CONFIG_OVERRIDE ", bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 9, "bold"), bd=1, relief="solid")
         opt_group.pack(fill="x", pady=10, ipady=10)
         
@@ -203,22 +194,21 @@ class ProjectActionWindow(tk.Toplevel):
         self.op_mode = m
         for k, b in self.mode_btns.items():
             if k == m:
-                # Highlighted Selected State
-                b.default_color = CP_YELLOW
-                b.default_fg = "black"
+                b.default_color, b.default_fg = CP_YELLOW, "black"
                 b.configure(bg=CP_YELLOW, fg="black")
             else:
-                # Dim Unselected State
-                b.default_color = CP_PANEL
-                b.default_fg = CP_TEXT
+                b.default_color, b.default_fg = CP_PANEL, CP_TEXT
                 b.configure(bg=CP_PANEL, fg=CP_TEXT)
 
     def toggle_direction(self):
         self.direction = "R2L" if self.direction == "L2R" else "L2R"
-        if self.img_r:
-            self.arrow_btn.config(image=self.img_r if self.direction=="L2R" else self.img_l)
+        self.arrow_btn.config(text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"])
+        if self.direction == "L2R":
+            self.arrow_btn.default_fg = CP_CYAN
+            self.arrow_btn.configure(fg=CP_CYAN)
         else:
-            self.arrow_btn.config(text="==>" if self.direction=="L2R" else "<==")
+            self.arrow_btn.default_fg = CP_ORANGE
+            self.arrow_btn.configure(fg=CP_ORANGE)
         self.update_ui_state()
 
     def update_ui_state(self):
@@ -226,12 +216,9 @@ class ProjectActionWindow(tk.Toplevel):
         self.side_b_ent.config(highlightbackground=CP_RED if self.direction == "L2R" else CP_CYAN)
 
     def run_task(self):
-        self.cfg["src"] = self.side_a_ent.get()
-        self.cfg["dst"] = self.side_b_ent.get()
-        self.cfg["last_dir"] = self.direction
-        self.cfg["last_op"] = self.op_mode
-        self.cfg["last_ignore"] = self.ignore_ent.get()
-        self.cfg["last_flags"] = self.flags_ent.get()
+        self.cfg["src"], self.cfg["dst"] = self.side_a_ent.get(), self.side_b_ent.get()
+        self.cfg["last_dir"], self.cfg["last_op"] = self.direction, self.op_mode
+        self.cfg["last_ignore"], self.cfg["last_flags"] = self.ignore_ent.get(), self.flags_ent.get()
         save_commands(commands)
 
         src, dst = (self.cfg["src"], self.cfg["dst"]) if self.direction == "L2R" else (self.cfg["dst"], self.cfg["src"])
@@ -246,25 +233,40 @@ class ProjectActionWindow(tk.Toplevel):
         def worker():
             p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             for line in p.stdout:
-                self.log_text.insert("end", f" > {line}")
-                self.log_text.see("end")
-            p.wait()
-            self.action_btn.config(state="normal", text="EXECUTE_CMD")
-            trigger_all_checks()
+                self.log_text.insert("end", f" > {line}"); self.log_text.see("end")
+            p.wait(); self.action_btn.config(state="normal", text="EXECUTE_CMD"); trigger_all_checks()
         threading.Thread(target=worker, daemon=True).start()
+
+def open_settings():
+    win = tk.Toplevel(ROOT)
+    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 400)
+    body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=25, pady=20)
+
+    def s_field(label, val):
+        f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
+        tk.Label(f, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 8, "bold")).pack(anchor="w")
+        e = CyberEntry(f); e.insert(0, val); e.pack(fill="x", pady=2)
+        return e
+
+    l_icon_e = s_field("LEFT_ICON_CHAR ()", app_settings["icon_l"])
+    r_icon_e = s_field("RIGHT_ICON_CHAR ()", app_settings["icon_r"])
+    interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
+
+    def save_stg():
+        app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
+        app_settings["check_interval"] = int(interval_e.get())
+        save_settings(app_settings); win.destroy()
+    
+    HoverButton(body, text="SAVE_SETTINGS", command=save_stg, hover_color=CP_GREEN).pack(fill="x", pady=20)
 
 def edit_command(key):
     is_edit = key is not None
     cfg = commands.get(key, {"label": "NEW", "src": "C:/", "dst": "remote:/", "cmd": "rclone check src dst --size-only", "index": len(commands), "enabled": True})
-    
-    win = tk.Toplevel(ROOT)
-    container = setup_custom_window(win, "REGISTRY_EDITOR", 500, 600)
-    body = tk.Frame(container, bg=CP_BG)
-    body.pack(fill="both", expand=True, padx=20, pady=10)
+    win = tk.Toplevel(ROOT); container = setup_custom_window(win, "REGISTRY_EDITOR", 500, 600)
+    body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=20, pady=10)
 
     def field(label, val):
-        f = tk.Frame(body, bg=CP_BG)
-        f.pack(fill="x", pady=8)
+        f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
         tk.Label(f, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 8, "bold")).pack(anchor="w")
         e = CyberEntry(f); e.insert(0, str(val)); e.pack(fill="x", pady=2)
         return e
@@ -282,8 +284,7 @@ def edit_command(key):
         commands[new_key] = {"label": label_e.get(), "src": src_e.get(), "dst": dst_e.get(), "cmd": cmd_e.get(), "index": int(idx_e.get()), "enabled": True}
         save_commands(commands); create_gui(); win.destroy(); trigger_all_checks()
 
-    btn_f = tk.Frame(body, bg=CP_BG)
-    btn_f.pack(pady=20)
+    btn_f = tk.Frame(body, bg=CP_BG); btn_f.pack(pady=20)
     HoverButton(btn_f, text="SAVE", command=save, width=12, hover_color=CP_GREEN).pack(side="left", padx=5)
     if is_edit: HoverButton(btn_f, text="DELETE", command=lambda: [commands.pop(key), save_commands(commands), create_gui(), win.destroy()], width=12, hover_color=CP_RED).pack(side="left", padx=5)
     HoverButton(btn_f, text="EXIT", command=win.destroy, width=12).pack(side="left", padx=5)
@@ -310,13 +311,8 @@ def trigger_all_checks():
     if not widgets: ROOT.after(30000, trigger_all_checks); return
     for w in widgets: w.trigger_check()
 
-ROOT = tk.Tk()
-ROOT.overrideredirect(True)
-ROOT.configure(bg=CP_BG)
-ROOT.attributes("-topmost", True)
-
-BORDER = tk.Frame(ROOT, bg=CP_DIM, bd=0, highlightthickness=1, highlightbackground=CP_RED)
-BORDER.place(relwidth=1, relheight=1)
+ROOT = tk.Tk(); ROOT.overrideredirect(True); ROOT.configure(bg=CP_BG); ROOT.attributes("-topmost", True)
+BORDER = tk.Frame(ROOT, bg=CP_DIM, bd=0, highlightthickness=1, highlightbackground=CP_RED); BORDER.place(relwidth=1, relheight=1)
 MAIN = tk.Frame(BORDER, bg=CP_BG); MAIN.pack(pady=1, padx=2, expand=True, fill="both")
 ROOT1 = tk.Frame(MAIN, bg=CP_PANEL); ROOT1.pack(side="left", pady=2, padx=5)
 
@@ -326,25 +322,22 @@ def create_gui():
     for key, cfg in items:
         if not cfg.get("enabled", True): continue
         lbl = tk.Label(ROOT1, bg=CP_PANEL, text=cfg["label"], font=("JetBrainsMono NFP", 16, "bold"), fg=CP_DIM, cursor="hand2")
-        lbl.pack(side="left", padx=10)
-        lbl.bind("<Button-1>", lambda e, c=cfg, k=key: ProjectActionWindow(ROOT, c, k))
-        lbl.bind("<Button-3>", lambda e, k=key: edit_command(k))
-        check_and_update_label(lbl, cfg)
+        lbl.pack(side="left", padx=10); lbl.bind("<Button-1>", lambda e, c=cfg, k=key: ProjectActionWindow(ROOT, c, k))
+        lbl.bind("<Button-3>", lambda e, k=key: edit_command(k)); check_and_update_label(lbl, cfg)
     tk.Frame(ROOT1, width=1, bg=CP_DIM).pack(side="left", padx=8, fill="y", pady=8)
     HoverButton(ROOT1, text="\uf067", command=lambda: edit_command(None), default_color=CP_PANEL, hover_color=CP_CYAN).pack(side="left", padx=2)
+    HoverButton(ROOT1, text="\uf013", command=open_settings, default_color=CP_PANEL, hover_color=CP_YELLOW).pack(side="left", padx=2)
     HoverButton(ROOT1, text="\uf021", command=lambda: os.execv(sys.executable, ['python'] + sys.argv), default_color=CP_PANEL).pack(side="left", padx=2)
     HoverButton(ROOT1, text="\uf00d", command=lambda: sys.exit(0), hover_color=CP_RED, default_color=CP_PANEL).pack(side="left", padx=(2, 8))
     def adjust():
-        ROOT.update_idletasks()
-        w = ROOT1.winfo_reqwidth() + 14 
+        ROOT.update_idletasks(); w = ROOT1.winfo_reqwidth() + 14 
         ROOT.geometry(f"{w}x{app_settings['height']}+{app_settings['x']}+{app_settings['y']}")
     ROOT.after(50, adjust)
 
 def start_drag(e): ROOT.x, ROOT.y = e.x, e.y
 def do_drag(e):
     x, y = (e.x - ROOT.x + ROOT.winfo_x(), e.y - ROOT.y + ROOT.winfo_y())
-    ROOT.geometry(f"+{x}+{y}")
-    app_settings["x"], app_settings["y"] = x, y; save_settings(app_settings)
+    ROOT.geometry(f"+{x}+{y}"); app_settings["x"], app_settings["y"] = x, y; save_settings(app_settings)
 
 MAIN.bind("<Button-1>", start_drag); MAIN.bind("<B1-Motion>", do_drag)
 create_gui(); trigger_all_checks(); ROOT.mainloop()
