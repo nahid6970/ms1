@@ -3689,16 +3689,14 @@ class AHKShortcutEditor(QMainWindow):
                     trigger = shortcut.get('trigger', '')
                     
                     if '\n' in replacement:
-                        # Multiline: Use AHK v2 continuation section (must use double quotes for string wrapper)
-                        safe_replacement = replacement.replace('"', '""')
-                        
+                        # Multiline: Use AHK v2 continuation section
+                        # Quotes inside a continuation section are literal, no need to escape " as ""
                         output_lines.append(f":X:{trigger}::Paste(\"")
                         output_lines.append("(") 
                         
-                        lines = safe_replacement.split('\n')
+                        lines = replacement.split('\n')
                         for line in lines:
-                            # AHK v2 Continuation: escape lines starting with ) or , with backtick
-                            # Although only ) is strictly needed for closing, safety first
+                            # AHK v2 Continuation: escape lines starting with ) with backtick
                             if line.strip().startswith(")"):
                                 output_lines.append("`" + line)
                             else:
