@@ -920,16 +920,64 @@
             "id": "btn_1784049314",
             "bindings": {
                 "Button-1": {
-                    "type": "subprocess",
+                    "type": "run_command",
                     "hide": false,
                     "admin": false,
-                    "cmd": "winget search \"\" | Select-Object -Skip 2 | fzf --preview 'winget show {2}' --layout=reverse --bind 'enter:execute(winget install {2})'"
+                    "new_terminal": true,
+                    "cmd": "winget search \"\" | Select-Object -Skip 2 | fzf --preview 'winget show {2}' --layout=reverse --bind 'enter:execute(winget install --id {2} --silent --accept-package-agreements --accept-source-agreements)'"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": true,
                     "cmd": "winget list | Select-Object -Skip 2 | fzf --preview 'winget show {1}' --layout=reverse --bind 'enter:execute(winget uninstall {1})'"
+                }
+            },
+            "border_color": "",
+            "font": [
+                "Arial",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
+        },
+        {
+            "text": "S",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "btn_1784050576",
+            "bindings": {
+                "Button-1": {
+                    "type": "run_command",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": true,
+                    "cmd": "scoop search | Select-Object -Skip 4 | fzf --preview 'scoop info {1}' --layout=reverse --bind 'enter:execute(scoop install {1})'"
+                },
+                "Button-3": {
+                    "type": "run_command",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": true,
+                    "cmd": "scoop list | Select-Object -Skip 4 | fzf --preview 'scoop info {1}' --layout=reverse --bind 'enter:execute(scoop uninstall {1})'"
                 }
             },
             "border_color": "",

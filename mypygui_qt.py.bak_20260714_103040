@@ -1070,12 +1070,7 @@ def open_edit_gui(item_cfg, category, index=None):
             cmd = inputs["cmd"].text()
             if not cmd: continue
             b_type = inputs["type"].currentText()
-            new_bindings[bkey] = {
-                "type": b_type, 
-                "hide": inputs["hide"].isChecked(), 
-                "admin": inputs["admin"].isChecked(),
-                "new_terminal": inputs["new_terminal"].isChecked()
-            }
+            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
             if b_type == "popup":
