@@ -6,9 +6,9 @@
         "cmd": "rclone check src dst --size-only",
         "index": 1,
         "enabled": true,
-        "last_dir": "R2L",
+        "last_dir": "L2R",
         "last_op": "copy",
-        "last_ignore": "",
+        "last_ignore": "asdasd",
         "last_flags": "--fast-list -P --size-only"
     }
 }

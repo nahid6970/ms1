@@ -77,10 +77,12 @@ class HoverButton(tk.Button):
         self.hover_color = kw.pop('hover_color', CP_YELLOW)
         self.default_fg = kw.pop('default_fg', "white")
         self.hover_fg = kw.pop('hover_fg', "black")
+        # Use passed font if available, otherwise use default
+        btn_font = kw.pop('font', ("Consolas", 10, "bold"))
         super().__init__(master, **kw)
         self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color, fg=self.hover_fg))
         self.bind("<Leave>", lambda e: self.configure(bg=self.default_color, fg=self.default_fg))
-        self.configure(bg=self.default_color, fg=self.default_fg, bd=0, highlightthickness=0, font=("Consolas", 10, "bold"), cursor="hand2")
+        self.configure(bg=self.default_color, fg=self.default_fg, bd=0, highlightthickness=0, font=btn_font, cursor="hand2")
 
 class CyberEntry(tk.Entry):
     def __init__(self, master=None, **kw):
@@ -89,7 +91,12 @@ class CyberEntry(tk.Entry):
 
 def setup_custom_window(win, title, width, height):
     win.overrideredirect(True)
-    win.geometry(f"{width}x{height}")
+    # Center window on screen
+    sw = win.winfo_screenwidth()
+    sh = win.winfo_screenheight()
+    center_x = (sw // 2) - (width // 2)
+    center_y = (sh // 2) - (height // 2)
+    win.geometry(f"{width}x{height}+{center_x}+{center_y}")
     win.configure(bg=CP_BG)
     
     border = tk.Frame(win, bg=CP_DIM, bd=0, highlightthickness=1, highlightbackground=CP_CYAN)
