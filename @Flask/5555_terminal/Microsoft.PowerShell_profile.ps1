@@ -854,6 +854,6 @@ $ENV:STARSHIP_CONFIG = "C:\@delta\ms1\linux\config\.config\starship\starship.tom
 $env:OLLAMA_HOST = "http://localhost:11434"
 
 
-Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
+# Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
 # oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
-Invoke-Expression (& { (zoxide init powershell | Out-String) })
+# Invoke-Expression (& { (zoxide init powershell | Out-String) })
