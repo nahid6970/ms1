@@ -850,7 +850,7 @@ function pkill {
 }
 
 # $env:GEMINI_API_KEY = "AIzaSyD3tpmHrTXFJGAvL7N055Qz1b4ZRUX6yJM"
-$ENV:STARSHIP_CONFIG = "C:\@delta\ms1\linux\config\.config\starship\starship.toml"
+# $ENV:STARSHIP_CONFIG = "C:\@delta\ms1\linux\config\.config\starship\starship.toml"
 $env:OLLAMA_HOST = "http://localhost:11434"
 
 
