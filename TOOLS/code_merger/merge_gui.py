@@ -2692,10 +2692,20 @@ class PrepTab(QWidget):
             return
 
         self.prompt_out.setPlainText(prompt)
+
+        # Save prompt to external MD file for history/external use
+        try:
+            output_md = r"C:\@delta\output\code_merger\generated_prmpt.md"
+            os.makedirs(os.path.dirname(output_md), exist_ok=True)
+            with open(output_md, 'w', encoding='utf-8') as f:
+                f.write(prompt)
+        except Exception as e:
+            print(f"Error auto-saving prompt to {output_md}: {e}", file=sys.stderr)
+
         if self.files:
-            self.status_cb("Prompt generated — copy and paste into AI")
+            self.status_cb("Prompt generated — saved to disk & ready to copy")
         else:
-            self.status_cb("New project prompt generated — copy and paste into AI")
+            self.status_cb("New project prompt generated — saved to disk & ready to copy")
 
     def _copy(self):
         text = self.prompt_out.toPlainText()
