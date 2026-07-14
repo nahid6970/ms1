@@ -2,6 +2,7 @@ import sys
 import os
 import winreg
 import json
+import re
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QListWidget, 
@@ -27,7 +28,7 @@ class EnvVariableManager(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("ALIAS & CONTEXT MANAGER v1.0")
-        self.resize(1200, 700)
+        self.resize(1300, 750)
         
         # Apply Cyberpunk Theme
         self.apply_theme()
@@ -45,6 +46,7 @@ class EnvVariableManager(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.create_alias_tab(), "ALIASES")
         self.tabs.addTab(self.create_context_tab(), "CONTEXT MENU")
+        self.tabs.addTab(self.create_backup_tab(), "BACKUP/RESTORE")
         main_layout.addWidget(self.tabs)
         
         # Add status bar at bottom
@@ -233,6 +235,41 @@ class EnvVariableManager(QMainWindow):
         self.load_context_entries()
         return widget
 
+    def create_backup_tab(self):
+        """Create backup and restore tab"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        
+        info = QLabel("💾 BACKUP & RESTORE CONFIGURATION")
+        info.setStyleSheet(f"font-size: 14pt; color: {CP_YELLOW}; padding: 10px;")
+        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(info)
+        
+        desc = QLabel("Export all command aliases and context menu entries to a JSON file.")
+        desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 10px;")
+        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(desc)
+        
+        btn_layout = QHBoxLayout()
+        backup_btn = QPushButton("📤 EXPORT TO data.json")
+        import_btn = QPushButton("📥 IMPORT FROM data.json")
+        
+        backup_btn.setMinimumHeight(60)
+        import_btn.setMinimumHeight(60)
+        
+        backup_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_CYAN}; color: {CP_CYAN}; font-size: 12pt;")
+        import_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_ORANGE}; color: {CP_ORANGE}; font-size: 12pt;")
+        
+        backup_btn.clicked.connect(self.export_config)
+        import_btn.clicked.connect(self.import_config)
+        
+        btn_layout.addWidget(backup_btn)
+        btn_layout.addWidget(import_btn)
+        layout.addLayout(btn_layout)
+        
+        layout.addStretch()
+        return widget
+
     # ===== ALIAS METHODS =====
     def load_aliases(self):
         self.alias_list.clear()
@@ -285,7 +322,6 @@ class EnvVariableManager(QMainWindow):
 
     def setup_auto_load(self):
         try:
-            # PS profiles
             ps_profiles = [
                 os.path.join(os.path.expanduser("~"), "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1"),
                 os.path.join(os.path.expanduser("~"), "Documents", "PowerShell", "Microsoft.PowerShell_profile.ps1")
@@ -300,12 +336,10 @@ class EnvVariableManager(QMainWindow):
                     with open(ps_profile, 'a', encoding='utf-8') as f:
                         f.write(f"\n# Auto-load aliases\n{loader_line}")
             
-            # CMD
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Command Processor", 0, winreg.KEY_SET_VALUE)
             winreg.SetValueEx(key, "AutoRun", 0, winreg.REG_SZ, os.path.join(self.alias_dir, "aliases.cmd"))
             winreg.CloseKey(key)
 
-            # Bash
             bashrc = os.path.join(os.path.expanduser("~"), ".bashrc")
             bash_loader_line = f"source ~/.aliases/aliases.sh\n"
             existing_bash = ""
@@ -484,6 +518,55 @@ class EnvVariableManager(QMainWindow):
                 self._delete_reg_key(winreg.HKEY_CURRENT_USER, path)
                 self.load_context_entries()
 
+    def move_context_up(self):
+        self._swap_logic(-1)
+
+    def move_context_down(self):
+        self._swap_logic(1)
+
+    def _swap_logic(self, offset):
+        row = self.context_table.currentRow()
+        target = row + offset
+        if target < 0 or target >= self.context_table.rowCount(): return
+        
+        p1 = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        p2 = self.context_table.item(target, 0).data(Qt.ItemDataRole.UserRole)
+        if not p1 or not p2: return
+
+        try:
+            self._swap_registry_keys(p1, p2)
+            self.load_context_entries()
+            self.context_table.selectRow(target)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))
+
+    def _swap_registry_keys(self, p1, p2):
+        n1, n2 = p1.split('\\')[-1], p2.split('\\')[-1]
+        parent = "\\".join(p1.split('\\')[:-1])
+        temp = f"{parent}\\_TEMP_{datetime.now().microsecond}"
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, p1, temp)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, p1)
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, p2, p1)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, p2)
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, temp, p2)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, temp)
+
+    def _copy_reg_key(self, hkey, src, dst):
+        with winreg.OpenKey(hkey, src, 0, winreg.KEY_READ) as skey:
+            with winreg.CreateKey(hkey, dst) as dkey:
+                i = 0
+                while True:
+                    try:
+                        n, v, t = winreg.EnumValue(skey, i)
+                        winreg.SetValueEx(dkey, n, 0, t, v); i += 1
+                    except OSError: break
+            i = 0
+            while True:
+                try:
+                    sn = winreg.EnumKey(skey, i)
+                    self._copy_reg_key(hkey, f"{src}\\{sn}", f"{dst}\\{sn}"); i += 1
+                except OSError: break
+
     def _delete_reg_key(self, hkey, path):
         try:
             key = winreg.OpenKey(hkey, path, 0, winreg.KEY_ALL_ACCESS)
@@ -494,20 +577,102 @@ class EnvVariableManager(QMainWindow):
             winreg.DeleteKey(hkey, path)
         except: pass
 
-    def move_context_up(self): self._swap_sibling( -1)
-    def move_context_down(self): self._swap_sibling( 1)
+    # ===== BACKUP / RESTORE METHODS =====
+    def get_context_menu_data(self):
+        data = {}
+        bases = [("Directory\\Background\\shell", "Background"), ("Directory\\shell", "Folder"), ("*\\shell", "AllFiles")]
+        for bp, s in bases:
+            res = self._export_shell_keys(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{bp}")
+            if res: data[s] = res
+        return data
 
-    def _swap_sibling(self, direction):
-        row = self.context_table.currentRow()
-        target = row + direction
-        if target < 0 or target >= self.context_table.rowCount(): return
-        
-        p1 = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        p2 = self.context_table.item(target, 0).data(Qt.ItemDataRole.UserRole)
-        if not p1 or not p2: return
+    def _export_shell_keys(self, hkey, path):
+        entries = {}
+        try:
+            key = winreg.OpenKey(hkey, path, 0, winreg.KEY_READ)
+            i = 0
+            while True:
+                try:
+                    sn = winreg.EnumKey(key, i)
+                    if sn.lower() in ["cmd", "powershell", "anycode", "wsl"]: i += 1; continue
+                    fp = f"{path}\\{sn}"; ed = {}
+                    with winreg.OpenKey(hkey, fp, 0, winreg.KEY_READ) as sk:
+                        for val in ["MUIVerb", "Icon", "SubCommands", "CommandFlags"]:
+                            try: ed[val], _ = winreg.QueryValueEx(sk, val)
+                            except: pass
+                    try:
+                        with winreg.OpenKey(hkey, f"{fp}\\command", 0, winreg.KEY_READ) as ck:
+                            ed["command"], _ = winreg.QueryValueEx(ck, "")
+                    except: pass
+                    try:
+                        winreg.OpenKey(hkey, f"{fp}\\shell", 0, winreg.KEY_READ)
+                        ed["children"] = self._export_shell_keys(hkey, f"{fp}\\shell")
+                    except: pass
+                    entries[sn] = ed; i += 1
+                except OSError: break
+            winreg.CloseKey(key)
+        except: pass
+        return entries
 
-        # Swap by renaming logic... simplified here as a message
-        self.set_status("Moving keys requires recursive rename - Not implemented in this view", CP_ORANGE)
+    def export_config(self):
+        path = os.path.join(os.path.dirname(__file__), "data.json")
+        try:
+            config = {
+                "version": "1.3",
+                "timestamp": datetime.now().isoformat(),
+                "aliases": self.aliases,
+                "context_menu": self.get_context_menu_data()
+            }
+            with open(path, 'w', encoding='utf-8') as f: json.dump(config, f, indent=4)
+            self.set_status("Exported to data.json", CP_GREEN)
+            QMessageBox.information(self, "Success", f"Exported to {path}")
+        except Exception as e:
+            self.set_status("Export failed", CP_RED)
+
+    def import_config(self):
+        path = os.path.join(os.path.dirname(__file__), "data.json")
+        if not os.path.exists(path): return
+        try:
+            with open(path, 'r', encoding='utf-8') as f: config = json.load(f)
+            
+            # User path remapping
+            cur_user = os.path.basename(os.path.expanduser("~"))
+            def remap(item, old, new):
+                if isinstance(item, dict): return {k: remap(v, old, new) for k, v in item.items()}
+                if isinstance(item, str): return item.replace(f"C:\\Users\\{old}", f"C:\\Users\\{new}").replace(f"C:/Users/{old}", f"C:/Users/{new}")
+                return item
+            
+            # Simple check for old users
+            m = re.search(r'C:\\Users\\([^\\]+)', json.dumps(config), re.I)
+            if m and m.group(1).lower() != cur_user.lower():
+                config = remap(config, m.group(1), cur_user)
+
+            if "aliases" in config:
+                self.aliases.update(config["aliases"])
+                self.save_aliases()
+            if "context_menu" in config:
+                for s, ent in config["context_menu"].items():
+                    bp = {"Background": r"Directory\Background\shell", "Folder": r"Directory\shell", "AllFiles": r"*\shell"}.get(s)
+                    if bp: self._import_shell_entries(winreg.HKEY_CURRENT_USER, f"Software\\Classes\\{bp}", ent)
+            
+            self.load_aliases(); self.load_context_entries()
+            self.set_status("Imported successfully", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Import failed: {e}", CP_RED)
+
+    def _import_shell_entries(self, hkey, path, entries):
+        for n, d in entries.items():
+            fp = f"{path}\\{n}"
+            key = winreg.CreateKey(hkey, fp)
+            for k in ["MUIVerb", "Icon", "SubCommands"]:
+                if k in d: winreg.SetValueEx(key, k, 0, winreg.REG_SZ, d[k])
+            if "CommandFlags" in d: winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, d["CommandFlags"])
+            winreg.CloseKey(key)
+            if "command" in d:
+                with winreg.CreateKey(hkey, f"{fp}\\command") as ck: winreg.SetValue(ck, "", winreg.REG_SZ, d["command"])
+            if "children" in d:
+                winreg.CreateKey(hkey, f"{fp}\\shell")
+                self._import_shell_entries(hkey, f"{fp}\\shell", d["children"])
 
     def set_status(self, message, color=CP_TEXT):
         self.status_label.setText(message)

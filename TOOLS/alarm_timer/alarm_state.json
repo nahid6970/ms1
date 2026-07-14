@@ -33,6 +33,15 @@
           "type": "text",
           "label": "12",
           "body": ""
+        },
+        {
+          "id": "462c6b87",
+          "label": "Month END",
+          "fires_at": 1785610357.893,
+          "created_at": 1784051591.9914298,
+          "input_mode": "picker",
+          "input_value": "",
+          "use_custom_colors": false
         }
       ]
     },
