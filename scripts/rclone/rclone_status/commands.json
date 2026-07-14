@@ -5,6 +5,10 @@
         "dst": "c:/asdasda",
         "cmd": "rclone check src dst --size-only",
         "index": 1,
-        "enabled": true
+        "enabled": true,
+        "last_dir": "R2L",
+        "last_op": "copy",
+        "last_ignore": "",
+        "last_flags": "--fast-list -P --size-only"
     }
 }

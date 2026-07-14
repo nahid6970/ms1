@@ -26,9 +26,9 @@ CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"          
 CP_TEXT = "#E0E0E0"         
 
-# SVG Resources - Increased stroke weight for visibility
-ARROW_RIGHT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
-ARROW_LEFT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
+# SVG Resources - Using pure white stroke for maximum contrast
+ARROW_RIGHT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
+ARROW_LEFT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
 
 JSON_PATH = os.path.join(os.path.dirname(__file__), "commands.json")
 SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
@@ -127,6 +127,8 @@ class ProjectActionWindow(tk.Toplevel):
         self.key = key
         self.direction = cfg.get("last_dir", "L2R")
         self.op_mode = cfg.get("last_op", "sync")
+        
+        # Reference images on self to prevent garbage collection
         self.img_r = get_svg_image(ARROW_RIGHT_SVG)
         self.img_l = get_svg_image(ARROW_LEFT_SVG)
         
@@ -148,22 +150,29 @@ class ProjectActionWindow(tk.Toplevel):
         self.side_a_ent.insert(0, self.cfg["src"])
         self.side_a_ent.pack(side="left", fill="x", expand=True)
 
-        self.arrow_btn = tk.Button(inner, image=self.img_r if self.direction=="L2R" else self.img_l, bg=CP_BG, activebackground=CP_BG, bd=0, command=self.toggle_direction, cursor="hand2")
+        # Use text fallback if SVG fails to load
+        self.arrow_btn = tk.Button(inner, bg=CP_BG, activebackground=CP_BG, bd=0, command=self.toggle_direction, cursor="hand2")
+        if self.img_r:
+            self.arrow_btn.config(image=self.img_r if self.direction=="L2R" else self.img_l)
+        else:
+            self.arrow_btn.config(text="==>" if self.direction=="L2R" else "<==", fg=CP_CYAN, font=("Consolas", 18, "bold"))
         self.arrow_btn.pack(side="left", padx=20)
 
         self.side_b_ent = CyberEntry(inner, justify="right")
         self.side_b_ent.insert(0, self.cfg["dst"])
         self.side_b_ent.pack(side="left", fill="x", expand=True)
 
-        # Mode Selection (Cyber style)
+        # Mode Selection (Cyber Highlight)
         mode_frame = tk.Frame(content, bg=CP_BG)
         mode_frame.pack(fill="x", pady=5)
         self.mode_btns = {}
         for m in ["sync", "copy", "check"]:
-            btn = HoverButton(mode_frame, text=m.upper(), width=12, default_color=CP_PANEL if self.op_mode != m else CP_CYAN, default_fg="white" if self.op_mode != m else "black")
+            btn = HoverButton(mode_frame, text=m.upper(), width=12)
             btn.config(command=lambda mode=m: self.set_mode(mode))
             btn.pack(side="left", padx=5)
             self.mode_btns[m] = btn
+        
+        self.set_mode(self.op_mode) # Initialize highlighted state
 
         # Options
         opt_group = tk.LabelFrame(content, text=" CONFIG_OVERRIDE ", bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 9, "bold"), bd=1, relief="solid")
@@ -193,19 +202,30 @@ class ProjectActionWindow(tk.Toplevel):
     def set_mode(self, m):
         self.op_mode = m
         for k, b in self.mode_btns.items():
-            b.config(bg=CP_PANEL if k != m else CP_CYAN, fg="white" if k != m else "black")
+            if k == m:
+                # Highlighted Selected State
+                b.default_color = CP_YELLOW
+                b.default_fg = "black"
+                b.configure(bg=CP_YELLOW, fg="black")
+            else:
+                # Dim Unselected State
+                b.default_color = CP_PANEL
+                b.default_fg = CP_TEXT
+                b.configure(bg=CP_PANEL, fg=CP_TEXT)
 
     def toggle_direction(self):
         self.direction = "R2L" if self.direction == "L2R" else "L2R"
-        self.arrow_btn.config(image=self.img_r if self.direction=="L2R" else self.img_l)
+        if self.img_r:
+            self.arrow_btn.config(image=self.img_r if self.direction=="L2R" else self.img_l)
+        else:
+            self.arrow_btn.config(text="==>" if self.direction=="L2R" else "<==")
         self.update_ui_state()
 
     def update_ui_state(self):
-        self.side_a_ent.config(highlightcolor=CP_CYAN if self.direction == "L2R" else CP_RED)
-        self.side_b_ent.config(highlightcolor=CP_RED if self.direction == "L2R" else CP_CYAN)
+        self.side_a_ent.config(highlightbackground=CP_CYAN if self.direction == "L2R" else CP_RED)
+        self.side_b_ent.config(highlightbackground=CP_RED if self.direction == "L2R" else CP_CYAN)
 
     def run_task(self):
-        # Persistent memory
         self.cfg["src"] = self.side_a_ent.get()
         self.cfg["dst"] = self.side_b_ent.get()
         self.cfg["last_dir"] = self.direction
@@ -239,7 +259,6 @@ def edit_command(key):
     
     win = tk.Toplevel(ROOT)
     container = setup_custom_window(win, "REGISTRY_EDITOR", 500, 600)
-    
     body = tk.Frame(container, bg=CP_BG)
     body.pack(fill="both", expand=True, padx=20, pady=10)
 
