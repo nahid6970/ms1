@@ -915,7 +915,7 @@
         },
         {
             "text": "W",
-            "fg": "#ffffff",
+            "fg": "#00FFFF",
             "bg": "#050505",
             "id": "btn_1784049314",
             "bindings": {
@@ -924,10 +924,10 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": true,
-                    "cmd": "winget search \"\" | Select-Object -Skip 2 | fzf --preview 'winget show {2}' --layout=reverse --bind 'enter:execute(winget install --id {2} --silent --accept-package-agreements --accept-source-agreements)'"
+                    "cmd": "winget search \"\" | Select-Object -Skip 2 | fzf --preview 'winget show {2}' --layout=reverse --bind \"enter:execute(winget install {2} --accept-package-agreements --accept-source-agreements)\""
                 },
                 "Button-3": {
-                    "type": "subprocess",
+                    "type": "run_command",
                     "hide": false,
                     "admin": false,
                     "new_terminal": true,
@@ -938,7 +938,7 @@
             "font": [
                 "Arial",
                 15,
-                "normal"
+                "bold"
             ],
             "border": 0,
             "border_radius": 0,
@@ -961,7 +961,7 @@
         },
         {
             "text": "S",
-            "fg": "#ffffff",
+            "fg": "#FFFF7F",
             "bg": "#050505",
             "id": "btn_1784050576",
             "bindings": {
@@ -984,7 +984,7 @@
             "font": [
                 "Arial",
                 15,
-                "normal"
+                "bold"
             ],
             "border": 0,
             "border_radius": 0,
