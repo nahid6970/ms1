@@ -6,8 +6,6 @@ Persistent
 
 ;! v2 startups
 #Include C:\@delta\ms1\scripts\Autohtokey\version2\tray.ahk
-#Include C:\@delta\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
-#Include C:\@delta\ms1\scripts\pyautogui\Clash_of_Clans.ahk
 #Include C:\@delta\ms1\scripts\Autohtokey\math.ahk
 #Include "C:\@delta\ms1\@AutoHotKey\shortcut_manager\generated_shortcuts.ahk"
 ; #Include "C:\@delta\ms1\scripts\Autohtokey\recordKey.ahk"
