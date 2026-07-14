@@ -2695,7 +2695,7 @@ class PrepTab(QWidget):
 
         # Save prompt to external MD file for history/external use
         try:
-            output_md = r"C:\@delta\output\code_merger\generated_prmpt.md"
+            output_md = r"C:\@delta\output\code_merger\code_merger_generated_prmpt.md"
             os.makedirs(os.path.dirname(output_md), exist_ok=True)
             with open(output_md, 'w', encoding='utf-8') as f:
                 f.write(prompt)
