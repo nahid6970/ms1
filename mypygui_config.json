@@ -968,14 +968,14 @@
                 "Button-1": {
                     "type": "run_command",
                     "hide": false,
-                    "admin": false,
+                    "admin": true,
                     "new_terminal": true,
                     "cmd": "scoop search | Select-Object -Skip 4 | fzf --preview 'scoop info {1}' --layout=reverse --bind 'enter:execute(scoop install {1})'"
                 },
                 "Button-3": {
                     "type": "run_command",
                     "hide": false,
-                    "admin": false,
+                    "admin": true,
                     "new_terminal": true,
                     "cmd": "scoop list | Select-Object -Skip 4 | fzf --preview 'scoop info {1}' --layout=reverse --bind 'enter:execute(scoop uninstall {1})'"
                 }
