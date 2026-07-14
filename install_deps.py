@@ -3,7 +3,10 @@
 install_deps.py — Parse a Python script and install only the third-party
 imports that are actually used, via `uv pip install --system`.
 
-Usage: python install_deps.py <script.py>
+Usage: 
+  1. CLI: python install_deps.py <script.py>
+  2. Integration: Add this to the top of any script:
+     import install_deps; install_deps.bootstrap(__file__)
 """
 
 import ast
@@ -13,7 +16,7 @@ import subprocess
 import importlib.util
 
 # stdlib modules (won't be installed)
-STDLIB = sys.stdlib_module_names - ({"curses"} if sys.platform == "win32" else set())  # Python 3.10+
+STDLIB = sys.stdlib_module_names - ({"curses"} if sys.platform == "win32" else set())
 
 # map import name → pip package name when they differ
 IMPORT_TO_PKG = {
@@ -43,62 +46,6 @@ IMPORT_TO_PKG = {
     "winpty": "pywinpty",
 }
 
-
-def get_imported_names(tree: ast.AST) -> set[str]:
-    """Return top-level module names that appear in import statements."""
-    names = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                names.add(alias.name.split(".")[0])
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                names.add(node.module.split(".")[0])
-    return names
-
-
-def get_used_names(tree: ast.AST) -> set[str]:
-    """Return all Name/Attribute identifiers used in the code body."""
-    used = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name):
-            used.add(node.id)
-        elif isinstance(node, ast.Attribute):
-            # collect root of attribute chains
-            root = node
-            while isinstance(root, ast.Attribute):
-                root = root.value
-            if isinstance(root, ast.Name):
-                used.add(root.id)
-    return used
-
-
-def is_used(module: str, tree: ast.AST, used_names: set[str]) -> bool:
-    """Check if a module is actually referenced in the code (not just imported)."""
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name.split(".")[0] == module:
-                    # bare `import x` with no alias — treat as used (may have side effects)
-                    if alias.asname is None:
-                        return True
-                    if alias.asname in used_names:
-                        return True
-        elif isinstance(node, ast.ImportFrom):
-            if node.module and node.module.split(".")[0] == module:
-                for alias in node.names:
-                    bound = alias.asname or alias.name
-                    if bound == "*" or bound in used_names:
-                        return True
-    return False
-
-
-def resolve_pkg(module: str) -> str:
-    return IMPORT_TO_PKG.get(module, module)
-
-
-# For packages where top-level import succeeds but submodules may be missing,
-# verify a known submodule instead.
 VERIFY_SUBMODULE = {
     "PyQt6": "PyQt6.QtWidgets",
     "PyQt5": "PyQt5.QtWidgets",
@@ -110,157 +57,148 @@ VERIFY_SUBMODULE = {
     "numpy": "numpy.core",
 }
 
-def is_installed(module: str, script_dir: str = None) -> bool:
-    """Check if a module is installed globally or exists locally in the script's directory."""
-    # 1. Check local directory (so we don't try to pip install local files/folders)
-    if script_dir:
-        if os.path.exists(os.path.join(script_dir, f"{module}.py")):
-            return True
-        if os.path.isdir(os.path.join(script_dir, module)):
-            return True
-
-    # 2. Check installed packages
-    check = VERIFY_SUBMODULE.get(module, module)
-    try:
-        if importlib.util.find_spec(check) is None:
-            return False
-        return True
-    except Exception:
-        return False
-
-
-def get_unused_import_lines(tree: ast.AST, used_names: set[str], source: str) -> set[int]:
-    """Return 0-indexed line numbers of unused import statements."""
-    unused_lines = set()
+def get_imported_names(tree: ast.AST) -> set[str]:
+    names = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                mod = alias.name.split(".")[0]
-                if mod in STDLIB:
-                    continue
-                # bare import with no alias → always keep
-                if alias.asname is None:
-                    if mod not in used_names:
-                        unused_lines.add(node.lineno - 1)
-                else:
-                    if alias.asname not in used_names:
-                        unused_lines.add(node.lineno - 1)
+                names.add(alias.name.split(".")[0])
         elif isinstance(node, ast.ImportFrom):
-            if not node.module:
-                continue
-            all_unused = all(
-                (alias.asname or alias.name) not in used_names and (alias.asname or alias.name) != "*"
-                for alias in node.names
-            )
-            if all_unused:
-                unused_lines.add(node.lineno - 1)
-    return unused_lines
+            if node.module:
+                names.add(node.module.split(".")[0])
+    return names
 
+def get_used_names(tree: ast.AST) -> set[str]:
+    used = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name):
+            used.add(node.id)
+        elif isinstance(node, ast.Attribute):
+            root = node
+            while isinstance(root, ast.Attribute):
+                root = root.value
+            if isinstance(root, ast.Name):
+                used.add(root.id)
+    return used
 
-def clean_unused_imports(script: str, tree: ast.AST, used_names: set[str]) -> None:
-    with open(script, encoding="utf-8") as f:
-        lines = f.readlines()
+def is_used(module: str, tree: ast.AST, used_names: set[str]) -> bool:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.split(".")[0] == module:
+                    if alias.asname is None or alias.asname in used_names:
+                        return True
+        elif isinstance(node, ast.ImportFrom):
+            if node.module and node.module.split(".")[0] == module:
+                for alias in node.names:
+                    bound = alias.asname or alias.name
+                    if bound == "*" or bound in used_names:
+                        return True
+    return False
 
-    unused = get_unused_import_lines(tree, used_names, "".join(lines))
-    if not unused:
-        print("No unused imports to remove.")
+def is_installed(module: str, script_dir: str = None) -> bool:
+    if script_dir:
+        if os.path.exists(os.path.join(script_dir, f"{module}.py")): return True
+        if os.path.isdir(os.path.join(script_dir, module)): return True
+    check = VERIFY_SUBMODULE.get(module, module)
+    try:
+        return importlib.util.find_spec(check) is not None
+    except Exception:
+        return False
+
+def resolve_pkg(module: str) -> str:
+    return IMPORT_TO_PKG.get(module, module)
+
+def bootstrap(script_path: str):
+    """
+    Call this at the top of a script to auto-install dependencies.
+    Example: import install_deps; install_deps.bootstrap(__file__)
+    """
+    # Prevent infinite loops if a package fails to install
+    if os.environ.get("INSTALL_DEPS_RESTARTED") == script_path:
         return
 
-    new_lines = [l for i, l in enumerate(lines) if i not in unused]
-    with open(script, "w", encoding="utf-8") as f:
-        f.writelines(new_lines)
+    script_path = os.path.abspath(script_path)
+    script_dir = os.path.dirname(script_path)
 
-    for i in sorted(unused):
-        print(f"  removed line {i+1}: {lines[i].rstrip()}")
-    print(f"Removed {len(unused)} unused import(s).")
+    with open(script_path, encoding="utf-8") as f:
+        tree = ast.parse(f.read(), filename=script_path)
 
-
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: install_deps.py <script.py> [--clean] [--run]")
-        sys.exit(1)
-
-    script = sys.argv[1]
-    clean = "--clean" in sys.argv
-    run = True  # always run the script after
-
-    with open(script, encoding="utf-8") as f:
-        source = f.read()
-
-    tree = ast.parse(source, filename=script)
     imported = get_imported_names(tree)
     used_names = get_used_names(tree)
-
     third_party = {m for m in imported if m not in STDLIB}
-    script_dir = os.path.dirname(os.path.abspath(script))
-    failed = []
-
-    if clean:
-        clean_unused_imports(script, tree, used_names)
-    else:
-        to_install = []
-        for mod in sorted(third_party):
-            if not is_used(mod, tree, used_names):
-                print(f"  skip (unused): {mod}")
-                continue
-            if is_installed(mod, script_dir):
-                print(f"  skip (present): {mod}")
-                continue
+    
+    to_install = []
+    for mod in sorted(third_party):
+        if is_used(mod, tree, used_names) and not is_installed(mod, script_dir):
             pkg = resolve_pkg(mod)
             if sys.platform != "win32" and pkg in {"pywin32", "windows-curses", "pywinpty"}:
-                print(f"  skip (Windows-only package): {pkg}")
                 continue
             to_install.append(pkg)
 
-        to_install = sorted(set(to_install))
+    if not to_install:
+        return
 
-        if not to_install:
-            print("Nothing to install.")
-        else:
-            print(f"\n[!] The following third-party packages will be installed:")
-            for pkg in to_install:
-                print(f"  - {pkg}")
-            
-            try:
-                input("\nPress [ENTER] to proceed with installation, or Ctrl+C to cancel...")
-            except KeyboardInterrupt:
-                print("\nInstallation cancelled by user.")
-                sys.exit(0)
+    print(f"\n[!] Missing dependencies for {os.path.basename(script_path)}: {', '.join(to_install)}")
+    print("[!] Installing via uv...")
+    
+    for pkg in to_install:
+        subprocess.run(["uv", "pip", "install", "--system", pkg])
 
-            print("")
-            for pkg in to_install:
-                print(f"  installing {pkg}...")
-                proc = subprocess.run(["uv", "pip", "install", "--system", pkg])
-                if proc.returncode != 0:
-                    failed.append(pkg)
+    print("[!] Dependencies installed. Restarting script...\n")
+    os.environ["INSTALL_DEPS_RESTARTED"] = script_path
+    # Pass the current PYTHONPATH to the child process so it can still find install_deps.py
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.path.dirname(__file__) + os.pathsep + env.get("PYTHONPATH", "")
+    os.execve(sys.executable, [sys.executable, script_path] + sys.argv[1:], env)
+
+def clean_unused_imports(script: str) -> None:
+    with open(script, encoding="utf-8") as f:
+        lines = f.readlines()
+    tree = ast.parse("".join(lines))
+    used_names = get_used_names(tree)
+    
+    unused_indices = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            mod = (node.module.split(".")[0] if isinstance(node, ast.ImportFrom) else node.names[0].name.split(".")[0])
+            if mod in STDLIB: continue
             
-            if failed:
-                print(f"\nFAILED to install: {', '.join(failed)}")
-                if "pyaudio" in failed and sys.platform == "win32":
-                    print("\nTIP: 'pyaudio' requires 'Microsoft Visual C++ Build Tools' on Windows.")
-                    print("Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/")
+            is_any_used = False
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.asname is None or alias.asname in used_names:
+                        is_any_used = True; break
             else:
-                print("All packages installed successfully.")
+                for alias in node.names:
+                    if (alias.asname or alias.name) == "*" or (alias.asname or alias.name) in used_names:
+                        is_any_used = True; break
+            
+            if not is_any_used:
+                unused_indices.append(node.lineno - 1)
 
-    if run:
-        # Warning for experimental Python versions
-        if sys.version_info.major == 3 and sys.version_info.minor >= 14:
-            print(f"\nNOTICE: You are using Python {sys.version_info.major}.{sys.version_info.minor} (Alpha/Dev).")
-            if failed:
-                print("Note: Pre-compiled binaries (wheels) rarely exist for this Python version yet.")
+    if not unused_indices:
+        print("No unused imports to remove.")
+        return
 
-        if failed:
-            print(f"\n[!] WARNING: Running script with MISSING dependencies: {', '.join(failed)}")
-            print("[!] This is 'ok' for now, but features using these modules will crash.")
-            print("[!] To fix this, you must install 'Microsoft C++ Build Tools' to compile from source.")
+    new_lines = [l for i, l in enumerate(lines) if i not in unused_indices]
+    with open(script, "w", encoding="utf-8") as f:
+        f.writelines(new_lines)
+    print(f"Removed {len(unused_indices)} unused import(s).")
 
-        print(f"\nRunning {script} ...\n")
-        result = subprocess.run([sys.executable, script])
-        
-        if result.returncode != 0 and failed:
-            print(f"\n[!] Script exited with error ({result.returncode}).")
-            print(f"[!] This is likely because the following modules are missing: {', '.join(failed)}")
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: install_deps.py <script.py> [--clean]")
+        sys.exit(1)
 
+    script = sys.argv[1]
+    if "--clean" in sys.argv:
+        clean_unused_imports(script)
+    else:
+        bootstrap(script)
+        # If bootstrap returns, it means everything was already installed
+        print(f"Running {script} ...\n")
+        subprocess.run([sys.executable, script])
 
 if __name__ == "__main__":
     main()
