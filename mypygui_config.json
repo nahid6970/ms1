@@ -2,7 +2,7 @@
     "git_repos": [
         {
             "name": "ms1",
-            "path": "C:\\Users\\nahid\\@delta\\ms1",
+            "path": "C:\\@delta\\ms1",
             "label": "ms1",
             "fg": "",
             "bg": "",
@@ -32,7 +32,7 @@
         },
         {
             "name": "db",
-            "path": "C:\\Users\\nahid\\@delta\\db",
+            "path": "C:\\@delta\\db",
             "label": "db",
             "fg": "",
             "bg": "",
@@ -62,7 +62,7 @@
         },
         {
             "name": "test",
-            "path": "C:\\Users\\nahid\\@delta\\test",
+            "path": "C:\\@delta\\test",
             "label": "test",
             "fg": "",
             "bg": "",

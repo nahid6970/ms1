@@ -1,47 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-12T11:13:21.476218",
-    "user_env": {
-        "Path": "C:\\Users\\nahid6970\\scoop\\shims;C:\\Users\\nahid6970\\scoop\\apps\\ghostscript\\current\\lib;C:\\Users\\nahid6970\\scoop\\apps\\perl\\current\\perl\\site\\bin;C:\\Users\\nahid6970\\scoop\\apps\\perl\\current\\perl\\bin;C:\\Users\\nahid6970\\AppData\\Local\\agy\\bin;C:\\Users\\nahid6970\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts;C:\\Users\\nahid6970\\scoop\\persist\\bun\\bin;C:\\Users\\nahid6970\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid6970\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid6970\\go\\bin;C:\\Users\\nahid6970\\.local\\bin;C:\\Users\\nahid6970\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid6970\\scoop\\apps\\python312\\current;C:\\Users\\nahid6970\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid6970\\scoop\\shims;C:\\Users\\nahid6970\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid6970\\.cache\\lm-studio\\bin;C:\\Users\\nahid6970\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid6970\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Microsoft.Winget.Source_8wekyb3d8bbwe\\aria2-1.37.0-win-64bit-build1;C:\\Users\\nahid6970\\AppData\\Local\\Programs\\superfile\\;C:\\Users\\nahid6970\\.dotnet\\tools;C:\\Users\\nahid6970\\scoop\\apps\\msys2\\current\\usr\\bin;C:\\Users\\nahid6970\\scoop\\apps\\msys2\\current\\mingw64\\bin;C:\\Users\\nahid6970\\AppData\\Local\\Microsoft\\WinGet\\Links;C:\\Users\\nahid6970\\AppData\\Local\\SpacetimeDB;C:\\Users\\nahid6970\\.dotnet\\tools;C:\\Users\\nahid6970\\.lmstudio\\bin;C:\\zig\\zig-windows-x86_64-0.13.0;C:\\Users\\nahid6970\\AppData\\Local\\Kiro-Cli\\;C:\\Users\\nahid6970\\AppData\\Local\\Kiro-Cli",
-        "TEMP": "C:\\Users\\nahid6970\\AppData\\Local\\Temp",
-        "TMP": "C:\\Users\\nahid6970\\AppData\\Local\\Temp",
-        "GIT_INSTALL_ROOT": "C:\\Users\\nahid6970\\scoop\\apps\\git\\current",
-        "POSH_THEMES_PATH": "C:\\Users\\nahid6970\\scoop\\apps\\oh-my-posh\\current\\themes",
-        "BAT_CONFIG_DIR": "C:\\Users\\nahid6970\\scoop\\apps\\bat\\current",
-        "chocolateyinstall": "C:\\Users\\nahid6970\\AppData\\Local\\UniGetUI\\Chocolatey",
-        "OneDrive": "C:\\Users\\nahid6970\\OneDrive",
-        "CMDER_ROOT": "C:\\Users\\nahid6970\\scoop\\apps\\Cmder\\current",
-        "ConEmuDir": "C:\\Users\\nahid6970\\scoop\\apps\\Cmder\\current\\vendor\\conemu-maximus5",
-        "OLLAMA_HOST": "http://localhost:11434",
-        "OLLAMA_API_BASE": "http://127.0.0.1:11434",
-        "MOZ_PLUGIN_PATH": "C:\\Users\\nahid6970\\scoop\\apps\\foxit-reader\\2025.2.1\\plugins\\",
-        "export": "GOOSE_PROVIDER=gemini-cli",
-        "PSReadLineScreenReaderOptimization": "None",
-        "GOOGLE_CLOUD_PROJECT": "123",
-        "HERMES_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
-        "HERMES_HOME": "C:\\Users\\nahid6970\\AppData\\Local\\hermes"
-    },
-    "system_env": {
-        "ComSpec": "%SystemRoot%\\system32\\cmd.exe",
-        "DriverData": "C:\\Windows\\System32\\Drivers\\DriverData",
-        "OS": "Windows_NT",
-        "Path": "C:\\Program Files\\coreutils\\bin;C:\\Program Files\\ImageMagick-7.1.2-Q16;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current;C:\\Users\\nahid\\AppData\\Local\\UniGetUI\\Chocolatey\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current\\bin;C:\\Users\\nahid\\scoop\\apps\\nodejs-lts\\current;C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python312\\current;C:\\Users\\nahid\\scoop\\apps\\python311\\current\\Scripts;C:\\Users\\nahid\\scoop\\apps\\python311\\current;C:\\Users\\nahid\\scoop\\shims;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\nahid\\.cache\\lm-studio\\bin;C:\\Users\\nahid\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama;C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\aria2.aria2_Mic;C:\\Program Files\\Tailscale\\;C:\\Program Files\\Dart\\dart-sdk\\bin;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\jre\\bin\\server;C:\\Program Files\\Sniffnet\\;C:\\Program Files\\Meld\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\",
-        "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC",
-        "PROCESSOR_ARCHITECTURE": "AMD64",
-        "PSModulePath": "%ProgramFiles%\\WindowsPowerShell\\Modules;%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\Modules",
-        "TEMP": "%SystemRoot%\\TEMP",
-        "TMP": "%SystemRoot%\\TEMP",
-        "USERNAME": "SYSTEM",
-        "windir": "%SystemRoot%",
-        "NUMBER_OF_PROCESSORS": "8",
-        "PROCESSOR_LEVEL": "23",
-        "PROCESSOR_IDENTIFIER": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
-        "PROCESSOR_REVISION": "1801",
-        "POWERSHELL_TELEMETRY_OPTOUT": "1",
-        "DART_SDK": "C:\\Program Files\\Dart\\dart-sdk",
-        "CLASSPATH": "C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\lib\\xodopdfstudio.jar;C:\\Program Files\\Apryse Software\\Xodo PDF Reader\\lib\\cmaps.jar",
-        "POWERSHELL_DISTRIBUTION_CHANNEL": "MSI:Windows 10 Pro"
-    },
+    "timestamp": "2026-07-14T08:46:21.000000",
     "aliases": {
         "ll": "ls -la",
         "gs": "git status",
@@ -160,6 +119,5 @@
                 "command": "powershell.exe -Command \"$h=(Get-FileHash '\"%V\"').Hash; curl.exe -s -X POST -H 'x-apikey: a4203342501524109fa5505a77c2934cff3d137982d61fe725fb0c01bfbfe538' -F 'file=@\"%V\"' https://www.virustotal.com/api/v3/files; Start-Process \\\"https://www.virustotal.com/gui/file/$h\\\"\""
             }
         }
-    },
-    "scripts": {}
+    }
 }

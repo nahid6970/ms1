@@ -217,17 +217,7 @@ def main():
         if not to_install:
             print("Nothing to install.")
         else:
-            print(f"\n[!] The following third-party packages will be installed:")
-            for pkg in to_install:
-                print(f"  - {pkg}")
-            
-            try:
-                input("\nPress [ENTER] to proceed with installation, or Ctrl+C to cancel...")
-            except KeyboardInterrupt:
-                print("\nInstallation cancelled by user.")
-                sys.exit(0)
-
-            print("")
+            print(f"\nInstalling: {', '.join(to_install)}")
             for pkg in to_install:
                 print(f"  installing {pkg}...")
                 proc = subprocess.run(["uv", "pip", "install", "--system", pkg])

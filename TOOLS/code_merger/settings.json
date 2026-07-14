@@ -16,91 +16,99 @@
   "extension_icon_size": 20,
   "projects": [
     {
-      "path": "/home/nahid/@delta/db/@Convex/image-share",
+      "path": "C:\\@delta\\ms1",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\ENV",
+      "name": ""
+    },
+    {
+      "path": "\\home\\nahid\\@delta\\db\\@Convex\\image-share",
       "name": "Convex - Gallery"
     },
     {
-      "path": "/home/nahid/@delta/db/@Convex/myhome-convex",
+      "path": "\\home\\nahid\\@delta\\db\\@Convex\\myhome-convex",
       "name": "Convex - myhome"
     },
     {
-      "path": "/home/nahid/@delta/db/@run_from_db/Script_Manager",
+      "path": "\\home\\nahid\\@delta\\db\\@run_from_db\\Script_Manager",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/db/fifa",
+      "path": "\\home\\nahid\\@delta\\db\\fifa",
       "name": "Flask - FIFA"
     },
     {
-      "path": "/home/nahid/@delta/db/vlr",
+      "path": "\\home\\nahid\\@delta\\db\\vlr",
       "name": "Flask - VLR STATS"
     },
     {
-      "path": "/home/nahid/@delta/lol/@AutoHotKey/shortcut_manager",
+      "path": "\\home\\nahid\\@delta\\lol\\@AutoHotKey\\shortcut_manager",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/lol/TOOLS/ENV",
+      "path": "\\home\\nahid\\@delta\\lol\\TOOLS\\ENV",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/lol/TOOLS/espanso",
+      "path": "\\home\\nahid\\@delta\\lol\\TOOLS\\espanso",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/lol/TOOLS/profile_analyze",
+      "path": "\\home\\nahid\\@delta\\lol\\TOOLS\\profile_analyze",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/ms1",
+      "path": "\\home\\nahid\\@delta\\ms1",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/ms1/@AutoHotKey/Button_Generator",
+      "path": "\\home\\nahid\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
       "name": "AHK - Button Generator"
     },
     {
-      "path": "/home/nahid/@delta/ms1/@AutoHotKey/shortcut_manager",
+      "path": "\\home\\nahid\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
       "name": "AHK - Shortcut Manager"
     },
     {
-      "path": "/home/nahid/@delta/ms1/@Flask/5018_cell",
+      "path": "\\home\\nahid\\@delta\\ms1\\@Flask\\5018_cell",
       "name": "Flask - 5018 (Cell)"
     },
     {
-      "path": "/home/nahid/@delta/ms1/@Flask/5151_gallery",
+      "path": "\\home\\nahid\\@delta\\ms1\\@Flask\\5151_gallery",
       "name": ""
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/Editor",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\Editor",
       "name": "Tool - myEditor"
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/Image folder mover",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\Image folder mover",
       "name": "Tool - Image Mover"
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/alarm_timer",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\alarm_timer",
       "name": "Tool - Alarm Countodwn Timer"
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/code_merger",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Tool - Code Manager"
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/nerd-font-icon",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\nerd-font-icon",
       "name": "Tool - Nerd Icon Cnverter"
     },
     {
-      "path": "/home/nahid/@delta/ms1/TOOLS/terminal_tui",
+      "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\terminal_tui",
       "name": "Tool - Terminal TUI"
     },
     {
-      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/Automation",
+      "path": "\\home\\nahid\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",
       "name": "Extension - Automation"
     },
     {
-      "path": "/home/nahid/@delta/ms1/test_project/my-first-extension/convex_extensions_manager/tab_saver",
+      "path": "\\home\\nahid\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
       "name": "Extension - Tab Saver"
     }
   ],

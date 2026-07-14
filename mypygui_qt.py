@@ -1,18 +1,10 @@
-#!/usr/bin/env python3
 # mypygui_qt.py — PyQt6 rewrite of the Windows taskbar status bar
-
-import os
-import sys
-# Force X11/XCB backend on Linux to enable absolute positioning and docking via XWayland
-if sys.platform.startswith('linux'):
-    os.environ["QT_QPA_PLATFORM"] = "xcb"
 
 import ctypes
 import json
+import os
 import subprocess
-if os.name != 'nt':
-    subprocess.CREATE_NO_WINDOW = 0
-    subprocess.CREATE_NEW_CONSOLE = 0
+import sys
 import threading
 import time
 import re
@@ -84,10 +76,7 @@ class _RcloneSignal(QObject):
     run_next = pyqtSignal(dict, object) # (cfg, toggle_lbl)
 _rclone_sig = None  # initialized after QApplication exists
 
-if os.name == 'nt':
-    from ctypes import wintypes
-else:
-    wintypes = None
+from ctypes import wintypes
 
 # AppBar Constants
 ABM_NEW = 0x00000000
@@ -97,23 +86,17 @@ ABM_SETPOS = 0x00000003
 ABE_TOP = 1
 WM_USER = 0x0400
 
-if os.name == 'nt':
-    class APPBARDATA(ctypes.Structure):
-        _fields_ = [
-            ("cbSize", wintypes.DWORD),
-            ("hWnd", wintypes.HWND),
-            ("uCallbackMessage", wintypes.UINT),
-            ("uEdge", wintypes.UINT),
-            ("rc", wintypes.RECT),
-            ("lParam", wintypes.LPARAM),
-        ]
-else:
-    class APPBARDATA(object):
-        pass
+class APPBARDATA(ctypes.Structure):
+    _fields_ = [
+        ("cbSize", wintypes.DWORD),
+        ("hWnd", wintypes.HWND),
+        ("uCallbackMessage", wintypes.UINT),
+        ("uEdge", wintypes.UINT),
+        ("rc", wintypes.RECT),
+        ("lParam", wintypes.LPARAM),
+    ]
 
 def register_appbar(hwnd):
-    if os.name != 'nt':
-        return
     abd = APPBARDATA()
     abd.cbSize = ctypes.sizeof(APPBARDATA)
     abd.hWnd = hwnd
@@ -121,16 +104,12 @@ def register_appbar(hwnd):
     ctypes.windll.shell32.SHAppBarMessage(ABM_NEW, ctypes.byref(abd))
 
 def unregister_appbar(hwnd):
-    if os.name != 'nt':
-        return
     abd = APPBARDATA()
     abd.cbSize = ctypes.sizeof(APPBARDATA)
     abd.hWnd = hwnd
     ctypes.windll.shell32.SHAppBarMessage(ABM_REMOVE, ctypes.byref(abd))
 
 def set_appbar_position(hwnd, width, height):
-    if os.name != 'nt':
-        return
     screen_geo = QApplication.primaryScreen().geometry()
     sw, sh = screen_geo.width(), screen_geo.height()
     abd = APPBARDATA()
@@ -216,181 +195,6 @@ DIALOG_QSS = f"""
 
 DEFAULT_FONT_FALLBACK = ["JetBrainsMono NFP", 16, "bold"]
 
-def normalize_path(path):
-    if not path:
-        return path
-    if os.name != 'nt':
-        home = os.path.expanduser("~")
-        path = path.replace("C:\\Users\\nahid", home)
-        path = path.replace("C:/Users/nahid", home)
-        path = path.replace("C:\\@delta", os.path.join(home, "@delta"))
-        path = path.replace("C:/@delta", os.path.join(home, "@delta"))
-        path = path.replace("\\", "/")
-        if path.startswith("C:"):
-            path = path.replace("C:", home, 1)
-        elif path.startswith("D:"):
-            path = path.replace("D:", home, 1)
-    return path
-
-def normalize_config_paths(obj):
-    if isinstance(obj, dict):
-        return {k: normalize_config_paths(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [normalize_config_paths(x) for x in obj]
-    elif isinstance(obj, str):
-        if "\\" in obj or ("/" in obj and ("Users/" in obj or "C:/" in obj or "D:/" in obj or "@delta/" in obj)):
-            return normalize_path(obj)
-        return obj
-    return obj
-
-def denormalize_path(path):
-    if not path:
-        return path
-    if os.name != 'nt':
-        home = os.path.expanduser("~")
-        if path.startswith(home):
-            path = path.replace(home, "C:\\Users\\nahid", 1)
-        path = path.replace("/", "\\")
-    return path
-
-def denormalize_config_paths(obj):
-    if isinstance(obj, dict):
-        return {k: denormalize_config_paths(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [denormalize_config_paths(x) for x in obj]
-    elif isinstance(obj, str):
-        if "/" in obj and not obj.startswith("http"):
-            return denormalize_path(obj)
-        return obj
-    return obj
-
-def open_path(path):
-    try:
-        if os.name == 'nt':
-            os.startfile(path)
-        else:
-            subprocess.Popen(['xdg-open', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception as e:
-        logging.error(f"Failed to open path {path}: {e}")
-
-def set_x11_struts(win_id, height):
-    if os.name == 'nt' or QApplication.platformName() != "xcb":
-        return
-    try:
-        import ctypes
-        x11 = ctypes.cdll.LoadLibrary("libX11.so.6")
-        
-        x11.XOpenDisplay.restype = ctypes.c_void_p
-        x11.XOpenDisplay.argtypes = [ctypes.c_char_p]
-        display = x11.XOpenDisplay(None)
-        if not display:
-            return
-        
-        x11.XInternAtom.restype = ctypes.c_ulong
-        x11.XInternAtom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
-        
-        atom_strut = x11.XInternAtom(display, b"_NET_WM_STRUT", 0)
-        atom_strut_partial = x11.XInternAtom(display, b"_NET_WM_STRUT_PARTIAL", 0)
-        atom_cardinal = x11.XInternAtom(display, b"CARDINAL", 0)
-        atom_type = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE", 0)
-        atom_atom = x11.XInternAtom(display, b"ATOM", 0)
-        
-        screen_geo = QApplication.primaryScreen().geometry()
-        sw = screen_geo.width()
-        
-        strut_data = (ctypes.c_long * 4)(0, 0, height, 0)
-        strut_partial_data = (ctypes.c_long * 12)(0, 0, height, 0, 0, 0, 0, 0, 0, sw - 1, 0, 0)
-        
-        x11.XChangeProperty.argtypes = [
-            ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong,
-            ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_int
-        ]
-        
-        # Set struts
-        x11.XChangeProperty(display, win_id, atom_strut, atom_cardinal, 32, 0, ctypes.byref(strut_data), 4)
-        x11.XChangeProperty(display, win_id, atom_strut_partial, atom_cardinal, 32, 0, ctypes.byref(strut_partial_data), 12)
-        
-        # Set window type to DOCK so Wayland compositors (like KWin) reserve space automatically
-        if height > 0:
-            atom_dock = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE_DOCK", 0)
-            type_data = (ctypes.c_ulong * 1)(atom_dock)
-            x11.XChangeProperty(display, win_id, atom_type, atom_atom, 32, 0, ctypes.byref(type_data), 1)
-        else:
-            atom_normal = x11.XInternAtom(display, b"_NET_WM_WINDOW_TYPE_NORMAL", 0)
-            type_data = (ctypes.c_ulong * 1)(atom_normal)
-            x11.XChangeProperty(display, win_id, atom_type, atom_atom, 32, 0, ctypes.byref(type_data), 1)
-        
-        x11.XFlush.restype = ctypes.c_int
-        x11.XFlush.argtypes = [ctypes.c_void_p]
-        x11.XFlush(display)
-        
-        x11.XCloseDisplay.restype = ctypes.c_int
-        x11.XCloseDisplay.argtypes = [ctypes.c_void_p]
-        x11.XCloseDisplay(display)
-    except Exception as e:
-        print(f"Failed to set X11 struts: {e}")
-
-
-
-def run_in_terminal(command, cwd=None, title="Terminal"):
-    if os.name == 'nt':
-        if "lazygit" in command:
-            subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=cwd, shell=True)
-        elif "edit " in command:
-            subprocess.Popen(["powershell", "-NoExit", "-Command", command], creationflags=subprocess.CREATE_NEW_CONSOLE)
-        else:
-            subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='{title}' ; {command}}}"], shell=True, cwd=cwd)
-    else:
-        import shutil
-        terminals = [
-            ["gnome-terminal", "--", "bash", "-c"],
-            ["konsole", "-e", "bash", "-c"],
-            ["xfce4-terminal", "-e", "bash", "-c"],
-            ["kitty", "bash", "-c"],
-            ["alacritty", "-e", "bash", "-c"],
-            ["xterm", "-e", "bash", "-c"]
-        ]
-        
-        cleaned_cmd = command
-        if cleaned_cmd.startswith("& {") and cleaned_cmd.endswith("}"):
-            inner = cleaned_cmd[3:-1]
-            parts = inner.split(";")
-            bash_parts = []
-            for p in parts:
-                p = p.strip()
-                if "$host.UI.RawUI.WindowTitle" in p:
-                    continue
-                if p:
-                    bash_parts.append(p)
-            cleaned_cmd = " && ".join(bash_parts)
-        
-        if cleaned_cmd.startswith("edit "):
-            log_file = cleaned_cmd[5:].strip('"')
-            cleaned_cmd = f"xdg-open '{log_file}'"
-            try:
-                subprocess.Popen(['xdg-open', log_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                return
-            except Exception:
-                pass
-            cleaned_cmd = f"nano '{log_file}'"
-
-        for term in terminals:
-            if shutil.which(term[0]):
-                if shutil.which("pwsh") and (".ps1" in cleaned_cmd or "gitter" in cleaned_cmd):
-                    cmd_str = f"pwsh -NoExit -Command \"{cleaned_cmd}\""
-                    if cwd:
-                        cmd_str = f"cd '{cwd}' && {cmd_str}"
-                    subprocess.Popen(term + [cmd_str], cwd=cwd)
-                else:
-                    keep_open = "; exec bash" if "lazygit" not in cleaned_cmd else ""
-                    cmd_str = f"{cleaned_cmd}{keep_open}"
-                    if cwd:
-                        cmd_str = f"cd '{cwd}' && {cmd_str}"
-                    subprocess.Popen(term + [cmd_str], cwd=cwd)
-                return
-        logging.warning("No terminal emulator found. Running in background.")
-        subprocess.Popen(cleaned_cmd, shell=True, cwd=cwd)
-
 # ─── Config ───────────────────────────────────────────────────────────────────
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mypygui_config.json")
 
@@ -398,24 +202,18 @@ def load_config():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             content = f.read()
-            if os.name == 'nt':
-                user_profile = os.environ.get("USERPROFILE", "").replace("\\", "/")
-                if user_profile:
-                    content = content.replace("C:/Users/nahid", user_profile)
-                    content = content.replace("C:\\\\Users\\\\nahid", user_profile.replace("/", "\\\\"))
-                    content = content.replace("C:\\Users\\nahid", user_profile.replace("/", "\\"))
-            config = json.loads(content)
-            if os.name != 'nt':
-                config = normalize_config_paths(config)
-            return config
+            user_profile = os.environ.get("USERPROFILE", "").replace("\\", "/")
+            if user_profile:
+                content = content.replace("C:/Users/nahid", user_profile)
+                content = content.replace("C:\\\\Users\\\\nahid", user_profile.replace("/", "\\\\"))
+                content = content.replace("C:\\Users\\nahid", user_profile.replace("/", "\\"))
+            return json.loads(content)
     except Exception as e:
         print(f"Error loading config: {e}")
         return {}
 
 def save_config(config):
     try:
-        if os.name != 'nt':
-            config = denormalize_config_paths(config)
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
     except Exception as e:
@@ -732,64 +530,30 @@ class IconLabel(QLabel):
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def run_command(command, admin=False, hide=False, no_exit=True):
-    if os.name == 'nt':
-        executable = "pwsh"
-        if admin:
-            try:
-                args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
-                ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
-            except Exception as e:
-                print(f"Admin run_command failed: {e}")
-            return
-
-        cmd_args = [executable]
-        if no_exit:
-            cmd_args.append("-NoExit")
-        cmd_args.extend(["-Command", command])
-
-        flags = 0
-        if hide:
-            flags |= subprocess.CREATE_NO_WINDOW
-        else:
-            flags |= subprocess.CREATE_NEW_CONSOLE
-
+    executable = "pwsh"
+    if admin:
         try:
-            subprocess.Popen(cmd_args, creationflags=flags)
+            args = f"{'-NoExit ' if no_exit else ''}-Command \"{command}\""
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, args, None, 1 if not hide else 0)
         except Exception as e:
-            print(f"run_command failed: {e}")
-    else:
-        import shutil
-        shell_exec = "pwsh" if shutil.which("pwsh") else "bash"
-        if admin:
-            if shutil.which("pkexec"):
-                cmd_args = ["pkexec", shell_exec]
-                if shell_exec == "pwsh":
-                    if no_exit:
-                        cmd_args.append("-NoExit")
-                    cmd_args.extend(["-Command", command])
-                else:
-                    cmd_args.extend(["-c", command])
-                try:
-                    subprocess.Popen(cmd_args)
-                except Exception as e:
-                    print(f"Admin (pkexec) run_command failed: {e}")
-                return
-            else:
-                run_in_terminal(f"sudo {command}", title="Admin Command")
-                return
+            print(f"Admin run_command failed: {e}")
+        return
 
-        if hide:
-            cmd_args = [shell_exec]
-            if shell_exec == "pwsh":
-                cmd_args.extend(["-Command", command])
-            else:
-                cmd_args.extend(["-c", command])
-            try:
-                subprocess.Popen(cmd_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception as e:
-                print(f"run_command failed: {e}")
-        else:
-            run_in_terminal(command, title="Command")
+    cmd_args = [executable]
+    if no_exit:
+        cmd_args.append("-NoExit")
+    cmd_args.extend(["-Command", command])
+
+    flags = 0
+    if hide:
+        flags |= subprocess.CREATE_NO_WINDOW
+    else:
+        flags |= subprocess.CREATE_NEW_CONSOLE
+
+    try:
+        subprocess.Popen(cmd_args, creationflags=flags)
+    except Exception as e:
+        print(f"run_command failed: {e}")
 
 def handle_action(action_cfg):
     if not action_cfg:
@@ -799,37 +563,21 @@ def handle_action(action_cfg):
     cwd    = action_cfg.get("cwd")
     admin  = action_cfg.get("admin", False)
     hide   = action_cfg.get("hide", False)
-    in_term = action_cfg.get("in_terminal", False)
     
     # If admin and not already handled by run_command, handle here
     if admin and atype not in ["run_command"]:
-        if os.name == 'nt':
-            try:
-                ctypes.windll.shell32.ShellExecuteW(
-                    None, "runas",
-                    sys.executable if atype == "python" else "cmd.exe",
-                    f"/c {cmd}" if atype != "python" else cmd,
-                    cwd, 0 if hide else 1
-                )
-            except Exception as e:
-                print(f"Admin launch failed: {e}")
-        else:
-            import shutil
-            if shutil.which("pkexec"):
-                cmd_args = ["pkexec"]
-                if atype == "python":
-                    cmd_args.extend([sys.executable, cmd])
-                else:
-                    cmd_args.extend(["bash", "-c", cmd])
-                try:
-                    subprocess.Popen(cmd_args, cwd=cwd)
-                except Exception as e:
-                    print(f"Admin (pkexec) launch failed: {e}")
-            else:
-                run_in_terminal(f"sudo {cmd}", cwd=cwd, title="Admin Launch")
+        try:
+            ctypes.windll.shell32.ShellExecuteW(
+                None, "runas",
+                sys.executable if atype == "python" else "cmd.exe",
+                f"/c {cmd}" if atype != "python" else cmd,
+                cwd, 0 if hide else 1
+            )
+        except Exception as e:
+            print(f"Admin launch failed: {e}")
         return
 
-    flags = subprocess.CREATE_NO_WINDOW if (hide and os.name == 'nt') else 0
+    flags = subprocess.CREATE_NO_WINDOW if hide else 0
     if atype == "url":
         import webbrowser; webbrowser.open(cmd); return
     if atype == "subprocess":
@@ -838,11 +586,6 @@ def handle_action(action_cfg):
         run_command(cmd, admin=admin, hide=hide)
     elif atype == "python":
         subprocess.Popen([sys.executable, cmd], cwd=cwd, creationflags=flags)
-    elif atype == "bash":
-        if in_term:
-            run_in_terminal(cmd, cwd=cwd, title="Bash Command")
-        else:
-            subprocess.Popen(["bash", "-c", cmd], cwd=cwd, creationflags=flags)
     elif atype == "function":
         func_name = action_cfg.get("func")
         if func_name == "restart":      _app_restart()
@@ -860,18 +603,12 @@ def _app_restart():
 def force_shutdown():
     r = QMessageBox.question(None, "Shutdown", "Are you sure you want to shutdown?")
     if r == QMessageBox.StandardButton.Yes:
-        if os.name == 'nt':
-            subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
-        else:
-            subprocess.run(["shutdown", "-h", "now"])
+        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
 
 def force_restart():
     r = QMessageBox.question(None, "Restart", "Are you sure you want to restart?")
     if r == QMessageBox.StandardButton.Yes:
-        if os.name == 'nt':
-            subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
-        else:
-            subprocess.run(["reboot"])
+        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
 def calculate_time_to_appear(t0):
     print(f"Time taken to appear: {time.time() - t0:.2f} seconds")
@@ -898,25 +635,17 @@ def get_active_drives():
             for p in psutil.disk_partitions(all=False):
                 if not p.mountpoint:
                     continue
-                if os.name == 'nt':
-                    opts = p.opts.lower()
-                    if 'fixed' in opts or 'removable' in opts:
-                        try:
-                            psutil.disk_usage(p.mountpoint)
-                            drives.append(p.mountpoint)
-                        except Exception:
-                            continue
-                else:
-                    if p.device.startswith('/dev/'):
-                        try:
-                            psutil.disk_usage(p.mountpoint)
-                            drives.append(p.mountpoint)
-                        except Exception:
-                            continue
+                opts = p.opts.lower()
+                if 'fixed' in opts or 'removable' in opts:
+                    try:
+                        psutil.disk_usage(p.mountpoint)
+                        drives.append(p.mountpoint)
+                    except Exception:
+                        continue
         except Exception:
             pass
         if not drives:
-            drives = ['C:\\'] if os.name == 'nt' else ['/']
+            drives = ['C:\\']
         _drive_cache["drives"] = drives
         _drive_cache["last_check"] = now
     return _drive_cache["drives"]
@@ -1232,16 +961,15 @@ def open_edit_gui(item_cfg, category, index=None):
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
         cmd_le   = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
-        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "bash", "function", "url", "popup"])
+        type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url", "popup"])
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide Terminal"); hide_chk.setChecked(bcfg.get("hide", False))
         admin_chk = QCheckBox("Run as Admin");  admin_chk.setChecked(bcfg.get("admin", False))
-        in_term_chk = QCheckBox("In Terminal"); in_term_chk.setChecked(bcfg.get("in_terminal", False))
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
-        chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addWidget(in_term_chk); chk_layout.addStretch()
+        chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addStretch()
         form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
         right_layout.addWidget(grp)
-        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, "in_terminal": in_term_chk}
+        binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk}
 
     # Dedicated POPUP SETTINGS section
     grp_pop = QGroupBox("POPUP SETTINGS"); pop_lay = QVBoxLayout(); pop_lay.setSpacing(8); grp_pop.setLayout(pop_lay)
@@ -1335,7 +1063,7 @@ def open_edit_gui(item_cfg, category, index=None):
             cmd = inputs["cmd"].text()
             if not cmd: continue
             b_type = inputs["type"].currentText()
-            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked(), "in_terminal": inputs["in_terminal"].isChecked()}
+            new_bindings[bkey] = {"type": b_type, "hide": inputs["hide"].isChecked(), "admin": inputs["admin"].isChecked()}
             if b_type == "function": new_bindings[bkey]["func"] = cmd
             else:                    new_bindings[bkey]["cmd"]  = cmd
             if b_type == "popup":
@@ -1655,8 +1383,7 @@ def _apply_static_style(widget, key):
     widget.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 16}pt; font-weight: {fw}; {border_css} border-radius: {border_radius}px; padding-left: {px_l}px; padding-right: {px_r}px; padding-top: {py_t}px; padding-bottom: {py_b}px; margin-left: {m_l}px; margin-right: {m_r}px; margin-top: {m_t}px; margin-bottom: {m_b}px;")
 
 def _bind_static(lbl, key, default_cmd):
-    default_cmd_normalized = normalize_path(default_cmd)
-    cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd_normalized}})
+    cfg = load_config().get("static_bindings", {}).get(key, {"Button-1": {"type": "subprocess", "cmd": default_cmd}})
     
     def mousePressEvent(event):
         event.accept()
@@ -1701,7 +1428,8 @@ def _bind_drive(lbl, key, drive_index):
             handle_action(cfg[bkey])
         else:
             if btn == Qt.MouseButton.LeftButton and not (mods & Qt.KeyboardModifier.ControlModifier):
-                open_path(drive_path)
+                import subprocess
+                subprocess.Popen(f'explorer "{drive_path}"', shell=True)
                 
     lbl.mousePressEvent = mousePressEvent
     lbl.mouseReleaseEvent = mouseReleaseEvent
@@ -1777,26 +1505,8 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 def git_backup(repos):
-    import shutil
-    has_pwsh = shutil.which("pwsh") is not None
-    commands_list = []
-    for r in repos:
-        repo_path = normalize_path(r['path'])
-        if os.name == 'nt' or has_pwsh:
-            script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.ps1")
-            commands_list.append(script_path)
-        else:
-            script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.sh")
-            if not os.path.exists(script_path):
-                script_path = os.path.join(repo_path, "scripts", "Github", f"{r['name']}u.ps1")
-            commands_list.append(script_path)
-
-    if os.name == 'nt' or has_pwsh:
-        commands = " ; ".join(commands_list)
-        run_in_terminal(f"{commands} ; cd ~", title="GiTSync")
-    else:
-        commands = " && ".join([f"bash '{cmd}'" if cmd.endswith('.sh') else f"pwsh -Command '{cmd}'" for cmd in commands_list])
-        run_in_terminal(f"{commands} ; cd ~", title="GiTSync")
+    commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
+    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"], shell=True)
 
 def delete_git_lock_files(repos):
     for repo in repos:
@@ -1816,7 +1526,7 @@ def apply_git_style(lbl, cfg):
 
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
-LOG_DIR = normalize_path(r"C:\Users\nahid\script_output\rclone")
+LOG_DIR = r"C:\Users\nahid\script_output\rclone"
 try:
     os.makedirs(LOG_DIR, exist_ok=True)
 except Exception:
@@ -1928,10 +1638,7 @@ class StatusBar(QMainWindow):
         self._last_timer_type = None # "alarm" or "shutdown"
         self._last_timer_mins = 0
         
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.ToolTip)
-        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
-        if os.name != 'nt':
-            self.setWindowRole("panel")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self._config = load_config()
         self._apply_geometry()
         border_frame = QFrame(); border_frame.setStyleSheet(f"QFrame {{ background: {CP_BG}; border: 1px solid {CP_RED}; }}")
@@ -1949,19 +1656,15 @@ class StatusBar(QMainWindow):
         sb = self._config.get("statusbar", {})
         is_docked = sb.get("docked", False)
         always_on_top = sb.get("always_on_top", True)
+        hwnd = int(self.winId())
+
         # Apply always-on-top flag
-        if is_docked:
-            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip
-        else:
-            flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.ToolTip
-            
+        flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
         if always_on_top:
             flags |= Qt.WindowType.WindowStaysOnTopHint
-        if os.name != 'nt' and not is_docked:
-            flags |= Qt.WindowType.BypassWindowManagerHint
         self.setWindowFlags(flags)
+        self.show()  # setWindowFlags hides the window; re-show it
         
-        hwnd = int(self.winId())
         screen_geo = QApplication.primaryScreen().geometry()
         sw = screen_geo.width()
         
@@ -1972,14 +1675,8 @@ class StatusBar(QMainWindow):
             self.move(0, 0)
             register_appbar(hwnd)
             set_appbar_position(hwnd, w, h)
-            set_x11_struts(hwnd, h)
-            if self.windowHandle():
-                self.windowHandle().setProperty("kwin_strut_top", h)
         else:
             unregister_appbar(hwnd)
-            set_x11_struts(hwnd, 0)
-            if self.windowHandle():
-                self.windowHandle().setProperty("kwin_strut_top", 0)
             w, h = int(sb.get("width", 1920)), int(sb.get("height", 39))
             self.setFixedSize(w, h)
             x = sb.get("x", "center")
@@ -1987,16 +1684,9 @@ class StatusBar(QMainWindow):
             else: x = int(x)
             y = int(sb.get("y", 990))
             self.move(x, y)
-            
-        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
-        self.show()  # Now show the window after all geometry and hints are applied
-        self.setWindowTitle("MyPyGUI_StatusBar_Panel")
 
     def closeEvent(self, event):
         unregister_appbar(int(self.winId()))
-        set_x11_struts(int(self.winId()), 0)
-        if self.windowHandle():
-            self.windowHandle().setProperty("kwin_strut_top", 0)
         super().closeEvent(event)
 
     def _build_left(self):
@@ -2012,15 +1702,7 @@ class StatusBar(QMainWindow):
             if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("uptime"); return
             
             if btn == Qt.MouseButton.LeftButton:
-                if os.name == 'nt':
-                    subprocess.Popen("timedate.cpl", shell=True)
-                else:
-                    for cmd in ["gnome-control-center datetime", "systemsettings datetime", "kcmshell5 clock", "systemsettings5 clock"]:
-                        try:
-                            subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                            break
-                        except Exception:
-                            pass
+                subprocess.Popen("timedate.cpl", shell=True)
             elif btn == Qt.MouseButton.RightButton:
                 self._show_timer_menu()
                 
@@ -2176,19 +1858,6 @@ class StatusBar(QMainWindow):
         dock_chk = QCheckBox("DOCK (APPBAR)"); dock_chk.setChecked(_sb_cfg.get("docked", False))
         aot_chk = QCheckBox("ALWAYS ON TOP"); aot_chk.setChecked(_sb_cfg.get("always_on_top", True))
         
-        def toggle_dock_inputs():
-            is_checked = dock_chk.isChecked()
-            sb_x_le.setDisabled(is_checked)
-            sb_y_le.setDisabled(is_checked)
-            sb_w_le.setDisabled(is_checked)
-            if is_checked:
-                sb_x_le.setText("0")
-                sb_y_le.setText("0")
-                screen_geo = QApplication.primaryScreen().geometry()
-                sb_w_le.setText(str(screen_geo.width()))
-        dock_chk.toggled.connect(toggle_dock_inputs)
-        toggle_dock_inputs()
-        
         for le in [sb_bg_le, sb_border_le]: le.setFixedWidth(90)
         for le in [sb_bpx_le, sb_w_le, sb_h_le, sb_x_le, sb_y_le, popup_y_le]: le.setFixedWidth(70)
 
@@ -2233,29 +1902,20 @@ class StatusBar(QMainWindow):
                 cfg["popup_y_offset"] = int(popup_y_offset_le.text()) if "popup_y_offset_le" in locals() else int(popup_y_le.text())
                 
                 # Statusbar Geo
-                is_docked_val = dock_chk.isChecked()
-                w_val = int(sb_w_le.text())
-                y_val = int(sb_y_le.text())
                 x_val = sb_x_le.text().strip()
-                
-                if is_docked_val:
-                    x_val = 0
-                    y_val = 0
-                    w_val = QApplication.primaryScreen().geometry().width()
-                else:
-                    if x_val.lower() != "center":
-                        try: x_val = int(x_val)
-                        except: x_val = "center"
+                if x_val.lower() != "center":
+                    try: x_val = int(x_val)
+                    except: x_val = "center"
                 
                 cfg["statusbar"] = {
                     "bg": sb_bg_le.text() or CP_BG,
                     "border_color": sb_border_le.text() or CP_RED,
                     "border_px": int(sb_bpx_le.text()),
-                    "width": w_val,
+                    "width": int(sb_w_le.text()),
                     "height": int(sb_h_le.text()),
                     "x": x_val,
-                    "y": y_val,
-                    "docked": is_docked_val,
+                    "y": int(sb_y_le.text()),
+                    "docked": dock_chk.isChecked(),
                     "always_on_top": aot_chk.isChecked()
                 }
                 
@@ -2311,26 +1971,6 @@ class StatusBar(QMainWindow):
     def _bl_next(self):
         if self._bl_offset + self._bl_page_size < len(load_config().get("buttons_left", [])): self._bl_offset += self._bl_page_size; self._bl_render()
 
-    def _run_gitter_sync(self, path):
-        text, ok = QInputDialog.getText(
-            self, "Git Commit",
-            "Enter commit message (default: Automatic):",
-            QLineEdit.EchoMode.Normal, ""
-        )
-        if not ok:
-            return  # Abort if cancelled
-        
-        msg = text.strip()
-        if not msg:
-            msg = "Automatic"
-            
-        if os.name == 'nt':
-            cmd = f"git add -A ; git commit -m '{msg}' ; git push"
-        else:
-            cmd = f"git add -A && git commit -m \"{msg}\" && git push"
-            
-        run_in_terminal(cmd, cwd=path, title="GiTSync")
-
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
@@ -2343,11 +1983,11 @@ class StatusBar(QMainWindow):
                     mods, btn = event.modifiers(), event.button()
                     if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
                     if btn == Qt.MouseButton.LeftButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier: open_path(path)
-                        else: self._run_gitter_sync(path)
+                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(f'explorer "{path}"', shell=True)
+                        else: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd '{path}' ; gitter}}"], shell=True)
                     elif btn == Qt.MouseButton.RightButton:
-                        if mods & Qt.KeyboardModifier.ControlModifier: run_in_terminal(f"cd '{path}' ; git restore .", cwd=path, title="Git Restore")
-                        else: run_in_terminal("lazygit", cwd=path, title="lazygit")
+                        if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
+                        else: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
         del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
@@ -2377,7 +2017,7 @@ class StatusBar(QMainWindow):
                             if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
                             handle_action(action)
                     else:
-                        try: run_in_terminal(f'edit "{c["log"]}"', title="Edit Log")
+                        try: subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{c["log"]}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
                         except Exception as ex: print(f"Error opening log: {ex}")
                 return click
             lbl.mousePressEvent = _make_rclone_click(cfg); row.addWidget(lbl)
