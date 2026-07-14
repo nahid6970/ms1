@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # alarm_timer.py  –  Multi-column Alarm Countdown Timer
 # Cyberpunk theme  |  PyQt6
 # ============================================================
@@ -15,7 +16,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QScrollArea, QDialog,
     QFormLayout, QGroupBox, QFrame, QSizePolicy, QInputDialog,
     QMessageBox, QDateTimeEdit, QRadioButton,
-    QButtonGroup, QDialogButtonBox, QGridLayout,
+    QButtonGroup, QDialogButtonBox, QGridLayout, QColorDialog, QCheckBox,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
@@ -197,6 +198,8 @@ QRadioButton::indicator:checked {{
 DEFAULT_SETTINGS = {
     "column_width": 280,
     "alarm_sound": "",
+    "fired_color":  "#FF003C",   # color when timer has expired (fired)
+    "active_color": "#00F0FF",   # color when timer is running (active)
     "custom_patterns": [
         {"name": "Standard (HH:mm on dd MMM)", "pattern": "%H:%M on %d %b"},
         {"name": "Compact (HH:mm dd/MM/yy)", "pattern": "%H:%M %d/%m/%y"},
@@ -374,7 +377,7 @@ class AlarmPopup(QDialog):
 # ── Extensible Timer Dialog (Add / Edit) ───────────────────
 
 class TimerDialog(QDialog):
-    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, parent=None):
+    def __init__(self, title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, use_custom_colors_val: bool = False, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
@@ -388,6 +391,7 @@ class TimerDialog(QDialog):
         self._result_fires_at = fires_at_val
         self._result_input_mode = input_mode_val
         self._result_input_value = input_value_val
+        self._result_use_custom_colors = use_custom_colors_val
         self.custom_edits = {}
         
         lay = QVBoxLayout(self)
@@ -395,7 +399,7 @@ class TimerDialog(QDialog):
         lay.setContentsMargins(18, 18, 18, 18)
         
         # 1. Label Section
-        lbl_grp = QGroupBox("TIMER LABEL")
+        lbl_grp = QGroupBox("ITEM LABEL")
         lbl_form = QFormLayout(lbl_grp)
         self.label_edit = QLineEdit(label_val)
         self.label_edit.setPlaceholderText("e.g. Sprint deadline, Study session…")
@@ -430,7 +434,8 @@ class TimerDialog(QDialog):
         
         self.modes_config = [
             ("text", "Relative text", self._create_text_panel),
-            ("picker", "Pick datetime", self._create_picker_panel)
+            ("picker", "Pick datetime", self._create_picker_panel),
+            ("text_only", "Text only (no timer)", self._create_text_only_panel),
         ]
         
         for idx, pat in enumerate(self._custom_patterns):
@@ -466,6 +471,8 @@ class TimerDialog(QDialog):
         # Populate values if available before switching modes
         if input_mode_val == "text":
             self.time_edit.setText(input_value_val)
+        elif input_mode_val == "text_only":
+            self.text_only_body_edit.setText(input_value_val)
         elif input_mode_val.startswith("custom_"):
             edit = self.custom_edits.get(input_mode_val)
             if edit:
@@ -490,7 +497,35 @@ class TimerDialog(QDialog):
         self.err_lbl = QLabel("")
         self.err_lbl.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
         lay.addWidget(self.err_lbl)
-        
+
+        # Custom colors toggle (only meaningful for timer modes, not text_only)
+        colors_grp = QGroupBox("CUSTOM COLORS")
+        colors_lay = QVBoxLayout(colors_grp)
+        colors_lay.setContentsMargins(8, 6, 8, 6)
+        self._custom_colors_chk = QCheckBox(
+            "Use custom fired / active colors from Settings"
+        )
+        self._custom_colors_chk.setChecked(use_custom_colors_val)
+        self._custom_colors_chk.setStyleSheet(
+            f"QCheckBox {{ color: {CP_TEXT}; spacing: 6px; }}"
+            f"QCheckBox::indicator {{ width: 14px; height: 14px;"
+            f" border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}"
+            f"QCheckBox::indicator:checked {{ background: {CP_CYAN}; border-color: {CP_CYAN}; }}"
+        )
+
+        # preview row showing which colors will be used
+        fired_c  = self._settings.get("fired_color",  DEFAULT_SETTINGS["fired_color"])
+        active_c = self._settings.get("active_color", DEFAULT_SETTINGS["active_color"])
+        preview  = QLabel(
+            f"  fired: <span style='color:{fired_c}; font-weight:bold'>{fired_c.upper()}</span>"
+            f"  &nbsp;|&nbsp;  active: <span style='color:{active_c}; font-weight:bold'>{active_c.upper()}</span>"
+            f"  &nbsp;<span style='color:{CP_SUBTEXT}'>(change in ⚙ Settings)</span>"
+        )
+        preview.setTextFormat(Qt.TextFormat.RichText)
+        colors_lay.addWidget(self._custom_colors_chk)
+        colors_lay.addWidget(preview)
+        lay.addWidget(colors_grp)
+
         # Bottom Buttons
         btn_row = QHBoxLayout()
         ok_btn = QPushButton(ok_text)
@@ -519,6 +554,23 @@ class TimerDialog(QDialog):
         for mode_id, panel in self.panels.items():
             panel.setVisible(mode_id == active_mode_id)
         self.adjustSize()
+
+    def _create_text_only_panel(self) -> QWidget:
+        widget = QWidget()
+        tp = QVBoxLayout(widget)
+        tp.setContentsMargins(0, 0, 0, 0)
+        info = QLabel(
+            f"<span style='color:{CP_SUBTEXT}'>No countdown — just a title/note card.</span>"
+        )
+        info.setTextFormat(Qt.TextFormat.RichText)
+        self.text_only_body_edit = QLineEdit()
+        self.text_only_body_edit.setPlaceholderText(
+            "Optional body text (leave blank for title only)"
+        )
+        self.text_only_body_edit.setMinimumHeight(34)
+        tp.addWidget(info)
+        tp.addWidget(self.text_only_body_edit)
+        return widget
 
     def _create_text_panel(self) -> QWidget:
         widget = QWidget()
@@ -611,13 +663,23 @@ class TimerDialog(QDialog):
         msg.exec()
 
     def _on_ok(self):
-        label = self.label_edit.text().strip() or "Timer"
+        label = self.label_edit.text().strip() or "Item"
         active_mode = None
         for mode_id, rb in self.radio_buttons.items():
             if rb.isChecked():
                 active_mode = mode_id
                 break
-                
+
+        # ── Text-only shortcut: no timer needed ────────────
+        if active_mode == "text_only":
+            self._result_label = label
+            self._result_fires_at = None
+            self._result_input_mode = "text_only"
+            self._result_input_value = self.text_only_body_edit.text().strip()
+            self._result_use_custom_colors = False   # no timer → custom colors N/A
+            self.accept()
+            return
+
         input_val = ""
         if active_mode == "text":
             raw = self.time_edit.text().strip()
@@ -664,13 +726,14 @@ class TimerDialog(QDialog):
         self._result_label = label
         self._result_input_mode = active_mode
         self._result_input_value = input_val
+        self._result_use_custom_colors = self._custom_colors_chk.isChecked()
         self.accept()
 
     @staticmethod
-    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, parent=None):
-        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, input_mode_val, input_value_val, settings, parent)
+    def get_timer(title: str, ok_text: str, label_val: str = "", fires_at_val: float | None = None, input_mode_val: str = "text", input_value_val: str = "", settings: dict | None = None, use_custom_colors_val: bool = False, parent=None):
+        dlg = TimerDialog(title, ok_text, label_val, fires_at_val, input_mode_val, input_value_val, settings, use_custom_colors_val, parent)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            return dlg._result_label, dlg._result_fires_at, dlg._result_input_mode, dlg._result_input_value
+            return dlg._result_label, dlg._result_fires_at, dlg._result_input_mode, dlg._result_input_value, dlg._result_use_custom_colors
         return None
 
 
@@ -702,6 +765,21 @@ class SettingsDialog(QDialog):
         self.snd.setPlaceholderText("optional .wav path")
         form.addRow("Alarm sound:", self.snd)
         lay.addWidget(grp)
+
+        # Timer Colors Group
+        color_grp  = QGroupBox("TIMER COLORS")
+        color_form = QFormLayout(color_grp)
+        color_form.setSpacing(8)
+
+        self._fired_color  = self._s.get("fired_color",  DEFAULT_SETTINGS["fired_color"])
+        self._active_color = self._s.get("active_color", DEFAULT_SETTINGS["active_color"])
+
+        self._fired_btn  = self._make_color_btn(self._fired_color,  "fired")
+        self._active_btn = self._make_color_btn(self._active_color, "active")
+
+        color_form.addRow("Fired / expired color:", self._fired_btn)
+        color_form.addRow("Active / running color:", self._active_btn)
+        lay.addWidget(color_grp)
 
         # Custom Patterns Group
         pat_grp = QGroupBox("CUSTOM DATE/TIME PATTERNS")
@@ -768,6 +846,46 @@ class SettingsDialog(QDialog):
         lay.addWidget(btns)
 
         self._refresh_patterns()
+
+    def _make_color_btn(self, color: str, role: str) -> QPushButton:
+        """Return a button showing the current color; opens QColorDialog on click."""
+        btn = QPushButton()
+        btn.setFixedHeight(28)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._apply_color_btn_style(btn, color)
+        btn.clicked.connect(lambda: self._pick_color(btn, role))
+        return btn
+
+    def _apply_color_btn_style(self, btn: QPushButton, color: str):
+        btn.setText(color.upper())
+        btn.setStyleSheet(
+            f"QPushButton {{ background: {color}; color: {'#000' if self._is_light(color) else '#fff'};"
+            f" border: 1px solid #555; font-weight: bold; font-family: Consolas; }}"
+            f"QPushButton:hover {{ border: 1px solid {CP_YELLOW}; }}"
+        )
+
+    @staticmethod
+    def _is_light(hex_color: str) -> bool:
+        h = hex_color.lstrip("#")
+        if len(h) != 6:
+            return False
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return (r * 299 + g * 587 + b * 114) / 1000 > 128
+
+    def _pick_color(self, btn: QPushButton, role: str):
+        from PyQt6.QtGui import QColor
+        current = self._fired_color if role == "fired" else self._active_color
+        chosen = QColorDialog.getColor(
+            QColor(current), self,
+            f"Pick {'Fired' if role == 'fired' else 'Active'} Color"
+        )
+        if chosen.isValid():
+            hex_val = chosen.name()
+            if role == "fired":
+                self._fired_color = hex_val
+            else:
+                self._active_color = hex_val
+            self._apply_color_btn_style(btn, hex_val)
 
     def _show_help(self):
         help_text = (
@@ -876,7 +994,9 @@ class SettingsDialog(QDialog):
             self._s["column_width"] = max(180, int(self.col_w.text()))
         except ValueError:
             pass
-        self._s["alarm_sound"] = self.snd.text().strip()
+        self._s["alarm_sound"]   = self.snd.text().strip()
+        self._s["fired_color"]   = self._fired_color
+        self._s["active_color"]  = self._active_color
         self._s["custom_patterns"] = self._custom_pats
         self.accept()
 
@@ -955,13 +1075,14 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", use_custom_colors: bool = False, parent=None):
         super().__init__(parent)
         self.card_id  = card_id
         self.label    = label
         self.fires_at = fires_at
         self.input_mode = input_mode
         self.input_value = input_value
+        self.use_custom_colors = use_custom_colors
         
         now = time.time()
         if created_at <= 0.0 or created_at >= fires_at:
@@ -1062,11 +1183,31 @@ class TimerCard(QFrame):
             f"TimerCard {{ border: 1px solid {color}; background: {CP_PANEL}; }}"
         )
 
+    def _get_colors(self) -> tuple[str, str]:
+        """Return (fired_color, active_color) — from settings if custom colors enabled."""
+        if self.use_custom_colors:
+            settings = self._find_settings()
+            if settings:
+                return (
+                    settings.get("fired_color",  CP_RED),
+                    settings.get("active_color", CP_CYAN),
+                )
+        return CP_RED, CP_CYAN
+
+    def _find_settings(self) -> dict | None:
+        p = self.parent()
+        while p:
+            if hasattr(p, "_settings"):
+                return p._settings
+            p = p.parent()
+        return None
+
     def resizeEvent(self, e):
         super().resizeEvent(e)
-        self._update_bar()
+        _, active_color = self._get_colors()
+        self._update_bar(active_color)
 
-    def _update_bar(self):
+    def _update_bar(self, active_color: str = CP_CYAN):
         now = time.time()
         if self.fires_at <= now:
             self._prog_fill.setFixedWidth(0)
@@ -1082,18 +1223,24 @@ class TimerCard(QFrame):
         w = int(self._prog_bg.width() * ratio)
         self._prog_fill.setFixedWidth(max(0, w))
         
-        color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
-        self._prog_fill.setStyleSheet(f"background: {color};")
+        # progress bar uses the active color when ratio is high,
+        # blending toward orange/red as it nears expiry
+        if self.use_custom_colors:
+            bar_color = active_color
+        else:
+            bar_color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
+        self._prog_fill.setStyleSheet(f"background: {bar_color};")
 
     def _tick(self):
         now = time.time()
+        fired_color, active_color = self._get_colors()
         if now >= self.fires_at:
             self._display.setText("00:00")
             self._display.setStyleSheet(
-                f"color: {CP_RED}; font-size: 26pt; font-weight: bold;"
+                f"color: {fired_color}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
-            self._set_border(CP_RED)
+            self._set_border(fired_color)
             self._prog_fill.setFixedWidth(0)
             self._prog_bg.setVisible(False)
             
@@ -1107,11 +1254,11 @@ class TimerCard(QFrame):
             rem = int(self.fires_at - now)
             self._display.setText(fmt_secs(rem))
             self._display.setStyleSheet(
-                f"color: {CP_CYAN}; font-size: 26pt; font-weight: bold;"
+                f"color: {active_color}; font-size: 26pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
             self._set_border(CP_GREEN)
-            self._update_bar()
+            self._update_bar(active_color)
 
     def _on_delete(self):
         self._ticker.stop()
@@ -1131,27 +1278,29 @@ class TimerCard(QFrame):
             p = p.parent()
             
         result = TimerDialog.get_timer(
-            "EDIT TIMER",
+            "EDIT ITEM",
             "✔  APPLY",
             self.label,
             self.fires_at,
             self.input_mode,
             self.input_value,
             settings=settings,
+            use_custom_colors_val=self.use_custom_colors,
             parent=self
         )
         if result is None:
             return
-        new_label, new_fires_at, new_input_mode, new_input_value = result
+        new_label, new_fires_at, new_input_mode, new_input_value, new_use_custom_colors = result
         self.label = new_label
         self._lbl.setText(self.label)
         self.input_mode = new_input_mode
         self.input_value = new_input_value
-        
-        if abs(new_fires_at - self.fires_at) > 0.01:
-            self.created_at = time.time()
-            
-        self.fires_at = new_fires_at
+        self.use_custom_colors = new_use_custom_colors
+
+        if new_fires_at is not None:
+            if abs(new_fires_at - self.fires_at) > 0.01:
+                self.created_at = time.time()
+            self.fires_at = new_fires_at
         self.fired = False
         self._tick()
         self.state_changed.emit()
@@ -1165,6 +1314,7 @@ class TimerCard(QFrame):
             "created_at": self.created_at,
             "input_mode": self.input_mode,
             "input_value": self.input_value,
+            "use_custom_colors": self.use_custom_colors,
         }
 
     @classmethod
@@ -1175,7 +1325,193 @@ class TimerCard(QFrame):
         created_at = d.get("created_at", 0.0)
         input_mode = d.get("input_mode", "text")
         input_value = d.get("input_value", "")
-        return cls(card_id, label, fires_at, created_at, input_mode, input_value, parent)
+        use_custom_colors = d.get("use_custom_colors", False)
+        return cls(card_id, label, fires_at, created_at, input_mode, input_value, use_custom_colors, parent)
+
+
+# ── TextCard ──────────────────────────────────────────────
+
+class TextCard(QFrame):
+    """A card that displays text/title only — no countdown, no timer."""
+    removed       = pyqtSignal(str)
+    duplicated    = pyqtSignal(str)
+    state_changed = pyqtSignal()
+
+    def __init__(self, card_id: str, label: str, body: str = "", parent=None):
+        super().__init__(parent)
+        self.card_id = card_id
+        self.label   = label
+        self.body    = body
+
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setMinimumWidth(220)
+        self.setStyleSheet(
+            f"TextCard {{ border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}"
+        )
+        self._build_ui()
+
+    def _build_ui(self):
+        root = QVBoxLayout(self)
+        root.setContentsMargins(10, 10, 10, 10)
+        root.setSpacing(4)
+
+        # top row: label + edit + duplicate + delete
+        top = QHBoxLayout()
+        self._lbl = QLabel(self.label)
+        self._lbl.setStyleSheet(
+            f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;"
+            " background: transparent; border: none;"
+        )
+        self._lbl.setWordWrap(True)
+
+        edit_btn = QPushButton()
+        edit_btn.setFixedSize(22, 22)
+        edit_btn.setIcon(icon_rename(color=CP_CYAN, size=13))
+        edit_btn.setIconSize(QSize(13, 13))
+        edit_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_CYAN}; }}"
+        )
+        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        edit_btn.setToolTip("Edit text")
+        edit_btn.clicked.connect(self._on_edit)
+
+        dup_btn = QPushButton()
+        dup_btn.setFixedSize(22, 22)
+        dup_btn.setIcon(icon_duplicate(color=CP_CYAN, size=13))
+        dup_btn.setIconSize(QSize(13, 13))
+        dup_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_CYAN}; }}"
+        )
+        dup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        dup_btn.setToolTip("Duplicate")
+        dup_btn.clicked.connect(lambda: self.duplicated.emit(self.card_id))
+
+        del_btn = QPushButton()
+        del_btn.setFixedSize(22, 22)
+        del_btn.setIcon(icon_delete(color=CP_RED, size=13))
+        del_btn.setIconSize(QSize(13, 13))
+        del_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; border: none; }}"
+            f"QPushButton:hover {{ background: #2a1010; border: 1px solid {CP_RED}; }}"
+        )
+        del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        del_btn.setToolTip("Delete")
+        del_btn.clicked.connect(lambda: self.removed.emit(self.card_id))
+
+        top.addWidget(self._lbl, 1)
+        top.addWidget(edit_btn, 0)
+        top.addWidget(dup_btn, 0)
+        top.addWidget(del_btn, 0)
+
+        # optional body text
+        self._body_lbl = QLabel(self.body)
+        self._body_lbl.setWordWrap(True)
+        self._body_lbl.setStyleSheet(
+            f"color: {CP_TEXT}; font-size: 9pt; background: transparent; border: none;"
+        )
+        self._body_lbl.setVisible(bool(self.body))
+
+        # "TEXT" badge so it's clear it's not a timer
+        badge = QLabel("TEXT")
+        badge.setAlignment(Qt.AlignmentFlag.AlignRight)
+        badge.setStyleSheet(
+            f"color: {CP_DIM}; font-size: 7pt; letter-spacing: 1px;"
+            " background: transparent; border: none;"
+        )
+
+        root.addLayout(top)
+        root.addWidget(self._body_lbl)
+        root.addWidget(badge)
+
+    def _on_edit(self):
+        dlg = TextItemDialog(self.label, self.body, parent=self)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            self.label = dlg.result_label
+            self.body  = dlg.result_body
+            self._lbl.setText(self.label)
+            self._body_lbl.setText(self.body)
+            self._body_lbl.setVisible(bool(self.body))
+            self.state_changed.emit()
+
+    def to_dict(self) -> dict:
+        return {
+            "id":   self.card_id,
+            "type": "text",
+            "label": self.label,
+            "body":  self.body,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict, parent=None) -> "TextCard":
+        return cls(d["id"], d.get("label", ""), d.get("body", ""), parent)
+
+
+# ── TextItemDialog ─────────────────────────────────────────
+
+class TextItemDialog(QDialog):
+    """Simple dialog for creating/editing a text-only card."""
+    def __init__(self, label: str = "", body: str = "", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("TEXT ITEM")
+        self.setStyleSheet(GLOBAL_QSS + f"QDialog {{ background: {CP_BG}; }}")
+        self.setMinimumWidth(420)
+        self.setModal(True)
+
+        self.result_label = label
+        self.result_body  = body
+
+        lay = QVBoxLayout(self)
+        lay.setSpacing(12)
+        lay.setContentsMargins(18, 18, 18, 18)
+
+        grp = QGroupBox("TEXT ITEM")
+        form = QFormLayout(grp)
+
+        self._label_edit = QLineEdit(label)
+        self._label_edit.setPlaceholderText("e.g. Section header, note title…")
+        self._label_edit.setMinimumHeight(30)
+
+        self._body_edit = QLineEdit(body)
+        self._body_edit.setPlaceholderText("Optional description / note (leave blank for title only)")
+        self._body_edit.setMinimumHeight(30)
+
+        form.addRow("Title:", self._label_edit)
+        form.addRow("Body:", self._body_edit)
+        lay.addWidget(grp)
+
+        self._err = QLabel("")
+        self._err.setStyleSheet(f"color: {CP_RED}; font-size: 9pt;")
+        lay.addWidget(self._err)
+
+        btn_row = QHBoxLayout()
+        ok_btn = QPushButton("✔  OK")
+        ok_btn.setFixedHeight(36)
+        ok_btn.setStyleSheet(
+            f"QPushButton {{ background: {CP_GREEN}; color: #000;"
+            f" font-weight: bold; border: none; }}"
+            f"QPushButton:hover {{ background: #00cc1a; }}"
+        )
+        cancel_btn = QPushButton("✖ CANCEL")
+        cancel_btn.setFixedHeight(36)
+        ok_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_row.addWidget(ok_btn)
+        btn_row.addWidget(cancel_btn)
+        lay.addLayout(btn_row)
+
+        ok_btn.clicked.connect(self._on_ok)
+        cancel_btn.clicked.connect(self.reject)
+
+    def _on_ok(self):
+        label = self._label_edit.text().strip()
+        if not label:
+            self._err.setText("⚠  Title cannot be empty.")
+            return
+        self.result_label = label
+        self.result_body  = self._body_edit.text().strip()
+        self.accept()
 
 
 # ── ColumnWidget ───────────────────────────────────────────
@@ -1189,7 +1525,7 @@ class ColumnWidget(QFrame):
         self.col_id    = col_id
         self.name      = name
         self.col_width = col_width
-        self._cards: dict[str, TimerCard] = {}
+        self._cards: dict[str, TimerCard | TextCard] = {}
 
         self.setFixedWidth(col_width)
         self.setFrameShape(QFrame.Shape.Box)
@@ -1264,8 +1600,8 @@ class ColumnWidget(QFrame):
         self._card_layout.addStretch(1)
         self._scroll.setWidget(self._card_container)
 
-        # add-timer button
-        self._add_btn = QPushButton("＋  ADD TIMER")
+        # add-item button
+        self._add_btn = QPushButton("＋  ADD ITEM")
         self._add_btn.setFixedHeight(34)
         self._add_btn.setStyleSheet(
             f"QPushButton {{ background: {CP_DIM};"
@@ -1281,7 +1617,7 @@ class ColumnWidget(QFrame):
         root.addWidget(self._scroll, 1)
         root.addWidget(self._add_btn)
 
-    def add_card(self, card: TimerCard):
+    def add_card(self, card: "TimerCard | TextCard"):
         idx = self._card_layout.count() - 1   # before stretch
         self._card_layout.insertWidget(idx, card)
         self._cards[card.card_id] = card
@@ -1294,7 +1630,11 @@ class ColumnWidget(QFrame):
     def sort_cards(self):
         cards = list(self._cards.values())
         now = time.time()
-        cards.sort(key=lambda c: (0 if c.fires_at <= now else 1, c.fires_at))
+        def sort_key(c):
+            if isinstance(c, TextCard):
+                return (2, 0)  # text cards sink to the bottom
+            return (0 if c.fires_at <= now else 1, c.fires_at)
+        cards.sort(key=sort_key)
         for i, card in enumerate(cards):
             self._card_layout.removeWidget(card)
             self._card_layout.insertWidget(i, card)
@@ -1309,15 +1649,24 @@ class ColumnWidget(QFrame):
         src = self._cards.get(cid)
         if src is None:
             return
-        new_card = TimerCard(
-            str(uuid.uuid4())[:8],
-            src.label + " (copy)",
-            src.fires_at,
-            time.time(),
-            src.input_mode,
-            src.input_value,
-            self,
-        )
+        if isinstance(src, TextCard):
+            new_card = TextCard(
+                str(uuid.uuid4())[:8],
+                src.label + " (copy)",
+                src.body,
+                self,
+            )
+        else:
+            new_card = TimerCard(
+                str(uuid.uuid4())[:8],
+                src.label + " (copy)",
+                src.fires_at,
+                time.time(),
+                src.input_mode,
+                src.input_value,
+                src.use_custom_colors,
+                self,
+            )
         self.add_card(new_card)
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
@@ -1335,11 +1684,14 @@ class ColumnWidget(QFrame):
                 break
             p = p.parent()
             
-        result = TimerDialog.get_timer("ADD TIMER", "✔  ADD TIMER", settings=settings, parent=self)
+        result = TimerDialog.get_timer("ADD ITEM", "✔  ADD ITEM", settings=settings, parent=self)
         if result is None:
             return
-        label, fires_at, input_mode, input_value = result
-        card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, time.time(), input_mode, input_value, self)
+        label, fires_at, input_mode, input_value, use_custom_colors = result
+        if input_mode == "text_only":
+            card = TextCard(str(uuid.uuid4())[:8], label, input_value, self)
+        else:
+            card = TimerCard(str(uuid.uuid4())[:8], label, fires_at, time.time(), input_mode, input_value, use_custom_colors, self)
         self.add_card(card)
         QTimer.singleShot(50, lambda:
             self._scroll.verticalScrollBar().setValue(
@@ -1384,7 +1736,10 @@ class ColumnWidget(QFrame):
     def from_dict(cls, d: dict, col_width: int = 280, parent=None) -> "ColumnWidget":
         col = cls(d["id"], d.get("name", "Column"), col_width, parent)
         for cd in d.get("cards", []):
-            col.add_card(TimerCard.from_dict(cd, col))
+            if cd.get("type") == "text":
+                col.add_card(TextCard.from_dict(cd, col))
+            else:
+                col.add_card(TimerCard.from_dict(cd, col))
         return col
 
 
@@ -1538,7 +1893,15 @@ class MainWindow(QMainWindow):
 
     def _on_restart(self):
         self._save()
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+        if os.name == "nt":
+            # Windows: os.execv doesn't replace the process properly;
+            # use subprocess to launch a new instance then exit.
+            import subprocess
+            subprocess.Popen([sys.executable] + sys.argv)
+            sys.exit(0)
+        else:
+            # Unix/Linux: replace the current process image in-place
+            os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def _on_changed(self):
         self._save()

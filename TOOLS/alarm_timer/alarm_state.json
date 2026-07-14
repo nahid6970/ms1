@@ -1,0 +1,268 @@
+{
+  "settings": {
+    "column_width": 300,
+    "alarm_sound": "",
+    "fired_color": "#08b1ff",
+    "active_color": "#79ff31",
+    "custom_patterns": [
+      {
+        "name": "Standard (HH:mm on dd MMM)",
+        "pattern": "%H:%M on %d %b"
+      },
+      {
+        "name": "Compact (HH:mm dd/MM/yy)",
+        "pattern": "%H:%M %d/%m/%y"
+      },
+      {
+        "name": "Date only (yyyy-MM-dd)",
+        "pattern": "%Y-%m-%d"
+      },
+      {
+        "name": "Codex",
+        "pattern": "%H:%M on %d %b"
+      }
+    ]
+  },
+  "columns": [
+    {
+      "id": "c56537c8",
+      "name": "Kiro 1st of Month",
+      "cards": [
+        {
+          "id": "41492b3e",
+          "type": "text",
+          "label": "12",
+          "body": ""
+        }
+      ]
+    },
+    {
+      "id": "95dca221",
+      "name": "Codex",
+      "cards": [
+        {
+          "id": "76eb1b0f",
+          "label": "03",
+          "fires_at": 1784212140.0,
+          "created_at": 1783946916.340244,
+          "input_mode": "custom_3",
+          "input_value": "20:29 on 16 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "505a49e5",
+          "label": "00",
+          "fires_at": 1784644080.0,
+          "created_at": 1783947126.0754373,
+          "input_mode": "custom_3",
+          "input_value": "20:28 on 21 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "a7f5c453",
+          "label": "02",
+          "fires_at": 1784872020.0,
+          "created_at": 1783947285.7429726,
+          "input_mode": "custom_3",
+          "input_value": "11:47 on 24 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "6e33452c",
+          "label": "01",
+          "fires_at": 1784720520.0,
+          "created_at": 1783947354.5992687,
+          "input_mode": "custom_3",
+          "input_value": "17:42 on 22 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "ed31453c",
+          "label": "04",
+          "fires_at": 1784904720.0,
+          "created_at": 1783951748.6743338,
+          "input_mode": "custom_3",
+          "input_value": "20:52 on 24 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "5d7fdebf",
+          "label": "05",
+          "fires_at": 1784921100.0,
+          "created_at": 1783951838.1411543,
+          "input_mode": "custom_3",
+          "input_value": "01:25 on 25 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "92ab5510",
+          "label": "06",
+          "fires_at": 1784618280.0,
+          "created_at": 1783951928.530607,
+          "input_mode": "custom_3",
+          "input_value": "13:18 on 21 Jul",
+          "use_custom_colors": false
+        },
+        {
+          "id": "3ca619ac",
+          "label": "07",
+          "fires_at": 1786205880.0,
+          "created_at": 1783952003.5391543,
+          "input_mode": "custom_3",
+          "input_value": "22:18 on 8 Aug",
+          "use_custom_colors": false
+        },
+        {
+          "id": "b8ccf04d",
+          "label": "08",
+          "fires_at": 1786208760.0,
+          "created_at": 1783952065.2003613,
+          "input_mode": "custom_3",
+          "input_value": "23:06 on 8 Aug",
+          "use_custom_colors": false
+        }
+      ]
+    },
+    {
+      "id": "89fd0ef6",
+      "name": "AGY",
+      "cards": [
+        {
+          "id": "d0121d3d",
+          "label": "01",
+          "fires_at": 1783954190.4958756,
+          "created_at": 1783953890.4965146,
+          "input_mode": "text",
+          "input_value": "5",
+          "use_custom_colors": false
+        },
+        {
+          "id": "1199e223",
+          "label": "00",
+          "fires_at": 1783953002.077961,
+          "created_at": 1783952996.0785007,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": false
+        },
+        {
+          "id": "624ab947",
+          "label": "02",
+          "fires_at": 1783952596.8434925,
+          "created_at": 1783952296.8447645,
+          "input_mode": "text",
+          "input_value": "5",
+          "use_custom_colors": false
+        },
+        {
+          "id": "a645bc31",
+          "label": "03",
+          "fires_at": 1783952923.3406236,
+          "created_at": 1783952917.3421764,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": true
+        },
+        {
+          "id": "560a1fec",
+          "label": "04",
+          "fires_at": 1783953066.0294676,
+          "created_at": 1783953060.0300283,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": true
+        },
+        {
+          "id": "85a58ee8",
+          "label": "05",
+          "fires_at": 1783953135.0616496,
+          "created_at": 1783953129.0630958,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": false
+        },
+        {
+          "id": "58f70497",
+          "label": "06",
+          "fires_at": 1784090777.2387748,
+          "created_at": 1783953197.2393174,
+          "input_mode": "text",
+          "input_value": "38h 13m",
+          "use_custom_colors": true
+        },
+        {
+          "id": "c46aa4f9",
+          "label": "07",
+          "fires_at": 1783953310.227057,
+          "created_at": 1783953304.2276795,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": true
+        },
+        {
+          "id": "fedfb2ff",
+          "label": "08",
+          "fires_at": 1783953482.0147052,
+          "created_at": 1783953476.015243,
+          "input_mode": "text",
+          "input_value": ".1",
+          "use_custom_colors": true
+        },
+        {
+          "id": "b2776c38",
+          "label": "09",
+          "fires_at": 1784198771.352789,
+          "created_at": 1783953671.35356,
+          "input_mode": "text",
+          "input_value": "68h 5m",
+          "use_custom_colors": true
+        },
+        {
+          "id": "26ad736c",
+          "label": "10",
+          "fires_at": 1784293753.6996162,
+          "created_at": 1783953853.7010791,
+          "input_mode": "text",
+          "input_value": "94h 25m",
+          "use_custom_colors": true
+        },
+        {
+          "id": "54925b15",
+          "label": "11",
+          "fires_at": 1784454310.3158286,
+          "created_at": 1783953850.316313,
+          "input_mode": "text",
+          "input_value": "139h 1m",
+          "use_custom_colors": true
+        },
+        {
+          "id": "a5cbb234",
+          "label": "12",
+          "fires_at": 1783954298.9566958,
+          "created_at": 1783953998.9598377,
+          "input_mode": "text",
+          "input_value": "5",
+          "use_custom_colors": true
+        },
+        {
+          "id": "d0ec93d0",
+          "label": "13",
+          "fires_at": 1783954213.8506565,
+          "created_at": 1783954183.8514476,
+          "input_mode": "text",
+          "input_value": ".5",
+          "use_custom_colors": true
+        },
+        {
+          "id": "cf25f407",
+          "label": "14",
+          "fires_at": 1784514053.9550333,
+          "created_at": 1783954253.9571614,
+          "input_mode": "text",
+          "input_value": "155h 30m",
+          "use_custom_colors": false
+        }
+      ]
+    }
+  ]
+}
