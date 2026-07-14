@@ -7,7 +7,7 @@ import subprocess
 import threading
 import time
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog, messagebox, ttk
 import json
 from PIL import Image, ImageDraw
 import pystray
@@ -21,7 +21,17 @@ try:
 except ImportError:
     cairosvg = None
 
-# Official Rclone SVG symbol
+# CYBERPUNK THEME PALETTE
+CP_BG = "#050505"
+CP_PANEL = "#111111"
+CP_YELLOW = "#FCEE0A"
+CP_CYAN = "#00F0FF"
+CP_RED = "#FF003C"
+CP_GREEN = "#06de22"
+CP_DIM = "#3a3a3a"
+CP_TEXT = "#E0E0E0"
+
+# SVG Icons
 RCLONE_SVG = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="256" height="257" viewBox="0 0 256 257" version="1.1" xmlns="http://www.w3.org/2000/svg">
     <g transform="matrix(1,0,0,1,0,-213)">
@@ -47,16 +57,10 @@ RCLONE_SVG = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </g>
 </svg>"""
 
-# Terminal output capture - removed, using real console instead
+ARROW_RIGHT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
+ARROW_LEFT_SVG = """<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>"""
 
-def calculate_time_to_appear(start_time):
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Time taken to appear: {elapsed_time:.2f} seconds")
-
-start_time = time.time()
-
-# Relative path for JSON files
+# File paths
 JSON_PATH = os.path.join(os.path.dirname(__file__), "commands.json")
 SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "settings.json")
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
@@ -80,21 +84,16 @@ def save_commands(commands):
 
 def load_settings():
     default_settings = {
-        "width": None, # Auto
+        "width": None,
         "height": 39,
         "x": None,
         "y": 993,
-        "interval": 3600,
         "check_interval": 600,
         "minimize_to_tray": True,
-        "auto_sync_enabled": False,
-        "auto_sync_on_red": True,
         "topmost": False,
         "dialog_width": 550,
         "settings_win_width": 480,
         "settings_win_height": 700,
-        "show_command_output": False,
-        "buffer_output": True
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -111,1001 +110,334 @@ def save_settings(settings):
     except Exception as e:
         print(f"Error saving settings: {e}")
 
-# Tray Icon logic
-tray_icon = None
-
-def create_image():
-    # If CairoSVG is available, use the rclone logo
-    if cairosvg:
-        try:
-            png_data = cairosvg.svg2png(bytestring=RCLONE_SVG.encode('utf-8'))
-            return Image.open(BytesIO(png_data))
-        except Exception as e:
-            print(f"Error rendering SVG: {e}")
-    
-    # Fallback to simple icon
-    width = 64
-    height = 64
-    image = Image.new('RGB', (width, height), (29, 32, 39)) # Match bg color
-    dc = ImageDraw.Draw(image)
-    dc.rectangle([width // 4, height // 4, width * 3 // 4, height * 3 // 4], fill='red')
-    return image
-
-def show_window(icon=None, item=None):
-    if icon:
-        icon.stop()
-    ROOT.after(0, ROOT.deiconify)
-    ROOT.after(0, ROOT.lift)
-    ROOT.after(0, ROOT.focus_force)
-
-def quit_app(icon=None, item=None):
-    if icon:
-        icon.stop()
-    ROOT.quit()
-    os._exit(0)
-
-def setup_tray():
-    global tray_icon
-    image = create_image()
-    menu = (item('Show', show_window, default=True), item('Quit', quit_app))
-    tray_icon = pystray.Icon("rclone_gui", image, "RClone GUI", menu, action=show_window)
-    tray_icon.run()
-
-def on_close_click():
-    if app_settings.get("minimize_to_tray"):
-        ROOT.withdraw()
-        threading.Thread(target=setup_tray, daemon=True).start()
-    else:
-        quit_app()
-
+# Global variables
 commands = load_commands()
 app_settings = load_settings()
-
-# Fullscreen detection and topmost management
-def is_fullscreen_app_active():
-    """Check if a fullscreen application is currently active"""
-    try:
-        hwnd = win32gui.GetForegroundWindow()
-        if hwnd == 0:
-            return False
-        
-        # Get window rect
-        rect = win32gui.GetWindowRect(hwnd)
-        width = rect[2] - rect[0]
-        height = rect[3] - rect[1]
-        
-        # Get screen dimensions
-        screen_width = ctypes.windll.user32.GetSystemMetrics(0)
-        screen_height = ctypes.windll.user32.GetSystemMetrics(1)
-        
-        # Check if window covers entire screen
-        if width >= screen_width and height >= screen_height:
-            # Additional check: is it actually fullscreen style?
-            style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-            if not (style & win32con.WS_CAPTION):
-                return True
-        
-        return False
-    except:
-        return False
-
-def manage_topmost():
-    """Manage topmost state based on fullscreen detection"""
-    if not app_settings.get("topmost", False):
-        return
-    
-    if is_fullscreen_app_active():
-        ROOT.attributes('-topmost', False)
-    else:
-        ROOT.attributes('-topmost', True)
-    
-    # Check every 500ms
-    ROOT.after(500, manage_topmost)
-
-# Auto-Sync logic
-auto_sync_enabled = app_settings.get("auto_sync_enabled", False)
-auto_sync_on_red = app_settings.get("auto_sync_on_red", True)
-pulse_id = None
-check_cycle_running = False
-all_items = []
-
-def run_sync_for_item(cfg, label):
-    """Run sync for a specific item"""
-    print(f"\n{'='*60}")
-    print(f"🔄 AUTO-SYNC TRIGGERED -- {cfg.get('name', cfg['label'])}")
-    print(f"{'='*60}")
-    
-    log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_sync.log")
-    cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-    actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-    
-    print(f"📁 Source: {cfg['src']}")
-    print(f"📁 Destination: {cfg['dst']}")
-    print(f"⚙️  Running sync command...")
-    
-    with open(log_path, "w", encoding='utf-8') as f:
-        subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-    
-    print(f"✅ Sync completed -- {cfg.get('name', cfg['label'])}")
-    print(f"📝 Log saved to: {log_path}")
-    
-    # After sync, run check immediately
-    print(f"🔍 Running check -- {cfg.get('name', cfg['label'])}...")
-    check_single_item(label, cfg)
-    print(f"{'='*60}\n")
-
-def toggle_auto_sync():
-    global auto_sync_enabled
-    auto_sync_enabled = not auto_sync_enabled
-    app_settings["auto_sync_enabled"] = auto_sync_enabled
-    save_settings(app_settings)
-    update_auto_sync_ui()
-
-def update_auto_sync_ui():
-    global pulse_id
-    if auto_sync_enabled:
-        # Stop any existing pulse effect
-        if pulse_id:
-            ROOT.after_cancel(pulse_id)
-            pulse_id = None
-        # Light green background with black text
-        btn_auto.config(text="\uf017 ON", bg="#06de22", fg="black", activebackground="#06de22", activeforeground="black")
-    else:
-        if pulse_id:
-            ROOT.after_cancel(pulse_id)
-            pulse_id = None
-        btn_auto.config(fg="red", text="\uf017 OFF", bg="#111111", activebackground="#2c313a", activeforeground="red")
-
-def pulse_effect(color_idx=0):
-    global pulse_id
-    if not auto_sync_enabled: return
-    colors = ["#06de22", "#05a81a", "#047512", "#05a81a"]
-    btn_auto.config(fg=colors[color_idx % len(colors)])
-    pulse_id = ROOT.after(500, lambda: pulse_effect(color_idx + 1))
-
-#! Variables to track the position of the mouse when clicking​⁡
-drag_data = {"x": 0, "y": 0}
-
-def start_drag(event):
-    drag_data["x"] = event.x
-    drag_data["y"] = event.y
-
-def stop_drag(event):
-    drag_data["x"] = None
-    drag_data["y"] = None
-    # Save new position
-    app_settings["x"] = ROOT.winfo_x()
-    app_settings["y"] = ROOT.winfo_y()
-    save_settings(app_settings)
-
-def do_drag(event):
-    if drag_data["x"] is not None and drag_data["y"] is not None:
-        x, y = (event.x - drag_data["x"] + ROOT.winfo_x(), event.y - drag_data["y"] + ROOT.winfo_y())
-        ROOT.geometry("+%s+%s" % (x, y))
-
-def switch_to_frame(frame_to_show, frame_to_hide):
-    frame_to_hide.pack_forget()
-    frame_to_show.pack()
-
-def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
-    BORDER_FRAME.place(relwidth=1, relheight=1)
-    return BORDER_FRAME
-
-def set_console_title(title):
-    ctypes.windll.kernel32.SetConsoleTitleW(title)
-
-def run_command(pwsh_command):
-    """Run a PowerShell command in a new terminal window."""
-    subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
-
-class HoverButton(tk.Button):
-    def __init__(self, master=None, **kw):
-        self.default_color = kw.pop('default_color', "#2c313a")
-        self.hover_color = kw.pop('hover_color', "red")
-        self.default_fg = kw.pop('default_fg', "#FFFFFF")
-        self.hover_fg = kw.pop('hover_fg', "#000000")
-        super().__init__(master, **kw)
-        self.bind("<Enter>", self.on_enter)
-        self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.default_color, fg=self.default_fg, activebackground=self.hover_color, activeforeground=self.hover_fg, bd=0, highlightthickness=0)
-
-    def on_enter(self, event):
-        self.configure(bg=self.hover_color, fg=self.hover_fg)
-
-    def on_leave(self, event):
-        self.configure(bg=self.default_color, fg=self.default_fg)
-
-# Get console window handle and ensure it exists (for pythonw support)
-kernel32 = ctypes.windll.kernel32
-user32 = ctypes.windll.user32
-console_hwnd = kernel32.GetConsoleWindow()
-
-if not console_hwnd:
-    kernel32.AllocConsole()
-    console_hwnd = kernel32.GetConsoleWindow()
-    if console_hwnd:
-        # Redirect stdout/stderr to the new console
-        sys.stdout = open('CONOUT$', 'w', buffering=1)
-        sys.stderr = open('CONOUT$', 'w', buffering=1)
-
-if console_hwnd:
-    set_console_title("🔥")
-    user32.ShowWindow(console_hwnd, 0)  # SW_HIDE = 0
-
-# Create main window
-ROOT = tk.Tk()
-ROOT.title("Python GUI")
-ROOT.configure(bg="#282c34")
-ROOT.overrideredirect(True)  # Remove default borders
-
-# Create custom border
-BORDER_FRAME = create_custom_border(ROOT)
-default_font = ("Jetbrainsmono nfp", 10)
-ROOT.option_add("*Font", default_font)
-
-screen_width = ROOT.winfo_screenwidth()
-screen_height = ROOT.winfo_screenheight()
-
-# Initial geometry from settings
-init_x = app_settings["x"] if app_settings["x"] is not None else (screen_width//2 - 1920//2)
-init_y = app_settings["y"]
-init_w = app_settings["width"] if app_settings["width"] else ""
-init_h = app_settings["height"]
-
-if init_w:
-    ROOT.geometry(f"{init_w}x{init_h}+{init_x}+{init_y}")
-else:
-    ROOT.geometry(f"+{init_x}+{init_y}")
-
-# Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#050505")
-MAIN_FRAME.pack(pady=1, padx=2, expand=True, fill="both")
-
-#! ALL Boxes
-ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-ROOT1.pack(side="left", pady=(2,2), padx=(5,1), anchor="w", fill="x")
-
-# Auto-Sync state (Handled above with persistence)
-
-def toggle_terminal_viewer():
-    """Toggle the console window visibility"""
-    global console_hwnd
-    
-    # If console was closed or never created, try to create it
-    if not console_hwnd or not user32.IsWindow(console_hwnd):
-        kernel32.AllocConsole()
-        console_hwnd = kernel32.GetConsoleWindow()
-        if console_hwnd:
-            sys.stdout = open('CONOUT$', 'w', buffering=1)
-            sys.stderr = open('CONOUT$', 'w', buffering=1)
-            set_console_title("🔥")
-            user32.ShowWindow(console_hwnd, 1)
-            user32.SetForegroundWindow(console_hwnd)
-            return
-
-    if console_hwnd:
-        if user32.IsWindowVisible(console_hwnd):
-            user32.ShowWindow(console_hwnd, 0)  # Hide
-        else:
-            user32.ShowWindow(console_hwnd, 1)  # Show
-            user32.SetForegroundWindow(console_hwnd)
-
-def open_settings():
-    settings_win = tk.Toplevel(ROOT)
-    settings_win.title("Settings")
-    
-    sw = app_settings.get("settings_win_width", 480)
-    sh = app_settings.get("settings_win_height", 700)
-    settings_win.geometry(f"{sw}x{sh}")
-    settings_win.configure(bg="#050505")
-    
-    # Main container for settings (no scrolling as requested)
-    main_container = tk.Frame(settings_win, bg="#050505")
-    main_container.pack(fill="both", expand=True)
-
-    # Grid container for settings
-    grid_frame = tk.Frame(main_container, bg="#050505")
-    grid_frame.pack(pady=10, padx=20, fill="x")
-    grid_frame.columnconfigure(1, weight=1)
-
-    # Helper to add grid row
-    def add_setting_row(row, text, entry_val):
-        lbl = tk.Label(grid_frame, text=text, bg="#050505", fg="#E0E0E0", anchor="e", width=25, font=("Consolas", 10))
-        lbl.grid(row=row, column=0, padx=(0, 10), pady=6, sticky="e")
-        ent = tk.Entry(grid_frame, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", relief="solid", bd=1)
-        ent.insert(0, str(entry_val))
-        ent.grid(row=row, column=1, pady=6, sticky="ew")
-        return ent
-
-    w_entry = add_setting_row(0, "Main Window Width (auto):", app_settings["width"] or "")
-    h_entry = add_setting_row(1, "Main Window Height:", app_settings["height"])
-    x_entry = add_setting_row(2, "X Position (auto):", app_settings["x"] or "")
-    y_entry = add_setting_row(3, "Y Position:", app_settings["y"])
-    i_entry = add_setting_row(4, "Auto-Sync Interval (sec):", app_settings["interval"])
-    c_entry = add_setting_row(5, "Check Interval (sec):", app_settings.get("check_interval", 600))
-    dw_entry = add_setting_row(6, "Edit/Add Window Width:", app_settings.get("dialog_width", 550))
-    sw_entry = add_setting_row(7, "Settings Win Width:", app_settings.get("settings_win_width", 480))
-    sh_entry = add_setting_row(8, "Settings Win Height:", app_settings.get("settings_win_height", 700))
-
-    # Checkbuttons container
-    cb_frame = tk.Frame(main_container, bg="#050505")
-    cb_frame.pack(pady=5, padx=20, fill="x")
-
-    tray_var = tk.BooleanVar(value=app_settings.get("minimize_to_tray", True))
-    tk.Checkbutton(cb_frame, text="Minimize to Tray on Close", variable=tray_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(anchor="w", pady=1)
-
-    topmost_var = tk.BooleanVar(value=app_settings.get("topmost", False))
-    tk.Checkbutton(cb_frame, text="Always on Top (hides for fullscreen)", variable=topmost_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(anchor="w", pady=1)
-
-    auto_sync_red_var = tk.BooleanVar(value=app_settings.get("auto_sync_on_red", True))
-    tk.Checkbutton(cb_frame, text="Auto-Sync When Item Turns Red", variable=auto_sync_red_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(anchor="w", pady=1)
-
-    show_output_var = tk.BooleanVar(value=app_settings.get("show_command_output", False))
-    tk.Checkbutton(cb_frame, text="Show Command Output in Terminal", variable=show_output_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(anchor="w", pady=1)
-
-    buffer_output_var = tk.BooleanVar(value=app_settings.get("buffer_output", True))
-    tk.Checkbutton(cb_frame, text="Buffer Output (prevents mixing, recommended)", variable=buffer_output_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").pack(anchor="w", pady=1)
-
-    # Note container
-    notes_frame = tk.Frame(main_container, bg="#050505")
-    notes_frame.pack(pady=5)
-    tk.Label(notes_frame, text="Note: Enable Auto-Sync button in main window", bg="#050505", fg="yellow", font=("JetBrainsMono NFP", 8)).pack()
-    tk.Label(notes_frame, text="Items sync individually when they turn red", bg="#050505", fg="yellow", font=("JetBrainsMono NFP", 8)).pack()
-
-    def save():
-        try:
-            global auto_sync_on_red
-            app_settings["width"] = int(w_entry.get()) if w_entry.get() else None
-            app_settings["height"] = int(h_entry.get())
-            app_settings["x"] = int(x_entry.get()) if x_entry.get() else None
-            app_settings["y"] = int(y_entry.get())
-            app_settings["interval"] = int(i_entry.get())
-            app_settings["check_interval"] = int(c_entry.get())
-            app_settings["dialog_width"] = int(dw_entry.get())
-            app_settings["settings_win_width"] = int(sw_entry.get())
-            app_settings["settings_win_height"] = int(sh_entry.get())
-            app_settings["minimize_to_tray"] = tray_var.get()
-            app_settings["topmost"] = topmost_var.get()
-            app_settings["auto_sync_on_red"] = auto_sync_red_var.get()
-            app_settings["show_command_output"] = show_output_var.get()
-            app_settings["buffer_output"] = buffer_output_var.get()
-            auto_sync_on_red = auto_sync_red_var.get()
-            save_settings(app_settings)
-            
-            # Apply topmost setting immediately
-            if app_settings["topmost"]:
-                ROOT.attributes('-topmost', True)
-                manage_topmost()
-            else:
-                ROOT.attributes('-topmost', False)
-            
-            messagebox.showinfo("Success", "Settings saved.")
-            settings_win.destroy()
-        except ValueError:
-            messagebox.showerror("Error", "Invalid input. Use numbers.")
-
-    tk.Button(main_container, text="Save Settings", command=save, bg="#3a3a3a", fg="white", width=20, height=1, font=("Consolas", 10, "bold")).pack(pady=15)
-
-def on_label_click(event, cfg):
-    try:
-        log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
-        subprocess.Popen([
-            "powershell", "-NoExit", "-Command", f'edit "{log_path}"'
-        ], creationflags=subprocess.CREATE_NEW_CONSOLE)
-    except Exception as e:
-        print(f"Error opening log file: {e}")
-
-def ctrl_left_click(event, cfg):
-    if event.state & 0x0004:  # Ctrl key mask
-        cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        run_command(actual_cmd)
-
-def ctrl_right_click(event, cfg):
-    if event.state & 0x0004:  # Ctrl key mask
-        cmd = cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list")
-        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
-        run_command(actual_cmd)
-
-def remove_command(key):
-    if messagebox.askyesno("Remove", f"Remove {key}?"):
-        del commands[key]
-        save_commands(commands)
-        refresh_gui()
-
-def edit_command(key):
-    """Open edit dialog for a command"""
-    cfg = commands[key]
-    
-    dialog_w = app_settings.get("dialog_width", 700)
-    edit_win = tk.Toplevel(ROOT)
-    edit_win.title(f"Edit: {key}")
-    edit_win.geometry(f"{dialog_w}x680")
-    edit_win.configure(bg="#050505")
-    
-    container = tk.Frame(edit_win, bg="#050505")
-    container.pack(fill="both", expand=True, padx=20, pady=10)
-    container.columnconfigure(1, weight=1)
-    
-    row = 0
-    tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    name_entry.insert(0, key)
-    name_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    label_entry.insert(0, cfg["label"])
-    label_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    src_entry.insert(0, cfg["src"])
-    src_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    dst_entry.insert(0, cfg["dst"])
-    dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Check Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
-    check_entry.insert("1.0", cfg.get("cmd", "rclone check src dst --fast-list --size-only"))
-    check_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Left Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
-    left_entry.insert("1.0", cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO"))
-    left_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Right Click Command:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    right_entry.insert(0, cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list"))
-    right_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    index_entry.insert(0, str(cfg.get("index", 0)))
-    index_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    enabled_var = tk.BooleanVar(value=cfg.get("enabled", True))
-    tk.Checkbutton(container, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").grid(row=row, column=0, columnspan=2, sticky="w", pady=10)
-    
-    button_frame = tk.Frame(edit_win, bg="#050505")
-    button_frame.pack(pady=15)
-    
-    def save_edit():
-        new_key = name_entry.get()
-        if not new_key:
-            messagebox.showerror("Error", "Name cannot be empty")
-            return
-        
-        # Remove old key if name changed
-        if new_key != key:
-            del commands[key]
-        
-        commands[new_key] = {
-            "cmd": check_entry.get("1.0", "end-1c"),
-            "src": src_entry.get(),
-            "dst": dst_entry.get(),
-            "label": label_entry.get(),
-            "left_click_cmd": left_entry.get("1.0", "end-1c"),
-            "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
-            "enabled": enabled_var.get()
-        }
-        save_commands(commands)
-        refresh_gui()
-        edit_win.destroy()
-    
-    def delete_item():
-        if messagebox.askyesno("Delete", f"Delete {key}?"):
-            del commands[key]
-            save_commands(commands)
-            refresh_gui()
-            edit_win.destroy()
-    
-    def duplicate_item():
-        base_name = name_entry.get()
-        new_key = base_name + "_copy"
-        counter = 1
-        while new_key in commands:
-            new_key = f"{base_name}_copy_{counter}"
-            counter += 1
-        
-        commands[new_key] = {
-            "cmd": check_entry.get("1.0", "end-1c"),
-            "src": src_entry.get(),
-            "dst": dst_entry.get(),
-            "label": label_entry.get(),
-            "left_click_cmd": left_entry.get("1.0", "end-1c"),
-            "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
-            "enabled": enabled_var.get()
-        }
-        save_commands(commands)
-        refresh_gui()
-        edit_win.destroy()
-        messagebox.showinfo("Success", f"Duplicated as: {new_key}")
-
-    tk.Button(button_frame, text="Save", command=save_edit, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Duplicate", command=duplicate_item, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Delete", command=delete_item, bg="#FF003C", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Cancel", command=edit_win.destroy, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-
-def add_command():
-    dialog_w = app_settings.get("dialog_width", 700)
-    add_win = tk.Toplevel(ROOT)
-    add_win.title("Add New Command")
-    add_win.geometry(f"{dialog_w}x680")
-    add_win.configure(bg="#050505")
-    
-    container = tk.Frame(add_win, bg="#050505")
-    container.pack(fill="both", expand=True, padx=20, pady=10)
-    container.columnconfigure(1, weight=1)
-    
-    row = 0
-    tk.Label(container, text="Name (key):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    name_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    name_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Label (Icon/Text):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    label_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    label_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Source Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    src_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    src_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Destination Path:", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    dst_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    dst_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Check Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    check_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
-    check_entry.insert("1.0", "rclone check src dst --fast-list --size-only")
-    check_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Left Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="nw").grid(row=row, column=0, sticky="nw", padx=(0,10), pady=5)
-    left_entry = tk.Text(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF", height=5, wrap="word", font=("Consolas", 9))
-    left_entry.insert("1.0", "rclone sync src dst -P --fast-list --log-level INFO")
-    left_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    tk.Label(container, text="Right Click Command (optional):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    right_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    right_entry.insert(0, "rclone sync dst src -P --fast-list")
-    right_entry.grid(row=row, column=1, sticky="ew", pady=5)
-
-    row += 1
-    tk.Label(container, text="Display Order (Index):", bg="#050505", fg="#E0E0E0", font=("Consolas", 10), anchor="w").grid(row=row, column=0, sticky="w", padx=(0,10), pady=5)
-    index_entry = tk.Entry(container, bg="#111111", fg="#00F0FF", insertbackground="#00F0FF", bd=1, relief="solid", highlightthickness=1, highlightbackground="#3a3a3a", highlightcolor="#00F0FF")
-    index_entry.insert(0, str(len(commands)))
-    index_entry.grid(row=row, column=1, sticky="ew", pady=5)
-    
-    row += 1
-    enabled_var = tk.BooleanVar(value=True)
-    tk.Checkbutton(container, text="Enabled", variable=enabled_var, bg="#050505", fg="#E0E0E0", selectcolor="#111111", activebackground="#050505", activeforeground="#E0E0E0").grid(row=row, column=0, columnspan=2, sticky="w", pady=10)
-    
-    def save_new():
-        name = name_entry.get()
-        label = label_entry.get()
-        src = src_entry.get()
-        dst = dst_entry.get()
-        
-        if not all([name, label, src, dst]):
-            messagebox.showerror("Error", "Name, Label, Source, and Destination are required")
-            return
-        
-        commands[name] = {
-            "cmd": check_entry.get("1.0", "end-1c"),
-            "src": src,
-            "dst": dst,
-            "label": label,
-            "left_click_cmd": left_entry.get("1.0", "end-1c"),
-            "right_click_cmd": right_entry.get(),
-            "index": int(index_entry.get()) if index_entry.get().isdigit() else 0,
-            "enabled": enabled_var.get()
-        }
-        save_commands(commands)
-        refresh_gui()
-        add_win.destroy()
-    
-    button_frame = tk.Frame(add_win, bg="#050505")
-    button_frame.pack(pady=15)
-    
-    tk.Button(button_frame, text="Add", command=save_new, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Cancel", command=add_win.destroy, bg="#3a3a3a", fg="white", width=10, font=("Consolas", 10, "bold")).pack(side="left", padx=5)
-
-# Periodically check using rclone
-def check_single_item(label, cfg):
-    """Run check for a single item"""
-    log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
-    actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
-    
-    print(f"🔍 Checking -- {cfg.get('name', cfg['label'])}")
-    
-    if app_settings.get("show_command_output"):
-        print(f"\n{'*'*40}")
-        print(f"🛠️  COMMAND -- {actual_cmd}")
-        print(f"{'*'*40}")
-        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-        with open(log_path, "w", encoding='utf-8') as f:
-            for line in process.stdout:
-                print(f"  > {line.strip()}")
-                f.write(line)
-        process.wait()
-        print(f"{'*'*40}\n")
-    else:
-        with open(log_path, "w", encoding='utf-8') as f:
-            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-    
-    if os.path.exists(log_path):
-        with open(log_path, "r", encoding='utf-8', errors='replace') as f:
-            content = f.read()
-        if "ERROR" not in content and "0 differences found" in content:
-            label.config(fg="#06de22")
-            print(f"✅ {cfg.get('name', cfg['label'])} -- No differences (GREEN)")
-        else:
-            label.config(fg="red")
-            print(f"❌ {cfg.get('name', cfg['label'])} -- Differences found (RED)")
-
-# Global check cycle management
-check_cycle_running = False
-last_check_time = {}
+tray_icon = None
 pending_checks = 0
 check_lock = threading.Lock()
-output_lock = threading.Lock()  # Prevent mixed output
 
-def start_global_countdown():
-    """Start a global countdown timer for all items"""
-    check_interval_sec = app_settings.get("check_interval", 600)
-    
-    def countdown(remaining):
-        if remaining > 0:
-            print(f"⏱️  Next check cycle in {remaining} seconds...", end='\r')
-            ROOT.after(1000, lambda: countdown(remaining - 1))
-        elif remaining == 0:
-            print(f"\n{'='*60}")
-            print(f"⏰ Check interval reached - Starting new check cycle")
-            print(f"{'='*60}")
-            # Trigger all checks and wait for completion
-            trigger_all_checks_and_wait()
-    
-    countdown(check_interval_sec)
+def get_svg_image(svg_data, size=(32, 32)):
+    if cairosvg:
+        try:
+            png_data = cairosvg.svg2png(bytestring=svg_data.encode('utf-8'), output_width=size[0], output_height=size[1])
+            return ImageTk.PhotoImage(Image.open(BytesIO(png_data)))
+        except: pass
+    # Fallback text-based look if SVG rendering fails
+    return None
 
-def trigger_all_checks_and_wait():
-    """Trigger all checks and wait for them to complete before starting countdown"""
-    global pending_checks
-    
-    # Count how many checks we need to run
-    with check_lock:
-        pending_checks = 0
-        for widget in ROOT1.winfo_children():
-            if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
-                pending_checks += 1
-    
-    if pending_checks == 0:
-        # No items to check, start countdown immediately
-        start_global_countdown()
-        return
-    
-    # Trigger all checks
-    for widget in ROOT1.winfo_children():
-        if isinstance(widget, tk.Label) and hasattr(widget, 'trigger_check'):
-            widget.trigger_check()
-    
-    # Wait for all checks to complete
-    check_completion()
+class ProjectActionWindow(tk.Toplevel):
+    def __init__(self, master, cfg, key):
+        super().__init__(master)
+        self.cfg = cfg
+        self.key = key
+        self.title(f"Rclone: {key}")
+        self.geometry("900x550")
+        self.configure(bg=CP_BG)
+        self.direction = "L2R" # Default Left to Right
+        
+        self.init_ui()
 
-def check_completion():
-    """Check if all checks are done, verify all GREEN, then start countdown"""
-    global pending_checks
+    def init_ui(self):
+        # Header
+        header = tk.Frame(self, bg=CP_PANEL, height=40)
+        header.pack(fill="x", side="top")
+        tk.Label(header, text=f"PROJECT: {self.key}", bg=CP_PANEL, fg=CP_YELLOW, font=("Consolas", 12, "bold")).pack(pady=10)
+
+        # Main Layout
+        main_content = tk.Frame(self, bg=CP_BG)
+        main_content.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # Path Selection Area
+        path_frame = tk.Frame(main_content, bg=CP_BG)
+        path_frame.pack(fill="x")
+
+        # Left Side
+        left_frame = tk.Frame(path_frame, bg=CP_BG)
+        left_frame.pack(side="left", fill="both", expand=True)
+        tk.Label(left_frame, text="SIDE A", bg=CP_BG, fg=CP_CYAN, font=("Consolas", 10)).pack(anchor="w")
+        self.side_a_ent = tk.Entry(left_frame, bg=CP_PANEL, fg=CP_TEXT, insertbackground=CP_CYAN, bd=1, relief="solid")
+        self.side_a_ent.insert(0, self.cfg["src"])
+        self.side_a_ent.pack(fill="x", pady=5)
+
+        # Middle (Arrow Button)
+        mid_frame = tk.Frame(path_frame, bg=CP_BG)
+        mid_frame.pack(side="left", padx=20)
+        self.arrow_btn = tk.Button(mid_frame, text="==>", bg=CP_DIM, fg=CP_CYAN, font=("Consolas", 14, "bold"), 
+                                  command=self.toggle_direction, relief="flat", padx=10)
+        self.arrow_btn.pack()
+
+        # Right Side
+        right_frame = tk.Frame(path_frame, bg=CP_BG)
+        right_frame.pack(side="left", fill="both", expand=True)
+        tk.Label(right_frame, text="SIDE B", bg=CP_BG, fg=CP_CYAN, font=("Consolas", 10)).pack(anchor="e")
+        self.side_b_ent = tk.Entry(right_frame, bg=CP_PANEL, fg=CP_TEXT, insertbackground=CP_CYAN, bd=1, relief="solid", justify="right")
+        self.side_b_ent.insert(0, self.cfg["dst"])
+        self.side_b_ent.pack(fill="x", pady=5)
+
+        # Operation Selection
+        op_frame = tk.Frame(main_content, bg=CP_BG)
+        op_frame.pack(pady=20)
+        self.op_var = tk.StringVar(value="sync")
+        for op in ["sync", "copy", "check"]:
+            rb = tk.Radiobutton(op_frame, text=op.upper(), variable=self.op_var, value=op, bg=CP_BG, fg=CP_TEXT, 
+                                selectcolor=CP_PANEL, activebackground=CP_BG, activeforeground=CP_CYAN, font=("Consolas", 10))
+            rb.pack(side="left", padx=15)
+
+        # Middle Action Button
+        self.action_btn = tk.Button(main_content, text="START OPERATION", bg=CP_YELLOW, fg="black", font=("Consolas", 12, "bold"), 
+                                    command=self.execute_task, relief="flat", pady=10, width=30)
+        self.action_btn.pack()
+
+        # Additional Fields
+        extra_frame = tk.Frame(main_content, bg=CP_BG)
+        extra_frame.pack(fill="x", pady=20)
+        
+        tk.Label(extra_frame, text="Ignore (e.g. node_modules,*.tmp):", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=0, column=0, sticky="w")
+        self.ignore_ent = tk.Entry(extra_frame, bg=CP_PANEL, fg=CP_CYAN, bd=1, relief="solid")
+        self.ignore_ent.grid(row=0, column=1, sticky="ew", padx=(10,0))
+
+        tk.Label(extra_frame, text="Flags (e.g. --fast-list -P):", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=1, column=0, sticky="w", pady=10)
+        self.flags_ent = tk.Entry(extra_frame, bg=CP_PANEL, fg=CP_CYAN, bd=1, relief="solid")
+        self.flags_ent.insert(0, "--fast-list -P --size-only")
+        self.flags_ent.grid(row=1, column=1, sticky="ew", padx=(10,0))
+        extra_frame.columnconfigure(1, weight=1)
+
+        # Status / Log
+        self.log_text = tk.Text(main_content, height=8, bg=CP_PANEL, fg=CP_TEXT, font=("Consolas", 9), bd=0)
+        self.log_text.pack(fill="both", expand=True)
+
+    def toggle_direction(self):
+        if self.direction == "L2R":
+            self.direction = "R2L"
+            self.arrow_btn.config(text="<==")
+            self.side_a_ent.config(fg=CP_YELLOW)
+            self.side_b_ent.config(fg=CP_CYAN)
+        else:
+            self.direction = "L2R"
+            self.arrow_btn.config(text="==>")
+            self.side_a_ent.config(fg=CP_CYAN)
+            self.side_b_ent.config(fg=CP_YELLOW)
+
+    def execute_task(self):
+        op = self.op_var.get()
+        side_a = self.side_a_ent.get()
+        side_b = self.side_b_ent.get()
+        ignore = self.ignore_ent.get()
+        flags = self.flags_ent.get()
+
+        if self.direction == "L2R":
+            src, dst = side_a, side_b
+        else:
+            src, dst = side_b, side_a
+
+        cmd = f'rclone {op} "{src}" "{dst}" {flags}'
+        if ignore:
+            for item in ignore.split(','):
+                cmd += f' --exclude "{item.strip()}"'
+
+        self.action_btn.config(state="disabled", text="RUNNING...")
+        self.log_text.insert("end", f"\n> Executing: {cmd}\n")
+        self.log_text.see("end")
+
+        def run():
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            for line in process.stdout:
+                self.log_text.insert("end", line)
+                self.log_text.see("end")
+            process.wait()
+            self.action_btn.config(state="normal", text="START OPERATION")
+            self.log_text.insert("end", f"\n> Finished with code {process.returncode}\n")
+            # Refresh status in main window after operation
+            trigger_all_checks()
+
+        threading.Thread(target=run, daemon=True).start()
+
+def on_label_click(event, cfg, key):
+    ProjectActionWindow(ROOT, cfg, key)
+
+def add_command():
+    edit_command(None)
+
+def edit_command(key):
+    is_edit = key is not None
+    cfg = commands.get(key, {
+        "label": "NEW", "src": "C:/", "dst": "remote:/", 
+        "cmd": "rclone check src dst --size-only", "index": len(commands), "enabled": True
+    })
     
-    with check_lock:
-        if pending_checks <= 0:
-            # All checks complete, now verify all items are GREEN
-            red_items = []
-            for widget in ROOT1.winfo_children():
-                if isinstance(widget, tk.Label) and widget.cget('fg') == 'red' and hasattr(widget, 'cfg'):
-                    red_items.append(widget)
-            
-            if red_items:
-                print(f"\n⚠️  {len(red_items)} item(s) still RED after sync, re-syncing...")
-                # Reset counter for red items
-                pending_checks = len(red_items)
-                # Re-trigger sync for red items
-                for widget in red_items:
-                    widget.trigger_check()
-                # Wait for completion
-                ROOT.after(500, check_completion)
+    dialog = tk.Toplevel(ROOT)
+    dialog.title("Edit Project" if is_edit else "Add Project")
+    dialog.geometry("500x550")
+    dialog.configure(bg=CP_BG)
+    dialog.transient(ROOT)
+
+    def create_field(parent, label, default_val):
+        frame = tk.Frame(parent, bg=CP_BG)
+        frame.pack(fill="x", pady=5)
+        tk.Label(frame, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 10)).pack(anchor="w")
+        ent = tk.Entry(frame, bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, bd=1, relief="solid")
+        ent.insert(0, str(default_val))
+        ent.pack(fill="x", pady=2)
+        return ent
+
+    name_ent = create_field(dialog, "Unique Name (Key):", key if key else f"project_{len(commands)}")
+    label_ent = create_field(dialog, "Display Icon/Label:", cfg["label"])
+    src_ent = create_field(dialog, "Side A (Source):", cfg["src"])
+    dst_ent = create_field(dialog, "Side B (Destination):", cfg["dst"])
+    cmd_ent = create_field(dialog, "Check Command:", cfg["cmd"])
+    idx_ent = create_field(dialog, "Sort Index:", cfg["index"])
+
+    def save():
+        new_key = name_ent.get()
+        if is_edit and new_key != key:
+            del commands[key]
+        
+        commands[new_key] = {
+            "label": label_ent.get(),
+            "src": src_ent.get(),
+            "dst": dst_ent.get(),
+            "cmd": cmd_ent.get(),
+            "index": int(idx_ent.get()),
+            "enabled": True
+        }
+        save_commands(commands)
+        create_gui()
+        dialog.destroy()
+        trigger_all_checks()
+
+    def delete():
+        if messagebox.askyesno("Confirm", f"Delete {key}?"):
+            del commands[key]
+            save_commands(commands)
+            create_gui()
+            dialog.destroy()
+
+    btn_frame = tk.Frame(dialog, bg=CP_BG)
+    btn_frame.pack(pady=20)
+    
+    HoverButton(btn_frame, text="SAVE", command=save, width=15, default_color=CP_GREEN, hover_color=CP_YELLOW).pack(side="left", padx=5)
+    if is_edit:
+        HoverButton(btn_frame, text="DELETE", command=delete, width=15, default_color=CP_RED, hover_color=CP_YELLOW).pack(side="left", padx=5)
+    HoverButton(btn_frame, text="CANCEL", command=dialog.destroy, width=15).pack(side="left", padx=5)
+
+
+def check_and_update_label(label, cfg):
+    def run_check():
+        actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        try:
+            res = subprocess.run(actual_cmd, shell=True, capture_output=True, text=True)
+            if "0 differences found" in res.stdout and "ERROR" not in res.stdout:
+                label.config(fg=CP_GREEN)
             else:
-                print(f"\n{'='*60}")
-                print(f"✅ All items GREEN - Starting countdown")
-                print(f"{'='*60}\n")
-                start_global_countdown()
-            return
-    
-    # Check again in 500ms
-    ROOT.after(500, check_completion)
+                label.config(fg=CP_RED)
+        finally:
+            mark_check_complete()
+
+    label.trigger_check = lambda: threading.Thread(target=run_check, daemon=True).start()
 
 def mark_check_complete():
-    """Mark one check as complete"""
     global pending_checks
     with check_lock:
         pending_checks -= 1
+        if pending_checks <= 0:
+            start_global_countdown()
 
-def check_and_update(label, cfg):
-    def run_check():
-        try:
-            log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_check.log")
-            actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+def start_global_countdown():
+    interval = app_settings.get("check_interval", 600)
+    ROOT.after(interval * 1000, trigger_all_checks)
 
-            if app_settings.get("show_command_output"):
-                if app_settings.get("buffer_output", True):
-                    # Buffered mode - collect all output then print
-                    output_buffer = []
-                    output_buffer.append(f"\n🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
-                    output_buffer.append(f"{'*'*40}")
-                    output_buffer.append(f"🛠️  CHECK COMMAND: {actual_cmd}")
-                    output_buffer.append(f"{'*'*40}")
-                    
-                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                    with open(log_path, "w", encoding='utf-8') as f:
-                        for line in process.stdout:
-                            f.write(line)
-                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
-                                output_buffer.append(f"  > {line.strip()}")
-                    process.wait()
-                    output_buffer.append(f"{'*'*40}\n")
-                    
-                    with output_lock:
-                        for line in output_buffer:
-                            print(line)
-                else:
-                    # Real-time mode - print each line with project label
-                    with output_lock:
-                        print(f"\n🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
-                        print(f"{'*'*40}")
-                        print(f"🛠️  CHECK COMMAND: {actual_cmd}")
-                        print(f"{'*'*40}")
-                    
-                    process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                    with open(log_path, "w", encoding='utf-8') as f:
-                        for line in process.stdout:
-                            f.write(line)
-                            if any(x in line for x in ["ERROR", "NOTICE", "INFO", "differences found"]) and "symlink" not in line.lower():
-                                with output_lock:
-                                    print(f"{cfg.get('name', cfg['label'])} > {line.strip()}")
-                    process.wait()
-                    with output_lock:
-                        print(f"{'*'*40}\n")
-            else:
-                with output_lock:
-                    print(f"🔍 Periodic check -- {cfg.get('name', cfg['label'])}")
-                with open(log_path, "w", encoding='utf-8') as f:
-                    subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
+def trigger_all_checks():
+    global pending_checks
+    widgets = [w for w in ROOT1.winfo_children() if hasattr(w, 'trigger_check')]
+    with check_lock:
+        pending_checks = len(widgets)
+    if pending_checks == 0:
+        start_global_countdown()
+        return
+    for w in widgets:
+        w.trigger_check()
 
-            if os.path.exists(log_path):
-                with open(log_path, "r", encoding='utf-8', errors='replace') as f:
-                    content = f.read()
+# UI Helpers
+class HoverButton(tk.Button):
+    def __init__(self, master=None, **kw):
+        self.default_color = kw.pop('default_color', CP_DIM)
+        self.hover_color = kw.pop('hover_color', CP_RED)
+        self.default_fg = kw.pop('default_fg', "#FFFFFF")
+        self.hover_fg = kw.pop('hover_fg', "#000000")
+        super().__init__(master, **kw)
+        self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color, fg=self.hover_fg))
+        self.bind("<Leave>", lambda e: self.configure(bg=self.default_color, fg=self.default_fg))
+        self.configure(bg=self.default_color, fg=self.default_fg, bd=0, highlightthickness=0)
 
-                # Check if differences found
-                if "ERROR" not in content and "0 differences found" in content:
-                    label.config(fg="#06de22")
-                    with output_lock:
-                        print(f"✅ {cfg.get('name', cfg['label'])} -- No differences (GREEN)")
-                else:
-                    # Differences found - turn red and auto-sync
-                    label.config(fg="red")
-                    with output_lock:
-                        print(f"❌ {cfg.get('name', cfg['label'])} -- Differences detected (RED)")
-                        print(f"🚀 Auto-syncing -- {cfg.get('name', cfg['label'])}...")
+def quit_app():
+    if tray_icon: tray_icon.stop()
+    ROOT.quit()
+    os._exit(0)
 
-                    # Auto-sync
-                    sync_log_path = os.path.join(LOG_DIR, f"{cfg.get('name', cfg['label'])}_sync.log")
-                    sync_cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
-                    actual_sync_cmd = sync_cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+# Main Application Window
+ROOT = tk.Tk()
+ROOT.overrideredirect(True)
+ROOT.configure(bg=CP_BG)
 
-                    if app_settings.get("show_command_output"):
-                        if app_settings.get("buffer_output", True):
-                            # Buffered mode
-                            output_buffer = []
-                            output_buffer.append(f"{'*'*40}")
-                            output_buffer.append(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
-                            output_buffer.append(f"{'*'*40}")
-                            
-                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                            with open(sync_log_path, "w", encoding='utf-8') as f:
-                                for line in process.stdout:
-                                    f.write(line)
-                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
-                                        output_buffer.append(f"  >> {line.strip()}")
-                            process.wait()
-                            output_buffer.append(f"{'*'*40}\n")
-                            
-                            with output_lock:
-                                for line in output_buffer:
-                                    print(line)
-                        else:
-                            # Real-time mode with project label
-                            with output_lock:
-                                print(f"\n{'*'*40}")
-                                print(f"🛠️  SYNC COMMAND: {actual_sync_cmd}")
-                                print(f"{'*'*40}")
-                            
-                            process = subprocess.Popen(actual_sync_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                            with open(sync_log_path, "w", encoding='utf-8') as f:
-                                for line in process.stdout:
-                                    f.write(line)
-                                    if any(x in line for x in ["ERROR", "NOTICE", "INFO :", "Copied", "Deleted"]) and "symlink" not in line.lower():
-                                        with output_lock:
-                                            print(f"{cfg.get('name', cfg['label'])} >> {line.strip()}")
-                            process.wait()
-                            with output_lock:
-                                print(f"{'*'*40}\n")
-                    else:
-                        with open(sync_log_path, "w", encoding='utf-8') as f:
-                            subprocess.run(actual_sync_cmd, shell=True, stdout=f, stderr=f)
+# Custom border
+BORDER_FRAME = tk.Frame(ROOT, bg=CP_DIM, bd=0, highlightthickness=1, highlightbackground=CP_RED)
+BORDER_FRAME.place(relwidth=1, relheight=1)
 
-                    with output_lock:
-                        print(f"✅ Sync completed -- {cfg.get('name', cfg['label'])} verifying...")
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg=CP_BG)
+MAIN_FRAME.pack(pady=1, padx=2, expand=True, fill="both")
 
-                    # Check again after sync to verify
-                    if app_settings.get("show_command_output"):
-                        process = subprocess.Popen(actual_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-                        with open(log_path, "w", encoding='utf-8') as f:
-                            for line in process.stdout:
-                                f.write(line)
-                        process.wait()
-                    else:
-                        with open(log_path, "w", encoding='utf-8') as f:
-                            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
-
-                    # Read result after sync
-                    if os.path.exists(log_path):
-                        with open(log_path, "r", encoding='utf-8', errors='replace') as f:
-                            content = f.read()
-                        if "ERROR" not in content and "0 differences found" in content:
-                            label.config(fg="#06de22")
-                            with output_lock:
-                                print(f"✅ {cfg.get('name', cfg['label'])} -- Verified - No differences after sync (GREEN)")
-                        else:
-                            label.config(fg="red")
-                            with output_lock:
-                                print(f"⚠️ {cfg.get('name', cfg['label'])} -- Still has differences after sync (RED)")
-        finally:
-            # Mark this check as complete
-            mark_check_complete()
-
-    # Store the check function on the label so it can be triggered globally
-    label.trigger_check = lambda: threading.Thread(target=run_check, daemon=True).start()
-    label.cfg = cfg  # Store config reference for re-sync
-    
-    # Don't run initial check here - let trigger_all_checks_and_wait handle it
-
+ROOT1 = tk.Frame(MAIN_FRAME, bg=CP_PANEL)
+ROOT1.pack(side="left", pady=2, padx=5) # Removed fill="x"
 
 def create_gui():
-    # Clear existing widgets if any (for refresh)
-    global all_items
-    all_items = []
-    
-    for widget in ROOT1.winfo_children():
-        widget.destroy()
-
-    # Sort items by index
+    for widget in ROOT1.winfo_children(): widget.destroy()
     sorted_items = sorted(commands.items(), key=lambda x: (x[1].get("index", 0), x[0]))
 
     for key, cfg in sorted_items:
-        is_enabled = cfg.get("enabled", True)
-        cfg['name'] = key  # Add name for logging
-        
-        lbl = tk.Label(
-            ROOT1,
-            bg="#1d2027",
-            text=cfg["label"],
-            font=("JetBrainsMono NFP", 16, "bold"),
-            fg="#555555" if not is_enabled else "#FFFFFF",
-            cursor="hand2"
-        )
-        lbl.pack(side="left", padx=(5, 5))
+        if not cfg.get("enabled", True): continue
+        lbl = tk.Label(ROOT1, bg=CP_PANEL, text=cfg["label"], font=("JetBrainsMono NFP", 16, "bold"), fg="#555555", cursor="hand2")
+        lbl.pack(side="left", padx=8)
+        lbl.bind("<Button-1>", lambda event, c=cfg, k=key: on_label_click(event, c, k))
+        lbl.bind("<Button-3>", lambda event, k=key: edit_command(k)) # Right-click to edit
+        check_and_update_label(lbl, cfg)
 
-        # Event bindings
-        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))           # left click
-        lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
-        lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
-        
-        # Right click to edit
-        lbl.bind("<Button-3>", lambda event, k=key: edit_command(k))
+    # Separator
+    tk.Frame(ROOT1, width=2, bg=CP_DIM).pack(side="left", padx=5, fill="y", pady=5)
 
-        if is_enabled:
-            check_and_update(lbl, cfg)
-    
-    # Add separator or just more padding
-    tk.Frame(ROOT1, width=10, bg="#1d2027").pack(side="left")
-
-    # Add Button (+)
-    btn_add = HoverButton(ROOT1, text="+", font=("JetBrainsMono NFP", 14, "bold"), command=add_command, width=2)
+    # Control Buttons
+    btn_add = HoverButton(ROOT1, text="\uf067", font=("JetBrainsMono NFP", 12), command=add_command, default_color=CP_PANEL, hover_color=CP_CYAN)
     btn_add.pack(side="left", padx=2)
-
-    # Auto Sync Toggle (🕒) - Use regular button to maintain state colors
-    global btn_auto
-    btn_auto = tk.Button(ROOT1, text="\uf017 OFF", font=("JetBrainsMono NFP", 10, "bold"), command=toggle_auto_sync, fg="red", bg="#111111", bd=0, highlightthickness=0, cursor="hand2", activebackground="#2c313a", activeforeground="red")
-    btn_auto.pack(side="left", padx=2)
     
-    # Initialize UI state
-    update_auto_sync_ui()
-
-    # Terminal Viewer Button (�)
-    btn_terminal = HoverButton(ROOT1, text="\uf120", font=("JetBrainsMono NFP", 12, "bold"), command=toggle_terminal_viewer)
-    btn_terminal.pack(side="left", padx=2)
-
-    # Reload Button (🔄)
-    btn_reload = HoverButton(ROOT1, text="\uf021", font=("JetBrainsMono NFP", 12, "bold"), command=lambda: os.execv(sys.executable, ['python'] + sys.argv))
+    btn_reload = HoverButton(ROOT1, text="\uf021", font=("JetBrainsMono NFP", 12), command=lambda: os.execv(sys.executable, ['python'] + sys.argv), default_color=CP_PANEL)
     btn_reload.pack(side="left", padx=2)
+    
+    btn_close = HoverButton(ROOT1, text="\uf00d", font=("JetBrainsMono NFP", 12), command=quit_app, hover_color=CP_RED, default_color=CP_PANEL)
+    btn_close.pack(side="left", padx=(2, 5))
 
-    # Settings Button (⚙️)
-    btn_settings = HoverButton(ROOT1, text="\uf013", font=("JetBrainsMono NFP", 12, "bold"), command=open_settings)
-    btn_settings.pack(side="left", padx=2)
-
-    # Close Button (X)
-    btn_close = HoverButton(ROOT1, text="\uf00d", font=("JetBrainsMono NFP", 12, "bold"), command=on_close_click, hover_color="red")
-    btn_close.pack(side="left", padx=(5, 2))
-
-    # Update ROOT size logic
     def adjust_width():
         ROOT.update_idletasks()
-        # Ensure ROOT1 is fully updated
-        req_width = ROOT1.winfo_reqwidth() + 25 
-        req_height = app_settings["height"]
-        
-        # Current position
-        curr_x = ROOT.winfo_x()
-        curr_y = ROOT.winfo_y()
-        
-        # If no width is set in settings, or if it's auto-adjusting
-        if not app_settings.get("width"):
-            ROOT.geometry(f"{req_width}x{req_height}+{curr_x}+{curr_y}")
-        else:
-            ROOT.geometry(f"{app_settings['width']}x{req_height}+{curr_x}+{curr_y}")
+        # Calculate width: ROOT1 width + internal margins + outer border space
+        # ROOT1 padx is 5 on both sides (10 total) + BORDER_FRAME highlight (2 total) + safety (2)
+        w = ROOT1.winfo_reqwidth() + 14 
+        ROOT.geometry(f"{w}x{app_settings['height']}+{app_settings['x'] or 100}+{app_settings['y'] or 100}")
     
-    # Schedule multiple updates to ensure layout is finalized
+    # Schedule multiple updates to catch rendering timing
+    ROOT.after(10, adjust_width)
     ROOT.after(100, adjust_width)
-    ROOT.after(500, adjust_width)
 
-def refresh_gui():
-    create_gui()
-    trigger_all_checks_and_wait()
+# Dragging logic
+drag_data = {"x": 0, "y": 0}
+def start_drag(e): drag_data["x"], drag_data["y"] = e.x, e.y
+def do_drag(e):
+    x, y = (e.x - drag_data["x"] + ROOT.winfo_x(), e.y - drag_data["y"] + ROOT.winfo_y())
+    ROOT.geometry(f"+{x}+{y}")
+    app_settings["x"], app_settings["y"] = x, y
+    save_settings(app_settings)
 
-# Support dragging on the main frame
 MAIN_FRAME.bind("<Button-1>", start_drag)
 MAIN_FRAME.bind("<B1-Motion>", do_drag)
-ROOT1.bind("<Button-1>", start_drag)
-ROOT1.bind("<B1-Motion>", do_drag)
 
-# Call GUI init
 create_gui()
-
-# Start global countdown timer
-trigger_all_checks_and_wait()
-
-# Apply topmost setting on startup
-if app_settings.get("topmost", False):
-    ROOT.attributes('-topmost', True)
-    manage_topmost()
-
+trigger_all_checks()
 ROOT.mainloop()

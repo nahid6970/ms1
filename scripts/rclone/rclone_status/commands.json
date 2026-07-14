@@ -1,72 +1,10 @@
 {
-    "msBackups": {
-        "cmd": "rclone check src dst --fast-list --size-only --exclude \"*.pyc\" --exclude \"*.pyo\" --exclude \"*.log\" --exclude \"*.tmp\" --exclude \"*.cache\"",
-        "src": "C:/@delta/msBackups",
-        "dst": "gu:/msBackups",
-        "label": "\udb85\ude32",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \"*.pyc\" --exclude \"*.pyo\" --exclude \"*.log\" --exclude \"*.tmp\" --exclude \"*.cache\" --log-level INFO ",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 2,
-        "enabled": true
-    },
-    "software": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/software",
-        "dst": "gu:/software",
-        "label": "\uf40e",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 5,
-        "enabled": true
-    },
-    "song": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "D:/song",
-        "dst": "gu:/song",
-        "label": "\uec1b",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 4,
-        "enabled": true
-    },
-    "ms1": {
-        "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\"",
-        "src": "C:/@delta/ms1/",
-        "dst": "o0:/ms1/",
-        "label": "ms1",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 0,
-        "enabled": true
-    },
-    "Photos": {
-        "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "C:/Users/nahid/Pictures/",
-        "dst": "gu:/Pictures/",
-        "label": "\uf03e",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 3,
-        "enabled": true
-    },
-    "db": {
-        "cmd": "rclone check src dst --fast-list --size-only --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\"",
-        "src": "C:/@delta/db/",
-        "dst": "o0:/db/",
-        "label": "db",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\"  --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
+    "project_0": {
+        "label": "NEW",
+        "src": "C:/fffff",
+        "dst": "c:/asdasda",
+        "cmd": "rclone check src dst --size-only",
         "index": 1,
-        "enabled": true
-    },
-    "AndroidTest-Collab": {
-        "cmd": "rclone check src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
-        "src": "C:\\@delta\\test\\FolderSync",
-        "dst": "g00:\\FolderSync",
-        "label": "T",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\" --exclude \"node_modules/**\" --exclude \".gradle/**\" --exclude \".kotlin/**\" --exclude \"build/**\" --exclude \"*.apk\" --exclude \"local.properties\" --log-level INFO",
-        "right_click_cmd": "rclone sync dst src -P --fast-list",
-        "index": 6,
         "enabled": true
     }
 }
