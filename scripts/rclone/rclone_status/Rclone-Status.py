@@ -250,8 +250,16 @@ class ProjectActionWindow(tk.Toplevel):
 
 def open_settings():
     win = tk.Toplevel(ROOT)
-    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 580)
+    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 480)
     body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=25, pady=20)
+
+    def dual_field(label, val1, val2):
+        f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
+        tk.Label(f, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 8, "bold")).pack(anchor="w")
+        row = tk.Frame(f, bg=CP_BG); row.pack(fill="x", pady=2)
+        e1 = CyberEntry(row, width=8); e1.insert(0, val1); e1.pack(side="left")
+        e2 = CyberEntry(row); e2.insert(0, val2); e2.pack(side="left", fill="x", expand=True, padx=(10, 0))
+        return e1, e2
 
     def s_field(label, val):
         f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
@@ -259,19 +267,20 @@ def open_settings():
         e = CyberEntry(f); e.insert(0, val); e.pack(fill="x", pady=2)
         return e
 
-    l_icon_e = s_field("LEFT_ICON_CHAR ()", app_settings["icon_l"])
-    r_icon_e = s_field("RIGHT_ICON_CHAR ()", app_settings["icon_r"])
-    l_color_e = s_field("LEFT_ARROW_COLOR (HEX)", app_settings.get("color_l", "#ff934b"))
-    r_color_e = s_field("RIGHT_ARROW_COLOR (HEX)", app_settings.get("color_r", "#00F0FF"))
+    l_icon_e, l_color_e = dual_field("LEFT_ICON & COLOR (HEX)", app_settings["icon_l"], app_settings.get("color_l", "#ff934b"))
+    r_icon_e, r_color_e = dual_field("RIGHT_ICON & COLOR (HEX)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
 
     def save_stg():
-        app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
-        app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
-        app_settings["icon_size"] = int(size_e.get())
-        app_settings["check_interval"] = int(interval_e.get())
-        save_settings(app_settings); win.destroy()
+        try:
+            app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
+            app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
+            app_settings["icon_size"] = int(size_e.get())
+            app_settings["check_interval"] = int(interval_e.get())
+            save_settings(app_settings); win.destroy()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid numeric value in Size or Interval.")
     
     HoverButton(body, text="SAVE_SETTINGS", command=save_stg, hover_color=CP_GREEN).pack(fill="x", pady=20)
 
