@@ -658,6 +658,14 @@
             "trigger": ";read",
             "replacement": "read dev.md about the project",
             "enabled": true
+        },
+        {
+            "name": "install python dependency",
+            "category": "General",
+            "description": "",
+            "trigger": ";dep",
+            "replacement": "import sys, os\n# 1. Add the absolute path to the folder containing install_deps.py\nUTILITY_PATH = r\"C:\\@delta\\ms1\" \nif UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)\n\n# 2. Import and run the bootstrap\nimport install_deps\ninstall_deps.bootstrap(__file__)",
+            "enabled": true
         }
     ],
     "file_shortcuts": [

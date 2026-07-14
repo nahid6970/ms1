@@ -139,17 +139,29 @@ def bootstrap(script_path: str):
     if not to_install:
         return
 
-    print(f"\n[!] Missing dependencies for {os.path.basename(script_path)}: {', '.join(to_install)}")
-    print("[!] Installing via uv...")
-    
+    print(f"\n[!] The following missing dependencies were detected for {os.path.basename(script_path)}:")
     for pkg in to_install:
+        print(f"  - {pkg}")
+    
+    try:
+        input("\nPress [ENTER] to proceed with installation via 'uv', or Ctrl+C to cancel...")
+    except KeyboardInterrupt:
+        print("\nInstallation cancelled by user.")
+        sys.exit(0)
+
+    print("")
+    for pkg in to_install:
+        print(f"  installing {pkg}...")
         subprocess.run(["uv", "pip", "install", "--system", pkg])
 
-    print("[!] Dependencies installed. Restarting script...\n")
+    print("\n[!] Dependencies installed. Restarting script...\n")
     os.environ["INSTALL_DEPS_RESTARTED"] = script_path
-    # Pass the current PYTHONPATH to the child process so it can still find install_deps.py
+    
+    # Pass the current folder to PYTHONPATH so the restarted script can still find install_deps.py
     env = os.environ.copy()
-    env["PYTHONPATH"] = os.path.dirname(__file__) + os.pathsep + env.get("PYTHONPATH", "")
+    utility_dir = os.path.dirname(os.path.abspath(__file__))
+    env["PYTHONPATH"] = utility_dir + os.pathsep + env.get("PYTHONPATH", "")
+    
     os.execve(sys.executable, [sys.executable, script_path] + sys.argv[1:], env)
 
 def clean_unused_imports(script: str) -> None:
