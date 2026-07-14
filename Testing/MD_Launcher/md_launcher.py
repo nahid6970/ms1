@@ -182,7 +182,7 @@ class SettingsDialog(QDialog):
 
     def _section(self, text):
         lbl = QLabel(text)
-        lbl.setFont(QFont("Consolas", 8, QFont.Bold))
+        lbl.setFont(QFont("Consolas", 8, QFont.Weight.Bold))
         lbl.setStyleSheet(f"color: {CP_YELLOW}; background: transparent; border: none;")
         return lbl
 
