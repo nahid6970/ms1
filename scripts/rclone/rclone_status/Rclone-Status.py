@@ -51,7 +51,9 @@ def load_settings():
         "width": None, "height": 39, "x": 100, "y": 100, 
         "check_interval": 600, "topmost": True,
         "icon_l": "\uf100", "icon_r": "\uf101",
-        "icon_size": 22
+        "icon_size": 22,
+        "color_l": "#ff934b", # CP_ORANGE default
+        "color_r": "#00F0FF"  # CP_CYAN default
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -150,7 +152,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.arrow_btn = HoverButton(inner, text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"], 
                                      font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)), width=3, height=1, 
                                      default_color=CP_BG, hover_color=CP_CYAN, hover_fg="black")
-        self.arrow_btn.default_fg = CP_CYAN if self.direction == "L2R" else CP_ORANGE
+        self.arrow_btn.default_fg = app_settings.get("color_r", CP_CYAN) if self.direction == "L2R" else app_settings.get("color_l", CP_ORANGE)
         self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
         self.arrow_btn.config(command=self.toggle_direction)
         self.arrow_btn.pack(side="left", padx=25)
@@ -213,11 +215,11 @@ class ProjectActionWindow(tk.Toplevel):
         self.arrow_btn.config(text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"],
                               font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)))
         if self.direction == "L2R":
-            self.arrow_btn.default_fg = CP_CYAN
-            self.arrow_btn.configure(fg=CP_CYAN)
+            self.arrow_btn.default_fg = app_settings.get("color_r", CP_CYAN)
+            self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
         else:
-            self.arrow_btn.default_fg = CP_ORANGE
-            self.arrow_btn.configure(fg=CP_ORANGE)
+            self.arrow_btn.default_fg = app_settings.get("color_l", CP_ORANGE)
+            self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
         self.update_ui_state()
 
     def update_ui_state(self):
@@ -248,7 +250,7 @@ class ProjectActionWindow(tk.Toplevel):
 
 def open_settings():
     win = tk.Toplevel(ROOT)
-    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 480)
+    container = setup_custom_window(win, "GLOBAL_SETTINGS", 450, 580)
     body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=25, pady=20)
 
     def s_field(label, val):
@@ -259,11 +261,14 @@ def open_settings():
 
     l_icon_e = s_field("LEFT_ICON_CHAR ()", app_settings["icon_l"])
     r_icon_e = s_field("RIGHT_ICON_CHAR ()", app_settings["icon_r"])
+    l_color_e = s_field("LEFT_ARROW_COLOR (HEX)", app_settings.get("color_l", "#ff934b"))
+    r_color_e = s_field("RIGHT_ARROW_COLOR (HEX)", app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
 
     def save_stg():
         app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
+        app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
         app_settings["icon_size"] = int(size_e.get())
         app_settings["check_interval"] = int(interval_e.get())
         save_settings(app_settings); win.destroy()
