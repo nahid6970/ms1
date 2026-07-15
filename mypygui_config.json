@@ -264,7 +264,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "cmd /c \"C:\\@delta\\ms1\\TOOLS\\startup_manager\\startup.py\""
+                    "cmd": "C:\\@delta\\ms1\\TOOLS\\startup_manager\\startup.py"
                 }
             },
             "bg": "",

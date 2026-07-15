@@ -39,14 +39,15 @@
     "name": "Flask - 5002 - Share File",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "AutoHotkey64.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784123383.8511949
   },
   {
     "name": "Flask - 5003 - Browse Files",
@@ -59,7 +60,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784122042.2034054
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
@@ -144,13 +146,13 @@
     "name": "mypygui",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\mypygui_qt.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
+    "hide_terminal": true,
     "script_enabled": false
   },
   {
@@ -412,7 +414,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784122042.2034054
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",
@@ -435,7 +438,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784122042.2034054
   },
   {
     "Command": "",
@@ -609,7 +613,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784122042.2034054
   },
   {
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
@@ -757,7 +762,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784122042.2034054
   },
   {
     "Command": "C:\\@delta\\msBackups\\bazarr\\bazarr.py",
@@ -775,14 +781,15 @@
     "name": "CPU FAN Check",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python"
     ],
     "Command": "C:\\@delta\\ms1\\TOOLS\\CPU.py",
     "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784123635.8617675
   },
   {
     "Command": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py",

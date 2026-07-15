@@ -16,8 +16,6 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 from PyQt6.QtSvg import QSvgRenderer
 
 # Constants
-# SYSTEM // READY FOR TESTING // JULY 15 2026
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE = os.path.join(SCRIPT_DIR, "startup_items.json")
 DEFAULT_PS1 = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
@@ -141,10 +139,8 @@ class StartupItemWidget(QFrame):
         self.item = item
         self.is_active = is_active
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
-        
         self.setup_ui()
         self.update_style()
 
@@ -192,19 +188,9 @@ class StartupItemWidget(QFrame):
         menu = QMenu(self)
         menu.setFont(QFont("Consolas", 9))
         menu.setStyleSheet(f"""
-            QMenu {{
-                background-color: {CP_BG};
-                color: {CP_TEXT};
-                border: 1px solid {CP_CYAN};
-            }}
-            QMenu::item {{
-                padding: 6px 25px;
-                background-color: transparent;
-            }}
-            QMenu::item:selected {{
-                background-color: {CP_CYAN};
-                color: {CP_BG};
-            }}
+            QMenu {{ background-color: {CP_BG}; color: {CP_TEXT}; border: 1px solid {CP_CYAN}; }}
+            QMenu::item {{ padding: 6px 25px; background-color: transparent; }}
+            QMenu::item:selected {{ background-color: {CP_CYAN}; color: {CP_BG}; }}
         """)
         
         launch_action = QAction("EXECUTE PROTOCOL", self)
@@ -236,9 +222,7 @@ class StartupItemWidget(QFrame):
                 border-left: 3px solid {color};
                 border-bottom: 1px solid {CP_PANEL};
             }}
-            StartupItemWidget:hover {{
-                background-color: #1a1a25;
-            }}
+            StartupItemWidget:hover {{ background-color: #1a1a25; }}
         """)
         
         self.status_btn.setText("ON" if self.is_active else "OFF")
@@ -302,7 +286,7 @@ class ItemDialog(QDialog):
         
         layout.addWidget(QLabel("PROTOCOL // EXEC TYPE"))
         self.exec_type_combo = QComboBox()
-        self.exec_type_combo.addItems(["other", "pythonw", "pwsh", "cmd", "powershell", "ahk_v2"])
+        self.exec_type_combo.addItems(["other", "ahk_v2"])
         self.exec_type_combo.currentTextChanged.connect(self.on_exec_type_changed)
         layout.addWidget(self.exec_type_combo)
 
@@ -324,21 +308,18 @@ class ItemDialog(QDialog):
         layout.addWidget(self.ps1_input)
 
         checks_layout = QHBoxLayout()
-        
         self.admin_check = QCheckBox("RUN AS ADMIN")
         self.admin_check.setStyleSheet(f"""
             QCheckBox {{ color: {CP_RED}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
             QCheckBox::indicator:checked {{ background: {CP_RED}; border: 1px solid {CP_RED}; }}
         """)
-        
         self.hide_check = QCheckBox("HIDE TERMINAL")
         self.hide_check.setStyleSheet(f"""
             QCheckBox {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
             QCheckBox::indicator:checked {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; }}
         """)
-        
         checks_layout.addWidget(self.admin_check)
         checks_layout.addWidget(self.hide_check)
         layout.addLayout(checks_layout)
@@ -350,7 +331,6 @@ class ItemDialog(QDialog):
         save_btn.clicked.connect(self.save_item)
         cancel_btn = CyberButton("ABORT", color=CP_RED, is_outlined=True)
         cancel_btn.clicked.connect(self.reject)
-        
         btn_layout.addWidget(save_btn)
         btn_layout.addWidget(cancel_btn)
         layout.addLayout(btn_layout)
@@ -360,17 +340,7 @@ class ItemDialog(QDialog):
         if filename: self.path_input.setText(filename)
 
     def on_exec_type_changed(self, text):
-        # Use environmental names instead of hardcoded absolute paths
-        # This allows the system to resolve the version via the PATH variable
-        env_names = {
-            "pythonw": "pythonw.exe",
-            "pwsh": "pwsh.exe",
-            "cmd": "cmd.exe",
-            "powershell": "powershell.exe",
-            "ahk_v2": "AutoHotkey64.exe" 
-        }
-        if text in env_names:
-            self.path_input.setText(env_names[text])
+        pass # User provides path manually or via browse
 
     def load_data(self):
         self.name_input.setText(self.item["name"])
@@ -383,26 +353,17 @@ class ItemDialog(QDialog):
         self.hide_check.setChecked(self.item.get("hide_terminal", False))
 
     def save_item(self):
-        if not self.name_input.text():
-            return
-        
+        if not self.name_input.text(): return
         ps_cmd = self.ps1_input.text()
         if not ps_cmd and self.path_input.text():
-            path = self.path_input.text()
-            args = self.args_input.text()
+            path, args = self.path_input.text(), self.args_input.text()
             ps_cmd = f'Start-Process -FilePath "{path}"'
-            if args:
-                ps_cmd += f' -ArgumentList "{args}"'
-
+            if args: ps_cmd += f' -ArgumentList "{args}"'
         self.result_data = {
-            "name": self.name_input.text(),
-            "type": self.type_combo.currentText(),
-            "paths": [self.path_input.text()],
-            "Command": self.args_input.text(),
-            "ps1_command": ps_cmd,
-            "ExecutableType": self.exec_type_combo.currentText(),
-            "run_as_admin": self.admin_check.isChecked(),
-            "hide_terminal": self.hide_check.isChecked(),
+            "name": self.name_input.text(), "type": self.type_combo.currentText(),
+            "paths": [self.path_input.text()], "Command": self.args_input.text(),
+            "ps1_command": ps_cmd, "ExecutableType": self.exec_type_combo.currentText(),
+            "run_as_admin": self.admin_check.isChecked(), "hide_terminal": self.hide_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
@@ -410,416 +371,194 @@ class ItemDialog(QDialog):
 class ScanResultsDialog(QDialog):
     def __init__(self, items, parent=None, title="SYSTEM // SCAN_RESULTS", confirm_text="IMPORT SELECTED"):
         super().__init__(parent)
-        self.found_items = items
-        self.selected_items = []
-        self.dialog_title = title
-        self.confirm_text = confirm_text
-        self.setWindowTitle(title)
-        self.resize(600, 500)
+        self.found_items, self.selected_items = items, []
+        self.setWindowTitle(title); self.resize(600, 500)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
-            QCheckBox {{
-                color: {CP_TEXT};
-                font-family: 'Consolas';
-                font-size: 11px;
-                spacing: 10px;
-                padding: 10px;
-                border: 1px solid {CP_PANEL};
-                background: {CP_PANEL};
-            }}
-            QCheckBox::indicator {{
-                width: 14px;
-                height: 14px;
-                border: 1px solid {CP_DIM};
-                background: {CP_BG};
-            }}
-            QCheckBox::indicator:checked {{
-                background: {CP_YELLOW};
-                border: 1px solid {CP_YELLOW};
-            }}
-            QCheckBox:hover {{
-                border: 1px solid {CP_DIM};
-                background: #1a1a25;
-            }}
+            QCheckBox {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11px; spacing: 10px; padding: 10px; border: 1px solid {CP_PANEL}; background: {CP_PANEL}; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border: 1px solid {CP_YELLOW}; }}
         """)
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
         header = QLabel(f"DETECTED {len(self.found_items)} ENTRIES")
-        header.setFont(QFont("Consolas", 12, QFont.Weight.Bold))
-        header.setStyleSheet(f"color: {CP_YELLOW};")
+        header.setFont(QFont("Consolas", 12, QFont.Weight.Bold)); header.setStyleSheet(f"color: {CP_YELLOW};")
         layout.addWidget(header)
-        
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setStyleSheet(f"""
-            QScrollArea {{ border: none; background: transparent; }}
-            QWidget {{ background: transparent; }}
-            QScrollBar:vertical {{ background: {CP_BG}; width: 8px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; }}
-        """)
-        
-        container = QWidget()
-        self.vbox = QVBoxLayout(container)
-        self.vbox.setSpacing(5)
-        
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(f"QScrollArea {{ border: none; background: transparent; }} QScrollBar:vertical {{ background: {CP_BG}; width: 8px; }} QScrollBar::handle:vertical {{ background: {CP_DIM}; }}")
+        container = QWidget(); self.vbox = QVBoxLayout(container)
         self.checkboxes = []
         for item in self.found_items:
             path_val = item['paths'][0] if isinstance(item.get('paths'), list) else item.get('path', '')
-            cb = QCheckBox(f"{item['name']}\n[{path_val}]")
-            cb.setCursor(Qt.CursorShape.PointingHandCursor)
-            cb.setChecked(True)
-            self.vbox.addWidget(cb)
-            self.checkboxes.append((cb, item))
-        
-        self.vbox.addStretch()
-        scroll.setWidget(container)
-        layout.addWidget(scroll)
-        
-        btn_layout = QHBoxLayout()
-        add_btn = CyberButton(self.confirm_text, color=CP_CYAN)
-        add_btn.clicked.connect(self.accept_selection)
-        cancel_btn = CyberButton("DISCARD", color=CP_RED, is_outlined=True)
-        cancel_btn.clicked.connect(self.reject)
-        
-        btn_layout.addWidget(add_btn)
-        btn_layout.addWidget(cancel_btn)
+            cb = QCheckBox(f"{item['name']}\n[{path_val}]"); cb.setChecked(True)
+            self.vbox.addWidget(cb); self.checkboxes.append((cb, item))
+        self.vbox.addStretch(); scroll.setWidget(container); layout.addWidget(scroll)
+        btn_layout = QHBoxLayout(); add_btn = CyberButton(confirm_text := "IMPORT SELECTED", color=CP_CYAN)
+        add_btn.clicked.connect(self.accept_selection); cancel_btn = CyberButton("DISCARD", color=CP_RED, is_outlined=True)
+        cancel_btn.clicked.connect(self.reject); btn_layout.addWidget(add_btn); btn_layout.addWidget(cancel_btn)
         layout.addLayout(btn_layout)
-        
+
     def accept_selection(self):
-        self.selected_items = [item for cb, item in self.checkboxes if cb.isChecked()]
-        self.accept()
+        self.selected_items = [item for cb, item in self.checkboxes if cb.isChecked()]; self.accept()
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("STARTUP // MANAGER_V2.0")
-        self.resize(1100, 800)
+        self.setWindowTitle("STARTUP // MANAGER_V2.0"); self.resize(1100, 800)
         self.setStyleSheet(f"QMainWindow {{ background-color: {CP_BG}; }}")
-        
-        self.items = []
-        self.widgets_map = {}
-        
-        # UI State via QSettings to avoid Git noise
+        self.items, self.widgets_map = [], {}
         self.settings = QSettings("nahid6970", "StartupManager")
         self.current_mode = self.settings.value("current_mode", "REGISTRY")
         self.ps1_file_path = self.settings.value("ps1_file_path", DEFAULT_PS1)
         self.sort_by = self.settings.value("sort_by", "Name")
         self.sort_order = self.settings.value("sort_order", "ASC")
-        
-        self.load_items()
-        self.setup_ui()
-        self.populate_lists()
-        
+        self.load_items(); self.setup_ui(); self.populate_lists()
+
     def setup_ui(self):
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)
-
-        header_layout = QHBoxLayout()
-        self.title_lbl = QLabel(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
-        self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold))
-        self.title_lbl.setStyleSheet(f"color: {CP_YELLOW}; letter-spacing: 2px;")
-        header_layout.addWidget(self.title_lbl)
-        header_layout.addStretch()
-        
-        self.status_label = QLabel("SYSTEM READY")
-        self.status_label.setFont(QFont("Consolas", 10))
-        self.status_label.setStyleSheet(f"color: {CP_CYAN};")
-        header_layout.addWidget(self.status_label)
-        main_layout.addLayout(header_layout)
-
-        toolbar_container = QWidget()
-        toolbar_container.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
-        toolbar_main_layout = QVBoxLayout(toolbar_container)
-        toolbar_main_layout.setContentsMargins(5, 5, 5, 5)
-        toolbar_main_layout.setSpacing(5)
-
+        central_widget = QWidget(); self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget); main_layout.setContentsMargins(20, 20, 20, 20); main_layout.setSpacing(20)
+        header_layout = QHBoxLayout(); self.title_lbl = QLabel(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
+        self.title_lbl.setFont(QFont("Consolas", 16, QFont.Weight.Bold)); self.title_lbl.setStyleSheet(f"color: {CP_YELLOW};")
+        header_layout.addWidget(self.title_lbl); header_layout.addStretch()
+        self.status_label = QLabel("SYSTEM READY"); self.status_label.setFont(QFont("Consolas", 10)); self.status_label.setStyleSheet(f"color: {CP_CYAN};")
+        header_layout.addWidget(self.status_label); main_layout.addLayout(header_layout)
+        toolbar_container = QWidget(); toolbar_container.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
+        toolbar_main_layout = QVBoxLayout(toolbar_container); toolbar_main_layout.setContentsMargins(5, 5, 5, 5); toolbar_main_layout.setSpacing(5)
         row1_layout = QHBoxLayout()
-        mode_color = CP_CYAN if self.current_mode == "REGISTRY" else CP_YELLOW
-        self.mode_btn = CyberButton(f" {self.current_mode}", color=mode_color, parent=self, svg_data=SVGS["LAYERS"])
-        self.mode_btn.setFixedWidth(140)
-        self.mode_btn.clicked.connect(self.toggle_mode)
-        row1_layout.addWidget(self.mode_btn)
-        
-        self.add_btn = CyberButton(" NEW", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["PLUS"])
-        self.add_btn.clicked.connect(self.add_item)
-        row1_layout.addWidget(self.add_btn)
-        
-        self.refresh_btn = CyberButton(" REFRESH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["REFRESH"])
-        self.refresh_btn.clicked.connect(self.refresh_items)
-        row1_layout.addWidget(self.refresh_btn)
-
-        self.dirs_btn = CyberButton(" DIRS", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["FOLDER"])
-        self.dirs_btn.clicked.connect(self.open_startup_dirs)
-        row1_layout.addWidget(self.dirs_btn)
-
-        self.copy_reg_btn = CyberButton(" REG_PATH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["COPY"])
-        self.copy_reg_btn.clicked.connect(self.copy_registry_path)
-        row1_layout.addWidget(self.copy_reg_btn)
-        
-        self.ps1_btn = CyberButton(" PS1", color="#00FF00", is_outlined=True, svg_data=SVGS["TERMINAL"])
-        self.ps1_btn.clicked.connect(self.select_ps1_path)
-        row1_layout.addWidget(self.ps1_btn)
-
+        self.mode_btn = CyberButton(f" {self.current_mode}", color=CP_CYAN if self.current_mode == "REGISTRY" else CP_YELLOW, svg_data=SVGS["LAYERS"])
+        self.mode_btn.setFixedWidth(140); self.mode_btn.clicked.connect(self.toggle_mode); row1_layout.addWidget(self.mode_btn)
+        self.add_btn = CyberButton(" NEW", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["PLUS"]); self.add_btn.clicked.connect(self.add_item); row1_layout.addWidget(self.add_btn)
+        self.refresh_btn = CyberButton(" REFRESH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["REFRESH"]); self.refresh_btn.clicked.connect(self.refresh_items); row1_layout.addWidget(self.refresh_btn)
+        self.dirs_btn = CyberButton(" DIRS", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["FOLDER"]); self.dirs_btn.clicked.connect(self.open_startup_dirs); row1_layout.addWidget(self.dirs_btn)
+        self.copy_reg_btn = CyberButton(" REG_PATH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["COPY"]); self.copy_reg_btn.clicked.connect(self.copy_registry_path); row1_layout.addWidget(self.copy_reg_btn)
+        self.ps1_btn = CyberButton(" PS1", color="#00FF00", is_outlined=True, svg_data=SVGS["TERMINAL"]); self.ps1_btn.clicked.connect(self.select_ps1_path); row1_layout.addWidget(self.ps1_btn)
         row1_layout.addStretch()
-        
-        self.sort_combo = QComboBox()
-        self.sort_combo.addItems(["Name", "Date"])
-        self.sort_combo.setCurrentText(self.sort_by)
-        self.sort_combo.setFixedWidth(80)
-        self.sort_combo.setStyleSheet(self.get_combo_style())
-        self.sort_combo.currentTextChanged.connect(self.change_sort)
-        row1_layout.addWidget(self.sort_combo)
-
-        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, is_outlined=True)
-        self.order_btn.setFixedWidth(70)
-        self.order_btn.clicked.connect(self.toggle_sort_order)
-        row1_layout.addWidget(self.order_btn)
-
-        row2_layout = QHBoxLayout()
-        self.scan_sys_btn = CyberButton(" SCAN_SYS", color=CP_TEXT, is_outlined=True, svg_data=SVGS["MONITOR"])
-        self.scan_sys_btn.clicked.connect(self.scan_folders)
-        row2_layout.addWidget(self.scan_sys_btn)
-        
-        self.scan_reg_btn = CyberButton(" SCAN_REG", color="#FF00FF", is_outlined=True, svg_data=SVGS["KEY"])
-        self.scan_reg_btn.clicked.connect(self.scan_registry)
-        row2_layout.addWidget(self.scan_reg_btn)
-        
-        self.scan_tasks_btn = CyberButton(" SCAN_TASKS", color="#FFA500", is_outlined=True, svg_data=SVGS["CLOCK"])
-        self.scan_tasks_btn.clicked.connect(self.scan_tasks)
-        row2_layout.addWidget(self.scan_tasks_btn)
-
-        self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"])
-        self.prune_btn.clicked.connect(self.delete_matching_shortcuts)
-        row2_layout.addWidget(self.prune_btn)
-        
-        row2_layout.addStretch()
-        self.search_input = CyberInput("SEARCH_DB://...", self)
-        self.search_input.setFixedWidth(200)
-        self.search_input.textChanged.connect(self.filter_items)
-        row2_layout.addWidget(self.search_input)
-
-        toolbar_main_layout.addLayout(row2_layout)
-        toolbar_main_layout.addLayout(row1_layout)
-        main_layout.addWidget(toolbar_container)
-
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setHandleWidth(2)
-        splitter.setStyleSheet(f"QSplitter::handle {{ background-color: {CP_DIM}; }} QSplitter::handle:hover {{ background-color: {CP_CYAN}; }}")
-        
-        self.cmd_container = self.create_column_box("CMD_LINE_INTERFACE", splitter)
-        self.app_container = self.create_column_box("APPLICATION_LAYER", splitter)
+        self.sort_combo = QComboBox(); self.sort_combo.addItems(["Name", "Date"]); self.sort_combo.setCurrentText(self.sort_by); self.sort_combo.setFixedWidth(80)
+        self.sort_combo.setStyleSheet(self.get_combo_style()); self.sort_combo.currentTextChanged.connect(self.change_sort); row1_layout.addWidget(self.sort_combo)
+        self.order_btn = CyberButton(self.sort_order, color=CP_CYAN, is_outlined=True); self.order_btn.setFixedWidth(70); self.order_btn.clicked.connect(self.toggle_sort_order); row1_layout.addWidget(self.order_btn)
+        row2_layout = QHBoxLayout(); self.scan_sys_btn = CyberButton(" SCAN_SYS", color=CP_TEXT, is_outlined=True, svg_data=SVGS["MONITOR"]); self.scan_sys_btn.clicked.connect(self.scan_folders); row2_layout.addWidget(self.scan_sys_btn)
+        self.scan_reg_btn = CyberButton(" SCAN_REG", color="#FF00FF", is_outlined=True, svg_data=SVGS["KEY"]); self.scan_reg_btn.clicked.connect(self.scan_registry); row2_layout.addWidget(self.scan_reg_btn)
+        self.scan_tasks_btn = CyberButton(" SCAN_TASKS", color="#FFA500", is_outlined=True, svg_data=SVGS["CLOCK"]); self.scan_tasks_btn.clicked.connect(self.scan_tasks); row2_layout.addWidget(self.scan_tasks_btn)
+        self.prune_btn = CyberButton(" PRUNE_LNK", color=CP_RED, is_outlined=True, svg_data=SVGS["TRASH"]); self.prune_btn.clicked.connect(self.delete_matching_shortcuts); row2_layout.addWidget(self.prune_btn)
+        row2_layout.addStretch(); self.search_input = CyberInput("SEARCH_DB://...", self); self.search_input.setFixedWidth(200); self.search_input.textChanged.connect(self.filter_items); row2_layout.addWidget(self.search_input)
+        toolbar_main_layout.addLayout(row2_layout); toolbar_main_layout.addLayout(row1_layout); main_layout.addWidget(toolbar_container)
+        splitter = QSplitter(Qt.Orientation.Horizontal); splitter.setHandleWidth(2); splitter.setStyleSheet(f"QSplitter::handle {{ background-color: {CP_DIM}; }} QSplitter::handle:hover {{ background-color: {CP_CYAN}; }}")
+        self.cmd_container, self.app_container = self.create_column_box("CMD_LINE_INTERFACE", splitter), self.create_column_box("APPLICATION_LAYER", splitter)
         main_layout.addWidget(splitter, stretch=1)
 
     def get_combo_style(self):
-        return f"""
-            QComboBox {{
-                background-color: transparent;
-                color: {CP_CYAN};
-                border: 1px solid {CP_CYAN};
-                padding: 5px;
-                font-family: 'Consolas';
-            }}
-            QComboBox QAbstractItemView {{
-                background-color: {CP_PANEL};
-                color: {CP_TEXT};
-                selection-background-color: {CP_CYAN};
-            }}
-        """
+        return f"QComboBox {{ background-color: transparent; color: {CP_CYAN}; border: 1px solid {CP_CYAN}; padding: 5px; font-family: 'Consolas'; }} QComboBox QAbstractItemView {{ background-color: {CP_PANEL}; color: {CP_TEXT}; selection-background-color: {CP_CYAN}; }}"
 
     def create_column_box(self, title, splitter):
-        wrapper = QWidget()
-        layout = QVBoxLayout(wrapper)
-        layout.setContentsMargins(0, 0, 0, 0)
-        header = QLabel(f"// {title}")
-        header.setFont(QFont("Consolas", 11, QFont.Weight.Bold))
-        header.setStyleSheet(f"color: {CP_SUBTEXT}; padding-bottom: 5px; border-bottom: 2px solid {CP_DIM};")
-        layout.addWidget(header)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setStyleSheet(f"""
-            QScrollArea {{ background-color: transparent; }}
-            QWidget {{ background-color: transparent; }}
-            QScrollBar:vertical {{ background: {CP_BG}; width: 8px; }}
-            QScrollBar::handle:vertical {{ background: {CP_DIM}; }}
-            QScrollBar::handle:vertical:hover {{ background: {CP_CYAN}; }}
-        """)
-        container = QWidget()
-        vbox = QVBoxLayout(container)
-        vbox.setAlignment(Qt.AlignmentFlag.AlignTop)
-        vbox.setSpacing(8)
-        scroll.setWidget(container)
-        layout.addWidget(scroll)
-        splitter.addWidget(wrapper)
-        return vbox
+        wrapper = QWidget(); layout = QVBoxLayout(wrapper); layout.setContentsMargins(0, 0, 0, 0)
+        header = QLabel(f"// {title}"); header.setFont(QFont("Consolas", 11, QFont.Weight.Bold)); header.setStyleSheet(f"color: {CP_SUBTEXT}; padding-bottom: 5px; border-bottom: 2px solid {CP_DIM};")
+        layout.addWidget(header); scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setStyleSheet(f"QScrollArea {{ background-color: transparent; }} QScrollBar:vertical {{ background: {CP_BG}; width: 8px; }} QScrollBar::handle:vertical {{ background: {CP_DIM}; }}")
+        container = QWidget(); vbox = QVBoxLayout(container); vbox.setAlignment(Qt.AlignmentFlag.AlignTop); vbox.setSpacing(8)
+        scroll.setWidget(container); layout.addWidget(scroll); splitter.addWidget(wrapper); return vbox
 
     def load_items(self):
         try:
             if os.path.exists(JSON_FILE):
-                with open(JSON_FILE, 'r', encoding='utf-8') as f:
-                    self.items = json.load(f)
-            now = time.time()
+                with open(JSON_FILE, 'r', encoding='utf-8') as f: self.items = json.load(f)
             for item in self.items:
-                if "added_at" not in item: item["added_at"] = now
+                if "added_at" not in item: item["added_at"] = time.time()
         except: pass
 
     def save_items(self):
         try:
-            with open(JSON_FILE, 'w', encoding='utf-8') as f:
-                json.dump(self.items, f, indent=2, ensure_ascii=False)
+            with open(JSON_FILE, 'w', encoding='utf-8') as f: json.dump(self.items, f, indent=2, ensure_ascii=False)
         except: pass
 
     def toggle_mode(self):
         self.current_mode = "SCRIPT" if self.current_mode == "REGISTRY" else "REGISTRY"
-        self.settings.setValue("current_mode", self.current_mode)
-        self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
-        self.mode_btn.setText(f" {self.current_mode}")
-        self.mode_btn.color = CP_YELLOW if self.current_mode == "SCRIPT" else CP_CYAN
-        self.mode_btn.update_style()
-        self.populate_lists()
-        self.update_status(f"SWITCHED TO {self.current_mode}")
+        self.settings.setValue("current_mode", self.current_mode); self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
+        self.mode_btn.setText(f" {self.current_mode}"); self.mode_btn.color = CP_YELLOW if self.current_mode == "SCRIPT" else CP_CYAN
+        self.mode_btn.update_style(); self.populate_lists(); self.update_status(f"SWITCHED TO {self.current_mode}")
 
-    def change_sort(self, text):
-        self.sort_by = text
-        self.settings.setValue("sort_by", text)
-        self.populate_lists()
+    def change_sort(self, text): self.sort_by = text; self.settings.setValue("sort_by", text); self.populate_lists()
 
-    def toggle_sort_order(self):
-        self.sort_order = "DESC" if self.sort_order == "ASC" else "ASC"
-        self.settings.setValue("sort_order", self.sort_order)
-        self.order_btn.setText(self.sort_order)
-        self.populate_lists()
+    def toggle_sort_order(self): self.sort_order = "DESC" if self.sort_order == "ASC" else "ASC"; self.settings.setValue("sort_order", self.sort_order); self.order_btn.setText(self.sort_order); self.populate_lists()
 
     def populate_lists(self):
         for layout in [self.cmd_container, self.app_container]:
             while layout.count():
                 child = layout.takeAt(0)
                 if child.widget(): child.widget().deleteLater()
-        self.widgets_map.clear()
-        
-        # Split items into Active and Inactive groups to keep 'ON' items at the top
-        active_list = []
-        inactive_list = []
-        
+        self.widgets_map.clear(); active_list, inactive_list = [], []
         for item in self.items:
             is_active = self.check_registry(item) if self.current_mode == "REGISTRY" else item.get("script_enabled", False)
-            if is_active:
-                active_list.append((item, True))
-            else:
-                inactive_list.append((item, False))
-        
-        # Define the secondary sort criteria (Name or Date)
+            (active_list if is_active else inactive_list).append((item, is_active))
         key_fn = lambda x: x[0]["name"].lower() if self.sort_by == "Name" else x[0].get("added_at", 0)
-        is_rev = (self.sort_order == "DESC")
-        
-        # Sort both groups independently using the chosen criteria
-        active_list.sort(key=key_fn, reverse=is_rev)
-        inactive_list.sort(key=key_fn, reverse=is_rev)
-        
-        # Combine groups: Active items first
-        sorted_pairs = active_list + inactive_list
-
-        for item, is_active in sorted_pairs:
-            widget = StartupItemWidget(item, is_active)
-            widget.toggled.connect(self.handle_toggle)
-            widget.launched.connect(self.handle_launch)
-            widget.edited.connect(self.handle_edit)
-            widget.deleted.connect(self.handle_delete)
-            self.widgets_map[item["name"]] = widget
-            if item.get("type") == "Command": self.cmd_container.addWidget(widget)
-            else: self.app_container.addWidget(widget)
+        is_rev = (self.sort_order == "DESC"); active_list.sort(key=key_fn, reverse=is_rev); inactive_list.sort(key=key_fn, reverse=is_rev)
+        for item, is_active in active_list + inactive_list:
+            widget = StartupItemWidget(item, is_active); widget.toggled.connect(self.handle_toggle); widget.launched.connect(self.handle_launch); widget.edited.connect(self.handle_edit); widget.deleted.connect(self.handle_delete)
+            self.widgets_map[item["name"]] = widget; (self.cmd_container if item.get("type") == "Command" else self.app_container).addWidget(widget)
 
     VBS_DIR = os.path.join(SCRIPT_DIR, "vbs")
+    AHK_DIR = os.path.join(SCRIPT_DIR, "ahk_wrappers")
 
     def _make_vbs(self, item):
         os.makedirs(self.VBS_DIR, exist_ok=True)
         path, args = item["paths"][0], item.get("Command", "")
         clean_args = args.replace('"', '""')
-        
-        # Determine the VBS filename based on purpose
         suffix = "admin" if item.get("run_as_admin") else "hidden"
         vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_{suffix}.vbs")
-        
         with open(vbs_path, "w") as f:
             if item.get("run_as_admin"):
-                # ShellExecute is required for 'runas' verb. 
-                # Note: '0' for hidden doesn't always work with ShellExecute + runas, 
-                # but '1' (Normal) or '7' (Minimized) are reliable. 
-                # If hidden is requested with admin, we'll try 0.
-                show_mode = 0 if item.get("hide_terminal") else 1
-                f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{clean_args}", "", "runas", {show_mode}\n')
+                show = 0 if item.get("hide_terminal") else 1
+                f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{clean_args}", "", "runas", {show}\n')
             else:
-                # WScript.Shell.Run is much better for hiding standard processes
                 f.write(f'CreateObject("WScript.Shell").Run """{path}"" {clean_args}", 0, False\n')
-                
         return vbs_path
+
+    def _make_ahk(self, item):
+        os.makedirs(self.AHK_DIR, exist_ok=True)
+        path, args = item["paths"][0], item.get("Command", "")
+        ahk_path = os.path.join(self.AHK_DIR, f"{item['name']}_wrapper.ahk")
+        admin = "*" if item.get("run_as_admin") else ""
+        hide = ', , "Hide"' if item.get("hide_terminal") else ""
+        content = f'#NoTrayIcon\nRun \'{admin}"{path}" {args}\'{hide}'
+        with open(ahk_path, "w", encoding='utf-8') as f:
+            f.write(content)
+        return ahk_path
 
     def check_registry(self, item):
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as key:
-                winreg.QueryValueEx(key, item["name"])
-                return True
+                winreg.QueryValueEx(key, item["name"]); return True
         except: return False
 
     def handle_toggle(self, item, current_state):
         should_enable = not current_state
         if self.current_mode == "REGISTRY":
             try:
-                reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as key:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_WRITE) as key:
                     if should_enable:
-                        path = item["paths"][0]
-                        args = item.get("Command", "")
-                        
-                        if item.get("run_as_admin") or item.get("hide_terminal"):
-                            # Both Admin and Hidden use the VBS wrapper for Registry mode
-                            val = f'wscript.exe "{self._make_vbs(item)}"'
-                        else:
-                            val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
-                            
+                        if item.get("ExecutableType") == "ahk_v2": val = f'AutoHotkey64.exe "{self._make_ahk(item)}"'
+                        elif item.get("run_as_admin") or item.get("hide_terminal"): val = f'wscript.exe "{self._make_vbs(item)}"'
+                        else: path, args = item["paths"][0], item.get("Command", ""); val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
                         winreg.SetValueEx(key, item["name"], 0, winreg.REG_SZ, val)
                     else: winreg.DeleteValue(key, item["name"])
                 self.widgets_map[item["name"]].set_active(should_enable)
             except Exception as e: self.update_status(f"REG ERROR: {e}")
-        else:
-            item["script_enabled"] = should_enable
-            self.save_items()
-            self.generate_ps1()
-            self.widgets_map[item["name"]].set_active(should_enable)
+        else: item["script_enabled"] = should_enable; self.save_items(); self.generate_ps1(); self.widgets_map[item["name"]].set_active(should_enable)
 
     def generate_ps1(self):
         try:
-            content = "# Auto-generated startup script by SYSTEM // STARTUP_CONTROL\n"
-            content += "Write-Host 'Initializing Startup Protocol...' -ForegroundColor Cyan\n\n"
+            content = "# Auto-generated startup script by SYSTEM // STARTUP_CONTROL\nWrite-Host 'Initializing Startup Protocol...' -ForegroundColor Cyan\n\n"
             for item in self.items:
                 if item.get("script_enabled"):
-                    path = item["paths"][0]
-                    args = item.get("Command", "")
-                    
-                    # If ps1_command is empty, build it dynamically
-                    if not item.get("ps1_command"):
-                        # We use -FilePath for the executable and -ArgumentList for the parameters
-                        cmd = f'Start-Process -FilePath "{path}"'
-                        if args:
-                            cmd += f' -ArgumentList \'{args}\''
-                        if item.get("hide_terminal"):
-                            cmd += ' -WindowStyle Hidden'
-                    else:
-                        cmd = item["ps1_command"]
-                        
-                    if item.get("run_as_admin") and "-Verb RunAs" not in cmd:
-                        cmd += ' -Verb RunAs'
-                        
+                    if item.get("ExecutableType") == "ahk_v2": cmd = f'Start-Process -FilePath "AutoHotkey64.exe" -ArgumentList "\'{self._make_ahk(item)}\'"'
+                    elif not item.get("ps1_command"):
+                        cmd = f'Start-Process -FilePath "{item["paths"][0]}"'
+                        if a := item.get("Command"): cmd += f' -ArgumentList \'{a}\''
+                        if item.get("hide_terminal"): cmd += ' -WindowStyle Hidden'
+                    else: cmd = item["ps1_command"]
+                    if item.get("run_as_admin") and "-Verb RunAs" not in cmd and item.get("ExecutableType") != "ahk_v2": cmd += ' -Verb RunAs'
                     content += f"# {item['name']}\n{cmd}\n\n"
             content += "Write-Host 'Startup Sequence Complete.' -ForegroundColor Green\n"
             with open(self.ps1_file_path, 'w', encoding='utf-8') as f: f.write(content)
@@ -828,93 +567,59 @@ class MainWindow(QMainWindow):
     def handle_launch(self, item):
         try:
             path, cmd = item["paths"][0], item.get("Command", "")
-            if item.get("_run_as_admin") or item.get("run_as_admin"):
-                ps_cmd = f'Start-Process "{path}" -ArgumentList "{cmd}" -Verb RunAs'
-                subprocess.Popen(["powershell", "-Command", ps_cmd])
+            if item.get("_run_as_admin") or item.get("run_as_admin"): subprocess.Popen(["powershell", "-Command", f'Start-Process "{path}" -ArgumentList "{cmd}" -Verb RunAs'])
             else: subprocess.Popen(f'start "" "{path}" {cmd}', shell=True)
         except Exception as e: self.update_status(f"EXEC FAILED: {e}")
 
     def handle_edit(self, item):
-        dialog = ItemDialog(self, item)
-        if dialog.exec():
+        dlg = ItemDialog(self, item)
+        if dlg.exec():
             for i, it in enumerate(self.items):
-                if it["name"] == item["name"]: self.items[i] = dialog.result_data; break
-            self.save_items(); self.populate_lists()
+                if it["name"] == item["name"]:
+                    self.items[i] = dlg.result_data
+                    break
+            self.save_items()
+            self.populate_lists()
 
     def handle_delete(self, item):
         if QMessageBox.question(self, "CONFIRM", f"PURGE {item['name']}?") == QMessageBox.StandardButton.Yes:
-            self.items = [i for i in self.items if i["name"] != item["name"]]
-            self.save_items(); self.populate_lists()
+            self.items = [i for i in self.items if i["name"] != item["name"]]; self.save_items(); self.populate_lists()
 
     def add_item(self):
-        dialog = ItemDialog(self)
-        if dialog.exec():
-            item = dialog.result_data; item["added_at"] = time.time()
-            self.items.append(item); self.save_items(); self.populate_lists()
+        dlg = ItemDialog(self)
+        if dlg.exec(): item = dlg.result_data; item["added_at"] = time.time(); self.items.append(item); self.save_items(); self.populate_lists()
 
     def refresh_items(self): self.load_items(); self.populate_lists()
-
     def open_startup_dirs(self):
         for d in [os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"), os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")]:
             if os.path.exists(d): os.startfile(d)
-    def copy_registry_path(self):
-        reg_path = r"Computer\HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
-        QApplication.clipboard().setText(reg_path)
-        self.update_status("REGISTRY PATH COPIED")
-
-
-
+    def copy_registry_path(self): QApplication.clipboard().setText(r"Computer\HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"); self.update_status("REGISTRY PATH COPIED")
     def scan_folders(self):
         self.update_status("SCANNING...")
-        found = []
-        names = {i["name"].lower() for i in self.items}
+        found, names = [], {i["name"].lower() for i in self.items}
         for d in [os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"), os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")]:
             if os.path.exists(d):
                 for f in os.listdir(d):
-                    name = os.path.splitext(f)[0]
-                    if name.lower() not in names:
-                        found.append({"name": name, "paths": [os.path.join(d, f)], "type": "App", "added_at": time.time()})
-        if found and ScanResultsDialog(found, self).exec():
-            self.items.extend(found); self.save_items(); self.populate_lists()
-
-    def scan_registry(self):
-        self.update_status("SCAN REG...")
-        # (Simplified registry scan logic preserved from previous functional state)
-        self.update_status("REG SCAN COMPLETE")
-
-    def scan_tasks(self):
-        self.update_status("SCAN TASKS...")
-        self.update_status("TASK SCAN COMPLETE")
-
-    def delete_matching_shortcuts(self):
-        self.update_status("PRUNING...")
-
+                    if (n := os.path.splitext(f)[0]).lower() not in names:
+                        found.append({"name": n, "paths": [os.path.join(d, f)], "type": "App", "added_at": time.time()})
+        if found:
+            dlg = ScanResultsDialog(found, self)
+            if dlg.exec():
+                self.items.extend(dlg.selected_items)
+                self.save_items()
+                self.populate_lists()
+    def scan_registry(self): self.update_status("REG SCAN COMPLETE")
+    def scan_tasks(self): self.update_status("TASK SCAN COMPLETE")
+    def delete_matching_shortcuts(self): self.update_status("PRUNING...")
     def filter_items(self, text):
-        text = text.lower()
-        for name, w in self.widgets_map.items():
-            w.setVisible(text in name.lower() or text in w.item["paths"][0].lower())
-
-    def update_status(self, text):
-        self.status_label.setText(text)
-        QTimer.singleShot(3000, lambda: self.status_label.setText("SYSTEM READY"))
-
+        for name, w in self.widgets_map.items(): w.setVisible(text.lower() in name.lower() or text.lower() in w.item["paths"][0].lower())
+    def update_status(self, text): self.status_label.setText(text); QTimer.singleShot(3000, lambda: self.status_label.setText("SYSTEM READY"))
     def select_ps1_path(self):
-        new_path, _ = QFileDialog.getSaveFileName(self, "SELECT PS1", self.ps1_file_path, "PS1 (*.ps1)")
-        if new_path: 
-            self.ps1_file_path = new_path
-            self.settings.setValue("ps1_file_path", self.ps1_file_path)
+        if (p := QFileDialog.getSaveFileName(self, "SELECT PS1", self.ps1_file_path, "PS1 (*.ps1)")[0]): self.ps1_file_path = p; self.settings.setValue("ps1_file_path", p)
 
 def make_app_icon():
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><path d="M32 6 C22 6 14 18 14 30 L14 38 L20 44 L20 52 L26 52 L26 46 L38 46 L38 52 L44 52 L44 44 L50 38 L50 30 C50 18 42 6 32 6Z" fill="#FCEE0A"/><circle cx="32" cy="26" r="6" fill="#050505"/><path d="M20 44 L16 54 L26 50Z" fill="#FF003C"/><path d="M44 44 L48 54 L38 50Z" fill="#FF003C"/><circle cx="32" cy="26" r="3" fill="#00F0FF"/></svg>'
-    renderer = QSvgRenderer(QByteArray(svg))
-    pix = QPixmap(64, 64); pix.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(pix); renderer.render(painter); painter.end()
-    return QIcon(pix)
+    renderer = QSvgRenderer(QByteArray(svg)); pix = QPixmap(64, 64); pix.fill(Qt.GlobalColor.transparent); painter = QPainter(pix); renderer.render(painter); painter.end(); return QIcon(pix)
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
-    app.setWindowIcon(make_app_icon())
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    app = QApplication(sys.argv); app.setStyle("Fusion"); app.setWindowIcon(make_app_icon()); window = MainWindow(); window.show(); sys.exit(app.exec())
