@@ -4,6 +4,7 @@ import sys
 import os
 import json
 import winreg
+from PyQt6.QtCore import QSettings
 import subprocess
 import time
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
@@ -18,7 +19,6 @@ from PyQt6.QtSvg import QSvgRenderer
 # Constants
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE = os.path.join(SCRIPT_DIR, "startup_items.json")
-SETTINGS_FILE = os.path.join(SCRIPT_DIR, "settings.json")
 DEFAULT_PS1 = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
 
 # Cyberpunk Palette
@@ -483,10 +483,13 @@ class MainWindow(QMainWindow):
         
         self.items = []
         self.widgets_map = {}
-        self.current_mode = "REGISTRY"
-        self.ps1_file_path = DEFAULT_PS1
-        self.sort_by = "Name"
-        self.sort_order = "ASC"
+        
+        # Load volatile UI state from system registry instead of file to avoid Git noise
+        self.settings = QSettings("nahid6970", "StartupManager")
+        self.current_mode = self.settings.value("current_mode", "REGISTRY")
+        self.ps1_file_path = self.settings.value("ps1_file_path", DEFAULT_PS1)
+        self.sort_by = self.settings.value("sort_by", "Name")
+        self.sort_order = self.settings.value("sort_order", "ASC")
         
         self.load_items()
         self.setup_ui()
@@ -608,33 +611,22 @@ class MainWindow(QMainWindow):
             if os.path.exists(JSON_FILE):
                 with open(JSON_FILE, 'r', encoding='utf-8') as f:
                     self.items = json.load(f)
-            if os.path.exists(SETTINGS_FILE):
-                with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-                    self.current_mode = settings.get("current_mode", "REGISTRY")
-                    self.ps1_file_path = settings.get("ps1_file_path", DEFAULT_PS1)
-                    self.sort_by = settings.get("sort_by", "Name")
-                    self.sort_order = settings.get("sort_order", "ASC")
+            
             now = time.time()
             for item in self.items:
                 if "added_at" not in item: item["added_at"] = now
         except: pass
 
     def save_items(self):
+        """Save core data to JSON. UI State is saved separately via QSettings."""
         try:
             with open(JSON_FILE, 'w', encoding='utf-8') as f:
                 json.dump(self.items, f, indent=2, ensure_ascii=False)
-            settings = {
-                "current_mode": self.current_mode, "ps1_file_path": self.ps1_file_path,
-                "sort_by": self.sort_by, "sort_order": self.sort_order
-            }
-            with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(settings, f, indent=2, ensure_ascii=False)
         except: pass
 
     def toggle_mode(self):
         self.current_mode = "SCRIPT" if self.current_mode == "REGISTRY" else "REGISTRY"
-        self.save_items()
+        self.settings.setValue("current_mode", self.current_mode)
         self.title_lbl.setText(f"SYSTEM // STARTUP_CONTROL // {self.current_mode}")
         self.mode_btn.setText(f" {self.current_mode}")
         self.mode_btn.color = CP_YELLOW if self.current_mode == "SCRIPT" else CP_CYAN
@@ -644,13 +636,13 @@ class MainWindow(QMainWindow):
 
     def change_sort(self, text):
         self.sort_by = text
-        self.save_items()
+        self.settings.setValue("sort_by", self.sort_by)
         self.populate_lists()
 
     def toggle_sort_order(self):
         self.sort_order = "DESC" if self.sort_order == "ASC" else "ASC"
         self.order_btn.setText(self.sort_order)
-        self.save_items()
+        self.settings.setValue("sort_order", self.sort_order)
         self.populate_lists()
 
     def populate_lists(self):
@@ -789,7 +781,9 @@ class MainWindow(QMainWindow):
 
     def select_ps1_path(self):
         new_path, _ = QFileDialog.getSaveFileName(self, "SELECT PS1", self.ps1_file_path, "PS1 (*.ps1)")
-        if new_path: self.ps1_file_path = new_path; self.save_items()
+        if new_path: 
+            self.ps1_file_path = new_path
+            self.settings.setValue("ps1_file_path", self.ps1_file_path)
 
 def make_app_icon():
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><circle cx="32" cy="32" r="20" fill="#FCEE0A"/></svg>'
