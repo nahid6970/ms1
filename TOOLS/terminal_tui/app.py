@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import sys
 
@@ -28,112 +27,7 @@ import threading
 import subprocess
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
-
-# ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
-_original_normpath = os.path.normpath
-
-def _custom_normpath(path):
-    if not path:
-        return ""
-    path_str = str(path)
-    if os.name != 'nt':
-        # Replace backslashes with forward slashes
-        path_str = path_str.replace('\\', '/')
-        # If it starts with C:/Users/<username> (case-insensitive), replace it with the Linux user's home directory
-        home = os.path.expanduser('~')
-        username = os.path.basename(home)
-        pattern = r'^[a-zA-Z]:/[uU]sers/' + re.escape(username)
-        if re.match(pattern, path_str):
-            path_str = re.sub(pattern, home, path_str)
-        else:
-            # Otherwise, translate the drive letter to home directory (e.g. C:/ -> /home/username/)
-            m = re.match(r'^[a-zA-Z]:/', path_str)
-            if m:
-                path_str = re.sub(r'^[a-zA-Z]:/', home + '/', path_str)
-        # Clean up any previously-mangled paths (e.g. /home/nahid/Users/nahid -> /home/nahid)
-        mangled_prefix = home + '/Users/' + username
-        if path_str.startswith(mangled_prefix):
-            path_str = path_str.replace(mangled_prefix, home, 1)
-    return _original_normpath(path_str)
-
-os.path.normpath = _custom_normpath
-
-# ── CROSS-PLATFORM PTY ────────────────────────────────────────────────────────
-if os.name == 'nt':
-    from winpty import PTY
-else:
-    import struct
-    class PTY:
-        def __init__(self, cols=100, rows=30):
-            self.cols = cols
-            self.rows = rows
-            self.pid = None
-            self.fd = None
-
-        def spawn(self, appname, cmdline=None, cwd=None, env=None):
-            import pty
-            import fcntl
-            import shutil
-            
-            pid, fd = pty.fork()
-            if pid == 0:
-                if cwd and os.path.isdir(cwd):
-                    os.chdir(cwd)
-                shell = '/bin/bash'
-                args = [shell]
-                if cmdline:
-                    if 'powershell' in cmdline or 'pwsh' in cmdline:
-                        pwsh_path = shutil.which('pwsh')
-                        if pwsh_path:
-                            shell = pwsh_path
-                            args = [shell, '-NoProfile', '-NoExit']
-                child_env = os.environ.copy()
-                if env:
-                    child_env.update(env)
-                os.execve(shell, args, child_env)
-            else:
-                self.pid = pid
-                self.fd = fd
-                fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-                fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-                self.set_size(self.cols, self.rows)
-
-        def isalive(self):
-            if self.pid is None:
-                return False
-            try:
-                pid, status = os.waitpid(self.pid, os.WNOHANG)
-                return pid == 0
-            except OSError:
-                return False
-
-        def read(self, blocking=False):
-            if self.fd is None:
-                return ""
-            try:
-                d = os.read(self.fd, 4096)
-                return d.decode('utf-8', errors='replace')
-            except (BlockingIOError, OSError):
-                return ""
-
-        def write(self, data):
-            if self.fd is None:
-                return
-            if isinstance(data, str):
-                data = data.encode('utf-8')
-            try:
-                os.write(self.fd, data)
-            except OSError:
-                pass
-
-        def set_size(self, cols, rows):
-            self.cols = cols
-            self.rows = rows
-            if self.fd is not None:
-                import fcntl
-                import termios
-                s = struct.pack('HHHH', rows, cols, 0, 0)
-                fcntl.ioctl(self.fd, termios.TIOCSWINSZ, s)
+from winpty import PTY
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -142,8 +36,8 @@ app.config['SECRET_KEY'] = 'terminal-tui-secret-key'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
-BASE_DIR = os.path.normpath(r"C:\@delta\ms1\TOOLS")
-CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json'))
+BASE_DIR = r"C:\@delta\ms1\TOOLS"
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json')
 
 _CONFIG_CACHE = None
 _CONFIG_LOCK = threading.Lock()
@@ -375,7 +269,7 @@ def restart_current_process(delay_seconds=1.0):
 class TerminalSession:
     def __init__(self, name, path, use_real_dir_name=False):
         self.name = name
-        self.path = os.path.normpath(path)
+        self.path = path
         self.cols = 100
         self.rows = 30
         self.pty = PTY(self.cols, self.rows)
@@ -385,11 +279,11 @@ class TerminalSession:
         # Ensure project-specific data directory exists
         # Use a sanitized path instead of name to ensure stability when renaming projects
         import re
-        safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', self.path).strip('_')
+        safe_path = re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
         project_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Project_data", safe_path)
         
         # Migrate existing Project_data from backup directory if it exists there but not locally
-        backup_data_dir = os.path.normpath(os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path))
+        backup_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
         if not os.path.exists(project_data_dir) and os.path.exists(backup_data_dir):
             try:
                 import shutil
@@ -403,7 +297,7 @@ class TerminalSession:
         profile_path = os.path.join(project_data_dir, "profile.ps1")
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
-        path_clean = self.path.replace("/", "\\") if os.name == 'nt' else self.path
+        path_clean = path.replace("/", "\\")
         
         if bool(use_real_dir_name):
             prompt_display_name = os.path.basename(os.path.normpath(path))
@@ -494,13 +388,13 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             except Exception as e:
                 print(f"Error migrating profile: {e}")
         
-        # Spawn shell
-        if os.name == 'nt':
-            profile_path_clean = profile_path.replace("\\", "/")
-            cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
-            self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=self.path)
-        else:
-            self.pty.spawn("bash", cwd=self.path)
+        # Spawn PowerShell with custom profile, bypassing main user profile
+        # Wrap in curly braces script block to handle spaces/parentheses in path correctly
+        profile_path_clean = profile_path.replace("\\", "/")
+        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
+        
+        # Spawn PowerShell
+        self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
         
         self.connected_sids = set()
         self.sids_lock = threading.Lock()
@@ -588,8 +482,6 @@ def load_projects_config():
     projs = get_config_val("projects", list)
     # Sanitize bookmarks to be dicts
     for p in projs:
-        if "path" in p:
-            p["path"] = os.path.normpath(p["path"])
         if "bookmarks" not in p:
             p["bookmarks"] = []
         else:
@@ -3358,121 +3250,83 @@ def api_save_snippets():
 
 @app.route('/api/system/ports', methods=['GET'])
 def api_get_system_ports():
-    """Get active listening ports and their associated processes on Windows and Linux"""
+    """Get active listening ports and their associated processes on Windows"""
     cf = 0x08000000 if sys.platform == "win32" else 0
     try:
-        ports_list = []
-        if sys.platform == "win32":
-            # Get active TCP listening connections
-            res_netstat = subprocess.run(
-                ["netstat", "-ano", "-p", "tcp"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
-            )
-            
-            # Get mapping of PID -> Process Name using tasklist
-            res_tasklist = subprocess.run(
-                ["tasklist", "/fo", "csv", "/nh"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
-            )
-            
-            # Parse tasklist into a pid_to_name map
-            pid_to_name = {}
-            for line in (res_tasklist.stdout or "").strip().split("\n"):
-                line = line.strip()
-                if not line:
-                    continue
-                parts = [p.strip('"') for p in line.split('","')]
-                if len(parts) >= 2:
-                    p_name, p_pid = parts[0], parts[1]
-                    pid_to_name[p_pid] = p_name
+        # Get active TCP listening connections
+        res_netstat = subprocess.run(
+            ["netstat", "-ano", "-p", "tcp"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
+        )
+        
+        # Get mapping of PID -> Process Name using tasklist
+        res_tasklist = subprocess.run(
+            ["tasklist", "/fo", "csv", "/nh"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
+        )
+        
+        # Parse tasklist into a pid_to_name map
+        pid_to_name = {}
+        for line in (res_tasklist.stdout or "").strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = [p.strip('"') for p in line.split('","')]
+            if len(parts) >= 2:
+                p_name, p_pid = parts[0], parts[1]
+                pid_to_name[p_pid] = p_name
 
-            # Parse netstat output
-            seen = set() # Avoid duplicate entries
-            for line in (res_netstat.stdout or "").strip().split("\n"):
-                line = line.strip()
-                # We look for lines containing "LISTENING"
-                if "LISTENING" not in line:
-                    continue
+        # Parse netstat output
+        ports_list = []
+        seen = set() # Avoid duplicate entries
+        
+        for line in (res_netstat.stdout or "").strip().split("\n"):
+            line = line.strip()
+            # We look for lines containing "LISTENING"
+            if "LISTENING" not in line:
+                continue
+            
+            # e.g. TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1044
+            parts = re.split(r'\s+', line)
+            if len(parts) >= 5:
+                proto = parts[0]
+                local_addr = parts[1]
+                state = parts[3]
+                pid = parts[4]
                 
-                # e.g. TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1044
-                parts = re.split(r'\s+', line)
-                if len(parts) >= 5:
-                    proto = parts[0]
-                    local_addr = parts[1]
-                    state = parts[3]
-                    pid = parts[4]
-                    
-                    # Extract port from local address
-                    port = ""
-                    if local_addr.startswith("["):
-                        r_idx = local_addr.rfind(":")
-                        if r_idx != -1:
-                            port = local_addr[r_idx+1:]
-                    else:
-                        r_idx = local_addr.rfind(":")
-                        if r_idx != -1:
-                            port = local_addr[r_idx+1:]
-                    
-                    if not port:
-                        continue
-                    
-                    key = (port, pid)
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    
-                    proc_name = pid_to_name.get(pid, "Unknown")
-                    ports_list.append({
-                        "protocol": proto,
-                        "localAddress": local_addr,
-                        "port": int(port),
-                        "pid": pid,
-                        "processName": proc_name,
-                        "state": state
-                    })
-        else:
-            # Linux version using ss -tlnup
-            res = subprocess.run(
-                ["ss", "-tlnup"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, errors='replace', timeout=5
-            )
-            seen = set()
-            lines = (res.stdout or "").splitlines()
-            for line in lines[1:]:
-                parts = line.split()
-                if len(parts) < 5:
-                    continue
-                state = parts[1]
-                local_addr = parts[4]
-                r_idx = local_addr.rfind(":")
-                if r_idx == -1:
-                    continue
-                port = local_addr[r_idx+1:]
+                # Extract port from local address (handle IPv6 bracket notation [::]:port vs 0.0.0.0:port)
+                port = ""
+                if local_addr.startswith("["):
+                    # IPv6
+                    r_idx = local_addr.rfind(":")
+                    if r_idx != -1:
+                        port = local_addr[r_idx+1:]
+                else:
+                    # IPv4
+                    r_idx = local_addr.rfind(":")
+                    if r_idx != -1:
+                        port = local_addr[r_idx+1:]
                 
-                proc_name = 'Unknown'
-                pid = '-'
-                if len(parts) >= 7:
-                    m = re.search(r'"([^"]+)",pid=(\d+)', parts[-1])
-                    if m:
-                        proc_name, pid = m.group(1), m.group(2)
+                if not port:
+                    continue
                 
                 key = (port, pid)
                 if key in seen:
                     continue
                 seen.add(key)
                 
+                proc_name = pid_to_name.get(pid, "Unknown")
                 ports_list.append({
-                    "protocol": "TCP",
+                    "protocol": proto,
                     "localAddress": local_addr,
                     "port": int(port),
                     "pid": pid,
                     "processName": proc_name,
                     "state": state
                 })
-
+                
         # Sort ports by port number
         ports_list.sort(key=lambda x: x["port"])
         return jsonify({"ports": ports_list, "starred": load_starred_ports()})
