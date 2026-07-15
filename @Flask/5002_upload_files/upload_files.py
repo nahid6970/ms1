@@ -338,20 +338,7 @@ def notification_manager_worker():
                 )
                 bullet_lbl.pack(side="left", padx=(4, 6))
 
-                # Display name (left-aligned)
-                display_name = shorten_notification_filename(item["filename"], max_length=22)
-                name_lbl = tk.Label(
-                    item_frame,
-                    text=display_name,
-                    bg=bg,
-                    fg=text,
-                    font=list_font,
-                    anchor="w",
-                    justify="left"
-                )
-                name_lbl.pack(side="left")
-
-                # Info (size and arrival time, right-aligned)
+                # Display name and info labels with a dynamic dots bridge
                 info_text = f"{item['size_str']} • {item['arrival_time']}"
                 info_lbl = tk.Label(
                     item_frame,
@@ -364,22 +351,47 @@ def notification_manager_worker():
                 )
                 info_lbl.pack(side="right", padx=(0, 6))
 
+                display_name = shorten_notification_filename(item["filename"], max_length=28)
+                name_lbl = tk.Label(
+                    item_frame,
+                    text=display_name,
+                    bg=bg,
+                    fg=text,
+                    font=list_font,
+                    anchor="w",
+                    justify="left"
+                )
+                name_lbl.pack(side="left")
+
+                # Dots label fills the expand area in between
+                dots_lbl = tk.Label(
+                    item_frame,
+                    text="............................................................",
+                    bg=bg,
+                    fg="#333333",  # Subtle grey dots
+                    font=list_font,
+                    anchor="w"
+                )
+                dots_lbl.pack(side="left", fill="x", expand=True, padx=4)
+
                 def make_click_cmd(it=item):
                     return lambda e=None: click_item(it)
 
                 # Bind hover events for smooth UI interaction
-                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, ilbl=info_lbl):
+                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, ilbl=info_lbl):
                     return lambda e: [
                         frame.configure(bg=item_hover_bg), 
                         blbl.configure(bg=item_hover_bg), 
                         nlbl.configure(bg=item_hover_bg),
+                        dlbl.configure(bg=item_hover_bg),
                         ilbl.configure(bg=item_hover_bg)
                     ]
-                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, ilbl=info_lbl):
+                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, ilbl=info_lbl):
                     return lambda e: [
                         frame.configure(bg=bg), 
                         blbl.configure(bg=bg), 
                         nlbl.configure(bg=bg),
+                        dlbl.configure(bg=bg),
                         ilbl.configure(bg=bg)
                     ]
 
@@ -388,6 +400,7 @@ def notification_manager_worker():
                 item_frame.bind("<Button-1>", make_click_cmd())
                 bullet_lbl.bind("<Button-1>", make_click_cmd())
                 name_lbl.bind("<Button-1>", make_click_cmd())
+                dots_lbl.bind("<Button-1>", make_click_cmd())
                 info_lbl.bind("<Button-1>", make_click_cmd())
 
             bind_mousewheel(canvas)
