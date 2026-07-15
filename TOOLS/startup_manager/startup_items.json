@@ -609,15 +609,14 @@
     "name": "Flask - 5018 - Excelly",
     "type": "Command",
     "paths": [
-      "python.exe"
+      "pythonw.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false,
-    "added_at": 1784124586.5457065
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
@@ -765,7 +764,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784134351.243188
   },
   {
     "Command": "C:\\@delta\\msBackups\\bazarr\\bazarr.py",
