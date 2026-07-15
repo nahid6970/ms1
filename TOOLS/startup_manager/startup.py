@@ -18,8 +18,9 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 from PyQt6.QtSvg import QSvgRenderer
 
 # Constants
-JSON_FILE = r"C:\@delta\output\startup\startup_items.json"
-SETTINGS_FILE = r"C:\@delta\output\startup\settings.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_FILE = os.path.join(SCRIPT_DIR, "startup_items.json")
+SETTINGS_FILE = os.path.join(SCRIPT_DIR, "settings.json")
 DEFAULT_PS1 = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
 
 CONVEX_URL = "https://different-gnat-734.convex.cloud"
@@ -1294,7 +1295,7 @@ class MainWindow(QMainWindow):
         self.filter_items(self.search_input.text())
 
 
-    VBS_DIR = r"C:\@delta\output\startup\vbs"
+    VBS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vbs")
 
     def _make_vbs(self, item):
         os.makedirs(self.VBS_DIR, exist_ok=True)
@@ -1897,8 +1898,10 @@ class MainWindow(QMainWindow):
                 if data:
                     self.items = self._fix_floats(data)
                     self.save_items()
+                    # Trigger script regeneration to ensure the code in the script directory is updated
+                    self.generate_ps1()
                     self.populate_lists()
-                    QMessageBox.information(self, "RESTORE", "Restored successfully.")
+                    QMessageBox.information(self, "RESTORE", "Restored successfully. Startup script and database synchronized.")
         except Exception as e:
             QMessageBox.critical(self, "RESTORE FAILED", str(e))
 
