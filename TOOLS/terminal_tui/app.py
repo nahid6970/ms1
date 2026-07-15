@@ -3571,6 +3571,7 @@ def api_ai_command():
     req = request.json or {}
     prompt = req.get('prompt', '')
     api_key = req.get('api_key', '')
+    project_name = req.get('project', '')
     provider = req.get('provider', 'gemini')
     model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
@@ -3659,6 +3660,21 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
+                    # Emit live progress to frontend
+                    if project_name:
+                        socketio.emit('ai-status', {'text': f'Running: {func_name}...'}, namespace='/pty')
+                        socketio.emit('ai-activity-step', {'name': func_name, 'args': args}, namespace='/pty')
+
+                    # Emit live progress to frontend
+                    if project_name:
+                        socketio.emit('ai-status', {'text': f'Running: {func_name}...'}, namespace='/pty')
+                        socketio.emit('ai-activity-step', {'name': func_name, 'args': args}, namespace='/pty')
+
+                    # Emit live progress to frontend
+                    if project_name:
+                        socketio.emit('ai-status', {'text': f'Running: {func_name}...'}, namespace='/pty')
+                        socketio.emit('ai-activity-step', {'name': func_name, 'args': args}, namespace='/pty')
+
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     tools_used.append(func_name)
                     tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
@@ -3959,6 +3975,11 @@ def api_ai_command():
                     fc = tc['functionCall']
                     fname = fc['name']
                     fargs = fc.get('args', {})
+                    # Emit live progress to frontend
+                    if project_name:
+                        socketio.emit('ai-status', {'text': f'Running: {fname}...'}, namespace='/pty')
+                        socketio.emit('ai-activity-step', {'name': fname, 'args': fargs}, namespace='/pty')
+
                     res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key)
                     tools_used.append(fname)
                     tool_logs.append({"name": fname, "args": fargs, "result": res_str[:2000] + ("..." if len(res_str) > 2000 else "")})
