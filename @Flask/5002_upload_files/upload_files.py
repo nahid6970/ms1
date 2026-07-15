@@ -107,8 +107,25 @@ def show_upload_notification(filename, file_path):
     if os.name != "nt":
         return
 
+    size_str = ""
+    try:
+        if os.path.exists(file_path):
+            size_bytes = os.path.getsize(file_path)
+            for unit in ['B', 'KB', 'MB', 'GB']:
+                if size_bytes < 1024.0:
+                    size_str = f"{size_bytes:.1f} {unit}" if unit != 'B' else f"{int(size_bytes)} B"
+                    break
+                size_bytes /= 1024.0
+    except Exception:
+        pass
+    if not size_str:
+        size_str = "0 B"
+
+    import datetime
+    arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
+
     start_notification_manager()
-    NOTIFICATION_QUEUE.put((filename, file_path))
+    NOTIFICATION_QUEUE.put((filename, file_path, size_str, arrival_time))
 
 def start_notification_manager():
     global NOTIFICATION_MANAGER_STARTED
@@ -298,17 +315,33 @@ def notification_manager_worker():
                 item_frame = tk.Frame(scrollable_frame, bg=bg, cursor="hand2")
                 item_frame.pack(fill="x", pady=2, padx=4)
 
+                # Determine bullet color based on file extension
+                ext = os.path.splitext(item["filename"])[1].lower()
+                if ext == '.pdf':
+                    bullet_color = "#ef4444"  # Red
+                elif ext in ['.txt', '.md', '.doc', '.docx']:
+                    bullet_color = "#00bcf2"  # Blue/Cyan
+                elif ext in ['.png', '.jpg', '.jpeg', '.gif', '.svg']:
+                    bullet_color = "#ec4899"  # Pink/Purple
+                elif ext in ['.zip', '.rar', '.tar', '.gz', '.7z']:
+                    bullet_color = "#f97316"  # Orange
+                elif ext in ['.mp3', '.wav', '.mp4', '.mkv', '.avi']:
+                    bullet_color = "#d946ef"  # Magenta
+                else:
+                    bullet_color = "#10b981"  # Emerald Green
+
                 bullet_lbl = tk.Label(
                     item_frame,
                     text="•",
                     bg=bg,
-                    fg="#10b981",  # Vibrant green/emerald bullet
+                    fg=bullet_color,
                     font=list_font,
                     anchor="w"
                 )
                 bullet_lbl.pack(side="left", padx=(4, 6))
 
-                display_name = shorten_notification_filename(item["filename"], max_length=36)
+                # Display name (left-aligned)
+                display_name = shorten_notification_filename(item["filename"], max_length=22)
                 name_lbl = tk.Label(
                     item_frame,
                     text=display_name,
@@ -318,22 +351,46 @@ def notification_manager_worker():
                     anchor="w",
                     justify="left"
                 )
-                name_lbl.pack(side="left", fill="x", expand=True)
+                name_lbl.pack(side="left")
+
+                # Info (size and arrival time, right-aligned)
+                info_text = f"{item['size_str']} • {item['arrival_time']}"
+                info_lbl = tk.Label(
+                    item_frame,
+                    text=info_text,
+                    bg=bg,
+                    fg=muted,
+                    font=list_font,
+                    anchor="e",
+                    justify="right"
+                )
+                info_lbl.pack(side="right", padx=(0, 6))
 
                 def make_click_cmd(it=item):
                     return lambda e=None: click_item(it)
 
                 # Bind hover events for smooth UI interaction
-                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl):
-                    return lambda e: [frame.configure(bg=item_hover_bg), blbl.configure(bg=item_hover_bg), nlbl.configure(bg=item_hover_bg)]
-                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl):
-                    return lambda e: [frame.configure(bg=bg), blbl.configure(bg=bg), nlbl.configure(bg=bg)]
+                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, ilbl=info_lbl):
+                    return lambda e: [
+                        frame.configure(bg=item_hover_bg), 
+                        blbl.configure(bg=item_hover_bg), 
+                        nlbl.configure(bg=item_hover_bg),
+                        ilbl.configure(bg=item_hover_bg)
+                    ]
+                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, ilbl=info_lbl):
+                    return lambda e: [
+                        frame.configure(bg=bg), 
+                        blbl.configure(bg=bg), 
+                        nlbl.configure(bg=bg),
+                        ilbl.configure(bg=bg)
+                    ]
 
                 item_frame.bind("<Enter>", make_hover_enter())
                 item_frame.bind("<Leave>", make_hover_leave())
                 item_frame.bind("<Button-1>", make_click_cmd())
                 bullet_lbl.bind("<Button-1>", make_click_cmd())
                 name_lbl.bind("<Button-1>", make_click_cmd())
+                info_lbl.bind("<Button-1>", make_click_cmd())
 
             bind_mousewheel(canvas)
             update_card_position()
@@ -366,15 +423,25 @@ def notification_manager_worker():
             nonlocal notification_counter
             while True:
                 try:
-                    filename, file_path = NOTIFICATION_QUEUE.get_nowait()
+                    item_tuple = NOTIFICATION_QUEUE.get_nowait()
                 except queue.Empty:
                     break
+
+                if len(item_tuple) == 4:
+                    filename, file_path, size_str, arrival_time = item_tuple
+                else:
+                    filename, file_path = item_tuple
+                    size_str = "0 B"
+                    import datetime
+                    arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
 
                 notification_counter += 1
                 notifications_data.append({
                     "id": notification_counter,
                     "filename": filename,
-                    "file_path": file_path
+                    "file_path": file_path,
+                    "size_str": size_str,
+                    "arrival_time": arrival_time
                 })
                 added_any = True
 
