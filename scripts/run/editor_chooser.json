@@ -58,6 +58,7 @@
         ".json": "Notepad++",
         ".txt": "Notepad++",
         ".fsasdad": "Notepad++",
-        ".ps1": "Notepad++"
+        ".ps1": "Notepad++",
+        ".conf": "Notepad++"
     }
 }

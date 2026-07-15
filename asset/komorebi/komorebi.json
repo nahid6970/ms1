@@ -328,6 +328,11 @@
             "kind": "Exe",
             "id": "explorer.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Title",
+            "id": "Bitwarden",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -410,6 +415,11 @@
             "kind": "Exe",
             "id": "explorer.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Title",
+            "id": "Bitwarden",
+            "matching_strategy": "Equals"
         }
     ],
     "gui_settings": {
