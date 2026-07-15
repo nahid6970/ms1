@@ -3581,8 +3581,11 @@ def api_ai_command():
     system_instruction = custom_system if custom_system else (
         "You are an AI assistant and command line helper. "
         "Help the user with terminal commands, coding, and general tasks. "
-        "If the user asks for a command, return the command. "
-        "Always use standard Markdown formatting. Wrap code blocks, scripts, or multi-line command listings in triple backticks (e.g. ```bash ... ```) so they render beautifully."
+        "You have access to tools to read/write files, list directories, and run shell commands. "
+        "If you need to perform complex logic (like processing data or running regex), you can run 'python -c' or 'grep' via the run_shell_command tool. "
+        "CRITICAL: If a task requires multiple steps (e.g., read a file, then edit it, then run it), call the necessary tools one after another. "
+        "The backend will loop and provide results until you provide a final text answer. "
+        "Always use standard Markdown. Wrap code/commands in triple backticks."
     )
     
     import requests
@@ -3590,6 +3593,7 @@ def api_ai_command():
     rate_limits = None
     usage_metadata = None
     tools_used = []
+    tool_logs = []
     cmd_parts = []
     
     if provider == 'groq':
@@ -3652,6 +3656,7 @@ def api_ai_command():
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     tools_used.append(func_name)
+                    tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3738,6 +3743,7 @@ def api_ai_command():
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     tools_used.append(func_name)
+                    tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3824,6 +3830,7 @@ def api_ai_command():
                         args = {}
                     result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
                     tools_used.append(func_name)
+                    tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
                         "role": "tool",
                         "tool_call_id": tc_id,
@@ -3949,6 +3956,7 @@ def api_ai_command():
                     fargs = fc.get('args', {})
                     res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key)
                     tools_used.append(fname)
+                    tool_logs.append({"name": fname, "args": fargs, "result": res_str[:2000] + ("..." if len(res_str) > 2000 else "")})
                     tool_responses.append({
                         "functionResponse": {
                             "name": fname,
@@ -3999,7 +4007,13 @@ def api_ai_command():
     except Exception as ex:
         print("Error logging AI usage:", ex)
         
-    return jsonify({"command": cmd, "rate_limits": rate_limits, "usage_metadata": usage_metadata, "tools_used": list(set(tools_used))})
+    return jsonify({
+        "command": cmd, 
+        "rate_limits": rate_limits, 
+        "usage_metadata": usage_metadata, 
+        "tools_used": list(set(tools_used)),
+        "tool_logs": tool_logs
+    })
 
 @app.route('/api/ai-usage', methods=['GET'])
 def api_ai_usage():

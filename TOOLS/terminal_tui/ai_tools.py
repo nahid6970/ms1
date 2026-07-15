@@ -133,6 +133,10 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
                 return combined
             except subprocess.TimeoutExpired:
                 return "Error: Command execution timed out after 15 seconds."
+
+        elif tool_name == "request_follow_up":
+            reason = arguments.get('reason', 'Processing intermediate results.')
+            return f"Backend: Inference turn requested. Reason: {reason}"
             
     except Exception as e:
         return f"Error executing {tool_name}: {str(e)}"
@@ -235,16 +239,29 @@ OPENAI_TOOLS = [
         "type": "function",
         "function": {
             "name": "run_shell_command",
-            "description": "Executes a shell command on the host machine and returns stdout/stderr. Use to run compile, build, test, or lookup commands.",
+            "description": "Executes a shell command on the host machine and returns stdout/stderr. You can run python scripts (python -c 'code'), grep for searching text, git commands, or any other system utility. Use this to perform complex logic that simple file reading cannot do.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "command": {
                         "type": "string",
-                        "description": "The shell command to execute, e.g. 'dir', 'git status', 'python test.py'"
+                        "description": "The shell command to execute, e.g. 'python -c \"print(sum(range(100)))\"', 'grep -r \"todo\" .', 'git log -n 5'"
                     }
                 },
                 "required": ["command"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "request_follow_up",
+            "description": "Call this if you have finished a partial task (like reading multiple files) and need another turn to analyze or proceed with more steps. This ensures the backend triggers another inference pass.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "reason": {"type": "string", "description": "Why a follow-up turn is needed."}
+                }
             }
         }
     }
@@ -317,13 +334,23 @@ GEMINI_TOOLS = [{"functionDeclarations": [
     },
     {
         "name": "run_shell_command",
-        "description": "Executes a shell command on the host machine and returns stdout/stderr.",
+        "description": "Executes a shell command (python, grep, git, etc.) and returns stdout/stderr.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "command": {"type": "STRING", "description": "The shell command to execute."}
+                "command": {"type": "STRING", "description": "The command string to run in the terminal."}
             },
             "required": ["command"]
+        }
+    },
+    {
+        "name": "request_follow_up",
+        "description": "Requests an additional inference turn to process more steps.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "reason": {"type": "STRING", "description": "Reason for follow-up."}
+            }
         }
     }
 ]}]

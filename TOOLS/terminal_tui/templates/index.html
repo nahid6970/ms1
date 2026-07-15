@@ -143,6 +143,17 @@
             background: rgba(255,255,255,0.06); font-weight: 600;
         }
         #ai-chat-history .ai-md a { color: var(--accent-color); text-decoration: underline; }
+        /* Tool Log Tooltip */
+        #ai-tool-log-tooltip {
+            display: none; position: fixed; background: #0f172a; border: 1.5px solid var(--accent-color);
+            border-radius: 8px; padding: 12px; font-size: 0.72rem; color: var(--text-primary);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.85); z-index: 9999; width: 350px; max-height: 450px;
+            overflow-y: auto; pointer-events: auto; font-family: 'Fira Code', monospace;
+            backdrop-filter: blur(10px);
+        }
+        .tool-log-arg { color: #f59e0b; }
+        .tool-log-res { color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 6px; padding-top: 4px; white-space: pre-wrap; word-break: break-all; }
+
         html.hide-sidebar-layout .sidebar {
             display: none !important;
         }
@@ -1838,6 +1849,9 @@
     </div>
 
     <div id="ai-copilot-popover" class="statusbar-popover" style="right:84px; width:380px; overflow:visible; border-radius:0px !important;">
+        <!-- Tool Log Tooltip -->
+        <div id="ai-tool-log-tooltip"></div>
+
         <!-- Global tooltip for message metadata -->
         <div id="ai-global-tooltip" style="display:none; position:absolute; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:6px; padding:8px; font-size:0.64rem; color:var(--text-secondary); box-shadow:0 8px 16px rgba(0,0,0,0.6); z-index:4000; text-align:left; pointer-events:none; width:200px; line-height:1.4;"></div>
         <div class="sbpop-header" style="display:flex; justify-content:space-between; align-items:center;">
@@ -1989,6 +2003,10 @@
                                 <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); cursor:pointer; user-select:none; padding-left:4px;">
                                     <span>Run Command</span>
                                     <input type="checkbox" class="ai-tool-sub" data-tool="run_shell_command" onchange="updateToolState()" checked style="accent-color:var(--accent-color); cursor:pointer;">
+                                </label>
+                                <label style="display:flex; align-items:center; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); cursor:pointer; user-select:none; padding-left:4px;">
+                                    <span>Follow-up Turn</span>
+                                    <input type="checkbox" class="ai-tool-sub" data-tool="request_follow_up" onchange="updateToolState()" checked style="accent-color:var(--accent-color); cursor:pointer;">
                                 </label>
                                 <div id="tavily-key-container" style="display:flex; gap:4px; margin-top:2px; padding-left:4px; align-items:center;">
                                     <input type="password" id="tavily-api-key-input" placeholder="Tavily API Key (tvly-...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.62rem; outline:none; height:20px;">
@@ -9269,16 +9287,21 @@
                         read_file: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Read File"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
                         list_directory: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="List Directory"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
                         get_system_info: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="System Info"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
-                        web_search: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Web Search"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-                        run_shell_command: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="Run Command"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
+                        web_search: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+                        run_shell_command: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+                        request_follow_up: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`
                     };
                     
-                    const renderToolsUsed = (tools) => {
+                    const renderToolsUsed = (tools, logs) => {
                         if (!tools || !tools.length) return '';
                         let html = `<span style="display:inline-flex; align-items:center; gap:4px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(255,255,255,0.08);">`;
-                        tools.forEach(t => {
-                            if (TOOL_ICONS[t]) {
-                                html += `<span title="Used tool: ${t}" style="display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:4px;">${TOOL_ICONS[t]}</span>`;
+                        tools.forEach(tName => {
+                            if (TOOL_ICONS[tName]) {
+                                // Find logs for this specific tool name in the message
+                                const matchedLogs = logs ? logs.filter(l => l.name === tName) : [];
+                                const logDataAttr = matchedLogs.length ? `data-tool-logs='${JSON.stringify(matchedLogs).replace(/'/g, "&apos;")}'` : '';
+                                
+                                html += `<span onmouseover="showToolLogTooltip(event)" onmouseout="hideToolLogTooltip()" ${logDataAttr} style="display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:4px; cursor:help;">${TOOL_ICONS[tName]}</span>`;
                             }
                         });
                         html += `</span>`;
@@ -9290,7 +9313,7 @@
                             <div style="flex:1; max-width:85%; background:var(--bg-sidebar); border:1px solid var(--border-color); padding:8px 10px; border-radius:12px 12px 12px 2px; position:relative; word-break:break-word;">
                                 <div class="ai-md" style="font-family:inherit; font-size:inherit; color:var(--text-primary); line-height:1.5;">${renderMarkdown(msg.content)}</div>
                                 <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:6px; border-top:1px solid rgba(255,255,255,0.05); padding-top:4px; align-items:center;">
-                                    ${msg.model ? `<span style="color:#22d3ee; font-size:0.65rem; margin-right:auto; font-weight:600; display:inline-flex; align-items:center;">🤖 ${msg.model}${renderToolsUsed(msg.tools_used)}</span>` : ''}
+                                    ${msg.model ? `<span style="color:#22d3ee; font-size:0.65rem; margin-right:auto; font-weight:600; display:inline-flex; align-items:center;">🤖 ${msg.model}${renderToolsUsed(msg.tools_used, msg.tool_logs)}</span>` : ''}
                                     ${msg.metadata && !msg.content.startsWith('Error: ') ? `
                                         <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; border-radius:4px; transition:all 0.15s ease;" title="Show Payload Info" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.05)'; showAIGlobalTooltip(event, ${idx});" onmouseout="this.style.color='var(--text-muted)'; this.style.background='none'; hideAIGlobalTooltip();">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -11975,6 +11998,54 @@
             const tooltip = document.getElementById('ai-global-tooltip');
             if (tooltip) tooltip.style.display = 'none';
         }
+        function showToolLogTooltip(e) {
+            const tooltip = document.getElementById('ai-tool-log-tooltip');
+            const logsJson = e.currentTarget.getAttribute('data-tool-logs');
+            if (!tooltip || !logsJson) return;
+
+            const logs = JSON.parse(logsJson);
+            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
+                <span style="font-weight:800; font-size:0.65rem; text-transform:uppercase; color:var(--text-muted);">Tool Execution Log</span>
+                <span style="font-size:0.6rem; color:var(--accent-color); background:rgba(37,99,235,0.1); padding:1px 5px; border-radius:4px;">${logs.length} calls</span>
+            </div>`;
+            
+            logs.forEach((log, i) => {
+                html += `<div style="margin-bottom:${i < logs.length - 1 ? '16px' : '0'};">
+                    <div style="font-weight:700; color:var(--accent-color); margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                        <span style="width:4px; height:4px; border-radius:50%; background:var(--accent-color);"></span>
+                        ${log.name}
+                    </div>
+                    <div style="background:rgba(0,0,0,0.3); padding:6px; border-radius:4px; margin-bottom:6px;">
+                        <div style="font-size:0.65rem; color:var(--text-muted); margin-bottom:2px;">Arguments:</div>
+                        <div class="tool-log-arg" style="white-space:pre-wrap; font-size:0.7rem;">${JSON.stringify(log.args, null, 2)}</div>
+                    </div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); margin-bottom:2px;">Result:</div>
+                    <div class="tool-log-res" style="background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; font-size:0.7rem;">${escapeHtml(log.result)}</div>
+                </div>`;
+            });
+
+            tooltip.innerHTML = html;
+            tooltip.style.display = 'block';
+
+            // Position near cursor
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            // Adjust if off-screen
+            const tw = 320;
+            const th = tooltip.offsetHeight;
+            const rightEdge = x + tw;
+            const bottomEdge = y + th;
+
+            tooltip.style.left = (rightEdge > window.innerWidth ? e.clientX - tw - 15 : x) + 'px';
+            tooltip.style.top = (bottomEdge > window.innerHeight ? e.clientY - th - 15 : y) + 'px';
+        }
+
+        function hideToolLogTooltip() {
+            const tooltip = document.getElementById('ai-tool-log-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        }
+
         
         function toggleAILimitDropdown(e, idx) {
             e.stopPropagation();
@@ -12749,6 +12820,7 @@
                     content: command, 
                     model: model, 
                     tools_used: data.tools_used || [],
+                    tool_logs: data.tool_logs || [],
                     metadata: {
                         prompt: prompt,
                         system_prompt: system_instruction,
