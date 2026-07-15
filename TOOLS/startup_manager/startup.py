@@ -749,8 +749,21 @@ class MainWindow(QMainWindow):
             content += "Write-Host 'Initializing Startup Protocol...' -ForegroundColor Cyan\n\n"
             for item in self.items:
                 if item.get("script_enabled"):
-                    cmd = item.get("ps1_command", f'Start-Process -FilePath "{item["paths"][0]}"')
-                    if item.get("run_as_admin") and "-Verb RunAs" not in cmd: cmd += ' -Verb RunAs'
+                    path = item["paths"][0]
+                    args = item.get("Command", "")
+                    
+                    # If ps1_command is empty, build it dynamically
+                    if not item.get("ps1_command"):
+                        # We use -FilePath for the executable and -ArgumentList for the parameters
+                        cmd = f'Start-Process -FilePath "{path}"'
+                        if args:
+                            cmd += f' -ArgumentList \'{args}\''
+                    else:
+                        cmd = item["ps1_command"]
+                        
+                    if item.get("run_as_admin") and "-Verb RunAs" not in cmd:
+                        cmd += ' -Verb RunAs'
+                        
                     content += f"# {item['name']}\n{cmd}\n\n"
             content += "Write-Host 'Startup Sequence Complete.' -ForegroundColor Green\n"
             with open(self.ps1_file_path, 'w', encoding='utf-8') as f: f.write(content)
