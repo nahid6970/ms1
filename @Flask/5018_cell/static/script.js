@@ -14715,7 +14715,6 @@ function populateF1Sheets(searchAllCategories = false) {
         const nameSpan = document.createElement('span');
         nameSpan.className = 'f1-sheet-name-wrapper';
         nameSpan.innerHTML = `
-            <span class="f1-sheet-icon">📄</span>
             <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
         `;
 
@@ -14795,7 +14794,6 @@ function populateF1Sheets(searchAllCategories = false) {
                 const subNameSpan = document.createElement('span');
                 subNameSpan.className = 'f1-sheet-name-wrapper';
                 subNameSpan.innerHTML = `
-                <span class="f1-sheet-icon">📃</span>
                 <span class="f1-sheet-name">${subSheet.name}</span>
             `;
 
@@ -15216,7 +15214,6 @@ function filterF1Sheets() {
 
                 item.innerHTML = `
                     <div class="f1-sheet-name-wrapper">
-                        <span class="f1-sheet-icon">🔍</span>
                         <span class="f1-sheet-name">${sheet.name}${categoryLabel}</span>
                     </div>
                 `;
