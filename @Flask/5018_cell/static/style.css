@@ -3280,16 +3280,28 @@ tr {
 .f1-sheet-list {
     flex: 1;
     overflow-y: auto;
-    padding: 6px 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+    padding: 10px;
+    display: grid;
+    /* This creates a grid where items are at least 200px wide and fill the row */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
     align-content: flex-start;
-    align-items: flex-start;
 }
 
 .f1-sheet-group {
     display: contents;
+}
+
+/* Ensure separators span the full width of the grid */
+.f1-sheet-separator {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #00ff9d 50%, transparent 100%);
+    margin: 8px 0;
+    position: relative;
+    flex-shrink: 0;
+    opacity: 0.3;
 }
 
 .f1-drop-indicator {
@@ -3411,14 +3423,14 @@ tr {
 }
 
 .f1-parent-sheet {
-    flex: 1 1 auto;
-    min-width: fit-content;
+    /* Removed flex properties to let Grid handle sizing */
     background: #0a1f15;
     border: 1px solid #1a4d36;
     border-left: 2px solid #00ff9d;
     box-shadow: none;
     font-weight: 600;
     color: #e0e0e0;
+    min-height: 38px;
 }
 
 .f1-sub-sheet {
@@ -3427,9 +3439,8 @@ tr {
     background: #0a1520;
     border: 1px solid #1a2f4d;
     border-left: 2px solid #00f3ff;
-    flex: 1 1 auto;
-    min-width: fit-content;
     color: #ccc;
+    min-height: 34px;
 }
 
 .f1-sub-sheet .f1-sheet-icon {
