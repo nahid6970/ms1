@@ -520,6 +520,9 @@ class MainWindow(QMainWindow):
         for item, is_active in active_list + inactive_list:
             widget = StartupItemWidget(item, is_active); widget.toggled.connect(self.handle_toggle); widget.launched.connect(self.handle_launch); widget.edited.connect(self.handle_edit); widget.deleted.connect(self.handle_delete)
             self.widgets_map[item["name"]] = widget; (self.cmd_container if item.get("type") == "Command" else self.app_container).addWidget(widget)
+        
+        # Ensure search filter persists after list is rebuilt
+        self.filter_items(self.search_input.text())
 
     VBS_DIR = os.path.join(SCRIPT_DIR, "vbs")
     AHK_DIR = os.path.join(SCRIPT_DIR, "ahk_wrappers")
