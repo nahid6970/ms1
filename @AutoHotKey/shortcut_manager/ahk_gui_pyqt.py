@@ -922,7 +922,7 @@ class AddEditShortcutDialog(QDialog):
             form_layout.addWidget(self.match_foreground_checkbox)
 
         # Context criteria input groups
-        if self.shortcut_type in ["context", "exclude", "startup"]:
+        if self.shortcut_type in ["context", "exclude", "startup", "text"]:
             form_layout.addSpacing(10)
             form_layout.addWidget(QLabel("<b>Window Context Matching:</b>"))
             
@@ -949,7 +949,7 @@ class AddEditShortcutDialog(QDialog):
                 row.addWidget(edit)
                 return row
 
-            if self.shortcut_type == "context":
+            if self.shortcut_type in ("context", "text"):
                 form_layout.addLayout(_ctx_row('window_title_toggle', 'window_title_edit', 'Window Title:', 'e.g., Gemini, Visual Studio Code'))
                 form_layout.addLayout(_ctx_row('process_name_toggle', 'process_name_edit', 'Process Name:', 'e.g., WindowsTerminal.exe'))
                 form_layout.addLayout(_ctx_row('window_class_toggle', 'window_class_edit', 'Window Class:', 'e.g., CabinetWClass'))
@@ -1125,14 +1125,21 @@ SendText("Hello World")"""
             self.excluded_hotkeys_edit.setPlaceholderText("^r\n^s\n!x\n^+t\n; one hotkey per line\n; leave blank to exclude ALL shortcuts")
             excl_layout.addWidget(self.excluded_hotkeys_edit)
             top_layout.addLayout(excl_layout)
-        else:
-            # Replacement
+        else: # text
             replacement_layout = QVBoxLayout()
             replacement_layout.addWidget(QLabel("Replacement Text:"))
             self.replacement_edit = QTextEdit()
-            self.replacement_edit.setMinimumHeight(300)  # Bigger height
-            self.replacement_edit.setMinimumWidth(400)   # Bigger width
+            self.replacement_edit.setMinimumHeight(300)
+            self.replacement_edit.setMinimumWidth(400)
             replacement_layout.addWidget(self.replacement_edit)
+            
+            # Mode toggle
+            self.use_clipboard_checkbox = QCheckBox("Use Clipboard to Paste (Faster for long text)")
+            self.use_clipboard_checkbox.setChecked(True)
+            self.use_clipboard_checkbox.setToolTip("If unchecked, it will type characters one by one (safer for some apps like Notepad++)")
+            replacement_layout.addSpacing(5)
+            replacement_layout.addWidget(self.use_clipboard_checkbox)
+            
             top_layout.addLayout(replacement_layout)
         
         layout.addLayout(top_layout)
@@ -1241,6 +1248,19 @@ SendText("Hello World")"""
         else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
+            self.use_clipboard_checkbox.setChecked(self.shortcut_data.get("use_clipboard", True))
+            
+            self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
+            self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
+            self.window_class_edit.setText(self.shortcut_data.get("window_class", ""))
+            
+            wt_on = self.shortcut_data.get("window_title_enabled", False)
+            pn_on = self.shortcut_data.get("process_name_enabled", False)
+            wc_on = self.shortcut_data.get("window_class_enabled", False)
+            
+            self.window_title_toggle.setChecked(wt_on); self.window_title_edit.setEnabled(wt_on)
+            self.process_name_toggle.setChecked(pn_on); self.process_name_edit.setEnabled(pn_on)
+            self.window_class_toggle.setChecked(wc_on); self.window_class_edit.setEnabled(wc_on)
 
     def show_command_reference(self):
         """Show AutoHotkey command reference in a dialog"""
@@ -1687,6 +1707,13 @@ SendText("Hello World")"""
                 "description": description,
                 "trigger": trigger,
                 "replacement": replacement,
+                "use_clipboard": self.use_clipboard_checkbox.isChecked(),
+                "window_title": self.window_title_edit.text().strip(),
+                "process_name": self.process_name_edit.text().strip(),
+                "window_class": self.window_class_edit.text().strip(),
+                "window_title_enabled": self.window_title_toggle.isChecked(),
+                "process_name_enabled": self.process_name_toggle.isChecked(),
+                "window_class_enabled": self.window_class_toggle.isChecked(),
                 "enabled": enabled
             }
 
@@ -3687,26 +3714,50 @@ class AHKShortcutEditor(QMainWindow):
                     
                     replacement = shortcut.get('replacement', '')
                     trigger = shortcut.get('trigger', '')
+                    use_clipboard = shortcut.get('use_clipboard', True)
                     
-                    if '\n' in replacement:
-                        # Multiline: Use AHK v2 continuation section
-                        # Quotes inside a continuation section are literal, no need to escape " as ""
-                        output_lines.append(f":X:{trigger}::Paste(\"")
-                        output_lines.append("(") 
-                        
-                        lines = replacement.split('\n')
-                        for line in lines:
-                            # AHK v2 Continuation: escape lines starting with ) with backtick
-                            if line.strip().startswith(")"):
-                                output_lines.append("`" + line)
-                            else:
-                                output_lines.append(line)
-                                
-                        output_lines.append(")\")")
+                    # Handle Context if specified
+                    func_name = f"Is{re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Text'))}Context"
+                    has_context_fields = any([
+                        shortcut.get('window_title_enabled', False) and shortcut.get('window_title', ''),
+                        shortcut.get('process_name_enabled', False) and shortcut.get('process_name', ''),
+                        shortcut.get('window_class_enabled', False) and shortcut.get('window_class', ''),
+                    ])
+                    
+                    if has_context_fields:
+                        append_context_checker(shortcut, func_name)
+                        output_lines.append(f"#HotIf {func_name}()")
+
+                    if use_clipboard:
+                        if '\n' in replacement:
+                            output_lines.append(f":X:{trigger}::Paste(\"")
+                            output_lines.append("(") 
+                            lines = replacement.split('\n')
+                            for line in lines:
+                                if line.strip().startswith(")"):
+                                    output_lines.append("`" + line)
+                                else:
+                                    output_lines.append(line)
+                            output_lines.append(")\")")
+                        else:
+                            safe_replacement = replacement.replace("'", "''")
+                            output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                     else:
-                        # Single line: Use single quotes to robustly handle double quotes in content
-                        safe_replacement = replacement.replace("'", "''")
-                        output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
+                        # Use SendText (typing mode)
+                        safe_replacement = replacement.replace('"', '""').replace('`', '``')
+                        if '\n' in replacement:
+                            output_lines.append(f":X:{trigger}::SendText(\"")
+                            output_lines.append("(")
+                            lines = replacement.split('\n')
+                            for i, line in enumerate(lines):
+                                l = "`" + line if line.strip().startswith(")") else line
+                                output_lines.append(l)
+                            output_lines.append(")\")")
+                        else:
+                            output_lines.append(f':X:{trigger}::SendText("{safe_replacement}")')
+                    
+                    if has_context_fields:
+                        output_lines.append("#HotIf")
                     output_lines.append("")
                 output_lines.append("")
 
