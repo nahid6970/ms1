@@ -345,15 +345,17 @@ class ItemDialog(QDialog):
         if filename: self.path_input.setText(filename)
 
     def on_exec_type_changed(self, text):
-        common_paths = {
-            "pythonw": r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe",
-            "pwsh": r"C:\Program Files\PowerShell\7\pwsh.exe",
-            "cmd": r"C:\Windows\System32\cmd.exe",
-            "powershell": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
-            "ahk_v2": r"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe"
+        # Use environmental names instead of hardcoded absolute paths
+        # This allows the system to resolve the version via the PATH variable
+        env_names = {
+            "pythonw": "pythonw.exe",
+            "pwsh": "pwsh.exe",
+            "cmd": "cmd.exe",
+            "powershell": "powershell.exe",
+            "ahk_v2": "AutoHotkey64.exe" 
         }
-        if text in common_paths:
-            self.path_input.setText(common_paths[text])
+        if text in env_names:
+            self.path_input.setText(env_names[text])
 
     def load_data(self):
         self.name_input.setText(self.item["name"])
@@ -702,9 +704,12 @@ class MainWindow(QMainWindow):
     def _make_vbs(self, item):
         os.makedirs(self.VBS_DIR, exist_ok=True)
         path, args = item["paths"][0], item.get("Command", "")
+        # Escape quotes for VBS string
+        clean_args = args.replace('"', '""')
         vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_admin.vbs")
         with open(vbs_path, "w") as f:
-            f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{args}", "", "runas", 1\n')
+            # ShellExecute handles both absolute paths and environmental commands (like pythonw)
+            f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{clean_args}", "", "runas", 1\n')
         return vbs_path
 
     def check_registry(self, item):
@@ -721,7 +726,13 @@ class MainWindow(QMainWindow):
                 reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as key:
                     if should_enable:
-                        val = f'wscript.exe "{self._make_vbs(item)}"' if item.get("run_as_admin") else f'"{item["paths"][0]}" {item.get("Command", "")}'.strip()
+                        path = item["paths"][0]
+                        args = item.get("Command", "")
+                        if item.get("run_as_admin"):
+                            val = f'wscript.exe "{self._make_vbs(item)}"'
+                        else:
+                            # If it's a simple name like pythonw, quotes are optional but safer
+                            val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
                         winreg.SetValueEx(key, item["name"], 0, winreg.REG_SZ, val)
                     else: winreg.DeleteValue(key, item["name"])
                 self.widgets_map[item["name"]].set_active(should_enable)

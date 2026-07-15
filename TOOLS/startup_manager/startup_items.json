@@ -135,17 +135,16 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\mypygui_qt.py",
-    "ExecutableType": "pythonw",
-    "added_at": 1781462643.087258,
     "name": "mypygui",
+    "type": "Command",
     "paths": [
-      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
+      "pythonw.exe"
     ],
+    "Command": "C:\\@delta\\ms1\\mypygui_qt.py",
     "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
+    "ExecutableType": "pythonw",
     "run_as_admin": false,
-    "script_enabled": false,
-    "type": "Command"
+    "script_enabled": false
   },
   {
     "Command": "",
