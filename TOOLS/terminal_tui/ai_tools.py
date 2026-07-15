@@ -23,6 +23,36 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
                 if len(content) > 8000:
                     return content[:8000] + "\n\n... (Content truncated because it is too large)"
                 return content
+
+        elif tool_name == "write_file":
+            filepath = arguments.get('filepath')
+            content = arguments.get('content', '')
+            if not filepath:
+                return "Error: filepath argument is required."
+            
+            # Create directory if it doesn't exist
+            dirname = os.path.dirname(filepath)
+            if dirname:
+                os.makedirs(dirname, exist_ok=True)
+                
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+            return f"Successfully wrote {len(content)} characters to {filepath}."
+
+        elif tool_name == "delete_file":
+            filepath = arguments.get('filepath')
+            if not filepath:
+                return "Error: filepath argument is required."
+            if not os.path.exists(filepath):
+                return f"Error: File not found: {filepath}"
+            
+            if os.path.isdir(filepath):
+                import shutil
+                shutil.rmtree(filepath)
+                return f"Successfully deleted directory and its contents: {filepath}"
+            else:
+                os.remove(filepath)
+                return f"Successfully deleted file: {filepath}"
                 
         elif tool_name == "list_directory":
             path = arguments.get('path', '.')
@@ -175,6 +205,35 @@ OPENAI_TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "write_file",
+            "description": "Creates a new file or overwrites an existing one with the provided content.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to the file to write."},
+                    "content": {"type": "string", "description": "The full text content to write into the file."}
+                },
+                "required": ["filepath", "content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_file",
+            "description": "Deletes a file or directory from the local file system.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to the file or directory to remove."}
+                },
+                "required": ["filepath"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "run_shell_command",
             "description": "Executes a shell command on the host machine and returns stdout/stderr. Use to run compile, build, test, or lookup commands.",
             "parameters": {
@@ -199,6 +258,29 @@ GEMINI_TOOLS = [{"functionDeclarations": [
             "type": "OBJECT",
             "properties": {
                 "filepath": {"type": "STRING", "description": "Absolute or relative path to the file to read."}
+            },
+            "required": ["filepath"]
+        }
+    },
+    {
+        "name": "write_file",
+        "description": "Creates or overwrites a local file with content.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING", "description": "Path to the file."},
+                "content": {"type": "STRING", "description": "Full content of the file."}
+            },
+            "required": ["filepath", "content"]
+        }
+    },
+    {
+        "name": "delete_file",
+        "description": "Deletes a file or folder.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING", "description": "Path to delete."}
             },
             "required": ["filepath"]
         }
