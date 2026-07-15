@@ -46,7 +46,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5456996
   },
   {
     "name": "Flask - 5003 - Browse Files",
@@ -59,7 +60,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5457017
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
@@ -150,7 +152,7 @@
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
+    "hide_terminal": true,
     "script_enabled": false
   },
   {
@@ -436,7 +438,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5457053
   },
   {
     "Command": "",
@@ -610,7 +613,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5457065
   },
   {
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
@@ -758,7 +762,8 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5457075
   },
   {
     "Command": "C:\\@delta\\msBackups\\bazarr\\bazarr.py",
@@ -783,7 +788,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784124586.5457077
   },
   {
     "Command": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py",
