@@ -31,7 +31,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5001 - Text",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -41,7 +41,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5002 - Share File",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -51,7 +51,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5003 - Drive",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -61,7 +61,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5005 - GameARR",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -71,7 +71,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5006 - Run Commands",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -81,7 +81,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5007 - ControlBy Android",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -91,7 +91,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5008 - Valorant Match",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -101,7 +101,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5009 - MCQ",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -111,7 +111,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5010 - CoC",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -120,7 +120,7 @@
     "added_at": 1768273756.591541,
     "name": "Clipboard",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "script_enabled": false,
     "type": "Command"
@@ -140,9 +140,9 @@
     "added_at": 1781462643.087258,
     "name": "mypygui",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
     "run_as_admin": false,
     "script_enabled": false,
     "type": "Command"
@@ -381,7 +381,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5000 - myhome",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -401,7 +401,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5011 - TV Show",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -411,7 +411,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5015 - JOB",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -421,7 +421,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5013 - Movies",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -441,7 +441,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5016 - Sync W Android",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -451,7 +451,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5012 - Gallery",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -491,7 +491,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 4999 - Startup Setup",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -501,7 +501,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 4998 - Applist",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -511,7 +511,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5555 - Terminal",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -552,7 +552,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5017 - Audio Stream",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -592,7 +592,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5018 - Excelly",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -614,7 +614,7 @@
     "added_at": 1768273756.591541,
     "name": "web host",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -624,7 +624,7 @@
     "added_at": 1768273756.591541,
     "name": "Flask - 5004 - Paint",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
     "type": "Command"
   },
@@ -713,9 +713,9 @@
     "added_at": 1769513702.432895,
     "name": "Chrome Extension Manager Listener",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\test_project\\my-first-extension\\@chrome_ext_manager\\extension_manager.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\test_project\\my-first-extension\\@chrome_ext_manager\\extension_manager.py\"",
     "script_enabled": false,
     "type": "Command"
   },
@@ -725,9 +725,9 @@
     "added_at": 1771037792.422986,
     "name": "RCLONE SYNC",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Status-Bar\\RCLONE\\Rclone-Status.py\"",
     "script_enabled": false,
     "type": "Command"
   },
@@ -737,9 +737,9 @@
     "added_at": 1772010062.5365136,
     "name": "Komorebi Tray Status",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py\"",
     "script_enabled": false,
     "type": "Command"
   },
@@ -749,9 +749,9 @@
     "added_at": 1773294824.1902173,
     "name": "Bazarr",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\msBackups\\bazarr\\bazarr.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\msBackups\\bazarr\\bazarr.py\"",
     "script_enabled": false,
     "type": "Command"
   },
@@ -761,9 +761,9 @@
     "added_at": 1775017807.0811055,
     "name": "CPU FAN Check",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
     "script_enabled": false,
     "type": "Command"
   },
@@ -773,9 +773,9 @@
     "added_at": 1775619330.5827222,
     "name": "NETWORK-SPEED",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py\"",
     "run_as_admin": true,
     "script_enabled": false,
     "type": "Command"
@@ -854,7 +854,7 @@
     "paths": [
       "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5555_terminal\\xxxx\\start_terminal.bat\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5555_terminal\\xxxx\\start_terminal.bat\"",
     "run_as_admin": false,
     "script_enabled": false,
     "type": "Command"
