@@ -174,19 +174,15 @@ def notification_manager_worker():
         margin_right = 18
         margin_bottom = 54
 
-        def get_card_height():
-            num_items = len(notifications_data)
-            if num_items == 0:
-                return min_height
-            calculated = 50 + (num_items * 30) + 45
-            return min(calculated, 480)
-
         def update_card_position():
             if not card_window or not card_window.winfo_exists():
                 return
+            card_window.update_idletasks()
+            natural_height = card_window.winfo_reqheight()
+            h = min(natural_height, 480)
+            
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
-            h = get_card_height()
             x = screen_width - width - margin_right
             y = screen_height - h - margin_bottom
             card_window.geometry(f"{width}x{h}+{x}+{y}")
@@ -310,8 +306,8 @@ def notification_manager_worker():
                 for child in widget.winfo_children():
                     bind_mousewheel(child)
 
-            # Build list items (md list styling)
-            for item in notifications_data:
+            # Build list items (md list styling) - newest files at the top
+            for item in reversed(notifications_data):
                 item_frame = tk.Frame(scrollable_frame, bg=bg, cursor="hand2")
                 item_frame.pack(fill="x", pady=2, padx=4)
 
