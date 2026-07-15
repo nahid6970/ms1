@@ -3282,8 +3282,8 @@ tr {
     overflow-y: auto;
     padding: 10px;
     display: grid;
-    /* This creates a grid where items are at least 200px wide and fill the row */
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* Show exactly 3 sheets per row */
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     align-content: flex-start;
 }
@@ -3410,16 +3410,19 @@ tr {
 }
 
 .f1-sheet-item {
-    padding: 7px 10px;
+    padding: 10px;
     border-radius: 2px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* Center horizontally */
+    text-align: center;      /* Center text content */
     gap: 6px;
     cursor: pointer;
     position: relative;
     overflow: visible;
+    height: auto;            /* Allow growth */
+    min-height: 45px;
 }
 
 .f1-parent-sheet {
@@ -3523,19 +3526,25 @@ tr {
 
 .f1-sheet-name-wrapper {
     display: flex;
+    flex-direction: column;  /* Stack icon and text vertically for better centering */
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    gap: 4px;
     flex: 1;
     cursor: pointer;
+    width: 100%;
 }
 
 .f1-sheet-icon {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .f1-sheet-name {
     flex: 1;
-    font-size: 14px;
+    font-size: 13px;
+    white-space: normal;     /* Allow text to wrap */
+    word-break: break-word;  /* Break long words to prevent overflow */
+    line-height: 1.2;
 }
 
 .f1-sheet-actions {
