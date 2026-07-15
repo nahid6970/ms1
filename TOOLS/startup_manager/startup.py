@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QScrollArea, QFrame, QMessageBox, QDialog, 
                              QComboBox, QFileDialog, QSplitter, QGraphicsEffect,
-                             QGraphicsDropShadowEffect, QMenu, QCheckBox)
+                             QGraphicsDropShadowEffect, QMenu, QCheckBox,
+                             QRadioButton, QButtonGroup)
 from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve, QByteArray, QSettings
 from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QAction, QIcon, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
@@ -285,10 +286,28 @@ class ItemDialog(QDialog):
         layout.addWidget(self.type_combo)
         
         layout.addWidget(QLabel("PROTOCOL // EXEC TYPE"))
-        self.exec_type_combo = QComboBox()
-        self.exec_type_combo.addItems(["other", "ahk_v2"])
-        self.exec_type_combo.currentTextChanged.connect(self.on_exec_type_changed)
-        layout.addWidget(self.exec_type_combo)
+        protocol_layout = QHBoxLayout()
+        self.protocol_group = QButtonGroup(self)
+        
+        self.radio_other = QRadioButton("other")
+        self.radio_ahk = QRadioButton("ahk_v2")
+        
+        radio_style = f"""
+            QRadioButton {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 11px; }}
+            QRadioButton::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; border-radius: 6px; }}
+            QRadioButton::indicator:checked {{ background-color: {CP_CYAN}; border: 1px solid {CP_CYAN}; }}
+        """
+        self.radio_other.setStyleSheet(radio_style)
+        self.radio_ahk.setStyleSheet(radio_style)
+        self.radio_other.setChecked(True)
+        
+        self.protocol_group.addButton(self.radio_other)
+        self.protocol_group.addButton(self.radio_ahk)
+        
+        protocol_layout.addWidget(self.radio_other)
+        protocol_layout.addWidget(self.radio_ahk)
+        protocol_layout.addStretch()
+        layout.addLayout(protocol_layout)
 
         layout.addWidget(QLabel("SOURCE // PATH"))
         path_layout = QHBoxLayout()
@@ -339,16 +358,17 @@ class ItemDialog(QDialog):
         filename, _ = QFileDialog.getOpenFileName(self, "Select Executable", "", "Executables (*.exe);;All Files (*.*)")
         if filename: self.path_input.setText(filename)
 
-    def on_exec_type_changed(self, text):
-        pass # User provides path manually or via browse
-
     def load_data(self):
         self.name_input.setText(self.item["name"])
         self.type_combo.setCurrentText(self.item["type"])
         self.path_input.setText(self.item["paths"][0] if self.item["paths"] else "")
         self.args_input.setText(self.item.get("Command", ""))
         self.ps1_input.setText(self.item.get("ps1_command", ""))
-        self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
+        
+        exec_type = self.item.get("ExecutableType", "other")
+        if exec_type == "ahk_v2": self.radio_ahk.setChecked(True)
+        else: self.radio_other.setChecked(True)
+        
         self.admin_check.setChecked(self.item.get("run_as_admin", False))
         self.hide_check.setChecked(self.item.get("hide_terminal", False))
 
@@ -359,10 +379,13 @@ class ItemDialog(QDialog):
             path, args = self.path_input.text(), self.args_input.text()
             ps_cmd = f'Start-Process -FilePath "{path}"'
             if args: ps_cmd += f' -ArgumentList "{args}"'
+            
+        exec_type = "ahk_v2" if self.radio_ahk.isChecked() else "other"
+            
         self.result_data = {
             "name": self.name_input.text(), "type": self.type_combo.currentText(),
             "paths": [self.path_input.text()], "Command": self.args_input.text(),
-            "ps1_command": ps_cmd, "ExecutableType": self.exec_type_combo.currentText(),
+            "ps1_command": ps_cmd, "ExecutableType": exec_type,
             "run_as_admin": self.admin_check.isChecked(), "hide_terminal": self.hide_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
