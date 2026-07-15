@@ -320,13 +320,25 @@ class ItemDialog(QDialog):
         self.ps1_input = CyberInput("Complete PowerShell command line...")
         layout.addWidget(self.ps1_input)
 
+        checks_layout = QHBoxLayout()
+        
         self.admin_check = QCheckBox("RUN AS ADMIN")
         self.admin_check.setStyleSheet(f"""
             QCheckBox {{ color: {CP_RED}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
             QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
             QCheckBox::indicator:checked {{ background: {CP_RED}; border: 1px solid {CP_RED}; }}
         """)
-        layout.addWidget(self.admin_check)
+        
+        self.hide_check = QCheckBox("HIDE TERMINAL")
+        self.hide_check.setStyleSheet(f"""
+            QCheckBox {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 10px; }}
+            QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_BG}; }}
+            QCheckBox::indicator:checked {{ background: {CP_CYAN}; border: 1px solid {CP_CYAN}; }}
+        """)
+        
+        checks_layout.addWidget(self.admin_check)
+        checks_layout.addWidget(self.hide_check)
+        layout.addLayout(checks_layout)
 
         layout.addStretch()
 
@@ -365,6 +377,7 @@ class ItemDialog(QDialog):
         self.ps1_input.setText(self.item.get("ps1_command", ""))
         self.exec_type_combo.setCurrentText(self.item.get("ExecutableType", "other"))
         self.admin_check.setChecked(self.item.get("run_as_admin", False))
+        self.hide_check.setChecked(self.item.get("hide_terminal", False))
 
     def save_item(self):
         if not self.name_input.text():
@@ -386,6 +399,7 @@ class ItemDialog(QDialog):
             "ps1_command": ps_cmd,
             "ExecutableType": self.exec_type_combo.currentText(),
             "run_as_admin": self.admin_check.isChecked(),
+            "hide_terminal": self.hide_check.isChecked(),
             "script_enabled": self.item.get("script_enabled", False) if self.item else False
         }
         self.accept()
@@ -704,12 +718,24 @@ class MainWindow(QMainWindow):
     def _make_vbs(self, item):
         os.makedirs(self.VBS_DIR, exist_ok=True)
         path, args = item["paths"][0], item.get("Command", "")
-        # Escape quotes for VBS string
         clean_args = args.replace('"', '""')
-        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_admin.vbs")
+        
+        # Determine the VBS filename based on purpose
+        suffix = "admin" if item.get("run_as_admin") else "hidden"
+        vbs_path = os.path.join(self.VBS_DIR, f"{item['name']}_{suffix}.vbs")
+        
         with open(vbs_path, "w") as f:
-            # ShellExecute handles both absolute paths and environmental commands (like pythonw)
-            f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{clean_args}", "", "runas", 1\n')
+            if item.get("run_as_admin"):
+                # ShellExecute is required for 'runas' verb. 
+                # Note: '0' for hidden doesn't always work with ShellExecute + runas, 
+                # but '1' (Normal) or '7' (Minimized) are reliable. 
+                # If hidden is requested with admin, we'll try 0.
+                show_mode = 0 if item.get("hide_terminal") else 1
+                f.write(f'CreateObject("Shell.Application").ShellExecute "{path}", "{clean_args}", "", "runas", {show_mode}\n')
+            else:
+                # WScript.Shell.Run is much better for hiding standard processes
+                f.write(f'CreateObject("WScript.Shell").Run """{path}"" {clean_args}", 0, False\n')
+                
         return vbs_path
 
     def check_registry(self, item):
@@ -728,11 +754,13 @@ class MainWindow(QMainWindow):
                     if should_enable:
                         path = item["paths"][0]
                         args = item.get("Command", "")
-                        if item.get("run_as_admin"):
+                        
+                        if item.get("run_as_admin") or item.get("hide_terminal"):
+                            # Both Admin and Hidden use the VBS wrapper for Registry mode
                             val = f'wscript.exe "{self._make_vbs(item)}"'
                         else:
-                            # If it's a simple name like pythonw, quotes are optional but safer
                             val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
+                            
                         winreg.SetValueEx(key, item["name"], 0, winreg.REG_SZ, val)
                     else: winreg.DeleteValue(key, item["name"])
                 self.widgets_map[item["name"]].set_active(should_enable)
@@ -758,6 +786,8 @@ class MainWindow(QMainWindow):
                         cmd = f'Start-Process -FilePath "{path}"'
                         if args:
                             cmd += f' -ArgumentList \'{args}\''
+                        if item.get("hide_terminal"):
+                            cmd += ' -WindowStyle Hidden'
                     else:
                         cmd = item["ps1_command"]
                         
