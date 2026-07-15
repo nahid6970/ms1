@@ -132,179 +132,235 @@ def notification_manager_worker():
         root = tk.Tk()
         root.withdraw()
 
-        body_font = tkfont.Font(family="Segoe UI", size=-16)
-        close_font = tkfont.Font(family="Segoe UI", size=-18)
+        body_font = tkfont.Font(family="Segoe UI", size=-12)
+        title_font = tkfont.Font(family="Segoe UI", size=-14, weight="bold")
+        list_font = tkfont.Font(family="Segoe UI", size=-12)
 
-        active_notifications = []
-        clear_all_window = None
+        notifications_data = []  # List of dicts: {"id": int, "filename": str, "file_path": str}
+        notification_counter = 0
 
-        width = 320
-        height = 58
-        gap = 10
-        margin_right = 18
-        margin_bottom = 54
+        # Colors
         bg = "#111111"
-        border = "#0078d4"
+        border = "#333333"
         text = "#f3f3f3"
         muted = "#bdbdbd"
+        accent = "#0078d4"
+        red_color = "#ff4d4d"
+        red_hover = "#ff1a1a"
+        item_hover_bg = "#2a2a2a"
 
-        def notification_position(slot):
+        card_window = None
+
+        width = 360
+        max_height = 450
+        min_height = 120
+        margin_right = 18
+        margin_bottom = 54
+
+        def get_card_height():
+            num_items = min(len(notifications_data), 5)
+            if num_items == 0:
+                return min_height
+            calculated = 50 + (num_items * 32) + 45
+            return calculated
+
+        def update_card_position():
+            if not card_window or not card_window.winfo_exists():
+                return
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
+            h = get_card_height()
             x = screen_width - width - margin_right
-            y = screen_height - height - margin_bottom - (slot * (height + gap))
-            return x, y
+            y = screen_height - h - margin_bottom
+            card_window.geometry(f"{width}x{h}+{x}+{y}")
 
-        def move_window(window, slot):
-            if window.winfo_exists():
-                x, y = notification_position(slot)
-                window.geometry(f"{width}x{height}+{x}+{y}")
+        def rebuild_ui():
+            nonlocal card_window
+            if not card_window or not card_window.winfo_exists():
+                card_window = tk.Toplevel(root)
+                card_window.overrideredirect(True)
+                card_window.attributes("-topmost", True)
+                card_window.configure(bg=bg)
 
-        def refresh_notification_positions():
-            clear_slot_offset = 1 if clear_all_window and clear_all_window.winfo_exists() else 0
-            for index, notification in enumerate(active_notifications):
-                move_window(notification["window"], index + clear_slot_offset)
+            # Clear all widgets in card_window
+            for widget in card_window.winfo_children():
+                widget.destroy()
 
-        def update_clear_all_notification():
-            nonlocal clear_all_window
+            # Main container with a nice border
+            outer_frame = tk.Frame(card_window, bg=bg, highlightthickness=1, highlightbackground=accent)
+            outer_frame.pack(fill="both", expand=True)
 
-            if len(active_notifications) <= 1:
-                if clear_all_window and clear_all_window.winfo_exists():
-                    clear_all_window.destroy()
-                clear_all_window = None
-                refresh_notification_positions()
-                return
-
-            if clear_all_window and clear_all_window.winfo_exists():
-                move_window(clear_all_window, 0)
-                refresh_notification_positions()
-                return
-
-            clear_all_window = tk.Toplevel(root)
-            clear_all_window.withdraw()
-            clear_all_window.overrideredirect(True)
-            clear_all_window.attributes("-topmost", True)
-            move_window(clear_all_window, 0)
-
-            frame = tk.Frame(clear_all_window, bg=bg, highlightthickness=1, highlightbackground=border)
-            frame.pack(fill="both", expand=True)
-
-            label = tk.Label(
-                frame,
-                text="Clear all notifications",
+            # Header Frame
+            header_frame = tk.Frame(outer_frame, bg=bg, height=45)
+            header_frame.pack(fill="x", side="top", padx=10, pady=5)
+            
+            title_lbl = tk.Label(
+                header_frame,
+                text="Upload Notifications",
                 bg=bg,
                 fg=text,
-                font=body_font,
-                anchor="w",
-                justify="left",
+                font=title_font,
+                anchor="w"
             )
-            label.place(x=14, y=16, width=262, height=22)
+            title_lbl.pack(side="left", fill="y")
 
-            close_button = tk.Button(
-                frame,
+            # Small close window button (top right)
+            close_win_btn = tk.Button(
+                header_frame,
                 text="×",
                 bg=bg,
                 fg=muted,
-                activebackground="#2a2a2a",
+                activebackground=bg,
                 activeforeground=text,
                 relief="flat",
                 bd=0,
-                font=close_font,
-                command=clear_all_notifications,
-                cursor="hand2",
+                font=tkfont.Font(family="Segoe UI", size=-18),
+                command=close_card,
+                cursor="hand2"
             )
-            close_button.place(x=282, y=14, width=26, height=26)
+            close_win_btn.pack(side="right", fill="y", padx=5)
 
-            for widget in (frame, label):
-                widget.configure(cursor="hand2")
-                widget.bind("<Button-1>", clear_all_notifications)
+            # If empty
+            if not notifications_data:
+                empty_lbl = tk.Label(
+                    outer_frame,
+                    text="No new notifications",
+                    bg=bg,
+                    fg=muted,
+                    font=body_font
+                )
+                empty_lbl.pack(fill="both", expand=True, pady=20)
+                update_card_position()
+                card_window.deiconify()
+                return
 
-            clear_all_window.deiconify()
-            refresh_notification_positions()
+            # Display container (simple Frame, no Canvas or scrollbars)
+            list_container = tk.Frame(outer_frame, bg=bg)
+            list_container.pack(fill="both", expand=True, padx=5)
 
-        def remove_notification(notification):
-            if notification in active_notifications:
-                active_notifications.remove(notification)
-            if notification["window"].winfo_exists():
-                notification["window"].destroy()
-            update_clear_all_notification()
+            # Show only the latest 5 files (the end of the list)
+            latest_items = notifications_data[-5:]
+            total_count = len(notifications_data)
 
-        def clear_all_notifications(_event=None):
-            nonlocal clear_all_window
+            # Build list items (md list styling)
+            for item in latest_items:
+                item_frame = tk.Frame(list_container, bg=bg, cursor="hand2")
+                item_frame.pack(fill="x", pady=2, padx=5)
 
-            for notification in active_notifications[:]:
-                if notification["window"].winfo_exists():
-                    notification["window"].destroy()
-            active_notifications.clear()
+                bullet_lbl = tk.Label(
+                    item_frame,
+                    text="•",
+                    bg=bg,
+                    fg=accent,
+                    font=list_font,
+                    anchor="w"
+                )
+                bullet_lbl.pack(side="left", padx=(2, 5))
 
-            if clear_all_window and clear_all_window.winfo_exists():
-                clear_all_window.destroy()
-            clear_all_window = None
+                display_name = shorten_notification_filename(item["filename"], max_length=36)
+                name_lbl = tk.Label(
+                    item_frame,
+                    text=display_name,
+                    bg=bg,
+                    fg=text,
+                    font=list_font,
+                    anchor="w",
+                    justify="left"
+                )
+                name_lbl.pack(side="left", fill="x", expand=True)
 
-        def create_notification(filename, file_path):
-            slot = len(active_notifications) + (1 if clear_all_window and clear_all_window.winfo_exists() else 0)
+                def make_click_cmd(it=item):
+                    return lambda e=None: click_item(it)
 
-            window = tk.Toplevel(root)
-            window.withdraw()
-            window.overrideredirect(True)
-            window.attributes("-topmost", True)
-            move_window(window, slot)
+                # Bind hover events for smooth UI interaction
+                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl):
+                    return lambda e: [frame.configure(bg=item_hover_bg), blbl.configure(bg=item_hover_bg), nlbl.configure(bg=item_hover_bg)]
+                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl):
+                    return lambda e: [frame.configure(bg=bg), blbl.configure(bg=bg), nlbl.configure(bg=bg)]
 
-            frame = tk.Frame(window, bg=bg, highlightthickness=1, highlightbackground=border)
-            frame.pack(fill="both", expand=True)
+                item_frame.bind("<Enter>", make_hover_enter())
+                item_frame.bind("<Leave>", make_hover_leave())
+                item_frame.bind("<Button-1>", make_click_cmd())
+                bullet_lbl.bind("<Button-1>", make_click_cmd())
+                name_lbl.bind("<Button-1>", make_click_cmd())
 
-            notification = {"window": window}
+            # Footer Frame for Clear button
+            footer_frame = tk.Frame(outer_frame, bg=bg, height=35)
+            footer_frame.pack(fill="x", side="bottom", padx=10, pady=5)
 
-            def handle_click(_event=None):
-                open_file_folder(file_path)
-                remove_notification(notification)
+            # Left side: Counter or indicator if there are more files
+            if total_count > 5:
+                counter_text = f"+{total_count - 5} more files"
+                counter_lbl = tk.Label(
+                    footer_frame,
+                    text=counter_text,
+                    bg=bg,
+                    fg=muted,
+                    font=body_font,
+                    anchor="w"
+                )
+                counter_lbl.pack(side="left", fill="y")
 
-            close_button = tk.Button(
-                frame,
-                text="×",
+            # Right side: Clear text button in RED fg
+            clear_btn = tk.Button(
+                footer_frame,
+                text="Clear",
                 bg=bg,
-                fg=muted,
-                activebackground="#2a2a2a",
-                activeforeground=text,
-                relief="flat",
-                bd=0,
-                font=close_font,
-                command=lambda: remove_notification(notification),
-                cursor="hand2",
-            )
-            close_button.place(x=282, y=14, width=26, height=26)
-
-            message = tk.Label(
-                frame,
-                text=shorten_notification_filename(filename),
-                bg=bg,
-                fg=text,
+                fg=red_color,
+                activebackground=bg,
+                activeforeground=red_hover,
                 font=body_font,
-                anchor="w",
-                justify="left",
+                relief="flat",
+                bd=0,
+                cursor="hand2",
+                command=clear_all
             )
-            message.place(x=14, y=16, width=262, height=22)
+            clear_btn.pack(side="right", fill="y")
 
-            for widget in (frame, message):
-                widget.configure(cursor="hand2")
-                widget.bind("<Button-1>", handle_click)
+            update_card_position()
+            card_window.deiconify()
 
-            window.protocol("WM_DELETE_WINDOW", lambda: remove_notification(notification))
-            active_notifications.append(notification)
-            window.deiconify()
-            update_clear_all_notification()
+        def click_item(item):
+            open_file_folder(item["file_path"])
+            remove_item(item)
+
+        def remove_item(item):
+            if item in notifications_data:
+                notifications_data.remove(item)
+            if not notifications_data:
+                close_card()
+            else:
+                rebuild_ui()
+
+        def clear_all():
+            notifications_data.clear()
+            close_card()
+
+        def close_card():
+            nonlocal card_window
+            if card_window and card_window.winfo_exists():
+                card_window.destroy()
+            card_window = None
 
         def poll_notifications():
+            added_any = False
+            nonlocal notification_counter
             while True:
                 try:
                     filename, file_path = NOTIFICATION_QUEUE.get_nowait()
                 except queue.Empty:
                     break
 
-                try:
-                    create_notification(filename, file_path)
-                except Exception as e:
-                    print(f"Notification error for '{filename}': {e}")
+                notification_counter += 1
+                notifications_data.append({
+                    "id": notification_counter,
+                    "filename": filename,
+                    "file_path": file_path
+                })
+                added_any = True
+
+            if added_any:
+                rebuild_ui()
 
             root.after(100, poll_notifications)
 
