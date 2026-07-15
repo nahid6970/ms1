@@ -1844,6 +1844,7 @@
             <div style="display:flex; align-items:center; gap:6px;">
                 <span>🤖 AI Copilot</span>
                 <button onclick="clearAIChat()" style="background:none; border:none; color:#ef4444; font-size:0.65rem; cursor:pointer; text-decoration:underline; padding:0; line-height:1;" title="Clear conversation history">Clear Chat</button>
+                <button onclick="continueAIChat()" id="ai-continue-btn" style="display:none; background:none; border:1px solid var(--border-color); color:var(--accent-color); font-size:0.65rem; cursor:pointer; padding:1px 5px; border-radius:4px; line-height:1; font-weight:600;" title="Prompt AI to continue generating if it stopped">Continue...</button>
             </div>
             <button class="sbpop-close" onclick="closeAICopilotPopover()">✕</button>
         </div>
@@ -9239,10 +9240,12 @@
 
             if (aiChatHistory.length === 0) {
                 chatBox.style.display = 'none';
+                document.getElementById('ai-continue-btn').style.display = 'none';
                 return;
             }
 
             chatBox.style.display = 'flex';
+            document.getElementById('ai-continue-btn').style.display = 'inline-block';
             chatBox.innerHTML = '';
 
             aiChatHistory.forEach((msg, idx) => {
@@ -9569,6 +9572,14 @@
             saveAIChatHistory();
             renderAIChatHistory();
         }
+        function continueAIChat() {
+            const promptIn = document.getElementById('ai-prompt-input');
+            if (promptIn) {
+                promptIn.value = "Continue";
+                generateAICommand();
+            }
+        }
+
 
         function regenerateAIChatCommand(idx) {
             if (idx <= 0) return;

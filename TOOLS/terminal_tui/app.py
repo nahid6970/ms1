@@ -3590,7 +3590,7 @@ def api_ai_command():
     rate_limits = None
     usage_metadata = None
     tools_used = []
-    cmd = ""
+    cmd_parts = []
     
     if provider == 'groq':
         if not model:
@@ -3624,7 +3624,8 @@ def api_ai_command():
             payload["tools"] = enabled_tools
             payload["tool_choice"] = "auto"
         try:
-            for _ in range(4):
+            # Loop up to 8 times to allow multiple tool steps
+            for _ in range(8):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
                 res_data = res.json()
                 if res.status_code != 200:
@@ -3633,9 +3634,12 @@ def api_ai_command():
                     return jsonify({"error": error_msg}), res.status_code
                 
                 message = res_data.get('choices', [{}])[0].get('message', {})
+                text_content = (message.get('content') or '').strip()
+                if text_content:
+                    cmd_parts.append(text_content)
+
                 tool_calls = message.get('tool_calls')
                 if not tool_calls:
-                    cmd = (message.get('content') or '').strip()
                     break
                 
                 payload["messages"].append(message)
@@ -3701,7 +3705,7 @@ def api_ai_command():
             payload["tools"] = enabled_tools
             payload["tool_choice"] = "auto"
         try:
-            for _ in range(4):
+            for _ in range(8):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
                 try:
                     res_data = res.json()
@@ -3716,9 +3720,12 @@ def api_ai_command():
                     return jsonify({"error": f"Morph API ({res.status_code}): {error_msg}"}), res.status_code
 
                 message = res_data.get('choices', [{}])[0].get('message', {})
+                text_content = (message.get('content') or '').strip()
+                if text_content:
+                    cmd_parts.append(text_content)
+
                 tool_calls = message.get('tool_calls')
                 if not tool_calls:
-                    cmd = (message.get('content') or '').strip()
                     break
                 
                 payload["messages"].append(message)
@@ -3784,7 +3791,7 @@ def api_ai_command():
             payload["tools"] = enabled_tools
             payload["tool_choice"] = "auto"
         try:
-            for _ in range(4):
+            for _ in range(8):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
                 try:
                     res_data = res.json()
@@ -3799,9 +3806,12 @@ def api_ai_command():
                     return jsonify({"error": f"OpenRouter API ({res.status_code}): {error_msg}"}), res.status_code
 
                 message = res_data.get('choices', [{}])[0].get('message', {})
+                text_content = (message.get('content') or '').strip()
+                if text_content:
+                    cmd_parts.append(text_content)
+
                 tool_calls = message.get('tool_calls')
                 if not tool_calls:
-                    cmd = (message.get('content') or '').strip()
                     break
                 
                 payload["messages"].append(message)
@@ -3877,7 +3887,7 @@ def api_ai_command():
                     "parts": [{"text": system_instruction}]
                 }
         try:
-            for _ in range(4):
+            for _ in range(8):
                 res = requests.post(url, json=payload, headers=headers, timeout=60)
                 res_data = res.json()
                 if res.status_code != 200:
@@ -3920,9 +3930,12 @@ def api_ai_command():
                 content_obj = candidates[0].get('content', {})
                 parts = content_obj.get('parts', [])
                 
+                for p in parts:
+                    if 'text' in p:
+                        cmd_parts.append(p['text'].strip())
+
                 tool_calls = [p for p in parts if 'functionCall' in p]
                 if not tool_calls:
-                    cmd = parts[0].get('text', '').strip() if parts and 'text' in parts[0] else ''
                     break
                 
                 # Append assistant's function call message
@@ -3958,6 +3971,9 @@ def api_ai_command():
             usage_metadata = res_data.get("usageMetadata", {})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+
+    # Combine all parts from multiple turns
+    cmd = "\n\n".join(cmd_parts).strip()
 
     # Clean thinking tags, CoT reasoning, and rule echoes
     import re
