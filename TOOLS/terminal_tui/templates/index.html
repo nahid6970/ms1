@@ -146,13 +146,35 @@
         /* Tool Log Tooltip */
         #ai-tool-log-tooltip {
             display: none; position: fixed; background: #0f172a; border: 1.5px solid var(--accent-color);
-            border-radius: 8px; padding: 12px; font-size: 0.72rem; color: var(--text-primary);
+            border-radius: 8px; padding: 0; font-size: 0.72rem; color: var(--text-primary);
             box-shadow: 0 10px 40px rgba(0,0,0,0.85); z-index: 9999; width: 350px; max-height: 450px;
-            overflow-y: auto; pointer-events: auto; font-family: 'Fira Code', monospace;
-            backdrop-filter: blur(10px);
+            overflow: hidden; pointer-events: auto; font-family: 'Fira Code', monospace;
+            backdrop-filter: blur(10px); display: flex; flex-direction: column;
         }
+        #ai-tool-log-tooltip.pinned { pointer-events: auto; }
+        .tool-log-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+        }
+        .tool-log-body { padding: 12px; overflow-y: auto; flex: 1; }
         .tool-log-arg { color: #f59e0b; }
-        .tool-log-res { color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 6px; padding-top: 4px; white-space: pre-wrap; word-break: break-all; }
+        .tool-log-res { 
+            color: #94a3b8; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            margin-top: 6px; 
+            padding-top: 4px; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.68rem;
+        }
+        .tool-log-res::-webkit-scrollbar { width: 4px; }
+        .tool-log-res::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 2px; }
 
         html.hide-sidebar-layout .sidebar {
             display: none !important;
@@ -9301,7 +9323,7 @@
                                 const matchedLogs = logs ? logs.filter(l => l.name === tName) : [];
                                 const logDataAttr = matchedLogs.length ? `data-tool-logs='${JSON.stringify(matchedLogs).replace(/'/g, "&apos;")}'` : '';
                                 
-                                html += `<span onmouseover="showToolLogTooltip(event)" onmouseout="hideToolLogTooltip()" ${logDataAttr} style="display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:4px; cursor:help;">${TOOL_ICONS[tName]}</span>`;
+                                html += `<span onmouseover="showToolLogTooltip(event)" onmouseout="hideToolLogTooltip()" onclick="togglePinToolLog(event)" ${logDataAttr} style="display:inline-flex; align-items:center; justify-content:center; width:17px; height:17px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:4px; cursor:pointer;">${TOOL_ICONS[tName]}</span>`;
                             }
                         });
                         html += `</span>`;
@@ -11998,16 +12020,23 @@
             const tooltip = document.getElementById('ai-global-tooltip');
             if (tooltip) tooltip.style.display = 'none';
         }
+        let toolLogPinned = false;
+
         function showToolLogTooltip(e) {
+            if (toolLogPinned) return;
             const tooltip = document.getElementById('ai-tool-log-tooltip');
             const logsJson = e.currentTarget.getAttribute('data-tool-logs');
             if (!tooltip || !logsJson) return;
 
             const logs = JSON.parse(logsJson);
-            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
-                <span style="font-weight:800; font-size:0.65rem; text-transform:uppercase; color:var(--text-muted);">Tool Execution Log</span>
-                <span style="font-size:0.6rem; color:var(--accent-color); background:rgba(37,99,235,0.1); padding:1px 5px; border-radius:4px;">${logs.length} calls</span>
-            </div>`;
+            
+            let html = `
+                <div class="tool-log-header">
+                    <span style="font-weight:800; font-size:0.65rem; text-transform:uppercase; color:var(--text-muted);">Tool Execution Log (${logs.length})</span>
+                    <button onclick="unpinToolLog()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem; line-height:1;">&times;</button>
+                </div>
+                <div class="tool-log-body">
+            `;
             
             logs.forEach((log, i) => {
                 html += `<div style="margin-bottom:${i < logs.length - 1 ? '16px' : '0'};">
@@ -12020,19 +12049,18 @@
                         <div class="tool-log-arg" style="white-space:pre-wrap; font-size:0.7rem;">${JSON.stringify(log.args, null, 2)}</div>
                     </div>
                     <div style="font-size:0.65rem; color:var(--text-muted); margin-bottom:2px;">Result:</div>
-                    <div class="tool-log-res" style="background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; font-size:0.7rem;">${escapeHtml(log.result)}</div>
+                    <div class="tool-log-res">${escapeHtml(log.result)}</div>
                 </div>`;
             });
+            html += `</div>`;
 
             tooltip.innerHTML = html;
-            tooltip.style.display = 'block';
+            tooltip.style.display = 'flex';
 
             // Position near cursor
             const x = e.clientX + 15;
             const y = e.clientY + 15;
-            
-            // Adjust if off-screen
-            const tw = 320;
+            const tw = 350;
             const th = tooltip.offsetHeight;
             const rightEdge = x + tw;
             const bottomEdge = y + th;
@@ -12042,8 +12070,29 @@
         }
 
         function hideToolLogTooltip() {
+            if (toolLogPinned) return;
             const tooltip = document.getElementById('ai-tool-log-tooltip');
             if (tooltip) tooltip.style.display = 'none';
+        }
+
+        function togglePinToolLog(e) {
+            e.stopPropagation();
+            if (toolLogPinned) {
+                unpinToolLog();
+            } else {
+                toolLogPinned = true;
+                const tooltip = document.getElementById('ai-tool-log-tooltip');
+                tooltip.classList.add('pinned');
+                // Ensure it's showing the right data if they clicked without hovering first
+                showToolLogTooltip(e);
+            }
+        }
+
+        function unpinToolLog() {
+            toolLogPinned = false;
+            const tooltip = document.getElementById('ai-tool-log-tooltip');
+            tooltip.classList.remove('pinned');
+            tooltip.style.display = 'none';
         }
 
         
