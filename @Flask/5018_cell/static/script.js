@@ -646,11 +646,38 @@ function showF10SelectionHighlight(selection) {
     }
 }
 
-function showF10MatchLabels(selection) {
+function selectF10Match(index) {
+    if (!f10FormatterAnchor || !f10FormatterAnchor.matches || !f10FormatterAnchor.matches[index]) return;
+    
+    const match = f10FormatterAnchor.matches[index];
+    f10FormatterAnchor.start = match.start;
+    f10FormatterAnchor.end = match.end;
+    f10FormatterAnchor.rawText = f10FormatterAnchor.input.value.substring(match.start, match.end);
+    
+    // Attempt to get/create preview range for new single selection
+    f10FormatterAnchor.previewRange = match.previewRange || getPreviewRangeForRawSelection(f10FormatterAnchor.input, match.start, match.end);
+    
+    // Clear matches so labels and dropdown disappear
+    f10FormatterAnchor.matches = null;
+    
+    if (f10MatchOverlay) f10MatchOverlay.remove();
+    const existingDropdown = document.getElementById('f10MatchDropdown');
+    if (existingDropdown) existingDropdown.remove();
+
+    showF10SelectionHighlight(f10FormatterAnchor);
+    updateF10ActiveIndicator();
+    
+    showToast(`Selected version ${index + 1}`, 'success');
+}
+
+function showF10MatchLabels(selection, showDropdown = false) {
     if (f10MatchOverlay && f10MatchOverlay.isConnected) {
         f10MatchOverlay.remove();
     }
     f10MatchOverlay = null;
+    
+    const existingDropdown = document.getElementById('f10MatchDropdown');
+    if (existingDropdown) existingDropdown.remove();
 
     const liveInput = getF10CurrentInput(selection);
     if (!selection || !liveInput || !selection.matches || selection.matches.length <= 1) return;
@@ -663,6 +690,55 @@ function showF10MatchLabels(selection) {
     const overlay = document.createElement('div');
     overlay.className = 'f10-match-overlay';
 
+    // 1. Create Dropdown Menu if requested
+    if (showDropdown) {
+        const dropdown = document.createElement('div');
+        dropdown.id = 'f10MatchDropdown';
+        dropdown.className = 'f10-match-dropdown';
+        dropdown.style.left = (lastMouseX + 10) + 'px';
+        dropdown.style.top = (lastMouseY + 10) + 'px';
+        
+        const title = document.createElement('div');
+        title.className = 'f10-dropdown-title';
+        title.textContent = `Select match (${selection.matches.length} found)`;
+        dropdown.appendChild(title);
+
+        selection.matches.forEach((match, index) => {
+            const item = document.createElement('div');
+            item.className = 'f10-dropdown-item';
+            
+            // Generate a small snippet for context
+            const val = liveInput.value;
+            const start = Math.max(0, match.start - 10);
+            const end = Math.min(val.length, match.end + 10);
+            const context = (start > 0 ? '...' : '') + val.substring(start, end).replace(/\n/g, ' ') + (end < val.length ? '...' : '');
+            
+            item.innerHTML = `<span class="v-label">v${index + 1}</span> <span class="v-context">${escapeHtml(context)}</span>`;
+            item.onclick = (e) => {
+                e.stopPropagation();
+                selectF10Match(index);
+            };
+            item.onmouseenter = () => {
+                showF10SelectionHighlight({ ...selection, previewRange: match.previewRange || getPreviewRangeForRawSelection(liveInput, match.start, match.end) });
+            };
+            item.onmouseleave = () => {
+                showF10SelectionHighlight(f10FormatterAnchor);
+            };
+            dropdown.appendChild(item);
+        });
+        document.body.appendChild(dropdown);
+
+        // Click outside to close dropdown
+        const closeDropdown = (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.remove();
+                document.removeEventListener('mousedown', closeDropdown);
+            }
+        };
+        setTimeout(() => document.addEventListener('mousedown', closeDropdown), 10);
+    }
+
+    // 2. Create Floating Badges
     selection.matches.forEach((match, index) => {
         const range = match.previewRange || getPreviewRangeForRawSelection(liveInput, match.start, match.end);
         if (!range) return;
@@ -675,6 +751,13 @@ function showF10MatchLabels(selection) {
         badge.textContent = `v${index + 1}`;
         badge.style.left = (rect.right - cellRect.left + 2) + 'px';
         badge.style.top = (rect.top - cellRect.top + Math.max(0, rect.height - 12)) + 'px';
+        badge.title = "Click to select this version";
+        
+        badge.onclick = (e) => {
+            e.stopPropagation();
+            selectF10Match(index);
+        };
+        
         overlay.appendChild(badge);
     });
 
@@ -1495,7 +1578,8 @@ function handleKeyboardShortcuts(e) {
             matches: sameAnchor ? null : hoverPick.matches
         };
         showF10SelectionHighlight(f10FormatterAnchor);
-        showF10MatchLabels(f10FormatterAnchor);
+        // Show labels AND the consolidated dropdown on initial F10 trigger
+        showF10MatchLabels(f10FormatterAnchor, true);
         updateF10ActiveIndicator();
         return;
     }
