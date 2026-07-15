@@ -9,38 +9,36 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
     """Executes a local tool and returns the result as a string."""
     try:
         if tool_name == "read_file":
-            filepath = arguments.get('filepath')
+            filepath = arguments.get('filepath') or arguments.get('path')
             if not filepath:
                 return "Error: filepath argument is required."
             if not os.path.exists(filepath):
                 return f"Error: File not found: {filepath}"
             if os.path.isdir(filepath):
-                return f"Error: {filepath} is a directory, not a file. Use list_directory instead."
+                return f"Error: {filepath} is a directory. Use list_directory instead."
             
             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
-                # Cap the output at 8000 characters to prevent blowing up the AI context
                 if len(content) > 8000:
-                    return content[:8000] + "\n\n... (Content truncated because it is too large)"
+                    return content[:8000] + "\n\n... (Content truncated)"
                 return content
 
         elif tool_name == "write_file":
-            filepath = arguments.get('filepath')
+            filepath = arguments.get('filepath') or arguments.get('path')
             content = arguments.get('content', '')
             if not filepath:
                 return "Error: filepath argument is required."
             
-            # Create directory if it doesn't exist
             dirname = os.path.dirname(filepath)
             if dirname:
                 os.makedirs(dirname, exist_ok=True)
                 
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
-            return f"Successfully wrote {len(content)} characters to {filepath}."
+            return f"Successfully wrote to {filepath}."
 
         elif tool_name == "delete_file":
-            filepath = arguments.get('filepath')
+            filepath = arguments.get('filepath') or arguments.get('path')
             if not filepath:
                 return "Error: filepath argument is required."
             if not os.path.exists(filepath):
@@ -49,309 +47,164 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
             if os.path.isdir(filepath):
                 import shutil
                 shutil.rmtree(filepath)
-                return f"Successfully deleted directory and its contents: {filepath}"
+                return f"Deleted directory: {filepath}"
             else:
                 os.remove(filepath)
-                return f"Successfully deleted file: {filepath}"
+                return f"Deleted file: {filepath}"
                 
         elif tool_name == "list_directory":
             path = arguments.get('path', '.')
-            if not path:
-                path = '.'
             if not os.path.exists(path):
                 return f"Error: Directory not found: {path}"
-            if not os.path.isdir(path):
-                return f"Error: {path} is not a directory."
             
             files = os.listdir(path)
-            if not files:
-                return "Directory is empty."
-            return "\n".join(files)
+            return "\n".join(files) if files else "Directory is empty."
             
         elif tool_name == "get_system_info":
             info = [
-                f"OS: {platform.system()} {platform.release()} ({platform.architecture()[0]})",
+                f"OS: {platform.system()} {platform.release()}",
                 f"Python: {sys.version}",
-                f"Current Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                f"Current Working Directory: {os.getcwd()}"
+                f"Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                f"CWD: {os.getcwd()}"
             ]
             return "\n".join(info)
 
         elif tool_name == "web_search":
             query = arguments.get('query')
-            if not query:
-                return "Error: query argument is required."
-            if not tavily_api_key:
-                return "Error: Tavily API Key is not configured. Please set it in AI Tools Config (🛠️)."
+            if not query or not tavily_api_key:
+                return "Error: Query or Tavily API Key missing."
             
             url = "https://api.tavily.com/search"
-            payload = {
-                "api_key": tavily_api_key,
-                "query": query,
-                "search_depth": "basic",
-                "max_results": 5
-            }
+            payload = {"api_key": tavily_api_key, "query": query, "max_results": 5}
             res = requests.post(url, json=payload, timeout=15)
-            if res.status_code != 200:
-                return f"Error from Tavily API (HTTP {res.status_code}): {res.text}"
-            
-            data = res.json()
-            results = data.get('results', [])
-            if not results:
-                return "No search results found."
-            
-            formatted = []
-            for r in results:
-                formatted.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content']}\n")
-            return "\n".join(formatted)
+            results = res.json().get('results', [])
+            return "\n".join([f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content']}\n" for r in results]) or "No results."
 
         elif tool_name == "run_shell_command":
             command = arguments.get('command')
-            if not command:
-                return "Error: command argument is required."
-            
+            if not command: return "Error: No command."
             import subprocess
             try:
-                # Runs command in system shell (e.g. cmd.exe on Windows, bash on Unix)
-                res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=15)
-                out = res.stdout or ""
-                err = res.stderr or ""
-                
-                combined = ""
-                if out:
-                    combined += out
-                if err:
-                    if combined:
-                        combined += "\n"
-                    combined += f"Stderr:\n{err}"
-                
-                if not combined.strip():
-                    return f"Command completed with exit code {res.returncode} (No output)."
-                
-                if len(combined) > 8000:
-                    return combined[:8000] + "\n\n... (Output truncated because it is too large)"
-                return combined
+                res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
+                out = (res.stdout or "") + (res.stderr or "")
+                return out[:8000] if out.strip() else f"Done (Code {res.returncode})"
             except subprocess.TimeoutExpired:
-                return "Error: Command execution timed out after 15 seconds."
+                return "Error: Timeout."
 
         elif tool_name == "request_follow_up":
-            reason = arguments.get('reason', 'Processing intermediate results.')
-            return f"Backend: Inference turn requested. Reason: {reason}"
+            return f"Follow-up turn granted: {arguments.get('reason', 'Processing...')}"
             
     except Exception as e:
-        return f"Error executing {tool_name}: {str(e)}"
-        
+        return f"Error: {str(e)}"
     return f"Unknown tool: {tool_name}"
- 
+
 OPENAI_TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "read_file",
-            "description": "Reads the contents of a local file. Use this to read code or config files.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filepath": {
-                        "type": "string", 
-                        "description": "Absolute or relative path to the file to read."
-                    }
-                },
-                "required": ["filepath"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "list_directory",
-            "description": "Lists the files and folders in a local directory.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string", 
-                        "description": "Path to the directory, e.g. ./ or C:/path/to/folder"
-                    }
-                },
-                "required": ["path"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_system_info",
-            "description": "Gets the current system OS, Python version, current working directory, and local time.",
-            "parameters": {
-                "type": "object",
-                "properties": {}
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "web_search",
-            "description": "Searches the web for real-time information, latest documentation, or troubleshooting guides.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The search query, e.g., 'Python flask socketio emit to specific client'"
-                    }
-                },
-                "required": ["query"]
-            }
+            "description": "Reads a local file.",
+            "parameters": {"type": "object", "properties": {"filepath": {"type": "string"}}, "required": ["filepath"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "write_file",
-            "description": "Creates a new file or overwrites an existing one with the provided content.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filepath": {"type": "string", "description": "Path to the file to write."},
-                    "content": {"type": "string", "description": "The full text content to write into the file."}
-                },
-                "required": ["filepath", "content"]
-            }
+            "description": "Writes/Overwrites a local file.",
+            "parameters": {"type": "object", "properties": {"filepath": {"type": "string"}, "content": {"type": "string"}}, "required": ["filepath", "content"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "delete_file",
-            "description": "Deletes a file or directory from the local file system.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filepath": {"type": "string", "description": "Path to the file or directory to remove."}
-                },
-                "required": ["filepath"]
-            }
+            "description": "Deletes a file/folder.",
+            "parameters": {"type": "object", "properties": {"filepath": {"type": "string"}}, "required": ["filepath"]}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_directory",
+            "description": "Lists directory contents.",
+            "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_system_info",
+            "description": "Gets OS and environment info.",
+            "parameters": {"type": "object", "properties": {}}
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Searches the web.",
+            "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "run_shell_command",
-            "description": "Executes a shell command on the host machine and returns stdout/stderr. You can run python scripts (python -c 'code'), grep for searching text, git commands, or any other system utility. Use this to perform complex logic that simple file reading cannot do.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "command": {
-                        "type": "string",
-                        "description": "The shell command to execute, e.g. 'python -c \"print(sum(range(100)))\"', 'grep -r \"todo\" .', 'git log -n 5'"
-                    }
-                },
-                "required": ["command"]
-            }
+            "description": "Runs a Windows shell command.",
+            "parameters": {"type": "object", "properties": {"command": {"type": "string"}}, "required": ["command"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "request_follow_up",
-            "description": "Call this if you have finished a partial task (like reading multiple files) and need another turn to analyze or proceed with more steps. This ensures the backend triggers another inference pass.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "reason": {"type": "string", "description": "Why a follow-up turn is needed."}
-                }
-            }
+            "description": "Requests an extra turn to continue multi-step work.",
+            "parameters": {"type": "object", "properties": {"reason": {"type": "string"}}}
         }
     }
 ]
- 
+
 GEMINI_TOOLS = [{"functionDeclarations": [
     {
         "name": "read_file",
-        "description": "Reads the contents of a local file.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "filepath": {"type": "STRING", "description": "Absolute or relative path to the file to read."}
-            },
-            "required": ["filepath"]
-        }
+        "description": "Reads a local file.",
+        "parameters": {"type": "OBJECT", "properties": {"filepath": {"type": "STRING"}}, "required": ["filepath"]}
     },
     {
         "name": "write_file",
-        "description": "Creates or overwrites a local file with content.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "filepath": {"type": "STRING", "description": "Path to the file."},
-                "content": {"type": "STRING", "description": "Full content of the file."}
-            },
-            "required": ["filepath", "content"]
-        }
+        "description": "Writes content to a file.",
+        "parameters": {"type": "OBJECT", "properties": {"filepath": {"type": "STRING"}, "content": {"type": "STRING"}}, "required": ["filepath", "content"]}
     },
     {
         "name": "delete_file",
         "description": "Deletes a file or folder.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "filepath": {"type": "STRING", "description": "Path to delete."}
-            },
-            "required": ["filepath"]
-        }
+        "parameters": {"type": "OBJECT", "properties": {"filepath": {"type": "STRING"}}, "required": ["filepath"]}
     },
     {
         "name": "list_directory",
-        "description": "Lists the files and folders in a local directory.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "path": {"type": "STRING", "description": "Path to the directory, e.g. ./ or C:/path/to/folder"}
-            },
-            "required": ["path"]
-        }
+        "description": "Lists directory contents.",
+        "parameters": {"type": "OBJECT", "properties": {"path": {"type": "STRING"}}, "required": ["path"]}
     },
     {
         "name": "get_system_info",
-        "description": "Gets the current system OS, Python version, current working directory, and local time.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {}
-        }
+        "description": "Gets system environment info.",
+        "parameters": {"type": "OBJECT", "properties": {}}
     },
     {
         "name": "web_search",
-        "description": "Searches the web for real-time information, latest documentation, or troubleshooting guides.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "query": {"type": "STRING", "description": "The search query."}
-            },
-            "required": ["query"]
-        }
+        "description": "Search the internet via Tavily.",
+        "parameters": {"type": "OBJECT", "properties": {"query": {"type": "STRING"}}, "required": ["query"]}
     },
     {
         "name": "run_shell_command",
-        "description": "Executes a shell command (python, grep, git, etc.) and returns stdout/stderr.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "command": {"type": "STRING", "description": "The command string to run in the terminal."}
-            },
-            "required": ["command"]
-        }
+        "description": "Runs a shell command on the host.",
+        "parameters": {"type": "OBJECT", "properties": {"command": {"type": "STRING"}}, "required": ["command"]}
     },
     {
         "name": "request_follow_up",
-        "description": "Requests an additional inference turn to process more steps.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "reason": {"type": "STRING", "description": "Reason for follow-up."}
-            }
-        }
+        "description": "Triggers another loop turn for complex tasks.",
+        "parameters": {"type": "OBJECT", "properties": {"reason": {"type": "STRING"}}}
     }
 ]}]
 
@@ -361,6 +214,5 @@ def get_enabled_openai_tools(enabled_list):
 
 def get_enabled_gemini_tools(enabled_list):
     declarations = [d for d in GEMINI_TOOLS[0]['functionDeclarations'] if d['name'] in enabled_list]
-    if not declarations:
-        return None
+    if not declarations: return None
     return [{"functionDeclarations": declarations}]
