@@ -11763,6 +11763,9 @@
         }
 
         function _renderTesterCard(model, status, detail, timeMs) {
+            const isHidden = _isModelHidden(model.val);
+            
+            // Define standard color base
             const statusColors = {
                 pending: { bg: 'rgba(100,116,139,0.12)', border: '#475569', icon: '⏳', color: '#94a3b8' },
                 running: { bg: 'rgba(59,130,246,0.12)', border: '#3b82f6', icon: '⏳', color: '#60a5fa' },
@@ -11770,12 +11773,22 @@
                 error:   { bg: 'rgba(239,68,68,0.1)', border: '#ef4444', icon: '❌', color: '#f87171' },
                 skipped: { bg: 'rgba(100,116,139,0.05)', border: '#334155', icon: '⏭️', color: '#64748b' }
             };
-            const s = statusColors[status] || statusColors.pending;
+
+            let s = statusColors[status] || statusColors.pending;
+
+            // Apply Conflict Logic for visibility mismatches
+            if (status === 'success' && isHidden) {
+                // Works but is Hidden -> Cyan/Blue (Informational)
+                s = { bg: 'rgba(6,182,212,0.15)', border: '#0891b2', icon: '✅', color: '#22d3ee' };
+            } else if (status === 'error' && !isHidden) {
+                // Fails but is Visible -> Orange/Gold (Warning)
+                s = { bg: 'rgba(245,158,11,0.15)', border: '#d97706', icon: '⚠️', color: '#fbbf24' };
+            }
+
             const timeStr = timeMs != null ? `${(timeMs / 1000).toFixed(2)}s` : '';
             const detailEscaped = (detail || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const truncatedDetail = detailEscaped.length > 200 ? detailEscaped.substring(0, 200) + '…' : detailEscaped;
 
-            const isHidden = _isModelHidden(model.val);
             const eyeIcon = isHidden ? '🚫' : '👁️';
             const eyeTitle = isHidden ? 'Model hidden globally — click to show' : 'Model visible globally — click to hide';
             const eyeOpacity = isHidden ? '0.5' : '1';
