@@ -16,6 +16,8 @@ from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QActio
 from PyQt6.QtSvg import QSvgRenderer
 
 # Constants
+# SYSTEM // READY FOR TESTING // JULY 15 2026
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE = os.path.join(SCRIPT_DIR, "startup_items.json")
 DEFAULT_PS1 = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
@@ -40,7 +42,8 @@ SVGS = {
     "KEY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="M21 2l-9.6 9.6"></path><path d="M15.5 7.5l2 2 3.5-3.5"></path></svg>',
     "CLOCK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
     "TRASH": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2-0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
-    "LAYERS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>'
+    "LAYERS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
+    "COPY": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2-0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>'
 }
 
 class CyberButton(QPushButton):
@@ -558,6 +561,10 @@ class MainWindow(QMainWindow):
         self.dirs_btn = CyberButton(" DIRS", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["FOLDER"])
         self.dirs_btn.clicked.connect(self.open_startup_dirs)
         row1_layout.addWidget(self.dirs_btn)
+
+        self.copy_reg_btn = CyberButton(" REG_PATH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["COPY"])
+        self.copy_reg_btn.clicked.connect(self.copy_registry_path)
+        row1_layout.addWidget(self.copy_reg_btn)
         
         self.ps1_btn = CyberButton(" PS1", color="#00FF00", is_outlined=True, svg_data=SVGS["TERMINAL"])
         self.ps1_btn.clicked.connect(self.select_ps1_path)
@@ -850,6 +857,12 @@ class MainWindow(QMainWindow):
     def open_startup_dirs(self):
         for d in [os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"), os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")]:
             if os.path.exists(d): os.startfile(d)
+    def copy_registry_path(self):
+        reg_path = r"Computer\HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+        QApplication.clipboard().setText(reg_path)
+        self.update_status("REGISTRY PATH COPIED")
+
+
 
     def scan_folders(self):
         self.update_status("SCANNING...")
