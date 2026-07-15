@@ -849,7 +849,7 @@ if __name__ == "__main__":
     try:
         with open(cfg_file) as f:
             cfg = json.load(f)
-        win.resize(cfg.get("width", 900), cfg.get("height", 800))
+        win.resize(cfg.get("width", 1200), cfg.get("height", 800))
     except Exception:
         win.resize(900, 800)
     win.show()
