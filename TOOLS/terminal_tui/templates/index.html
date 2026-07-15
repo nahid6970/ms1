@@ -6,6 +6,22 @@
     <title>Workspace Manager Dashboard</title>
     <!-- Custom Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <script>
+        // Favicon Loading Logic
+        const FaviconManager = {
+            originalHref: "{{ url_for('static', filename='favicon.png') }}",
+            setLoading: function() {
+                const link = document.querySelector("link[rel~='icon']");
+                // Using a spinning gear SVG as a Data URL for the loading state
+                link.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cstyle%3E .spinner %7B transform-origin: center; animation: spin 2s linear infinite; %7D @keyframes spin %7B from %7B transform: rotate(0deg); %7D to %7B transform: rotate(360deg); %7D %7D %3C/style%3E%3Cg class='spinner'%3E%3Cpath d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'/%3E%3C/g%3E%3C/svg%3E";
+            },
+            reset: function() {
+                const link = document.querySelector("link[rel~='icon']");
+                link.href = this.originalHref;
+            }
+        };
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12794,6 +12810,9 @@
             submitBtn.style.background = '#64748b';
             submitBtn.title = 'Thinking...';
             submitBtn.disabled = true;
+            
+            // Show loading icon in browser tab
+            if (typeof FaviconManager !== 'undefined') FaviconManager.setLoading();
 
             const priorHistory = rePromptIdx !== null 
                 ? aiChatHistory.slice(0, rePromptIdx) 
@@ -12904,6 +12923,10 @@
                 submitBtn.style.background = originalBg;
                 submitBtn.title = originalTitle;
                 submitBtn.disabled = false;
+                
+                // Revert to original icon in browser tab
+                if (typeof FaviconManager !== 'undefined') FaviconManager.reset();
+
                 if (rePromptIdx === null) {
                     promptInput.focus();
                 }
