@@ -46,14 +46,17 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
-    "ExecutableType": "pythonw",
-    "added_at": 1768273756.591541,
-    "name": "Flask - 5003 - Drive",
+    "name": "Flask - 5003 - Browse Files",
+    "type": "Command",
     "paths": [
-      "pythonw"
+      "pythonw.exe"
     ],
-    "type": "Command"
+    "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py\"",
+    "ExecutableType": "pythonw",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
@@ -145,7 +148,8 @@
     "ExecutableType": "pythonw",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784085879.7244506
   },
   {
     "Command": "",

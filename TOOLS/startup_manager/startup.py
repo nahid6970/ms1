@@ -699,11 +699,30 @@ class MainWindow(QMainWindow):
                 child = layout.takeAt(0)
                 if child.widget(): child.widget().deleteLater()
         self.widgets_map.clear()
-        sorted_items = sorted(self.items, 
-                            key=lambda x: x["name"].lower() if self.sort_by == "Name" else x.get("added_at", 0),
-                            reverse=(self.sort_order == "DESC"))
-        for item in sorted_items:
+        
+        # Split items into Active and Inactive groups to keep 'ON' items at the top
+        active_list = []
+        inactive_list = []
+        
+        for item in self.items:
             is_active = self.check_registry(item) if self.current_mode == "REGISTRY" else item.get("script_enabled", False)
+            if is_active:
+                active_list.append((item, True))
+            else:
+                inactive_list.append((item, False))
+        
+        # Define the secondary sort criteria (Name or Date)
+        key_fn = lambda x: x[0]["name"].lower() if self.sort_by == "Name" else x[0].get("added_at", 0)
+        is_rev = (self.sort_order == "DESC")
+        
+        # Sort both groups independently using the chosen criteria
+        active_list.sort(key=key_fn, reverse=is_rev)
+        inactive_list.sort(key=key_fn, reverse=is_rev)
+        
+        # Combine groups: Active items first
+        sorted_pairs = active_list + inactive_list
+
+        for item, is_active in sorted_pairs:
             widget = StartupItemWidget(item, is_active)
             widget.toggled.connect(self.handle_toggle)
             widget.launched.connect(self.handle_launch)
