@@ -1,14 +1,14 @@
 {
     "project_0": {
         "label": "NEW",
-        "src": "C:/fffff",
-        "dst": "c:/asdasda",
+        "src": "gu:/song",
+        "dst": "C:/diddy",
         "cmd": "rclone check src dst --size-only",
         "index": 1,
         "enabled": true,
-        "last_dir": "R2L",
-        "last_op": "check",
+        "last_dir": "L2R",
+        "last_op": "sync",
         "last_ignore": "asdasd",
-        "last_flags": "--fast-list -P --size-only"
+        "last_flags": "--fast-list -P --size-only --dry-run"
     }
 }

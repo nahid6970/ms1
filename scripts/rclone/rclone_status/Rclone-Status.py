@@ -242,7 +242,8 @@ class ProjectActionWindow(tk.Toplevel):
         self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         def worker():
-            p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            # Use UTF-8 and replace errors to handle rclone output on Windows
+            p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
             for line in p.stdout:
                 self.log_text.insert("end", f" > {line}"); self.log_text.see("end")
             p.wait(); self.action_btn.config(state="normal", text="EXECUTE_CMD"); trigger_all_checks()
@@ -346,7 +347,7 @@ def check_and_update_label(label, cfg):
     def run():
         cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
         try:
-            res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
             label.config(fg=CP_GREEN if "0 differences found" in res.stdout and "ERROR" not in res.stdout else CP_RED)
         finally: mark_check_complete()
     label.trigger_check = lambda: threading.Thread(target=run, daemon=True).start()
