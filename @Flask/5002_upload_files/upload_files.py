@@ -299,7 +299,9 @@ def notification_manager_worker():
 
             # Bind mouse wheel for scrolling (without showing scrollbar UI)
             def _on_mousewheel(event):
-                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+                # Only scroll if content is larger than the visible canvas height
+                if canvas.winfo_height() < scrollable_frame.winfo_height():
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
             
             def bind_mousewheel(widget):
                 widget.bind("<MouseWheel>", _on_mousewheel)
