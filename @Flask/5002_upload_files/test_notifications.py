@@ -6,9 +6,9 @@ def main():
     print("=" * 60)
     print("Notification System Visual Test")
     print("=" * 60)
-    print("Triggering 50 notifications to demonstrate:")
+    print("Triggering 50 notifications with LONG filenames to demonstrate:")
     print("1. All notifications displaying inside a single card.")
-    print("2. Newest files appearing instantly at the top of the list.")
+    print("2. Safe filename truncation keeping the card width within boundaries.")
     print("3. File info (size and arrival time) clean-aligned to the right side.")
     print("4. Dynamic bullet point colors based on file extension.")
     print("5. Mousewheel scrolling enabled with hidden scrollbar track.")
@@ -25,10 +25,10 @@ def main():
     # Extension rotation list
     extensions = ['.txt', '.pdf', '.png', '.zip', '.mp4']
 
-    # Send 50 test notifications (1 second delay)
+    # Send 50 test notifications with very long filenames (1 second delay)
     for i in range(1, 51):
         ext = extensions[i % len(extensions)]
-        filename = f"report_file_{i:02d}{ext}"
+        filename = f"very_long_filename_for_testing_purposes_that_exceeds_normal_lengths_index_{i:02d}{ext}"
         dummy_path = os.path.join(share_dir, filename)
         
         # Write dummy data to vary the size (from 10 KB to 500 KB)
@@ -40,7 +40,7 @@ def main():
 
         # Call notification helper
         show_upload_notification(filename, dummy_path)
-        print(f"[{i:02d}/50] Dispatched: {filename} (Size: {i*10} KB, Ext: {ext})")
+        print(f"[{i:02d}/50] Dispatched: {filename[:30]}...{ext} (Size: {i*10} KB, Ext: {ext})")
         time.sleep(1.0)  # 1 notification per second
         
     print("-" * 60)
@@ -53,7 +53,7 @@ def main():
     # Cleanup test files
     for i in range(1, 51):
         ext = extensions[i % len(extensions)]
-        filename = f"report_file_{i:02d}{ext}"
+        filename = f"very_long_filename_for_testing_purposes_that_exceeds_normal_lengths_index_{i:02d}{ext}"
         dummy_path = os.path.join(share_dir, filename)
         try:
             if os.path.exists(dummy_path):
