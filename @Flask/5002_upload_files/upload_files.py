@@ -108,14 +108,16 @@ def show_upload_notification(filename, file_path):
         return
 
     size_str = ""
+    size_bytes = 0
     try:
         if os.path.exists(file_path):
             size_bytes = os.path.getsize(file_path)
+            temp_size = float(size_bytes)
             for unit in ['B', 'KB', 'MB', 'GB']:
-                if size_bytes < 1024.0:
-                    size_str = f"{size_bytes:.1f} {unit}" if unit != 'B' else f"{int(size_bytes)} B"
+                if temp_size < 1024.0:
+                    size_str = f"{temp_size:.1f} {unit}" if unit != 'B' else f"{int(temp_size)} B"
                     break
-                size_bytes /= 1024.0
+                temp_size /= 1024.0
     except Exception:
         pass
     if not size_str:
@@ -125,7 +127,7 @@ def show_upload_notification(filename, file_path):
     arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
 
     start_notification_manager()
-    NOTIFICATION_QUEUE.put((filename, file_path, size_str, arrival_time))
+    NOTIFICATION_QUEUE.put((filename, file_path, size_bytes, size_str, arrival_time))
 
 def start_notification_manager():
     global NOTIFICATION_MANAGER_STARTED
@@ -338,18 +340,48 @@ def notification_manager_worker():
                 )
                 bullet_lbl.pack(side="left", padx=(4, 6))
 
-                # Display name and info labels with a dynamic dots bridge
-                info_text = f"{item['size_str']} • {item['arrival_time']}"
-                info_lbl = tk.Label(
+                # Determine size color based on bytes
+                sb = item.get("size_bytes", 0)
+                if sb < 1024 * 1024:  # Under 1 MB
+                    size_color = "#a3a3a3"  # Soft muted silver
+                elif sb < 10 * 1024 * 1024:  # 1 MB - 10 MB
+                    size_color = "#3b82f6"  # Bright Blue
+                elif sb < 50 * 1024 * 1024:  # 10 MB - 50 MB
+                    size_color = "#f97316"  # Orange
+                else:  # Over 50 MB
+                    size_color = "#ef4444"  # Red
+
+                # Time label on right
+                time_lbl = tk.Label(
                     item_frame,
-                    text=info_text,
+                    text=item['arrival_time'],
                     bg=bg,
                     fg=muted,
                     font=list_font,
-                    anchor="e",
-                    justify="right"
+                    anchor="e"
                 )
-                info_lbl.pack(side="right", padx=(0, 6))
+                time_lbl.pack(side="right", padx=(0, 6))
+
+                # Separator bullet
+                sep_lbl = tk.Label(
+                    item_frame,
+                    text=" • ",
+                    bg=bg,
+                    fg="#444444",
+                    font=list_font
+                )
+                sep_lbl.pack(side="right")
+
+                # Size label
+                size_lbl = tk.Label(
+                    item_frame,
+                    text=item['size_str'],
+                    bg=bg,
+                    fg=size_color,
+                    font=list_font,
+                    anchor="e"
+                )
+                size_lbl.pack(side="right")
 
                 display_name = shorten_notification_filename(item["filename"], max_length=28)
                 name_lbl = tk.Label(
@@ -378,21 +410,25 @@ def notification_manager_worker():
                     return lambda e=None: click_item(it)
 
                 # Bind hover events for smooth UI interaction
-                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, ilbl=info_lbl):
+                def make_hover_enter(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, tlbl=time_lbl, slbl=sep_lbl, szlbl=size_lbl):
                     return lambda e: [
                         frame.configure(bg=item_hover_bg), 
                         blbl.configure(bg=item_hover_bg), 
                         nlbl.configure(bg=item_hover_bg),
                         dlbl.configure(bg=item_hover_bg),
-                        ilbl.configure(bg=item_hover_bg)
+                        tlbl.configure(bg=item_hover_bg),
+                        slbl.configure(bg=item_hover_bg),
+                        szlbl.configure(bg=item_hover_bg)
                     ]
-                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, ilbl=info_lbl):
+                def make_hover_leave(frame=item_frame, blbl=bullet_lbl, nlbl=name_lbl, dlbl=dots_lbl, tlbl=time_lbl, slbl=sep_lbl, szlbl=size_lbl):
                     return lambda e: [
                         frame.configure(bg=bg), 
                         blbl.configure(bg=bg), 
                         nlbl.configure(bg=bg),
                         dlbl.configure(bg=bg),
-                        ilbl.configure(bg=bg)
+                        tlbl.configure(bg=bg),
+                        slbl.configure(bg=bg),
+                        szlbl.configure(bg=bg)
                     ]
 
                 item_frame.bind("<Enter>", make_hover_enter())
@@ -401,7 +437,9 @@ def notification_manager_worker():
                 bullet_lbl.bind("<Button-1>", make_click_cmd())
                 name_lbl.bind("<Button-1>", make_click_cmd())
                 dots_lbl.bind("<Button-1>", make_click_cmd())
-                info_lbl.bind("<Button-1>", make_click_cmd())
+                time_lbl.bind("<Button-1>", make_click_cmd())
+                sep_lbl.bind("<Button-1>", make_click_cmd())
+                size_lbl.bind("<Button-1>", make_click_cmd())
 
             bind_mousewheel(canvas)
             update_card_position()
@@ -438,11 +476,15 @@ def notification_manager_worker():
                 except queue.Empty:
                     break
 
-                if len(item_tuple) == 4:
+                if len(item_tuple) == 5:
+                    filename, file_path, size_bytes, size_str, arrival_time = item_tuple
+                elif len(item_tuple) == 4:
                     filename, file_path, size_str, arrival_time = item_tuple
+                    size_bytes = 0
                 else:
                     filename, file_path = item_tuple
                     size_str = "0 B"
+                    size_bytes = 0
                     import datetime
                     arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
 
@@ -451,6 +493,7 @@ def notification_manager_worker():
                     "id": notification_counter,
                     "filename": filename,
                     "file_path": file_path,
+                    "size_bytes": size_bytes,
                     "size_str": size_str,
                     "arrival_time": arrival_time
                 })
