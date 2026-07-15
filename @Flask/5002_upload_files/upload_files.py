@@ -129,6 +129,14 @@ def show_upload_notification(filename, file_path):
     start_notification_manager()
     NOTIFICATION_QUEUE.put((filename, file_path, size_bytes, size_str, arrival_time))
 
+def update_upload_progress(filename, percent, size_bytes=0):
+    """Notify the system about current upload progress of a file."""
+    if os.name != "nt":
+        return
+
+    start_notification_manager()
+    NOTIFICATION_QUEUE.put(("progress", filename, percent, size_bytes))
+
 def start_notification_manager():
     global NOTIFICATION_MANAGER_STARTED
 
@@ -315,20 +323,43 @@ def notification_manager_worker():
                 item_frame = tk.Frame(scrollable_frame, bg=bg, cursor="hand2")
                 item_frame.pack(fill="x", pady=2, padx=4)
 
-                # Determine bullet color based on file extension
-                ext = os.path.splitext(item["filename"])[1].lower()
-                if ext == '.pdf':
-                    bullet_color = "#ef4444"  # Red
-                elif ext in ['.txt', '.md', '.doc', '.docx']:
-                    bullet_color = "#00bcf2"  # Blue/Cyan
-                elif ext in ['.png', '.jpg', '.jpeg', '.gif', '.svg']:
-                    bullet_color = "#ec4899"  # Pink/Purple
-                elif ext in ['.zip', '.rar', '.tar', '.gz', '.7z']:
-                    bullet_color = "#f97316"  # Orange
-                elif ext in ['.mp3', '.wav', '.mp4', '.mkv', '.avi']:
-                    bullet_color = "#d946ef"  # Magenta
+                # Determine sizes, colors and labels based on status
+                if item.get("status") == "uploading":
+                    bullet_color = "#eab308"  # Yellow for progress
+                    size_color = "#eab308"
+                    size_text = f"Uploading: {item.get('percent', 0)}%"
+                    sep_text = ""
+                    time_text = ""
                 else:
-                    bullet_color = "#10b981"  # Emerald Green
+                    # Determine bullet color based on file extension
+                    ext = os.path.splitext(item["filename"])[1].lower()
+                    if ext == '.pdf':
+                        bullet_color = "#ef4444"  # Red
+                    elif ext in ['.txt', '.md', '.doc', '.docx']:
+                        bullet_color = "#00bcf2"  # Blue/Cyan
+                    elif ext in ['.png', '.jpg', '.jpeg', '.gif', '.svg']:
+                        bullet_color = "#ec4899"  # Pink/Purple
+                    elif ext in ['.zip', '.rar', '.tar', '.gz', '.7z']:
+                        bullet_color = "#f97316"  # Orange
+                    elif ext in ['.mp3', '.wav', '.mp4', '.mkv', '.avi']:
+                        bullet_color = "#d946ef"  # Magenta
+                    else:
+                        bullet_color = "#10b981"  # Emerald Green
+
+                    # Determine size color based on bytes
+                    sb = item.get("size_bytes", 0)
+                    if sb < 1024 * 1024:  # Under 1 MB
+                        size_color = "#a3a3a3"  # Soft muted silver
+                    elif sb < 10 * 1024 * 1024:  # 1 MB - 10 MB
+                        size_color = "#3b82f6"  # Bright Blue
+                    elif sb < 50 * 1024 * 1024:  # 10 MB - 50 MB
+                        size_color = "#f97316"  # Orange
+                    else:  # Over 50 MB
+                        size_color = "#ef4444"  # Red
+                    
+                    size_text = item['size_str']
+                    sep_text = " • "
+                    time_text = item['arrival_time']
 
                 bullet_lbl = tk.Label(
                     item_frame,
@@ -340,42 +371,31 @@ def notification_manager_worker():
                 )
                 bullet_lbl.pack(side="left", padx=(4, 6))
 
-                # Determine size color based on bytes
-                sb = item.get("size_bytes", 0)
-                if sb < 1024 * 1024:  # Under 1 MB
-                    size_color = "#a3a3a3"  # Soft muted silver
-                elif sb < 10 * 1024 * 1024:  # 1 MB - 10 MB
-                    size_color = "#3b82f6"  # Bright Blue
-                elif sb < 50 * 1024 * 1024:  # 10 MB - 50 MB
-                    size_color = "#f97316"  # Orange
-                else:  # Over 50 MB
-                    size_color = "#ef4444"  # Red
-
                 # Time label on right
                 time_lbl = tk.Label(
                     item_frame,
-                    text=item['arrival_time'],
+                    text=time_text,
                     bg=bg,
                     fg=muted,
                     font=list_font,
                     anchor="e"
                 )
-                time_lbl.pack(side="right", padx=(0, 6))
+                time_lbl.pack(side="right", padx=(0, 6) if time_text else 0)
 
                 # Separator bullet
                 sep_lbl = tk.Label(
                     item_frame,
-                    text=" • ",
+                    text=sep_text,
                     bg=bg,
                     fg="#444444",
                     font=list_font
                 )
                 sep_lbl.pack(side="right")
 
-                # Size label
+                # Size/Progress label
                 size_lbl = tk.Label(
                     item_frame,
-                    text=item['size_str'],
+                    text=size_text,
                     bg=bg,
                     fg=size_color,
                     font=list_font,
@@ -446,6 +466,8 @@ def notification_manager_worker():
             card_window.deiconify()
 
         def click_item(item):
+            if item.get("status") == "uploading":
+                return
             open_file_folder(item["file_path"])
             remove_item(item)
 
@@ -476,28 +498,86 @@ def notification_manager_worker():
                 except queue.Empty:
                     break
 
-                if len(item_tuple) == 5:
-                    filename, file_path, size_bytes, size_str, arrival_time = item_tuple
-                elif len(item_tuple) == 4:
-                    filename, file_path, size_str, arrival_time = item_tuple
-                    size_bytes = 0
-                else:
-                    filename, file_path = item_tuple
-                    size_str = "0 B"
-                    size_bytes = 0
-                    import datetime
-                    arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
+                if len(item_tuple) == 4 and item_tuple[0] == "progress":
+                    _, filename, percent, size_bytes = item_tuple
+                    
+                    # Calculate size_str
+                    temp_size = float(size_bytes)
+                    size_str = ""
+                    for unit in ['B', 'KB', 'MB', 'GB']:
+                        if temp_size < 1024.0:
+                            size_str = f"{temp_size:.1f} {unit}" if unit != 'B' else f"{int(temp_size)} B"
+                            break
+                        temp_size /= 1024.0
+                    if not size_str:
+                        size_str = "0 B"
 
-                notification_counter += 1
-                notifications_data.append({
-                    "id": notification_counter,
-                    "filename": filename,
-                    "file_path": file_path,
-                    "size_bytes": size_bytes,
-                    "size_str": size_str,
-                    "arrival_time": arrival_time
-                })
-                added_any = True
+                    # Find existing item
+                    existing = None
+                    for it in notifications_data:
+                        if it["filename"] == filename and it.get("status") == "uploading":
+                            existing = it
+                            break
+                    
+                    if existing:
+                        existing["percent"] = percent
+                        existing["size_bytes"] = size_bytes
+                        existing["size_str"] = size_str
+                    else:
+                        notification_counter += 1
+                        import datetime
+                        arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
+                        notifications_data.append({
+                            "id": notification_counter,
+                            "filename": filename,
+                            "file_path": "",
+                            "size_bytes": size_bytes,
+                            "size_str": size_str,
+                            "arrival_time": arrival_time,
+                            "status": "uploading",
+                            "percent": percent
+                        })
+                    added_any = True
+
+                else:
+                    # Final/completed item
+                    if len(item_tuple) == 5:
+                        filename, file_path, size_bytes, size_str, arrival_time = item_tuple
+                    elif len(item_tuple) == 4:
+                        filename, file_path, size_str, arrival_time = item_tuple
+                        size_bytes = 0
+                    else:
+                        filename, file_path = item_tuple
+                        size_str = "0 B"
+                        size_bytes = 0
+                        import datetime
+                        arrival_time = datetime.datetime.now().strftime("%I:%M%p").lstrip('0').lower()
+
+                    # Find existing uploading item and upgrade it
+                    existing = None
+                    for it in notifications_data:
+                        if it["filename"] == filename and it.get("status") == "uploading":
+                            existing = it
+                            break
+                    
+                    if existing:
+                        existing["status"] = "completed"
+                        existing["file_path"] = file_path
+                        existing["size_bytes"] = size_bytes
+                        existing["size_str"] = size_str
+                        existing["arrival_time"] = arrival_time
+                    else:
+                        notification_counter += 1
+                        notifications_data.append({
+                            "id": notification_counter,
+                            "filename": filename,
+                            "file_path": file_path,
+                            "size_bytes": size_bytes,
+                            "size_str": size_str,
+                            "arrival_time": arrival_time,
+                            "status": "completed"
+                        })
+                    added_any = True
 
             if added_any:
                 rebuild_ui()
@@ -876,6 +956,21 @@ html_template = '''
                                 progressText.innerText = `${Math.round(overallProgress)}%`;
 
                                 uploadStatusDiv.innerHTML = `<p>Uploading <strong>${file.name}</strong>: ${Math.round(percentComplete)}%</p>`;
+
+                                // Send progress update to server (throttled to avoid spamming)
+                                var pctRounded = Math.round(percentComplete);
+                                if (!xhr.lastProgressTime || (Date.now() - xhr.lastProgressTime > 150) || pctRounded === 100) {
+                                    xhr.lastProgressTime = Date.now();
+                                    fetch('/upload-progress', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            filename: file.name,
+                                            percent: pctRounded,
+                                            size_bytes: event.total
+                                        })
+                                    }).catch(() => {});
+                                }
                             }
                         };
 
@@ -924,6 +1019,16 @@ html_template = '''
 </body>
 </html>
 '''
+
+@app.route("/upload-progress", methods=["POST"])
+def upload_progress():
+    data = request.json or {}
+    filename = data.get("filename")
+    percent = data.get("percent", 0)
+    size_bytes = data.get("size_bytes", 0)
+    if filename:
+        update_upload_progress(filename, percent, size_bytes)
+    return '', 204
 
 @app.route("/", methods=["GET", "POST"])
 def index():

@@ -1,25 +1,28 @@
 import time
 import os
-from upload_files import show_upload_notification
+from upload_files import show_upload_notification, update_upload_progress
 
 def main():
     print("=" * 60)
     print("Notification System Visual Test")
     print("=" * 60)
-    print("Triggering 50 notifications with rotating file sizes to demonstrate:")
-    print("1. File size labels color-coded by range:")
-    print("   - Muted Silver for < 1 MB (small files)")
-    print("   - Bright Blue for 1 MB - 10 MB (medium files)")
-    print("   - Orange for 10 MB - 50 MB (large files)")
-    print("   - Bright Red for > 50 MB (huge files)")
-    print("2. Dynamic bullet point colors based on file extension.")
-    print("3. Filenames up to 28 characters displayed cleanly.")
-    print("4. Perfect right-alignment of size and time details with dot leaders.")
-    print("5. Mousewheel scrolling enabled with hidden scrollbar track.")
-    print("6. Muted summary count indicating 'Total: 50 files' at the bottom-left.")
-    print("7. Sleek dark aesthetics with a red 'Clear' text link button at the bottom-right.")
+    print("Triggering 50 notifications with simulated progress updates:")
+    print("1. Yellow bullet (•) and 'Uploading: X%' text for in-progress files.")
+    print("2. Automatically switches to correct file color and metadata when completed.")
+    print("3. Prevent clicking on notifications while they are uploading.")
+    print("4. File size labels color-coded by range:")
+    print("   - Muted Silver for < 1 MB")
+    print("   - Bright Blue for 1 MB - 10 MB")
+    print("   - Orange for 10 MB - 50 MB")
+    print("   - Bright Red for > 50 MB")
+    print("5. Dynamic bullet point colors based on file extension (once completed).")
+    print("6. Filenames up to 28 characters displayed cleanly.")
+    print("7. Perfect right-alignment of size and time details with dot leaders.")
+    print("8. Mousewheel scrolling enabled with hidden scrollbar track.")
+    print("9. Muted summary count indicating 'Total: 50 files' at the bottom-left.")
+    print("10. Sleek dark aesthetics with a red 'Clear' text link button.")
     print("-" * 60)
-    print("Notice: Dispatched at 1 notification per second...")
+    print("Notice: Simulating progress increments (0% -> 100% in 1s) per file...")
     print("-" * 60)
     
     # Target directory for test files
@@ -37,10 +40,10 @@ def main():
         80 * 1024 * 1024     # 80 MB  -> Red
     ]
 
-    # Send 50 test notifications (1 second delay)
+    # Send 50 test notifications (1 second delay total, with progress ticks)
     for i in range(1, 51):
         ext = extensions[i % len(extensions)]
-        filename = f"very_long_filename_for_testing_purposes_that_exceeds_normal_lengths_index_{i:02d}{ext}"
+        filename = f"report_file_{i:02d}{ext}"
         dummy_path = os.path.join(share_dir, filename)
         
         target_size = sizes_bytes[i % len(sizes_bytes)]
@@ -53,10 +56,16 @@ def main():
         except Exception:
             pass
 
-        # Call notification helper
+        # Simulate upload progress steps (0% to 75%)
+        for pct in [0, 25, 50, 75]:
+            update_upload_progress(filename, pct, target_size)
+            print(f"[{i:02d}/50] Progress: {filename} ({pct}%)")
+            time.sleep(0.15)  # Quick transition steps
+            
+        # Dispatch the completed notification
         show_upload_notification(filename, dummy_path)
-        print(f"[{i:02d}/50] Dispatched: {filename[:25]}...{ext} (Mock Size: {target_size / (1024*1024):.1f} MB)")
-        time.sleep(1.0)  # 1 notification per second
+        print(f"[{i:02d}/50] Completed: {filename} ({target_size / (1024*1024):.1f} MB)")
+        time.sleep(0.4)   # Short pause before starting next file
         
     print("-" * 60)
     print("✅ All 50 test notifications dispatched!")
@@ -68,7 +77,7 @@ def main():
     # Cleanup test files
     for i in range(1, 51):
         ext = extensions[i % len(extensions)]
-        filename = f"very_long_filename_for_testing_purposes_that_exceeds_normal_lengths_index_{i:02d}{ext}"
+        filename = f"report_file_{i:02d}{ext}"
         dummy_path = os.path.join(share_dir, filename)
         try:
             if os.path.exists(dummy_path):
