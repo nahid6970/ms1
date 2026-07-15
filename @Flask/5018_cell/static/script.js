@@ -460,29 +460,49 @@ function createRawVisibleOffsetMap(raw) {
     return visibleToRaw;
 }
 
+/**
+ * Finds occurrences of a word in the raw markdown string that correspond 
+ * to actual "visible" words after markdown stripping.
+ */
 function findRawWordMatches(raw, visibleWord) {
     if (!raw || !visibleWord) return null;
 
-    const stripped = stripMarkdown(raw);
-    if (!stripped) return null;
+    // Use a unified boundary check: character is a boundary if it's NOT a letter or number (Eng/Bengali)
+    // This ensures that markers like ¿¿, **, or [[ are treated as boundaries for the word inside.
+    const isBoundaryChar = (char) => {
+        if (!char) return true;
+        // Check if alphanumeric or Bengali range
+        return !/[a-zA-Z0-9\u0980-\u09FF]/.test(char);
+    };
 
     const candidates = [];
     let searchFrom = 0;
+    
+    // Create map once to verify visibility
+    const visibleToRawMap = calculateVisibleToRawMap(raw);
+    const rawToVisibleMap = new Map();
+    visibleToRawMap.forEach((rawPos, visPos) => rawToVisibleMap.set(rawPos, visPos));
+
     while (searchFrom < raw.length) {
         const index = raw.indexOf(visibleWord, searchFrom);
         if (index === -1) break;
 
+        // Boundary check in raw text
         const before = index > 0 ? raw[index - 1] : '';
         const after = index + visibleWord.length < raw.length ? raw[index + visibleWord.length] : '';
-        const isStartBoundary = !before || /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/.test(before);
-        const isEndBoundary = !after || /[\s!@#%^&*()\-+=[\]{}|\\;:'",.<>/?]/.test(after);
+        
+        const isStartBoundary = isBoundaryChar(before);
+        const isEndBoundary = isBoundaryChar(after);
 
-        if (isStartBoundary && isEndBoundary) {
-            const candidateVisibleStart = findVisibleOffsetFromRaw(raw, index);
+        // Visibility check: Ensure this specific occurrence isn't inside a hidden syntax marker
+        // (e.g. searching for "link" shouldn't match "link" inside "{link:url}")
+        const isVisible = rawToVisibleMap.has(index);
+
+        if (isStartBoundary && isEndBoundary && isVisible) {
             candidates.push({
                 start: index,
                 end: index + visibleWord.length,
-                visibleStart: candidateVisibleStart
+                visibleStart: rawToVisibleMap.get(index)
             });
         }
 
@@ -500,8 +520,17 @@ function findRawWordNearVisibleOffset(raw, visibleWord, approximateVisibleStart)
     return { start: matches[0].start, end: matches[0].end };
 }
 
-function getRenderedWordOccurrences(root, visibleWord, boundaryRegex) {
+/**
+ * Finds occurrences of a word within the rendered HTML preview.
+ */
+function getRenderedWordOccurrences(root, visibleWord) {
     if (!root || !visibleWord) return [];
+    
+    const isBoundaryChar = (char) => {
+        if (!char) return true;
+        return !/[a-zA-Z0-9\u0980-\u09FF]/.test(char);
+    };
+
     const occurrences = [];
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let node;
@@ -513,14 +542,15 @@ function getRenderedWordOccurrences(root, visibleWord, boundaryRegex) {
             const before = index > 0 ? text[index - 1] : '';
             const afterIndex = index + visibleWord.length;
             const after = afterIndex < text.length ? text[afterIndex] : '';
-            const isStartBoundary = !before || boundaryRegex.test(before);
-            const isEndBoundary = !after || boundaryRegex.test(after);
+            
+            const isStartBoundary = isBoundaryChar(before);
+            const isEndBoundary = isBoundaryChar(after);
 
             if (isStartBoundary && isEndBoundary) {
                 const range = document.createRange();
                 range.setStart(node, index);
                 range.setEnd(node, afterIndex);
-                occurrences.push({ node, startOffset: index, endOffset: afterIndex, range });
+                occurrences.push({ node, startOffset: index, endOffset: afterIndex, range: range.cloneRange() });
             }
 
             index = text.indexOf(visibleWord, index + Math.max(visibleWord.length, 1));
@@ -738,24 +768,31 @@ function showF10MatchLabels(selection, showDropdown = false) {
         setTimeout(() => document.addEventListener('mousedown', closeDropdown), 10);
     }
 
-    // 2. Create Floating Badges
+    // 2. Create Floating Badges - Positioned BELOW the line
     selection.matches.forEach((match, index) => {
         const range = match.previewRange || getPreviewRangeForRawSelection(liveInput, match.start, match.end);
-        if (!range) return;
+        if (!range || !range.startContainer.isConnected) return;
+        
+        // Get client rects for current line/word position
         const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
-        const rect = rects[rects.length - 1] || range.getBoundingClientRect();
+        const rect = rects[0] || range.getBoundingClientRect();
         if (!rect || rect.height === 0) return;
 
         const badge = document.createElement('div');
         badge.className = 'f10-match-badge';
         badge.textContent = `v${index + 1}`;
-        badge.style.left = (rect.right - cellRect.left + 2) + 'px';
-        badge.style.top = (rect.top - cellRect.top + Math.max(0, rect.height - 12)) + 'px';
-        badge.title = "Click to select this version";
         
+        // Position at word bottom-left relative to cell
+        // We use Math.round to prevent sub-pixel blurring
+        badge.style.left = Math.round(rect.left - cellRect.left) + 'px';
+        badge.style.top = Math.round(rect.bottom - cellRect.top + 3) + 'px';
+        badge.title = `Version ${index + 1} - Click to select`;
+        
+        // BIND the current loop index to the click handler to fix "wrong version" issue
+        const versionIndex = index;
         badge.onclick = (e) => {
             e.stopPropagation();
-            selectF10Match(index);
+            selectF10Match(versionIndex);
         };
         
         overlay.appendChild(badge);
@@ -1160,25 +1197,26 @@ function getHoverFormatterSelection() {
 
     if (node.nodeType === Node.TEXT_NODE && root !== input) {
         const text = node.textContent || '';
+        const isBoundaryChar = (char) => !/[a-zA-Z0-9\u0980-\u09FF]/.test(char);
+
         let localOffset = Math.min(range.startOffset, text.length);
-        if (localOffset > 0 && (localOffset === text.length || boundaryRegex.test(text[localOffset])) && !boundaryRegex.test(text[localOffset - 1])) {
+        // Adjust if clicked at word end
+        if (localOffset > 0 && (localOffset === text.length || isBoundaryChar(text[localOffset])) && !isBoundaryChar(text[localOffset - 1])) {
             localOffset--;
         }
 
         let localStart = localOffset;
-        while (localStart > 0 && !boundaryRegex.test(text[localStart - 1])) localStart--;
+        while (localStart > 0 && !isBoundaryChar(text[localStart - 1])) localStart--;
         let localEnd = localOffset;
-        while (localEnd < text.length && !boundaryRegex.test(text[localEnd])) localEnd++;
+        while (localEnd < text.length && !isBoundaryChar(text[localEnd])) localEnd++;
         if (localStart >= localEnd) return null;
 
-        const visibleStart = getRenderedTextOffset(root, node, localStart);
-        const visibleEnd = getRenderedTextOffset(root, node, localEnd);
         const visibleWord = text.substring(localStart, localEnd);
-        const previewRange = document.createRange();
-        previewRange.setStart(node, localStart);
-        previewRange.setEnd(node, localEnd);
-        const renderedMatches = getRenderedWordOccurrences(root, visibleWord, boundaryRegex);
+        
+        // Find all occurrences in preview and raw to establish mapping
+        const renderedMatches = getRenderedWordOccurrences(root, visibleWord);
         const rawMatches = findRawWordMatches(rawValue, visibleWord);
+        
         const selectedIndex = renderedMatches.findIndex(match =>
             match.node === node &&
             match.startOffset === localStart &&
@@ -1186,17 +1224,29 @@ function getHoverFormatterSelection() {
         );
 
         if (rawMatches && rawMatches.length > 0) {
-            const matchIndex = selectedIndex >= 0 && selectedIndex < rawMatches.length ? selectedIndex : 0;
+            // Priority 1: Direct 1:1 mapping by index
+            // Priority 2: Closest match by character offset if list sizes differ
+            let matchIndex = selectedIndex;
+            if (matchIndex === -1 || matchIndex >= rawMatches.length) {
+                const visibleStartOffset = getRenderedTextOffset(root, node, localStart);
+                let minDiff = Infinity;
+                rawMatches.forEach((m, i) => {
+                    const diff = Math.abs(m.visibleStart - visibleStartOffset);
+                    if (diff < minDiff) { minDiff = diff; matchIndex = i; }
+                });
+            }
+
             const rawMatch = rawMatches[matchIndex];
             const matches = rawMatches.map((match, index) => ({
                 ...match,
                 previewRange: renderedMatches[index]?.range || null
             }));
+            
             return {
                 input,
                 start: rawMatch.start,
                 end: rawMatch.end,
-                previewRange: renderedMatches[matchIndex]?.range || previewRange,
+                previewRange: renderedMatches[matchIndex]?.range || null,
                 rawText: rawValue.substring(rawMatch.start, rawMatch.end),
                 matches,
                 selectedMatchIndex: matchIndex
