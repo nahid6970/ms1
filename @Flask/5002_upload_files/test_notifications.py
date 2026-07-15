@@ -8,9 +8,10 @@ def main():
     print("=" * 60)
     print("Triggering 50 notifications to demonstrate:")
     print("1. All notifications displaying inside a single card.")
-    print("2. Styled list layout matching Markdown bullet points (•).")
-    print("3. Dynamic sizing and scrolling mechanics (caps height at 450px).")
-    print("4. Sleek dark aesthetics with a red 'Clear All' button.")
+    print("2. No gaps between items and the footer frame.")
+    print("3. Mousewheel scrolling enabled with hidden scrollbar track.")
+    print("4. Muted summary count indicating 'Total: 50 files' at the bottom-left.")
+    print("5. Sleek dark aesthetics with a red 'Clear' text link button at the bottom-right.")
     print("-" * 60)
     
     # Send 50 test notifications
@@ -26,8 +27,7 @@ def main():
     print("-" * 60)
     print("✅ All 50 test notifications dispatched!")
     print("Please check the bottom-right corner of your desktop screen.")
-    print("You can hover over elements, scroll, click individual items to dismiss them,")
-    print("or click the red 'Clear All Notifications' button to close the card.")
+    print("Use your mouse wheel to scroll through all the notifications!")
     print("-" * 60)
     input("Press ENTER key to exit this test script...")
 

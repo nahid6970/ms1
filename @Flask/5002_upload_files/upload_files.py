@@ -158,11 +158,11 @@ def notification_manager_worker():
         margin_bottom = 54
 
         def get_card_height():
-            num_items = min(len(notifications_data), 5)
+            num_items = len(notifications_data)
             if num_items == 0:
                 return min_height
-            calculated = 50 + (num_items * 32) + 45
-            return calculated
+            calculated = 50 + (num_items * 30) + 45
+            return min(calculated, 480)
 
         def update_card_position():
             if not card_window or not card_window.winfo_exists():
@@ -192,7 +192,7 @@ def notification_manager_worker():
 
             # Header Frame
             header_frame = tk.Frame(outer_frame, bg=bg, height=45)
-            header_frame.pack(fill="x", side="top", padx=10, pady=5)
+            header_frame.pack(fill="x", side="top", padx=12, pady=6)
             
             title_lbl = tk.Label(
                 header_frame,
@@ -234,28 +234,79 @@ def notification_manager_worker():
                 card_window.deiconify()
                 return
 
-            # Display container (simple Frame, no Canvas or scrollbars)
-            list_container = tk.Frame(outer_frame, bg=bg)
-            list_container.pack(fill="both", expand=True, padx=5)
+            # Footer Frame (packed first at the bottom to prevent gaps and overlay issues)
+            footer_frame = tk.Frame(outer_frame, bg=bg, height=35)
+            footer_frame.pack(fill="x", side="bottom", padx=12, pady=6)
 
-            # Show only the latest 5 files (the end of the list)
-            latest_items = notifications_data[-5:]
             total_count = len(notifications_data)
 
+            # Left side: Counter showing total files
+            if total_count > 0:
+                counter_text = f"Total: {total_count} files"
+                counter_lbl = tk.Label(
+                    footer_frame,
+                    text=counter_text,
+                    bg=bg,
+                    fg=muted,
+                    font=body_font,
+                    anchor="w"
+                )
+                counter_lbl.pack(side="left", fill="y")
+
+            # Right side: Clear text button in RED fg
+            clear_btn = tk.Button(
+                footer_frame,
+                text="Clear",
+                bg=bg,
+                fg=red_color,
+                activebackground=bg,
+                activeforeground=red_hover,
+                font=body_font,
+                relief="flat",
+                bd=0,
+                cursor="hand2",
+                command=clear_all
+            )
+            clear_btn.pack(side="right", fill="y")
+
+            # List container: scrollable canvas without visible scrollbar scroll widget
+            list_container = tk.Frame(outer_frame, bg=bg)
+            list_container.pack(fill="both", expand=True, padx=6)
+
+            canvas = tk.Canvas(list_container, bg=bg, highlightthickness=0)
+            canvas.pack(fill="both", expand=True)
+
+            scrollable_frame = tk.Frame(canvas, bg=bg)
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=width - 20)
+
+            # Bind mouse wheel for scrolling (without showing scrollbar UI)
+            def _on_mousewheel(event):
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            
+            def bind_mousewheel(widget):
+                widget.bind("<MouseWheel>", _on_mousewheel)
+                for child in widget.winfo_children():
+                    bind_mousewheel(child)
+
             # Build list items (md list styling)
-            for item in latest_items:
-                item_frame = tk.Frame(list_container, bg=bg, cursor="hand2")
-                item_frame.pack(fill="x", pady=2, padx=5)
+            for item in notifications_data:
+                item_frame = tk.Frame(scrollable_frame, bg=bg, cursor="hand2")
+                item_frame.pack(fill="x", pady=2, padx=4)
 
                 bullet_lbl = tk.Label(
                     item_frame,
                     text="•",
                     bg=bg,
-                    fg=accent,
+                    fg="#10b981",  # Vibrant green/emerald bullet
                     font=list_font,
                     anchor="w"
                 )
-                bullet_lbl.pack(side="left", padx=(2, 5))
+                bullet_lbl.pack(side="left", padx=(4, 6))
 
                 display_name = shorten_notification_filename(item["filename"], max_length=36)
                 name_lbl = tk.Label(
@@ -284,39 +335,7 @@ def notification_manager_worker():
                 bullet_lbl.bind("<Button-1>", make_click_cmd())
                 name_lbl.bind("<Button-1>", make_click_cmd())
 
-            # Footer Frame for Clear button
-            footer_frame = tk.Frame(outer_frame, bg=bg, height=35)
-            footer_frame.pack(fill="x", side="bottom", padx=10, pady=5)
-
-            # Left side: Counter or indicator if there are more files
-            if total_count > 5:
-                counter_text = f"+{total_count - 5} more files"
-                counter_lbl = tk.Label(
-                    footer_frame,
-                    text=counter_text,
-                    bg=bg,
-                    fg=muted,
-                    font=body_font,
-                    anchor="w"
-                )
-                counter_lbl.pack(side="left", fill="y")
-
-            # Right side: Clear text button in RED fg
-            clear_btn = tk.Button(
-                footer_frame,
-                text="Clear",
-                bg=bg,
-                fg=red_color,
-                activebackground=bg,
-                activeforeground=red_hover,
-                font=body_font,
-                relief="flat",
-                bd=0,
-                cursor="hand2",
-                command=clear_all
-            )
-            clear_btn.pack(side="right", fill="y")
-
+            bind_mousewheel(canvas)
             update_card_position()
             card_window.deiconify()
 
