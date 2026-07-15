@@ -19,6 +19,8 @@ def main():
     print("5. Muted summary count indicating 'Total: 50 files' at the bottom-left.")
     print("6. Sleek dark aesthetics with a red 'Clear' text link button at the bottom-right.")
     print("-" * 60)
+    print("Notice: Dispatched at 1 notification per second...")
+    print("-" * 60)
     
     # Target directory for test files
     share_dir = os.path.join(os.path.expanduser('~/Desktop'), "ShareFolder")
@@ -27,7 +29,7 @@ def main():
     # Extension rotation list
     extensions = ['.txt', '.pdf', '.png', '.zip', '.mp4']
 
-    # Send 50 test notifications
+    # Send 50 test notifications (1 second delay)
     for i in range(1, 51):
         ext = extensions[i % len(extensions)]
         filename = f"report_file_{i:02d}{ext}"
@@ -43,7 +45,7 @@ def main():
         # Call notification helper
         show_upload_notification(filename, dummy_path)
         print(f"[{i:02d}/50] Dispatched: {filename} (Size: {i*10} KB, Ext: {ext})")
-        time.sleep(0.03)  # Small delay for clean loading animation/display
+        time.sleep(1.0)  # 1 notification per second
         
     print("-" * 60)
     print("✅ All 50 test notifications dispatched!")
