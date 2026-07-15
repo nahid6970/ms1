@@ -3286,6 +3286,7 @@ tr {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     align-content: flex-start;
+    align-items: start; /* Each box only grows as tall as its own content */
 }
 
 .f1-sheet-group {
@@ -3410,41 +3411,36 @@ tr {
 }
 
 .f1-sheet-item {
-    padding: 12px 8px;       /* Increased vertical padding */
+    padding: 8px 6px;
     border-radius: 2px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 6px;
     cursor: pointer;
     position: relative;
-    overflow: hidden;        /* Contain content */
-    height: auto;
-    min-height: 60px;        /* Increased base height for better fit */
+    height: auto;            /* Allow vertical expansion */
+    min-height: 40px;        /* Lowered min-height so short titles stay compact */
     box-sizing: border-box;
+    overflow: visible;
 }
 
 .f1-parent-sheet {
-    /* Removed flex properties to let Grid handle sizing */
     background: #0a1f15;
     border: 1px solid #1a4d36;
     border-left: 2px solid #00ff9d;
     box-shadow: none;
     font-weight: 600;
     color: #e0e0e0;
-    min-height: 38px;
 }
 
 .f1-sub-sheet {
-    padding: 6px 10px;
     font-size: 12px;
     background: #0a1520;
     border: 1px solid #1a2f4d;
     border-left: 2px solid #00f3ff;
     color: #ccc;
-    min-height: 34px;
 }
 
 .f1-sub-sheet .f1-sheet-icon {
@@ -3532,22 +3528,16 @@ tr {
     flex: 1;
     cursor: pointer;
     width: 100%;
-    max-width: 100%;
-}
-
-.f1-sheet-icon {
-    display: none;           /* Explicitly hide icons */
 }
 
 .f1-sheet-name {
-    flex: 1;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
-    white-space: normal;     /* Allow text to wrap */
-    word-break: break-word;  /* Prevent text leaking outside */
-    line-height: 1.3;
-    display: block;
-    max-width: 100%;
+    white-space: normal;
+    word-break: normal;      /* Standard wrapping */
+    overflow-wrap: break-word; /* Wrap long strings */
+    line-height: 1.2;
+    padding: 2px 0;
 }
 
 .f1-sheet-actions {
