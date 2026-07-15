@@ -39,29 +39,27 @@
     "name": "Flask - 5002 - Share File",
     "type": "Command",
     "paths": [
-      "AutoHotkey64.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784123383.8511949
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "name": "Flask - 5003 - Browse Files",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784122042.2034054
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
@@ -152,9 +150,8 @@
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": true,
-    "script_enabled": false,
-    "added_at": 1784123900.7283783
+    "hide_terminal": false,
+    "script_enabled": false
   },
   {
     "Command": "",
@@ -432,15 +429,14 @@
     "name": "Flask - 5013 - Movies",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784122042.2034054
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "",
@@ -607,15 +603,14 @@
     "name": "Flask - 5018 - Excelly",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784122042.2034054
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
@@ -756,15 +751,14 @@
     "name": "Komorebi Tray Status",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py",
     "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "other",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784122042.2034054
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\msBackups\\bazarr\\bazarr.py",
