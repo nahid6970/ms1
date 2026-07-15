@@ -538,9 +538,14 @@ class MainWindow(QMainWindow):
             try:
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_WRITE) as key:
                     if should_enable:
-                        if item.get("ExecutableType") == "ahk_v2": val = f'AutoHotkey64.exe "{self._make_ahk(item)}"'
-                        elif item.get("run_as_admin") or item.get("hide_terminal"): val = f'wscript.exe "{self._make_vbs(item)}"'
-                        else: path, args = item["paths"][0], item.get("Command", ""); val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
+                        if item.get("ExecutableType") == "ahk_v2": 
+                            # Use the absolute path to the generated AHK script directly
+                            val = f'"{self._make_ahk(item)}"'
+                        elif item.get("run_as_admin") or item.get("hide_terminal"): 
+                            val = f'wscript.exe "{self._make_vbs(item)}"'
+                        else: 
+                            path, args = item["paths"][0], item.get("Command", "")
+                            val = f'"{path}" {args}'.strip() if " " in path or "\\" in path else f'{path} {args}'.strip()
                         winreg.SetValueEx(key, item["name"], 0, winreg.REG_SZ, val)
                     else: winreg.DeleteValue(key, item["name"])
                 self.widgets_map[item["name"]].set_active(should_enable)
@@ -552,12 +557,15 @@ class MainWindow(QMainWindow):
             content = "# Auto-generated startup script by SYSTEM // STARTUP_CONTROL\nWrite-Host 'Initializing Startup Protocol...' -ForegroundColor Cyan\n\n"
             for item in self.items:
                 if item.get("script_enabled"):
-                    if item.get("ExecutableType") == "ahk_v2": cmd = f'Start-Process -FilePath "AutoHotkey64.exe" -ArgumentList "\'{self._make_ahk(item)}\'"'
+                    if item.get("ExecutableType") == "ahk_v2": 
+                        # Launch AHK script path directly via shell association
+                        cmd = f'Start-Process -FilePath "{self._make_ahk(item)}"'
                     elif not item.get("ps1_command"):
                         cmd = f'Start-Process -FilePath "{item["paths"][0]}"'
                         if a := item.get("Command"): cmd += f' -ArgumentList \'{a}\''
                         if item.get("hide_terminal"): cmd += ' -WindowStyle Hidden'
-                    else: cmd = item["ps1_command"]
+                    else:
+                        cmd = item["ps1_command"]
                     if item.get("run_as_admin") and "-Verb RunAs" not in cmd and item.get("ExecutableType") != "ahk_v2": cmd += ' -Verb RunAs'
                     content += f"# {item['name']}\n{cmd}\n\n"
             content += "Write-Host 'Startup Sequence Complete.' -ForegroundColor Green\n"

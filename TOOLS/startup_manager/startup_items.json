@@ -153,7 +153,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784123900.7283783
   },
   {
     "Command": "",
@@ -787,9 +788,8 @@
     "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784123635.8617675
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py",
