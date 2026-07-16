@@ -647,13 +647,29 @@
                     "type": "python",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_gui_pyqt.py"
                 },
                 "Button-3": {
+                    "type": "python",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py"
+                },
+                "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\AHK_Button.py"
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "bg": "",

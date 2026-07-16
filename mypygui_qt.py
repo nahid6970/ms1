@@ -63,11 +63,14 @@ from PyQt6.QtWidgets import (
     QStyle, QStyleOption, QGridLayout, QMenu,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction
 from PyQt6.QtSvg import QSvgRenderer
 
 sys.stderr = StreamToLogger(logging.ERROR)
 
+CTRL_COMMAND_MODULES = [
+    {"name": "Explorer (Open Folder)", "cmd": 'explorer "{dir}"'},
+]
 
 start_time = time.time()
 
@@ -555,15 +558,52 @@ def run_command(command, admin=False, hide=False, no_exit=True):
     except Exception as e:
         print(f"run_command failed: {e}")
 
-def handle_action(action_cfg):
+def handle_action(action_cfg, btn_cfg=None, bkey=None):
     if not action_cfg:
         return
     atype  = action_cfg.get("type")
-    cmd    = action_cfg.get("cmd")
+    cmd    = action_cfg.get("cmd", "")
     cwd    = action_cfg.get("cwd")
     admin  = action_cfg.get("admin", False)
     hide   = action_cfg.get("hide", False)
     new_t  = action_cfg.get("new_terminal", False)
+
+    if btn_cfg and cmd:
+        target_path = btn_cfg.get("path", "") or btn_cfg.get("icon_path", "")
+        if not target_path:
+            fb_key = "Button-3" if bkey in ["Control-Button-3", "Button-3"] else "Button-1"
+            b1_cmd = btn_cfg.get("bindings", {}).get(fb_key, {}).get("cmd", "")
+            if not b1_cmd:
+                b1_cmd = btn_cfg.get("bindings", {}).get("Button-1", {}).get("cmd", "")
+            if b1_cmd:
+                clean_b1 = b1_cmd
+                for prefix in ["cmd /c start ", "cmd /c code ", "cmd /c ", "python ", "code ", "start "]:
+                    if clean_b1.lower().startswith(prefix):
+                        clean_b1 = clean_b1[len(prefix):]
+                target_path = clean_b1.strip('"').strip("'").strip()
+
+        if target_path:
+            abs_path = os.path.abspath(os.path.expandvars(target_path))
+            script_dir = os.path.dirname(abs_path)
+            cmd = cmd.replace("{path}", abs_path).replace("{dir}", script_dir)
+        else:
+            cmd = cmd.replace("{path}", "").replace("{dir}", os.path.dirname(os.path.abspath(__file__)))
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+        cmd_lower = cmd.lower().strip()
+        if cmd_lower.startswith("explorer ") or cmd_lower == "explorer":
+            path_clean = cmd[9:].strip() if cmd_lower.startswith("explorer ") else ""
+            path_clean = path_clean.strip('"').strip("'")
+            if not path_clean:
+                path_clean = script_dir
+            if os.path.isfile(path_clean):
+                subprocess.Popen(f'explorer /select,"{path_clean}"')
+                return
+            elif os.path.isdir(path_clean):
+                subprocess.Popen(f'explorer "{path_clean}"')
+                return
+            else:
+                subprocess.Popen(f'explorer "{path_clean}"' if " " in path_clean else f'explorer {path_clean}')
+                return
     
     # If admin and not already handled by run_command, handle here
     if admin and atype not in ["run_command"]:
@@ -967,6 +1007,22 @@ def open_edit_gui(item_cfg, category, index=None):
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
         bcfg = item_cfg.get("bindings", {}).get(bkey, {})
         cmd_le   = QLineEdit(bcfg.get("cmd", bcfg.get("func", "")))
+        
+        cmd_row = QWidget(); cmd_lay = QHBoxLayout(cmd_row); cmd_lay.setContentsMargins(0,0,0,0); cmd_lay.setSpacing(4)
+        cmd_lay.addWidget(cmd_le)
+        if bkey in ["Control-Button-1", "Control-Button-3"]:
+            btn_preset = QPushButton("▼")
+            btn_preset.setFixedWidth(28)
+            btn_preset.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN};")
+            menu_preset = QMenu(dlg)
+            menu_preset.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}")
+            for module in CTRL_COMMAND_MODULES:
+                act = QAction(module["name"], dlg)
+                act.triggered.connect(lambda checked, c=module["cmd"], le=cmd_le: le.setText(c))
+                menu_preset.addAction(act)
+            btn_preset.setMenu(menu_preset)
+            cmd_lay.addWidget(btn_preset)
+            
         type_cb  = QComboBox(); type_cb.addItems(["subprocess", "run_command", "python", "function", "url", "popup"])
         type_cb.setCurrentText(bcfg.get("type", "subprocess"))
         hide_chk  = QCheckBox("Hide"); hide_chk.setChecked(bcfg.get("hide", False))
@@ -974,7 +1030,7 @@ def open_edit_gui(item_cfg, category, index=None):
         new_term_chk = QCheckBox("New Term"); new_term_chk.setChecked(bcfg.get("new_terminal", False))
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
         chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addWidget(new_term_chk); chk_layout.addStretch()
-        form.addRow("CMD", cmd_le); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
+        form.addRow("CMD", cmd_row); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
         right_layout.addWidget(grp)
         binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, "new_terminal": new_term_chk}
 
@@ -1358,7 +1414,7 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
         if bkey and bkey in _bindings:
             action = _bindings[bkey]
             if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1), action.get("bg_color"), action.get("transparent_bg", False))
-            else: handle_action(action)
+            else: handle_action(action, _cfg, bkey)
     
     lbl.mousePressEvent = mousePressEvent
     lbl.mouseReleaseEvent = mouseReleaseEvent
@@ -1407,7 +1463,7 @@ def _bind_static(lbl, key, default_cmd):
         bkey = None
         if btn == Qt.MouseButton.LeftButton: bkey = "Control-Button-1" if mods & Qt.KeyboardModifier.ControlModifier else "Button-1"
         elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
-        if bkey and bkey in _cfg: handle_action(_cfg[bkey])
+        if bkey and bkey in _cfg: handle_action(_cfg[bkey], _cfg, bkey)
     
     lbl.mousePressEvent = mousePressEvent
     lbl.mouseReleaseEvent = mouseReleaseEvent
@@ -1437,7 +1493,7 @@ def _bind_drive(lbl, key, drive_index):
             bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
             
         if bkey and bkey in cfg:
-            handle_action(cfg[bkey])
+            handle_action(cfg[bkey], cfg, bkey)
         else:
             if btn == Qt.MouseButton.LeftButton and not (mods & Qt.KeyboardModifier.ControlModifier):
                 import subprocess
@@ -2023,11 +2079,11 @@ class StatusBar(QMainWindow):
                         if event.button() == Qt.MouseButton.LeftButton:
                             action = c.get("bindings", {}).get("Control-Button-1", {"type": "run_command", "cmd": c.get("left_click_cmd", "")}).copy()
                             if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
-                            handle_action(action)
+                            handle_action(action, c, "Control-Button-1")
                         elif event.button() == Qt.MouseButton.RightButton:
                             action = c.get("bindings", {}).get("Control-Button-3", {"type": "run_command", "cmd": c.get("right_click_cmd", "")}).copy()
                             if "cmd" in action: action["cmd"] = action["cmd"].replace("src", f'"{c.get("src", "")}"').replace("dst", f'"{c.get("dst", "")}"')
-                            handle_action(action)
+                            handle_action(action, c, "Control-Button-3")
                     else:
                         try: subprocess.Popen(["powershell", "-NoExit", "-Command", f'edit "{c["log"]}"'], creationflags=subprocess.CREATE_NEW_CONSOLE)
                         except Exception as ex: print(f"Error opening log: {ex}")
