@@ -94,22 +94,25 @@ search_controls_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
 search_controls_frame.pack(side="top", anchor="center", pady=(0, 10))
 
 # Create the search entry
-search_entry = tk.Entry(search_controls_frame, font=("calibri", 12), bg="#FFFFFF", fg="#000000", insertbackground="#F00")
-search_entry.grid(row=0, column=0, padx=(20, 5), pady=(0, 0))
+search_entry = customtkinter.CTkEntry(search_controls_frame, font=("calibri", 14), width=250, placeholder_text="Search apps...")
+search_entry.grid(row=0, column=0, padx=(20, 10), pady=(0, 0))
 
 def add_app_window():
-    add_window = tk.Toplevel(ROOT)
+    add_window = customtkinter.CTkToplevel(ROOT)
     add_window.title("Add New Application")
-    add_window.geometry("400x300")
-    add_window.configure(bg="#282c34")
+    add_window.geometry("450x380")
+    add_window.attributes('-topmost', True)
+
+    frame = customtkinter.CTkFrame(add_window)
+    frame.pack(pady=20, padx=20, fill="both", expand=True)
 
     labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:"]
     entries = {}
 
     for i, text in enumerate(labels):
-        tk.Label(add_window, text=text, bg="#282c34", fg="#fff").grid(row=i, column=0, padx=5, pady=5, sticky="w")
-        entry = tk.Entry(add_window, width=40)
-        entry.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
+        customtkinter.CTkLabel(frame, text=text, font=("calibri", 14)).grid(row=i, column=0, padx=10, pady=10, sticky="w")
+        entry = customtkinter.CTkEntry(frame, width=250)
+        entry.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
         entries[text.replace(":", "").replace(" ", "_").lower()] = entry
 
     def save_new_app():
@@ -125,9 +128,9 @@ def add_app_window():
         add_window.destroy()
         refresh_app_list()
 
-    tk.Button(add_window, text="Save App", command=save_new_app, bg="#4CAF50", fg="white").grid(row=len(labels), columnspan=2, pady=10)
+    customtkinter.CTkButton(frame, text="Save App", command=save_new_app, font=("calibri", 14, "bold"), fg_color="#4CAF50", hover_color="#45a049").grid(row=len(labels), columnspan=2, pady=20)
 
-add_app_button = tk.Button(search_controls_frame, text="+", command=add_app_window, bg="#007bff", fg="white", width=2)
+add_app_button = customtkinter.CTkButton(search_controls_frame, text="+", command=add_app_window, width=32, height=32, font=("calibri", 18, "bold"), fg_color="#007bff", hover_color="#0056b3")
 add_app_button.grid(row=0, column=1, padx=(0, 20), pady=(0, 0))
 
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
@@ -207,26 +210,29 @@ def show_options(options):
         btn.pack(side="left", padx=5, pady=5, anchor="center")
 
 def edit_application(app_to_edit):
-    edit_window = tk.Toplevel(ROOT)
+    edit_window = customtkinter.CTkToplevel(ROOT)
     edit_window.title("Edit Application")
-    edit_window.geometry("400x300")
-    edit_window.configure(bg="#282c34")
+    edit_window.geometry("450x380")
+    edit_window.attributes('-topmost', True)
+
+    frame = customtkinter.CTkFrame(edit_window)
+    frame.pack(pady=20, padx=20, fill="both", expand=True)
 
     labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:"]
     entries = {}
 
     for i, text in enumerate(labels):
-        tk.Label(edit_window, text=text, bg="#282c34", fg="#fff").grid(row=i, column=0, padx=5, pady=5, sticky="w")
-        entry = tk.Entry(edit_window, width=40)
-        entry.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
+        customtkinter.CTkLabel(frame, text=text, font=("calibri", 14)).grid(row=i, column=0, padx=10, pady=10, sticky="w")
+        entry = customtkinter.CTkEntry(frame, width=250)
+        entry.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
         entries[text.replace(":", "").replace(" ", "_").lower()] = entry
 
     # Pre-fill entries with current app data
     entries["app_name"].insert(0, app_to_edit["name"])
-    entries["scoop_name"].insert(0, app_to_edit["scoop_name"])
-    entries["scoop_path"].insert(0, app_to_edit["scoop_path"])
-    entries["winget_name"].insert(0, app_to_edit["winget_name"])
-    entries["winget_path"].insert(0, app_to_edit["winget_path"])
+    entries["scoop_name"].insert(0, app_to_edit.get("scoop_name", ""))
+    entries["scoop_path"].insert(0, app_to_edit.get("scoop_path", ""))
+    entries["winget_name"].insert(0, app_to_edit.get("winget_name", ""))
+    entries["winget_path"].insert(0, app_to_edit.get("winget_path", ""))
 
     def save_edited_app():
         app_to_edit["name"] = entries["app_name"].get()
@@ -238,7 +244,7 @@ def edit_application(app_to_edit):
         edit_window.destroy()
         refresh_app_list()
 
-    tk.Button(edit_window, text="Save Changes", command=save_edited_app, bg="#4CAF50", fg="white").grid(row=len(labels), columnspan=2, pady=10)
+    customtkinter.CTkButton(frame, text="Save Changes", command=save_edited_app, font=("calibri", 14, "bold"), fg_color="#007bff", hover_color="#0056b3").grid(row=len(labels), columnspan=2, pady=20)
 
 def delete_application(app_to_delete):
     global applications
