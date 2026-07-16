@@ -26,18 +26,18 @@
                     },
                     "Antigravity-Cli": {
                         "MUIVerb": "Antigravity-Cli",
-                        "command": "cmd /k cd /d \"%V\" && agy --dangerously-skip-permissions"
+                        "command": "wt.exe --title \"Antigravity\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"agy --dangerously-skip-permissions\""
                     },
                     "Antigravity-Cli Resume": {
-                        "command": "cmd /k cd /d \"%V\" && agy --dangerously-skip-permissions -c"
+                        "command": "wt.exe --title \"Antigravity Resume\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"agy --dangerously-skip-permissions -c\""
                     },
                     "Codex": {
                         "MUIVerb": "Codex",
-                        "command": "wt.exe --title \"Codex\" --suppressApplicationTitle cmd /k \"cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox\""
+                        "command": "wt.exe --title \"Codex\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"codex --dangerously-bypass-approvals-and-sandbox\""
                     },
                     "Codex Resume": {
                         "MUIVerb": "Codex Resume",
-                        "command": "wt.exe --title \"Codex\" --suppressApplicationTitle cmd /k \"cd /d \"%V\" && codex --dangerously-bypass-approvals-and-sandbox resume\""
+                        "command": "wt.exe --title \"Codex Resume\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"codex --dangerously-bypass-approvals-and-sandbox resume\""
                     },
                     "KIRO": {
                         "MUIVerb": "KIRO",
@@ -46,11 +46,11 @@
                     },
                     "Kiro CLI": {
                         "MUIVerb": "Kiro CLI",
-                        "command": "wt.exe --title \"KIRO\" cmd.exe /c \"cd /d \"%V\" && kiro-cli chat --trust-all-tools\""
+                        "command": "wt.exe --title \"KIRO\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"kiro-cli chat --trust-all-tools\""
                     },
                     "Kiro CLI Resume": {
                         "MUIVerb": "Kiro CLI Resume",
-                        "command": "wt.exe --title \"KIRO\" cmd.exe /c \"cd /d \"%V\" && kiro-cli chat --trust-all-tools --resume\""
+                        "command": "wt.exe --title \"KIRO Resume\" pwsh.exe -NoExit -WorkingDirectory \"%V\" -Command \"kiro-cli chat --trust-all-tools --resume\""
                     }
                 }
             },
