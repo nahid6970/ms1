@@ -545,7 +545,7 @@ class MainWindow(QMainWindow):
         os.makedirs(self.AHK_DIR, exist_ok=True)
         path, args = item["paths"][0], item.get("Command", "")
         ahk_path = os.path.join(self.AHK_DIR, f"{item['name']}_wrapper.ahk")
-        admin = "*" if item.get("run_as_admin") else ""
+        admin = "*RunAs " if item.get("run_as_admin") else ""
         hide = ', , "Hide"' if item.get("hide_terminal") else ""
         content = f'#NoTrayIcon\nRun \'{admin}"{path}" {args}\'{hide}'
         with open(ahk_path, "w", encoding='utf-8') as f:
@@ -600,9 +600,45 @@ class MainWindow(QMainWindow):
 
     def handle_launch(self, item):
         try:
+            # Check options, overriding if custom admin run was requested
+            run_as_admin = item.get("_run_as_admin") or item.get("run_as_admin", False)
+            hide_terminal = item.get("hide_terminal", False)
+            exec_type = item.get("ExecutableType", "other")
             path, cmd = item["paths"][0], item.get("Command", "")
-            if item.get("_run_as_admin") or item.get("run_as_admin"): subprocess.Popen(["powershell", "-Command", f'Start-Process "{path}" -ArgumentList "{cmd}" -Verb RunAs'])
-            else: subprocess.Popen(f'start "" "{path}" {cmd}', shell=True)
+            
+            # Temporary item representation with target admin status
+            temp_item = {**item, "run_as_admin": run_as_admin}
+            
+            if self.current_mode == "REGISTRY":
+                if exec_type == "ahk_v2":
+                    ahk_file = self._make_ahk(temp_item)
+                    subprocess.Popen(f'start "" "{ahk_file}"', shell=True)
+                elif run_as_admin or hide_terminal:
+                    vbs_file = self._make_vbs(temp_item)
+                    subprocess.Popen(f'wscript.exe "{vbs_file}"', shell=True)
+                else:
+                    if run_as_admin:
+                        subprocess.Popen(["powershell", "-Command", f'Start-Process "{path}" -ArgumentList "{cmd}" -Verb RunAs'])
+                    else:
+                        subprocess.Popen(f'start "" "{path}" {cmd}', shell=True)
+            else:
+                # SCRIPT (PowerShell) mode
+                if exec_type == "ahk_v2":
+                    ahk_file = self._make_ahk(temp_item)
+                    ps_cmd = f'Start-Process -FilePath "{ahk_file}"'
+                elif not temp_item.get("ps1_command"):
+                    ps_cmd = f'Start-Process -FilePath "{path}"'
+                    if cmd:
+                        ps_cmd += f' -ArgumentList \'{cmd}\''
+                    if hide_terminal:
+                        ps_cmd += ' -WindowStyle Hidden'
+                else:
+                    ps_cmd = temp_item["ps1_command"]
+                
+                if run_as_admin and "-Verb RunAs" not in ps_cmd and exec_type != "ahk_v2":
+                    ps_cmd += ' -Verb RunAs'
+                
+                subprocess.Popen(["powershell", "-Command", ps_cmd])
         except Exception as e: self.update_status(f"EXEC FAILED: {e}")
 
     def handle_edit(self, item):

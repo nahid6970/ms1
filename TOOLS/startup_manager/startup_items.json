@@ -902,7 +902,8 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784230244.5017378
   },
   {
     "Command": "",
@@ -930,5 +931,19 @@
     "script_enabled": false,
     "show_terminal": false,
     "type": "Command"
+  },
+  {
+    "name": "AI Task Complete Notification",
+    "type": "Command",
+    "paths": [
+      "python"
+    ],
+    "Command": "C:\\@delta\\ms1\\asset\\gemini\\notification_daemon.py",
+    "ps1_command": "Start-Process -FilePath \"python\" -ArgumentList \"C:\\@delta\\ms1\\asset\\gemini\\notification_daemon.py\"",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": true,
+    "script_enabled": false,
+    "added_at": 1784230286.287112
   }
 ]
