@@ -25,9 +25,9 @@
         <File filename="C:\@delta\ms1\TOOLS\startup_manager\ahk_wrappers\CPU FAN Check_wrapper.ahk" />
         <File filename="C:\Users\nahid\scoop\apps\rclone\current\rclone.conf" />
         <File filename="C:\@delta\ms1\scripts\rclone\rclone_manager\Rclone-Manager.py" />
-        <File filename="C:\@delta\ms1\asset\gemini\GEMINI.md" />
         <File filename="C:\@delta\ms1\TOOLS\freeform_crop.py" />
         <File filename="C:\@delta\ms1\TOOLS\volume_mixer\volume_mixer.py" />
+        <File filename="C:\Users\nahid\notification.txt" />
     </History>
     <ProjectPanels>
         <ProjectPanel id="0" workSpaceFile="" />
@@ -45,7 +45,7 @@
         <GUIConfig name="ScintillaViewsSplitter">vertical</GUIConfig>
         <GUIConfig name="UserDefineDlg" position="undocked">hide</GUIConfig>
         <GUIConfig name="TabSetting" replaceBySpace="no" size="4" backspaceUnindent="no" />
-        <GUIConfig name="AppPosition" x="964" y="6" width="957" height="988" isMaximized="no" />
+        <GUIConfig name="AppPosition" x="-1" y="6" width="1922" height="988" isMaximized="no" />
         <GUIConfig name="FindWindowPosition" left="975" top="91" right="1608" bottom="450" isLessModeOn="no" />
         <GUIConfig name="FinderConfig" wrappedLines="no" purgeBeforeEverySearch="no" showOnlyOneEntryPerFoundLine="yes" FiF_ignoreunsavedChangesInOpenedFiles="no" />
         <GUIConfig name="noUpdate" intervalDays="15" nextUpdateDate="20260729" autoUpdateMode="1">no</GUIConfig>
