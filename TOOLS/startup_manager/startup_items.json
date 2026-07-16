@@ -48,7 +48,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784182568.68742
   },
   {
     "name": "Flask - 5003 - Browse Files",
@@ -409,15 +410,14 @@
     "name": "Flask - 5011 - TV Show",
     "type": "Command",
     "paths": [
-      "pythonw.exe"
+      "python.exe"
     ],
     "Command": "C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py\"",
-    "ExecutableType": "pythonw",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1784122042.2034054
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",

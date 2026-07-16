@@ -265,6 +265,13 @@
                     "admin": false,
                     "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\TOOLS\\startup_manager\\startup.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "bg": "",
