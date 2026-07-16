@@ -481,7 +481,7 @@ class EnvVariableManager(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name, cmd, icon = label_edit.text(), cmd_edit.toPlainText(), icon_edit.text()
             if name and cmd:
-                path_base = f"{parent_path}\\shell\\{name}" if parent_path else f"Software\Classes\*\shell\\{name}"
+                path_base = f"{parent_path}\\shell\\{name}" if parent_path else f"Software\\Classes\\*\\shell\\{name}"
                 key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path_base)
                 winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, name)
                 if icon: winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
