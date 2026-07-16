@@ -1,3 +1,12 @@
+import sys, os
+# 1. Add the absolute path to the folder containing install_deps.py
+UTILITY_PATH = r"C:\@delta\ms1"
+if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
+
+# 2. Import and run the bootstrap
+import install_deps
+install_deps.bootstrap(__file__)
+
 import sys, os, psutil, socket, threading, time, json, sqlite3
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
