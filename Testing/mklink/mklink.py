@@ -167,17 +167,195 @@ STYLESHEET = f"""
 # HELPER CLASSES
 # ==========================================
 
-class ItemRow(QWidget):
-    def __init__(self, parent=None, link_type="folder", target="", fake=""):
+class SelectiveFileDialog(QDialog):
+    """Dialog to select individual files from a target folder for symlink."""
+    def __init__(self, parent, target_path, previously_selected=None, previously_excluded=None):
         super().__init__(parent)
+        self.setWindowTitle("Select Files to Symlink")
+        self.resize(800, 600)
+        self.setModal(True)
+        self.result_files = None  # Will hold list of selected relative paths
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        # Title
+        title = QLabel("📋 Select Files to Symlink")
+        title.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {CP_YELLOW};")
+        layout.addWidget(title)
+
+        # Folder info
+        folder_lbl = QLabel(f"Scanning: {target_path}")
+        folder_lbl.setStyleSheet(f"color: {CP_CYAN}; font-size: 9pt;")
+        folder_lbl.setWordWrap(True)
+        layout.addWidget(folder_lbl)
+
+        # Search / filter
+        filter_layout = QHBoxLayout()
+        self.filter_entry = QLineEdit()
+        self.filter_entry.setPlaceholderText("Filter files...")
+        self.filter_entry.textChanged.connect(self._apply_filter)
+        filter_layout.addWidget(self.filter_entry)
+
+        select_all_btn = QPushButton("Select All")
+        select_all_btn.setFixedWidth(100)
+        select_all_btn.setStyleSheet(f"color: {CP_GREEN}; border-color: {CP_GREEN};")
+        select_all_btn.clicked.connect(self._select_all)
+        filter_layout.addWidget(select_all_btn)
+
+        deselect_all_btn = QPushButton("Deselect All")
+        deselect_all_btn.setFixedWidth(110)
+        deselect_all_btn.setStyleSheet(f"color: {CP_RED}; border-color: {CP_RED};")
+        deselect_all_btn.clicked.connect(self._deselect_all)
+        filter_layout.addWidget(deselect_all_btn)
+
+        layout.addLayout(filter_layout)
+
+        # Count label
+        self.count_lbl = QLabel("")
+        self.count_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
+        layout.addWidget(self.count_lbl)
+
+        # Scroll area with checkboxes
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }}")
+        self.scroll_content = QWidget()
+        self.scroll_vlayout = QVBoxLayout(self.scroll_content)
+        self.scroll_vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.scroll_vlayout.setSpacing(2)
+        self.scroll.setWidget(self.scroll_content)
+        layout.addWidget(self.scroll)
+
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+
+        apply_btn = QPushButton("Apply Selection")
+        apply_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_GREEN};
+                color: {CP_GREEN};
+            }}
+            QPushButton:hover {{
+                background-color: {CP_GREEN};
+                color: black;
+            }}
+        """)
+        apply_btn.clicked.connect(self._apply)
+
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(apply_btn)
+        layout.addLayout(btn_layout)
+
+        # Scan files
+        self.checkboxes = []  # list of (relative_path, QCheckBox)
+        self._scan_files(target_path, previously_selected, previously_excluded)
+        self._update_count()
+
+    def _scan_files(self, target_path, previously_selected, previously_excluded):
+        if not os.path.isdir(target_path):
+            lbl = QLabel("⚠ Target path is not a valid directory.")
+            lbl.setStyleSheet(f"color: {CP_RED};")
+            self.scroll_vlayout.addWidget(lbl)
+            return
+
+        all_files = []
+        for root, dirs, files in os.walk(target_path):
+            for fname in files:
+                full = os.path.join(root, fname)
+                rel = os.path.relpath(full, target_path)
+                all_files.append(rel)
+
+        all_files.sort(key=str.lower)
+
+        if not all_files:
+            lbl = QLabel("No files found in this directory.")
+            lbl.setStyleSheet(f"color: {CP_SUBTEXT};")
+            self.scroll_vlayout.addWidget(lbl)
+            return
+
+        # Determine checked state:
+        # If previously_selected exists, only those are checked.
+        # If previously_excluded exists, everything except those is checked.
+        # Otherwise, all checked by default.
+        for rel in all_files:
+            cb = QCheckBox(rel)
+            cb.setStyleSheet(f"""
+                QCheckBox {{
+                    color: {CP_TEXT};
+                    padding: 3px 5px;
+                    border: none;
+                }}
+                QCheckBox:hover {{
+                    color: {CP_CYAN};
+                }}
+                QCheckBox::indicator {{
+                    width: 14px;
+                    height: 14px;
+                    border: 1px solid {CP_DIM};
+                    background: {CP_PANEL};
+                }}
+                QCheckBox::indicator:checked {{
+                    background: {CP_CYAN};
+                    border-color: {CP_CYAN};
+                }}
+            """)
+
+            if previously_selected is not None:
+                cb.setChecked(rel in previously_selected)
+            elif previously_excluded is not None:
+                cb.setChecked(rel not in previously_excluded)
+            else:
+                cb.setChecked(True)
+
+            cb.stateChanged.connect(self._update_count)
+            self.scroll_vlayout.addWidget(cb)
+            self.checkboxes.append((rel, cb))
+
+    def _apply_filter(self, text):
+        text = text.lower()
+        for rel, cb in self.checkboxes:
+            cb.setVisible(text in rel.lower())
+
+    def _select_all(self):
+        for rel, cb in self.checkboxes:
+            if cb.isVisible():
+                cb.setChecked(True)
+
+    def _deselect_all(self):
+        for rel, cb in self.checkboxes:
+            if cb.isVisible():
+                cb.setChecked(False)
+
+    def _update_count(self):
+        total = len(self.checkboxes)
+        selected = sum(1 for _, cb in self.checkboxes if cb.isChecked())
+        self.count_lbl.setText(f"{selected} / {total} files selected")
+
+    def _apply(self):
+        self.result_files = [rel for rel, cb in self.checkboxes if cb.isChecked()]
+        self.accept()
+
+
+class ItemRow(QWidget):
+    def __init__(self, parent=None, link_type="folder", target="", fake="", selected_files=None, excluded_files=None):
+        super().__init__(parent)
+        self.selected_files = selected_files  # list of relative paths or None
+        self.excluded_files = excluded_files  # list of excluded relative paths or None
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 5, 0, 5)
         
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["folder", "file"])
+        self.type_combo.addItems(["folder", "file", "selective"])
         self.type_combo.setCurrentText(link_type)
         self.type_combo.setFixedWidth(100)
         self.type_combo.currentTextChanged.connect(self.update_combo_style)
+        self.type_combo.currentTextChanged.connect(self._on_type_changed)
         
         self.target_entry = QLineEdit(target)
         self.target_entry.setPlaceholderText("Target Path")
@@ -192,6 +370,13 @@ class ItemRow(QWidget):
         fake_btn = QPushButton("📂")
         fake_btn.setFixedWidth(30)
         fake_btn.clicked.connect(self.browse_fake)
+
+        # Select Files button (only visible for "selective" type)
+        self.select_files_btn = QPushButton("📋 Select")
+        self.select_files_btn.setFixedWidth(80)
+        self.select_files_btn.setStyleSheet(f"color: {CP_CYAN}; border-color: {CP_CYAN};")
+        self.select_files_btn.clicked.connect(self.open_selective_dialog)
+        self.select_files_btn.setVisible(link_type == "selective")
         
         self.remove_btn = QPushButton("❌")
         self.remove_btn.setFixedWidth(30)
@@ -202,41 +387,85 @@ class ItemRow(QWidget):
         self.layout.addWidget(target_btn)
         self.layout.addWidget(self.fake_entry)
         self.layout.addWidget(fake_btn)
+        self.layout.addWidget(self.select_files_btn)
         self.layout.addWidget(self.remove_btn)
         
         # Set initial style
         self.update_combo_style(self.type_combo.currentText())
 
+    def _on_type_changed(self, text):
+        self.select_files_btn.setVisible(text == "selective")
+        if text != "selective":
+            self.selected_files = None
+            self.excluded_files = None
+
     def update_combo_style(self, text):
         if text == "folder":
-            # Yellow folder color
             self.type_combo.setStyleSheet("background-color: #FCEE0A; color: black; font-weight: bold; border: 1px solid #3a3a3a;")
+        elif text == "selective":
+            self.type_combo.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-weight: bold; border: 1px solid #3a3a3a;")
         else:
-            # White file color
             self.type_combo.setStyleSheet("background-color: #FFFFFF; color: black; font-weight: bold; border: 1px solid #3a3a3a;")
 
     def browse_target(self):
-        if self.type_combo.currentText() == "folder":
-            path = QFileDialog.getExistingDirectory(self, "Select Target Folder")
-        else:
+        current_type = self.type_combo.currentText()
+        if current_type == "file":
             path, _ = QFileDialog.getOpenFileName(self, "Select Target File")
+        else:  # folder or selective
+            path = QFileDialog.getExistingDirectory(self, "Select Target Folder")
         if path:
             self.target_entry.setText(os.path.normpath(path))
 
     def browse_fake(self):
-        if self.type_combo.currentText() == "folder":
-            path = QFileDialog.getExistingDirectory(self, "Select Link Directory")
-        else:
+        current_type = self.type_combo.currentText()
+        if current_type == "file":
             path, _ = QFileDialog.getSaveFileName(self, "Select Link File Location")
+        else:  # folder or selective
+            path = QFileDialog.getExistingDirectory(self, "Select Link Directory")
         if path:
             self.fake_entry.setText(os.path.normpath(path))
 
+    def open_selective_dialog(self):
+        target = self.target_entry.text().strip()
+        if not target:
+            QMessageBox.warning(self, "No Target", "Please set a target folder first.")
+            return
+        if not os.path.isdir(target):
+            QMessageBox.warning(self, "Invalid Target", f"Target is not a valid directory:\n{target}")
+            return
+
+        dlg = SelectiveFileDialog(
+            self,
+            target,
+            previously_selected=self.selected_files,
+            previously_excluded=self.excluded_files
+        )
+        if dlg.exec() == QDialog.DialogCode.Accepted and dlg.result_files is not None:
+            self.selected_files = dlg.result_files
+            # Also compute excluded list for persistence
+            all_files = []
+            for root, dirs, files in os.walk(target):
+                for fname in files:
+                    full = os.path.join(root, fname)
+                    rel = os.path.relpath(full, target)
+                    all_files.append(rel)
+            self.excluded_files = [f for f in all_files if f not in self.selected_files]
+            count = len(self.selected_files)
+            self.select_files_btn.setText(f"📋 {count} sel")
+            self.select_files_btn.setToolTip(f"{count} files selected for symlink")
+
     def get_data(self):
-        return {
+        data = {
             "type": self.type_combo.currentText(),
             "target": self.target_entry.text().strip(),
             "fake": self.fake_entry.text().strip()
         }
+        if self.type_combo.currentText() == "selective":
+            if self.selected_files is not None:
+                data["selected_files"] = self.selected_files
+            if self.excluded_files is not None:
+                data["excluded_files"] = self.excluded_files
+        return data
 
 class AddLinkDialog(QDialog):
     def __init__(self, parent, on_save_callback, edit_data=None):
@@ -333,12 +562,19 @@ class AddLinkDialog(QDialog):
                     "fake": edit_data.get("fake", "")
                 }]
             for item in items:
-                self.add_row(item.get("type", "folder"), item.get("target", ""), item.get("fake", ""))
+                self.add_row(
+                    item.get("type", "folder"),
+                    item.get("target", ""),
+                    item.get("fake", ""),
+                    item.get("selected_files"),
+                    item.get("excluded_files")
+                )
         else:
             self.add_empty_row()
 
-    def add_row(self, link_type="folder", target="", fake=""):
-        row = ItemRow(link_type=link_type, target=target, fake=fake)
+    def add_row(self, link_type="folder", target="", fake="", selected_files=None, excluded_files=None):
+        row = ItemRow(link_type=link_type, target=target, fake=fake,
+                      selected_files=selected_files, excluded_files=excluded_files)
         row.remove_btn.clicked.connect(lambda: self.remove_row(row))
         self.scroll_layout.addWidget(row)
         self.rows.append(row)
@@ -494,6 +730,38 @@ class SymlinkManager(QMainWindow):
             fake = item.get("fake", "")
             link_type = item.get("type", "folder")
             
+            # SELECTIVE TYPE: check individual file symlinks
+            if link_type == "selective":
+                selected = item.get("selected_files", [])
+                if not selected:
+                    statuses.append(("No files selected", CP_YELLOW))
+                    continue
+                sel_working = 0
+                sel_missing = 0
+                sel_broken = 0
+                for rel in selected:
+                    link_path = os.path.join(fake, rel)
+                    if not os.path.exists(link_path) and not os.path.lexists(link_path):
+                        sel_missing += 1
+                    elif os.path.islink(link_path):
+                        realpath = os.path.realpath(link_path)
+                        expected = os.path.normpath(os.path.join(target, rel)).lower()
+                        if os.path.normpath(realpath).lower() == expected and os.path.exists(link_path):
+                            sel_working += 1
+                        else:
+                            sel_broken += 1
+                    else:
+                        sel_broken += 1
+                if sel_working == len(selected):
+                    statuses.append(("Working", CP_GREEN))
+                elif sel_missing == len(selected):
+                    statuses.append(("Missing Links", CP_YELLOW))
+                elif sel_broken > 0:
+                    statuses.append(("Issue Detected", CP_ORANGE))
+                else:
+                    statuses.append(("Partial", CP_YELLOW))
+                continue
+
             # COPY MODE LOGIC
             if copy_mode:
                 if os.path.exists(fake) and not os.path.lexists(fake):
@@ -640,6 +908,58 @@ class SymlinkManager(QMainWindow):
                 error_logs.append(f"Target missing: {target}")
                 continue
 
+            # SELECTIVE TYPE: symlink each selected file individually
+            if link_type == "selective":
+                selected = item.get("selected_files", [])
+                if not selected:
+                    error_logs.append(f"No files selected for selective link: {target}")
+                    continue
+                for rel in selected:
+                    src = os.path.normpath(os.path.join(target, rel))
+                    dst = os.path.normpath(os.path.join(fake, rel))
+                    if not os.path.exists(src):
+                        error_logs.append(f"Source file missing: {src}")
+                        continue
+                    # Remove existing
+                    try:
+                        if os.path.exists(dst) or os.path.lexists(dst):
+                            os.remove(dst)
+                    except Exception as e:
+                        error_logs.append(f"Failed to remove {dst}: {str(e)}")
+                        continue
+                    # Ensure parent dir
+                    try:
+                        parent = os.path.dirname(dst)
+                        if parent and not os.path.exists(parent):
+                            os.makedirs(parent, exist_ok=True)
+                    except Exception as e:
+                        error_logs.append(f"Failed to create dirs for {dst}: {str(e)}")
+                        continue
+                    # Create symlink
+                    try:
+                        if os.name == 'nt':
+                            cmd = f'mklink "{dst}" "{src}"'
+                            result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
+                            if result.returncode == 0:
+                                success_count += 1
+                            else:
+                                err = result.stderr.strip() or result.stdout.strip()
+                                if "privilege" in err.lower() or "access is denied" in err.lower():
+                                    params = f'/c {cmd}'
+                                    ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
+                                    if ret > 32:
+                                        success_count += 1
+                                    else:
+                                        error_logs.append(f"Elevation failed for: {dst}")
+                                else:
+                                    error_logs.append(f"Cmd failed for {dst}: {err}")
+                        else:
+                            os.symlink(src, dst)
+                            success_count += 1
+                    except Exception as e:
+                        error_logs.append(f"Selective symlink failed for {dst}: {str(e)}")
+                continue
+
             # Remove existing if any (permission already granted above)
             try:
                 if os.path.exists(fake) or os.path.lexists(fake):
@@ -754,7 +1074,12 @@ class SymlinkManager(QMainWindow):
             # Details (multi-item paths)
             paths_text = "<html>"
             for item in link_entry.get("items", []):
-                paths_text += f"<span style='color:#3498db'>[{item['type'][0].upper()}] Target:</span> {item['target']}<br><span style='color:#9b59b6'>Link:</span> {item['fake']}<br>"
+                type_letter = item['type'][0].upper()
+                extra = ""
+                if item['type'] == 'selective':
+                    sel_count = len(item.get('selected_files', []))
+                    extra = f" <span style='color:{CP_CYAN};'>({sel_count} files)</span>"
+                paths_text += f"<span style='color:#3498db'>[{type_letter}] Target:</span> {item['target']}{extra}<br><span style='color:#9b59b6'>Link:</span> {item['fake']}<br>"
             paths_text += "</html>"
             
             paths_lbl = QLabel(paths_text)
