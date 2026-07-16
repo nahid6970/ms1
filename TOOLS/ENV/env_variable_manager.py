@@ -449,107 +449,467 @@ class EnvVariableManager(QMainWindow):
             winreg.CloseKey(key)
         except: pass
 
-    def add_context_group(self):
+    def add_context_separator(self):
+        """Add a separator before the next item or as a standalone"""
         parent_path = ""
-        row = self.context_table.currentRow()
-        if row >= 0 and self.context_table.item(row, 1).text() == "GROUP":
-            parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        name, ok = QInputDialog.getText(self, "Add Group", "Group Label:")
-        if ok and name:
-            path = rf"{parent_path}\shell\{name}" if parent_path else rf"Software\Classes\Directory\Background\shell\{name}"
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
-            winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, name)
-            winreg.SetValueEx(key, "SubCommands", 0, winreg.REG_SZ, "")
-            winreg.CreateKey(key, "shell")
-            winreg.CloseKey(key)
-            self.load_context_entries()
-
-    def add_context_entry(self):
-        row = self.context_table.currentRow()
-        parent_path = ""
-        if row >= 0 and self.context_table.item(row, 1).text() == "GROUP":
-            parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        
-        dialog = QDialog(self); dialog.setWindowTitle("Add Context Entry")
-        layout = QVBoxLayout(dialog); form = QFormLayout()
-        label_edit = QLineEdit(); cmd_edit = QTextEdit(); icon_edit = QLineEdit()
-        form.addRow("Label:", label_edit); form.addRow("Command:", cmd_edit); form.addRow("Icon Path:", icon_edit)
-        layout.addLayout(form)
-        btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-        btns.accepted.connect(dialog.accept); btns.rejected.connect(dialog.reject); layout.addWidget(btns)
-        
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            name, cmd, icon = label_edit.text(), cmd_edit.toPlainText(), icon_edit.text()
-            if name and cmd:
-                path_base = f"{parent_path}\\shell\\{name}" if parent_path else f"Software\\Classes\\*\\shell\\{name}"
-                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path_base)
-                winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, name)
-                if icon: winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
-                ckey = winreg.CreateKey(key, "command")
-                winreg.SetValue(ckey, "", winreg.REG_SZ, cmd)
-                winreg.CloseKey(ckey); winreg.CloseKey(key)
-                self.load_context_entries()
-
-    def edit_context_entry(self):
-        row = self.context_table.currentRow()
-        if row < 0: return
-        path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        type_text = self.context_table.item(row, 1).text()
-        
-        label = self.context_table.item(row, 0).text().replace("  ↳ ", "")
-        cmd = self.context_table.item(row, 2).text()
-        
-        new_label, ok = QInputDialog.getText(self, "Edit Label", "Label:", text=label)
-        if ok and new_label:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_SET_VALUE) as key:
-                winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, new_label)
-            if type_text == "ENTRY":
-                new_cmd, ok2 = QInputDialog.getText(self, "Edit Command", "Command:", text=cmd)
-                if ok2:
-                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, f"{path}\\command", 0, winreg.KEY_SET_VALUE) as ckey:
-                        winreg.SetValue(ckey, "", winreg.REG_SZ, new_cmd)
-            self.load_context_entries()
-
-    def remove_context_entry(self):
         row = self.context_table.currentRow()
         if row >= 0:
-            path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-            if QMessageBox.question(self, "Confirm", "Delete this entry?") == QMessageBox.StandardButton.Yes:
-                self._delete_reg_key(winreg.HKEY_CURRENT_USER, path)
-                self.load_context_entries()
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
 
-    def move_context_up(self):
-        self._swap_logic(-1)
-
-    def move_context_down(self):
-        self._swap_logic(1)
-
-    def _swap_logic(self, offset):
-        row = self.context_table.currentRow()
-        target = row + offset
-        if target < 0 or target >= self.context_table.rowCount(): return
-        
-        p1 = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-        p2 = self.context_table.item(target, 0).data(Qt.ItemDataRole.UserRole)
-        if not p1 or not p2: return
-
+        name = f"Sep_{datetime.now().strftime('%H%M%S')}"
         try:
-            self._swap_registry_keys(p1, p2)
+            if parent_path:
+                hkcu_base = parent_path.replace("Directory\\", "Software\\Classes\\Directory\\")
+                self._create_separator_entry(rf"{hkcu_base}\shell\{name}")
+            else:
+                self._create_separator_entry(rf"Software\Classes\Directory\shell\{name}")
+                self._create_separator_entry(rf"Software\Classes\Directory\Background\shell\{name}")
+            
             self.load_context_entries()
-            self.context_table.selectRow(target)
+            self.set_status("Separator added", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
-    def _swap_registry_keys(self, p1, p2):
-        n1, n2 = p1.split('\\')[-1], p2.split('\\')[-1]
-        parent = "\\".join(p1.split('\\')[:-1])
-        temp = f"{parent}\\_TEMP_{datetime.now().microsecond}"
-        self._copy_reg_key(winreg.HKEY_CURRENT_USER, p1, temp)
-        self._delete_reg_key(winreg.HKEY_CURRENT_USER, p1)
-        self._copy_reg_key(winreg.HKEY_CURRENT_USER, p2, p1)
-        self._delete_reg_key(winreg.HKEY_CURRENT_USER, p2)
-        self._copy_reg_key(winreg.HKEY_CURRENT_USER, temp, p2)
-        self._delete_reg_key(winreg.HKEY_CURRENT_USER, temp)
+    def _create_separator_entry(self, path):
+        """Helper to create registry separator"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, 0x20) # 0x20 = Separator
+        winreg.CloseKey(key)
+
+    def set_context_icon(self):
+        """Set icon for selected context menu item"""
+        row = self.context_table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, "Error", "Select an item first!")
+            return
+            
+        full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon File", "", 
+                                                  "Icons (*.ico *.exe *.dll);;All Files (*.*)")
+        if icon_path:
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, full_path, 0, winreg.KEY_SET_VALUE)
+                winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon_path)
+                winreg.CloseKey(key)
+                
+                self.load_context_entries()
+                self.set_status("Icon updated", CP_GREEN)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", str(e))
+
+    def add_context_group(self):
+        """Add a new cascading menu group"""
+        # Check if a group is selected to add a sub-group
+        parent_path = ""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QCheckBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add Context Group")
+        dialog_layout = QVBoxLayout(dialog)
+        
+        form_layout = QFormLayout()
+        label_edit = QLineEdit()
+        label_edit.setPlaceholderText("e.g. 'My AI Tools'")
+        form_layout.addRow("Group Label:", label_edit)
+        
+        dialog_layout.addLayout(form_layout)
+        
+        # Scope selection (only if not adding to a group)
+        scope_group = None
+        cb_files = cb_folders = cb_background = None
+        if not parent_path:
+            scope_group = QGroupBox("Where should this group appear?")
+            scope_layout = QVBoxLayout()
+            cb_files = QCheckBox("Files")
+            cb_folders = QCheckBox("Folders")
+            cb_background = QCheckBox("Folder Background")
+            cb_files.setChecked(True)
+            scope_layout.addWidget(cb_files)
+            scope_layout.addWidget(cb_folders)
+            scope_layout.addWidget(cb_background)
+            scope_group.setLayout(scope_layout)
+            dialog_layout.addWidget(scope_group)
+            
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        dialog_layout.addWidget(buttons)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+            
+        name = label_edit.text().strip()
+        if not name:
+            return
+            
+        try:
+            if parent_path:
+                # Nested group - parent_path is already in HKCU format
+                path = rf"{parent_path}\shell\{name}"
+                self._create_group_entry(path)
+            else:
+                if cb_files.isChecked():
+                    self._create_group_entry(rf"Software\Classes\*\shell\{name}")
+                if cb_folders.isChecked():
+                    self._create_group_entry(rf"Software\Classes\Directory\shell\{name}")
+                if cb_background.isChecked():
+                    self._create_group_entry(rf"Software\Classes\Directory\Background\shell\{name}")
+            self.load_context_entries()
+            self.set_status(f"Added context group: {name}", CP_GREEN)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to add group: {str(e)}")
+
+    def _create_group_entry(self, path):
+        """Helper to create a cascading menu group in registry"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        # Get the leaf name for the label
+        label = path.split('\\')[-1]
+        winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, label)
+        winreg.SetValueEx(key, "SubCommands", 0, winreg.REG_SZ, "")
+        winreg.CreateKey(key, "shell")
+        winreg.CloseKey(key)
+
+    def add_context_entry(self):
+        """Add a new right-click context menu entry"""
+        # Check if a group is selected to add a child entry
+        parent_path = ""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            type_text = self.context_table.item(row, 1).text()
+            if type_text == "GROUP":
+                parent_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
+        # Create dialog with all fields
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QCheckBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add Context Entry")
+        dialog.setMinimumWidth(700)
+        dialog_layout = QVBoxLayout(dialog)
+        
+        form_layout = QFormLayout()
+        
+        # Menu label
+        label_edit = QLineEdit()
+        label_edit.setPlaceholderText("e.g. 'Open Terminal Here'")
+        form_layout.addRow("Menu Label:", label_edit)
+        
+        # Command
+        cmd_edit = QTextEdit()
+        cmd_edit.setPlaceholderText("Use %V for directory, %1 for file path")
+        cmd_edit.setMaximumHeight(60)
+        form_layout.addRow("Command:", cmd_edit)
+        
+        # Icon
+        icon_layout = QHBoxLayout()
+        icon_edit = QLineEdit()
+        icon_edit.setPlaceholderText("Optional icon path")
+        icon_browse = QPushButton("Browse...")
+        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
+        icon_layout.addWidget(icon_edit)
+        icon_layout.addWidget(icon_browse)
+        form_layout.addRow("Icon:", icon_layout)
+        
+        dialog_layout.addLayout(form_layout)
+        
+        # Scope selection (only if not adding to a group)
+        scope_group = None
+        cb_files = cb_folders = cb_background = None
+        if not parent_path:
+            scope_group = QGroupBox("Where should this appear?")
+            scope_layout = QVBoxLayout()
+            
+            cb_files = QCheckBox("Files (right-click on any file)")
+            cb_folders = QCheckBox("Folders (right-click on folder)")
+            cb_background = QCheckBox("Folder Background (right-click on empty space)")
+            
+            cb_files.setChecked(True)
+            
+            scope_layout.addWidget(cb_files)
+            scope_layout.addWidget(cb_folders)
+            scope_layout.addWidget(cb_background)
+            scope_group.setLayout(scope_layout)
+            dialog_layout.addWidget(scope_group)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        dialog_layout.addWidget(buttons)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        name = label_edit.text().strip()
+        cmd = cmd_edit.toPlainText().strip()
+        icon = icon_edit.text().strip()
+        
+        if not name or not cmd:
+            QMessageBox.warning(self, "Error", "Label and Command are required!")
+            return
+        
+        try:
+            if parent_path:
+                # Add as child of selected group
+                self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd, icon)
+                self.load_context_entries()
+                self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
+            else:
+                # Create entries based on selection
+                if cb_files.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd, icon)
+                if cb_folders.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd, icon)
+                if cb_background.isChecked():
+                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd, icon)
+                
+                self.load_context_entries()
+                self.set_status(f"Added context menu entry: {name}", CP_GREEN)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
+
+    def edit_context_entry(self):
+        """Edit selected context menu entry"""
+        row = self.context_table.currentRow()
+        if row < 0:
+            return
+            
+        old_full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        old_name = old_full_path.split('\\')[-1]
+        type_text = self.context_table.item(row, 1).text()
+        old_cmd = self.context_table.item(row, 2).text()
+        
+        # Get current label (MUIVerb) from registry
+        old_label = old_name
+        old_icon = ""
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_READ)
+            try:
+                old_label, _ = winreg.QueryValueEx(key, "MUIVerb")
+            except:
+                pass
+            try:
+                old_icon, _ = winreg.QueryValueEx(key, "Icon")
+            except:
+                pass
+            winreg.CloseKey(key)
+        except:
+            pass
+        
+        # Create dialog with form layout
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Edit Context Entry")
+        dialog.setMinimumWidth(700)
+        dialog_layout = QVBoxLayout(dialog)
+        
+        form_layout = QFormLayout()
+        
+        # Label field (what user sees in context menu)
+        label_edit = QLineEdit(old_label)
+        form_layout.addRow("Display Label:", label_edit)
+        
+        # Command field (only for ENTRY type)
+        cmd_edit = None
+        if type_text == "ENTRY":
+            cmd_edit = QTextEdit()
+            cmd_edit.setPlainText(old_cmd)
+            cmd_edit.setMaximumHeight(60)
+            form_layout.addRow("Command:", cmd_edit)
+        
+        # Icon field
+        icon_layout = QHBoxLayout()
+        icon_edit = QLineEdit(old_icon)
+        icon_browse = QPushButton("Browse...")
+        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
+        icon_layout.addWidget(icon_edit)
+        icon_layout.addWidget(icon_browse)
+        form_layout.addRow("Icon Path:", icon_layout)
+        
+        dialog_layout.addLayout(form_layout)
+        
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        dialog_layout.addWidget(button_box)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        new_label = label_edit.text().strip()
+        new_cmd = cmd_edit.toPlainText().strip() if cmd_edit else "(Cascading Menu)"
+        new_icon = icon_edit.text().strip()
+        
+        if not new_label:
+            return
+            
+        if type_text == "ENTRY" and new_cmd:
+            new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
+
+        try:
+            # Update the existing entry (don't rename the key, just update MUIVerb)
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_SET_VALUE) as key:
+                # Update the display label
+                winreg.SetValueEx(key, "MUIVerb", 0, winreg.REG_SZ, new_label)
+                
+                # Set icon if provided
+                if new_icon:
+                    winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
+                elif old_icon and not new_icon:
+                    # Remove icon if cleared
+                    try:
+                        winreg.DeleteValue(key, "Icon")
+                    except:
+                        pass
+            
+            # Update command if it's an entry
+            if type_text == "ENTRY" and new_cmd:
+                cmd_path = f"{old_full_path}\\command"
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, cmd_path, 0, winreg.KEY_SET_VALUE) as cmd_key:
+                    winreg.SetValue(cmd_key, "", winreg.REG_SZ, new_cmd)
+                
+            self.load_context_entries()
+            self.set_status(f"Updated context menu entry: {new_label}", CP_GREEN)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
+
+    def _browse_icon(self, line_edit):
+        """Helper to browse for icon file"""
+        icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon File", "", 
+                                                  "Icons (*.ico *.exe *.dll);;All Files (*.*)")
+        if icon_path:
+            line_edit.setText(icon_path)
+
+    def _create_reg_entry(self, path, command, icon=""):
+        """Helper to create registry keys for context menu in HKCU"""
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        label = path.split('\\')[-1]
+        winreg.SetValue(key, "", winreg.REG_SZ, label)
+        
+        # Set icon if provided
+        if icon:
+            winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
+        
+        cmd_key = winreg.CreateKey(key, "command")
+        winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
+        
+        winreg.CloseKey(cmd_key)
+        winreg.CloseKey(key)
+
+    def remove_context_entry(self):
+        """Remove a context menu entry"""
+        row = self.context_table.currentRow()
+        if row >= 0:
+            full_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            display_name = self.context_table.item(row, 0).text().split('[')[0].strip()
+            
+            reply = QMessageBox.question(self, "Confirm", f"Remove '{display_name}' and all its sub-items?",
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            if reply == QMessageBox.StandardButton.Yes:
+                try:
+                    # Delete from HKCU (where we store user entries)
+                    self._delete_reg_key(winreg.HKEY_CURRENT_USER, full_path)
+                    
+                    self.load_context_entries()
+                    self.set_status(f"Removed {display_name}", CP_GREEN)
+                except Exception as e:
+                    self.set_status(f"Error removing entry: {str(e)}", CP_RED)
+
+    def move_context_up(self):
+        """Move context menu entry up in order by swapping with previous entry"""
+        row = self.context_table.currentRow()
+        if row <= 0:
+            QMessageBox.warning(self, "Error", "Cannot move up - already at top or no selection!")
+            return
+        
+        # Get current and previous items
+        current_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        prev_row = row - 1
+        
+        # Skip indented items (children) - only swap siblings at same level
+        current_indent = self.context_table.item(row, 0).text().count("↳")
+        prev_indent = self.context_table.item(prev_row, 0).text().count("↳")
+        
+        if current_indent != prev_indent:
+            QMessageBox.warning(self, "Error", "Cannot swap items at different nesting levels!")
+            return
+            
+        prev_path = self.context_table.item(prev_row, 0).data(Qt.ItemDataRole.UserRole)
+        
+        try:
+            # Swap by renaming keys
+            self._swap_registry_keys(current_path, prev_path)
+            self.load_context_entries()
+            self.context_table.selectRow(prev_row)
+            self.set_status("Moved entry up", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Error moving entry: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to move entry: {str(e)}")
+
+    def move_context_down(self):
+        """Move context menu entry down in order by swapping with next entry"""
+        row = self.context_table.currentRow()
+        if row < 0 or row >= self.context_table.rowCount() - 1:
+            QMessageBox.warning(self, "Error", "Cannot move down - already at bottom or no selection!")
+            return
+        
+        # Get current and next items
+        current_path = self.context_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        next_row = row + 1
+        
+        # Skip indented items (children) - only swap siblings at same level
+        current_indent = self.context_table.item(row, 0).text().count("↳")
+        next_indent = self.context_table.item(next_row, 0).text().count("↳")
+        
+        if current_indent != next_indent:
+            QMessageBox.warning(self, "Error", "Cannot swap items at different nesting levels!")
+            return
+            
+        next_path = self.context_table.item(next_row, 0).data(Qt.ItemDataRole.UserRole)
+        
+        try:
+            # Swap by renaming keys
+            self._swap_registry_keys(current_path, next_path)
+            self.load_context_entries()
+            self.context_table.selectRow(next_row)
+            self.set_status("Moved entry down", CP_GREEN)
+        except Exception as e:
+            self.set_status(f"Error moving entry: {str(e)}", CP_RED)
+            QMessageBox.critical(self, "Error", f"Failed to move entry: {str(e)}")
+    
+    def _swap_registry_keys(self, path1, path2):
+        """Swap two registry keys by renaming them"""
+        import time
+        
+        # Extract key names
+        name1 = path1.split('\\')[-1]
+        name2 = path2.split('\\')[-1]
+        parent = "\\".join(path1.split('\\')[:-1])
+        
+        # Use temporary name to avoid conflicts
+        temp_name = f"_TEMP_SWAP_{int(time.time())}"
+        temp_path = f"{parent}\\{temp_name}"
+        
+        # Step 1: Rename path1 to temp
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, path1, temp_path)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, path1)
+        
+        # Step 2: Rename path2 to path1's name
+        new_path1 = f"{parent}\\{name1}"
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, path2, new_path1)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, path2)
+        
+        # Step 3: Rename temp to path2's name
+        new_path2 = f"{parent}\\{name2}"
+        self._copy_reg_key(winreg.HKEY_CURRENT_USER, temp_path, new_path2)
+        self._delete_reg_key(winreg.HKEY_CURRENT_USER, temp_path)
 
     def _copy_reg_key(self, hkey, src, dst):
         with winreg.OpenKey(hkey, src, 0, winreg.KEY_READ) as skey:
@@ -568,14 +928,21 @@ class EnvVariableManager(QMainWindow):
                 except OSError: break
 
     def _delete_reg_key(self, hkey, path):
+        """Helper to delete registry key and all subkeys"""
         try:
+            # First delete subkeys
             key = winreg.OpenKey(hkey, path, 0, winreg.KEY_ALL_ACCESS)
-            while True:
-                try: self._delete_reg_key(key, winreg.EnumKey(key, 0))
-                except OSError: break
+            try:
+                while True:
+                    subkey = winreg.EnumKey(key, 0)
+                    self._delete_reg_key(key, subkey)
+            except OSError:
+                pass
             winreg.CloseKey(key)
+            # Then delete the key itself
             winreg.DeleteKey(hkey, path)
-        except: pass
+        except FileNotFoundError:
+            pass # Already gone
 
     # ===== BACKUP / RESTORE METHODS =====
     def get_context_menu_data(self):
