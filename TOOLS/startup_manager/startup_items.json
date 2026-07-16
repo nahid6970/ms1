@@ -945,5 +945,14 @@
     "hide_terminal": true,
     "script_enabled": false,
     "added_at": 1784230286.287112
+  },
+  {
+    "name": "RobloxPlayerBeta",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Roblox\\Versions\\version-ddf02245bdbb428c\\RobloxPlayerBeta.exe"
+    ],
+    "Command": "--launch-to-tray",
+    "type": "App",
+    "added_at": 1784230866.7609577
   }
 ]

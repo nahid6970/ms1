@@ -678,7 +678,50 @@ class MainWindow(QMainWindow):
                 self.items.extend(dlg.selected_items)
                 self.save_items()
                 self.populate_lists()
-    def scan_registry(self): self.update_status("REG SCAN COMPLETE")
+    def scan_registry(self):
+        self.update_status("SCANNING REGISTRY...")
+        found, names = [], {i["name"].lower() for i in self.items}
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as key:
+                info = winreg.QueryInfoKey(key)
+                for i in range(info[1]):
+                    name, val, val_type = winreg.EnumValue(key, i)
+                    if name.lower() not in names:
+                        val_str = str(val).strip()
+                        path = ""
+                        args = ""
+                        if val_str.startswith('"'):
+                            end_quote = val_str.find('"', 1)
+                            if end_quote != -1:
+                                path = val_str[1:end_quote]
+                                args = val_str[end_quote+1:].strip()
+                            else:
+                                path = val_str
+                        else:
+                            parts = val_str.split(' ', 1)
+                            path = parts[0]
+                            if len(parts) > 1:
+                                args = parts[1]
+                        
+                        found.append({
+                            "name": name,
+                            "paths": [path],
+                            "Command": args,
+                            "type": "App" if path.lower().endswith(".exe") else "Command",
+                            "added_at": time.time()
+                        })
+        except Exception as e:
+            self.update_status(f"REG SCAN FAILED: {e}")
+            return
+            
+        if found:
+            dlg = ScanResultsDialog(found, self, title="SYSTEM // REGISTRY_SCAN_RESULTS", confirm_text="IMPORT SELECTED")
+            if dlg.exec():
+                self.items.extend(dlg.selected_items)
+                self.save_items()
+                self.populate_lists()
+        else:
+            self.update_status("NO NEW REGISTRY ENTRIES")
     def scan_tasks(self): self.update_status("TASK SCAN COMPLETE")
     def delete_matching_shortcuts(self): self.update_status("PRUNING...")
     def filter_items(self, text):
