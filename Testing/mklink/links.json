@@ -4,8 +4,8 @@
         "items": [
             {
                 "type": "file",
-                "target": "C:/@delta/db/5018_cell/data.json",
-                "fake": "C:/@delta/ms1/@Flask/5018_cell/data.json"
+                "target": "C:\\@delta\\db\\5018_cell\\data.json",
+                "fake": "C:\\@delta\\ms1\\@Flask\\5018_cell\\data.json"
             }
         ]
     },
@@ -14,8 +14,8 @@
         "items": [
             {
                 "type": "file",
-                "target": "C:/@delta/db/5000_myhome/data.json",
-                "fake": "C:/@delta/ms1/@Flask/5000_myhome/data.json"
+                "target": "C:\\@delta\\db\\5000_myhome\\data.json",
+                "fake": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\data.json"
             }
         ]
     },
@@ -195,6 +195,17 @@
                 "type": "file",
                 "target": "C:\\@delta\\ms1\\linux\\linux\\neovim\\init.lua",
                 "fake": "C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua"
+            }
+        ],
+        "copy_mode": false
+    },
+    {
+        "name": "notepad++",
+        "items": [
+            {
+                "type": "selective",
+                "target": "C:\\@delta\\ms1\\asset\\notepadplusplus\\Notepad++",
+                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++"
             }
         ],
         "copy_mode": false

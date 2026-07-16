@@ -253,7 +253,10 @@ class SelectiveFileDialog(QDialog):
         layout.addLayout(btn_layout)
 
         # Scan files
-        self.checkboxes = []  # list of (relative_path, QCheckBox)
+        self.checkboxes = []      # list of (relative_path, QCheckBox) — files only
+        self.folder_cbs = {}      # dir_rel_path -> QCheckBox
+        self.folder_children = {} # dir_rel_path -> list of file QCheckBox refs
+        self._updating_folders = False  # guard against recursive signals
         self._scan_files(target_path, previously_selected, previously_excluded)
         self._update_count()
 
@@ -264,14 +267,22 @@ class SelectiveFileDialog(QDialog):
             self.scroll_vlayout.addWidget(lbl)
             return
 
+        # Collect all files with their relative paths
         all_files = []
+        all_dirs = set()
         for root, dirs, files in os.walk(target_path):
+            rel_root = os.path.relpath(root, target_path)
+            if rel_root != ".":
+                # Add this dir and all parent dirs
+                parts = rel_root.replace("\\", "/").split("/")
+                for i in range(len(parts)):
+                    all_dirs.add(os.path.join(*parts[:i+1]))
             for fname in files:
                 full = os.path.join(root, fname)
                 rel = os.path.relpath(full, target_path)
                 all_files.append(rel)
 
-        all_files.sort(key=str.lower)
+        all_files.sort(key=lambda x: x.lower())
 
         if not all_files:
             lbl = QLabel("No files found in this directory.")
@@ -279,58 +290,214 @@ class SelectiveFileDialog(QDialog):
             self.scroll_vlayout.addWidget(lbl)
             return
 
-        # Determine checked state:
-        # If previously_selected exists, only those are checked.
-        # If previously_excluded exists, everything except those is checked.
-        # Otherwise, all checked by default.
-        for rel in all_files:
-            cb = QCheckBox(rel)
-            cb.setStyleSheet(f"""
-                QCheckBox {{
-                    color: {CP_TEXT};
-                    padding: 3px 5px;
-                    border: none;
-                }}
-                QCheckBox:hover {{
-                    color: {CP_CYAN};
-                }}
-                QCheckBox::indicator {{
-                    width: 14px;
-                    height: 14px;
-                    border: 1px solid {CP_DIM};
-                    background: {CP_PANEL};
-                }}
-                QCheckBox::indicator:checked {{
-                    background: {CP_CYAN};
-                    border-color: {CP_CYAN};
-                }}
-            """)
+        # Build ordered list: for each directory, insert folder header then its files
+        # Group files by their immediate parent directory
+        # We'll output items in sorted order, inserting folder headers as we encounter new dirs
 
+        # Determine file checked state helper
+        def is_file_checked(rel):
             if previously_selected is not None:
-                cb.setChecked(rel in previously_selected)
+                return rel in previously_selected
             elif previously_excluded is not None:
-                cb.setChecked(rel not in previously_excluded)
-            else:
-                cb.setChecked(True)
+                return rel not in previously_excluded
+            return True
+
+        # Compute nesting depth for indentation
+        def depth(rel_path):
+            return rel_path.replace("\\", "/").count("/")
+
+        # Track which folders we've already inserted
+        inserted_dirs = set()
+
+        # Sort dirs for ordered insertion
+        sorted_dirs = sorted(all_dirs, key=lambda x: x.lower())
+
+        # Style templates
+        file_style = f"""
+            QCheckBox {{
+                color: {CP_TEXT};
+                padding: 2px 5px;
+                border: none;
+            }}
+            QCheckBox:hover {{
+                color: {CP_CYAN};
+            }}
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {CP_CYAN};
+                border-color: {CP_CYAN};
+            }}
+        """
+
+        folder_style = f"""
+            QCheckBox {{
+                color: {CP_YELLOW};
+                padding: 4px 5px;
+                border: none;
+                font-weight: bold;
+            }}
+            QCheckBox:hover {{
+                color: #FFFFFF;
+            }}
+            QCheckBox::indicator {{
+                width: 16px;
+                height: 16px;
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+            }}
+            QCheckBox::indicator:checked {{
+                background: {CP_YELLOW};
+                border-color: {CP_YELLOW};
+            }}
+        """
+
+        # Initialize folder_children for all dirs
+        for d in all_dirs:
+            self.folder_children[d] = []
+
+        # Process files in order, inserting folder headers as needed
+        for rel in all_files:
+            parent = os.path.dirname(rel)
+
+            # Insert any parent folder checkboxes we haven't yet
+            if parent and parent != ".":
+                parts = parent.replace("\\", "/").split("/")
+                for i in range(len(parts)):
+                    ancestor = os.path.join(*parts[:i+1])
+                    if ancestor not in inserted_dirs:
+                        inserted_dirs.add(ancestor)
+                        d = depth(ancestor)
+                        indent = d * 20
+                        folder_cb = QCheckBox(f"📁 {ancestor}")
+                        folder_cb.setStyleSheet(folder_style)
+                        folder_cb.setChecked(True)  # default, will update after files added
+
+                        # Wrap in a widget for indentation
+                        wrapper = QWidget()
+                        wrapper_layout = QHBoxLayout(wrapper)
+                        wrapper_layout.setContentsMargins(indent, 0, 0, 0)
+                        wrapper_layout.addWidget(folder_cb)
+                        wrapper.setStyleSheet("border: none;")
+
+                        self.scroll_vlayout.addWidget(wrapper)
+                        self.folder_cbs[ancestor] = folder_cb
+                        folder_cb.stateChanged.connect(
+                            lambda state, dir_key=ancestor: self._on_folder_toggled(dir_key, state)
+                        )
+
+            # Create file checkbox
+            file_depth = depth(rel)
+            indent = file_depth * 20
+            fname_only = os.path.basename(rel)
+            cb = QCheckBox(f"  {fname_only}")
+            cb.setStyleSheet(file_style)
+            cb.setChecked(is_file_checked(rel))
+            cb.setProperty("rel_path", rel)
+
+            wrapper = QWidget()
+            wrapper_layout = QHBoxLayout(wrapper)
+            wrapper_layout.setContentsMargins(indent, 0, 0, 0)
+            wrapper_layout.addWidget(cb)
+            wrapper.setStyleSheet("border: none;")
 
             cb.stateChanged.connect(self._update_count)
-            self.scroll_vlayout.addWidget(cb)
+            cb.stateChanged.connect(lambda state, file_rel=rel: self._on_file_toggled(file_rel))
+            self.scroll_vlayout.addWidget(wrapper)
             self.checkboxes.append((rel, cb))
+
+            # Register file under its parent folder and all ancestor folders
+            if parent and parent != ".":
+                parts = parent.replace("\\", "/").split("/")
+                for i in range(len(parts)):
+                    ancestor = os.path.join(*parts[:i+1])
+                    if ancestor in self.folder_children:
+                        self.folder_children[ancestor].append(cb)
+
+        # Also handle root-level files (no parent dir) — they don't need folder headers
+        # They're already added above with indent=0
+
+        # Update folder checked states based on their children
+        self._sync_all_folder_states()
+
+    def _on_folder_toggled(self, dir_key, state):
+        """When a folder checkbox is toggled, toggle all its child files."""
+        if self._updating_folders:
+            return
+        self._updating_folders = True
+        checked = state == 2  # Qt.CheckState.Checked
+        children = self.folder_children.get(dir_key, [])
+        for cb in children:
+            cb.setChecked(checked)
+
+        # Also toggle sub-folder checkboxes
+        for fdir, fcb in self.folder_cbs.items():
+            if fdir != dir_key and fdir.startswith(dir_key + os.sep):
+                fcb.setChecked(checked)
+
+        self._updating_folders = False
+        self._update_count()
+
+    def _on_file_toggled(self, file_rel):
+        """When a file is toggled, update parent folder checkbox state."""
+        if self._updating_folders:
+            return
+        self._updating_folders = True
+        self._sync_all_folder_states()
+        self._updating_folders = False
+
+    def _sync_all_folder_states(self):
+        """Sync folder checkbox states based on their children."""
+        # Process deepest folders first
+        sorted_dirs = sorted(self.folder_cbs.keys(), key=lambda x: x.count(os.sep), reverse=True)
+        for dir_key in sorted_dirs:
+            children = self.folder_children.get(dir_key, [])
+            if not children:
+                continue
+            all_checked = all(cb.isChecked() for cb in children)
+            none_checked = not any(cb.isChecked() for cb in children)
+            folder_cb = self.folder_cbs[dir_key]
+            folder_cb.blockSignals(True)
+            folder_cb.setChecked(all_checked)
+            folder_cb.blockSignals(False)
 
     def _apply_filter(self, text):
         text = text.lower()
+        # Show/hide file checkboxes and their wrappers
+        visible_dirs = set()
         for rel, cb in self.checkboxes:
-            cb.setVisible(text in rel.lower())
+            matches = text in rel.lower()
+            cb.parentWidget().setVisible(matches)
+            if matches:
+                # Mark all ancestor dirs as visible
+                parent = os.path.dirname(rel)
+                if parent and parent != ".":
+                    parts = parent.replace("\\", "/").split("/")
+                    for i in range(len(parts)):
+                        visible_dirs.add(os.path.join(*parts[:i+1]))
+
+        # Show/hide folder checkboxes
+        for dir_key, fcb in self.folder_cbs.items():
+            if not text:
+                fcb.parentWidget().setVisible(True)
+            else:
+                fcb.parentWidget().setVisible(dir_key in visible_dirs or text in dir_key.lower())
 
     def _select_all(self):
         for rel, cb in self.checkboxes:
-            if cb.isVisible():
+            if cb.parentWidget().isVisible():
                 cb.setChecked(True)
+        self._sync_all_folder_states()
 
     def _deselect_all(self):
         for rel, cb in self.checkboxes:
-            if cb.isVisible():
+            if cb.parentWidget().isVisible():
                 cb.setChecked(False)
+        self._sync_all_folder_states()
 
     def _update_count(self):
         total = len(self.checkboxes)
