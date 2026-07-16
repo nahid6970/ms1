@@ -11554,15 +11554,22 @@
                 const plaintext = JSON.stringify(accounts);
                 const encryptedBase64 = await encryptData(plaintext, password);
                 
-                const blob = new Blob([encryptedBase64], { type: "text/plain" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = "ai_accounts_backup.enc";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                const res = await fetch('/api/save-backup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: activeProject,
+                        filename: "ai_accounts_backup.enc",
+                        content: encryptedBase64
+                    })
+                });
+                
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to save file.");
+                }
+                
+                alert(`Successfully exported API keys to main TUI app project directory:\n${data.path}`);
             } catch (e) {
                 console.error("Encryption export failed:", e);
                 alert("Failed to export: " + e.message);

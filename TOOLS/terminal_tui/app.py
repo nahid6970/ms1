@@ -4051,6 +4051,24 @@ def api_ai_command():
         "tool_logs": tool_logs
     })
 
+@app.route('/api/save-backup', methods=['POST'])
+def api_save_backup():
+    data = request.json or {}
+    filename = data.get('filename', 'ai_accounts_backup.enc')
+    content = data.get('content', '')
+    
+    if not content:
+        return jsonify({"error": "Content is required"}), 400
+        
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    target_file = os.path.join(app_dir, filename)
+    try:
+        with open(target_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return jsonify({"success": True, "path": target_file})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/ai-usage', methods=['GET'])
 def api_ai_usage():
     import json
