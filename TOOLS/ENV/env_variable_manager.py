@@ -31,7 +31,7 @@ class EnvVariableManager(QMainWindow):
         self.resize(1300, 750)
         
         # Initialize Icons Directory
-        self.icons_dir = os.path.join(os.path.expanduser("~"), ".env_manager", "icons")
+        self.icons_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon")
         os.makedirs(self.icons_dir, exist_ok=True)
         
         # Apply Cyberpunk Theme
@@ -613,15 +613,11 @@ class EnvVariableManager(QMainWindow):
         cmd_edit.setMaximumHeight(60)
         form_layout.addRow("Command:", cmd_edit)
         
-        # Icon
-        icon_layout = QHBoxLayout()
-        icon_edit = QLineEdit()
-        icon_edit.setPlaceholderText("Optional icon path")
-        icon_browse = QPushButton("Browse...")
-        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
-        icon_layout.addWidget(icon_edit)
-        icon_layout.addWidget(icon_browse)
-        form_layout.addRow("Icon:", icon_layout)
+        # SVG Icon Code
+        svg_edit = QTextEdit()
+        svg_edit.setPlaceholderText("Paste raw SVG XML code here (e.g. <svg ...> ... </svg>)")
+        svg_edit.setMaximumHeight(100)
+        form_layout.addRow("SVG Icon Code:", svg_edit)
         
         dialog_layout.addLayout(form_layout)
         
@@ -655,26 +651,19 @@ class EnvVariableManager(QMainWindow):
         
         name = label_edit.text().strip()
         cmd = cmd_edit.toPlainText().strip()
-        icon = icon_edit.text().strip()
+        svg_content = svg_edit.toPlainText().strip()
         
         if not name or not cmd:
             QMessageBox.warning(self, "Error", "Label and Command are required!")
             return
             
-        svg_content = None
-        if icon.lower().endswith(".svg") and os.path.exists(icon):
-            try:
-                with open(icon, 'r', encoding='utf-8') as f:
-                    svg_content = f.read()
-            except Exception as e:
-                print(f"Could not read SVG file: {e}")
-        elif icon.startswith("<svg"):
-            svg_content = icon
-            
+        icon = ""
         if svg_content:
             compiled_ico = self.compile_svg_to_ico(svg_content, name)
             if compiled_ico:
                 icon = compiled_ico
+        else:
+            svg_content = None
         
         try:
             if parent_path:
@@ -707,9 +696,9 @@ class EnvVariableManager(QMainWindow):
         type_text = self.context_table.item(row, 1).text()
         old_cmd = self.context_table.item(row, 2).text()
         
-        # Get current label (MUIVerb) from registry
+        # Get current label (MUIVerb) and IconSVG from registry
         old_label = old_name
-        old_icon = ""
+        old_svg = ""
         try:
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_READ)
             try:
@@ -717,7 +706,7 @@ class EnvVariableManager(QMainWindow):
             except:
                 pass
             try:
-                old_icon, _ = winreg.QueryValueEx(key, "Icon")
+                old_svg, _ = winreg.QueryValueEx(key, "IconSVG")
             except:
                 pass
             winreg.CloseKey(key)
@@ -745,14 +734,12 @@ class EnvVariableManager(QMainWindow):
             cmd_edit.setMaximumHeight(60)
             form_layout.addRow("Command:", cmd_edit)
         
-        # Icon field
-        icon_layout = QHBoxLayout()
-        icon_edit = QLineEdit(old_icon)
-        icon_browse = QPushButton("Browse...")
-        icon_browse.clicked.connect(lambda: self._browse_icon(icon_edit))
-        icon_layout.addWidget(icon_edit)
-        icon_layout.addWidget(icon_browse)
-        form_layout.addRow("Icon Path:", icon_layout)
+        # SVG Icon Code field
+        svg_edit = QTextEdit()
+        svg_edit.setPlainText(old_svg)
+        svg_edit.setPlaceholderText("Paste raw SVG XML code here (e.g. <svg ...> ... </svg>)")
+        svg_edit.setMaximumHeight(100)
+        form_layout.addRow("SVG Icon Code:", svg_edit)
         
         dialog_layout.addLayout(form_layout)
         
@@ -767,7 +754,7 @@ class EnvVariableManager(QMainWindow):
         
         new_label = label_edit.text().strip()
         new_cmd = cmd_edit.toPlainText().strip() if cmd_edit else "(Cascading Menu)"
-        new_icon = icon_edit.text().strip()
+        svg_content = svg_edit.toPlainText().strip()
         
         if not new_label:
             return
@@ -775,20 +762,13 @@ class EnvVariableManager(QMainWindow):
         if type_text == "ENTRY" and new_cmd:
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
 
-        svg_content = None
-        if new_icon.lower().endswith(".svg") and os.path.exists(new_icon):
-            try:
-                with open(new_icon, 'r', encoding='utf-8') as f:
-                    svg_content = f.read()
-            except:
-                pass
-        elif new_icon.startswith("<svg"):
-            svg_content = new_icon
-            
+        new_icon = ""
         if svg_content:
             compiled_ico = self.compile_svg_to_ico(svg_content, new_label)
             if compiled_ico:
                 new_icon = compiled_ico
+        else:
+            svg_content = None
 
         try:
             # Update the existing entry (don't rename the key, just update MUIVerb)
@@ -799,7 +779,7 @@ class EnvVariableManager(QMainWindow):
                 # Set icon if provided
                 if new_icon:
                     winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, new_icon)
-                elif old_icon and not new_icon:
+                else:
                     # Remove icon if cleared
                     try:
                         winreg.DeleteValue(key, "Icon")
