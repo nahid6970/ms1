@@ -226,7 +226,7 @@
     "added_at": 1768273756.591541,
     "name": "Disable Defender",
     "paths": [
-      "C:\\@delta\\ms1\\scripts\\disable_defender.ps1"
+      "C:\\@delta\\ms1\\scripts\\defender\\disable_defender.ps1"
     ],
     "script_enabled": false,
     "type": "Command"
