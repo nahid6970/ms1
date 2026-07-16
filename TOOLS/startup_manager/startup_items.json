@@ -455,14 +455,17 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
-    "ExecutableType": "pythonw",
-    "added_at": 1768273756.591541,
     "name": "Flask - 5016 - Sync W Android",
+    "type": "Command",
     "paths": [
       "pythonw"
     ],
-    "type": "Command"
+    "Command": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py\"",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5012_share_images\\share_images.py",
@@ -616,7 +619,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784168118.3995082
   },
   {
     "Command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\n8n.ahk",
