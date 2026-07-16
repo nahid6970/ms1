@@ -3582,6 +3582,9 @@ def api_ai_command():
                     break
         except Exception as e:
             print("Error finding project path:", e)
+    if not project_path:
+        project_path = r"C:\@delta\ms1\TOOLS\terminal_tui"
+        
     provider = req.get('provider', 'gemini')
     model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
@@ -3589,7 +3592,7 @@ def api_ai_command():
     tools_enabled = req.get('tools_enabled', [])
     tavily_api_key = req.get('tavily_api_key', '')
     
-    system_instruction = custom_system if custom_system else (
+    base_instruction = custom_system if custom_system else (
         "You are an AI assistant and command line helper for Windows. "
         "Help the user with terminal commands, coding, and general tasks. "
         "You have access to tools to read/write files, list directories, and run shell commands. "
@@ -3603,6 +3606,7 @@ def api_ai_command():
         "7. The backend loops automatically. Provide your final response only when the task is complete.\n"
         "Always use standard Markdown formatting."
     )
+    system_instruction = f"{base_instruction}\nInitial working directory: {project_path}"
     
     import requests
     import ai_tools
