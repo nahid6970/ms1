@@ -3572,6 +3572,16 @@ def api_ai_command():
     prompt = req.get('prompt', '')
     api_key = req.get('api_key', '')
     project_name = req.get('project', '')
+    project_path = None
+    if project_name:
+        try:
+            projects = get_config_val("projects", list)
+            for p in projects:
+                if p.get("name") == project_name:
+                    project_path = p.get("path")
+                    break
+        except Exception as e:
+            print("Error finding project path:", e)
     provider = req.get('provider', 'gemini')
     model = req.get('model', '')
     custom_system = req.get('system_instruction', '').strip()
@@ -3675,7 +3685,7 @@ def api_ai_command():
                         socketio.emit('ai-status', {'text': f'Running: {func_name}...'}, namespace='/pty')
                         socketio.emit('ai-activity-step', {'name': func_name, 'args': args}, namespace='/pty')
 
-                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key, cwd=project_path)
                     tools_used.append(func_name)
                     tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
@@ -3762,7 +3772,7 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
-                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key, cwd=project_path)
                     tools_used.append(func_name)
                     tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
@@ -3849,7 +3859,7 @@ def api_ai_command():
                         args = json.loads(tc.get("function", {}).get("arguments", "{}"))
                     except:
                         args = {}
-                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key)
+                    result_str = ai_tools.execute_tool(func_name, args, tavily_api_key=tavily_api_key, cwd=project_path)
                     tools_used.append(func_name)
                     tool_logs.append({"name": func_name, "args": args, "result": result_str[:2000] + ("..." if len(result_str) > 2000 else "")})
                     payload["messages"].append({
@@ -3980,7 +3990,7 @@ def api_ai_command():
                         socketio.emit('ai-status', {'text': f'Running: {fname}...'}, namespace='/pty')
                         socketio.emit('ai-activity-step', {'name': fname, 'args': fargs}, namespace='/pty')
 
-                    res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key)
+                    res_str = ai_tools.execute_tool(fname, fargs, tavily_api_key=tavily_api_key, cwd=project_path)
                     tools_used.append(fname)
                     tool_logs.append({"name": fname, "args": fargs, "result": res_str[:2000] + ("..." if len(res_str) > 2000 else "")})
                     tool_responses.append({

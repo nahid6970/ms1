@@ -5,11 +5,17 @@ import datetime
 import json
 import requests
 
-def execute_tool(tool_name, arguments, tavily_api_key=None):
+def execute_tool(tool_name, arguments, tavily_api_key=None, cwd=None):
     """Executes a local tool and returns the result as a string."""
     try:
-        if tool_name == "read_file":
+        if tool_name in ("read_file", "write_file", "delete_file"):
             filepath = arguments.get('filepath') or arguments.get('path')
+            if filepath and cwd and not os.path.isabs(filepath):
+                filepath = os.path.join(cwd, filepath)
+            arguments['filepath'] = filepath
+
+        if tool_name == "read_file":
+            filepath = arguments.get('filepath')
             if not filepath:
                 return "Error: filepath argument is required."
             if not os.path.exists(filepath):
@@ -24,7 +30,7 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
                 return content
 
         elif tool_name == "write_file":
-            filepath = arguments.get('filepath') or arguments.get('path')
+            filepath = arguments.get('filepath')
             content = arguments.get('content', '')
             if not filepath:
                 return "Error: filepath argument is required."
@@ -38,7 +44,7 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
             return f"Successfully wrote to {filepath}."
 
         elif tool_name == "delete_file":
-            filepath = arguments.get('filepath') or arguments.get('path')
+            filepath = arguments.get('filepath')
             if not filepath:
                 return "Error: filepath argument is required."
             if not os.path.exists(filepath):
@@ -54,6 +60,8 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
                 
         elif tool_name == "list_directory":
             path = arguments.get('path', '.')
+            if cwd and not os.path.isabs(path):
+                path = os.path.normpath(os.path.join(cwd, path))
             if not os.path.exists(path):
                 return f"Error: Directory not found: {path}"
             
@@ -65,7 +73,7 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
                 f"OS: {platform.system()} {platform.release()}",
                 f"Python: {sys.version}",
                 f"Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                f"CWD: {os.getcwd()}"
+                f"CWD: {cwd if cwd else os.getcwd()}"
             ]
             return "\n".join(info)
 
@@ -85,7 +93,7 @@ def execute_tool(tool_name, arguments, tavily_api_key=None):
             if not command: return "Error: No command."
             import subprocess
             try:
-                res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
+                res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30, cwd=cwd)
                 out = (res.stdout or "") + (res.stderr or "")
                 return out[:8000] if out.strip() else f"Done (Code {res.returncode})"
             except subprocess.TimeoutExpired:
