@@ -367,7 +367,7 @@ def notification_manager_worker():
                 if item.get("status") == "uploading":
                     bullet_color = "#eab308"  # Yellow for progress
                     size_color = "#eab308"
-                    size_text = f"Size: {item.get('size_str', '0 B')} & {item.get('percent', 0)}%"
+                    size_text = f"{item.get('size_str', '0 B')} -> {item.get('percent', 0)}%"
                     sep_text = ""
                     time_text = ""
                 else:
