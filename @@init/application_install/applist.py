@@ -382,7 +382,7 @@ def refresh_app_list():
         # Frame for action buttons (initially hidden)
         actions_frame = tk.Frame(app_frame, bg="#1d2027")
 
-        chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
+        chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat", anchor="w")
         chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
         chkbox_bt.bind("<Button-1>", lambda event, a_frame=actions_frame: toggle_actions(a_frame))
 
