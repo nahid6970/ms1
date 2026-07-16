@@ -302,6 +302,7 @@ class EnvVariableManager(QMainWindow):
             self.generate_cmd_loader()
             self.generate_powershell_loader()
             self.generate_bash_loader()
+            self.export_config(silent=True)
             self.set_status("Aliases saved & scripts generated", CP_GREEN)
         except Exception as e:
             self.set_status(f"Error saving aliases: {str(e)}", CP_RED)
@@ -475,6 +476,7 @@ class EnvVariableManager(QMainWindow):
                 self._create_separator_entry(rf"Software\Classes\Directory\Background\shell\{name}")
             
             self.load_context_entries()
+            self.export_config(silent=True)
             self.set_status("Separator added", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
@@ -569,6 +571,7 @@ class EnvVariableManager(QMainWindow):
                 if cb_background.isChecked():
                     self._create_group_entry(rf"Software\Classes\Directory\Background\shell\{name}")
             self.load_context_entries()
+            self.export_config(silent=True)
             self.set_status(f"Added context group: {name}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to add group: {str(e)}")
@@ -670,6 +673,7 @@ class EnvVariableManager(QMainWindow):
                 # Add as child of selected group
                 self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd, icon, svg_content)
                 self.load_context_entries()
+                self.export_config(silent=True)
                 self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
             else:
                 # Create entries based on selection
@@ -681,6 +685,7 @@ class EnvVariableManager(QMainWindow):
                     self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd, icon, svg_content)
                 
                 self.load_context_entries()
+                self.export_config(silent=True)
                 self.set_status(f"Added context menu entry: {name}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to add entry: {str(e)}")
@@ -802,6 +807,7 @@ class EnvVariableManager(QMainWindow):
                     winreg.SetValue(cmd_key, "", winreg.REG_SZ, new_cmd)
                 
             self.load_context_entries()
+            self.export_config(silent=True)
             self.set_status(f"Updated context menu entry: {new_label}", CP_GREEN)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to update entry: {str(e)}")
@@ -846,6 +852,7 @@ class EnvVariableManager(QMainWindow):
                     self._delete_reg_key(winreg.HKEY_CURRENT_USER, full_path)
                     
                     self.load_context_entries()
+                    self.export_config(silent=True)
                     self.set_status(f"Removed {display_name}", CP_GREEN)
                 except Exception as e:
                     self.set_status(f"Error removing entry: {str(e)}", CP_RED)
@@ -875,6 +882,7 @@ class EnvVariableManager(QMainWindow):
             # Swap by renaming keys
             self._swap_registry_keys(current_path, prev_path)
             self.load_context_entries()
+            self.export_config(silent=True)
             self.context_table.selectRow(prev_row)
             self.set_status("Moved entry up", CP_GREEN)
         except Exception as e:
@@ -906,6 +914,7 @@ class EnvVariableManager(QMainWindow):
             # Swap by renaming keys
             self._swap_registry_keys(current_path, next_path)
             self.load_context_entries()
+            self.export_config(silent=True)
             self.context_table.selectRow(next_row)
             self.set_status("Moved entry down", CP_GREEN)
         except Exception as e:
@@ -1112,7 +1121,7 @@ class EnvVariableManager(QMainWindow):
                 winreg.CreateKey(hkey, f"{fp}\\shell")
                 self._import_shell_entries(hkey, f"{fp}\\shell", d["children"])
 
-    def export_config(self):
+    def export_config(self, silent=False):
         path = os.path.join(os.path.dirname(__file__), "data.json")
         try:
             config = {
@@ -1123,7 +1132,8 @@ class EnvVariableManager(QMainWindow):
             }
             with open(path, 'w', encoding='utf-8') as f: json.dump(config, f, indent=4)
             self.set_status("Exported to data.json", CP_GREEN)
-            QMessageBox.information(self, "Success", f"Exported to {path}")
+            if not silent:
+                QMessageBox.information(self, "Success", f"Exported to {path}")
         except Exception as e:
             self.set_status("Export failed", CP_RED)
 
