@@ -42,6 +42,19 @@ class EnvVariableManager(QMainWindow):
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
         
+        # Top Bar (Header + Settings button)
+        top_bar = QHBoxLayout()
+        title_label = QLabel("ALIAS & CONTEXT MANAGER")
+        title_label.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {CP_YELLOW};")
+        settings_btn = QPushButton("⚙️ SETTINGS")
+        settings_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_YELLOW}; padding: 5px 15px; font-weight: bold;")
+        settings_btn.clicked.connect(self.show_settings)
+        
+        top_bar.addWidget(title_label)
+        top_bar.addStretch()
+        top_bar.addWidget(settings_btn)
+        main_layout.addLayout(top_bar)
+        
         # Status Bar
         self.status_label = QLabel("SYSTEM READY")
         self.status_label.setStyleSheet(f"color: {CP_GREEN}; font-weight: bold; padding: 5px;")
@@ -50,7 +63,6 @@ class EnvVariableManager(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.create_alias_tab(), "ALIASES")
         self.tabs.addTab(self.create_context_tab(), "CONTEXT MENU")
-        self.tabs.addTab(self.create_backup_tab(), "BACKUP/RESTORE")
         main_layout.addWidget(self.tabs)
         
         # Add status bar at bottom
@@ -242,40 +254,39 @@ class EnvVariableManager(QMainWindow):
         self.load_context_entries()
         return widget
 
-    def create_backup_tab(self):
-        """Create backup and restore tab"""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+    def show_settings(self):
+        """Show settings dialog"""
+        from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QLabel
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Settings")
+        dialog.setMinimumWidth(400)
+        layout = QVBoxLayout(dialog)
         
-        info = QLabel("💾 BACKUP & RESTORE CONFIGURATION")
-        info.setStyleSheet(f"font-size: 14pt; color: {CP_YELLOW}; padding: 10px;")
-        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(info)
+        title = QLabel("⚙️ SYSTEM SETTINGS")
+        title.setStyleSheet(f"font-size: 12pt; font-weight: bold; color: {CP_YELLOW}; margin-bottom: 10px;")
+        layout.addWidget(title)
         
-        desc = QLabel("Export all command aliases and context menu entries to a JSON file.")
-        desc.setStyleSheet(f"color: {CP_SUBTEXT}; padding: 10px;")
-        desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(desc)
-        
-        btn_layout = QHBoxLayout()
-        backup_btn = QPushButton("📤 EXPORT TO data.json")
+        # Import button
         import_btn = QPushButton("📥 IMPORT FROM data.json")
+        import_btn.setMinimumHeight(40)
+        import_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_ORANGE}; color: {CP_ORANGE}; font-weight: bold;")
+        import_btn.clicked.connect(lambda: [self.import_config(), dialog.accept()])
+        layout.addWidget(import_btn)
         
-        backup_btn.setMinimumHeight(60)
-        import_btn.setMinimumHeight(60)
+        layout.addSpacing(10)
         
-        backup_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_CYAN}; color: {CP_CYAN}; font-size: 12pt;")
-        import_btn.setStyleSheet(f"background-color: {CP_PANEL}; border: 2px solid {CP_ORANGE}; color: {CP_ORANGE}; font-size: 12pt;")
-        
-        backup_btn.clicked.connect(self.export_config)
-        import_btn.clicked.connect(self.import_config)
-        
-        btn_layout.addWidget(backup_btn)
-        btn_layout.addWidget(import_btn)
-        layout.addLayout(btn_layout)
+        # We can add other useful things in future here
+        future_placeholder = QLabel("Additional settings can be added here in the future.")
+        future_placeholder.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic;")
+        layout.addWidget(future_placeholder)
         
         layout.addStretch()
-        return widget
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        dialog.exec()
 
     # ===== ALIAS METHODS =====
     def load_aliases(self):

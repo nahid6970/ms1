@@ -1,16 +1,10 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-16T09:46:27.489437",
+    "timestamp": "2026-07-16T09:52:08.506822",
     "aliases": {
         "ll": "ls -la",
-        "gs": "git status",
-        "ga": "git add",
-        "gc": "git commit",
-        "gp": "git push",
         "gl": "git log --oneline",
-        "cls": "clear",
-        "gg": "gemini",
-        "gr": "gemini --resume latest"
+        "cls": "clear"
     },
     "context_menu": {
         "Background": {
