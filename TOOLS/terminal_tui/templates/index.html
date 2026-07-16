@@ -11454,6 +11454,19 @@
 
         // Encrypt plain string
         async function encryptData(plaintext, password) {
+            if (!window.crypto || !window.crypto.subtle) {
+                // Fallback for non-secure contexts
+                const textBytes = new TextEncoder().encode(plaintext);
+                const passBytes = new TextEncoder().encode(password);
+                const result = new Uint8Array(textBytes.length);
+                for (let i = 0; i < textBytes.length; i++) {
+                    const keyByte = passBytes[i % passBytes.length] ^ (i & 0xFF);
+                    result[i] = textBytes[i] ^ keyByte;
+                }
+                const base64 = btoa(String.fromCharCode.apply(null, result));
+                return "fallback:" + base64;
+            }
+
             const encoder = new TextEncoder();
             const salt = window.crypto.getRandomValues(new Uint8Array(16));
             const iv = window.crypto.getRandomValues(new Uint8Array(12));
@@ -11476,6 +11489,26 @@
 
         // Decrypt package string
         async function decryptData(base64Package, password) {
+            if (base64Package.startsWith("fallback:")) {
+                const actualBase64 = base64Package.substring("fallback:".length);
+                const binary = atob(actualBase64);
+                const packageBytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    packageBytes[i] = binary.charCodeAt(i);
+                }
+                const passBytes = new TextEncoder().encode(password);
+                const result = new Uint8Array(packageBytes.length);
+                for (let i = 0; i < packageBytes.length; i++) {
+                    const keyByte = passBytes[i % passBytes.length] ^ (i & 0xFF);
+                    result[i] = packageBytes[i] ^ keyByte;
+                }
+                return new TextDecoder().decode(result);
+            }
+
+            if (!window.crypto || !window.crypto.subtle) {
+                throw new Error("Secure context required (HTTPS/localhost) to decrypt AES-GCM data.");
+            }
+
             const decoder = new TextDecoder();
             const packageBytes = new Uint8Array(
                 atob(base64Package).split("").map(c => c.charCodeAt(0))
