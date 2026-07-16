@@ -25,7 +25,7 @@ def normalize_path(path):
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu, QCheckBox)
+                             QDialog, QMessageBox, QScrollArea, QFrame, QComboBox, QSizePolicy, QFileDialog, QMenu, QCheckBox, QProgressBar)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QIcon, QColor, QCursor
 
@@ -779,6 +779,169 @@ class AddLinkDialog(QDialog):
         self.accept()
 
 # ==========================================
+# OPERATION STATUS DIALOG
+# ==========================================
+
+class OperationStatusDialog(QDialog):
+    """Live-updating status window for symlink/copy operations."""
+    def __init__(self, parent, total_ops):
+        super().__init__(parent)
+        self.setWindowTitle("⚙ Operation in Progress")
+        self.resize(700, 500)
+        self.setModal(True)
+        self.total_ops = max(total_ops, 1)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+        layout.setContentsMargins(15, 15, 15, 15)
+
+        # Title
+        self.title_lbl = QLabel("⚙ Processing...")
+        self.title_lbl.setStyleSheet(f"font-size: 14pt; font-weight: bold; color: {CP_YELLOW}; border: none;")
+        layout.addWidget(self.title_lbl)
+
+        # Progress bar
+        self.progress = QProgressBar()
+        self.progress.setMinimum(0)
+        self.progress.setMaximum(total_ops)
+        self.progress.setValue(0)
+        self.progress.setTextVisible(True)
+        self.progress.setFormat("%v / %m  (%p%)")
+        self.progress.setStyleSheet(f"""
+            QProgressBar {{
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+                height: 22px;
+                text-align: center;
+                color: {CP_TEXT};
+                font-weight: bold;
+            }}
+            QProgressBar::chunk {{
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 {CP_CYAN}, stop:1 {CP_GREEN});
+            }}
+        """)
+        layout.addWidget(self.progress)
+
+        # Stats line
+        self.stats_lbl = QLabel("")
+        self.stats_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt; border: none;")
+        layout.addWidget(self.stats_lbl)
+
+        # Log scroll area
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }}")
+        self.scroll_content = QWidget()
+        self.scroll_vlayout = QVBoxLayout(self.scroll_content)
+        self.scroll_vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.scroll_vlayout.setSpacing(1)
+        self.scroll_vlayout.setContentsMargins(5, 5, 5, 5)
+        self.scroll.setWidget(self.scroll_content)
+        layout.addWidget(self.scroll)
+
+        # Close button (hidden until finished)
+        self.close_btn = QPushButton("Close")
+        self.close_btn.setFixedWidth(120)
+        self.close_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+                color: {CP_CYAN};
+                padding: 8px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_CYAN};
+                color: black;
+            }}
+        """)
+        self.close_btn.clicked.connect(self.accept)
+        self.close_btn.setVisible(False)
+
+        close_layout = QHBoxLayout()
+        close_layout.addStretch()
+        close_layout.addWidget(self.close_btn)
+        layout.addLayout(close_layout)
+
+        self._log_count = 0
+
+    def log_item(self, text, status="info"):
+        """Add a line to the log. status: 'success', 'error', 'info'"""
+        if status == "success":
+            color = CP_GREEN
+            icon = "✅"
+        elif status == "error":
+            color = CP_RED
+            icon = "❌"
+        else:
+            color = CP_CYAN
+            icon = "ℹ️"
+
+        lbl = QLabel(f"{icon}  {text}")
+        lbl.setStyleSheet(f"color: {color}; font-size: 9pt; border: none; padding: 1px 0px;")
+        lbl.setWordWrap(True)
+        self.scroll_vlayout.addWidget(lbl)
+        self._log_count += 1
+
+        # Auto-scroll to bottom
+        QApplication.processEvents()
+        vbar = self.scroll.verticalScrollBar()
+        vbar.setValue(vbar.maximum())
+
+    def set_progress(self, value):
+        """Update the progress bar."""
+        self.progress.setValue(min(value, self.total_ops))
+        self.stats_lbl.setText(f"Processing {value} of {self.total_ops}...")
+        QApplication.processEvents()
+
+    def finish(self, success_count, error_count, error_logs=None):
+        """Mark the operation as complete and show summary."""
+        total = success_count + error_count
+        self.progress.setValue(self.total_ops)
+
+        if error_count == 0:
+            self.title_lbl.setText(f"✅ Complete — All {success_count} items linked successfully")
+            self.title_lbl.setStyleSheet(f"font-size: 13pt; font-weight: bold; color: {CP_GREEN}; border: none;")
+            self.progress.setStyleSheet(f"""
+                QProgressBar {{
+                    border: 1px solid {CP_GREEN};
+                    background: {CP_PANEL};
+                    height: 22px;
+                    text-align: center;
+                    color: {CP_TEXT};
+                    font-weight: bold;
+                }}
+                QProgressBar::chunk {{
+                    background: {CP_GREEN};
+                }}
+            """)
+        else:
+            self.title_lbl.setText(f"⚠ Done — {success_count} succeeded, {error_count} failed")
+            self.title_lbl.setStyleSheet(f"font-size: 13pt; font-weight: bold; color: {CP_ORANGE}; border: none;")
+            self.progress.setStyleSheet(f"""
+                QProgressBar {{
+                    border: 1px solid {CP_ORANGE};
+                    background: {CP_PANEL};
+                    height: 22px;
+                    text-align: center;
+                    color: {CP_TEXT};
+                    font-weight: bold;
+                }}
+                QProgressBar::chunk {{
+                    background: {CP_ORANGE};
+                }}
+            """)
+
+        self.stats_lbl.setText(f"✅ {success_count} success  •  ❌ {error_count} errors  •  Total: {total}")
+        self.stats_lbl.setStyleSheet(f"color: {CP_TEXT}; font-size: 10pt; font-weight: bold; border: none;")
+
+        self.setWindowTitle("Operation Complete")
+        self.close_btn.setVisible(True)
+        QApplication.processEvents()
+
+
+# ==========================================
 # MAIN APPLICATION
 # ==========================================
 
@@ -1047,8 +1210,15 @@ class SymlinkManager(QMainWindow):
         conflicts = []
         for item in items:
             fake = os.path.normpath(item["fake"])
-            if os.path.exists(fake) or os.path.lexists(fake):
-                conflicts.append(fake)
+            link_type = item.get("type", "folder")
+            if link_type == "selective":
+                for rel in item.get("selected_files", []):
+                    dst = os.path.normpath(os.path.join(fake, rel))
+                    if os.path.exists(dst) or os.path.lexists(dst):
+                        conflicts.append(dst)
+            else:
+                if os.path.exists(fake) or os.path.lexists(fake):
+                    conflicts.append(fake)
         
         if conflicts:
             msg = f"The following {len(conflicts)} item(s) already exist:\n\n"
@@ -1062,9 +1232,22 @@ class SymlinkManager(QMainWindow):
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
-        # 2. EXECUTION
+        # 2. Count total operations for progress
+        total_ops = 0
+        for item in items:
+            if item.get("type") == "selective":
+                total_ops += len(item.get("selected_files", []))
+            else:
+                total_ops += 1
+
+        # 3. Open status dialog and execute
+        status_dlg = OperationStatusDialog(self, total_ops)
+        status_dlg.show()
+        QApplication.processEvents()
+
         success_count = 0
         error_logs = []
+        current_op = 0
         
         for item in items:
             target = os.path.normpath(item["target"])
@@ -1072,62 +1255,133 @@ class SymlinkManager(QMainWindow):
             link_type = item.get("type", "folder")
 
             if not os.path.exists(target):
-                error_logs.append(f"Target missing: {target}")
+                if link_type == "selective":
+                    for rel in item.get("selected_files", []):
+                        current_op += 1
+                        status_dlg.log_item(f"Target missing: {target}", "error")
+                        error_logs.append(f"Target missing: {target}")
+                        status_dlg.set_progress(current_op)
+                else:
+                    current_op += 1
+                    status_dlg.log_item(f"Target missing: {target}", "error")
+                    error_logs.append(f"Target missing: {target}")
+                    status_dlg.set_progress(current_op)
                 continue
 
-            # SELECTIVE TYPE: symlink each selected file individually
+            # SELECTIVE TYPE: batch all mklink commands
             if link_type == "selective":
                 selected = item.get("selected_files", [])
                 if not selected:
                     error_logs.append(f"No files selected for selective link: {target}")
                     continue
+
+                # Pre-process: remove existing, ensure dirs
+                batch_cmds = []  # for Windows batch file
+                batch_pairs = [] # (src, dst, rel) for tracking
                 for rel in selected:
+                    current_op += 1
                     src = os.path.normpath(os.path.join(target, rel))
                     dst = os.path.normpath(os.path.join(fake, rel))
+                    
                     if not os.path.exists(src):
+                        status_dlg.log_item(f"Source missing: {rel}", "error")
                         error_logs.append(f"Source file missing: {src}")
+                        status_dlg.set_progress(current_op)
                         continue
+
                     # Remove existing
                     try:
                         if os.path.exists(dst) or os.path.lexists(dst):
                             os.remove(dst)
                     except Exception as e:
+                        status_dlg.log_item(f"Remove failed: {rel}", "error")
                         error_logs.append(f"Failed to remove {dst}: {str(e)}")
+                        status_dlg.set_progress(current_op)
                         continue
+
                     # Ensure parent dir
                     try:
                         parent = os.path.dirname(dst)
                         if parent and not os.path.exists(parent):
                             os.makedirs(parent, exist_ok=True)
                     except Exception as e:
+                        status_dlg.log_item(f"Dir create failed: {rel}", "error")
                         error_logs.append(f"Failed to create dirs for {dst}: {str(e)}")
+                        status_dlg.set_progress(current_op)
                         continue
-                    # Create symlink
-                    try:
-                        if os.name == 'nt':
-                            cmd = f'mklink "{dst}" "{src}"'
-                            result = subprocess.run(f'cmd /c {cmd}', capture_output=True, text=True, shell=True)
-                            if result.returncode == 0:
-                                success_count += 1
-                            else:
-                                err = result.stderr.strip() or result.stdout.strip()
-                                if "privilege" in err.lower() or "access is denied" in err.lower():
-                                    params = f'/c {cmd}'
-                                    ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
-                                    if ret > 32:
-                                        success_count += 1
-                                    else:
-                                        error_logs.append(f"Elevation failed for: {dst}")
-                                else:
-                                    error_logs.append(f"Cmd failed for {dst}: {err}")
-                        else:
+
+                    if os.name == 'nt':
+                        batch_cmds.append(f'mklink "{dst}" "{src}"')
+                        batch_pairs.append((src, dst, rel, current_op))
+                    else:
+                        try:
                             os.symlink(src, dst)
                             success_count += 1
-                    except Exception as e:
-                        error_logs.append(f"Selective symlink failed for {dst}: {str(e)}")
+                            status_dlg.log_item(f"✔ {rel}", "success")
+                        except Exception as e:
+                            error_logs.append(f"Symlink failed for {dst}: {str(e)}")
+                            status_dlg.log_item(f"✘ {rel}", "error")
+                        status_dlg.set_progress(current_op)
+
+                # Execute batch on Windows
+                if os.name == 'nt' and batch_cmds:
+                    status_dlg.log_item(f"Running batch: {len(batch_cmds)} mklink commands...", "info")
+                    QApplication.processEvents()
+
+                    # Write batch file
+                    import tempfile
+                    bat_path = os.path.join(tempfile.gettempdir(), "mklink_batch.bat")
+                    with open(bat_path, "w") as bf:
+                        bf.write("@echo off\n")
+                        for cmd in batch_cmds:
+                            bf.write(cmd + "\n")
+
+                    # Try running normally first
+                    result = subprocess.run(
+                        f'cmd /c "{bat_path}"',
+                        capture_output=True, text=True, shell=True
+                    )
+
+                    needs_elevation = False
+                    if result.returncode != 0:
+                        out = (result.stderr + result.stdout).lower()
+                        if "privilege" in out or "access is denied" in out:
+                            needs_elevation = True
+
+                    if needs_elevation:
+                        status_dlg.log_item("Requesting admin elevation (one prompt)...", "info")
+                        QApplication.processEvents()
+                        ret = ctypes.windll.shell32.ShellExecuteW(
+                            None, "runas", "cmd.exe",
+                            f'/c "{bat_path}"', None, 0  # SW_HIDE
+                        )
+                        if ret > 32:
+                            # Wait a moment for the elevated process
+                            import time
+                            time.sleep(1)
+
+                    # Verify results per-file
+                    for src, dst, rel, op_idx in batch_pairs:
+                        if os.path.exists(dst) or os.path.lexists(dst):
+                            success_count += 1
+                            status_dlg.log_item(f"✔ {rel}", "success")
+                        else:
+                            error_logs.append(f"Mklink failed for {dst}")
+                            status_dlg.log_item(f"✘ {rel}", "error")
+                        status_dlg.set_progress(op_idx)
+
+                    # Cleanup
+                    try:
+                        os.remove(bat_path)
+                    except:
+                        pass
+
                 continue
 
-            # Remove existing if any (permission already granted above)
+            # NON-SELECTIVE TYPES (folder / file)
+            current_op += 1
+            
+            # Remove existing
             try:
                 if os.path.exists(fake) or os.path.lexists(fake):
                     if os.path.isdir(fake) and not os.path.islink(fake) and not self.is_junction(fake):
@@ -1137,11 +1391,12 @@ class SymlinkManager(QMainWindow):
                         else: os.remove(fake)
             except Exception as e:
                 error_logs.append(f"Failed to remove {fake}: {str(e)}")
+                status_dlg.log_item(f"✘ Remove failed: {os.path.basename(fake)}", "error")
+                status_dlg.set_progress(current_op)
                 continue
 
             # Create
             try:
-                # Ensure parent directory exists
                 parent_dir = os.path.dirname(fake)
                 if parent_dir and not os.path.exists(parent_dir):
                     os.makedirs(parent_dir, exist_ok=True)
@@ -1152,6 +1407,7 @@ class SymlinkManager(QMainWindow):
                     else:
                         shutil.copy2(target, fake)
                     success_count += 1
+                    status_dlg.log_item(f"✔ Copied: {os.path.basename(fake)}", "success")
                 else:
                     if os.name == 'nt':
                         if link_type == "folder":
@@ -1163,45 +1419,45 @@ class SymlinkManager(QMainWindow):
                         
                         if result.returncode == 0:
                             success_count += 1
+                            status_dlg.log_item(f"✔ Linked: {os.path.basename(fake)}", "success")
                         else:
                             err = result.stderr.strip() or result.stdout.strip()
                             if "privilege" in err.lower() or "access is denied" in err.lower():
+                                status_dlg.log_item(f"⚡ Elevating: {os.path.basename(fake)}", "info")
+                                QApplication.processEvents()
                                 params = f'/c {cmd}'
-                                ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 1)
+                                ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd.exe", params, None, 0)
                                 if ret > 32:
-                                    success_count += 1
+                                    import time
+                                    time.sleep(0.5)
+                                    if os.path.exists(fake) or os.path.lexists(fake):
+                                        success_count += 1
+                                        status_dlg.log_item(f"✔ Linked (elevated): {os.path.basename(fake)}", "success")
+                                    else:
+                                        error_logs.append(f"Elevation may have failed for: {fake}")
+                                        status_dlg.log_item(f"✘ Elevation unclear: {os.path.basename(fake)}", "error")
                                 else:
                                     error_logs.append(f"Elevation failed for: {fake}")
+                                    status_dlg.log_item(f"✘ Elevation failed: {os.path.basename(fake)}", "error")
                             else:
                                 error_logs.append(f"Cmd failed for {fake}: {err}")
+                                status_dlg.log_item(f"✘ Failed: {os.path.basename(fake)}", "error")
                     else:
                         try:
                             os.symlink(target, fake)
                             success_count += 1
+                            status_dlg.log_item(f"✔ Linked: {os.path.basename(fake)}", "success")
                         except Exception as sym_err:
                             error_logs.append(f"Symlink creation failed for {fake}: {str(sym_err)}")
+                            status_dlg.log_item(f"✘ Failed: {os.path.basename(fake)}", "error")
             except Exception as e:
                 error_logs.append(f"Unexpected error for {fake}: {str(e)}")
-        
-        # 3. SUMMARY REPORT
-        if error_logs:
-            report = f"Processed {len(items)} items:\n"
-            report += f"✅ Success: {success_count}\n"
-            report += f"❌ Failed: {len(error_logs)}\n\n"
-            report += "Errors:\n" + "\n".join([f"• {e}" for e in error_logs])
+                status_dlg.log_item(f"✘ Error: {os.path.basename(fake)}", "error")
             
-            # Show in a scrollable message box if it's long
-            msg_box = QMessageBox(self)
-            msg_box.setWindowTitle("Operation Results")
-            msg_box.setText(f"Completed with {len(error_logs)} errors.")
-            msg_box.setInformativeText("See details below.")
-            msg_box.setDetailedText(report)
-            msg_box.setIcon(QMessageBox.Icon.Warning)
-            msg_box.exec()
-        else:
-            op = "copied" if copy_mode else "linked"
-            QMessageBox.information(self, "Success", f"All {len(items)} items {op} successfully.")
+            status_dlg.set_progress(current_op)
         
+        # 3. FINALIZE STATUS DIALOG
+        status_dlg.finish(success_count, len(error_logs), error_logs)
         self.refresh_ui()
 
     def get_filtered_links(self):
