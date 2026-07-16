@@ -723,7 +723,29 @@ class MainWindow(QMainWindow):
         else:
             self.update_status("NO NEW REGISTRY ENTRIES")
     def scan_tasks(self): self.update_status("TASK SCAN COMPLETE")
-    def delete_matching_shortcuts(self): self.update_status("PRUNING...")
+    def delete_matching_shortcuts(self):
+        self.update_status("PRUNING...")
+        pruned_count = 0
+        names = {i["name"].lower() for i in self.items}
+        dirs = [
+            os.path.expandvars(r"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup"),
+            os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup")
+        ]
+        for d in dirs:
+            if not os.path.exists(d): continue
+            for f in os.listdir(d):
+                name_without_ext = os.path.splitext(f)[0].lower()
+                if name_without_ext in names:
+                    filepath = os.path.join(d, f)
+                    try:
+                        os.remove(filepath)
+                        pruned_count += 1
+                    except Exception as e:
+                        print(f"Failed to delete {filepath}: {e}")
+        if pruned_count > 0:
+            self.update_status(f"PRUNED {pruned_count} SHORTCUTS")
+        else:
+            self.update_status("NO MATCHES TO PRUNE")
     def filter_items(self, text):
         for name, w in self.widgets_map.items(): w.setVisible(text.lower() in name.lower() or text.lower() in w.item["paths"][0].lower())
     def update_status(self, text): self.status_label.setText(text); QTimer.singleShot(3000, lambda: self.status_label.setText("SYSTEM READY"))
