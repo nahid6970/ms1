@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QMessageBox, QInputDialog, QTabWidget, QTextEdit, 
                              QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, 
                              QDialog, QDialogButtonBox, QFormLayout)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QByteArray
 from PyQt6.QtGui import QFont, QFontDatabase, QColor
 
 # CYBERPUNK THEME PALETTE
@@ -29,6 +29,10 @@ class EnvVariableManager(QMainWindow):
         super().__init__()
         self.setWindowTitle("ALIAS & CONTEXT MANAGER v1.0")
         self.resize(1300, 750)
+        
+        # Initialize Icons Directory
+        self.icons_dir = os.path.join(os.path.expanduser("~"), ".env_manager", "icons")
+        os.makedirs(self.icons_dir, exist_ok=True)
         
         # Apply Cyberpunk Theme
         self.apply_theme()
@@ -214,6 +218,7 @@ class EnvVariableManager(QMainWindow):
         up_btn = QPushButton("⬆️ MOVE UP")
         down_btn = QPushButton("⬇️ MOVE DOWN")
         refresh_btn = QPushButton("🔄 REFRESH")
+        apply_svg_btn = QPushButton("⚡ APPLY SVGS")
         
         add_btn.clicked.connect(self.add_context_entry)
         add_group_btn.clicked.connect(self.add_context_group)
@@ -222,6 +227,7 @@ class EnvVariableManager(QMainWindow):
         up_btn.clicked.connect(self.move_context_up)
         down_btn.clicked.connect(self.move_context_down)
         refresh_btn.clicked.connect(self.load_context_entries)
+        apply_svg_btn.clicked.connect(self.apply_svg_icons)
         
         controls_layout.addWidget(add_btn)
         controls_layout.addWidget(add_group_btn)
@@ -230,6 +236,7 @@ class EnvVariableManager(QMainWindow):
         controls_layout.addWidget(up_btn)
         controls_layout.addWidget(down_btn)
         controls_layout.addWidget(refresh_btn)
+        controls_layout.addWidget(apply_svg_btn)
         layout.addLayout(controls_layout)
         
         self.load_context_entries()
@@ -653,21 +660,36 @@ class EnvVariableManager(QMainWindow):
         if not name or not cmd:
             QMessageBox.warning(self, "Error", "Label and Command are required!")
             return
+            
+        svg_content = None
+        if icon.lower().endswith(".svg") and os.path.exists(icon):
+            try:
+                with open(icon, 'r', encoding='utf-8') as f:
+                    svg_content = f.read()
+            except Exception as e:
+                print(f"Could not read SVG file: {e}")
+        elif icon.startswith("<svg"):
+            svg_content = icon
+            
+        if svg_content:
+            compiled_ico = self.compile_svg_to_ico(svg_content, name)
+            if compiled_ico:
+                icon = compiled_ico
         
         try:
             if parent_path:
                 # Add as child of selected group
-                self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd, icon)
+                self._create_reg_entry(rf"{parent_path}\shell\{name}", cmd, icon, svg_content)
                 self.load_context_entries()
                 self.set_status(f"Added context menu entry: {name} to group", CP_GREEN)
             else:
                 # Create entries based on selection
                 if cb_files.isChecked():
-                    self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd, icon)
+                    self._create_reg_entry(rf"Software\Classes\*\shell\{name}", cmd, icon, svg_content)
                 if cb_folders.isChecked():
-                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd, icon)
+                    self._create_reg_entry(rf"Software\Classes\Directory\shell\{name}", cmd, icon, svg_content)
                 if cb_background.isChecked():
-                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd, icon)
+                    self._create_reg_entry(rf"Software\Classes\Directory\Background\shell\{name}", cmd, icon, svg_content)
                 
                 self.load_context_entries()
                 self.set_status(f"Added context menu entry: {name}", CP_GREEN)
@@ -753,6 +775,21 @@ class EnvVariableManager(QMainWindow):
         if type_text == "ENTRY" and new_cmd:
             new_cmd = new_cmd.replace("{path}", "\"%V\"").replace("%1", "\"%V\"")
 
+        svg_content = None
+        if new_icon.lower().endswith(".svg") and os.path.exists(new_icon):
+            try:
+                with open(new_icon, 'r', encoding='utf-8') as f:
+                    svg_content = f.read()
+            except:
+                pass
+        elif new_icon.startswith("<svg"):
+            svg_content = new_icon
+            
+        if svg_content:
+            compiled_ico = self.compile_svg_to_ico(svg_content, new_label)
+            if compiled_ico:
+                new_icon = compiled_ico
+
         try:
             # Update the existing entry (don't rename the key, just update MUIVerb)
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, old_full_path, 0, winreg.KEY_SET_VALUE) as key:
@@ -766,6 +803,15 @@ class EnvVariableManager(QMainWindow):
                     # Remove icon if cleared
                     try:
                         winreg.DeleteValue(key, "Icon")
+                    except:
+                        pass
+                
+                # Set IconSVG if provided
+                if svg_content:
+                    winreg.SetValueEx(key, "IconSVG", 0, winreg.REG_SZ, svg_content)
+                else:
+                    try:
+                        winreg.DeleteValue(key, "IconSVG")
                     except:
                         pass
             
@@ -783,11 +829,11 @@ class EnvVariableManager(QMainWindow):
     def _browse_icon(self, line_edit):
         """Helper to browse for icon file"""
         icon_path, _ = QFileDialog.getOpenFileName(self, "Select Icon File", "", 
-                                                  "Icons (*.ico *.exe *.dll);;All Files (*.*)")
+                                                  "Icons (*.ico *.exe *.dll *.svg);;All Files (*.*)")
         if icon_path:
             line_edit.setText(icon_path)
 
-    def _create_reg_entry(self, path, command, icon=""):
+    def _create_reg_entry(self, path, command, icon="", svg_content=None):
         """Helper to create registry keys for context menu in HKCU"""
         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
         label = path.split('\\')[-1]
@@ -796,6 +842,8 @@ class EnvVariableManager(QMainWindow):
         # Set icon if provided
         if icon:
             winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon)
+        if svg_content:
+            winreg.SetValueEx(key, "IconSVG", 0, winreg.REG_SZ, svg_content)
         
         cmd_key = winreg.CreateKey(key, "command")
         winreg.SetValue(cmd_key, "", winreg.REG_SZ, command)
@@ -953,6 +1001,83 @@ class EnvVariableManager(QMainWindow):
             if res: data[s] = res
         return data
 
+    def compile_svg_to_ico(self, svg_content_or_path, ico_name):
+        """Compiles SVG code or file to a local .ico file and returns the path"""
+        from PyQt6.QtGui import QPainter, QPixmap
+        from PyQt6.QtSvg import QSvgRenderer
+        from PyQt6.QtCore import QByteArray, Qt
+        
+        ico_path = os.path.join(self.icons_dir, f"{ico_name}.ico")
+        try:
+            renderer = QSvgRenderer()
+            if os.path.exists(svg_content_or_path):
+                renderer.load(svg_content_or_path)
+            else:
+                renderer.load(QByteArray(svg_content_or_path.encode('utf-8')))
+            
+            # Render at 32x32 for high quality shell icon
+            pixmap = QPixmap(32, 32)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            renderer.render(painter)
+            painter.end()
+            
+            pixmap.save(ico_path, "ICO")
+            return ico_path
+        except Exception as e:
+            print(f"Error compiling SVG to ICO: {e}")
+            return None
+
+    def apply_svg_icons(self):
+        """Scan all context menu registry entries, compile IconSVG to .ico, and update their registry Icon paths"""
+        bases = [r"Software\Classes\Directory\Background\shell", r"Software\Classes\Directory\shell", r"Software\Classes\*\shell"]
+        count = 0
+        for base in bases:
+            count += self._process_svg_keys(winreg.HKEY_CURRENT_USER, base)
+        self.load_context_entries()
+        QMessageBox.information(self, "Success", f"Compiled and applied {count} SVG icons to context menus.")
+
+    def _process_svg_keys(self, hkey, path):
+        count = 0
+        try:
+            key = winreg.OpenKey(hkey, path, 0, winreg.KEY_READ)
+            i = 0
+            while True:
+                try:
+                    sn = winreg.EnumKey(key, i)
+                    fp = f"{path}\\{sn}"
+                    svg_content = None
+                    try:
+                        with winreg.OpenKey(hkey, fp, 0, winreg.KEY_READ) as sk:
+                            try:
+                                svg_content, _ = winreg.QueryValueEx(sk, "IconSVG")
+                            except:
+                                pass
+                    except:
+                        pass
+                    
+                    if svg_content:
+                        compiled_ico = self.compile_svg_to_ico(svg_content, sn)
+                        if compiled_ico:
+                            with winreg.OpenKey(hkey, fp, 0, winreg.KEY_SET_VALUE) as sk:
+                                winreg.SetValueEx(sk, "Icon", 0, winreg.REG_SZ, compiled_ico)
+                            count += 1
+                    
+                    # Recursively check subkeys
+                    try:
+                        winreg.OpenKey(hkey, f"{fp}\\shell", 0, winreg.KEY_READ)
+                        count += self._process_svg_keys(hkey, f"{fp}\\shell")
+                    except:
+                        pass
+                    
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(key)
+        except:
+            pass
+        return count
+
     def _export_shell_keys(self, hkey, path):
         entries = {}
         try:
@@ -964,7 +1089,7 @@ class EnvVariableManager(QMainWindow):
                     if sn.lower() in ["cmd", "powershell", "anycode", "wsl"]: i += 1; continue
                     fp = f"{path}\\{sn}"; ed = {}
                     with winreg.OpenKey(hkey, fp, 0, winreg.KEY_READ) as sk:
-                        for val in ["MUIVerb", "Icon", "SubCommands", "CommandFlags"]:
+                        for val in ["MUIVerb", "Icon", "SubCommands", "CommandFlags", "IconSVG"]:
                             try: ed[val], _ = winreg.QueryValueEx(sk, val)
                             except: pass
                     try:
@@ -980,6 +1105,32 @@ class EnvVariableManager(QMainWindow):
             winreg.CloseKey(key)
         except: pass
         return entries
+
+    def _import_shell_entries(self, hkey, path, entries):
+        for n, d in entries.items():
+            fp = f"{path}\\{n}"
+            key = winreg.CreateKey(hkey, fp)
+            
+            icon_path = d.get("Icon", "")
+            svg_content = d.get("IconSVG", None)
+            if svg_content:
+                compiled_ico = self.compile_svg_to_ico(svg_content, n)
+                if compiled_ico:
+                    icon_path = compiled_ico
+            
+            for k in ["MUIVerb", "SubCommands"]:
+                if k in d: winreg.SetValueEx(key, k, 0, winreg.REG_SZ, d[k])
+            if icon_path:
+                winreg.SetValueEx(key, "Icon", 0, winreg.REG_SZ, icon_path)
+            if svg_content:
+                winreg.SetValueEx(key, "IconSVG", 0, winreg.REG_SZ, svg_content)
+            if "CommandFlags" in d: winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, d["CommandFlags"])
+            winreg.CloseKey(key)
+            if "command" in d:
+                with winreg.CreateKey(hkey, f"{fp}\\command") as ck: winreg.SetValue(ck, "", winreg.REG_SZ, d["command"])
+            if "children" in d:
+                winreg.CreateKey(hkey, f"{fp}\\shell")
+                self._import_shell_entries(hkey, f"{fp}\\shell", d["children"])
 
     def export_config(self):
         path = os.path.join(os.path.dirname(__file__), "data.json")
