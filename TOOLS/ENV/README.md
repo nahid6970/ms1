@@ -20,6 +20,8 @@ A cyberpunk-themed, premium PyQt6 GUI tool for managing Windows command aliases 
 * **No File Browse Required**: Paste raw SVG XML code (`<svg ...> ... </svg>`) directly into the dialog box.
 * **Under-the-Hood Compilation**: The manager automatically renders and compiles the SVG to a `.ico` file.
 * **Local Storage**: Compiled icons are saved under `C:\@delta\ms1\TOOLS\ENV\icon`.
+* **Explorer Cache Busting**: Filenames are generated using an MD5 hash of the SVG code (e.g. `LabelName_a8f9c1b2.ico`). This ensures that changes to an icon take effect immediately without being blocked by the Windows Explorer icon cache.
+* **Automatic Directory Cleanup**: Whenever an icon is updated, previous versions of the `.ico` file for that command label are automatically purged to prevent clutter.
 * **PC Move Protection**: Raw SVG code is saved inside the exported configuration JSON, meaning you can easily restore your setup on any new machine.
 
 ### 💡 Interactive Command Help
