@@ -24,6 +24,139 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
+class SvgEditorDialog(QDialog):
+    def __init__(self, current_svg="", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("SVG Stylize & Preview")
+        self.resize(800, 600)
+        self.svg_code = current_svg
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
+            QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_TEXT}; font-family: 'Consolas'; border: 1px solid {CP_DIM}; }}
+            QPushButton {{ background-color: {CP_DIM}; color: white; padding: 8px; border: 1px solid {CP_DIM}; font-weight: bold; }}
+            QPushButton:hover {{ border: 1px solid {CP_CYAN}; }}
+            QLabel {{ color: {CP_YELLOW}; font-weight: bold; }}
+            QScrollArea {{ border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+        """)
+        
+        from PyQt6.QtWidgets import QPlainTextEdit, QScrollArea
+        from PyQt6.QtCore import QTimer
+        layout = QHBoxLayout(self)
+        left_layout = QVBoxLayout()
+        right_layout = QVBoxLayout()
+        
+        # LEFT: Editor and Colors
+        left_layout.addWidget(QLabel("SVG CODE:"))
+        self.txt_input = QPlainTextEdit()
+        self.txt_input.setPlaceholderText("<svg>...</svg>")
+        self.txt_input.setPlainText(self.svg_code)
+        left_layout.addWidget(self.txt_input, stretch=2)
+        
+        left_layout.addWidget(QLabel("BASE COLORS (CLICK TO REPLACE):"))
+        self.color_scroll = QScrollArea()
+        self.color_scroll.setWidgetResizable(True)
+        self.color_scroll.setFixedHeight(80)
+        self.color_widget = QWidget()
+        self.color_layout = QHBoxLayout(self.color_widget)
+        self.color_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.color_scroll.setWidget(self.color_widget)
+        left_layout.addWidget(self.color_scroll)
+        
+        # RIGHT: Preview
+        right_layout.addWidget(QLabel("LIVE PREVIEW:"))
+        self.preview_lbl = QLabel()
+        self.preview_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_lbl.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 8px;")
+        self.preview_lbl.setMinimumSize(256, 256)
+        right_layout.addWidget(self.preview_lbl)
+        right_layout.addStretch()
+        
+        # Buttons
+        btn_box = QHBoxLayout()
+        btn_save = QPushButton("💾 SAVE & CLOSE")
+        btn_save.setStyleSheet(f"background-color: {CP_GREEN}; color: black;")
+        btn_save.clicked.connect(self.save_and_close)
+        
+        btn_cancel = QPushButton("❌ CANCEL")
+        btn_cancel.clicked.connect(self.reject)
+        
+        btn_box.addWidget(btn_save)
+        btn_box.addWidget(btn_cancel)
+        right_layout.addLayout(btn_box)
+        
+        layout.addLayout(left_layout, stretch=2)
+        layout.addLayout(right_layout, stretch=1)
+        
+        self.color_timer = QTimer(self)
+        self.color_timer.setSingleShot(True)
+        self.color_timer.timeout.connect(self.update_panel)
+        self.txt_input.textChanged.connect(lambda: self.color_timer.start(500))
+        
+        self.update_panel()
+        
+    def update_panel(self):
+        self.update_preview()
+        self.update_colors()
+        
+    def update_preview(self):
+        from PyQt6.QtGui import QPixmap, QPainter
+        from PyQt6.QtSvg import QSvgRenderer
+        from PyQt6.QtCore import QByteArray, Qt
+        svg = self.txt_input.toPlainText()
+        if not svg.strip():
+            self.preview_lbl.setPixmap(QPixmap())
+            return
+            
+        renderer = QSvgRenderer(QByteArray(svg.encode('utf-8')))
+        pixmap = QPixmap(256, 256)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        self.preview_lbl.setPixmap(pixmap)
+        
+    def update_colors(self):
+        from functools import partial
+        import re
+        while self.color_layout.count():
+            item = self.color_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+                
+        svg = self.txt_input.toPlainText()
+        colors = sorted(list(set(re.findall(r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}', svg))), key=len, reverse=True)
+        
+        if not colors:
+            lbl = QLabel("None")
+            lbl.setStyleSheet(f"color: {CP_DIM}; font-style: italic;")
+            self.color_layout.addWidget(lbl)
+        else:
+            for c in colors:
+                btn = QPushButton()
+                btn.setFixedSize(40, 40)
+                btn.setToolTip(f"Replace {c}")
+                btn.setStyleSheet(f"background-color: {c}; border: 1px solid {CP_DIM}; border-radius: 4px;")
+                btn.clicked.connect(partial(self.pick_replacement_color, c))
+                self.color_layout.addWidget(btn)
+        self.color_layout.addStretch()
+        
+    def pick_replacement_color(self, old_color):
+        from PyQt6.QtWidgets import QColorDialog
+        from PyQt6.QtGui import QColor
+        import re
+        c = QColorDialog.getColor(QColor(old_color), self, "Select New Color")
+        if c.isValid():
+            new_color = c.name().upper()
+            svg = self.txt_input.toPlainText()
+            pattern = re.compile(re.escape(old_color), re.IGNORECASE)
+            new_svg = pattern.sub(new_color, svg)
+            self.txt_input.setPlainText(new_svg)
+            self.update_panel()
+            
+    def save_and_close(self):
+        self.svg_code = self.txt_input.toPlainText()
+        self.accept()
+
 class EnvVariableManager(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -637,10 +770,19 @@ class EnvVariableManager(QMainWindow):
         form_layout.addRow("Command:", cmd_layout)
         
         # SVG Icon Code
+        svg_layout = QHBoxLayout()
         svg_edit = QTextEdit()
         svg_edit.setPlaceholderText("Paste raw SVG XML code here (e.g. <svg ...> ... </svg>)")
         svg_edit.setMaximumHeight(100)
-        form_layout.addRow("SVG Icon Code:", svg_edit)
+        svg_layout.addWidget(svg_edit)
+        
+        style_btn = QPushButton("🎨 Stylize\n&& Preview")
+        style_btn.setToolTip("Click to interactively change SVG colors and preview the icon.")
+        style_btn.setFixedWidth(80)
+        style_btn.clicked.connect(lambda: self.open_svg_editor(svg_edit))
+        svg_layout.addWidget(style_btn)
+        
+        form_layout.addRow("SVG Icon Code:", svg_layout)
         
         dialog_layout.addLayout(form_layout)
         
@@ -769,11 +911,20 @@ class EnvVariableManager(QMainWindow):
             form_layout.addRow("Command:", cmd_layout)
         
         # SVG Icon Code field
+        svg_layout = QHBoxLayout()
         svg_edit = QTextEdit()
         svg_edit.setPlainText(old_svg)
         svg_edit.setPlaceholderText("Paste raw SVG XML code here (e.g. <svg ...> ... </svg>)")
         svg_edit.setMaximumHeight(100)
-        form_layout.addRow("SVG Icon Code:", svg_edit)
+        svg_layout.addWidget(svg_edit)
+        
+        style_btn = QPushButton("🎨 Stylize\n&& Preview")
+        style_btn.setToolTip("Click to interactively change SVG colors and preview the icon.")
+        style_btn.setFixedWidth(80)
+        style_btn.clicked.connect(lambda: self.open_svg_editor(svg_edit))
+        svg_layout.addWidget(style_btn)
+        
+        form_layout.addRow("SVG Icon Code:", svg_layout)
         
         dialog_layout.addLayout(form_layout)
         
@@ -1338,6 +1489,12 @@ class EnvVariableManager(QMainWindow):
         layout.addWidget(buttons)
         
         dialog.exec()
+
+    def open_svg_editor(self, text_edit):
+        from PyQt6.QtWidgets import QDialog
+        dialog = SvgEditorDialog(text_edit.toPlainText(), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            text_edit.setPlainText(dialog.svg_code)
 
     def set_status(self, message, color=CP_TEXT):
         self.status_label.setText(message)
