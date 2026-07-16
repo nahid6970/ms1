@@ -258,16 +258,26 @@ def load_applications():
             apps = json.load(f)
             # Sort applications by name
             apps.sort(key=lambda x: x.get("name", "").lower())
+            
+            for app in apps:
+                if app.get("scoop_name") and not app.get("scoop_path"):
+                    app["scoop_path"] = os.path.join(os.path.expanduser("~"), "scoop", "apps", app["scoop_name"], "current")
+            
             return apps
     return []
 
 def save_applications(apps):
     serializable_apps = []
     for app in apps:
+        scoop_path = app.get("scoop_path", "")
+        if not scoop_path and app.get("scoop_name"):
+            scoop_path = os.path.join(os.path.expanduser("~"), "scoop", "apps", app["scoop_name"], "current")
+            app["scoop_path"] = scoop_path
+            
         serializable_apps.append({
             "name": app["name"],
             "scoop_name": app["scoop_name"],
-            "scoop_path": app["scoop_path"],
+            "scoop_path": scoop_path,
             "winget_name": app["winget_name"],
             "winget_path": app["winget_path"]
         })
