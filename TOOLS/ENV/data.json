@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-16T09:52:08.506822",
+    "timestamp": "2026-07-16T09:59:24.461388",
     "aliases": {
         "ll": "ls -la",
         "gl": "git log --oneline",
@@ -90,7 +90,8 @@
             },
             "Rclone NCDU": {
                 "MUIVerb": "Disk Usage [GDU]",
-                "Icon": "C:\\@delta\\msBackups\\icon\\nerd-icon\\storage\\icon24.ico",
+                "Icon": "C:\\@delta\\ms1\\TOOLS\\ENV\\icon\\Disk Usage [GDU].ico",
+                "IconSVG": "<svg viewBox=\"0 0 24 24\" id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><defs><style>.cls-1{fill:none;stroke:#ffffff;stroke-miterlimit:10;stroke-width:1.91px;}.cls-2{fill:#ffffff;}</style></defs><rect class=\"cls-1\" x=\"3.41\" y=\"1.5\" width=\"17.18\" height=\"21\" rx=\"1.91\"></rect><circle class=\"cls-1\" cx=\"12\" cy=\"10.09\" r=\"4.77\"></circle><line class=\"cls-1\" x1=\"13.43\" y1=\"11.52\" x2=\"16.3\" y2=\"14.39\"></line><circle class=\"cls-2\" cx=\"12\" cy=\"10.09\" r=\"0.95\"></circle><line class=\"cls-1\" x1=\"7.23\" y1=\"18.68\" x2=\"16.77\" y2=\"18.68\"></line></g></svg>",
                 "command": "cmd /k \"cd /d \"%V\" && gdu\""
             }
         },
