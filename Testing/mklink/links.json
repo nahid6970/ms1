@@ -205,7 +205,29 @@
             {
                 "type": "selective",
                 "target": "C:\\@delta\\ms1\\asset\\notepadplusplus\\Notepad++",
-                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++"
+                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++",
+                "selected_files": [
+                    "config.xml",
+                    "contextMenu.xml",
+                    "langs.xml",
+                    "session.xml",
+                    "shortcuts.xml",
+                    "stylers.xml",
+                    "themes\\Alucard.xml",
+                    "themes\\Bespin.xml",
+                    "themes\\Black board.xml",
+                    "themes\\Choco.xml",
+                    "themes\\DansLeRuSH-Dark.xml",
+                    "themes\\DarkModeDefault.xml",
+                    "themes\\Deep Black.xml",
+                    "themes\\Dracula.xml"
+                ],
+                "excluded_files": [
+                    "session.xml.inCaseOfCorruption.bak",
+                    "backup\\new 1@2026-07-16_104837",
+                    "backup\\new 1@2026-07-16_150631",
+                    "plugins\\Config\\converter.ini"
+                ]
             }
         ],
         "copy_mode": false
