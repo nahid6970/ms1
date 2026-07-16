@@ -2447,13 +2447,19 @@ class AHKShortcutEditor(QMainWindow):
                         self.text_shortcuts.remove(s)
                         self.file_shortcuts.append(s)
                     
+                    # Reverse Fix-up: Restore text shortcuts that were incorrectly moved to exclusion rules
+                    to_move_back_text = [s for s in self.exclusion_rules if "trigger" in s and "replacement" in s]
+                    for s in to_move_back_text:
+                        self.exclusion_rules.remove(s)
+                        self.text_shortcuts.append(s)
+                    
                     # Fix-up: Move exclusion rules and context shortcuts that were accidentally saved in text_shortcuts
-                    to_move_exclude = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" not in s]
+                    to_move_exclude = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" not in s and "trigger" not in s]
                     for s in to_move_exclude:
                         self.text_shortcuts.remove(s)
                         self.exclusion_rules.append(s)
                         
-                    to_move_context = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" in s]
+                    to_move_context = [s for s in self.text_shortcuts if ("window_title" in s or "process_name" in s or "window_class" in s) and "hotkey" in s and "trigger" not in s]
                     for s in to_move_context:
                         self.text_shortcuts.remove(s)
                         self.context_shortcuts.append(s)
