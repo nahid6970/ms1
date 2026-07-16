@@ -4,7 +4,7 @@ import re
 import subprocess
 import threading
 import time
-from flask import Flask, request, send_from_directory, redirect, url_for, flash, render_template_string
+from flask import Flask, request, send_from_directory, redirect, url_for, flash, render_template_string, Response
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -102,8 +102,19 @@ def open_file_folder(file_path):
     else:
         subprocess.Popen(["explorer", app.config["SHARE_FOLDER"]])
 
+SSE_CLIENTS = []
+
+def notify_sse_clients(event_type, **kwargs):
+    data = {"type": event_type, **kwargs}
+    for q in list(SSE_CLIENTS):
+        try:
+            q.put_nowait(data)
+        except Exception:
+            pass
+
 def show_upload_notification(filename, file_path):
     """Show a small clickable Windows-style notification above the taskbar."""
+    notify_sse_clients("complete", filename=filename)
     if os.name != "nt":
         return
 
@@ -131,11 +142,39 @@ def show_upload_notification(filename, file_path):
 
 def update_upload_progress(filename, percent, size_bytes=0):
     """Notify the system about current upload progress of a file."""
+    notify_sse_clients("progress", filename=filename, percent=percent, size_bytes=size_bytes)
     if os.name != "nt":
         return
 
     start_notification_manager()
     NOTIFICATION_QUEUE.put(("progress", filename, percent, size_bytes))
+
+
+def start_udp_progress_server():
+    """Start a lightweight UDP server to receive progress updates without HTTP blocking."""
+    def run_server():
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.bind(("0.0.0.0", 5009))
+            while True:
+                data, addr = s.recvfrom(2048)
+                try:
+                    msg = data.decode('utf-8', errors='ignore')
+                    parts = msg.split('|')
+                    if len(parts) >= 3:
+                        filename = parts[0]
+                        percent = int(parts[1])
+                        size_bytes = int(parts[2])
+                        update_upload_progress(filename, percent, size_bytes)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"UDP Progress Server error: {e}")
+        finally:
+            s.close()
+            
+    threading.Thread(target=run_server, daemon=True).start()
 
 def start_notification_manager():
     global NOTIFICATION_MANAGER_STARTED
@@ -145,6 +184,7 @@ def start_notification_manager():
             return
         NOTIFICATION_MANAGER_STARTED = True
 
+    start_udp_progress_server()
     threading.Thread(target=notification_manager_worker, daemon=True).start()
 
 def notification_manager_worker():
@@ -514,8 +554,14 @@ def notification_manager_worker():
 
                     # Find existing item
                     existing = None
+                    search_name = create_safe_filename(filename)
+                    search_sec = secure_filename(filename)
                     for it in notifications_data:
-                        if it["filename"] == filename and it.get("status") == "uploading":
+                        it_safe = create_safe_filename(it["filename"])
+                        it_sec = secure_filename(it["filename"])
+                        if (it["filename"] in (filename, search_name, search_sec) or 
+                            it_safe in (filename, search_name, search_sec) or 
+                            it_sec in (filename, search_name, search_sec)) and it.get("status") == "uploading":
                             existing = it
                             break
                     
@@ -555,8 +601,14 @@ def notification_manager_worker():
 
                     # Find existing uploading item and upgrade it
                     existing = None
+                    search_name = create_safe_filename(filename)
+                    search_sec = secure_filename(filename)
                     for it in notifications_data:
-                        if it["filename"] == filename and it.get("status") == "uploading":
+                        it_safe = create_safe_filename(it["filename"])
+                        it_sec = secure_filename(it["filename"])
+                        if (it["filename"] in (filename, search_name, search_sec) or 
+                            it_safe in (filename, search_name, search_sec) or 
+                            it_sec in (filename, search_name, search_sec)) and it.get("status") == "uploading":
                             existing = it
                             break
                     
@@ -1014,11 +1066,73 @@ html_template = '''
                 window.location.reload(); 
             }, 1500); // Reload after 1.5 seconds
         });
+
+        // Real-time updates via SSE stream (from Android or Web UI)
+        const eventSource = new EventSource("/stream");
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const progressCircle = document.getElementById("circular-progress");
+            const progressText = document.getElementById("progress-percentage");
+            const uploadStatusDiv = document.getElementById("upload-status");
+
+            if (data.type === "progress") {
+                progressCircle.style.background = `conic-gradient(var(--primary-color) ${data.percent}%, #e0e0e0 ${data.percent}%)`;
+                progressText.innerText = `${data.percent}%`;
+                uploadStatusDiv.innerHTML = `<p>Uploading <strong>${data.filename}</strong>: ${data.percent}%</p>`;
+            } else if (data.type === "complete") {
+                progressCircle.style.background = `conic-gradient(var(--primary-color) 100%, #e0e0e0 100%)`;
+                progressText.innerText = `100%`;
+                uploadStatusDiv.innerHTML = `<p style="color: var(--primary-color);"><strong>${data.filename}</strong> uploaded successfully!</p>`;
+                
+                // Dynamically refresh file list without full reload
+                fetch(window.location.pathname)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, "text/html");
+                        const newList = doc.querySelector(".file-list");
+                        const oldList = document.querySelector(".file-list");
+                        if (newList && oldList) {
+                            oldList.innerHTML = newList.innerHTML;
+                        }
+                    });
+
+                // Reset progress UI after 2.5 seconds
+                setTimeout(() => {
+                    progressCircle.style.background = "conic-gradient(var(--primary-color) 0%, #e0e0e0 0%)";
+                    progressText.innerText = "0%";
+                    uploadStatusDiv.innerHTML = "Upload status will appear here.";
+                }, 2500);
+            }
+        };
     </script>
 
 </body>
 </html>
 '''
+
+@app.route("/stream")
+def sse_stream():
+    import json
+    def event_stream():
+        import queue
+        q = queue.Queue()
+        SSE_CLIENTS.append(q)
+        try:
+            # Send initial keep-alive comment
+            yield "data: {\"type\": \"connected\"}\n\n"
+            while True:
+                data = q.get()
+                yield f"data: {json.dumps(data)}\n\n"
+        except GeneratorExit:
+            pass
+        finally:
+            try:
+                SSE_CLIENTS.remove(q)
+            except ValueError:
+                pass
+            
+    return Response(event_stream(), mimetype="text/event-stream")
 
 @app.route("/upload-progress", methods=["POST"])
 def upload_progress():
@@ -1074,13 +1188,14 @@ def index():
                 upload_time = end_time - start_time
                 speed = file_size / upload_time if upload_time > 0 else 0
                 
-                print(f"✅ Uploaded: {filename} ({file_size} bytes) in {upload_time:.2f}s ({speed/1024:.1f} KB/s)")
+                print(f"[SUCCESS] Uploaded: {filename} ({file_size} bytes) in {upload_time:.2f}s ({speed/1024:.1f} KB/s)")
                 show_upload_notification(filename, file_path)
                 
                 flash(f"File '{filename}' uploaded successfully.", "success")
                 return '', 200  # Success
             except Exception as e:
-                print(f"❌ Upload error for '{filename}': {e}")
+                print(f"[ERROR] Upload error for '{filename}': {e}")
+
                 flash(f"Server error saving '{filename}': {e}", "error")
                 return '', 500 # Internal Server Error
         else:

@@ -364,6 +364,13 @@
         "winget_path": "C:\\ProgramData\\Jackett\\JackettTray.exe"
     },
     {
+        "name": "JackieLiu.NotepadsApp",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "JackieLiu.NotepadsApp",
+        "winget_path": ""
+    },
+    {
         "name": "Java Runtime Environment",
         "scoop_name": "",
         "scoop_path": "",
@@ -861,10 +868,10 @@
         "winget_path": ""
     },
     {
-        "name": "JackieLiu.NotepadsApp",
-        "scoop_name": "",
+        "name": "android-clt",
+        "scoop_name": "android-clt",
         "scoop_path": "",
-        "winget_name": "JackieLiu.NotepadsApp",
+        "winget_name": "",
         "winget_path": ""
     }
 ]
