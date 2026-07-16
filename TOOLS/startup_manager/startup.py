@@ -553,19 +553,24 @@ class MainWindow(QMainWindow):
         return ahk_path
 
     def check_registry(self, item):
+        hive = item.get("registry_hive", "HKCU")
+        key_path = item.get("registry_key_path", r"Software\Microsoft\Windows\CurrentVersion\Run")
+        hkey = winreg.HKEY_LOCAL_MACHINE if hive == "HKLM" else winreg.HKEY_CURRENT_USER
         try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as key:
+            with winreg.OpenKey(hkey, key_path, 0, winreg.KEY_READ) as key:
                 winreg.QueryValueEx(key, item["name"]); return True
         except: return False
 
     def handle_toggle(self, item, current_state):
         should_enable = not current_state
         if self.current_mode == "REGISTRY":
+            hive = item.get("registry_hive", "HKCU")
+            key_path = item.get("registry_key_path", r"Software\Microsoft\Windows\CurrentVersion\Run")
+            hkey = winreg.HKEY_LOCAL_MACHINE if hive == "HKLM" else winreg.HKEY_CURRENT_USER
             try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_WRITE) as key:
+                with winreg.OpenKey(hkey, key_path, 0, winreg.KEY_WRITE) as key:
                     if should_enable:
                         if item.get("ExecutableType") == "ahk_v2": 
-                            # Use the absolute path to the generated AHK script directly
                             val = f'"{self._make_ahk(item)}"'
                         elif item.get("run_as_admin") or item.get("hide_terminal"): 
                             val = f'wscript.exe "{self._make_vbs(item)}"'
@@ -575,7 +580,7 @@ class MainWindow(QMainWindow):
                         winreg.SetValueEx(key, item["name"], 0, winreg.REG_SZ, val)
                     else: winreg.DeleteValue(key, item["name"])
                 self.widgets_map[item["name"]].set_active(should_enable)
-            except Exception as e: self.update_status(f"REG ERROR: {e}")
+            except Exception as e: self.update_status(f"REG ERROR: {e}. Try running as Admin.")
         else: item["script_enabled"] = should_enable; self.save_items(); self.generate_ps1(); self.widgets_map[item["name"]].set_active(should_enable)
 
     def generate_ps1(self):
@@ -681,39 +686,45 @@ class MainWindow(QMainWindow):
     def scan_registry(self):
         self.update_status("SCANNING REGISTRY...")
         found, names = [], {i["name"].lower() for i in self.items}
-        try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as key:
-                info = winreg.QueryInfoKey(key)
-                for i in range(info[1]):
-                    name, val, val_type = winreg.EnumValue(key, i)
-                    if name.lower() not in names:
-                        val_str = str(val).strip()
-                        path = ""
-                        args = ""
-                        if val_str.startswith('"'):
-                            end_quote = val_str.find('"', 1)
-                            if end_quote != -1:
-                                path = val_str[1:end_quote]
-                                args = val_str[end_quote+1:].strip()
+        targets = [
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", "HKCU"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Microsoft\Windows\CurrentVersion\Run", "HKLM"),
+            (winreg.HKEY_LOCAL_MACHINE, r"Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run", "HKLM")
+        ]
+        for hkey, key_path, hive_name in targets:
+            try:
+                with winreg.OpenKey(hkey, key_path, 0, winreg.KEY_READ) as key:
+                    info = winreg.QueryInfoKey(key)
+                    for i in range(info[1]):
+                        name, val, val_type = winreg.EnumValue(key, i)
+                        if name.lower() not in names:
+                            val_str = str(val).strip()
+                            path = ""
+                            args = ""
+                            if val_str.startswith('"'):
+                                end_quote = val_str.find('"', 1)
+                                if end_quote != -1:
+                                    path = val_str[1:end_quote]
+                                    args = val_str[end_quote+1:].strip()
+                                else:
+                                    path = val_str
                             else:
-                                path = val_str
-                        else:
-                            parts = val_str.split(' ', 1)
-                            path = parts[0]
-                            if len(parts) > 1:
-                                args = parts[1]
-                        
-                        found.append({
-                            "name": name,
-                            "paths": [path],
-                            "Command": args,
-                            "type": "App" if path.lower().endswith(".exe") else "Command",
-                            "added_at": time.time()
-                        })
-        except Exception as e:
-            self.update_status(f"REG SCAN FAILED: {e}")
-            return
-            
+                                parts = val_str.split(' ', 1)
+                                path = parts[0]
+                                if len(parts) > 1:
+                                    args = parts[1]
+                            
+                            found.append({
+                                "name": name,
+                                "paths": [path],
+                                "Command": args,
+                                "type": "App" if path.lower().endswith(".exe") else "Command",
+                                "added_at": time.time(),
+                                "registry_hive": hive_name,
+                                "registry_key_path": key_path
+                            })
+            except Exception as e:
+                print(f"Skipped key {hive_name}\\{key_path}: {e}")
         if found:
             dlg = ScanResultsDialog(found, self, title="SYSTEM // REGISTRY_SCAN_RESULTS", confirm_text="IMPORT SELECTED")
             if dlg.exec():
