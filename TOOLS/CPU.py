@@ -74,7 +74,7 @@ class TaskCompletePopup(QWidget):
         # Close Button
         self.close_btn = QPushButton("ACKNOWLEDGE")
         self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.close_btn.clicked.connect(self.close)
+        self.close_btn.clicked.connect(QApplication.instance().quit)
         self.container_layout.addWidget(self.close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         
         # Center the window on screen
@@ -101,6 +101,12 @@ class TaskCompletePopup(QWidget):
     def mouseReleaseEvent(self, event):
         if hasattr(self, 'oldPos'):
             del self.oldPos
+
+    def closeEvent(self, event):
+        app = QApplication.instance()
+        if app:
+            app.quit()
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
