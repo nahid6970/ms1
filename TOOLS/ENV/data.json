@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-16T10:07:13.475880",
+    "timestamp": "2026-07-16T10:08:32.822542",
     "aliases": {
         "ll": "ls -la",
         "gl": "git log --oneline",
@@ -84,13 +84,13 @@
             },
             "Git UI": {
                 "MUIVerb": "Github Manager",
-                "Icon": "C:\\@delta\\ms1\\TOOLS\\ENV\\icon\\Github_Manager_6556cb36.ico",
-                "IconSVG": "<svg viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path fill=\"#75b1ff\" d=\"M8 3a5 5 0 100 10A5 5 0 008 3z\"></path></g></svg>",
+                "Icon": "C:\\@delta\\ms1\\TOOLS\\ENV\\icon\\Github_Manager_a75545b1.ico",
+                "IconSVG": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M5.13984 4.72563C5.94742 4.3112 6.5 3.47013 6.5 2.5C6.5 1.11929 5.38071 0 4 0C2.61929 0 1.5 1.11929 1.5 2.5C1.5 3.52516 2.11705 4.4062 3 4.79198V11.208C2.11705 11.5938 1.5 12.4748 1.5 13.5C1.5 14.8807 2.61929 16 4 16C5.38071 16 6.5 14.8807 6.5 13.5C6.5 12.4748 5.88295 11.5938 5 11.208V7.41421L7.08579 9.5H9.70802C10.0938 10.383 10.9748 11 12 11C13.3807 11 14.5 9.88071 14.5 8.5C14.5 7.11929 13.3807 6 12 6C10.9748 6 10.0938 6.61705 9.70802 7.5H7.91421L5.13984 4.72563Z\" fill=\"#ffffff\"></path> </g></svg>",
                 "command": "\"C:\\Users\\nahid\\AppData\\Local\\Programs\\Python\\Python314\\pythonw.exe\" \"C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.py\" \"%V\""
             },
             "Rclone NCDU": {
                 "MUIVerb": "Disk Usage [GDU]",
-                "Icon": "C:\\@delta\\ms1\\TOOLS\\ENV\\icon\\Disk_Usage__GDU__6556cb36.ico",
+                "Icon": "C:\\@delta\\ms1\\TOOLS\\ENV\\icon\\Rclone_NCDU_6556cb36.ico",
                 "IconSVG": "<svg viewBox=\"0 0 16 16\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path fill=\"#75b1ff\" d=\"M8 3a5 5 0 100 10A5 5 0 008 3z\"></path></g></svg>",
                 "command": "cmd /k \"cd /d \"%V\" && gdu\""
             }
