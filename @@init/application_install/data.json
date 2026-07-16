@@ -21,6 +21,13 @@
         "winget_path": "C:\\Program Files\\Alacritty\\alacritty.exe"
     },
     {
+        "name": "Android Cli",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Google.AndroidCLI",
+        "winget_path": ""
+    },
+    {
         "name": "android-clt",
         "scoop_name": "android-clt",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\android-clt\\current",
@@ -875,10 +882,10 @@
         "winget_path": ""
     },
     {
-        "name": "Android Cli",
-        "scoop_name": "",
-        "scoop_path": "",
-        "winget_name": "Google.AndroidCLI",
+        "name": "KDE Connect",
+        "scoop_name": "kdeconnect",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\kdeconnect\\current",
+        "winget_name": "",
         "winget_path": ""
     }
 ]

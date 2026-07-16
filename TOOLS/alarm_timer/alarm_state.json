@@ -166,10 +166,10 @@
         {
           "id": "a645bc31",
           "label": "03",
-          "fires_at": 1783952923.3406236,
-          "created_at": 1783952917.3421764,
+          "fires_at": 1784647812.8630972,
+          "created_at": 1784225232.868197,
           "input_mode": "text",
-          "input_value": ".1",
+          "input_value": "117h 23m",
           "use_custom_colors": true
         },
         {
