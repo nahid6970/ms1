@@ -1024,8 +1024,36 @@ class EnvVariableManager(QMainWindow):
         from PyQt6.QtGui import QPainter, QPixmap
         from PyQt6.QtSvg import QSvgRenderer
         from PyQt6.QtCore import QByteArray, Qt
+        import hashlib
+        import re
         
-        ico_path = os.path.join(self.icons_dir, f"{ico_name}.ico")
+        # Normalize the name so it is a valid filename
+        safe_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', ico_name)
+        
+        try:
+            if os.path.exists(svg_content_or_path):
+                with open(svg_content_or_path, 'r', encoding='utf-8') as f:
+                    data_to_hash = f.read()
+            else:
+                data_to_hash = svg_content_or_path
+            
+            content_hash = hashlib.md5(data_to_hash.encode('utf-8')).hexdigest()[:8]
+        except:
+            content_hash = "temp"
+            
+        ico_path = os.path.join(self.icons_dir, f"{safe_name}_{content_hash}.ico")
+        
+        # Clean up old icons for this entry name to keep directory clean
+        try:
+            for f in os.listdir(self.icons_dir):
+                if f.startswith(f"{safe_name}_") and f.endswith(".ico") and f != f"{safe_name}_{content_hash}.ico":
+                    try:
+                        os.remove(os.path.join(self.icons_dir, f))
+                    except:
+                        pass
+        except:
+            pass
+            
         try:
             renderer = QSvgRenderer()
             if os.path.exists(svg_content_or_path):
