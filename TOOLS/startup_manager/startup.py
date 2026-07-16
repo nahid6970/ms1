@@ -722,7 +722,50 @@ class MainWindow(QMainWindow):
                 self.populate_lists()
         else:
             self.update_status("NO NEW REGISTRY ENTRIES")
-    def scan_tasks(self): self.update_status("TASK SCAN COMPLETE")
+    def scan_tasks(self):
+        self.update_status("SCANNING TASKS...")
+        found, names = [], {i["name"].lower() for i in self.items}
+        ps_cmd = (
+            "Get-ScheduledTask | "
+            "Where-Object { $_.State -ne 'Disabled' -and $_.TaskPath -notlike '\\Microsoft\\*' } | "
+            "ForEach-Object { [PSCustomObject]@{ Name = $_.TaskName; Path = $_.TaskPath; "
+            "Action = ($_.Actions | Select-Object -First 1).Execute; "
+            "Arguments = ($_.Actions | Select-Object -First 1).Argument } } | "
+            "ConvertTo-Json"
+        )
+        try:
+            res = subprocess.run(["powershell", "-Command", ps_cmd], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            if res.returncode == 0 and res.stdout.strip():
+                import json
+                tasks_data = json.loads(res.stdout)
+                if isinstance(tasks_data, dict):
+                    tasks_data = [tasks_data]
+                for t in tasks_data:
+                    name = t.get("Name")
+                    action = t.get("Action")
+                    args = t.get("Arguments") or ""
+                    if name and name.lower() not in names:
+                        if action:
+                            found.append({
+                                "name": name,
+                                "paths": [action],
+                                "Command": args,
+                                "type": "App" if action.lower().endswith(".exe") else "Command",
+                                "added_at": time.time(),
+                                "origin": "TaskScheduler"
+                            })
+        except Exception as e:
+            self.update_status(f"TASK SCAN FAILED: {e}")
+            return
+            
+        if found:
+            dlg = ScanResultsDialog(found, self, title="SYSTEM // TASK_SCAN_RESULTS", confirm_text="IMPORT SELECTED")
+            if dlg.exec():
+                self.items.extend(dlg.selected_items)
+                self.save_items()
+                self.populate_lists()
+        else:
+            self.update_status("NO NEW TASK ENTRIES")
     def delete_matching_shortcuts(self):
         self.update_status("PRUNING...")
         pruned_count = 0
