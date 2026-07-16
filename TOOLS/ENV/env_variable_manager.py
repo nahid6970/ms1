@@ -622,10 +622,19 @@ class EnvVariableManager(QMainWindow):
         form_layout.addRow("Menu Label:", label_edit)
         
         # Command
+        cmd_layout = QHBoxLayout()
         cmd_edit = QTextEdit()
         cmd_edit.setPlaceholderText("Use %V for directory, %1 for file path")
         cmd_edit.setMaximumHeight(60)
-        form_layout.addRow("Command:", cmd_edit)
+        cmd_layout.addWidget(cmd_edit)
+        
+        help_btn = QPushButton("💡 Help")
+        help_btn.setToolTip("Click to see detailed command guides for CMD, PowerShell, WT, and more!")
+        help_btn.setFixedWidth(70)
+        help_btn.clicked.connect(self.show_command_help)
+        cmd_layout.addWidget(help_btn)
+        
+        form_layout.addRow("Command:", cmd_layout)
         
         # SVG Icon Code
         svg_edit = QTextEdit()
@@ -745,10 +754,19 @@ class EnvVariableManager(QMainWindow):
         # Command field (only for ENTRY type)
         cmd_edit = None
         if type_text == "ENTRY":
+            cmd_layout = QHBoxLayout()
             cmd_edit = QTextEdit()
             cmd_edit.setPlainText(old_cmd)
             cmd_edit.setMaximumHeight(60)
-            form_layout.addRow("Command:", cmd_edit)
+            cmd_layout.addWidget(cmd_edit)
+            
+            help_btn = QPushButton("💡 Help")
+            help_btn.setToolTip("Click to see detailed command guides for CMD, PowerShell, WT, and more!")
+            help_btn.setFixedWidth(70)
+            help_btn.clicked.connect(self.show_command_help)
+            cmd_layout.addWidget(help_btn)
+            
+            form_layout.addRow("Command:", cmd_layout)
         
         # SVG Icon Code field
         svg_edit = QTextEdit()
@@ -1192,6 +1210,106 @@ class EnvVariableManager(QMainWindow):
             if "children" in d:
                 winreg.CreateKey(hkey, f"{fp}\\shell")
                 self._import_shell_entries(hkey, f"{fp}\\shell", d["children"])
+
+    def show_command_help(self):
+        """Show a detailed help guide dialog for context menu commands"""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QDialogButtonBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Command Guide & Examples")
+        dialog.setMinimumSize(750, 600)
+        
+        layout = QVBoxLayout(dialog)
+        
+        browser = QTextBrowser()
+        # Enable HTML styling
+        html_content = f"""
+        <style>
+            body {{
+                background-color: {CP_BG};
+                color: {CP_TEXT};
+                font-size: 10pt;
+            }}
+            h2 {{
+                color: {CP_YELLOW};
+                border-bottom: 1px solid {CP_DIM};
+                padding-bottom: 5px;
+            }}
+            h3 {{
+                color: {CP_CYAN};
+                margin-top: 15px;
+            }}
+            code {{
+                background-color: {CP_PANEL};
+                color: {CP_ORANGE};
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-weight: bold;
+            }}
+            pre {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                padding: 10px;
+                border: 1px solid {CP_DIM};
+                border-radius: 5px;
+                white-space: pre-wrap;
+            }}
+            ul {{
+                margin-left: 20px;
+            }}
+            li {{
+                margin-bottom: 5px;
+            }}
+        </style>
+        <h2>💡 Right-Click Context Menu Command Guide</h2>
+        
+        <h3>1. Directory Path Variables</h3>
+        <ul>
+            <li><code>%V</code> : The primary path to use. It represents the directory you right-clicked on, or the current folder path if right-clicking on empty background space.</li>
+            <li><code>%1</code> : The path of the specific selected file or folder. Use this when the item applies specifically to a file selection.</li>
+        </ul>
+        
+        <h3>2. CMD (Command Prompt) Examples</h3>
+        <ul>
+            <li><b>Run command and keep CMD window open</b>:<br>
+            <pre>cmd.exe /k "your-command"</pre></li>
+            <li><b>Start CMD directly in the target directory</b>:<br>
+            <pre>cmd.exe /k "cd /d \\"%V\\""</pre></li>
+            <li><b>Run a script in target folder and keep open</b>:<br>
+            <pre>cmd.exe /k "cd /d \\"%V\\" && python my_script.py"</pre></li>
+        </ul>
+        
+        <h3>3. PowerShell / pwsh Examples</h3>
+        <ul>
+            <li><b>Run command in PowerShell Core (pwsh) and keep open</b>:<br>
+            <pre>pwsh.exe -NoExit -Command "your-command"</pre></li>
+            <li><b>Open pwsh directly in the target directory</b>:<br>
+            <pre>pwsh.exe -WorkingDirectory "%V" -NoExit</pre></li>
+            <li><b>Open standard PowerShell in the target directory</b>:<br>
+            <pre>powershell.exe -NoExit -Command "Set-Location '%V'"</pre></li>
+            <li><b>Run script and keep PowerShell open</b>:<br>
+            <pre>pwsh.exe -WorkingDirectory "%V" -NoExit -Command "& './my_script.ps1'"</pre></li>
+        </ul>
+        
+        <h3>4. Windows Terminal (wt) Integration</h3>
+        <ul>
+            <li><b>Open new tab in Windows Terminal at current directory (default profile)</b>:<br>
+            <pre>wt.exe -d "%V"</pre></li>
+            <li><b>Open a specific shell (e.g. pwsh) in Windows Terminal keeping it open</b>:<br>
+            <pre>wt.exe -d "%V" nt pwsh.exe -NoExit -Command "echo 'Hello!'"</pre></li>
+            <li><b>Open command prompt (CMD) in Windows Terminal</b>:<br>
+            <pre>wt.exe -d "%V" nt cmd.exe /k "echo 'CMD tab'"</pre></li>
+            <li><b>Run multiple command tabs or panes side-by-side</b>:<br>
+            <pre>wt.exe -d "%V" nt pwsh.exe ; split-pane -d "%V" -H cmd.exe</pre></li>
+        </ul>
+        """
+        browser.setHtml(html_content)
+        layout.addWidget(browser)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        dialog.exec()
 
     def set_status(self, message, color=CP_TEXT):
         self.status_label.setText(message)
