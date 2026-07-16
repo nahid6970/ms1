@@ -1,0 +1,12 @@
+# Compiled Icons
+icon/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+ENV/
