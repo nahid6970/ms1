@@ -100,6 +100,52 @@
             top: calc(100% + 3px) !important;
         }
 
+        /* AI Copilot Submit/Stop Button Styling */
+        #ai-copilot-submit {
+            padding: 5px;
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
+        }
+        #ai-copilot-submit:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #b55fe6, #8b5cf6);
+            box-shadow: 0 4px 8px rgba(124, 58, 237, 0.5);
+        }
+        #ai-copilot-submit:active {
+            transform: translateY(0);
+        }
+        #ai-copilot-submit.generating {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
+            animation: pulse-red 2s infinite alternate;
+        }
+        #ai-copilot-submit.generating:hover {
+            background: linear-gradient(135deg, #f87171, #ef4444) !important;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.6) !important;
+        }
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+                transform: scale(1.05);
+            }
+        }
+
         /* Remove width/height limits of AI Copilot Popover */
         #ai-copilot-popover {
             max-width: none !important;
@@ -2096,7 +2142,7 @@
                     </button>
                     <!-- Mic + Generate buttons -->
                     <button id="ai-mic-btn" onclick="toggleAIMic()" style="padding:5px; flex-shrink:0; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-secondary); font-size:0.95rem; cursor:pointer;" title="Speak/Record">🎤</button>
-                    <button id="ai-copilot-submit" onclick="generateAICommand()" style="padding:5px; flex-shrink:0; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:#a855f7; border:none; border-radius:6px; color:white; font-size:0.95rem; cursor:pointer;" title="Generate Command">⚡</button>
+                    <button id="ai-copilot-submit" onclick="generateAICommand()" title="Generate Command">⚡</button>
                 </div>
             </div>
         </div>
@@ -12921,13 +12967,12 @@
 
             const submitBtn = document.getElementById('ai-copilot-submit');
             
-            const originalBg = submitBtn.style.background;
-            const originalText = submitBtn.innerText;
+            const originalHtml = submitBtn.innerHTML;
             const originalTitle = submitBtn.title;
 
             // Change submit button to a Cancel button style
-            submitBtn.innerText = '⏹️';
-            submitBtn.style.background = '#ef4444';
+            submitBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:block;"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`;
+            submitBtn.classList.add('generating');
             submitBtn.title = 'Cancel Generation';
             submitBtn.disabled = false;
             
@@ -13062,8 +13107,8 @@
                 }
             } finally {
                 aiAbortController = null;
-                submitBtn.innerText = originalText;
-                submitBtn.style.background = originalBg;
+                submitBtn.innerHTML = originalHtml;
+                submitBtn.classList.remove('generating');
                 submitBtn.title = originalTitle;
                 submitBtn.disabled = false;
 
