@@ -1133,12 +1133,24 @@ SendText("Hello World")"""
             self.replacement_edit.setMinimumWidth(400)
             replacement_layout.addWidget(self.replacement_edit)
             
-            # Mode toggle
-            self.use_clipboard_checkbox = QCheckBox("Use Clipboard to Paste (Faster for long text)")
-            self.use_clipboard_checkbox.setChecked(True)
-            self.use_clipboard_checkbox.setToolTip("If unchecked, it will type characters one by one (safer for some apps like Notepad++)")
+            # Delivery method dropdown
+            delivery_row = QHBoxLayout()
+            delivery_label = QLabel("Delivery:")
+            delivery_label.setStyleSheet(f"color: {CP_TEXT}; font-family: 'Consolas'; font-weight: bold;")
+            delivery_label.setFixedWidth(90)
+            self.delivery_method_combo = QComboBox()
+            self.delivery_method_combo.addItems(["Paste (Clipboard)", "SendText (Typing)", "SendInput (Fast Injection)", "SendEvent (Slow & Reliable)"])
+            self.delivery_method_combo.setCurrentIndex(0)
+            self.delivery_method_combo.setToolTip(
+                "Paste: Fast, uses clipboard (may disturb clipboard history)\n"
+                "SendText: Types characters one by one (safer for apps like Notepad++)\n"
+                "SendInput: Fast keystroke injection without touching clipboard\n"
+                "SendEvent: Slow reliable typing for games/legacy apps"
+            )
+            delivery_row.addWidget(delivery_label)
+            delivery_row.addWidget(self.delivery_method_combo)
             replacement_layout.addSpacing(5)
-            replacement_layout.addWidget(self.use_clipboard_checkbox)
+            replacement_layout.addLayout(delivery_row)
 
             # Menu toggle
             self.show_as_menu_checkbox = QCheckBox("Show multi-line text as a selection menu")
@@ -1263,7 +1275,12 @@ SendText("Hello World")"""
         else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
-            self.use_clipboard_checkbox.setChecked(self.shortcut_data.get("use_clipboard", True))
+            # Backward compat: old use_clipboard bool -> new delivery_method string
+            delivery = self.shortcut_data.get("delivery_method", "")
+            if not delivery:
+                delivery = "paste" if self.shortcut_data.get("use_clipboard", True) else "sendtext"
+            method_map = {"paste": 0, "sendtext": 1, "sendinput": 2, "sendevent": 3}
+            self.delivery_method_combo.setCurrentIndex(method_map.get(delivery, 0))
             self.show_as_menu_checkbox.setChecked(self.shortcut_data.get("show_as_menu", False))
             
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
@@ -1723,7 +1740,7 @@ SendText("Hello World")"""
                 "description": description,
                 "trigger": trigger,
                 "replacement": replacement,
-                "use_clipboard": self.use_clipboard_checkbox.isChecked(),
+                "delivery_method": ["paste", "sendtext", "sendinput", "sendevent"][self.delivery_method_combo.currentIndex()],
                 "show_as_menu": self.show_as_menu_checkbox.isChecked(),
                 "window_title": self.window_title_edit.text().strip(),
                 "process_name": self.process_name_edit.text().strip(),
@@ -3737,7 +3754,10 @@ class AHKShortcutEditor(QMainWindow):
                     
                     replacement = shortcut.get('replacement', '')
                     trigger = shortcut.get('trigger', '')
-                    use_clipboard = shortcut.get('use_clipboard', True)
+                    # Resolve delivery method (backward compat with use_clipboard)
+                    delivery_method = shortcut.get('delivery_method', '')
+                    if not delivery_method:
+                        delivery_method = 'paste' if shortcut.get('use_clipboard', True) else 'sendtext'
                     
                     # Handle Context if specified
                     func_name = f"Is{re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Text'))}Context"
@@ -3757,7 +3777,8 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append(f":X:{trigger}:: {{")
                         output_lines.append("    m := Menu()")
                         lines = replacement.split('\n')
-                        paste_func = "Paste" if use_clipboard else "SendText"
+                        paste_func_map = {"paste": "Paste", "sendtext": "SendText", "sendinput": "SendInput", "sendevent": "SendEvent"}
+                        paste_func = paste_func_map.get(delivery_method, "Paste")
                         
                         added_lines = set()
                         for i, line in enumerate(lines):
@@ -3776,7 +3797,7 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append("    m.Show()")
                         output_lines.append("}")
                     else:
-                        if use_clipboard:
+                        if delivery_method == 'paste':
                             if '\n' in replacement:
                                 output_lines.append(f":X:{trigger}::Paste(\"")
                                 output_lines.append("(") 
@@ -3790,8 +3811,58 @@ class AHKShortcutEditor(QMainWindow):
                             else:
                                 safe_replacement = replacement.replace("'", "''")
                                 output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
+                        elif delivery_method == 'sendinput':
+                            safe_replacement = replacement.replace('"', '""').replace('`', '``')
+                            if '\n' in replacement:
+                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append('    old := A_SendMode')
+                                output_lines.append('    SendMode("Input")')
+                                output_lines.append(f'    SendText("')
+                                output_lines.append("(")
+                                lines = replacement.split('\n')
+                                for line in lines:
+                                    l = "`" + line if line.strip().startswith(")") else line
+                                    output_lines.append(l)
+                                output_lines.append(')")')
+                                output_lines.append('    SendMode(old)')
+                                output_lines.append("}")
+                            else:
+                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append('    old := A_SendMode')
+                                output_lines.append('    SendMode("Input")')
+                                output_lines.append(f'    SendText("{safe_replacement}")')
+                                output_lines.append('    SendMode(old)')
+                                output_lines.append("}")
+                        elif delivery_method == 'sendevent':
+                            safe_replacement = replacement.replace('"', '""').replace('`', '``')
+                            if '\n' in replacement:
+                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append('    old := A_SendMode')
+                                output_lines.append('    SendMode("Event")')
+                                output_lines.append('    oldDelay := A_KeyDelay')
+                                output_lines.append('    SetKeyDelay(10, 10)')
+                                output_lines.append(f'    SendText("')
+                                output_lines.append("(")
+                                lines = replacement.split('\n')
+                                for line in lines:
+                                    l = "`" + line if line.strip().startswith(")") else line
+                                    output_lines.append(l)
+                                output_lines.append(')")')
+                                output_lines.append('    SetKeyDelay(oldDelay)')
+                                output_lines.append('    SendMode(old)')
+                                output_lines.append("}")
+                            else:
+                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append('    old := A_SendMode')
+                                output_lines.append('    SendMode("Event")')
+                                output_lines.append('    oldDelay := A_KeyDelay')
+                                output_lines.append('    SetKeyDelay(10, 10)')
+                                output_lines.append(f'    SendText("{safe_replacement}")')
+                                output_lines.append('    SetKeyDelay(oldDelay)')
+                                output_lines.append('    SendMode(old)')
+                                output_lines.append("}")
                         else:
-                            # Use SendText (typing mode)
+                            # Default: SendText (typing mode)
                             safe_replacement = replacement.replace('"', '""').replace('`', '``')
                             if '\n' in replacement:
                                 output_lines.append(f":X:{trigger}::SendText(\"")
