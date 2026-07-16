@@ -1,6 +1,6 @@
+import subprocess
 import sys
 import time
-import tkinter as tk
 import pygetwindow as gw
 import pyautogui
 
@@ -33,110 +33,49 @@ def focus_terminal_and_esc():
     except Exception:
         pass # Silently fail if window manipulation fails
 
-def show_notification(title, message, duration=5000):
-    # Attempt to focus terminal and send ESC in the background
+def show_notification(title, message):
     focus_terminal_and_esc()
 
-    root = tk.Tk()
-    root.withdraw() # Hide main window
+    # Native Windows Toast Notification script via PowerShell
+    ps_script = f"""
+    [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+    [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+    $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+    $toastXml = [Windows.Data.Xml.Dom.XmlDocument]::new()
+    $toastXml.LoadXml($template.GetXml())
+    $toastXml.GetElementsByTagName('text')[0].AppendChild($toastXml.CreateTextNode('{title}')) | Out-Null
+    $toastXml.GetElementsByTagName('text')[1].AppendChild($toastXml.CreateTextNode('{message}')) | Out-Null
+    $toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml)
+    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Antigravity').Show($toast)
+    """
     
-    # Create frameless top-level window
-    toast = tk.Toplevel(root)
-    toast.overrideredirect(True)
-    toast.attributes("-topmost", True)
-    toast.attributes("-alpha", 0.0) # Start transparent
-    
-    # Dark Theme Colors
-    BG_COLOR = "#202020"
-    TEXT_COLOR = "#FFFFFF"
-    MUTED_TEXT = "#A0A0A0"
-    ACCENT_COLOR = "#0078D4" # Windows Blue
-    
-    toast.configure(bg=BG_COLOR)
-    
-    # Left accent colored strip
-    accent = tk.Frame(toast, bg=ACCENT_COLOR, width=4)
-    accent.pack(side="left", fill="y")
-    
-    # Content Container
-    content = tk.Frame(toast, bg=BG_COLOR)
-    content.pack(side="left", fill="both", expand=True, padx=12, pady=10)
-    
-    # Title Label
-    title_lbl = tk.Label(
-        content, 
-        text=title, 
-        font=("Segoe UI", 10, "bold"), 
-        fg=TEXT_COLOR, 
-        bg=BG_COLOR, 
-        anchor="w"
-    )
-    title_lbl.pack(fill="x", pady=(0, 2))
-    
-    # Message Label
-    msg_lbl = tk.Label(
-        content, 
-        text=message, 
-        font=("Segoe UI", 9), 
-        fg=MUTED_TEXT, 
-        bg=BG_COLOR, 
-        anchor="nw", 
-        justify="left", 
-        wraplength=250
-    )
-    msg_lbl.pack(fill="both", expand=True)
-    
-    # Close Button (X)
-    close_btn = tk.Label(
-        toast, 
-        text="×", 
-        font=("Segoe UI", 14), 
-        fg=MUTED_TEXT, 
-        bg=BG_COLOR, 
-        cursor="hand2"
-    )
-    close_btn.pack(side="right", anchor="n", padx=(0, 8), pady=4)
-    
-    close_btn.bind("<Enter>", lambda e: close_btn.config(fg=TEXT_COLOR))
-    close_btn.bind("<Leave>", lambda e: close_btn.config(fg=MUTED_TEXT))
-    close_btn.bind("<Button-1>", lambda e: root.destroy())
-    
-    # Position calculations
-    width = 320
-    height = 75
-    
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    
-    x = screen_width - width - 20
-    y_target = screen_height - height - 60 # Sits above taskbar
-    y_start = screen_height + 10 # Starts below screen boundary
-    
-    toast.geometry(f"{width}x{height}+{x}+{y_start}")
-    
-    # Slide up & Fade in animation
-    def animate_in(alpha=0.0, y=y_start):
-        if alpha < 1.0 or y > y_target:
-            next_alpha = min(alpha + 0.1, 1.0)
-            next_y = max(y - 8, y_target)
-            toast.attributes("-alpha", next_alpha)
-            toast.geometry(f"{width}x{height}+{x}+{next_y}")
-            toast.after(10, lambda: animate_in(next_alpha, next_y))
-        else:
-            toast.after(duration, animate_out)
+    try:
+        subprocess.run(["powershell", "-Command", ps_script], capture_output=True, check=True)
+    except Exception:
+        # Fallback to a simple Tkinter window if PowerShell toast fails
+        try:
+            import tkinter as tk
+            root = tk.Tk()
+            root.overrideredirect(True)
+            root.attributes("-topmost", True)
+            root.configure(bg="#202020")
             
-    # Slide down/fade out animation
-    def animate_out(alpha=1.0):
-        if alpha > 0.0:
-            next_alpha = max(alpha - 0.1, 0.0)
-            toast.attributes("-alpha", next_alpha)
-            toast.after(15, lambda: animate_out(next_alpha))
-        else:
-            root.destroy()
+            # Layout size
+            width = 320
+            height = 75
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            x = screen_width - width - 20
+            y = screen_height - height - 60
+            root.geometry(f"{width}x{height}+{x}+{y}")
             
-    # Start animation sequence
-    toast.after(100, lambda: animate_in(0.0, y_start))
-    root.mainloop()
+            tk.Label(root, text=title, font=("Segoe UI", 10, "bold"), fg="#FFFFFF", bg="#202020", anchor="w").pack(fill="x", padx=12, pady=(10, 2))
+            tk.Label(root, text=message, font=("Segoe UI", 9), fg="#A0A0A0", bg="#202020", anchor="w").pack(fill="x", padx=12)
+            
+            root.after(3000, root.destroy)
+            root.mainloop()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     show_notification("Antigravity CLI", "Task completed successfully.")

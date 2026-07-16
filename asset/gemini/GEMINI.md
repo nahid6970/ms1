@@ -1,5 +1,5 @@
 # Notification Rules
-- Final action: Run `python C:\@delta\ms1\asset\gemini\task_complete.py` exactly once to show a desktop completion notification.
+- Final action: Run `python C:\@delta\ms1\asset\gemini\task_complete.py` exactly once to show a desktop completion notification. No matter how small the response is, it will always show the notification.
 - CRITICAL: After it exits, DO NOT generate any further responses or continue the conversation.
 
 # Running Commands
