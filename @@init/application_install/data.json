@@ -21,6 +21,13 @@
         "winget_path": "C:\\Program Files\\Alacritty\\alacritty.exe"
     },
     {
+        "name": "android-clt",
+        "scoop_name": "android-clt",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\android-clt\\current",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Aria2",
         "scoop_name": "aria2",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\aria2\\current\\aria2c.exe",
@@ -51,7 +58,7 @@
     {
         "name": "AutoHotkey v2",
         "scoop_name": "autohotkey",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\autohotkey\\current",
         "winget_name": "AutoHotkey.AutoHotkey",
         "winget_path": "C:\\Program Files\\AutoHotkey\\UX\\AutoHotkeyUX.exe"
     },
@@ -93,14 +100,14 @@
     {
         "name": "Bitwarden",
         "scoop_name": "bitwarden",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\bitwarden\\current",
         "winget_name": "Bitwarden.Bitwarden",
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Bitwarden\\Bitwarden.exe"
     },
     {
         "name": "BleachBit",
         "scoop_name": "bleachbit",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\bleachbit\\current",
         "winget_name": "BleachBit.BleachBit",
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\BleachBit\\bleachbit.exe"
     },
@@ -114,7 +121,7 @@
     {
         "name": "Bulk Crap Uninstaller",
         "scoop_name": "bulk-crap-uninstaller",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\bulk-crap-uninstaller\\current",
         "winget_name": "BCUninstaller",
         "winget_path": "C:\\Program Files\\BCUninstaller\\BCUninstaller.exe"
     },
@@ -184,7 +191,7 @@
     {
         "name": "DotNet_6",
         "scoop_name": "ScoopName",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ScoopName\\current",
         "winget_name": "Microsoft.DotNet.DesktopRuntime.6",
         "winget_path": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.29\\createdump.exe"
     },
@@ -205,7 +212,7 @@
     {
         "name": "Everything",
         "scoop_name": "everything",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\everything\\current",
         "winget_name": "voidtools.Everything",
         "winget_path": ""
     },
@@ -254,7 +261,7 @@
     {
         "name": "FileConverter",
         "scoop_name": "file-converter-np",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\file-converter-np\\current",
         "winget_name": "AdrienAllard.FileConverter",
         "winget_path": "C:\\Program Files\\File Converter\\FileConverter.exe"
     },
@@ -331,7 +338,7 @@
     {
         "name": "handbrake",
         "scoop_name": "handbrake",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\handbrake\\current",
         "winget_name": "",
         "winget_path": ""
     },
@@ -352,7 +359,7 @@
     {
         "name": "Inkscape",
         "scoop_name": "inkscape",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\inkscape\\current",
         "winget_name": "Inkscape.Inkscape",
         "winget_path": "C:\\Program Files\\Inkscape\\bin\\inkscape.exe"
     },
@@ -429,7 +436,7 @@
     {
         "name": "Meld - File Compare",
         "scoop_name": "meld",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\meld\\current",
         "winget_name": "Meld.Meld",
         "winget_path": "C:\\Program Files\\Meld\\Meld.exe"
     },
@@ -450,14 +457,14 @@
     {
         "name": "msys2",
         "scoop_name": "msys2",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\msys2\\current",
         "winget_name": "",
         "winget_path": ""
     },
     {
         "name": "Nilesoft Shell",
         "scoop_name": "nilesoft-shell",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\nilesoft-shell\\current",
         "winget_name": "nilesoft.shell",
         "winget_path": ""
     },
@@ -478,7 +485,7 @@
     {
         "name": "OBS Studio",
         "scoop_name": "obs-studio",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\obs-studio\\current",
         "winget_name": "OBSProject.OBSStudio",
         "winget_path": "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe"
     },
@@ -520,7 +527,7 @@
     {
         "name": "PotPlayer",
         "scoop_name": "potplayer",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\potplayer\\current",
         "winget_name": "Daum.PotPlayer",
         "winget_path": "C:\\Program Files\\DAUM\\PotPlayer\\PotPlayerMini64.exe"
     },
@@ -562,7 +569,7 @@
     {
         "name": "qBittorrent",
         "scoop_name": "qbittorrent",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\qbittorrent\\current",
         "winget_name": "qBittorrent.qBittorrent",
         "winget_path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
     },
@@ -667,7 +674,7 @@
     {
         "name": "Steam",
         "scoop_name": "steam",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\steam\\current",
         "winget_name": "Valve.Steam",
         "winget_path": "C:\\Program Files (x86)\\Steam\\steam.exe"
     },
@@ -716,7 +723,7 @@
     {
         "name": "UniGetUI ",
         "scoop_name": "unigetui",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\unigetui\\current",
         "winget_name": "MartiCliment.UniGetUI",
         "winget_path": ""
     },
@@ -744,14 +751,14 @@
     {
         "name": "VSCode",
         "scoop_name": "vscode",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\vscode\\current",
         "winget_name": "Microsoft.VisualStudioCode",
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
     },
     {
         "name": "VSCodium",
         "scoop_name": "vscodium",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\vscodium\\current",
         "winget_name": "VSCodium",
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\VSCodium\\VSCodium.exe"
     },
@@ -765,7 +772,7 @@
     {
         "name": "WhatsApp",
         "scoop_name": "whatsapp",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\whatsapp\\current",
         "winget_name": "9NKSQGP7F2NH",
         "winget_path": "C:\\Program Files\\WindowsApps\\5319275A.WhatsAppDesktop_2.2407.10.0_x64__cv1g1gvanyjgm\\WhatsApp.exe"
     },
@@ -842,7 +849,7 @@
     {
         "name": "X-Mouse Button Control",
         "scoop_name": "xmousebuttoncontrol",
-        "scoop_path": "",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\xmousebuttoncontrol\\current",
         "winget_name": "Highresolution.X-MouseButtonControl",
         "winget_path": "C:\\Program Files\\Highresolution Enterprises\\X-Mouse Button Control\\XMouseButtonControl.exe"
     },
@@ -868,10 +875,10 @@
         "winget_path": ""
     },
     {
-        "name": "android-clt",
-        "scoop_name": "android-clt",
+        "name": "Android Cli",
+        "scoop_name": "",
         "scoop_path": "",
-        "winget_name": "",
+        "winget_name": "Google.AndroidCLI",
         "winget_path": ""
     }
 ]
