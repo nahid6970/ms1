@@ -312,25 +312,29 @@
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c start C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\@@init\\application_install\\applist.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c start C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist.py"
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 },
                 "Control-Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "bg": "",
@@ -352,7 +356,11 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center"
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         },
         {
             "id": "Rclone_bt",
