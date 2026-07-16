@@ -247,8 +247,10 @@ def delete_application(app_to_delete):
     refresh_app_list()
 
 import json
+import os
 
-DATA_FILE = "C:/@delta/ms1/@Flask/4998_Applist/data.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(SCRIPT_DIR, "data.json")
 
 def load_applications():
     if os.path.exists(DATA_FILE):
