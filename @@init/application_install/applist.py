@@ -156,17 +156,17 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
 def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     install_options = []
     if winget_name:
-        install_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'winget install {winget_name}')})
+        install_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "winget install {winget_name}"', shell=True)})
     if scoop_name:
-        install_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop install {scoop_name}"')})
+        install_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "scoop install {scoop_name}"', shell=True)})
     show_options(install_options)
 
 def uninstall_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     uninstall_options = []
     if winget_name:
-        uninstall_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'winget uninstall {winget_name}')})
+        uninstall_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "winget uninstall {winget_name}"', shell=True)})
     if scoop_name:
-        uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop uninstall {scoop_name}"')})
+        uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "scoop uninstall {scoop_name}"', shell=True)})
     show_options(uninstall_options)
 
 def open_file_location(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
