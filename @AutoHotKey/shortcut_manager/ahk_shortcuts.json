@@ -658,21 +658,6 @@
             "trigger": ";read",
             "replacement": "read dev.md about the project",
             "enabled": true
-        },
-        {
-            "name": "python dependency installer",
-            "category": "General",
-            "description": "",
-            "trigger": ";dep",
-            "replacement": "import sys, os\n# 1. Add the absolute path to the folder containing install_deps.py\nUTILITY_PATH = r\"C:\\@delta\\ms1\"\nif UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)\n\n# 2. Import and run the bootstrap\nimport install_deps\ninstall_deps.bootstrap(__file__)",
-            "use_clipboard": true,
-            "window_title": "",
-            "process_name": "",
-            "window_class": "",
-            "window_title_enabled": false,
-            "process_name_enabled": false,
-            "window_class_enabled": false,
-            "enabled": true
         }
     ],
     "file_shortcuts": [
@@ -917,6 +902,21 @@
             "description": "",
             "trigger": ";python312s",
             "replacement": "C:\\\\Users\\\\nahid\\\\scoop\\\\apps\\\\python312\\\\current\\\\pythonw.exe",
+            "use_clipboard": true,
+            "window_title": "",
+            "process_name": "",
+            "window_class": "",
+            "window_title_enabled": false,
+            "process_name_enabled": false,
+            "window_class_enabled": false,
+            "enabled": true
+        },
+        {
+            "name": "python dependency installer",
+            "category": "General",
+            "description": "",
+            "trigger": ";dep",
+            "replacement": "import sys, os\n# 1. Add the absolute path to the folder containing install_deps.py\nUTILITY_PATH = r\"C:\\@delta\\ms1\"\nif UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)\n\n# 2. Import and run the bootstrap\nimport install_deps\ninstall_deps.bootstrap(__file__)",
             "use_clipboard": true,
             "window_title": "",
             "process_name": "",

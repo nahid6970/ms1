@@ -1139,6 +1139,21 @@ SendText("Hello World")"""
             self.use_clipboard_checkbox.setToolTip("If unchecked, it will type characters one by one (safer for some apps like Notepad++)")
             replacement_layout.addSpacing(5)
             replacement_layout.addWidget(self.use_clipboard_checkbox)
+
+            # Menu toggle
+            self.show_as_menu_checkbox = QCheckBox("Show multi-line text as a selection menu")
+            self.show_as_menu_checkbox.setChecked(False)
+            self.show_as_menu_checkbox.setToolTip("If checked and text has multiple lines, a menu will pop up to let you pick one line.")
+            self.show_as_menu_checkbox.setStyleSheet(f"""
+                QCheckBox {{
+                    font-family: 'Consolas', 'Segoe UI', sans-serif;
+                    font-size: 11pt;
+                    color: {CP_TEXT};
+                    spacing: 8px;
+                    margin-top: 5px;
+                }}
+            """)
+            replacement_layout.addWidget(self.show_as_menu_checkbox)
             
             top_layout.addLayout(replacement_layout)
         
@@ -1249,6 +1264,7 @@ SendText("Hello World")"""
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
             self.use_clipboard_checkbox.setChecked(self.shortcut_data.get("use_clipboard", True))
+            self.show_as_menu_checkbox.setChecked(self.shortcut_data.get("show_as_menu", False))
             
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
             self.process_name_edit.setText(self.shortcut_data.get("process_name", ""))
@@ -1708,6 +1724,7 @@ SendText("Hello World")"""
                 "trigger": trigger,
                 "replacement": replacement,
                 "use_clipboard": self.use_clipboard_checkbox.isChecked(),
+                "show_as_menu": self.show_as_menu_checkbox.isChecked(),
                 "window_title": self.window_title_edit.text().strip(),
                 "process_name": self.process_name_edit.text().strip(),
                 "window_class": self.window_class_edit.text().strip(),
@@ -3728,33 +3745,58 @@ class AHKShortcutEditor(QMainWindow):
                         append_context_checker(shortcut, func_name)
                         output_lines.append(f"#HotIf {func_name}()")
 
-                    if use_clipboard:
-                        if '\n' in replacement:
-                            output_lines.append(f":X:{trigger}::Paste(\"")
-                            output_lines.append("(") 
-                            lines = replacement.split('\n')
-                            for line in lines:
-                                if line.strip().startswith(")"):
-                                    output_lines.append("`" + line)
-                                else:
-                                    output_lines.append(line)
-                            output_lines.append(")\")")
-                        else:
-                            safe_replacement = replacement.replace("'", "''")
-                            output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
+                    show_as_menu = shortcut.get('show_as_menu', False)
+
+                    if show_as_menu and '\n' in replacement:
+                        output_lines.append(f":X:{trigger}:: {{")
+                        output_lines.append("    m := Menu()")
+                        lines = replacement.split('\n')
+                        paste_func = "Paste" if use_clipboard else "SendText"
+                        
+                        added_lines = set()
+                        for i, line in enumerate(lines):
+                            if not line.strip():
+                                continue
+                            # Ensure unique menu item names if there are duplicates
+                            display_line = line
+                            while display_line in added_lines:
+                                display_line += " "
+                            added_lines.add(display_line)
+                            
+                            safe_line = escape_ahk_string(line)
+                            safe_display = escape_ahk_string(display_line)
+                            output_lines.append(f'    m.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {paste_func}("{safe_line}"))')
+                            
+                        output_lines.append("    m.Show()")
+                        output_lines.append("}")
                     else:
-                        # Use SendText (typing mode)
-                        safe_replacement = replacement.replace('"', '""').replace('`', '``')
-                        if '\n' in replacement:
-                            output_lines.append(f":X:{trigger}::SendText(\"")
-                            output_lines.append("(")
-                            lines = replacement.split('\n')
-                            for i, line in enumerate(lines):
-                                l = "`" + line if line.strip().startswith(")") else line
-                                output_lines.append(l)
-                            output_lines.append(")\")")
+                        if use_clipboard:
+                            if '\n' in replacement:
+                                output_lines.append(f":X:{trigger}::Paste(\"")
+                                output_lines.append("(") 
+                                lines = replacement.split('\n')
+                                for line in lines:
+                                    if line.strip().startswith(")"):
+                                        output_lines.append("`" + line)
+                                    else:
+                                        output_lines.append(line)
+                                output_lines.append(")\")")
+                            else:
+                                safe_replacement = replacement.replace("'", "''")
+                                output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
                         else:
-                            output_lines.append(f':X:{trigger}::SendText("{safe_replacement}")')
+                            # Use SendText (typing mode)
+                            safe_replacement = replacement.replace('"', '""').replace('`', '``')
+                            if '\n' in replacement:
+                                output_lines.append(f":X:{trigger}::SendText(\"")
+                                output_lines.append("(")
+                                lines = replacement.split('\n')
+                                for i, line in enumerate(lines):
+                                    l = "`" + line if line.strip().startswith(")") else line
+                                    output_lines.append(l)
+                                output_lines.append(")\")")
+                            else:
+                                output_lines.append(f':X:{trigger}::SendText("{safe_replacement}")')
                     
                     if has_context_fields:
                         output_lines.append("#HotIf")
