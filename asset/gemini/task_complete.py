@@ -1,18 +1,8 @@
 import sys
 import time
+import tkinter as tk
 import pygetwindow as gw
 import pyautogui
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect)
-from PyQt6.QtCore import Qt, QPoint
-from PyQt6.QtGui import QColor
-
-# PROFESSIONAL PALETTE
-BG_COLOR = "#FFFFFF"
-BORDER_COLOR = "#E0E0E0"
-PRIMARY_COLOR = "#0078D4"  # Enterprise Blue
-TEXT_COLOR = "#201F1E"
-SECONDARY_TEXT = "#605E5C"
-BTN_HOVER = "#005A9E"
 
 def focus_terminal_and_esc():
     """Attempts to find the Gemini terminal window, focus it, and send ESC."""
@@ -43,110 +33,110 @@ def focus_terminal_and_esc():
     except Exception:
         pass # Silently fail if window manipulation fails
 
-class TaskCompletePopup(QWidget):
-    def __init__(self):
-        super().__init__()
-        
-        # Window Flags: Frameless and Always on Top
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        
-        # Central Layout
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout(self.layout)
-        
-        # Main Container
-        self.container = QWidget()
-        self.container.setObjectName("Container")
-        self.container_layout = QVBoxLayout(self.container)
-        self.container_layout.setContentsMargins(30, 30, 30, 30)
-        self.layout.addWidget(self.container)
-        
-        # Styling
-        self.setStyleSheet(f"""
-            QWidget#Container {{
-                background-color: {BG_COLOR};
-                border: 1px solid {BORDER_COLOR};
-                border-radius: 8px;
-            }}
-            QLabel {{
-                color: {TEXT_COLOR};
-                font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-                font-size: 14pt;
-                font-weight: 400;
-            }}
-            QPushButton {{
-                background-color: {PRIMARY_COLOR};
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 24px;
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 10pt;
-                font-weight: 600;
-            }}
-            QPushButton:hover {{
-                background-color: {BTN_HOVER};
-            }}
-            QPushButton:pressed {{
-                background-color: #004578;
-            }}
-        """)
-        
-        # Subtle Shadow Effect
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(20)
-        shadow.setColor(QColor(0, 0, 0, 60))
-        shadow.setOffset(0, 4)
-        self.container.setGraphicsEffect(shadow)
-        
-        # Message Label
-        self.label = QLabel("Task Completed Successfully")
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.container_layout.addWidget(self.label)
-        
-        # Spacer
-        self.container_layout.addSpacing(20)
-        
-        # Close Button
-        self.close_btn = QPushButton("Dismiss")
-        self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.close_btn.clicked.connect(self.close)
-        self.container_layout.addWidget(self.close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        # Center the window on screen
-        self.adjustSize()
-        self.center()
-        
-    def center(self):
-        qr = self.frameGeometry()
-        cp = self.screen().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+def show_notification(title, message, duration=5000):
+    # Attempt to focus terminal and send ESC in the background
+    focus_terminal_and_esc()
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        # When the window shows, trigger the terminal focus and ESC
-        focus_terminal_and_esc()
-
-    # Allow dragging the frameless window
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.oldPos = event.globalPosition().toPoint()
-
-    def mouseMoveEvent(self, event):
-        if hasattr(self, 'oldPos'):
-            delta = QPoint(event.globalPosition().toPoint() - self.oldPos)
-            self.move(self.x() + delta.x(), self.y() + delta.y())
-            self.oldPos = event.globalPosition().toPoint()
-
-    def mouseReleaseEvent(self, event):
-        if hasattr(self, 'oldPos'):
-            del self.oldPos
+    root = tk.Tk()
+    root.withdraw() # Hide main window
+    
+    # Create frameless top-level window
+    toast = tk.Toplevel(root)
+    toast.overrideredirect(True)
+    toast.attributes("-topmost", True)
+    toast.attributes("-alpha", 0.0) # Start transparent
+    
+    # Dark Theme Colors
+    BG_COLOR = "#202020"
+    TEXT_COLOR = "#FFFFFF"
+    MUTED_TEXT = "#A0A0A0"
+    ACCENT_COLOR = "#0078D4" # Windows Blue
+    
+    toast.configure(bg=BG_COLOR)
+    
+    # Left accent colored strip
+    accent = tk.Frame(toast, bg=ACCENT_COLOR, width=4)
+    accent.pack(side="left", fill="y")
+    
+    # Content Container
+    content = tk.Frame(toast, bg=BG_COLOR)
+    content.pack(side="left", fill="both", expand=True, padx=12, pady=10)
+    
+    # Title Label
+    title_lbl = tk.Label(
+        content, 
+        text=title, 
+        font=("Segoe UI", 10, "bold"), 
+        fg=TEXT_COLOR, 
+        bg=BG_COLOR, 
+        anchor="w"
+    )
+    title_lbl.pack(fill="x", pady=(0, 2))
+    
+    # Message Label
+    msg_lbl = tk.Label(
+        content, 
+        text=message, 
+        font=("Segoe UI", 9), 
+        fg=MUTED_TEXT, 
+        bg=BG_COLOR, 
+        anchor="nw", 
+        justify="left", 
+        wraplength=250
+    )
+    msg_lbl.pack(fill="both", expand=True)
+    
+    # Close Button (X)
+    close_btn = tk.Label(
+        toast, 
+        text="×", 
+        font=("Segoe UI", 14), 
+        fg=MUTED_TEXT, 
+        bg=BG_COLOR, 
+        cursor="hand2"
+    )
+    close_btn.pack(side="right", anchor="n", padx=(0, 8), pady=4)
+    
+    close_btn.bind("<Enter>", lambda e: close_btn.config(fg=TEXT_COLOR))
+    close_btn.bind("<Leave>", lambda e: close_btn.config(fg=MUTED_TEXT))
+    close_btn.bind("<Button-1>", lambda e: root.destroy())
+    
+    # Position calculations
+    width = 320
+    height = 75
+    
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    
+    x = screen_width - width - 20
+    y_target = screen_height - height - 60 # Sits above taskbar
+    y_start = screen_height + 10 # Starts below screen boundary
+    
+    toast.geometry(f"{width}x{height}+{x}+{y_start}")
+    
+    # Slide up & Fade in animation
+    def animate_in(alpha=0.0, y=y_start):
+        if alpha < 1.0 or y > y_target:
+            next_alpha = min(alpha + 0.1, 1.0)
+            next_y = max(y - 8, y_target)
+            toast.attributes("-alpha", next_alpha)
+            toast.geometry(f"{width}x{height}+{x}+{next_y}")
+            toast.after(10, lambda: animate_in(next_alpha, next_y))
+        else:
+            toast.after(duration, animate_out)
+            
+    # Slide down/fade out animation
+    def animate_out(alpha=1.0):
+        if alpha > 0.0:
+            next_alpha = max(alpha - 0.1, 0.0)
+            toast.attributes("-alpha", next_alpha)
+            toast.after(15, lambda: animate_out(next_alpha))
+        else:
+            root.destroy()
+            
+    # Start animation sequence
+    toast.after(100, lambda: animate_in(0.0, y_start))
+    root.mainloop()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = TaskCompletePopup()
-    window.show()
-    sys.exit(app.exec())
+    show_notification("Antigravity CLI", "Task completed successfully.")
