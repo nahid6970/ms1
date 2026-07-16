@@ -126,7 +126,7 @@ def show_upload_notification(filename, file_path):
             temp_size = float(size_bytes)
             for unit in ['B', 'KB', 'MB', 'GB']:
                 if temp_size < 1024.0:
-                    size_str = f"{temp_size:.1f} {unit}" if unit != 'B' else f"{int(temp_size)} B"
+                    size_str = f"{int(temp_size)} {unit}"
                     break
                 temp_size /= 1024.0
     except Exception:
@@ -546,7 +546,7 @@ def notification_manager_worker():
                     size_str = ""
                     for unit in ['B', 'KB', 'MB', 'GB']:
                         if temp_size < 1024.0:
-                            size_str = f"{temp_size:.1f} {unit}" if unit != 'B' else f"{int(temp_size)} B"
+                            size_str = f"{int(temp_size)} {unit}"
                             break
                         temp_size /= 1024.0
                     if not size_str:
