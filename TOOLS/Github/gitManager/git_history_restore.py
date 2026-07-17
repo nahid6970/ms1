@@ -968,6 +968,14 @@ class MainWindow(QMainWindow):
         tree_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         tree_label_layout.addWidget(tree_label)
         tree_label_layout.addStretch()
+        
+        self.tree_sort_recent = False
+        self.sort_recent_btn = CyberButton("SORT: NAME", CP_DIM, CP_CYAN, "white", "black")
+        self.sort_recent_btn.setFixedSize(120, 24)
+        self.sort_recent_btn.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; font-size: 8pt; font-weight: bold;")
+        self.sort_recent_btn.clicked.connect(self.toggle_tree_sort)
+        tree_label_layout.addWidget(self.sort_recent_btn)
+        
         tree_layout.addLayout(tree_label_layout)
         
         self.left_tree_view = QTreeView()
@@ -1329,6 +1337,31 @@ class MainWindow(QMainWindow):
             self.file_history_label.setText("FILE COMMIT HISTORY: Select a file/folder...")
         self.save_config()
 
+    def toggle_tree_sort(self):
+        if getattr(self, 'tree_sort_recent', False):
+            self.tree_sort_recent = False
+            self.sort_recent_btn.setText("SORT: NAME")
+            self.left_tree_model.sort(0, Qt.SortOrder.AscendingOrder)
+        else:
+            self.tree_sort_recent = True
+            self.sort_recent_btn.setText("SORT: RECENT")
+            self.left_tree_model.sort(3, Qt.SortOrder.DescendingOrder)
+
+    def open_file_in_editor_by_path(self, rel_path):
+        from PyQt6.QtGui import QDesktopServices
+        from PyQt6.QtCore import QUrl
+        import os
+        current_dir = self.path_input.text()
+        base_dir = GitWorker.get_git_root(current_dir)
+        full_path = os.path.normpath(os.path.join(base_dir, rel_path))
+        if os.path.exists(full_path):
+            if os.name == 'nt':
+                os.startfile(full_path)
+            else:
+                QDesktopServices.openUrl(QUrl.fromLocalFile(full_path))
+        else:
+            QMessageBox.warning(self, "Error", f"File not found:\n{full_path}")
+
     def on_left_tree_clicked(self, index):
         path = self.left_tree_model.filePath(index)
         if os.path.exists(path):
@@ -1376,12 +1409,17 @@ class MainWindow(QMainWindow):
         
         action_gallery = None
         action_timeline = None
+        action_open_editor = None
         
         if is_file:
+            action_open_editor = menu.addAction("📝 Open in Editor")
+            menu.addSeparator()
             action_gallery = menu.addAction("🖼️ View File Version Gallery")
             action_restore = menu.addAction("⏮️ Restore this File")
             action_timeline = menu.addAction("📜 View File Timeline")
         else:
+            action_open_editor = menu.addAction("📝 Open Folder in Explorer")
+            menu.addSeparator()
             action_restore = menu.addAction("📂 Restore Entire Folder")
             
         selected = menu.exec(self.left_tree_view.viewport().mapToGlobal(pos))
@@ -1399,6 +1437,8 @@ class MainWindow(QMainWindow):
                 self.restore_file_by_path(rel_path, commit_hash.strip())
         elif selected == action_timeline and is_file:
             self.open_timeline_by_path(rel_path)
+        elif selected == action_open_editor:
+            self.open_file_in_editor_by_path(rel_path)
 
     def load_file_commit_history(self, rel_path):
         directory = self.path_input.text().strip()
