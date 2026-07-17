@@ -1339,13 +1339,79 @@ class MainWindow(QMainWindow):
 
     def toggle_tree_sort(self):
         if getattr(self, 'tree_sort_recent', False):
+            # Switch back to normal filesystem tree
             self.tree_sort_recent = False
             self.sort_recent_btn.setText("SORT: NAME")
-            self.left_tree_model.sort(0, Qt.SortOrder.AscendingOrder)
+            self.sort_recent_btn.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; font-size: 8pt; font-weight: bold;")
+            self.left_tree_view.setModel(self.left_tree_model)
+            for i in range(1, 4):
+                self.left_tree_view.hideColumn(i)
+            directory = self.path_input.text().strip()
+            if directory and os.path.isdir(directory):
+                self.left_tree_view.setRootIndex(self.left_tree_model.index(directory))
         else:
+            # Switch to flat recent files list
             self.tree_sort_recent = True
             self.sort_recent_btn.setText("SORT: RECENT")
-            self.left_tree_model.sort(3, Qt.SortOrder.DescendingOrder)
+            self.sort_recent_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; border: 1px solid {CP_CYAN}; font-size: 8pt; font-weight: bold;")
+            self._build_recent_files_model()
+
+    def _build_recent_files_model(self):
+        """Build a flat QStandardItemModel of all files sorted by modification time."""
+        directory = self.path_input.text().strip()
+        if not directory or not os.path.isdir(directory):
+            return
+        
+        base_dir = GitWorker.get_git_root(directory)
+        if not base_dir:
+            base_dir = directory
+        
+        # Collect all files recursively with their modification times
+        file_entries = []
+        git_dir = os.path.join(base_dir, '.git')
+        for root, dirs, files in os.walk(base_dir):
+            # Skip .git directory
+            if root.startswith(git_dir):
+                continue
+            dirs[:] = [d for d in dirs if not d.startswith('.git')]
+            for fname in files:
+                full_path = os.path.join(root, fname)
+                try:
+                    mtime = os.path.getmtime(full_path)
+                    rel_path = os.path.relpath(full_path, base_dir).replace('\\', '/')
+                    file_entries.append((full_path, rel_path, mtime))
+                except OSError:
+                    continue
+        
+        # Sort by modification time, most recent first
+        file_entries.sort(key=lambda x: x[2], reverse=True)
+        
+        # Build the model
+        from datetime import datetime
+        recent_model = QStandardItemModel()
+        recent_model.setHorizontalHeaderLabels(["FILE", "MODIFIED"])
+        
+        for full_path, rel_path, mtime in file_entries:
+            # File name item - store full path in UserRole
+            item = QStandardItem(f"  {rel_path}")
+            item.setData(full_path, Qt.ItemDataRole.UserRole)
+            item.setEditable(False)
+            item.setForeground(QColor(CP_TEXT))
+            
+            # Time item
+            time_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            time_item = QStandardItem(time_str)
+            time_item.setEditable(False)
+            time_item.setForeground(QColor(CP_DIM))
+            
+            recent_model.appendRow([item, time_item])
+        
+        self.left_tree_view.setModel(recent_model)
+        self.left_tree_view.setRootIndex(recent_model.invisibleRootItem().index())
+        # Show both columns and resize
+        for i in range(recent_model.columnCount()):
+            self.left_tree_view.setColumnHidden(i, False)
+        self.left_tree_view.setColumnWidth(0, 300)
 
     def open_file_in_editor_by_path(self, rel_path):
         from PyQt6.QtGui import QDesktopServices
@@ -1362,9 +1428,22 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.warning(self, "Error", f"File not found:\n{full_path}")
 
+    def _get_tree_item_path(self, index):
+        """Get file path from tree index, works with both QFileSystemModel and QStandardItemModel."""
+        model = self.left_tree_view.model()
+        if model is self.left_tree_model:
+            return self.left_tree_model.filePath(index)
+        else:
+            # QStandardItemModel - path stored in UserRole
+            # Make sure we use column 0 for the data
+            if index.column() != 0:
+                index = model.index(index.row(), 0, index.parent())
+            path = model.data(index, Qt.ItemDataRole.UserRole)
+            return path if path else ""
+
     def on_left_tree_clicked(self, index):
-        path = self.left_tree_model.filePath(index)
-        if os.path.exists(path):
+        path = self._get_tree_item_path(index)
+        if path and os.path.exists(path):
             directory = self.path_input.text().strip()
             base_dir = GitWorker.get_git_root(directory)
             rel_path = os.path.relpath(path, base_dir).replace('\\', '/')
@@ -1374,8 +1453,8 @@ class MainWindow(QMainWindow):
             self.load_file_commit_history(rel_path)
 
     def on_left_tree_double_clicked(self, index):
-        path = self.left_tree_model.filePath(index)
-        if os.path.exists(path):
+        path = self._get_tree_item_path(index)
+        if path and os.path.exists(path):
             directory = self.path_input.text().strip()
             base_dir = GitWorker.get_git_root(directory)
             rel_path = os.path.relpath(path, base_dir).replace('\\', '/')
@@ -1390,8 +1469,8 @@ class MainWindow(QMainWindow):
         index = self.left_tree_view.indexAt(pos)
         if not index.isValid(): return
         
-        path = self.left_tree_model.filePath(index)
-        if not os.path.exists(path): return
+        path = self._get_tree_item_path(index)
+        if not path or not os.path.exists(path): return
         
         directory = self.path_input.text().strip()
         base_dir = GitWorker.get_git_root(directory)
@@ -1906,7 +1985,16 @@ class MainWindow(QMainWindow):
             self.save_config()
             if hasattr(self, 'left_tree_model'):
                 self.left_tree_model.setRootPath(directory)
-                self.left_tree_view.setRootIndex(self.left_tree_model.index(directory))
+                if not getattr(self, 'tree_sort_recent', False):
+                    # Normal mode: ensure QFileSystemModel is active
+                    if self.left_tree_view.model() is not self.left_tree_model:
+                        self.left_tree_view.setModel(self.left_tree_model)
+                        for i in range(1, 4):
+                            self.left_tree_view.hideColumn(i)
+                    self.left_tree_view.setRootIndex(self.left_tree_model.index(directory))
+                else:
+                    # Recent mode: rebuild the flat list for the new directory
+                    self._build_recent_files_model()
 
         self.table.setRowCount(0)
         self.status_label.setText("LOADING...")
