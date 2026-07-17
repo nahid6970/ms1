@@ -121,6 +121,18 @@ def ensure_uv_available() -> None:
         raise RuntimeError("uv was not found on PATH. Install uv first, then rerun the script.")
 
 
+def has_visible_console() -> bool:
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+def visible_python_executable(python_exe: str) -> str:
+    if sys.platform == "win32" and os.path.basename(python_exe).lower() == "pythonw.exe":
+        candidate = os.path.join(os.path.dirname(python_exe), "python.exe")
+        if os.path.exists(candidate):
+            return candidate
+    return python_exe
+
+
 def script_env_dir(script_path: str, python_version: str) -> str:
     script_path = os.path.abspath(script_path)
     digest = hashlib.sha256(script_path.encode("utf-8")).hexdigest()[:12]
@@ -203,6 +215,18 @@ def has_local_module(script_dir: str, module: str) -> bool:
     )
 
 
+def relaunch_in_new_terminal(script_path: str, python_exe: str) -> None:
+    if sys.platform != "win32":
+        raise RuntimeError("Automatic terminal relaunch is only implemented on Windows.")
+
+    visible_python = visible_python_executable(python_exe)
+    env = os.environ.copy()
+    env["INSTALL_DEPS_RELAUNCHED"] = "1"
+
+    cmd = [visible_python, script_path, *sys.argv[1:]]
+    subprocess.Popen(cmd, cwd=os.path.dirname(script_path), env=env, creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+
 def bootstrap(script_path: str, python_version: str | None = None, isolated: bool = False):
     """
     Call this at the top of a script to auto-install dependencies.
@@ -255,6 +279,10 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
             env["PYTHONPATH"] = utility_dir + os.pathsep + env.get("PYTHONPATH", "")
             os.execve(target_python, [target_python, script_path] + sys.argv[1:], env)
         return
+
+    if not has_visible_console() and os.environ.get("INSTALL_DEPS_RELAUNCHED") != "1":
+        relaunch_in_new_terminal(script_path, target_python)
+        sys.exit(0)
 
     print(f"\n[!] The following missing dependencies were detected for {os.path.basename(script_path)}:")
     for pkg in to_install:
