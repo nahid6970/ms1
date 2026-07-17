@@ -1100,12 +1100,13 @@ class MainWindow(QMainWindow):
                 color: {CP_CYAN};
                 border: 1px solid {CP_DIM};
                 border-left: none;
-                padding: 8px 0px;
+                padding: 0px;
                 font-family: '{CURRENT_FONT_FAMILY}';
                 font-size: 9pt;
             }}
             QPushButton::menu-indicator {{
                 image: none;
+                width: 0px;
             }}
             QPushButton:hover {{
                 background-color: #222222;
