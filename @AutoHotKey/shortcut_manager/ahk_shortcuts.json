@@ -783,7 +783,7 @@
             "description": "",
             "trigger": ";aidp",
             "replacement": "agy --dangerously-skip-permissions -c\ncodex --dangerously-bypass-approvals-and-sandbox resume\nkiro-cli chat --trust-all-tools --resume",
-            "delivery_method": "paste",
+            "delivery_method": "sendinput",
             "show_as_menu": true,
             "window_title": "",
             "process_name": "",

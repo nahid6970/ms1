@@ -1,12 +1,11 @@
-# mypygui_qt.py — PyQt6 rewrite of the Windows taskbar status bar
 import sys, os
-# 1. Add the absolute path to the folder containing install_deps.py
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
 
-# 2. Import and run the bootstrap
+UTILITY_PATH = r"C:\@delta\ms1"
+if UTILITY_PATH not in sys.path:
+  sys.path.append(UTILITY_PATH)
+
 import install_deps
-install_deps.bootstrap(__file__)
+install_deps.bootstrap(__file__, python_version="3.14", isolated=False)
 
 import ctypes
 import json
