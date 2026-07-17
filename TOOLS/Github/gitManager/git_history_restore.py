@@ -20,6 +20,29 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem, QFontDatabase, QFontInfo
+from PyQt6.QtSvg import QSvgRenderer
+from PyQt6.QtCore import QByteArray
+
+RESTORE_SVG = """
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+  <path d="M3 3v5h5"/>
+  <path d="M12 7v5l4 2"/>
+</svg>
+"""
+
+def create_svg_icon(svg_str, color, size=24):
+    try:
+        svg_colored = svg_str.replace('currentColor', color)
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer = QSvgRenderer(QByteArray(svg_colored.encode('utf-8')))
+        renderer.render(painter)
+        painter.end()
+        return QIcon(pixmap)
+    except:
+        return QIcon()
 
 # --- THEME CONSTANTS (from THEME_GUIDE.md) ---
 CP_BG = "#050505"           # Main Window Background
@@ -668,7 +691,10 @@ class CyberButton(QPushButton):
             }}
         """)
 
-    def update_colors(self, color, hover_color, text_color="white", hover_text_color="black"):
+    def update_colors(self, color, hover_color, text_color="white", hover_text_color="black", icon_svg=None):
+        if icon_svg:
+            self.setIcon(create_svg_icon(icon_svg, text_color))
+            self.setIconSize(QSize(18, 18))
         self.setStyleSheet(f"""
             QPushButton {{
                 background-color: {color};
@@ -1057,32 +1083,33 @@ class MainWindow(QMainWindow):
         explore_btn.clicked.connect(self.open_commit_explorer)
         
         self.restore_action_texts = [
-            "⏮️ RESTORE SELECTED VERSION",
-            "⏮️ RESTORE COMMIT FILES (SELECTED)",
-            "⏮️ RESTORE COMMIT FILES (PREVIOUS)"
+            " RESTORE SELECTED VERSION",
+            " RESTORE COMMIT FILES (SELECTED)",
+            " RESTORE COMMIT FILES (PREVIOUS)"
         ]
 
         self.restore_btn = CyberButton(self.restore_action_texts[self.default_restore_action], CP_RED, "#ff1a40", "white", "white")
         self.restore_btn.clicked.connect(self.execute_restore_action)
         
-        self.restore_menu_btn = QPushButton("⚙️")
+        self.restore_menu_btn = QPushButton("▼")
+        self.restore_menu_btn.setFixedWidth(28)
         self.restore_menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.restore_menu_btn.setStyleSheet(f"""
             QPushButton {{
-                background-color: {CP_RED};
-                color: white;
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
                 border: 1px solid {CP_DIM};
                 border-left: none;
-                padding: 8px 10px;
+                padding: 8px 0px;
                 font-family: '{CURRENT_FONT_FAMILY}';
-                font-weight: bold;
-                font-size: 10pt;
+                font-size: 9pt;
             }}
             QPushButton::menu-indicator {{
                 image: none;
             }}
             QPushButton:hover {{
-                background-color: #ff1a40;
+                background-color: #222222;
+                color: {CP_YELLOW};
             }}
         """)
         
@@ -2192,11 +2219,11 @@ class MainWindow(QMainWindow):
         self.default_restore_action = idx
         self.restore_btn.setText(self.restore_action_texts[idx])
         if idx == 0:
-            self.restore_btn.update_colors(CP_RED, "#ff1a40", "white", "white")
+            self.restore_btn.update_colors(CP_RED, "#ff1a40", "white", "white", RESTORE_SVG)
         elif idx == 1:
-            self.restore_btn.update_colors(CP_CYAN, "#00ccdd", "black", "black")
+            self.restore_btn.update_colors(CP_CYAN, "#00ccdd", "black", "black", RESTORE_SVG)
         elif idx == 2:
-            self.restore_btn.update_colors(CP_YELLOW, "#d0c505", "black", "black")
+            self.restore_btn.update_colors(CP_YELLOW, "#d0c505", "black", "black", RESTORE_SVG)
         self.save_config()
 
 # --- GIT OPERATIONS DIALOG ---
