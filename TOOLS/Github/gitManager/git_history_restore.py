@@ -265,17 +265,18 @@ class GitWorker:
     @staticmethod
     def get_file_history(directory, file_path, limit=50):
         try:
-            cmd = ["git", "log", "--pretty=format:%h|%ad|%s", "--date=format:%Y-%m-%d--%H:%M", "-n", str(limit), "--", file_path]
+            cmd = ["git", "log", "--pretty=format:%h|%an|%ad|%s", "--date=format:%Y-%m-%d--%H:%M", "-n", str(limit), "--", file_path]
             result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8')
             commits = []
             for line in result.strip().split('\n'):
                 if not line: continue
-                parts = line.split('|', 2)
-                if len(parts) == 3:
+                parts = line.split('|', 3)
+                if len(parts) == 4:
                     commits.append({
                         "hash": parts[0],
-                        "date": parts[1],
-                        "message": parts[2]
+                        "author": parts[1],
+                        "date": parts[2],
+                        "message": parts[3]
                     })
             return {"success": commits}
         except Exception as e:
@@ -521,6 +522,17 @@ class GitWorker:
             })
         
         return file_sections
+
+    @staticmethod
+    def get_file_content_at_commit(directory, commit_hash, file_path):
+        """Get full file content (bytes) at a specific commit"""
+        try:
+            base_dir = GitWorker.get_git_root(directory)
+            cmd = ["git", "show", f"{commit_hash}:{file_path}"]
+            result = subprocess.check_output(cmd, cwd=base_dir)
+            return {"success": result}
+        except Exception as e:
+            return {"error": str(e)}
 
 # --- UI COMPONENTS ---
 
@@ -919,6 +931,8 @@ class MainWindow(QMainWindow):
             
         self.left_tree_view.clicked.connect(self.on_left_tree_clicked)
         self.left_tree_view.doubleClicked.connect(self.on_left_tree_double_clicked)
+        self.left_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.left_tree_view.customContextMenuRequested.connect(self.show_left_tree_context_menu)
         
         tree_layout.addWidget(self.left_tree_view)
         self.left_stacked_widget.addWidget(tree_container)
@@ -926,7 +940,10 @@ class MainWindow(QMainWindow):
         left_panel_layout.addWidget(self.left_stacked_widget)
         main_splitter.addWidget(left_panel_widget)
         
-        # RIGHT: Diff Panel
+        # RIGHT: Stacked Panel (Diff Panel / File History Panel)
+        self.right_stacked_widget = QStackedWidget()
+        
+        # RIGHT - Page 0: Diff Panel
         diff_widget = QWidget()
         diff_layout = QVBoxLayout(diff_widget)
         diff_layout.setContentsMargins(0, 0, 0, 0)
@@ -959,10 +976,42 @@ class MainWindow(QMainWindow):
         
         # Track expanded files
         self.expanded_files = set()
+        self.right_stacked_widget.addWidget(diff_widget)
         
-        main_splitter.addWidget(diff_widget)
-        main_splitter.setStretchFactor(0, self.split_ratio[0])  # Table
-        main_splitter.setStretchFactor(1, self.split_ratio[1])  # Diff
+        # RIGHT - Page 1: File History Panel
+        file_history_widget = QWidget()
+        file_history_layout = QVBoxLayout(file_history_widget)
+        file_history_layout.setContentsMargins(0, 0, 0, 0)
+        
+        file_history_header_layout = QHBoxLayout()
+        self.file_history_label = QLabel("FILE COMMIT HISTORY:")
+        self.file_history_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        file_history_header_layout.addWidget(self.file_history_label)
+        file_history_layout.addLayout(file_history_header_layout)
+        
+        self.file_history_table = QTableWidget()
+        self.file_history_table.setColumnCount(4)
+        self.file_history_table.setHorizontalHeaderLabels(["HASH", "DATE", "AUTHOR", "MESSAGE"])
+        self.file_history_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.file_history_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.file_history_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.file_history_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.file_history_table.setShowGrid(False)
+        self.file_history_table.verticalHeader().setVisible(False)
+        self.file_history_table.setMouseTracking(True)
+        
+        self.file_history_delegate = CyberDelegate(self.file_history_table)
+        self.file_history_table.setItemDelegate(self.file_history_delegate)
+        self.file_history_table.cellEntered.connect(self.on_file_history_cell_entered)
+        self.file_history_table.leaveEvent = self.on_file_history_table_leave
+        self.file_history_table.itemDoubleClicked.connect(self.on_file_history_double_clicked)
+        
+        file_history_layout.addWidget(self.file_history_table)
+        self.right_stacked_widget.addWidget(file_history_widget)
+        
+        main_splitter.addWidget(self.right_stacked_widget)
+        main_splitter.setStretchFactor(0, self.split_ratio[0])  # Left stack
+        main_splitter.setStretchFactor(1, self.split_ratio[1])  # Right stack
         
         self.main_splitter = main_splitter  # Store reference for settings
         
@@ -1209,6 +1258,10 @@ class MainWindow(QMainWindow):
 
     def on_view_mode_changed(self, index):
         self.left_stacked_widget.setCurrentIndex(index)
+        self.right_stacked_widget.setCurrentIndex(index)
+        if index == 1:
+            self.file_history_table.setRowCount(0)
+            self.file_history_label.setText("FILE COMMIT HISTORY: Select a file/folder...")
 
     def on_left_tree_clicked(self, index):
         path = self.left_tree_model.filePath(index)
@@ -1219,6 +1272,7 @@ class MainWindow(QMainWindow):
             if rel_path == ".":
                 rel_path = "."
             self.scope_input.setText(rel_path)
+            self.load_file_commit_history(rel_path)
 
     def on_left_tree_double_clicked(self, index):
         path = self.left_tree_model.filePath(index)
@@ -1232,6 +1286,108 @@ class MainWindow(QMainWindow):
                 self.open_timeline_by_path(rel_path)
             else:
                 self.open_timeline_by_path(rel_path)
+
+    def show_left_tree_context_menu(self, pos):
+        index = self.left_tree_view.indexAt(pos)
+        if not index.isValid(): return
+        
+        path = self.left_tree_model.filePath(index)
+        if not os.path.exists(path): return
+        
+        directory = self.path_input.text().strip()
+        base_dir = GitWorker.get_git_root(directory)
+        rel_path = os.path.relpath(path, base_dir).replace('\\', '/')
+        if rel_path == ".": rel_path = "."
+        
+        is_file = os.path.isfile(path)
+        
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }} QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}")
+        
+        title = menu.addAction(f"{'📄' if is_file else '📁'} {os.path.basename(path)}")
+        title.setEnabled(False)
+        menu.addSeparator()
+        
+        action_gallery = None
+        action_timeline = None
+        
+        if is_file:
+            action_gallery = menu.addAction("🖼️ View File Version Gallery")
+            action_restore = menu.addAction("⏮️ Restore this File")
+            action_timeline = menu.addAction("📜 View File Timeline")
+        else:
+            action_restore = menu.addAction("📂 Restore Entire Folder")
+            
+        selected = menu.exec(self.left_tree_view.viewport().mapToGlobal(pos))
+        
+        if selected == action_gallery and is_file:
+            res = GitWorker.get_file_history(base_dir, rel_path, limit=200)
+            if "success" in res:
+                dialog = FileVersionGalleryDialog(self, rel_path, res["success"], base_dir)
+                dialog.exec()
+            else:
+                QMessageBox.critical(self, "Error", f"Could not load history:\n{res.get('error')}")
+        elif selected == action_restore:
+            commit_hash, ok = QInputDialog.getText(self, "Restore Version", "Enter commit hash to restore to:", QLineEdit.EchoMode.Normal, "HEAD")
+            if ok and commit_hash.strip():
+                self.restore_file_by_path(rel_path, commit_hash.strip())
+        elif selected == action_timeline and is_file:
+            self.open_timeline_by_path(rel_path)
+
+    def load_file_commit_history(self, rel_path):
+        directory = self.path_input.text().strip()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        self.file_history_label.setText(f"FILE COMMIT HISTORY: {rel_path}")
+        self.file_history_table.setRowCount(0)
+        
+        res = GitWorker.get_file_history(base_dir, rel_path, limit=200)
+        if "success" in res:
+            commits = res["success"]
+            self.file_history_table.setRowCount(len(commits))
+            for i, commit in enumerate(commits):
+                date_item = QTableWidgetItem(time_ago(commit['date']))
+                date_item.setToolTip(commit['date'])
+                items = [
+                    QTableWidgetItem(commit['hash']),
+                    date_item,
+                    QTableWidgetItem(commit.get('author', 'Unknown')),
+                    QTableWidgetItem(commit['message'])
+                ]
+                
+                items[0].setForeground(QColor(CP_YELLOW))
+                items[1].setForeground(QColor(CP_TEXT))
+                items[2].setForeground(QColor(CP_CYAN))
+                items[3].setForeground(QColor(CP_TEXT))
+                
+                for col, item in enumerate(items):
+                    item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                    self.file_history_table.setItem(i, col, item)
+            self.file_history_table.viewport().update()
+
+    def on_file_history_double_clicked(self, item):
+        row = item.row()
+        rel_path = self.scope_input.text().strip()
+        if not rel_path or rel_path == ".":
+            return
+            
+        directory = self.path_input.text().strip()
+        base_dir = GitWorker.get_git_root(directory)
+        
+        res = GitWorker.get_file_history(base_dir, rel_path, limit=200)
+        if "success" in res:
+            dialog = FileVersionGalleryDialog(self, rel_path, res["success"], base_dir)
+            dialog.current_index = row
+            dialog.load_version()
+            dialog.exec()
+
+    def on_file_history_cell_entered(self, row, column):
+        self.file_history_delegate.hovered_row = row
+        self.file_history_table.viewport().update()
+
+    def on_file_history_table_leave(self, event):
+        self.file_history_delegate.hovered_row = -1
+        self.file_history_table.viewport().update()
 
     def on_cell_entered(self, row, column):
         self.delegate.hovered_row = row
@@ -2542,6 +2698,208 @@ class FileTimelineDialog(QDialog):
                 self.table.viewport().update()
         else:
             QMessageBox.warning(self, "Selection Required", "Please select a version to restore.")
+
+# --- FILE VERSION GALLERY DIALOG ---
+class FileVersionGalleryDialog(QDialog):
+    def __init__(self, parent, file_path, commits, directory):
+        super().__init__(parent)
+        self.file_path = file_path
+        self.commits = commits
+        self.directory = directory
+        self.current_index = 0
+        
+        self.setWindowTitle(f"Gallery: {os.path.basename(file_path)}")
+        self.resize(1000, 700)
+        
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
+            QWidget {{ color: {CP_TEXT}; font-family: '{CURRENT_FONT_FAMILY}'; font-size: 10pt; }}
+            QLabel {{ color: {CP_TEXT}; }}
+        """)
+        
+        # Main layout
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Header Info
+        self.header_label = QLabel()
+        self.header_label.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 11pt;")
+        layout.addWidget(self.header_label)
+        
+        self.commit_info_label = QLabel()
+        self.commit_info_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 9pt;")
+        self.commit_info_label.setWordWrap(True)
+        layout.addWidget(self.commit_info_label)
+        
+        # Middle Layout: Left Arrow, Content Stack, Right Arrow
+        middle_layout = QHBoxLayout()
+        middle_layout.setSpacing(15)
+        
+        self.left_btn = QPushButton("◀")
+        self.left_btn.setFixedSize(50, 100)
+        self.left_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.left_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                font-size: 24pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+            }}
+            QPushButton:disabled {{
+                color: #555555;
+                border: 1px solid #333333;
+            }}
+        """)
+        self.left_btn.clicked.connect(self.show_prev_version)
+        middle_layout.addWidget(self.left_btn)
+        
+        self.content_stack = QStackedWidget()
+        self.content_stack.setStyleSheet(f"background-color: #080808; border: 1px solid {CP_DIM};")
+        
+        # Text display
+        self.text_display = QTextBrowser()
+        self.text_display.setStyleSheet(f"""
+            QTextBrowser {{
+                background-color: #080808;
+                border: none;
+                color: {CP_TEXT};
+                font-family: '{CURRENT_FONT_FAMILY}', 'Consolas', monospace;
+                font-size: 10pt;
+            }}
+        """)
+        self.content_stack.addWidget(self.text_display)
+        
+        # Image display
+        from PyQt6.QtWidgets import QScrollArea
+        self.image_scroll = QScrollArea()
+        self.image_scroll.setWidgetResizable(True)
+        self.image_scroll.setFrameShape(QAbstractItemView.Shape.NoFrame)
+        self.image_scroll.setStyleSheet("background-color: #080808; border: none;")
+        self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.image_scroll.setWidget(self.image_label)
+        self.content_stack.addWidget(self.image_scroll)
+        
+        middle_layout.addWidget(self.content_stack, 1)
+        
+        self.right_btn = QPushButton("▶")
+        self.right_btn.setFixedSize(50, 100)
+        self.right_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.right_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                font-size: 24pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+            }}
+            QPushButton:disabled {{
+                color: #555555;
+                border: 1px solid #333333;
+            }}
+        """)
+        self.right_btn.clicked.connect(self.show_next_version)
+        middle_layout.addWidget(self.right_btn)
+        
+        layout.addLayout(middle_layout)
+        
+        # Bottom controls
+        bottom_layout = QHBoxLayout()
+        
+        self.status_bar = QLabel("Version 1 of 1")
+        self.status_bar.setStyleSheet(f"color: {CP_DIM}; font-weight: bold;")
+        bottom_layout.addWidget(self.status_bar)
+        
+        bottom_layout.addStretch()
+        
+        restore_btn = CyberButton("RESTORE THIS VERSION", CP_DIM, CP_GREEN)
+        restore_btn.clicked.connect(self.restore_current)
+        bottom_layout.addWidget(restore_btn)
+        
+        close_btn = CyberButton("CLOSE", CP_DIM, CP_CYAN)
+        close_btn.clicked.connect(self.accept)
+        bottom_layout.addWidget(close_btn)
+        
+        layout.addLayout(bottom_layout)
+        
+        self.load_version()
+
+    def load_version(self):
+        if not self.commits:
+            self.text_display.setPlainText("No history found for this file.")
+            self.content_stack.setCurrentIndex(0)
+            return
+            
+        commit = self.commits[self.current_index]
+        commit_hash = commit["hash"]
+        
+        self.header_label.setText(f"📄 GALLERY: {os.path.basename(self.file_path)}")
+        self.commit_info_label.setText(
+            f"COMMIT: {commit_hash} ({time_ago(commit['date'])})\n"
+            f"DATE: {commit['date']}\n"
+            f"AUTHOR: {commit.get('author', 'Unknown')}\n"
+            f"MESSAGE: {commit['message']}"
+        )
+        self.status_bar.setText(f"Version {self.current_index + 1} of {len(self.commits)}")
+        
+        res = GitWorker.get_file_content_at_commit(self.directory, commit_hash, self.file_path)
+        if "success" in res:
+            data = res["success"]
+            ext = os.path.splitext(self.file_path)[1].lower()
+            if ext in [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"]:
+                pixmap = QPixmap()
+                if pixmap.loadFromData(data):
+                    self.image_label.setPixmap(pixmap)
+                    self.content_stack.setCurrentIndex(1)
+                else:
+                    self.text_display.setPlainText("<Error loading image data>")
+                    self.content_stack.setCurrentIndex(0)
+            else:
+                try:
+                    text = data.decode('utf-8')
+                except Exception:
+                    try:
+                        text = data.decode('latin-1')
+                    except Exception:
+                        text = str(data)
+                self.text_display.setPlainText(text)
+                self.content_stack.setCurrentIndex(0)
+        else:
+            self.text_display.setPlainText(f"Error fetching version:\n{res['error']}")
+            self.content_stack.setCurrentIndex(0)
+            
+        # Update arrows:
+        # Index 0 = Newest, Index len-1 = Oldest
+        # Click Left Button (Older) -> Increment current_index
+        # Click Right Button (Newer) -> Decrement current_index
+        self.left_btn.setEnabled(self.current_index < len(self.commits) - 1)
+        self.right_btn.setEnabled(self.current_index > 0)
+
+    def show_prev_version(self):
+        if self.current_index < len(self.commits) - 1:
+            self.current_index += 1
+            self.load_version()
+
+    def show_next_version(self):
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.load_version()
+
+    def restore_current(self):
+        if not self.commits: return
+        commit_hash = self.commits[self.current_index]["hash"]
+        if hasattr(self.parent(), "restore_file_by_path"):
+            self.parent().restore_file_by_path(self.file_path, commit_hash)
 
 # --- REFLOG DIALOG ---
 class ReflogDialog(QDialog):
