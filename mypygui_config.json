@@ -1033,6 +1033,37 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "left"
+        },
+        {
+            "text": "test",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "btn_1784297489",
+            "bindings": {},
+            "border_color": "",
+            "font": [
+                "Arial",
+                15,
+                "normal"
+            ],
+            "border": 0,
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "margin_top": 0,
+            "margin_bottom": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left"
         }
     ],
     "buttons_right": [
