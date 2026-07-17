@@ -702,7 +702,7 @@
             "category": "General",
             "description": "",
             "trigger": ";dep",
-            "replacement": "import sys, os\n# 1. Add the absolute path to the folder containing install_deps.py\nUTILITY_PATH = r\"C:\\@delta\\ms1\"\nif UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)\n\n# 2. Import and run the bootstrap\nimport install_deps\ninstall_deps.bootstrap(__file__)",
+            "replacement": "# Type1: Global\nimport sys, os\nUTILITY_PATH = r\"C:\\@delta\\ms1\"\nif UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)\nimport install_deps\ninstall_deps.bootstrap(__file__)\n\n# Tyoe2: Specific\nimport sys, os\nUTILITY_PATH = r\"C:\\@delta\\ms1\"\nif UTILITY_PATH not in sys.path:\n  sys.path.append(UTILITY_PATH)\nimport install_deps\ninstall_deps.bootstrap(__file__, python_version=\"3.13\", isolated=True)",
             "use_clipboard": true,
             "window_title": "",
             "process_name": "",
@@ -711,7 +711,8 @@
             "process_name_enabled": false,
             "window_class_enabled": false,
             "enabled": true,
-            "show_as_menu": false
+            "show_as_menu": false,
+            "delivery_method": "paste"
         },
         {
             "name": "test1",
