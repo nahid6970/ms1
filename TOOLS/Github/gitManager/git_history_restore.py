@@ -1460,7 +1460,7 @@ class MainWindow(QMainWindow):
             time_str = mtime_ago(fmt) if fmt else ""
             time_item = QStandardItem(time_str)
             time_item.setEditable(False)
-            time_item.setForeground(QColor(CP_DIM))
+            time_item.setForeground(QColor("#888888"))
             time_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             
             parent_item.appendRow([folder_item, time_item])
@@ -1487,7 +1487,7 @@ class MainWindow(QMainWindow):
                 time_str = mtime_ago(mtime)
                 time_item = QStandardItem(time_str)
                 time_item.setEditable(False)
-                time_item.setForeground(QColor(CP_DIM))
+                time_item.setForeground(QColor("#888888"))
                 time_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 
                 parent_item.appendRow([file_item, time_item])
