@@ -776,6 +776,22 @@
             "process_name_enabled": false,
             "window_class_enabled": false,
             "enabled": true
+        },
+        {
+            "name": "ai agent commands dropdown",
+            "category": "General",
+            "description": "",
+            "trigger": ";aidp",
+            "replacement": "agy --dangerously-skip-permissions -c\ncodex --dangerously-bypass-approvals-and-sandbox resume\nkiro-cli chat --trust-all-tools --resume",
+            "delivery_method": "paste",
+            "show_as_menu": true,
+            "window_title": "",
+            "process_name": "",
+            "window_class": "",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "enabled": true
         }
     ],
     "file_shortcuts": [
