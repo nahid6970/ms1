@@ -226,5 +226,16 @@
             }
         ],
         "copy_mode": false
+    },
+    {
+        "name": "Codex AI Agent Guidline",
+        "items": [
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\gemini\\GEMINI.md",
+                "fake": "C:\\Users\\nahid\\.codex\\AGENTS.md"
+            }
+        ],
+        "copy_mode": false
     }
 ]
