@@ -70,6 +70,7 @@ sys.stderr = StreamToLogger(logging.ERROR)
 
 CTRL_COMMAND_MODULES = [
     {"name": "Explorer (Open Folder)", "cmd": 'explorer "{dir}"'},
+    {"name": "File Pilot", "cmd": 'filepilot "{dir}"'},
 ]
 
 start_time = time.time()

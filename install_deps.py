@@ -128,20 +128,29 @@ def bootstrap(script_path: str):
     used_names = get_used_names(tree)
     third_party = {m for m in imported if m not in STDLIB}
     
+    installed_pkgs = []
     to_install = []
     for mod in sorted(third_party):
-        if is_used(mod, tree, used_names) and not is_installed(mod, script_dir):
+        if is_used(mod, tree, used_names):
             pkg = resolve_pkg(mod)
             if sys.platform != "win32" and pkg in {"pywin32", "windows-curses", "pywinpty"}:
                 continue
-            to_install.append(pkg)
+            if is_installed(mod, script_dir):
+                installed_pkgs.append(pkg)
+            else:
+                to_install.append(pkg)
+
+    if installed_pkgs:
+        print(f"\n[+] Installed dependencies for {os.path.basename(script_path)}:")
+        for pkg in installed_pkgs:
+            print(f"  \033[92m- {pkg}\033[0m")
 
     if not to_install:
         return
 
     print(f"\n[!] The following missing dependencies were detected for {os.path.basename(script_path)}:")
     for pkg in to_install:
-        print(f"  - {pkg}")
+        print(f"  \033[91m- {pkg}\033[0m")
     
     try:
         input("\nPress [ENTER] to proceed with installation via 'uv', or Ctrl+C to cancel...")
