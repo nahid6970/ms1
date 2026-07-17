@@ -1357,7 +1357,11 @@ class MainWindow(QMainWindow):
             self._build_recent_files_model()
 
     def _build_recent_files_model(self):
-        """Build a flat QStandardItemModel of all files sorted by modification time."""
+        """Build a tree QStandardItemModel sorted by most recent modification time.
+        
+        Folders are sorted by the max mtime of any file recursively inside them,
+        so deeply nested recently-edited files cause their parent folders to bubble up.
+        """
         directory = self.path_input.text().strip()
         if not directory or not os.path.isdir(directory):
             return
@@ -1367,51 +1371,160 @@ class MainWindow(QMainWindow):
             base_dir = directory
         
         # Collect all files recursively with their modification times
-        file_entries = []
+        # Build a dict: rel_dir_path -> [(filename, full_path, mtime), ...]
+        from datetime import datetime
+        dir_files = {}   # rel_dir -> list of (name, full_path, mtime)
+        dir_max_mtime = {}  # rel_dir -> max mtime (recursive)
+        
         git_dir = os.path.join(base_dir, '.git')
         for root, dirs, files in os.walk(base_dir):
-            # Skip .git directory
             if root.startswith(git_dir):
                 continue
             dirs[:] = [d for d in dirs if not d.startswith('.git')]
+            
+            rel_dir = os.path.relpath(root, base_dir).replace('\\', '/')
+            if rel_dir == '.':
+                rel_dir = ''
+            
+            entries = []
             for fname in files:
                 full_path = os.path.join(root, fname)
                 try:
                     mtime = os.path.getmtime(full_path)
-                    rel_path = os.path.relpath(full_path, base_dir).replace('\\', '/')
-                    file_entries.append((full_path, rel_path, mtime))
+                    entries.append((fname, full_path, mtime))
                 except OSError:
                     continue
-        
-        # Sort by modification time, most recent first
-        file_entries.sort(key=lambda x: x[2], reverse=True)
-        
-        # Build the model
-        from datetime import datetime
-        recent_model = QStandardItemModel()
-        recent_model.setHorizontalHeaderLabels(["FILE", "MODIFIED"])
-        
-        for full_path, rel_path, mtime in file_entries:
-            # File name item - store full path in UserRole
-            item = QStandardItem(f"  {rel_path}")
-            item.setData(full_path, Qt.ItemDataRole.UserRole)
-            item.setEditable(False)
-            item.setForeground(QColor(CP_TEXT))
             
-            # Time item
-            time_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            if entries:
+                dir_files[rel_dir] = entries
+                # Update this dir and all parent dirs with max mtime
+                max_mt = max(e[2] for e in entries)
+                # Update self
+                if rel_dir not in dir_max_mtime or max_mt > dir_max_mtime[rel_dir]:
+                    dir_max_mtime[rel_dir] = max_mt
+                # Propagate up to all parent directories
+                parts = rel_dir.split('/') if rel_dir else []
+                for i in range(len(parts)):
+                    parent = '/'.join(parts[:i]) if i > 0 else ''
+                    if parent not in dir_max_mtime or max_mt > dir_max_mtime[parent]:
+                        dir_max_mtime[parent] = max_mt
+        
+        # Build tree model
+        recent_model = QStandardItemModel()
+        recent_model.setHorizontalHeaderLabels(["NAME", "MODIFIED"])
+        
+        # Map of rel_dir_path -> QStandardItem (folder node)
+        folder_items = {}
+        
+        def get_or_create_folder(rel_dir):
+            """Get or create folder item for the given relative directory path."""
+            if rel_dir == '':
+                return recent_model.invisibleRootItem()
+            if rel_dir in folder_items:
+                return folder_items[rel_dir]
+            
+            # Ensure parent exists first
+            parts = rel_dir.rsplit('/', 1)
+            parent_dir = parts[0] if len(parts) > 1 else ''
+            folder_name = parts[-1] if len(parts) > 1 else rel_dir
+            
+            parent_item = get_or_create_folder(parent_dir)
+            
+            # Create folder item
+            folder_item = QStandardItem(f"\U0001f4c1 {folder_name}")
+            full_folder_path = os.path.normpath(os.path.join(base_dir, rel_dir))
+            folder_item.setData(full_folder_path, Qt.ItemDataRole.UserRole)
+            folder_item.setEditable(False)
+            folder_item.setForeground(QColor(CP_YELLOW))
+            
+            # Time column for folder
+            fmt = dir_max_mtime.get(rel_dir, 0)
+            time_str = datetime.fromtimestamp(fmt).strftime("%Y-%m-%d %H:%M") if fmt else ""
             time_item = QStandardItem(time_str)
             time_item.setEditable(False)
             time_item.setForeground(QColor(CP_DIM))
             
-            recent_model.appendRow([item, time_item])
+            parent_item.appendRow([folder_item, time_item])
+            folder_items[rel_dir] = folder_item
+            return folder_item
+        
+        # First, create all folder nodes
+        all_dirs = sorted(dir_files.keys())
+        for rel_dir in all_dirs:
+            if rel_dir:  # Skip root
+                get_or_create_folder(rel_dir)
+        
+        # Add files to their respective folders
+        for rel_dir in all_dirs:
+            parent_item = get_or_create_folder(rel_dir)
+            # Sort files within this folder by mtime descending
+            entries = sorted(dir_files[rel_dir], key=lambda x: x[2], reverse=True)
+            for fname, full_path, mtime in entries:
+                file_item = QStandardItem(f"\U0001f4c4 {fname}")
+                file_item.setData(full_path, Qt.ItemDataRole.UserRole)
+                file_item.setEditable(False)
+                file_item.setForeground(QColor(CP_TEXT))
+                
+                time_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+                time_item = QStandardItem(time_str)
+                time_item.setEditable(False)
+                time_item.setForeground(QColor(CP_DIM))
+                
+                parent_item.appendRow([file_item, time_item])
+        
+        # Now sort children of every folder node by their max mtime (descending)
+        def sort_children(parent):
+            """Sort child items: folders first (by max mtime desc), then files (by mtime desc)."""
+            rows = []
+            for i in range(parent.rowCount()):
+                child = parent.child(i, 0)
+                time_child = parent.child(i, 1)
+                is_folder = child.hasChildren() or (child.data(Qt.ItemDataRole.UserRole) and 
+                            os.path.isdir(str(child.data(Qt.ItemDataRole.UserRole))))
+                
+                # Get sort key - for folders use dir_max_mtime, for files use their mtime
+                child_path = child.data(Qt.ItemDataRole.UserRole)
+                if is_folder and child_path:
+                    child_rel = os.path.relpath(child_path, base_dir).replace('\\', '/')
+                    sort_time = dir_max_mtime.get(child_rel, 0)
+                else:
+                    try:
+                        sort_time = os.path.getmtime(child_path) if child_path else 0
+                    except:
+                        sort_time = 0
+                
+                rows.append((is_folder, sort_time, i))
+            
+            # Sort: folders first, then by time descending
+            rows.sort(key=lambda x: (-x[0], -x[1]))
+            
+            # Reorder by taking rows out and re-adding in sorted order
+            sorted_rows = []
+            for _, _, orig_idx in rows:
+                sorted_rows.append(parent.takeRow(orig_idx))
+                # Adjust remaining indices after takeRow shifts them
+                for j in range(len(rows)):
+                    if rows[j][2] > orig_idx:
+                        rows[j] = (rows[j][0], rows[j][1], rows[j][2] - 1)
+            
+            for row in sorted_rows:
+                parent.appendRow(row)
+            
+            # Recursively sort children of folder items
+            for i in range(parent.rowCount()):
+                child = parent.child(i, 0)
+                if child and child.hasChildren():
+                    sort_children(child)
+        
+        sort_children(recent_model.invisibleRootItem())
         
         self.left_tree_view.setModel(recent_model)
         self.left_tree_view.setRootIndex(recent_model.invisibleRootItem().index())
-        # Show both columns and resize
+        # Show both columns
         for i in range(recent_model.columnCount()):
             self.left_tree_view.setColumnHidden(i, False)
-        self.left_tree_view.setColumnWidth(0, 300)
+        self.left_tree_view.header().setStretchLastSection(True)
+        self.left_tree_view.setColumnWidth(0, 280)
 
     def open_file_in_editor_by_path(self, rel_path):
         from PyQt6.QtGui import QDesktopServices
