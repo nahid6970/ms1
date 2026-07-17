@@ -724,6 +724,8 @@ class MainWindow(QMainWindow):
         self.active_commit_hash = None # Track currently restored full commit
         self.restored_files = {} # Track restored files: {rel_path: commit_hash}
         self.saved_repos = [] # List of {"name": str, "path": str}
+        self.view_mode_index = 0
+        self.default_restore_action = 0
         
         self.font_family = CURRENT_FONT_FAMILY
         self.diff_font_size = CURRENT_DIFF_FONT_SIZE
@@ -840,6 +842,7 @@ class MainWindow(QMainWindow):
         mode_layout.addWidget(QLabel("VIEW MODE:"))
         self.view_mode_combo = QComboBox()
         self.view_mode_combo.addItems(["Commits History", "File Explorer Tree"])
+        self.view_mode_combo.setCurrentIndex(self.view_mode_index)
         self.view_mode_combo.setStyleSheet(f"""
             QComboBox {{
                 background-color: {CP_PANEL};
@@ -1032,15 +1035,24 @@ class MainWindow(QMainWindow):
         explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
         explore_btn.clicked.connect(self.open_commit_explorer)
         
-        # Single dropdown button for the 3 restore actions
-        self.restore_dropdown_btn = QPushButton("⏮️ RESTORE OPTIONS ▾")
-        self.restore_dropdown_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.restore_dropdown_btn.setStyleSheet(f"""
+        self.restore_action_texts = [
+            "⏮️ RESTORE SELECTED VERSION",
+            "⏮️ RESTORE COMMIT FILES (SELECTED)",
+            "⏮️ RESTORE COMMIT FILES (PREVIOUS)"
+        ]
+
+        self.restore_btn = CyberButton(self.restore_action_texts[self.default_restore_action], CP_RED, "#ff1a40", "white", "white")
+        self.restore_btn.clicked.connect(self.execute_restore_action)
+        
+        self.restore_menu_btn = QPushButton("⚙️")
+        self.restore_menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.restore_menu_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_RED};
                 color: white;
                 border: 1px solid {CP_DIM};
-                padding: 8px 16px;
+                border-left: none;
+                padding: 8px 10px;
                 font-family: '{CURRENT_FONT_FAMILY}';
                 font-weight: bold;
                 font-size: 10pt;
@@ -1050,7 +1062,6 @@ class MainWindow(QMainWindow):
             }}
             QPushButton:hover {{
                 background-color: #ff1a40;
-                border: 1px solid {CP_YELLOW};
             }}
         """)
         
@@ -1071,23 +1082,23 @@ class MainWindow(QMainWindow):
             }}
         """)
         
-        act_version = restore_menu.addAction("⏮️ RESTORE SELECTED VERSION")
-        act_version.triggered.connect(self.revert_commit)
-        
-        act_selected = restore_menu.addAction("⏮️ RESTORE COMMIT FILES (SELECTED)")
-        act_selected.triggered.connect(self.restore_commit_files)
-        
-        act_prev = restore_menu.addAction("⏮️ RESTORE COMMIT FILES (PREVIOUS)")
-        act_prev.triggered.connect(self.restore_files_to_current)
-        
-        self.restore_dropdown_btn.setMenu(restore_menu)
+        for idx, text in enumerate(self.restore_action_texts):
+            act = restore_menu.addAction(text)
+            act.triggered.connect(lambda checked, i=idx: self.set_default_restore_action(i))
+            
+        self.restore_menu_btn.setMenu(restore_menu)
+
+        restore_layout = QHBoxLayout()
+        restore_layout.setSpacing(0)
+        restore_layout.addWidget(self.restore_btn)
+        restore_layout.addWidget(self.restore_menu_btn)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
         action_layout.addWidget(git_console_btn)
         action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(explore_btn)
-        action_layout.addWidget(self.restore_dropdown_btn)
+        action_layout.addLayout(restore_layout)
         layout.addLayout(action_layout)
 
         if os.path.isdir(self.path_input.text()):
@@ -1262,6 +1273,7 @@ class MainWindow(QMainWindow):
         if index == 1:
             self.file_history_table.setRowCount(0)
             self.file_history_label.setText("FILE COMMIT HISTORY: Select a file/folder...")
+        self.save_config()
 
     def on_left_tree_clicked(self, index):
         path = self.left_tree_model.filePath(index)
@@ -1755,6 +1767,8 @@ class MainWindow(QMainWindow):
                     self.split_ratio = data.get("split_ratio", [2, 3])
                     self.saved_repos = data.get("saved_repos", [])
                     self.last_directory = data.get("last_directory", "")
+                    self.view_mode_index = data.get("view_mode_index", 0)
+                    self.default_restore_action = data.get("default_restore_action", 0)
                     global CURRENT_FONT_FAMILY, CURRENT_DIFF_FONT_SIZE
                     CURRENT_FONT_FAMILY = data.get("font_family", "Consolas")
                     CURRENT_DIFF_FONT_SIZE = data.get("diff_font_size", 10)
@@ -1778,7 +1792,9 @@ class MainWindow(QMainWindow):
                     "split_ratio": self.split_ratio,
                     "saved_repos": self.saved_repos,
                     "font_family": CURRENT_FONT_FAMILY,
-                    "diff_font_size": CURRENT_DIFF_FONT_SIZE
+                    "diff_font_size": CURRENT_DIFF_FONT_SIZE,
+                    "view_mode_index": self.view_mode_combo.currentIndex() if hasattr(self, 'view_mode_combo') else 0,
+                    "default_restore_action": getattr(self, 'default_restore_action', 0)
                 }, f)
         except: pass
 
@@ -2137,6 +2153,19 @@ class MainWindow(QMainWindow):
                 self.status_label.setText("RESTORE PARTIALLY FAILED")
                 QMessageBox.warning(self, "Partial Success", f"Restored {success_count} file(s).\nFailed: {len(failed)}")
 
+    def execute_restore_action(self):
+        idx = self.default_restore_action
+        if idx == 0:
+            self.revert_commit()
+        elif idx == 1:
+            self.restore_commit_files()
+        elif idx == 2:
+            self.restore_files_to_current()
+
+    def set_default_restore_action(self, idx):
+        self.default_restore_action = idx
+        self.restore_btn.setText(self.restore_action_texts[idx])
+        self.save_config()
 
 # --- GIT OPERATIONS DIALOG ---
 class GitOpsDialog(QDialog):
