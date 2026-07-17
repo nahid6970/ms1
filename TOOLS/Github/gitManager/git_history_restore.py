@@ -668,6 +668,28 @@ class CyberButton(QPushButton):
             }}
         """)
 
+    def update_colors(self, color, hover_color, text_color="white", hover_text_color="black"):
+        self.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {color};
+                color: {text_color};
+                border: 1px solid {CP_DIM};
+                padding: 8px 16px;
+                font-family: '{CURRENT_FONT_FAMILY}';
+                font-weight: bold;
+                font-size: 10pt;
+            }}
+            QPushButton:hover {{
+                background-color: #2a2a2a;
+                border: 1px solid {hover_color};
+                color: {hover_color};
+            }}
+            QPushButton:pressed {{
+                background-color: {hover_color};
+                color: {hover_text_color};
+            }}
+        """)
+
 class CyberDiffBrowser(QTextBrowser):
     file_context_requested = pyqtSignal(int)
     file_restore_requested = pyqtSignal(int)
@@ -842,7 +864,6 @@ class MainWindow(QMainWindow):
         mode_layout.addWidget(QLabel("VIEW MODE:"))
         self.view_mode_combo = QComboBox()
         self.view_mode_combo.addItems(["Commits History", "File Explorer Tree"])
-        self.view_mode_combo.setCurrentIndex(self.view_mode_index)
         self.view_mode_combo.setStyleSheet(f"""
             QComboBox {{
                 background-color: {CP_PANEL};
@@ -1100,6 +1121,11 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(explore_btn)
         action_layout.addLayout(restore_layout)
         layout.addLayout(action_layout)
+        
+        # Apply the default view mode AFTER all widgets are set up
+        self.view_mode_combo.setCurrentIndex(self.view_mode_index)
+        # Apply colors to restore button
+        self.set_default_restore_action(self.default_restore_action)
 
         if os.path.isdir(self.path_input.text()):
             self.load_commits()
@@ -2165,6 +2191,12 @@ class MainWindow(QMainWindow):
     def set_default_restore_action(self, idx):
         self.default_restore_action = idx
         self.restore_btn.setText(self.restore_action_texts[idx])
+        if idx == 0:
+            self.restore_btn.update_colors(CP_RED, "#ff1a40", "white", "white")
+        elif idx == 1:
+            self.restore_btn.update_colors(CP_CYAN, "#00ccdd", "black", "black")
+        elif idx == 2:
+            self.restore_btn.update_colors(CP_YELLOW, "#d0c505", "black", "black")
         self.save_config()
 
 # --- GIT OPERATIONS DIALOG ---
