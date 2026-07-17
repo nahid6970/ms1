@@ -160,6 +160,24 @@ def time_ago(date_str):
     except:
         return date_str
 
+def mtime_ago(timestamp):
+    """Convert a unix timestamp to relative time like '5m', '2h 15m', '1d 3h'"""
+    try:
+        import time
+        diff = int(time.time() - timestamp)
+        if diff < 0: diff = 0
+        parts = []
+        for unit, secs in [("y", 31536000), ("mo", 2592000), ("d", 86400), ("h", 3600), ("m", 60)]:
+            val = diff // secs
+            if val:
+                parts.append(f"{val}{unit}")
+                diff %= secs
+            if len(parts) == 2:
+                break
+        return " ".join(parts) if parts else "just now"
+    except:
+        return ""
+
 # --- GIT LOGIC ---
 class CommitLoaderThread(QThread):
     """Background thread for loading commits"""
@@ -1439,10 +1457,11 @@ class MainWindow(QMainWindow):
             
             # Time column for folder
             fmt = dir_max_mtime.get(rel_dir, 0)
-            time_str = datetime.fromtimestamp(fmt).strftime("%Y-%m-%d %H:%M") if fmt else ""
+            time_str = mtime_ago(fmt) if fmt else ""
             time_item = QStandardItem(time_str)
             time_item.setEditable(False)
             time_item.setForeground(QColor(CP_DIM))
+            time_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             
             parent_item.appendRow([folder_item, time_item])
             folder_items[rel_dir] = folder_item
@@ -1465,10 +1484,11 @@ class MainWindow(QMainWindow):
                 file_item.setEditable(False)
                 file_item.setForeground(QColor(CP_TEXT))
                 
-                time_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+                time_str = mtime_ago(mtime)
                 time_item = QStandardItem(time_str)
                 time_item.setEditable(False)
                 time_item.setForeground(QColor(CP_DIM))
+                time_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 
                 parent_item.appendRow([file_item, time_item])
         
@@ -1523,8 +1543,9 @@ class MainWindow(QMainWindow):
         # Show both columns
         for i in range(recent_model.columnCount()):
             self.left_tree_view.setColumnHidden(i, False)
-        self.left_tree_view.header().setStretchLastSection(True)
-        self.left_tree_view.setColumnWidth(0, 280)
+        self.left_tree_view.header().setStretchLastSection(False)
+        self.left_tree_view.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.left_tree_view.setColumnWidth(1, 80)
 
     def open_file_in_editor_by_path(self, rel_path):
         from PyQt6.QtGui import QDesktopServices
