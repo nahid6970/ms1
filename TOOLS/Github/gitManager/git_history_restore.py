@@ -263,6 +263,38 @@ class GitWorker:
             return directory
 
     @staticmethod
+    def get_all_file_commit_times(directory):
+        """Get the last commit unix timestamp for every tracked file in one efficient call.
+        Returns dict: { relative_file_path: unix_timestamp }
+        """
+        try:
+            # git log with --name-only outputs commit info then filenames
+            # --format="%at" gives us unix timestamp
+            # Since commits are reverse-chronological, first occurrence = most recent
+            cmd = ["git", "log", "--format=%at", "--name-only"]
+            result = subprocess.check_output(cmd, cwd=directory, text=True, encoding='utf-8', errors='replace')
+            
+            file_times = {}
+            current_timestamp = None
+            
+            for line in result.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                # If it's a pure number, it's a timestamp
+                if line.isdigit():
+                    current_timestamp = int(line)
+                elif current_timestamp is not None:
+                    # It's a filename - only keep first occurrence (most recent)
+                    rel_path = line.replace('\\', '/')
+                    if rel_path not in file_times:
+                        file_times[rel_path] = current_timestamp
+            
+            return file_times
+        except Exception:
+            return {}
+
+    @staticmethod
     def get_diff_between(directory, commit_a, commit_b="HEAD", scope="."):
         """Get the diff between two points, scoped to a path"""
         try:
@@ -1388,11 +1420,14 @@ class MainWindow(QMainWindow):
         if not base_dir:
             base_dir = directory
         
-        # Collect all files recursively with their modification times
+        # Collect all files recursively with their git commit times
         # Build a dict: rel_dir_path -> [(filename, full_path, mtime), ...]
         from datetime import datetime
         dir_files = {}   # rel_dir -> list of (name, full_path, mtime)
         dir_max_mtime = {}  # rel_dir -> max mtime (recursive)
+        
+        # Get git commit times for all tracked files (single efficient call)
+        git_commit_times = GitWorker.get_all_file_commit_times(base_dir)
         
         git_dir = os.path.join(base_dir, '.git')
         for root, dirs, files in os.walk(base_dir):
@@ -1407,11 +1442,16 @@ class MainWindow(QMainWindow):
             entries = []
             for fname in files:
                 full_path = os.path.join(root, fname)
-                try:
-                    mtime = os.path.getmtime(full_path)
-                    entries.append((fname, full_path, mtime))
-                except OSError:
-                    continue
+                # Build the relative path as git sees it
+                file_rel = os.path.relpath(full_path, base_dir).replace('\\', '/')
+                # Use git commit time if available, otherwise fall back to OS mtime
+                mtime = git_commit_times.get(file_rel)
+                if mtime is None:
+                    try:
+                        mtime = os.path.getmtime(full_path)
+                    except OSError:
+                        continue
+                entries.append((fname, full_path, mtime))
             
             if entries:
                 dir_files[rel_dir] = entries
