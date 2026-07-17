@@ -222,9 +222,13 @@ def relaunch_in_new_terminal(script_path: str, python_exe: str) -> None:
     visible_python = visible_python_executable(python_exe)
     env = os.environ.copy()
     env["INSTALL_DEPS_RELAUNCHED"] = "1"
-
-    cmd = [visible_python, script_path, *sys.argv[1:]]
-    subprocess.Popen(cmd, cwd=os.path.dirname(script_path), env=env, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    command = subprocess.list2cmdline([visible_python, script_path, *sys.argv[1:]])
+    subprocess.Popen(
+        ["cmd.exe", "/k", command],
+        cwd=os.path.dirname(script_path),
+        env=env,
+        creationflags=subprocess.CREATE_NEW_CONSOLE,
+    )
 
 
 def bootstrap(script_path: str, python_version: str | None = None, isolated: bool = False):
@@ -280,7 +284,7 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
             os.execve(target_python, [target_python, script_path] + sys.argv[1:], env)
         return
 
-    if not has_visible_console() and os.environ.get("INSTALL_DEPS_RELAUNCHED") != "1":
+    if os.environ.get("INSTALL_DEPS_RELAUNCHED") != "1":
         relaunch_in_new_terminal(script_path, target_python)
         sys.exit(0)
 
