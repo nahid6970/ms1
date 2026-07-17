@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QTableWidget, QTableWidgetItem,
     QHeaderView, QFileDialog, QMessageBox, QAbstractItemView, QStyledItemDelegate, QStyle,
     QTreeView, QDialog, QFileIconProvider, QInputDialog, QTextBrowser, QSplitter, QSpinBox, QMenu, QSizePolicy,
-    QComboBox
+    QComboBox, QStackedWidget
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QDir, QFileInfo, QThread, pyqtSignal, QThread, pyqtSignal, QUrl
 from PyQt6.QtGui import QFont, QColor, QCursor, QPainter, QFileSystemModel, QIcon, QPixmap, QPen, QStandardItemModel, QStandardItem, QFontDatabase, QFontInfo
@@ -818,7 +818,40 @@ class MainWindow(QMainWindow):
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
         self.main_splitter = main_splitter  # Store reference for settings
         
-        # LEFT: Commit Table
+        # LEFT: View Mode & Stacked Panel
+        left_panel_widget = QWidget()
+        left_panel_layout = QVBoxLayout(left_panel_widget)
+        left_panel_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # View Mode dropdown
+        mode_layout = QHBoxLayout()
+        mode_layout.addWidget(QLabel("VIEW MODE:"))
+        self.view_mode_combo = QComboBox()
+        self.view_mode_combo.addItems(["Commits History", "File Explorer Tree"])
+        self.view_mode_combo.setStyleSheet(f"""
+            QComboBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+                font-family: '{CURRENT_FONT_FAMILY}';
+                font-weight: bold;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                selection-background-color: {CP_CYAN};
+                selection-color: black;
+            }}
+        """)
+        self.view_mode_combo.currentIndexChanged.connect(self.on_view_mode_changed)
+        mode_layout.addWidget(self.view_mode_combo)
+        mode_layout.addStretch()
+        left_panel_layout.addLayout(mode_layout)
+        
+        self.left_stacked_widget = QStackedWidget()
+        
+        # Stack Widget 1: Commit Table View
         table_widget = QWidget()
         table_layout = QVBoxLayout(table_widget)
         table_layout.setContentsMargins(0, 0, 0, 0)
@@ -861,7 +894,37 @@ class MainWindow(QMainWindow):
         self.table.itemDoubleClicked.connect(lambda: self.open_commit_explorer())
 
         table_layout.addWidget(self.table)
-        main_splitter.addWidget(table_widget)
+        self.left_stacked_widget.addWidget(table_widget)
+        
+        # Stack Widget 2: File Explorer Tree View
+        tree_container = QWidget()
+        tree_layout = QVBoxLayout(tree_container)
+        tree_layout.setContentsMargins(0, 0, 0, 0)
+        
+        tree_label_layout = QHBoxLayout()
+        tree_label = QLabel("FILE EXPLORER:")
+        tree_label.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        tree_label_layout.addWidget(tree_label)
+        tree_label_layout.addStretch()
+        tree_layout.addLayout(tree_label_layout)
+        
+        self.left_tree_view = QTreeView()
+        self.left_tree_model = QFileSystemModel()
+        self.left_tree_model.setReadOnly(True)
+        self.left_tree_model.setFilter(QDir.Filter.AllDirs | QDir.Filter.Files | QDir.Filter.NoDotAndDotDot)
+        self.left_tree_model.setIconProvider(CyberIconProvider())
+        self.left_tree_view.setModel(self.left_tree_model)
+        for i in range(1, 4):
+            self.left_tree_view.hideColumn(i)
+            
+        self.left_tree_view.clicked.connect(self.on_left_tree_clicked)
+        self.left_tree_view.doubleClicked.connect(self.on_left_tree_double_clicked)
+        
+        tree_layout.addWidget(self.left_tree_view)
+        self.left_stacked_widget.addWidget(tree_container)
+        
+        left_panel_layout.addWidget(self.left_stacked_widget)
+        main_splitter.addWidget(left_panel_widget)
         
         # RIGHT: Diff Panel
         diff_widget = QWidget()
@@ -920,24 +983,62 @@ class MainWindow(QMainWindow):
         explore_btn = CyberButton("EXPLORE COMMIT", CP_DIM, CP_CYAN, "white", "black")
         explore_btn.clicked.connect(self.open_commit_explorer)
         
-        restore_files_btn = CyberButton("RESTORE COMMIT FILES (PREVIOUS)", CP_YELLOW, CP_YELLOW, "black", "black")
-        restore_files_btn.clicked.connect(self.restore_files_to_current)
+        # Single dropdown button for the 3 restore actions
+        self.restore_dropdown_btn = QPushButton("⏮️ RESTORE OPTIONS ▾")
+        self.restore_dropdown_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.restore_dropdown_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_RED};
+                color: white;
+                border: 1px solid {CP_DIM};
+                padding: 8px 16px;
+                font-family: '{CURRENT_FONT_FAMILY}';
+                font-weight: bold;
+                font-size: 10pt;
+            }}
+            QPushButton::menu-indicator {{
+                image: none;
+            }}
+            QPushButton:hover {{
+                background-color: #ff1a40;
+                border: 1px solid {CP_YELLOW};
+            }}
+        """)
         
-        revert_btn = CyberButton("RESTORE SELECTED VERSION", CP_DIM, CP_RED, "white", "black")
-        revert_btn.clicked.connect(self.revert_commit)
+        restore_menu = QMenu(self)
+        restore_menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {CP_PANEL};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                font-family: '{CURRENT_FONT_FAMILY}';
+            }}
+            QMenu::item {{
+                padding: 8px 24px;
+            }}
+            QMenu::item:selected {{
+                background-color: {CP_RED};
+                color: white;
+            }}
+        """)
+        
+        act_version = restore_menu.addAction("⏮️ RESTORE SELECTED VERSION")
+        act_version.triggered.connect(self.revert_commit)
+        
+        act_selected = restore_menu.addAction("⏮️ RESTORE COMMIT FILES (SELECTED)")
+        act_selected.triggered.connect(self.restore_commit_files)
+        
+        act_prev = restore_menu.addAction("⏮️ RESTORE COMMIT FILES (PREVIOUS)")
+        act_prev.triggered.connect(self.restore_files_to_current)
+        
+        self.restore_dropdown_btn.setMenu(restore_menu)
         
         action_layout.addWidget(self.status_label)
         action_layout.addStretch()
         action_layout.addWidget(git_console_btn)
         action_layout.addWidget(copy_hash_btn)
         action_layout.addWidget(explore_btn)
-        action_layout.addWidget(restore_files_btn)
-        
-        restore_commit_files_btn = CyberButton("RESTORE COMMIT FILES (SELECTED)", CP_GREEN, CP_GREEN, "black", "black")
-        restore_commit_files_btn.clicked.connect(self.restore_commit_files)
-        action_layout.addWidget(restore_commit_files_btn)
-        
-        action_layout.addWidget(revert_btn)
+        action_layout.addWidget(self.restore_dropdown_btn)
         layout.addLayout(action_layout)
 
         if os.path.isdir(self.path_input.text()):
@@ -1105,6 +1206,32 @@ class MainWindow(QMainWindow):
             if selected_path:
                 self.path_input.setText(selected_path)
                 self.load_commits()
+
+    def on_view_mode_changed(self, index):
+        self.left_stacked_widget.setCurrentIndex(index)
+
+    def on_left_tree_clicked(self, index):
+        path = self.left_tree_model.filePath(index)
+        if os.path.exists(path):
+            directory = self.path_input.text().strip()
+            base_dir = GitWorker.get_git_root(directory)
+            rel_path = os.path.relpath(path, base_dir).replace('\\', '/')
+            if rel_path == ".":
+                rel_path = "."
+            self.scope_input.setText(rel_path)
+
+    def on_left_tree_double_clicked(self, index):
+        path = self.left_tree_model.filePath(index)
+        if os.path.exists(path):
+            directory = self.path_input.text().strip()
+            base_dir = GitWorker.get_git_root(directory)
+            rel_path = os.path.relpath(path, base_dir).replace('\\', '/')
+            if rel_path == ".":
+                rel_path = "."
+            if os.path.isfile(path):
+                self.open_timeline_by_path(rel_path)
+            else:
+                self.open_timeline_by_path(rel_path)
 
     def on_cell_entered(self, row, column):
         self.delegate.hovered_row = row
@@ -1509,7 +1636,11 @@ class MainWindow(QMainWindow):
     def load_commits(self):
         directory = self.path_input.text().strip()
         if not directory: return
-        if os.path.isdir(directory): self.save_config()
+        if os.path.isdir(directory): 
+            self.save_config()
+            if hasattr(self, 'left_tree_model'):
+                self.left_tree_model.setRootPath(directory)
+                self.left_tree_view.setRootIndex(self.left_tree_model.index(directory))
 
         self.table.setRowCount(0)
         self.status_label.setText("LOADING...")
