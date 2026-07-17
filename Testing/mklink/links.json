@@ -209,7 +209,6 @@
                 "selected_files": [
                     "config.xml",
                     "contextMenu.xml",
-                    "session.xml",
                     "shortcuts.xml",
                     "stylers.xml",
                     "themes\\Alucard.xml",
@@ -222,11 +221,7 @@
                     "themes\\Dracula.xml"
                 ],
                 "excluded_files": [
-                    "langs.xml",
-                    "session.xml.inCaseOfCorruption.bak",
-                    "backup\\new 1@2026-07-16_104837",
-                    "backup\\new 1@2026-07-16_150631",
-                    "plugins\\Config\\converter.ini"
+                    "session.xml"
                 ]
             }
         ],

@@ -18,8 +18,6 @@
         <Replace name="ms1" />
     </FindHistory>
     <History nbMaxFile="10" inSubMenu="no" customLength="-1">
-        <File filename="C:\@delta\ms1\scripts\rclone\rclone_status\settings.json" />
-        <File filename="C:\@delta\ms1\TOOLS\freeform_crop_gui.py" />
         <File filename="C:\@delta\ms1\TOOLS\startup_manager\startup_items.json" />
         <File filename="C:\@delta\ms1\TOOLS\terminal_tui\calculator.py" />
         <File filename="C:\@delta\ms1\TOOLS\startup_manager\ahk_wrappers\CPU FAN Check_wrapper.ahk" />
@@ -28,6 +26,8 @@
         <File filename="C:\@delta\ms1\TOOLS\freeform_crop.py" />
         <File filename="C:\@delta\ms1\TOOLS\volume_mixer\volume_mixer.py" />
         <File filename="C:\Users\nahid\notification.txt" />
+        <File filename="C:\@delta\ms1\asset\gemini\trustedFolders.json" />
+        <File filename="C:\@delta\ms1\asset\gemini\settings.json" />
     </History>
     <ProjectPanels>
         <ProjectPanel id="0" workSpaceFile="" />
