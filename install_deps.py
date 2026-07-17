@@ -7,8 +7,8 @@ uv-managed Python environment.
 Usage:
   1. CLI: python install_deps.py <script.py>
   2. Integration: Add this to the top of any script:
-     import install_deps; install_deps.bootstrap(__file__, python_version="3.13", isolated=True)
      import install_deps; install_deps.bootstrap(__file__, isolated=False)
+     import install_deps; install_deps.bootstrap(__file__, python_version="3.13", isolated=True)
 """
 
 import ast
@@ -203,7 +203,7 @@ def has_local_module(script_dir: str, module: str) -> bool:
     )
 
 
-def bootstrap(script_path: str, python_version: str | None = None, isolated: bool = True):
+def bootstrap(script_path: str, python_version: str | None = None, isolated: bool = False):
     """
     Call this at the top of a script to auto-install dependencies.
     Examples:
@@ -350,7 +350,7 @@ def main():
 
     args = sys.argv[1:]
     python_version = None
-    isolated = True
+    isolated = False
     if "--system" in args:
         isolated = False
         args.remove("--system")
