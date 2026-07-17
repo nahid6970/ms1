@@ -399,6 +399,13 @@
         "winget_path": ""
     },
     {
+        "name": "KDE Connect",
+        "scoop_name": "kdeconnect",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\kdeconnect\\current",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "keyviz [keypress monitor]",
         "scoop_name": "keyviz",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe",
@@ -700,6 +707,13 @@
         "winget_path": ""
     },
     {
+        "name": "Tailscale [vpn]",
+        "scoop_name": "tailscale",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\tailscale\\current",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "ThioJoe.SvgThumbnailExtension",
         "scoop_name": "",
         "scoop_path": "",
@@ -878,13 +892,6 @@
         "name": "Zoxide",
         "scoop_name": "zoxide",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
-        "winget_name": "",
-        "winget_path": ""
-    },
-    {
-        "name": "KDE Connect",
-        "scoop_name": "kdeconnect",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\kdeconnect\\current",
         "winget_name": "",
         "winget_path": ""
     }

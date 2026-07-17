@@ -28,8 +28,8 @@ def do_drag(event):
         ROOT.geometry("+%s+%s" % (x, y))
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
-    BORDER_FRAME.place(relwidth=1, relheight=1)
+    BORDER_FRAME = tk.Frame(parent, bg="#d32f2f", bd=0, highlightthickness=0)
+    BORDER_FRAME.place(x=0, y=0, relwidth=1, relheight=1)
     return BORDER_FRAME
 
 # Create main window
@@ -37,16 +37,22 @@ ROOT = tk.Tk()
 ROOT.title("Folder")
 ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
-ROOT.configure(bg="#282c34")
+ROOT.configure(bg="#d32f2f")
 ROOT.overrideredirect(True)  # Remove default borders
 
 # Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
 
+# Drag only from the header area so interactive widgets like the search bar
+# do not move the whole window.
+DRAG_BAR = tk.Frame(BORDER_FRAME, bg="#1d2027", height=24)
+DRAG_BAR.pack(side="top", fill="x")
+DRAG_BAR.pack_propagate(False)
+
 # Add bindings to make the window movable
-ROOT.bind("<ButtonPress-1>", start_drag)
-ROOT.bind("<ButtonRelease-1>", stop_drag)
-ROOT.bind("<B1-Motion>", do_drag)
+DRAG_BAR.bind("<ButtonPress-1>", start_drag)
+DRAG_BAR.bind("<ButtonRelease-1>", stop_drag)
+DRAG_BAR.bind("<B1-Motion>", do_drag)
 
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
@@ -57,8 +63,7 @@ ROOT.geometry(f"430x600+{x}+{y}") #! overall size of the window
 
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=430, height=600) #!
 MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1)  # Add some padding at the top
-MAIN_FRAME.pack(expand=True)
+MAIN_FRAME.pack(fill="both", expand=True, padx=1, pady=1)
 
 
 #! Close Window
@@ -66,8 +71,8 @@ def close_window(event=None):
     ROOT.destroy()
 
 #!? Main ROOT BOX
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
+ROOT1 = tk.Frame(DRAG_BAR, bg="#1d2027")
+ROOT1.pack(side="right", anchor="ne", pady=(1, 0), padx=(3, 1))
 
 def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
     label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
@@ -444,5 +449,4 @@ def on_canvas_configure(event):
 canvas.bind("<Configure>", on_canvas_configure)
 
 #! Ending
-MAIN_FRAME.pack()
 ROOT.mainloop()

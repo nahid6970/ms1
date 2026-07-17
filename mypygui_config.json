@@ -311,14 +311,14 @@
                 "Button-1": {
                     "type": "subprocess",
                     "hide": false,
-                    "admin": false,
+                    "admin": true,
                     "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\@@init\\application_install\\applist.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
-                    "admin": false,
+                    "admin": true,
                     "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
                 },
