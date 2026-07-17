@@ -133,6 +133,22 @@ def visible_python_executable(python_exe: str) -> str:
     return python_exe
 
 
+def describe_install_target(isolated: bool, requested_python: str, target_python: str) -> str:
+    if isolated:
+        env_dir = os.path.dirname(os.path.dirname(target_python))
+        return (
+            f"mode: isolated uv env\n"
+            f"python: {requested_python}\n"
+            f"env: {env_dir}\n"
+            f"interpreter: {target_python}"
+        )
+    return (
+        "mode: system/current interpreter\n"
+        f"python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}\n"
+        f"interpreter: {target_python}"
+    )
+
+
 def script_env_dir(script_path: str, python_version: str) -> str:
     script_path = os.path.abspath(script_path)
     digest = hashlib.sha256(script_path.encode("utf-8")).hexdigest()[:12]
@@ -292,6 +308,10 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
     for pkg in to_install:
         print(f"  \033[91m- {pkg}\033[0m")
 
+    print("\n[!] Install target:")
+    for line in describe_install_target(isolated, requested_python, target_python).splitlines():
+        print(f"  {line}")
+
     try:
         input("\nPress [ENTER] to proceed with installation via 'uv', or Ctrl+C to cancel...")
     except KeyboardInterrupt:
@@ -300,10 +320,10 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
 
     print("")
     if isolated:
-        print(f"  using Python {requested_python} at: {target_python}")
+        print(f"  installing into isolated Python {requested_python} at: {target_python}")
         subprocess.run(["uv", "pip", "install", "--python", target_python, *to_install], check=True)
     else:
-        print(f"  using current Python at: {target_python}")
+        print(f"  installing into current Python at: {target_python}")
         subprocess.run(["uv", "pip", "install", "--system", *to_install], check=True)
 
     if isolated:
