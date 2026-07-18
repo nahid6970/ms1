@@ -322,6 +322,10 @@ class VoiceApp(QMainWindow):
                 border: 1px solid {CP_GREEN};
                 padding: 0px;
                 margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
             }}
             QPushButton#status:hover {{
                 background-color: {CP_GREEN};
@@ -1002,6 +1006,10 @@ class VoiceApp(QMainWindow):
                 border: 1px solid {color};
                 padding: 0px;
                 margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
             }}
             QPushButton#status:hover {{
                 background-color: {color};

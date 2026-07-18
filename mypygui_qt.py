@@ -2167,6 +2167,17 @@ class StatusBar(QMainWindow):
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
         
+        # Voice Input integration
+        try:
+            from TOOLS.Voice.voice_input import VoiceApp
+            self._voice_app = VoiceApp()
+            self._voice_app.status_btn.show()
+            self._voice_app.lang_btn.show()
+            ll.addWidget(self._voice_app.status_btn)
+            ll.addWidget(self._voice_app.lang_btn)
+        except Exception as e:
+            logging.error(f"Failed to integrate Voice input: {e}")
+
         helium_toggle = QLabel()
         helium_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         
@@ -2190,17 +2201,6 @@ class StatusBar(QMainWindow):
                 
         helium_toggle.mousePressEvent = helium_click
         ll.addWidget(helium_toggle)
-
-        # Voice Input integration
-        try:
-            from TOOLS.Voice.voice_input import VoiceApp
-            self._voice_app = VoiceApp()
-            self._voice_app.status_btn.show()
-            self._voice_app.lang_btn.show()
-            ll.addWidget(self._voice_app.status_btn)
-            ll.addWidget(self._voice_app.lang_btn)
-        except Exception as e:
-            logging.error(f"Failed to integrate Voice input: {e}")
 
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
