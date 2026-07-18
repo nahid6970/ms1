@@ -622,15 +622,14 @@ class VoiceApp(QMainWindow):
             self.save_config()
 
     def import_settings(self, parent_dialog):
-        from PyQt6.QtWidgets import QFileDialog
-        file_name, _ = QFileDialog.getOpenFileName(parent_dialog, "Import Settings", "", "JSON Files (*.json);;All Files (*)")
-        if file_name:
+        backup_file = self.script_dir / "backup_commited.json"
+        if backup_file.exists():
             try:
-                with open(file_name, 'r') as f:
+                with open(backup_file, 'r') as f:
                     new_config = json.load(f)
                 self.config.update(new_config)
                 self.save_config()
-                QMessageBox.information(parent_dialog, "Import Successful", "Settings imported successfully.")
+                QMessageBox.information(parent_dialog, "Import Successful", "Settings imported successfully from backup_commited.json.")
                 parent_dialog.accept()
                 self.update_style()
                 self._apply_window_flags()
@@ -642,17 +641,17 @@ class VoiceApp(QMainWindow):
                     self.restart_hotkey_listener()
             except Exception as e:
                 QMessageBox.critical(parent_dialog, "Import Error", f"Failed to import settings:\n{e}")
+        else:
+            QMessageBox.warning(parent_dialog, "Import Error", "backup_commited.json not found in the script directory.")
 
     def export_settings(self):
-        from PyQt6.QtWidgets import QFileDialog
-        file_name, _ = QFileDialog.getSaveFileName(self, "Export Settings", "voice_config.json", "JSON Files (*.json);;All Files (*)")
-        if file_name:
-            try:
-                with open(file_name, 'w') as f:
-                    json.dump(self.config, f, indent=2)
-                QMessageBox.information(self, "Export Successful", "Settings exported successfully.")
-            except Exception as e:
-                QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{e}")
+        backup_file = self.script_dir / "backup_commited.json"
+        try:
+            with open(backup_file, 'w') as f:
+                json.dump(self.config, f, indent=2)
+            QMessageBox.information(self, "Export Successful", "Settings exported successfully to backup_commited.json.")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{e}")
 
     def _apply_window_flags(self):
         flags = Qt.WindowType.FramelessWindowHint
