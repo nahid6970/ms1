@@ -2143,13 +2143,15 @@ class StatusBar(QMainWindow):
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
         
-        helium_toggle = QLabel("⚡")
+        helium_toggle = QLabel()
         helium_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         
         def update_helium_style():
             active = is_incognito_active()
-            color = CP_GREEN if active else CP_DIM
-            helium_toggle.setStyleSheet(f"color: {color}; font-size: 14pt; font-weight: bold; margin-left: 2px; margin-right: 4px;")
+            color = CP_CYAN if active else CP_DIM
+            text = "\udb81\udd62" if active else "\udb81\udd61"
+            helium_toggle.setText(text)
+            helium_toggle.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; margin-left: 2px; margin-right: 4px;")
             helium_toggle.setToolTip(f"Helium Incognito: {'ACTIVE' if active else 'INACTIVE'}\nLeft Click to Toggle\nRight Click for Settings")
             
         update_helium_style()
