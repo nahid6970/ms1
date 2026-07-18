@@ -73,12 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Generate description based on filename
     const descriptions = {
-      'sample_script': 'Sample Script - Test script with alert',
       'disable_youtube': 'Disable YouTube - Redirects to Google',
-      'dark_mode_toggle': 'Dark Mode - Inverts page colors',
-      'text_highlighter': 'Text Highlighter - Highlight selected text',
       'youtube_ad_skipper': 'YouTube Ad Skipper - Skip/speed up ads',
-      'element_popper': 'Element Popper - Pop out elements with Ctrl+Click',
       'auto_clicker': 'Auto Clicker - Automated clicking functionality',
       'page_monitor': 'Page Monitor - Track page changes',
       'form_filler': 'Form Filler - Auto-fill form fields',
