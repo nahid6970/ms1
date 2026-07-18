@@ -3051,7 +3051,7 @@ class VoiceApp(QMainWindow):
     def _compact_window_width(self):
         return (
             self.config.get("compact_left_padding", 0)
-            + 8
+            + 18
             + self.config.get("status_lang_gap", 2)
             + 26
             + self.config.get("compact_right_padding", 0)
@@ -3063,7 +3063,7 @@ class VoiceApp(QMainWindow):
     def _expanded_window_width(self):
         width = (
             self.config.get("expanded_left_padding", 0)
-            + 8
+            + 18
             + self.config.get("status_lang_gap", 2)
             + 28
             + 18
@@ -3083,8 +3083,8 @@ class VoiceApp(QMainWindow):
 
     def _apply_button_geometry(self):
         compact = self._compact_view
-        self.status_btn.setFixedSize(16, 18)
-        self.lang_btn.setFixedSize(26 if compact else 28, 18)
+        self.status_btn.setFixedSize(18, 20)
+        self.lang_btn.setFixedSize(26 if compact else 28, 20)
         self.google_btn.setFixedSize(18, 18)
         self.copy_btn.setFixedSize(18, 18)
         self.help_btn.setFixedSize(18, 18)
