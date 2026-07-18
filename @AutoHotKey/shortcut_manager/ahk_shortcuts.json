@@ -353,7 +353,7 @@
             "hotkey": "!u",
             "target_path": "C:\\@delta\\ms1\\TOOLS\\Ultimate_Gui.py",
             "hide_terminal": true,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "open folder gui",
