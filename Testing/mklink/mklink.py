@@ -1772,52 +1772,123 @@ class SymlinkManager(QMainWindow):
 
             # Buttons
             btn_layout = QHBoxLayout()
+            btn_layout.setSpacing(6)
             
+            # Helper to create inline SVG icons
+            from PyQt6.QtGui import QPixmap
+            def create_svg_icon(svg_data, color):
+                # Replace fill/stroke colors in the SVG dynamically if needed
+                colored_svg = svg_data.replace("currentColor", color)
+                pm = QPixmap()
+                pm.loadFromData(colored_svg.encode('utf-8'), "svg")
+                return QIcon(pm)
+
+            # Icon sizes
+            icon_sz = QSize(16, 16)
+            btn_sz = QSize(32, 32)
+
+            # Raw SVGs
+            # Link/Fix SVG
+            link_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>"""
+
+            # Sync SVG
+            sync_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>"""
+
+            # Folder Open SVG
+            folder_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>"""
+
+            # Edit SVG
+            edit_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>"""
+
+            # Delete/Trash SVG
+            trash_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>"""
+
             if status_text not in ("Working", "Copied"):
-                fix_btn = QPushButton("🔗 Fix All")
-                fix_btn.setFixedSize(110, 30)
+                fix_btn = QPushButton()
+                fix_btn.setFixedSize(btn_sz)
+                fix_btn.setIcon(create_svg_icon(link_svg, CP_CYAN))
+                fix_btn.setIconSize(icon_sz)
+                fix_btn.setToolTip("Fix / Create Link")
                 fix_btn.setStyleSheet(f"""
-                    QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
-                    QPushButton:hover {{ background-color: {CP_CYAN}; color: black; }}
+                    QPushButton {{ border-color: {CP_CYAN}; background-color: {CP_DIM}; }}
+                    QPushButton:hover {{ background-color: {CP_CYAN}; }}
                 """)
+                # Re-color icon to black when hovered
+                fix_btn.enterEvent = lambda event, b=fix_btn: b.setIcon(create_svg_icon(link_svg, "#000000"))
+                fix_btn.leaveEvent = lambda event, b=fix_btn: b.setIcon(create_svg_icon(link_svg, CP_CYAN))
                 fix_btn.clicked.connect(lambda checked, idx=i: self.create_link(idx))
                 btn_layout.addWidget(fix_btn)
 
             if link_entry.get("copy_mode", False):
-                sync_target_btn = QPushButton("🔄 Sync Target")
-                sync_target_btn.setFixedSize(110, 30)
+                sync_target_btn = QPushButton()
+                sync_target_btn.setFixedSize(btn_sz)
+                sync_target_btn.setIcon(create_svg_icon(sync_svg, CP_GREEN))
+                sync_target_btn.setIconSize(icon_sz)
+                sync_target_btn.setToolTip("Sync back to Target")
                 sync_target_btn.setStyleSheet(f"""
-                    QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
-                    QPushButton:hover {{ background-color: {CP_GREEN}; color: black; }}
+                    QPushButton {{ border-color: {CP_GREEN}; background-color: {CP_DIM}; }}
+                    QPushButton:hover {{ background-color: {CP_GREEN}; }}
                 """)
+                sync_target_btn.enterEvent = lambda event, b=sync_target_btn: b.setIcon(create_svg_icon(sync_svg, "#000000"))
+                sync_target_btn.leaveEvent = lambda event, b=sync_target_btn: b.setIcon(create_svg_icon(sync_svg, CP_GREEN))
                 sync_target_btn.clicked.connect(lambda checked, idx=i: self.sync_back_to_target(idx))
                 btn_layout.addWidget(sync_target_btn)
 
             # Open Both Button
-            open_btn = QPushButton("📂 Open")
-            open_btn.setFixedSize(80, 30)
+            open_btn = QPushButton()
+            open_btn.setFixedSize(btn_sz)
+            open_btn.setIcon(create_svg_icon(folder_svg, "#9b59b6"))
+            open_btn.setIconSize(icon_sz)
+            open_btn.setToolTip("Open Folders")
             open_btn.setStyleSheet(f"""
-                QPushButton {{ border-color: #9b59b6; color: #9b59b6; }}
-                QPushButton:hover {{ background-color: #9b59b6; color: black; }}
+                QPushButton {{ border-color: #9b59b6; background-color: {CP_DIM}; }}
+                QPushButton:hover {{ background-color: #9b59b6; }}
             """)
+            open_btn.enterEvent = lambda event, b=open_btn: b.setIcon(create_svg_icon(folder_svg, "#000000"))
+            open_btn.leaveEvent = lambda event, b=open_btn: b.setIcon(create_svg_icon(folder_svg, "#9b59b6"))
             open_btn.clicked.connect(lambda checked, idx=i: self.open_both_folders(idx))
             btn_layout.addWidget(open_btn)
 
-            edit_btn = QPushButton("📝 Edit")
-            edit_btn.setFixedSize(80, 30)
+            edit_btn = QPushButton()
+            edit_btn.setFixedSize(btn_sz)
+            edit_btn.setIcon(create_svg_icon(edit_svg, CP_ORANGE))
+            edit_btn.setIconSize(icon_sz)
+            edit_btn.setToolTip("Edit Entry")
             edit_btn.setStyleSheet(f"""
-                QPushButton {{ border-color: {CP_ORANGE}; color: {CP_ORANGE}; }}
-                QPushButton:hover {{ background-color: {CP_ORANGE}; color: black; }}
+                QPushButton {{ border-color: {CP_ORANGE}; background-color: {CP_DIM}; }}
+                QPushButton:hover {{ background-color: {CP_ORANGE}; }}
             """)
+            edit_btn.enterEvent = lambda event, b=edit_btn: b.setIcon(create_svg_icon(edit_svg, "#000000"))
+            edit_btn.leaveEvent = lambda event, b=edit_btn: b.setIcon(create_svg_icon(edit_svg, CP_ORANGE))
             edit_btn.clicked.connect(lambda checked, idx=i: self.edit_link(idx))
             btn_layout.addWidget(edit_btn)
 
-            del_btn = QPushButton("🗑️")
-            del_btn.setFixedSize(50, 30)
+            del_btn = QPushButton()
+            del_btn.setFixedSize(btn_sz)
+            del_btn.setIcon(create_svg_icon(trash_svg, CP_RED))
+            del_btn.setIconSize(icon_sz)
+            del_btn.setToolTip("Delete Entry")
             del_btn.setStyleSheet(f"""
-                QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}
-                QPushButton:hover {{ background-color: {CP_RED}; color: black; }}
+                QPushButton {{ border-color: {CP_RED}; background-color: {CP_DIM}; }}
+                QPushButton:hover {{ background-color: {CP_RED}; }}
             """)
+            del_btn.enterEvent = lambda event, b=del_btn: b.setIcon(create_svg_icon(trash_svg, "#ffffff"))
+            del_btn.leaveEvent = lambda event, b=del_btn: b.setIcon(create_svg_icon(trash_svg, CP_RED))
             del_btn.clicked.connect(lambda checked, idx=i: self.delete_link(idx))
             btn_layout.addWidget(del_btn)
 
