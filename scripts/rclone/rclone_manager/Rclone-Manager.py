@@ -594,7 +594,12 @@ class RcloneApp(QMainWindow):
         for i, (name, _, default) in enumerate(filter_defs):
             state = saved_filters[i] if i < len(saved_filters) else False
             lbl = ToggleLabel(name, state, on_change=self._save_toggles)
-            entry = QLineEdit(default)
+            entry = QLineEdit()
+            if name in ("Include", "Exclude"):
+                entry.setPlaceholderText("e.g. *.jpg, dir/**")
+                # Don't set default text so placeholder is visible if empty
+            else:
+                entry.setText(default)
             self.filter_labels.append(lbl)
             self.filter_entries.append(entry)
             filter_grid.addWidget(lbl,   i, 0)
@@ -741,7 +746,7 @@ class RcloneApp(QMainWindow):
         if self.tool_labels[0].active:
             s_parts = ["rclone", "size", q_stor, q_frm]
             for i, (_, f, _) in enumerate(self.flag_defs):
-                if self.flag_labels[i].active and ("drive" in f or "list" in f):
+                if self.flag_labels[i].active:
                     s_parts.append(f)
             for i, (_, pref, _) in enumerate(self.filter_defs):
                 if self.filter_labels[i].active:
