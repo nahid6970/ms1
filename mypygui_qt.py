@@ -2691,25 +2691,26 @@ class VoiceApp(QMainWindow):
 
         # Use IconLabel for rock-solid size (no Qt button metrics issues)
         self.status_btn = IconLabel("", {"font": ["JetBrainsMono NFP", 18, "bold"]})
-        self.status_btn.setFixedSize(16, 18)
+        self.status_btn.setFixedSize(18, 20)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet("""
             QLabel {
                 color: #00ff21;
                 background: transparent;
                 padding: 0px;
-                margin: 0px 4px 0px 0px;
+                margin: 1px 7px 1px 1px;  /* compensate for any press shift */
                 font-size: 18px;
                 font-weight: bold;
-                min-width: 16px;
-                max-width: 16px;
+                min-width: 18px;
+                max-width: 18px;
+                text-align: center;
             }
         """)
         self.status_btn.mousePressEvent = lambda e: e.accept()
         self.status_btn.mouseReleaseEvent = lambda e: self.toggle_record() if e.button() == Qt.MouseButton.LeftButton else None
         self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
-        layout.addSpacing(6)  # Locked preferred spacing
+        layout.addSpacing(5)
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
