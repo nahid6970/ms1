@@ -2689,38 +2689,27 @@ class VoiceApp(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         self.toolbar_layout = layout
 
-        self.status_btn = QPushButton("")
-        self.status_btn.setObjectName("status")
-        self.status_btn.setFixedSize(8, 18)
-        self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.status_btn.setMinimumSize(8, 18)
-        self.status_btn.setMaximumSize(8, 18)
-        self.status_btn.setFlat(True)
-        self.status_btn.setAutoDefault(False)
-        self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.status_btn.clicked.connect(self.toggle_record)
+        # Use IconLabel for rock-solid size (no Qt button metrics issues)
+        self.status_btn = IconLabel("", {"font": ["JetBrainsMono NFP", 18, "bold"]})
+        self.status_btn.setFixedSize(16, 18)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.status_btn.setStyleSheet(f"""
-            QPushButton#status {{
-                background-color: {CP_GREEN};
-                border: 1px solid {CP_GREEN};
+        self.status_btn.setStyleSheet("""
+            QLabel {
+                color: #00ff21;
+                background: transparent;
                 padding: 0px;
-                margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
-            }}
-            QPushButton#status:hover, QPushButton#status:pressed, QPushButton#status:focus {{
-                background-color: {CP_GREEN};
-                border: 1px solid {CP_GREEN};
-                padding: 0px;
-                margin: 0px;
-            }}
+                margin: 0px 4px 0px 0px;
+                font-size: 18px;
+                font-weight: bold;
+                min-width: 16px;
+                max-width: 16px;
+            }
         """)
+        self.status_btn.mousePressEvent = lambda e: e.accept()
+        self.status_btn.mouseReleaseEvent = lambda e: self.toggle_record() if e.button() == Qt.MouseButton.LeftButton else None
         self.status_btn.installEventFilter(self)
         layout.addWidget(self.status_btn)
-        layout.addSpacing(self.config.get("status_lang_gap", 2))
+        layout.addSpacing(6)  # Locked preferred spacing
 
         self.lang_btn = QPushButton()
         self.lang_btn.setObjectName("lang")
@@ -2810,12 +2799,13 @@ class VoiceApp(QMainWindow):
             QPushButton#status {{ 
                 background-color: {CP_GREEN}; 
                 border: 1px solid {CP_GREEN}; 
-                padding: 0px; 
-                margin: 0px; 
-                min-width: 8px; 
-                max-width: 8px; 
-                min-height: 18px; 
-                max-height: 18px; 
+                padding: 0px !important; 
+                margin: 0px !important; 
+                min-width: 8px !important; 
+                max-width: 8px !important; 
+                width: 8px !important;
+                min-height: 18px !important; 
+                max-height: 18px !important; 
             }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
@@ -3113,7 +3103,7 @@ class VoiceApp(QMainWindow):
 
     def _apply_button_geometry(self):
         compact = self._compact_view
-        self.status_btn.setFixedSize(8, 18)
+        self.status_btn.setFixedSize(16, 18)
         self.lang_btn.setFixedSize(26 if compact else 28, 18)
         self.google_btn.setFixedSize(18, 18)
         self.copy_btn.setFixedSize(18, 18)
@@ -3424,28 +3414,15 @@ class VoiceApp(QMainWindow):
         self.record_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;")
 
     def _set_status(self, color):
-        self.status_btn.setText("")
-        self.status_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {color};
-                border: 1px solid {color};
-                padding: 0px;
-                margin: 0px;
-                min-width: 8px;
-                max-width: 8px;
-                min-height: 18px;
-                max-height: 18px;
-            }}
-            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
-                background-color: {color};
-                border: 1px solid {color};
-                padding: 0px;
-                margin: 0px;
-            }}
-        """)
-        w = 8
-        h = 18
-        self.status_btn.setFixedSize(w, h)
+        """Update SVG circle color"""
+        if hasattr(self, '_update_status_color'):
+            self._update_status_color(color)
+        else:
+            # fallback
+            try:
+                self.status_btn.setStyleSheet(f"color: {color};")
+            except:
+                pass
 
     def _finish_space_recording(self):
         if not self._recording_active:
