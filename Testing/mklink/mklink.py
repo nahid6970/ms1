@@ -1243,7 +1243,7 @@ class SymlinkManager(QMainWindow):
         # Determine aggregate status
         colors = [s[1] for s in statuses]
         if all(c == CP_GREEN for c in colors):
-            return "Working", CP_GREEN
+            return "Copied" if copy_mode else "Working", CP_GREEN
         if any(c == CP_RED for c in colors):
             return "Critical Error", CP_RED
         if any(c == CP_ORANGE for c in colors):
