@@ -2142,9 +2142,6 @@ class StatusBar(QMainWindow):
 
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
-        git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
-        git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
-        bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); bkup.setCursor(Qt.CursorShape.PointingHandCursor); bkup.mousePressEvent = lambda e: git_backup(repos); git_row.addWidget(bkup)
         
         helium_toggle = QLabel("⚡")
         helium_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -2152,7 +2149,7 @@ class StatusBar(QMainWindow):
         def update_helium_style():
             active = is_incognito_active()
             color = CP_GREEN if active else CP_DIM
-            helium_toggle.setStyleSheet(f"color: {color}; font-size: 14pt; font-weight: bold; margin-left: 2px; margin-right: 2px;")
+            helium_toggle.setStyleSheet(f"color: {color}; font-size: 14pt; font-weight: bold; margin-left: 2px; margin-right: 4px;")
             helium_toggle.setToolTip(f"Helium Incognito: {'ACTIVE' if active else 'INACTIVE'}\nLeft Click to Toggle\nRight Click for Settings")
             
         update_helium_style()
@@ -2166,7 +2163,11 @@ class StatusBar(QMainWindow):
                 subprocess.Popen([sys.executable, script_path])
                 
         helium_toggle.mousePressEvent = helium_click
-        git_row.addWidget(helium_toggle)
+        ll.addWidget(helium_toggle)
+
+        git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
+        git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
+        bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); bkup.setCursor(Qt.CursorShape.PointingHandCursor); bkup.mousePressEvent = lambda e: git_backup(repos); git_row.addWidget(bkup)
         for idx, repo in enumerate(repos):
             lbl = IconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); p = repo["path"]
             def _make_click(path, _cfg, _idx):
