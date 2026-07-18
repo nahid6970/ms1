@@ -18,16 +18,16 @@
         <Replace name="ms1" />
     </FindHistory>
     <History nbMaxFile="10" inSubMenu="no" customLength="-1">
-        <File filename="C:\@delta\ms1\TOOLS\freeform_crop.py" />
-        <File filename="C:\@delta\ms1\TOOLS\volume_mixer\volume_mixer.py" />
-        <File filename="C:\Users\nahid\notification.txt" />
-        <File filename="C:\@delta\ms1\asset\gemini\trustedFolders.json" />
-        <File filename="C:\@delta\ms1\asset\gemini\settings.json" />
-        <File filename="C:\@delta\db\@run_from_db\Script_Manager\script_manager_gui_qt.py" />
-        <File filename="C:\@delta\ms1\TOOLS\startup_manager\ahk_wrappers\NETWORK-SPEED_wrapper.ahk" />
-        <File filename="C:\@delta\ms1\asset\gemini\GEMINI.md" />
-        <File filename="C:\@delta\ms1\md\python_uv_env_management.md" />
-        <File filename="C:\@delta\ms1\TOOLS\Voice\voice_input.py" />
+        <File filename="C:\Users\nahid\Downloads\macro_recorder_fixed.ahk" />
+        <File filename="C:\Users\nahid\Downloads\macro_recorder_fixed (1).ahk" />
+        <File filename="C:\@delta\ms1\install_deps.py" />
+        <File filename="C:\@delta\ms1\TOOLS\terminal_tui\app.py" />
+        <File filename="C:\@delta\ms1\mypygui_qt.py" />
+        <File filename="C:\@delta\ms1\TOOLS\freeform_crop_gui.py" />
+        <File filename="C:\@delta\ms1\asset\notepadplusplus\Notepad++\config.xml" />
+        <File filename="C:\Users\nahid\.codex\skills\.system\openai-docs\SKILL.md" />
+        <File filename="C:\Users\nahid\.codex\skills\.system\skill-installer\SKILL.md" />
+        <File filename="C:\Users\nahid\.codex\AGENTS.md" />
     </History>
     <ProjectPanels>
         <ProjectPanel id="0" workSpaceFile="" />
@@ -45,7 +45,7 @@
         <GUIConfig name="ScintillaViewsSplitter">vertical</GUIConfig>
         <GUIConfig name="UserDefineDlg" position="undocked">hide</GUIConfig>
         <GUIConfig name="TabSetting" replaceBySpace="no" size="4" backspaceUnindent="no" />
-        <GUIConfig name="AppPosition" x="-8" y="-8" width="1936" height="1009" isMaximized="yes" />
+        <GUIConfig name="AppPosition" x="-1" y="6" width="957" height="988" isMaximized="no" />
         <GUIConfig name="FindWindowPosition" left="975" top="52" right="1608" bottom="411" isLessModeOn="no" />
         <GUIConfig name="FinderConfig" wrappedLines="no" purgeBeforeEverySearch="no" showOnlyOneEntryPerFoundLine="yes" FiF_ignoreunsavedChangesInOpenedFiles="no" />
         <GUIConfig name="noUpdate" intervalDays="15" nextUpdateDate="20260729" autoUpdateMode="1">no</GUIConfig>
@@ -87,7 +87,7 @@
         <GUIConfig name="MarkAll" matchCase="no" wholeWordOnly="yes" />
         <GUIConfig name="SmartHighLight" matchCase="no" wholeWordOnly="yes" useFindSettings="no" onAnotherView="no">yes</GUIConfig>
         <GUIConfig name="DarkMode" enable="no" colorTone="0" customColorTop="2105376" customColorMenuHotTrack="4539717" customColorActive="3684408" customColorMain="2105376" customColorError="176" customColorText="14737632" customColorDarkText="12632256" customColorDisabledText="8421504" customColorLinkText="65535" customColorEdge="6579300" customColorHotEdge="10197915" customColorDisabledEdge="4737096" enableWindowsMode="no" darkThemeName="DarkModeDefault.xml" darkToolBarIconSet="0" darkTbFluentColor="0" darkTbFluentCustomColor="0" darkTbFluentMono="no" darkTabIconSet="2" darkTabUseTheme="no" lightThemeName="Dracula.xml" lightToolBarIconSet="3" lightTbFluentColor="3" lightTbFluentCustomColor="16744448" lightTbFluentMono="no" lightTabIconSet="1" lightTabUseTheme="yes" />
-        <GUIConfig name="ScintillaPrimaryView" lineNumberMargin="show" lineNumberDynamicWidth="yes" bookMarkMargin="show" indentGuideLine="show" folderMarkStyle="box" isChangeHistoryEnabled="1" lineWrapMethod="aligned" currentLineIndicator="1" currentLineFrameWidth="1" virtualSpace="no" scrollBeyondLastLine="yes" rightClickKeepsSelection="no" selectedTextForegroundSingleColor="no" disableAdvancedScrolling="no" wrapSymbolShow="hide" Wrap="yes" borderEdge="yes" isEdgeBgMode="no" edgeMultiColumnPos="" zoom="5" zoom2="0" zoomSync="no" whiteSpaceShow="hide" eolShow="hide" eolMode="1" npcShow="hide" npcMode="1" npcCustomColor="no" npcIncludeCcUniEOL="no" npcNoInputC0="yes" ccShow="yes" borderWidth="2" smoothFont="yes" paddingLeft="0" paddingRight="0" distractionFreeDivPart="4" lineCopyCutWithoutSelection="yes" disableSelectedTextDragDrop="no" multiSelection="yes" columnSel2MultiEdit="yes" />
+        <GUIConfig name="ScintillaPrimaryView" lineNumberMargin="show" lineNumberDynamicWidth="yes" bookMarkMargin="show" indentGuideLine="show" folderMarkStyle="box" isChangeHistoryEnabled="1" lineWrapMethod="aligned" currentLineIndicator="1" currentLineFrameWidth="1" virtualSpace="no" scrollBeyondLastLine="yes" rightClickKeepsSelection="no" selectedTextForegroundSingleColor="no" disableAdvancedScrolling="no" wrapSymbolShow="hide" Wrap="yes" borderEdge="yes" isEdgeBgMode="no" edgeMultiColumnPos="" zoom="4" zoom2="0" zoomSync="no" whiteSpaceShow="hide" eolShow="hide" eolMode="1" npcShow="hide" npcMode="1" npcCustomColor="no" npcIncludeCcUniEOL="no" npcNoInputC0="yes" ccShow="yes" borderWidth="2" smoothFont="yes" paddingLeft="0" paddingRight="0" distractionFreeDivPart="4" lineCopyCutWithoutSelection="yes" disableSelectedTextDragDrop="no" multiSelection="yes" columnSel2MultiEdit="yes" />
         <GUIConfig name="DockingManager" leftWidth="200" rightWidth="200" topHeight="200" bottomHeight="200">
             <ActiveTabs cont="0" activeTab="-1" />
             <ActiveTabs cont="1" activeTab="-1" />

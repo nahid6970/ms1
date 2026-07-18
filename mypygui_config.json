@@ -379,6 +379,13 @@
                     "admin": false,
                     "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_manager\\Rclone-Manager.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "bg": "",
@@ -725,6 +732,7 @@
                     "type": "popup",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": false,
                     "cmd": "folder_list",
                     "row_limit": 1,
                     "bg_color": "#000000",
@@ -732,20 +740,22 @@
                     "border_color": "#FFFF7F",
                     "border_px": 2
                 },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
-                },
                 "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": false,
                     "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
                 }
             },
-            "svg_content": "",
+            "svg_content": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z\" fill=\"#FFFF00\"></path> </g></svg>",
             "svg_hover_map": {},
             "bg": "",
             "border": 0,
@@ -758,7 +768,7 @@
             "margin_left": 0,
             "margin_right": 0,
             "icon_path": "",
-            "nf_char": "",
+            "nf_char": "",
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
