@@ -442,153 +442,164 @@ class VoiceApp(QMainWindow):
             "Live mode: keeps recording until stopped")
 
     def show_settings(self):
+        from PyQt6.QtWidgets import QTabWidget, QVBoxLayout, QFileDialog, QGroupBox
         dialog = QDialog(self)
         dialog.setWindowTitle("Settings")
-        dialog.setStyleSheet(self.styleSheet())
-        layout = QGridLayout(dialog)
-        layout.setHorizontalSpacing(12)
-        layout.setVerticalSpacing(8)
-        layout.setColumnStretch(0, 1)
-        layout.setColumnStretch(1, 1)
-
+        dialog.setStyleSheet(self.styleSheet() + "\nQTabWidget::pane { border: 1px solid " + CP_DIM + "; } QTabBar::tab { background: " + CP_PANEL + "; border: 1px solid " + CP_DIM + "; padding: 4px; } QTabBar::tab:selected { background: " + CP_DIM + "; font-weight: bold; }")
+        
+        main_layout = QVBoxLayout(dialog)
+        tabs = QTabWidget()
+        main_layout.addWidget(tabs)
+        
+        # --- General Tab ---
+        general_tab = QWidget()
+        gen_layout = QGridLayout(general_tab)
+        gen_layout.setHorizontalSpacing(12)
+        gen_layout.setVerticalSpacing(8)
+        gen_layout.setColumnStretch(0, 1)
+        gen_layout.setColumnStretch(1, 1)
+        
         spin = QSpinBox(); spin.setRange(1, 300)
         spin.setValue(self.config.get("phrase_time_limit", 10)); spin.setSuffix(" sec")
-        layout.addWidget(QLabel("Max speak time:"), 0, 0)
-        layout.addWidget(spin, 0, 1)
-
-        # X Position
-        x_spin = QSpinBox(); x_spin.setRange(0, 10000)
-        x_spin.setValue(self.config.get("x", 100))
-        layout.addWidget(QLabel("Window X:"), 1, 0)
-        layout.addWidget(x_spin, 1, 1)
-
-        # Y Position
-        y_spin = QSpinBox(); y_spin.setRange(0, 10000)
-        y_spin.setValue(self.config.get("y", 100))
-        layout.addWidget(QLabel("Window Y:"), 2, 0)
-        layout.addWidget(y_spin, 2, 1)
-
-        # Border Color
-        color_edit = QLineEdit()
-        color_edit.setText(self.config.get("border_color", CP_RED))
-        layout.addWidget(QLabel("Border Color (Hex):"), 3, 0)
-        layout.addWidget(color_edit, 3, 1)
-
-        pin_check = QCheckBox()
-        pin_check.setChecked(self.config.get("always_on_top", False))
-        layout.addWidget(QLabel("Always on top:"), 4, 0)
-        layout.addWidget(pin_check, 4, 1)
-
-        taskbar_check = QCheckBox()
-        taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
-        layout.addWidget(QLabel("Hide from taskbar:"), 5, 0)
-        layout.addWidget(taskbar_check, 5, 1)
-
-        compact_left_pad = QSpinBox()
-        compact_left_pad.setRange(0, 50)
-        compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
-        layout.addWidget(QLabel("Compact left padding:"), 0, 2)
-        layout.addWidget(compact_left_pad, 0, 3)
-
-        status_lang_gap = QSpinBox()
-        status_lang_gap.setRange(0, 20)
-        status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
-        layout.addWidget(QLabel("Status/lang gap:"), 1, 2)
-        layout.addWidget(status_lang_gap, 1, 3)
-
-        compact_right_pad = QSpinBox()
-        compact_right_pad.setRange(0, 50)
-        compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
-        layout.addWidget(QLabel("Compact right padding:"), 2, 2)
-        layout.addWidget(compact_right_pad, 2, 3)
-
-        compact_top_pad = QSpinBox()
-        compact_top_pad.setRange(0, 50)
-        compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
-        layout.addWidget(QLabel("Compact top padding:"), 3, 2)
-        layout.addWidget(compact_top_pad, 3, 3)
-
-        compact_bottom_pad = QSpinBox()
-        compact_bottom_pad.setRange(0, 50)
-        compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
-        layout.addWidget(QLabel("Compact bottom padding:"), 4, 2)
-        layout.addWidget(compact_bottom_pad, 4, 3)
-
-        expanded_left_pad = QSpinBox()
-        expanded_left_pad.setRange(0, 50)
-        expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
-        layout.addWidget(QLabel("Expanded left padding:"), 6, 0)
-        layout.addWidget(expanded_left_pad, 6, 1)
-
-        expanded_right_pad = QSpinBox()
-        expanded_right_pad.setRange(0, 50)
-        expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
-        layout.addWidget(QLabel("Expanded right padding:"), 6, 2)
-        layout.addWidget(expanded_right_pad, 6, 3)
-
-        expanded_top_pad = QSpinBox()
-        expanded_top_pad.setRange(0, 50)
-        expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
-        layout.addWidget(QLabel("Expanded top padding:"), 7, 0)
-        layout.addWidget(expanded_top_pad, 7, 1)
-
-        expanded_bottom_pad = QSpinBox()
-        expanded_bottom_pad.setRange(0, 50)
-        expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
-        layout.addWidget(QLabel("Expanded bottom padding:"), 7, 2)
-        layout.addWidget(expanded_bottom_pad, 7, 3)
+        gen_layout.addWidget(QLabel("Max speak time:"), 0, 0)
+        gen_layout.addWidget(spin, 0, 1)
 
         spc_check = QCheckBox()
         spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
-        layout.addWidget(QLabel("Stop on Space (SPC mode):"), 8, 0)
-        layout.addWidget(spc_check, 8, 1)
+        gen_layout.addWidget(QLabel("Stop on Space (SPC mode):"), 1, 0)
+        gen_layout.addWidget(spc_check, 1, 1)
 
         engine_combo = QComboBox()
         engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
         idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
         engine_combo.setCurrentIndex(idx)
-        layout.addWidget(QLabel("Mode:"), 8, 2)
-        layout.addWidget(engine_combo, 8, 3)
-
-        hide_rec_check = QCheckBox()
-        hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
-        layout.addWidget(QLabel("Hide record button:"), 9, 0)
-        layout.addWidget(hide_rec_check, 9, 1)
+        gen_layout.addWidget(QLabel("Mode:"), 2, 0)
+        gen_layout.addWidget(engine_combo, 2, 1)
 
         hotkey_combo = QComboBox()
         hotkey_combo.addItems(list(self.HOTKEY_OPTIONS.keys()))
         hotkey_combo.setCurrentText(self.config.get("hotkey", "RightAlt+Space"))
-        layout.addWidget(QLabel("Global hotkey:"), 9, 2)
-        layout.addWidget(hotkey_combo, 9, 3)
+        gen_layout.addWidget(QLabel("Global hotkey:"), 3, 0)
+        gen_layout.addWidget(hotkey_combo, 3, 1)
+        
+        gen_layout.setRowStretch(4, 1)
+        tabs.addTab(general_tab, "General")
+        
+        # --- Appearance Tab ---
+        app_tab = QWidget()
+        app_layout = QGridLayout(app_tab)
+        app_layout.setHorizontalSpacing(12)
+        app_layout.setVerticalSpacing(8)
+        
+        x_spin = QSpinBox(); x_spin.setRange(0, 10000)
+        x_spin.setValue(self.config.get("x", 100))
+        app_layout.addWidget(QLabel("Window X:"), 0, 0)
+        app_layout.addWidget(x_spin, 0, 1)
 
+        y_spin = QSpinBox(); y_spin.setRange(0, 10000)
+        y_spin.setValue(self.config.get("y", 100))
+        app_layout.addWidget(QLabel("Window Y:"), 1, 0)
+        app_layout.addWidget(y_spin, 1, 1)
+        
+        color_edit = QLineEdit()
+        color_edit.setText(self.config.get("border_color", CP_RED))
+        app_layout.addWidget(QLabel("Border Color (Hex):"), 2, 0)
+        app_layout.addWidget(color_edit, 2, 1)
+        
+        pin_check = QCheckBox()
+        pin_check.setChecked(self.config.get("always_on_top", False))
+        app_layout.addWidget(QLabel("Always on top:"), 3, 0)
+        app_layout.addWidget(pin_check, 3, 1)
+
+        taskbar_check = QCheckBox()
+        taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
+        app_layout.addWidget(QLabel("Hide from taskbar:"), 4, 0)
+        app_layout.addWidget(taskbar_check, 4, 1)
+        
+        hide_rec_check = QCheckBox()
+        hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
+        app_layout.addWidget(QLabel("Hide record button:"), 5, 0)
+        app_layout.addWidget(hide_rec_check, 5, 1)
+        
+        status_lang_gap = QSpinBox()
+        status_lang_gap.setRange(0, 20)
+        status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
+        app_layout.addWidget(QLabel("Status/lang gap:"), 6, 0)
+        app_layout.addWidget(status_lang_gap, 6, 1)
+        
+        app_layout.setRowStretch(7, 1)
+        tabs.addTab(app_tab, "Appearance")
+        
+        # --- Padding Tab ---
+        pad_tab = QWidget()
+        pad_layout = QGridLayout(pad_tab)
+        pad_layout.setHorizontalSpacing(12)
+        pad_layout.setVerticalSpacing(8)
+        
+        compact_group = QGroupBox("Compact")
+        compact_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
+        cg_layout = QGridLayout(compact_group)
+        compact_left_pad = QSpinBox(); compact_left_pad.setRange(0, 50); compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
+        cg_layout.addWidget(QLabel("Left:"), 0, 0); cg_layout.addWidget(compact_left_pad, 0, 1)
+        compact_right_pad = QSpinBox(); compact_right_pad.setRange(0, 50); compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
+        cg_layout.addWidget(QLabel("Right:"), 1, 0); cg_layout.addWidget(compact_right_pad, 1, 1)
+        compact_top_pad = QSpinBox(); compact_top_pad.setRange(0, 50); compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
+        cg_layout.addWidget(QLabel("Top:"), 2, 0); cg_layout.addWidget(compact_top_pad, 2, 1)
+        compact_bottom_pad = QSpinBox(); compact_bottom_pad.setRange(0, 50); compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
+        cg_layout.addWidget(QLabel("Bottom:"), 3, 0); cg_layout.addWidget(compact_bottom_pad, 3, 1)
+        pad_layout.addWidget(compact_group, 0, 0)
+
+        expanded_group = QGroupBox("Expanded")
+        expanded_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
+        eg_layout = QGridLayout(expanded_group)
+        expanded_left_pad = QSpinBox(); expanded_left_pad.setRange(0, 50); expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
+        eg_layout.addWidget(QLabel("Left:"), 0, 0); eg_layout.addWidget(expanded_left_pad, 0, 1)
+        expanded_right_pad = QSpinBox(); expanded_right_pad.setRange(0, 50); expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
+        eg_layout.addWidget(QLabel("Right:"), 1, 0); eg_layout.addWidget(expanded_right_pad, 1, 1)
+        expanded_top_pad = QSpinBox(); expanded_top_pad.setRange(0, 50); expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
+        eg_layout.addWidget(QLabel("Top:"), 2, 0); eg_layout.addWidget(expanded_top_pad, 2, 1)
+        expanded_bottom_pad = QSpinBox(); expanded_bottom_pad.setRange(0, 50); expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
+        eg_layout.addWidget(QLabel("Bottom:"), 3, 0); eg_layout.addWidget(expanded_bottom_pad, 3, 1)
+        pad_layout.addWidget(expanded_group, 0, 1)
+        
+        pad_layout.setRowStretch(1, 1)
+        tabs.addTab(pad_tab, "Padding")
+
+        # --- Import / Export Buttons ---
+        btn_layout = QHBoxLayout()
+        import_btn = QPushButton("Import")
+        export_btn = QPushButton("Export")
+        import_btn.clicked.connect(lambda: self.import_settings(dialog))
+        export_btn.clicked.connect(self.export_settings)
+        btn_layout.addWidget(import_btn)
+        btn_layout.addWidget(export_btn)
+        
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
-        layout.addWidget(buttons, 10, 0, 1, 4)
+        
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addLayout(btn_layout)
+        bottom_layout.addStretch()
+        bottom_layout.addWidget(buttons)
+        main_layout.addLayout(bottom_layout)
 
         if dialog.exec():
             self.config["phrase_time_limit"] = spin.value()
-            
-            # Update Position
             self.config["x"] = x_spin.value()
             self.config["y"] = y_spin.value()
             self.move(self.config["x"], self.config["y"])
-
-            # Update Border Color
             self.config["border_color"] = color_edit.text()
             self.update_style()
-
             new_pin = pin_check.isChecked()
             if new_pin != self.config.get("always_on_top", False):
                 self.config["always_on_top"] = new_pin
                 self._apply_window_flags()
                 self.show()
-
             new_taskbar = taskbar_check.isChecked()
             if new_taskbar != self.config.get("hide_from_taskbar", True):
                 self.config["hide_from_taskbar"] = new_taskbar
                 self._apply_window_flags()
                 self.show()
-
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             self.config["compact_left_padding"] = compact_left_pad.value()
@@ -609,6 +620,39 @@ class VoiceApp(QMainWindow):
                 self.restart_hotkey_listener()
             self._apply_window_layout(preserve_right_edge=True)
             self.save_config()
+
+    def import_settings(self, parent_dialog):
+        from PyQt6.QtWidgets import QFileDialog
+        file_name, _ = QFileDialog.getOpenFileName(parent_dialog, "Import Settings", "", "JSON Files (*.json);;All Files (*)")
+        if file_name:
+            try:
+                with open(file_name, 'r') as f:
+                    new_config = json.load(f)
+                self.config.update(new_config)
+                self.save_config()
+                QMessageBox.information(parent_dialog, "Import Successful", "Settings imported successfully.")
+                parent_dialog.accept()
+                self.update_style()
+                self._apply_window_flags()
+                self._apply_window_layout()
+                if "x" in self.config and "y" in self.config:
+                    self.move(self.config["x"], self.config["y"])
+                self.show()
+                if hasattr(self, 'restart_hotkey_listener'):
+                    self.restart_hotkey_listener()
+            except Exception as e:
+                QMessageBox.critical(parent_dialog, "Import Error", f"Failed to import settings:\n{e}")
+
+    def export_settings(self):
+        from PyQt6.QtWidgets import QFileDialog
+        file_name, _ = QFileDialog.getSaveFileName(self, "Export Settings", "voice_config.json", "JSON Files (*.json);;All Files (*)")
+        if file_name:
+            try:
+                with open(file_name, 'w') as f:
+                    json.dump(self.config, f, indent=2)
+                QMessageBox.information(self, "Export Successful", "Settings exported successfully.")
+            except Exception as e:
+                QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{e}")
 
     def _apply_window_flags(self):
         flags = Qt.WindowType.FramelessWindowHint

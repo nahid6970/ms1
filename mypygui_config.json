@@ -906,13 +906,29 @@
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\TOOLS\\Voice\\voice_input.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
+                    "new_terminal": false,
                     "cmd": "C:\\@delta\\ms1\\TOOLS\\volume_mixer\\volume_mixer.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "border_color": "",
