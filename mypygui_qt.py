@@ -2690,7 +2690,12 @@ class VoiceApp(QMainWindow):
         self.toolbar_layout = layout
 
         # Use IconLabel for rock-solid size (no Qt button metrics issues)
-        self.status_btn = IconLabel("", {"font": ["JetBrainsMono NFP", 18, "bold"]})
+        self.status_btn = IconLabel("", {
+            "font": ["JetBrainsMono NFP", 18, "bold"],
+            "svg_content": self.config.get("status_svg", ""),
+            "icon_width": 18,
+            "icon_height": 20
+        })
         self.status_btn.setFixedSize(18, 20)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet("""
@@ -2709,6 +2714,7 @@ class VoiceApp(QMainWindow):
         self.status_btn.mousePressEvent = lambda e: e.accept()
         self.status_btn.mouseReleaseEvent = lambda e: self.toggle_record() if e.button() == Qt.MouseButton.LeftButton else None
         self.status_btn.installEventFilter(self)
+        self._set_status(CP_GREEN)
         layout.addWidget(self.status_btn)
         layout.addSpacing(5)
 
@@ -2851,7 +2857,7 @@ class VoiceApp(QMainWindow):
             "Live mode: keeps recording until stopped")
 
     def show_settings(self):
-        from PyQt6.QtWidgets import QTabWidget, QVBoxLayout, QFileDialog, QGroupBox
+        from PyQt6.QtWidgets import QTabWidget, QVBoxLayout, QFileDialog, QGroupBox, QPlainTextEdit
         dialog = QDialog(self)
         dialog.setWindowTitle("Settings")
         dialog.setStyleSheet(self.styleSheet() + "\nQTabWidget::pane { border: 1px solid " + CP_DIM + "; } QTabBar::tab { background: " + CP_PANEL + "; border: 1px solid " + CP_DIM + "; padding: 4px; } QTabBar::tab:selected { background: " + CP_DIM + "; font-weight: bold; }")
@@ -2934,7 +2940,14 @@ class VoiceApp(QMainWindow):
         app_layout.addWidget(QLabel("Status/lang gap:"), 6, 0)
         app_layout.addWidget(status_lang_gap, 6, 1)
         
-        app_layout.setRowStretch(7, 1)
+        svg_edit = QPlainTextEdit()
+        svg_edit.setPlaceholderText("<svg>...</svg> (use currentColor for status color)")
+        svg_edit.setPlainText(self.config.get("status_svg", ""))
+        svg_edit.setMaximumHeight(80)
+        app_layout.addWidget(QLabel("Status SVG code:"), 7, 0)
+        app_layout.addWidget(svg_edit, 7, 1)
+        
+        app_layout.setRowStretch(8, 1)
         tabs.addTab(app_tab, "Appearance")
         
         btn_layout = QHBoxLayout()
@@ -2980,6 +2993,8 @@ class VoiceApp(QMainWindow):
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
             self.config["status_lang_gap"] = status_lang_gap.value()
+            self.config["status_svg"] = svg_edit.toPlainText().strip()
+            self._set_status(CP_GREEN)
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
@@ -3380,10 +3395,19 @@ class VoiceApp(QMainWindow):
 
     def _set_status(self, color):
         """Update SVG circle color"""
-        if hasattr(self, '_update_status_color'):
-            self._update_status_color(color)
+        import re
+        svg_tpl = self.config.get("status_svg", "")
+        if svg_tpl:
+            svg_content = svg_tpl
+            if "currentColor" in svg_content:
+                svg_content = svg_content.replace("currentColor", color)
+            else:
+                svg_content = re.sub(r'fill="[^"]+"', f'fill="{color}"', svg_content)
+                svg_content = re.sub(r'stroke="[^"]+"', f'stroke="{color}"', svg_content)
+            self.status_btn.btn_cfg["svg_content"] = svg_content
+            self.status_btn.update()
         else:
-            # fallback
+            self.status_btn.btn_cfg["svg_content"] = ""
             try:
                 self.status_btn.setStyleSheet(f"color: {color};")
             except:
