@@ -20,6 +20,7 @@ from datetime import datetime
 from queue import Queue, Empty
 
 import psutil
+import winreg
 # ... rest of imports unchanged ...
 
 try:
@@ -1704,6 +1705,99 @@ class AlarmNotification(QDialog):
     def mousePressEvent(self, event):
         self.accept()
 
+def get_http_progid():
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice") as key:
+            prog_id, _ = winreg.QueryValueEx(key, "ProgId")
+            return prog_id
+    except OSError:
+        return None
+
+def get_progid_command(prog_id):
+    try:
+        path = fr"Software\Classes\{prog_id}\shell\open\command"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, path) as key:
+            value, _ = winreg.QueryValueEx(key, "")
+            return value
+    except OSError:
+        try:
+            with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, fr"{prog_id}\shell\open\command") as key:
+                value, _ = winreg.QueryValueEx(key, "")
+                return value
+        except OSError:
+            return None
+
+def parse_command(cmd_str):
+    cmd_str = cmd_str.strip()
+    if cmd_str.startswith('"'):
+        end_quote_idx = cmd_str.find('"', 1)
+        if end_quote_idx != -1:
+            exe = cmd_str[1:end_quote_idx]
+            args = cmd_str[end_quote_idx+1:].strip()
+            return exe, args
+    parts = cmd_str.split(' ', 1)
+    if len(parts) > 1:
+        return parts[0], parts[1]
+    return parts[0], ""
+
+def get_private_flag(exe_path):
+    exe_name = os.path.basename(exe_path).lower()
+    if "chrome" in exe_name or "brave" in exe_name:
+        return "--incognito"
+    elif "edge" in exe_name or "msedge" in exe_name:
+        return "-inprivate"
+    elif "firefox" in exe_name or "librewolf" in exe_name or "waterfox" in exe_name:
+        return "-private-window"
+    elif "opera" in exe_name:
+        return "--private"
+    else:
+        return "--incognito"
+
+def write_registry_value(prog_id, value):
+    path = fr"Software\Classes\{prog_id}\shell\open\command"
+    try:
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
+        with key:
+            winreg.SetValueEx(key, "", 0, winreg.REG_SZ, value)
+        return True
+    except OSError:
+        return False
+
+def is_incognito_active():
+    prog_id = get_http_progid()
+    if not prog_id:
+        return False
+    cmd_str = get_progid_command(prog_id)
+    if not cmd_str:
+        return False
+    exe, args = parse_command(cmd_str)
+    arg_tokens = args.split()
+    all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+    return any(f in arg_tokens for f in all_flags)
+
+def toggle_incognito():
+    prog_id = get_http_progid()
+    if not prog_id:
+        return False
+    cmd_str = get_progid_command(prog_id)
+    if not cmd_str:
+        return False
+    exe, args = parse_command(cmd_str)
+    arg_tokens = args.split()
+    flag = get_private_flag(exe)
+    all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+    is_active = any(f in arg_tokens for f in all_flags)
+
+    if is_active:
+        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+    else:
+        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+        arg_tokens.insert(0, flag)
+
+    new_args = " ".join(arg_tokens)
+    new_value = f'"{exe}" {new_args}'
+    return write_registry_value(prog_id, new_value)
+
 # ─── Main window ──────────────────────────────────────────────────────────────
 class StatusBar(QMainWindow):
     def __init__(self):
@@ -2051,6 +2145,28 @@ class StatusBar(QMainWindow):
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
         bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); bkup.setCursor(Qt.CursorShape.PointingHandCursor); bkup.mousePressEvent = lambda e: git_backup(repos); git_row.addWidget(bkup)
+        
+        helium_toggle = QLabel("⚡")
+        helium_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        def update_helium_style():
+            active = is_incognito_active()
+            color = CP_GREEN if active else CP_DIM
+            helium_toggle.setStyleSheet(f"color: {color}; font-size: 14pt; font-weight: bold; margin-left: 2px; margin-right: 2px;")
+            helium_toggle.setToolTip(f"Helium Incognito: {'ACTIVE' if active else 'INACTIVE'}\nLeft Click to Toggle\nRight Click for Settings")
+            
+        update_helium_style()
+        
+        def helium_click(event):
+            if event.button() == Qt.MouseButton.LeftButton:
+                toggle_incognito()
+                update_helium_style()
+            elif event.button() == Qt.MouseButton.RightButton:
+                script_path = r"C:\@delta\ms1\TOOLS\terminal_link\helium_incognito_setup.py"
+                subprocess.Popen([sys.executable, script_path])
+                
+        helium_toggle.mousePressEvent = helium_click
+        git_row.addWidget(helium_toggle)
         for idx, repo in enumerate(repos):
             lbl = IconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); p = repo["path"]
             def _make_click(path, _cfg, _idx):
