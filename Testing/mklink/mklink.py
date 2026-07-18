@@ -528,26 +528,76 @@ class ItemRow(QWidget):
         self.target_entry.setPlaceholderText("Target Path")
         
         target_btn = QPushButton("📂")
-        target_btn.setFixedWidth(30)
+        target_btn.setFixedSize(30, 26)
+        target_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                color: white;
+                font-size: 10pt;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                border: 1px solid {CP_CYAN};
+                color: {CP_CYAN};
+            }}
+        """)
         target_btn.clicked.connect(self.browse_target)
         
         self.fake_entry = QLineEdit(fake)
         self.fake_entry.setPlaceholderText("Link Path")
         
         fake_btn = QPushButton("📂")
-        fake_btn.setFixedWidth(30)
+        fake_btn.setFixedSize(30, 26)
+        fake_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                color: white;
+                font-size: 10pt;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                border: 1px solid {CP_CYAN};
+                color: {CP_CYAN};
+            }}
+        """)
         fake_btn.clicked.connect(self.browse_fake)
 
         # Select Files button (only visible for "selective" type)
         self.select_files_btn = QPushButton("📋 Select")
-        self.select_files_btn.setFixedWidth(80)
-        self.select_files_btn.setStyleSheet(f"color: {CP_CYAN}; border-color: {CP_CYAN};")
+        self.select_files_btn.setFixedSize(80, 26)
+        self.select_files_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_CYAN};
+                color: {CP_CYAN};
+                font-size: 9pt;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_CYAN};
+                color: black;
+            }}
+        """)
         self.select_files_btn.clicked.connect(self.open_selective_dialog)
         self.select_files_btn.setVisible(link_type == "selective")
         
         self.remove_btn = QPushButton("❌")
-        self.remove_btn.setFixedWidth(30)
-        self.remove_btn.setStyleSheet(f"color: {CP_RED}; border-color: {CP_RED};")
+        self.remove_btn.setFixedSize(30, 26)
+        self.remove_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_RED};
+                color: {CP_RED};
+                font-size: 8pt;
+                padding: 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {CP_RED};
+                color: white;
+            }}
+        """)
         
         self.layout.addWidget(self.type_combo)
         self.layout.addWidget(self.target_entry)
