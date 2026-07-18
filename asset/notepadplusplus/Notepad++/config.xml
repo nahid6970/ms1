@@ -24,7 +24,6 @@
         <File filename="C:\@delta\ms1\TOOLS\terminal_tui\app.py" />
         <File filename="C:\@delta\ms1\mypygui_qt.py" />
         <File filename="C:\@delta\ms1\TOOLS\freeform_crop_gui.py" />
-        <File filename="C:\@delta\ms1\asset\notepadplusplus\Notepad++\config.xml" />
         <File filename="C:\Users\nahid\.codex\skills\.system\openai-docs\SKILL.md" />
         <File filename="C:\Users\nahid\.codex\skills\.system\skill-installer\SKILL.md" />
         <File filename="C:\Users\nahid\.codex\AGENTS.md" />
@@ -45,7 +44,7 @@
         <GUIConfig name="ScintillaViewsSplitter">vertical</GUIConfig>
         <GUIConfig name="UserDefineDlg" position="undocked">hide</GUIConfig>
         <GUIConfig name="TabSetting" replaceBySpace="no" size="4" backspaceUnindent="no" />
-        <GUIConfig name="AppPosition" x="-1" y="6" width="957" height="988" isMaximized="no" />
+        <GUIConfig name="AppPosition" x="-8" y="-8" width="1936" height="1009" isMaximized="no" />
         <GUIConfig name="FindWindowPosition" left="975" top="52" right="1608" bottom="411" isLessModeOn="no" />
         <GUIConfig name="FinderConfig" wrappedLines="no" purgeBeforeEverySearch="no" showOnlyOneEntryPerFoundLine="yes" FiF_ignoreunsavedChangesInOpenedFiles="no" />
         <GUIConfig name="noUpdate" intervalDays="15" nextUpdateDate="20260729" autoUpdateMode="1">no</GUIConfig>

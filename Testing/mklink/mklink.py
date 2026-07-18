@@ -1060,8 +1060,8 @@ class SymlinkManager(QMainWindow):
             fake = item.get("fake", "")
             link_type = item.get("type", "folder")
             
-            # SELECTIVE TYPE: check individual file symlinks
-            if link_type == "selective":
+            # SELECTIVE TYPE: check individual file symlinks (skip if copy_mode is active)
+            if link_type == "selective" and not copy_mode:
                 selected = item.get("selected_files", [])
                 if not selected:
                     statuses.append(("No files selected", CP_YELLOW))
@@ -1094,13 +1094,75 @@ class SymlinkManager(QMainWindow):
 
             # COPY MODE LOGIC
             if copy_mode:
-                if os.path.exists(fake) and not os.path.lexists(fake):
-                    # Normal file/folder exists (good)
-                    statuses.append(("Copied", CP_GREEN))
+                if not os.path.exists(fake):
+                    statuses.append(("Missing", CP_YELLOW))
                 elif os.path.islink(fake) or self.is_junction(fake):
                     statuses.append(("Is Link (Mode: Copy)", CP_ORANGE))
-                elif not os.path.exists(fake):
-                    statuses.append(("Missing", CP_YELLOW))
+                else:
+                    # Destination exists. Let's compare contents to see if it is out of sync.
+                    def files_differ(f1, f2):
+                        try:
+                            s1, s2 = os.stat(f1), os.stat(f2)
+                            if s1.st_size != s2.st_size:
+                                return True
+                            # Allow up to 1 second difference for FAT filesystem precision
+                            if abs(s1.st_mtime - s2.st_mtime) > 1.0:
+                                return True
+                            return False
+                        except:
+                            return True
+
+                    if link_type == "file":
+                        if files_differ(target, fake):
+                            statuses.append(("Out of Sync", CP_ORANGE))
+                        else:
+                            statuses.append(("Copied", CP_GREEN))
+                    elif link_type == "selective":
+                        selected = item.get("selected_files", [])
+                        if not selected:
+                            statuses.append(("No files selected", CP_YELLOW))
+                        else:
+                            any_diff = False
+                            any_missing = False
+                            for rel in selected:
+                                src_f = os.path.join(target, rel)
+                                dst_f = os.path.join(fake, rel)
+                                if not os.path.exists(dst_f):
+                                    any_missing = True
+                                elif files_differ(src_f, dst_f):
+                                    any_diff = True
+                            if any_missing:
+                                statuses.append(("Partial/Missing", CP_YELLOW))
+                            elif any_diff:
+                                statuses.append(("Out of Sync", CP_ORANGE))
+                            else:
+                                statuses.append(("Copied", CP_GREEN))
+                    else: # folder
+                        # Recursively compare target & fake directories
+                        any_diff = False
+                        any_missing = False
+                        
+                        # Collect all files in target recursively
+                        target_files = []
+                        for root, _, files in os.walk(target):
+                            for fn in files:
+                                target_files.append(os.path.relpath(os.path.join(root, fn), target))
+                                
+                        for rel in target_files:
+                            src_f = os.path.join(target, rel)
+                            dst_f = os.path.join(fake, rel)
+                            if not os.path.exists(dst_f):
+                                any_missing = True
+                            elif files_differ(src_f, dst_f):
+                                any_diff = True
+                                break
+                                
+                        if any_missing:
+                            statuses.append(("Partial/Missing", CP_YELLOW))
+                        elif any_diff:
+                            statuses.append(("Out of Sync", CP_ORANGE))
+                        else:
+                            statuses.append(("Copied", CP_GREEN))
                 continue
             
             # LINK MODE LOGIC
@@ -1516,7 +1578,7 @@ class SymlinkManager(QMainWindow):
             # Buttons
             btn_layout = QHBoxLayout()
             
-            if status_text != "Working":
+            if status_text not in ("Working", "Copied"):
                 fix_btn = QPushButton("🔗 Fix All")
                 fix_btn.setFixedSize(110, 30)
                 fix_btn.setStyleSheet(f"""

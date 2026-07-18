@@ -203,29 +203,12 @@
         "name": "notepad++",
         "items": [
             {
-                "type": "selective",
+                "type": "folder",
                 "target": "C:\\@delta\\ms1\\asset\\notepadplusplus\\Notepad++",
-                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++",
-                "selected_files": [
-                    "config.xml",
-                    "contextMenu.xml",
-                    "shortcuts.xml",
-                    "stylers.xml",
-                    "themes\\Alucard.xml",
-                    "themes\\Bespin.xml",
-                    "themes\\Black board.xml",
-                    "themes\\Choco.xml",
-                    "themes\\DansLeRuSH-Dark.xml",
-                    "themes\\DarkModeDefault.xml",
-                    "themes\\Deep Black.xml",
-                    "themes\\Dracula.xml"
-                ],
-                "excluded_files": [
-                    "session.xml"
-                ]
+                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++"
             }
         ],
-        "copy_mode": false
+        "copy_mode": true
     },
     {
         "name": "Codex AI Agent Guidline",
