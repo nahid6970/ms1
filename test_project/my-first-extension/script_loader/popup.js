@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'open_local_files_in_new_tab': 'Open Local Files in New Tab - Opens local file links in a new tab',
       'checkbox_auto_checker': 'Checkbox Auto Checker - Auto-checks all visible checkboxes when any checkbox is pressed',
       'form_draft_saver': 'Form Draft Saver - Automatically saves and restores typed form inputs',
-      'copy_table_as_markdown': 'Copy Table As Markdown - Shows a button on table hover to copy HTML tables as Markdown'
+      'copy_table_as_markdown': 'Copy Table As Markdown - Shows a button on table hover to copy HTML tables as Markdown',
+      'link_text_extractor': 'Link Text Extractor - Copies the text of a link to your clipboard when holding Ctrl and clicking'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];
