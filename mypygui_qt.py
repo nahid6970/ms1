@@ -1001,8 +1001,12 @@ def open_edit_gui(item_cfg, category, index=None):
     panels.addWidget(right_scroll, r_weight)
     _ctrl_lbl = QLabel("CONTROLS"); _ctrl_lbl.setObjectName("section_label"); right_layout.addWidget(_ctrl_lbl)
 
-    click_types = [("LEFT CLICK", "Button-1"), ("RIGHT CLICK", "Button-3"),
-                   ("CTRL + LEFT", "Control-Button-1"), ("CTRL + RIGHT", "Control-Button-3")]
+    click_types = [
+        ("LEFT CLICK", "Button-1"),
+        ("CTRL + LEFT", "Control-Button-1"),
+        ("RIGHT CLICK", "Button-3"),
+        ("CTRL + RIGHT", "Control-Button-3")
+    ]
     binding_inputs = {}
     
     first_bcfg = {}
@@ -1010,6 +1014,23 @@ def open_edit_gui(item_cfg, category, index=None):
         bc = item_cfg.get("bindings", {}).get(bkey, {})
         if bc.get("type") == "popup":
             first_bcfg = bc; break
+
+    left_sec_frame = QFrame()
+    left_sec_frame.setObjectName("left_sec_frame")
+    left_sec_frame.setStyleSheet(f"QFrame#left_sec_frame {{ border: 1px solid {CP_CYAN}; border-radius: 4px; padding: 4px; margin-bottom: 8px; }}")
+    left_sec_lay = QVBoxLayout(left_sec_frame)
+    left_sec_lay.setContentsMargins(4, 4, 4, 4)
+    left_sec_lay.setSpacing(6)
+
+    right_sec_frame = QFrame()
+    right_sec_frame.setObjectName("right_sec_frame")
+    right_sec_frame.setStyleSheet(f"QFrame#right_sec_frame {{ border: 1px solid {CP_YELLOW}; border-radius: 4px; padding: 4px; margin-bottom: 8px; }}")
+    right_sec_lay = QVBoxLayout(right_sec_frame)
+    right_sec_lay.setContentsMargins(4, 4, 4, 4)
+    right_sec_lay.setSpacing(6)
+
+    right_layout.addWidget(left_sec_frame)
+    right_layout.addWidget(right_sec_frame)
 
     for label_text, bkey in click_types:
         grp = QGroupBox(label_text); form = QFormLayout(); form.setSpacing(4); grp.setLayout(form)
@@ -1039,7 +1060,9 @@ def open_edit_gui(item_cfg, category, index=None):
         chk_row = QWidget(); chk_layout = QHBoxLayout(chk_row); chk_layout.setContentsMargins(0,0,0,0)
         chk_layout.addWidget(hide_chk); chk_layout.addWidget(admin_chk); chk_layout.addWidget(new_term_chk); chk_layout.addStretch()
         form.addRow("CMD", cmd_row); form.addRow("TYPE", type_cb); form.addRow("", chk_row)
-        right_layout.addWidget(grp)
+        
+        target_lay = left_sec_lay if bkey in ["Button-1", "Control-Button-1"] else right_sec_lay
+        target_lay.addWidget(grp)
         binding_inputs[bkey] = {"cmd": cmd_le, "type": type_cb, "hide": hide_chk, "admin": admin_chk, "new_terminal": new_term_chk}
 
     # Dedicated POPUP SETTINGS section
