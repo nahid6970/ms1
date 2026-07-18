@@ -1834,7 +1834,7 @@ class SymlinkManager(QMainWindow):
                 fix_btn.clicked.connect(lambda checked, idx=i: self.create_link(idx))
                 btn_layout.addWidget(fix_btn)
 
-            if link_entry.get("copy_mode", False):
+            if link_entry.get("copy_mode", False) and status_text != "Copied":
                 sync_target_btn = QPushButton()
                 sync_target_btn.setFixedSize(btn_sz)
                 sync_target_btn.setIcon(create_svg_icon(sync_svg, CP_GREEN))
