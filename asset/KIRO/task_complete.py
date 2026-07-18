@@ -1,136 +1,173 @@
 import sys
-import time
-import pygetwindow as gw
-import pyautogui
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect)
-from PyQt6.QtCore import Qt, QPoint
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtGui import QColor, QLinearGradient
 
-# PROFESSIONAL PALETTE
-BG_COLOR = "#FFFFFF"
-BORDER_COLOR = "#E0E0E0"
-PRIMARY_COLOR = "#0078D4"  # Enterprise Blue
-TEXT_COLOR = "#201F1E"
-SECONDARY_TEXT = "#605E5C"
-BTN_HOVER = "#005A9E"
+BG_COLOR = "#1E1E2E"
+BORDER_COLOR = "#313244"
+PRIMARY_COLOR = "#89B4FA"  # Kiro Blue
+TEXT_COLOR = "#CDD6F4"
+BTN_HOVER = "#74C7EC"
 
-def focus_terminal_and_esc():
-    """Attempts to find the Gemini terminal window, focus it, and send ESC."""
-    try:
-        # Give a small delay for the window to settle
-        time.sleep(0.5)
-        titles = gw.getAllTitles()
-        target_window = None
-        
-        # Priority 1: Window with 'Gemini' in title
-        for title in titles:
-            if "Gemini" in title and "File Explorer" not in title:
-                target_window = gw.getWindowsWithTitle(title)[0]
-                break
-        
-        # Priority 2: Common terminal titles
-        if not target_window:
-            for title in titles:
-                if any(term in title for term in ["Windows PowerShell", "Command Prompt", "Terminal"]):
-                    target_window = gw.getWindowsWithTitle(title)[0]
-                    break
-        
-        if target_window:
-            target_window.activate()
-            # Wait for focus to be established
-            time.sleep(0.2)
-            pyautogui.press('esc')
-    except Exception:
-        pass # Silently fail if window manipulation fails
+# Gradient color sets for animation
+GRADIENT_COLORS = [
+    ("#FF6B6B", "#4ECDC4"),  # Red to Teal
+    ("#667eea", "#764ba2"),  # Blue to Purple
+    ("#f093fb", "#f5576c"),  # Pink to Red
+    ("#4facfe", "#00f2fe"),  # Blue to Cyan
+    ("#43e97b", "#38f9d7"),  # Green to Cyan
+    ("#fa709a", "#fee140"),  # Pink to Yellow
+    ("#a8edea", "#fed6e3"),  # Cyan to Pink
+    ("#ff9a9e", "#fecfef"),  # Pink to Light Pink
+]
 
 class TaskCompletePopup(QWidget):
     def __init__(self):
         super().__init__()
-        
-        # Window Flags: Frameless and Always on Top
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        
-        # Central Layout
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout(self.layout)
-        
-        # Main Container
+
+        self.gradient_index = 0
+        self._transition_progress = 1.0
+        self.setup_ui()
+        self.setup_gradient_timer()
+        self.setup_animation()
+
+    @pyqtProperty(float)
+    def transition_progress(self):
+        return self._transition_progress
+
+    @transition_progress.setter
+    def transition_progress(self, value):
+        self._transition_progress = value
+        self.update_gradient_style()
+
+    def setup_animation(self):
+        self.animation = QPropertyAnimation(self, b"transition_progress")
+        self.animation.setDuration(1200)  # 1.2 second transition
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
+
+    def setup_ui(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(10, 10, 10, 10)
+        self.setLayout(layout)
+
         self.container = QWidget()
         self.container.setObjectName("Container")
-        self.container_layout = QVBoxLayout(self.container)
-        self.container_layout.setContentsMargins(30, 30, 30, 30)
-        self.layout.addWidget(self.container)
+        c_layout = QVBoxLayout(self.container)
+        c_layout.setContentsMargins(40, 30, 40, 30)
+        layout.addWidget(self.container)
+
+        self.update_gradient_style()
+
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(24)
+        shadow.setColor(QColor(0, 0, 0, 120))
+        shadow.setOffset(0, 4)
+        self.container.setGraphicsEffect(shadow)
+
+        title = QLabel("✦ KIRO AI")
+        title.setObjectName("title")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        c_layout.addWidget(title)
+
+        c_layout.addSpacing(8)
+
+        msg = QLabel("Task Completed Successfully")
+        msg.setObjectName("msg")
+        msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        c_layout.addWidget(msg)
+
+        c_layout.addSpacing(20)
+
+        btn = QPushButton("Dismiss")
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(self.close)
+        c_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.adjustSize()
+        qr = self.frameGeometry()
+        qr.moveCenter(self.screen().availableGeometry().center())
+        self.move(qr.topLeft())
+
+    def setup_gradient_timer(self):
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.start_transition)
+        self.timer.start(2500)  # Start new transition every 2.5 seconds
+
+    def start_transition(self):
+        self.gradient_index = (self.gradient_index + 1) % len(GRADIENT_COLORS)
+        self.animation.setStartValue(0.0)
+        self.animation.setEndValue(1.0)
+        self.animation.start()
+
+    def interpolate_color(self, color1, color2, t):
+        """Interpolate between two hex colors"""
+        c1 = QColor(color1)
+        c2 = QColor(color2)
+        r = int(c1.red() + (c2.red() - c1.red()) * t)
+        g = int(c1.green() + (c2.green() - c1.green()) * t)
+        b = int(c1.blue() + (c2.blue() - c1.blue()) * t)
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+    def get_text_color(self, bg_color):
+        """Get contrasting text color based on background brightness"""
+        color = QColor(bg_color)
+        brightness = (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114)
+        return "black" if brightness > 128 else "white"
+
+    def update_gradient_style(self):
+        current_colors = GRADIENT_COLORS[self.gradient_index]
+        prev_index = (self.gradient_index - 1) % len(GRADIENT_COLORS)
+        prev_colors = GRADIENT_COLORS[prev_index]
         
-        # Styling
+        # Interpolate between previous and current gradient
+        color1 = self.interpolate_color(prev_colors[0], current_colors[0], self._transition_progress)
+        color2 = self.interpolate_color(prev_colors[1], current_colors[1], self._transition_progress)
+        
+        # Calculate text color based on average brightness of gradient
+        avg_color = self.interpolate_color(color1, color2, 0.5)
+        text_color = self.get_text_color(avg_color)
         self.setStyleSheet(f"""
             QWidget#Container {{
-                background-color: {BG_COLOR};
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                    stop:0 {color1}, stop:1 {color2});
                 border: 1px solid {BORDER_COLOR};
                 border-radius: 8px;
+                min-width: 400px;
             }}
-            QLabel {{
-                color: {TEXT_COLOR};
-                font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-                font-size: 14pt;
-                font-weight: 400;
+            QLabel#title {{
+                color: {text_color};
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 11pt;
+                font-weight: 700;
+                letter-spacing: 1px;
+            }}
+            QLabel#msg {{
+                color: {text_color};
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 13pt;
             }}
             QPushButton {{
-                background-color: {PRIMARY_COLOR};
-                color: white;
+                background-color: rgba(255, 255, 255, 0.9);
+                color: #1E1E2E;
                 border: none;
                 border-radius: 4px;
                 padding: 8px 24px;
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 10pt;
-                font-weight: 600;
+                font-weight: 700;
             }}
-            QPushButton:hover {{
-                background-color: {BTN_HOVER};
-            }}
-            QPushButton:pressed {{
-                background-color: #004578;
-            }}
+            QPushButton:hover {{ background-color: rgba(255, 255, 255, 1); }}
+            QPushButton:pressed {{ background-color: rgba(255, 255, 255, 0.8); }}
         """)
-        
-        # Subtle Shadow Effect
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(20)
-        shadow.setColor(QColor(0, 0, 0, 60))
-        shadow.setOffset(0, 4)
-        self.container.setGraphicsEffect(shadow)
-        
-        # Message Label
-        self.label = QLabel("Task Completed Successfully")
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.container_layout.addWidget(self.label)
-        
-        # Spacer
-        self.container_layout.addSpacing(20)
-        
-        # Close Button
-        self.close_btn = QPushButton("Dismiss")
-        self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.close_btn.clicked.connect(self.close)
-        self.container_layout.addWidget(self.close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        # Center the window on screen
-        self.adjustSize()
-        self.center()
-        
-    def center(self):
-        qr = self.frameGeometry()
-        cp = self.screen().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        # When the window shows, trigger the terminal focus and ESC
-        focus_terminal_and_esc()
+    def closeEvent(self, event):
+        self.timer.stop()
+        self.animation.stop()
+        QApplication.instance().quit()
+        event.accept()
 
-    # Allow dragging the frameless window
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.oldPos = event.globalPosition().toPoint()
