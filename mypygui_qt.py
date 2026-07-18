@@ -2169,7 +2169,6 @@ class StatusBar(QMainWindow):
         
         # Voice Input integration
         try:
-            from TOOLS.Voice.voice_input import VoiceApp
             self._voice_app = VoiceApp()
             self._voice_app.status_btn.show()
             self._voice_app.lang_btn.show()
@@ -2409,6 +2408,1064 @@ class StatusBar(QMainWindow):
                     font = get_default_font()
                     self._git_labels[name].setStyleSheet(f"color: {color}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
         except Empty: pass
+
+from pathlib import Path
+import speech_recognition as sr
+from pynput import keyboard as pynput_keyboard
+import webbrowser
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QEvent, QTimer
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QPushButton, QVBoxLayout,
+                             QSizePolicy, QComboBox, QCheckBox, QMessageBox, QDialog,
+                             QSpinBox, QFormLayout, QDialogButtonBox, QLineEdit,
+                             QGridLayout, QGroupBox, QTabWidget)
+
+def paste_text(text, preserve_clipboard=False):
+    previous_clipboard = pyperclip.paste() if preserve_clipboard else None
+    pyperclip.copy(text)
+    import time; time.sleep(0.1)
+    from pynput.keyboard import Controller, Key
+    keyboard = Controller()
+    with keyboard.pressed(Key.ctrl):
+        keyboard.press('v')
+        keyboard.release('v')
+    if preserve_clipboard and previous_clipboard is not None:
+        pyperclip.copy(previous_clipboard)
+
+
+class VoiceThread(QThread):
+    result = pyqtSignal(str)
+    error  = pyqtSignal(str)
+
+    def __init__(self, lang, phrase_time_limit):
+        super().__init__()
+        self.lang = lang
+        self.phrase_time_limit = phrase_time_limit
+        self.running = False
+
+    def run(self):
+        try:
+            import speech_recognition as sr
+            recognizer = sr.Recognizer()
+            with sr.Microphone() as source:
+                self.running = True
+                audio = recognizer.listen(source, timeout=5, phrase_time_limit=self.phrase_time_limit)
+                self.running = False
+                self.result.emit(recognizer.recognize_google(audio, language=self.lang))
+        except Exception as e:
+            self.running = False
+            self.error.emit(str(e))
+
+    def stop(self):
+        self.running = False
+
+
+class SpaceStopThread(QThread):
+    result = pyqtSignal(str)
+    error  = pyqtSignal(str)
+
+    def __init__(self, lang_getter):
+        super().__init__()
+        self.lang_getter = lang_getter
+        self.running = False
+        self._stop = False
+
+    def run(self):
+        stream = None
+        audio_interface = None
+        try:
+            import speech_recognition as sr
+            import io, wave, pyaudio
+            CHUNK, FORMAT, CHANNELS, RATE = 256, pyaudio.paInt16, 1, 16000
+            audio_interface = pyaudio.PyAudio()
+            stream = audio_interface.open(
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK,
+            )
+            self.running = True
+            segments = []
+            current_lang = None
+            current_frames = []
+            while not self._stop:
+                chunk = stream.read(CHUNK, exception_on_overflow=False)
+                chunk_lang = self.lang_getter()
+                if current_lang is None:
+                    current_lang = chunk_lang
+                elif chunk_lang != current_lang and current_frames:
+                    segments.append((current_lang, current_frames))
+                    current_frames = []
+                    current_lang = chunk_lang
+                current_frames.append(chunk)
+            if stream.is_active():
+                stream.stop_stream()
+            sample_width = audio_interface.get_sample_size(FORMAT)
+            self.running = False
+            recognizer = sr.Recognizer()
+            if current_frames:
+                segments.append((current_lang or self.lang_getter(), current_frames))
+
+            recognized_parts = []
+            for lang, frames in segments:
+                if not frames:
+                    continue
+                buf = io.BytesIO()
+                with wave.open(buf, 'wb') as wf:
+                    wf.setnchannels(CHANNELS)
+                    wf.setsampwidth(sample_width)
+                    wf.setframerate(RATE)
+                    wf.writeframes(b''.join(frames))
+                buf.seek(0)
+                with sr.AudioFile(buf) as source:
+                    audio = recognizer.record(source)
+                part = recognizer.recognize_google(audio, language=lang)
+                if part:
+                    recognized_parts.append(part)
+            self.result.emit(" ".join(recognized_parts).strip())
+        except Exception as e:
+            self.running = False
+            self.error.emit(str(e))
+        finally:
+            try:
+                if stream is not None:
+                    stream.close()
+            except Exception:
+                pass
+            try:
+                if audio_interface is not None:
+                    audio_interface.terminate()
+            except Exception:
+                pass
+
+    def stop(self):
+        self._stop = True
+
+
+class ContinuousThread(QThread):
+    result = pyqtSignal(str)
+    error  = pyqtSignal(str)
+
+    def __init__(self, lang_getter, phrase_time_limit):
+        super().__init__()
+        self.lang_getter = lang_getter
+        self.phrase_time_limit = phrase_time_limit
+        self._stop = False
+
+    def run(self):
+        import speech_recognition as sr
+        recognizer = sr.Recognizer()
+        while not self._stop:
+            try:
+                with sr.Microphone() as source:
+                    audio = recognizer.listen(source, timeout=1, phrase_time_limit=self.phrase_time_limit)
+                if self._stop:
+                    break
+                text = recognizer.recognize_google(audio, language=self.lang_getter())
+                if text:
+                    self.result.emit(text)
+            except sr.WaitTimeoutError:
+                continue
+            except Exception as e:
+                if not self._stop:
+                    self.error.emit(str(e))
+                break
+
+    def stop(self):
+        self._stop = True
+
+
+class VoiceApp(QMainWindow):
+    toggle_record_requested = pyqtSignal()
+    space_press_requested = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.script_dir  = Path(r"C:\@delta\ms1\TOOLS\Voice")
+        self.config_file = self.script_dir / "voice_config.json"
+        self.voice_thread = None
+        self._continuous_thread = None
+        self._live_recording = False
+        self._recording_active = False
+        self._stop_requested = False
+        self._session_id = 0
+        self.load_config()
+        self._compact_view = self.config.get("compact_view", False)
+        self._active_language = self.config.get("language", "en-US")
+        self.init_ui()
+        self.toggle_record_requested.connect(self.toggle_record)
+        self.space_press_requested.connect(self._handle_space_press)
+        self.setup_global_hotkey()
+
+    def load_config(self):
+        if self.config_file.exists():
+            with open(self.config_file) as f:
+                self.config = json.load(f)
+        else:
+            self.config = {
+                "language": "en-US", 
+                "always_on_top": False,
+                "hide_from_taskbar": True,
+                "x": 100,
+                "y": 100,
+                "border_color": CP_RED,
+                "open_google": False,
+                "copy_to_clipboard": True,
+                "compact_view": False,
+                "status_btn_width": 8,
+                "status_btn_height": 18,
+                "status_lang_gap": 2,
+                "output_mode": "search",
+                "compact_left_padding": 0,
+                "compact_right_padding": 0,
+                "expanded_left_padding": 0,
+                "expanded_right_padding": 0,
+                "compact_top_padding": 0,
+                "compact_bottom_padding": 0,
+                "expanded_top_padding": 0,
+                "expanded_bottom_padding": 0,
+                "hotkey": "RightAlt+Space"
+            }
+            self.save_config()
+        if "copy_to_clipboard" not in self.config:
+            self.config["copy_to_clipboard"] = True
+            self.save_config()
+        if "hide_from_taskbar" not in self.config:
+            self.config["hide_from_taskbar"] = True
+            self.save_config()
+        if "compact_view" not in self.config:
+            self.config["compact_view"] = False
+            self.save_config()
+        if "status_btn_width" not in self.config:
+            self.config["status_btn_width"] = 8
+            self.save_config()
+        if "status_btn_height" not in self.config:
+            self.config["status_btn_height"] = 18
+            self.save_config()
+        if "status_lang_gap" not in self.config:
+            self.config["status_lang_gap"] = 2
+            self.save_config()
+        if "compact_left_padding" not in self.config:
+            self.config["compact_left_padding"] = 0
+            self.save_config()
+        if "compact_right_padding" not in self.config:
+            self.config["compact_right_padding"] = 0
+            self.save_config()
+        if "expanded_left_padding" not in self.config:
+            self.config["expanded_left_padding"] = 0
+            self.save_config()
+        if "expanded_right_padding" not in self.config:
+            self.config["expanded_right_padding"] = 0
+            self.save_config()
+        if "compact_top_padding" not in self.config:
+            self.config["compact_top_padding"] = 0
+            self.save_config()
+        if "compact_bottom_padding" not in self.config:
+            self.config["compact_bottom_padding"] = 0
+            self.save_config()
+        if "expanded_top_padding" not in self.config:
+            self.config["expanded_top_padding"] = 0
+            self.save_config()
+        if "expanded_bottom_padding" not in self.config:
+            self.config["expanded_bottom_padding"] = 0
+            self.save_config()
+        if "hotkey" not in self.config:
+            self.config["hotkey"] = "RightAlt+Space"
+            self.save_config()
+
+    def save_config(self):
+        with open(self.config_file, 'w') as f:
+            json.dump(self.config, f, indent=2)
+
+    def init_ui(self):
+        self.setWindowTitle("Voice Input")
+        self._apply_window_flags()
+        self.update_style()
+
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QHBoxLayout(central)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.toolbar_layout = layout
+
+        self.status_btn = QPushButton("")
+        self.status_btn.setObjectName("status")
+        self.status_btn.setFixedSize(8, 18)
+        self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.status_btn.setMinimumSize(self.status_btn.size())
+        self.status_btn.setMaximumSize(self.status_btn.size())
+        self.status_btn.setFlat(True)
+        self.status_btn.setAutoDefault(False)
+        self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.status_btn.clicked.connect(self.toggle_record)
+        self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.status_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+                padding: 0px;
+                margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
+            }}
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+                padding: 0px;
+                margin: 0px;
+            }}
+        """)
+        self.status_btn.installEventFilter(self)
+        layout.addWidget(self.status_btn)
+        layout.addSpacing(self.config.get("status_lang_gap", 2))
+
+        self.lang_btn = QPushButton()
+        self.lang_btn.setObjectName("lang")
+        self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.lang_btn.clicked.connect(self.toggle_language)
+        self.lang_btn.installEventFilter(self)
+        self._update_lang_btn()
+        layout.addWidget(self.lang_btn)
+
+        self.google_btn = QPushButton()
+        self.google_btn.setObjectName("toggle")
+        self.google_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.google_btn.clicked.connect(self.toggle_google_search)
+        self._update_google_btn()
+        layout.addWidget(self.google_btn)
+
+        self.copy_btn = QPushButton()
+        self.copy_btn.setObjectName("toggle")
+        self.copy_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.copy_btn.clicked.connect(self.toggle_copy_to_clipboard)
+        self._update_copy_btn()
+        layout.addWidget(self.copy_btn)
+
+        self.record_btn = QPushButton("🎤 REC")
+        self.record_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.record_btn.clicked.connect(self.toggle_record)
+        layout.addWidget(self.record_btn)
+
+        self.help_btn = QPushButton("?")
+        self.help_btn.setObjectName("help")
+        self.help_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.help_btn.clicked.connect(self.show_help)
+        layout.addWidget(self.help_btn)
+
+        self.settings_btn = QPushButton("⚙")
+        self.settings_btn.setObjectName("help")
+        self.settings_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.settings_btn.clicked.connect(self.show_settings)
+        layout.addWidget(self.settings_btn)
+
+        self.close_btn = QPushButton("✕")
+        self.close_btn.setObjectName("help")
+        self.close_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.close_btn.clicked.connect(self.close)
+        layout.addWidget(self.close_btn)
+
+        self._apply_button_geometry()
+        self._apply_window_layout(preserve_right_edge=False)
+        if "right_edge" in self.config:
+            self.move(self.config["right_edge"] - self.width(), self.config.get("y", 100))
+        else:
+            self.move(self.config.get("x", 100), self.config.get("y", 100))
+
+    def update_style(self):
+        border_color = self.config.get("border_color", CP_RED)
+        self.setStyleSheet(f"""
+            QMainWindow {{ 
+                background-color: {CP_BG}; 
+                border: 2px solid {border_color};
+            }}
+            QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 0px 4px; margin: 0px; font-weight: bold; min-height: 18px; max-height: 18px; }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+            QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
+            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 0px 2px; }}
+            QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0px 2px; font-weight: bold; }}
+            QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0px 2px; }}
+            QPushButton#status {{ background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0px; margin: 0px; min-width: 8px; max-width: 8px; min-height: 18px; max-height: 18px; }}
+            QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
+            QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
+            QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            QLineEdit {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 4px; }}
+        """)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self.drag_pos)
+            event.accept()
+            self.config["x"] = self.x()
+            self.config["y"] = self.y()
+            self.config["right_edge"] = self.x() + self.width()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.save_config()
+            event.accept()
+
+    def eventFilter(self, obj, event):
+        if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.RightButton:
+                self.show_settings()
+                return True
+        if hasattr(self, 'lang_btn') and obj is self.lang_btn and event.type() == QEvent.Type.MouseButtonPress:
+            if event.button() == Qt.MouseButton.RightButton:
+                self._toggle_output_mode()
+                return True
+        return super().eventFilter(obj, event)
+
+    def show_help(self):
+        hotkey = self.config.get("hotkey", "RightAlt+Space")
+        QMessageBox.information(self, "Shortcut",
+            f"Global Hotkey: {hotkey}\n"
+            "SPC mode: Space stops recording\n"
+            "Live mode: keeps recording until stopped")
+
+    def show_settings(self):
+        from PyQt6.QtWidgets import QTabWidget, QVBoxLayout, QFileDialog, QGroupBox
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Settings")
+        dialog.setStyleSheet(self.styleSheet() + "\nQTabWidget::pane { border: 1px solid " + CP_DIM + "; } QTabBar::tab { background: " + CP_PANEL + "; border: 1px solid " + CP_DIM + "; padding: 4px; } QTabBar::tab:selected { background: " + CP_DIM + "; font-weight: bold; }")
+        
+        main_layout = QVBoxLayout(dialog)
+        tabs = QTabWidget()
+        main_layout.addWidget(tabs)
+        
+        general_tab = QWidget()
+        gen_layout = QGridLayout(general_tab)
+        gen_layout.setHorizontalSpacing(12)
+        gen_layout.setVerticalSpacing(8)
+        gen_layout.setColumnStretch(0, 1)
+        gen_layout.setColumnStretch(1, 1)
+        
+        spin = QSpinBox(); spin.setRange(1, 300)
+        spin.setValue(self.config.get("phrase_time_limit", 10)); spin.setSuffix(" sec")
+        gen_layout.addWidget(QLabel("Max speak time:"), 0, 0)
+        gen_layout.addWidget(spin, 0, 1)
+
+        spc_check = QCheckBox()
+        spc_check.setChecked(self.config.get("stop_mode", "auto") == "space")
+        gen_layout.addWidget(QLabel("Stop on Space (SPC mode):"), 1, 0)
+        gen_layout.addWidget(spc_check, 1, 1)
+
+        engine_combo = QComboBox()
+        engine_combo.addItems(["Local (one phrase)", "Local (continuous live)"])
+        idx = {"local": 0, "browser": 1}.get(self.config.get("engine", "local"), 0)
+        engine_combo.setCurrentIndex(idx)
+        gen_layout.addWidget(QLabel("Mode:"), 2, 0)
+        gen_layout.addWidget(engine_combo, 2, 1)
+
+        hotkey_combo = QComboBox()
+        hotkey_combo.addItems(list(self.HOTKEY_OPTIONS.keys()))
+        hotkey_combo.setCurrentText(self.config.get("hotkey", "RightAlt+Space"))
+        gen_layout.addWidget(QLabel("Global hotkey:"), 3, 0)
+        gen_layout.addWidget(hotkey_combo, 3, 1)
+        
+        gen_layout.setRowStretch(4, 1)
+        tabs.addTab(general_tab, "General")
+        
+        app_tab = QWidget()
+        app_layout = QGridLayout(app_tab)
+        app_layout.setHorizontalSpacing(12)
+        app_layout.setVerticalSpacing(8)
+        
+        x_spin = QSpinBox(); x_spin.setRange(0, 10000)
+        x_spin.setValue(self.config.get("x", 100))
+        app_layout.addWidget(QLabel("Window X:"), 0, 0)
+        app_layout.addWidget(x_spin, 0, 1)
+
+        y_spin = QSpinBox(); y_spin.setRange(0, 10000)
+        y_spin.setValue(self.config.get("y", 100))
+        app_layout.addWidget(QLabel("Window Y:"), 1, 0)
+        app_layout.addWidget(y_spin, 1, 1)
+        
+        color_edit = QLineEdit()
+        color_edit.setText(self.config.get("border_color", CP_RED))
+        app_layout.addWidget(QLabel("Border Color (Hex):"), 2, 0)
+        app_layout.addWidget(color_edit, 2, 1)
+        
+        pin_check = QCheckBox()
+        pin_check.setChecked(self.config.get("always_on_top", False))
+        app_layout.addWidget(QLabel("Always on top:"), 3, 0)
+        app_layout.addWidget(pin_check, 3, 1)
+
+        taskbar_check = QCheckBox()
+        taskbar_check.setChecked(self.config.get("hide_from_taskbar", True))
+        app_layout.addWidget(QLabel("Hide from taskbar:"), 4, 0)
+        app_layout.addWidget(taskbar_check, 4, 1)
+        
+        hide_rec_check = QCheckBox()
+        hide_rec_check.setChecked(self.config.get("hide_record_btn", False))
+        app_layout.addWidget(QLabel("Hide record button:"), 5, 0)
+        app_layout.addWidget(hide_rec_check, 5, 1)
+        
+        status_lang_gap = QSpinBox()
+        status_lang_gap.setRange(0, 20)
+        status_lang_gap.setValue(self.config.get("status_lang_gap", 2))
+        app_layout.addWidget(QLabel("Status/lang gap:"), 6, 0)
+        app_layout.addWidget(status_lang_gap, 6, 1)
+        
+        app_layout.setRowStretch(7, 1)
+        tabs.addTab(app_tab, "Appearance")
+        
+        pad_tab = QWidget()
+        pad_layout = QGridLayout(pad_tab)
+        pad_layout.setHorizontalSpacing(12)
+        pad_layout.setVerticalSpacing(8)
+        
+        compact_group = QGroupBox("Compact")
+        compact_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
+        cg_layout = QGridLayout(compact_group)
+        compact_left_pad = QSpinBox(); compact_left_pad.setRange(0, 50); compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
+        cg_layout.addWidget(QLabel("Left:"), 0, 0); cg_layout.addWidget(compact_left_pad, 0, 1)
+        compact_right_pad = QSpinBox(); compact_right_pad.setRange(0, 50); compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
+        cg_layout.addWidget(QLabel("Right:"), 1, 0); cg_layout.addWidget(compact_right_pad, 1, 1)
+        compact_top_pad = QSpinBox(); compact_top_pad.setRange(0, 50); compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
+        cg_layout.addWidget(QLabel("Top:"), 2, 0); cg_layout.addWidget(compact_top_pad, 2, 1)
+        compact_bottom_pad = QSpinBox(); compact_bottom_pad.setRange(0, 50); compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
+        cg_layout.addWidget(QLabel("Bottom:"), 3, 0); cg_layout.addWidget(compact_bottom_pad, 3, 1)
+        pad_layout.addWidget(compact_group, 0, 0)
+
+        expanded_group = QGroupBox("Expanded")
+        expanded_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
+        eg_layout = QGridLayout(expanded_group)
+        expanded_left_pad = QSpinBox(); expanded_left_pad.setRange(0, 50); expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
+        eg_layout.addWidget(QLabel("Left:"), 0, 0); eg_layout.addWidget(expanded_left_pad, 0, 1)
+        expanded_right_pad = QSpinBox(); expanded_right_pad.setRange(0, 50); expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
+        eg_layout.addWidget(QLabel("Right:"), 1, 0); eg_layout.addWidget(expanded_right_pad, 1, 1)
+        expanded_top_pad = QSpinBox(); expanded_top_pad.setRange(0, 50); expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
+        eg_layout.addWidget(QLabel("Top:"), 2, 0); eg_layout.addWidget(expanded_top_pad, 2, 1)
+        expanded_bottom_pad = QSpinBox(); expanded_bottom_pad.setRange(0, 50); expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
+        eg_layout.addWidget(QLabel("Bottom:"), 3, 0); eg_layout.addWidget(expanded_bottom_pad, 3, 1)
+        pad_layout.addWidget(expanded_group, 0, 1)
+        
+        pad_layout.setRowStretch(1, 1)
+        tabs.addTab(pad_tab, "Padding")
+
+        btn_layout = QHBoxLayout()
+        import_btn = QPushButton("Import")
+        export_btn = QPushButton("Export")
+        import_btn.clicked.connect(lambda: self.import_settings(dialog))
+        export_btn.clicked.connect(self.export_settings)
+        btn_layout.addWidget(import_btn)
+        btn_layout.addWidget(export_btn)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept); buttons.rejected.connect(dialog.reject)
+        
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addLayout(btn_layout)
+        bottom_layout.addStretch()
+        bottom_layout.addWidget(buttons)
+        main_layout.addLayout(bottom_layout)
+
+        if dialog.exec():
+            self.config["phrase_time_limit"] = spin.value()
+            self.config["x"] = x_spin.value()
+            self.config["y"] = y_spin.value()
+            self.move(self.config["x"], self.config["y"])
+            self.config["border_color"] = color_edit.text()
+            self.update_style()
+            new_pin = pin_check.isChecked()
+            if new_pin != self.config.get("always_on_top", False):
+                self.config["always_on_top"] = new_pin
+                self._apply_window_flags()
+                self.show()
+            new_taskbar = taskbar_check.isChecked()
+            if new_taskbar != self.config.get("hide_from_taskbar", True):
+                self.config["hide_from_taskbar"] = new_taskbar
+                self._apply_window_flags()
+                self.show()
+            self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
+            self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
+            self.config["compact_left_padding"] = compact_left_pad.value()
+            self.config["compact_right_padding"] = compact_right_pad.value()
+            self.config["compact_top_padding"] = compact_top_pad.value()
+            self.config["compact_bottom_padding"] = compact_bottom_pad.value()
+            self.config["status_lang_gap"] = status_lang_gap.value()
+            self.config["expanded_left_padding"] = expanded_left_pad.value()
+            self.config["expanded_right_padding"] = expanded_right_pad.value()
+            self.config["expanded_top_padding"] = expanded_top_pad.value()
+            self.config["expanded_bottom_padding"] = expanded_bottom_pad.value()
+            new_hide = hide_rec_check.isChecked()
+            if new_hide != self.config.get("hide_record_btn", False):
+                self.config["hide_record_btn"] = new_hide
+            new_hotkey = hotkey_combo.currentText()
+            if new_hotkey != self.config.get("hotkey", "RightAlt+Space"):
+                self.config["hotkey"] = new_hotkey
+                self.restart_hotkey_listener()
+            self._apply_window_layout(preserve_right_edge=True)
+            self.save_config()
+
+    def import_settings(self, parent_dialog):
+        backup_file = self.script_dir / "backup_commited.json"
+        if backup_file.exists():
+            try:
+                with open(backup_file, 'r') as f:
+                     new_config = json.load(f)
+                self.config.update(new_config)
+                self.save_config()
+                QMessageBox.information(parent_dialog, "Import Successful", "Settings imported successfully from backup_commited.json.")
+                parent_dialog.accept()
+                self.update_style()
+                self._apply_window_flags()
+                self._apply_window_layout()
+                if "x" in self.config and "y" in self.config:
+                    self.move(self.config["x"], self.config["y"])
+                self.show()
+                if hasattr(self, 'restart_hotkey_listener'):
+                    self.restart_hotkey_listener()
+            except Exception as e:
+                QMessageBox.critical(parent_dialog, "Import Error", f"Failed to import settings:\n{e}")
+        else:
+            QMessageBox.warning(parent_dialog, "Import Error", "backup_commited.json not found in the script directory.")
+
+    def export_settings(self):
+        backup_file = self.script_dir / "backup_commited.json"
+        try:
+            with open(backup_file, 'w') as f:
+                json.dump(self.config, f, indent=2)
+            QMessageBox.information(self, "Export Successful", "Settings exported successfully to backup_commited.json.")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{e}")
+
+    def _apply_window_flags(self):
+        flags = Qt.WindowType.FramelessWindowHint
+        if self.config.get("always_on_top"):
+            flags |= Qt.WindowType.WindowStaysOnTopHint
+        if self.config.get("hide_from_taskbar", True):
+            flags |= Qt.WindowType.Tool
+        self.setWindowFlags(flags)
+
+    def _base_window_width(self):
+        return self._expanded_window_width()
+
+    def _compact_window_width(self):
+        return (
+            self.config.get("compact_left_padding", 0)
+            + 8
+            + self.config.get("status_lang_gap", 2)
+            + 26
+            + self.config.get("compact_right_padding", 0)
+        )
+
+    def _compact_window_height(self):
+        return 20 + self.config.get("compact_top_padding", 0) + self.config.get("compact_bottom_padding", 0)
+
+    def _expanded_window_width(self):
+        width = (
+            self.config.get("expanded_left_padding", 0)
+            + 8
+            + self.config.get("status_lang_gap", 2)
+            + 28
+            + 18
+            + 18
+            + 18
+            + 18
+            + 18
+            + 18
+            + self.config.get("expanded_right_padding", 0)
+        )
+        if not self.config.get("hide_record_btn", False):
+            width += 58
+        return width
+
+    def _expanded_window_height(self):
+        return 20 + self.config.get("expanded_top_padding", 0) + self.config.get("expanded_bottom_padding", 0)
+
+    def _apply_button_geometry(self):
+        compact = self._compact_view
+        self.status_btn.setFixedSize(8, 18)
+        self.lang_btn.setFixedSize(26 if compact else 28, 18)
+        self.google_btn.setFixedSize(18, 18)
+        self.copy_btn.setFixedSize(18, 18)
+        self.help_btn.setFixedSize(18, 18)
+        self.settings_btn.setFixedSize(18, 18)
+        self.close_btn.setFixedSize(18, 18)
+        if compact:
+            self.record_btn.setFixedSize(0, 0)
+        else:
+            self.record_btn.setFixedSize(58, 18)
+
+    def _visible_toolbar_width(self, compact=None):
+        if compact is None:
+            compact = self._compact_view
+        if compact:
+            return self._compact_window_width()
+        return self._expanded_window_width()
+
+    def _apply_window_layout(self, preserve_right_edge=True):
+        compact = self._compact_view
+        self._apply_button_geometry()
+        left = self.config.get("compact_left_padding", 0) if compact else self.config.get("expanded_left_padding", 0)
+        right = self.config.get("compact_right_padding", 0) if compact else self.config.get("expanded_right_padding", 0)
+        top = self.config.get("compact_top_padding", 0) if compact else self.config.get("expanded_top_padding", 0)
+        bottom = self.config.get("compact_bottom_padding", 0) if compact else self.config.get("expanded_bottom_padding", 0)
+        self.toolbar_layout.setContentsMargins(left, top, right, bottom)
+        self.record_btn.setVisible(not compact and not self.config.get("hide_record_btn", False))
+        for btn in (self.google_btn, self.copy_btn, self.help_btn, self.settings_btn, self.close_btn):
+            btn.setVisible(not compact)
+        new_width = self._visible_toolbar_width(compact)
+        new_height = self._compact_window_height() if compact else self._expanded_window_height()
+        if preserve_right_edge:
+            geo = self.frameGeometry()
+            right_edge = geo.x() + geo.width()
+            y_pos = geo.y()
+            self.setFixedSize(new_width, new_height)
+            self.move(right_edge - new_width, y_pos)
+        else:
+            self.setFixedSize(new_width, new_height)
+
+    def toggle_compact_view(self):
+        self._compact_view = not self._compact_view
+        self.config["compact_view"] = self._compact_view
+        self.save_config()
+        self._apply_window_layout(preserve_right_edge=True)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        QTimer.singleShot(0, self._apply_button_geometry)
+
+    def closeEvent(self, event):
+        self.config["compact_view"] = self._compact_view
+        self.config["right_edge"] = self.x() + self.width()
+        self.config["y"] = self.y()
+        self.save_config()
+        super().closeEvent(event)
+
+    HOTKEY_OPTIONS = {
+        "RightAlt+Space": (165, 32),
+        "RightAlt+H":     (165, ord('h')),
+        "RightCtrl+Space":(163, 32),
+        "RightCtrl+H":    (163, ord('h')),
+        "Alt+H":          (None, ord('h')),
+    }
+
+    def setup_global_hotkey(self):
+        hotkey_name = self.config.get("hotkey", "RightAlt+Space")
+        mod_vk, trig_vk = self.HOTKEY_OPTIONS.get(hotkey_name, self.HOTKEY_OPTIONS["RightAlt+Space"])
+        self._hotkey_mod_pressed = False
+
+        def _vk(key):
+            try:
+                return key.vk
+            except AttributeError:
+                try:
+                    return key.value.vk
+                except AttributeError:
+                    return None
+
+        def on_press(key):
+            import os
+            if os.name != 'nt':
+                from pynput.keyboard import Key
+                if hotkey_name.startswith("RightAlt") and (key == Key.alt_gr or key == Key.alt_r):
+                    self._hotkey_mod_pressed = True
+                elif hotkey_name.startswith("RightCtrl") and key == Key.ctrl_r:
+                    self._hotkey_mod_pressed = True
+                elif hotkey_name.startswith("Alt") and key in (Key.alt, Key.alt_l, Key.alt_r, Key.alt_gr):
+                    self._hotkey_mod_pressed = True
+
+                if self._hotkey_mod_pressed:
+                    if "Space" in hotkey_name and key == Key.space:
+                        self.toggle_record_requested.emit()
+                    elif "H" in hotkey_name and hasattr(key, 'char') and key.char == 'h':
+                        self.toggle_record_requested.emit()
+
+                if key == Key.space:
+                    self.space_press_requested.emit()
+                return
+
+            kv = _vk(key)
+            if mod_vk is not None and kv == mod_vk:
+                self._hotkey_mod_pressed = True
+            elif self._hotkey_mod_pressed and kv == trig_vk:
+                self.toggle_record_requested.emit()
+            elif kv == 32:
+                self.space_press_requested.emit()
+
+        def on_release(key):
+            import os
+            if os.name != 'nt':
+                from pynput.keyboard import Key
+                if hotkey_name.startswith("RightAlt") and (key == Key.alt_gr or key == Key.alt_r):
+                    self._hotkey_mod_pressed = False
+                elif hotkey_name.startswith("RightCtrl") and key == Key.ctrl_r:
+                    self._hotkey_mod_pressed = False
+                elif hotkey_name.startswith("Alt") and key in (Key.alt, Key.alt_l, Key.alt_r, Key.alt_gr):
+                    self._hotkey_mod_pressed = False
+                return
+
+            if mod_vk is not None and _vk(key) == mod_vk:
+                self._hotkey_mod_pressed = False
+
+        listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
+        listener.start()
+        self._hotkey_listener = listener
+
+    def restart_hotkey_listener(self):
+        if hasattr(self, '_hotkey_listener'):
+            self._hotkey_listener.stop()
+        self.setup_global_hotkey()
+
+    def toggle_language(self):
+        new_lang = "bn-BD" if self.config["language"] == "en-US" else "en-US"
+        self.change_language(new_lang)
+
+    def change_language(self, lang):
+        self.config["language"] = lang
+        self._active_language = lang
+        self.save_config()
+        self._update_lang_btn()
+
+    def _update_lang_btn(self):
+        is_en = self.config["language"] == "en-US"
+        self.lang_btn.setText("EN" if is_en else "BN")
+        mode = self.config.get("output_mode", "search")
+        border_color = "#FF8C00" if mode == "search" else "#00BFFF"
+        text_color = CP_RED if is_en else CP_GREEN
+        self.lang_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: 2px solid {border_color};
+                color: {text_color};
+                font-weight: bold;
+                margin: 0px;
+                padding: 0px;
+                min-height: 18px;
+                max-height: 18px;
+                min-width: 26px;
+                max-width: 26px;
+            }}
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+                border: 2px solid {border_color};
+                color: {text_color};
+                margin: 0px;
+                padding: 0px;
+            }}
+        """)
+        self.lang_btn.setFixedSize(26, 18)
+
+    def _toggle_output_mode(self):
+        current = self.config.get("output_mode", "search")
+        self.config["output_mode"] = "clipboard" if current == "search" else "search"
+        self.config["open_google"] = self.config["output_mode"] == "search"
+        self.config["copy_to_clipboard"] = self.config["output_mode"] == "clipboard"
+        self.save_config()
+        self._update_lang_btn()
+        self._update_google_btn()
+        self._update_copy_btn()
+
+    def _set_toggle_btn(self, btn, label, enabled):
+        color = CP_GREEN if enabled else CP_DIM
+        btn.setText(label)
+        btn.setStyleSheet(
+            f"border: 2px solid {color}; color: {color}; font-weight: bold; padding: 0; min-height: 18px; max-height: 18px;"
+        )
+        btn.setFixedSize(btn.width(), 18)
+
+    def _update_google_btn(self):
+        self._set_toggle_btn(self.google_btn, "G", self.config.get("open_google", False))
+
+    def _update_copy_btn(self):
+        self._set_toggle_btn(self.copy_btn, "C", self.config.get("copy_to_clipboard", True))
+
+    def toggle_google_search(self):
+        self.config["open_google"] = not self.config.get("open_google", False)
+        self.save_config()
+        self._update_google_btn()
+
+    def toggle_copy_to_clipboard(self):
+        self.config["copy_to_clipboard"] = not self.config.get("copy_to_clipboard", True)
+        self.save_config()
+        self._update_copy_btn()
+
+    def get_active_language(self):
+        return self._active_language
+
+    def toggle_record(self):
+        if self.config.get("engine", "local") == "browser":
+            if self._live_recording:
+                self._stop_continuous()
+            else:
+                self._start_continuous()
+            return
+
+        if self._recording_active:
+            if self.config.get("stop_mode", "auto") == "space":
+                self._finish_space_recording()
+            else:
+                self._stop_single()
+        else:
+            self._start_single()
+
+    def _handle_space_press(self):
+        handled = False
+        if self._recording_active and self.config.get("stop_mode", "auto") == "space":
+            self._finish_space_recording()
+            handled = True
+        elif self._live_recording:
+            self._stop_continuous()
+            handled = True
+
+        if handled:
+            QTimer.singleShot(25, self._erase_stop_space)
+
+    def _erase_stop_space(self):
+        try:
+            from pynput.keyboard import Controller, Key
+            keyboard = Controller()
+            keyboard.press(Key.backspace)
+            keyboard.release(Key.backspace)
+        except Exception:
+            pass
+
+    def _start_single(self):
+        self._session_id += 1
+        session_id = self._session_id
+        self._recording_active = True
+        self._stop_requested = False
+        self._set_status(CP_RED)
+        if self.config.get("stop_mode", "auto") == "space":
+            self.record_btn.setText("⏹️ SPC")
+            self.voice_thread = SpaceStopThread(self.get_active_language)
+        else:
+            self.record_btn.setText("⏹️ STOP")
+            self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
+        self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
+        self.voice_thread.result.connect(lambda text, sid=session_id: self.on_result(sid, text))
+        self.voice_thread.error.connect(lambda error, sid=session_id: self.on_error(sid, error))
+        self.voice_thread.finished.connect(lambda sid=session_id: self._on_local_finished(sid))
+        self.voice_thread.start()
+
+    def _start_continuous(self):
+        self._session_id += 1
+        session_id = self._session_id
+        self._live_recording = True
+        self._stop_requested = False
+        self._set_status(CP_RED)
+        self.record_btn.setText("⏹️ LIVE")
+        self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
+        self._continuous_thread = ContinuousThread(
+            self.get_active_language, self.config.get("phrase_time_limit", 10))
+        self._continuous_thread.result.connect(lambda text, sid=session_id: self.on_result(sid, text))
+        self._continuous_thread.error.connect(lambda error, sid=session_id: self.on_error(sid, error))
+        self._continuous_thread.finished.connect(self._on_continuous_finished)
+        self._continuous_thread.start()
+
+    def _stop_continuous(self):
+        if self._continuous_thread and self._continuous_thread.isRunning():
+            self._continuous_thread.stop()
+        self._live_recording = False
+        self._set_status(CP_YELLOW)
+        self._reset_record_btn()
+
+    def _on_continuous_finished(self):
+        self._live_recording = False
+        self._set_status(CP_GREEN)
+        self._reset_record_btn()
+
+    def _stop_single(self):
+        if self.voice_thread:
+            self.voice_thread.stop()
+        self._recording_active = False
+        self._stop_requested = True
+        self._set_status(CP_YELLOW)
+        self._reset_record_btn()
+
+    def _on_local_finished(self, session_id):
+        if session_id != self._session_id:
+            return
+        self.voice_thread = None
+        self._recording_active = False
+        if self._stop_requested:
+            self._stop_requested = False
+            self._set_status(CP_GREEN)
+            self._reset_record_btn()
+
+    def _reset_record_btn(self):
+        self.record_btn.setText("🎤 REC")
+        self.record_btn.setStyleSheet(f"background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;")
+
+    def _set_status(self, color):
+        self.status_btn.setText("")
+        self.status_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {color};
+                border: 1px solid {color};
+                padding: 0px;
+                margin: 0px;
+                min-width: 8px;
+                max-width: 8px;
+                min-height: 18px;
+                max-height: 18px;
+            }}
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+                background-color: {color};
+                border: 1px solid {color};
+                padding: 0px;
+                margin: 0px;
+            }}
+        """)
+        w = 8
+        h = 18
+        self.status_btn.setFixedSize(w, h)
+
+    def _finish_space_recording(self):
+        if not self._recording_active:
+            return
+        if isinstance(self.voice_thread, SpaceStopThread):
+            self.voice_thread.stop()
+        self._recording_active = False
+        self._stop_requested = True
+        self._reset_record_btn()
+        self._set_status(CP_YELLOW)
+
+    def on_result(self, session_id, text):
+        if session_id != self._session_id:
+            return
+        if not text or not text.strip():
+            self._stop_requested = False
+            self._set_status(CP_GREEN)
+            self._reset_record_btn()
+            self._recording_active = False
+            self._live_recording = False
+            return
+        paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
+        self._stop_requested = False
+        if self._live_recording:
+            self._set_status(CP_GREEN)
+            QTimer.singleShot(400, lambda: self._set_status(CP_RED) if self._live_recording else None)
+        else:
+            self._set_status(CP_GREEN)
+            self._reset_record_btn()
+            self._recording_active = False
+            if self.config.get("open_google"):
+                webbrowser.open(f"https://www.google.com/search?q={text}")
+
+    def on_error(self, session_id, error):
+        if session_id != self._session_id:
+            return
+        if self._stop_requested:
+            self._stop_requested = False
+            self._set_status(CP_GREEN)
+            self._reset_record_btn()
+            self._live_recording = False
+            self._recording_active = False
+            return
+        self._set_status(CP_RED)
+        self._reset_record_btn()
+        self._live_recording = False
+        self._recording_active = False
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
 _main_window = None

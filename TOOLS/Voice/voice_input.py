@@ -317,7 +317,7 @@ class VoiceApp(QMainWindow):
         self.status_btn.clicked.connect(self.toggle_record)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet(f"""
-            QPushButton#status {{
+            QPushButton {{
                 background-color: {CP_GREEN};
                 border: 1px solid {CP_GREEN};
                 padding: 0px;
@@ -327,9 +327,11 @@ class VoiceApp(QMainWindow):
                 min-height: 18px;
                 max-height: 18px;
             }}
-            QPushButton#status:hover {{
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
                 background-color: {CP_GREEN};
                 border: 1px solid {CP_GREEN};
+                padding: 0px;
+                margin: 0px;
             }}
         """)
         self.status_btn.installEventFilter(self)
@@ -854,8 +856,26 @@ class VoiceApp(QMainWindow):
         mode = self.config.get("output_mode", "search")
         border_color = "#FF8C00" if mode == "search" else "#00BFFF"
         text_color = CP_RED if is_en else CP_GREEN
-        self.lang_btn.setStyleSheet(f"border: 2px solid {border_color}; color: {text_color}; font-weight: bold; margin: 0px; padding: 0px; min-height: 18px; max-height: 18px;")
-        self.lang_btn.setFixedSize(self.lang_btn.width(), 18)
+        self.lang_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: 2px solid {border_color};
+                color: {text_color};
+                font-weight: bold;
+                margin: 0px;
+                padding: 0px;
+                min-height: 18px;
+                max-height: 18px;
+                min-width: 26px;
+                max-width: 26px;
+            }}
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+                border: 2px solid {border_color};
+                color: {text_color};
+                margin: 0px;
+                padding: 0px;
+            }}
+        """)
+        self.lang_btn.setFixedSize(26, 18)
 
     def _toggle_output_mode(self):
         current = self.config.get("output_mode", "search")
@@ -1001,7 +1021,7 @@ class VoiceApp(QMainWindow):
     def _set_status(self, color):
         self.status_btn.setText("")
         self.status_btn.setStyleSheet(f"""
-            QPushButton#status {{
+            QPushButton {{
                 background-color: {color};
                 border: 1px solid {color};
                 padding: 0px;
@@ -1011,9 +1031,11 @@ class VoiceApp(QMainWindow):
                 min-height: 18px;
                 max-height: 18px;
             }}
-            QPushButton#status:hover {{
+            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
                 background-color: {color};
                 border: 1px solid {color};
+                padding: 0px;
+                margin: 0px;
             }}
         """)
         w = 8
