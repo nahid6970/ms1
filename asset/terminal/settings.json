@@ -89,6 +89,7 @@
                 "face": "JetBrainsMono Nerd Font",
                 "size": 12
             },
+            "historySize": 9999,
             "opacity": 75,
             "startingDirectory": "%USERPROFILE%"
         },
