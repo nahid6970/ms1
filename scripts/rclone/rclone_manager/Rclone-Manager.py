@@ -746,7 +746,7 @@ class RcloneApp(QMainWindow):
         if self.tool_labels[0].active:
             s_parts = ["rclone", "size", q_stor, q_frm]
             for i, (_, f, _) in enumerate(self.flag_defs):
-                if self.flag_labels[i].active:
+                if self.flag_labels[i].active and ("drive" in f or "list" in f):
                     s_parts.append(f)
             for i, (_, pref, _) in enumerate(self.filter_defs):
                 if self.filter_labels[i].active:
