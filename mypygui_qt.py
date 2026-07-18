@@ -2693,15 +2693,15 @@ class VoiceApp(QMainWindow):
         self.status_btn.setObjectName("status")
         self.status_btn.setFixedSize(8, 18)
         self.status_btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.status_btn.setMinimumSize(self.status_btn.size())
-        self.status_btn.setMaximumSize(self.status_btn.size())
+        self.status_btn.setMinimumSize(8, 18)
+        self.status_btn.setMaximumSize(8, 18)
         self.status_btn.setFlat(True)
         self.status_btn.setAutoDefault(False)
         self.status_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.status_btn.clicked.connect(self.toggle_record)
         self.status_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.status_btn.setStyleSheet(f"""
-            QPushButton {{
+            QPushButton#status {{
                 background-color: {CP_GREEN};
                 border: 1px solid {CP_GREEN};
                 padding: 0px;
@@ -2711,7 +2711,7 @@ class VoiceApp(QMainWindow):
                 min-height: 18px;
                 max-height: 18px;
             }}
-            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+            QPushButton#status:hover, QPushButton#status:pressed, QPushButton#status:focus {{
                 background-color: {CP_GREEN};
                 border: 1px solid {CP_GREEN};
                 padding: 0px;
@@ -2727,6 +2727,9 @@ class VoiceApp(QMainWindow):
         self.lang_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.lang_btn.clicked.connect(self.toggle_language)
         self.lang_btn.installEventFilter(self)
+        self.lang_btn.setFixedSize(26, 18)
+        self.lang_btn.setMinimumSize(26, 18)
+        self.lang_btn.setMaximumSize(26, 18)
         self._update_lang_btn()
         layout.addWidget(self.lang_btn)
 
@@ -2782,13 +2785,38 @@ class VoiceApp(QMainWindow):
                 border: 2px solid {border_color};
             }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 9pt; }}
-            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 0px 4px; margin: 0px; font-weight: bold; min-height: 18px; max-height: 18px; }}
+            QPushButton {{ 
+                background-color: {CP_DIM}; 
+                border: 1px solid {CP_DIM}; 
+                color: white; 
+                padding: 0px 4px; 
+                margin: 0px; 
+                font-weight: bold; 
+                min-height: 18px; 
+                max-height: 18px;
+            }}
             QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPushButton:pressed {{ background-color: {CP_YELLOW}; color: black; }}
-            QPushButton#lang {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; padding: 0px 2px; }}
+            QPushButton:focus {{ outline: none; }}
+            QPushButton#lang {{ 
+                background-color: {CP_PANEL}; 
+                border: 2px solid #FF8C00; 
+                color: {CP_TEXT}; 
+                padding: 0px 2px; 
+                margin: 0px;
+            }}
             QPushButton#toggle {{ background-color: {CP_PANEL}; padding: 0px 2px; font-weight: bold; }}
             QPushButton#help {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN}; font-weight: bold; padding: 0px 2px; }}
-            QPushButton#status {{ background-color: {CP_GREEN}; border: 1px solid {CP_GREEN}; padding: 0px; margin: 0px; min-width: 8px; max-width: 8px; min-height: 18px; max-height: 18px; }}
+            QPushButton#status {{ 
+                background-color: {CP_GREEN}; 
+                border: 1px solid {CP_GREEN}; 
+                padding: 0px; 
+                margin: 0px; 
+                min-width: 8px; 
+                max-width: 8px; 
+                min-height: 18px; 
+                max-height: 18px; 
+            }}
             QCheckBox {{ spacing: 6px; color: {CP_TEXT}; }}
             QCheckBox::indicator {{ width: 12px; height: 12px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
             QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -3235,25 +3263,24 @@ class VoiceApp(QMainWindow):
         border_color = "#FF8C00" if mode == "search" else "#00BFFF"
         text_color = CP_RED if is_en else CP_GREEN
         self.lang_btn.setStyleSheet(f"""
-            QPushButton {{
+            QPushButton#lang {{
                 border: 2px solid {border_color};
                 color: {text_color};
                 font-weight: bold;
                 margin: 0px;
-                padding: 0px;
+                padding: 0px 2px;
                 min-height: 18px;
                 max-height: 18px;
                 min-width: 26px;
                 max-width: 26px;
             }}
-            QPushButton:hover, QPushButton:pressed, QPushButton:focus {{
+            QPushButton#lang:hover, QPushButton#lang:pressed, QPushButton#lang:focus {{
                 border: 2px solid {border_color};
                 color: {text_color};
                 margin: 0px;
-                padding: 0px;
+                padding: 0px 2px;
             }}
         """)
-        self.lang_btn.setFixedSize(26, 18)
 
     def _toggle_output_mode(self):
         current = self.config.get("output_mode", "search")
