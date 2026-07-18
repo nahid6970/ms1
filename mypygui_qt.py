@@ -2937,40 +2937,6 @@ class VoiceApp(QMainWindow):
         app_layout.setRowStretch(7, 1)
         tabs.addTab(app_tab, "Appearance")
         
-        pad_tab = QWidget()
-        pad_layout = QGridLayout(pad_tab)
-        pad_layout.setHorizontalSpacing(12)
-        pad_layout.setVerticalSpacing(8)
-        
-        compact_group = QGroupBox("Compact")
-        compact_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
-        cg_layout = QGridLayout(compact_group)
-        compact_left_pad = QSpinBox(); compact_left_pad.setRange(0, 50); compact_left_pad.setValue(self.config.get("compact_left_padding", 0))
-        cg_layout.addWidget(QLabel("Left:"), 0, 0); cg_layout.addWidget(compact_left_pad, 0, 1)
-        compact_right_pad = QSpinBox(); compact_right_pad.setRange(0, 50); compact_right_pad.setValue(self.config.get("compact_right_padding", 0))
-        cg_layout.addWidget(QLabel("Right:"), 1, 0); cg_layout.addWidget(compact_right_pad, 1, 1)
-        compact_top_pad = QSpinBox(); compact_top_pad.setRange(0, 50); compact_top_pad.setValue(self.config.get("compact_top_padding", 0))
-        cg_layout.addWidget(QLabel("Top:"), 2, 0); cg_layout.addWidget(compact_top_pad, 2, 1)
-        compact_bottom_pad = QSpinBox(); compact_bottom_pad.setRange(0, 50); compact_bottom_pad.setValue(self.config.get("compact_bottom_padding", 0))
-        cg_layout.addWidget(QLabel("Bottom:"), 3, 0); cg_layout.addWidget(compact_bottom_pad, 3, 1)
-        pad_layout.addWidget(compact_group, 0, 0)
-
-        expanded_group = QGroupBox("Expanded")
-        expanded_group.setStyleSheet("QGroupBox { color: " + CP_TEXT + "; }")
-        eg_layout = QGridLayout(expanded_group)
-        expanded_left_pad = QSpinBox(); expanded_left_pad.setRange(0, 50); expanded_left_pad.setValue(self.config.get("expanded_left_padding", 0))
-        eg_layout.addWidget(QLabel("Left:"), 0, 0); eg_layout.addWidget(expanded_left_pad, 0, 1)
-        expanded_right_pad = QSpinBox(); expanded_right_pad.setRange(0, 50); expanded_right_pad.setValue(self.config.get("expanded_right_padding", 0))
-        eg_layout.addWidget(QLabel("Right:"), 1, 0); eg_layout.addWidget(expanded_right_pad, 1, 1)
-        expanded_top_pad = QSpinBox(); expanded_top_pad.setRange(0, 50); expanded_top_pad.setValue(self.config.get("expanded_top_padding", 0))
-        eg_layout.addWidget(QLabel("Top:"), 2, 0); eg_layout.addWidget(expanded_top_pad, 2, 1)
-        expanded_bottom_pad = QSpinBox(); expanded_bottom_pad.setRange(0, 50); expanded_bottom_pad.setValue(self.config.get("expanded_bottom_padding", 0))
-        eg_layout.addWidget(QLabel("Bottom:"), 3, 0); eg_layout.addWidget(expanded_bottom_pad, 3, 1)
-        pad_layout.addWidget(expanded_group, 0, 1)
-        
-        pad_layout.setRowStretch(1, 1)
-        tabs.addTab(pad_tab, "Padding")
-
         btn_layout = QHBoxLayout()
         import_btn = QPushButton("Import")
         export_btn = QPushButton("Export")
@@ -2987,6 +2953,12 @@ class VoiceApp(QMainWindow):
         bottom_layout.addStretch()
         bottom_layout.addWidget(buttons)
         main_layout.addLayout(bottom_layout)
+
+        # Center on screen
+        from PyQt6.QtWidgets import QApplication
+        screen_geo = QApplication.primaryScreen().availableGeometry()
+        dialog.adjustSize()
+        dialog.move(screen_geo.center().x() - dialog.width() // 2, screen_geo.center().y() - dialog.height() // 2)
 
         if dialog.exec():
             self.config["phrase_time_limit"] = spin.value()
@@ -3007,15 +2979,7 @@ class VoiceApp(QMainWindow):
                 self.show()
             self.config["stop_mode"] = "space" if spc_check.isChecked() else "auto"
             self.config["engine"] = ["local", "browser"][engine_combo.currentIndex()]
-            self.config["compact_left_padding"] = compact_left_pad.value()
-            self.config["compact_right_padding"] = compact_right_pad.value()
-            self.config["compact_top_padding"] = compact_top_pad.value()
-            self.config["compact_bottom_padding"] = compact_bottom_pad.value()
             self.config["status_lang_gap"] = status_lang_gap.value()
-            self.config["expanded_left_padding"] = expanded_left_pad.value()
-            self.config["expanded_right_padding"] = expanded_right_pad.value()
-            self.config["expanded_top_padding"] = expanded_top_pad.value()
-            self.config["expanded_bottom_padding"] = expanded_bottom_pad.value()
             new_hide = hide_rec_check.isChecked()
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
