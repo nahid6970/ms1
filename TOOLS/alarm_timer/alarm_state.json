@@ -202,10 +202,10 @@
         {
           "id": "c46aa4f9",
           "label": "07",
-          "fires_at": 1783953310.227057,
-          "created_at": 1783953304.2276795,
+          "fires_at": 1784953056.1393595,
+          "created_at": 1784390556.1441557,
           "input_mode": "text",
-          "input_value": ".1",
+          "input_value": "156h 15m",
           "use_custom_colors": true
         },
         {
