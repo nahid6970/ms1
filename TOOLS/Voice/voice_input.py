@@ -2,8 +2,9 @@ import sys, os
 UTILITY_PATH = r"C:\@delta\ms1"
 if UTILITY_PATH not in sys.path:
   sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__, python_version="3.13", isolated=True)
+if __name__ == "__main__":
+  import install_deps
+  install_deps.bootstrap(__file__, python_version="3.13", isolated=True)
 
 
 import sys
@@ -426,7 +427,7 @@ class VoiceApp(QMainWindow):
     def eventFilter(self, obj, event):
         if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.RightButton:
-                self.toggle_compact_view()
+                self.show_settings()
                 return True
         if hasattr(self, 'lang_btn') and obj is self.lang_btn and event.type() == QEvent.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.RightButton:
