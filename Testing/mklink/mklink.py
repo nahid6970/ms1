@@ -1422,18 +1422,28 @@ class SymlinkManager(QMainWindow):
                         status_dlg.set_progress(current_op)
                         continue
 
-                    if os.name == 'nt':
-                        batch_cmds.append(f'mklink "{dst}" "{src}"')
-                        batch_pairs.append((src, dst, rel, current_op))
-                    else:
+                    if copy_mode:
                         try:
-                            os.symlink(src, dst)
+                            shutil.copy2(src, dst)
                             success_count += 1
-                            status_dlg.log_item(f"✔ {rel}", "success")
+                            status_dlg.log_item(f"✔ Copied: {rel}", "success")
                         except Exception as e:
-                            error_logs.append(f"Symlink failed for {dst}: {str(e)}")
+                            error_logs.append(f"Copy failed for {dst}: {str(e)}")
                             status_dlg.log_item(f"✘ {rel}", "error")
                         status_dlg.set_progress(current_op)
+                    else:
+                        if os.name == 'nt':
+                            batch_cmds.append(f'mklink "{dst}" "{src}"')
+                            batch_pairs.append((src, dst, rel, current_op))
+                        else:
+                            try:
+                                os.symlink(src, dst)
+                                success_count += 1
+                                status_dlg.log_item(f"✔ {rel}", "success")
+                            except Exception as e:
+                                error_logs.append(f"Symlink failed for {dst}: {str(e)}")
+                                status_dlg.log_item(f"✘ {rel}", "error")
+                            status_dlg.set_progress(current_op)
 
                 # Execute batch on Windows
                 if os.name == 'nt' and batch_cmds:
@@ -1572,6 +1582,141 @@ class SymlinkManager(QMainWindow):
         status_dlg.finish(success_count, len(error_logs), error_logs)
         self.refresh_ui()
 
+    def sync_back_to_target(self, index):
+        link_entry = self.get_filtered_links()[index]
+        items = link_entry.get("items", [])
+        if not items:
+            return
+
+        reply = QMessageBox.question(
+            self, "Confirm Sync",
+            f"Are you sure you want to sync files BACK from the link directories to the target folders for '{link_entry['name']}'?\n"
+            "This will overwrite modified files in the original target folder.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # Count total operations
+        total_ops = 0
+        for item in items:
+            if item.get("type") == "selective":
+                total_ops += len(item.get("selected_files", []))
+            elif item.get("type") == "folder":
+                # Scan source files in fake to sync to target
+                fake_dir = item["fake"]
+                count = 0
+                if os.path.exists(fake_dir) and os.path.isdir(fake_dir):
+                    for root, _, files in os.walk(fake_dir):
+                        count += len(files)
+                total_ops += max(count, 1)
+            else:
+                total_ops += 1
+
+        status_dlg = OperationStatusDialog(self, total_ops)
+        status_dlg.setWindowTitle("🔄 Syncing Back to Target")
+        status_dlg.show()
+        QApplication.processEvents()
+
+        success_count = 0
+        error_logs = []
+        current_op = 0
+
+        for item in items:
+            target = os.path.normpath(item["target"])
+            fake = os.path.normpath(item["fake"])
+            link_type = item.get("type", "folder")
+
+            if not os.path.exists(fake):
+                current_op += 1
+                status_dlg.log_item(f"Link source missing: {fake}", "error")
+                error_logs.append(f"Link source missing: {fake}")
+                status_dlg.set_progress(current_op)
+                continue
+
+            # Ensure target parent dir exists
+            try:
+                parent_dir = os.path.dirname(target)
+                if parent_dir and not os.path.exists(parent_dir):
+                    os.makedirs(parent_dir, exist_ok=True)
+            except Exception as e:
+                current_op += 1
+                status_dlg.log_item(f"Failed to create target parent dir: {str(e)}", "error")
+                error_logs.append(f"Failed to create target parent dir: {str(e)}")
+                status_dlg.set_progress(current_op)
+                continue
+
+            if link_type == "file":
+                current_op += 1
+                try:
+                    shutil.copy2(fake, target)
+                    success_count += 1
+                    status_dlg.log_item(f"✔ Synced file: {os.path.basename(target)}", "success")
+                except Exception as e:
+                    error_logs.append(f"Failed to sync file {target}: {str(e)}")
+                    status_dlg.log_item(f"✘ Sync failed: {os.path.basename(target)}", "error")
+                status_dlg.set_progress(current_op)
+
+            elif link_type == "selective":
+                selected = item.get("selected_files", [])
+                for rel in selected:
+                    current_op += 1
+                    src_f = os.path.join(fake, rel)
+                    dst_f = os.path.join(target, rel)
+                    if not os.path.exists(src_f):
+                        status_dlg.log_item(f"File missing at source: {rel}", "error")
+                        error_logs.append(f"File missing at source link path: {src_f}")
+                        status_dlg.set_progress(current_op)
+                        continue
+                    try:
+                        dst_parent = os.path.dirname(dst_f)
+                        if dst_parent and not os.path.exists(dst_parent):
+                            os.makedirs(dst_parent, exist_ok=True)
+                        shutil.copy2(src_f, dst_f)
+                        success_count += 1
+                        status_dlg.log_item(f"✔ Synced: {rel}", "success")
+                    except Exception as e:
+                        error_logs.append(f"Failed to sync {dst_f}: {str(e)}")
+                        status_dlg.log_item(f"✘ Sync failed: {rel}", "error")
+                    status_dlg.set_progress(current_op)
+
+            else: # folder
+                # Walk all files inside fake directory and copy back to target
+                try:
+                    walk_paths = []
+                    for root, _, files in os.walk(fake):
+                        for fn in files:
+                            walk_paths.append(os.path.relpath(os.path.join(root, fn), fake))
+                    
+                    if not walk_paths:
+                        # empty dir
+                        current_op += 1
+                        status_dlg.set_progress(current_op)
+                    else:
+                        for rel in walk_paths:
+                            current_op += 1
+                            src_f = os.path.join(fake, rel)
+                            dst_f = os.path.join(target, rel)
+                            try:
+                                dst_parent = os.path.dirname(dst_f)
+                                if dst_parent and not os.path.exists(dst_parent):
+                                    os.makedirs(dst_parent, exist_ok=True)
+                                shutil.copy2(src_f, dst_f)
+                                success_count += 1
+                                status_dlg.log_item(f"✔ Synced: {rel}", "success")
+                            except Exception as e:
+                                error_logs.append(f"Failed to sync {dst_f}: {str(e)}")
+                                status_dlg.log_item(f"✘ Sync failed: {rel}", "error")
+                            status_dlg.set_progress(current_op)
+                except Exception as e:
+                    current_op += 1
+                    error_logs.append(f"Failed to read folder {fake}: {str(e)}")
+                    status_dlg.log_item(f"✘ Read failed: {os.path.basename(fake)}", "error")
+                    status_dlg.set_progress(current_op)
+
+        status_dlg.finish(success_count, len(error_logs), error_logs)
+        self.refresh_ui()
+
     def get_filtered_links(self):
         query = self.search_entry.text().lower()
         return [l for l in self.links if query in l['name'].lower()]
@@ -1637,6 +1782,16 @@ class SymlinkManager(QMainWindow):
                 """)
                 fix_btn.clicked.connect(lambda checked, idx=i: self.create_link(idx))
                 btn_layout.addWidget(fix_btn)
+
+            if link_entry.get("copy_mode", False):
+                sync_target_btn = QPushButton("🔄 Sync Target")
+                sync_target_btn.setFixedSize(110, 30)
+                sync_target_btn.setStyleSheet(f"""
+                    QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
+                    QPushButton:hover {{ background-color: {CP_GREEN}; color: black; }}
+                """)
+                sync_target_btn.clicked.connect(lambda checked, idx=i: self.sync_back_to_target(idx))
+                btn_layout.addWidget(sync_target_btn)
 
             # Open Both Button
             open_btn = QPushButton("📂 Open")
