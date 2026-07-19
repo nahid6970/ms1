@@ -2895,9 +2895,10 @@ class AHKShortcutEditor(QMainWindow):
                 for shortcut, stype, sidx in all_shortcuts_with_type:
                     html += self.generate_shortcut_html(shortcut, stype, sidx, False)
 
-        html += f"""
+        if script_shortcuts:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://script">{get_toggle_icon('script')} Script Shortcuts</a></div>
-        """
+            """
 
         if self.section_states.get("script", True):
             if group_by_category:
@@ -2923,9 +2924,10 @@ class AHKShortcutEditor(QMainWindow):
                     original_index = self.script_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "script", original_index, False)
 
-        html += f"""
+        if launcher_shortcuts:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://launcher">{get_toggle_icon('launcher')} Launcher Shortcuts</a></div>
-        """
+            """
 
         if self.section_states.get("launcher", True):
             if group_by_category:
@@ -2949,9 +2951,10 @@ class AHKShortcutEditor(QMainWindow):
                     original_index = self.launcher_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "launcher", original_index, False)
 
-        html += f"""
+        if remap_shortcuts:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://remap">{get_toggle_icon('remap')} Key Remaps</a></div>
-        """
+            """
 
         if self.section_states.get("remap", True):
             if group_by_category:
@@ -2978,8 +2981,11 @@ class AHKShortcutEditor(QMainWindow):
         html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title"><a href="toggle-section://context">{get_toggle_icon('context')} Context Shortcuts</a></div>
         """
+        if context_shortcuts:
+            html += f"""
+                    <div class="section-title"><a href="toggle-section://context">{get_toggle_icon('context')} Context Shortcuts</a></div>
+            """
 
         if self.section_states.get("context", True):
             if group_by_category:
@@ -3003,9 +3009,10 @@ class AHKShortcutEditor(QMainWindow):
                     original_index = self.context_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "context", original_index, False)
 
-        html += f"""
+        if exclusion_rules:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://exclude">{get_toggle_icon('exclude')} Exclusion Rules</a></div>
-        """
+            """
 
         if self.section_states.get("exclude", True):
             if group_by_category:
@@ -3029,9 +3036,10 @@ class AHKShortcutEditor(QMainWindow):
                     original_index = self.exclusion_rules.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "exclude", original_index, False)
 
-        html += f"""
+        if startup_scripts:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://startup">{get_toggle_icon('startup')} Background Scripts</a></div>
-        """
+            """
 
         if self.section_states.get("startup", True):
             if group_by_category:
@@ -3058,8 +3066,11 @@ class AHKShortcutEditor(QMainWindow):
         html += f"""
                 </div>
                 <div class="column">
-                    <div class="section-title"><a href="toggle-section://text">{get_toggle_icon('text')} Text Shortcuts</a></div>
         """
+        if text_shortcuts:
+            html += f"""
+                    <div class="section-title"><a href="toggle-section://text">{get_toggle_icon('text')} Text Shortcuts</a></div>
+            """
 
         if self.section_states.get("text", True):
             if group_by_category:
@@ -3085,9 +3096,10 @@ class AHKShortcutEditor(QMainWindow):
                     original_index = self.text_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "text", original_index, False)
 
-        html += f"""
+        if file_shortcuts:
+            html += f"""
                     <div class="section-title"><a href="toggle-section://file">{get_toggle_icon('file')} File Shortcuts</a></div>
-        """
+            """
 
         if self.section_states.get("file", True):
             if group_by_category:
