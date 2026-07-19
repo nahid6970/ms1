@@ -109,13 +109,15 @@
 
 **Status:** Complete
 
-**Description:** Hotstrings that expand text snippets.
+**Description:** Hotstrings or hotkeys that expand text snippets or display an interactive selection menu/submenu structure.
 
 **Implementation:**
 
 - Stored in `text_shortcuts`
-- Uses `Paste(...)` helper for literal text insertion
-- Handles multiline replacements
+- Automatically detects if the trigger is a hotkey (e.g., starts with modifier chars like `^`, `!`, `+`, `#` or contains ` & `) or a hotstring, compiling as a hotkey (`trigger::`) or hotstring (`:X:trigger::`) dynamically.
+- When "Show multi-line text as a selection menu" is checked, parses the replacement text to generate interactive hierarchically nested menus (up to 5 levels) in AutoHotkey v2 using leading-dash syntax.
+- Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Extensible for future action tags.
+- Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `Run(...)` for folder navigation.
 
 ## File Shortcuts
 

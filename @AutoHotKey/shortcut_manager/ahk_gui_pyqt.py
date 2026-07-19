@@ -3773,33 +3773,153 @@ class AHKShortcutEditor(QMainWindow):
 
                     show_as_menu = shortcut.get('show_as_menu', False)
 
+                    # Determine if the trigger is a hotkey or a hotstring
+                    is_hotkey = False
+                    if trigger:
+                        if any(trigger.startswith(c) for c in ['^', '!', '+', '#', '*', '~', '$', '<', '>']) or ' & ' in trigger:
+                            is_hotkey = True
+                        else:
+                            common_hotkey_words = ['ctrl', 'alt', 'shift', 'win', 'scrolllock', 'printscreen', 'capslock', 'numlock']
+                            if any(word in trigger.lower() for word in common_hotkey_words):
+                                is_hotkey = True
+
+                    safe_trigger = escape_hotkey(trigger)
+                    prefix_x = "" if is_hotkey else ":X:"
+
                     if show_as_menu and '\n' in replacement:
-                        output_lines.append(f":X:{trigger}:: {{")
+                        output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
                         output_lines.append("    m := Menu()")
-                        lines = replacement.split('\n')
+                        
                         paste_func_map = {"paste": "Paste", "sendtext": "SendText", "sendinput": "SendInput", "sendevent": "SendEvent"}
                         paste_func = paste_func_map.get(delivery_method, "Paste")
                         
-                        added_lines = set()
-                        for i, line in enumerate(lines):
+                        # Parsing logic for hierarchical options with brackets [name:X][text:Y][folder:Z]
+                        raw_lines = replacement.split('\n')
+                        parsed_items = []
+                        for line in raw_lines:
                             if not line.strip():
                                 continue
-                            # Ensure unique menu item names if there are duplicates
-                            display_line = line
-                            while display_line in added_lines:
-                                display_line += " "
-                            added_lines.add(display_line)
                             
-                            safe_line = escape_ahk_string(line)
-                            safe_display = escape_ahk_string(display_line)
-                            output_lines.append(f'    m.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {paste_func}("{safe_line}"))')
+                            # Count leading dashes for submenu level (clamp at 5)
+                            stripped = line.lstrip('-')
+                            level = len(line) - len(stripped)
+                            level = min(level, 5)
+                            stripped = stripped.strip()
                             
+                            # Extract all bracketed tags [key:value] or [value]
+                            blocks = re.findall(r'\[([^\]]*)\]', stripped)
+                            
+                            tags = {}
+                            if not blocks:
+                                # Backward compatibility: treat the non-empty stripped line as both name and text
+                                if stripped:
+                                    tags['name'] = stripped
+                                    tags['text'] = stripped
+                            else:
+                                for block in blocks:
+                                    if ':' in block:
+                                        k, v = block.split(':', 1)
+                                        k = k.strip().lower()
+                                        v = v.strip()
+                                        tags[k] = v
+                                    else:
+                                        # Default to text action if no colon
+                                        tags['text'] = block.strip()
+                                
+                                # Default name if not specified
+                                if 'name' not in tags:
+                                    if 'text' in tags:
+                                        tags['name'] = tags['text']
+                                    elif 'folder' in tags:
+                                        tags['name'] = f"Open {tags['folder']}"
+                                    elif tags:
+                                        tags['name'] = list(tags.values())[0]
+                                    else:
+                                        tags['name'] = "Unnamed"
+                            
+                            if tags:
+                                parsed_items.append((level, tags))
+                        
+                        # Build the hierarchical tree
+                        root_nodes = []
+                        active_nodes = { -1: None }
+                        for lvl, tags in parsed_items:
+                            node = {
+                                'level': lvl,
+                                'tags': tags,
+                                'children': [],
+                                'parent': None
+                            }
+                            parent_lvl = lvl - 1
+                            parent_node = active_nodes.get(parent_lvl)
+                            if parent_node is not None:
+                                parent_node['children'].append(node)
+                                node['parent'] = parent_node
+                            else:
+                                root_nodes.append(node)
+                            
+                            active_nodes[lvl] = node
+                            # Clear deeper levels
+                            for l in list(active_nodes.keys()):
+                                if l > lvl:
+                                    del active_nodes[l]
+                        
+                        menu_counter = 0
+                        
+                        def get_modular_action_code(tags, p_func):
+                            if 'folder' in tags:
+                                safe_folder = escape_ahk_string(tags['folder'])
+                                return f'Run("explorer.exe `"{safe_folder}`"")'
+                            elif 'text' in tags:
+                                safe_text = escape_ahk_string(tags['text'])
+                                return f'{p_func}("{safe_text}")'
+                            return 'return'
+
+                        def generate_menu_node(node, parent_menu_var):
+                            nonlocal menu_counter
+                            if node['children']:
+                                menu_counter += 1
+                                submenu_var = f"m_{menu_counter}"
+                                output_lines.append(f"    {submenu_var} := Menu()")
+                                
+                                added_names = set()
+                                for child in node['children']:
+                                    display_name = child['tags'].get('name', 'Unnamed')
+                                    while display_name in added_names:
+                                        display_name += " "
+                                    added_names.add(display_name)
+                                    safe_display = escape_ahk_string(display_name)
+                                    
+                                    if child['children']:
+                                        child_menu_var = generate_menu_node(child, submenu_var)
+                                        output_lines.append(f'    {submenu_var}.Add("{safe_display}", {child_menu_var})')
+                                    else:
+                                        action_code = get_modular_action_code(child['tags'], paste_func)
+                                        output_lines.append(f'    {submenu_var}.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {action_code})')
+                                return submenu_var
+                            return None
+
+                        added_names = set()
+                        for node in root_nodes:
+                            display_name = node['tags'].get('name', 'Unnamed')
+                            while display_name in added_names:
+                                display_name += " "
+                            added_names.add(display_name)
+                            safe_display = escape_ahk_string(display_name)
+                            
+                            if node['children']:
+                                submenu_var = generate_menu_node(node, "m")
+                                output_lines.append(f'    m.Add("{safe_display}", {submenu_var})')
+                            else:
+                                action_code = get_modular_action_code(node['tags'], paste_func)
+                                output_lines.append(f'    m.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {action_code})')
+                        
                         output_lines.append("    m.Show()")
                         output_lines.append("}")
                     else:
                         if delivery_method == 'paste':
                             if '\n' in replacement:
-                                output_lines.append(f":X:{trigger}::Paste(\"")
+                                output_lines.append(f"{prefix_x}{safe_trigger}::Paste(\"")
                                 output_lines.append("(") 
                                 lines = replacement.split('\n')
                                 for line in lines:
@@ -3810,11 +3930,11 @@ class AHKShortcutEditor(QMainWindow):
                                 output_lines.append(")\")")
                             else:
                                 safe_replacement = replacement.replace("'", "''")
-                                output_lines.append(f":X:{trigger}::Paste('{safe_replacement}')")
+                                output_lines.append(f"{prefix_x}{safe_trigger}::Paste('{safe_replacement}')")
                         elif delivery_method == 'sendinput':
                             safe_replacement = replacement.replace('"', '""').replace('`', '``')
                             if '\n' in replacement:
-                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
                                 output_lines.append('    old := A_SendMode')
                                 output_lines.append('    SendMode("Input")')
                                 output_lines.append(f'    SendText("')
@@ -3827,7 +3947,7 @@ class AHKShortcutEditor(QMainWindow):
                                 output_lines.append('    SendMode(old)')
                                 output_lines.append("}")
                             else:
-                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
                                 output_lines.append('    old := A_SendMode')
                                 output_lines.append('    SendMode("Input")')
                                 output_lines.append(f'    SendText("{safe_replacement}")')
@@ -3836,7 +3956,7 @@ class AHKShortcutEditor(QMainWindow):
                         elif delivery_method == 'sendevent':
                             safe_replacement = replacement.replace('"', '""').replace('`', '``')
                             if '\n' in replacement:
-                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
                                 output_lines.append('    old := A_SendMode')
                                 output_lines.append('    SendMode("Event")')
                                 output_lines.append('    oldDelay := A_KeyDelay')
@@ -3852,7 +3972,7 @@ class AHKShortcutEditor(QMainWindow):
                                 output_lines.append('    SendMode(old)')
                                 output_lines.append("}")
                             else:
-                                output_lines.append(f":X:{trigger}:: {{")
+                                output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
                                 output_lines.append('    old := A_SendMode')
                                 output_lines.append('    SendMode("Event")')
                                 output_lines.append('    oldDelay := A_KeyDelay')
@@ -3865,7 +3985,7 @@ class AHKShortcutEditor(QMainWindow):
                             # Default: SendText (typing mode)
                             safe_replacement = replacement.replace('"', '""').replace('`', '``')
                             if '\n' in replacement:
-                                output_lines.append(f":X:{trigger}::SendText(\"")
+                                output_lines.append(f"{prefix_x}{safe_trigger}::SendText(\"")
                                 output_lines.append("(")
                                 lines = replacement.split('\n')
                                 for i, line in enumerate(lines):
@@ -3873,7 +3993,7 @@ class AHKShortcutEditor(QMainWindow):
                                     output_lines.append(l)
                                 output_lines.append(")\")")
                             else:
-                                output_lines.append(f':X:{trigger}::SendText("{safe_replacement}")')
+                                output_lines.append(f'{prefix_x}{safe_trigger}::SendText("{safe_replacement}")')
                     
                     if has_context_fields:
                         output_lines.append("#HotIf")

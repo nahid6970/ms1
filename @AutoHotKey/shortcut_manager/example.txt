@@ -1,0 +1,6 @@
+[name:Main menu options]
+-[name:My Name][text:nahidahmed]
+-[name:My first command][this is a first command]
+-[name:Open Folders]
++-[name:App Data Folder][folder:C:\Users\nahid\.gemini\antigravity-cli]
++-[name:Workspace Folder][folder:C:\@delta\ms1\@AutoHotKey\shortcut_manager]

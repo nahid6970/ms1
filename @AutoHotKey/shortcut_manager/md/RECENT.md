@@ -2,6 +2,22 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 06:12 - Advanced Selection Menu and Hotkey Triggers for Text Shortcuts
+
+**What We Accomplished:**
+
+- Added support for hotkey triggers (e.g. `^d` or `Ctrl & d`) in the text shortcuts category. The generator now correctly distinguishes hotkeys from hotstrings and compiles them appropriately using `{trigger}::` instead of `:X:{trigger}::`.
+- Implemented an advanced hierarchical submenu compiler for selection menus. When "Show multi-line text as a selection menu" is checked, the generator parses the replacement text using a leading-dash syntax to build nested submenus (up to 5 levels).
+- Integrated modular bracket-based option parsing. Menu items can specify `[name:Display Name]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Defaulting logic and modular extensibility are fully supported.
+- Provided a clear usage example in `example.txt` and added a preconfigured advanced Ctrl+D menu entry in `ahk_shortcuts.json`.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `ahk_shortcuts.json`
+- `example.txt`
+- `md/RECENT.md`
+
 ## 2026-06-26 19:30 - Launcher Shortcut Type & Terminal Hide Toggle
 
 **What We Accomplished:**
