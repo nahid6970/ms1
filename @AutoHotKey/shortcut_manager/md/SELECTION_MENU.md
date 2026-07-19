@@ -70,8 +70,8 @@ For the example above, the compiler generates clean, nested Menu object initiali
 ^d:: {
     m := Menu()
     m_1 := Menu()
-    m_1.Add("App Data Folder", (ItemName, ItemPos, MyMenu) => Run("explorer.exe `"C:\Users\nahid\.gemini\antigravity-cli`""))
-    m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => Run("explorer.exe `"C:\@delta\ms1\@AutoHotKey\shortcut_manager`""))
+    m_1.Add("App Data Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\Users\nahid\.gemini\antigravity-cli"))
+    m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\@delta\ms1\@AutoHotKey\shortcut_manager"))
     m.Add("My Name", (ItemName, ItemPos, MyMenu) => Paste("nahidahmed"))
     m.Add("My first command", (ItemName, ItemPos, MyMenu) => Paste("this is a first command"))
     m.Add("Open Folders", m_1)

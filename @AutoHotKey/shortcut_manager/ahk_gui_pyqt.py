@@ -3266,6 +3266,31 @@ class AHKShortcutEditor(QMainWindow):
                 "    Sleep 500",
                 "    A_Clipboard := Old",
                 "}",
+                "",
+                "OpenFolderInTab(path) {",
+                "    winTitle := \"ahk_class CabinetWClass\"",
+                "    if WinExist(winTitle) {",
+                "        WinActivate(winTitle)",
+                "        if WinWaitActive(winTitle, , 2) {",
+                "            clipSaved := ClipboardAll()",
+                "            A_Clipboard := \"\"",
+                "            A_Clipboard := path",
+                "            if ClipWait(1) {",
+                "                Send \"^t\"",
+                "                Sleep 300  ; Allow tab to initialize",
+                "                Send \"^l\"",
+                "                Sleep 150  ; Focus address bar",
+                "                Send \"^v\"",
+                "                Sleep 150  ; Paste path",
+                "                Send \"{Enter}\"",
+                "                Sleep 200  ; Wait before restoring clipboard",
+                "            }",
+                "            A_Clipboard := clipSaved",
+                "            return",
+                "        }",
+                "    }",
+                "    Run(\"explorer.exe `\"\" path \"`\"\")",
+                "}",
                 ""
             ])
 
@@ -3869,7 +3894,7 @@ class AHKShortcutEditor(QMainWindow):
                         def get_modular_action_code(tags, p_func):
                             if 'folder' in tags:
                                 safe_folder = escape_ahk_string(tags['folder'])
-                                return f'Run("explorer.exe `"{safe_folder}`"")'
+                                return f'OpenFolderInTab("{safe_folder}")'
                             elif 'text' in tags:
                                 safe_text = escape_ahk_string(tags['text'])
                                 return f'{p_func}("{safe_text}")'

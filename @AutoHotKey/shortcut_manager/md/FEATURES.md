@@ -117,7 +117,7 @@
 - Automatically detects if the trigger is a hotkey (e.g., starts with modifier chars like `^`, `!`, `+`, `#` or contains ` & `) or a hotstring, compiling as a hotkey (`trigger::`) or hotstring (`:X:trigger::`) dynamically.
 - When "Show multi-line text as a selection menu" is checked, parses the replacement text to generate interactive hierarchically nested menus (up to 5 levels) in AutoHotkey v2 using leading-dash syntax.
 - Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Extensible for future action tags.
-- Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `Run(...)` for folder navigation.
+- Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `OpenFolderInTab(...)` for opening folders (opening in a new tab if an existing Explorer window is present).
 
 ## File Shortcuts
 

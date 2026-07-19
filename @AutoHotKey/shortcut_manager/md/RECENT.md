@@ -2,6 +2,21 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 06:35 - Existing File Explorer New Tab Navigation for Folder Tag
+
+**What We Accomplished:**
+
+- Modified folder-opening logic in selection menus (`[folder:...]` tag). Instead of opening a new File Explorer window using a direct `Run` call, it now delegates to a new helper function `OpenFolderInTab(path)`.
+- Implemented `OpenFolderInTab(path)` in the generated AHK script. If an active Windows Explorer window exists, it brings it to the foreground, opens a new tab (`Ctrl+T`), focuses the address bar (`Ctrl+L`), and pastes the folder path, navigating to it smoothly. If no Explorer window is open, it falls back to launching a new Explorer window.
+- Updated documentation files `md/SELECTION_MENU.md` and `md/FEATURES.md` to reflect the new tab-oriented navigation behavior.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/FEATURES.md`
+- `md/SELECTION_MENU.md`
+- `md/RECENT.md`
+
 ## 2026-07-19 06:12 - Advanced Selection Menu and Hotkey Triggers for Text Shortcuts
 
 **What We Accomplished:**
