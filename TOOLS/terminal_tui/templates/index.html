@@ -11513,7 +11513,11 @@
             }
 
             try {
-                const plaintext = JSON.stringify(accounts);
+                const exportPayload = {
+                    accounts: accounts,
+                    tavilyApiKey: localStorage.getItem('tavily-api-key') || ''
+                };
+                const plaintext = JSON.stringify(exportPayload);
                 const encryptedBase64 = await encryptData(plaintext, password);
                 
                 const res = await fetch('/api/save-backup', {
@@ -11554,9 +11558,17 @@
                 
                 try {
                     const decrypted = await decryptData(encryptedBase64, password);
-                    const importedAccounts = JSON.parse(decrypted);
+                    const parsed = JSON.parse(decrypted);
                     
-                    if (!Array.isArray(importedAccounts)) {
+                    // Support both old format (plain array) and new format (object with accounts + tavilyApiKey)
+                    let importedAccounts;
+                    let tavilyKey = '';
+                    if (Array.isArray(parsed)) {
+                        importedAccounts = parsed;
+                    } else if (parsed && Array.isArray(parsed.accounts)) {
+                        importedAccounts = parsed.accounts;
+                        tavilyKey = parsed.tavilyApiKey || '';
+                    } else {
                         throw new Error("Invalid backup file structure.");
                     }
                     
@@ -11572,7 +11584,16 @@
                     });
                     
                     localStorage.setItem('ai-accounts-list', JSON.stringify(accounts));
-                    alert(`Successfully imported and merged ${importedAccounts.length} accounts!`);
+                    
+                    // Restore Tavily API key if present in the backup
+                    if (tavilyKey) {
+                        localStorage.setItem('tavily-api-key', tavilyKey);
+                        const keyInput = document.getElementById('tavily-api-key-input');
+                        if (keyInput) keyInput.value = tavilyKey;
+                        if (typeof updateTavilyKeyUI === 'function') updateTavilyKeyUI(true);
+                    }
+                    
+                    alert(`Successfully imported and merged ${importedAccounts.length} accounts!` + (tavilyKey ? '\nTavily API key restored.' : ''));
                     
                     renderAIAccountsList();
                     initAIToolsConfig();

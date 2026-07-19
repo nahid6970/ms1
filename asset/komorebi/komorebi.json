@@ -333,11 +333,6 @@
             "kind": "Title",
             "id": "Bitwarden",
             "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Title",
-            "id": "Workspaces",
-            "matching_strategy": "StartsWith"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -425,11 +420,6 @@
             "kind": "Title",
             "id": "Bitwarden",
             "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Title",
-            "id": "Workspaces",
-            "matching_strategy": "StartsWith"
         }
     ],
     "gui_settings": {
