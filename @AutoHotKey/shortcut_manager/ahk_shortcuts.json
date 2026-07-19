@@ -799,7 +799,7 @@
             "category": "General",
             "description": "Multi-level selection menu with submenus and folder explorer open actions.",
             "trigger": "^d",
-            "replacement": "[name:My Main Options]\n-[name:Insert Name][text:nahidahmed]\n-[name:First Command][this is a first command]\n-[name:Folders Submenu]\n--[name:Open AppData Folder][folder:C:\\Users\\nahid\\.gemini\\antigravity-cli]\n--[name:Open Workspace][folder:C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager]\n[name:My Main Options]\n-[name:Insert Name][text:nahidahmed]\n-[name:First Command][this is a first command]\n-[name:Folders Submenu]\n--[name:Open AppData Folder][folder:C:\\Users\\nahid\\.gemini\\antigravity-cli]\n--[name:Open Workspace][folder:C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager]",
+            "replacement": "[name:AI CLI Agents]\n-[name:AGY][text:agy --dangerously-skip-permissions -c]\n-[name:CODEX][text:codex --dangerously-bypass-approvals-and-sandbox resume]\n-[name:KIRO][text:kiro-cli chat --trust-all-tools --resume]\n[name:Folders]\n-[name:ms1]\n--[name:AutoHotKey][folder:C:\\@delta\\ms1\\@AutoHotKey]\n--[name:asset][folder:C:\\@delta\\ms1\\asset]\n--[name:md][folder:C:\\@delta\\ms1\\md]",
             "delivery_method": "paste",
             "show_as_menu": true,
             "window_title": "",
