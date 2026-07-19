@@ -2,14 +2,19 @@
 
 All sessions are recorded here. Do not archive old entries.
 
-## 2026-07-19 07:37 - Window Safety Try-Catches & Parent Trigger Bypass
+## 2026-07-19 07:55 - Submenu Hover Auto-Expansion & Bounds Safety Checks
 
 **What We Accomplished:**
 
-- Prevented "Gui has no window" error during asynchronous window events by registering events immediately after GUI creation, and wrapping the `.Show()` calls inside `CreateGUI()` in try-catch blocks.
-- Resolved submenu highlight and premature closing issues by verifying if the cursor is still hovering over the parent item that triggered the submenu. If it is, the backtrack closing routine is bypassed, allowing the submenu to remain open.
+- Resolved bug where the first item of a newly cascaded submenu did not auto-expand on hover by initializing `selectedIndex` to `0` (instead of `1`). This triggers the `selectedIndex != idx` transition, initiating the hover submenu opening sequence correctly for all items.
+- Added safety bounds checks to `OnKeyDown` and `SelectCurrent` to prevent potential out-of-bounds index errors when `selectedIndex` is `0`.
 
 **Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:37 - Window Safety Try-Catches & Parent Trigger Bypass
 
 - `ahk_gui_pyqt.py`
 - `md/RECENT.md`

@@ -8,6 +8,7 @@
 
 2. **Hover Auto-Expansion & Validation**:
    - Submenus now automatically open on hover.
+   - Fixed a bug where the first item of submenus (index 1) did not auto-expand because the selected index defaulted to 1. We now initialize `selectedIndex` to `0` and perform safety checks on key/select events.
    - Prevented instant/accidental triggers by implementing a 400ms debouncing delay.
    - Added hover control verification: when the timer fires, the control under the cursor is checked to verify the mouse is still on the item.
 
