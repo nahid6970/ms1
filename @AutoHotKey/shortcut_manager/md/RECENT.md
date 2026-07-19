@@ -2,6 +2,20 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 13:22 - Favourite Bookmark Feature
+
+**What We Accomplished:**
+
+- Added a ⭐ Favourite checkbox (yellow-styled) in the shortcut edit dialog, below "Enable Shortcut".
+- Favourited shortcuts display a ⭐ icon before their name in the main view.
+- Added a collapsible "⭐ Favourites" section at the very top of the first column that aggregates all favourited shortcuts from every type (script, launcher, text, file, context, exclusion, startup, remap).
+- The `favourite` field is persisted in `ahk_shortcuts.json`.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
 ## 2026-07-19 12:17 - Shell Command Execution Tag (`cmd:`) for Selection Menus
 
 **What We Accomplished:**

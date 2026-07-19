@@ -808,7 +808,8 @@
             "window_title_enabled": false,
             "process_name_enabled": false,
             "window_class_enabled": false,
-            "enabled": true
+            "enabled": true,
+            "favourite": true
         }
     ],
     "file_shortcuts": [

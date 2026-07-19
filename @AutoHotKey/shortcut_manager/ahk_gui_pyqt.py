@@ -765,6 +765,17 @@ class AddEditShortcutDialog(QDialog):
             }}
         """)
 
+        self.favourite_checkbox = QCheckBox("⭐ Favourite")
+        self.favourite_checkbox.setChecked(False)
+        self.favourite_checkbox.setStyleSheet(f"""
+            QCheckBox {{
+                font-family: 'Consolas', 'Segoe UI', sans-serif;
+                font-size: 11pt;
+                color: {CP_YELLOW};
+                spacing: 8px;
+            }}
+        """)
+
         # Common template helper style for standard recording buttons
         record_style = """
             QPushButton {
@@ -901,6 +912,7 @@ class AddEditShortcutDialog(QDialog):
         # ── Toggle Buttons (Placed neatly at the bottom) ──────────────
         form_layout.addSpacing(10)
         form_layout.addWidget(self.enabled_checkbox)
+        form_layout.addWidget(self.favourite_checkbox)
 
         if self.shortcut_type == "launcher":
             self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
@@ -1354,6 +1366,7 @@ SendText("Hello World")"""
         self.category_combo.setCurrentText(self.shortcut_data.get("category", ""))
         self.description_edit.setText(self.shortcut_data.get("description", ""))
         self.enabled_checkbox.setChecked(self.shortcut_data.get("enabled", True))
+        self.favourite_checkbox.setChecked(self.shortcut_data.get("favourite", False))
 
         if self.shortcut_type == "script":
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
@@ -1720,6 +1733,7 @@ SendText("Hello World")"""
         category = self.category_combo.currentText().strip() or "General"
         description = self.description_edit.text().strip()
         enabled = self.enabled_checkbox.isChecked()
+        favourite = self.favourite_checkbox.isChecked()
 
         if self.shortcut_type == "script":
             hotkey = self.hotkey_edit.text().strip()
@@ -1883,6 +1897,8 @@ SendText("Hello World")"""
                 "window_class_enabled": self.window_class_toggle.isChecked(),
                 "enabled": enabled
             }
+
+        shortcut_data['favourite'] = favourite
 
         if self.shortcut_data:
             # Edit existing
@@ -2836,6 +2852,50 @@ class AHKShortcutEditor(QMainWindow):
         <body>
             <div class="container">
                 <div class="column">
+        """
+
+        # ── FAVOURITE section ──────────────────────────────
+        all_shortcuts_with_type = []
+        for s in script_shortcuts:
+            if s.get('favourite', False):
+                idx = self.script_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'script', idx))
+        for s in launcher_shortcuts:
+            if s.get('favourite', False):
+                idx = self.launcher_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'launcher', idx))
+        for s in remap_shortcuts:
+            if s.get('favourite', False):
+                idx = self.remap_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'remap', idx))
+        for s in context_shortcuts:
+            if s.get('favourite', False):
+                idx = self.context_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'context', idx))
+        for s in exclusion_rules:
+            if s.get('favourite', False):
+                idx = self.exclusion_rules.index(s)
+                all_shortcuts_with_type.append((s, 'exclude', idx))
+        for s in startup_scripts:
+            if s.get('favourite', False):
+                idx = self.startup_scripts.index(s)
+                all_shortcuts_with_type.append((s, 'startup', idx))
+        for s in text_shortcuts:
+            if s.get('favourite', False):
+                idx = self.text_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'text', idx))
+        for s in file_shortcuts:
+            if s.get('favourite', False):
+                idx = self.file_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'file', idx))
+
+        if all_shortcuts_with_type:
+            html += f'<div class="section-title"><a href="toggle-section://favourite">{get_toggle_icon("favourite")} ⭐ Favourites</a></div>'
+            if self.section_states.get("favourite", True):
+                for shortcut, stype, sidx in all_shortcuts_with_type:
+                    html += self.generate_shortcut_html(shortcut, stype, sidx, False)
+
+        html += f"""
                     <div class="section-title"><a href="toggle-section://script">{get_toggle_icon('script')} Script Shortcuts</a></div>
         """
 
@@ -3127,6 +3187,8 @@ class AHKShortcutEditor(QMainWindow):
         icon_width = 60
 
         name = shortcut.get('name', 'Unnamed')
+        favourite = shortcut.get('favourite', False)
+        fav_icon = '<span style="color: #FCEE0A; font-size: 14px;">⭐</span> ' if favourite else ''
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
@@ -3154,7 +3216,7 @@ class AHKShortcutEditor(QMainWindow):
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="middle" align="center">󰌌</td>
-                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{name}{desc_html}</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{name}{desc_html}</td>
                                 </tr>
                             </table>
                         </a>
