@@ -14,7 +14,8 @@
     "bin": false,
     "node_modules": false,
     "obj": false,
-    ".gitignore": false
+    ".gitignore": false,
+    ".uv-envs": false
   },
   "theme": {
     "folder_normal": 208,

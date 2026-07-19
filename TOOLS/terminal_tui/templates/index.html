@@ -14865,6 +14865,71 @@
             splitTerminal('tabs', `tailscale funnel ${port}`);
         }
 
+        function showConnectionLostOverlay() {
+            if (document.getElementById('connection-lost-overlay')) return;
+            
+            const overlay = document.createElement('div');
+            overlay.id = 'connection-lost-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(8, 11, 17, 0.98);
+                color: #f1f5f9;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                font-family: system-ui, -apple-system, sans-serif;
+                text-align: center;
+                backdrop-filter: blur(8px);
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: #161c26; padding: 32px 40px; border-radius: 12px; border: 1.5px solid #ef4444; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-width: 400px; width: 90%; box-sizing: border-box;">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">🔌</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 8px 0; color: #ef4444;">Server Offline</h3>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin: 0 0 20px 0; line-height: 1.5;">The backend service (app.py) is no longer running. This window will close automatically.</p>
+                    <div style="font-size: 0.72rem; color: #475569;">Attempting to close tab...</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function startBackendHealthCheck() {
+            let consecutiveFailures = 0;
+            const maxFailures = 4;
+            const checkInterval = 3000;
+
+            setInterval(async () => {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2500);
+                    
+                    const response = await fetch('/api/projects', { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        consecutiveFailures = 0;
+                    } else {
+                        consecutiveFailures++;
+                    }
+                } catch (err) {
+                    consecutiveFailures++;
+                }
+
+                if (consecutiveFailures >= maxFailures) {
+                    console.warn("Backend server (app.py) is not running. Closing browser window...");
+                    showConnectionLostOverlay();
+                    window.open('', '_self', '');
+                    window.close();
+                }
+            }, checkInterval);
+        }
+
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
@@ -14921,6 +14986,9 @@
                     restoreTerminalLayout(savedActiveProject);
                 }
             }
+
+            // Start backend health check for auto-closing window if offline
+            startBackendHealthCheck();
         };
     </script>
 </body>
