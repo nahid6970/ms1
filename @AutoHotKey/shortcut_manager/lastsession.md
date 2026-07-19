@@ -7,4 +7,6 @@
 - **Syntax Info Dialog (ℹ)**: Cleaned up border styles and widened the dialogue size to ensure no horizontal scrollbar is present.
 - **Search Optimization**: Conditionally hidden empty section categories when search query yields 0 matching entries.
 - **Dropdown Bugfix**: Added guards in CustomMenuGUI (`OnItemClick` and `EnterSubmenu`) to prevent redundant transition loops when clicking a parent item that contains subitems, fixing the buggy hovering state.
+- **Native Menu Toggle**: Added a setting checkbox "Use standard Windows native context menu" to switch between the custom side-by-side cascading GUI and standard AHK Windows native context menus.
+
 
