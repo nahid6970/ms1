@@ -2609,70 +2609,10 @@
 
                 <!-- API Key Configuration -->
                 <div id="ai-modal-api-keys-container" style="flex: 1; max-width: 400px; margin-bottom: 0;">
-                    <!-- Gemini API Key -->
-                    <div id="ai-api-key-container" style="display:none;">
-                        <div style="display:flex; gap:6px;">
-                            <input type="password" id="ai-api-key-input" placeholder="Gemini API Key (AIzaSy...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                            <button onclick="saveGeminiAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
-                        </div>
-                    </div>
-                    <div id="ai-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
-                        <button onclick="clearGeminiAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            API Key
-                        </button>
-                        <button onclick="openAIAccountsManager('gemini')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Gemini Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </button>
-                    </div>
-                    <!-- Groq API Key -->
-                    <div id="groq-api-key-container" style="display:none;">
-                        <div style="display:flex; gap:6px;">
-                            <input type="password" id="groq-api-key-input" placeholder="Groq API Key (gsk_...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                            <button onclick="saveGroqAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
-                        </div>
-                    </div>
-                    <div id="groq-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
-                        <button onclick="clearGroqAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            API Key
-                        </button>
-                        <button onclick="openAIAccountsManager('groq')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Groq Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </button>
-                    </div>
-                    <!-- Morph API Key -->
-                    <div id="morph-api-key-container" style="display:none;">
-                        <div style="display:flex; gap:6px;">
-                            <input type="password" id="morph-api-key-input" placeholder="Morph API Key (sk-...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                            <button onclick="saveMorphAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
-                        </div>
-                    </div>
-                    <div id="morph-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
-                        <button onclick="clearMorphAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            API Key
-                        </button>
-                        <button onclick="openAIAccountsManager('morph')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage Morph Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </button>
-                    </div>
-                    <!-- OpenRouter API Key -->
-                    <div id="openrouter-api-key-container" style="display:none;">
-                        <div style="display:flex; gap:6px;">
-                            <input type="password" id="openrouter-api-key-input" placeholder="OpenRouter API Key (sk-or-...)" style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 10px; font-size:0.78rem; outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                            <button onclick="saveOpenRouterAPIKey()" style="padding:5px 12px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500;">Save</button>
-                        </div>
-                    </div>
-                    <div id="openrouter-api-key-saved-msg" style="display:none; justify-content:flex-start; align-items:center; gap:6px;">
-                        <button onclick="clearOpenRouterAPIKey()" style="background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#10b981; font-size:0.72rem; cursor:pointer; padding:4px 10px; border-radius:6px; font-weight:500; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseenter="this.style.background='#10b981'; this.style.color='#fff'" onmouseleave="this.style.background='rgba(16, 185, 129, 0.15)'; this.style.color='#10b981'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            API Key
-                        </button>
-                        <button onclick="openAIAccountsManager('openrouter')" style="background:none; border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; padding:4px 6px; border-radius:6px; font-weight:500; display:flex; align-items:center; justify-content:center; transition:all 0.2s; height:24px;" title="Manage OpenRouter Accounts" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        </button>
-                    </div>
+                    <button onclick="openAIAccountsManager(activeFilterTab)" style="background:var(--bg-sidebar); border:1px solid var(--border-color); color:var(--text-primary); cursor:pointer; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:500; display:flex; align-items:center; gap:6px; transition:all 0.2s; outline:none;" onmouseover="this.style.color='var(--accent-color)'; this.style.borderColor='var(--accent-color)'" onmouseout="this.style.color='var(--text-primary)'; this.style.borderColor='var(--border-color)'">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        API Settings
+                    </button>
                 </div>
 
                 <!-- Account Label Selector -->
@@ -10280,25 +10220,7 @@
             renderFilterModelsList();
             fetchDynamicModels(provider);
 
-            // Show/hide API key sections based on active provider tab
-            const keyMap = {
-                gemini: { container: 'ai-api-key-container', saved: 'ai-api-key-saved-msg', storageKey: 'gemini-api-key' },
-                groq: { container: 'groq-api-key-container', saved: 'groq-api-key-saved-msg', storageKey: 'groq-api-key' },
-                morph: { container: 'morph-api-key-container', saved: 'morph-api-key-saved-msg', storageKey: 'morph-api-key' },
-                openrouter: { container: 'openrouter-api-key-container', saved: 'openrouter-api-key-saved-msg', storageKey: 'openrouter-api-key' }
-            };
-            Object.entries(keyMap).forEach(([p, ids]) => {
-                const containerEl = document.getElementById(ids.container);
-                const savedEl = document.getElementById(ids.saved);
-                if (p === provider) {
-                    const hasKey = !!localStorage.getItem(ids.storageKey);
-                    if (containerEl) containerEl.style.display = hasKey ? 'none' : 'block';
-                    if (savedEl) savedEl.style.display = hasKey ? 'flex' : 'none';
-                } else {
-                    if (containerEl) containerEl.style.display = 'none';
-                    if (savedEl) savedEl.style.display = 'none';
-                }
-            });
+            // API Keys are managed in the API accounts manager (openAIAccountsManager)
 
             // Populate account label selector for this provider
             populateModalLabelSelector(provider);
