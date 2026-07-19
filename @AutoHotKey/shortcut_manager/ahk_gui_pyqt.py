@@ -1165,7 +1165,33 @@ SendText("Hello World")"""
                     margin-top: 5px;
                 }}
             """)
-            replacement_layout.addWidget(self.show_as_menu_checkbox)
+
+            menu_info_btn = QPushButton("ℹ")
+            menu_info_btn.setFixedSize(26, 26)
+            menu_info_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            menu_info_btn.setToolTip("Selection Menu Syntax Help")
+            menu_info_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background: {CP_DIM};
+                    color: {CP_CYAN};
+                    border: 1px solid {CP_CYAN};
+                    border-radius: 13px;
+                    font-size: 14pt;
+                    font-weight: bold;
+                    padding: 0px;
+                }}
+                QPushButton:hover {{
+                    background: {CP_CYAN};
+                    color: {CP_BG};
+                }}
+            """)
+            menu_info_btn.clicked.connect(self.show_menu_syntax_help)
+
+            menu_row = QHBoxLayout()
+            menu_row.addWidget(self.show_as_menu_checkbox)
+            menu_row.addWidget(menu_info_btn)
+            menu_row.addStretch()
+            replacement_layout.addLayout(menu_row)
             
             top_layout.addLayout(replacement_layout)
         
@@ -1196,6 +1222,112 @@ SendText("Hello World")"""
                 existing_sorted.remove(cat)
         result.extend(existing_sorted)
         return result
+
+    def show_menu_syntax_help(self):
+        help_dialog = QDialog(self)
+        help_dialog.setWindowTitle("Selection Menu Syntax Help")
+        help_dialog.setMinimumSize(620, 560)
+        help_dialog.setStyleSheet(f"""
+            QDialog {{
+                background: {CP_BG};
+            }}
+        """)
+        layout = QVBoxLayout(help_dialog)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(False)
+        browser.setStyleSheet(f"""
+            QTextBrowser {{
+                background: {CP_PANEL};
+                color: {CP_TEXT};
+                border: none;
+                font-family: 'Consolas', 'Segoe UI', monospace;
+                font-size: 10pt;
+                padding: 15px;
+            }}
+        """)
+        browser.setHtml(f"""
+        <h2 style="color:{CP_CYAN}; margin-bottom:8px;">Selection Menu Syntax</h2>
+        <p>Write your replacement text using the syntax below. Each line becomes a menu item.</p>
+
+        <h3 style="color:{CP_YELLOW};">Hierarchy (Dashes)</h3>
+        <p>Use leading dashes (<code>-</code>) to create nested submenus:</p>
+        <pre style="background:#1a1a1a; padding:8px; border-left:3px solid {CP_CYAN}; margin:6px 0;">
+[name:Root Item]
+-[name:Level 1 Child]
+--[name:Level 2 Child]
+---[name:Level 3 Child]</pre>
+        <p style="color:{CP_SUBTEXT};">Items with children become expandable submenus (up to 5 levels). Empty lines are skipped.</p>
+
+        <h3 style="color:{CP_YELLOW};">Action Tags</h3>
+        <p>Each line can have one or more <code>[key:value]</code> tags:</p>
+        <table cellspacing="0" cellpadding="4" style="border-collapse:collapse; width:100%; margin:6px 0;">
+        <tr style="background:#1a1a1a;">
+            <td style="color:{CP_CYAN}; font-weight:bold; border-bottom:1px solid {CP_DIM}; width:80px;">Tag</td>
+            <td style="color:{CP_TEXT}; border-bottom:1px solid {CP_DIM};">Purpose</td>
+        </tr>
+        <tr><td style="color:{CP_GREEN};"><code>name</code></td><td>Display label in the menu</td></tr>
+        <tr><td style="color:{CP_GREEN};"><code>text</code></td><td>Paste/type the specified text</td></tr>
+        <tr><td style="color:{CP_GREEN};"><code>folder</code></td><td>Open folder in File Explorer</td></tr>
+        <tr><td style="color:{CP_GREEN};"><code>cmd</code></td><td>Run a shell command</td></tr>
+        <tr><td style="color:{CP_ORANGE};"><code>shell</code></td><td>Shell for <code>cmd</code>: <code>cmd</code> (default) or <code>pwsh</code></td></tr>
+        <tr><td style="color:{CP_ORANGE};"><code>show</code></td><td>Visibility for <code>cmd</code>: <code>hidden</code> (default) or <code>visible</code></td></tr>
+        </table>
+
+        <h3 style="color:{CP_YELLOW};">Examples</h3>
+        <pre style="background:#1a1a1a; padding:8px; border-left:3px solid {CP_GREEN}; margin:6px 0;">
+<span style="color:{CP_SUBTEXT};"># Paste text</span>
+-[name:My Email][text:user@example.com]
+
+<span style="color:{CP_SUBTEXT};"># Open a folder</span>
+-[name:Downloads][folder:C:\\Users\\nahid\\Downloads]
+
+<span style="color:{CP_SUBTEXT};"># Run CMD command (hidden)</span>
+-[name:Flush DNS][cmd:ipconfig /flushdns]
+
+<span style="color:{CP_SUBTEXT};"># Run CMD command (visible terminal)</span>
+-[name:Ping Google][cmd:ping google.com][show:visible]
+
+<span style="color:{CP_SUBTEXT};"># Run PowerShell command</span>
+-[name:List Processes][cmd:Get-Process][shell:pwsh][show:visible]
+
+<span style="color:{CP_SUBTEXT};"># Nested submenu</span>
+[name:Dev Tools]
+-[name:Commands]
+--[name:Git Status][cmd:git status][shell:pwsh][show:visible]
+--[name:Clear Temp][cmd:Remove-Item $env:TEMP\\* -Recurse -Force][shell:pwsh]
+-[name:Folders]
+--[name:Project][folder:C:\\myproject]</pre>
+
+        <h3 style="color:{CP_YELLOW};">Defaults</h3>
+        <ul>
+        <li>If no <code>[name:]</code> is given, the action value is used as the label.</li>
+        <li>A tag without a colon like <code>[hello world]</code> defaults to <code>[text:hello world]</code>.</li>
+        <li>Plain text without brackets uses the line as both name and text.</li>
+        </ul>
+        """)
+        layout.addWidget(browser)
+
+        close_btn = QPushButton("Close")
+        close_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {CP_DIM};
+                color: {CP_TEXT};
+                border: none;
+                padding: 8px 30px;
+                font-size: 11pt;
+                margin: 8px;
+            }}
+            QPushButton:hover {{
+                background: {CP_CYAN};
+                color: {CP_BG};
+            }}
+        """)
+        close_btn.clicked.connect(help_dialog.accept)
+        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        help_dialog.exec()
 
     def browse_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select File to Drop")
