@@ -1174,9 +1174,8 @@ SendText("Hello World")"""
                 QPushButton {{
                     background: transparent;
                     color: {CP_CYAN};
-                    border: 1px solid {CP_CYAN};
-                    border-radius: 10px;
-                    font-size: 11pt;
+                    border: none;
+                    font-size: 13pt;
                     font-weight: bold;
                     padding: 0px;
                     margin: 0px;
