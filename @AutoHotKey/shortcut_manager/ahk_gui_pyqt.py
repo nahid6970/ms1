@@ -3569,8 +3569,34 @@ class AHKShortcutEditor(QMainWindow):
                 "                Send \"^l\"",
                 "                Sleep 150  ; Focus address bar",
                 "                Send \"^v\"",
-                "                Sleep 150  ; Paste path"
+                "                Sleep 150  ; Paste path",
+                "                Send \"{Enter}\"",
+                "                Sleep 200  ; Wait before restoring clipboard",
+                "            }",
+                "            A_Clipboard := clipSaved",
+                "            return",
+                "        }",
+                "    }",
+                "    Run(\"explorer.exe `\"\" path \"`\"\")",
+                "}",
+                "",
+                "RunCmd(command) {",
+                "    Run(A_ComSpec . \" /c \" . command, , \"Hide\")",
+                "}",
+                "",
+                "RunCmdVisible(command) {",
+                "    Run(A_ComSpec . \" /k \" . command)",
+                "}",
+                "",
+                "RunPwsh(command) {",
+                "    Run(\"pwsh.exe -NoProfile -Command \" . command, , \"Hide\")",
+                "}",
+                "",
+                "RunPwshVisible(command) {",
+                "    Run(\"pwsh.exe -NoProfile -NoExit -Command \" . command)",
+                "}"
             ])
+
             if self.use_native_menu:
                 output_lines.extend([
                     "Class CustomMenu extends Menu {",
@@ -4033,55 +4059,6 @@ class AHKShortcutEditor(QMainWindow):
                     "    CustomMenuGUI.OnHoverTimer()",
                     "}"
                 ])
-
-            output_lines.extend([
-                "                Send \"^l\"",
-                "                Sleep 150  ; Focus address bar",
-                "                Send \"^v\"",
-                "                Sleep 150  ; Paste path",
-                "                Send \"{Enter}\"",
-                "                Sleep 200  ; Wait before restoring clipboard",
-                "            }",
-                "            A_Clipboard := clipSaved",
-                "            return",
-                "        }",
-                "    }",
-                "    Run(\"explorer.exe `\"\" path \"`\"\")",
-                "}",
-                "",
-                "RunCmd(command) {",
-                "    Run(A_ComSpec . \" /c \" . command, , \"Hide\")",
-                "}",
-                "",
-                "RunCmdVisible(command) {",
-                "    Run(A_ComSpec . \" /k \" . command)",
-                "}",
-                "",
-                "RunPwsh(command) {",
-                "    Run(\"pwsh.exe -NoProfile -Command \" . command, , \"Hide\")",
-                "}",
-                "",
-                "RunPwshVisible(command) {",
-                "    Run(\"pwsh.exe -NoProfile -NoExit -Command \" . command)",
-                "}",
-                "",
-                "    }",
-                "}",
-                "",
-                "CustomMenuGUI_KeyDown(wParam, lParam, msg, hwnd) {",
-                "    return CustomMenuGUI.OnKeyDown(wParam, lParam, msg, hwnd)",
-                "}",
-                "CustomMenuGUI_MouseMove(wParam, lParam, msg, hwnd) {",
-                "    return CustomMenuGUI.OnMouseMove(wParam, lParam, msg, hwnd)",
-                "}",
-                "CustomMenuGUI_Activate(wParam, lParam, msg, hwnd) {",
-                "    return CustomMenuGUI.OnActivate(wParam, lParam, msg, hwnd)",
-                "}",
-                "CustomMenuGUI_HoverTimer() {",
-                "    CustomMenuGUI.OnHoverTimer()",
-                "}"
-                ""
-            ])
 
             def split_context_values(raw_value):
                 return [part.strip() for part in raw_value.split(",") if part.strip()]
