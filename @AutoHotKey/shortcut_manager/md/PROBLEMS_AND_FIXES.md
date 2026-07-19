@@ -55,5 +55,56 @@
 - `ahk_gui_pyqt.py`
 - `dev.md`
 
+## 2026-07-19 07:14 - AHK v2 Array is Empty error when going back
+
+**Problem:** Navigating back in submenus caused a crash: `Error: Array is empty` pointing to `parentObj := CustomMenuGUI.guiStack.Pop()`.
+
+**Root Cause:** A race condition allowed navigation triggers to execute twice before the stack operation completed, attempting to pop an already empty array.
+
+**Solution:** Popped the stack parent atomically before yielding execution to UI transitions, adding safety length checks to `guiStack.Length` in both `GoBack` and keyboard navigation.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+
+## 2026-07-19 07:13 - AHK v2 Gui has no window error during menu transitions
+
+**Problem:** Showing menus occasionally crashed the script: `Error: Gui has no window` when trying to register GUI events or show a menu.
+
+**Root Cause:** Event handlers were registered after the GUI window creation asynchronously, or `.Show()` was called before the OS window handle was fully prepared.
+
+**Solution:** Immediate event handler registration right after `Gui(...)` instantiation and wrapped all `.Show()` calls inside `try-catch` blocks.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+
+## 2026-07-19 07:19 - AHK v2 Invalid callback function for SetTimer
+
+**Problem:** Hovering over items caused a crash: `Error: Invalid callback function` when attempting to stop the hover timer via `SetTimer(CustomMenuGUI.OnHoverTimer, 0)`.
+
+**Root Cause:** AHK v2 has strict constraints on passing static methods directly as callbacks to timers or hooks, leading to invalid handle references.
+
+**Solution:** Routed timer callbacks through global proxy functions (e.g., `CustomMenuGUI_HoverTimer`) rather than static class methods.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+
+## 2026-07-19 08:05 - Selection menus remain stuck open on the screen
+
+**Problem:** When hovering between main menus and submenus, or clicking elsewhere on the screen, menus sometimes remained stuck open or required repeated click/hover interactions to close.
+
+**Root Cause:** 
+1. When backtracking on hover, the parent menu was never activated or refocused, leaving the OS active window state out of sync.
+2. The deactivation handler `OnActivate` only checked deactivation for the leaf menu (`CustomMenuGUI.guiObj.Hwnd`), ignoring focus shifts from parent menu windows.
+
+**Solution:** 
+1. Added `try CustomMenuGUI.guiObj.Show()` during mouse backtracking (`OnMouseMove`) to explicitly reactivate the parent GUI.
+2. Updated `OnActivate` to verify deactivation for any menu window in the stack, and check if the newly activated window (`lParam`) belongs to our menu stack. If focus shifts to any external window, `CloseAll()` is triggered.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+- `md/PROBLEMS_AND_FIXES.md`
+
+
 
 

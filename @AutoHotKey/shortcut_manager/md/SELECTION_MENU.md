@@ -79,6 +79,18 @@ For the example above, the compiler generates clean, nested Menu object initiali
 }
 ```
 
+## GUI Interaction & Navigation Behavior
+
+Instead of standard native context menus, the compiler implements a custom side-by-side cascading menu system with advanced mouse and window behaviors:
+
+1. **Cascading Side-by-Side Submenus**: Submenus open adjacent to their parent menu (expanding to the right by default) instead of replacing the parent window or requiring a back button.
+2. **Hover Auto-Expansion & Debouncing**: Hovering the mouse pointer over a submenu item automatically opens it. A 400ms debouncing delay is enforced, and mouse-position verification is performed when the timer fires to prevent accidental triggers when moving the pointer across items.
+3. **Boundary-Aware Flipping & Clamping**: Menu placement is calculated using screen coordinates (`CoordMode "Mouse", "Screen"`) and is aware of multi-monitor work areas (`MonitorGetWorkArea`).
+   - **Horizontal Flipping**: If a submenu would extend beyond the right boundary of the current monitor, it automatically flips to open on the opposite (left) side of the parent menu.
+   - **Vertical Clamping**: If a menu would extend below the bottom boundary of the monitor, it is shifted upward to stay fully visible on the screen.
+4. **Mouse Back-tracking**: Moving the mouse pointer back onto a parent menu automatically hides and destroys all active submenus down the stack. The parent GUI window is explicitly reactivated to maintain focus.
+5. **Loss-of-Focus Auto-Closing**: Focus is monitored globally using the `WM_ACTIVATE` message hook. When any menu window is deactivated, the script checks if the newly activated window (`lParam`) belongs to the menu stack. If focus shifts to any window outside the stack (e.g. desktop, code editor), the entire menu cascade is instantly closed and cleaned up.
+
 ## Custom Styling (Font Family & Size)
 
 Instead of native system-wide menus, selection menus are compiled using a custom AHK GUI window (`CustomMenu` and `CustomMenuGUI`). This allows complete freedom to adjust typography.

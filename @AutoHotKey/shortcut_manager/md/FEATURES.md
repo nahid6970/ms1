@@ -117,7 +117,12 @@
 - Automatically detects if the trigger is a hotkey (e.g., starts with modifier chars like `^`, `!`, `+`, `#` or contains ` & `) or a hotstring, compiling as a hotkey (`trigger::`) or hotstring (`:X:trigger::`) dynamically.
 - When "Show multi-line text as a selection menu" is checked, parses the replacement text to generate interactive hierarchically nested menus (up to 5 levels) in AutoHotkey v2 using leading-dash syntax.
 - Renders using a custom, high-performance GUI wrapper (`CustomMenu`/`CustomMenuGUI`) supporting full typography customization (font size and font family adjustable via the editor's Settings dialog).
-- Supports fully fluid mouse hover highlighting, smooth keyboard arrow-key navigation (Esc to close, Left Arrow to go Back, Right/Enter to select), and automatic auto-close on lost focus.
+- Supports side-by-side cascading submenus (opens to the right of parent menu window by default).
+- Supports hover-to-expand behavior with 400ms debouncing and mouse-position verification to avoid accidental opening.
+- Supports boundary-aware positioning (flips left if a submenu exceeds the right edge of the monitor, and clamps vertically within multi-monitor work areas).
+- Supports backtracking navigation (hovering back onto a parent menu automatically closes/destroys active submenus down the stack and reactivates the parent menu window).
+- Supports reliable global deactivation (monitors `WM_ACTIVATE` script-wide, closing all menus if focus shifts outside the active menu stack).
+- Supports smooth keyboard arrow-key navigation (Esc to close, Left Arrow to go Back, Right/Enter to select).
 - Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Extensible for future action tags.
 - Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `OpenFolderInTab(...)` for opening folders (opening in a new tab if an existing Explorer window is present).
 
