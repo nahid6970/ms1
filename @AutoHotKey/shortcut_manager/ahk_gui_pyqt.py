@@ -2166,6 +2166,7 @@ class AHKShortcutEditor(QMainWindow):
         }
         # Section expanded/collapsed states
         self.section_states = {
+            "favourite": True,
             "script": True,
             "launcher": True,
             "context": True,
