@@ -2894,7 +2894,7 @@ class AHKShortcutEditor(QMainWindow):
             html += f'<div class="section-title"><a href="toggle-section://favourite">{get_toggle_icon("favourite")} ⭐ Favourites</a></div>'
             if self.section_states.get("favourite", True):
                 for shortcut, stype, sidx in all_shortcuts_with_type:
-                    html += self.generate_shortcut_html(shortcut, stype, sidx, False)
+                    html += self.generate_shortcut_html(shortcut, stype, sidx, False, is_favourite=True)
 
         if script_shortcuts:
             html += f"""
@@ -3135,7 +3135,7 @@ class AHKShortcutEditor(QMainWindow):
 
         return html
 
-    def generate_shortcut_html(self, shortcut, shortcut_type, index, indented):
+    def generate_shortcut_html(self, shortcut, shortcut_type, index, indented, is_favourite=False):
         enabled = shortcut.get('enabled', True)
         status = "✅" if enabled else "❌"
         status_class = "status-enabled" if enabled else "status-disabled"
@@ -3196,6 +3196,12 @@ class AHKShortcutEditor(QMainWindow):
             key = shortcut.get('trigger', '')
             key_width = 220
         
+        if is_favourite:
+            key_width = 220
+            # Truncate overly long key values for favourites to keep alignment clean
+            if len(key) > 22:
+                key = key[:19] + "..."
+
         # Ensure icon column is stable
         icon_width = 60
 
