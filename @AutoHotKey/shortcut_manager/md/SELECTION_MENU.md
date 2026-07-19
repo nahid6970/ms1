@@ -104,14 +104,18 @@ Instead of standard native context menus, the compiler implements a custom side-
 4. **Mouse Back-tracking**: Moving the mouse pointer back onto a parent menu automatically hides and destroys all active submenus down the stack. The parent GUI window is explicitly reactivated to maintain focus.
 5. **Loss-of-Focus Auto-Closing**: Focus is monitored globally using the `WM_ACTIVATE` message hook. When any menu window is deactivated, the script checks if the newly activated window (`lParam`) belongs to the menu stack. If focus shifts to any window outside the stack (e.g. desktop, code editor), the entire menu cascade is instantly closed and cleaned up.
 
-## Custom Styling (Font Family & Size)
+## Native Menu vs. Custom GUI Menu
 
-Instead of native system-wide menus, selection menus are compiled using a custom AHK GUI window (`CustomMenu` and `CustomMenuGUI`). This allows complete freedom to adjust typography.
+By default, selection menus are compiled using a custom AHK GUI window (`CustomMenu` and `CustomMenuGUI`) which supports custom styling, side-by-side cascading submenus, and mouse-hover expansion.
+
+However, if you prefer the standard Windows native context menu style, you can toggle this behavior.
 
 ### Configuration
 Open the **Settings** dialog in the AutoHotkey Shortcut Editor GUI. You will find:
 1. **Selection Menu Font**: Select any font family installed on your system (e.g. `Segoe UI`, `Consolas`, `Arial`, or `Segoe UI Semibold`).
 2. **Selection Menu Font Size**: Adjust the font size from `8` up to `36`.
+3. **Use standard Windows native context menu**: Check this box to bypass the custom side-by-side GUI menu stack entirely and compile selection menus to run using standard AHK v2 `Menu` objects.
 
-These values are saved to `ahk_shortcuts.json` under `selection_menu_font_family` and `selection_menu_font_size` and automatically compiled into the preamble of `generated_shortcuts.ahk`.
+These values are saved to `ahk_shortcuts.json` under `selection_menu_font_family`, `selection_menu_font_size`, and `use_native_menu` and automatically compiled into `generated_shortcuts.ahk`.
+
 

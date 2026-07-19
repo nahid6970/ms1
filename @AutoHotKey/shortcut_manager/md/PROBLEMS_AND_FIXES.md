@@ -105,6 +105,29 @@
 - `md/RECENT.md`
 - `md/PROBLEMS_AND_FIXES.md`
 
+## 2026-07-19 14:00 - Selection Menu Bug: Redundant submenu transition loops when clicking parent items
+
+**Problem:** If an item in the selection menu dropdown has subitems, clicking the item itself rather than hovering would cause the UI to become buggy, hovering would stop working, and AHK would require a reload/restart.
+
+**Root Cause:** Clicking a parent item triggered `OnItemClick` which executed the submenu transition logic concurrently with the hover auto-expansion trigger, resulting in double-activation and mismatched GUI stacks.
+
+**Solution:** Added safety guard conditions in both `OnItemClick` and `EnterSubmenu` in `CustomMenuGUI` to check `isTransitioning` and return early if a transition is already in progress.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+
+## 2026-07-19 14:15 - Selection Menu Crash: Invalid index error on item click
+
+**Problem:** Clicking some menu items threw a runtime crash: `Error: Invalid index. Specifically: 3` pointing to `item := CustomMenuGUI.activeMenu.items[itemIdx]`.
+
+**Root Cause:** The click callback references the global variable `CustomMenuGUI.activeMenu`. If a transition occurred or the state changed during the click/release cycle, `activeMenu` could point to a different menu object than the one containing the clicked button, leading to out-of-bounds index errors.
+
+**Solution:** Bound the specific menu object `menuObj` directly to each item's button callback wrapper in the GUI creation loop, ensuring it retrieves the item from the correct menu instance rather than relying on the mutable global `activeMenu`.
+
+**Files Modified:**
+- `ahk_gui_pyqt.py`
+
+
 
 
 

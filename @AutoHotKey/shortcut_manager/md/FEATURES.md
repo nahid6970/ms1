@@ -116,14 +116,14 @@
 - Stored in `text_shortcuts`
 - Automatically detects if the trigger is a hotkey (e.g., starts with modifier chars like `^`, `!`, `+`, `#` or contains ` & `) or a hotstring, compiling as a hotkey (`trigger::`) or hotstring (`:X:trigger::`) dynamically.
 - When "Show multi-line text as a selection menu" is checked, parses the replacement text to generate interactive hierarchically nested menus (up to 5 levels) in AutoHotkey v2 using leading-dash syntax.
-- Renders using a custom, high-performance GUI wrapper (`CustomMenu`/`CustomMenuGUI`) supporting full typography customization (font size and font family adjustable via the editor's Settings dialog).
-- Supports side-by-side cascading submenus (opens to the right of parent menu window by default).
+- Renders using either a custom, high-performance GUI wrapper (`CustomMenu`/`CustomMenuGUI`) supporting full typography customization (font size and font family adjustable via the editor's Settings dialog), or standard Windows native context menus (`Menu` objects) via a toggle in the Settings dialog.
+- Supports side-by-side cascading submenus (opens to the right of parent menu window by default) when using the custom GUI wrapper.
 - Supports hover-to-expand behavior with 400ms debouncing and mouse-position verification to avoid accidental opening.
 - Supports boundary-aware positioning (flips left if a submenu exceeds the right edge of the monitor, and clamps vertically within multi-monitor work areas).
 - Supports backtracking navigation (hovering back onto a parent menu automatically closes/destroys active submenus down the stack and reactivates the parent menu window).
 - Supports reliable global deactivation (monitors `WM_ACTIVATE` script-wide, closing all menus if focus shifts outside the active menu stack).
 - Supports smooth keyboard arrow-key navigation (Esc to close, Left Arrow to go Back, Right/Enter to select).
-- Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Extensible for future action tags.
+- Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, `[folder:Folder path to open in Explorer]`, and `[cmd:Shell command]` (configurable via `[shell:]` and `[show:]`).
 - Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `OpenFolderInTab(...)` for opening folders (opening in a new tab if an existing Explorer window is present).
 
 ## File Shortcuts
@@ -156,6 +156,19 @@
 - Set "Inactive in" + process name to stop a background script's hotkeys from firing in a conflicting app.
 - Leave context mode as "No context" for scripts with no hotkeys (timers, hooks, globals).
 
+## Favourites Bookmark Feature
+
+**Status:** Complete
+
+**Description:** Bookmark shortcuts of any type for quick access in a dedicated category.
+
+**Implementation:**
+
+- Shortcuts of any category can be favourited using the "⭐ Favourite" checkbox in the Add/Edit dialog.
+- Favourited items display a ⭐ icon before their name in the editor.
+- A collapsible "⭐ Favourites" category appears at the very top of the editor layout to aggregate and display all bookmarked shortcuts across all sections.
+- Keyboard icons (⌨) and names are vertically aligned cleanly in the Favourites section using a fixed key column width.
+
 ## Search and Organization
 
 **Status:** Complete
@@ -164,7 +177,8 @@
 
 **Implementation:**
 
-- Search box filters all shortcut lists
-- Category grouping can be toggled on/off
-- Category colors are editable
+- Search box filters all shortcut lists. Empty sections are automatically collapsed/hidden if they contain no search results.
+- Category grouping can be toggled on/off.
+- Category colors are editable.
+
 

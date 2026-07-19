@@ -2,6 +2,26 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 15:30 - Native Menu Toggle & Stability Fixes
+
+**What We Accomplished:**
+
+- **Native Menu Toggle**: Added a configuration setting (`use_native_menu`) to toggle between the custom side-by-side cascading GUI menu and the standard AHK native context menus.
+- **Settings Dialog**: Added a checkbox "Use standard Windows native context menu" to allow user configuration.
+- **Stability Fixes**:
+  - Bound `menuObj` to individual item callbacks in `CustomMenuGUI` to fix an out-of-bounds `Invalid Index` runtime crash when clicking menu items during transition cycles.
+  - Added transition guards (`isTransitioning`) to `OnItemClick` and `EnterSubmenu` to prevent redundant reload/hover bugs when clicking menu parent items.
+- **Documentation**: Updated `FEATURES.md`, `SELECTION_MENU.md`, `PROBLEMS_AND_FIXES.md`, and `lastsession.md` to reflect the latest changes.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `lastsession.md`
+- `md/FEATURES.md`
+- `md/SELECTION_MENU.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
 ## 2026-07-19 13:22 - Favourite Bookmark Feature
 
 **What We Accomplished:**
@@ -15,6 +35,7 @@ All sessions are recorded here. Do not archive old entries.
 
 - `ahk_gui_pyqt.py`
 - `md/RECENT.md`
+
 
 ## 2026-07-19 12:17 - Shell Command Execution Tag (`cmd:`) for Selection Menus
 
