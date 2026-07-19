@@ -1256,56 +1256,57 @@ SendText("Hello World")"""
                 color: {CP_TEXT};
                 border: none;
                 font-family: 'Consolas', 'Segoe UI', monospace;
-                font-size: 10pt;
-                padding: 15px;
+                font-size: 10.5pt;
+                padding: 20px;
+                line-height: 1.5;
             }}
         """)
         browser.setHtml(f"""
-        <h2 style="color:{CP_CYAN}; margin-bottom:8px;">Selection Menu Syntax</h2>
-        <p>Write your replacement text using the syntax below. Each line becomes a menu item.</p>
+        <h2 style="color:{CP_CYAN}; margin-top:0px; margin-bottom:12px; font-size: 16pt;">Selection Menu Syntax</h2>
+        <p style="margin-bottom:15px; font-size:11pt;">Write your replacement text using the syntax below. Each line becomes a menu item.</p>
 
-        <h3 style="color:{CP_YELLOW};">Hierarchy (Dashes)</h3>
-        <p>Use leading dashes (<code>-</code>) to create nested submenus:</p>
-        <pre style="background:#1a1a1a; padding:8px; border-left:3px solid {CP_CYAN}; margin:6px 0;">
+        <h3 style="color:{CP_YELLOW}; margin-top:15px; margin-bottom:8px; font-size: 13pt;">Hierarchy (Dashes)</h3>
+        <p style="margin-bottom:8px;">Use leading dashes (<code>-</code>) to create nested submenus:</p>
+        <pre style="background:#222222; color:#ffffff; padding:10px; border-left:4px solid {CP_CYAN}; margin:8px 0; font-family:'Consolas'; font-size:10.5pt; line-height:1.4;">
 [name:Root Item]
 -[name:Level 1 Child]
 --[name:Level 2 Child]
 ---[name:Level 3 Child]</pre>
-        <p style="color:{CP_SUBTEXT};">Items with children become expandable submenus (up to 5 levels). Empty lines are skipped.</p>
+        <p style="color:{CP_SUBTEXT}; margin-bottom:15px; font-size:9.5pt;">Items with children become expandable submenus (up to 5 levels). Empty lines are skipped.</p>
 
-        <h3 style="color:{CP_YELLOW};">Action Tags</h3>
-        <p>Each line can have one or more <code>[key:value]</code> tags:</p>
-        <table cellspacing="0" cellpadding="4" style="border-collapse:collapse; width:100%; margin:6px 0;">
-        <tr style="background:#1a1a1a;">
-            <td style="color:{CP_CYAN}; font-weight:bold; border-bottom:1px solid {CP_DIM}; width:80px;">Tag</td>
-            <td style="color:{CP_TEXT}; border-bottom:1px solid {CP_DIM};">Purpose</td>
+        <h3 style="color:{CP_YELLOW}; margin-top:15px; margin-bottom:8px; font-size: 13pt;">Action Tags</h3>
+        <p style="margin-bottom:8px;">Each line can have one or more <code>[key:value]</code> tags:</p>
+        <table cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; margin:8px 0; font-size:10.5pt;">
+        <tr style="background:#222222;">
+            <td style="color:{CP_CYAN}; font-weight:bold; border-bottom:2px solid {CP_DIM}; width:100px;">Tag</td>
+            <td style="color:{CP_TEXT}; font-weight:bold; border-bottom:2px solid {CP_DIM};">Purpose</td>
         </tr>
-        <tr><td style="color:{CP_GREEN};"><code>name</code></td><td>Display label in the menu</td></tr>
-        <tr><td style="color:{CP_GREEN};"><code>text</code></td><td>Paste/type the specified text</td></tr>
-        <tr><td style="color:{CP_GREEN};"><code>folder</code></td><td>Open folder in File Explorer</td></tr>
-        <tr><td style="color:{CP_GREEN};"><code>cmd</code></td><td>Run a shell command</td></tr>
-        <tr><td style="color:{CP_ORANGE};"><code>shell</code></td><td>Shell for <code>cmd</code>: <code>cmd</code> (default) or <code>pwsh</code></td></tr>
-        <tr><td style="color:{CP_ORANGE};"><code>show</code></td><td>Visibility for <code>cmd</code>: <code>hidden</code> (default) or <code>visible</code></td></tr>
+        <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>name</code></td><td style="border-bottom:1px solid #222222;">Display label in the menu</td></tr>
+        <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>text</code></td><td style="border-bottom:1px solid #222222;">Paste/type the specified text</td></tr>
+        <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>folder</code></td><td style="border-bottom:1px solid #222222;">Open folder in File Explorer</td></tr>
+        <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>cmd</code></td><td style="border-bottom:1px solid #222222;">Run a shell command</td></tr>
+        <tr><td style="color:#ffb86c; font-weight:bold; border-bottom:1px solid #222222;"><code>shell</code></td><td style="border-bottom:1px solid #222222;">Shell for <code>cmd</code>: <code>cmd</code> (default) or <code>pwsh</code></td></tr>
+        <tr><td style="color:#ffb86c; font-weight:bold; border-bottom:1px solid #222222;"><code>show</code></td><td style="border-bottom:1px solid #222222;">Visibility for <code>cmd</code>: <code>hidden</code> (default) or <code>visible</code></td></tr>
         </table>
 
-        <h3 style="color:{CP_YELLOW};">Examples</h3>
-        <pre style="background:#1a1a1a; padding:8px; border-left:3px solid {CP_GREEN}; margin:6px 0;">
-<span style="color:{CP_SUBTEXT};"># Paste text</span>
+        <h3 style="color:{CP_YELLOW}; margin-top:20px; margin-bottom:8px; font-size: 13pt;">Examples</h3>
+        <pre style="background:#222222; color:#ffffff; padding:12px; border-left:4px solid {CP_GREEN}; margin:8px 0; font-family:'Consolas'; font-size:10.5pt; line-height:1.5;">
+<span style="color:#888888; font-style:italic;"># Paste text</span>
 -[name:My Email][text:user@example.com]
 
-<span style="color:{CP_SUBTEXT};"># Open a folder</span>
+<span style="color:#888888; font-style:italic;"># Open a folder</span>
 -[name:Downloads][folder:C:\\Users\\nahid\\Downloads]
 
-<span style="color:{CP_SUBTEXT};"># Run CMD command (hidden)</span>
+<span style="color:#888888; font-style:italic;"># Run CMD command (hidden)</span>
 -[name:Flush DNS][cmd:ipconfig /flushdns]
 
-<span style="color:{CP_SUBTEXT};"># Run CMD command (visible terminal)</span>
+<span style="color:#888888; font-style:italic;"># Run CMD command (visible terminal)</span>
 -[name:Ping Google][cmd:ping google.com][show:visible]
 
-<span style="color:{CP_SUBTEXT};"># Run PowerShell command</span>
+<span style="color:#888888; font-style:italic;"># Run PowerShell command</span>
 -[name:List Processes][cmd:Get-Process][shell:pwsh][show:visible]
 
-<span style="color:{CP_SUBTEXT};"># Nested submenu</span>
+<span style="color:#888888; font-style:italic;"># Nested submenu</span>
 [name:Dev Tools]
 -[name:Commands]
 --[name:Git Status][cmd:git status][shell:pwsh][show:visible]
@@ -1313,11 +1314,11 @@ SendText("Hello World")"""
 -[name:Folders]
 --[name:Project][folder:C:\\myproject]</pre>
 
-        <h3 style="color:{CP_YELLOW};">Defaults</h3>
-        <ul>
-        <li>If no <code>[name:]</code> is given, the action value is used as the label.</li>
-        <li>A tag without a colon like <code>[hello world]</code> defaults to <code>[text:hello world]</code>.</li>
-        <li>Plain text without brackets uses the line as both name and text.</li>
+        <h3 style="color:{CP_YELLOW}; margin-top:20px; margin-bottom:8px; font-size: 13pt;">Defaults</h3>
+        <ul style="margin-left:15px; padding-left:5px; line-height:1.5; font-size:10.5pt;">
+        <li style="margin-bottom:6px;">If no <code>[name:]</code> is given, the action value is used as the label.</li>
+        <li style="margin-bottom:6px;">A tag without a colon like <code>[hello world]</code> defaults to <code>[text:hello world]</code>.</li>
+        <li style="margin-bottom:6px;">Plain text without brackets uses the line as both name and text.</li>
         </ul>
         """)
         layout.addWidget(browser)
@@ -1521,9 +1522,37 @@ SendText("Hello World")"""
                 background-color: #2b2b2b;
                 color: #e0e0e0;
                 border: none;
-                padding: 0px;
+                padding: 10px;
                 font-family: '{app_font}', 'JetBrainsMono NFP', 'Consolas', monospace;
-                font-size: 13px;
+                font-size: 10pt;
+                line-height: 1.6;
+            }}
+            h1, h2, h3 {{
+                color: {CP_CYAN};
+                margin-top: 15px;
+                margin-bottom: 8px;
+            }}
+            h3 {{
+                color: {CP_YELLOW};
+            }}
+            p, li {{
+                color: #e0e0e0;
+                line-height: 1.5;
+            }}
+            code {{
+                background-color: #1a1a1a;
+                color: {CP_GREEN};
+                font-family: 'Consolas', 'JetBrainsMono NFP', monospace;
+                font-weight: bold;
+                padding: 2px 4px;
+            }}
+            pre {{
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border-left: 3px solid {CP_CYAN};
+                padding: 10px;
+                font-family: 'Consolas', 'JetBrainsMono NFP', monospace;
+                line-height: 1.4;
             }}
         """)
         
