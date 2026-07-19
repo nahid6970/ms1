@@ -3319,6 +3319,22 @@ class AHKShortcutEditor(QMainWindow):
                 "    Run(\"explorer.exe `\"\" path \"`\"\")",
                 "}",
                 "",
+                "RunCmd(command) {",
+                "    Run(A_ComSpec . \" /c \" . command, , \"Hide\")",
+                "}",
+                "",
+                "RunCmdVisible(command) {",
+                "    Run(A_ComSpec . \" /k \" . command)",
+                "}",
+                "",
+                "RunPwsh(command) {",
+                "    Run(\"pwsh.exe -NoProfile -Command \" . command, , \"Hide\")",
+                "}",
+                "",
+                "RunPwshVisible(command) {",
+                "    Run(\"pwsh.exe -NoProfile -NoExit -Command \" . command)",
+                "}",
+                "",
                 "Class CustomMenu {",
                 "    items := []",
                 "    __New() {",
@@ -4335,6 +4351,8 @@ class AHKShortcutEditor(QMainWindow):
                                         tags['name'] = tags['text']
                                     elif 'folder' in tags:
                                         tags['name'] = f"Open {tags['folder']}"
+                                    elif 'cmd' in tags:
+                                        tags['name'] = tags['cmd']
                                     elif tags:
                                         tags['name'] = list(tags.values())[0]
                                     else:
@@ -4373,6 +4391,18 @@ class AHKShortcutEditor(QMainWindow):
                             if 'folder' in tags:
                                 safe_folder = escape_ahk_string(tags['folder'])
                                 return f'OpenFolderInTab("{safe_folder}")'
+                            elif 'cmd' in tags:
+                                safe_cmd = escape_ahk_string(tags['cmd'])
+                                show_mode = tags.get('show', '').lower()
+                                shell = tags.get('shell', '').lower()
+                                if shell in ('pwsh', 'powershell'):
+                                    if show_mode == 'visible':
+                                        return f'RunPwshVisible("{safe_cmd}")'
+                                    return f'RunPwsh("{safe_cmd}")'
+                                else:
+                                    if show_mode == 'visible':
+                                        return f'RunCmdVisible("{safe_cmd}")'
+                                    return f'RunCmd("{safe_cmd}")'
                             elif 'text' in tags:
                                 safe_text = escape_ahk_string(tags['text'])
                                 return f'{p_func}("{safe_text}")'

@@ -2,6 +2,22 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 12:17 - Shell Command Execution Tag (`cmd:`) for Selection Menus
+
+**What We Accomplished:**
+
+- Added `[cmd:...]` tag support to selection menus. Items with this tag execute shell commands when clicked.
+- Added 4 AHK helper functions: `RunCmd` (hidden CMD), `RunCmdVisible` (visible CMD), `RunPwsh` (hidden pwsh), `RunPwshVisible` (visible pwsh).
+- Added `[shell:pwsh]` modifier tag to select PowerShell instead of CMD.
+- Added `[show:visible]` modifier tag to keep the terminal window open instead of running hidden.
+- Updated `SELECTION_MENU.md` with tag table, examples, and generated AHK code.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+- `md/SELECTION_MENU.md`
+
 ## 2026-07-19 08:05 - Menu Closing Reliability & Activation Back-tracking
 
 **What We Accomplished:**

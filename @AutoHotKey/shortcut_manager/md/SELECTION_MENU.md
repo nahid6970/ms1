@@ -39,6 +39,9 @@ Each line can contain key-value pairs formatted as `[key:value]`.
 | `name` | Dictates the display name in the menu. Defaults to the action value if omitted. | `[name:My Command]` |
 | `text` | Inserts the text using the shortcut's delivery method. | `[text:print("Hello")]` |
 | `folder` | Opens the specified directory in Windows File Explorer. | `[folder:C:\Users]` |
+| `cmd` | Runs a shell command (CMD by default, hidden window). | `[cmd:ping google.com]` |
+| `shell` | Selects the shell for `cmd:`. Values: `cmd` (default), `pwsh` or `powershell`. | `[cmd:Get-Process][shell:pwsh]` |
+| `show` | Controls window visibility for `cmd:`. Values: `hidden` (default), `visible`. | `[cmd:dir][show:visible]` |
 
 #### Default / Fallback Rules:
 - If a bracketed block has no colon (e.g., `[this is a first command]`), it defaults to the `text:` tag.
@@ -58,6 +61,10 @@ Below is a complete replacement configuration (as defined in `example.txt`):
 -[name:Open Folders]
 --[name:App Data Folder][folder:C:\Users\nahid\.gemini\antigravity-cli]
 --[name:Workspace Folder][folder:C:\@delta\ms1\@AutoHotKey\shortcut_manager]
+-[name:Commands]
+--[name:Flush DNS][cmd:ipconfig /flushdns][show:visible]
+--[name:List Processes][cmd:Get-Process][shell:pwsh][show:visible]
+--[name:Clear Temp][cmd:Remove-Item $env:TEMP\* -Recurse -Force][shell:pwsh]
 ```
 
 ---
@@ -72,12 +79,18 @@ For the example above, the compiler generates clean, nested Menu object initiali
     m_1 := CustomMenu()
     m_1.Add("App Data Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\Users\nahid\.gemini\antigravity-cli"))
     m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\@delta\ms1\@AutoHotKey\shortcut_manager"))
+    m_2 := CustomMenu()
+    m_2.Add("Flush DNS", (ItemName, ItemPos, MyMenu) => RunCmdVisible("ipconfig /flushdns"))
+    m_2.Add("List Processes", (ItemName, ItemPos, MyMenu) => RunPwshVisible("Get-Process"))
+    m_2.Add("Clear Temp", (ItemName, ItemPos, MyMenu) => RunPwsh("Remove-Item $env:TEMP\* -Recurse -Force"))
     m.Add("My Name", (ItemName, ItemPos, MyMenu) => Paste("nahidahmed"))
     m.Add("My first command", (ItemName, ItemPos, MyMenu) => Paste("this is a first command"))
     m.Add("Open Folders", m_1)
+    m.Add("Commands", m_2)
     m.Show()
 }
 ```
+
 
 ## GUI Interaction & Navigation Behavior
 
