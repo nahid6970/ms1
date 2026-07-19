@@ -14901,13 +14901,13 @@
 
         function startBackendHealthCheck() {
             let consecutiveFailures = 0;
-            const maxFailures = 4;
-            const checkInterval = 3000;
+            const maxFailures = 2;
+            const checkInterval = 1000;
 
             setInterval(async () => {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2500);
+                    const timeoutId = setTimeout(() => controller.abort(), 800);
                     
                     const response = await fetch('/api/projects', { signal: controller.signal });
                     clearTimeout(timeoutId);
