@@ -2,6 +2,19 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 08:05 - Menu Closing Reliability & Activation Back-tracking
+
+**What We Accomplished:**
+
+- Resolved menu-closing bugs where parent menus remained stuck open on the screen after backtracking.
+- Added explicit activation to the parent menu GUI during mouse hover backtracking (`OnMouseMove`), ensuring it regains focus and receives deactivate events.
+- Enhanced the global `OnActivate` message hook to perform validation across all menu windows (verifying if both the deactivated window and the newly activated window belong to the menu stack). If focus moves to any window outside the menu stack, all menus are closed instantly.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
 ## 2026-07-19 07:58 - Monitor Boundary-Aware Coordinates & Submenu Flipping
 
 **What We Accomplished:**
