@@ -1167,18 +1167,19 @@ SendText("Hello World")"""
             """)
 
             menu_info_btn = QPushButton("ℹ")
-            menu_info_btn.setFixedSize(26, 26)
+            menu_info_btn.setFixedSize(20, 20)
             menu_info_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             menu_info_btn.setToolTip("Selection Menu Syntax Help")
             menu_info_btn.setStyleSheet(f"""
                 QPushButton {{
-                    background: {CP_DIM};
+                    background: transparent;
                     color: {CP_CYAN};
                     border: 1px solid {CP_CYAN};
-                    border-radius: 13px;
-                    font-size: 14pt;
+                    border-radius: 10px;
+                    font-size: 11pt;
                     font-weight: bold;
                     padding: 0px;
+                    margin: 0px;
                 }}
                 QPushButton:hover {{
                     background: {CP_CYAN};
@@ -1226,7 +1227,7 @@ SendText("Hello World")"""
     def show_menu_syntax_help(self):
         help_dialog = QDialog(self)
         help_dialog.setWindowTitle("Selection Menu Syntax Help")
-        help_dialog.setMinimumSize(620, 560)
+        help_dialog.setMinimumSize(700, 580)
         help_dialog.setStyleSheet(f"""
             QDialog {{
                 background: {CP_BG};
@@ -1237,6 +1238,7 @@ SendText("Hello World")"""
 
         browser = QTextBrowser()
         browser.setOpenExternalLinks(False)
+        browser.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         browser.setStyleSheet(f"""
             QTextBrowser {{
                 background: {CP_PANEL};
