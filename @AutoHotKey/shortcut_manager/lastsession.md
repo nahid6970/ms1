@@ -12,9 +12,11 @@
    - Prevented instant/accidental triggers by implementing a 400ms debouncing delay.
    - Added hover control verification: when the timer fires, the control under the cursor is checked to verify the mouse is still on the item.
 
-3. **Layout Auto-Sizing**:
+3. **Layout Auto-Sizing & Boundary Positioning**:
    - Removed hardcoded `w180` width limits which caused submenu arrows (`>`) to wrap.
    - Implemented dynamic layout calculations: controls render naturally, then their widths are updated to match the widest control + padding.
+   - Switched positioning to screen coordinates (`CoordMode "Mouse", "Screen"`) to prevent offsets relative to active window contexts.
+   - Added boundary-aware monitor work area checks: main menu stays fully on-screen. If a submenu exceeds the right edge of the monitor, it automatically flips to open on the opposite (left) side of the parent menu. Submenus are vertically aligned to fit monitor limits.
 
 4. **Crash & Race Condition Fixes**:
    - Resolved AHK v2 "Error: Array is empty" in `GoBack()` by popping the stack parent atomically before any yield.

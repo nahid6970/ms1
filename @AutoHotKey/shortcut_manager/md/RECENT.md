@@ -2,14 +2,20 @@
 
 All sessions are recorded here. Do not archive old entries.
 
-## 2026-07-19 07:55 - Submenu Hover Auto-Expansion & Bounds Safety Checks
+## 2026-07-19 07:58 - Monitor Boundary-Aware Coordinates & Submenu Flipping
 
 **What We Accomplished:**
 
-- Resolved bug where the first item of a newly cascaded submenu did not auto-expand on hover by initializing `selectedIndex` to `0` (instead of `1`). This triggers the `selectedIndex != idx` transition, initiating the hover submenu opening sequence correctly for all items.
-- Added safety bounds checks to `OnKeyDown` and `SelectCurrent` to prevent potential out-of-bounds index errors when `selectedIndex` is `0`.
+- Switched menu positioning to use screen coordinates (`CoordMode "Mouse", "Screen"`) to prevent offsets relative to non-maximized active window contexts.
+- Implemented multi-monitor work area detection: queries bounds for the monitor where the cursor resides to keep menus aligned with desktop boundaries.
+- Added boundary flipping/clamping: main menu bounds stay completely on-screen. If a cascading submenu exceeds the right edge of the monitor, it flips to open on the left side of the parent menu. Submenus are vertically aligned to fit within screen limits.
 
 **Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:55 - Submenu Hover Auto-Expansion & Bounds Safety Checks
 
 - `ahk_gui_pyqt.py`
 - `md/RECENT.md`
