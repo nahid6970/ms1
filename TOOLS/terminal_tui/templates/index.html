@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workspace Manager Dashboard</title>
+    <title>Workspaces</title>
     <!-- Custom Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script>
@@ -5316,7 +5316,7 @@
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
-                    document.title = "Terminal Manager";
+                    document.title = "Workspaces";
                     
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
@@ -5647,10 +5647,10 @@
                 if (name === 'Default') {
                     const currentProjDetails = projects.find(p => p.name === activeProject) || {};
                     headerNameEl.innerText = currentProjDetails.name || activeProject;
-                    document.title = currentProjDetails.name || activeProject;
+                    document.title = "Workspaces";
                 } else {
                     headerNameEl.innerText = name;
-                    document.title = name;
+                    document.title = "Workspaces";
                 }
             }
             
@@ -7615,7 +7615,7 @@
                 }
                 
                 document.getElementById('active-project-branch').style.display = 'none';
-                document.title = currentProjDetails.name || projectName;
+                document.title = "Workspaces";
                 
                 clearTerminalPanes();
                 splitPaneCounter = 1;
