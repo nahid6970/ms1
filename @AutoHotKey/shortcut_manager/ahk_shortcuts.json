@@ -387,7 +387,7 @@
         {
             "category": "AHK",
             "description": "Inserts AHK v1 header requirement",
-            "enabled": true,
+            "enabled": false,
             "name": "AutoHotkey Version 1",
             "replacement": "#Requires AutoHotkey v1.0",
             "trigger": ";v1"
@@ -395,7 +395,7 @@
         {
             "category": "AHK",
             "description": "Inserts AHK v2 header requirement",
-            "enabled": true,
+            "enabled": false,
             "name": "AutoHotkey Version 2",
             "replacement": "{#}Requires AutoHotkey v2.0",
             "trigger": ";v2"
@@ -641,7 +641,7 @@
             "description": "",
             "trigger": "[[",
             "replacement": "[[I:]]",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "first bracket",
@@ -1035,5 +1035,7 @@
     ],
     "remap_shortcuts": [],
     "app_font_family": "Consolas",
-    "app_font_size": 16
+    "app_font_size": 16,
+    "selection_menu_font_family": "JetBrainsMonoNL NFP ExtraBold",
+    "selection_menu_font_size": 14
 }

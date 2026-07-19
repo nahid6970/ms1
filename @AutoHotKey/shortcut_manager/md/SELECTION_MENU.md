@@ -68,8 +68,8 @@ For the example above, the compiler generates clean, nested Menu object initiali
 
 ```autohotkey
 ^d:: {
-    m := Menu()
-    m_1 := Menu()
+    m := CustomMenu()
+    m_1 := CustomMenu()
     m_1.Add("App Data Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\Users\nahid\.gemini\antigravity-cli"))
     m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\@delta\ms1\@AutoHotKey\shortcut_manager"))
     m.Add("My Name", (ItemName, ItemPos, MyMenu) => Paste("nahidahmed"))
@@ -78,3 +78,15 @@ For the example above, the compiler generates clean, nested Menu object initiali
     m.Show()
 }
 ```
+
+## Custom Styling (Font Family & Size)
+
+Instead of native system-wide menus, selection menus are compiled using a custom AHK GUI window (`CustomMenu` and `CustomMenuGUI`). This allows complete freedom to adjust typography.
+
+### Configuration
+Open the **Settings** dialog in the AutoHotkey Shortcut Editor GUI. You will find:
+1. **Selection Menu Font**: Select any font family installed on your system (e.g. `Segoe UI`, `Consolas`, `Arial`, or `Segoe UI Semibold`).
+2. **Selection Menu Font Size**: Adjust the font size from `8` up to `36`.
+
+These values are saved to `ahk_shortcuts.json` under `selection_menu_font_family` and `selection_menu_font_size` and automatically compiled into the preamble of `generated_shortcuts.ahk`.
+

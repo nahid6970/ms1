@@ -2,6 +2,67 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-07-19 07:37 - Window Safety Try-Catches & Parent Trigger Bypass
+
+**What We Accomplished:**
+
+- Prevented "Gui has no window" error during asynchronous window events by registering events immediately after GUI creation, and wrapping the `.Show()` calls inside `CreateGUI()` in try-catch blocks.
+- Resolved submenu highlight and premature closing issues by verifying if the cursor is still hovering over the parent item that triggered the submenu. If it is, the backtrack closing routine is bypassed, allowing the submenu to remain open.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:24 - Side-by-Side Hierarchical Submenus & Debounced Mouse Position Verification
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:19 - Global Callback Proxy for Hover Timer
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:16 - Hover Submenu Auto-Expansion, Dynamic Width Auto-Sizing & Transition Protection
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:14 - Classic High-Fidelity Menu Styling & Atomic Stack Pop Fix
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:13 - Native Menu Compaction & GUI Window Try-Catch Safety Fixes
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:11 - Light UI Styling & Asynchronous GUI Stack Memory Crash Fix
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+
+## 2026-07-19 07:08 - Custom Selection Menu GUI with Font Family & Size Settings
+
+**What We Accomplished:**
+
+- Replaced native AHK `Menu()` objects with a customizable custom GUI menu class (`CustomMenu` & `CustomMenuGUI`).
+- Resolved AHK v2 invalid callback function error by implementing global proxy callback functions (`CustomMenuGUI_KeyDown`, `CustomMenuGUI_MouseMove`, and `CustomMenuGUI_Activate`) to wrap and call static method handlers with correct context/parameters.
+- Implemented robust, highly responsive mouse-hover highlighting, arrow-key navigation (Esc to close, Left Arrow to go Back, Right/Enter to select), and auto-closing when the menu window loses focus.
+- Added **Selection Menu Font** and **Selection Menu Font Size** fields to the Settings dialog in the Python PyQt application.
+- Integrated selection menu settings loading/saving via `ahk_shortcuts.json` under `selection_menu_font_family` and `selection_menu_font_size` keys.
+- Updated compiler logic in `ahk_gui_pyqt.py` to write these settings into the script preamble and compile selection menus to instantiate `CustomMenu` objects instead of standard AHK `Menu` objects.
+- Updated documentation files `md/SELECTION_MENU.md` and `md/FEATURES.md`.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/FEATURES.md`
+- `md/SELECTION_MENU.md`
+- `md/RECENT.md`
+
 ## 2026-07-19 06:35 - Existing File Explorer New Tab Navigation for Folder Tag
 
 **What We Accomplished:**
