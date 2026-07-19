@@ -77,6 +77,7 @@ Important behavior:
 - Comma-separated values are treated as multiple matches.
 - Multi-line script actions are wrapped into block syntax.
 - Text/file shortcuts use helper paste functions in the generated AHK script.
+- Text shortcuts can be configured as selection menus. When enabled, multi-line replacements compile into interactive hierarchical menus (using leading dashes for submenus up to 5 levels) with bracketed modular action tags (such as `[name:]`, `[text:]`, and `[folder:]`).
 
 ## Development Conventions
 

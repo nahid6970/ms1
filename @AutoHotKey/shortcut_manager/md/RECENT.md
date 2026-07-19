@@ -10,13 +10,17 @@ All sessions are recorded here. Do not archive old entries.
 - Implemented an advanced hierarchical submenu compiler for selection menus. When "Show multi-line text as a selection menu" is checked, the generator parses the replacement text using a leading-dash syntax to build nested submenus (up to 5 levels).
 - Integrated modular bracket-based option parsing. Menu items can specify `[name:Display Name]`, `[text:Text to paste]`, and `[folder:Folder path to open in Explorer]`. Defaulting logic and modular extensibility are fully supported.
 - Provided a clear usage example in `example.txt` and added a preconfigured advanced Ctrl+D menu entry in `ahk_shortcuts.json`.
+- Created a new documentation file `md/SELECTION_MENU.md` detailing the new menu compilation features, and updated the behavior notes in `dev.md`.
 
 **Files Modified:**
 
 - `ahk_gui_pyqt.py`
 - `ahk_shortcuts.json`
+- `dev.md`
 - `example.txt`
+- `md/FEATURES.md`
 - `md/RECENT.md`
+- `md/SELECTION_MENU.md`
 
 ## 2026-06-26 19:30 - Launcher Shortcut Type & Terminal Hide Toggle
 

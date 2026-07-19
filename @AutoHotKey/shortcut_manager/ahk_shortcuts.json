@@ -799,7 +799,7 @@
             "category": "General",
             "description": "Multi-level selection menu with submenus and folder explorer open actions.",
             "trigger": "^d",
-            "replacement": "[name:My Main Options]\n-[name:Insert Name][text:nahidahmed]\n-[name:First Command][this is a first command]\n-[name:Folders Submenu]\n--[name:Open AppData Folder][folder:C:\\Users\\nahid\\.gemini\\antigravity-cli]\n--[name:Open Workspace][folder:C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager]",
+            "replacement": "[name:My Main Options]\n-[name:Insert Name][text:nahidahmed]\n-[name:First Command][this is a first command]\n-[name:Folders Submenu]\n--[name:Open AppData Folder][folder:C:\\Users\\nahid\\.gemini\\antigravity-cli]\n--[name:Open Workspace][folder:C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager]\n[name:My Main Options]\n-[name:Insert Name][text:nahidahmed]\n-[name:First Command][this is a first command]\n-[name:Folders Submenu]\n--[name:Open AppData Folder][folder:C:\\Users\\nahid\\.gemini\\antigravity-cli]\n--[name:Open Workspace][folder:C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager]",
             "delivery_method": "paste",
             "show_as_menu": true,
             "window_title": "",
