@@ -894,5 +894,12 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
+    },
+    {
+        "name": "croc [file transfer relay wan]",
+        "scoop_name": "croc",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\croc\\current",
+        "winget_name": "",
+        "winget_path": ""
     }
 ]

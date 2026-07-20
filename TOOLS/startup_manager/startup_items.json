@@ -489,14 +489,17 @@
     "type": "App"
   },
   {
-    "Command": "",
-    "ExecutableType": "other",
-    "added_at": 1768273756.591541,
     "name": "Tailscale",
+    "type": "App",
     "paths": [
-      "C:\\Program Files\\Tailscale\\tailscale-ipn.exe"
+      "C:\\Users\\nahid\\scoop\\apps\\tailscale\\current\\tailscale-ipn.exe"
     ],
-    "type": "App"
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\Users\\nahid\\scoop\\apps\\tailscale\\current\\tailscale-ipn.exe\"",
+    "ExecutableType": "other",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false
   },
   {
     "Command": "",
@@ -809,7 +812,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": true,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784513971.0182576
   },
   {
     "Command": "-hide",
