@@ -486,6 +486,24 @@ input[type="text"], input[type="number"], input[type="url"], select {
 .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; }
 .setting-item label { margin-bottom: 0; color: #eee; font-size: 0.95rem; }
 
+.setting-input, .setting-select {
+    width: 320px !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    background: #252525 !important;
+    border: 1px solid #333 !important;
+    color: white !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+    font-size: 0.9rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+.setting-input:focus, .setting-select:focus {
+    border-color: #0084ff !important;
+    outline: none !important;
+    box-shadow: 0 0 5px rgba(0, 132, 255, 0.4) !important;
+}
+
 /* Rating Group Modern Styling */
 .rating-group {
     display: flex;
