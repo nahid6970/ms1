@@ -1284,6 +1284,7 @@ SendText("Hello World")"""
         <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>name</code></td><td style="border-bottom:1px solid #222222;">Display label in the menu</td></tr>
         <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>text</code></td><td style="border-bottom:1px solid #222222;">Paste/type the specified text</td></tr>
         <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>folder</code></td><td style="border-bottom:1px solid #222222;">Open folder in File Explorer</td></tr>
+        <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>dynamic</code></td><td style="border-bottom:1px solid #222222;">If <code>yes</code>, <code>true</code>, or <code>1</code> (used with <code>folder</code>), dynamically lists subdirectories as submenus on hover/open.</td></tr>
         <tr><td style="color:{CP_GREEN}; font-weight:bold; border-bottom:1px solid #222222;"><code>cmd</code></td><td style="border-bottom:1px solid #222222;">Run a shell command</td></tr>
         <tr><td style="color:#ffb86c; font-weight:bold; border-bottom:1px solid #222222;"><code>shell</code></td><td style="border-bottom:1px solid #222222;">Shell for <code>cmd</code>: <code>cmd</code> (default) or <code>pwsh</code></td></tr>
         <tr><td style="color:#ffb86c; font-weight:bold; border-bottom:1px solid #222222;"><code>show</code></td><td style="border-bottom:1px solid #222222;">Visibility for <code>cmd</code>: <code>hidden</code> (default) or <code>visible</code></td></tr>
@@ -3615,8 +3616,50 @@ class AHKShortcutEditor(QMainWindow):
                     "    Show() {",
                     "        CustomMenuGUI.ShowMenu(this)",
                     "    }",
-                    "}",
-                    "",
+                    "}"
+                ])
+
+            output_lines.extend([
+                "global global_use_native_menu := " + ("true" if self.use_native_menu else "false"),
+                "",
+                "Class DynamicFolderMenu extends CustomMenu {",
+                "    path := \"\"",
+                "    is_populated := false",
+                "    depth := 1",
+                "",
+                "    __New(path, depth := 1) {",
+                "        this.path := path",
+                "        this.depth := depth",
+                "        if (!HasProp(this, \"items\"))",
+                "            this.items := []",
+                "        if (global_use_native_menu) {",
+                "            this.Populate()",
+                "        }",
+                "    }",
+                "",
+                "    Populate() {",
+                "        if this.is_populated",
+                "            return",
+                "        this.is_populated := true",
+                "        ",
+                "        path := this.path",
+                "        this.Add(\"[Open folder]\", (ItemName, ItemPos, MyMenu) => OpenFolderInTab(path))",
+                "        ",
+                "        if (this.depth <= 4) {",
+                "            Loop Files this.path . \"\\*\", \"D\" {",
+                "                subPath := A_LoopFileFullPath",
+                "                subName := A_LoopFileName",
+                "                subSubmenu := DynamicFolderMenu(subPath, this.depth + 1)",
+                "                this.Add(subName, subSubmenu)",
+                "            }",
+                "        }",
+                "    }",
+                "}",
+                ""
+            ])
+
+            if not self.use_native_menu:
+                output_lines.extend([
                     "Class CustomMenuGUI {",
                     "    static guiObj := \"\"",
                     "    static guiStack := []",
@@ -3986,6 +4029,9 @@ class AHKShortcutEditor(QMainWindow):
                     "            return",
                     "        CustomMenuGUI.CancelHoverTimer()",
                     "        CustomMenuGUI.isTransitioning := true",
+                    "        if (HasMethod(submenuObj, \"Populate\")) {",
+                    "            submenuObj.Populate()",
+                    "        }",
                     "        currentGui := CustomMenuGUI.guiObj",
                     "        CustomMenuGUI.guiStack.Push({gui: currentGui, menu: CustomMenuGUI.activeMenu, idx: CustomMenuGUI.selectedIndex, buttons: CustomMenuGUI.buttons})",
                     "",
@@ -4695,9 +4741,13 @@ class AHKShortcutEditor(QMainWindow):
                                     added_names.add(display_name)
                                     safe_display = escape_ahk_string(display_name)
                                     
+                                    is_dynamic = child['tags'].get('dynamic', '').lower() in ('yes', 'true', '1') and 'folder' in child['tags']
                                     if child['children']:
                                         child_menu_var = generate_menu_node(child, submenu_var)
                                         output_lines.append(f'    {submenu_var}.Add("{safe_display}", {child_menu_var})')
+                                    elif is_dynamic:
+                                        safe_folder = escape_ahk_string(child['tags']['folder'])
+                                        output_lines.append(f'    {submenu_var}.Add("{safe_display}", DynamicFolderMenu("{safe_folder}"))')
                                     else:
                                         action_code = get_modular_action_code(child['tags'], paste_func)
                                         output_lines.append(f'    {submenu_var}.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {action_code})')
@@ -4712,9 +4762,13 @@ class AHKShortcutEditor(QMainWindow):
                             added_names.add(display_name)
                             safe_display = escape_ahk_string(display_name)
                             
+                            is_dynamic = node['tags'].get('dynamic', '').lower() in ('yes', 'true', '1') and 'folder' in node['tags']
                             if node['children']:
                                 submenu_var = generate_menu_node(node, "m")
                                 output_lines.append(f'    m.Add("{safe_display}", {submenu_var})')
+                            elif is_dynamic:
+                                safe_folder = escape_ahk_string(node['tags']['folder'])
+                                output_lines.append(f'    m.Add("{safe_display}", DynamicFolderMenu("{safe_folder}"))')
                             else:
                                 action_code = get_modular_action_code(node['tags'], paste_func)
                                 output_lines.append(f'    m.Add("{safe_display}", (ItemName, ItemPos, MyMenu) => {action_code})')
