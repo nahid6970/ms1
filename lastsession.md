@@ -1,12 +1,9 @@
-# Last Session Summary
+# Last Session Summary (Completed: 2026-07-20 13:08)
 
 ## Recent Implementation Context
-- **Dynamic Folder Menus (`[dynamic:yes]`)**: Submenus can dynamically scan and list folder contents on hover. Added GUI options (`ahk_shortcuts.json`) to ignore specific folders (e.g., `.git`), extensions, and omit empty folders.
-- **Native Context Menu Lazy-Loading**: Intercepted Win32 `WM_INITMENUPOPUP` (0x0117) to lazily load dynamic subfolders *only* when opened. This fixed severe UI freezing and lag on mechanical HDDs during eager recursive scanning.
-- **CustomMenuGUI Mouse Wheel Scrolling**: Fixed vertical off-screen overflow for CustomMenuGUI (the custom AHK GUI alternative to native menus). Clamped maximum height to the monitor's work area and implemented a `WM_MOUSEWHEEL` (0x020A) handler to allow smooth scrolling through long lists.
-- **Menu Separators**: Any item named starting with `*****` is now parsed and rendered as a horizontal separator line in both the native context menu and `CustomMenuGUI`. Keyboard and mouse-hover navigation automatically skip over separators.
-- **Submenu Arrow Customization**: Added a "Submenu Indicator" setting to the settings dialog and `ahk_shortcuts.json` that lets the user change the arrow icon (e.g. to a NerdFont icon or custom string).
-- **CustomMenuGUI Optimization**: Fixed mouse-hover vibration lag on long menus by optimizing `HighlightItem()` to only repaint controls whose highlighted state changes.
-- **Reference Docs**: Documented `dynamic` and `folder` tag syntax in `md/SELECTION_MENU.md`.
-
-*Goal for Next AI*: The dynamic folder system is now fully functional, lazy-loaded (fast), and scrollable in both UI modes. Separators and custom indicators are supported in both native and custom menus. Continue assisting the user with any new features they request.
+- **Customizable Submenu Indicator**: Added settings option to use custom NerdFont glyphs or text (e.g. `❯`, `➔`) as the submenu arrow instead of hardcoded `>`.
+- **Right-Aligned Indicator Option**: Added settings option to right-align submenu arrows using a mouse-transparent (`+E0x20`) text overlay.
+- **Layout & Visual Polishing**:
+  - Split menu generation into two loops (Buttons first, then Arrow Overlays) to fix vertical spacing gaps.
+  - Dynamically updates arrow text color (`cWhite` vs `cBlack`) during mouse/keyboard selection highlights.
+  - Adjusted horizontal width padding (`+24px`) to prevent text overlap.
