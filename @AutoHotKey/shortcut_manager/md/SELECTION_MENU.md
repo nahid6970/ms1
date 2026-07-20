@@ -39,6 +39,7 @@ Each line can contain key-value pairs formatted as `[key:value]`.
 | `name` | Dictates the display name in the menu. Defaults to the action value if omitted. | `[name:My Command]` |
 | `text` | Inserts the text using the shortcut's delivery method. | `[text:print("Hello")]` |
 | `folder` | Opens the specified directory in Windows File Explorer. | `[folder:C:\Users]` |
+| `dynamic` | If `yes`, `true`, or `1` (used with `folder`), dynamically lists subdirectories and files on hover. | `[folder:C:\Users][dynamic:yes]` |
 | `cmd` | Runs a shell command (CMD by default, hidden window). | `[cmd:ping google.com]` |
 | `shell` | Selects the shell for `cmd:`. Values: `cmd` (default), `pwsh` or `powershell`. | `[cmd:Get-Process][shell:pwsh]` |
 | `show` | Controls window visibility for `cmd:`. Values: `hidden` (default), `visible`. | `[cmd:dir][show:visible]` |
