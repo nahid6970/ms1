@@ -27,20 +27,26 @@ def add_header(response):
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
-ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
 IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
 SETTINGS_FILE = r"C:\@delta\db\5011_tv_show\settings.json"
 
 os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
 
 def load_settings():
+    default_settings = {
+        "sonarr_url": "http://192.168.0.101:8989",
+        "sonarr_api_key": "",
+        "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr"
+    }
     if os.path.exists(SETTINGS_FILE):
         try:
             with open(SETTINGS_FILE, 'r') as f:
-                return json.load(f)
+                loaded = json.load(f)
+                default_settings.update(loaded)
+                return default_settings
         except:
             pass
-    return {"sonarr_url": "http://192.168.0.101:8989", "sonarr_api_key": ""}
+    return default_settings
 
 def save_settings(settings):
     os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
@@ -80,7 +86,9 @@ def save_data(data):
 
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
-    if not os.path.exists(ROOT_SHOWS_FOLDER):
+    settings = load_settings()
+    root_folder = settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr")
+    if not os.path.exists(root_folder):
         return []
     
     shows = load_data()
@@ -89,8 +97,8 @@ def scan_for_missing_shows():
     missing_shows = []
     
     try:
-        for item in os.listdir(ROOT_SHOWS_FOLDER):
-            item_path = os.path.join(ROOT_SHOWS_FOLDER, item)
+        for item in os.listdir(root_folder):
+            item_path = os.path.join(root_folder, item)
             if os.path.isdir(item_path):
                 # Check if this directory path is already in our shows
                 if item_path.lower() not in existing_paths:
@@ -575,6 +583,7 @@ def api_settings():
         settings = load_settings()
         settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
         settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
+        settings['root_shows_folder'] = data.get('root_shows_folder', settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr"))
         save_settings(settings)
         return jsonify({'success': True})
     return jsonify(load_settings())

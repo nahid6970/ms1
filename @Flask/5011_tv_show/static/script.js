@@ -361,9 +361,11 @@ async function openSettingsModal() {
         
         const urlInput = document.getElementById('sonarrApiUrl');
         const keyInput = document.getElementById('sonarrApiKey');
+        const folderInput = document.getElementById('rootShowsFolder');
         
         if (urlInput) urlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
         if (keyInput) keyInput.value = settings.sonarr_api_key || '';
+        if (folderInput) folderInput.value = settings.root_shows_folder || 'C:\\Users\\nahid\\Downloads\\@sonarr';
     } catch (e) {
         console.error('Error loading Sonarr settings:', e);
     }
@@ -380,6 +382,7 @@ function closeSettingsModal() {
 async function saveSonarrSettings() {
     const url = document.getElementById('sonarrApiUrl').value;
     const apiKey = document.getElementById('sonarrApiKey').value;
+    const folder = document.getElementById('rootShowsFolder').value;
     
     try {
         const response = await fetch('/api/settings', {
@@ -389,7 +392,8 @@ async function saveSonarrSettings() {
             },
             body: JSON.stringify({
                 sonarr_url: url,
-                sonarr_api_key: apiKey
+                sonarr_api_key: apiKey,
+                root_shows_folder: folder
             })
         });
         const data = await response.json();
