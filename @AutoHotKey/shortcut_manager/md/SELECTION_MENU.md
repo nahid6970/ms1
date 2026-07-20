@@ -49,6 +49,14 @@ Each line can contain key-value pairs formatted as `[key:value]`.
 - If no tags are provided (e.g., just plain text `Insert Item`), it treats the entire line as both `name` and `text` for backward compatibility.
 - Future action tags (e.g., `[url:...]`) can be easily added to the modular compiler loop.
 
+### 3. Menu Separators
+
+To insert a horizontal visual divider/separator line in your menu, use `*****` (five asterisks) as the item name:
+```text
+-[name:*****]
+```
+Separators are supported in both the native Windows context menu and the custom `CustomMenuGUI`. In the custom GUI, separators render as clean 1-pixel lines, ignore hover selection/clicks, and are automatically skipped when using the UP/DOWN arrow keys.
+
 ---
 
 ## Configuration Example
