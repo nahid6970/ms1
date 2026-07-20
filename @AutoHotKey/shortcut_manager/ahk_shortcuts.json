@@ -1040,5 +1040,19 @@
     "app_font_size": 16,
     "selection_menu_font_family": "JetBrainsMonoNL NFP ExtraBold",
     "selection_menu_font_size": 14,
-    "use_native_menu": false
+    "use_native_menu": false,
+    "dynamic_menu_ignore_folders": [
+        ".git",
+        "node_modules",
+        "__pycache__",
+        ".vscode"
+    ],
+    "dynamic_menu_ignore_extensions": [
+        ".exe",
+        ".dll",
+        ".bin",
+        ".pyc",
+        ".tmp"
+    ],
+    "dynamic_menu_ignore_empty": true
 }

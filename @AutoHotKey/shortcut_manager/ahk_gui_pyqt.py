@@ -2045,11 +2045,11 @@ class SettingsDialog(QDialog):
         self.parent_window = parent
         self.setWindowTitle("Settings")
         self.setModal(True)
-        self.resize(450, 300)
+        self.resize(500, 520)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
-            QComboBox, QSpinBox {{
+            QComboBox, QSpinBox, QLineEdit {{
                 background-color: {CP_PANEL};
                 color: {CP_CYAN};
                 border: 1px solid {CP_DIM};
@@ -2068,13 +2068,13 @@ class SettingsDialog(QDialog):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
+        layout.setSpacing(12)
 
         # Font Selection
         font_layout = QHBoxLayout()
         font_layout.addWidget(QLabel("Application Font:"))
         
-        from PyQt6.QtWidgets import QFontComboBox, QSpinBox
+        from PyQt6.QtWidgets import QFontComboBox, QSpinBox, QCheckBox, QLineEdit
         self.font_combo = QFontComboBox()
         self.font_combo.setCurrentFont(QFont(self.parent_window.app_font_family))
         font_layout.addWidget(self.font_combo)
@@ -2135,7 +2135,6 @@ class SettingsDialog(QDialog):
         sm_size_layout.addStretch()
         layout.addLayout(sm_size_layout)
 
-        from PyQt6.QtWidgets import QCheckBox
         self.menu_style_checkbox = QCheckBox("Use standard Windows native context menu")
         self.menu_style_checkbox.setChecked(self.parent_window.use_native_menu)
         self.menu_style_checkbox.setStyleSheet(f"""
@@ -2143,11 +2142,50 @@ class SettingsDialog(QDialog):
                 color: {CP_TEXT};
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 10pt;
-                margin-top: 5px;
-                margin-bottom: 5px;
+                margin-top: 2px;
+                margin-bottom: 2px;
             }}
         """)
         layout.addWidget(self.menu_style_checkbox)
+
+        # Separator line
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setFrameShadow(QFrame.Shadow.Sunken)
+        sep.setStyleSheet(f"background-color: {CP_DIM}; max-height: 1px;")
+        layout.addWidget(sep)
+
+        # Dynamic Folder Menu Ignore Settings
+        layout.addWidget(QLabel("<b>Dynamic Folder Menu Exclusions:</b>"))
+
+        ignore_folders_layout = QHBoxLayout()
+        ignore_folders_layout.addWidget(QLabel("Ignore Folder Names:"))
+        self.ignore_folders_input = QLineEdit()
+        self.ignore_folders_input.setPlaceholderText(".git, node_modules, __pycache__")
+        self.ignore_folders_input.setText(", ".join(self.parent_window.dynamic_menu_ignore_folders))
+        ignore_folders_layout.addWidget(self.ignore_folders_input)
+        layout.addLayout(ignore_folders_layout)
+
+        ignore_exts_layout = QHBoxLayout()
+        ignore_exts_layout.addWidget(QLabel("Ignore File Extensions:"))
+        self.ignore_exts_input = QLineEdit()
+        self.ignore_exts_input.setPlaceholderText(".exe, .dll, .bin")
+        self.ignore_exts_input.setText(", ".join(self.parent_window.dynamic_menu_ignore_extensions))
+        ignore_exts_layout.addWidget(self.ignore_exts_input)
+        layout.addLayout(ignore_exts_layout)
+
+        self.ignore_empty_checkbox = QCheckBox("Omit empty folders")
+        self.ignore_empty_checkbox.setChecked(self.parent_window.dynamic_menu_ignore_empty)
+        self.ignore_empty_checkbox.setStyleSheet(f"""
+            QCheckBox {{
+                color: {CP_TEXT};
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 10pt;
+                margin-top: 2px;
+                margin-bottom: 2px;
+            }}
+        """)
+        layout.addWidget(self.ignore_empty_checkbox)
 
         layout.addWidget(QLabel("<small><i>Note: Some icons require a Nerd Font (NFP) to display correctly.</i></small>"))
 
@@ -2173,6 +2211,15 @@ class SettingsDialog(QDialog):
         self.parent_window.selection_menu_font_family = self.sm_font_combo.currentFont().family()
         self.parent_window.selection_menu_font_size = self.sm_size_spin.value()
         self.parent_window.use_native_menu = self.menu_style_checkbox.isChecked()
+
+        # Parse Ignore list entries
+        folders_raw = self.ignore_folders_input.text()
+        self.parent_window.dynamic_menu_ignore_folders = [f.strip() for f in folders_raw.split(",") if f.strip()]
+        
+        exts_raw = self.ignore_exts_input.text()
+        self.parent_window.dynamic_menu_ignore_extensions = [e.strip() for e in exts_raw.split(",") if e.strip()]
+        
+        self.parent_window.dynamic_menu_ignore_empty = self.ignore_empty_checkbox.isChecked()
         
         # Save shortcut builder theme
         selected_theme = self.theme_combo.currentData()
@@ -2187,6 +2234,8 @@ class SettingsDialog(QDialog):
         self.parent_window.apply_global_font()
         self.parent_window.save_shortcuts_json()
         self.accept()
+
+
 
 
 class AHKShortcutEditor(QMainWindow):
@@ -2205,6 +2254,9 @@ class AHKShortcutEditor(QMainWindow):
         self.selection_menu_font_family = "Segoe UI"
         self.selection_menu_font_size = 12
         self.use_native_menu = False
+        self.dynamic_menu_ignore_folders = [".git", "node_modules", "__pycache__", ".vscode"]
+        self.dynamic_menu_ignore_extensions = [".exe", ".dll", ".bin", ".pyc", ".tmp"]
+        self.dynamic_menu_ignore_empty = True
         self.category_colors = {
             "System": "#FF6B6B", "Navigation": "#4ECDC4", "Text": "#45B7D1",
             "Media": "#96CEB4", "AutoHotkey": "#FFEAA7", "General": "#DDA0DD",
@@ -2679,6 +2731,9 @@ class AHKShortcutEditor(QMainWindow):
                     self.selection_menu_font_family = data.get("selection_menu_font_family", "Segoe UI")
                     self.selection_menu_font_size = data.get("selection_menu_font_size", 12)
                     self.use_native_menu = data.get("use_native_menu", False)
+                    self.dynamic_menu_ignore_folders = data.get("dynamic_menu_ignore_folders", [".git", "node_modules", "__pycache__", ".vscode"])
+                    self.dynamic_menu_ignore_extensions = data.get("dynamic_menu_ignore_extensions", [".exe", ".dll", ".bin", ".pyc", ".tmp"])
+                    self.dynamic_menu_ignore_empty = data.get("dynamic_menu_ignore_empty", True)
                     
                     # Fix-up: Move file shortcuts that were accidentally saved in text_shortcuts
                     to_move = [s for s in self.text_shortcuts if "file_path" in s]
@@ -2740,7 +2795,10 @@ class AHKShortcutEditor(QMainWindow):
                 "app_font_size": self.app_font_size,
                 "selection_menu_font_family": self.selection_menu_font_family,
                 "selection_menu_font_size": self.selection_menu_font_size,
-                "use_native_menu": self.use_native_menu
+                "use_native_menu": self.use_native_menu,
+                "dynamic_menu_ignore_folders": self.dynamic_menu_ignore_folders,
+                "dynamic_menu_ignore_extensions": self.dynamic_menu_ignore_extensions,
+                "dynamic_menu_ignore_empty": self.dynamic_menu_ignore_empty
             }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -3619,8 +3677,15 @@ class AHKShortcutEditor(QMainWindow):
                     "}"
                 ])
 
+            ignore_folders_ahk = "[" + ", ".join(f'"{f}"' for f in self.dynamic_menu_ignore_folders) + "]"
+            ignore_exts_ahk = "[" + ", ".join(f'"{e}"' for e in self.dynamic_menu_ignore_extensions) + "]"
+            ignore_empty_ahk = "true" if self.dynamic_menu_ignore_empty else "false"
+
             output_lines.extend([
                 "global global_use_native_menu := " + ("true" if self.use_native_menu else "false"),
+                f"global global_dynamic_menu_ignore_folders := {ignore_folders_ahk}",
+                f"global global_dynamic_menu_ignore_extensions := {ignore_exts_ahk}",
+                f"global global_dynamic_menu_ignore_empty := {ignore_empty_ahk}",
                 "",
                 "Class DynamicFolderMenu extends CustomMenu {",
                 "    path := \"\"",
@@ -3649,8 +3714,74 @@ class AHKShortcutEditor(QMainWindow):
                 "            Loop Files this.path . \"\\*\", \"D\" {",
                 "                subPath := A_LoopFileFullPath",
                 "                subName := A_LoopFileName",
+                "                ",
+                "                isIgnored := false",
+                "                for _, ignoreFolder in global_dynamic_menu_ignore_folders {",
+                "                    if (StrCompare(subName, ignoreFolder, false) == 0) {",
+                "                        isIgnored := true",
+                "                        break",
+                "                    }",
+                "                }",
+                "                if (isIgnored)",
+                "                    continue",
+                "",
+                "                if (global_dynamic_menu_ignore_empty) {",
+                "                    isEmpty := true",
+                "                    Loop Files subPath . \"\\*\", \"FD\" {",
+                "                        innerName := A_LoopFileName",
+                "                        innerExt := \".\" . A_LoopFileExt",
+                "                        ",
+                "                        innerFolderIgnored := false",
+                "                        if (InStr(A_LoopFileAttrib, \"D\")) {",
+                "                            for _, ignoreFolder in global_dynamic_menu_ignore_folders {",
+                "                                if (StrCompare(innerName, ignoreFolder, false) == 0) {",
+                "                                    innerFolderIgnored := true",
+                "                                    break",
+                "                                }",
+                "                            }",
+                "                        }",
+                "                        if (innerFolderIgnored)",
+                "                            continue",
+                "                            ",
+                "                        innerFileIgnored := false",
+                "                        if (!InStr(A_LoopFileAttrib, \"D\")) {",
+                "                            for _, ignoreExt in global_dynamic_menu_ignore_extensions {",
+                "                                if (StrCompare(innerExt, ignoreExt, false) == 0) {",
+                "                                    innerFileIgnored := true",
+                "                                    break",
+                "                                }",
+                "                            }",
+                "                        }",
+                "                        if (innerFileIgnored)",
+                "                            continue",
+                "                            ",
+                "                        isEmpty := false",
+                "                        break",
+                "                    }",
+                "                    if (isEmpty)",
+                "                        continue",
+                "                }",
+                "                ",
                 "                subSubmenu := DynamicFolderMenu(subPath, this.depth + 1)",
                 "                this.Add(subName, subSubmenu)",
+                "            }",
+                "            ",
+                "            Loop Files this.path . \"\\*\", \"F\" {",
+                "                filePath := A_LoopFileFullPath",
+                "                fileName := A_LoopFileName",
+                "                fileExt := \".\" . A_LoopFileExt",
+                "                ",
+                "                isIgnored := false",
+                "                for _, ignoreExt in global_dynamic_menu_ignore_extensions {",
+                "                    if (StrCompare(fileExt, ignoreExt, false) == 0) {",
+                "                        isIgnored := true",
+                "                        break",
+                "                    }",
+                "                }",
+                "                if (isIgnored)",
+                "                    continue",
+                "                    ",
+                "                this.Add(fileName, (ItemName, ItemPos, MyMenu) => Run(filePath))",
                 "            }",
                 "        }",
                 "    }",
