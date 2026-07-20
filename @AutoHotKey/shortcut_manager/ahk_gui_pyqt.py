@@ -2157,6 +2157,19 @@ class SettingsDialog(QDialog):
         sm_indicator_layout.addWidget(self.sm_indicator_edit)
         layout.addLayout(sm_indicator_layout)
 
+        self.sm_indicator_right_align_checkbox = QCheckBox("Right-align submenu indicator")
+        self.sm_indicator_right_align_checkbox.setChecked(self.parent_window.selection_menu_submenu_indicator_right_align)
+        self.sm_indicator_right_align_checkbox.setStyleSheet(f"""
+            QCheckBox {{
+                color: {CP_TEXT};
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 10pt;
+                margin-top: 2px;
+                margin-bottom: 2px;
+            }}
+        """)
+        layout.addWidget(self.sm_indicator_right_align_checkbox)
+
         # Separator line
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
@@ -2221,6 +2234,7 @@ class SettingsDialog(QDialog):
         self.parent_window.selection_menu_font_size = self.sm_size_spin.value()
         self.parent_window.use_native_menu = self.menu_style_checkbox.isChecked()
         self.parent_window.selection_menu_submenu_indicator = self.sm_indicator_edit.text()
+        self.parent_window.selection_menu_submenu_indicator_right_align = self.sm_indicator_right_align_checkbox.isChecked()
 
         # Parse Ignore list entries
         folders_raw = self.ignore_folders_input.text()
@@ -2264,6 +2278,7 @@ class AHKShortcutEditor(QMainWindow):
         self.selection_menu_font_family = "Segoe UI"
         self.selection_menu_font_size = 12
         self.selection_menu_submenu_indicator = " >"
+        self.selection_menu_submenu_indicator_right_align = True
         self.use_native_menu = False
         self.dynamic_menu_ignore_folders = [".git", "node_modules", "__pycache__", ".vscode"]
         self.dynamic_menu_ignore_extensions = [".exe", ".dll", ".bin", ".pyc", ".tmp"]
@@ -2742,6 +2757,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.selection_menu_font_family = data.get("selection_menu_font_family", "Segoe UI")
                     self.selection_menu_font_size = data.get("selection_menu_font_size", 12)
                     self.selection_menu_submenu_indicator = data.get("selection_menu_submenu_indicator", " >")
+                    self.selection_menu_submenu_indicator_right_align = data.get("selection_menu_submenu_indicator_right_align", True)
                     self.use_native_menu = data.get("use_native_menu", False)
                     self.dynamic_menu_ignore_folders = data.get("dynamic_menu_ignore_folders", [".git", "node_modules", "__pycache__", ".vscode"])
                     self.dynamic_menu_ignore_extensions = data.get("dynamic_menu_ignore_extensions", [".exe", ".dll", ".bin", ".pyc", ".tmp"])
@@ -2808,6 +2824,7 @@ class AHKShortcutEditor(QMainWindow):
                 "selection_menu_font_family": self.selection_menu_font_family,
                 "selection_menu_font_size": self.selection_menu_font_size,
                 "selection_menu_submenu_indicator": self.selection_menu_submenu_indicator,
+                "selection_menu_submenu_indicator_right_align": self.selection_menu_submenu_indicator_right_align,
                 "use_native_menu": self.use_native_menu,
                 "dynamic_menu_ignore_folders": self.dynamic_menu_ignore_folders,
                 "dynamic_menu_ignore_extensions": self.dynamic_menu_ignore_extensions,
@@ -3838,6 +3855,7 @@ class AHKShortcutEditor(QMainWindow):
                     "    static hoverTimerActive := false",
                     "    static isTransitioning := false",
                     f"    static submenuIndicator := \"{self.selection_menu_submenu_indicator}\"",
+                    f"    static rightAlignIndicator := {'true' if self.selection_menu_submenu_indicator_right_align else 'false'}",
                     "",
                     "    static CancelHoverTimer() {",
                     "        if CustomMenuGUI.hoverTimerActive {",
@@ -3890,20 +3908,34 @@ class AHKShortcutEditor(QMainWindow):
                     "                btn := guiObj.Add(\"Text\", sepOptions)",
                     "                buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: true})",
                     "            } else {",
-                    "                if (IsObject(item.action) && !HasMethod(item.action, \"Call\")) {",
+                    "                if (IsObject(item.action) && !HasMethod(item.action, \"Call\") && !CustomMenuGUI.rightAlignIndicator) {",
                     "                    label := label . \"  \" . CustomMenuGUI.submenuIndicator",
                     "                }",
                     "                btn := guiObj.Add(\"Text\", options, \"  \" . label)",
                     "                btn.itemIdx := idx",
                     "                btn.menuObj := CustomMenuGUI.activeMenu",
                     "                btn.OnEvent(\"Click\", (ctrl, *) => CustomMenuGUI.OnItemClick(ctrl.itemIdx, ctrl.menuObj))",
-                    "                buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: false})",
+                    "                buttons.Push({ctrl: btn, arrowCtrl: \"\", isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: false})",
+                    "            }",
+                    "        }",
+                    "",
+                    "        ; Add submenu indicators after layout to prevent vertical spacing disruption",
+                    "        for btnObj in buttons {",
+                    "            if (HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                continue",
+                    "            item := CustomMenuGUI.activeMenu.items[btnObj.itemIdx]",
+                    "            if (IsObject(item.action) && !HasMethod(item.action, \"Call\") && CustomMenuGUI.rightAlignIndicator) {",
+                    "                btnObj.ctrl.GetPos(&cX, &cY, &cW, &cH)",
+                    "                btnObj.arrowCtrl := guiObj.Add(\"Text\", \"x\" . cX . \" y\" . cY . \" w\" . cW . \" h\" . cH . \" Right BackgroundTrans +E0x20\", CustomMenuGUI.submenuIndicator . \"  \")",
                     "            }",
                     "        }",
                     "",
                     "        maxW := 120",
                     "        for btnObj in buttons {",
                     "            btnObj.ctrl.GetPos(,, &w, &h)",
+                    "            if (HasProp(btnObj, \"arrowCtrl\") && btnObj.arrowCtrl != \"\") {",
+                    "                w += 24",
+                    "            }",
                     "            if (w > maxW) {",
                     "                maxW := w",
                     "            }",
@@ -3912,6 +3944,10 @@ class AHKShortcutEditor(QMainWindow):
                     "",
                     "        for btnObj in buttons {",
                     "            btnObj.ctrl.Move(,, maxW)",
+                    "            if (HasProp(btnObj, \"arrowCtrl\") && btnObj.arrowCtrl != \"\") {",
+                    "                btnObj.ctrl.GetPos(,, &w, &h)",
+                    "                btnObj.arrowCtrl.Move(,, maxW, h)",
+                    "            }",
                     "        }",
                     "",
                     "        CustomMenuGUI.guiObj := guiObj",
@@ -4007,9 +4043,15 @@ class AHKShortcutEditor(QMainWindow):
                     "                    if (shouldHighlight) {",
                     "                        ctrl.Opt(\"Background\" . CustomMenuGUI.accentColor)",
                     "                        ctrl.SetFont(\"cWhite\")",
+                    "                        if (HasProp(btnObj, \"arrowCtrl\") && btnObj.arrowCtrl != \"\") {",
+                    "                            try btnObj.arrowCtrl.SetFont(\"cWhite\")",
+                    "                        }",
                     "                    } else {",
                     "                        ctrl.Opt(\"Background\" . CustomMenuGUI.bgColor)",
                     "                        ctrl.SetFont(\"c\" . CustomMenuGUI.fontColor)",
+                    "                        if (HasProp(btnObj, \"arrowCtrl\") && btnObj.arrowCtrl != \"\") {",
+                    "                            try btnObj.arrowCtrl.SetFont(\"c\" . CustomMenuGUI.fontColor)",
+                    "                        }",
                     "                    }",
                     "                }",
                     "            }",
