@@ -158,6 +158,7 @@ async function openScanMissingModal() {
                         <span class="missing-episode-title">${ep.episode_title}</span>
                     </div>
                     <div class="missing-episode-actions">
+                        <button onclick="resetSonarrEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-sync" title="Reset and Search in Sonarr" style="background-color: #0084ff; color: white;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Sonarr</button>
                         <button onclick="checkMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-check" title="Mark as Watched"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Check</button>
                         <button onclick="deleteMissingEpisode(${ep.show_id}, ${ep.episode_id}, this)" class="btn-delete" title="Delete from JSON"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Del</button>
                     </div>
@@ -353,7 +354,20 @@ async function syncShow(event, showId, btn) {
 }
 
 // Settings Modal Functions
-function openSettingsModal() {
+async function openSettingsModal() {
+    try {
+        const response = await fetch('/api/settings');
+        const settings = await response.json();
+        
+        const urlInput = document.getElementById('sonarrApiUrl');
+        const keyInput = document.getElementById('sonarrApiKey');
+        
+        if (urlInput) urlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
+        if (keyInput) keyInput.value = settings.sonarr_api_key || '';
+    } catch (e) {
+        console.error('Error loading Sonarr settings:', e);
+    }
+
     document.getElementById('settingsModal').style.display = 'block';
     document.body.classList.add('modal-open');
 }
@@ -361,6 +375,68 @@ function openSettingsModal() {
 function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
     document.body.classList.remove('modal-open');
+}
+
+async function saveSonarrSettings() {
+    const url = document.getElementById('sonarrApiUrl').value;
+    const apiKey = document.getElementById('sonarrApiKey').value;
+    
+    try {
+        const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sonarr_url: url,
+                sonarr_api_key: apiKey
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Settings saved successfully!');
+            closeSettingsModal();
+        } else {
+            alert('Failed to save settings');
+        }
+    } catch (e) {
+        console.error('Error saving settings:', e);
+        alert('Error saving settings');
+    }
+}
+
+async function resetSonarrEpisode(showId, episodeId, button) {
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = 'Resetting...';
+    try {
+        const response = await fetch('/api/reset_sonarr_episode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ show_id: showId, episode_id: episodeId })
+        });
+        const data = await response.json();
+        if (data.success) {
+            button.style.backgroundColor = '#4ade80';
+            button.innerHTML = 'Success!';
+            setTimeout(() => {
+                button.style.backgroundColor = '#0084ff';
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }, 2000);
+        } else {
+            alert('Failed: ' + data.message);
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error resetting Sonarr episode:', error);
+        alert('Network error resetting episode');
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    }
 }
 
 // Server-side Folder Opening Function

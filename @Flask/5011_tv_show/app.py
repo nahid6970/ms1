@@ -29,8 +29,23 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
 ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
 IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
+SETTINGS_FILE = r"C:\@delta\db\5011_tv_show\settings.json"
 
 os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
+
+def load_settings():
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            pass
+    return {"sonarr_url": "http://192.168.0.101:8989", "sonarr_api_key": ""}
+
+def save_settings(settings):
+    os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(settings, f, indent=4)
 
 def get_cached_image(url):
     if not url:
@@ -552,6 +567,132 @@ def mark_all_episodes_seen():
         save_data(shows)
     
     return jsonify({'success': True, 'updated_count': updated_count})
+
+@app.route('/api/settings', methods=['GET', 'POST'])
+def api_settings():
+    if request.method == 'POST':
+        data = request.json or {}
+        settings = load_settings()
+        settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
+        settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
+        save_settings(settings)
+        return jsonify({'success': True})
+    return jsonify(load_settings())
+
+@app.route('/api/reset_sonarr_episode', methods=['POST'])
+def api_reset_sonarr_episode():
+    data = request.json or {}
+    show_id = data.get('show_id')
+    episode_id = data.get('episode_id')
+    
+    if not show_id or not episode_id:
+        return jsonify({'success': False, 'message': 'Missing show_id or episode_id'}), 400
+        
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found in database'}), 404
+        
+    episode = next((e for e in show.get('episodes', []) if e['id'] == episode_id), None)
+    if not episode:
+        return jsonify({'success': False, 'message': 'Episode not found in database'}), 404
+        
+    episode_title = episode['title']
+    
+    # Parse season and episode number
+    import re
+    match = re.search(r'[sS](\d+)[eE](\d+)', episode_title)
+    if not match:
+        return jsonify({'success': False, 'message': f'Could not parse Season/Episode from: {episode_title}'}), 400
+        
+    season_num = int(match.group(1))
+    episode_num = int(match.group(2))
+    
+    # Load settings for Sonarr URL and API key
+    settings = load_settings()
+    sonarr_url = settings.get('sonarr_url', 'http://192.168.0.101:8989').rstrip('/')
+    api_key = settings.get('sonarr_api_key', '')
+    
+    if not api_key:
+        return jsonify({'success': False, 'message': 'Sonarr API Key not configured in Settings'}), 400
+        
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+    
+    # 1. Find the series in Sonarr
+    show_dir = show.get('directory_path')
+    series_id = None
+    
+    try:
+        series_response = requests.get(f"{sonarr_url}/api/v3/series", headers=headers, timeout=10)
+        if series_response.status_code != 200:
+            return jsonify({'success': False, 'message': f'Sonarr API returned status code {series_response.status_code}'}), 500
+            
+        series_list = series_response.json()
+        
+        # Match by path
+        if show_dir:
+            normalized_show_dir = os.path.normpath(show_dir).lower()
+            for s in series_list:
+                s_path = s.get('path')
+                if s_path and os.path.normpath(s_path).lower() == normalized_show_dir:
+                    series_id = s.get('id')
+                    break
+                    
+        # Fallback to match by title (case insensitive)
+        if not series_id:
+            show_title = show['title'].lower()
+            for s in series_list:
+                s_title = s.get('title', '').lower()
+                if s_title == show_title:
+                    series_id = s.get('id')
+                    break
+                    
+        if not series_id:
+            return jsonify({'success': False, 'message': f"Could not find series in Sonarr matching path: {show_dir} or title: {show['title']}"}), 404
+            
+        # 2. Get episodes for this series
+        episodes_response = requests.get(f"{sonarr_url}/api/v3/episode?seriesId={series_id}", headers=headers, timeout=10)
+        if episodes_response.status_code != 200:
+            return jsonify({'success': False, 'message': 'Failed to fetch episodes from Sonarr'}), 500
+            
+        sonarr_episodes = episodes_response.json()
+        target_episode = None
+        for ep in sonarr_episodes:
+            if ep.get('seasonNumber') == season_num and ep.get('episodeNumber') == episode_num:
+                target_episode = ep
+                break
+                
+        if not target_episode:
+            return jsonify({'success': False, 'message': f'Episode Season {season_num} Episode {episode_num} not found in Sonarr'}), 404
+            
+        target_episode_id = target_episode['id']
+        
+        # 3. Update monitored status in Sonarr
+        target_episode['monitored'] = False
+        requests.put(f"{sonarr_url}/api/v3/episode/{target_episode_id}", headers=headers, json=target_episode, timeout=10)
+        
+        target_episode['monitored'] = True
+        put_response = requests.put(f"{sonarr_url}/api/v3/episode/{target_episode_id}", headers=headers, json=target_episode, timeout=10)
+        
+        if put_response.status_code != 202 and put_response.status_code != 200:
+            return jsonify({'success': False, 'message': f'Failed to update episode monitored status in Sonarr: {put_response.text}'}), 500
+            
+        # 4. Trigger a search for the episode in Sonarr
+        command_payload = {
+            'name': 'EpisodeSearch',
+            'episodeIds': [target_episode_id]
+        }
+        command_response = requests.post(f"{sonarr_url}/api/v3/command", headers=headers, json=command_payload, timeout=10)
+        if command_response.status_code not in [200, 201, 202]:
+            return jsonify({'success': False, 'message': f'Episode monitored but failed to trigger search in Sonarr: {command_response.text}'}), 500
+            
+        return jsonify({'success': True, 'message': 'Episode successfully monitored and search triggered in Sonarr'})
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'message': f'Network error communicating with Sonarr: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)

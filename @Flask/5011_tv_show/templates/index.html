@@ -230,6 +230,17 @@
                     <span class="slider round"></span>
                 </label>
             </div>
+            <div class="setting-item" style="border-top: 1px solid #333; margin-top: 10px; padding-top: 15px;">
+                <label for="sonarrApiUrl">Sonarr URL</label>
+                <input type="text" id="sonarrApiUrl" class="setting-input" style="background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; padding: 6px 10px; width: 220px;" placeholder="http://192.168.0.101:8989">
+            </div>
+            <div class="setting-item">
+                <label for="sonarrApiKey">Sonarr API Key</label>
+                <input type="password" id="sonarrApiKey" class="setting-input" style="background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; padding: 6px 10px; width: 220px;" placeholder="Paste API Key here">
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button onclick="saveSonarrSettings()" class="add-button" style="display: inline-block; padding: 8px 16px; font-size: 14px; background-color: #1db954; color: white; border-radius: 4px;">Save Settings</button>
+            </div>
         </div>
     </div>
 
