@@ -133,7 +133,9 @@ function closeEditEpisodeModal() {
 async function openScanMissingModal() {
     const modal = document.getElementById('scanMissingModal');
     const list = document.getElementById('missingEpisodesList');
+    const searchInput = document.getElementById('missingEpisodesSearch');
     
+    if (searchInput) searchInput.value = '';
     list.innerHTML = '<p>Scanning for missing episode files...</p>';
     modal.style.display = 'block';
     document.body.classList.add('modal-open');
@@ -828,6 +830,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide context menu on scroll
         document.addEventListener('scroll', () => {
             contextMenu.style.display = 'none';
+        });
+    }
+
+    // Search missing episodes
+    const missingSearch = document.getElementById('missingEpisodesSearch');
+    if (missingSearch) {
+        missingSearch.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const items = document.querySelectorAll('.missing-episode-item');
+            items.forEach(item => {
+                const showTitle = (item.querySelector('.missing-show-title')?.textContent || '').toLowerCase();
+                const epTitle = (item.querySelector('.missing-episode-title')?.textContent || '').toLowerCase();
+                if (showTitle.includes(query) || epTitle.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
     }
 });
