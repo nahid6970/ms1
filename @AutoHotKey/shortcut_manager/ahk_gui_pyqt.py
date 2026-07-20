@@ -2148,6 +2148,15 @@ class SettingsDialog(QDialog):
         """)
         layout.addWidget(self.menu_style_checkbox)
 
+        # Submenu indicator setting
+        sm_indicator_layout = QHBoxLayout()
+        sm_indicator_layout.addWidget(QLabel("Submenu Indicator:"))
+        self.sm_indicator_edit = QLineEdit()
+        self.sm_indicator_edit.setText(self.parent_window.selection_menu_submenu_indicator)
+        self.sm_indicator_edit.setPlaceholderText(" >")
+        sm_indicator_layout.addWidget(self.sm_indicator_edit)
+        layout.addLayout(sm_indicator_layout)
+
         # Separator line
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
@@ -2211,6 +2220,7 @@ class SettingsDialog(QDialog):
         self.parent_window.selection_menu_font_family = self.sm_font_combo.currentFont().family()
         self.parent_window.selection_menu_font_size = self.sm_size_spin.value()
         self.parent_window.use_native_menu = self.menu_style_checkbox.isChecked()
+        self.parent_window.selection_menu_submenu_indicator = self.sm_indicator_edit.text()
 
         # Parse Ignore list entries
         folders_raw = self.ignore_folders_input.text()
@@ -2253,6 +2263,7 @@ class AHKShortcutEditor(QMainWindow):
         self.app_font_size = 10
         self.selection_menu_font_family = "Segoe UI"
         self.selection_menu_font_size = 12
+        self.selection_menu_submenu_indicator = " >"
         self.use_native_menu = False
         self.dynamic_menu_ignore_folders = [".git", "node_modules", "__pycache__", ".vscode"]
         self.dynamic_menu_ignore_extensions = [".exe", ".dll", ".bin", ".pyc", ".tmp"]
@@ -2730,6 +2741,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.app_font_size = data.get("app_font_size", 10)
                     self.selection_menu_font_family = data.get("selection_menu_font_family", "Segoe UI")
                     self.selection_menu_font_size = data.get("selection_menu_font_size", 12)
+                    self.selection_menu_submenu_indicator = data.get("selection_menu_submenu_indicator", " >")
                     self.use_native_menu = data.get("use_native_menu", False)
                     self.dynamic_menu_ignore_folders = data.get("dynamic_menu_ignore_folders", [".git", "node_modules", "__pycache__", ".vscode"])
                     self.dynamic_menu_ignore_extensions = data.get("dynamic_menu_ignore_extensions", [".exe", ".dll", ".bin", ".pyc", ".tmp"])
@@ -2795,6 +2807,7 @@ class AHKShortcutEditor(QMainWindow):
                 "app_font_size": self.app_font_size,
                 "selection_menu_font_family": self.selection_menu_font_family,
                 "selection_menu_font_size": self.selection_menu_font_size,
+                "selection_menu_submenu_indicator": self.selection_menu_submenu_indicator,
                 "use_native_menu": self.use_native_menu,
                 "dynamic_menu_ignore_folders": self.dynamic_menu_ignore_folders,
                 "dynamic_menu_ignore_extensions": self.dynamic_menu_ignore_extensions,
@@ -3824,6 +3837,7 @@ class AHKShortcutEditor(QMainWindow):
                     "    static hoverTargetCtrl := \"\"",
                     "    static hoverTimerActive := false",
                     "    static isTransitioning := false",
+                    f"    static submenuIndicator := \"{self.selection_menu_submenu_indicator}\"",
                     "",
                     "    static CancelHoverTimer() {",
                     "        if CustomMenuGUI.hoverTimerActive {",
@@ -3877,7 +3891,7 @@ class AHKShortcutEditor(QMainWindow):
                     "                buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: true})",
                     "            } else {",
                     "                if (IsObject(item.action) && !HasMethod(item.action, \"Call\")) {",
-                    "                    label := label . \"  >\"",
+                    "                    label := label . \"  \" . CustomMenuGUI.submenuIndicator",
                     "                }",
                     "                btn := guiObj.Add(\"Text\", options, \"  \" . label)",
                     "                btn.itemIdx := idx",
