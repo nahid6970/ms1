@@ -1,6 +1,6 @@
-# Deploying Projects with Flask / Databases on Vercel
+# Deploying Projects with Flask, Convex, and Vercel
 
-This guide explains how this project is structured, how to deploy it, and how to adapt projects (both Flask-based and Static) to work on Vercel.
+This guide explains how this project is structured, how to deploy it, and how to adapt your projects to run on Vercel with Convex database integration.
 
 ---
 
@@ -8,70 +8,80 @@ This guide explains how this project is structured, how to deploy it, and how to
 
 This project consists of:
 1. **Frontend**: Static files (`index.html`, `static/css/style.css`, `static/js/main.js`).
-2. **Backend**: A Flask application (`app.py`) running a server locally.
-3. **Database**: A local SQLite file (`wwe.db`).
-4. **Scraper**: A script (`scraper.py`) that fetches WWE PPV event information and saves it to the SQLite database.
+2. **Backend**: A Flask application (`app.py`).
+3. **Database**: A serverless cloud database on **Convex** (migrated from local SQLite `wwe.db`).
+4. **Scraper**: A script (`scraper.py`) that fetches WWE PPV events and saves them directly to Convex.
 
 ---
 
-## 2. The Core Problem with Vercel & SQLite
+## 2. Using Convex with Vercel
 
-When you upload a folder to Vercel, it defaults to hosting it as a **static website** (unless configured otherwise).
-* **Static Hosting**: Only serves HTML, CSS, and JS. The Flask server (`app.py`) and SQLite database (`wwe.db`) do not run.
-* **Serverless Functions**: Vercel allows running backend Python code, but it is **read-only and ephemeral**.
-  * Any write operation to a local file (such as updating `wwe.db` or exporting `index.html`) will fail or be lost immediately on the next request.
+Because Vercel serverless functions are read-only and stateless, a local database like SQLite won't save data persistently. **Convex** solves this by providing a cloud-hosted serverless database.
+
+### Configuring Environment Variables (`CONVEX_URL`)
+To allow the Python backend to talk to Convex:
+1. Locally, the Convex URL is saved inside `.env.local` (automatically created by `npx convex dev`).
+2. On Vercel, secret files like `.env.local` are ignored for security. You must manually add it:
+   * Go to the **Vercel Dashboard** and click on your project.
+   * Go to the **Settings** tab -> **Environment Variables** (left menu).
+   * Click **Add Environment Variable** in the top right.
+   * Enter **Key**: `CONVEX_URL`
+   * Enter **Value**: (your Convex HTTP address, e.g. `https://your-deployment.convex.cloud`)
+   * Click **Save**.
 
 ---
 
-## 3. How We Fixed This Project (Static Deployment with LocalStorage)
+## 3. How to Update Your Project on Vercel
+Once a project is created on Vercel, the drag-and-drop folder upload box disappears from the web interface. To push new updates:
 
-Since Vercel is serving your frontend as a static site, we updated the frontend JavaScript code (`static/js/main.js`) to:
-1. Check if the page is running in **static mode** (when `window.STATIC_EVENTS` is present).
-2. Save changes (like checking "Seen" or "Hidden") to the browser's **`localStorage`** instead of trying to send a POST request to the Flask server.
-3. On page load, it merges the default events with the saved states from `localStorage`.
-
----
-
-## 4. How to Deploy Flask/Backends on Vercel
-
-If you want to run a Flask backend on Vercel instead of a static site, you must follow these steps:
-
-### Step A: Structure the Flask App for Vercel
-Vercel expects serverless backend entry points under the `/api` directory.
-1. Move/rename your main Flask entry point (or create a file) at `api/index.py`:
-   ```python
-   # api/index.py
-   from flask import Flask
-   app = Flask(__name__)
-
-   @app.route('/api/hello')
-   def hello():
-       return {"message": "Hello from Flask on Vercel!"}
-   ```
-
-### Step B: Create a `vercel.json` Configuration
-Create a file named `vercel.json` in the root of your project:
-```json
-{
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    }
-  ]
-}
+### Method A: Vercel CLI (Fastest)
+Run this command from your project folder:
+```bash
+vercel --prod
 ```
 
-### Step C: Handle the Database (Crucial!)
-Because Vercel serverless functions are stateless and read-only, **you cannot use SQLite**. Instead, you must:
-1. Use a cloud-hosted database (e.g., PostgreSQL on **Supabase**, **Vercel Postgres**, or MongoDB on **Atlas**).
-2. Connect to it via a connection string (e.g., `postgresql://...`) saved in Vercel's **Environment Variables** (`dotenv` locally, and the Vercel dashboard for production).
+### Method B: GitHub Integration (Automatic)
+Link your Vercel project to a GitHub repository. Every time you commit and push changes, Vercel will automatically redeploy the site.
 
 ---
 
-## 5. Summary: Which Setup to Choose?
+## 4. Resetting and Testing Data
 
-| Goal | Hosting Approach | State/Database Strategy |
-| :--- | :--- | :--- |
-| **Simple Static Page** | Drag & Drop directory to Vercel | Use `localStorage` on the frontend. |
-| **Dynamic Backend** | Configure `vercel.json` + Python Serverless | Use a cloud database (Postgres/Supabase). |
+If you want to clear your data to test the scraper from scratch:
+
+### A. Clear the Convex Database
+1. Open the Convex dashboard using the command:
+   ```bash
+   npx convex dashboard
+   ```
+2. Navigate to the **Data** tab on the left.
+3. Select the `events` table, and delete all records.
+
+### B. Clear Your Browser's `localStorage` (Checkboxes Cache)
+Your browser caches seen/hidden checkbox clicks. To reset them:
+1. Open the website, press **F12** to open Developer Tools, and select the **Console** tab.
+2. Run the command:
+   ```javascript
+   localStorage.clear()
+   ```
+3. Refresh the page.
+
+---
+
+## 5. Resolving Vercel Deploy Dependency Errors
+If Vercel fails to resolve dependencies during build time:
+* **The Error**: Python library version conflicts (e.g. `no version of convex==1.18.0`).
+* **The Fix**: The Python `convex` library has different version numbers than the JS/TS npm packages. Ensure your `requirements.txt` includes only:
+  ```text
+  Flask==3.0.2
+  beautifulsoup4==4.12.3
+  convex
+  python-dotenv==1.0.1
+  ```
+
+---
+
+## 6. Understanding Vercel Links
+Vercel generates multiple URLs for your project:
+* **Production URL (`wweppv.vercel.app`)**: The main address showing the latest live production code.
+* **Deployment/Preview URL (`wwe-nigd3un3j...vercel.app`)**: A unique, permanent URL created for every single upload. Useful for testing drafts before releasing them to the main website.
