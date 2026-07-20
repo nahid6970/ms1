@@ -254,7 +254,10 @@
                 
                 <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
                     <label for="rootShowsFolder" style="margin: 0; color: #eee; font-size: 0.95rem;">Shows Download Path</label>
-                    <input type="text" id="rootShowsFolder" class="setting-input" placeholder="C:\Users\nahid\Downloads\@sonarr">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                        <input type="text" id="rootShowsFolder" class="setting-input" placeholder="C:\Users\nahid\Downloads\@sonarr">
+                        <button onclick="syncSonarrPaths(this)" class="add-button" style="padding: 4px 10px; font-size: 11px; background-color: #f2994a; color: white; border-radius: 4px; font-weight: bold; width: fit-content; border: none; cursor: pointer;">Update Paths in Sonarr & DB</button>
+                    </div>
                 </div>
             </div>
             

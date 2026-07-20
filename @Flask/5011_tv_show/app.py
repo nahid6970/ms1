@@ -613,6 +613,79 @@ def api_test_sonarr():
     except requests.exceptions.RequestException as e:
         return jsonify({'success': False, 'message': f'Connection failed: {str(e)}'})
 
+@app.route('/api/update_sonarr_paths', methods=['POST'])
+def api_update_sonarr_paths():
+    settings = load_settings()
+    sonarr_url = settings.get('sonarr_url', 'http://192.168.0.101:8989').rstrip('/')
+    api_key = settings.get('sonarr_api_key', '')
+    root_folder = settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr")
+    
+    if not api_key:
+        return jsonify({'success': False, 'message': 'Sonarr API Key not configured in Settings'}), 400
+        
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        # 1. Get all series from Sonarr
+        series_response = requests.get(f"{sonarr_url}/api/v3/series", headers=headers, timeout=10)
+        if series_response.status_code != 200:
+            return jsonify({'success': False, 'message': f'Failed to get series: HTTP {series_response.status_code}'}), 500
+            
+        series_list = series_response.json()
+        updated_count = 0
+        failed_count = 0
+        
+        normalized_root = os.path.normpath(root_folder).lower()
+        
+        # Update in Sonarr
+        for series in series_list:
+            current_path = series.get('path', '')
+            if not current_path:
+                continue
+                
+            norm_curr_path = os.path.normpath(current_path)
+            parent_dir = os.path.dirname(norm_curr_path)
+            folder_name = os.path.basename(norm_curr_path)
+            
+            if parent_dir.lower() != normalized_root:
+                new_path = os.path.normpath(os.path.join(root_folder, folder_name))
+                series['path'] = new_path
+                
+                put_url = f"{sonarr_url}/api/v3/series/{series['id']}?moveFiles=false"
+                put_response = requests.put(put_url, headers=headers, json=series, timeout=10)
+                
+                if put_response.status_code in [200, 202]:
+                    updated_count += 1
+                else:
+                    failed_count += 1
+                    
+        # 2. Update local data.json
+        shows = load_data()
+        local_updated = False
+        for show in shows:
+            dir_path = show.get('directory_path')
+            if dir_path:
+                norm_dir = os.path.normpath(dir_path)
+                parent_dir = os.path.dirname(norm_dir)
+                folder_name = os.path.basename(norm_dir)
+                if parent_dir.lower() != normalized_root:
+                    show['directory_path'] = os.path.normpath(os.path.join(root_folder, folder_name))
+                    local_updated = True
+                    
+        if local_updated:
+            save_data(shows)
+            
+        return jsonify({
+            'success': True, 
+            'message': f'Updated {updated_count} show paths in Sonarr. (Failed: {failed_count})'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error migrating paths: {str(e)}'}), 500
+
 @app.route('/api/reset_sonarr_episode', methods=['POST'])
 def api_reset_sonarr_episode():
     data = request.json or {}

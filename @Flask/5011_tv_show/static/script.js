@@ -423,6 +423,31 @@ async function testSonarrConnection() {
     }
 }
 
+async function syncSonarrPaths(button) {
+    const originalText = button.textContent;
+    button.textContent = 'Updating...';
+    button.disabled = true;
+    button.style.opacity = '0.7';
+    
+    try {
+        const response = await fetch('/api/update_sonarr_paths', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        alert(data.message);
+    } catch (e) {
+        console.error('Error migrating paths:', e);
+        alert('Failed to connect to server');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+        button.style.opacity = '1';
+    }
+}
+
 async function saveSonarrSettings() {
     const url = document.getElementById('sonarrApiUrl').value;
     const apiKey = document.getElementById('sonarrApiKey').value;
