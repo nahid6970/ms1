@@ -588,6 +588,31 @@ def api_settings():
         return jsonify({'success': True})
     return jsonify(load_settings())
 
+@app.route('/api/test_sonarr', methods=['POST'])
+def api_test_sonarr():
+    data = request.json or {}
+    sonarr_url = data.get('sonarr_url', '').rstrip('/')
+    api_key = data.get('sonarr_api_key', '')
+    
+    if not sonarr_url or not api_key:
+        return jsonify({'success': False, 'message': 'Sonarr URL and API Key are required'}), 400
+        
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.get(f"{sonarr_url}/api/v3/system/status", headers=headers, timeout=5)
+        if response.status_code == 200:
+            status_data = response.json()
+            version = status_data.get('version', 'Unknown')
+            return jsonify({'success': True, 'message': f'Connected! Sonarr version: {version}'})
+        else:
+            return jsonify({'success': False, 'message': f'Failed with status code {response.status_code}. Please check API key.'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'message': f'Connection failed: {str(e)}'})
+
 @app.route('/api/reset_sonarr_episode', methods=['POST'])
 def api_reset_sonarr_episode():
     data = request.json or {}

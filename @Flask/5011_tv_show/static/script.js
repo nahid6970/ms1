@@ -355,6 +355,13 @@ async function syncShow(event, showId, btn) {
 
 // Settings Modal Functions
 async function openSettingsModal() {
+    // Clear status span
+    const statusSpan = document.getElementById('testConnectionStatus');
+    if (statusSpan) {
+        statusSpan.textContent = '';
+        statusSpan.style.color = '';
+    }
+    
     try {
         const response = await fetch('/api/settings');
         const settings = await response.json();
@@ -377,6 +384,43 @@ async function openSettingsModal() {
 function closeSettingsModal() {
     document.getElementById('settingsModal').style.display = 'none';
     document.body.classList.remove('modal-open');
+}
+
+async function testSonarrConnection() {
+    const url = document.getElementById('sonarrApiUrl').value;
+    const apiKey = document.getElementById('sonarrApiKey').value;
+    const statusSpan = document.getElementById('testConnectionStatus');
+    
+    if (!statusSpan) return;
+    
+    statusSpan.textContent = 'Testing connection...';
+    statusSpan.style.color = '#e0e0e0';
+    
+    try {
+        const response = await fetch('/api/test_sonarr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sonarr_url: url,
+                sonarr_api_key: apiKey
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            statusSpan.textContent = data.message;
+            statusSpan.style.color = '#4ade80';
+        } else {
+            statusSpan.textContent = data.message;
+            statusSpan.style.color = '#ff6b6b';
+        }
+    } catch (e) {
+        console.error('Error testing connection:', e);
+        statusSpan.textContent = 'Error connecting to application server';
+        statusSpan.style.color = '#ff6b6b';
+    }
 }
 
 async function saveSonarrSettings() {
