@@ -1045,7 +1045,8 @@
         ".git",
         "node_modules",
         "__pycache__",
-        ".vscode"
+        ".vscode",
+        ".uv-envs"
     ],
     "dynamic_menu_ignore_extensions": [
         ".exe",
