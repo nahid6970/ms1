@@ -3668,7 +3668,7 @@ class AHKShortcutEditor(QMainWindow):
                     "    __New() {",
                     "        this.items := []",
                     "    }",
-                    "    Add(label, action) {",
+                    "    Add(label:=\"\", action:=\"\") {",
                     "        this.items.Push({label: label, action: action})",
                     "    }",
                     "    Show() {",
@@ -3869,15 +3869,21 @@ class AHKShortcutEditor(QMainWindow):
                     "",
                     "        for idx, item in CustomMenuGUI.activeMenu.items {",
                     "            label := item.label",
-                    "            if (IsObject(item.action) && !HasMethod(item.action, \"Call\")) {",
-                    "                label := label . \"  >\"",
-                    "            }",
                     "            options := (idx == 1) ? \"Left Background\" . CustomMenuGUI.bgColor : \"y+2 Left Background\" . CustomMenuGUI.bgColor",
-                    "            btn := guiObj.Add(\"Text\", options, \"  \" . label)",
-                    "            btn.itemIdx := idx",
-                    "            btn.menuObj := CustomMenuGUI.activeMenu",
-                    "            btn.OnEvent(\"Click\", (ctrl, *) => CustomMenuGUI.OnItemClick(ctrl.itemIdx, ctrl.menuObj))",
-                    "            buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu})",
+                    "            if (label == \"\") {",
+                    "                lineColor := (CustomMenuGUI.bgColor == \"White\" || CustomMenuGUI.bgColor == \"FFFFFF\") ? \"D3D3D3\" : \"555555\"",
+                    "                btn := guiObj.Add(\"Text\", options . \" h1 Background\" . lineColor)",
+                    "                buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: true})",
+                    "            } else {",
+                    "                if (IsObject(item.action) && !HasMethod(item.action, \"Call\")) {",
+                    "                    label := label . \"  >\"",
+                    "                }",
+                    "                btn := guiObj.Add(\"Text\", options, \"  \" . label)",
+                    "                btn.itemIdx := idx",
+                    "                btn.menuObj := CustomMenuGUI.activeMenu",
+                    "                btn.OnEvent(\"Click\", (ctrl, *) => CustomMenuGUI.OnItemClick(ctrl.itemIdx, ctrl.menuObj))",
+                    "                buttons.Push({ctrl: btn, isBack: false, itemIdx: idx, menuObj: CustomMenuGUI.activeMenu, isSeparator: false})",
+                    "            }",
                     "        }",
                     "",
                     "        maxW := 120",
@@ -3975,6 +3981,8 @@ class AHKShortcutEditor(QMainWindow):
                     "",
                     "    static HighlightItem() {",
                     "        for idx, btnObj in CustomMenuGUI.buttons {",
+                    "            if (HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                continue",
                     "            ctrl := btnObj.ctrl",
                     "            try {",
                     "                if (idx == CustomMenuGUI.selectedIndex) {",
@@ -4001,16 +4009,26 @@ class AHKShortcutEditor(QMainWindow):
                     "        VK_ESCAPE := 0x1B",
                     "",
                     "        if (wParam == VK_DOWN) {",
-                    "            CustomMenuGUI.selectedIndex += 1",
-                    "            if (CustomMenuGUI.selectedIndex > CustomMenuGUI.buttons.Length)",
-                    "                CustomMenuGUI.selectedIndex := 1",
+                    "            Loop {",
+                    "                CustomMenuGUI.selectedIndex += 1",
+                    "                if (CustomMenuGUI.selectedIndex > CustomMenuGUI.buttons.Length)",
+                    "                    CustomMenuGUI.selectedIndex := 1",
+                    "                btnObj := CustomMenuGUI.buttons[CustomMenuGUI.selectedIndex]",
+                    "                if !(HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                    break",
+                    "            }",
                     "            CustomMenuGUI.HighlightItem()",
                     "            return 0",
                     "        }",
                     "        else if (wParam == VK_UP) {",
-                    "            CustomMenuGUI.selectedIndex -= 1",
-                    "            if (CustomMenuGUI.selectedIndex < 1)",
-                    "                CustomMenuGUI.selectedIndex := CustomMenuGUI.buttons.Length",
+                    "            Loop {",
+                    "                CustomMenuGUI.selectedIndex -= 1",
+                    "                if (CustomMenuGUI.selectedIndex < 1)",
+                    "                    CustomMenuGUI.selectedIndex := CustomMenuGUI.buttons.Length",
+                    "                btnObj := CustomMenuGUI.buttons[CustomMenuGUI.selectedIndex]",
+                    "                if !(HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                    break",
+                    "            }",
                     "            CustomMenuGUI.HighlightItem()",
                     "            return 0",
                     "        }",
@@ -4053,6 +4071,8 @@ class AHKShortcutEditor(QMainWindow):
                     "                return",
                     "            for idx, btnObj in CustomMenuGUI.buttons {",
                     "                if (btnObj.ctrl.Hwnd == ctrl.Hwnd) {",
+                    "                    if (HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                        return",
                     "                    if (CustomMenuGUI.selectedIndex != idx) {",
                     "                        CustomMenuGUI.selectedIndex := idx",
                     "                        CustomMenuGUI.HighlightItem()",
@@ -4078,6 +4098,8 @@ class AHKShortcutEditor(QMainWindow):
                     "                    parentObj := CustomMenuGUI.guiStack[loopIndex]",
                     "                    for idx, btnObj in parentObj.buttons {",
                     "                        if (btnObj.ctrl.Hwnd == ctrl.Hwnd) {",
+                    "                            if (HasProp(btnObj, \"isSeparator\") && btnObj.isSeparator)",
+                    "                                return",
                     "                            if (parentObj.idx == idx) {",
                     "                                return",
                     "                            }",
@@ -4936,7 +4958,9 @@ class AHKShortcutEditor(QMainWindow):
                                     safe_display = escape_ahk_string(display_name)
                                     
                                     is_dynamic = child['tags'].get('dynamic', '').lower() in ('yes', 'true', '1') and 'folder' in child['tags']
-                                    if child['children']:
+                                    if display_name.strip().startswith("*****"):
+                                        output_lines.append(f'    {submenu_var}.Add()')
+                                    elif child['children']:
                                         child_menu_var = generate_menu_node(child, submenu_var)
                                         output_lines.append(f'    {submenu_var}.Add("{safe_display}", {child_menu_var})')
                                     elif is_dynamic:
@@ -4957,7 +4981,9 @@ class AHKShortcutEditor(QMainWindow):
                             safe_display = escape_ahk_string(display_name)
                             
                             is_dynamic = node['tags'].get('dynamic', '').lower() in ('yes', 'true', '1') and 'folder' in node['tags']
-                            if node['children']:
+                            if display_name.strip().startswith("*****"):
+                                output_lines.append(f'    m.Add()')
+                            elif node['children']:
                                 submenu_var = generate_menu_node(node, "m")
                                 output_lines.append(f'    m.Add("{safe_display}", {submenu_var})')
                             elif is_dynamic:

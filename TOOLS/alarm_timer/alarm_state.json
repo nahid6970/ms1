@@ -256,10 +256,10 @@
         {
           "id": "d0ec93d0",
           "label": "13",
-          "fires_at": 1783954213.8506565,
-          "created_at": 1783954183.8514476,
+          "fires_at": 1785051571.180303,
+          "created_at": 1784523031.1858525,
           "input_mode": "text",
-          "input_value": ".5",
+          "input_value": "146h 49m",
           "use_custom_colors": true
         },
         {

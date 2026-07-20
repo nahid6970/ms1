@@ -816,7 +816,7 @@
             "category": "General",
             "description": "",
             "trigger": "^b",
-            "replacement": "অ\n আ\n ই\n ঈ\n উ\n ঊ\n ঋ\n এ\n ঐ\n ও\n ঔ\n*****\n া \n ি \n ী \n ু \n ূ \n ৃ \n ে \n ৈ \n ো \n ৌ \n*****\n ্\n ং\n ঃ\n ঁ\n*****\nয-ফলা (◌্য)\nর-ফলা (◌্র)",
+            "replacement": "অ\n আ\n ই\n ঈ\n উ\n ঊ\n ঋ\n এ\n ঐ\n ও\n ঔ\n া \n ি \n ী \n ু \n ূ \n ৃ \n ে \n ৈ \n ো \n ৌ \n*****\n ্\n ং\n ঃ\n ঁ\n*****\nয-ফলা (◌্য)\nর-ফলা (◌্র)",
             "delivery_method": "paste",
             "show_as_menu": true,
             "window_title": "",
