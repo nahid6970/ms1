@@ -2,11 +2,8 @@
 
 ## Done So Far
 - **⭐ Favourites Section**: Added collapsible Favourites category to aggregate shortcuts of all types, including toggling, edit field synchronization, and persistence.
-- **Alignment Fixes**: Normalized the keyboard icon (⌨) alignment in the Favourites section by forcing a uniform `key_width` of 220px and truncating long keys.
 - **`[cmd:]` Shell Syntax**: Introduced Selection Menu tags `[cmd:]`, `[shell:]`, and `[show:]` to run command line prompts from selection menus.
-- **Syntax Info Dialog (ℹ)**: Cleaned up border styles and widened the dialogue size to ensure no horizontal scrollbar is present.
-- **Search Optimization**: Conditionally hidden empty section categories when search query yields 0 matching entries.
-- **Dropdown Bugfix**: Added guards in CustomMenuGUI (`OnItemClick` and `EnterSubmenu`) to prevent redundant transition loops when clicking a parent item that contains subitems, fixing the buggy hovering state.
-- **Native Menu Toggle**: Added a setting checkbox "Use standard Windows native context menu" to switch between the custom side-by-side cascading GUI and standard AHK Windows native context menus.
-
-
+- **Dynamic Folder Menus (`[dynamic:yes]`)**: Introduced dynamic scanning of folders and subdirectories on hover.
+- **Ignore Lists / Exclusions**: Added GUI options (saved in `ahk_shortcuts.json`) to ignore folder names, file extensions, and omit empty folders from dynamic menus.
+- **Win32 Native Menu Lazy Loading**: Intercepted low-level Win32 `WM_INITMENUPOPUP` (0x0117) messages in AHK to lazy-load dynamic folder submenus just-in-time, completely fixing mechanical HDD lag for native menus.
+- **Docs Update**: Added the `dynamic` tag parameters to [SELECTION_MENU.md](file:///C:/@delta/ms1/@AutoHotKey/shortcut_manager/md/SELECTION_MENU.md).
