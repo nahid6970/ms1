@@ -9,7 +9,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PIL import Image, ImageOps
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-                             QGroupBox, QFormLayout, QPlainTextEdit, QFileDialog, 
+                             QGroupBox, QFormLayout, QGridLayout, QPlainTextEdit, QFileDialog, 
                              QProgressBar, QSpinBox, QCheckBox, QDialog, QMessageBox, QInputDialog)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from selenium import webdriver
@@ -569,45 +569,62 @@ class FacebookDownloaderApp(QMainWindow):
 
         # Input Group
         input_grp = QGroupBox("CORE PARAMETERS")
-        input_layout = QFormLayout()
+        input_layout = QVBoxLayout()
         
+        # Output Dir Row
         dir_layout = QHBoxLayout()
+        dir_label = QLabel("OUTPUT DIR:")
+        dir_label.setFixedWidth(90)
         self.dir_input = QLineEdit(self.output_dir)
         self.dir_input.textChanged.connect(self.on_dir_changed)
         self.browse_btn = QPushButton("BROWSE")
         self.browse_btn.clicked.connect(self.browse_folder)
         self.open_btn = QPushButton("OPEN")
         self.open_btn.clicked.connect(self.open_folder)
+        dir_layout.addWidget(dir_label)
         dir_layout.addWidget(self.dir_input)
         dir_layout.addWidget(self.browse_btn)
         dir_layout.addWidget(self.open_btn)
+        input_layout.addLayout(dir_layout)
 
-        self.auto_detect_cb = QCheckBox("Auto Detect")
-        self.auto_detect_cb.setChecked(self.settings.get("auto_detect", True))
-        self.auto_detect_cb.setToolTip("Automatically detect total images by cycling through the gallery until it loops back to the first image.")
-        self.auto_detect_cb.toggled.connect(self.on_auto_detect_toggled)
-        self.auto_detect_cb.toggled.connect(self.save_settings)
-
+        # Settings Grid
+        settings_grid = QGridLayout()
+        settings_grid.setContentsMargins(0, 10, 0, 0)
+        settings_grid.setHorizontalSpacing(15)
+        settings_grid.setVerticalSpacing(10)
+        
+        # Row 0: Max Images & Detect settings
+        max_img_label = QLabel("LIMIT:")
+        max_img_label.setFixedWidth(90)
         self.max_images_spin = QSpinBox()
         self.max_images_spin.setRange(1, 5000)
         self.max_images_spin.setValue(self.settings.get("max_images", 100))
         self.max_images_spin.setFixedWidth(80)
         self.max_images_spin.valueChanged.connect(self.save_settings)
+        
+        settings_grid.addWidget(max_img_label, 0, 0)
+        settings_grid.addWidget(self.max_images_spin, 0, 1)
 
-        # Build the MAX IMAGES row with auto-detect toggle inline
-        self.image_loop_detect_cb = QCheckBox("Image Loop Detect")
+        self.auto_detect_cb = QCheckBox("Auto Detect (URL)")
+        self.auto_detect_cb.setChecked(self.settings.get("auto_detect", True))
+        self.auto_detect_cb.setToolTip("Automatically detect total images by cycling through the gallery until it loops back to the first image.")
+        self.auto_detect_cb.toggled.connect(self.on_auto_detect_toggled)
+        self.auto_detect_cb.toggled.connect(self.save_settings)
+
+        self.image_loop_detect_cb = QCheckBox("Loop Detect (Hash)")
         self.image_loop_detect_cb.setChecked(self.settings.get("image_loop_detect", False))
-        self.image_loop_detect_cb.setToolTip("Use perceptual image hashing (dhash) to detect when gallery loops back to the first image. More reliable than URL matching.")
+        self.image_loop_detect_cb.setToolTip("Use perceptual image hashing (dhash) to detect when gallery loops back to the first image.")
         self.image_loop_detect_cb.toggled.connect(self.save_settings)
 
-        max_images_layout = QHBoxLayout()
-        max_images_layout.addWidget(self.max_images_spin)
-        max_images_layout.addWidget(self.auto_detect_cb)
-        max_images_layout.addWidget(self.image_loop_detect_cb)
-        
+        settings_grid.addWidget(self.auto_detect_cb, 0, 2)
+        settings_grid.addWidget(self.image_loop_detect_cb, 0, 3)
+
         # Apply initial auto-detect state
         self.on_auto_detect_toggled(self.auto_detect_cb.isChecked())
-        
+
+        # Row 1: Execution Toggles
+        exec_label = QLabel("EXECUTION:")
+        exec_label.setFixedWidth(90)
         self.headless_cb = QCheckBox("Headless")
         self.headless_cb.setChecked(self.settings.get("headless", False))
         self.headless_cb.toggled.connect(self.save_settings)
@@ -616,23 +633,24 @@ class FacebookDownloaderApp(QMainWindow):
         self.make_pdf_cb.setChecked(self.settings.get("make_pdf", True))
         self.make_pdf_cb.toggled.connect(self.save_settings)
         
-        self.delete_images_cb = QCheckBox("Delete Images")
+        self.delete_images_cb = QCheckBox("Delete Img")
         self.delete_images_cb.setChecked(self.settings.get("delete_images", False))
         self.delete_images_cb.toggled.connect(self.save_settings)
         
-        self.copy_cb = QCheckBox("Copy Clipboard")
+        self.copy_cb = QCheckBox("Copy to Clip")
         self.copy_cb.setChecked(self.settings.get("copy_clipboard", True))
         self.copy_cb.toggled.connect(self.save_settings)
 
-        toggles_layout = QHBoxLayout()
-        toggles_layout.addWidget(self.headless_cb)
-        toggles_layout.addWidget(self.make_pdf_cb)
-        toggles_layout.addWidget(self.delete_images_cb)
-        toggles_layout.addWidget(self.copy_cb)
+        settings_grid.addWidget(exec_label, 1, 0)
+        settings_grid.addWidget(self.headless_cb, 1, 1)
+        settings_grid.addWidget(self.make_pdf_cb, 1, 2)
+        settings_grid.addWidget(self.delete_images_cb, 1, 3)
+        settings_grid.addWidget(self.copy_cb, 1, 4)
 
-        input_layout.addRow("OUTPUT DIR:", dir_layout)
-        input_layout.addRow("MAX IMAGES:", max_images_layout)
-        input_layout.addRow("EXECUTION:", toggles_layout)
+        # Push items to left
+        settings_grid.setColumnStretch(5, 1)
+
+        input_layout.addLayout(settings_grid)
         input_grp.setLayout(input_layout)
         main_layout.addWidget(input_grp)
 
