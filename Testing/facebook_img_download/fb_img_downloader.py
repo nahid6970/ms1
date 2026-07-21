@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import time
+import threading
 import requests
 import json
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
@@ -34,6 +35,7 @@ class DownloaderThread(QThread):
     log_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
     finished_signal = pyqtSignal(int, str)
+    wait_for_click_signal = pyqtSignal()  # emitted when user needs to click first image
 
     def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False):
         super().__init__()
@@ -46,6 +48,7 @@ class DownloaderThread(QThread):
         self.auto_detect = auto_detect
         self.is_running = True
         self.is_paused = False
+        self.user_clicked_event = threading.Event()  # blocks until user clicks CONTINUE
 
     def _get_current_image(self, driver):
         """Extract the highest-quality scontent/fbcdn image URL from the current view."""
@@ -189,35 +192,19 @@ class DownloaderThread(QThread):
                     except:
                         pass
 
-            # Enter gallery mode if we're on a post page
+            # Enter gallery mode — ask user to click the first image in the browser
             if "/photo" not in driver.current_url:
-                self.log_signal.emit("Post detected. Entering gallery mode...")
-                try:
-                    # User provided explicit XPath
-                    explicit_xpath = "/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div/div/div/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/div/div/div[1]/a/div[1]/div[1]/div/img"
-                    photo_links = driver.find_elements(By.XPATH, explicit_xpath)
-                    
-                    if not photo_links:
-                        photo_links = driver.find_elements(By.XPATH, "//a[img][(contains(@href, '/photo') or contains(@href, 'fbid=') or contains(@href, '/photos/')) and not(contains(@href, 'login'))]")
-                    if not photo_links:
-                        photo_links = driver.find_elements(By.XPATH, "//a[img[contains(@src,'scontent') or contains(@src,'fbcdn')] and not(contains(@href, 'login'))]")
-                    
-                    if photo_links:
-                        self.log_signal.emit("Found photo link. Clicking to enter theater/gallery mode...")
-                        driver.execute_script("arguments[0].click();", photo_links[0])
-                        time.sleep(5)
-                    else:
-                        self.log_signal.emit("No photo links found by XPath. Trying keyboard (TABx5 + ENTER) fallback...")
-                        from selenium.webdriver.common.action_chains import ActionChains
-                        for _ in range(5):
-                            ActionChains(driver).send_keys(Keys.TAB).perform()
-                            time.sleep(0.3)
-                        ActionChains(driver).send_keys(Keys.ENTER).perform()
-                        time.sleep(0.5)
-                        ActionChains(driver).send_keys(Keys.ENTER).perform()
-                        time.sleep(5)
-                except Exception as e:
-                    self.log_signal.emit(f"Gallery entry error: {e}")
+                self.log_signal.emit("Page loaded. Please click the FIRST IMAGE in the browser to enter gallery mode.")
+                self.log_signal.emit("Then press the ► CONTINUE button in this app to start downloading.")
+                self.wait_for_click_signal.emit()
+                # Block here until user presses CONTINUE
+                while not self.user_clicked_event.is_set() and self.is_running:
+                    time.sleep(0.2)
+                if not self.is_running:
+                    self.finished_signal.emit(0, "")
+                    return
+                self.log_signal.emit("User confirmed. Waiting for gallery to load...")
+                time.sleep(3)
 
             downloaded_urls = set()
             downloaded_files = []
@@ -619,7 +606,13 @@ class FacebookDownloaderApp(QMainWindow):
         self.settings_btn = QPushButton("⚙ SETTINGS")
         self.settings_btn.clicked.connect(self.show_settings)
 
+        self.continue_btn = QPushButton("► CONTINUE")
+        self.continue_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-size: 11pt; font-weight: bold;")
+        self.continue_btn.clicked.connect(self.on_continue_clicked)
+        self.continue_btn.setVisible(False)
+
         ctrl_layout.addWidget(self.action_btn, 3)
+        ctrl_layout.addWidget(self.continue_btn, 2)
         ctrl_layout.addWidget(self.pause_btn, 2)
         ctrl_layout.addWidget(self.restart_btn, 1)
         ctrl_layout.addWidget(self.settings_btn, 1)
@@ -749,9 +742,25 @@ class FacebookDownloaderApp(QMainWindow):
         self.dl_thread.log_signal.connect(self.log)
         self.dl_thread.progress_signal.connect(self.progress_bar.setValue)
         self.dl_thread.finished_signal.connect(self.download_finished)
+        self.dl_thread.wait_for_click_signal.connect(self.show_continue_button)
         self.dl_thread.start()
 
+    def show_continue_button(self):
+        """Show the CONTINUE button and flash it to get user attention."""
+        self.continue_btn.setVisible(True)
+        self.footer.setText("⚠ Click the first image in the browser, then press ► CONTINUE")
+        self.footer.setStyleSheet(f"color: {CP_GREEN}; font-style: italic; font-weight: bold;")
+
+    def on_continue_clicked(self):
+        """User clicked CONTINUE after selecting the first image."""
+        self.continue_btn.setVisible(False)
+        self.footer.setText("Downloading...")
+        self.footer.setStyleSheet(f"color: {CP_SUBTEXT}; font-style: italic;")
+        if hasattr(self, 'dl_thread'):
+            self.dl_thread.user_clicked_event.set()
+
     def download_finished(self, count, pdf_path):
+        self.continue_btn.setVisible(False)
         self.action_btn.setEnabled(True)
         self.action_btn.setText("▶ START DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
