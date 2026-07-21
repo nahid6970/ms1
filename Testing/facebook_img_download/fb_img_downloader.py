@@ -3,6 +3,8 @@ import os
 import re
 import time
 import threading
+import requests
+import json
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PIL import Image, ImageOps
 import winreg
