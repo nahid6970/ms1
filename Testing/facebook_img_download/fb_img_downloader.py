@@ -3,10 +3,10 @@ import os
 import re
 import time
 import threading
-import requests
-import json
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from PIL import Image, ImageOps
+import winreg
+import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QGroupBox, QFormLayout, QGridLayout, QPlainTextEdit, QFileDialog, 
@@ -52,6 +52,20 @@ def dhash_similarity(hash1, hash2):
     """Return similarity ratio (0.0 to 1.0) between two dhash values."""
     hamming = (hash1 ^ hash2).bit_count()
     return 1.0 - (hamming / DHASH_BITS)
+
+def get_default_browser_path():
+    """Retrieve the Windows default browser path from the registry."""
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice') as key:
+            prog_id, _ = winreg.QueryValueEx(key, 'ProgId')
+        with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, rf'{prog_id}\shell\open\command') as key:
+            command, _ = winreg.QueryValueEx(key, '')
+        match = re.search(r'"([^"]+)"|([^ ]+)', command)
+        if match:
+            return match.group(1) if match.group(1) else match.group(2)
+    except:
+        pass
+    return None
 
 class DownloaderThread(QThread):
     log_signal = pyqtSignal(str)
@@ -164,31 +178,15 @@ class DownloaderThread(QThread):
             options.add_argument("--window-size=1920,1080")
             options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
-            # Force using Google Chrome by specifying binary location if found in standard paths
-            chrome_paths = [
-                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-            ]
-            local_app_data = os.environ.get("LOCALAPPDATA")
-            if local_app_data:
-                chrome_paths.append(os.path.join(local_app_data, r"Google\Chrome\Application\chrome.exe"))
-            user_profile = os.environ.get("USERPROFILE")
-            if user_profile:
-                chrome_paths.append(os.path.join(user_profile, r"AppData\Local\Google\Chrome\Application\chrome.exe"))
-
-            chrome_binary = None
-            for path in chrome_paths:
-                if os.path.exists(path):
-                    chrome_binary = path
-                    break
-
             self.log_signal.emit("Initializing WebDriver...")
-            if chrome_binary:
-                options.binary_location = chrome_binary
-                self.log_signal.emit(f"Using Google Chrome binary at: {chrome_binary}")
+            
+            default_browser = get_default_browser_path()
+            if default_browser and os.path.exists(default_browser):
+                options.binary_location = default_browser
+                self.log_signal.emit(f"Using default system browser: {default_browser}")
             else:
-                self.log_signal.emit("Google Chrome binary not found in standard paths, falling back to default Selenium search.")
-
+                self.log_signal.emit("Could not detect default browser, falling back to Selenium resolution.")
+                
             driver = webdriver.Chrome(options=options)
 
             self.log_signal.emit(f"Opening browser...")
@@ -557,12 +555,8 @@ class FacebookDownloaderApp(QMainWindow):
 
         # Header
         header = QLabel("SYSTEM :: FACEBOOK_IMAGE_DOWNLOADER")
-        header.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; border-bottom: 2px solid {CP_CYAN}; padding-bottom: 5px;")
+        header.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; border-bottom: 2px solid {CP_CYAN}; padding-bottom: 5px; margin-bottom: 10px;")
         main_layout.addWidget(header)
-
-        info_label = QLabel("INFO: This tool explicitly requires Google Chrome to be installed.")
-        info_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 9pt; font-style: italic; padding-bottom: 10px;")
-        main_layout.addWidget(info_label)
 
         # Input Group
         input_grp = QGroupBox("CORE PARAMETERS")
