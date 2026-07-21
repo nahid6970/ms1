@@ -170,9 +170,9 @@ class DownloaderThread(QThread):
 
             driver = webdriver.Chrome(options=options)
 
-            self.log_signal.emit(f"Opening URL: {self.url}")
-            driver.get(self.url)
-            time.sleep(5)
+            self.log_signal.emit(f"Opening browser...")
+            driver.get("about:blank")
+            time.sleep(1)
             
             # Press ESC to dismiss any unexpected popups
             try:
@@ -192,19 +192,17 @@ class DownloaderThread(QThread):
                     except:
                         pass
 
-            # Enter gallery mode — ask user to click the first image in the browser
-            if "/photo" not in driver.current_url:
-                self.log_signal.emit("Page loaded. Please click the FIRST IMAGE in the browser to enter gallery mode.")
-                self.log_signal.emit("Then press the ► CONTINUE button in this app to start downloading.")
-                self.wait_for_click_signal.emit()
-                # Block here until user presses CONTINUE
-                while not self.user_clicked_event.is_set() and self.is_running:
-                    time.sleep(0.2)
-                if not self.is_running:
-                    self.finished_signal.emit(0, "")
-                    return
-                self.log_signal.emit("User confirmed. Waiting for gallery to load...")
-                time.sleep(3)
+            # Wait for user to navigate, click the first image, then press CONTINUE
+            self.log_signal.emit("Browser ready. Navigate to the post, click the FIRST IMAGE, then press ► CONTINUE.")
+            self.wait_for_click_signal.emit()
+            # Block here until user presses CONTINUE
+            while not self.user_clicked_event.is_set() and self.is_running:
+                time.sleep(0.2)
+            if not self.is_running:
+                self.finished_signal.emit(0, "")
+                return
+            self.log_signal.emit("User confirmed. Starting download...")
+            time.sleep(2)
 
             downloaded_urls = set()
             downloaded_files = []
