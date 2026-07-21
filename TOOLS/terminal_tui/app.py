@@ -2437,6 +2437,248 @@ export class AppComponent {
   }
 }"""
         }
+    elif framework == "vercel_convex":
+        templates = {
+            "package.json": """{
+  "name": "vercel-convex-starter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "convex:dev": "convex dev"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "convex": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.2.0"
+  }
+}""",
+            "convex/schema.ts": """import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  messages: defineTable({
+    author: v.string(),
+    body: v.string(),
+  }),
+});""",
+            "convex/messages.ts": """import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("messages").order("desc").take(100);
+  },
+});
+
+export const send = mutation({
+  args: { body: v.string(), author: v.string() },
+  handler: async (ctx, { body, author }) => {
+    await ctx.db.insert("messages", { body, author });
+  },
+});""",
+            "app/ConvexClientProvider.jsx": """"use client";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL || "http://localhost:3000");
+
+export function ConvexClientProvider({ children }) {
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
+}""",
+            "app/layout.js": """import { ConvexClientProvider } from "./ConvexClientProvider";
+
+export const metadata = {
+  title: 'Next.js + Convex App',
+  description: 'Vercel + Convex Starter',
+}
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body style={{ margin: 0, padding: 0, background: '#09090b', color: '#fafafa', fontFamily: 'sans-serif' }}>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
+    </html>
+  )
+}""",
+            "app/page.js": """"use client";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
+import { useState } from "react";
+
+export default function Home() {
+  const messages = useQuery(api.messages.list) || [];
+  const sendMessage = useMutation(api.messages.send);
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newMessage) return;
+    await sendMessage({ body: newMessage, author: "User" });
+    setNewMessage("");
+  };
+
+  return (
+    <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '16px', padding: '20px' }}>
+      <h1 style={{ fontSize: '2.5rem', margin: 0, fontWeight: '800', color: '#3182ce' }}>Next.js + Convex (Vercel)</h1>
+      <div style={{ width: '100%', maxWidth: '500px', background: '#18181b', borderRadius: '8px', padding: '20px', border: '1px solid #27272a' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            value={newMessage} 
+            onChange={(e) => setNewMessage(e.target.value)} 
+            placeholder="Type a message..." 
+            style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #3f3f46', background: '#09090b', color: '#fff' }}
+          />
+          <button type="submit" style={{ padding: '10px 20px', borderRadius: '6px', background: '#3182ce', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Send</button>
+        </form>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+          {messages.map((msg) => (
+            <div key={msg._id} style={{ padding: '8px 12px', background: '#27272a', borderRadius: '6px' }}>
+              <strong>{msg.author}:</strong> {msg.body}
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}"""
+        }
+    elif framework == "cloudflare_convex":
+        templates = {
+            "package.json": """{
+  "name": "cloudflare-convex-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "convex:dev": "convex dev"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "convex": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "vite": "^4.4.5",
+    "typescript": "^5.0.0"
+  }
+}""",
+            "vite.config.js": """import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})""",
+            "index.html": """<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloudflare + Convex Starter</title>
+  </head>
+  <body style="margin: 0; background: #0f172a; color: #f8fafc; font-family: sans-serif;">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>""",
+            "src/main.jsx": """import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL || "http://localhost:3000");
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ConvexProvider client={convex}>
+      <App />
+    </ConvexProvider>
+  </React.StrictMode>,
+)""",
+            "src/App.jsx": """import { useState } from 'react'
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
+
+function App() {
+  const messages = useQuery(api.messages.list) || [];
+  const sendMessage = useMutation(api.messages.send);
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newMessage) return;
+    await sendMessage({ body: newMessage, author: "User" });
+    setNewMessage("");
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '20px', padding: '20px' }}>
+      <h1 style={{ color: '#f97316', fontSize: '2.5rem', margin: 0, fontWeight: '800' }}>Cloudflare + Convex</h1>
+      <div style={{ width: '100%', maxWidth: '500px', background: '#1e293b', borderRadius: '8px', padding: '20px', border: '1px solid #334155' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            value={newMessage} 
+            onChange={(e) => setNewMessage(e.target.value)} 
+            placeholder="Type a message..." 
+            style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #475569', background: '#0f172a', color: '#fff' }}
+          />
+          <button type="submit" style={{ padding: '10px 20px', borderRadius: '6px', background: '#f97316', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Send</button>
+        </form>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+          {messages.map((msg) => (
+            <div key={msg._id} style={{ padding: '8px 12px', background: '#334155', borderRadius: '6px' }}>
+              <strong>{msg.author}:</strong> {msg.body}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default App""",
+            "convex/schema.ts": """import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  messages: defineTable({
+    author: v.string(),
+    body: v.string(),
+  }),
+});""",
+            "convex/messages.ts": """import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("messages").order("desc").take(100);
+  },
+});
+
+export const send = mutation({
+  args: { body: v.string(), author: v.string() },
+  handler: async (ctx, { body, author }) => {
+    await ctx.db.insert("messages", { body, author });
+  },
+});"""
+        }
     else:
         return jsonify({"error": "Unknown framework template"}), 400
 
