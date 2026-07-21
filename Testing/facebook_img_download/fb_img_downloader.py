@@ -59,9 +59,8 @@ class DownloaderThread(QThread):
     finished_signal = pyqtSignal(int, str)
     wait_for_click_signal = pyqtSignal()  # emitted when user needs to click first image
 
-    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False, image_loop_detect=False):
+    def __init__(self, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False, image_loop_detect=False):
         super().__init__()
-        self.url = url
         self.output_dir = output_dir
         self.max_images = max_images
         self.headless = headless
@@ -451,7 +450,6 @@ class FacebookDownloaderApp(QMainWindow):
     def save_settings(self):
         """Collect current UI values and save to JSON."""
         try:
-            self.settings["target_url"] = self.url_input.text().strip()
             self.settings["output_dir"] = self.output_dir
             self.settings["max_images"] = self.max_images_spin.value()
             self.settings["headless"] = self.headless_cb.isChecked()
@@ -573,11 +571,6 @@ class FacebookDownloaderApp(QMainWindow):
         input_grp = QGroupBox("CORE PARAMETERS")
         input_layout = QFormLayout()
         
-        self.url_input = QLineEdit()
-        self.url_input.setPlaceholderText("https://www.facebook.com/share/p/...")
-        self.url_input.setText(self.settings.get("target_url", ""))
-        self.url_input.textChanged.connect(self.save_settings)
-        
         dir_layout = QHBoxLayout()
         self.dir_input = QLineEdit(self.output_dir)
         self.dir_input.textChanged.connect(self.on_dir_changed)
@@ -637,7 +630,6 @@ class FacebookDownloaderApp(QMainWindow):
         toggles_layout.addWidget(self.delete_images_cb)
         toggles_layout.addWidget(self.copy_cb)
 
-        input_layout.addRow("TARGET URL:", self.url_input)
         input_layout.addRow("OUTPUT DIR:", dir_layout)
         input_layout.addRow("MAX IMAGES:", max_images_layout)
         input_layout.addRow("EXECUTION:", toggles_layout)
@@ -747,11 +739,6 @@ class FacebookDownloaderApp(QMainWindow):
             self.max_images_spin.setStyleSheet(f"color: {CP_CYAN};")
 
     def start_download(self):
-        url = self.url_input.text().strip()
-        if not url:
-            QMessageBox.critical(self, "Error", "Target URL is required.")
-            return
-
         auto_detect = self.auto_detect_cb.isChecked()
 
         if auto_detect:
@@ -785,7 +772,6 @@ class FacebookDownloaderApp(QMainWindow):
         self.log("Initializing extraction process...")
 
         self.dl_thread = DownloaderThread(
-            url, 
             self.output_dir, 
             max_images,
             self.headless_cb.isChecked(),
