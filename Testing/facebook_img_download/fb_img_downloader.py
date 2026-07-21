@@ -6,6 +6,7 @@ import threading
 import requests
 import json
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from PIL import Image, ImageOps
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QGroupBox, QFormLayout, QPlainTextEdit, QFileDialog, 
@@ -30,6 +31,27 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+DHASH_BITS = 256
+
+def compute_dhash_from_file(path):
+    """Compute a 256-bit perceptual dhash from an image file."""
+    with Image.open(path) as image:
+        image = ImageOps.exif_transpose(image)
+        grey = image.convert("L").resize((17, 16), Image.Resampling.LANCZOS)
+        pixels = list(grey.getdata())
+    result = 0
+    for row in range(16):
+        row_start = row * 17
+        for col in range(16):
+            result <<= 1
+            if pixels[row_start + col] > pixels[row_start + col + 1]:
+                result |= 1
+    return result
+
+def dhash_similarity(hash1, hash2):
+    """Return similarity ratio (0.0 to 1.0) between two dhash values."""
+    hamming = (hash1 ^ hash2).bit_count()
+    return 1.0 - (hamming / DHASH_BITS)
 
 class DownloaderThread(QThread):
     log_signal = pyqtSignal(str)
@@ -37,7 +59,7 @@ class DownloaderThread(QThread):
     finished_signal = pyqtSignal(int, str)
     wait_for_click_signal = pyqtSignal()  # emitted when user needs to click first image
 
-    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False):
+    def __init__(self, url, output_dir, max_images, headless, make_pdf, delete_images, auto_detect=False, image_loop_detect=False):
         super().__init__()
         self.url = url
         self.output_dir = output_dir
@@ -46,6 +68,7 @@ class DownloaderThread(QThread):
         self.make_pdf = make_pdf
         self.delete_images = delete_images
         self.auto_detect = auto_detect
+        self.image_loop_detect = image_loop_detect
         self.is_running = True
         self.is_paused = False
         self.user_clicked_event = threading.Event()  # blocks until user clicks CONTINUE
@@ -208,6 +231,7 @@ class DownloaderThread(QThread):
             downloaded_files = []
             no_new_streak = 0  # consecutive cycles with no new image
             first_image_url = None  # used for auto-detect loop detection
+            first_image_hash = None  # used for image-based loop detection
 
             while count < self.max_images and self.is_running:
                 while self.is_paused and self.is_running:
@@ -248,6 +272,30 @@ class DownloaderThread(QThread):
                                 final_filepath = filepath.replace(".jpg", ".webp")
                                 os.rename(filepath, final_filepath)
                             downloaded_files.append(final_filepath)
+                            
+                            # Image-based loop detection using perceptual hash
+                            if self.image_loop_detect and self.auto_detect:
+                                try:
+                                    current_hash = compute_dhash_from_file(final_filepath)
+                                    if first_image_hash is None:
+                                        first_image_hash = current_hash
+                                        self.log_signal.emit("IMAGE LOOP DETECT: First image hash fingerprinted.")
+                                    elif count > 1:
+                                        sim = dhash_similarity(first_image_hash, current_hash)
+                                        if sim >= 1.0:
+                                            self.log_signal.emit(f"IMAGE LOOP DETECT: 100% match with first image detected! Gallery looped at image {count}.")
+                                            # Remove the duplicate
+                                            try:
+                                                os.remove(final_filepath)
+                                                downloaded_files.pop()
+                                                count -= 1
+                                            except:
+                                                pass
+                                            self.progress_signal.emit(100)
+                                            break
+                                except Exception as e:
+                                    self.log_signal.emit(f"IMAGE LOOP DETECT error: {e}")
+                            
                             if not self.auto_detect:
                                 self.progress_signal.emit(int((count / self.max_images) * 100))
                         except Exception as e:
@@ -380,7 +428,8 @@ class FacebookDownloaderApp(QMainWindow):
             "make_pdf": True,
             "delete_images": False,
             "copy_clipboard": True,
-            "auto_detect": True
+            "auto_detect": True,
+            "image_loop_detect": False
         }
         try:
             if os.path.exists(self.settings_file):
@@ -410,6 +459,7 @@ class FacebookDownloaderApp(QMainWindow):
             self.settings["delete_images"] = self.delete_images_cb.isChecked()
             self.settings["copy_clipboard"] = self.copy_cb.isChecked()
             self.settings["auto_detect"] = self.auto_detect_cb.isChecked()
+            self.settings["image_loop_detect"] = self.image_loop_detect_cb.isChecked()
             
             with open(self.settings_file, 'w') as f:
                 json.dump(self.settings, f, indent=4)
@@ -552,9 +602,15 @@ class FacebookDownloaderApp(QMainWindow):
         self.max_images_spin.valueChanged.connect(self.save_settings)
 
         # Build the MAX IMAGES row with auto-detect toggle inline
+        self.image_loop_detect_cb = QCheckBox("Image Loop Detect")
+        self.image_loop_detect_cb.setChecked(self.settings.get("image_loop_detect", False))
+        self.image_loop_detect_cb.setToolTip("Use perceptual image hashing (dhash) to detect when gallery loops back to the first image. More reliable than URL matching.")
+        self.image_loop_detect_cb.toggled.connect(self.save_settings)
+
         max_images_layout = QHBoxLayout()
         max_images_layout.addWidget(self.max_images_spin)
         max_images_layout.addWidget(self.auto_detect_cb)
+        max_images_layout.addWidget(self.image_loop_detect_cb)
         
         # Apply initial auto-detect state
         self.on_auto_detect_toggled(self.auto_detect_cb.isChecked())
@@ -735,7 +791,8 @@ class FacebookDownloaderApp(QMainWindow):
             self.headless_cb.isChecked(),
             self.make_pdf_cb.isChecked(),
             self.delete_images_cb.isChecked(),
-            auto_detect=auto_detect
+            auto_detect=auto_detect,
+            image_loop_detect=self.image_loop_detect_cb.isChecked()
         )
         self.dl_thread.log_signal.connect(self.log)
         self.dl_thread.progress_signal.connect(self.progress_bar.setValue)
