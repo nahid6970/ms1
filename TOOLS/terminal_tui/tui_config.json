@@ -1,6 +1,64 @@
 {
   "projects": [
     {
+      "name": "Terminal TUI",
+      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui",
+      "pinned": false,
+      "theme": {
+        "background": "#12080d",
+        "foreground": "#c8b6c0",
+        "cursor": "#43efbb",
+        "borderColor": "#525252",
+        "scrollbarColor": "#ffffff",
+        "scrollbarIdleColor": "#ffffff"
+      },
+      "cardTheme": {
+        "bgColor": "#000610",
+        "textColor": "#00ffcc",
+        "pathColor": "#ff0055",
+        "accentColor": "#ffe600"
+      },
+      "bookmarks": [
+        {
+          "command": "agy --dangerously-skip-permissions -c",
+          "global": true,
+          "name": "🤖 Antigravity",
+          "windowTitle": ""
+        },
+        {
+          "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
+          "global": true,
+          "name": "🤖 Codex",
+          "windowTitle": ""
+        },
+        {
+          "command": "kiro-cli chat --trust-all-tools --resume",
+          "global": true,
+          "name": "🤖 Kiro-Cli",
+          "windowTitle": ""
+        },
+        {
+          "command": "npx -y convex@latest dev",
+          "global": true,
+          "name": "🎯 npx convex",
+          "windowTitle": ""
+        },
+        {
+          "command": "net stop winnat",
+          "global": true,
+          "name": "🛜 net stop winnat",
+          "windowTitle": ""
+        },
+        {
+          "command": "explorer .",
+          "global": true,
+          "name": "📁 Explorer",
+          "windowTitle": ""
+        }
+      ],
+      "category": "Tool"
+    },
+    {
       "name": "Default",
       "path": "C:\\Users\\nahid",
       "pinned": false,
@@ -62,64 +120,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
-    },
-    {
-      "name": "Terminal TUI",
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui",
-      "pinned": false,
-      "theme": {
-        "background": "#12080d",
-        "foreground": "#c8b6c0",
-        "cursor": "#43efbb",
-        "borderColor": "#525252",
-        "scrollbarColor": "#ffffff",
-        "scrollbarIdleColor": "#ffffff"
-      },
-      "cardTheme": {
-        "bgColor": "#000610",
-        "textColor": "#00ffcc",
-        "pathColor": "#ff0055",
-        "accentColor": "#ffe600"
-      },
-      "bookmarks": [
-        {
-          "command": "agy --dangerously-skip-permissions -c",
-          "global": true,
-          "name": "🤖 Antigravity",
-          "windowTitle": ""
-        },
-        {
-          "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
-          "global": true,
-          "name": "🤖 Codex",
-          "windowTitle": ""
-        },
-        {
-          "command": "kiro-cli chat --trust-all-tools --resume",
-          "global": true,
-          "name": "🤖 Kiro-Cli",
-          "windowTitle": ""
-        },
-        {
-          "command": "npx -y convex@latest dev",
-          "global": true,
-          "name": "🎯 npx convex",
-          "windowTitle": ""
-        },
-        {
-          "command": "net stop winnat",
-          "global": true,
-          "name": "🛜 net stop winnat",
-          "windowTitle": ""
-        },
-        {
-          "command": "explorer .",
-          "global": true,
-          "name": "📁 Explorer",
-          "windowTitle": ""
-        }
-      ],
-      "category": "Tool"
     },
     {
       "name": "Code Merger",
