@@ -69,7 +69,6 @@ class DownloaderThread(QThread):
         self.auto_detect = auto_detect
         self.image_loop_detect = image_loop_detect
         self.is_running = True
-        self.is_paused = False
         self.user_clicked_event = threading.Event()  # blocks until user clicks CONTINUE
 
     def _get_current_image(self, driver):
@@ -233,8 +232,6 @@ class DownloaderThread(QThread):
             first_image_hash = None  # used for image-based loop detection
 
             while count < self.max_images and self.is_running:
-                while self.is_paused and self.is_running:
-                    time.sleep(1)
                 
                 if not self.is_running:
                     break
@@ -660,10 +657,6 @@ class FacebookDownloaderApp(QMainWindow):
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
         self.action_btn.clicked.connect(self.toggle_action)
         
-        self.pause_btn = QPushButton("⏸ PAUSE")
-        self.pause_btn.setEnabled(False)
-        self.pause_btn.clicked.connect(self.toggle_pause)
-        
         self.restart_btn = QPushButton("↺ RESTART")
         self.restart_btn.clicked.connect(self.restart_app)
         
@@ -677,7 +670,6 @@ class FacebookDownloaderApp(QMainWindow):
 
         ctrl_layout.addWidget(self.action_btn, 3)
         ctrl_layout.addWidget(self.continue_btn, 2)
-        ctrl_layout.addWidget(self.pause_btn, 2)
         ctrl_layout.addWidget(self.restart_btn, 1)
         ctrl_layout.addWidget(self.settings_btn, 1)
         main_layout.addLayout(ctrl_layout)
@@ -731,22 +723,8 @@ class FacebookDownloaderApp(QMainWindow):
             self.dl_thread.stop()
             self.action_btn.setEnabled(False)
             self.action_btn.setText("⏳ STOPPING...")
-            self.pause_btn.setEnabled(False)
         else:
             self.start_download()
-
-    def toggle_pause(self):
-        if hasattr(self, 'dl_thread') and self.dl_thread.isRunning():
-            if self.dl_thread.is_paused:
-                self.dl_thread.is_paused = False
-                self.pause_btn.setText("⏸ PAUSE")
-                self.pause_btn.setStyleSheet("")
-                self.log("Process resumed.")
-            else:
-                self.dl_thread.is_paused = True
-                self.pause_btn.setText("▶ RESUME")
-                self.pause_btn.setStyleSheet(f"background-color: {CP_YELLOW}; color: black;")
-                self.log("Process paused.")
 
     def on_auto_detect_toggled(self, checked):
         """Enable/disable the max images spinbox based on auto-detect state."""
@@ -783,9 +761,6 @@ class FacebookDownloaderApp(QMainWindow):
 
         self.action_btn.setText("■ STOP DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; font-size: 11pt;")
-        self.pause_btn.setEnabled(True)
-        self.pause_btn.setText("⏸ PAUSE")
-        self.pause_btn.setStyleSheet("")
         self.progress_bar.setValue(0)
         self.log("Initializing extraction process...")
 
@@ -823,9 +798,6 @@ class FacebookDownloaderApp(QMainWindow):
         self.action_btn.setEnabled(True)
         self.action_btn.setText("▶ START DOWNLOAD")
         self.action_btn.setStyleSheet(f"background-color: {CP_CYAN}; color: black; font-size: 11pt;")
-        self.pause_btn.setEnabled(False)
-        self.pause_btn.setText("⏸ PAUSE")
-        self.pause_btn.setStyleSheet("")
         self.log(f"Process ended. {count} images saved to {self.output_dir}")
         
         msg = f"Successfully downloaded {count} images."
