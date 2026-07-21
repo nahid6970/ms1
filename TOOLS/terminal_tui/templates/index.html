@@ -5929,7 +5929,7 @@
             }
             const addProjectBtn = document.getElementById('workspace-add-btn');
             if (addProjectBtn) {
-                addProjectBtn.style.display = showSidebarList ? 'none' : 'flex';
+                addProjectBtn.style.display = 'flex';
             }
             
             // 3. The workspace-header is ALWAYS visible now since it has global buttons
@@ -5965,7 +5965,7 @@
                 }
                 if (projActions) projActions.style.display = 'flex';
                 if (divider) divider.style.display = 'block';
-                if (quickThemeBtn) quickThemeBtn.style.display = showSidebarList ? 'none' : 'flex';
+                if (quickThemeBtn) quickThemeBtn.style.display = 'flex';
                 
                 const label = document.getElementById('selected-workspace-selector-label');
                 if (label) label.innerText = activeProject;
