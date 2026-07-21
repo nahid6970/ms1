@@ -12,7 +12,6 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -166,7 +165,7 @@ class DownloaderThread(QThread):
             else:
                 self.log_signal.emit("Google Chrome binary not found in standard paths, falling back to default Selenium search.")
 
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+            driver = webdriver.Chrome(options=options)
 
             self.log_signal.emit(f"Opening URL: {self.url}")
             driver.get(self.url)
@@ -530,6 +529,10 @@ class FacebookDownloaderApp(QMainWindow):
         header = QLabel("SYSTEM :: FACEBOOK_IMAGE_DOWNLOADER")
         header.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold; border-bottom: 2px solid {CP_CYAN}; padding-bottom: 5px;")
         main_layout.addWidget(header)
+
+        info_label = QLabel("INFO: This tool explicitly requires Google Chrome to be installed.")
+        info_label.setStyleSheet(f"color: {CP_YELLOW}; font-size: 9pt; font-style: italic; padding-bottom: 10px;")
+        main_layout.addWidget(info_label)
 
         # Input Group
         input_grp = QGroupBox("CORE PARAMETERS")

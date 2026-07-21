@@ -175,6 +175,13 @@
         "winget_path": ""
     },
     {
+        "name": "croc [file transfer relay wan]",
+        "scoop_name": "croc",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\croc\\current",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Crystal DiskInfo",
         "scoop_name": "crystaldiskinfo",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\crystaldiskinfo\\current\\DiskInfo64.exe",
@@ -333,6 +340,13 @@
         "scoop_name": "go",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\go\\current\\go.env",
         "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Google Chrome",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Google.Chrome",
         "winget_path": ""
     },
     {
@@ -896,10 +910,10 @@
         "winget_path": ""
     },
     {
-        "name": "croc [file transfer relay wan]",
-        "scoop_name": "croc",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\croc\\current",
-        "winget_name": "",
+        "name": "Bitdefender Antivirus",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Bitdefender.Bitdefender",
         "winget_path": ""
     }
 ]
