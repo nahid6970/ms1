@@ -720,8 +720,10 @@ function showF10MatchLabels(selection, showDropdown = false) {
     const overlay = document.createElement('div');
     overlay.className = 'f10-match-overlay';
 
-    // 1. Create Dropdown Menu if requested
-    if (showDropdown) {
+    const hideDropdownSetting = localStorage.getItem('hideF10MatchDropdown') === 'true';
+
+    // 1. Create Dropdown Menu if requested and not hidden in settings
+    if (showDropdown && !hideDropdownSetting) {
         const dropdown = document.createElement('div');
         dropdown.id = 'f10MatchDropdown';
         dropdown.className = 'f10-match-dropdown';
@@ -8241,6 +8243,10 @@ function openSettings() {
     const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
     document.getElementById('vrindaFontToggle').checked = vrindaEnabled;
 
+    // Load Hide F10 Match Dropdown toggle state
+    const hideF10Dropdown = localStorage.getItem('hideF10MatchDropdown') === 'true'; // Default false
+    document.getElementById('hideF10DropdownToggle').checked = hideF10Dropdown;
+
     document.getElementById('settingsModal').style.display = 'block';
 }
 
@@ -8254,6 +8260,17 @@ function toggleVrindaFont(enabled) {
     } else {
         table.classList.add('disable-vrinda');
         showToast('Vrinda font disabled', 'success');
+    }
+}
+
+function toggleHideF10Dropdown(hide) {
+    localStorage.setItem('hideF10MatchDropdown', hide);
+    if (hide) {
+        const existingDropdown = document.getElementById('f10MatchDropdown');
+        if (existingDropdown) existingDropdown.remove();
+        showToast('F10 Match Dropdown hidden', 'info');
+    } else {
+        showToast('F10 Match Dropdown enabled', 'info');
     }
 }
 
