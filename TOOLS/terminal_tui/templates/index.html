@@ -3749,8 +3749,10 @@
                 (p.category && p.category.toLowerCase().includes(searchQuery))
             );
 
-            // Sort so that active (running) projects are always at the top in the sidebar list
+            // Sort so that currently active project is at the top, then active (running) projects
             filtered.sort((a, b) => {
+                if (a.name === activeProject && b.name !== activeProject) return -1;
+                if (b.name === activeProject && a.name !== activeProject) return 1;
                 if (a.is_active && !b.is_active) return -1;
                 if (!a.is_active && b.is_active) return 1;
                 return 0;
@@ -5765,9 +5767,11 @@
 
             // Active/running workspaces first
             filtered.sort((a, b) => {
-                const aScore = a.name === activeProject ? 0 : a.is_active ? 1 : 2;
-                const bScore = b.name === activeProject ? 0 : b.is_active ? 1 : 2;
-                return aScore - bScore;
+                if (a.name === activeProject && b.name !== activeProject) return -1;
+                if (b.name === activeProject && a.name !== activeProject) return 1;
+                if (a.is_active && !b.is_active) return -1;
+                if (!a.is_active && b.is_active) return 1;
+                return 0;
             });
             
             if (filtered.length === 0) {
