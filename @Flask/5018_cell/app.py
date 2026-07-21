@@ -243,9 +243,30 @@ def delete_column(sheet_index, col_index):
 @app.route('/api/rows', methods=['POST'])
 def add_row():
     data = load_data()
-    sheet_index = request.json.get('sheetIndex', data['activeSheet'])
+    req_json = request.json or {}
+    sheet_index = req_json.get('sheetIndex', data['activeSheet'])
+    position = req_json.get('position', 'top')
     sheet = data['sheets'][sheet_index]
-    sheet['rows'].append(['' for _ in sheet['columns']])
+    
+    new_row = ['' for _ in sheet['columns']]
+    if position == 'top':
+        # Shift cellStyles keys down by 1 row
+        cell_styles = sheet.get('cellStyles', {})
+        if cell_styles:
+            new_cell_styles = {}
+            for key, style in cell_styles.items():
+                parts = key.split('-')
+                if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                    r, c = int(parts[0]), int(parts[1])
+                    new_cell_styles[f"{r + 1}-{c}"] = style
+                else:
+                    new_cell_styles[key] = style
+            sheet['cellStyles'] = new_cell_styles
+        
+        sheet['rows'].insert(0, new_row)
+    else:
+        sheet['rows'].append(new_row)
+        
     save_data(data)
     return jsonify({'success': True})
 

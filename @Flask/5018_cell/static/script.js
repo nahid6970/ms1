@@ -2359,10 +2359,25 @@ async function deleteColumn(index) {
 async function addRow(count = 1) {
     try {
         const sheet = tableData.sheets[currentSheet];
-        const rowsToAdd = [];
 
-        for (let i = 0; i < count; i++) {
-            rowsToAdd.push(new Array(sheet.columns.length).fill(''));
+        // Shift existing cellStyles keys down by count rows
+        if (sheet.cellStyles) {
+            const newCellStyles = {};
+            for (const [key, style] of Object.entries(sheet.cellStyles)) {
+                const parts = key.split('-');
+                if (parts.length === 2) {
+                    const r = parseInt(parts[0], 10);
+                    const c = parseInt(parts[1], 10);
+                    if (!isNaN(r) && !isNaN(c)) {
+                        newCellStyles[`${r + count}-${c}`] = style;
+                    } else {
+                        newCellStyles[key] = style;
+                    }
+                } else {
+                    newCellStyles[key] = style;
+                }
+            }
+            sheet.cellStyles = newCellStyles;
         }
 
         // Add all rows at once via API
@@ -2370,29 +2385,27 @@ async function addRow(count = 1) {
             const response = await fetch('/api/rows', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sheetIndex: currentSheet })
+                body: JSON.stringify({ sheetIndex: currentSheet, position: 'top' })
             });
             if (response.ok) {
-                sheet.rows.push(new Array(sheet.columns.length).fill(''));
+                sheet.rows.unshift(new Array(sheet.columns.length).fill(''));
             }
         }
 
-        const newRowIndex = sheet.rows.length - 1;
         renderTable();
         updateRowCountDisplay();
 
-        // Scroll to and focus on the first new row
+        // Scroll to and focus on the first new row (index 0)
         setTimeout(() => {
             const table = document.getElementById('dataTable');
+            if (!table) return;
             const tbody = table.querySelector('tbody');
+            if (!tbody) return;
             const rows = tbody.querySelectorAll('tr');
-            const newRow = rows[newRowIndex - count + 1]; // First of the new rows
+            const newRow = rows[0]; // Top row
 
             if (newRow) {
-                // Scroll the row into view
                 newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                // Focus on the first input/textarea in the new row
                 const firstInput = newRow.querySelector('td:not(.row-number) input, td:not(.row-number) textarea');
                 if (firstInput) {
                     firstInput.focus();
@@ -2401,7 +2414,7 @@ async function addRow(count = 1) {
         }, 100);
 
         if (count > 1) {
-            showToast(`Added ${count} rows`, 'success');
+            showToast(`Added ${count} rows at top`, 'success');
         }
     } catch (error) {
         console.error('Error adding row:', error);
