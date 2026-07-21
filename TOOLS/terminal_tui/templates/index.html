@@ -669,43 +669,7 @@
             position: relative;
         }
 
-        /* Modern Sidebar Toggle Button docked to vertical border */
-        .sidebar-toggle-btn {
-            position: absolute;
-            left: -1px;
-            top: 32px; /* vertically centered in the 64px header */
-            transform: translateY(-50%);
-            width: 16px;
-            height: 38px;
-            background-color: var(--bg-sidebar);
-            border: 1px solid var(--border-color);
-            border-left: none;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-            padding: 0;
-        }
 
-        .sidebar-toggle-btn:hover {
-            color: var(--text-primary);
-            background-color: var(--bg-card-hover);
-            border-color: var(--accent-color);
-            width: 18px; /* slight expand on hover */
-        }
-
-        /* Shift button position slightly right when sidebar is collapsed to keep it visible */
-        .sidebar.collapsed ~ .workspace .sidebar-toggle-btn {
-            left: 0;
-            border-left: 1px solid var(--border-color);
-        }
 
         /* Custom Searchable Select Dropdown */
         .custom-select-trigger:hover {
@@ -1609,16 +1573,15 @@
 
     <!-- Right Area: Terminal Workspace -->
     <div class="workspace" id="workspace-container">
-        <!-- Modern Sidebar toggle button docked to the left border -->
-        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide Sidebar">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </button>
-
         <!-- Terminal View (Hidden until project selected) -->
         <div class="workspace-header" id="workspace-header" style="display: none;">
             <div class="workspace-title-info">
+                <!-- Sidebar Toggle Button -->
+                <button class="action-btn sidebar-toggle-btn-modern" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Hide Sidebar" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
                 <button class="action-btn" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f59e0b; transition: all 0.2s;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -6884,11 +6847,11 @@
             const btn = document.getElementById('sidebar-toggle-btn');
             if (btn) {
                 btn.innerHTML = isCollapsed ? `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 ` : `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 `;
