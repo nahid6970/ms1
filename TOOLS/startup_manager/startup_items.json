@@ -499,7 +499,8 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1784687685.6057143
   },
   {
     "Command": "",
@@ -957,5 +958,19 @@
     "Command": "--launch-to-tray",
     "type": "App",
     "added_at": 1784230866.7609577
+  },
+  {
+    "name": "Flask - 5577 - Terminal-TUI",
+    "type": "Command",
+    "paths": [
+      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py\"",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": true,
+    "script_enabled": false,
+    "added_at": 1784688152.8692079
   }
 ]
