@@ -473,8 +473,17 @@
             "description": "",
             "enabled": true,
             "name": "Custom Syntex [Half]",
-            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\ntry to use table for organizing similar types things\nmostly use bengla language other than some names or important things\nNo advertisement or any other talk like about coaching etc only study note\nFor math use katex or latex formatting with \\(Math\\) or $Math$ and also dont use math signs for any number or math related text. just only use for any eqation or signs that need it\nFor math follow this kind of structure for question examples:-\n| সমস্যা নং | বিষয়বস্তু | ইকুয়েশন (Equation) ও সমাধান |\n| --- | --- | --- |",
-            "trigger": ";cms"
+            "replacement": "make a study note for this\nmd syntex formet is a bit different here is how i use them\n\n#1.5#text#/#  = extra big text\n##text##  = big text\n**text** = bold text, also dont ever use single star syntax i saw u sometime use them which are not defined in my project so they shows single star which is annoying and i have to fix them to double star\n@@text@@ = italic text\n__text__ = underline\n- text = list 1\n-- text = list 2\n--- text = list 3\nDont add unnecessary extra lines between heading and its content\ndont use --- or dash to add separator just keep single empty line for spacing\ntry to use table for organizing similar types things\nmostly use bengla language other than some names or important things\nNo advertisement or any other talk like about coaching etc only study note\nFor math use katex or latex formatting with \\(Math\\) or $Math$ and also dont use math signs for any other subject other than math\nFor math follow this kind of structure for question examples:-\n| সমস্যা নং | বিষয়বস্তু | ইকুয়েশন (Equation) ও সমাধান |\n| --- | --- | --- |\nAlso based on the lecture keep the sequene of rules properly and also dont skip any examples\nAlso at the end add a small suggestion/quick table so i can fast review the study note and also try to figure out if there are any existing shortcut tricks for the math other than the lecture and also for which math which tricks are applicable mention it with math numbers and for quick shortcut table first column math numbers second column types and thrid column the shortcut formula or how to apply\nany shortcut for all the methods so we can easily calculate them without any x",
+            "trigger": ";cms",
+            "delivery_method": "paste",
+            "show_as_menu": false,
+            "window_title": "",
+            "process_name": "",
+            "window_class": "",
+            "window_title_enabled": false,
+            "process_name_enabled": false,
+            "window_class_enabled": false,
+            "favourite": false
         },
         {
             "category": "General",
