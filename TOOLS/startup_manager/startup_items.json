@@ -86,14 +86,17 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
-    "ExecutableType": "pythonw",
-    "added_at": 1768273756.591541,
     "name": "Flask - 5007 - ControlBy Android",
+    "type": "Command",
     "paths": [
-      "pythonw"
+      "python"
     ],
-    "type": "Command"
+    "Command": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "ps1_command": "Start-Process -FilePath \"python\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py\"",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "C:\\@delta\\ms1\\@Flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
