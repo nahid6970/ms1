@@ -2359,50 +2359,67 @@ async function deleteColumn(index) {
 async function addRow(count = 1) {
     try {
         const sheet = tableData.sheets[currentSheet];
+        const atTop = localStorage.getItem('newRowAtTop') !== 'false'; // Default true
 
-        // Shift existing cellStyles keys down by count rows
-        if (sheet.cellStyles) {
-            const newCellStyles = {};
-            for (const [key, style] of Object.entries(sheet.cellStyles)) {
-                const parts = key.split('-');
-                if (parts.length === 2) {
-                    const r = parseInt(parts[0], 10);
-                    const c = parseInt(parts[1], 10);
-                    if (!isNaN(r) && !isNaN(c)) {
-                        newCellStyles[`${r + count}-${c}`] = style;
+        if (atTop) {
+            // Shift existing cellStyles keys down by count rows
+            if (sheet.cellStyles) {
+                const newCellStyles = {};
+                for (const [key, style] of Object.entries(sheet.cellStyles)) {
+                    const parts = key.split('-');
+                    if (parts.length === 2) {
+                        const r = parseInt(parts[0], 10);
+                        const c = parseInt(parts[1], 10);
+                        if (!isNaN(r) && !isNaN(c)) {
+                            newCellStyles[`${r + count}-${c}`] = style;
+                        } else {
+                            newCellStyles[key] = style;
+                        }
                     } else {
                         newCellStyles[key] = style;
                     }
-                } else {
-                    newCellStyles[key] = style;
+                }
+                sheet.cellStyles = newCellStyles;
+            }
+
+            // Add all rows at once via API (top position)
+            for (let i = 0; i < count; i++) {
+                const response = await fetch('/api/rows', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sheetIndex: currentSheet, position: 'top' })
+                });
+                if (response.ok) {
+                    sheet.rows.unshift(new Array(sheet.columns.length).fill(''));
                 }
             }
-            sheet.cellStyles = newCellStyles;
-        }
-
-        // Add all rows at once via API
-        for (let i = 0; i < count; i++) {
-            const response = await fetch('/api/rows', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sheetIndex: currentSheet, position: 'top' })
-            });
-            if (response.ok) {
-                sheet.rows.unshift(new Array(sheet.columns.length).fill(''));
+        } else {
+            // Add all rows at once via API (bottom position)
+            for (let i = 0; i < count; i++) {
+                const response = await fetch('/api/rows', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sheetIndex: currentSheet, position: 'bottom' })
+                });
+                if (response.ok) {
+                    sheet.rows.push(new Array(sheet.columns.length).fill(''));
+                }
             }
         }
 
         renderTable();
         updateRowCountDisplay();
 
-        // Scroll to and focus on the first new row (index 0)
+        // Scroll to and focus on the first new row
         setTimeout(() => {
             const table = document.getElementById('dataTable');
             if (!table) return;
             const tbody = table.querySelector('tbody');
             if (!tbody) return;
             const rows = tbody.querySelectorAll('tr');
-            const newRow = rows[0]; // Top row
+            
+            const newRowIndex = atTop ? 0 : sheet.rows.length - count;
+            const newRow = rows[newRowIndex];
 
             if (newRow) {
                 newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2414,7 +2431,7 @@ async function addRow(count = 1) {
         }, 100);
 
         if (count > 1) {
-            showToast(`Added ${count} rows at top`, 'success');
+            showToast(`Added ${count} rows`, 'success');
         }
     } catch (error) {
         console.error('Error adding row:', error);
@@ -8260,7 +8277,16 @@ function openSettings() {
     const hideF10Dropdown = localStorage.getItem('hideF10MatchDropdown') === 'true'; // Default false
     document.getElementById('hideF10DropdownToggle').checked = hideF10Dropdown;
 
+    // Load Add New Rows at Top toggle state
+    const newRowAtTop = localStorage.getItem('newRowAtTop') !== 'false'; // Default true
+    document.getElementById('newRowAtTopToggle').checked = newRowAtTop;
+
     document.getElementById('settingsModal').style.display = 'block';
+}
+
+function toggleNewRowPosition(enabled) {
+    localStorage.setItem('newRowAtTop', enabled);
+    showToast(enabled ? 'New rows will be added at the top' : 'New rows will be added at the bottom', 'success');
 }
 
 function toggleVrindaFont(enabled) {
