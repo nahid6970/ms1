@@ -720,12 +720,14 @@
                         {% set cmdColor = cmd_data.cmdColor if (cmd_data is mapping and cmd_data.cmdColor) else '#64748b' %}
                         {% set accentColor = cmd_data.accentColor if (cmd_data is mapping and cmd_data.accentColor) else '#cad13d' %}
                         {% set bgColor = cmd_data.bgColor if (cmd_data is mapping and cmd_data.bgColor) else '#1e293b' %}
+                        {% set cmdType = cmd_data.cmdType if (cmd_data is mapping and cmd_data.cmdType) else 'command' %}
                         
                         <div class="command-card" id="card-{{ label | replace(' ', '_') }}" 
                              draggable="true" 
                              style="--accent-clr: {{ accentColor }}; --text-clr: {{ textColor }}; --cmd-clr: {{ cmdColor }}; --bg-clr: {{ bgColor }};"
                              data-label="{{ label }}" 
                              data-command="{{ cmd }}"
+                             data-cmd-type="{{ cmdType }}"
                              data-text-color="{{ textColor }}"
                              data-cmd-color="{{ cmdColor }}"
                              data-accent-color="{{ accentColor }}"
@@ -807,8 +809,15 @@
                     <input type="text" id="new-cmd-label" placeholder="e.g., Open Notepad" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label for="new-cmd-string">Command / Executable String</label>
-                    <input type="text" id="new-cmd-string" placeholder="e.g., start notepad" autocomplete="off">
+                    <label for="new-cmd-type">Type</label>
+                    <select id="new-cmd-type" style="width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 0; font-family: inherit; font-size: 0.9rem; outline: none;">
+                        <option value="command">Command / Executable</option>
+                        <option value="ahk">AHK Shortcut (e.g. !l)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-cmd-string">Command / Shortcut String</label>
+                    <input type="text" id="new-cmd-string" placeholder="e.g., start notepad or !l" autocomplete="off">
                 </div>
                 <!-- Color pickers inside add modal -->
                 <div class="color-picker-grid">
@@ -848,8 +857,15 @@
                     <input type="text" id="edit-cmd-label" placeholder="e.g., Open Notepad" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label for="edit-cmd-string">Command / Executable String</label>
-                    <input type="text" id="edit-cmd-string" placeholder="e.g., start notepad" autocomplete="off">
+                    <label for="edit-cmd-type">Type</label>
+                    <select id="edit-cmd-type" style="width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 0; font-family: inherit; font-size: 0.9rem; outline: none;">
+                        <option value="command">Command / Executable</option>
+                        <option value="ahk">AHK Shortcut (e.g. !l)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cmd-string">Command / Shortcut String</label>
+                    <input type="text" id="edit-cmd-string" placeholder="e.g., start notepad or !l" autocomplete="off">
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label for="edit-copy-style-source">Apply Style From Another Button</label>
@@ -1077,9 +1093,11 @@
                 const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
                 const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
                 const bgColor = card.getAttribute('data-bg-color') || '#1e293b';
+                const cmdType = card.getAttribute('data-cmd-type') || 'command';
                 
                 updatedCommands[label] = {
                     command: command,
+                    cmdType: cmdType,
                     textColor: textColor,
                     cmdColor: cmdColor,
                     accentColor: accentColor,
@@ -1113,6 +1131,7 @@
                 const cmdColor = isObj ? (cmd_data.cmdColor || '#64748b') : '#64748b';
                 const accentColor = isObj ? (cmd_data.accentColor || '#cad13d') : '#cad13d';
                 const bgColor = isObj ? (cmd_data.bgColor || '#1e293b') : '#1e293b';
+                const cmdType = isObj ? (cmd_data.cmdType || 'command') : 'command';
 
                 // Escape simple values for safety
                 const safeLabel = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -1124,6 +1143,7 @@
                          style="--accent-clr: ${accentColor}; --text-clr: ${textColor}; --cmd-clr: ${cmdColor}; --bg-clr: ${bgColor};"
                          data-label="${label}" 
                          data-command="${cmd}"
+                         data-cmd-type="${cmdType}"
                          data-text-color="${textColor}"
                          data-cmd-color="${cmdColor}"
                          data-accent-color="${accentColor}"
@@ -1175,6 +1195,7 @@
             contextMenuTargetLabel = label;
             
             const command = card.getAttribute('data-command') || '';
+            const cmdType = card.getAttribute('data-cmd-type') || 'command';
             const textColor = card.getAttribute('data-text-color') || '#f8fafc';
             const cmdColor = card.getAttribute('data-cmd-color') || '#64748b';
             const accentColor = card.getAttribute('data-accent-color') || '#cad13d';
@@ -1182,6 +1203,7 @@
             
             document.getElementById('edit-cmd-label').value = label;
             document.getElementById('edit-cmd-string').value = command;
+            document.getElementById('edit-cmd-type').value = cmdType;
             document.getElementById('edit-textColor').value = textColor;
             document.getElementById('edit-cmdColor').value = cmdColor;
             document.getElementById('edit-accentColor').value = accentColor;
@@ -1218,8 +1240,10 @@
             // Reset fields
             document.getElementById('new-cmd-label').value = '';
             document.getElementById('new-cmd-string').value = '';
+            document.getElementById('new-cmd-type').value = 'command';
             document.getElementById('edit-cmd-label').value = '';
             document.getElementById('edit-cmd-string').value = '';
+            document.getElementById('edit-cmd-type').value = 'command';
             deleteTargetLabel = '';
             contextMenuTargetLabel = '';
         }
@@ -1291,9 +1315,11 @@
         function submitAddCommand() {
             const labelInput = document.getElementById('new-cmd-label');
             const cmdInput = document.getElementById('new-cmd-string');
+            const cmdTypeInput = document.getElementById('new-cmd-type');
             
             const label = labelInput.value.trim();
             const cmd = cmdInput.value.trim();
+            const cmdType = cmdTypeInput.value;
             const textColor = document.getElementById('new-textColor').value;
             const cmdColor = document.getElementById('new-cmdColor').value;
             const accentColor = document.getElementById('new-accentColor').value;
@@ -1310,6 +1336,7 @@
                 body: JSON.stringify({ 
                     label: label, 
                     command: cmd,
+                    cmdType: cmdType,
                     textColor: textColor,
                     cmdColor: cmdColor,
                     accentColor: accentColor,
@@ -1335,9 +1362,11 @@
         function submitEditCommand() {
             const labelInput = document.getElementById('edit-cmd-label');
             const cmdInput = document.getElementById('edit-cmd-string');
+            const cmdTypeInput = document.getElementById('edit-cmd-type');
             
             const newLabel = labelInput.value.trim();
             const newCmd = cmdInput.value.trim();
+            const newCmdType = cmdTypeInput.value;
             const textColor = document.getElementById('edit-textColor').value;
             const cmdColor = document.getElementById('edit-cmdColor').value;
             const accentColor = document.getElementById('edit-accentColor').value;
@@ -1359,6 +1388,7 @@
                 if (currentLabel === contextMenuTargetLabel) {
                     updatedCommands[newLabel] = {
                         command: newCmd,
+                        cmdType: newCmdType,
                         textColor: textColor,
                         cmdColor: cmdColor,
                         accentColor: accentColor,
@@ -1368,6 +1398,7 @@
                     // Keep the other cards exactly as is
                     updatedCommands[currentLabel] = {
                         command: card.getAttribute('data-command'),
+                        cmdType: card.getAttribute('data-cmd-type') || 'command',
                         textColor: card.getAttribute('data-text-color') || '#f8fafc',
                         cmdColor: card.getAttribute('data-cmd-color') || '#64748b',
                         accentColor: card.getAttribute('data-accent-color') || '#cad13d',

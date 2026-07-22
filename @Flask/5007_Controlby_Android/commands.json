@@ -4,69 +4,87 @@
         "textColor": "#f8fafc",
         "cmdColor": "#000000",
         "accentColor": "#f57a29",
-        "bgColor": "#497dee"
+        "bgColor": "#497dee",
+        "cmdType": "command"
     },
     "Display 2": {
         "command": "C:\\@delta\\msBackups\\Display\\DisplaySwitch.exe /external",
         "textColor": "#f8fafc",
         "cmdColor": "#000000",
         "accentColor": "#f57a29",
-        "bgColor": "#497dee"
+        "bgColor": "#497dee",
+        "cmdType": "command"
     },
     "Display 1 KillApps": {
         "command": "C:\\@delta\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
         "textColor": "#d1fae5",
         "cmdColor": "#a1a1aa",
         "accentColor": "#ef4444",
-        "bgColor": "#1c1917"
+        "bgColor": "#1c1917",
+        "cmdType": "command"
     },
     "Open Calculator": {
         "command": "start calc",
         "textColor": "#000000",
         "cmdColor": "#616161",
         "accentColor": "#4592f7",
-        "bgColor": "#fcfcfc"
+        "bgColor": "#fcfcfc",
+        "cmdType": "command"
     },
     "Open Notepad": {
         "command": "start notepad",
         "textColor": "#000000",
         "cmdColor": "#616161",
         "accentColor": "#4592f7",
-        "bgColor": "#fcfcfc"
+        "bgColor": "#fcfcfc",
+        "cmdType": "command"
     },
     "Show IP Config": {
         "command": "ipconfig",
         "textColor": "#fef3c7",
         "cmdColor": "#a1a1aa",
         "accentColor": "#a855f7",
-        "bgColor": "#1e1b4b"
+        "bgColor": "#1e1b4b",
+        "cmdType": "command"
     },
     "System Info": {
         "command": "systeminfo",
         "textColor": "#fef3c7",
         "cmdColor": "#a1a1aa",
         "accentColor": "#a855f7",
-        "bgColor": "#1e1b4b"
+        "bgColor": "#1e1b4b",
+        "cmdType": "command"
     },
     "Sign Out": {
         "command": "shutdown /l",
         "textColor": "#000000",
         "cmdColor": "#292929",
         "accentColor": "#f0e13d",
-        "bgColor": "#f5bcad"
+        "bgColor": "#f5bcad",
+        "cmdType": "command"
     },
     "Restart": {
         "command": "shutdown /r /t 0",
         "textColor": "#000000",
         "cmdColor": "#292929",
         "accentColor": "#f0e13d",
-        "bgColor": "#f28c73"
+        "bgColor": "#f28c73",
+        "cmdType": "command"
     },
     "Shutdown": {
         "command": "shutdown /s /t 0",
         "textColor": "#000000",
         "cmdColor": "#292929",
         "accentColor": "#f0e13d",
-        "bgColor": "#ec4f27"
+        "bgColor": "#ec4f27",
+        "cmdType": "command"
+    },
+    "Black  Screen": {
+        "command": "^!b",
+        "cmdType": "ahk",
+        "textColor": "#f8fafc",
+        "cmdColor": "#64748b",
+        "accentColor": "#cad13d",
+        "bgColor": "#1e293b"
     }
 }

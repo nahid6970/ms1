@@ -3,6 +3,7 @@ import subprocess
 import threading
 import time
 import json
+import tempfile
 import os
 
 app = Flask(__name__)
@@ -121,6 +122,9 @@ def load_commands():
                 if "accentColor" not in v:
                     v["accentColor"] = "#cad13d"
                     migrated = True
+                if "cmdType" not in v:
+                    v["cmdType"] = "command"
+                    migrated = True
                     
         if migrated:
             save_commands(data)
@@ -153,8 +157,30 @@ def execute_command(cmd, label):
         command_outputs.append(f"Command: {cmd}")
         command_outputs.append("-" * 50)
         
-        # Execute command and capture output
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+        # Check command type
+        cmd_type = "command"
+        commands = load_commands()
+        if label in commands:
+            cmd_type = commands[label].get("cmdType", "command")
+            
+        if cmd_type == "ahk":
+            command_outputs.append(f"Executing AHK Shortcut: {cmd}")
+            # Create a temporary ahk script
+            fd, temp_path = tempfile.mkstemp(suffix=".ahk")
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.write(f'#Requires AutoHotkey v2.0\nSend("{cmd}")\n')
+            
+            # Execute the script
+            result = subprocess.run(f'start /wait "" "{temp_path}"', shell=True, capture_output=True, text=True, timeout=10)
+            
+            # Cleanup
+            try:
+                os.remove(temp_path)
+            except:
+                pass
+        else:
+            # Execute normal command
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
         
         if result.stdout:
             command_outputs.append(f"Output:\n{result.stdout.strip()}")
@@ -237,6 +263,7 @@ def add_command():
         
     commands[label] = {
         "command": cmd,
+        "cmdType": data.get('cmdType', 'command'),
         "textColor": data.get('textColor', '#f8fafc'),
         "cmdColor": data.get('cmdColor', '#64748b'),
         "accentColor": data.get('accentColor', '#cad13d'),
