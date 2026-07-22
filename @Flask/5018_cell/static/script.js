@@ -8263,22 +8263,7 @@ function toggleSheetList() {
     sheetList.classList.toggle('show');
 }
 
-function openSettings() {
-    // Load current grid line color
-    const savedColor = localStorage.getItem('gridLineColor') || '#dddddd';
-    document.getElementById('gridLineColor').value = savedColor;
-    document.getElementById('gridLineColorText').value = savedColor.substring(1).toUpperCase(); // Remove # prefix
 
-    // Load Vrinda font toggle state
-    const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
-    document.getElementById('vrindaFontToggle').checked = vrindaEnabled;
-
-    // Load Hide F10 Match Dropdown toggle state
-    const hideF10Dropdown = localStorage.getItem('hideF10MatchDropdown') === 'true'; // Default false
-    document.getElementById('hideF10DropdownToggle').checked = hideF10Dropdown;
-
-    document.getElementById('settingsModal').style.display = 'block';
-}
 
 function toggleVrindaFont(enabled) {
     localStorage.setItem('vrindaFontEnabled', enabled);
@@ -16733,6 +16718,20 @@ function openSettings() {
         const currentColor = getGridLineColor();
         document.getElementById('gridLineColor').value = currentColor;
         document.getElementById('gridLineColorText').value = currentColor.substring(1).toUpperCase();
+
+        // Load Vrinda font toggle state
+        const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
+        const vrindaToggle = document.getElementById('vrindaFontToggle');
+        if (vrindaToggle) {
+            vrindaToggle.checked = vrindaEnabled;
+        }
+
+        // Load Hide F10 Match Dropdown toggle state
+        const hideF10Dropdown = localStorage.getItem('hideF10MatchDropdown') === 'true'; // Default false
+        const hideF10Toggle = document.getElementById('hideF10DropdownToggle');
+        if (hideF10Toggle) {
+            hideF10Toggle.checked = hideF10Dropdown;
+        }
 
         // Load row insert position toggle state
         const insertAtTop = localStorage.getItem('rowInsertAtTop') !== 'false'; // Default true
