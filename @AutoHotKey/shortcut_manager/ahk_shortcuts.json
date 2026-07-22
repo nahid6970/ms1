@@ -801,7 +801,7 @@
             "description": "Multi-level selection menu with submenus and folder explorer open actions.",
             "trigger": "^d",
             "replacement": "[name:AI CLI Agents]\n-[name:AGY][text:agy --dangerously-skip-permissions -c]\n-[name:CODEX][text:codex --dangerously-bypass-approvals-and-sandbox resume]\n-[name:KIRO][text:kiro-cli chat --trust-all-tools --resume]\n\n[name:Prompt]\n-[name:recent-changes][text:make a temporary md file in the root project what we implemented so far coz this session is running out and i will go to next session and name the md lastsession.md make it small not big so ai can fast understand the recent changes also if it exist just update it and keep it small and very brief with proper info]\n-[name:md-framework][text:make an md file about the framework in this directory C:\\@delta\\ms1\\md so next time i can do this my self]\n\n[name:Folders]\n-[name:usr][folder:C:\\Users\\nahid][dynamic:yes]\n-[name:ms1][folder:C:\\@delta\\ms1][dynamic:yes]\n-[name:db][folder:C:\\@delta\\db][dynamic:yes]\n-[name:Android][folder:C:\\@delta\\test][dynamic:yes]\n\n[name:Github Actions]\n-[name:Git Status ms1][cmd:git -C C:\\@delta\\ms1 status][shell:pwsh][show:visible]\n\n[name:localhost]\n-[name:Sonarr][cmd:start http://192.168.0.101:8989/calendar][shell:pwsh][show:hidden]\n-[name:Prowlarr][cmd:start http://192.168.0.101:9696/][shell:pwsh][show:hidden]",
-            "delivery_method": "sendevent",
+            "delivery_method": "sendinput",
             "show_as_menu": true,
             "window_title": "",
             "process_name": "",

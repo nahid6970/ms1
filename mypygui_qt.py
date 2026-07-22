@@ -1924,14 +1924,31 @@ class StatusBar(QMainWindow):
             a3 = menu.addAction(f"Rerun Last ({self._last_timer_mins}m {self._last_timer_type})")
         else: a3 = None
         
-        action = menu.exec(self.uptime_label.mapToGlobal(QPoint(0, -menu.sizeHint().height())))
+        menu_height = menu.sizeHint().height()
+        gpos = self.uptime_label.mapToGlobal(QPoint(0, 0))
+        if gpos.y() < 150:
+            menu_y = gpos.y() + self.uptime_label.height()
+        else:
+            menu_y = gpos.y() - menu_height
+        action = menu.exec(QPoint(gpos.x(), menu_y))
         if not action: return
         
         if action == a3:
             self._start_countdown(self._last_timer_type, self._last_timer_mins)
         else:
-            mins, ok = QInputDialog.getDouble(self, "Timer", "Enter minutes:", 1, 0.1, 1440, 1)
-            if ok: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
+            # Center dialog on screen to ensure it is always visible
+            input_dlg = QInputDialog(self)
+            input_dlg.setWindowTitle("Timer")
+            input_dlg.setLabelText("Enter minutes:")
+            input_dlg.setDoubleRange(0.1, 1440.0)
+            input_dlg.setDoubleValue(1.0)
+            input_dlg.setDoubleDecimals(1)
+            screen_geo = QApplication.primaryScreen().availableGeometry()
+            input_dlg.adjustSize()
+            input_dlg.move(screen_geo.center().x() - input_dlg.width() // 2, screen_geo.center().y() - input_dlg.height() // 2)
+            if input_dlg.exec():
+                mins = input_dlg.doubleValue()
+                self._start_countdown("alarm" if action == a1 else "shutdown", mins)
 
     def _start_countdown(self, ttype, mins):
         self._timer_active = True; self._last_timer_type = ttype; self._last_timer_mins = mins
@@ -2307,16 +2324,22 @@ class StatusBar(QMainWindow):
             a3 = menu.addAction(f"Rerun Last ({self._last_timer_mins}m {self._last_timer_type})")
         else: a3 = None
         
-        action = menu.exec(self.uptime_label.mapToGlobal(QPoint(0, -menu.sizeHint().height())))
+        menu_height = menu.sizeHint().height()
+        gpos = self.uptime_label.mapToGlobal(QPoint(0, 0))
+        if gpos.y() < 150:
+            menu_y = gpos.y() + self.uptime_label.height()
+        else:
+            menu_y = gpos.y() - menu_height
+        action = menu.exec(QPoint(gpos.x(), menu_y))
         if not action: return
         
         if action == a3:
             self._start_countdown(self._last_timer_type, self._last_timer_mins)
         else:
             dlg = TimerInputDialog(self)
-            gpos = self.uptime_label.mapToGlobal(self.uptime_label.rect().topLeft())
-            offset = int(load_config().get("popup_y_offset", 2))
-            dlg.move(gpos.x() + self.uptime_label.width() // 2 - 100, gpos.y() - 100 - offset)
+            dlg.adjustSize()
+            screen_geo = QApplication.primaryScreen().availableGeometry()
+            dlg.move(screen_geo.center().x() - dlg.width() // 2, screen_geo.center().y() - dlg.height() // 2)
             if dlg.exec():
                 mins = dlg.value()
                 if mins > 0: self._start_countdown("alarm" if action == a1 else "shutdown", mins)
