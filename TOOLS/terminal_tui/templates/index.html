@@ -6845,6 +6845,8 @@
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
             
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+            
             // Update toggle icon
             const btn = document.getElementById('sidebar-toggle-btn');
             if (btn) {
@@ -14745,6 +14747,25 @@
             // Apply custom sidebar width on load
             const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width')) || 250;
             document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+
+            const savedSidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+            if (savedSidebarCollapsed) {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) sidebar.classList.add('collapsed');
+                const btn = document.getElementById('sidebar-toggle-btn');
+                if (btn) {
+                    btn.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    `;
+                    btn.title = "Show Sidebar";
+                }
+                const wsHeader = document.getElementById('workspace-header');
+                if (wsHeader) {
+                    wsHeader.style.paddingLeft = '24px';
+                }
+            }
 
             const savedAiPopH = parseInt(localStorage.getItem('ai-popover-height')) || 600;
             document.documentElement.style.setProperty('--ai-popover-max-height', savedAiPopH + 'px');
