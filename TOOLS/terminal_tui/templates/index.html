@@ -5890,7 +5890,8 @@
             // 2. Update header dropdown visibility
             const headerDropdown = document.getElementById('workspace-selector-dropdown-container');
             if (headerDropdown) {
-                headerDropdown.style.display = showSidebarList ? 'none' : 'inline-block';
+                const isSidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                headerDropdown.style.display = (!showSidebarList || isSidebarCollapsed) ? 'inline-block' : 'none';
             }
             const addProjectBtn = document.getElementById('workspace-add-btn');
             if (addProjectBtn) {
@@ -6846,6 +6847,12 @@
             const isCollapsed = sidebar.classList.contains('collapsed');
             
             localStorage.setItem('sidebar-collapsed', isCollapsed);
+            
+            const headerDropdown = document.getElementById('workspace-selector-dropdown-container');
+            if (headerDropdown) {
+                const isCompletelyHidden = localStorage.getItem('show-sidebar-workspaces') === 'false';
+                headerDropdown.style.display = (isCollapsed || isCompletelyHidden) ? 'inline-block' : 'none';
+            }
             
             // Update toggle icon
             const btn = document.getElementById('sidebar-toggle-btn');
@@ -14764,6 +14771,10 @@
                 const wsHeader = document.getElementById('workspace-header');
                 if (wsHeader) {
                     wsHeader.style.paddingLeft = '24px';
+                }
+                const headerDropdown = document.getElementById('workspace-selector-dropdown-container');
+                if (headerDropdown) {
+                    headerDropdown.style.display = 'inline-block';
                 }
             }
 
