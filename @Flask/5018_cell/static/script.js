@@ -2359,9 +2359,9 @@ async function deleteColumn(index) {
 async function addRow(count = 1) {
     try {
         const sheet = tableData.sheets[currentSheet];
-        const atTop = localStorage.getItem('newRowAtTop') !== 'false'; // Default true
+        const insertAtTop = localStorage.getItem('rowInsertAtTop') !== 'false'; // Default true
 
-        if (atTop) {
+        if (insertAtTop) {
             // Shift existing cellStyles keys down by count rows
             if (sheet.cellStyles) {
                 const newCellStyles = {};
@@ -2382,7 +2382,7 @@ async function addRow(count = 1) {
                 sheet.cellStyles = newCellStyles;
             }
 
-            // Add all rows at once via API (top position)
+            // Add all rows at once via API
             for (let i = 0; i < count; i++) {
                 const response = await fetch('/api/rows', {
                     method: 'POST',
@@ -2394,7 +2394,7 @@ async function addRow(count = 1) {
                 }
             }
         } else {
-            // Add all rows at once via API (bottom position)
+            // Add all rows at once at the bottom via API
             for (let i = 0; i < count; i++) {
                 const response = await fetch('/api/rows', {
                     method: 'POST',
@@ -2418,8 +2418,8 @@ async function addRow(count = 1) {
             if (!tbody) return;
             const rows = tbody.querySelectorAll('tr');
             
-            const newRowIndex = atTop ? 0 : sheet.rows.length - count;
-            const newRow = rows[newRowIndex];
+            const targetIndex = insertAtTop ? 0 : sheet.rows.length - count;
+            const newRow = rows[targetIndex];
 
             if (newRow) {
                 newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2431,7 +2431,7 @@ async function addRow(count = 1) {
         }, 100);
 
         if (count > 1) {
-            showToast(`Added ${count} rows`, 'success');
+            showToast(`Added ${count} rows ${insertAtTop ? 'at top' : 'at bottom'}`, 'success');
         }
     } catch (error) {
         console.error('Error adding row:', error);
@@ -8277,16 +8277,7 @@ function openSettings() {
     const hideF10Dropdown = localStorage.getItem('hideF10MatchDropdown') === 'true'; // Default false
     document.getElementById('hideF10DropdownToggle').checked = hideF10Dropdown;
 
-    // Load Add New Rows at Top toggle state
-    const newRowAtTop = localStorage.getItem('newRowAtTop') !== 'false'; // Default true
-    document.getElementById('newRowAtTopToggle').checked = newRowAtTop;
-
     document.getElementById('settingsModal').style.display = 'block';
-}
-
-function toggleNewRowPosition(enabled) {
-    localStorage.setItem('newRowAtTop', enabled);
-    showToast(enabled ? 'New rows will be added at the top' : 'New rows will be added at the bottom', 'success');
 }
 
 function toggleVrindaFont(enabled) {
@@ -16743,8 +16734,20 @@ function openSettings() {
         document.getElementById('gridLineColor').value = currentColor;
         document.getElementById('gridLineColorText').value = currentColor.substring(1).toUpperCase();
 
+        // Load row insert position toggle state
+        const insertAtTop = localStorage.getItem('rowInsertAtTop') !== 'false'; // Default true
+        const toggle = document.getElementById('rowInsertPositionToggle');
+        if (toggle) {
+            toggle.checked = insertAtTop;
+        }
+
         renderCustomColorSyntaxList();
     }
+}
+
+function toggleRowInsertPosition(enabled) {
+    localStorage.setItem('rowInsertAtTop', enabled);
+    showToast(enabled ? 'New rows will be added at the top' : 'New rows will be added at the bottom', 'success');
 }
 
 function closeSettingsModal() {
