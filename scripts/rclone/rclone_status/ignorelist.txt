@@ -1,0 +1,48 @@
+# ==========================================
+# Common Folders to Exclude
+# ==========================================
+node_modules/**
+.git/**
+.svn/**
+.hg/**
+.vscode/**
+.idea/**
+__pycache__/**
+venv/**
+env/**
+.venv/**
+.pytest_cache/**
+.tox/**
+build/**
+dist/**
+target/**
+out/**
+vendor/**
+coverage/**
+.next/**
+.nuxt/**
+tmp/**
+temp/**
+
+# ==========================================
+# Common Files to Exclude
+# ==========================================
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.class
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+*.sqlite3
+.env
