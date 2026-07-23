@@ -1,14 +1,14 @@
 {
     "project_0": {
         "label": "NEW",
-        "src": "gu:/song",
-        "dst": "C:/diddy",
+        "src": "C:\\@delta\\ms1",
+        "dst": "gu:\\ms1",
         "cmd": "rclone check src dst --size-only",
         "index": 1,
         "enabled": true,
         "last_dir": "L2R",
         "last_op": "sync",
-        "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "last_ignore": ".git/**, .uv-envs/**, *.pyc",
         "last_flags": "--fast-list -P --size-only --dry-run"
     }
 }
