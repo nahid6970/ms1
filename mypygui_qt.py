@@ -2578,7 +2578,7 @@ class StatusBar(QMainWindow):
             color = CP_CYAN if active else CP_RED
             text = "\udb81\udd62"
             helium_toggle.setText(text)
-            helium_toggle.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; margin-left: 2px; margin-right: 4px;")
+            helium_toggle.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; margin-left: 2px; margin-right: 1px;")
             helium_toggle.setToolTip(f"Helium Incognito: {'ACTIVE' if active else 'INACTIVE'}\nLeft Click to Toggle\nRight Click for Settings")
             
         update_helium_style()
@@ -2628,6 +2628,7 @@ class StatusBar(QMainWindow):
             "icon_height": 20
         })
         self._script_monitor_btn.setFixedSize(18, 20)
+        self._script_monitor_btn.setStyleSheet("margin-left: 1px; margin-right: 5px;")
         self._script_monitor_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         
         def monitor_click(event):
