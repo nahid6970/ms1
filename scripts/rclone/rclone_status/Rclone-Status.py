@@ -386,12 +386,12 @@ def open_settings():
 
 def edit_command(key):
     is_edit = key is not None
-    cfg = commands.get(key, {"label": "NEW", "src": "C:/", "dst": "remote:/", "cmd": "rclone check src dst --size-only", "index": len(commands), "enabled": True})
-    win = tk.Toplevel(ROOT); container = setup_custom_window(win, "REGISTRY_EDITOR", 500, 600)
+    cfg = commands.get(key, {"label": "NEW", "src": "C:/", "dst": "remote:/", "cmd": "rclone check src dst --size-only", "index": len(commands), "enabled": True, "last_ignore": ""})
+    win = tk.Toplevel(ROOT); container = setup_custom_window(win, "REGISTRY_EDITOR", 500, 660)
     body = tk.Frame(container, bg=CP_BG); body.pack(fill="both", expand=True, padx=20, pady=10)
 
     def field(label, val):
-        f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=8)
+        f = tk.Frame(body, bg=CP_BG); f.pack(fill="x", pady=6)
         tk.Label(f, text=label, bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 8, "bold")).pack(anchor="w")
         e = CyberEntry(f); e.insert(0, str(val)); e.pack(fill="x", pady=2)
         return e
@@ -401,15 +401,26 @@ def edit_command(key):
     src_e = field("PATH_A", cfg["src"])
     dst_e = field("PATH_B", cfg["dst"])
     cmd_e = field("VALIDATION_CMD", cfg["cmd"])
+    ignore_e = field("EXCLUSIONS", cfg.get("last_ignore", ""))
     idx_e = field("Z_INDEX", cfg.get("index", 0))
 
     def save():
         new_key = name_e.get()
         if is_edit and new_key != key: del commands[key]
-        commands[new_key] = {"label": label_e.get(), "src": src_e.get(), "dst": dst_e.get(), "cmd": cmd_e.get(), "index": int(idx_e.get()), "enabled": True}
+        updated_cfg = cfg.copy()
+        updated_cfg.update({
+            "label": label_e.get(),
+            "src": src_e.get(),
+            "dst": dst_e.get(),
+            "cmd": cmd_e.get(),
+            "last_ignore": ignore_e.get(),
+            "index": int(idx_e.get()),
+            "enabled": True
+        })
+        commands[new_key] = updated_cfg
         save_commands(commands); create_gui(); win.destroy(); trigger_all_checks()
 
-    btn_f = tk.Frame(body, bg=CP_BG); btn_f.pack(pady=20)
+    btn_f = tk.Frame(body, bg=CP_BG); btn_f.pack(pady=15)
     HoverButton(btn_f, text="SAVE", command=save, width=12, hover_color=CP_GREEN).pack(side="left", padx=5)
     if is_edit: HoverButton(btn_f, text="DELETE", command=lambda: [commands.pop(key), save_commands(commands), create_gui(), win.destroy()], width=12, hover_color=CP_RED).pack(side="left", padx=5)
     HoverButton(btn_f, text="EXIT", command=win.destroy, width=12).pack(side="left", padx=5)

@@ -1,6 +1,6 @@
 {
     "project_0": {
-        "label": "NEW",
+        "label": "ms1",
         "src": "C:\\@delta\\ms1",
         "dst": "gu:\\ms1",
         "cmd": "rclone check src dst --size-only",
