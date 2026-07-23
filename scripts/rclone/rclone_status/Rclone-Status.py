@@ -253,26 +253,68 @@ class ProjectActionWindow(tk.Toplevel):
             for item in self.cfg["last_ignore"].split(','):
                 item = item.strip()
                 if not item: continue
-                
-                # Resolve relative path for ignore files (relative to script dir)
                 check_path = item if os.path.isabs(item) else os.path.join(os.path.dirname(__file__), item)
-                
                 if os.path.isfile(check_path) and item.lower().endswith('.txt'):
-                    cmd += f' --exclude-from "{check_path}"'
+                    try:
+                        with open(check_path, "r", encoding="utf-8") as ef:
+                            for line in ef:
+                                line = line.strip()
+                                if line: cmd += f' --exclude "{line}"'
+                    except: pass
                 else:
-                    # Treat as a literal pattern if file not found or not .txt
                     cmd += f' --exclude "{item}"'
 
         self.action_btn.config(state="disabled", text="BUSY...")
-        self.log_text.insert("end", f"// RUNNING: {cmd}\n", "yellow")
+        # Show shortened command (hide long exclude lists)
+        exclude_count = cmd.count('--exclude')
+        if exclude_count > 3:
+            short_cmd = cmd[:cmd.index('--exclude')] + f'[{exclude_count} exclusions]'
+        else:
+            short_cmd = cmd
+        self.log_text.insert("end", f"// RUNNING: {short_cmd}\n", "yellow")
         self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         def worker():
-            # Use UTF-8 and replace errors to handle rclone output on Windows
             p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
-            for line in p.stdout:
-                self.log_text.insert("end", f" > {line}"); self.log_text.see("end")
-            p.wait(); self.action_btn.config(state="normal", text="EXECUTE_CMD"); trigger_all_checks()
+            
+            self.log_text.mark_set("out", "end-1c")
+            self.log_text.mark_gravity("out", "left")
+            
+            perm = []
+            prog = []
+            
+            def refresh():
+                self.log_text.delete("out", "end")
+                for l in perm:
+                    self.log_text.insert("end", l)
+                for l in prog:
+                    self.log_text.insert("end", l)
+                self.log_text.see("end")
+            
+            for raw_line in iter(p.stdout.readline, ''):
+                # Split by \r in case rclone uses it (take last segment only)
+                line = raw_line.split('\r')[-1].strip()
+                if not line: continue
+                
+                is_p = any(k in line for k in ["Transferred:", "Checks:", "Elapsed time:", "Transferring:", "Checking:", "  * ", "  *\t", " *\t", " * "])
+                
+                if is_p:
+                    # Detect start of new progress block: byte-count line has "ETA"
+                    if "Transferred:" in line and "ETA" in line and prog:
+                        prog.clear()
+                    prog.append(f" > {line}\n")
+                    # Only refresh on block-ending line for less flicker
+                    if "Elapsed time:" in line:
+                        refresh()
+                else:
+                    perm.append(f" > {line}\n")
+                    prog.clear()
+                    refresh()
+            
+            p.wait()
+            refresh()
+            self.action_btn.config(state="normal", text="EXECUTE_CMD")
+            trigger_all_checks()
         threading.Thread(target=worker, daemon=True).start()
 
 def open_settings():
