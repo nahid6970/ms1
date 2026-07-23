@@ -179,10 +179,10 @@ QLabel {{
 
 DIALOG_QSS = f"""
     QDialog, QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; font-size: 10pt; }}
-    QLineEdit, QComboBox, QSpinBox {{
-        background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
+    QLineEdit, QComboBox, QSpinBox, QPlainTextEdit, QTextEdit {{
+        background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid #555555; padding: 4px; border-radius: 3px;
     }}
-    QLineEdit:focus, QComboBox:focus, QSpinBox:focus {{ border: 1px solid {CP_CYAN}; }}
+    QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
     QSpinBox::up-button {{
         subcontrol-origin: border;
         subcontrol-position: top right;
@@ -1979,7 +1979,8 @@ class ScriptMonitorSettingsDialog(QDialog):
         self.svg_edit = QPlainTextEdit()
         self.svg_edit.setPlaceholderText("<svg>...</svg>")
         self.svg_edit.setPlainText(self.config.get("script_monitor_svg", DEFAULT_SCRIPT_MONITOR_SVG))
-        self.svg_edit.setMaximumHeight(90)
+        self.svg_edit.setMaximumHeight(95)
+        self.svg_edit.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid #666666; border-radius: 4px; padding: 6px; font-family: Consolas; font-size: 9pt;")
         lay.addWidget(self.svg_edit)
         
         bottom_box = QHBoxLayout()
