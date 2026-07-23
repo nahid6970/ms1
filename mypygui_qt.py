@@ -1931,6 +1931,144 @@ class ScriptMonitorSettingsDialog(QDialog):
         self.config["script_monitor_svg"] = self.svg_edit.toPlainText().strip() or DEFAULT_SCRIPT_MONITOR_SVG
         self.accept()
 
+class ScriptMonitorListDialog(QDialog):
+    def __init__(self, config, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Script Monitor - Status & Rerun")
+        self.resize(720, 420)
+        self.setStyleSheet(DIALOG_QSS)
+        self.config = config
+        
+        lay = QVBoxLayout(self)
+        
+        title_lbl = QLabel("Monitored Scripts Control Panel")
+        title_lbl.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; font-weight: bold;")
+        lay.addWidget(title_lbl)
+        
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(['Status', 'Script / Process', 'Runner (Python/Pythonw/etc)', 'Action'])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        lay.addWidget(self.table)
+        
+        btn_lay = QHBoxLayout()
+        ref_btn = QPushButton("🔄 Refresh Status")
+        ref_btn.clicked.connect(self.populate_table)
+        run_all_btn = QPushButton("▶ Run All Stopped")
+        run_all_btn.clicked.connect(self.run_all_stopped)
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        
+        btn_lay.addWidget(ref_btn)
+        btn_lay.addWidget(run_all_btn)
+        btn_lay.addStretch()
+        btn_lay.addWidget(close_btn)
+        lay.addLayout(btn_lay)
+        
+        self.populate_table()
+        
+        self.adjustSize()
+        screen_geo = QApplication.primaryScreen().availableGeometry()
+        self.move(screen_geo.center().x() - self.width() // 2, screen_geo.center().y() - self.height() // 2)
+
+    def populate_table(self):
+        items = self.config.get("script_monitor_items", [])
+        runners_config = self.config.get("script_runners", {})
+        
+        running_procs = []
+        for proc in psutil.process_iter(['name', 'exe', 'cmdline']):
+            try:
+                name = (proc.info['name'] or "").lower()
+                exe = (proc.info['exe'] or "").lower()
+                cmdline_list = proc.info['cmdline'] or []
+                cmdline = ' '.join(cmdline_list).lower()
+                running_procs.append((name, exe, cmdline))
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+
+        self.table.setRowCount(0)
+        self.script_widgets = []
+        
+        default_runners = ["python", "pythonw", "pwsh -NoExit -Command", "cmd /c"]
+        
+        for item in items:
+            item_lower = item.lower()
+            is_running = any(
+                item_lower in name or item_lower in exe or item_lower in cmdline
+                for name, exe, cmdline in running_procs
+            )
+            
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            
+            status_text = "● RUNNING" if is_running else "○ STOPPED"
+            status_item = QTableWidgetItem(status_text)
+            status_item.setForeground(QColor(CP_GREEN if is_running else CP_RED))
+            status_item.setFont(QFont("Consolas", 10, QFont.Weight.Bold))
+            self.table.setItem(row, 0, status_item)
+            
+            script_item = QTableWidgetItem(item)
+            self.table.setItem(row, 1, script_item)
+            
+            runner_combo = QComboBox()
+            runner_combo.setEditable(True)
+            saved_runner = runners_config.get(item, "pythonw")
+            for r in default_runners:
+                runner_combo.addItem(r)
+            if saved_runner not in default_runners:
+                runner_combo.insertItem(0, saved_runner)
+            runner_combo.setCurrentText(saved_runner)
+            
+            def _make_runner_change(script_name, combo_box):
+                def _on_change(val):
+                    runners = self.config.get("script_runners", {})
+                    runners[script_name] = combo_box.currentText().strip()
+                    self.config["script_runners"] = runners
+                    save_config(self.config)
+                return _on_change
+                
+            runner_combo.currentTextChanged.connect(_make_runner_change(item, runner_combo))
+            self.table.setCellWidget(row, 2, runner_combo)
+            
+            run_btn = QPushButton("▶ Rerun" if is_running else "▶ Run")
+            run_btn.setStyleSheet(f"background-color: {CP_DIM}; color: white; border: 1px solid {CP_CYAN}; padding: 4px;")
+            
+            def _make_run_click(script_name, combo_box):
+                def _on_click():
+                    runner = combo_box.currentText().strip() or "python"
+                    self.run_script(script_name, runner)
+                    QTimer.singleShot(1000, self.populate_table)
+                return _on_click
+                
+            run_btn.clicked.connect(_make_run_click(item, runner_combo))
+            self.table.setCellWidget(row, 3, run_btn)
+            
+            self.script_widgets.append({
+                'item': item,
+                'is_running': is_running,
+                'runner_combo': runner_combo
+            })
+
+    def run_script(self, script_path, runner):
+        try:
+            cmd = f'{runner} "{script_path}"'
+            subprocess.Popen(cmd, shell=True)
+            logging.info(f"Launched script monitor action: {cmd}")
+        except Exception as e:
+            logging.error(f"Failed to launch script {script_path}: {e}")
+
+    def run_all_stopped(self):
+        for entry in self.script_widgets:
+            if not entry['is_running']:
+                script_name = entry['item']
+                runner = entry['runner_combo'].currentText().strip() or "python"
+                self.run_script(script_name, runner)
+        QTimer.singleShot(1500, self.populate_table)
+
 def get_http_progid():
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice") as key:
@@ -2458,6 +2596,8 @@ class StatusBar(QMainWindow):
         
         def monitor_click(event):
             if event.button() == Qt.MouseButton.LeftButton:
+                dlg = ScriptMonitorListDialog(self._config, self)
+                dlg.exec()
                 self._check_script_status()
             elif event.button() == Qt.MouseButton.RightButton:
                 dlg = ScriptMonitorSettingsDialog(self._config, self)
