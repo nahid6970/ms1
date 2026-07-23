@@ -187,7 +187,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.ignore_ent = CyberEntry(grid, textvariable=self.ignore_var)
         self.ignore_ent.grid(row=0, column=1, sticky="ew", padx=(10,0))
         
-        placeholder = "e.g. *.jpg, dir/**"
+        placeholder = "e.g. *.jpg, dir/**, C:/path/ignore.txt"
         self.ph_label = tk.Label(self.ignore_ent, text=placeholder, bg=CP_PANEL, fg="#007a7a", font=("Consolas", 10), cursor="xterm")
         
         def check_ph(*args):
@@ -248,7 +248,13 @@ class ProjectActionWindow(tk.Toplevel):
         src, dst = (self.cfg["src"], self.cfg["dst"]) if self.direction == "L2R" else (self.cfg["dst"], self.cfg["src"])
         cmd = f'rclone {self.op_mode} "{src}" "{dst}" {self.cfg["last_flags"]}'
         if self.cfg["last_ignore"]:
-            for item in self.cfg["last_ignore"].split(','): cmd += f' --exclude "{item.strip()}"'
+            for item in self.cfg["last_ignore"].split(','):
+                item = item.strip()
+                if not item: continue
+                if os.path.isfile(item) and item.lower().endswith('.txt'):
+                    cmd += f' --exclude-from "{item}"'
+                else:
+                    cmd += f' --exclude "{item}"'
 
         self.action_btn.config(state="disabled", text="BUSY...")
         self.log_text.insert("end", f"// RUNNING: {cmd}\n", "yellow")
