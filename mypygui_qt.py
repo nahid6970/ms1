@@ -1757,6 +1757,7 @@ class RunningScriptScannerDialog(QDialog):
         self.table = QTableWidget()
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels(['Name', 'PID', 'Command Path / Args'])
+        self.table.verticalHeader().hide()
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
@@ -1935,7 +1936,6 @@ class ScriptMonitorListDialog(QDialog):
     def __init__(self, config, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Script Monitor - Status & Rerun")
-        self.resize(720, 420)
         self.setStyleSheet(DIALOG_QSS)
         self.config = config
         
@@ -1947,7 +1947,8 @@ class ScriptMonitorListDialog(QDialog):
         
         self.table = QTableWidget()
         self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(['Status', 'Script / Process', 'Runner (Python/Pythonw/etc)', 'Action'])
+        self.table.setHorizontalHeaderLabels(['Status', 'Script / Process Path', 'Runner', 'Action'])
+        self.table.verticalHeader().hide()
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
@@ -1970,10 +1971,6 @@ class ScriptMonitorListDialog(QDialog):
         lay.addLayout(btn_lay)
         
         self.populate_table()
-        
-        self.adjustSize()
-        screen_geo = QApplication.primaryScreen().availableGeometry()
-        self.move(screen_geo.center().x() - self.width() // 2, screen_geo.center().y() - self.height() // 2)
 
     def populate_table(self):
         items = self.config.get("script_monitor_items", [])
@@ -2015,6 +2012,7 @@ class ScriptMonitorListDialog(QDialog):
             self.table.setItem(row, 1, script_item)
             
             runner_combo = QComboBox()
+            runner_combo.setToolTip("Type or select runner (e.g. python, pythonw, pwsh, cmd)")
             runner_combo.setEditable(True)
             saved_runner = runners_config.get(item, "pythonw")
             for r in default_runners:
@@ -2052,6 +2050,15 @@ class ScriptMonitorListDialog(QDialog):
                 'is_running': is_running,
                 'runner_combo': runner_combo
             })
+
+        fm = self.fontMetrics()
+        max_script_w = max([fm.horizontalAdvance(it) for it in items] + [250])
+        needed_w = 110 + max_script_w + 140 + 90 + 80
+        screen_geo = QApplication.primaryScreen().availableGeometry()
+        target_w = min(max(needed_w, 750), screen_geo.width() - 80)
+        target_h = min(max(180 + len(items) * 42, 350), screen_geo.height() - 80)
+        self.resize(target_w, target_h)
+        self.move(screen_geo.center().x() - target_w // 2, screen_geo.center().y() - target_h // 2)
 
     def run_script(self, script_path, runner):
         try:
