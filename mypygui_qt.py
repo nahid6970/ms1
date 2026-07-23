@@ -71,7 +71,8 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
-    QStyle, QStyleOption, QGridLayout, QMenu,
+    QStyle, QStyleOption, QGridLayout, QMenu, QTableWidget,
+    QTableWidgetItem, QHeaderView, QListWidget, QSpinBox,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
 from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction
@@ -1729,6 +1730,207 @@ class AlarmNotification(QDialog):
     def mousePressEvent(self, event):
         self.accept()
 
+# ─── Script Monitor ───────────────────────────────────────────────────────────
+DEFAULT_SCRIPT_MONITOR_SVG = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="4 17 10 11 4 5"/>
+  <line x1="12" y1="19" x2="20" y2="19"/>
+</svg>"""
+
+class RunningScriptScannerDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Scan Running Processes")
+        self.resize(750, 450)
+        self.setStyleSheet(DIALOG_QSS)
+        self.selected_item = None
+        
+        lay = QVBoxLayout(self)
+        
+        search_lay = QHBoxLayout()
+        search_lay.addWidget(QLabel("Search:"))
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Filter by process name or command line...")
+        self.search_bar.textChanged.connect(self.filter_table)
+        search_lay.addWidget(self.search_bar)
+        lay.addLayout(search_lay)
+        
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(['Name', 'PID', 'Command Path / Args'])
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.itemDoubleClicked.connect(self.on_double_click)
+        lay.addWidget(self.table)
+        
+        btn_lay = QHBoxLayout()
+        ref_btn = QPushButton("Refresh")
+        ref_btn.clicked.connect(self.scan_processes)
+        add_btn = QPushButton("Add Selected")
+        add_btn.clicked.connect(self.on_add_selected)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        btn_lay.addWidget(ref_btn)
+        btn_lay.addStretch()
+        btn_lay.addWidget(add_btn)
+        btn_lay.addWidget(cancel_btn)
+        lay.addLayout(btn_lay)
+        
+        self.processes = []
+        self.scan_processes()
+
+    def scan_processes(self):
+        self.processes = []
+        for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline']):
+            try:
+                pid = proc.info['pid']
+                name = proc.info['name'] or ""
+                cmdline_list = proc.info['cmdline'] or []
+                cmdline = ' '.join(cmdline_list) if cmdline_list else (proc.info['exe'] or name)
+                
+                self.processes.append({
+                    'pid': str(pid),
+                    'name': name,
+                    'cmdline': cmdline
+                })
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        self.filter_table()
+
+    def filter_table(self):
+        search_text = self.search_bar.text().strip().lower()
+        search_terms = search_text.split()
+        
+        self.table.setRowCount(0)
+        for proc in self.processes:
+            name_lower = proc['name'].lower()
+            cmd_lower = proc['cmdline'].lower()
+            
+            if search_terms:
+                if not all(term in name_lower or term in cmd_lower for term in search_terms):
+                    continue
+                    
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            
+            name_item = QTableWidgetItem(proc['name'])
+            if "python" in name_lower or ".py" in cmd_lower or ".bat" in cmd_lower or ".ps1" in cmd_lower:
+                name_item.setForeground(QColor(CP_CYAN))
+                
+            self.table.setItem(row, 0, name_item)
+            self.table.setItem(row, 1, QTableWidgetItem(proc['pid']))
+            self.table.setItem(row, 2, QTableWidgetItem(proc['cmdline']))
+
+    def on_double_click(self, item):
+        self.on_add_selected()
+
+    def on_add_selected(self):
+        row = self.table.currentRow()
+        if row >= 0:
+            name = self.table.item(row, 0).text()
+            cmdline = self.table.item(row, 2).text()
+            
+            target = ""
+            if "python" in name.lower() and ".py" in cmdline.lower():
+                parts = cmdline.split()
+                for p in parts:
+                    if p.endswith(".py"):
+                        target = os.path.basename(p)
+                        break
+            if not target:
+                target = name if name else cmdline
+                
+            self.selected_item = target
+            self.accept()
+
+class ScriptMonitorSettingsDialog(QDialog):
+    def __init__(self, config, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Script Monitor Settings")
+        self.resize(580, 520)
+        self.setStyleSheet(DIALOG_QSS)
+        self.config = config
+        
+        lay = QVBoxLayout(self)
+        
+        lbl_list = QLabel("Monitored Scripts / Process Names / Keywords:")
+        lbl_list.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+        lay.addWidget(lbl_list)
+        
+        self.script_list = QListWidget()
+        items = self.config.get("script_monitor_items", [])
+        for item in items:
+            self.script_list.addItem(item)
+        lay.addWidget(self.script_list)
+        
+        btn_box = QHBoxLayout()
+        add_manual_btn = QPushButton("+ Add Name/Path")
+        add_manual_btn.clicked.connect(self.add_manual)
+        scan_btn = QPushButton("🔍 Scan Running Processes...")
+        scan_btn.clicked.connect(self.scan_and_add)
+        remove_btn = QPushButton("❌ Remove Selected")
+        remove_btn.clicked.connect(self.remove_selected)
+        
+        btn_box.addWidget(add_manual_btn)
+        btn_box.addWidget(scan_btn)
+        btn_box.addWidget(remove_btn)
+        lay.addLayout(btn_box)
+        
+        int_lay = QHBoxLayout()
+        int_lay.addWidget(QLabel("Check Interval (seconds):"))
+        self.interval_spin = QSpinBox()
+        self.interval_spin.setRange(1, 60)
+        self.interval_spin.setValue(int(self.config.get("script_monitor_interval", 3)))
+        int_lay.addWidget(self.interval_spin)
+        int_lay.addStretch()
+        lay.addLayout(int_lay)
+        
+        lay.addWidget(QLabel("Custom SVG Icon code (use currentColor for status color):"))
+        self.svg_edit = QPlainTextEdit()
+        self.svg_edit.setPlaceholderText("<svg>...</svg>")
+        self.svg_edit.setPlainText(self.config.get("script_monitor_svg", DEFAULT_SCRIPT_MONITOR_SVG))
+        self.svg_edit.setMaximumHeight(90)
+        lay.addWidget(self.svg_edit)
+        
+        bottom_box = QHBoxLayout()
+        save_btn = QPushButton("Save & Apply")
+        save_btn.clicked.connect(self.save_and_accept)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        bottom_box.addStretch()
+        bottom_box.addWidget(save_btn)
+        bottom_box.addWidget(cancel_btn)
+        lay.addLayout(bottom_box)
+        
+        self.adjustSize()
+        screen_geo = QApplication.primaryScreen().availableGeometry()
+        self.move(screen_geo.center().x() - self.width() // 2, screen_geo.center().y() - self.height() // 2)
+
+    def add_manual(self):
+        text, ok = QInputDialog.getText(self, "Add Script/Process", "Enter script filename, full path, or process name:")
+        if ok and text.strip():
+            self.script_list.addItem(text.strip())
+
+    def scan_and_add(self):
+        dlg = RunningScriptScannerDialog(self)
+        if dlg.exec() and dlg.selected_item:
+            self.script_list.addItem(dlg.selected_item)
+
+    def remove_selected(self):
+        for item in self.script_list.selectedItems():
+            self.script_list.takeItem(self.script_list.row(item))
+
+    def save_and_accept(self):
+        items = []
+        for i in range(self.script_list.count()):
+            items.append(self.script_list.item(i).text())
+        self.config["script_monitor_items"] = items
+        self.config["script_monitor_interval"] = self.interval_spin.value()
+        self.config["script_monitor_svg"] = self.svg_edit.toPlainText().strip() or DEFAULT_SCRIPT_MONITOR_SVG
+        self.accept()
+
 def get_http_progid():
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice") as key:
@@ -2218,6 +2420,12 @@ class StatusBar(QMainWindow):
         helium_toggle.mousePressEvent = helium_click
         ll.addWidget(helium_toggle)
 
+        # Script Monitor Integration
+        try:
+            self._init_script_monitor(ll)
+        except Exception as e:
+            logging.error(f"Failed to integrate Script Monitor: {e}")
+
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
         bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); git_row.addWidget(bkup)
@@ -2237,6 +2445,94 @@ class StatusBar(QMainWindow):
             lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
         del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
         if repos: threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
+
+    def _init_script_monitor(self, ll):
+        self._script_monitor_btn = IconLabel("⚡", {
+            "font": ["JetBrainsMono NFP", 18, "bold"],
+            "svg_content": self._config.get("script_monitor_svg", DEFAULT_SCRIPT_MONITOR_SVG),
+            "icon_width": 18,
+            "icon_height": 20
+        })
+        self._script_monitor_btn.setFixedSize(18, 20)
+        self._script_monitor_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        def monitor_click(event):
+            if event.button() == Qt.MouseButton.LeftButton:
+                self._check_script_status()
+            elif event.button() == Qt.MouseButton.RightButton:
+                dlg = ScriptMonitorSettingsDialog(self._config, self)
+                if dlg.exec():
+                    save_config(self._config)
+                    interval = int(self._config.get("script_monitor_interval", 3))
+                    self._script_monitor_timer.setInterval(interval * 1000)
+                    self._check_script_status()
+                    
+        self._script_monitor_btn.mousePressEvent = monitor_click
+        ll.addWidget(self._script_monitor_btn)
+        
+        self._script_monitor_timer = QTimer(self)
+        self._script_monitor_timer.timeout.connect(self._check_script_status)
+        interval = int(self._config.get("script_monitor_interval", 3))
+        self._script_monitor_timer.start(interval * 1000)
+        self._check_script_status()
+
+    def _check_script_status(self):
+        if not hasattr(self, '_script_monitor_btn') or not self._script_monitor_btn:
+            return
+            
+        items = self._config.get("script_monitor_items", [])
+        if not items:
+            self._update_script_monitor_color(CP_DIM, "Script Monitor: No scripts configured\nRight-click to add scripts.")
+            return
+
+        running_procs = []
+        for proc in psutil.process_iter(['name', 'exe', 'cmdline']):
+            try:
+                name = (proc.info['name'] or "").lower()
+                exe = (proc.info['exe'] or "").lower()
+                cmdline_list = proc.info['cmdline'] or []
+                cmdline = ' '.join(cmdline_list).lower()
+                running_procs.append((name, exe, cmdline))
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+
+        statuses = []
+        all_running = True
+        for item in items:
+            item_lower = item.lower()
+            is_running = any(
+                item_lower in name or item_lower in exe or item_lower in cmdline
+                for name, exe, cmdline in running_procs
+            )
+            if is_running:
+                statuses.append(f"[✓] {item}")
+            else:
+                statuses.append(f"[✗] {item}")
+                all_running = False
+
+        status_color = CP_GREEN if all_running else CP_RED
+        status_text = "ALL RUNNING" if all_running else "SOME STOPPED"
+        tooltip_lines = [f"Script Monitor: {status_text} ({sum(1 for s in statuses if '[✓]' in s)}/{len(items)})"]
+        tooltip_lines.extend(statuses)
+        tooltip_lines.append("(Left Click: Re-check | Right Click: Settings)")
+        
+        self._update_script_monitor_color(status_color, '\n'.join(tooltip_lines))
+
+    def _update_script_monitor_color(self, color, tooltip_text=""):
+        svg_tpl = self._config.get("script_monitor_svg", DEFAULT_SCRIPT_MONITOR_SVG)
+        if not svg_tpl:
+            svg_tpl = DEFAULT_SCRIPT_MONITOR_SVG
+            
+        svg_content = svg_tpl
+        if "currentColor" in svg_content:
+            svg_content = svg_content.replace("currentColor", color)
+        else:
+            svg_content = re.sub(r'fill="[^"]+"', f'fill="{color}"', svg_content)
+            svg_content = re.sub(r'stroke="[^"]+"', f'stroke="{color}"', svg_content)
+            
+        self._script_monitor_btn.btn_cfg["svg_content"] = svg_content
+        self._script_monitor_btn.setToolTip(tooltip_text)
+        self._script_monitor_btn.update()
 
     def _toggle_rclone_popup(self):
         if self._rclone_popup and self._rclone_popup.isVisible(): self._rclone_popup.hide(); self._rclone_popup = None; return
@@ -3108,6 +3404,8 @@ class VoiceApp(QMainWindow):
         compact = self._compact_view
         self.status_btn.setFixedSize(18, 20)
         self.lang_btn.setFixedSize(26 if compact else 28, 20)
+        if hasattr(self, '_script_monitor_btn') and self._script_monitor_btn:
+            self._script_monitor_btn.setFixedSize(18, 20)
         self.google_btn.setFixedSize(18, 18)
         self.copy_btn.setFixedSize(18, 18)
         self.help_btn.setFixedSize(18, 18)
