@@ -1,0 +1,23 @@
+{
+  "name": "Excel-like Data Table",
+  "short_name": "Data Table",
+  "description": "Excel-like Data Table Application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#107C41",
+  "icons": [
+    {
+      "src": "/static/app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

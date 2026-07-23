@@ -8,6 +8,10 @@ app = Flask(__name__)
 # Disable caching for development
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.svg')
+
 @app.after_request
 def add_header(response):
     # Prevent caching of all responses
