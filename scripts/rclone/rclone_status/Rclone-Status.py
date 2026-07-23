@@ -436,10 +436,14 @@ def check_and_update_label(label, cfg):
             for item in cfg["last_ignore"].split(','):
                 item = item.strip()
                 if not item: continue
-                # Resolve relative path for ignore files (relative to script dir)
                 check_path = item if os.path.isabs(item) else os.path.join(os.path.dirname(__file__), item)
                 if os.path.isfile(check_path) and item.lower().endswith('.txt'):
-                    cmd += f' --exclude-from "{check_path}"'
+                    try:
+                        with open(check_path, "r", encoding="utf-8") as ef:
+                            for line in ef:
+                                line = line.strip()
+                                if line: cmd += f' --exclude "{line}"'
+                    except: pass
                 else:
                     cmd += f' --exclude "{item}"'
         

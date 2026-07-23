@@ -7,7 +7,7 @@
         "index": 1,
         "enabled": true,
         "last_dir": "L2R",
-        "last_op": "sync",
+        "last_op": "check",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only"
     }
