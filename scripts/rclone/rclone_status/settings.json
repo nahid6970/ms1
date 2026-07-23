@@ -10,6 +10,7 @@
     "icon_size": 50,
     "color_l": "#F71E49",
     "color_r": "#56D32C",
+    "keep_terminal_open": true,
     "minimize_to_tray": true,
     "dialog_width": 550,
     "settings_win_width": 480,

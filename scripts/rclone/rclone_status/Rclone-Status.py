@@ -53,7 +53,8 @@ def load_settings():
         "icon_l": "\uf100", "icon_r": "\uf101",
         "icon_size": 22,
         "color_l": "#ff934b", # CP_ORANGE default
-        "color_r": "#00F0FF"  # CP_CYAN default
+        "color_r": "#00F0FF",  # CP_CYAN default
+        "keep_terminal_open": True
     }
     if os.path.exists(SETTINGS_PATH):
         try:
@@ -275,46 +276,31 @@ class ProjectActionWindow(tk.Toplevel):
         self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         def worker():
-            p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
-            
-            self.log_text.mark_set("out", "end-1c")
-            self.log_text.mark_gravity("out", "left")
-            
-            perm = []
-            prog = []
-            
-            def refresh():
-                self.log_text.delete("out", "end")
-                for l in perm:
-                    self.log_text.insert("end", l)
-                for l in prog:
-                    self.log_text.insert("end", l)
-                self.log_text.see("end")
-            
-            for raw_line in iter(p.stdout.readline, ''):
-                # Split by \r in case rclone uses it (take last segment only)
-                line = raw_line.split('\r')[-1].strip()
-                if not line: continue
-                
-                is_p = any(k in line for k in ["Transferred:", "Checks:", "Elapsed time:", "Transferring:", "Checking:", "  * ", "  *\t", " *\t", " * "])
-                
-                if is_p:
-                    # Detect start of new progress block: byte-count line has "ETA"
-                    if "Transferred:" in line and "ETA" in line and prog:
-                        prog.clear()
-                    prog.append(f" > {line}\n")
-                    # Only refresh on block-ending line for less flicker
-                    if "Elapsed time:" in line:
-                        refresh()
-                else:
-                    perm.append(f" > {line}\n")
-                    prog.clear()
-                    refresh()
-            
-            p.wait()
-            refresh()
-            self.action_btn.config(state="normal", text="EXECUTE_CMD")
-            trigger_all_checks()
+            def finish(error_line=None):
+                if error_line:
+                    self.log_text.insert("end", error_line, "yellow")
+                self.action_btn.config(state="normal", text="EXECUTE_CMD")
+                trigger_all_checks()
+
+            try:
+                pwsh_cmd = ["pwsh", "-NoLogo", "-NoProfile"]
+                if app_settings.get("keep_terminal_open", True):
+                    pwsh_cmd.append("-NoExit")
+                pwsh_cmd.extend(["-Command", cmd])
+                p = subprocess.Popen(
+                    pwsh_cmd,
+                    cwd=os.path.dirname(__file__),
+                    creationflags=subprocess.CREATE_NEW_CONSOLE,
+                )
+            except FileNotFoundError:
+                ROOT.after(0, lambda: finish(" > pwsh was not found on PATH.\n"))
+                return
+
+            if not app_settings.get("keep_terminal_open", True):
+                p.wait()
+            else:
+                time.sleep(0.25)
+            ROOT.after(0, finish)
         threading.Thread(target=worker, daemon=True).start()
 
 def open_settings():
@@ -368,6 +354,22 @@ def open_settings():
     r_icon_e, r_color_e = color_pick_field("RIGHT_CHANNEL (ICON | COLOR)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
+    keep_open_var = tk.BooleanVar(value=app_settings.get("keep_terminal_open", True))
+    keep_open_row = tk.Frame(body, bg=CP_BG)
+    keep_open_row.pack(fill="x", pady=8)
+    tk.Checkbutton(
+        keep_open_row,
+        text="KEEP_TERMINAL_OPEN",
+        variable=keep_open_var,
+        bg=CP_BG,
+        fg=CP_YELLOW,
+        selectcolor=CP_PANEL,
+        activebackground=CP_BG,
+        activeforeground=CP_YELLOW,
+        highlightthickness=0,
+        bd=0,
+        font=("Consolas", 9, "bold"),
+    ).pack(anchor="w")
 
     def save_stg():
         try:
@@ -375,6 +377,7 @@ def open_settings():
             app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
             app_settings["icon_size"] = int(size_e.get())
             app_settings["check_interval"] = int(interval_e.get())
+            app_settings["keep_terminal_open"] = bool(keep_open_var.get())
             save_settings(app_settings); win.destroy()
         except ValueError:
             messagebox.showerror("Error", "Invalid numeric value.")
