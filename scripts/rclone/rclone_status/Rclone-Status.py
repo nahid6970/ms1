@@ -420,10 +420,38 @@ def edit_command(key):
         commands[new_key] = updated_cfg
         save_commands(commands); create_gui(); win.destroy(); trigger_all_checks()
 
+    def duplicate():
+        base_key = f"p_{len(commands)}"
+        count = 1
+        new_key = base_key
+        while new_key in commands:
+            new_key = f"{base_key}_{count}"
+            count += 1
+        name_e.delete(0, "end")
+        name_e.insert(0, new_key)
+        label_e.delete(0, "end")
+        label_e.insert(0, f"{label_e.get()}_copy")
+        save_commands(commands)
+        # Save as a new entry without deleting original key
+        updated_cfg = cfg.copy()
+        updated_cfg.update({
+            "label": label_e.get(),
+            "src": src_e.get(),
+            "dst": dst_e.get(),
+            "cmd": cmd_e.get(),
+            "last_ignore": ignore_e.get(),
+            "index": int(idx_e.get()),
+            "enabled": True
+        })
+        commands[new_key] = updated_cfg
+        save_commands(commands); create_gui(); win.destroy(); trigger_all_checks()
+
     btn_f = tk.Frame(body, bg=CP_BG); btn_f.pack(pady=15)
-    HoverButton(btn_f, text="SAVE", command=save, width=12, hover_color=CP_GREEN).pack(side="left", padx=5)
-    if is_edit: HoverButton(btn_f, text="DELETE", command=lambda: [commands.pop(key), save_commands(commands), create_gui(), win.destroy()], width=12, hover_color=CP_RED).pack(side="left", padx=5)
-    HoverButton(btn_f, text="EXIT", command=win.destroy, width=12).pack(side="left", padx=5)
+    HoverButton(btn_f, text="SAVE", command=save, width=10, hover_color=CP_GREEN).pack(side="left", padx=3)
+    if is_edit:
+        HoverButton(btn_f, text="DUPLICATE", command=duplicate, width=10, hover_color=CP_CYAN).pack(side="left", padx=3)
+        HoverButton(btn_f, text="DELETE", command=lambda: [commands.pop(key), save_commands(commands), create_gui(), win.destroy()], width=10, hover_color=CP_RED).pack(side="left", padx=3)
+    HoverButton(btn_f, text="EXIT", command=win.destroy, width=10).pack(side="left", padx=3)
 
 def check_and_update_label(label, cfg):
     def run():
@@ -438,18 +466,14 @@ def check_and_update_label(label, cfg):
                 if not item: continue
                 check_path = item if os.path.isabs(item) else os.path.join(os.path.dirname(__file__), item)
                 if os.path.isfile(check_path) and item.lower().endswith('.txt'):
-                    try:
-                        with open(check_path, "r", encoding="utf-8") as ef:
-                            for line in ef:
-                                line = line.strip()
-                                if line: cmd += f' --exclude "{line}"'
-                    except: pass
+                    cmd += f' --exclude-from "{check_path}"'
                 else:
                     cmd += f' --exclude "{item}"'
         
         try:
             res = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
-            label.config(fg=CP_GREEN if "0 differences found" in res.stdout and "ERROR" not in res.stdout else CP_RED)
+            output = (res.stdout or "") + "\n" + (res.stderr or "")
+            label.config(fg=CP_GREEN if "0 differences found" in output and "ERROR" not in output else CP_RED)
         finally: mark_check_complete()
     label.trigger_check = lambda: threading.Thread(target=run, daemon=True).start()
 
