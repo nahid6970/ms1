@@ -187,8 +187,8 @@ class ProjectActionWindow(tk.Toplevel):
         self.ignore_ent = CyberEntry(grid, textvariable=self.ignore_var)
         self.ignore_ent.grid(row=0, column=1, sticky="ew", padx=(10,0))
         
-        placeholder = "*.tmp, node_modules/, .git/"
-        self.ph_label = tk.Label(self.ignore_ent, text=placeholder, bg=CP_PANEL, fg=CP_DIM, font=("Consolas", 10), cursor="xterm")
+        placeholder = "e.g. *.jpg, dir/**"
+        self.ph_label = tk.Label(self.ignore_ent, text=placeholder, bg=CP_PANEL, fg="#007a7a", font=("Consolas", 10), cursor="xterm")
         
         def check_ph(*args):
             if not self.ignore_var.get():
