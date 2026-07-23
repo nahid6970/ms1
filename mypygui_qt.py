@@ -1916,8 +1916,9 @@ class ScriptMonitorSettingsDialog(QDialog):
         lay.addLayout(int_lay)
         
         color_lay = QHBoxLayout()
-        color_lay.addWidget(QLabel("Stopped Alert Colors (1s Blink):"))
+        color_lay.addWidget(QLabel("Status Colors:"))
         
+        self._c_run_val = self.config.get("script_monitor_color_running", CP_GREEN)
         self._c1_val = self.config.get("script_monitor_color1", CP_RED)
         self._c2_val = self.config.get("script_monitor_color2", "#FFAA00")
         
@@ -1926,11 +1927,25 @@ class ScriptMonitorSettingsDialog(QDialog):
             lum = (0.299 * c.red() + 0.587 * c.green() + 0.114 * c.blue()) / 255.0
             return "#000000" if lum > 0.5 else "#FFFFFF"
 
-        self.c1_btn = QPushButton(" Color 1 ")
+        self.c_run_btn = QPushButton(" Running ")
+        self.c_run_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        def _update_run_ui():
+            fg = get_contrast_col(self._c_run_val)
+            self.c_run_btn.setStyleSheet(f"background-color: {self._c_run_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 14px;")
+        _update_run_ui()
+        
+        def _pick_run():
+            col = QColorDialog.getColor(QColor(self._c_run_val), self)
+            if col.isValid():
+                self._c_run_val = col.name().upper()
+                _update_run_ui()
+        self.c_run_btn.clicked.connect(_pick_run)
+
+        self.c1_btn = QPushButton(" Stopped 1 ")
         self.c1_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         def _update_c1_ui():
             fg = get_contrast_col(self._c1_val)
-            self.c1_btn.setStyleSheet(f"background-color: {self._c1_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 16px;")
+            self.c1_btn.setStyleSheet(f"background-color: {self._c1_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 14px;")
         _update_c1_ui()
         
         def _pick_c1():
@@ -1940,11 +1955,11 @@ class ScriptMonitorSettingsDialog(QDialog):
                 _update_c1_ui()
         self.c1_btn.clicked.connect(_pick_c1)
         
-        self.c2_btn = QPushButton(" Color 2 ")
+        self.c2_btn = QPushButton(" Stopped 2 ")
         self.c2_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         def _update_c2_ui():
             fg = get_contrast_col(self._c2_val)
-            self.c2_btn.setStyleSheet(f"background-color: {self._c2_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 16px;")
+            self.c2_btn.setStyleSheet(f"background-color: {self._c2_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 14px;")
         _update_c2_ui()
         
         def _pick_c2():
@@ -1954,6 +1969,7 @@ class ScriptMonitorSettingsDialog(QDialog):
                 _update_c2_ui()
         self.c2_btn.clicked.connect(_pick_c2)
         
+        color_lay.addWidget(self.c_run_btn)
         color_lay.addWidget(self.c1_btn)
         color_lay.addWidget(self.c2_btn)
         color_lay.addStretch()
@@ -2000,6 +2016,9 @@ class ScriptMonitorSettingsDialog(QDialog):
             items.append(self.script_list.item(i).text())
         self.config["script_monitor_items"] = items
         self.config["script_monitor_interval"] = self.interval_spin.value()
+        self.config["script_monitor_color_running"] = self._c_run_val
+        self.config["script_monitor_color1"] = self._c1_val
+        self.config["script_monitor_color2"] = self._c2_val
         self.config["script_monitor_svg"] = self.svg_edit.toPlainText().strip() or DEFAULT_SCRIPT_MONITOR_SVG
         self.accept()
 
@@ -2761,7 +2780,8 @@ class StatusBar(QMainWindow):
         if all_running:
             if hasattr(self, '_script_blink_timer'):
                 self._script_blink_timer.stop()
-            self._update_script_monitor_color(CP_GREEN, self._script_monitor_tooltip)
+            running_col = self._config.get("script_monitor_color_running", CP_GREEN)
+            self._update_script_monitor_color(running_col, self._script_monitor_tooltip)
         else:
             if hasattr(self, '_script_blink_timer') and not self._script_blink_timer.isActive():
                 self._script_blink_timer.start(40)
