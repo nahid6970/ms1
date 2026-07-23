@@ -8,7 +8,7 @@
         "enabled": true,
         "last_dir": "L2R",
         "last_op": "sync",
-        "last_ignore": ".git/**, .uv-envs/**, *.pyc",
+        "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --dry-run"
     }
 }
