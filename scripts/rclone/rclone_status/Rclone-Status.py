@@ -184,7 +184,28 @@ class ProjectActionWindow(tk.Toplevel):
         
         tk.Label(grid, text="EXCLUSIONS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=0, column=0, sticky="w")
         self.ignore_ent = CyberEntry(grid)
-        self.ignore_ent.insert(0, self.cfg.get("last_ignore", ""))
+        
+        last_ignore = self.cfg.get("last_ignore", "")
+        placeholder = "*.tmp, node_modules/, .git/"
+        
+        if not last_ignore:
+            self.ignore_ent.insert(0, placeholder)
+            self.ignore_ent.config(fg=CP_DIM)
+        else:
+            self.ignore_ent.insert(0, last_ignore)
+
+        def on_focus_in(e):
+            if self.ignore_ent.get() == placeholder:
+                self.ignore_ent.delete(0, 'end')
+                self.ignore_ent.config(fg=CP_CYAN)
+
+        def on_focus_out(e):
+            if not self.ignore_ent.get():
+                self.ignore_ent.insert(0, placeholder)
+                self.ignore_ent.config(fg=CP_DIM)
+
+        self.ignore_ent.bind("<FocusIn>", on_focus_in)
+        self.ignore_ent.bind("<FocusOut>", on_focus_out)
         self.ignore_ent.grid(row=0, column=1, sticky="ew", padx=(10,0))
 
         tk.Label(grid, text="RUNTIME_FLAGS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=1, column=0, sticky="w", pady=10)
@@ -229,7 +250,12 @@ class ProjectActionWindow(tk.Toplevel):
     def run_task(self):
         self.cfg["src"], self.cfg["dst"] = self.side_a_ent.get(), self.side_b_ent.get()
         self.cfg["last_dir"], self.cfg["last_op"] = self.direction, self.op_mode
-        self.cfg["last_ignore"], self.cfg["last_flags"] = self.ignore_ent.get(), self.flags_ent.get()
+        
+        ignore_val = self.ignore_ent.get()
+        if ignore_val == "*.tmp, node_modules/, .git/":
+            ignore_val = ""
+            
+        self.cfg["last_ignore"], self.cfg["last_flags"] = ignore_val, self.flags_ent.get()
         save_commands(commands)
 
         src, dst = (self.cfg["src"], self.cfg["dst"]) if self.direction == "L2R" else (self.cfg["dst"], self.cfg["src"])

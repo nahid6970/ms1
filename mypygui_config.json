@@ -388,6 +388,20 @@
                     "admin": false,
                     "new_terminal": false,
                     "cmd": "explorer \"{dir}\""
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\Rclone-Status.py"
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
                 }
             },
             "bg": "",
