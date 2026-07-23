@@ -184,7 +184,36 @@ DIALOG_QSS = f"""
     QLineEdit, QComboBox, QSpinBox {{
         background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
     }}
-    QLineEdit:focus, QComboBox:focus {{ border: 1px solid {CP_CYAN}; }}
+    QLineEdit:focus, QComboBox:focus, QSpinBox:focus {{ border: 1px solid {CP_CYAN}; }}
+    QSpinBox::up-button {{
+        subcontrol-origin: border;
+        subcontrol-position: top right;
+        width: 16px;
+        border-left: 1px solid {CP_DIM};
+        background: {CP_PANEL};
+    }}
+    QSpinBox::up-button:hover {{ background: {CP_DIM}; }}
+    QSpinBox::down-button {{
+        subcontrol-origin: border;
+        subcontrol-position: bottom right;
+        width: 16px;
+        border-left: 1px solid {CP_DIM};
+        border-top: 1px solid {CP_DIM};
+        background: {CP_PANEL};
+    }}
+    QSpinBox::down-button:hover {{ background: {CP_DIM}; }}
+    QSpinBox::up-arrow {{
+        width: 0px; height: 0px;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 5px solid {CP_CYAN};
+    }}
+    QSpinBox::down-arrow {{
+        width: 0px; height: 0px;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid {CP_CYAN};
+    }}
     QComboBox QAbstractItemView {{ background: {CP_PANEL}; color: {CP_CYAN}; selection-background-color: {CP_CYAN}; selection-color: {CP_BG}; }}
     QPushButton {{
         background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
