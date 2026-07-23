@@ -246,14 +246,21 @@ class ProjectActionWindow(tk.Toplevel):
         save_commands(commands)
 
         src, dst = (self.cfg["src"], self.cfg["dst"]) if self.direction == "L2R" else (self.cfg["dst"], self.cfg["src"])
-        cmd = f'rclone {self.op_mode} "{src}" "{dst}" {self.cfg["last_flags"]}'
+        flags = self.cfg.get("last_flags", "")
+        cmd = f'rclone {self.op_mode} "{src}" "{dst}" {flags}'
+        
         if self.cfg["last_ignore"]:
             for item in self.cfg["last_ignore"].split(','):
                 item = item.strip()
                 if not item: continue
-                if os.path.isfile(item) and item.lower().endswith('.txt'):
-                    cmd += f' --exclude-from "{item}"'
+                
+                # Resolve relative path for ignore files (relative to script dir)
+                check_path = item if os.path.isabs(item) else os.path.join(os.path.dirname(__file__), item)
+                
+                if os.path.isfile(check_path) and item.lower().endswith('.txt'):
+                    cmd += f' --exclude-from "{check_path}"'
                 else:
+                    # Treat as a literal pattern if file not found or not .txt
                     cmd += f' --exclude "{item}"'
 
         self.action_btn.config(state="disabled", text="BUSY...")
@@ -364,7 +371,22 @@ def edit_command(key):
 
 def check_and_update_label(label, cfg):
     def run():
-        cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        # Build command using the validation template and proper quoting
+        src, dst = cfg["src"], cfg["dst"]
+        cmd = cfg["cmd"].replace("src", f'"{src}"').replace("dst", f'"{dst}"')
+        
+        # Apply exclusions to background status check
+        if cfg.get("last_ignore"):
+            for item in cfg["last_ignore"].split(','):
+                item = item.strip()
+                if not item: continue
+                # Resolve relative path for ignore files (relative to script dir)
+                check_path = item if os.path.isabs(item) else os.path.join(os.path.dirname(__file__), item)
+                if os.path.isfile(check_path) and item.lower().endswith('.txt'):
+                    cmd += f' --exclude-from "{check_path}"'
+                else:
+                    cmd += f' --exclude "{item}"'
+        
         try:
             res = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
             label.config(fg=CP_GREEN if "0 differences found" in res.stdout and "ERROR" not in res.stdout else CP_RED)
