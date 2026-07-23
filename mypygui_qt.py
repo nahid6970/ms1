@@ -10,9 +10,7 @@ import ctypes
 import json
 import os
 import subprocess
-import sys
-import threading
-import time
+import sys, os, math, time, threading
 import re
 import logging
 from functools import partial
@@ -1917,6 +1915,50 @@ class ScriptMonitorSettingsDialog(QDialog):
         int_lay.addStretch()
         lay.addLayout(int_lay)
         
+        color_lay = QHBoxLayout()
+        color_lay.addWidget(QLabel("Stopped Alert Colors (1s Blink):"))
+        
+        self._c1_val = self.config.get("script_monitor_color1", CP_RED)
+        self._c2_val = self.config.get("script_monitor_color2", "#FFAA00")
+        
+        def get_contrast_col(h):
+            c = QColor(h)
+            lum = (0.299 * c.red() + 0.587 * c.green() + 0.114 * c.blue()) / 255.0
+            return "#000000" if lum > 0.5 else "#FFFFFF"
+
+        self.c1_btn = QPushButton(" Color 1 ")
+        self.c1_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        def _update_c1_ui():
+            fg = get_contrast_col(self._c1_val)
+            self.c1_btn.setStyleSheet(f"background-color: {self._c1_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 16px;")
+        _update_c1_ui()
+        
+        def _pick_c1():
+            col = QColorDialog.getColor(QColor(self._c1_val), self)
+            if col.isValid():
+                self._c1_val = col.name().upper()
+                _update_c1_ui()
+        self.c1_btn.clicked.connect(_pick_c1)
+        
+        self.c2_btn = QPushButton(" Color 2 ")
+        self.c2_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        def _update_c2_ui():
+            fg = get_contrast_col(self._c2_val)
+            self.c2_btn.setStyleSheet(f"background-color: {self._c2_val}; color: {fg}; font-weight: bold; border: 1px solid #777; border-radius: 4px; padding: 6px 16px;")
+        _update_c2_ui()
+        
+        def _pick_c2():
+            col = QColorDialog.getColor(QColor(self._c2_val), self)
+            if col.isValid():
+                self._c2_val = col.name().upper()
+                _update_c2_ui()
+        self.c2_btn.clicked.connect(_pick_c2)
+        
+        color_lay.addWidget(self.c1_btn)
+        color_lay.addWidget(self.c2_btn)
+        color_lay.addStretch()
+        lay.addLayout(color_lay)
+        
         lay.addWidget(QLabel("Custom SVG Icon code (use currentColor for status color):"))
         self.svg_edit = QPlainTextEdit()
         self.svg_edit.setPlaceholderText("<svg>...</svg>")
@@ -2651,7 +2693,27 @@ class StatusBar(QMainWindow):
         self._script_monitor_timer.timeout.connect(self._check_script_status)
         interval = int(self._config.get("script_monitor_interval", 3))
         self._script_monitor_timer.start(interval * 1000)
+        
+        self._script_blink_timer = QTimer(self)
+        self._script_blink_timer.setInterval(40)
+        self._script_blink_timer.timeout.connect(self._on_script_blink_tick)
+        self._script_monitor_tooltip = ""
+
         self._check_script_status()
+
+    def _on_script_blink_tick(self):
+        c1 = QColor(self._config.get("script_monitor_color1", CP_RED))
+        c2 = QColor(self._config.get("script_monitor_color2", "#FFAA00"))
+        
+        t = time.time() % 1.2
+        factor = (math.sin((t / 1.2) * 2 * math.pi) + 1.0) / 2.0
+        
+        r = int(c1.red() + (c2.red() - c1.red()) * factor)
+        g = int(c1.green() + (c2.green() - c1.green()) * factor)
+        b = int(c1.blue() + (c2.blue() - c1.blue()) * factor)
+        
+        col = QColor(r, g, b).name()
+        self._update_script_monitor_color(col, getattr(self, '_script_monitor_tooltip', ''))
 
     def _check_script_status(self):
         if not hasattr(self, '_script_monitor_btn') or not self._script_monitor_btn:
@@ -2659,6 +2721,8 @@ class StatusBar(QMainWindow):
             
         items = self._config.get("script_monitor_items", [])
         if not items:
+            if hasattr(self, '_script_blink_timer'):
+                self._script_blink_timer.stop()
             self._update_script_monitor_color(CP_DIM, "Script Monitor: No scripts configured\nRight-click to add scripts.")
             return
 
@@ -2687,13 +2751,21 @@ class StatusBar(QMainWindow):
                 statuses.append(f"[✗] {item}")
                 all_running = False
 
-        status_color = CP_GREEN if all_running else CP_RED
         status_text = "ALL RUNNING" if all_running else "SOME STOPPED"
         tooltip_lines = [f"Script Monitor: {status_text} ({sum(1 for s in statuses if '[✓]' in s)}/{len(items)})"]
         tooltip_lines.extend(statuses)
-        tooltip_lines.append("(Left Click: Re-check | Right Click: Settings)")
+        tooltip_lines.append("(Left Click: Control Panel | Right Click: Settings)")
         
-        self._update_script_monitor_color(status_color, '\n'.join(tooltip_lines))
+        self._script_monitor_tooltip = '\n'.join(tooltip_lines)
+
+        if all_running:
+            if hasattr(self, '_script_blink_timer'):
+                self._script_blink_timer.stop()
+            self._update_script_monitor_color(CP_GREEN, self._script_monitor_tooltip)
+        else:
+            if hasattr(self, '_script_blink_timer') and not self._script_blink_timer.isActive():
+                self._script_blink_timer.start(40)
+            self._on_script_blink_tick()
 
     def _update_script_monitor_color(self, color, tooltip_text=""):
         svg_tpl = self._config.get("script_monitor_svg", DEFAULT_SCRIPT_MONITOR_SVG)
@@ -2710,6 +2782,7 @@ class StatusBar(QMainWindow):
         self._script_monitor_btn.btn_cfg["svg_content"] = svg_content
         self._script_monitor_btn.setToolTip(tooltip_text)
         self._script_monitor_btn.update()
+        self._script_monitor_btn.repaint()
 
     def _toggle_rclone_popup(self):
         if self._rclone_popup and self._rclone_popup.isVisible(): self._rclone_popup.hide(); self._rclone_popup = None; return
