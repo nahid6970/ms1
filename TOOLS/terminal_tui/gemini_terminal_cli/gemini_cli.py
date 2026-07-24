@@ -242,6 +242,18 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
     return f"Unknown tool: {name}"
 
 
+def list_tool_catalog() -> List[Dict[str, str]]:
+    return [
+        {"name": "read_file", "description": "Read a local file."},
+        {"name": "write_file", "description": "Write content to a local file."},
+        {"name": "delete_file", "description": "Delete a local file or directory."},
+        {"name": "list_directory", "description": "List directory contents."},
+        {"name": "get_system_info", "description": "Get system information."},
+        {"name": "run_shell_command", "description": "Run a shell command."},
+        {"name": "request_follow_up", "description": "Request another turn for multi-step work."},
+    ]
+
+
 class GeminiClient:
     def __init__(self, api_key: str, model: str) -> None:
         self.api_key = api_key
@@ -730,6 +742,7 @@ def print_help() -> None:
               /model test          Test all models and hide failures
               /addapi              Add a named API key
               /loadapi             Load a saved API account
+              /tool                Show implemented tools
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
@@ -739,9 +752,18 @@ def print_help() -> None:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /model to pick a model with the arrow keys.
               - Use /addapi once, then /loadapi or just restart to reuse the last account.
+              - Use /tool or /tools to see the implemented local tools.
             """
         ).strip()
     )
+
+
+def print_tool_catalog() -> None:
+    print()
+    title("Implemented Tools")
+    for tool in list_tool_catalog():
+        print(f"- {tool['name']}: {tool['description']}")
+    print()
 
 
 def make_user_content(text: str) -> Dict[str, Any]:
@@ -1042,6 +1064,9 @@ def main() -> int:
                     print(save_model_prefs(hidden_models, speed_tags, client.model, active_api_account))
                     info(f"Loaded API account: {chosen_name}")
                     continue
+                if command == "/tool":
+                    print_tool_catalog()
+                    continue
                 if command == "/system":
                     if remainder:
                         system_instruction = remainder
@@ -1050,11 +1075,13 @@ def main() -> int:
                         warn("Usage: /system <text>")
                     continue
                 if command == "/tools":
-                    if remainder.lower() in {"on", "off"}:
+                    if not remainder:
+                        print_tool_catalog()
+                    elif remainder.lower() in {"on", "off"}:
                         tools_enabled = remainder.lower() == "on"
                         info(f"Tools {'enabled' if tools_enabled else 'disabled'}.")
                     else:
-                        warn("Usage: /tools on|off")
+                        print_tool_catalog()
                     continue
                 if command == "/save":
                     if remainder:
