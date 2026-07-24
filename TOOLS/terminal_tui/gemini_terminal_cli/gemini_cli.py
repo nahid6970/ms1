@@ -20,7 +20,9 @@ from typing import Any, Dict, List, Optional
 DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_SYSTEM = (
     "You are a terminal coding assistant. "
-    "Be concise, practical, and ask before making destructive changes."
+    "Be concise, practical, and ask before making destructive changes. "
+    "When editing code, prefer search_file and minimal block edits "
+    "(replace_block, insert_after, delete_block) over rewriting whole files."
 )
 MAX_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -92,6 +94,10 @@ def write_file(path: Path, content: str) -> str:
         return f"Error writing file: {exc}"
 
 
+def replace_file(path: Path, content: str) -> str:
+    return write_file(path, content)
+
+
 def delete_path(path: Path) -> str:
     try:
         if not path.exists():
@@ -105,6 +111,107 @@ def delete_path(path: Path) -> str:
         return f"Deleted file: {path}"
     except Exception as exc:
         return f"Error deleting path: {exc}"
+
+
+def search_file(path: Path, query: str, recursive: bool = False, max_results: int = 20) -> str:
+    if not query.strip():
+        return "Error: query is required."
+    if not path.exists():
+        return f"Error: path not found: {path}"
+
+    results: List[str] = []
+    query_lower = query.lower()
+
+    def scan_file(file_path: Path) -> None:
+        try:
+            text = file_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            return
+        for lineno, line in enumerate(text.splitlines(), start=1):
+            if query_lower in line.lower():
+                results.append(f"{file_path}:{lineno}: {line}")
+                if len(results) >= max_results:
+                    return
+
+    if path.is_file():
+        scan_file(path)
+    else:
+        for file_path in sorted(path.rglob("*")) if recursive else sorted(path.iterdir()):
+            if len(results) >= max_results:
+                break
+            if file_path.is_file():
+                scan_file(file_path)
+
+    return "\n".join(results) if results else "No matches."
+
+
+def _replace_nth(text: str, old: str, new: str, occurrence: int = 1) -> tuple[str, bool]:
+    if occurrence < 1:
+        occurrence = 1
+    idx = -1
+    start = 0
+    for _ in range(occurrence):
+        idx = text.find(old, start)
+        if idx < 0:
+            return text, False
+        start = idx + len(old)
+    return text[:idx] + new + text[idx + len(old):], True
+
+
+def replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+        updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
+        if not found:
+            return f"Error: block not found in {path}"
+        path.write_text(updated, encoding="utf-8")
+        return f"Replaced block in {path}"
+    except Exception as exc:
+        return f"Error replacing block: {exc}"
+
+
+def insert_after_in_file(path: Path, anchor_text: str, insert_text: str, occurrence: int = 1) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    if not anchor_text:
+        return "Error: anchor_text is required."
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+        anchor_index = -1
+        start = 0
+        if occurrence < 1:
+            occurrence = 1
+        for _ in range(occurrence):
+            anchor_index = content.find(anchor_text, start)
+            if anchor_index < 0:
+                break
+            start = anchor_index + len(anchor_text)
+        if anchor_index < 0:
+            return f"Error: anchor not found in {path}"
+        insert_at = anchor_index + len(anchor_text)
+        updated = content[:insert_at] + insert_text + content[insert_at:]
+        path.write_text(updated, encoding="utf-8")
+        return f"Inserted text in {path}"
+    except Exception as exc:
+        return f"Error inserting text: {exc}"
+
+
+def delete_block_in_file(path: Path, block_text: str, occurrence: int = 1) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    if not block_text:
+        return "Error: block_text is required."
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+        updated, found = _replace_nth(content, block_text, "", occurrence=occurrence)
+        if not found:
+            return f"Error: block not found in {path}"
+        path.write_text(updated, encoding="utf-8")
+        return f"Deleted block in {path}"
+    except Exception as exc:
+        return f"Error deleting block: {exc}"
 
 
 def list_directory(path: Path) -> str:
@@ -175,6 +282,18 @@ FUNCTIONS = {
             "required": ["filepath", "content"],
         },
     },
+    "replace_file": {
+        "name": "replace_file",
+        "description": "Replace the full contents of a file.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "content": {"type": "STRING"},
+            },
+            "required": ["filepath", "content"],
+        },
+    },
     "delete_file": {
         "name": "delete_file",
         "description": "Delete a local file or directory.",
@@ -197,6 +316,61 @@ FUNCTIONS = {
         "name": "get_system_info",
         "description": "Get system information.",
         "parameters": {"type": "OBJECT", "properties": {}},
+    },
+    "search_file": {
+        "name": "search_file",
+        "description": "Search text within a file or directory and return matching lines.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "path": {"type": "STRING"},
+                "query": {"type": "STRING"},
+                "recursive": {"type": "BOOLEAN"},
+                "max_results": {"type": "INTEGER"},
+            },
+            "required": ["path", "query"],
+        },
+    },
+    "replace_block": {
+        "name": "replace_block",
+        "description": "Replace an exact block of text in a file.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "old_text": {"type": "STRING"},
+                "new_text": {"type": "STRING"},
+                "occurrence": {"type": "INTEGER"},
+            },
+            "required": ["filepath", "old_text", "new_text"],
+        },
+    },
+    "insert_after": {
+        "name": "insert_after",
+        "description": "Insert text after an exact anchor in a file.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "anchor_text": {"type": "STRING"},
+                "insert_text": {"type": "STRING"},
+                "occurrence": {"type": "INTEGER"},
+            },
+            "required": ["filepath", "anchor_text", "insert_text"],
+        },
+    },
+    "delete_block": {
+        "name": "delete_block",
+        "description": "Delete an exact block of text from a file.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "block_text": {"type": "STRING"},
+                "occurrence": {"type": "INTEGER"},
+            },
+            "required": ["filepath", "block_text"],
+        },
     },
     "run_shell_command": {
         "name": "run_shell_command",
@@ -226,6 +400,10 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
         filepath = args.get("filepath", "")
         content = args.get("content", "")
         return write_file(resolve_path(filepath, cwd), content)
+    if name == "replace_file":
+        filepath = args.get("filepath", "")
+        content = args.get("content", "")
+        return replace_file(resolve_path(filepath, cwd), content)
     if name == "delete_file":
         filepath = args.get("filepath", "")
         return delete_path(resolve_path(filepath, cwd))
@@ -234,6 +412,29 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
         return list_directory(resolve_path(path, cwd))
     if name == "get_system_info":
         return get_system_info(cwd)
+    if name == "search_file":
+        path = resolve_path(args.get("path", "."), cwd)
+        query = str(args.get("query", ""))
+        recursive = bool(args.get("recursive", False))
+        max_results = int(args.get("max_results", 20) or 20)
+        return search_file(path, query, recursive=recursive, max_results=max_results)
+    if name == "replace_block":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        old_text = str(args.get("old_text", ""))
+        new_text = str(args.get("new_text", ""))
+        occurrence = int(args.get("occurrence", 1) or 1)
+        return replace_block_in_file(filepath, old_text, new_text, occurrence=occurrence)
+    if name == "insert_after":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        anchor_text = str(args.get("anchor_text", ""))
+        insert_text = str(args.get("insert_text", ""))
+        occurrence = int(args.get("occurrence", 1) or 1)
+        return insert_after_in_file(filepath, anchor_text, insert_text, occurrence=occurrence)
+    if name == "delete_block":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        block_text = str(args.get("block_text", ""))
+        occurrence = int(args.get("occurrence", 1) or 1)
+        return delete_block_in_file(filepath, block_text, occurrence=occurrence)
     if name == "run_shell_command":
         return run_shell_command(str(args.get("command", "")), cwd)
     if name == "request_follow_up":
@@ -246,9 +447,14 @@ def list_tool_catalog() -> List[Dict[str, str]]:
     return [
         {"name": "read_file", "description": "Read a local file."},
         {"name": "write_file", "description": "Write content to a local file."},
+        {"name": "replace_file", "description": "Replace the full contents of a file."},
         {"name": "delete_file", "description": "Delete a local file or directory."},
         {"name": "list_directory", "description": "List directory contents."},
         {"name": "get_system_info", "description": "Get system information."},
+        {"name": "search_file", "description": "Search text within a file or directory."},
+        {"name": "replace_block", "description": "Replace an exact block of text in a file."},
+        {"name": "insert_after", "description": "Insert text after an exact anchor in a file."},
+        {"name": "delete_block", "description": "Delete an exact block of text from a file."},
         {"name": "run_shell_command", "description": "Run a shell command."},
         {"name": "request_follow_up", "description": "Request another turn for multi-step work."},
     ]
