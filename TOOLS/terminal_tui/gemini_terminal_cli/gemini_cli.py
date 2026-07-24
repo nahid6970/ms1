@@ -27,6 +27,11 @@ DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
 
+try:
+    import msvcrt
+except Exception:
+    msvcrt = None
+
 
 def _now_stamp() -> str:
     return dt.datetime.now().strftime("%Y-%m-%d-%H:%M")
@@ -376,6 +381,98 @@ def save_model_prefs(hidden_models: List[str]) -> str:
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
 
 
+def clear_screen() -> None:
+    if sys.stdout.isatty():
+        os.system("cls")
+
+
+def read_key() -> str:
+    if msvcrt is None:
+        return input().strip()
+    ch = msvcrt.getwch()
+    if ch in ("\x00", "\xe0"):
+        ch2 = msvcrt.getwch()
+        return ch + ch2
+    return ch
+
+
+def interactive_select(
+    title_text: str,
+    items: List[Dict[str, Any]],
+    render_item,
+    footer_lines: Optional[List[str]] = None,
+) -> Optional[Dict[str, Any]]:
+    if not items:
+        return None
+    index = 0
+    footer_lines = footer_lines or []
+
+    while True:
+        clear_screen()
+        title(title_text)
+        print("Use Up/Down, Enter to choose, Esc to cancel.")
+        print()
+        for i, item in enumerate(items):
+            prefix = ">" if i == index else " "
+            print(f"{prefix} {render_item(item, i)}")
+        if footer_lines:
+            print()
+            for line in footer_lines:
+                print(line)
+
+        key = read_key()
+        if key in ("\r", "\n"):
+            return items[index]
+        if key == "\x1b":
+            return None
+        if key in ("\xe0H", "\x00H"):
+            index = (index - 1) % len(items)
+        elif key in ("\xe0P", "\x00P"):
+            index = (index + 1) % len(items)
+        elif key.lower() == "q":
+            return None
+
+
+def pick_model_interactive(
+    models: List[Dict[str, Any]],
+    current_model: str,
+    title_text: str = "Select Model",
+) -> Optional[str]:
+    def render_item(model: Dict[str, Any], _: int) -> str:
+        active = " *current*" if model_name(model) == current_model else ""
+        hidden = " (hidden)" if model.get("_hidden") else ""
+        return f"{short_model_name(model)} [{model_name(model)}]{hidden}{active}"
+
+    chosen = interactive_select(
+        title_text=title_text,
+        items=models,
+        render_item=render_item,
+        footer_lines=["Press Q or Esc to cancel."],
+    )
+    if not chosen:
+        return None
+    return model_name(chosen)
+
+
+def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> None:
+    passed = 0
+    failed = 0
+    print()
+    title("Testing Models")
+    for model in models:
+        name = model_name(model)
+        print(f"- {short_model_name(model)} [{name}] ... ", end="", flush=True)
+        try:
+            result = test_model(client, name, temperature=0.0)
+            passed += 1
+            print(f"OK ({result[:60]})")
+        except Exception as exc:
+            failed += 1
+            print(f"FAIL ({exc})")
+    print()
+    info(f"Test summary: {passed} passed, {failed} failed.")
+
+
 def parse_model_index(text: str) -> Optional[int]:
     try:
         idx = int(text.strip())
@@ -525,7 +622,8 @@ def print_help() -> None:
               /models show <x>     Unhide a model
               /models hidden       List hidden models
               /models test <x>     Run a quick test on a model
-              /model <name>        Switch Gemini model
+              /model               Open the model picker
+              /model <name>        Switch Gemini model directly
               /model <number>      Switch using the /models list
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
@@ -652,6 +750,10 @@ def main() -> int:
                 print("Tip: use /models all for the full catalog.")
         print()
 
+    def get_recommended_models() -> List[Dict[str, Any]]:
+        models = model_cache or refresh_model_cache()
+        return filter_models_for_display(models, hidden_models, show_all=False)
+
     def run_turn(user_text: str) -> None:
         nonlocal contents
         contents.append(make_user_content(user_text))
@@ -751,14 +853,24 @@ def main() -> int:
                                 print(format_model_entry(index, model, client.model))
                             print()
                     elif subcommand in {"hide", "show", "test"}:
-                        if not subargs:
-                            warn(f"Usage: /models {subcommand} <name|number>")
-                            continue
                         if not model_cache:
                             refresh_model_cache()
-                        chosen = choose_model_from_list(model_cache, subargs)
+                        if subcommand == "test" and subargs.lower() == "all":
+                            test_all_models(client, model_cache)
+                            continue
+                        chosen = None
+                        if subargs:
+                            chosen = choose_model_from_list(model_cache, subargs)
+                        else:
+                            picker_models = model_cache if subcommand == "test" else model_cache
+                            if subcommand in {"hide", "show"}:
+                                picker_models = model_cache
+                            chosen = pick_model_interactive(
+                                picker_models,
+                                client.model,
+                                title_text=f"{subcommand.title()} Model",
+                            )
                         if not chosen:
-                            warn("Unknown model selection. Use /models first, then a number or model name.")
                             continue
                         if subcommand == "hide":
                             if chosen not in hidden_models:
@@ -795,7 +907,11 @@ def main() -> int:
                         else:
                             warn("Unknown model selection. Use /models first, then /model <number> or /model <name>.")
                     else:
-                        warn("Usage: /model <name>")
+                        choices = get_recommended_models()
+                        chosen = pick_model_interactive(choices, client.model, title_text="Select Model")
+                        if chosen:
+                            client.model = chosen
+                            info(f"Model set to {client.model}")
                     continue
                 if command == "/system":
                     if remainder:

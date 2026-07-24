@@ -49,6 +49,7 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/models show <x>` - unhide a model
 - `/models hidden` - list hidden models
 - `/models test <x>` - run a quick test on a model
+- `/model` - open the model picker
 - `/model <name>` - change model
 - `/model <number>` - choose from `/models`
 - `/system <text>` - replace the system instruction
