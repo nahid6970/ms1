@@ -523,6 +523,19 @@ def short_model_name(model: Dict[str, Any]) -> str:
     return short
 
 
+def short_model_label(model_name_value: str) -> str:
+    short = str(model_name_value or "")
+    for prefix in ("gemini-", "gemma-"):
+        if short.startswith(prefix):
+            short = short[len(prefix):]
+            break
+    short = short.replace("-flash-lite", " flash lite")
+    short = short.replace("-flash", " flash")
+    short = short.replace("-pro", " pro")
+    short = short.replace("-", " ")
+    return short
+
+
 def model_group(model: Dict[str, Any]) -> str:
     name = model_name(model).lower()
     display_name = str(model.get("displayName") or "").lower()
@@ -801,6 +814,9 @@ def main() -> int:
             speed_tags,
         )
 
+    def prompt_text() -> str:
+        return _ansi_wrap(f"gemini-{short_model_label(client.model)}> ", "1;32")
+
     def run_turn(user_text: str) -> None:
         nonlocal contents
         contents.append(make_user_content(user_text))
@@ -864,7 +880,7 @@ def main() -> int:
     else:
         while True:
             try:
-                user_input = input(_ansi_wrap("gemini> ", "1;32")).strip()
+                user_input = input(prompt_text()).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
