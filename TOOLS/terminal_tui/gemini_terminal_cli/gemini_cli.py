@@ -23,6 +23,7 @@ DEFAULT_SYSTEM = (
 )
 MAX_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
+DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 
 
@@ -361,21 +362,50 @@ def parse_model_index(text: str) -> Optional[int]:
     return idx if idx > 0 else None
 
 
-def format_model_entry(model: Dict[str, Any], index: int) -> str:
-    name = str(model.get("name", "")).removeprefix("models/")
-    display_name = model.get("displayName") or name
-    methods = model.get("supportedGenerationMethods") or []
-    methods_text = ",".join(methods) if methods else "unknown"
-    input_tokens = model.get("inputTokenLimit", "?")
-    output_tokens = model.get("outputTokenLimit", "?")
-    return f"{index:>2}. {name} | {display_name} | in:{input_tokens} out:{output_tokens} | {methods_text}"
+def model_name(model: Dict[str, Any]) -> str:
+    return str(model.get("name", "")).removeprefix("models/")
+
+
+def short_model_name(model: Dict[str, Any]) -> str:
+    name = model_name(model)
+    short = name
+    for prefix in ("gemini-", "gemma-"):
+        if short.startswith(prefix):
+            short = short[len(prefix):]
+            break
+    short = short.replace("-flash-lite", " flash lite")
+    short = short.replace("-flash", " flash")
+    short = short.replace("-pro", " pro")
+    short = short.replace("-", " ")
+    return short
+
+
+def model_group(model: Dict[str, Any]) -> str:
+    name = model_name(model).lower()
+    display_name = str(model.get("displayName") or "").lower()
+    if "preview" in name or "preview" in display_name:
+        return "Preview"
+    if "latest" in name or "latest" in display_name:
+        return "Aliases"
+    if "gemma" in name or "gemma" in display_name:
+        return "Gemma"
+    if "image" in name or "banana" in display_name:
+        return "Image"
+    return "Stable"
+
+
+def format_model_entry(index: int, model: Dict[str, Any], current_model: str) -> str:
+    name = model_name(model)
+    display_name = short_model_name(model)
+    active = " *" if name == current_model else ""
+    return f"{index:>2}. {display_name} [{name}]{active}"
 
 
 def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Optional[str]:
     idx = parse_model_index(selection)
     if idx is not None:
         if 1 <= idx <= len(models):
-            return str(models[idx - 1].get("name", "")).removeprefix("models/")
+            return model_name(models[idx - 1])
         return None
 
     target = selection.strip()
@@ -383,14 +413,34 @@ def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Opti
         return None
 
     for model in models:
-        name = str(model.get("name", "")).removeprefix("models/")
+        name = model_name(model)
         display_name = str(model.get("displayName", ""))
-        if target == name or target == display_name:
+        if target == name or target == display_name or target == short_model_name(model):
             return name
     return target
 
 
-def list_chat_models(client: GeminiClient) -> List[Dict[str, Any]]:
+def is_default_model(model: Dict[str, Any]) -> bool:
+    name = model_name(model).lower()
+    display_name = str(model.get("displayName") or "").lower()
+    if not name.startswith("gemini-"):
+        return False
+    blocked = (
+        "preview",
+        "image",
+        "tts",
+        "robot",
+        "computer-use",
+        "customtools",
+        "omni",
+        "gemma",
+    )
+    if any(token in name or token in display_name for token in blocked):
+        return False
+    return any(token in name for token in ("flash", "pro"))
+
+
+def list_chat_models(client: GeminiClient, show_all: bool = False) -> List[Dict[str, Any]]:
     raw_models = client.list_models()
     chat_models: List[Dict[str, Any]] = []
     for model in raw_models:
@@ -400,8 +450,10 @@ def list_chat_models(client: GeminiClient) -> List[Dict[str, Any]]:
             continue
         if name and not (name.startswith("models/gemini") or name.startswith("models/gemma")):
             continue
+        if not show_all and not is_default_model(model):
+            continue
         chat_models.append(model)
-    chat_models.sort(key=lambda m: str(m.get("displayName") or m.get("name") or "").lower())
+    chat_models.sort(key=lambda m: (model_group(m), str(m.get("displayName") or m.get("name") or "").lower()))
     return chat_models
 
 
@@ -413,7 +465,8 @@ def print_help() -> None:
               /help                Show this message
               /exit                Quit
               /reset               Clear conversation history
-              /models              List available chat models
+              /models              List recommended chat models
+              /models all          List the full catalog
               /model <name>        Switch Gemini model
               /model <number>      Switch using the /models list
               /system <text>       Replace system instruction
@@ -498,24 +551,44 @@ def main() -> int:
 
     model_cache: List[Dict[str, Any]] = []
 
-    def refresh_model_cache() -> List[Dict[str, Any]]:
+    def refresh_model_cache(show_all: bool = False) -> List[Dict[str, Any]]:
         nonlocal model_cache
         try:
-            model_cache = list_chat_models(client)
+            model_cache = list_chat_models(client, show_all=show_all)
         except Exception as exc:
             warn(f"Could not load model list: {exc}")
             model_cache = []
         return model_cache
 
-    def print_model_list() -> None:
-        models = refresh_model_cache()
+    def print_model_list(show_all: bool = False) -> None:
+        models = refresh_model_cache(show_all=show_all)
         if not models:
             warn("No chat models found.")
             return
         print()
         title("Available Models")
-        for i, model in enumerate(models, start=1):
-            print(format_model_entry(model, i))
+        if show_all:
+            print(f"Showing full catalog: {len(models)} models. Current model: {client.model}")
+        else:
+            print(f"Showing recommended models: {len(models)} models. Current model: {client.model}")
+        print()
+        if show_all:
+            index = 1
+            for group in ("Stable", "Aliases", "Preview", "Gemma", "Image"):
+                grouped_models = [m for m in models if model_group(m) == group]
+                if not grouped_models:
+                    continue
+                print(f"[{group}]")
+                for model in grouped_models:
+                    print(format_model_entry(index, model, client.model))
+                    index += 1
+                print()
+        else:
+            for index, model in enumerate(models[:DEFAULT_MODEL_LIST_LIMIT], start=1):
+                print(format_model_entry(index, model, client.model))
+            if len(models) > DEFAULT_MODEL_LIST_LIMIT:
+                print()
+                print("Tip: use /models all for the full catalog.")
         print()
 
     def run_turn(user_text: str) -> None:
@@ -523,13 +596,20 @@ def main() -> int:
         contents.append(make_user_content(user_text))
 
         for _ in range(MAX_TOOL_LOOPS):
-            response = client.generate(
-                contents=contents,
-                system_instruction=system_instruction,
-                tools_enabled=tools_enabled,
-                temperature=args.temperature,
-                max_output_tokens=args.max_output_tokens,
-            )
+            try:
+                response = client.generate(
+                    contents=contents,
+                    system_instruction=system_instruction,
+                    tools_enabled=tools_enabled,
+                    temperature=args.temperature,
+                    max_output_tokens=args.max_output_tokens,
+                )
+            except RuntimeError as exc:
+                msg = str(exc).strip()
+                error(msg)
+                if "quota" in msg.lower() or "rate" in msg.lower() or "too many requests" in msg.lower():
+                    warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
+                return
             candidates = response.get("candidates", [])
             if not candidates:
                 error("Gemini returned no candidates.")
@@ -592,7 +672,7 @@ def main() -> int:
                     print_help()
                     continue
                 if command == "/models":
-                    print_model_list()
+                    print_model_list(show_all=remainder.lower() in {"all", "full"})
                     continue
                 if command == "/reset":
                     contents = []

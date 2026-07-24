@@ -43,7 +43,8 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/help` - show commands
 - `/exit` - quit
 - `/reset` - clear conversation
-- `/models` - list available chat models
+- `/models` - list recommended chat models
+- `/models all` - list the full catalog
 - `/model <name>` - change model
 - `/model <number>` - choose from `/models`
 - `/system <text>` - replace the system instruction
