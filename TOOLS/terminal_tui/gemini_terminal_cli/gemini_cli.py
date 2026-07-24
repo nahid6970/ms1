@@ -6,6 +6,7 @@ import datetime as dt
 import json
 import os
 import platform
+import time
 import subprocess
 import sys
 import textwrap
@@ -362,21 +363,30 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
 
 def load_model_prefs() -> Dict[str, Any]:
     if not MODEL_PREFS_FILE.exists():
-        return {"hidden_models": []}
+        return {"hidden_models": [], "speed_tags": {}}
     try:
         data = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            return {"hidden_models": []}
+            return {"hidden_models": [], "speed_tags": {}}
         hidden = data.get("hidden_models", [])
         if not isinstance(hidden, list):
             hidden = []
-        return {"hidden_models": [str(item) for item in hidden]}
+        speed_tags = data.get("speed_tags", {})
+        if not isinstance(speed_tags, dict):
+            speed_tags = {}
+        return {
+            "hidden_models": [str(item) for item in hidden],
+            "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
+        }
     except Exception:
-        return {"hidden_models": []}
+        return {"hidden_models": [], "speed_tags": {}}
 
 
-def save_model_prefs(hidden_models: List[str]) -> str:
-    payload = {"hidden_models": sorted(set(hidden_models))}
+def save_model_prefs(hidden_models: List[str], speed_tags: Dict[str, str]) -> str:
+    payload = {
+        "hidden_models": sorted(set(hidden_models)),
+        "speed_tags": dict(sorted(speed_tags.items())),
+    }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
 
@@ -441,7 +451,9 @@ def pick_model_interactive(
     def render_item(model: Dict[str, Any], _: int) -> str:
         active = " *current*" if model_name(model) == current_model else ""
         hidden = " (hidden)" if model.get("_hidden") else ""
-        return f"{short_model_name(model)} [{model_name(model)}]{hidden}{active}"
+        tag = model.get("_tag")
+        tag_text = f" [{tag}]" if tag else ""
+        return f"{short_model_name(model)} [{model_name(model)}]{hidden}{active}{tag_text}"
 
     chosen = interactive_select(
         title_text=title_text,
@@ -455,24 +467,33 @@ def pick_model_interactive(
 
 
 def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[str]:
+    speed_tags: Dict[str, str] = {}
+    failed_models: List[str] = []
     passed = 0
     failed = 0
-    failed_models: List[str] = []
     print()
     title("Testing Models")
     for model in models:
         name = model_name(model)
         print(f"- {short_model_name(model)} [{name}] ... ", end="", flush=True)
+        started = time.perf_counter()
         try:
             result = test_model(client, name, temperature=0.0)
+            elapsed = time.perf_counter() - started
+            speed_tag = classify_test_speed(elapsed)
+            speed_tags[name] = speed_tag
             passed += 1
-            print(f"OK ({result[:60]})")
+            print(f"OK [{speed_tag}] ({result[:60]})")
         except Exception as exc:
+            elapsed = time.perf_counter() - started
+            speed_tag = classify_test_speed(elapsed)
+            speed_tags[name] = speed_tag
             failed += 1
             failed_models.append(name)
-            print(f"FAIL ({exc})")
+            print(f"FAIL [{speed_tag}] ({exc})")
     print()
     info(f"Test summary: {passed} passed, {failed} failed.")
+    test_all_models.last_speed_tags = speed_tags
     return failed_models
 
 
@@ -541,7 +562,30 @@ def format_model_entry(index: int, model: Dict[str, Any], current_model: str) ->
     display_name = short_model_name(model)
     active = " *" if name == current_model else ""
     hidden = " (hidden)" if model.get("_hidden") else ""
-    return f"{index:>2}. {display_name} [{name}]{hidden}{active}"
+    tag = model.get("_tag")
+    tag_text = f" [{tag}]" if tag else ""
+    return f"{index:>2}. {display_name} [{name}]{hidden}{active}{tag_text}"
+
+
+def apply_model_tags(models: List[Dict[str, Any]], speed_tags: Dict[str, str]) -> List[Dict[str, Any]]:
+    tagged_models: List[Dict[str, Any]] = []
+    for model in models:
+        copy_model = dict(model)
+        tag = speed_tags.get(model_name(model))
+        if tag:
+            copy_model["_tag"] = tag
+        tagged_models.append(copy_model)
+    return tagged_models
+
+
+def classify_test_speed(elapsed_seconds: float) -> str:
+    if elapsed_seconds <= 0.5:
+        return "fast"
+    if 3.0 <= elapsed_seconds <= 5.0:
+        return "medium"
+    if elapsed_seconds > 6.0:
+        return "slow"
+    return "normal"
 
 
 def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Optional[str]:
@@ -687,6 +731,7 @@ def main() -> int:
     contents: List[Dict[str, Any]] = []
     model_prefs = load_model_prefs()
     hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
+    speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
 
     if args.load_transcript:
         transcript_path = resolve_path(args.load_transcript, Path.cwd())
@@ -719,7 +764,10 @@ def main() -> int:
         if not models:
             warn("No chat models found.")
             return
-        shown_models = filter_models_for_display(models, hidden_models, show_all=show_all)
+        shown_models = apply_model_tags(
+            filter_models_for_display(models, hidden_models, show_all=show_all),
+            speed_tags,
+        )
         print()
         title("Available Models")
         if show_all:
@@ -748,7 +796,10 @@ def main() -> int:
 
     def get_recommended_models() -> List[Dict[str, Any]]:
         models = model_cache or refresh_model_cache()
-        return filter_models_for_display(models, hidden_models, show_all=False)
+        return apply_model_tags(
+            filter_models_for_display(models, hidden_models, show_all=False),
+            speed_tags,
+        )
 
     def run_turn(user_text: str) -> None:
         nonlocal contents
@@ -839,11 +890,13 @@ def main() -> int:
                         refresh_model_cache()
                     if remainder.lower() in {"test", "test all"}:
                         failed_models = test_all_models(client, model_cache)
+                        speed_tags.update(getattr(test_all_models, "last_speed_tags", {}))
                         hidden_set = set(hidden_models)
                         new_hidden = [m for m in failed_models if m not in hidden_set]
                         if new_hidden:
                             hidden_models.extend(new_hidden)
-                            print(save_model_prefs(hidden_models))
+                        print(save_model_prefs(hidden_models, speed_tags))
+                        if new_hidden:
                             info(f"Auto-hidden {len(new_hidden)} failed model(s).")
                         continue
                     if remainder:
@@ -854,10 +907,13 @@ def main() -> int:
                         else:
                             warn("Unknown model selection. Use /model to pick from the list or /model test.")
                     else:
-                        visible_models = [
-                            m for m in filter_models_for_display(model_cache, hidden_models, show_all=True)
-                            if not m.get("_hidden")
-                        ]
+                        visible_models = apply_model_tags(
+                            [
+                                m for m in filter_models_for_display(model_cache, hidden_models, show_all=True)
+                                if not m.get("_hidden")
+                            ],
+                            speed_tags,
+                        )
                         chosen = pick_model_interactive(visible_models, client.model, title_text="Select Model")
                         if chosen:
                             client.model = chosen
