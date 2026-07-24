@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import getpass
 import json
 import os
 import platform
@@ -27,6 +28,7 @@ MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
+API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.json")
 
 try:
     import msvcrt
@@ -363,11 +365,11 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
 
 def load_model_prefs() -> Dict[str, Any]:
     if not MODEL_PREFS_FILE.exists():
-        return {"hidden_models": [], "speed_tags": {}}
+        return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
     try:
         data = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            return {"hidden_models": [], "speed_tags": {}}
+            return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
         hidden = data.get("hidden_models", [])
         if not isinstance(hidden, list):
             hidden = []
@@ -377,18 +379,45 @@ def load_model_prefs() -> Dict[str, Any]:
         return {
             "hidden_models": [str(item) for item in hidden],
             "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
+            "last_model": str(data.get("last_model") or DEFAULT_MODEL),
+            "last_api_account": str(data.get("last_api_account") or ""),
         }
     except Exception:
-        return {"hidden_models": [], "speed_tags": {}}
+        return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
 
 
-def save_model_prefs(hidden_models: List[str], speed_tags: Dict[str, str]) -> str:
+def save_model_prefs(hidden_models: List[str], speed_tags: Dict[str, str], last_model: str, last_api_account: str) -> str:
     payload = {
         "hidden_models": sorted(set(hidden_models)),
         "speed_tags": dict(sorted(speed_tags.items())),
+        "last_model": last_model,
+        "last_api_account": last_api_account,
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
+
+
+def load_api_accounts() -> Dict[str, Any]:
+    if not API_ACCOUNTS_FILE.exists():
+        return {"accounts": {}}
+    try:
+        data = json.loads(API_ACCOUNTS_FILE.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {"accounts": {}}
+        accounts = data.get("accounts", {})
+        if not isinstance(accounts, dict):
+            accounts = {}
+        return {
+            "accounts": {str(name): str(key) for name, key in accounts.items()},
+        }
+    except Exception:
+        return {"accounts": {}}
+
+
+def save_api_accounts(accounts: Dict[str, str]) -> str:
+    payload = {"accounts": dict(sorted(accounts.items()))}
+    API_ACCOUNTS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return f"Saved API accounts to {API_ACCOUNTS_FILE}"
 
 
 def clear_screen() -> None:
@@ -495,6 +524,28 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[
     info(f"Test summary: {passed} passed, {failed} failed.")
     test_all_models.last_speed_tags = speed_tags
     return failed_models
+
+
+def pick_api_account_interactive(accounts: Dict[str, str], title_text: str = "Select API Account") -> Optional[str]:
+    items = [{"name": name, "key": key} for name, key in sorted(accounts.items(), key=lambda item: item[0].lower())]
+    if not items:
+        return None
+
+    def render_item(item: Dict[str, Any], _: int) -> str:
+        name = item["name"]
+        key = item["key"]
+        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+        return f"{name} [{masked}]"
+
+    chosen = interactive_select(
+        title_text=title_text,
+        items=items,
+        render_item=render_item,
+        footer_lines=["Press Q or Esc to cancel."],
+    )
+    if not chosen:
+        return None
+    return str(chosen["name"])
 
 
 def parse_model_index(text: str) -> Optional[int]:
@@ -678,6 +729,8 @@ def print_help() -> None:
               /reset               Clear conversation history
               /model               Open the model picker
               /model test          Test all models and hide failures
+              /addapi              Add a named API key
+              /loadapi             Load a saved API account
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
@@ -686,6 +739,7 @@ def print_help() -> None:
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /model to pick a model with the arrow keys.
+              - Use /addapi once, then /loadapi or just restart to reuse the last account.
             """
         ).strip()
     )
@@ -718,8 +772,8 @@ def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
-    parser.add_argument("--api-key", default=os.environ.get("GEMINI_API_KEY", ""), help="Gemini API key")
-    parser.add_argument("--model", default=DEFAULT_MODEL, help="Gemini model")
+    parser.add_argument("--api-key", default=None, help="Gemini API key")
+    parser.add_argument("--model", default=None, help="Gemini model")
     parser.add_argument("--system", default=DEFAULT_SYSTEM, help="System instruction")
     parser.add_argument("--project-root", default=os.getcwd(), help="Working directory for local tools")
     parser.add_argument("--temperature", type=float, default=0.2, help="Generation temperature")
@@ -729,22 +783,32 @@ def main() -> int:
     parser.add_argument("--save-transcript", help="Auto-save transcript on exit")
     args = parser.parse_args()
 
-    if not args.api_key:
-        error("Missing Gemini API key. Set GEMINI_API_KEY or pass --api-key.")
-        return 1
-
     cwd = resolve_path(args.project_root, Path.cwd())
     if not cwd.exists():
         error(f"Project root does not exist: {cwd}")
         return 1
 
-    client = GeminiClient(args.api_key, args.model)
-    system_instruction = args.system
-    tools_enabled = not args.no_tools
-    contents: List[Dict[str, Any]] = []
     model_prefs = load_model_prefs()
     hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
+    saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
+    saved_last_api_account = str(model_prefs.get("last_api_account") or "")
+
+    api_prefs = load_api_accounts()
+    api_accounts: Dict[str, str] = dict(api_prefs.get("accounts", {}))
+
+    api_key = args.api_key or api_accounts.get(saved_last_api_account, "") or os.environ.get("GEMINI_API_KEY", "")
+    active_api_account = saved_last_api_account if saved_last_api_account in api_accounts else ""
+    active_model = args.model or saved_last_model or DEFAULT_MODEL
+
+    if not api_key:
+        error("Missing Gemini API key. Use /addapi to add one, or pass --api-key / GEMINI_API_KEY.")
+        return 1
+
+    client = GeminiClient(api_key, active_model)
+    system_instruction = args.system
+    tools_enabled = not args.no_tools
+    contents: List[Dict[str, Any]] = []
 
     if args.load_transcript:
         transcript_path = resolve_path(args.load_transcript, Path.cwd())
@@ -757,6 +821,8 @@ def main() -> int:
 
     title("Gemini Terminal CLI")
     info(f"Model: {client.model}")
+    if active_api_account:
+        info(f"API account: {active_api_account}")
     info(f"Project root: {cwd}")
     info(f"Tools: {'on' if tools_enabled else 'off'}")
     print_help()
@@ -816,6 +882,10 @@ def main() -> int:
 
     def prompt_text() -> str:
         return _ansi_wrap(f"gemini-{short_model_label(client.model)}> ", "1;32")
+
+    def persist_selection() -> None:
+        account_name = active_api_account or saved_last_api_account
+        print(save_model_prefs(hidden_models, speed_tags, client.model, account_name))
 
     def run_turn(user_text: str) -> None:
         nonlocal contents
@@ -911,7 +981,7 @@ def main() -> int:
                         new_hidden = [m for m in failed_models if m not in hidden_set]
                         if new_hidden:
                             hidden_models.extend(new_hidden)
-                        print(save_model_prefs(hidden_models, speed_tags))
+                        persist_selection()
                         if new_hidden:
                             info(f"Auto-hidden {len(new_hidden)} failed model(s).")
                         continue
@@ -920,6 +990,7 @@ def main() -> int:
                         if chosen:
                             client.model = chosen
                             info(f"Model set to {client.model}")
+                            persist_selection()
                         else:
                             warn("Unknown model selection. Use /model to pick from the list or /model test.")
                     else:
@@ -934,6 +1005,43 @@ def main() -> int:
                         if chosen:
                             client.model = chosen
                             info(f"Model set to {client.model}")
+                            persist_selection()
+                    continue
+                if command == "/addapi":
+                    name = input("API name: ").strip()
+                    if not name:
+                        warn("API name is required.")
+                        continue
+                    key = getpass.getpass("API key: ").strip()
+                    if not key:
+                        warn("API key is required.")
+                        continue
+                    api_accounts[name] = key
+                    active_api_account = name
+                    client.api_key = key
+                    print(save_api_accounts(api_accounts))
+                    persist_selection()
+                    info(f"Loaded API account: {name}")
+                    continue
+                if command == "/loadapi":
+                    if not api_accounts:
+                        warn("No saved API accounts. Use /addapi first.")
+                        continue
+                    chosen_name = None
+                    if remainder:
+                        if remainder in api_accounts:
+                            chosen_name = remainder
+                        else:
+                            warn("Unknown API account name.")
+                            continue
+                    else:
+                        chosen_name = pick_api_account_interactive(api_accounts, title_text="Select API Account")
+                    if not chosen_name:
+                        continue
+                    active_api_account = chosen_name
+                    client.api_key = api_accounts[chosen_name]
+                    print(save_model_prefs(hidden_models, speed_tags, client.model, active_api_account))
+                    info(f"Loaded API account: {chosen_name}")
                     continue
                 if command == "/system":
                     if remainder:
@@ -992,6 +1100,8 @@ def main() -> int:
             "contents": contents,
         }
         print(save_transcript(transcript_path, state))
+
+    persist_selection()
 
     return 0
 

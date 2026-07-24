@@ -59,5 +59,7 @@
     "gemini-robotics-er-1.6-preview": "normal",
     "gemma-4-26b-a4b-it": "normal",
     "gemma-4-31b-it": "normal"
-  }
+  },
+  "last_model": "gemini-2.5-flash",
+  "last_api_account": "09"
 }

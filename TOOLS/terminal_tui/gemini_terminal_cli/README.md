@@ -12,7 +12,7 @@ It is designed to feel closer to a CLI tool than a web app:
 ## Requirements
 
 - Python 3.10+
-- A `GEMINI_API_KEY` environment variable, or pass `--api-key`
+- First-time setup needs either a `GEMINI_API_KEY` environment variable, or `/addapi`
 
 ## Run
 
@@ -45,6 +45,8 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/reset` - clear conversation
 - `/model` - open the model picker
 - `/model test` - test all models and auto-hide failures
+- `/addapi` - add a named API key
+- `/loadapi` - load a saved API account
 - `/system <text>` - replace the system instruction
 - `/tools on|off` - enable or disable local tools
 - `/save <file>` - write transcript JSON
@@ -66,4 +68,6 @@ The CLI exposes only local, standard-library tools:
 - The CLI does not depend on the Flask app.
 - It uses Gemini's function-calling API directly over HTTP.
 - Shell commands are intentionally explicit; the model must ask for them through the tool loop.
-- Hidden models are stored in `model_prefs.json` next to the CLI.
+- Hidden models, last model, and speed tags are stored in `model_prefs.json`.
+- Named API accounts are stored in `api_accounts.json`.
+- The CLI restores the last-used API account and model on startup when they have been saved.
