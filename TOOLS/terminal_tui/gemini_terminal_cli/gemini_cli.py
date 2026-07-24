@@ -24,7 +24,7 @@ DEFAULT_SYSTEM = (
     "When editing code, prefer search_file and minimal block edits "
     "(replace_block, insert_after, delete_block) over rewriting whole files."
 )
-MAX_TOOL_LOOPS = 8
+DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
@@ -582,11 +582,23 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
 
 def load_model_prefs() -> Dict[str, Any]:
     if not MODEL_PREFS_FILE.exists():
-        return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
+        return {
+            "hidden_models": [],
+            "speed_tags": {},
+            "last_model": DEFAULT_MODEL,
+            "last_api_account": "",
+            "tool_loop_limit": DEFAULT_TOOL_LOOPS,
+        }
     try:
         data = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
+            return {
+                "hidden_models": [],
+                "speed_tags": {},
+                "last_model": DEFAULT_MODEL,
+                "last_api_account": "",
+                "tool_loop_limit": DEFAULT_TOOL_LOOPS,
+            }
         hidden = data.get("hidden_models", [])
         if not isinstance(hidden, list):
             hidden = []
@@ -598,17 +610,31 @@ def load_model_prefs() -> Dict[str, Any]:
             "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": str(data.get("last_api_account") or ""),
+            "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
         }
     except Exception:
-        return {"hidden_models": [], "speed_tags": {}, "last_model": DEFAULT_MODEL, "last_api_account": ""}
+        return {
+            "hidden_models": [],
+            "speed_tags": {},
+            "last_model": DEFAULT_MODEL,
+            "last_api_account": "",
+            "tool_loop_limit": DEFAULT_TOOL_LOOPS,
+        }
 
 
-def save_model_prefs(hidden_models: List[str], speed_tags: Dict[str, str], last_model: str, last_api_account: str) -> str:
+def save_model_prefs(
+    hidden_models: List[str],
+    speed_tags: Dict[str, str],
+    last_model: str,
+    last_api_account: str,
+    tool_loop_limit: int,
+) -> str:
     payload = {
         "hidden_models": sorted(set(hidden_models)),
         "speed_tags": dict(sorted(speed_tags.items())),
         "last_model": last_model,
         "last_api_account": last_api_account,
+        "tool_loop_limit": int(tool_loop_limit),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -948,6 +974,7 @@ def print_help() -> None:
               /model test          Test all models and hide failures
               /addapi              Add a named API key
               /loadapi             Load a saved API account
+              /loops <n>           Set max tool-call loops
               /tool                Show implemented tools
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
@@ -959,6 +986,7 @@ def print_help() -> None:
               - Use /model to pick a model with the arrow keys.
               - Use /addapi once, then /loadapi or just restart to reuse the last account.
               - Use /tool or /tools to see the implemented local tools.
+              - Use /loops to raise or lower the tool-call depth.
             """
         ).strip()
     )
@@ -1005,6 +1033,7 @@ def main() -> int:
     parser.add_argument("--project-root", default=os.getcwd(), help="Working directory for local tools")
     parser.add_argument("--temperature", type=float, default=0.2, help="Generation temperature")
     parser.add_argument("--max-output-tokens", type=int, default=2048, help="Max output tokens")
+    parser.add_argument("--max-tool-loops", type=int, default=None, help="Max tool-call loops per turn")
     parser.add_argument("--no-tools", action="store_true", help="Disable local tool calling")
     parser.add_argument("--load-transcript", help="Load transcript JSON at startup")
     parser.add_argument("--save-transcript", help="Auto-save transcript on exit")
@@ -1020,6 +1049,9 @@ def main() -> int:
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
+    tool_loop_limit = int(model_prefs.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS)
+    if args.max_tool_loops is not None:
+        tool_loop_limit = max(1, int(args.max_tool_loops))
 
     api_prefs = load_api_accounts()
     api_accounts: Dict[str, str] = dict(api_prefs.get("accounts", {}))
@@ -1045,6 +1077,7 @@ def main() -> int:
         tools_enabled = bool(loaded.get("tools_enabled", tools_enabled))
         cwd = resolve_path(loaded.get("project_root", str(cwd)), Path.cwd())
         contents = list(loaded.get("contents", []))
+        tool_loop_limit = int(loaded.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
 
     title("Gemini Terminal CLI")
     info(f"Model: {client.model}")
@@ -1112,13 +1145,13 @@ def main() -> int:
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
-        print(save_model_prefs(hidden_models, speed_tags, client.model, account_name))
+        print(save_model_prefs(hidden_models, speed_tags, client.model, account_name, tool_loop_limit))
 
     def run_turn(user_text: str) -> None:
         nonlocal contents
         contents.append(make_user_content(user_text))
 
-        for _ in range(MAX_TOOL_LOOPS):
+        for _ in range(tool_loop_limit):
             try:
                 response = client.generate(
                     contents=contents,
@@ -1170,7 +1203,7 @@ def main() -> int:
 
             contents.append({"role": "user", "parts": responses})
 
-        warn("Reached the maximum tool-call loop depth.")
+        warn(f"Reached the maximum tool-call loop depth ({tool_loop_limit}).")
 
     if args.prompt:
         run_turn(args.prompt)
@@ -1267,8 +1300,23 @@ def main() -> int:
                         continue
                     active_api_account = chosen_name
                     client.api_key = api_accounts[chosen_name]
-                    print(save_model_prefs(hidden_models, speed_tags, client.model, active_api_account))
+                    persist_selection()
                     info(f"Loaded API account: {chosen_name}")
+                    continue
+                if command == "/loops":
+                    if not remainder:
+                        info(f"Current tool loop limit: {tool_loop_limit}")
+                    else:
+                        try:
+                            new_limit = int(remainder)
+                            if new_limit < 1:
+                                raise ValueError
+                        except ValueError:
+                            warn("Usage: /loops <positive number>")
+                            continue
+                        tool_loop_limit = new_limit
+                        persist_selection()
+                        info(f"Tool loop limit set to {tool_loop_limit}")
                     continue
                 if command == "/tool":
                     print_tool_catalog()
@@ -1298,6 +1346,7 @@ def main() -> int:
                             "project_root": str(cwd),
                             "tools_enabled": tools_enabled,
                             "contents": contents,
+                            "tool_loop_limit": tool_loop_limit,
                         }
                         print(save_transcript(transcript_path, state))
                     else:
@@ -1330,6 +1379,7 @@ def main() -> int:
             "project_root": str(cwd),
             "tools_enabled": tools_enabled,
             "contents": contents,
+            "tool_loop_limit": tool_loop_limit,
         }
         print(save_transcript(transcript_path, state))
 

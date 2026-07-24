@@ -32,6 +32,12 @@ python .\gemini_terminal_cli\gemini_cli.py -p "Summarize this repo"
 python .\gemini_terminal_cli\gemini_cli.py --project-root C:\path\to\project
 ```
 
+### Set the tool-loop limit
+
+```powershell
+python .\gemini_terminal_cli\gemini_cli.py --max-tool-loops 12
+```
+
 ### Load a transcript
 
 ```powershell
@@ -47,6 +53,7 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/model test` - test all models and auto-hide failures
 - `/addapi` - add a named API key
 - `/loadapi` - load a saved API account
+- `/loops <n>` - set the max tool-call loops for a turn
 - `/system <text>` - replace the system instruction
 - `/tools on|off` - enable or disable local tools
 - `/save <file>` - write transcript JSON
@@ -71,3 +78,4 @@ The CLI exposes only local, standard-library tools:
 - Hidden models, last model, and speed tags are stored in `model_prefs.json`.
 - Named API accounts are stored in `api_accounts.json`.
 - The CLI restores the last-used API account and model on startup when they have been saved.
+- The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
