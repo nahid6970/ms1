@@ -43,15 +43,8 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/help` - show commands
 - `/exit` - quit
 - `/reset` - clear conversation
-- `/models` - list recommended chat models
-- `/models all` - list the full catalog
-- `/models hide <x>` - hide a model from the default list
-- `/models show <x>` - unhide a model
-- `/models hidden` - list hidden models
-- `/models test <x>` - run a quick test on a model
 - `/model` - open the model picker
-- `/model <name>` - change model
-- `/model <number>` - choose from `/models`
+- `/model test` - test all models and auto-hide failures
 - `/system <text>` - replace the system instruction
 - `/tools on|off` - enable or disable local tools
 - `/save <file>` - write transcript JSON

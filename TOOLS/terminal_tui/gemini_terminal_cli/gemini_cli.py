@@ -454,9 +454,10 @@ def pick_model_interactive(
     return model_name(chosen)
 
 
-def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> None:
+def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[str]:
     passed = 0
     failed = 0
+    failed_models: List[str] = []
     print()
     title("Testing Models")
     for model in models:
@@ -468,9 +469,11 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> None:
             print(f"OK ({result[:60]})")
         except Exception as exc:
             failed += 1
+            failed_models.append(name)
             print(f"FAIL ({exc})")
     print()
     info(f"Test summary: {passed} passed, {failed} failed.")
+    return failed_models
 
 
 def parse_model_index(text: str) -> Optional[int]:
@@ -616,15 +619,8 @@ def print_help() -> None:
               /help                Show this message
               /exit                Quit
               /reset               Clear conversation history
-              /models              List recommended chat models
-              /models all          List the full catalog
-              /models hide <x>     Hide a model from the default list
-              /models show <x>     Unhide a model
-              /models hidden       List hidden models
-              /models test <x>     Run a quick test on a model
               /model               Open the model picker
-              /model <name>        Switch Gemini model directly
-              /model <number>      Switch using the /models list
+              /model test          Test all models and hide failures
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
@@ -632,7 +628,7 @@ def print_help() -> None:
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
-              - Use normal chat for everything else.
+              - Use /model to pick a model with the arrow keys.
             """
         ).strip()
     )
@@ -834,81 +830,35 @@ def main() -> int:
                 if command == "/help":
                     print_help()
                     continue
-                if command == "/models":
-                    subcommand, _, subargs = remainder.partition(" ")
-                    subcommand = subcommand.lower().strip()
-                    subargs = subargs.strip()
-                    if not subcommand:
-                        print_model_list(show_all=False)
-                    elif subcommand in {"all", "full"}:
-                        print_model_list(show_all=True)
-                    elif subcommand == "hidden":
-                        hidden_list = [m for m in (model_cache or refresh_model_cache()) if model_name(m) in hidden_models]
-                        if not hidden_list:
-                            info("No hidden models.")
-                        else:
-                            print()
-                            title("Hidden Models")
-                            for index, model in enumerate(hidden_list, start=1):
-                                print(format_model_entry(index, model, client.model))
-                            print()
-                    elif subcommand in {"hide", "show", "test"}:
-                        if not model_cache:
-                            refresh_model_cache()
-                        if subcommand == "test" and subargs.lower() == "all":
-                            test_all_models(client, model_cache)
-                            continue
-                        chosen = None
-                        if subargs:
-                            chosen = choose_model_from_list(model_cache, subargs)
-                        else:
-                            picker_models = model_cache if subcommand == "test" else model_cache
-                            if subcommand in {"hide", "show"}:
-                                picker_models = model_cache
-                            chosen = pick_model_interactive(
-                                picker_models,
-                                client.model,
-                                title_text=f"{subcommand.title()} Model",
-                            )
-                        if not chosen:
-                            continue
-                        if subcommand == "hide":
-                            if chosen not in hidden_models:
-                                hidden_models.append(chosen)
-                                print(save_model_prefs(hidden_models))
-                            info(f"Hidden: {chosen}")
-                        elif subcommand == "show":
-                            if chosen in hidden_models:
-                                hidden_models = [m for m in hidden_models if m != chosen]
-                                print(save_model_prefs(hidden_models))
-                            info(f"Shown: {chosen}")
-                        else:
-                            try:
-                                result = test_model(client, chosen, temperature=0.0)
-                                info(f"Test ok: {chosen}")
-                                print(result)
-                            except RuntimeError as exc:
-                                error(f"Test failed for {chosen}: {exc}")
-                    else:
-                        warn("Usage: /models [all|hidden|hide <x>|show <x>|test <x>]")
-                    continue
                 if command == "/reset":
                     contents = []
                     info("Conversation cleared.")
                     continue
                 if command == "/model":
+                    if not model_cache:
+                        refresh_model_cache()
+                    if remainder.lower() in {"test", "test all"}:
+                        failed_models = test_all_models(client, model_cache)
+                        hidden_set = set(hidden_models)
+                        new_hidden = [m for m in failed_models if m not in hidden_set]
+                        if new_hidden:
+                            hidden_models.extend(new_hidden)
+                            print(save_model_prefs(hidden_models))
+                            info(f"Auto-hidden {len(new_hidden)} failed model(s).")
+                        continue
                     if remainder:
-                        if not model_cache:
-                            refresh_model_cache()
                         chosen = choose_model_from_list(model_cache, remainder)
                         if chosen:
                             client.model = chosen
                             info(f"Model set to {client.model}")
                         else:
-                            warn("Unknown model selection. Use /models first, then /model <number> or /model <name>.")
+                            warn("Unknown model selection. Use /model to pick from the list or /model test.")
                     else:
-                        choices = get_recommended_models()
-                        chosen = pick_model_interactive(choices, client.model, title_text="Select Model")
+                        visible_models = [
+                            m for m in filter_models_for_display(model_cache, hidden_models, show_all=True)
+                            if not m.get("_hidden")
+                        ]
+                        chosen = pick_model_interactive(visible_models, client.model, title_text="Select Model")
                         if chosen:
                             client.model = chosen
                             info(f"Model set to {client.model}")
