@@ -25,6 +25,7 @@ MAX_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
+MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
 
 
 def _now_stamp() -> str:
@@ -354,6 +355,27 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
     return f"Transcript saved to {path}"
 
 
+def load_model_prefs() -> Dict[str, Any]:
+    if not MODEL_PREFS_FILE.exists():
+        return {"hidden_models": []}
+    try:
+        data = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {"hidden_models": []}
+        hidden = data.get("hidden_models", [])
+        if not isinstance(hidden, list):
+            hidden = []
+        return {"hidden_models": [str(item) for item in hidden]}
+    except Exception:
+        return {"hidden_models": []}
+
+
+def save_model_prefs(hidden_models: List[str]) -> str:
+    payload = {"hidden_models": sorted(set(hidden_models))}
+    MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return f"Saved model preferences to {MODEL_PREFS_FILE}"
+
+
 def parse_model_index(text: str) -> Optional[int]:
     try:
         idx = int(text.strip())
@@ -394,11 +416,32 @@ def model_group(model: Dict[str, Any]) -> str:
     return "Stable"
 
 
+def model_is_recommended(model: Dict[str, Any]) -> bool:
+    name = model_name(model).lower()
+    display_name = str(model.get("displayName") or "").lower()
+    if not name.startswith("gemini-"):
+        return False
+    blocked = (
+        "preview",
+        "image",
+        "tts",
+        "robot",
+        "computer-use",
+        "customtools",
+        "omni",
+        "gemma",
+    )
+    if any(token in name or token in display_name for token in blocked):
+        return False
+    return any(token in name for token in ("flash", "pro"))
+
+
 def format_model_entry(index: int, model: Dict[str, Any], current_model: str) -> str:
     name = model_name(model)
     display_name = short_model_name(model)
     active = " *" if name == current_model else ""
-    return f"{index:>2}. {display_name} [{name}]{active}"
+    hidden = " (hidden)" if model.get("_hidden") else ""
+    return f"{index:>2}. {display_name} [{name}]{hidden}{active}"
 
 
 def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Optional[str]:
@@ -420,27 +463,7 @@ def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Opti
     return target
 
 
-def is_default_model(model: Dict[str, Any]) -> bool:
-    name = model_name(model).lower()
-    display_name = str(model.get("displayName") or "").lower()
-    if not name.startswith("gemini-"):
-        return False
-    blocked = (
-        "preview",
-        "image",
-        "tts",
-        "robot",
-        "computer-use",
-        "customtools",
-        "omni",
-        "gemma",
-    )
-    if any(token in name or token in display_name for token in blocked):
-        return False
-    return any(token in name for token in ("flash", "pro"))
-
-
-def list_chat_models(client: GeminiClient, show_all: bool = False) -> List[Dict[str, Any]]:
+def list_chat_models(client: GeminiClient) -> List[Dict[str, Any]]:
     raw_models = client.list_models()
     chat_models: List[Dict[str, Any]] = []
     for model in raw_models:
@@ -450,11 +473,42 @@ def list_chat_models(client: GeminiClient, show_all: bool = False) -> List[Dict[
             continue
         if name and not (name.startswith("models/gemini") or name.startswith("models/gemma")):
             continue
-        if not show_all and not is_default_model(model):
-            continue
         chat_models.append(model)
     chat_models.sort(key=lambda m: (model_group(m), str(m.get("displayName") or m.get("name") or "").lower()))
     return chat_models
+
+
+def filter_models_for_display(
+    models: List[Dict[str, Any]],
+    hidden_models: List[str],
+    show_all: bool = False,
+) -> List[Dict[str, Any]]:
+    hidden = set(hidden_models)
+    if show_all:
+        shown = []
+        for model in models:
+            copy_model = dict(model)
+            copy_model["_hidden"] = model_name(model) in hidden
+            shown.append(copy_model)
+        return shown
+    return [model for model in models if model_is_recommended(model) and model_name(model) not in hidden]
+
+
+def test_model(client: GeminiClient, model_name_value: str, temperature: float = 0.0) -> str:
+    test_client = GeminiClient(client.api_key, model_name_value)
+    response = test_client.generate(
+        contents=[make_user_content("Reply with exactly: OK")],
+        system_instruction="Reply with exactly OK.",
+        tools_enabled=False,
+        temperature=temperature,
+        max_output_tokens=16,
+    )
+    candidates = response.get("candidates", [])
+    if not candidates:
+        return "Error: model returned no candidates."
+    parts = candidates[0].get("content", {}).get("parts", [])
+    text = render_model_parts(parts)
+    return text or "OK"
 
 
 def print_help() -> None:
@@ -467,6 +521,10 @@ def print_help() -> None:
               /reset               Clear conversation history
               /models              List recommended chat models
               /models all          List the full catalog
+              /models hide <x>     Hide a model from the default list
+              /models show <x>     Unhide a model
+              /models hidden       List hidden models
+              /models test <x>     Run a quick test on a model
               /model <name>        Switch Gemini model
               /model <number>      Switch using the /models list
               /system <text>       Replace system instruction
@@ -533,6 +591,8 @@ def main() -> int:
     system_instruction = args.system
     tools_enabled = not args.no_tools
     contents: List[Dict[str, Any]] = []
+    model_prefs = load_model_prefs()
+    hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
 
     if args.load_transcript:
         transcript_path = resolve_path(args.load_transcript, Path.cwd())
@@ -551,31 +611,32 @@ def main() -> int:
 
     model_cache: List[Dict[str, Any]] = []
 
-    def refresh_model_cache(show_all: bool = False) -> List[Dict[str, Any]]:
+    def refresh_model_cache() -> List[Dict[str, Any]]:
         nonlocal model_cache
         try:
-            model_cache = list_chat_models(client, show_all=show_all)
+            model_cache = list_chat_models(client)
         except Exception as exc:
             warn(f"Could not load model list: {exc}")
             model_cache = []
         return model_cache
 
     def print_model_list(show_all: bool = False) -> None:
-        models = refresh_model_cache(show_all=show_all)
+        models = refresh_model_cache()
         if not models:
             warn("No chat models found.")
             return
+        shown_models = filter_models_for_display(models, hidden_models, show_all=show_all)
         print()
         title("Available Models")
         if show_all:
-            print(f"Showing full catalog: {len(models)} models. Current model: {client.model}")
+            print(f"Showing full catalog: {len(shown_models)} models. Current model: {client.model}")
         else:
-            print(f"Showing recommended models: {len(models)} models. Current model: {client.model}")
+            print(f"Showing recommended models: {len(shown_models)} models. Current model: {client.model}")
         print()
         if show_all:
             index = 1
             for group in ("Stable", "Aliases", "Preview", "Gemma", "Image"):
-                grouped_models = [m for m in models if model_group(m) == group]
+                grouped_models = [m for m in shown_models if model_group(m) == group]
                 if not grouped_models:
                     continue
                 print(f"[{group}]")
@@ -584,9 +645,9 @@ def main() -> int:
                     index += 1
                 print()
         else:
-            for index, model in enumerate(models[:DEFAULT_MODEL_LIST_LIMIT], start=1):
+            for index, model in enumerate(shown_models[:DEFAULT_MODEL_LIST_LIMIT], start=1):
                 print(format_model_entry(index, model, client.model))
-            if len(models) > DEFAULT_MODEL_LIST_LIMIT:
+            if len(shown_models) > DEFAULT_MODEL_LIST_LIMIT:
                 print()
                 print("Tip: use /models all for the full catalog.")
         print()
@@ -672,7 +733,52 @@ def main() -> int:
                     print_help()
                     continue
                 if command == "/models":
-                    print_model_list(show_all=remainder.lower() in {"all", "full"})
+                    subcommand, _, subargs = remainder.partition(" ")
+                    subcommand = subcommand.lower().strip()
+                    subargs = subargs.strip()
+                    if not subcommand:
+                        print_model_list(show_all=False)
+                    elif subcommand in {"all", "full"}:
+                        print_model_list(show_all=True)
+                    elif subcommand == "hidden":
+                        hidden_list = [m for m in (model_cache or refresh_model_cache()) if model_name(m) in hidden_models]
+                        if not hidden_list:
+                            info("No hidden models.")
+                        else:
+                            print()
+                            title("Hidden Models")
+                            for index, model in enumerate(hidden_list, start=1):
+                                print(format_model_entry(index, model, client.model))
+                            print()
+                    elif subcommand in {"hide", "show", "test"}:
+                        if not subargs:
+                            warn(f"Usage: /models {subcommand} <name|number>")
+                            continue
+                        if not model_cache:
+                            refresh_model_cache()
+                        chosen = choose_model_from_list(model_cache, subargs)
+                        if not chosen:
+                            warn("Unknown model selection. Use /models first, then a number or model name.")
+                            continue
+                        if subcommand == "hide":
+                            if chosen not in hidden_models:
+                                hidden_models.append(chosen)
+                                print(save_model_prefs(hidden_models))
+                            info(f"Hidden: {chosen}")
+                        elif subcommand == "show":
+                            if chosen in hidden_models:
+                                hidden_models = [m for m in hidden_models if m != chosen]
+                                print(save_model_prefs(hidden_models))
+                            info(f"Shown: {chosen}")
+                        else:
+                            try:
+                                result = test_model(client, chosen, temperature=0.0)
+                                info(f"Test ok: {chosen}")
+                                print(result)
+                            except RuntimeError as exc:
+                                error(f"Test failed for {chosen}: {exc}")
+                    else:
+                        warn("Usage: /models [all|hidden|hide <x>|show <x>|test <x>]")
                     continue
                 if command == "/reset":
                     contents = []

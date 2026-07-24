@@ -45,6 +45,10 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 - `/reset` - clear conversation
 - `/models` - list recommended chat models
 - `/models all` - list the full catalog
+- `/models hide <x>` - hide a model from the default list
+- `/models show <x>` - unhide a model
+- `/models hidden` - list hidden models
+- `/models test <x>` - run a quick test on a model
 - `/model <name>` - change model
 - `/model <number>` - choose from `/models`
 - `/system <text>` - replace the system instruction
@@ -68,3 +72,4 @@ The CLI exposes only local, standard-library tools:
 - The CLI does not depend on the Flask app.
 - It uses Gemini's function-calling API directly over HTTP.
 - Shell commands are intentionally explicit; the model must ask for them through the tool loop.
+- Hidden models are stored in `model_prefs.json` next to the CLI.
