@@ -60,6 +60,7 @@
     "gemma-4-26b-a4b-it": "normal",
     "gemma-4-31b-it": "normal"
   },
-  "last_model": "gemini-3.5-flash-lite",
-  "last_api_account": "09"
+  "last_model": "gemini-3.1-flash-lite",
+  "last_api_account": "09",
+  "tool_loop_limit": 12
 }
