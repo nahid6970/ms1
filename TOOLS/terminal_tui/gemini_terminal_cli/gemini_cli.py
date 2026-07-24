@@ -23,6 +23,7 @@ DEFAULT_SYSTEM = (
 )
 MAX_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
+MODELS_PAGE_SIZE = 1000
 
 
 def _now_stamp() -> str:
@@ -279,6 +280,41 @@ class GeminiClient:
         except Exception as exc:
             raise RuntimeError(str(exc)) from exc
 
+    def list_models(self) -> List[Dict[str, Any]]:
+        models: List[Dict[str, Any]] = []
+        page_token: Optional[str] = None
+
+        while True:
+            query = {"pageSize": str(MODELS_PAGE_SIZE)}
+            if page_token:
+                query["pageToken"] = page_token
+
+            url = (
+                "https://generativelanguage.googleapis.com/v1beta/models"
+                f"?{urllib.parse.urlencode(query)}&key={urllib.parse.quote(self.api_key)}"
+            )
+            request = urllib.request.Request(url, method="GET")
+            try:
+                with urllib.request.urlopen(request, timeout=60) as response:
+                    raw = response.read().decode("utf-8", errors="replace")
+                    body = json.loads(raw)
+            except urllib.error.HTTPError as exc:
+                raw = exc.read().decode("utf-8", errors="replace")
+                try:
+                    body = json.loads(raw)
+                except Exception:
+                    body = {"error": {"message": raw or str(exc)}}
+                raise RuntimeError(body.get("error", {}).get("message", str(exc))) from exc
+            except Exception as exc:
+                raise RuntimeError(str(exc)) from exc
+
+            models.extend(body.get("models", []))
+            page_token = body.get("nextPageToken")
+            if not page_token:
+                break
+
+        return models
+
 
 def normalize_text(text: str) -> str:
     text = text.replace("\r\n", "\n").strip()
@@ -317,6 +353,58 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
     return f"Transcript saved to {path}"
 
 
+def parse_model_index(text: str) -> Optional[int]:
+    try:
+        idx = int(text.strip())
+    except ValueError:
+        return None
+    return idx if idx > 0 else None
+
+
+def format_model_entry(model: Dict[str, Any], index: int) -> str:
+    name = str(model.get("name", "")).removeprefix("models/")
+    display_name = model.get("displayName") or name
+    methods = model.get("supportedGenerationMethods") or []
+    methods_text = ",".join(methods) if methods else "unknown"
+    input_tokens = model.get("inputTokenLimit", "?")
+    output_tokens = model.get("outputTokenLimit", "?")
+    return f"{index:>2}. {name} | {display_name} | in:{input_tokens} out:{output_tokens} | {methods_text}"
+
+
+def choose_model_from_list(models: List[Dict[str, Any]], selection: str) -> Optional[str]:
+    idx = parse_model_index(selection)
+    if idx is not None:
+        if 1 <= idx <= len(models):
+            return str(models[idx - 1].get("name", "")).removeprefix("models/")
+        return None
+
+    target = selection.strip()
+    if not target:
+        return None
+
+    for model in models:
+        name = str(model.get("name", "")).removeprefix("models/")
+        display_name = str(model.get("displayName", ""))
+        if target == name or target == display_name:
+            return name
+    return target
+
+
+def list_chat_models(client: GeminiClient) -> List[Dict[str, Any]]:
+    raw_models = client.list_models()
+    chat_models: List[Dict[str, Any]] = []
+    for model in raw_models:
+        name = str(model.get("name", ""))
+        methods = model.get("supportedGenerationMethods") or []
+        if methods and "generateContent" not in methods:
+            continue
+        if name and not (name.startswith("models/gemini") or name.startswith("models/gemma")):
+            continue
+        chat_models.append(model)
+    chat_models.sort(key=lambda m: str(m.get("displayName") or m.get("name") or "").lower())
+    return chat_models
+
+
 def print_help() -> None:
     print(
         textwrap.dedent(
@@ -325,7 +413,9 @@ def print_help() -> None:
               /help                Show this message
               /exit                Quit
               /reset               Clear conversation history
+              /models              List available chat models
               /model <name>        Switch Gemini model
+              /model <number>      Switch using the /models list
               /system <text>       Replace system instruction
               /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
@@ -406,6 +496,28 @@ def main() -> int:
     info(f"Tools: {'on' if tools_enabled else 'off'}")
     print_help()
 
+    model_cache: List[Dict[str, Any]] = []
+
+    def refresh_model_cache() -> List[Dict[str, Any]]:
+        nonlocal model_cache
+        try:
+            model_cache = list_chat_models(client)
+        except Exception as exc:
+            warn(f"Could not load model list: {exc}")
+            model_cache = []
+        return model_cache
+
+    def print_model_list() -> None:
+        models = refresh_model_cache()
+        if not models:
+            warn("No chat models found.")
+            return
+        print()
+        title("Available Models")
+        for i, model in enumerate(models, start=1):
+            print(format_model_entry(model, i))
+        print()
+
     def run_turn(user_text: str) -> None:
         nonlocal contents
         contents.append(make_user_content(user_text))
@@ -479,14 +591,23 @@ def main() -> int:
                 if command == "/help":
                     print_help()
                     continue
+                if command == "/models":
+                    print_model_list()
+                    continue
                 if command == "/reset":
                     contents = []
                     info("Conversation cleared.")
                     continue
                 if command == "/model":
                     if remainder:
-                        client.model = remainder
-                        info(f"Model set to {client.model}")
+                        if not model_cache:
+                            refresh_model_cache()
+                        chosen = choose_model_from_list(model_cache, remainder)
+                        if chosen:
+                            client.model = chosen
+                            info(f"Model set to {client.model}")
+                        else:
+                            warn("Unknown model selection. Use /models first, then /model <number> or /model <name>.")
                     else:
                         warn("Usage: /model <name>")
                     continue
