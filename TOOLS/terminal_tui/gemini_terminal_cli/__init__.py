@@ -1,0 +1,2 @@
+"""Gemini terminal CLI package."""
+
