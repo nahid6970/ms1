@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import getpass
 import json
 import os
 import platform
@@ -1012,7 +1011,7 @@ def main() -> int:
                     if not name:
                         warn("API name is required.")
                         continue
-                    key = getpass.getpass("API key: ").strip()
+                    key = input("API key: ").strip()
                     if not key:
                         warn("API key is required.")
                         continue
