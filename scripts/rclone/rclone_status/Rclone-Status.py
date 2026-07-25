@@ -82,11 +82,13 @@ class HoverButton(tk.Button):
         self.default_fg = kw.pop('default_fg', "white")
         self.hover_fg = kw.pop('hover_fg', "black")
         self.hover_bg = kw.pop('hover_bg', True)
+        self.hover_effect = kw.pop('hover_effect', True)
         # Use passed font if available, otherwise use default
         btn_font = kw.pop('font', ("Consolas", 10, "bold"))
         super().__init__(master, **kw)
-        self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color if self.hover_bg else self.default_color, fg=self.hover_fg))
-        self.bind("<Leave>", lambda e: self.configure(bg=self.default_color, fg=self.default_fg))
+        if self.hover_effect:
+            self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color if self.hover_bg else self.default_color, fg=self.hover_fg))
+            self.bind("<Leave>", lambda e: self.configure(bg=self.default_color, fg=self.default_fg))
         self.configure(
             bg=self.default_color,
             fg=self.default_fg,
@@ -226,7 +228,7 @@ class ProjectActionWindow(tk.Toplevel):
         # Styled Switcher using settings icons
         self.arrow_btn = HoverButton(inner, text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"], 
                                      font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)), width=3, height=1, 
-                                     default_color=CP_BG, hover_color=CP_BG, hover_fg=CP_YELLOW, hover_bg=False)
+                                     default_color=CP_BG, hover_color=CP_BG, hover_fg=CP_YELLOW, hover_bg=False, hover_effect=False)
         self.arrow_btn.default_fg = app_settings.get("color_r", CP_CYAN) if self.direction == "L2R" else app_settings.get("color_l", CP_ORANGE)
         self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
         self.arrow_btn.config(command=self.toggle_direction)
