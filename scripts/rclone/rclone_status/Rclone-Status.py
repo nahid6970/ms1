@@ -293,18 +293,23 @@ class ProjectActionWindow(tk.Toplevel):
         chips.grid(row=0, column=0, sticky="w")
 
         self.flag_defs = [
-            ("Fast List", "--fast-list", True),
-            ("Progress", "-P", True),
-            ("Dry Run", "--dry-run", False),
+            ("Dry Run", "--dry-run", False, ("#90ee90", "#FF003C")),
+            ("Fast List", "--fast-list", True, None),
+            ("Progress", "-P", True, None),
             ("Track Renames", "--track-renames", False),
             ("Size Only", "--size-only", True),
         ]
         self.flag_labels = []
         saved_flags = self.cfg.get("last_flags_state", {})
 
-        for i, (label, flag, default_state) in enumerate(self.flag_defs):
+        for i, item in enumerate(self.flag_defs):
+            if len(item) == 4:
+                label, flag, default_state, colors = item
+            else:
+                label, flag, default_state = item
+                colors = None
             state = saved_flags.get(flag, default_state)
-            chip = ToggleLabel(chips, label, active=state, on_change=self.save_flag_state)
+            chip = ToggleLabel(chips, label, active=state, on_change=self.save_flag_state, colors=colors)
             chip.grid(row=0, column=i, padx=(0, 6), pady=2)
             chip.flag_value = flag
             self.flag_labels.append(chip)
