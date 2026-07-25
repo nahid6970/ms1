@@ -930,6 +930,7 @@ def interactive_select(
     title_text: str,
     items: List[Dict[str, Any]],
     render_item,
+    header_lines: Optional[List[str]] = None,
     footer_lines: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
     if not items:
@@ -942,6 +943,10 @@ def interactive_select(
         title(title_text)
         print("Use Up/Down, Enter to choose, Esc to cancel.")
         print()
+        if header_lines:
+            for line in header_lines:
+                print(line)
+            print()
         for i, item in enumerate(items):
             prefix = ">" if i == index else " "
             print(f"{prefix} {render_item(item, i)}")
@@ -968,19 +973,24 @@ def pick_model_interactive(
     current_model: str,
     title_text: str = "Select Model",
 ) -> Optional[str]:
+    widths = build_model_table_widths(models)
+
     def render_item(model: Dict[str, Any], _: int) -> str:
-        active = " *current*" if model_name(model) == current_model else ""
-        hidden = " (hidden)" if model.get("_hidden") else ""
-        tag = model.get("_tag")
-        tag_text = f" [{tag}]" if tag else ""
-        uses = model.get("_uses")
-        uses_text = f" [uses: {int(uses)}]" if uses is not None else ""
-        return f"{short_model_name(model)} [{model_name(model)}]{uses_text}{hidden}{active}{tag_text}"
+        return format_model_entry(
+            _ + 1,
+            model,
+            current_model,
+            widths=widths,
+        )
 
     chosen = interactive_select(
         title_text=title_text,
         items=models,
         render_item=render_item,
+        header_lines=[
+            f"{'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State",
+            f"{'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----",
+        ],
         footer_lines=["Press Q or Esc to cancel."],
     )
     if not chosen:
@@ -1125,16 +1135,45 @@ def model_is_recommended(model: Dict[str, Any]) -> bool:
     return any(token in name for token in ("flash", "pro"))
 
 
-def format_model_entry(index: int, model: Dict[str, Any], current_model: str) -> str:
+def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
+    short_width = 0
+    name_width = 0
+    tag_width = 0
+    for model in models:
+        short_width = max(short_width, len(short_model_name(model)))
+        name_width = max(name_width, len(model_name(model)))
+        tag_width = max(tag_width, len(str(model.get("_tag") or "")))
+    return {
+        "short": min(max(short_width, 12), 28),
+        "name": min(max(name_width, 18), 42),
+        "tag": min(max(tag_width, 4), 12),
+    }
+
+
+def format_model_entry(
+    index: int,
+    model: Dict[str, Any],
+    current_model: str,
+    widths: Optional[Dict[str, int]] = None,
+    selected: bool = False,
+) -> str:
     name = model_name(model)
     display_name = short_model_name(model)
-    active = " *" if name == current_model else ""
-    hidden = " (hidden)" if model.get("_hidden") else ""
-    tag = model.get("_tag")
-    tag_text = f" [{tag}]" if tag else ""
-    usage = model.get("_uses")
-    usage_text = f" [uses: {int(usage)}]" if usage is not None else ""
-    return f"{index:>2}. {display_name} [{name}]{usage_text}{hidden}{active}{tag_text}"
+    widths = widths or build_model_table_widths([model])
+    active = "*" if name == current_model else " "
+    hidden = "hidden" if model.get("_hidden") else ""
+    tag = str(model.get("_tag") or "")
+    usage = int(model.get("_uses") or 0)
+    marker = ">" if selected else " "
+    return (
+        f"{marker} {index:>2}  "
+        f"{display_name:<{widths['short']}}  "
+        f"{name:<{widths['name']}}  "
+        f"{usage:>4}  "
+        f"{tag:<{widths['tag']}}  "
+        f"{active}  "
+        f"{hidden}"
+    ).rstrip()
 
 
 def apply_model_tags(
@@ -1438,6 +1477,9 @@ def main() -> int:
         else:
             print(f"Showing recommended models: {len(shown_models)} models. Current model: {client.model} [uses: {current_uses}]")
         print()
+        widths = build_model_table_widths(shown_models)
+        print(f"{'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State")
+        print(f"{'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----")
         if show_all:
             index = 1
             for group in ("Stable", "Aliases", "Preview", "Gemma", "Image"):
@@ -1446,12 +1488,12 @@ def main() -> int:
                     continue
                 print(f"[{group}]")
                 for model in grouped_models:
-                    print(format_model_entry(index, model, client.model))
+                    print(format_model_entry(index, model, client.model, widths=widths))
                     index += 1
                 print()
         else:
             for index, model in enumerate(shown_models[:DEFAULT_MODEL_LIST_LIMIT], start=1):
-                print(format_model_entry(index, model, client.model))
+                print(format_model_entry(index, model, client.model, widths=widths))
             if len(shown_models) > DEFAULT_MODEL_LIST_LIMIT:
                 print()
                 print("Tip: use /models all for the full catalog.")
