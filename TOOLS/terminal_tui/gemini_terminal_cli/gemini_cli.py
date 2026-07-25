@@ -828,6 +828,12 @@ def pick_api_account_interactive(accounts: Dict[str, str], title_text: str = "Se
     return str(chosen["name"])
 
 
+def first_api_account_name(accounts: Dict[str, str]) -> Optional[str]:
+    if not accounts:
+        return None
+    return next(iter(sorted(accounts.keys(), key=str.lower)))
+
+
 def parse_model_index(text: str) -> Optional[int]:
     try:
         idx = int(text.strip())
@@ -1063,6 +1069,7 @@ def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
+    parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /loadapi 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
     parser.add_argument("--api-key", default=None, help="Gemini API key")
     parser.add_argument("--model", default=None, help="Gemini model")
@@ -1096,6 +1103,25 @@ def main() -> int:
     api_key = args.api_key or api_accounts.get(saved_last_api_account, "") or os.environ.get("GEMINI_API_KEY", "")
     active_api_account = saved_last_api_account if saved_last_api_account in api_accounts else ""
     active_model = args.model or saved_last_model or DEFAULT_MODEL
+
+    if args.startup_args:
+        if args.startup_args[0].startswith("/"):
+            startup_command = args.startup_args[0].lower()
+            startup_remainder = " ".join(args.startup_args[1:]).strip()
+            if startup_command == "/loadapi":
+                if not api_accounts:
+                    error("No saved API accounts. Use /addapi first.")
+                    return 1
+                chosen_name = startup_remainder or first_api_account_name(api_accounts)
+                if not chosen_name or chosen_name not in api_accounts:
+                    error("Unknown API account name.")
+                    return 1
+                api_key = api_accounts[chosen_name]
+                active_api_account = chosen_name
+            else:
+                warn(f"Ignoring unknown startup command: {' '.join(args.startup_args)}")
+        elif not args.prompt:
+            args.prompt = " ".join(args.startup_args)
 
     if not api_key:
         error("Missing Gemini API key. Use /addapi to add one, or pass --api-key / GEMINI_API_KEY.")

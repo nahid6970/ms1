@@ -44,6 +44,14 @@ python .\gemini_terminal_cli\gemini_cli.py --max-tool-loops 12
 python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_cli\transcripts\latest.json
 ```
 
+### Load a saved API account at startup
+
+```powershell
+python .\gemini_terminal_cli\gemini_cli.py /loadapi 09
+```
+
+If you omit the account name, the CLI loads the first saved account from `api_accounts.json`.
+
 ## Commands inside the REPL
 
 - `/help` - show commands
