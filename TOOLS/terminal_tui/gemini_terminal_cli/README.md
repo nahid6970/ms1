@@ -55,6 +55,12 @@ If you omit the account name, the CLI loads the first saved account from `api_ac
 If you omit `--password`, the CLI prompts for it.
 `--api-password` works the same as `--password`.
 
+### Load a system instruction from a file
+
+```powershell
+python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
+```
+
 ## Commands inside the REPL
 
 - `/help` - show commands
@@ -65,7 +71,7 @@ If you omit `--password`, the CLI prompts for it.
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
-- `/system <text>` - replace the system instruction
+- `/system <text|file>` - replace the system instruction or load it from a file
 - `/tools on|off` - enable or disable local tools
 - `/save <file>` - write transcript JSON
 - `/load <file>` - load transcript JSON
@@ -92,3 +98,4 @@ The CLI exposes only local, standard-library tools:
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.
+- `/test` is the current command for model testing; `/model test` remains an alias.
