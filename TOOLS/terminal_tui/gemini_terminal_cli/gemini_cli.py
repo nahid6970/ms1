@@ -792,6 +792,7 @@ def load_model_prefs() -> Dict[str, Any]:
         return {
             "hidden_models": [],
             "speed_tags": {},
+            "model_usage_counts": {},
             "last_model": DEFAULT_MODEL,
             "last_api_account": "",
             "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -812,9 +813,13 @@ def load_model_prefs() -> Dict[str, Any]:
         speed_tags = data.get("speed_tags", {})
         if not isinstance(speed_tags, dict):
             speed_tags = {}
+        usage_counts = data.get("model_usage_counts", {})
+        if not isinstance(usage_counts, dict):
+            usage_counts = {}
         return {
             "hidden_models": [str(item) for item in hidden],
             "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
+            "model_usage_counts": {str(k): int(v) for k, v in usage_counts.items()},
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": str(data.get("last_api_account") or ""),
             "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
@@ -823,6 +828,7 @@ def load_model_prefs() -> Dict[str, Any]:
         return {
             "hidden_models": [],
             "speed_tags": {},
+            "model_usage_counts": {},
             "last_model": DEFAULT_MODEL,
             "last_api_account": "",
             "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -832,6 +838,7 @@ def load_model_prefs() -> Dict[str, Any]:
 def save_model_prefs(
     hidden_models: List[str],
     speed_tags: Dict[str, str],
+    model_usage_counts: Dict[str, int],
     last_model: str,
     last_api_account: str,
     tool_loop_limit: int,
@@ -839,6 +846,7 @@ def save_model_prefs(
     payload = {
         "hidden_models": sorted(set(hidden_models)),
         "speed_tags": dict(sorted(speed_tags.items())),
+        "model_usage_counts": dict(sorted((str(k), int(v)) for k, v in model_usage_counts.items())),
         "last_model": last_model,
         "last_api_account": last_api_account,
         "tool_loop_limit": int(tool_loop_limit),
@@ -965,7 +973,9 @@ def pick_model_interactive(
         hidden = " (hidden)" if model.get("_hidden") else ""
         tag = model.get("_tag")
         tag_text = f" [{tag}]" if tag else ""
-        return f"{short_model_name(model)} [{model_name(model)}]{hidden}{active}{tag_text}"
+        uses = model.get("_uses")
+        uses_text = f" [uses: {int(uses)}]" if uses is not None else ""
+        return f"{short_model_name(model)} [{model_name(model)}]{uses_text}{hidden}{active}{tag_text}"
 
     chosen = interactive_select(
         title_text=title_text,
@@ -981,6 +991,7 @@ def pick_model_interactive(
 def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[str]:
     speed_tags: Dict[str, str] = {}
     failed_models: List[str] = []
+    passed_models: List[str] = []
     passed = 0
     failed = 0
     print()
@@ -991,10 +1002,13 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[
         started = time.perf_counter()
         try:
             result = test_model(client, name, temperature=0.0)
+            if normalize_text(result).strip() != "OK":
+                raise RuntimeError(f"Unexpected response: {result}")
             elapsed = time.perf_counter() - started
             speed_tag = classify_test_speed(elapsed)
             speed_tags[name] = speed_tag
             passed += 1
+            passed_models.append(name)
             print(f"OK [{speed_tag}] ({result[:60]})")
         except Exception as exc:
             elapsed = time.perf_counter() - started
@@ -1006,6 +1020,7 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[
     print()
     info(f"Test summary: {passed} passed, {failed} failed.")
     test_all_models.last_speed_tags = speed_tags
+    test_all_models.last_passed_models = passed_models
     return failed_models
 
 
@@ -1117,16 +1132,25 @@ def format_model_entry(index: int, model: Dict[str, Any], current_model: str) ->
     hidden = " (hidden)" if model.get("_hidden") else ""
     tag = model.get("_tag")
     tag_text = f" [{tag}]" if tag else ""
-    return f"{index:>2}. {display_name} [{name}]{hidden}{active}{tag_text}"
+    usage = model.get("_uses")
+    usage_text = f" [uses: {int(usage)}]" if usage is not None else ""
+    return f"{index:>2}. {display_name} [{name}]{usage_text}{hidden}{active}{tag_text}"
 
 
-def apply_model_tags(models: List[Dict[str, Any]], speed_tags: Dict[str, str]) -> List[Dict[str, Any]]:
+def apply_model_tags(
+    models: List[Dict[str, Any]],
+    speed_tags: Dict[str, str],
+    usage_counts: Optional[Dict[str, int]] = None,
+) -> List[Dict[str, Any]]:
     tagged_models: List[Dict[str, Any]] = []
     for model in models:
         copy_model = dict(model)
         tag = speed_tags.get(model_name(model))
         if tag:
             copy_model["_tag"] = tag
+        if usage_counts is not None:
+            uses = int(usage_counts.get(model_name(model), 0) or 0)
+            copy_model["_uses"] = uses
         tagged_models.append(copy_model)
     return tagged_models
 
@@ -1304,6 +1328,7 @@ def main() -> int:
     model_prefs = load_model_prefs()
     hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
+    model_usage_counts: Dict[str, int] = dict(model_prefs.get("model_usage_counts", {}))
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
     tool_loop_limit = int(model_prefs.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS)
@@ -1403,13 +1428,15 @@ def main() -> int:
         shown_models = apply_model_tags(
             filter_models_for_display(models, hidden_models, show_all=show_all),
             speed_tags,
+            model_usage_counts,
         )
         print()
         title("Available Models")
+        current_uses = int(model_usage_counts.get(client.model, 0) or 0)
         if show_all:
-            print(f"Showing full catalog: {len(shown_models)} models. Current model: {client.model}")
+            print(f"Showing full catalog: {len(shown_models)} models. Current model: {client.model} [uses: {current_uses}]")
         else:
-            print(f"Showing recommended models: {len(shown_models)} models. Current model: {client.model}")
+            print(f"Showing recommended models: {len(shown_models)} models. Current model: {client.model} [uses: {current_uses}]")
         print()
         if show_all:
             index = 1
@@ -1435,6 +1462,7 @@ def main() -> int:
         return apply_model_tags(
             filter_models_for_display(models, hidden_models, show_all=False),
             speed_tags,
+            model_usage_counts,
         )
 
     def prompt_text() -> str:
@@ -1442,7 +1470,13 @@ def main() -> int:
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
-        print(save_model_prefs(hidden_models, speed_tags, client.model, account_name, tool_loop_limit))
+        print(save_model_prefs(hidden_models, speed_tags, model_usage_counts, client.model, account_name, tool_loop_limit))
+
+    def record_model_usage(model_name_value: str, amount: int = 1) -> None:
+        if not model_name_value or amount <= 0:
+            return
+        model_usage_counts[model_name_value] = int(model_usage_counts.get(model_name_value, 0) or 0) + amount
+        persist_selection()
 
     def run_turn(user_text: str) -> None:
         nonlocal contents
@@ -1479,6 +1513,7 @@ def main() -> int:
             function_calls = extract_function_calls(parts)
             if not function_calls:
                 contents.append(content_obj)
+                record_model_usage(client.model)
                 return
 
             contents.append(content_obj)
@@ -1534,6 +1569,9 @@ def main() -> int:
                     if command == "/test" or remainder.lower() in {"test", "test all"}:
                         failed_models = test_all_models(client, model_cache)
                         speed_tags.update(getattr(test_all_models, "last_speed_tags", {}))
+                        passed_models = list(getattr(test_all_models, "last_passed_models", []))
+                        for model_name_value in passed_models:
+                            model_usage_counts[model_name_value] = int(model_usage_counts.get(model_name_value, 0) or 0) + 1
                         hidden_set = set(hidden_models)
                         new_hidden = [m for m in failed_models if m not in hidden_set]
                         if new_hidden:
@@ -1557,6 +1595,7 @@ def main() -> int:
                                 if not m.get("_hidden")
                             ],
                             speed_tags,
+                            model_usage_counts,
                         )
                         chosen = pick_model_interactive(visible_models, client.model, title_text="Select Model")
                         if chosen:
