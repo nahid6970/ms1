@@ -1,11 +1,11 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-25T18:49:33.944209",
+    "timestamp": "2026-07-25T18:53:15.835550",
     "aliases": {
         "ll": "ls -la",
         "gl": "git log --oneline",
         "cls": "clear",
-        "gemini": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358 /loadapi 09"
+        "gg": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358 /loadapi 09"
     },
     "context_menu": {
         "Background": {
