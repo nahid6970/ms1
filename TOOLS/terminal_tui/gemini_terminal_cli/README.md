@@ -48,10 +48,11 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 ### Load a saved API account at startup
 
 ```powershell
-python .\gemini_terminal_cli\gemini_cli.py /loadapi 09
+python .\gemini_terminal_cli\gemini_cli.py --password mypass /loadapi 09
 ```
 
 If you omit the account name, the CLI loads the first saved account from `api_accounts.lock`.
+If you omit `--password`, the CLI prompts for it.
 
 ## Commands inside the REPL
 
@@ -88,3 +89,4 @@ The CLI exposes only local, standard-library tools:
 - Named API accounts are stored in `api_accounts.lock`.
 - The CLI restores the last-used API account and model on startup when they have been saved.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
+- `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.

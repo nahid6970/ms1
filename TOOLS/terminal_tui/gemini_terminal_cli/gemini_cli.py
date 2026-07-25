@@ -1192,6 +1192,7 @@ def main() -> int:
     parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /loadapi 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
     parser.add_argument("--api-key", default=None, help="Gemini API key")
+    parser.add_argument("--password", "--api-password", dest="api_password", default=None, help="Password for locked API accounts")
     parser.add_argument("--model", default=None, help="Gemini model")
     parser.add_argument("--system", default=DEFAULT_SYSTEM, help="System instruction")
     parser.add_argument("--project-root", default=os.getcwd(), help="Working directory for local tools")
@@ -1224,7 +1225,7 @@ def main() -> int:
         nonlocal api_accounts, api_accounts_loaded
         if not api_accounts_loaded:
             try:
-                api_accounts = dict(load_api_accounts().get("accounts", {}))
+                api_accounts = dict(load_api_accounts(password=args.api_password).get("accounts", {}))
             except RuntimeError as exc:
                 error(str(exc))
                 api_accounts = {}
@@ -1485,7 +1486,7 @@ def main() -> int:
                     api_accounts[name] = key
                     active_api_account = name
                     client.api_key = key
-                    print(save_api_accounts(api_accounts))
+                    print(save_api_accounts(api_accounts, password=args.api_password))
                     api_accounts_loaded = True
                     persist_selection()
                     info(f"Loaded API account: {name}")
