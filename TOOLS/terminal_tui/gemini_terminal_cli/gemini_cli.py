@@ -988,10 +988,7 @@ def pick_model_interactive(
         title_text=title_text,
         items=models,
         render_item=render_item,
-        header_lines=[
-            f"{'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State",
-            f"{'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----",
-        ],
+        header_lines=build_model_table_header(widths),
         footer_lines=["Press Q or Esc to cancel."],
     )
     if not chosen:
@@ -1150,6 +1147,13 @@ def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
         "name": min(max(name_width, 18), 42),
         "tag": min(max(tag_width, 4), 12),
     }
+
+
+def build_model_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State",
+        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----",
+    ]
 
 
 def format_model_entry(
@@ -1487,8 +1491,8 @@ def main() -> int:
             print(f"Showing recommended models: {len(shown_models)} models. Current model: {client.model} [uses: {current_uses}]")
         print()
         widths = build_model_table_widths(shown_models)
-        print(f"{'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State")
-        print(f"{'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----")
+        for line in build_model_table_header(widths):
+            print(line)
         if show_all:
             index = 1
             for group in ("Stable", "Aliases", "Preview", "Gemma", "Image"):
