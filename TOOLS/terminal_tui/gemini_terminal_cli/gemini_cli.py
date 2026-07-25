@@ -548,6 +548,43 @@ def normalize_text(text: str) -> str:
     return text
 
 
+def _format_tool_value(value: Any) -> str:
+    if isinstance(value, str):
+        text = value.rstrip()
+        if "\n" in text or len(text) > 120:
+            return "\n".join(f"    {line}" for line in text.splitlines())
+        return text
+    if isinstance(value, (dict, list)):
+        return textwrap.indent(json.dumps(value, indent=2, ensure_ascii=False), "    ")
+    return str(value)
+
+
+def format_tool_call(name: str, args: Dict[str, Any]) -> str:
+    lines = [f"[tool] {name}"]
+    if not args:
+        return "\n".join(lines)
+    for key in sorted(args):
+        value = args[key]
+        if isinstance(value, str) and ("\n" in value.rstrip() or len(value) > 120):
+            lines.append(f"  {key}:")
+            lines.extend(_format_tool_value(value).splitlines())
+        else:
+            lines.append(f"  {key}: {json.dumps(value, ensure_ascii=False) if isinstance(value, (dict, list)) else value}")
+    return "\n".join(lines)
+
+
+def format_tool_result(result: str) -> str:
+    text = result[:4000].rstrip()
+    lines = ["[tool-result]"]
+    if text:
+        lines.extend(f"  {line}" for line in text.splitlines())
+    else:
+        lines.append("  <empty>")
+    if len(result) > 4000:
+        lines.append("  ... (truncated)")
+    return "\n".join(lines)
+
+
 def render_model_parts(parts: List[Dict[str, Any]]) -> str:
     chunks: List[str] = []
     for part in parts:
@@ -1189,7 +1226,7 @@ def main() -> int:
             for function_call in function_calls:
                 name = function_call.get("name", "")
                 call_args = function_call.get("args", {}) or {}
-                info(f"[tool] {name} {json.dumps(call_args, ensure_ascii=False)}")
+                info(format_tool_call(name, call_args))
                 result = execute_tool(name, call_args, cwd)
                 responses.append(
                     {
@@ -1199,7 +1236,7 @@ def main() -> int:
                         }
                     }
                 )
-                info(f"[tool-result] {result[:4000]}")
+                info(format_tool_result(result))
 
             contents.append({"role": "user", "parts": responses})
 

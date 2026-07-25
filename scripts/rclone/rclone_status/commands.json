@@ -9,7 +9,7 @@
         "last_dir": "L2R",
         "last_op": "sync",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "last_flags": "--fast-list -P --size-only"
+        "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames"
     },
     "p_1": {
         "label": "db",
@@ -19,20 +19,20 @@
         "index": 2,
         "enabled": true,
         "last_dir": "L2R",
-        "last_op": "check",
+        "last_op": "sync",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10"
     },
     "p_2": {
-        "label": "_copy",
-        "src": "C:\\@delta\\db",
-        "dst": "gu:\\db",
+        "label": "song",
+        "src": "gu:\\song",
+        "dst": "C:\\Users\\nahid\\Downloads\\song",
         "cmd": "rclone check src dst --size-only --fast-list",
         "index": 2,
         "enabled": true,
         "last_dir": "L2R",
-        "last_op": "check",
+        "last_op": "sync",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "last_flags": "--fast-list -P --size-only --transfers 10"
+        "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames"
     }
 }
