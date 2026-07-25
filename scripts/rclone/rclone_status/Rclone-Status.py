@@ -80,12 +80,26 @@ class HoverButton(tk.Button):
         self.hover_color = kw.pop('hover_color', CP_YELLOW)
         self.default_fg = kw.pop('default_fg', "white")
         self.hover_fg = kw.pop('hover_fg', "black")
+        self.hover_bg = kw.pop('hover_bg', True)
         # Use passed font if available, otherwise use default
         btn_font = kw.pop('font', ("Consolas", 10, "bold"))
         super().__init__(master, **kw)
-        self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color, fg=self.hover_fg))
+        self.bind("<Enter>", lambda e: self.configure(bg=self.hover_color if self.hover_bg else self.default_color, fg=self.hover_fg))
         self.bind("<Leave>", lambda e: self.configure(bg=self.default_color, fg=self.default_fg))
-        self.configure(bg=self.default_color, fg=self.default_fg, bd=0, highlightthickness=0, font=btn_font, cursor="hand2")
+        self.configure(
+            bg=self.default_color,
+            fg=self.default_fg,
+            bd=0,
+            relief="flat",
+            highlightthickness=0,
+            overrelief="flat",
+            activebackground=self.hover_color if self.hover_bg else self.default_color,
+            activeforeground=self.hover_fg,
+            font=btn_font,
+            cursor="hand2",
+            padx=0,
+            pady=0,
+        )
 
 class CyberEntry(tk.Entry):
     def __init__(self, master=None, **kw):
@@ -158,8 +172,21 @@ def setup_custom_window(win, title, width, height):
     
     tk.Label(title_bar, text=f"// {title}", bg=CP_PANEL, fg=CP_YELLOW, font=("Consolas", 9, "bold")).pack(side="left", padx=10)
     
-    close_btn = tk.Button(title_bar, text="\uf00d", font=("JetBrainsMono NFP", 10), bg=CP_PANEL, fg=CP_DIM, activebackground=CP_RED, activeforeground="white", bd=0, command=win.destroy, cursor="hand2")
-    close_btn.pack(side="right", padx=5)
+    close_btn = HoverButton(
+        title_bar,
+        text="X",
+        font=("Consolas", 10, "bold"),
+        default_color=CP_PANEL,
+        hover_color=CP_PANEL,
+        default_fg=CP_DIM,
+        hover_fg=CP_RED,
+        hover_bg=False,
+        command=win.destroy,
+        padx=0,
+        pady=0,
+        width=1,
+    )
+    close_btn.pack(side="right", padx=(0, 6), pady=0)
     close_btn.bind("<Enter>", lambda e: close_btn.config(fg="white", bg=CP_RED))
     close_btn.bind("<Leave>", lambda e: close_btn.config(fg=CP_DIM, bg=CP_PANEL))
 
@@ -613,10 +640,10 @@ def create_gui():
         lbl.pack(side="left", padx=10); lbl.bind("<Button-1>", lambda e, c=cfg, k=key: ProjectActionWindow(ROOT, c, k))
         lbl.bind("<Button-3>", lambda e, k=key: edit_command(k)); check_and_update_label(lbl, cfg)
     tk.Frame(ROOT1, width=1, bg=CP_DIM).pack(side="left", padx=8, fill="y", pady=8)
-    HoverButton(ROOT1, text="\uf067", command=lambda: edit_command(None), default_color=CP_PANEL, hover_color=CP_CYAN).pack(side="left", padx=2)
-    HoverButton(ROOT1, text="\uf013", command=open_settings, default_color=CP_PANEL, hover_color=CP_YELLOW).pack(side="left", padx=2)
-    HoverButton(ROOT1, text="\uf021", command=lambda: os.execv(sys.executable, ['python'] + sys.argv), default_color=CP_PANEL).pack(side="left", padx=2)
-    HoverButton(ROOT1, text="\uf00d", command=lambda: sys.exit(0), hover_color=CP_RED, default_color=CP_PANEL).pack(side="left", padx=(2, 8))
+    HoverButton(ROOT1, text="\uf067", command=lambda: edit_command(None), default_color=CP_PANEL, hover_color=CP_CYAN, hover_fg=CP_CYAN, hover_bg=False).pack(side="left", padx=2)
+    HoverButton(ROOT1, text="\uf013", command=open_settings, default_color=CP_PANEL, hover_color=CP_YELLOW, hover_fg=CP_YELLOW, hover_bg=False).pack(side="left", padx=2)
+    HoverButton(ROOT1, text="\uf021", command=lambda: os.execv(sys.executable, ['python'] + sys.argv), default_color=CP_PANEL, hover_fg=CP_CYAN, hover_bg=False).pack(side="left", padx=2)
+    HoverButton(ROOT1, text="\uf00d", command=lambda: sys.exit(0), default_color=CP_PANEL, hover_color=CP_RED, hover_fg=CP_RED, hover_bg=False).pack(side="left", padx=(2, 8))
     def adjust():
         ROOT.update_idletasks(); w = ROOT1.winfo_reqwidth() + 14 
         ROOT.geometry(f"{w}x{app_settings['height']}+{app_settings['x']}+{app_settings['y']}")
