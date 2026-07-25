@@ -4,12 +4,13 @@ Python/Tkinter desktop app for managing rclone tasks with a cyberpunk custom UI,
 # Latest Implementation
 - `Rclone-Status.py`: replaced raw runtime flags with toggle chips for `--dry-run`, `--fast-list`, `-P`, `--track-renames`, and `--size-only`; added editable `--transfers` input and `+` placeholder.
 - `Rclone-Status.py`: added configurable `project_spacing` for header gaps and `path_font_size` for left/right path fields in the task runner.
+- `Rclone-Status.py`: added Tab-triggered folder/file browser entries for the left/right path fields using a Tk browser dialog, with callback-based selection and filtered list mapping.
 - `Rclone-Status.py`: removed hover background effects from the arrow switcher and toolbar controls; fixed title-bar close button alignment/styling.
 - `Rclone-Status.py`: moved `EXECUTE_CMD` to the bottom-right footer, removed the in-app command preview, and now echoes the full rclone command in the terminal only.
 - `Rclone-Status.py`: replaced the focusable log area with a passive status label to avoid the blue clickable block.
 
 # Critical Context
-`HoverButton` now supports `hover_bg` and `hover_effect`; use these instead of custom per-button hover hacks. The task runner builds the final rclone command in `run_task()`, prints it through PowerShell, and keeps the UI command area hidden. Project label spacing comes from `app_settings["project_spacing"]`, and path entry font size comes from `app_settings["path_font_size"]`.
+`HoverButton` now supports `hover_bg` and `hover_effect`; use these instead of custom per-button hover hacks. The task runner builds the final rclone command in `run_task()`, prints it through PowerShell, and keeps the UI command area hidden. Project label spacing comes from `app_settings["project_spacing"]`, and path entry font size comes from `app_settings["path_font_size"]`. Tab on the left/right path entries opens `BrowserDialog`; selections must come from the visible filtered list, not the raw backing array.
 
 # Pending Task
-Apply the new settings behavior consistently if any other dialogs or entry points need the same path font or spacing controls.
+Apply the browser picker pattern to any other path entry surfaces if needed.

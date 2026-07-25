@@ -40,7 +40,7 @@
         "last_transfers": "10"
     },
     "p_2": {
-        "label": "song",
+        "label": "\uf001",
         "src": "gu:\\song",
         "dst": "C:\\Users\\nahid\\Downloads\\song",
         "cmd": "rclone check src dst --size-only --fast-list",
@@ -50,5 +50,25 @@
         "last_op": "sync",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames"
+    },
+    "p_3": {
+        "label": "msBackups",
+        "src": "gu:/msBackups/",
+        "dst": "C:/@delta/msBackups/",
+        "cmd": "rclone check src dst --size-only --fast-list",
+        "index": 2,
+        "enabled": true,
+        "last_dir": "L2R",
+        "last_op": "sync",
+        "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames",
+        "last_flags_state": {
+            "--dry-run": false,
+            "--fast-list": true,
+            "-P": true,
+            "--track-renames": false,
+            "--size-only": true
+        },
+        "last_transfers": "4"
     }
 }

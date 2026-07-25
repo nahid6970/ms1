@@ -8,6 +8,7 @@ import time
 import tkinter as tk
 from tkinter import messagebox, colorchooser
 import json
+import queue
 from PIL import Image, ImageTk
 import sys
 from io import BytesIO
@@ -110,6 +111,224 @@ class CyberEntry(tk.Entry):
         entry_font = kw.pop("font", ("Consolas", 10))
         super().__init__(master, **kw)
         self.configure(bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, bd=1, relief="solid", highlightthickness=1, highlightbackground=CP_DIM, highlightcolor=CP_CYAN, font=entry_font)
+
+class BrowserDialog(tk.Toplevel):
+    def __init__(self, parent, start_path, on_select=None, focus_target=None):
+        super().__init__(parent)
+        self.selected_path = None
+        self._on_select = on_select
+        self._focus_target = focus_target
+        self.current_path = self._normalize_path(start_path or "C:/")
+        self._all_items = []
+        self._visible_items = []
+        self._fetch_queue = queue.Queue()
+        self._fetch_token = 0
+        self._closed = False
+
+        self.container = setup_custom_window(self, f"BROWSE: {self.current_path}", 820, 560, autofit=False)
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self._build_ui()
+        self._fetch_content(self.current_path)
+
+    def _normalize_path(self, path):
+        path = (path or "").strip().replace("\\", "/")
+        if path and ":" in path and not path.endswith("/"):
+            path += "/"
+        return path or "C:/"
+
+    def _build_ui(self):
+        body = tk.Frame(self.container, bg=CP_BG)
+        body.pack(fill="both", expand=True, padx=14, pady=12)
+
+        search_row = tk.Frame(body, bg=CP_BG)
+        search_row.pack(fill="x", pady=(0, 8))
+        tk.Label(search_row, text="Search:", bg=CP_BG, fg=CP_YELLOW, font=("Consolas", 9, "bold")).pack(side="left")
+        self.search_var = tk.StringVar()
+        self.search_ent = CyberEntry(search_row, textvariable=self.search_var)
+        self.search_ent.pack(side="left", fill="x", expand=True, padx=(8, 0))
+        self.search_var.trace_add("write", lambda *_: self._filter_list(self.search_var.get()))
+
+        list_frame = tk.Frame(body, bg=CP_BG)
+        list_frame.pack(fill="both", expand=True)
+        self.listbox = tk.Listbox(
+            list_frame,
+            bg=CP_PANEL,
+            fg=CP_CYAN,
+            selectbackground=CP_CYAN,
+            selectforeground="black",
+            activestyle="none",
+            bd=0,
+            highlightthickness=1,
+            highlightbackground=CP_DIM,
+            font=("Consolas", 10),
+        )
+        self.listbox.pack(side="left", fill="both", expand=True)
+        self.listbox.bind("<Double-Button-1>", self._on_double_click)
+        self.listbox.bind("<Return>", self._on_double_click)
+
+        scroll = tk.Scrollbar(list_frame, command=self.listbox.yview)
+        scroll.pack(side="right", fill="y")
+        self.listbox.configure(yscrollcommand=scroll.set)
+
+        btn_row = tk.Frame(body, bg=CP_BG)
+        btn_row.pack(fill="x", pady=(8, 0))
+        HoverButton(btn_row, text="SELECT CURRENT FOLDER", command=self._select_current, default_color=CP_DIM).pack(side="left")
+        HoverButton(btn_row, text="BACK", command=self._go_back, default_color=CP_DIM).pack(side="left", padx=8)
+        HoverButton(btn_row, text="CANCEL", command=self._close, default_color=CP_DIM).pack(side="right")
+
+    def _close(self):
+        self._closed = True
+        if self.selected_path and callable(self._on_select):
+            self._on_select(self.selected_path)
+        if self.winfo_exists():
+            self.destroy()
+        target = self._focus_target if self._focus_target and self._focus_target.winfo_exists() else None
+        if target is not None:
+            parent = target.winfo_toplevel()
+            parent.after(25, lambda: (parent.lift(), parent.focus_force(), target.focus_set()))
+
+    def _go_back(self):
+        path = self.current_path.rstrip("/")
+        idx = path.rfind("/")
+        if idx != -1:
+            new_path = path[:idx + 1]
+            if len(new_path) > 1:
+                self._fetch_content(new_path)
+
+    def _fetch_content(self, path):
+        self.current_path = self._normalize_path(path)
+        self.title(f"BROWSE: {self.current_path}")
+        self.listbox.delete(0, "end")
+        self.listbox.insert("end", "Loading...")
+        self.listbox.selection_clear(0, "end")
+        self._fetch_token += 1
+        token = self._fetch_token
+        thread = threading.Thread(target=self._fetch_worker, args=(self.current_path, token), daemon=True)
+        thread.start()
+        self.after(75, lambda: self._poll_fetch(token))
+
+    def _fetch_worker(self, path, token):
+        try:
+            p = subprocess.Popen(
+                ["rclone", "lsf", "--max-depth", "1", "--format", "p", "--drive-acknowledge-abuse", path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+            try:
+                out, _ = p.communicate(timeout=15)
+            except subprocess.TimeoutExpired:
+                p.kill()
+                p.communicate()
+                out = b""
+            lines = out.decode("utf-8", errors="replace").splitlines()
+            items = []
+            for line in lines:
+                name = line.strip()
+                if not name:
+                    continue
+                items.append(self._normalize_path(path) + name)
+        except Exception:
+            items = []
+        self._fetch_queue.put((token, items))
+
+    def _poll_fetch(self, token):
+        if self._closed or not self.winfo_exists():
+            return
+        found = False
+        try:
+            while True:
+                fetched_token, items = self._fetch_queue.get_nowait()
+                if fetched_token != token:
+                    continue
+                found = True
+                self._populate(items)
+                return
+        except queue.Empty:
+            if not found:
+                self.after(75, lambda: self._poll_fetch(token))
+            return
+
+    def _populate(self, items):
+        self._all_items = items
+        self._filter_list(self.search_var.get())
+
+    def _filter_list(self, text):
+        search = (text or "").lower().strip()
+        self.listbox.delete(0, "end")
+        matches = []
+        for full_path in self._all_items:
+            name = full_path.rstrip("/").split("/")[-1]
+            if not search or search in name.lower():
+                matches.append(full_path)
+
+        if not matches:
+            self._visible_items = []
+            self.listbox.insert("end", "(No files or folders found here)" if not self._all_items else "(No matches for your search)")
+            return
+
+        self._visible_items = []
+        dirs = [p for p in matches if p.endswith("/")]
+        files = [p for p in matches if not p.endswith("/")]
+        for d in sorted(dirs):
+            display_name = d.rstrip("/").split("/")[-1] + "/"
+            self.listbox.insert("end", f"📁 {display_name}")
+            self.listbox.itemconfig(self.listbox.size() - 1, fg=CP_ORANGE)
+            self._visible_items.append(d)
+        for f in sorted(files):
+            display_name = f.rstrip("/").split("/")[-1]
+            self.listbox.insert("end", f"📄 {display_name}")
+            self.listbox.itemconfig(self.listbox.size() - 1, fg=CP_CYAN)
+            self._visible_items.append(f)
+
+    def _on_double_click(self, _event=None):
+        selection = self.listbox.curselection()
+        if not selection:
+            return
+        text = self.listbox.get(selection[0])
+        if text.startswith("("):
+            return
+        if selection[0] >= len(self._visible_items):
+            return
+        item = self._visible_items[selection[0]]
+        if item.endswith("/"):
+            self._fetch_content(item)
+        else:
+            self.selected_path = item
+            self._close()
+
+    def _select_current(self):
+        self.selected_path = self.current_path
+        self._close()
+
+class BrowserPathEntry(CyberEntry):
+    def __init__(self, master=None, **kw):
+        super().__init__(master, **kw)
+        self._browser_dialog = None
+        self.bind("<Tab>", self._open_browser)
+        self.bind("<KeyPress-Tab>", self._open_browser)
+
+    def _open_browser(self, _event=None):
+        start = self.get().strip() or "C:/"
+        if self._browser_dialog and self._browser_dialog.winfo_exists():
+            self._browser_dialog.lift()
+            self._browser_dialog.focus_force()
+            return "break"
+
+        self._browser_dialog = BrowserDialog(
+            self.winfo_toplevel(),
+            start,
+            on_select=self._apply_browser_selection,
+            focus_target=self,
+        )
+        return "break"
+
+    def _apply_browser_selection(self, selected_path):
+        self.delete(0, "end")
+        self.insert(0, selected_path)
+        self._browser_dialog = None
+        parent = self.winfo_toplevel()
+        parent.after(25, lambda: (parent.lift(), parent.focus_force(), self.focus_set()))
+
 
 class CyberSpinbox(tk.Spinbox):
     def __init__(self, master=None, **kw):
@@ -225,7 +444,7 @@ class ProjectActionWindow(tk.Toplevel):
         inner.pack(fill="x", padx=15, pady=5)
 
         path_font_size = int(app_settings.get("path_font_size", 10))
-        self.side_a_ent = CyberEntry(inner, font=("Consolas", path_font_size))
+        self.side_a_ent = BrowserPathEntry(inner, font=("Consolas", path_font_size))
         self.side_a_ent.insert(0, self.cfg["src"])
         self.side_a_ent.pack(side="left", fill="x", expand=True)
 
@@ -238,7 +457,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.arrow_btn.config(command=self.toggle_direction)
         self.arrow_btn.pack(side="left", padx=25)
 
-        self.side_b_ent = CyberEntry(inner, justify="right", font=("Consolas", path_font_size))
+        self.side_b_ent = BrowserPathEntry(inner, justify="right", font=("Consolas", path_font_size))
         self.side_b_ent.insert(0, self.cfg["dst"])
         self.side_b_ent.pack(side="left", fill="x", expand=True)
 
