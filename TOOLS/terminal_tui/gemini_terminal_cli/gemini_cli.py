@@ -16,7 +16,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set
 
 try:
     from Cryptodome.Cipher import AES
@@ -473,6 +473,15 @@ def list_tool_catalog() -> List[Dict[str, str]]:
     ]
 
 
+def tool_name_set() -> Set[str]:
+    return {tool["name"] for tool in list_tool_catalog()}
+
+
+def enabled_tool_names(disabled_tools: Set[str]) -> List[str]:
+    disabled = set(disabled_tools)
+    return [tool["name"] for tool in list_tool_catalog() if tool["name"] not in disabled]
+
+
 class GeminiClient:
     def __init__(self, api_key: str, model: str) -> None:
         self.api_key = api_key
@@ -482,7 +491,7 @@ class GeminiClient:
         self,
         contents: List[Dict[str, Any]],
         system_instruction: Optional[str] = None,
-        tools_enabled: bool = True,
+        tool_names: Optional[List[str]] = None,
         temperature: float = 0.2,
         max_output_tokens: int = 2048,
     ) -> Dict[str, Any]:
@@ -491,8 +500,12 @@ class GeminiClient:
             f"{urllib.parse.quote(self.model, safe='')}:generateContent?key={urllib.parse.quote(self.api_key)}"
         )
         payload: Dict[str, Any] = {"contents": contents}
-        if tools_enabled:
+        if tool_names is None:
             payload["tools"] = [{"functionDeclarations": list(FUNCTIONS.values())}]
+        else:
+            declarations = [FUNCTIONS[name] for name in tool_names if name in FUNCTIONS]
+            if declarations:
+                payload["tools"] = [{"functionDeclarations": declarations}]
         if system_instruction:
             payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
         payload["generationConfig"] = {
@@ -793,6 +806,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "hidden_models": [],
             "speed_tags": {},
             "model_usage_counts": {},
+            "disabled_tools": [],
             "last_model": DEFAULT_MODEL,
             "last_api_account": "",
             "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -803,6 +817,8 @@ def load_model_prefs() -> Dict[str, Any]:
             return {
                 "hidden_models": [],
                 "speed_tags": {},
+                "model_usage_counts": {},
+                "disabled_tools": [],
                 "last_model": DEFAULT_MODEL,
                 "last_api_account": "",
                 "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -816,10 +832,14 @@ def load_model_prefs() -> Dict[str, Any]:
         usage_counts = data.get("model_usage_counts", {})
         if not isinstance(usage_counts, dict):
             usage_counts = {}
+        disabled_tools = data.get("disabled_tools", [])
+        if not isinstance(disabled_tools, list):
+            disabled_tools = []
         return {
             "hidden_models": [str(item) for item in hidden],
             "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
             "model_usage_counts": {str(k): int(v) for k, v in usage_counts.items()},
+            "disabled_tools": [str(item) for item in disabled_tools],
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": str(data.get("last_api_account") or ""),
             "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
@@ -829,6 +849,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "hidden_models": [],
             "speed_tags": {},
             "model_usage_counts": {},
+            "disabled_tools": [],
             "last_model": DEFAULT_MODEL,
             "last_api_account": "",
             "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -839,6 +860,7 @@ def save_model_prefs(
     hidden_models: List[str],
     speed_tags: Dict[str, str],
     model_usage_counts: Dict[str, int],
+    disabled_tools: List[str],
     last_model: str,
     last_api_account: str,
     tool_loop_limit: int,
@@ -847,6 +869,7 @@ def save_model_prefs(
         "hidden_models": sorted(set(hidden_models)),
         "speed_tags": dict(sorted(speed_tags.items())),
         "model_usage_counts": dict(sorted((str(k), int(v)) for k, v in model_usage_counts.items())),
+        "disabled_tools": sorted(set(disabled_tools)),
         "last_model": last_model,
         "last_api_account": last_api_account,
         "tool_loop_limit": int(tool_loop_limit),
@@ -932,6 +955,8 @@ def interactive_select(
     render_item,
     header_lines: Optional[List[str]] = None,
     footer_lines: Optional[List[str]] = None,
+    instructions: str = "Use Up/Down, Enter to choose, Esc to cancel.",
+    on_space: Optional[Callable[[Dict[str, Any], int], None]] = None,
 ) -> Optional[Dict[str, Any]]:
     if not items:
         return None
@@ -941,7 +966,7 @@ def interactive_select(
     while True:
         clear_screen()
         title(title_text)
-        print("Use Up/Down, Enter to choose, Esc to cancel.")
+        print(instructions)
         print()
         if header_lines:
             for line in header_lines:
@@ -964,6 +989,8 @@ def interactive_select(
             index = (index - 1) % len(items)
         elif key in ("\xe0P", "\x00P"):
             index = (index + 1) % len(items)
+        elif key == " " and on_space is not None:
+            on_space(items[index], index)
         elif key.lower() == "q":
             return None
 
@@ -994,6 +1021,92 @@ def pick_model_interactive(
     if not chosen:
         return None
     return model_name(chosen)
+
+
+def build_tool_table_widths(tools: List[Dict[str, Any]]) -> Dict[str, int]:
+    name_width = 0
+    desc_width = 0
+    for tool in tools:
+        name_width = max(name_width, len(str(tool.get("name", ""))))
+        desc_width = max(desc_width, len(str(tool.get("description", ""))))
+    return {
+        "name": min(max(name_width, 10), 26),
+        "description": min(max(desc_width, 24), 56),
+    }
+
+
+def build_tool_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Tool':<{widths['name']}}  {'Description':<{widths['description']}}  State",
+        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['description']}  -----",
+    ]
+
+
+def format_tool_entry(
+    index: int,
+    tool: Dict[str, Any],
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    name = str(tool.get("name", ""))
+    description = str(tool.get("description", ""))
+    enabled = bool(tool.get("enabled", True))
+    marker = ">" if selected else " "
+    state = "on" if enabled else "off"
+    state_text = _ansi_wrap(state, "31") if not enabled else _ansi_wrap(state, "32")
+    row = (
+        f"{marker} {index:>2}  "
+        f"{name:<{widths['name']}}  "
+        f"{description:<{widths['description']}}  "
+        f"{state_text}"
+    ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    if not enabled:
+        return _ansi_wrap(row, "31")
+    return row
+
+
+def pick_tool_interactive(disabled_tools: Set[str], title_text: str = "Manage Tools") -> bool:
+    tools: List[Dict[str, Any]] = []
+    disabled = set(disabled_tools)
+    for tool in list_tool_catalog():
+        tool_copy = dict(tool)
+        tool_copy["enabled"] = tool_copy["name"] not in disabled
+        tools.append(tool_copy)
+
+    widths = build_tool_table_widths(tools)
+    changed = False
+
+    def render_item(tool: Dict[str, Any], index: int, selected: bool = False) -> str:
+        return format_tool_entry(index + 1, tool, widths, selected=selected)
+
+    def toggle_tool(tool: Dict[str, Any], _: int) -> None:
+        nonlocal changed
+        name = str(tool.get("name", ""))
+        if bool(tool.get("enabled", True)):
+            disabled.add(name)
+            tool["enabled"] = False
+        else:
+            disabled.discard(name)
+            tool["enabled"] = True
+        changed = True
+
+    interactive_select(
+        title_text=title_text,
+        items=tools,
+        render_item=render_item,
+        header_lines=build_tool_table_header(widths),
+        footer_lines=[
+            "Press Space to toggle the highlighted tool.",
+            "Press Enter or Esc to close.",
+        ],
+        instructions="Use Up/Down, Space to toggle, Enter to close, Esc to cancel.",
+        on_space=toggle_tool,
+    )
+    disabled_tools.clear()
+    disabled_tools.update(disabled)
+    return changed
 
 
 def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[str]:
@@ -1272,7 +1385,7 @@ def test_model(client: GeminiClient, model_name_value: str, temperature: float =
     response = test_client.generate(
         contents=[make_user_content("Reply with exactly: OK")],
         system_instruction="Reply with exactly OK.",
-        tools_enabled=False,
+        tool_names=[],
         temperature=temperature,
         max_output_tokens=16,
     )
@@ -1297,9 +1410,8 @@ def print_help() -> None:
               /addapi              Add a named API key
               /loadapi             Load the first saved API account, or a named one
               /loops <n>           Set max tool-call loops
-              /tool                Show implemented tools
+              /tool                Open the tool manager and toggle tools with Space
               /system <text|file>  Replace system instruction or load it from a file
-              /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
               /load <file>         Load transcript JSON
 
@@ -1307,19 +1419,11 @@ def print_help() -> None:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /model to pick a model with the arrow keys, or /test to test all models.
               - Use /addapi once, then /loadapi or just restart to reuse the last account.
-              - Use /tool or /tools to see the implemented local tools.
+              - Use /tool to see and toggle the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
             """
         ).strip()
     )
-
-
-def print_tool_catalog() -> None:
-    print()
-    title("Implemented Tools")
-    for tool in list_tool_catalog():
-        print(f"- {tool['name']}: {tool['description']}")
-    print()
 
 
 def make_user_content(text: str) -> Dict[str, Any]:
@@ -1381,6 +1485,7 @@ def main() -> int:
     hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
     model_usage_counts: Dict[str, int] = dict(model_prefs.get("model_usage_counts", {}))
+    disabled_tools: Set[str] = set(str(item) for item in model_prefs.get("disabled_tools", []))
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
     tool_loop_limit = int(model_prefs.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS)
@@ -1405,6 +1510,10 @@ def main() -> int:
     api_key = args.api_key or os.environ.get("GEMINI_API_KEY", "")
     active_api_account = ""
     active_model = args.model or saved_last_model or DEFAULT_MODEL
+    all_tool_names = tool_name_set()
+
+    if args.no_tools:
+        disabled_tools = set(all_tool_names)
 
     if args.startup_args:
         if args.startup_args[0].startswith("/"):
@@ -1440,7 +1549,6 @@ def main() -> int:
 
     client = GeminiClient(api_key, active_model)
     system_instruction = args.system
-    tools_enabled = not args.no_tools
     contents: List[Dict[str, Any]] = []
 
     if args.load_transcript:
@@ -1448,17 +1556,21 @@ def main() -> int:
         loaded = load_transcript(transcript_path)
         system_instruction = loaded.get("system_instruction", system_instruction)
         client.model = loaded.get("model", client.model)
-        tools_enabled = bool(loaded.get("tools_enabled", tools_enabled))
         cwd = resolve_path(loaded.get("project_root", str(cwd)), Path.cwd())
         contents = list(loaded.get("contents", []))
         tool_loop_limit = int(loaded.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
+        loaded_disabled_tools = loaded.get("disabled_tools")
+        if isinstance(loaded_disabled_tools, list):
+            disabled_tools = set(str(item) for item in loaded_disabled_tools)
+        elif "tools_enabled" in loaded and not bool(loaded.get("tools_enabled")):
+            disabled_tools = set(all_tool_names)
 
     title("Gemini Terminal CLI")
     info(f"Model: {client.model}")
     if active_api_account:
         info(f"API account: {active_api_account}")
     info(f"Project root: {cwd}")
-    info(f"Tools: {'on' if tools_enabled else 'off'}")
+    info(f"Tools on: {len(enabled_tool_names(disabled_tools))}/{len(all_tool_names)}")
     print_help()
 
     model_cache: List[Dict[str, Any]] = []
@@ -1525,7 +1637,17 @@ def main() -> int:
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
-        print(save_model_prefs(hidden_models, speed_tags, model_usage_counts, client.model, account_name, tool_loop_limit))
+        print(
+            save_model_prefs(
+                hidden_models,
+                speed_tags,
+                model_usage_counts,
+                sorted(disabled_tools),
+                client.model,
+                account_name,
+                tool_loop_limit,
+            )
+        )
 
     def record_model_usage(model_name_value: str, amount: int = 1) -> None:
         if not model_name_value or amount <= 0:
@@ -1542,7 +1664,7 @@ def main() -> int:
                 response = client.generate(
                     contents=contents,
                     system_instruction=system_instruction,
-                    tools_enabled=tools_enabled,
+                    tool_names=enabled_tool_names(disabled_tools),
                     temperature=args.temperature,
                     max_output_tokens=args.max_output_tokens,
                 )
@@ -1707,7 +1829,10 @@ def main() -> int:
                         info(f"Tool loop limit set to {tool_loop_limit}")
                     continue
                 if command == "/tool":
-                    print_tool_catalog()
+                    changed = pick_tool_interactive(disabled_tools)
+                    if changed:
+                        persist_selection()
+                        info(f"Tool settings updated. Enabled: {len(enabled_tool_names(disabled_tools))}/{len(all_tool_names)}")
                     continue
                 if command == "/system":
                     if remainder:
@@ -1720,15 +1845,6 @@ def main() -> int:
                     else:
                         warn("Usage: /system <text|file>")
                     continue
-                if command == "/tools":
-                    if not remainder:
-                        print_tool_catalog()
-                    elif remainder.lower() in {"on", "off"}:
-                        tools_enabled = remainder.lower() == "on"
-                        info(f"Tools {'enabled' if tools_enabled else 'disabled'}.")
-                    else:
-                        print_tool_catalog()
-                    continue
                 if command == "/save":
                     if remainder:
                         transcript_path = resolve_path(remainder, Path.cwd())
@@ -1736,7 +1852,7 @@ def main() -> int:
                             "model": client.model,
                             "system_instruction": system_instruction,
                             "project_root": str(cwd),
-                            "tools_enabled": tools_enabled,
+                            "disabled_tools": sorted(disabled_tools),
                             "contents": contents,
                             "tool_loop_limit": tool_loop_limit,
                         }
@@ -1751,7 +1867,11 @@ def main() -> int:
                         client.model = loaded.get("model", client.model)
                         system_instruction = loaded.get("system_instruction", system_instruction)
                         cwd = resolve_path(loaded.get("project_root", str(cwd)), Path.cwd())
-                        tools_enabled = bool(loaded.get("tools_enabled", tools_enabled))
+                        loaded_disabled_tools = loaded.get("disabled_tools")
+                        if isinstance(loaded_disabled_tools, list):
+                            disabled_tools = set(str(item) for item in loaded_disabled_tools)
+                        elif "tools_enabled" in loaded and not bool(loaded.get("tools_enabled")):
+                            disabled_tools = set(all_tool_names)
                         contents = list(loaded.get("contents", []))
                         info(f"Loaded transcript from {transcript_path}")
                     else:
@@ -1769,7 +1889,7 @@ def main() -> int:
             "model": client.model,
             "system_instruction": system_instruction,
             "project_root": str(cwd),
-            "tools_enabled": tools_enabled,
+            "disabled_tools": sorted(disabled_tools),
             "contents": contents,
             "tool_loop_limit": tool_loop_limit,
         }

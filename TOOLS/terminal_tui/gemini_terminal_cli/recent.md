@@ -2,6 +2,6 @@
 
 2. Latest Implementation: Updated `gemini_terminal_cli/gemini_cli.py` to support locked API account storage in `api_accounts.lock`, password-protected load/save flows, `/loadapi <name>` startup parsing, `/system <text|file>`, and `/test` as the model test command.
 
-3. Critical Context: Model and API state are stored in `model_prefs.json` and `api_accounts.lock`. The CLI remembers the last model and last API account across restarts; `/model` is arrow-key driven, `/test` auto-hides failing models, and `--password` / `--api-password` can bypass interactive prompts for the locked API file.
+3. Critical Context: Model and API state are stored in `model_prefs.json` and `api_accounts.lock`. The CLI remembers the last model and last API account across restarts; `/model` is arrow-key driven, `/test` auto-hides failing models, `/tool` opens an interactive tool manager with Space-to-toggle, and `--password` / `--api-password` can bypass interactive prompts for the locked API file.
 
 4. Pending Task: Decide whether the password flag should also be accepted from an environment variable for easier automation.

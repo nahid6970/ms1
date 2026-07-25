@@ -72,7 +72,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
 - `/system <text|file>` - replace the system instruction or load it from a file
-- `/tools on|off` - enable or disable local tools
+- `/tool` - open the tool manager; use Space to toggle tools on or off
 - `/save <file>` - write transcript JSON
 - `/load <file>` - load transcript JSON
 
@@ -93,9 +93,11 @@ The CLI exposes only local, standard-library tools:
 - It uses Gemini's function-calling API directly over HTTP.
 - Shell commands are intentionally explicit; the model must ask for them through the tool loop.
 - Hidden models, last model, and speed tags are stored in `model_prefs.json`.
+- Disabled tools are stored in `model_prefs.json` and in saved transcripts.
 - Named API accounts are stored in `api_accounts.lock`.
 - The CLI restores the last-used API account and model on startup when they have been saved.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.
 - `/test` is the current command for model testing; `/model test` remains an alias.
+- `/tool` is the only local tool command; `Space` toggles the selected tool and disabled tools show `off` in red.
