@@ -333,9 +333,19 @@ class ProjectActionWindow(tk.Toplevel):
         )
         self.add_flag_btn.grid(row=0, column=2, sticky="e", padx=(8, 0))
 
-        self.log_text = tk.Text(content, height=2, bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9), bd=0, highlightthickness=0)
+        self.log_var = tk.StringVar(value="")
+        self.log_text = tk.Label(
+            content,
+            textvariable=self.log_var,
+            bg=CP_BG,
+            fg=CP_YELLOW,
+            font=("Consolas", 9),
+            anchor="w",
+            justify="left",
+            bd=0,
+            highlightthickness=0,
+        )
         self.log_text.pack(fill="x", pady=(10, 4))
-        self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         footer = tk.Frame(content, bg=CP_BG)
         footer.pack(fill="x", pady=(0, 2))
@@ -433,7 +443,9 @@ class ProjectActionWindow(tk.Toplevel):
         def worker():
             def finish(error_line=None):
                 if error_line:
-                    self.log_text.insert("end", error_line, "yellow")
+                    self.log_var.set(error_line.strip())
+                else:
+                    self.log_var.set("")
                 self.action_btn.config(state="normal", text="EXECUTE_CMD")
                 trigger_all_checks()
 
