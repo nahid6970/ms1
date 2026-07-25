@@ -175,7 +175,7 @@ def setup_custom_window(win, title, width, height):
     close_btn = HoverButton(
         title_bar,
         text="X",
-        font=("Consolas", 10, "bold"),
+        font=("Consolas", 9, "bold"),
         default_color=CP_PANEL,
         hover_color=CP_PANEL,
         default_fg=CP_DIM,
@@ -186,9 +186,7 @@ def setup_custom_window(win, title, width, height):
         pady=0,
         width=1,
     )
-    close_btn.pack(side="right", padx=(0, 6), pady=0)
-    close_btn.bind("<Enter>", lambda e: close_btn.config(fg="white", bg=CP_RED))
-    close_btn.bind("<Leave>", lambda e: close_btn.config(fg=CP_DIM, bg=CP_PANEL))
+    close_btn.place(relx=1.0, x=-5, y=2, anchor="ne")
 
     def start_move(e): win.x, win.y = e.x, e.y
     def do_move(e):
