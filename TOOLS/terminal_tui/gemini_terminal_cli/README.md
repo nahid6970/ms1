@@ -61,7 +61,7 @@ If you omit `--password`, the CLI prompts for it.
 - `/exit` - quit
 - `/reset` - clear conversation
 - `/model` - open the model picker
-- `/model test` - test all models and auto-hide failures
+- `/test` - test all models and auto-hide failures
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn

@@ -1134,7 +1134,7 @@ def print_help() -> None:
               /exit                Quit
               /reset               Clear conversation history
               /model               Open the model picker
-              /model test          Test all models and hide failures
+              /test                Test all models and hide failures
               /addapi              Add a named API key
               /loadapi             Load the first saved API account, or a named one
               /loops <n>           Set max tool-call loops
@@ -1146,7 +1146,7 @@ def print_help() -> None:
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
-              - Use /model to pick a model with the arrow keys.
+              - Use /model to pick a model with the arrow keys, or /test to test all models.
               - Use /addapi once, then /loadapi or just restart to reuse the last account.
               - Use /tool or /tools to see the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
@@ -1445,10 +1445,10 @@ def main() -> int:
                     contents = []
                     info("Conversation cleared.")
                     continue
-                if command == "/model":
+                if command in {"/model", "/test"}:
                     if not model_cache:
                         refresh_model_cache()
-                    if remainder.lower() in {"test", "test all"}:
+                    if command == "/test" or remainder.lower() in {"test", "test all"}:
                         failed_models = test_all_models(client, model_cache)
                         speed_tags.update(getattr(test_all_models, "last_speed_tags", {}))
                         hidden_set = set(hidden_models)
@@ -1466,7 +1466,7 @@ def main() -> int:
                             info(f"Model set to {client.model}")
                             persist_selection()
                         else:
-                            warn("Unknown model selection. Use /model to pick from the list or /model test.")
+                            warn("Unknown model selection. Use /model to pick from the list or /test.")
                     else:
                         visible_models = apply_model_tags(
                             [
