@@ -1,10 +1,11 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-16T15:30:48.809369",
+    "timestamp": "2026-07-25T12:50:44.869378",
     "aliases": {
         "ll": "ls -la",
         "gl": "git log --oneline",
-        "cls": "clear"
+        "cls": "clear",
+        "gemini": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py"
     },
     "context_menu": {
         "Background": {

@@ -63,10 +63,10 @@
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames",
         "last_flags_state": {
-            "--dry-run": true,
+            "--dry-run": false,
             "--fast-list": true,
             "-P": true,
-            "--track-renames": false,
+            "--track-renames": true,
             "--size-only": true
         },
         "last_transfers": "4"
