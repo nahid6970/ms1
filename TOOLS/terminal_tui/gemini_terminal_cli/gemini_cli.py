@@ -1139,7 +1139,7 @@ def print_help() -> None:
               /loadapi             Load the first saved API account, or a named one
               /loops <n>           Set max tool-call loops
               /tool                Show implemented tools
-              /system <text>       Replace system instruction
+              /system <text|file>  Replace system instruction or load it from a file
               /tools on|off        Enable or disable local tools
               /save <file>         Save transcript JSON
               /load <file>         Load transcript JSON
@@ -1185,6 +1185,15 @@ def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
         f"Content:\n{file_text}\n\n"
         f"User request: {request_text}"
     )
+
+
+def resolve_system_instruction_input(text: str, cwd: Path) -> str:
+    candidate = resolve_path(text, cwd)
+    if candidate.exists() and candidate.is_file():
+        content = read_file(candidate)
+        if not content.startswith("Error:"):
+            return content
+    return text
 
 
 def main() -> int:
@@ -1525,10 +1534,14 @@ def main() -> int:
                     continue
                 if command == "/system":
                     if remainder:
-                        system_instruction = remainder
-                        info("System instruction replaced.")
+                        system_instruction = resolve_system_instruction_input(remainder, cwd)
+                        loaded_path = resolve_path(remainder, cwd)
+                        if loaded_path.exists() and loaded_path.is_file():
+                            info(f"System instruction loaded from {loaded_path}")
+                        else:
+                            info("System instruction replaced.")
                     else:
-                        warn("Usage: /system <text>")
+                        warn("Usage: /system <text|file>")
                     continue
                 if command == "/tools":
                     if not remainder:
