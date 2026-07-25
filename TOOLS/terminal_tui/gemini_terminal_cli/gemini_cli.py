@@ -7,6 +7,7 @@ import getpass
 import json
 import os
 import platform
+import re
 import time
 import subprocess
 import sys
@@ -560,6 +561,88 @@ def normalize_text(text: str) -> str:
     return text
 
 
+def _style_text(text: str, code: str) -> str:
+    if not sys.stdout.isatty():
+        return text
+    return f"\033[{code}m{text}\033[0m"
+
+
+def _render_inline_markdown(text: str) -> str:
+    if not text:
+        return text
+
+    def replace_link(match: re.Match[str]) -> str:
+        label = match.group(1)
+        url = match.group(2)
+        if sys.stdout.isatty():
+            return f"{_style_text(label, '4;36')} ({url})"
+        return f"{label} ({url})"
+
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_link, text)
+    text = re.sub(r"(?<!\*)\*\*(.+?)\*\*(?!\*)", lambda m: _style_text(m.group(1), "1"), text)
+    text = re.sub(r"(?<!_)__(.+?)__(?!_)", lambda m: _style_text(m.group(1), "1"), text)
+    text = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", lambda m: _style_text(m.group(1), "3"), text)
+    text = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", lambda m: _style_text(m.group(1), "3"), text)
+    text = re.sub(r"`([^`]+)`", lambda m: _style_text(m.group(1), "38;5;214"), text)
+    return text
+
+
+def render_markdown_text(text: str) -> str:
+    lines: List[str] = []
+    in_code_block = False
+    for raw_line in text.splitlines():
+        line = raw_line.rstrip()
+        fence = re.match(r"^\s*```(\w+)?\s*$", line)
+        if fence:
+            in_code_block = not in_code_block
+            language = fence.group(1) or ""
+            fence_label = f"```{language}" if language else "```"
+            lines.append(_style_text(fence_label, "90"))
+            continue
+        if in_code_block:
+            lines.append(f"  {raw_line}")
+            continue
+        if not line.strip():
+            lines.append("")
+            continue
+
+        heading = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if heading:
+            level = len(heading.group(1))
+            content = _render_inline_markdown(heading.group(2).strip())
+            if level <= 2:
+                lines.append(_style_text(content, "1;35"))
+            elif level == 3:
+                lines.append(_style_text(content, "1;36"))
+            else:
+                lines.append(_style_text(content, "1"))
+            continue
+
+        bullet = re.match(r"^\s*[-*+]\s+(.*)$", line)
+        if bullet:
+            lines.append(f"• {_render_inline_markdown(bullet.group(1))}")
+            continue
+
+        ordered = re.match(r"^\s*(\d+)\.\s+(.*)$", line)
+        if ordered:
+            lines.append(f"{ordered.group(1)}. {_render_inline_markdown(ordered.group(2))}")
+            continue
+
+        quote = re.match(r"^\s*>\s?(.*)$", line)
+        if quote:
+            lines.append(f"{_style_text('> ', '90')}{_render_inline_markdown(quote.group(1))}")
+            continue
+
+        horizontal_rule = re.match(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$", line)
+        if horizontal_rule:
+            lines.append(_style_text("─" * 32, "90"))
+            continue
+
+        lines.append(_render_inline_markdown(line))
+
+    return "\n".join(lines).strip()
+
+
 def _format_tool_value(value: Any) -> str:
     if isinstance(value, str):
         text = value.rstrip()
@@ -604,7 +687,7 @@ def render_model_parts(parts: List[Dict[str, Any]]) -> str:
             chunk = normalize_text(str(part["text"]))
             if chunk:
                 chunks.append(chunk)
-    return "\n\n".join(chunks).strip()
+    return render_markdown_text("\n\n".join(chunks).strip())
 
 
 def extract_function_calls(parts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
