@@ -167,7 +167,7 @@ def setup_custom_window(win, title, width, height):
     win.geometry(f"{width}x{height}+{center_x}+{center_y}")
     win.configure(bg=CP_BG)
     
-    border = tk.Frame(win, bg=CP_DIM, bd=0, highlightthickness=1, highlightbackground=CP_CYAN)
+    border = tk.Frame(win, bg=CP_BG, bd=0, highlightthickness=1, highlightbackground=CP_CYAN)
     border.place(relwidth=1, relheight=1)
     
     title_bar = tk.Frame(border, bg=CP_PANEL, height=30)
@@ -332,11 +332,15 @@ class ProjectActionWindow(tk.Toplevel):
         )
         self.add_flag_btn.grid(row=0, column=2, sticky="e", padx=(8, 0))
 
-        self.action_btn = HoverButton(content, text="EXECUTE_CMD", bg=CP_DIM, hover_color=CP_GREEN, command=self.run_task, pady=10)
-        self.action_btn.pack(fill="x", pady=5)
-
         self.log_text = tk.Text(content, height=10, bg=CP_PANEL, fg=CP_TEXT, font=("Consolas", 9), bd=0)
         self.log_text.pack(fill="both", expand=True, pady=10)
+        self.log_text.tag_config("yellow", foreground=CP_YELLOW)
+
+        footer = tk.Frame(content, bg=CP_BG)
+        footer.pack(fill="x", pady=(0, 5))
+
+        self.action_btn = HoverButton(footer, text="EXECUTE_CMD", bg=CP_DIM, hover_color=CP_GREEN, command=self.run_task, pady=10)
+        self.action_btn.pack(side="right")
         self.update_ui_state()
 
     def set_mode(self, m):
@@ -408,14 +412,6 @@ class ProjectActionWindow(tk.Toplevel):
                     cmd += f' --exclude "{item}"'
 
         self.action_btn.config(state="disabled", text="BUSY...")
-        # Show shortened command (hide long exclude lists)
-        exclude_count = cmd.count('--exclude')
-        if exclude_count > 3:
-            short_cmd = cmd[:cmd.index('--exclude')] + f'[{exclude_count} exclusions]'
-        else:
-            short_cmd = cmd
-        self.log_text.insert("end", f"// RUNNING: {short_cmd}\n", "yellow")
-        self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         def worker():
             def finish(error_line=None):
@@ -428,7 +424,11 @@ class ProjectActionWindow(tk.Toplevel):
                 pwsh_cmd = ["pwsh", "-NoLogo", "-NoProfile"]
                 if app_settings.get("keep_terminal_open", True):
                     pwsh_cmd.append("-NoExit")
-                pwsh_cmd.extend(["-Command", cmd])
+                shown_cmd = cmd.replace("'", "''")
+                pwsh_cmd.extend([
+                    "-Command",
+                    f"Write-Host '── RCLONE COMMAND ──' -ForegroundColor Yellow; Write-Host '{shown_cmd}' -ForegroundColor Cyan; {cmd}"
+                ])
                 p = subprocess.Popen(
                     pwsh_cmd,
                     cwd=os.path.dirname(__file__),
