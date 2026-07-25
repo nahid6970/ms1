@@ -226,7 +226,7 @@ class ProjectActionWindow(tk.Toplevel):
         # Styled Switcher using settings icons
         self.arrow_btn = HoverButton(inner, text=app_settings["icon_r"] if self.direction == "L2R" else app_settings["icon_l"], 
                                      font=("JetBrainsMono NFP", app_settings.get("icon_size", 22)), width=3, height=1, 
-                                     default_color=CP_BG, hover_color=CP_CYAN, hover_fg="black")
+                                     default_color=CP_BG, hover_color=CP_BG, hover_fg=CP_YELLOW, hover_bg=False)
         self.arrow_btn.default_fg = app_settings.get("color_r", CP_CYAN) if self.direction == "L2R" else app_settings.get("color_l", CP_ORANGE)
         self.arrow_btn.configure(fg=self.arrow_btn.default_fg)
         self.arrow_btn.config(command=self.toggle_direction)

@@ -34,7 +34,7 @@
             "--fast-list": true,
             "-P": true,
             "--dry-run": false,
-            "--track-renames": false,
+            "--track-renames": true,
             "--size-only": true
         },
         "last_transfers": "10"
