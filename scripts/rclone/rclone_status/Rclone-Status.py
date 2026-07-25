@@ -52,6 +52,7 @@ def load_settings():
         "check_interval": 600, "topmost": True,
         "icon_l": "\uf100", "icon_r": "\uf101",
         "icon_size": 22,
+        "path_font_size": 10,
         "project_spacing": 10,
         "color_l": "#ff934b", # CP_ORANGE default
         "color_r": "#00F0FF",  # CP_CYAN default
@@ -106,8 +107,9 @@ class HoverButton(tk.Button):
 
 class CyberEntry(tk.Entry):
     def __init__(self, master=None, **kw):
+        entry_font = kw.pop("font", ("Consolas", 10))
         super().__init__(master, **kw)
-        self.configure(bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, bd=1, relief="solid", highlightthickness=1, highlightbackground=CP_DIM, highlightcolor=CP_CYAN, font=("Consolas", 10))
+        self.configure(bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, bd=1, relief="solid", highlightthickness=1, highlightbackground=CP_DIM, highlightcolor=CP_CYAN, font=entry_font)
 
 class CyberSpinbox(tk.Spinbox):
     def __init__(self, master=None, **kw):
@@ -222,7 +224,8 @@ class ProjectActionWindow(tk.Toplevel):
         inner = tk.Frame(path_group, bg=CP_BG)
         inner.pack(fill="x", padx=15, pady=5)
 
-        self.side_a_ent = CyberEntry(inner)
+        path_font_size = int(app_settings.get("path_font_size", 10))
+        self.side_a_ent = CyberEntry(inner, font=("Consolas", path_font_size))
         self.side_a_ent.insert(0, self.cfg["src"])
         self.side_a_ent.pack(side="left", fill="x", expand=True)
 
@@ -235,7 +238,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.arrow_btn.config(command=self.toggle_direction)
         self.arrow_btn.pack(side="left", padx=25)
 
-        self.side_b_ent = CyberEntry(inner, justify="right")
+        self.side_b_ent = CyberEntry(inner, justify="right", font=("Consolas", path_font_size))
         self.side_b_ent.insert(0, self.cfg["dst"])
         self.side_b_ent.pack(side="left", fill="x", expand=True)
 
@@ -524,6 +527,7 @@ def open_settings():
     l_icon_e, l_color_e = color_pick_field("LEFT_CHANNEL (ICON | COLOR)", app_settings["icon_l"], app_settings.get("color_l", "#ff934b"))
     r_icon_e, r_color_e = color_pick_field("RIGHT_CHANNEL (ICON | COLOR)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
+    path_size_e = s_field("PATH_FONT_SIZE", app_settings.get("path_font_size", 10))
     spacing_e = s_field("PROJECT_SPACING", app_settings.get("project_spacing", 10))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
     keep_open_var = tk.BooleanVar(value=app_settings.get("keep_terminal_open", True))
@@ -548,6 +552,7 @@ def open_settings():
             app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
             app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
             app_settings["icon_size"] = int(size_e.get())
+            app_settings["path_font_size"] = int(path_size_e.get())
             app_settings["project_spacing"] = int(spacing_e.get())
             app_settings["check_interval"] = int(interval_e.get())
             app_settings["keep_terminal_open"] = bool(keep_open_var.get())

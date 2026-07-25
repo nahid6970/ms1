@@ -8,6 +8,7 @@
     "icon_l": "\uf100",
     "icon_r": "\uf101",
     "icon_size": 50,
+    "path_font_size": 16,
     "project_spacing": 10,
     "color_l": "#F71E49",
     "color_r": "#56D32C",
