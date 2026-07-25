@@ -948,8 +948,8 @@ def interactive_select(
                 print(line)
             print()
         for i, item in enumerate(items):
-            prefix = ">" if i == index else " "
-            print(f"{prefix} {render_item(item, i)}")
+            line = render_item(item, i, i == index)
+            print(line)
         if footer_lines:
             print()
             for line in footer_lines:
@@ -975,12 +975,13 @@ def pick_model_interactive(
 ) -> Optional[str]:
     widths = build_model_table_widths(models)
 
-    def render_item(model: Dict[str, Any], _: int) -> str:
+    def render_item(model: Dict[str, Any], index: int, selected: bool = False) -> str:
         return format_model_entry(
-            _ + 1,
+            index + 1,
             model,
             current_model,
             widths=widths,
+            selected=selected,
         )
 
     chosen = interactive_select(
@@ -1039,11 +1040,12 @@ def pick_api_account_interactive(accounts: Dict[str, str], title_text: str = "Se
     if not items:
         return None
 
-    def render_item(item: Dict[str, Any], _: int) -> str:
+    def render_item(item: Dict[str, Any], _: int, selected: bool = False) -> str:
         name = item["name"]
         key = item["key"]
         masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
-        return f"{name} [{masked}]"
+        line = f"{name} [{masked}]"
+        return _ansi_wrap(line, "48;5;24;97") if selected else line
 
     chosen = interactive_select(
         title_text=title_text,
@@ -1165,7 +1167,7 @@ def format_model_entry(
     tag = str(model.get("_tag") or "")
     usage = int(model.get("_uses") or 0)
     marker = ">" if selected else " "
-    return (
+    row = (
         f"{marker} {index:>2}  "
         f"{display_name:<{widths['short']}}  "
         f"{name:<{widths['name']}}  "
@@ -1174,6 +1176,13 @@ def format_model_entry(
         f"{active}  "
         f"{hidden}"
     ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    if name == current_model:
+        return _ansi_wrap(row, "32")
+    if model.get("_hidden"):
+        return _ansi_wrap(row, "2")
+    return row
 
 
 def apply_model_tags(
