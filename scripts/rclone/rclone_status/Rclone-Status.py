@@ -231,10 +231,12 @@ class ProjectActionWindow(tk.Toplevel):
         grid = tk.Frame(opt_group, bg=CP_BG)
         grid.pack(fill="x", padx=20, pady=5)
         
-        tk.Label(grid, text="EXCLUSIONS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=0, column=0, sticky="w")
+        excl_row = tk.Frame(grid, bg=CP_BG)
+        excl_row.grid(row=0, column=0, columnspan=2, sticky="ew")
+        tk.Label(excl_row, text="EXCLUSIONS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).pack(side="left")
         self.ignore_var = tk.StringVar(value=self.cfg.get("last_ignore", ""))
-        self.ignore_ent = CyberEntry(grid, textvariable=self.ignore_var)
-        self.ignore_ent.grid(row=0, column=1, sticky="ew", padx=(10,0))
+        self.ignore_ent = CyberEntry(excl_row, textvariable=self.ignore_var)
+        self.ignore_ent.pack(side="left", fill="x", expand=True, padx=(8, 0))
         
         placeholder = "e.g. *.jpg, dir/**, C:/path/ignore.txt"
         self.ph_label = tk.Label(self.ignore_ent, text=placeholder, bg=CP_PANEL, fg="#007a7a", font=("Consolas", 10), cursor="xterm")
@@ -282,6 +284,7 @@ class ProjectActionWindow(tk.Toplevel):
         self.transfers_var = tk.StringVar(value=str(self.cfg.get("last_transfers", "4")))
         self.transfers_box = CyberEntry(flags_bar, textvariable=self.transfers_var, width=4, justify="center")
         self.transfers_box.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.transfers_var.trace_add("write", lambda *_: self.save_flag_state())
         self.transfers_box.bind("<FocusOut>", lambda _e: self.save_flag_state())
         self.transfers_box.bind("<Return>", lambda _e: self.save_flag_state())
 

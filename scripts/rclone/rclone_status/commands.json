@@ -9,7 +9,15 @@
         "last_dir": "L2R",
         "last_op": "sync",
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames"
+        "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames",
+        "last_flags_state": {
+            "--fast-list": true,
+            "-P": true,
+            "--dry-run": true,
+            "--track-renames": true,
+            "--size-only": true
+        },
+        "last_transfers": "10"
     },
     "p_1": {
         "label": "db",
@@ -29,7 +37,7 @@
             "--track-renames": false,
             "--size-only": true
         },
-        "last_transfers": "4"
+        "last_transfers": "10"
     },
     "p_2": {
         "label": "song",
