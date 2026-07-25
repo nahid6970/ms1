@@ -1637,16 +1637,14 @@ def main() -> int:
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
-        print(
-            save_model_prefs(
-                hidden_models,
-                speed_tags,
-                model_usage_counts,
-                sorted(disabled_tools),
-                client.model,
-                account_name,
-                tool_loop_limit,
-            )
+        save_model_prefs(
+            hidden_models,
+            speed_tags,
+            model_usage_counts,
+            sorted(disabled_tools),
+            client.model,
+            account_name,
+            tool_loop_limit,
         )
 
     def record_model_usage(model_name_value: str, amount: int = 1) -> None:
