@@ -115,7 +115,7 @@ class ToggleLabel(tk.Label):
         super().__init__(master, text=text)
         self.active = active
         self._on_change = on_change
-        self._colors = colors or (CP_GREEN, CP_DIM)
+        self._colors = colors or ("#90ee90", "#666666")
         self._base_text = text
         self.configure(width=width, anchor="center", cursor="hand2")
         self.bind("<Button-1>", self._toggle)
