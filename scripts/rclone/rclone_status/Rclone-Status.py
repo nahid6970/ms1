@@ -52,6 +52,7 @@ def load_settings():
         "check_interval": 600, "topmost": True,
         "icon_l": "\uf100", "icon_r": "\uf101",
         "icon_size": 22,
+        "project_spacing": 10,
         "color_l": "#ff934b", # CP_ORANGE default
         "color_r": "#00F0FF",  # CP_CYAN default
         "keep_terminal_open": True
@@ -487,6 +488,7 @@ def open_settings():
     l_icon_e, l_color_e = color_pick_field("LEFT_CHANNEL (ICON | COLOR)", app_settings["icon_l"], app_settings.get("color_l", "#ff934b"))
     r_icon_e, r_color_e = color_pick_field("RIGHT_CHANNEL (ICON | COLOR)", app_settings["icon_r"], app_settings.get("color_r", "#00F0FF"))
     size_e = s_field("ICON_FONT_SIZE", app_settings.get("icon_size", 22))
+    spacing_e = s_field("PROJECT_SPACING", app_settings.get("project_spacing", 10))
     interval_e = s_field("CHECK_INTERVAL_SEC", app_settings["check_interval"])
     keep_open_var = tk.BooleanVar(value=app_settings.get("keep_terminal_open", True))
     keep_open_row = tk.Frame(body, bg=CP_BG)
@@ -510,6 +512,7 @@ def open_settings():
             app_settings["icon_l"], app_settings["icon_r"] = l_icon_e.get(), r_icon_e.get()
             app_settings["color_l"], app_settings["color_r"] = l_color_e.get(), r_color_e.get()
             app_settings["icon_size"] = int(size_e.get())
+            app_settings["project_spacing"] = int(spacing_e.get())
             app_settings["check_interval"] = int(interval_e.get())
             app_settings["keep_terminal_open"] = bool(keep_open_var.get())
             save_settings(app_settings); win.destroy()
@@ -632,10 +635,13 @@ ROOT1 = tk.Frame(MAIN, bg=CP_PANEL); ROOT1.pack(side="left", pady=2, padx=5)
 def create_gui():
     for w in ROOT1.winfo_children(): w.destroy()
     items = sorted(commands.items(), key=lambda x: (x[1].get("index", 0), x[0]))
+    project_spacing = max(0, int(app_settings.get("project_spacing", 10)))
+    project_pad = max(0, project_spacing // 2)
     for key, cfg in items:
         if not cfg.get("enabled", True): continue
         lbl = tk.Label(ROOT1, bg=CP_PANEL, text=cfg["label"], font=("JetBrainsMono NFP", 16, "bold"), fg=CP_DIM, cursor="hand2")
-        lbl.pack(side="left", padx=10); lbl.bind("<Button-1>", lambda e, c=cfg, k=key: ProjectActionWindow(ROOT, c, k))
+        lbl.pack(side="left", padx=(project_pad, project_pad))
+        lbl.bind("<Button-1>", lambda e, c=cfg, k=key: ProjectActionWindow(ROOT, c, k))
         lbl.bind("<Button-3>", lambda e, k=key: edit_command(k)); check_and_update_label(lbl, cfg)
     tk.Frame(ROOT1, width=1, bg=CP_DIM).pack(side="left", padx=8, fill="y", pady=8)
     HoverButton(ROOT1, text="\uf067", command=lambda: edit_command(None), default_color=CP_PANEL, hover_color=CP_CYAN, hover_fg=CP_CYAN, hover_bg=False).pack(side="left", padx=2)
