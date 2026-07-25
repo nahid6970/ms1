@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import getpass
 import json
 import os
 import platform
@@ -15,6 +16,15 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+try:
+    from Cryptodome.Cipher import AES
+    from Cryptodome.Protocol.KDF import PBKDF2
+    from Cryptodome.Random import get_random_bytes
+except Exception:
+    AES = None
+    PBKDF2 = None
+    get_random_bytes = None
 
 
 DEFAULT_MODEL = "gemini-2.5-flash"
@@ -29,7 +39,9 @@ MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
-API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.json")
+API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.lock")
+API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
+API_ACCOUNTS_MAGIC = b"GEMAPI1"
 
 try:
     import msvcrt
@@ -617,6 +629,81 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
     return f"Transcript saved to {path}"
 
 
+def _require_api_crypto() -> None:
+    if AES is None or PBKDF2 is None or get_random_bytes is None:
+        raise RuntimeError("Encrypted API account storage requires pycryptodome.")
+
+
+def _prompt_password(action: str) -> str:
+    prompt = f"{action} password: "
+    try:
+        return getpass.getpass(prompt).strip()
+    except (EOFError, KeyboardInterrupt):
+        return ""
+    except Exception:
+        return input(prompt).strip()
+
+
+def _pack_locked_part(part: bytes) -> bytes:
+    return len(part).to_bytes(4, "big") + part
+
+
+def _unpack_locked_part(data: bytes, offset: int) -> tuple[bytes, int]:
+    if offset + 4 > len(data):
+        raise ValueError("Locked API account file is truncated.")
+    size = int.from_bytes(data[offset:offset + 4], "big")
+    offset += 4
+    if offset + size > len(data):
+        raise ValueError("Locked API account file is truncated.")
+    return data[offset:offset + size], offset + size
+
+
+def _encrypt_api_accounts(accounts: Dict[str, str], password: str) -> bytes:
+    _require_api_crypto()
+    payload = json.dumps(
+        {"accounts": dict(sorted(accounts.items()))},
+        indent=2,
+        ensure_ascii=False,
+    ).encode("utf-8")
+    salt = get_random_bytes(16)
+    key = PBKDF2(password.encode("utf-8"), salt, dkLen=32, count=200_000)
+    cipher = AES.new(key, AES.MODE_EAX)
+    ciphertext, tag = cipher.encrypt_and_digest(payload)
+    parts = [
+        API_ACCOUNTS_MAGIC,
+        _pack_locked_part(salt),
+        _pack_locked_part(cipher.nonce),
+        _pack_locked_part(tag),
+        _pack_locked_part(ciphertext),
+    ]
+    return b"".join(parts)
+
+
+def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, Any]:
+    _require_api_crypto()
+    if not blob.startswith(API_ACCOUNTS_MAGIC):
+        raise ValueError("Invalid locked API account file.")
+    offset = len(API_ACCOUNTS_MAGIC)
+    salt, offset = _unpack_locked_part(blob, offset)
+    nonce, offset = _unpack_locked_part(blob, offset)
+    tag, offset = _unpack_locked_part(blob, offset)
+    ciphertext, offset = _unpack_locked_part(blob, offset)
+    if offset != len(blob):
+        raise ValueError("Invalid locked API account file.")
+    key = PBKDF2(password.encode("utf-8"), salt, dkLen=32, count=200_000)
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+    data = json.loads(plaintext.decode("utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("Locked API account file is invalid.")
+    accounts = data.get("accounts", {})
+    if not isinstance(accounts, dict):
+        accounts = {}
+    return {
+        "accounts": {str(name): str(key) for name, key in accounts.items()},
+    }
+
+
 def load_model_prefs() -> Dict[str, Any]:
     if not MODEL_PREFS_FILE.exists():
         return {
@@ -677,27 +764,60 @@ def save_model_prefs(
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
 
 
-def load_api_accounts() -> Dict[str, Any]:
-    if not API_ACCOUNTS_FILE.exists():
-        return {"accounts": {}}
+def load_api_accounts(password: Optional[str] = None) -> Dict[str, Any]:
+    if API_ACCOUNTS_FILE.exists():
+        if password is None:
+            password = _prompt_password("Load API accounts")
+        if not password:
+            raise RuntimeError("Password is required to load API accounts.")
+        try:
+            return _decrypt_api_accounts(API_ACCOUNTS_FILE.read_bytes(), password)
+        except Exception as exc:
+            raise RuntimeError(f"Could not load locked API accounts: {exc}") from exc
+
+    if API_ACCOUNTS_LEGACY_FILE.exists():
+        try:
+            data = json.loads(API_ACCOUNTS_LEGACY_FILE.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("Legacy API account file is invalid.")
+            accounts = data.get("accounts", {})
+            if not isinstance(accounts, dict):
+                accounts = {}
+            normalized = {str(name): str(key) for name, key in accounts.items()}
+        except Exception as exc:
+            raise RuntimeError(f"Could not read legacy API accounts: {exc}") from exc
+        if password is None:
+            password = _prompt_password("Lock API accounts")
+        if not password:
+            raise RuntimeError("Password is required to lock API accounts.")
+        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(normalized, password))
+        try:
+            API_ACCOUNTS_LEGACY_FILE.unlink()
+        except FileNotFoundError:
+            pass
+        except Exception:
+            pass
+        return {"accounts": normalized}
+
+    return {"accounts": {}}
+
+
+def save_api_accounts(accounts: Dict[str, str], password: Optional[str] = None) -> str:
+    if password is None:
+        password = _prompt_password("Save API accounts")
+    if not password:
+        return "Error: password is required."
     try:
-        data = json.loads(API_ACCOUNTS_FILE.read_text(encoding="utf-8"))
-        if not isinstance(data, dict):
-            return {"accounts": {}}
-        accounts = data.get("accounts", {})
-        if not isinstance(accounts, dict):
-            accounts = {}
-        return {
-            "accounts": {str(name): str(key) for name, key in accounts.items()},
-        }
-    except Exception:
-        return {"accounts": {}}
-
-
-def save_api_accounts(accounts: Dict[str, str]) -> str:
-    payload = {"accounts": dict(sorted(accounts.items()))}
-    API_ACCOUNTS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
-    return f"Saved API accounts to {API_ACCOUNTS_FILE}"
+        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(accounts, password))
+        try:
+            API_ACCOUNTS_LEGACY_FILE.unlink()
+        except FileNotFoundError:
+            pass
+        except Exception:
+            pass
+    except Exception as exc:
+        return f"Error saving locked API accounts: {exc}"
+    return f"Saved locked API accounts to {API_ACCOUNTS_FILE}"
 
 
 def clear_screen() -> None:
@@ -1016,7 +1136,7 @@ def print_help() -> None:
               /model               Open the model picker
               /model test          Test all models and hide failures
               /addapi              Add a named API key
-              /loadapi             Load a saved API account
+              /loadapi             Load the first saved API account, or a named one
               /loops <n>           Set max tool-call loops
               /tool                Show implemented tools
               /system <text>       Replace system instruction
@@ -1097,11 +1217,23 @@ def main() -> int:
     if args.max_tool_loops is not None:
         tool_loop_limit = max(1, int(args.max_tool_loops))
 
-    api_prefs = load_api_accounts()
-    api_accounts: Dict[str, str] = dict(api_prefs.get("accounts", {}))
+    api_accounts: Dict[str, str] = {}
+    api_accounts_loaded = False
 
-    api_key = args.api_key or api_accounts.get(saved_last_api_account, "") or os.environ.get("GEMINI_API_KEY", "")
-    active_api_account = saved_last_api_account if saved_last_api_account in api_accounts else ""
+    def ensure_api_accounts_loaded() -> Dict[str, str]:
+        nonlocal api_accounts, api_accounts_loaded
+        if not api_accounts_loaded:
+            try:
+                api_accounts = dict(load_api_accounts().get("accounts", {}))
+            except RuntimeError as exc:
+                error(str(exc))
+                api_accounts = {}
+                return api_accounts
+            api_accounts_loaded = True
+        return api_accounts
+
+    api_key = args.api_key or os.environ.get("GEMINI_API_KEY", "")
+    active_api_account = ""
     active_model = args.model or saved_last_model or DEFAULT_MODEL
 
     if args.startup_args:
@@ -1109,19 +1241,28 @@ def main() -> int:
             startup_command = args.startup_args[0].lower()
             startup_remainder = " ".join(args.startup_args[1:]).strip()
             if startup_command == "/loadapi":
-                if not api_accounts:
+                accounts = ensure_api_accounts_loaded()
+                if not accounts:
                     error("No saved API accounts. Use /addapi first.")
                     return 1
-                chosen_name = startup_remainder or first_api_account_name(api_accounts)
-                if not chosen_name or chosen_name not in api_accounts:
+                chosen_name = startup_remainder or first_api_account_name(accounts)
+                if not chosen_name or chosen_name not in accounts:
                     error("Unknown API account name.")
                     return 1
-                api_key = api_accounts[chosen_name]
+                api_key = accounts[chosen_name]
                 active_api_account = chosen_name
             else:
                 warn(f"Ignoring unknown startup command: {' '.join(args.startup_args)}")
         elif not args.prompt:
             args.prompt = " ".join(args.startup_args)
+
+    if not api_key:
+        accounts = ensure_api_accounts_loaded()
+        if accounts:
+            chosen_name = saved_last_api_account if saved_last_api_account in accounts else first_api_account_name(accounts)
+            if chosen_name:
+                api_key = accounts[chosen_name]
+                active_api_account = chosen_name
 
     if not api_key:
         error("Missing Gemini API key. Use /addapi to add one, or pass --api-key / GEMINI_API_KEY.")
@@ -1339,30 +1480,27 @@ def main() -> int:
                     if not key:
                         warn("API key is required.")
                         continue
+                    accounts = ensure_api_accounts_loaded()
+                    api_accounts = accounts
                     api_accounts[name] = key
                     active_api_account = name
                     client.api_key = key
                     print(save_api_accounts(api_accounts))
+                    api_accounts_loaded = True
                     persist_selection()
                     info(f"Loaded API account: {name}")
                     continue
                 if command == "/loadapi":
-                    if not api_accounts:
+                    accounts = ensure_api_accounts_loaded()
+                    if not accounts:
                         warn("No saved API accounts. Use /addapi first.")
                         continue
-                    chosen_name = None
-                    if remainder:
-                        if remainder in api_accounts:
-                            chosen_name = remainder
-                        else:
-                            warn("Unknown API account name.")
-                            continue
-                    else:
-                        chosen_name = pick_api_account_interactive(api_accounts, title_text="Select API Account")
-                    if not chosen_name:
+                    chosen_name = remainder if remainder else first_api_account_name(accounts)
+                    if not chosen_name or chosen_name not in accounts:
+                        warn("Unknown API account name.")
                         continue
                     active_api_account = chosen_name
-                    client.api_key = api_accounts[chosen_name]
+                    client.api_key = accounts[chosen_name]
                     persist_selection()
                     info(f"Loaded API account: {chosen_name}")
                     continue

@@ -13,6 +13,7 @@ It is designed to feel closer to a CLI tool than a web app:
 
 - Python 3.10+
 - First-time setup needs either a `GEMINI_API_KEY` environment variable, or `/addapi`
+- API accounts are stored in an encrypted `api_accounts.lock` file and prompt for a password
 
 ## Run
 
@@ -50,7 +51,7 @@ python .\gemini_terminal_cli\gemini_cli.py --load-transcript .\gemini_terminal_c
 python .\gemini_terminal_cli\gemini_cli.py /loadapi 09
 ```
 
-If you omit the account name, the CLI loads the first saved account from `api_accounts.json`.
+If you omit the account name, the CLI loads the first saved account from `api_accounts.lock`.
 
 ## Commands inside the REPL
 
@@ -60,7 +61,7 @@ If you omit the account name, the CLI loads the first saved account from `api_ac
 - `/model` - open the model picker
 - `/model test` - test all models and auto-hide failures
 - `/addapi` - add a named API key
-- `/loadapi` - load a saved API account
+- `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
 - `/system <text>` - replace the system instruction
 - `/tools on|off` - enable or disable local tools
@@ -84,6 +85,6 @@ The CLI exposes only local, standard-library tools:
 - It uses Gemini's function-calling API directly over HTTP.
 - Shell commands are intentionally explicit; the model must ask for them through the tool loop.
 - Hidden models, last model, and speed tags are stored in `model_prefs.json`.
-- Named API accounts are stored in `api_accounts.json`.
+- Named API accounts are stored in `api_accounts.lock`.
 - The CLI restores the last-used API account and model on startup when they have been saved.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.

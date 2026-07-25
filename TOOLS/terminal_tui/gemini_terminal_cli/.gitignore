@@ -10,5 +10,6 @@ __pycache__/
 transcripts/
 session*.json
 .env
+api_accounts.lock
 api_accounts.json
 model_prefs.json
