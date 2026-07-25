@@ -92,6 +92,54 @@ class CyberEntry(tk.Entry):
         super().__init__(master, **kw)
         self.configure(bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, bd=1, relief="solid", highlightthickness=1, highlightbackground=CP_DIM, highlightcolor=CP_CYAN, font=("Consolas", 10))
 
+class CyberSpinbox(tk.Spinbox):
+    def __init__(self, master=None, **kw):
+        super().__init__(master, **kw)
+        self.configure(
+            bg=CP_PANEL,
+            fg=CP_CYAN,
+            insertbackground=CP_CYAN,
+            bd=1,
+            relief="solid",
+            highlightthickness=1,
+            highlightbackground=CP_DIM,
+            highlightcolor=CP_CYAN,
+            font=("Consolas", 10),
+            buttonbackground=CP_DIM,
+            buttoncursor="hand2",
+            justify="center",
+        )
+
+class ToggleLabel(tk.Label):
+    def __init__(self, master, text, active=False, on_change=None, colors=None, width=12):
+        super().__init__(master, text=text)
+        self.active = active
+        self._on_change = on_change
+        self._colors = colors or (CP_GREEN, CP_DIM)
+        self._base_text = text
+        self.configure(width=width, anchor="center", cursor="hand2")
+        self.bind("<Button-1>", self._toggle)
+        self._refresh()
+
+    def _refresh(self):
+        bg = self._colors[0] if self.active else self._colors[1]
+        self.configure(
+            bg=bg,
+            fg="black",
+            text=self._base_text,
+            font=("Consolas", 9, "bold"),
+            padx=6,
+            pady=4,
+            bd=0,
+            highlightthickness=0,
+        )
+
+    def _toggle(self, _event=None):
+        self.active = not self.active
+        self._refresh()
+        if self._on_change:
+            self._on_change()
+
 def setup_custom_window(win, title, width, height):
     win.overrideredirect(True)
     # Center window on screen
@@ -201,11 +249,52 @@ class ProjectActionWindow(tk.Toplevel):
         self.ph_label.bind("<Button-1>", lambda e: self.ignore_ent.focus_set())
         check_ph()
 
-        tk.Label(grid, text="RUNTIME_FLAGS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=1, column=0, sticky="w", pady=10)
-        self.flags_ent = CyberEntry(grid)
-        self.flags_ent.insert(0, self.cfg.get("last_flags", "--fast-list -P --size-only"))
-        self.flags_ent.grid(row=1, column=1, sticky="ew", padx=(10,0), pady=10)
-        grid.columnconfigure(1, weight=1)
+        flags_row = tk.Frame(grid, bg=CP_BG)
+        flags_row.grid(row=1, column=0, columnspan=2, sticky="ew", pady=10)
+        flags_row.columnconfigure(1, weight=1)
+
+        tk.Label(flags_row, text="RUNTIME_FLAGS:", bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9)).grid(row=0, column=0, sticky="w")
+
+        flags_bar = tk.Frame(flags_row, bg=CP_BG)
+        flags_bar.grid(row=0, column=1, sticky="ew", padx=(10, 0))
+        flags_bar.columnconfigure(0, weight=1)
+
+        chips = tk.Frame(flags_bar, bg=CP_BG)
+        chips.grid(row=0, column=0, sticky="w")
+
+        self.flag_defs = [
+            ("Fast List", "--fast-list", True),
+            ("Progress", "-P", True),
+            ("Dry Run", "--dry-run", False),
+            ("Track Renames", "--track-renames", False),
+            ("Size Only", "--size-only", True),
+        ]
+        self.flag_labels = []
+        saved_flags = self.cfg.get("last_flags_state", {})
+
+        for i, (label, flag, default_state) in enumerate(self.flag_defs):
+            state = saved_flags.get(flag, default_state)
+            chip = ToggleLabel(chips, label, active=state, on_change=self.save_flag_state)
+            chip.grid(row=0, column=i, padx=(0, 6), pady=2)
+            chip.flag_value = flag
+            self.flag_labels.append(chip)
+
+        self.transfers_var = tk.StringVar(value=str(self.cfg.get("last_transfers", "4")))
+        self.transfers_box = CyberEntry(flags_bar, textvariable=self.transfers_var, width=4, justify="center")
+        self.transfers_box.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.transfers_box.bind("<FocusOut>", lambda _e: self.save_flag_state())
+        self.transfers_box.bind("<Return>", lambda _e: self.save_flag_state())
+
+        self.add_flag_btn = HoverButton(
+            flags_bar,
+            text="+",
+            width=3,
+            command=self.add_flag_placeholder,
+            default_color=CP_DIM,
+            hover_color=CP_ORANGE,
+            hover_fg="black",
+        )
+        self.add_flag_btn.grid(row=0, column=2, sticky="e", padx=(8, 0))
 
         self.action_btn = HoverButton(content, text="EXECUTE_CMD", bg=CP_DIM, hover_color=CP_GREEN, command=self.run_task, pady=10)
         self.action_btn.pack(fill="x", pady=5)
@@ -240,15 +329,32 @@ class ProjectActionWindow(tk.Toplevel):
         self.side_a_ent.config(highlightbackground=CP_CYAN if self.direction == "L2R" else CP_RED)
         self.side_b_ent.config(highlightbackground=CP_RED if self.direction == "L2R" else CP_CYAN)
 
+    def save_flag_state(self):
+        self.cfg["last_flags_state"] = {chip.flag_value: chip.active for chip in self.flag_labels}
+        self.cfg["last_transfers"] = self.transfers_var.get().strip() or "4"
+        save_commands(commands)
+
+    def add_flag_placeholder(self):
+        messagebox.showinfo("Add Flag", "Future flag slots can be added here later.")
+
     def run_task(self):
         self.cfg["src"], self.cfg["dst"] = self.side_a_ent.get(), self.side_b_ent.get()
         self.cfg["last_dir"], self.cfg["last_op"] = self.direction, self.op_mode
-        self.cfg["last_ignore"], self.cfg["last_flags"] = self.ignore_ent.get(), self.flags_ent.get()
+        self.cfg["last_ignore"] = self.ignore_ent.get()
+        self.save_flag_state()
         save_commands(commands)
 
         src, dst = (self.cfg["src"], self.cfg["dst"]) if self.direction == "L2R" else (self.cfg["dst"], self.cfg["src"])
-        flags = self.cfg.get("last_flags", "")
-        cmd = f'rclone {self.op_mode} "{src}" "{dst}" {flags}'
+        flags = []
+        for chip in self.flag_labels:
+            if chip.active:
+                if chip.flag_value == "--transfers":
+                    continue
+                flags.append(chip.flag_value)
+        transfers_val = self.transfers_var.get().strip()
+        if transfers_val:
+            flags.append(f'--transfers {transfers_val}')
+        cmd = f'rclone {self.op_mode} "{src}" "{dst}" {" ".join(flags)}'
         
         if self.cfg["last_ignore"]:
             for item in self.cfg["last_ignore"].split(','):
