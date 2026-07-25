@@ -157,14 +157,14 @@ class ToggleLabel(tk.Label):
         if self._on_change:
             self._on_change()
 
-def setup_custom_window(win, title, width, height):
+def setup_custom_window(win, title, width, height, autofit=False):
     win.overrideredirect(True)
-    # Center window on screen
-    sw = win.winfo_screenwidth()
-    sh = win.winfo_screenheight()
-    center_x = (sw // 2) - (width // 2)
-    center_y = (sh // 2) - (height // 2)
-    win.geometry(f"{width}x{height}+{center_x}+{center_y}")
+    if not autofit:
+        sw = win.winfo_screenwidth()
+        sh = win.winfo_screenheight()
+        center_x = (sw // 2) - (width // 2)
+        center_y = (sh // 2) - (height // 2)
+        win.geometry(f"{width}x{height}+{center_x}+{center_y}")
     win.configure(bg=CP_BG)
     
     border = tk.Frame(win, bg=CP_BG, bd=0, highlightthickness=1, highlightbackground=CP_CYAN)
@@ -208,8 +208,9 @@ class ProjectActionWindow(tk.Toplevel):
         self.direction = cfg.get("last_dir", "L2R")
         self.op_mode = cfg.get("last_op", "sync")
         
-        self.container = setup_custom_window(self, f"TASK_RUNNER: {key.upper()}", 900, 600)
+        self.container = setup_custom_window(self, f"TASK_RUNNER: {key.upper()}", 900, 600, autofit=True)
         self.init_ui()
+        self.after_idle(self.autofit_window)
 
     def init_ui(self):
         content = tk.Frame(self.container, bg=CP_BG)
@@ -332,15 +333,16 @@ class ProjectActionWindow(tk.Toplevel):
         )
         self.add_flag_btn.grid(row=0, column=2, sticky="e", padx=(8, 0))
 
-        self.log_text = tk.Text(content, height=10, bg=CP_PANEL, fg=CP_TEXT, font=("Consolas", 9), bd=0)
-        self.log_text.pack(fill="both", expand=True, pady=10)
+        self.log_text = tk.Text(content, height=2, bg=CP_BG, fg=CP_TEXT, font=("Consolas", 9), bd=0, highlightthickness=0)
+        self.log_text.pack(fill="x", pady=(10, 4))
         self.log_text.tag_config("yellow", foreground=CP_YELLOW)
 
         footer = tk.Frame(content, bg=CP_BG)
-        footer.pack(fill="x", pady=(0, 5))
+        footer.pack(fill="x", pady=(0, 2))
 
         self.action_btn = HoverButton(footer, text="EXECUTE_CMD", bg=CP_DIM, hover_color=CP_GREEN, command=self.run_task, pady=10)
         self.action_btn.pack(side="right")
+
         self.update_ui_state()
 
     def set_mode(self, m):
@@ -376,6 +378,21 @@ class ProjectActionWindow(tk.Toplevel):
 
     def add_flag_placeholder(self):
         messagebox.showinfo("Add Flag", "Future flag slots can be added here later.")
+
+    def autofit_window(self):
+        self.update_idletasks()
+        req_w = self.container.winfo_reqwidth()
+        req_h = self.container.winfo_reqheight()
+        sw = self.winfo_screenwidth()
+        sh = self.winfo_screenheight()
+        self._min_w = max(req_w, 880)
+        self._min_h = max(req_h, 280)
+        min_w = self._min_w
+        min_h = self._min_h
+        self.minsize(min_w, min_h)
+        center_x = (sw // 2) - (min_w // 2)
+        center_y = (sh // 2) - (min_h // 2)
+        self.geometry(f"{min_w}x{min_h}+{center_x}+{center_y}")
 
     def run_task(self):
         self.cfg["src"], self.cfg["dst"] = self.side_a_ent.get(), self.side_b_ent.get()
