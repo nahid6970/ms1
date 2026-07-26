@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import getpass
+import html
 import json
 import os
 import platform
@@ -234,6 +235,93 @@ def search_file(path: Path, query: str, recursive: bool = False, max_results: in
     return "\n".join(results) if results else "No matches."
 
 
+def search_web(query: str, max_results: int = 5) -> str:
+    if not query.strip():
+        return "Error: query is required."
+    max_results = max(1, min(int(max_results or 5), 10))
+    url = "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query})
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0"},
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            raw = response.read().decode("utf-8", errors="replace")
+    except Exception as exc:
+        return f"Error searching web: {exc}"
+
+    results: List[str] = []
+    pattern = re.compile(
+        r'<a[^>]+class="result__a"[^>]+href="(?P<href>[^"]+)"[^>]*>(?P<title>.*?)</a>',
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in pattern.finditer(raw):
+        href = html.unescape(match.group("href"))
+        title = re.sub(r"<[^>]+>", "", match.group("title"))
+        title = html.unescape(title).strip()
+        parsed = urllib.parse.urlparse(href)
+        params = urllib.parse.parse_qs(parsed.query)
+        if "uddg" in params:
+            href = params["uddg"][0]
+        if title and href:
+            results.append(f"{len(results) + 1}. {title}\n   {href}")
+        if len(results) >= max_results:
+            break
+    return "\n".join(results) if results else "No web results found."
+
+
+def search_tavily(query: str, tavily_accounts: Dict[str, str], max_results: int = 5) -> str:
+    if not query.strip():
+        return "Error: query is required."
+    if not tavily_accounts:
+        return "Error: no Tavily API accounts saved. Use /api to add one."
+    max_results = max(1, min(int(max_results or 5), 10))
+    errors: List[str] = []
+    for account_name, api_key in sorted(tavily_accounts.items(), key=lambda item: item[0].lower()):
+        payload = {
+            "api_key": api_key,
+            "query": query,
+            "search_depth": "basic",
+            "max_results": max_results,
+            "include_answer": False,
+            "include_raw_content": False,
+        }
+        request = urllib.request.Request(
+            "https://api.tavily.com/search",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                raw = response.read().decode("utf-8", errors="replace")
+                body = json.loads(raw)
+        except urllib.error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            errors.append(f"{account_name}: HTTP {exc.code} {raw[:160]}")
+            if exc.code in {401, 402, 403, 429}:
+                continue
+            continue
+        except Exception as exc:
+            errors.append(f"{account_name}: {exc}")
+            continue
+
+        results = body.get("results", [])
+        if not isinstance(results, list):
+            results = []
+        lines = [f"Tavily account: {account_name}"]
+        for idx, result in enumerate(results[:max_results], start=1):
+            if not isinstance(result, dict):
+                continue
+            title = str(result.get("title") or "Untitled").strip()
+            url = str(result.get("url") or "").strip()
+            content = str(result.get("content") or "").strip()
+            lines.append(f"{idx}. {title}\n   {url}\n   {content}".rstrip())
+        return "\n".join(lines) if len(lines) > 1 else f"Tavily account: {account_name}\nNo results."
+    return "Error: all Tavily API accounts failed.\n" + "\n".join(errors)
+
+
 def _replace_nth(text: str, old: str, new: str, occurrence: int = 1) -> tuple[str, bool]:
     if occurrence < 1:
         occurrence = 1
@@ -420,6 +508,30 @@ FUNCTIONS = {
             "required": ["path", "query"],
         },
     },
+    "search_web": {
+        "name": "search_web",
+        "description": "Search the web using the built-in no-key search provider.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "query": {"type": "STRING"},
+                "max_results": {"type": "INTEGER"},
+            },
+            "required": ["query"],
+        },
+    },
+    "search_tavily": {
+        "name": "search_tavily",
+        "description": "Search the web using saved Tavily API keys, trying the next key if one is limited.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "query": {"type": "STRING"},
+                "max_results": {"type": "INTEGER"},
+            },
+            "required": ["query"],
+        },
+    },
     "replace_block": {
         "name": "replace_block",
         "description": "Replace an exact block of text in a file.",
@@ -481,7 +593,7 @@ FUNCTIONS = {
 }
 
 
-def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
+def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None) -> str:
     if name == "read_file":
         filepath = args.get("filepath", "")
         return read_file(resolve_path(filepath, cwd))
@@ -507,6 +619,14 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
         recursive = bool(args.get("recursive", False))
         max_results = int(args.get("max_results", 20) or 20)
         return search_file(path, query, recursive=recursive, max_results=max_results)
+    if name == "search_web":
+        return search_web(str(args.get("query", "")), max_results=int(args.get("max_results", 5) or 5))
+    if name == "search_tavily":
+        return search_tavily(
+            str(args.get("query", "")),
+            tavily_accounts or {},
+            max_results=int(args.get("max_results", 5) or 5),
+        )
     if name == "replace_block":
         filepath = resolve_path(args.get("filepath", ""), cwd)
         old_text = str(args.get("old_text", ""))
@@ -541,6 +661,8 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "list_directory", "description": "List directory contents."},
         {"name": "get_system_info", "description": "Get system information."},
         {"name": "search_file", "description": "Search text within a file or directory."},
+        {"name": "search_web", "description": "Search the web without a saved API key."},
+        {"name": "search_tavily", "description": "Search the web with saved Tavily API keys."},
         {"name": "replace_block", "description": "Replace an exact block of text in a file."},
         {"name": "insert_after", "description": "Insert text after an exact anchor in a file."},
         {"name": "delete_block", "description": "Delete an exact block of text from a file."},
@@ -839,10 +961,32 @@ def _unpack_locked_part(data: bytes, offset: int) -> tuple[bytes, int]:
     return data[offset:offset + size], offset + size
 
 
-def _encrypt_api_accounts(accounts: Dict[str, str], password: str) -> bytes:
+def normalize_api_account_payload(data: Any) -> Dict[str, Dict[str, str]]:
+    if not isinstance(data, dict):
+        return {"accounts": {}, "tavily_accounts": {}}
+    accounts = data.get("accounts", {})
+    tavily_accounts = data.get("tavily_accounts", {})
+    if not isinstance(accounts, dict):
+        accounts = {}
+    if not isinstance(tavily_accounts, dict):
+        tavily_accounts = {}
+    return {
+        "accounts": {str(name): str(key) for name, key in accounts.items()},
+        "tavily_accounts": {str(name): str(key) for name, key in tavily_accounts.items()},
+    }
+
+
+def _encrypt_api_accounts(
+    accounts: Dict[str, str],
+    password: str,
+    tavily_accounts: Optional[Dict[str, str]] = None,
+) -> bytes:
     _require_api_crypto()
     payload = json.dumps(
-        {"accounts": dict(sorted(accounts.items()))},
+        {
+            "accounts": dict(sorted(accounts.items())),
+            "tavily_accounts": dict(sorted((tavily_accounts or {}).items())),
+        },
         indent=2,
         ensure_ascii=False,
     ).encode("utf-8")
@@ -877,12 +1021,7 @@ def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, Any]:
     data = json.loads(plaintext.decode("utf-8"))
     if not isinstance(data, dict):
         raise ValueError("Locked API account file is invalid.")
-    accounts = data.get("accounts", {})
-    if not isinstance(accounts, dict):
-        accounts = {}
-    return {
-        "accounts": {str(name): str(key) for name, key in accounts.items()},
-    }
+    return normalize_api_account_payload(data)
 
 
 def empty_account_model_prefs() -> Dict[str, Any]:
@@ -1021,32 +1160,40 @@ def load_api_accounts(password: Optional[str] = None) -> Dict[str, Any]:
             accounts = data.get("accounts", {})
             if not isinstance(accounts, dict):
                 accounts = {}
+            tavily_accounts = data.get("tavily_accounts", {})
+            if not isinstance(tavily_accounts, dict):
+                tavily_accounts = {}
             normalized = {str(name): str(key) for name, key in accounts.items()}
+            normalized_tavily = {str(name): str(key) for name, key in tavily_accounts.items()}
         except Exception as exc:
             raise RuntimeError(f"Could not read legacy API accounts: {exc}") from exc
         if password is None:
             password = _prompt_password("Lock API accounts")
         if not password:
             raise RuntimeError("Password is required to lock API accounts.")
-        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(normalized, password))
+        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(normalized, password, normalized_tavily))
         try:
             API_ACCOUNTS_LEGACY_FILE.unlink()
         except FileNotFoundError:
             pass
         except Exception:
             pass
-        return {"accounts": normalized}
+        return {"accounts": normalized, "tavily_accounts": normalized_tavily}
 
-    return {"accounts": {}}
+    return {"accounts": {}, "tavily_accounts": {}}
 
 
-def save_api_accounts(accounts: Dict[str, str], password: Optional[str] = None) -> str:
+def save_api_accounts(
+    accounts: Dict[str, str],
+    password: Optional[str] = None,
+    tavily_accounts: Optional[Dict[str, str]] = None,
+) -> str:
     if password is None:
         password = _prompt_password("Save API accounts")
     if not password:
         return "Error: password is required."
     try:
-        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(accounts, password))
+        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(accounts, password, tavily_accounts or {}))
         try:
             API_ACCOUNTS_LEGACY_FILE.unlink()
         except FileNotFoundError:
@@ -1277,12 +1424,15 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[
 
 
 def build_api_account_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int]:
+    provider_width = 0
     name_width = 0
     key_width = 0
     for item in items:
+        provider_width = max(provider_width, len(str(item.get("provider", ""))))
         name_width = max(name_width, len(str(item.get("name", ""))))
         key_width = max(key_width, len(str(item.get("masked_key", ""))))
     return {
+        "provider": min(max(provider_width, 8), 12),
         "name": min(max(name_width, 10), 28),
         "key": min(max(key_width, 10), 24),
     }
@@ -1290,8 +1440,8 @@ def build_api_account_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int
 
 def build_api_account_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  State",
-        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['key']}  -----",
+        f"  {'Id':>2}  {'Provider':<{widths['provider']}}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  State",
+        f"  {'--':>2}  {'-' * widths['provider']}  {'-' * widths['name']}  {'-' * widths['key']}  -----",
     ]
 
 
@@ -1302,12 +1452,14 @@ def format_api_account_entry(
     selected: bool = False,
 ) -> str:
     action = str(item.get("action", "load"))
+    provider = str(item.get("provider", ""))
     name = str(item.get("name", ""))
     key = str(item.get("masked_key", ""))
     state = str(item.get("state", ""))
     marker = ">" if selected else " "
     row = (
         f"{marker} {index:>2}  "
+        f"{provider:<{widths['provider']}}  "
         f"{name:<{widths['name']}}  "
         f"{key:<{widths['key']}}  "
         f"{state}"
@@ -1321,12 +1473,21 @@ def format_api_account_entry(
 
 def pick_api_account_interactive(
     accounts: Dict[str, str],
+    tavily_accounts: Optional[Dict[str, str]] = None,
     active_api_account: str = "",
     title_text: str = "Manage API Accounts",
 ) -> Optional[Dict[str, str]]:
+    tavily_accounts = tavily_accounts or {}
     items: List[Dict[str, str]] = [{
         "action": "add",
-        "name": "Add API",
+        "provider": "gemini",
+        "name": "Add Gemini API",
+        "masked_key": "",
+        "state": "new",
+    }, {
+        "action": "add",
+        "provider": "tavily",
+        "name": "Add Tavily API",
         "masked_key": "",
         "state": "new",
     }]
@@ -1335,9 +1496,19 @@ def pick_api_account_interactive(
         state = "active" if name == active_api_account else ""
         items.append({
             "action": "load",
+            "provider": "gemini",
             "name": name,
             "masked_key": masked,
             "state": state,
+        })
+    for name, key in sorted(tavily_accounts.items(), key=lambda item: item[0].lower()):
+        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+        items.append({
+            "action": "load",
+            "provider": "tavily",
+            "name": name,
+            "masked_key": masked,
+            "state": "saved",
         })
     widths = build_api_account_table_widths(items)
 
@@ -1353,7 +1524,11 @@ def pick_api_account_interactive(
     )
     if not chosen:
         return None
-    return {"action": str(chosen["action"]), "name": str(chosen["name"])}
+    return {
+        "action": str(chosen["action"]),
+        "provider": str(chosen["provider"]),
+        "name": str(chosen["name"]),
+    }
 
 
 def first_api_account_name(accounts: Dict[str, str]) -> Optional[str]:
@@ -1687,19 +1862,27 @@ def main() -> int:
         tool_loop_limit = max(1, int(args.max_tool_loops))
 
     api_accounts: Dict[str, str] = {}
+    tavily_accounts: Dict[str, str] = {}
     api_accounts_loaded = False
 
     def ensure_api_accounts_loaded() -> Dict[str, str]:
-        nonlocal api_accounts, api_accounts_loaded
+        nonlocal api_accounts, tavily_accounts, api_accounts_loaded
         if not api_accounts_loaded:
             try:
-                api_accounts = dict(load_api_accounts(password=args.api_password).get("accounts", {}))
+                loaded_api_accounts = load_api_accounts(password=args.api_password)
+                api_accounts = dict(loaded_api_accounts.get("accounts", {}))
+                tavily_accounts = dict(loaded_api_accounts.get("tavily_accounts", {}))
             except RuntimeError as exc:
                 error(str(exc))
                 api_accounts = {}
+                tavily_accounts = {}
                 return api_accounts
             api_accounts_loaded = True
         return api_accounts
+
+    def ensure_tavily_accounts_loaded() -> Dict[str, str]:
+        ensure_api_accounts_loaded()
+        return tavily_accounts
 
     api_key = args.api_key or os.environ.get("GEMINI_API_KEY", "")
     active_api_account = ""
@@ -1896,26 +2079,34 @@ def main() -> int:
             api_account_model_prefs,
         )
 
-    def add_api_account_interactive() -> None:
-        nonlocal api_accounts, api_accounts_loaded, model_cache
-        name = input("API name: ").strip()
+    def add_api_account_interactive(provider: str = "gemini") -> None:
+        nonlocal api_accounts, tavily_accounts, api_accounts_loaded, model_cache
+        provider = provider.lower().strip() or "gemini"
+        label = "Tavily" if provider == "tavily" else "Gemini"
+        name = input(f"{label} API name: ").strip()
         if not name:
             warn("API name is required.")
             return
-        key = input("API key: ").strip()
+        key = input(f"{label} API key: ").strip()
         if not key:
             warn("API key is required.")
             return
         accounts = ensure_api_accounts_loaded()
         api_accounts = accounts
+        if provider == "tavily":
+            tavily_accounts[name] = key
+            print(save_api_accounts(api_accounts, password=args.api_password, tavily_accounts=tavily_accounts))
+            api_accounts_loaded = True
+            info(f"Saved Tavily API account: {name}")
+            return
         api_accounts[name] = key
         switch_api_account(name, key)
         client.api_key = api_key
         model_cache = []
-        print(save_api_accounts(api_accounts, password=args.api_password))
+        print(save_api_accounts(api_accounts, password=args.api_password, tavily_accounts=tavily_accounts))
         api_accounts_loaded = True
         persist_selection()
-        info(f"Loaded API account: {name}")
+        info(f"Loaded Gemini API account: {name}")
 
     def load_api_account_by_name(chosen_name: str) -> None:
         nonlocal model_cache
@@ -1930,7 +2121,7 @@ def main() -> int:
         client.api_key = api_key
         model_cache = []
         persist_selection()
-        info(f"Loaded API account: {chosen_name}")
+        info(f"Loaded Gemini API account: {chosen_name}")
 
     def record_model_usage(model_name_value: str, amount: int = 1) -> None:
         if not model_name_value or amount <= 0:
@@ -1989,7 +2180,7 @@ def main() -> int:
                 name = function_call.get("name", "")
                 call_args = function_call.get("args", {}) or {}
                 info(format_tool_call(name, call_args))
-                result = execute_tool(name, call_args, cwd)
+                result = execute_tool(name, call_args, cwd, ensure_tavily_accounts_loaded())
                 responses.append(
                     {
                         "functionResponse": {
@@ -2090,11 +2281,13 @@ def main() -> int:
                     if remainder:
                         load_api_account_by_name(remainder)
                         continue
-                    chosen_api = pick_api_account_interactive(accounts, active_api_account)
+                    chosen_api = pick_api_account_interactive(accounts, ensure_tavily_accounts_loaded(), active_api_account)
                     if not chosen_api:
                         continue
                     if chosen_api["action"] == "add":
-                        add_api_account_interactive()
+                        add_api_account_interactive(chosen_api["provider"])
+                    elif chosen_api["provider"] == "tavily":
+                        info(f"Tavily API account saved: {chosen_api['name']}")
                     else:
                         load_api_account_by_name(chosen_api["name"])
                     continue
