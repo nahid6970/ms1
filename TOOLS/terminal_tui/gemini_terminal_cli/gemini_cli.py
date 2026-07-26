@@ -885,60 +885,88 @@ def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, Any]:
     }
 
 
+def empty_account_model_prefs() -> Dict[str, Any]:
+    return {
+        "hidden_models": [],
+        "speed_tags": {},
+        "model_usage_counts": {},
+    }
+
+
+def normalize_account_model_prefs(data: Any) -> Dict[str, Any]:
+    if not isinstance(data, dict):
+        return empty_account_model_prefs()
+    hidden = data.get("hidden_models", [])
+    if not isinstance(hidden, list):
+        hidden = []
+    speed_tags = data.get("speed_tags", {})
+    if not isinstance(speed_tags, dict):
+        speed_tags = {}
+    usage_counts = data.get("model_usage_counts", {})
+    if not isinstance(usage_counts, dict):
+        usage_counts = {}
+    return {
+        "hidden_models": [str(item) for item in hidden],
+        "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
+        "model_usage_counts": {str(k): int(v) for k, v in usage_counts.items()},
+    }
+
+
+def default_model_prefs() -> Dict[str, Any]:
+    return {
+        **empty_account_model_prefs(),
+        "api_accounts": {},
+        "disabled_tools": [],
+        "last_model": DEFAULT_MODEL,
+        "last_api_account": "",
+        "tool_loop_limit": DEFAULT_TOOL_LOOPS,
+    }
+
+
 def load_model_prefs() -> Dict[str, Any]:
     if not MODEL_PREFS_FILE.exists():
-        return {
-            "hidden_models": [],
-            "speed_tags": {},
-            "model_usage_counts": {},
-            "disabled_tools": [],
-            "last_model": DEFAULT_MODEL,
-            "last_api_account": "",
-            "tool_loop_limit": DEFAULT_TOOL_LOOPS,
-        }
+        return default_model_prefs()
     try:
         data = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            return {
-                "hidden_models": [],
-                "speed_tags": {},
-                "model_usage_counts": {},
-                "disabled_tools": [],
-                "last_model": DEFAULT_MODEL,
-                "last_api_account": "",
-                "tool_loop_limit": DEFAULT_TOOL_LOOPS,
-            }
-        hidden = data.get("hidden_models", [])
-        if not isinstance(hidden, list):
-            hidden = []
-        speed_tags = data.get("speed_tags", {})
-        if not isinstance(speed_tags, dict):
-            speed_tags = {}
-        usage_counts = data.get("model_usage_counts", {})
-        if not isinstance(usage_counts, dict):
-            usage_counts = {}
+            return default_model_prefs()
+        account_model_prefs = normalize_account_model_prefs(data)
+        api_accounts = data.get("api_accounts", {})
+        if not isinstance(api_accounts, dict):
+            api_accounts = {}
+        normalized_api_accounts = {
+            str(account_name): normalize_account_model_prefs(account_prefs)
+            for account_name, account_prefs in api_accounts.items()
+        }
+        last_api_account = str(data.get("last_api_account") or "")
+        if last_api_account and last_api_account not in normalized_api_accounts:
+            normalized_api_accounts[last_api_account] = account_model_prefs
         disabled_tools = data.get("disabled_tools", [])
         if not isinstance(disabled_tools, list):
             disabled_tools = []
-        return {
-            "hidden_models": [str(item) for item in hidden],
-            "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
-            "model_usage_counts": {str(k): int(v) for k, v in usage_counts.items()},
+        prefs = dict(account_model_prefs)
+        prefs.update({
+            "api_accounts": normalized_api_accounts,
             "disabled_tools": [str(item) for item in disabled_tools],
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
-            "last_api_account": str(data.get("last_api_account") or ""),
+            "last_api_account": last_api_account,
             "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
-        }
+        })
+        return prefs
     except Exception:
-        return {
-            "hidden_models": [],
-            "speed_tags": {},
-            "model_usage_counts": {},
-            "disabled_tools": [],
-            "last_model": DEFAULT_MODEL,
-            "last_api_account": "",
-            "tool_loop_limit": DEFAULT_TOOL_LOOPS,
-        }
+        return default_model_prefs()
+
+
+def serialize_model_prefs(
+    hidden_models: List[str],
+    speed_tags: Dict[str, str],
+    model_usage_counts: Dict[str, int],
+) -> Dict[str, Any]:
+    return {
+        "hidden_models": sorted(set(hidden_models)),
+        "speed_tags": dict(sorted(speed_tags.items())),
+        "model_usage_counts": dict(sorted((str(k), int(v)) for k, v in model_usage_counts.items())),
+    }
 
 
 def save_model_prefs(
@@ -949,11 +977,22 @@ def save_model_prefs(
     last_model: str,
     last_api_account: str,
     tool_loop_limit: int,
+    api_account_model_prefs: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> str:
+    account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts)
+    api_accounts = {
+        str(account_name): serialize_model_prefs(
+            list(account_prefs.get("hidden_models", [])),
+            dict(account_prefs.get("speed_tags", {})),
+            dict(account_prefs.get("model_usage_counts", {})),
+        )
+        for account_name, account_prefs in (api_account_model_prefs or {}).items()
+    }
+    if last_api_account:
+        api_accounts[last_api_account] = account_model_prefs
     payload = {
-        "hidden_models": sorted(set(hidden_models)),
-        "speed_tags": dict(sorted(speed_tags.items())),
-        "model_usage_counts": dict(sorted((str(k), int(v)) for k, v in model_usage_counts.items())),
+        **account_model_prefs,
+        "api_accounts": dict(sorted(api_accounts.items())),
         "disabled_tools": sorted(set(disabled_tools)),
         "last_model": last_model,
         "last_api_account": last_api_account,
@@ -1580,6 +1619,7 @@ def main() -> int:
         return 1
 
     model_prefs = load_model_prefs()
+    api_account_model_prefs: Dict[str, Dict[str, Any]] = dict(model_prefs.get("api_accounts", {}))
     hidden_models: List[str] = list(model_prefs.get("hidden_models", []))
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
     model_usage_counts: Dict[str, int] = dict(model_prefs.get("model_usage_counts", {}))
@@ -1610,6 +1650,28 @@ def main() -> int:
     active_model = args.model or saved_last_model or DEFAULT_MODEL
     all_tool_names = tool_name_set()
 
+    def snapshot_active_account_model_prefs() -> None:
+        if active_api_account:
+            api_account_model_prefs[active_api_account] = serialize_model_prefs(
+                hidden_models,
+                speed_tags,
+                model_usage_counts,
+            )
+
+    def load_account_model_prefs(account_name: str) -> None:
+        nonlocal hidden_models, speed_tags, model_usage_counts
+        account_prefs = normalize_account_model_prefs(api_account_model_prefs.get(account_name, {}))
+        hidden_models = list(account_prefs.get("hidden_models", []))
+        speed_tags = dict(account_prefs.get("speed_tags", {}))
+        model_usage_counts = dict(account_prefs.get("model_usage_counts", {}))
+
+    def switch_api_account(account_name: str, key: str) -> None:
+        nonlocal active_api_account, api_key
+        snapshot_active_account_model_prefs()
+        active_api_account = account_name
+        api_key = key
+        load_account_model_prefs(account_name)
+
     if args.no_tools:
         disabled_tools = set(all_tool_names)
 
@@ -1626,8 +1688,7 @@ def main() -> int:
                 if not chosen_name or chosen_name not in accounts:
                     error("Unknown API account name.")
                     return 1
-                api_key = accounts[chosen_name]
-                active_api_account = chosen_name
+                switch_api_account(chosen_name, accounts[chosen_name])
             else:
                 warn(f"Ignoring unknown startup command: {' '.join(args.startup_args)}")
         elif not args.prompt:
@@ -1638,8 +1699,7 @@ def main() -> int:
         if accounts:
             chosen_name = saved_last_api_account if saved_last_api_account in accounts else first_api_account_name(accounts)
             if chosen_name:
-                api_key = accounts[chosen_name]
-                active_api_account = chosen_name
+                switch_api_account(chosen_name, accounts[chosen_name])
 
     if not api_key:
         error("Missing Gemini API key. Use /addapi to add one, or pass --api-key / GEMINI_API_KEY.")
@@ -1763,6 +1823,12 @@ def main() -> int:
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
+        if account_name:
+            api_account_model_prefs[account_name] = serialize_model_prefs(
+                hidden_models,
+                speed_tags,
+                model_usage_counts,
+            )
         save_model_prefs(
             hidden_models,
             speed_tags,
@@ -1771,6 +1837,7 @@ def main() -> int:
             client.model,
             account_name,
             tool_loop_limit,
+            api_account_model_prefs,
         )
 
     def record_model_usage(model_name_value: str, amount: int = 1) -> None:
@@ -1884,11 +1951,17 @@ def main() -> int:
                         passed_models = list(getattr(test_all_models, "last_passed_models", []))
                         for model_name_value in passed_models:
                             model_usage_counts[model_name_value] = int(model_usage_counts.get(model_name_value, 0) or 0) + 1
+                        passed_set = set(passed_models)
+                        unhidden_count = sum(1 for m in hidden_models if m in passed_set)
+                        if unhidden_count:
+                            hidden_models = [m for m in hidden_models if m not in passed_set]
                         hidden_set = set(hidden_models)
                         new_hidden = [m for m in failed_models if m not in hidden_set]
                         if new_hidden:
                             hidden_models.extend(new_hidden)
                         persist_selection()
+                        if unhidden_count:
+                            info(f"Restored {unhidden_count} passing model(s).")
                         if new_hidden:
                             info(f"Auto-hidden {len(new_hidden)} failed model(s).")
                         continue
@@ -1932,8 +2005,9 @@ def main() -> int:
                     accounts = ensure_api_accounts_loaded()
                     api_accounts = accounts
                     api_accounts[name] = key
-                    active_api_account = name
-                    client.api_key = key
+                    switch_api_account(name, key)
+                    client.api_key = api_key
+                    model_cache = []
                     print(save_api_accounts(api_accounts, password=args.api_password))
                     api_accounts_loaded = True
                     persist_selection()
@@ -1948,8 +2022,9 @@ def main() -> int:
                     if not chosen_name or chosen_name not in accounts:
                         warn("Unknown API account name.")
                         continue
-                    active_api_account = chosen_name
-                    client.api_key = accounts[chosen_name]
+                    switch_api_account(chosen_name, accounts[chosen_name])
+                    client.api_key = api_key
+                    model_cache = []
                     persist_selection()
                     info(f"Loaded API account: {chosen_name}")
                     continue
