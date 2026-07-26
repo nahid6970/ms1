@@ -225,6 +225,11 @@ def read_dynamic_prompt(
             if char == "\003":
                 clear_preview()
                 raise KeyboardInterrupt
+            if char == "\x1b" and completions:
+                completions = []
+                comp_index = -1
+                redraw(force=True)
+                continue
             if char == "\x00" and completions and not msvcrt.kbhit():
                 accept_completion()
                 redraw(force=True)
