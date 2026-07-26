@@ -1,7 +1,7 @@
-1. Project DNA (Permanent): Python-based terminal Gemini CLI for Windows. It uses a modular, tool-driven architecture with local file/system helpers, persistent model/API preferences, and an interactive TUI for model selection and chat.
+1. Project DNA (Permanent): Python-based Windows terminal Gemini CLI with a modular, tool-driven architecture, interactive prompt/TUI, local file/system helpers, and persistent model/API preferences. Its primary goal is practical interactive chat and coding assistance from the terminal.
 
-2. Latest Implementation: Updated `gemini_terminal_cli/gemini_cli.py` to support locked API account storage in `api_accounts.lock`, password-protected load/save flows, `/loadapi <name>` startup parsing, `/system <text|file>`, and `/test` as the model test command.
+2. Latest Implementation: Modified `gemini_cli.py` to consume Windows extended arrow-key sequences and restore Up/Down command history without leaking H/P/K/M into input; force API retry cooldowns to a one-minute countdown; and write `YYYY-MM-DD-HH:MM` to `C:\Users\nahid\notification.txt` on successful completion, quota errors, empty responses, max tool-loop exit, and cooldown expiry.
 
-3. Critical Context: Model and API state are stored in `model_prefs.json` and `api_accounts.lock`. The CLI remembers the last model and last API account across restarts; `/model` is arrow-key driven, `/test` auto-hides failing models, `/tool` opens an interactive tool manager with Space-to-toggle, and `--password` / `--api-password` can bypass interactive prompts for the locked API file.
+3. Critical Context: `read_dynamic_prompt` owns prompt redraw and history; `command_history` is session-only and removes consecutive duplicates. `model_cooldowns` stores expiry datetimes, but retry responses always become exactly 60 seconds. Notification writes are intentionally best-effort and silent. Persistent state remains in `model_prefs.json` and `api_accounts.lock`.
 
-4. Pending Task: Decide whether the password flag should also be accepted from an environment variable for easier automation.
+4. Pending Task: Manually verify arrow-key history, the fixed `01:00` cooldown display, and notification-file triggers in a real Windows console.
