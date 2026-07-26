@@ -43,6 +43,7 @@ MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
 API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.lock")
 API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
 API_ACCOUNTS_MAGIC = b"GEMAPI1"
+NOTIFICATION_FILE = Path(r"C:\Users\nahid\notification.txt")
 
 try:
     import msvcrt
@@ -56,6 +57,13 @@ def _now_stamp() -> str:
 
 def _now() -> dt.datetime:
     return dt.datetime.now()
+
+
+def write_notification() -> None:
+    try:
+        NOTIFICATION_FILE.write_text(_now_stamp(), encoding="utf-8")
+    except Exception:
+        pass
 
 
 def _ansi_wrap(text: str, code: str) -> str:
@@ -1727,6 +1735,7 @@ def main() -> int:
         expired = [name for name, until in model_cooldowns.items() if until <= _now()]
         for name in expired:
             model_cooldowns.pop(name, None)
+            write_notification()
 
     def apply_cooldown_state(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         prune_model_cooldowns()
@@ -1792,10 +1801,12 @@ def main() -> int:
                     warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
                 if "quota" in msg.lower() or "rate" in msg.lower() or "too many requests" in msg.lower():
                     warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
+                    write_notification()
                 return
             candidates = response.get("candidates", [])
             if not candidates:
                 error("Gemini returned no candidates.")
+                write_notification()
                 return
 
             content_obj = candidates[0].get("content", {})
@@ -1810,6 +1821,7 @@ def main() -> int:
             if not function_calls:
                 contents.append(content_obj)
                 record_model_usage(client.model)
+                write_notification()
                 return
 
             contents.append(content_obj)
@@ -1832,6 +1844,7 @@ def main() -> int:
             contents.append({"role": "user", "parts": responses})
 
         warn(f"Reached the maximum tool-call loop depth ({tool_loop_limit}).")
+        write_notification()
 
     if args.prompt:
         run_turn(args.prompt)
