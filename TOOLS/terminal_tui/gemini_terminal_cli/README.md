@@ -66,7 +66,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/help` - show commands
 - `/exit` - quit
 - `/reset` - clear conversation
-- `/model` - open the model picker
+- `/mm` - open the model picker
 - `/test` - test all models and auto-hide failures
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
@@ -99,5 +99,5 @@ The CLI exposes only local, standard-library tools:
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.
-- `/test` is the current command for model testing; `/model test` remains an alias.
+- `/test` is the current command for model testing; `/mm test` remains an alias.
 - `/tool` is the only local tool command; `Space` toggles the selected tool and disabled tools show `off` in red.

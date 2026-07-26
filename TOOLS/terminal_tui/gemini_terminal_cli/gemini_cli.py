@@ -1774,7 +1774,7 @@ def print_help() -> None:
               /help                Show this message
               /exit                Quit
               /reset               Clear conversation history
-              /model               Open the model picker
+              /mm                  Open the model picker
               /test                Test all models and hide failures
               /api                 Open the API account picker
               /loops <n>           Set max tool-call loops
@@ -1785,7 +1785,7 @@ def print_help() -> None:
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
-              - Use /model to pick a model with the arrow keys, or /test to test all models.
+              - Use /mm to pick a model with the arrow keys, or /test to test all models.
               - Use /api to add or switch saved API accounts.
               - Use /tool to see and toggle the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
@@ -2225,7 +2225,7 @@ def main() -> int:
                     contents = []
                     info("Conversation cleared.")
                     continue
-                if command in {"/model", "/test"}:
+                if command in {"/mm", "/test"}:
                     if not model_cache:
                         refresh_model_cache()
                     if command == "/test" or remainder.lower() in {"test", "test all"}:
@@ -2255,7 +2255,7 @@ def main() -> int:
                             info(f"Model set to {client.model}")
                             persist_selection()
                         else:
-                            warn("Unknown model selection. Use /model to pick from the list or /test.")
+                            warn("Unknown model selection. Use /mm to pick from the list or /test.")
                     else:
                         visible_models = apply_cooldown_state(apply_model_tags(
                             [
