@@ -1788,8 +1788,7 @@ def main() -> int:
                 error(msg)
                 retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
                 if retry_match:
-                    seconds = float(retry_match.group(1))
-                    model_cooldowns[client.model] = _now() + dt.timedelta(seconds=seconds)
+                    model_cooldowns[client.model] = _now() + dt.timedelta(minutes=1)
                     warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
                 if "quota" in msg.lower() or "rate" in msg.lower() or "too many requests" in msg.lower():
                     warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
