@@ -54,10 +54,20 @@ def _now_stamp() -> str:
     return dt.datetime.now().strftime("%Y-%m-%d-%H:%M")
 
 
+def _now() -> dt.datetime:
+    return dt.datetime.now()
+
+
 def _ansi_wrap(text: str, code: str) -> str:
     if not sys.stdout.isatty():
         return text
     return f"\033[{code}m{text}\033[0m"
+
+
+def _format_seconds(seconds: float) -> str:
+    total = max(0, int(seconds + 0.999))
+    minutes, secs = divmod(total, 60)
+    return f"{minutes:02d}:{secs:02d}"
 
 
 def info(text: str) -> None:
@@ -70,6 +80,56 @@ def warn(text: str) -> None:
 
 def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
+
+
+def read_dynamic_prompt(prompt_provider: Callable[[], str]) -> str:
+    """Read a line while allowing a time-sensitive prompt to refresh."""
+    if msvcrt is None or not sys.stdin.isatty() or not sys.stdout.isatty():
+        return input(prompt_provider())
+
+    buffer: List[str] = []
+    displayed_prompt = ""
+    next_refresh = 0.0
+
+    def redraw(force: bool = False) -> None:
+        nonlocal displayed_prompt, next_refresh
+        now = time.monotonic()
+        if not force and now < next_refresh:
+            return
+        prompt = prompt_provider()
+        if force or prompt != displayed_prompt:
+            sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
+            sys.stdout.flush()
+            displayed_prompt = prompt
+        next_refresh = now + 0.25
+
+    redraw(force=True)
+    while True:
+        if msvcrt.kbhit():
+            char = msvcrt.getwch()
+            if char in ("\r", "\n"):
+                sys.stdout.write("\n")
+                sys.stdout.flush()
+                return "".join(buffer)
+            if char == "\003":
+                raise KeyboardInterrupt
+            if char in ("\x00", "\xe0"):
+                if msvcrt.kbhit():
+                    msvcrt.getwch()
+                continue
+            if char == "\x08":
+                if buffer:
+                    buffer.pop()
+                    sys.stdout.write("\b \b")
+                    sys.stdout.flush()
+                continue
+            if char.isprintable():
+                buffer.append(char)
+                sys.stdout.write(char)
+                sys.stdout.flush()
+        else:
+            redraw()
+            time.sleep(0.05)
 
 
 def title(text: str) -> None:
@@ -480,6 +540,15 @@ def tool_name_set() -> Set[str]:
 def enabled_tool_names(disabled_tools: Set[str]) -> List[str]:
     disabled = set(disabled_tools)
     return [tool["name"] for tool in list_tool_catalog() if tool["name"] not in disabled]
+
+
+def format_cooldown_until(until: Optional[dt.datetime]) -> str:
+    if until is None:
+        return ""
+    remaining = int((until - _now()).total_seconds() + 0.999)
+    if remaining <= 0:
+        return ""
+    return f"cooldown {_format_seconds(remaining)}"
 
 
 class GeminiClient:
@@ -999,8 +1068,15 @@ def pick_model_interactive(
     models: List[Dict[str, Any]],
     current_model: str,
     title_text: str = "Select Model",
+    model_cooldowns: Optional[Dict[str, dt.datetime]] = None,
 ) -> Optional[str]:
-    widths = build_model_table_widths(models)
+    model_cooldowns = model_cooldowns or {}
+    decorated_models: List[Dict[str, Any]] = []
+    for model in models:
+        copy_model = dict(model)
+        copy_model["_state"] = format_cooldown_until(model_cooldowns.get(model_name(model)))
+        decorated_models.append(copy_model)
+    widths = build_model_table_widths(decorated_models)
 
     def render_item(model: Dict[str, Any], index: int, selected: bool = False) -> str:
         return format_model_entry(
@@ -1013,7 +1089,7 @@ def pick_model_interactive(
 
     chosen = interactive_select(
         title_text=title_text,
-        items=models,
+        items=decorated_models,
         render_item=render_item,
         header_lines=build_model_table_header(widths),
         footer_lines=["Press Q or Esc to cancel."],
@@ -1251,21 +1327,24 @@ def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
     short_width = 0
     name_width = 0
     tag_width = 0
+    state_width = 0
     for model in models:
         short_width = max(short_width, len(short_model_name(model)))
         name_width = max(name_width, len(model_name(model)))
         tag_width = max(tag_width, len(str(model.get("_tag") or "")))
+        state_width = max(state_width, len(str(model.get("_state") or "")))
     return {
         "short": min(max(short_width, 12), 28),
         "name": min(max(name_width, 18), 42),
         "tag": min(max(tag_width, 4), 12),
+        "state": min(max(state_width, 6), 16),
     }
 
 
 def build_model_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  State",
-        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  -----",
+        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  {'State':<{widths['state']}}",
+        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  {'-' * widths['state']}",
     ]
 
 
@@ -1283,6 +1362,9 @@ def format_model_entry(
     hidden = "hidden" if model.get("_hidden") else ""
     tag = str(model.get("_tag") or "")
     usage = int(model.get("_uses") or 0)
+    state = str(model.get("_state") or hidden)
+    if state.startswith("cooldown"):
+        state = _ansi_wrap(state, "31")
     marker = ">" if selected else " "
     row = (
         f"{marker} {index:>2}  "
@@ -1291,7 +1373,7 @@ def format_model_entry(
         f"{usage:>4}  "
         f"{tag:<{widths['tag']}}  "
         f"{active}  "
-        f"{hidden}"
+        f"{state:<{widths['state']}}"
     ).rstrip()
     if selected:
         return _ansi_wrap(row, "48;5;24;97")
@@ -1550,6 +1632,7 @@ def main() -> int:
     client = GeminiClient(api_key, active_model)
     system_instruction = args.system
     contents: List[Dict[str, Any]] = []
+    model_cooldowns: Dict[str, dt.datetime] = {}
 
     if args.load_transcript:
         transcript_path = resolve_path(args.load_transcript, Path.cwd())
@@ -1589,11 +1672,11 @@ def main() -> int:
         if not models:
             warn("No chat models found.")
             return
-        shown_models = apply_model_tags(
+        shown_models = apply_cooldown_state(apply_model_tags(
             filter_models_for_display(models, hidden_models, show_all=show_all),
             speed_tags,
             model_usage_counts,
-        )
+        ))
         print()
         title("Available Models")
         current_uses = int(model_usage_counts.get(client.model, 0) or 0)
@@ -1632,8 +1715,34 @@ def main() -> int:
             model_usage_counts,
         )
 
+    def prune_model_cooldowns() -> None:
+        expired = [name for name, until in model_cooldowns.items() if until <= _now()]
+        for name in expired:
+            model_cooldowns.pop(name, None)
+
+    def apply_cooldown_state(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        prune_model_cooldowns()
+        decorated: List[Dict[str, Any]] = []
+        for model in models:
+            copy_model = dict(model)
+            name = model_name(model)
+            cooldown_text = format_cooldown_until(model_cooldowns.get(name))
+            if cooldown_text:
+                copy_model["_state"] = cooldown_text
+            elif copy_model.get("_hidden"):
+                copy_model["_state"] = "hidden"
+            else:
+                copy_model["_state"] = ""
+            decorated.append(copy_model)
+        return decorated
+
     def prompt_text() -> str:
-        return _ansi_wrap(f"gemini-{short_model_label(client.model)}> ", "1;32")
+        prune_model_cooldowns()
+        prefix = f"gemini-{short_model_label(client.model)}"
+        cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
+        if cooldown_text:
+            prefix += f" [{cooldown_text}]"
+        return _ansi_wrap(f"{prefix}> ", "1;32")
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
@@ -1669,6 +1778,11 @@ def main() -> int:
             except RuntimeError as exc:
                 msg = str(exc).strip()
                 error(msg)
+                retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
+                if retry_match:
+                    seconds = float(retry_match.group(1))
+                    model_cooldowns[client.model] = _now() + dt.timedelta(seconds=seconds)
+                    warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
                 if "quota" in msg.lower() or "rate" in msg.lower() or "too many requests" in msg.lower():
                     warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
                 return
@@ -1717,7 +1831,7 @@ def main() -> int:
     else:
         while True:
             try:
-                user_input = input(prompt_text()).strip()
+                user_input = read_dynamic_prompt(prompt_text).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
@@ -1764,15 +1878,20 @@ def main() -> int:
                         else:
                             warn("Unknown model selection. Use /model to pick from the list or /test.")
                     else:
-                        visible_models = apply_model_tags(
+                        visible_models = apply_cooldown_state(apply_model_tags(
                             [
                                 m for m in filter_models_for_display(model_cache, hidden_models, show_all=True)
                                 if not m.get("_hidden")
                             ],
                             speed_tags,
                             model_usage_counts,
+                        ))
+                        chosen = pick_model_interactive(
+                            visible_models,
+                            client.model,
+                            title_text="Select Model",
+                            model_cooldowns=model_cooldowns,
                         )
-                        chosen = pick_model_interactive(visible_models, client.model, title_text="Select Model")
                         if chosen:
                             client.model = chosen
                             info(f"Model set to {client.model}")
