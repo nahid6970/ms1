@@ -125,7 +125,7 @@ def read_dynamic_prompt(
     history: Optional[List[str]] = None,
     cwd: Optional[Path] = None
 ) -> str:
-    """Read a line while allowing a time-sensitive prompt to refresh and providing @ completions."""
+    """Read a line with time-sensitive refresh, @ completions, and fixed Windows line handling."""
     if msvcrt is None or not sys.stdin.isatty() or not sys.stdout.isatty():
         return input(prompt_provider())
 
@@ -140,38 +140,44 @@ def read_dynamic_prompt(
     comp_index = -1
     comp_original_word = ""
     comp_base_buffer = ""
+    had_preview = False
 
     def clear_preview() -> None:
-        """Helper to clear the preview line below the cursor."""
-        sys.stdout.write("\033[s\n\033[2K\033[u")
-        sys.stdout.flush()
+        nonlocal had_preview
+        if had_preview:
+            # Move down, clear line, move back up
+            sys.stdout.write("\033[1B\r\033[2K\033[1A\r")
+            sys.stdout.flush()
+            had_preview = False
 
     def redraw(force: bool = False) -> None:
-        nonlocal displayed_prompt, next_refresh
+        nonlocal displayed_prompt, next_refresh, had_preview
         now = time.monotonic()
         if not force and now < next_refresh:
             return
+        
         prompt = prompt_provider()
-        if force or prompt != displayed_prompt:
-            # Clear line and print prompt + buffer
+        # Ensure we are at the start of the current input line
+        sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
+        
+        if completions:
+            had_preview = True
+            preview_items = completions[:8]
+            preview_str = "  " + " ".join(
+                _ansi_wrap(c, "7") if i == comp_index else _ansi_wrap(c, "90")
+                for i, c in enumerate(preview_items)
+            )
+            if len(completions) > 8:
+                preview_str += _ansi_wrap(" ...", "90")
+            # Save cursor position, move down, clear line, print preview, restore cursor
+            sys.stdout.write("\033[s\n\033[2K" + preview_str + "\033[u")
+        else:
+            clear_preview()
+            # Ensure cursor is correct after potential preview clearing
             sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
-            
-            # If we have completions, show a preview line below
-            if completions:
-                preview_items = completions[:8]
-                preview_str = "  " + " ".join(
-                    _ansi_wrap(c, "7") if i == comp_index else _ansi_wrap(c, "90")
-                    for i, c in enumerate(preview_items)
-                )
-                if len(completions) > 8:
-                    preview_str += _ansi_wrap(" ...", "90")
-                # Save cursor, move to next line, clear it, print preview, restore cursor
-                sys.stdout.write("\033[s\n\033[2K" + preview_str + "\033[u")
-            else:
-                clear_preview()
-            
-            sys.stdout.flush()
-            displayed_prompt = prompt
+
+        sys.stdout.flush()
+        displayed_prompt = prompt
         next_refresh = now + 0.25
 
     redraw(force=True)
@@ -205,12 +211,12 @@ def read_dynamic_prompt(
                 continue
             if char in ("\x00", "\xe0"):
                 char2 = msvcrt.getwch()
-                if history and char2 == "H":
+                if history and char2 == "H": # Up
                     history_index = max(0, history_index - 1)
                     buffer = list(history[history_index])
                     completions = []
                     redraw(force=True)
-                elif history and char2 == "P":
+                elif history and char2 == "P": # Down
                     history_index = min(len(history), history_index + 1)
                     buffer = list(history[history_index]) if history_index < len(history) else []
                     completions = []
@@ -239,14 +245,9 @@ def read_dynamic_prompt(
                     comp_base_buffer = current_text[:match.start() + 1]
                     completions = _get_path_completions(comp_original_word, current_cwd)
                     comp_index = -1
-                    redraw(force=True)
                 else:
-                    if completions:
-                        completions = []
-                        redraw(force=True)
-                    else:
-                        sys.stdout.write(char)
-                        sys.stdout.flush()
+                    completions = []
+                redraw(force=True)
         else:
             redraw()
             time.sleep(0.05)
@@ -1888,6 +1889,7 @@ def print_help() -> None:
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
+              - Use @ followed by a path to get as-you-type file/folder suggestions (Tab to cycle).
               - Use /mm to pick a model with the arrow keys, or /test to test all models.
               - Use /api to add or switch saved API accounts.
               - Use /tool to see and toggle the implemented local tools.
@@ -1931,6 +1933,8 @@ def resolve_system_instruction_input(text: str, cwd: Path) -> str:
 
 
 def main() -> int:
+    if platform.system() == "Windows":
+        os.system("") # Enable Virtual Terminal Processing (ANSI support)
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
     parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /api 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
