@@ -91,18 +91,21 @@ def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
 
 
-def _get_path_completions(fragment: str, cwd: Path) -> List[str]:
+def _get_path_completions(fragment: str, cwd: Path) -> List[Dict[str, Any]]:
     """Helper to find file/folder completions for a fragment."""
     try:
+        display_prefix = ""
         if "/" in fragment or "\\" in fragment:
             path_part = fragment.replace("\\", "/")
             if path_part.endswith("/"):
                 base_dir = (cwd / path_part).resolve()
                 prefix = ""
+                display_prefix = path_part
             else:
                 parts = path_part.rsplit("/", 1)
                 base_dir = (cwd / parts[0]).resolve()
                 prefix = parts[1].lower()
+                display_prefix = parts[0] + "/"
         else:
             base_dir = cwd.resolve()
             prefix = fragment.lower()
@@ -110,12 +113,24 @@ def _get_path_completions(fragment: str, cwd: Path) -> List[str]:
         if not base_dir.exists() or not base_dir.is_dir():
             return []
 
-        matches = []
+        prefix_matches: List[Dict[str, Any]] = []
+        contains_matches: List[Dict[str, Any]] = []
         for entry in base_dir.iterdir():
-            if entry.name.lower().startswith(prefix):
-                suffix = "/" if entry.is_dir() else ""
-                matches.append(entry.name + suffix)
-        return sorted(matches)
+            name_lower = entry.name.lower()
+            if prefix and prefix not in name_lower:
+                continue
+            suffix = "/" if entry.is_dir() else ""
+            item = {
+                "value": display_prefix + entry.name + suffix,
+                "label": display_prefix + entry.name + suffix,
+                "is_dir": entry.is_dir(),
+            }
+            if not prefix or name_lower.startswith(prefix):
+                prefix_matches.append(item)
+            else:
+                contains_matches.append(item)
+        sort_key = lambda item: (not bool(item["is_dir"]), str(item["label"]).lower())
+        return sorted(prefix_matches, key=sort_key) + sorted(contains_matches, key=sort_key)
     except Exception:
         return []
 
@@ -136,9 +151,8 @@ def read_dynamic_prompt(
     history_index = len(history or [])
 
     # Completion state
-    completions: List[str] = []
+    completions: List[Dict[str, Any]] = []
     comp_index = -1
-    comp_original_word = ""
     comp_base_buffer = ""
     had_preview = False
 
@@ -153,32 +167,39 @@ def read_dynamic_prompt(
     def redraw(force: bool = False) -> None:
         nonlocal displayed_prompt, next_refresh, had_preview
         now = time.monotonic()
-        if not force and now < next_refresh:
+        if not force and (completions or now < next_refresh):
             return
         
         prompt = prompt_provider()
-        # Ensure we are at the start of the current input line
+        clear_preview()
         sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
         
         if completions:
             had_preview = True
             preview_items = completions[:8]
             preview_str = "  " + " ".join(
-                _ansi_wrap(c, "7") if i == comp_index else _ansi_wrap(c, "90")
+                _ansi_wrap(str(c["label"]), "7") if i == comp_index else _ansi_wrap(str(c["label"]), "90")
                 for i, c in enumerate(preview_items)
             )
             if len(completions) > 8:
                 preview_str += _ansi_wrap(" ...", "90")
             # Save cursor position, move down, clear line, print preview, restore cursor
             sys.stdout.write("\033[s\n\033[2K" + preview_str + "\033[u")
-        else:
-            clear_preview()
-            # Ensure cursor is correct after potential preview clearing
-            sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
 
         sys.stdout.flush()
         displayed_prompt = prompt
         next_refresh = now + 0.25
+
+    def refresh_completions_from_buffer() -> None:
+        nonlocal comp_base_buffer, completions, comp_index
+        current_text = "".join(buffer)
+        match = re.search(r"@([^\s]*)$", current_text)
+        if match:
+            comp_base_buffer = current_text[:match.start() + 1]
+            completions = _get_path_completions(match.group(1), current_cwd)
+        else:
+            completions = []
+        comp_index = -1
 
     redraw(force=True)
     while True:
@@ -192,22 +213,27 @@ def read_dynamic_prompt(
             if char == "\003":
                 clear_preview()
                 raise KeyboardInterrupt
+            if char == "\x00" and completions and not msvcrt.kbhit():
+                selected = completions[comp_index if comp_index >= 0 else 0]
+                buffer = list(comp_base_buffer + str(selected["value"]))
+                if bool(selected.get("is_dir")):
+                    refresh_completions_from_buffer()
+                else:
+                    completions = []
+                    comp_index = -1
+                redraw(force=True)
+                continue
             if char == "\t":
                 if completions:
                     comp_index = (comp_index + 1) % len(completions)
-                    buffer = list(comp_base_buffer + completions[comp_index])
+                    buffer = list(comp_base_buffer + str(completions[comp_index]["value"]))
                     redraw(force=True)
                 else:
-                    current_text = "".join(buffer)
-                    match = re.search(r"@([^\s]*)$", current_text)
-                    if match:
-                        comp_original_word = match.group(1)
-                        comp_base_buffer = current_text[:match.start() + 1]
-                        completions = _get_path_completions(comp_original_word, current_cwd)
-                        if completions:
-                            comp_index = 0
-                            buffer = list(comp_base_buffer + completions[comp_index])
-                            redraw(force=True)
+                    refresh_completions_from_buffer()
+                    if completions:
+                        comp_index = 0
+                        buffer = list(comp_base_buffer + str(completions[comp_index]["value"]))
+                        redraw(force=True)
                 continue
             if char in ("\x00", "\xe0"):
                 char2 = msvcrt.getwch()
@@ -215,38 +241,24 @@ def read_dynamic_prompt(
                     history_index = max(0, history_index - 1)
                     buffer = list(history[history_index])
                     completions = []
+                    comp_index = -1
                     redraw(force=True)
                 elif history and char2 == "P": # Down
                     history_index = min(len(history), history_index + 1)
                     buffer = list(history[history_index]) if history_index < len(history) else []
                     completions = []
+                    comp_index = -1
                     redraw(force=True)
                 continue
             if char == "\x08":
                 if buffer:
                     buffer.pop()
-                    current_text = "".join(buffer)
-                    match = re.search(r"@([^\s]*)$", current_text)
-                    if match:
-                        comp_original_word = match.group(1)
-                        comp_base_buffer = current_text[:match.start() + 1]
-                        completions = _get_path_completions(comp_original_word, current_cwd)
-                        comp_index = -1
-                    else:
-                        completions = []
+                    refresh_completions_from_buffer()
                     redraw(force=True)
                 continue
             if char.isprintable():
                 buffer.append(char)
-                current_text = "".join(buffer)
-                match = re.search(r"@([^\s]*)$", current_text)
-                if match:
-                    comp_original_word = match.group(1)
-                    comp_base_buffer = current_text[:match.start() + 1]
-                    completions = _get_path_completions(comp_original_word, current_cwd)
-                    comp_index = -1
-                else:
-                    completions = []
+                refresh_completions_from_buffer()
                 redraw(force=True)
         else:
             redraw()
