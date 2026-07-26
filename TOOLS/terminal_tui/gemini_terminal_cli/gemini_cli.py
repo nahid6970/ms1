@@ -1276,27 +1276,84 @@ def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[
     return failed_models
 
 
-def pick_api_account_interactive(accounts: Dict[str, str], title_text: str = "Select API Account") -> Optional[str]:
-    items = [{"name": name, "key": key} for name, key in sorted(accounts.items(), key=lambda item: item[0].lower())]
-    if not items:
-        return None
+def build_api_account_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int]:
+    name_width = 0
+    key_width = 0
+    for item in items:
+        name_width = max(name_width, len(str(item.get("name", ""))))
+        key_width = max(key_width, len(str(item.get("masked_key", ""))))
+    return {
+        "name": min(max(name_width, 10), 28),
+        "key": min(max(key_width, 10), 24),
+    }
+
+
+def build_api_account_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  State",
+        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['key']}  -----",
+    ]
+
+
+def format_api_account_entry(
+    index: int,
+    item: Dict[str, Any],
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    action = str(item.get("action", "load"))
+    name = str(item.get("name", ""))
+    key = str(item.get("masked_key", ""))
+    state = str(item.get("state", ""))
+    marker = ">" if selected else " "
+    row = (
+        f"{marker} {index:>2}  "
+        f"{name:<{widths['name']}}  "
+        f"{key:<{widths['key']}}  "
+        f"{state}"
+    ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    if action == "add":
+        return _ansi_wrap(row, "32")
+    return row
+
+
+def pick_api_account_interactive(
+    accounts: Dict[str, str],
+    active_api_account: str = "",
+    title_text: str = "Manage API Accounts",
+) -> Optional[Dict[str, str]]:
+    items: List[Dict[str, str]] = [{
+        "action": "add",
+        "name": "Add API",
+        "masked_key": "",
+        "state": "new",
+    }]
+    for name, key in sorted(accounts.items(), key=lambda item: item[0].lower()):
+        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+        state = "active" if name == active_api_account else ""
+        items.append({
+            "action": "load",
+            "name": name,
+            "masked_key": masked,
+            "state": state,
+        })
+    widths = build_api_account_table_widths(items)
 
     def render_item(item: Dict[str, Any], _: int, selected: bool = False) -> str:
-        name = item["name"]
-        key = item["key"]
-        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
-        line = f"{name} [{masked}]"
-        return _ansi_wrap(line, "48;5;24;97") if selected else line
+        return format_api_account_entry(_ + 1, item, widths, selected=selected)
 
     chosen = interactive_select(
         title_text=title_text,
         items=items,
         render_item=render_item,
+        header_lines=build_api_account_table_header(widths),
         footer_lines=["Press Q or Esc to cancel."],
     )
     if not chosen:
         return None
-    return str(chosen["name"])
+    return {"action": str(chosen["action"]), "name": str(chosen["name"])}
 
 
 def first_api_account_name(accounts: Dict[str, str]) -> Optional[str]:
@@ -1544,8 +1601,7 @@ def print_help() -> None:
               /reset               Clear conversation history
               /model               Open the model picker
               /test                Test all models and hide failures
-              /addapi              Add a named API key
-              /loadapi             Load the first saved API account, or a named one
+              /api                 Open the API account picker
               /loops <n>           Set max tool-call loops
               /tool                Open the tool manager and toggle tools with Space
               /system <text|file>  Replace system instruction or load it from a file
@@ -1555,7 +1611,7 @@ def print_help() -> None:
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /model to pick a model with the arrow keys, or /test to test all models.
-              - Use /addapi once, then /loadapi or just restart to reuse the last account.
+              - Use /api to add or switch saved API accounts.
               - Use /tool to see and toggle the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
             """
@@ -1598,7 +1654,7 @@ def resolve_system_instruction_input(text: str, cwd: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
-    parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /loadapi 09")
+    parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /api 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
     parser.add_argument("--api-key", default=None, help="Gemini API key")
     parser.add_argument("--password", "--api-password", dest="api_password", default=None, help="Password for locked API accounts")
@@ -1679,10 +1735,10 @@ def main() -> int:
         if args.startup_args[0].startswith("/"):
             startup_command = args.startup_args[0].lower()
             startup_remainder = " ".join(args.startup_args[1:]).strip()
-            if startup_command == "/loadapi":
+            if startup_command == "/api":
                 accounts = ensure_api_accounts_loaded()
                 if not accounts:
-                    error("No saved API accounts. Use /addapi first.")
+                    error("No saved API accounts. Use /api first.")
                     return 1
                 chosen_name = startup_remainder or first_api_account_name(accounts)
                 if not chosen_name or chosen_name not in accounts:
@@ -1702,7 +1758,7 @@ def main() -> int:
                 switch_api_account(chosen_name, accounts[chosen_name])
 
     if not api_key:
-        error("Missing Gemini API key. Use /addapi to add one, or pass --api-key / GEMINI_API_KEY.")
+        error("Missing Gemini API key. Use /api to add one, or pass --api-key / GEMINI_API_KEY.")
         return 1
 
     client = GeminiClient(api_key, active_model)
@@ -1839,6 +1895,42 @@ def main() -> int:
             tool_loop_limit,
             api_account_model_prefs,
         )
+
+    def add_api_account_interactive() -> None:
+        nonlocal api_accounts, api_accounts_loaded, model_cache
+        name = input("API name: ").strip()
+        if not name:
+            warn("API name is required.")
+            return
+        key = input("API key: ").strip()
+        if not key:
+            warn("API key is required.")
+            return
+        accounts = ensure_api_accounts_loaded()
+        api_accounts = accounts
+        api_accounts[name] = key
+        switch_api_account(name, key)
+        client.api_key = api_key
+        model_cache = []
+        print(save_api_accounts(api_accounts, password=args.api_password))
+        api_accounts_loaded = True
+        persist_selection()
+        info(f"Loaded API account: {name}")
+
+    def load_api_account_by_name(chosen_name: str) -> None:
+        nonlocal model_cache
+        accounts = ensure_api_accounts_loaded()
+        if not accounts:
+            warn("No saved API accounts. Use /api to add one.")
+            return
+        if not chosen_name or chosen_name not in accounts:
+            warn("Unknown API account name.")
+            return
+        switch_api_account(chosen_name, accounts[chosen_name])
+        client.api_key = api_key
+        model_cache = []
+        persist_selection()
+        info(f"Loaded API account: {chosen_name}")
 
     def record_model_usage(model_name_value: str, amount: int = 1) -> None:
         if not model_name_value or amount <= 0:
@@ -1993,40 +2085,18 @@ def main() -> int:
                             info(f"Model set to {client.model}")
                             persist_selection()
                     continue
-                if command == "/addapi":
-                    name = input("API name: ").strip()
-                    if not name:
-                        warn("API name is required.")
-                        continue
-                    key = input("API key: ").strip()
-                    if not key:
-                        warn("API key is required.")
-                        continue
+                if command == "/api":
                     accounts = ensure_api_accounts_loaded()
-                    api_accounts = accounts
-                    api_accounts[name] = key
-                    switch_api_account(name, key)
-                    client.api_key = api_key
-                    model_cache = []
-                    print(save_api_accounts(api_accounts, password=args.api_password))
-                    api_accounts_loaded = True
-                    persist_selection()
-                    info(f"Loaded API account: {name}")
-                    continue
-                if command == "/loadapi":
-                    accounts = ensure_api_accounts_loaded()
-                    if not accounts:
-                        warn("No saved API accounts. Use /addapi first.")
+                    if remainder:
+                        load_api_account_by_name(remainder)
                         continue
-                    chosen_name = remainder if remainder else first_api_account_name(accounts)
-                    if not chosen_name or chosen_name not in accounts:
-                        warn("Unknown API account name.")
+                    chosen_api = pick_api_account_interactive(accounts, active_api_account)
+                    if not chosen_api:
                         continue
-                    switch_api_account(chosen_name, accounts[chosen_name])
-                    client.api_key = api_key
-                    model_cache = []
-                    persist_selection()
-                    info(f"Loaded API account: {chosen_name}")
+                    if chosen_api["action"] == "add":
+                        add_api_account_interactive()
+                    else:
+                        load_api_account_by_name(chosen_api["name"])
                     continue
                 if command == "/loops":
                     if not remainder:
