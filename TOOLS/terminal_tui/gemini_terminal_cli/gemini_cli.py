@@ -82,7 +82,7 @@ def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
 
 
-def read_dynamic_prompt(prompt_provider: Callable[[], str]) -> str:
+def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[List[str]] = None) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if msvcrt is None or not sys.stdin.isatty() or not sys.stdout.isatty():
         return input(prompt_provider())
@@ -90,6 +90,7 @@ def read_dynamic_prompt(prompt_provider: Callable[[], str]) -> str:
     buffer: List[str] = []
     displayed_prompt = ""
     next_refresh = 0.0
+    history_index = len(history or [])
 
     def redraw(force: bool = False) -> None:
         nonlocal displayed_prompt, next_refresh
@@ -114,8 +115,15 @@ def read_dynamic_prompt(prompt_provider: Callable[[], str]) -> str:
             if char == "\003":
                 raise KeyboardInterrupt
             if char in ("\x00", "\xe0"):
-                if msvcrt.kbhit():
-                    msvcrt.getwch()
+                char2 = msvcrt.getwch()
+                if history and char2 == "H":
+                    history_index = max(0, history_index - 1)
+                    buffer = list(history[history_index])
+                    redraw(force=True)
+                elif history and char2 == "P":
+                    history_index = min(len(history), history_index + 1)
+                    buffer = list(history[history_index]) if history_index < len(history) else []
+                    redraw(force=True)
                 continue
             if char == "\x08":
                 if buffer:
@@ -1829,15 +1837,18 @@ def main() -> int:
     if args.prompt:
         run_turn(args.prompt)
     else:
+        command_history: List[str] = []
         while True:
             try:
-                user_input = read_dynamic_prompt(prompt_text).strip()
+                user_input = read_dynamic_prompt(prompt_text, command_history).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
 
             if not user_input:
                 continue
+            if not command_history or command_history[-1] != user_input:
+                command_history.append(user_input)
             if user_input.startswith("/"):
                 command, _, remainder = user_input.partition(" ")
                 command = command.lower()
