@@ -201,6 +201,18 @@ def read_dynamic_prompt(
             completions = []
         comp_index = -1
 
+    def accept_completion() -> None:
+        nonlocal buffer, completions, comp_index
+        if not completions:
+            return
+        selected = completions[comp_index if comp_index >= 0 else 0]
+        buffer = list(comp_base_buffer + str(selected["value"]))
+        if bool(selected.get("is_dir")):
+            refresh_completions_from_buffer()
+        else:
+            completions = []
+            comp_index = -1
+
     redraw(force=True)
     while True:
         if msvcrt.kbhit():
@@ -214,13 +226,7 @@ def read_dynamic_prompt(
                 clear_preview()
                 raise KeyboardInterrupt
             if char == "\x00" and completions and not msvcrt.kbhit():
-                selected = completions[comp_index if comp_index >= 0 else 0]
-                buffer = list(comp_base_buffer + str(selected["value"]))
-                if bool(selected.get("is_dir")):
-                    refresh_completions_from_buffer()
-                else:
-                    completions = []
-                    comp_index = -1
+                accept_completion()
                 redraw(force=True)
                 continue
             if char == "\t":
@@ -255,6 +261,10 @@ def read_dynamic_prompt(
                     buffer.pop()
                     refresh_completions_from_buffer()
                     redraw(force=True)
+                continue
+            if char == " " and completions:
+                accept_completion()
+                redraw(force=True)
                 continue
             if char.isprintable():
                 buffer.append(char)
