@@ -1755,14 +1755,12 @@ def show_fzf_menu():
             elif selection.startswith(''):
                 for file_path in file_paths:
                     if os.path.isdir(file_path):
-                        subprocess.run(['explorer.exe', '/n,', '/e,', file_path])
+                        subprocess.run(['explorer.exe', file_path])
                     else:
                         subprocess.run(['explorer.exe', '/select,', file_path])
             #! Run all files
             elif selection.startswith(''):
-                if os.path.isdir(file_path):
-                    subprocess.run(['explorer.exe', file_path])
-                else:
+                for file_path in file_paths:
                     subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
             elif selection.startswith('󰴠'):
                 # Copy all file paths to clipboard
@@ -2212,7 +2210,7 @@ for root_dir in directories:
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
             f"--bind=ctrl-o:execute-silent(python \"{script_path}\" --open-item {{2}})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
-            "--bind=ctrl-r:execute-silent(powershell -command \"if (Test-Path -Path '{2}' -PathType Container) { explorer.exe '{2}' } else { Start-Process '{2}' }\")",
+            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
             f"--bind=f4:reload(python \"{feeder_script_file}\")",
@@ -2350,7 +2348,7 @@ if __name__ == "__main__":
         elif sys.argv[1] == "--open-item" and len(sys.argv) > 2:
             path = sys.argv[2]
             if os.path.isdir(path):
-                subprocess.run(['explorer.exe', '/n,', '/e,', path])
+                subprocess.run(['explorer.exe', path])
             else:
                 subprocess.run(['explorer.exe', '/select,', path])
             sys.exit(0)
