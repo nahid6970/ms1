@@ -167,6 +167,8 @@ def read_dynamic_prompt(
     def redraw(force: bool = False) -> None:
         nonlocal displayed_prompt, next_refresh, had_preview
         now = time.monotonic()
+        if not force and buffer:
+            return
         if not force and (completions or now < next_refresh):
             return
         
@@ -212,6 +214,14 @@ def read_dynamic_prompt(
         else:
             completions = []
             comp_index = -1
+
+    def echo_printable(char: str) -> None:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+
+    def erase_last_printable() -> None:
+        sys.stdout.write("\b \b")
+        sys.stdout.flush()
 
     redraw(force=True)
     while True:
@@ -265,7 +275,11 @@ def read_dynamic_prompt(
                 if buffer:
                     buffer.pop()
                     refresh_completions_from_buffer()
-                    redraw(force=True)
+                    if completions:
+                        redraw(force=True)
+                    else:
+                        clear_preview()
+                        erase_last_printable()
                 continue
             if char == " " and completions:
                 accept_completion()
@@ -273,8 +287,18 @@ def read_dynamic_prompt(
                 continue
             if char.isprintable():
                 buffer.append(char)
+                if msvcrt.kbhit():
+                    clear_preview()
+                    completions = []
+                    comp_index = -1
+                    echo_printable(char)
+                    continue
                 refresh_completions_from_buffer()
-                redraw(force=True)
+                if completions:
+                    redraw(force=True)
+                else:
+                    clear_preview()
+                    echo_printable(char)
         else:
             redraw()
             time.sleep(0.05)
