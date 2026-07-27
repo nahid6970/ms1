@@ -12,8 +12,15 @@ It is designed to feel closer to a CLI tool than a web app:
 ## Requirements
 
 - Python 3.10+
+- `prompt_toolkit` for the interactive input line
 - First-time setup needs either a `GEMINI_API_KEY` environment variable, or `/addapi`
 - API accounts are stored in an encrypted `api_accounts.lock` file and prompt for a password
+
+Install the input dependency with:
+
+```powershell
+pip install prompt_toolkit
+```
 
 ## Run
 

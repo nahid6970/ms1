@@ -51,6 +51,19 @@ try:
 except Exception:
     msvcrt = None
 
+try:
+    from prompt_toolkit import prompt as pt_prompt
+    from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+    from prompt_toolkit.formatted_text import ANSI
+    from prompt_toolkit.history import InMemoryHistory
+    from prompt_toolkit.shortcuts import CompleteStyle
+except Exception:
+    pt_prompt = None
+    AutoSuggestFromHistory = None
+    ANSI = None
+    InMemoryHistory = None
+    CompleteStyle = None
+
 
 def _now_stamp() -> str:
     return dt.datetime.now().strftime("%Y-%m-%d-%H:%M")
@@ -93,60 +106,19 @@ def error(text: str) -> None:
 
 def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[List[str]] = None) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
-    if msvcrt is None or not sys.stdin.isatty() or not sys.stdout.isatty():
-        return input(prompt_provider())
+    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None:
+        prompt_history = InMemoryHistory(history or [])
+        return pt_prompt(
+            message=lambda: ANSI(prompt_provider()),
+            history=prompt_history,
+            auto_suggest=AutoSuggestFromHistory(),
+            complete_style=CompleteStyle.READLINE_LIKE,
+            mouse_support=False,
+            wrap_lines=False,
+            refresh_interval=0.25,
+        )
 
-    buffer: List[str] = []
-    displayed_prompt = ""
-    next_refresh = 0.0
-    history_index = len(history or [])
-
-    def redraw(force: bool = False) -> None:
-        nonlocal displayed_prompt, next_refresh
-        now = time.monotonic()
-        if not force and now < next_refresh:
-            return
-        prompt = prompt_provider()
-        if force or prompt != displayed_prompt:
-            sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
-            sys.stdout.flush()
-            displayed_prompt = prompt
-        next_refresh = now + 0.25
-
-    redraw(force=True)
-    while True:
-        if msvcrt.kbhit():
-            char = msvcrt.getwch()
-            if char in ("\r", "\n"):
-                sys.stdout.write("\n")
-                sys.stdout.flush()
-                return "".join(buffer)
-            if char == "\003":
-                raise KeyboardInterrupt
-            if char in ("\x00", "\xe0"):
-                char2 = msvcrt.getwch()
-                if history and char2 == "H":
-                    history_index = max(0, history_index - 1)
-                    buffer = list(history[history_index])
-                    redraw(force=True)
-                elif history and char2 == "P":
-                    history_index = min(len(history), history_index + 1)
-                    buffer = list(history[history_index]) if history_index < len(history) else []
-                    redraw(force=True)
-                continue
-            if char == "\x08":
-                if buffer:
-                    buffer.pop()
-                    sys.stdout.write("\b \b")
-                    sys.stdout.flush()
-                continue
-            if char.isprintable():
-                buffer.append(char)
-                sys.stdout.write(char)
-                sys.stdout.flush()
-        else:
-            redraw()
-            time.sleep(0.05)
+    return input(prompt_provider())
 
 
 def title(text: str) -> None:
