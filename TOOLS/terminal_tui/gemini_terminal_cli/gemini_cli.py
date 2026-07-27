@@ -2650,6 +2650,7 @@ def main() -> int:
                 "resource has been exhausted",
                 "limit exceeded",
                 "exceeded your current quota",
+                "high demand",
             )
         )
 
