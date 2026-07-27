@@ -97,6 +97,8 @@ The CLI exposes only local, standard-library tools:
 - `search_web`
 - `search_tavily`
 - `replace_block`
+- `smart_replace_block`
+- `replace_lines`
 - `insert_after`
 - `delete_block`
 - `apply_patch`
@@ -105,20 +107,12 @@ The CLI exposes only local, standard-library tools:
 - `get_system_info`
 - `request_follow_up`
 
-`apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, validates the context first, and then writes the touched files. It can be toggled from `/tool` like every other local tool.
+`apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, supports a ±50 line fuzzy search window with normalized whitespace matching if line numbers drift, and writes the touched files. It can be toggled from `/tool` like every other local tool.
 When an `apply_patch` call is shown in the terminal, removed diff lines render red and added diff lines render green.
 
+`replace_lines` allows replacing exact 1-indexed line ranges in a file directly, while `smart_replace_block` provides fuzzy fallback matching for line endings (`\r\n` vs `\n`) and trailing whitespace.
+
 `run_powershell` is the preferred inspection and command tool on Windows. It runs commands through `powershell.exe -NoProfile`, so the model can use commands such as `rg`, `Get-Content`, `git status`, and test commands before choosing an edit. For literal code searches with `Select-String`, prefer `-SimpleMatch` and single-quoted patterns, for example `Select-String -SimpleMatch 'preview.contentEditable = "true";'`.
-
-## Notes
-
-- The CLI does not depend on the Flask app.
-- It uses Gemini's function-calling API directly over HTTP.
-- Shell commands are intentionally explicit; the model must ask for them through the tool loop.
-- Hidden models, last model, and speed tags are stored in `model_prefs.json`.
-- Model visibility, speed tags, and `Uses` counts are shared across Gemini API accounts.
-- Disabled tools are stored in `model_prefs.json` and in saved transcripts.
-- Named API accounts are stored in `api_accounts.lock`.
 - REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts; the file is ignored by Git.
 - The CLI restores the last-used API account and model on startup when they have been saved.
 - `/failover` opens an interactive picker for the project, session, and global failover scopes.

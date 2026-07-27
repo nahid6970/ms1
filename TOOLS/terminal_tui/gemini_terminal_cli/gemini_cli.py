@@ -527,7 +527,31 @@ def apply_unified_patch(patch_text: str, cwd: Path) -> str:
 
             current_segment = result_lines[pos:pos + len(old_segment)]
             if current_segment != old_segment:
-                return f"Error: patch context did not match {target_path} near line {old_start}."
+                # Fuzzy window search (search +- 50 lines around pos)
+                found_pos = -1
+                search_radius = 50
+                min_idx = max(0, pos - search_radius)
+                max_idx = min(len(result_lines) - len(old_segment), pos + search_radius)
+                
+                # Check exact match within window
+                for candidate in range(min_idx, max_idx + 1):
+                    if result_lines[candidate:candidate + len(old_segment)] == old_segment:
+                        found_pos = candidate
+                        break
+                
+                # If exact match failed in window, check normalized line (ignore trailing space / CRLF)
+                if found_pos == -1:
+                    norm_old = [l.rstrip() for l in old_segment]
+                    for candidate in range(min_idx, max_idx + 1):
+                        cand_segment = [l.rstrip() for l in result_lines[candidate:candidate + len(old_segment)]]
+                        if cand_segment == norm_old:
+                            found_pos = candidate
+                            break
+                            
+                if found_pos != -1:
+                    pos = found_pos
+                else:
+                    return f"Error: patch context did not match {target_path} near line {old_start}."
 
             result_lines[pos:pos + len(old_segment)] = new_segment
             offset += len(new_segment) - len(old_segment)
@@ -552,6 +576,69 @@ def apply_unified_patch(patch_text: str, cwd: Path) -> str:
         return f"Error applying patch: {exc}"
 
     return "Applied patch:\n" + "\n".join(str(path) for path in touched)
+
+
+def replace_lines_in_file(path: Path, start_line: int, end_line: int, new_text: str) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    if start_line < 1:
+        return "Error: start_line must be >= 1."
+    if end_line < start_line:
+        return "Error: end_line must be >= start_line."
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if start_line > len(lines):
+            return f"Error: start_line ({start_line}) exceeds file line count ({len(lines)})."
+        
+        # 1-indexed to 0-indexed bounds
+        idx_start = start_line - 1
+        idx_end = min(end_line, len(lines))
+        
+        new_lines = new_text.splitlines() if new_text else []
+        lines[idx_start:idx_end] = new_lines
+        path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+        return f"Replaced lines {start_line}-{end_line} in {path}"
+    except Exception as exc:
+        return f"Error replacing lines: {exc}"
+
+
+def smart_replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+        updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
+        if found:
+            path.write_text(updated, encoding="utf-8")
+            return f"Replaced block in {path}"
+            
+        # Fallback 1: Normalized line endings (\r\n vs \n)
+        norm_content = content.replace("\r\n", "\n")
+        norm_old = old_text.replace("\r\n", "\n")
+        norm_new = new_text.replace("\r\n", "\n")
+        updated, found = _replace_nth(norm_content, norm_old, norm_new, occurrence=occurrence)
+        if found:
+            path.write_text(updated, encoding="utf-8")
+            return f"Replaced block in {path} (matched normalized line endings)"
+            
+        # Fallback 2: Strip trailing whitespace on each line
+        content_lines = norm_content.split("\n")
+        old_lines = norm_old.split("\n")
+        new_lines = norm_new.split("\n")
+        
+        target_norm_old = [l.rstrip() for l in old_lines]
+        match_count = 0
+        for i in range(len(content_lines) - len(old_lines) + 1):
+            if [l.rstrip() for l in content_lines[i:i + len(old_lines)]] == target_norm_old:
+                match_count += 1
+                if match_count == occurrence:
+                    content_lines[i:i + len(old_lines)] = new_lines
+                    path.write_text("\n".join(content_lines) + "\n", encoding="utf-8")
+                    return f"Replaced block in {path} (matched with trailing whitespace ignored)"
+                    
+        return f"Error: block not found in {path}"
+    except Exception as exc:
+        return f"Error replacing smart block: {exc}"
 
 
 def list_directory(path: Path) -> str:
@@ -807,6 +894,34 @@ FUNCTIONS = {
             "properties": {"reason": {"type": "STRING"}},
         },
     },
+    "replace_lines": {
+        "name": "replace_lines",
+        "description": "Replace a specific range of 1-indexed line numbers in a file with new text.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "start_line": {"type": "INTEGER"},
+                "end_line": {"type": "INTEGER"},
+                "new_text": {"type": "STRING"},
+            },
+            "required": ["filepath", "start_line", "end_line", "new_text"],
+        },
+    },
+    "smart_replace_block": {
+        "name": "smart_replace_block",
+        "description": "Replace a block of text in a file with fuzzy fallback matching for line-endings and trailing whitespace.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "old_text": {"type": "STRING"},
+                "new_text": {"type": "STRING"},
+                "occurrence": {"type": "INTEGER"},
+            },
+            "required": ["filepath", "old_text", "new_text"],
+        },
+    },
 }
 
 
@@ -850,6 +965,18 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         new_text = str(args.get("new_text", ""))
         occurrence = int(args.get("occurrence", 1) or 1)
         return replace_block_in_file(filepath, old_text, new_text, occurrence=occurrence)
+    if name == "smart_replace_block":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        old_text = str(args.get("old_text", ""))
+        new_text = str(args.get("new_text", ""))
+        occurrence = int(args.get("occurrence", 1) or 1)
+        return smart_replace_block_in_file(filepath, old_text, new_text, occurrence=occurrence)
+    if name == "replace_lines":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        start_line = int(args.get("start_line", 1) or 1)
+        end_line = int(args.get("end_line", 1) or 1)
+        new_text = str(args.get("new_text", ""))
+        return replace_lines_in_file(filepath, start_line, end_line, new_text)
     if name == "insert_after":
         filepath = resolve_path(args.get("filepath", ""), cwd)
         anchor_text = str(args.get("anchor_text", ""))
@@ -889,6 +1016,8 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "search_web", "description": "Search the web without a saved API key."},
         {"name": "search_tavily", "description": "Search the web with saved Tavily API keys."},
         {"name": "replace_block", "description": "[Code-Merge] Replace an exact block of text in a file."},
+        {"name": "smart_replace_block", "description": "[Code-Merge] Replace block with fuzzy line-ending/whitespace fallback."},
+        {"name": "replace_lines", "description": "[Code-Merge] Replace 1-indexed line range with new text."},
         {"name": "insert_after", "description": "[Code-Merge] Insert text after an exact anchor in a file."},
         {"name": "delete_block", "description": "[Code-Merge] Delete an exact block of text from a file."},
         {"name": "apply_patch", "description": "[Code-Merge] Apply a unified diff across files."},
