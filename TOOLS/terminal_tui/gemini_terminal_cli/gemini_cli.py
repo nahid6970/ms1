@@ -1357,7 +1357,10 @@ def load_model_prefs() -> Dict[str, Any]:
         if account_usage_sources:
             merged_hidden = set(account_model_prefs.get("hidden_models", []))
             merged_speed_tags = dict(account_model_prefs.get("speed_tags", {}))
-            merged_usage_counts: Dict[str, int] = {}
+            merged_usage_counts: Dict[str, int] = {
+                str(model): int(count)
+                for model, count in dict(account_model_prefs.get("model_usage_counts", {})).items()
+            }
             for account_prefs in account_usage_sources:
                 merged_hidden.update(str(item) for item in account_prefs.get("hidden_models", []))
                 merged_speed_tags.update({str(k): str(v) for k, v in dict(account_prefs.get("speed_tags", {})).items()})
