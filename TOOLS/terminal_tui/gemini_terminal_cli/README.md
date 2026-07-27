@@ -8,7 +8,6 @@ It is designed to feel closer to a CLI tool than a web app:
 - shell command execution
 - optional transcript save/load
 - Gemini function-calling loop
-- As-you-type file/directory suggestions for `@` mentions
 
 ## Requirements
 

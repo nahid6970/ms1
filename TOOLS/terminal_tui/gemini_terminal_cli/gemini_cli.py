@@ -9,7 +9,6 @@ import json
 import os
 import platform
 import re
-import shutil
 import time
 import subprocess
 import sys
@@ -92,240 +91,59 @@ def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
 
 
-def _get_path_completions(fragment: str, cwd: Path) -> List[Dict[str, Any]]:
-    """Helper to find file/folder completions for a fragment."""
-    try:
-        display_prefix = ""
-        if "/" in fragment or "\\" in fragment:
-            path_part = fragment.replace("\\", "/")
-            if path_part.endswith("/"):
-                base_dir = (cwd / path_part).resolve()
-                prefix = ""
-                display_prefix = path_part
-            else:
-                parts = path_part.rsplit("/", 1)
-                base_dir = (cwd / parts[0]).resolve()
-                prefix = parts[1].lower()
-                display_prefix = parts[0] + "/"
-        else:
-            base_dir = cwd.resolve()
-            prefix = fragment.lower()
-
-        if not base_dir.exists() or not base_dir.is_dir():
-            return []
-
-        prefix_matches: List[Dict[str, Any]] = []
-        contains_matches: List[Dict[str, Any]] = []
-        for entry in base_dir.iterdir():
-            name_lower = entry.name.lower()
-            if prefix and prefix not in name_lower:
-                continue
-            suffix = "/" if entry.is_dir() else ""
-            item = {
-                "value": display_prefix + entry.name + suffix,
-                "label": display_prefix + entry.name + suffix,
-                "is_dir": entry.is_dir(),
-            }
-            if not prefix or name_lower.startswith(prefix):
-                prefix_matches.append(item)
-            else:
-                contains_matches.append(item)
-        sort_key = lambda item: (not bool(item["is_dir"]), str(item["label"]).lower())
-        return sorted(prefix_matches, key=sort_key) + sorted(contains_matches, key=sort_key)
-    except Exception:
-        return []
-
-
-def read_dynamic_prompt(
-    prompt_provider: Callable[[], str],
-    history: Optional[List[str]] = None,
-    cwd: Optional[Path] = None
-) -> str:
-    """Read a line with time-sensitive refresh, @ completions, and fixed Windows line handling."""
+def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[List[str]] = None) -> str:
+    """Read a line while allowing a time-sensitive prompt to refresh."""
     if msvcrt is None or not sys.stdin.isatty() or not sys.stdout.isatty():
         return input(prompt_provider())
 
-    current_cwd = cwd or Path.cwd()
     buffer: List[str] = []
     displayed_prompt = ""
     next_refresh = 0.0
     history_index = len(history or [])
 
-    # Completion state
-    completions: List[Dict[str, Any]] = []
-    comp_index = -1
-    comp_base_buffer = ""
-    had_preview = False
-    preview_line_count = 0
-
-    def _terminal_cols() -> int:
-        try:
-            return max(40, shutil.get_terminal_size().columns)
-        except Exception:
-            return 80
-
-    def clear_preview() -> None:
-        nonlocal had_preview, preview_line_count
-        if had_preview and preview_line_count > 0:
-            # Move to first preview line, clear each, then return to input line
-            sys.stdout.write("\033[1B")
-            for _ in range(preview_line_count):
-                sys.stdout.write("\r\033[2K")
-                if _ < preview_line_count - 1:
-                    sys.stdout.write("\033[1B")
-            # Move back up to the input line
-            sys.stdout.write(f"\033[{preview_line_count}A\r")
-            sys.stdout.flush()
-        had_preview = False
-        preview_line_count = 0
-
     def redraw(force: bool = False) -> None:
-        nonlocal displayed_prompt, next_refresh, had_preview, preview_line_count
+        nonlocal displayed_prompt, next_refresh
         now = time.monotonic()
-        if not force and buffer:
+        if not force and now < next_refresh:
             return
-        if not force and (completions or now < next_refresh):
-            return
-
         prompt = prompt_provider()
-        clear_preview()
-        # Always clear the input line before reprinting to avoid stacked prompts
-        sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
-
-        if completions:
-            cols = _terminal_cols()
-            max_items = 6
-            preview_items = completions[:max_items]
-            lines: List[str] = []
-            for i, c in enumerate(preview_items):
-                label = str(c["label"])
-                # Truncate long labels so they never wrap
-                max_label = max(12, cols - 6)
-                if len(label) > max_label:
-                    label = label[: max_label - 1] + "…"
-                style = "7" if i == comp_index else "90"
-                lines.append("  " + _ansi_wrap(label, style))
-            if len(completions) > max_items:
-                lines.append(_ansi_wrap("  ...", "90"))
-            preview_line_count = len(lines)
-            had_preview = True
-            # Save cursor, print each preview line below, restore cursor
-            sys.stdout.write("\033[s")
-            for line in lines:
-                sys.stdout.write("\n\033[2K" + line)
-            sys.stdout.write("\033[u")
-
-        sys.stdout.flush()
-        displayed_prompt = prompt
+        if force or prompt != displayed_prompt:
+            sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
+            sys.stdout.flush()
+            displayed_prompt = prompt
         next_refresh = now + 0.25
-
-    def refresh_completions_from_buffer() -> None:
-        nonlocal comp_base_buffer, completions, comp_index
-        current_text = "".join(buffer)
-        match = re.search(r"@([^\s]*)$", current_text)
-        if match:
-            comp_base_buffer = current_text[:match.start() + 1]
-            completions = _get_path_completions(match.group(1), current_cwd)
-        else:
-            completions = []
-        comp_index = -1
-
-    def accept_completion() -> None:
-        nonlocal buffer, completions, comp_index
-        if not completions:
-            return
-        selected = completions[comp_index if comp_index >= 0 else 0]
-        buffer = list(comp_base_buffer + str(selected["value"]))
-        if bool(selected.get("is_dir")):
-            refresh_completions_from_buffer()
-        else:
-            completions = []
-            comp_index = -1
-
-    def echo_printable(char: str) -> None:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-
-    def erase_last_printable() -> None:
-        sys.stdout.write("\b \b")
-        sys.stdout.flush()
 
     redraw(force=True)
     while True:
         if msvcrt.kbhit():
             char = msvcrt.getwch()
             if char in ("\r", "\n"):
-                clear_preview()
                 sys.stdout.write("\n")
                 sys.stdout.flush()
                 return "".join(buffer)
             if char == "\003":
-                clear_preview()
                 raise KeyboardInterrupt
-            if char == "\x1b" and completions:
-                completions = []
-                comp_index = -1
-                redraw(force=True)
-                continue
-            if char == "\x00" and completions and not msvcrt.kbhit():
-                accept_completion()
-                redraw(force=True)
-                continue
-            if char == "\t":
-                if completions:
-                    comp_index = (comp_index + 1) % len(completions)
-                    buffer = list(comp_base_buffer + str(completions[comp_index]["value"]))
-                    redraw(force=True)
-                else:
-                    refresh_completions_from_buffer()
-                    if completions:
-                        comp_index = 0
-                        buffer = list(comp_base_buffer + str(completions[comp_index]["value"]))
-                        redraw(force=True)
-                continue
             if char in ("\x00", "\xe0"):
                 char2 = msvcrt.getwch()
-                if history and char2 == "H": # Up
+                if history and char2 == "H":
                     history_index = max(0, history_index - 1)
                     buffer = list(history[history_index])
-                    completions = []
-                    comp_index = -1
                     redraw(force=True)
-                elif history and char2 == "P": # Down
+                elif history and char2 == "P":
                     history_index = min(len(history), history_index + 1)
                     buffer = list(history[history_index]) if history_index < len(history) else []
-                    completions = []
-                    comp_index = -1
                     redraw(force=True)
                 continue
             if char == "\x08":
                 if buffer:
                     buffer.pop()
-                    refresh_completions_from_buffer()
-                    if completions:
-                        redraw(force=True)
-                    else:
-                        clear_preview()
-                        erase_last_printable()
-                continue
-            if char == " " and completions:
-                accept_completion()
-                redraw(force=True)
+                    sys.stdout.write("\b \b")
+                    sys.stdout.flush()
                 continue
             if char.isprintable():
                 buffer.append(char)
-                if msvcrt.kbhit():
-                    clear_preview()
-                    completions = []
-                    comp_index = -1
-                    echo_printable(char)
-                    continue
-                refresh_completions_from_buffer()
-                if completions:
-                    redraw(force=True)
-                else:
-                    clear_preview()
-                    echo_printable(char)
+                sys.stdout.write(char)
+                sys.stdout.flush()
         else:
             redraw()
             time.sleep(0.05)
@@ -1967,7 +1785,6 @@ def print_help() -> None:
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
-              - Use @ followed by a path to get as-you-type file/folder suggestions (Tab to cycle).
               - Use /mm to pick a model with the arrow keys, or /test to test all models.
               - Use /api to add or switch saved API accounts.
               - Use /tool to see and toggle the implemented local tools.
@@ -2011,8 +1828,6 @@ def resolve_system_instruction_input(text: str, cwd: Path) -> str:
 
 
 def main() -> int:
-    if platform.system() == "Windows":
-        os.system("") # Enable Virtual Terminal Processing (ANSI support)
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
     parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /api 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
@@ -2387,7 +2202,7 @@ def main() -> int:
         command_history: List[str] = []
         while True:
             try:
-                user_input = read_dynamic_prompt(prompt_text, command_history, cwd=cwd).strip()
+                user_input = read_dynamic_prompt(prompt_text, command_history).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
