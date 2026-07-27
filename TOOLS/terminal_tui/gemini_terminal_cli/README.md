@@ -101,10 +101,13 @@ The CLI exposes only local, standard-library tools:
 - `delete_block`
 - `apply_patch`
 - `run_shell_command`
+- `run_powershell`
 - `get_system_info`
 - `request_follow_up`
 
 `apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, validates the context first, and then writes the touched files. It can be toggled from `/tool` like every other local tool.
+
+`run_powershell` is the preferred inspection and command tool on Windows. It runs commands through `powershell.exe -NoProfile`, so the model can use commands such as `rg`, `Get-Content`, `git status`, and test commands before choosing an edit.
 
 ## Notes
 
@@ -127,3 +130,4 @@ The CLI exposes only local, standard-library tools:
 - `/test` is the current command for model testing; `/mm test` remains an alias.
 - `/tool` is the only local tool command; `Space` toggles the selected tool and disabled tools show `off` in red.
 - Enable `apply_patch` when you want efficient multi-file code edits; disable it when you want the model limited to smaller exact block operations.
+- Enable `run_powershell` for a Codex-like command-first workflow; command calls are displayed as `Ran <command>` in the transcript.

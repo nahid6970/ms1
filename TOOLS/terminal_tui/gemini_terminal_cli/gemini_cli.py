@@ -33,8 +33,8 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_SYSTEM = (
     "You are a terminal coding assistant. "
     "Be concise, practical, and ask before making destructive changes. "
-    "When editing code, prefer search_file and apply_patch for multi-file changes; "
-    "use minimal block edits (replace_block, insert_after, delete_block) for small changes."
+    "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
+    "Prefer apply_patch for edits only after refreshing the exact surrounding context."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -562,6 +562,34 @@ def run_shell_command(command: str, cwd: Path) -> str:
         return f"Error running shell command: {exc}"
 
 
+def run_powershell_command(command: str, cwd: Path, timeout_seconds: int = 60) -> str:
+    if not command.strip():
+        return "Error: no command provided."
+    timeout_seconds = max(1, min(int(timeout_seconds or 60), 300))
+    try:
+        result = subprocess.run(
+            [
+                "powershell.exe",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                command,
+            ],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+        output = (result.stdout or "") + (result.stderr or "")
+        output = output.strip()
+        return output if output else f"Done (exit code {result.returncode})"
+    except subprocess.TimeoutExpired:
+        return "Error: PowerShell command timed out."
+    except Exception as exc:
+        return f"Error running PowerShell command: {exc}"
+
+
 FUNCTIONS = {
     "read_file": {
         "name": "read_file",
@@ -721,6 +749,18 @@ FUNCTIONS = {
             "required": ["command"],
         },
     },
+    "run_powershell": {
+        "name": "run_powershell",
+        "description": "Run a PowerShell command for inspection, git checks, tests, or targeted local scripting.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "command": {"type": "STRING"},
+                "timeout_seconds": {"type": "INTEGER"},
+            },
+            "required": ["command"],
+        },
+    },
     "request_follow_up": {
         "name": "request_follow_up",
         "description": "Request another turn for multi-step work.",
@@ -787,6 +827,12 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         return apply_unified_patch(str(args.get("patch", "")), cwd)
     if name == "run_shell_command":
         return run_shell_command(str(args.get("command", "")), cwd)
+    if name == "run_powershell":
+        return run_powershell_command(
+            str(args.get("command", "")),
+            cwd,
+            timeout_seconds=int(args.get("timeout_seconds", 60) or 60),
+        )
     if name == "request_follow_up":
         reason = args.get("reason") or "Continuing..."
         return f"Follow-up turn granted: {reason}"
@@ -809,6 +855,7 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "delete_block", "description": "[Code-Merge] Delete an exact block of text from a file."},
         {"name": "apply_patch", "description": "[Code-Merge] Apply a unified diff across files."},
         {"name": "run_shell_command", "description": "Run a shell command."},
+        {"name": "run_powershell", "description": "Run a PowerShell command."},
         {"name": "request_follow_up", "description": "Request another turn for multi-step work."},
     ]
 
@@ -1017,6 +1064,14 @@ def _format_tool_value(value: Any) -> str:
 
 
 def format_tool_call(name: str, args: Dict[str, Any]) -> str:
+    if name in {"run_shell_command", "run_powershell"}:
+        command = str(args.get("command", "")).rstrip()
+        label = "PowerShell" if name == "run_powershell" else "shell"
+        if "\n" in command:
+            return "Ran " + label + " script:\n" + "\n".join(f"  {line}" for line in command.splitlines())
+        if command:
+            return f"Ran {command}"
+
     lines = [f"[tool] {name}"]
     if not args:
         return "\n".join(lines)
