@@ -1051,6 +1051,14 @@ def normalize_account_model_prefs(data: Any) -> Dict[str, Any]:
     }
 
 
+def normalize_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on", "enabled"}
+    return bool(value)
+
+
 def default_model_prefs() -> Dict[str, Any]:
     return {
         **empty_account_model_prefs(),
@@ -1059,6 +1067,8 @@ def default_model_prefs() -> Dict[str, Any]:
         "last_model": DEFAULT_MODEL,
         "last_api_account": "",
         "tool_loop_limit": DEFAULT_TOOL_LOOPS,
+        "auto_failover_default": False,
+        "auto_failover_projects": {},
     }
 
 
@@ -1083,6 +1093,9 @@ def load_model_prefs() -> Dict[str, Any]:
         disabled_tools = data.get("disabled_tools", [])
         if not isinstance(disabled_tools, list):
             disabled_tools = []
+        auto_failover_projects = data.get("auto_failover_projects", {})
+        if not isinstance(auto_failover_projects, dict):
+            auto_failover_projects = {}
         prefs = dict(account_model_prefs)
         prefs.update({
             "api_accounts": normalized_api_accounts,
@@ -1090,6 +1103,11 @@ def load_model_prefs() -> Dict[str, Any]:
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": last_api_account,
             "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
+            "auto_failover_default": normalize_bool(data.get("auto_failover_default", False)),
+            "auto_failover_projects": {
+                str(project_root): normalize_bool(enabled)
+                for project_root, enabled in auto_failover_projects.items()
+            },
         })
         return prefs
     except Exception:
@@ -1116,6 +1134,8 @@ def save_model_prefs(
     last_model: str,
     last_api_account: str,
     tool_loop_limit: int,
+    auto_failover_default: bool = False,
+    auto_failover_projects: Optional[Dict[str, bool]] = None,
     api_account_model_prefs: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts)
@@ -1136,6 +1156,8 @@ def save_model_prefs(
         "last_model": last_model,
         "last_api_account": last_api_account,
         "tool_loop_limit": int(tool_loop_limit),
+        "auto_failover_default": bool(auto_failover_default),
+        "auto_failover_projects": dict(sorted((str(k), bool(v)) for k, v in (auto_failover_projects or {}).items())),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -1775,18 +1797,20 @@ def print_help() -> None:
               /exit                Quit
               /reset               Clear conversation history
               /mm                  Open the model picker
-              /test                Test all models and hide failures
-              /api                 Open the API account picker
-              /loops <n>           Set max tool-call loops
-              /tool                Open the tool manager and toggle tools with Space
-              /system <text|file>  Replace system instruction or load it from a file
-              /save <file>         Save transcript JSON
-              /load <file>         Load transcript JSON
+            /test                Test all models and hide failures
+            /api                 Open the API account picker
+            /loops <n>           Set max tool-call loops
+            /failover ...        Control automatic API account failover
+            /tool                Open the tool manager and toggle tools with Space
+            /system <text|file>  Replace system instruction or load it from a file
+            /save <file>         Save transcript JSON
+            /load <file>         Load transcript JSON
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /mm to pick a model with the arrow keys, or /test to test all models.
               - Use /api to add or switch saved API accounts.
+              - Use /failover to enable account rotation for quota or rate-limit errors.
               - Use /tool to see and toggle the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
             """
@@ -1858,6 +1882,14 @@ def main() -> int:
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
     tool_loop_limit = int(model_prefs.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS)
+    auto_failover_default = normalize_bool(model_prefs.get("auto_failover_default", False))
+    auto_failover_projects_raw = model_prefs.get("auto_failover_projects", {})
+    if not isinstance(auto_failover_projects_raw, dict):
+        auto_failover_projects_raw = {}
+    auto_failover_projects: Dict[str, bool] = {
+        str(project_root): normalize_bool(enabled)
+        for project_root, enabled in auto_failover_projects_raw.items()
+    }
     if args.max_tool_loops is not None:
         tool_loop_limit = max(1, int(args.max_tool_loops))
 
@@ -1887,6 +1919,7 @@ def main() -> int:
     api_key = args.api_key or os.environ.get("GEMINI_API_KEY", "")
     active_api_account = ""
     active_model = args.model or saved_last_model or DEFAULT_MODEL
+    auto_failover_session_override: Optional[bool] = None
     all_tool_names = tool_name_set()
 
     def snapshot_active_account_model_prefs() -> None:
@@ -1910,6 +1943,53 @@ def main() -> int:
         active_api_account = account_name
         api_key = key
         load_account_model_prefs(account_name)
+
+    def current_project_key() -> str:
+        return str(cwd.resolve())
+
+    def project_auto_failover_enabled() -> bool:
+        return auto_failover_projects.get(current_project_key(), auto_failover_default)
+
+    def effective_auto_failover_enabled() -> bool:
+        if auto_failover_session_override is not None:
+            return auto_failover_session_override
+        return project_auto_failover_enabled()
+
+    def auto_failover_source() -> str:
+        if auto_failover_session_override is not None:
+            return "session"
+        if current_project_key() in auto_failover_projects:
+            return "project"
+        return "default"
+
+    def set_project_auto_failover(enabled: bool) -> None:
+        nonlocal auto_failover_session_override
+        auto_failover_projects[current_project_key()] = enabled
+        auto_failover_session_override = None
+        persist_selection()
+
+    def clear_project_auto_failover() -> None:
+        nonlocal auto_failover_session_override
+        auto_failover_projects.pop(current_project_key(), None)
+        auto_failover_session_override = None
+        persist_selection()
+
+    def set_session_auto_failover(enabled: Optional[bool]) -> None:
+        nonlocal auto_failover_session_override
+        auto_failover_session_override = enabled
+
+    def format_auto_failover_status() -> str:
+        return "on" if effective_auto_failover_enabled() else "off"
+
+    def failover_status_line() -> str:
+        source = auto_failover_source()
+        if source == "session":
+            scope = "session override"
+        elif source == "project":
+            scope = "project setting"
+        else:
+            scope = "global default"
+        return f"Auto failover: {format_auto_failover_status()} ({scope})"
 
     if args.no_tools:
         disabled_tools = set(all_tool_names)
@@ -1968,6 +2048,7 @@ def main() -> int:
     if active_api_account:
         info(f"API account: {active_api_account}")
     info(f"Project root: {cwd}")
+    info(failover_status_line())
     info(f"Tools on: {len(enabled_tool_names(disabled_tools))}/{len(all_tool_names)}")
     print_help()
 
@@ -2076,6 +2157,8 @@ def main() -> int:
             client.model,
             account_name,
             tool_loop_limit,
+            auto_failover_default,
+            auto_failover_projects,
             api_account_model_prefs,
         )
 
@@ -2129,9 +2212,51 @@ def main() -> int:
         model_usage_counts[model_name_value] = int(model_usage_counts.get(model_name_value, 0) or 0) + amount
         persist_selection()
 
+    def retryable_account_error(message: str) -> bool:
+        lowered = message.lower()
+        return any(
+            token in lowered
+            for token in (
+                "quota",
+                "429",
+                "rate limit",
+                "too many requests",
+                "resource exhausted",
+                "resource has been exhausted",
+                "limit exceeded",
+                "exceeded your current quota",
+            )
+        )
+
+    def attempt_account_failover(failed_accounts: Set[str]) -> bool:
+        nonlocal model_cache
+        if not effective_auto_failover_enabled():
+            return False
+        accounts = ensure_api_accounts_loaded()
+        if len(accounts) < 2:
+            return False
+        ordered_names = sorted(accounts.keys(), key=str.lower)
+        current_name = active_api_account
+        if current_name and current_name in ordered_names:
+            start_index = ordered_names.index(current_name) + 1
+            candidates = ordered_names[start_index:] + ordered_names[:start_index]
+        else:
+            candidates = ordered_names
+        for candidate in candidates:
+            if candidate == current_name or candidate in failed_accounts:
+                continue
+            switch_api_account(candidate, accounts[candidate])
+            client.api_key = api_key
+            model_cache = []
+            persist_selection()
+            info(f"Auto failover switched to API account: {candidate}")
+            return True
+        return False
+
     def run_turn(user_text: str) -> None:
         nonlocal contents
         contents.append(make_user_content(user_text))
+        failed_accounts: Set[str] = set()
 
         for _ in range(tool_loop_limit):
             try:
@@ -2149,7 +2274,12 @@ def main() -> int:
                 if retry_match:
                     model_cooldowns[client.model] = _now() + dt.timedelta(minutes=1)
                     warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
-                if "quota" in msg.lower() or "rate" in msg.lower() or "too many requests" in msg.lower():
+                if active_api_account:
+                    failed_accounts.add(active_api_account)
+                if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
+                    warn(f"Retrying the same request with {active_api_account}.")
+                    continue
+                if retryable_account_error(msg):
                     warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
                     write_notification()
                 return
@@ -2305,6 +2435,37 @@ def main() -> int:
                         tool_loop_limit = new_limit
                         persist_selection()
                         info(f"Tool loop limit set to {tool_loop_limit}")
+                    continue
+                if command == "/failover":
+                    parts = remainder.lower().split()
+                    if not parts:
+                        project_setting = auto_failover_projects.get(current_project_key())
+                        info(failover_status_line())
+                        info(f"Global default: {'on' if auto_failover_default else 'off'}")
+                        if project_setting is None:
+                            info("Project override: none")
+                        else:
+                            info(f"Project override: {'on' if project_setting else 'off'}")
+                        continue
+                    if len(parts) == 1 and parts[0] in {"on", "off"}:
+                        set_project_auto_failover(parts[0] == "on")
+                        info(f"Auto failover set to {'on' if effective_auto_failover_enabled() else 'off'} for this project.")
+                        continue
+                    if len(parts) == 1 and parts[0] in {"clear", "reset"}:
+                        clear_project_auto_failover()
+                        info(f"Auto failover reset to {'on' if effective_auto_failover_enabled() else 'off'} from the global default.")
+                        continue
+                    if len(parts) == 2 and parts[0] == "session" and parts[1] in {"on", "off"}:
+                        set_session_auto_failover(parts[1] == "on")
+                        info(f"Auto failover session override set to {'on' if effective_auto_failover_enabled() else 'off'}.")
+                        continue
+                    if len(parts) == 2 and parts[0] in {"default", "global"} and parts[1] in {"on", "off"}:
+                        auto_failover_default = parts[1] == "on"
+                        set_session_auto_failover(None)
+                        persist_selection()
+                        info(f"Auto failover global default set to {'on' if auto_failover_default else 'off'}.")
+                        continue
+                    warn("Usage: /failover [on|off|clear|reset|session on|session off|default on|default off]")
                     continue
                 if command == "/tool":
                     changed = pick_tool_interactive(disabled_tools)
