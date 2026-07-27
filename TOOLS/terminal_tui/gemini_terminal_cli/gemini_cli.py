@@ -1001,6 +1001,7 @@ def empty_account_model_prefs() -> Dict[str, Any]:
         "hidden_models": [],
         "speed_tags": {},
         "model_usage_counts": {},
+        "failover_uses": 0,
     }
 
 
@@ -1016,10 +1017,16 @@ def normalize_account_model_prefs(data: Any) -> Dict[str, Any]:
     usage_counts = data.get("model_usage_counts", {})
     if not isinstance(usage_counts, dict):
         usage_counts = {}
+    failover_uses = data.get("failover_uses", 0)
+    try:
+        failover_uses = int(failover_uses)
+    except Exception:
+        failover_uses = 0
     return {
         "hidden_models": [str(item) for item in hidden],
         "speed_tags": {str(k): str(v) for k, v in speed_tags.items()},
         "model_usage_counts": {str(k): int(v) for k, v in usage_counts.items()},
+        "failover_uses": max(0, int(failover_uses)),
     }
 
 
@@ -1090,11 +1097,13 @@ def serialize_model_prefs(
     hidden_models: List[str],
     speed_tags: Dict[str, str],
     model_usage_counts: Dict[str, int],
+    failover_uses: int = 0,
 ) -> Dict[str, Any]:
     return {
         "hidden_models": sorted(set(hidden_models)),
         "speed_tags": dict(sorted(speed_tags.items())),
         "model_usage_counts": dict(sorted((str(k), int(v)) for k, v in model_usage_counts.items())),
+        "failover_uses": max(0, int(failover_uses)),
     }
 
 
@@ -1102,6 +1111,7 @@ def save_model_prefs(
     hidden_models: List[str],
     speed_tags: Dict[str, str],
     model_usage_counts: Dict[str, int],
+    failover_uses: int,
     disabled_tools: List[str],
     last_model: str,
     last_api_account: str,
@@ -1110,12 +1120,13 @@ def save_model_prefs(
     auto_failover_projects: Optional[Dict[str, bool]] = None,
     api_account_model_prefs: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> str:
-    account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts)
+    account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
         str(account_name): serialize_model_prefs(
             list(account_prefs.get("hidden_models", [])),
             dict(account_prefs.get("speed_tags", {})),
             dict(account_prefs.get("model_usage_counts", {})),
+            int(account_prefs.get("failover_uses", 0) or 0),
         )
         for account_name, account_prefs in (api_account_model_prefs or {}).items()
     }
@@ -1421,21 +1432,24 @@ def build_api_account_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int
     provider_width = 0
     name_width = 0
     key_width = 0
+    failover_width = 0
     for item in items:
         provider_width = max(provider_width, len(str(item.get("provider", ""))))
         name_width = max(name_width, len(str(item.get("name", ""))))
         key_width = max(key_width, len(str(item.get("masked_key", ""))))
+        failover_width = max(failover_width, len(str(item.get("failover_uses", ""))))
     return {
         "provider": min(max(provider_width, 8), 12),
         "name": min(max(name_width, 10), 28),
         "key": min(max(key_width, 10), 24),
+        "failover": min(max(failover_width, 8), 10),
     }
 
 
 def build_api_account_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Provider':<{widths['provider']}}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  State",
-        f"  {'--':>2}  {'-' * widths['provider']}  {'-' * widths['name']}  {'-' * widths['key']}  -----",
+        f"  {'Id':>2}  {'Provider':<{widths['provider']}}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  {'Failovers':<{widths['failover']}}  State",
+        f"  {'--':>2}  {'-' * widths['provider']}  {'-' * widths['name']}  {'-' * widths['key']}  {'-' * widths['failover']}  -----",
     ]
 
 
@@ -1449,6 +1463,8 @@ def format_api_account_entry(
     provider = str(item.get("provider", ""))
     name = str(item.get("name", ""))
     key = str(item.get("masked_key", ""))
+    failover_uses = item.get("failover_uses", "")
+    failover_text = f"{int(failover_uses)}x" if str(failover_uses).strip() != "" else ""
     state = str(item.get("state", ""))
     marker = ">" if selected else " "
     row = (
@@ -1456,6 +1472,7 @@ def format_api_account_entry(
         f"{provider:<{widths['provider']}}  "
         f"{name:<{widths['name']}}  "
         f"{key:<{widths['key']}}  "
+        f"{failover_text:<{widths['failover']}}  "
         f"{state}"
     ).rstrip()
     if selected:
@@ -1469,20 +1486,24 @@ def pick_api_account_interactive(
     accounts: Dict[str, str],
     tavily_accounts: Optional[Dict[str, str]] = None,
     active_api_account: str = "",
+    api_account_model_prefs: Optional[Dict[str, Dict[str, Any]]] = None,
     title_text: str = "Manage API Accounts",
 ) -> Optional[Dict[str, str]]:
     tavily_accounts = tavily_accounts or {}
+    api_account_model_prefs = api_account_model_prefs or {}
     items: List[Dict[str, str]] = [{
         "action": "add",
         "provider": "gemini",
         "name": "Add Gemini API",
         "masked_key": "",
+        "failover_uses": "",
         "state": "new",
     }, {
         "action": "add",
         "provider": "tavily",
         "name": "Add Tavily API",
         "masked_key": "",
+        "failover_uses": "",
         "state": "new",
     }]
     for name, key in sorted(accounts.items(), key=lambda item: item[0].lower()):
@@ -1493,6 +1514,7 @@ def pick_api_account_interactive(
             "provider": "gemini",
             "name": name,
             "masked_key": masked,
+            "failover_uses": int(normalize_account_model_prefs(api_account_model_prefs.get(name, {})).get("failover_uses", 0) or 0),
             "state": state,
         })
     for name, key in sorted(tavily_accounts.items(), key=lambda item: item[0].lower()):
@@ -1502,6 +1524,7 @@ def pick_api_account_interactive(
             "provider": "tavily",
             "name": name,
             "masked_key": masked,
+            "failover_uses": "",
             "state": "saved",
         })
     widths = build_api_account_table_widths(items)
@@ -2009,6 +2032,7 @@ def main() -> int:
     api_key = args.api_key or os.environ.get("GEMINI_API_KEY", "")
     active_api_account = ""
     active_model = args.model or saved_last_model or DEFAULT_MODEL
+    failover_uses = int(model_prefs.get("failover_uses") or 0)
     auto_failover_session_override: Optional[bool] = None
     all_tool_names = tool_name_set()
 
@@ -2018,14 +2042,16 @@ def main() -> int:
                 hidden_models,
                 speed_tags,
                 model_usage_counts,
+                failover_uses,
             )
 
     def load_account_model_prefs(account_name: str) -> None:
-        nonlocal hidden_models, speed_tags, model_usage_counts
+        nonlocal hidden_models, speed_tags, model_usage_counts, failover_uses
         account_prefs = normalize_account_model_prefs(api_account_model_prefs.get(account_name, {}))
         hidden_models = list(account_prefs.get("hidden_models", []))
         speed_tags = dict(account_prefs.get("speed_tags", {}))
         model_usage_counts = dict(account_prefs.get("model_usage_counts", {}))
+        failover_uses = int(account_prefs.get("failover_uses", 0) or 0)
 
     def switch_api_account(account_name: str, key: str) -> None:
         nonlocal active_api_account, api_key
@@ -2262,11 +2288,13 @@ def main() -> int:
                 hidden_models,
                 speed_tags,
                 model_usage_counts,
+                failover_uses,
             )
         save_model_prefs(
             hidden_models,
             speed_tags,
             model_usage_counts,
+            failover_uses,
             sorted(disabled_tools),
             client.model,
             account_name,
@@ -2343,7 +2371,7 @@ def main() -> int:
         )
 
     def attempt_account_failover(failed_accounts: Set[str]) -> bool:
-        nonlocal model_cache
+        nonlocal model_cache, failover_uses
         if not effective_auto_failover_enabled():
             return False
         accounts = ensure_api_accounts_loaded()
@@ -2361,6 +2389,7 @@ def main() -> int:
                 continue
             switch_api_account(candidate, accounts[candidate])
             client.api_key = api_key
+            failover_uses += 1
             model_cache = []
             persist_selection()
             info(f"Auto failover switched to API account: {candidate}")
@@ -2525,7 +2554,12 @@ def main() -> int:
                     if remainder:
                         load_api_account_by_name(remainder)
                         continue
-                    chosen_api = pick_api_account_interactive(accounts, ensure_tavily_accounts_loaded(), active_api_account)
+                    chosen_api = pick_api_account_interactive(
+                        accounts,
+                        ensure_tavily_accounts_loaded(),
+                        active_api_account,
+                        api_account_model_prefs,
+                    )
                     if not chosen_api:
                         continue
                     if chosen_api["action"] == "add":

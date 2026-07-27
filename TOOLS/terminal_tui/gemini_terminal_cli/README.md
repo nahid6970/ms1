@@ -110,6 +110,7 @@ The CLI exposes only local, standard-library tools:
 - `/failover on` and `/failover off` store a project-specific override in `model_prefs.json` using the current `--project-root`.
 - `/failover session on` and `/failover session off` only affect the current process.
 - `/failover default on` and `/failover default off` change the global default used when no project override exists.
+- The `/api` picker shows a `Failovers` column with the number of times each Gemini account has been reached by automatic failover.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.
