@@ -12,3 +12,4 @@ session*.json
 .env
 api_accounts.json
 model_prefs.json
+prompt_history.txt

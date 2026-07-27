@@ -41,6 +41,7 @@ MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
+PROMPT_HISTORY_FILE = Path(__file__).with_name("prompt_history.txt")
 API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.lock")
 API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
 API_ACCOUNTS_MAGIC = b"GEMAPI1"
@@ -55,12 +56,14 @@ try:
     from prompt_toolkit import prompt as pt_prompt
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.formatted_text import ANSI
+    from prompt_toolkit.history import FileHistory
     from prompt_toolkit.history import InMemoryHistory
     from prompt_toolkit.shortcuts import CompleteStyle
 except Exception:
     pt_prompt = None
     AutoSuggestFromHistory = None
     ANSI = None
+    FileHistory = None
     InMemoryHistory = None
     CompleteStyle = None
 
@@ -104,10 +107,44 @@ def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
 
 
+def load_prompt_history(max_items: int = 200) -> List[str]:
+    try:
+        if not PROMPT_HISTORY_FILE.exists():
+            return []
+        items: List[str] = []
+        for line in PROMPT_HISTORY_FILE.read_text(encoding="utf-8", errors="replace").splitlines():
+            value = line.strip()
+            if value and (not items or items[-1] != value):
+                items.append(value)
+        return items[-max_items:]
+    except Exception:
+        return []
+
+
+def append_prompt_history(user_input: str, memory_history: List[str], max_items: int = 200) -> None:
+    value = user_input.strip()
+    if not value:
+        return
+    if memory_history and memory_history[-1] == value:
+        return
+    memory_history.append(value)
+    if len(memory_history) > max_items:
+        del memory_history[:-max_items]
+    if FileHistory is not None:
+        return
+    try:
+        PROMPT_HISTORY_FILE.write_text("\n".join(memory_history) + "\n", encoding="utf-8")
+    except Exception:
+        pass
+
+
 def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[List[str]] = None) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None:
-        prompt_history = InMemoryHistory(history or [])
+        if FileHistory is not None:
+            prompt_history = FileHistory(str(PROMPT_HISTORY_FILE))
+        else:
+            prompt_history = InMemoryHistory(history or [])
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
             history=prompt_history,
@@ -2719,7 +2756,7 @@ def main() -> int:
     if args.prompt:
         run_turn(args.prompt)
     else:
-        command_history: List[str] = []
+        command_history: List[str] = load_prompt_history()
         while True:
             try:
                 user_input = read_dynamic_prompt(prompt_text, command_history).strip()
@@ -2729,8 +2766,7 @@ def main() -> int:
 
             if not user_input:
                 continue
-            if not command_history or command_history[-1] != user_input:
-                command_history.append(user_input)
+            append_prompt_history(user_input, command_history)
             if user_input.startswith("/"):
                 command, _, remainder = user_input.partition(" ")
                 command = command.lower()

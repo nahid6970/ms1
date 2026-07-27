@@ -118,6 +118,7 @@ When an `apply_patch` call is shown in the terminal, removed diff lines render r
 - Hidden models, last model, and speed tags are stored in `model_prefs.json`.
 - Disabled tools are stored in `model_prefs.json` and in saved transcripts.
 - Named API accounts are stored in `api_accounts.lock`.
+- REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts; the file is ignored by Git.
 - The CLI restores the last-used API account and model on startup when they have been saved.
 - `/failover` opens an interactive picker for the project, session, and global failover scopes.
 - Auto failover only retries retryable quota/rate-limit errors and walks saved API accounts in circular order, skipping accounts already tried in the same turn.
