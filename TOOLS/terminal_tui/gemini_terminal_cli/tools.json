@@ -1,0 +1,116 @@
+[
+  {
+    "name": "read_file",
+    "category": "Inspection & File System",
+    "rating": "Best (Essential)",
+    "description": "Read a local file and return its text content (UTF-8). Truncates at 12000 chars. Returns error if path is a directory or doesn't exist."
+  },
+  {
+    "name": "write_file",
+    "category": "Code Modifications",
+    "rating": "Use with caution (Overwrites)",
+    "description": "Write content to a file, creating parent dirs if needed. OVERWRITES the entire file. High token cost because the AI must output the full file content. Best for creating new files only."
+  },
+  {
+    "name": "replace_file",
+    "category": "Code Modifications",
+    "rating": "Use with caution (Overwrites full file)",
+    "description": "Alias for write_file. Replaces the ENTIRE file content. Same high token cost. Avoid for partial edits."
+  },
+  {
+    "name": "delete_file",
+    "category": "Inspection & File System",
+    "rating": "Destructive",
+    "description": "Delete a file or recursively delete a directory (uses shutil.rmtree for dirs). Irreversible."
+  },
+  {
+    "name": "list_directory",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "description": "List directory contents sorted (dirs first, then files). Shows file sizes and dir markers. Read-only, no side effects."
+  },
+  {
+    "name": "get_system_info",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "description": "Returns OS platform, Python version, and current working directory. Read-only."
+  },
+  {
+    "name": "search_file",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "description": "Case-insensitive text search within a file or directory. Returns matching lines with file:line format. Supports recursive search and max_results limit (default 20). Read-only."
+  },
+  {
+    "name": "search_web",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "description": "Web search using DuckDuckGo HTML scraping. No API key needed. Returns top results with titles and URLs. Fallback search option."
+  },
+  {
+    "name": "search_tavily",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "description": "Web search using Tavily API. Requires saved API keys in api_accounts.lock. Tries multiple accounts with failover. Higher quality results than search_web."
+  },
+  {
+    "name": "fuzzy_apply_patch",
+    "category": "Code Modifications",
+    "rating": "Best for multi-file changes (Resilient)",
+    "description": "Apply a unified diff patch with fuzzy matching. If exact line numbers drift, it searches ±50 lines around the expected position for the context. Also tries normalized matching (strips trailing whitespace, normalizes CRLF/LF). Supports multi-file patches, new file creation, and file deletion. Most resilient patch tool."
+  },
+  {
+    "name": "smart_replace_block",
+    "category": "Code Modifications",
+    "rating": "Best for targeted edits (High accuracy)",
+    "description": "Find-and-replace a text block in a file with 3-tier matching: (1) exact string match, (2) normalized line endings (CRLF vs LF), (3) trailing whitespace stripped per line. Supports occurrence param for nth match. Best for single-file targeted replacements where you know the old text."
+  },
+  {
+    "name": "replace_lines",
+    "category": "Code Modifications",
+    "rating": "Best for exact line ranges (Low token)",
+    "description": "Replace a 1-indexed line range [start_line, end_line] with new text. Very token-efficient because the AI only outputs the replacement text, not context. Requires accurate line numbers. Best when you know exact line numbers from read_file output."
+  },
+  {
+    "name": "replace_block",
+    "category": "Code Modifications",
+    "rating": "Good (Requires exact text match)",
+    "description": "Basic find-and-replace of a text block. Requires EXACT string match (including whitespace, line endings). No fallback if match fails. Superseded by smart_replace_block which has fuzzy fallbacks. Keep off unless you need strict matching."
+  },
+  {
+    "name": "apply_patch",
+    "category": "Code Modifications",
+    "rating": "Strict (Fails on small line drifts)",
+    "description": "Apply a strict unified diff patch. Context lines must match EXACTLY at the specified line numbers. No fuzzy search, no normalization. Fails if AI-generated line numbers drift even by 1 line. Superseded by fuzzy_apply_patch. Keep off."
+  },
+  {
+    "name": "insert_after",
+    "category": "Code Modifications",
+    "rating": "Good (Targeted insertion)",
+    "description": "Insert text immediately after an exact anchor string. Supports occurrence param for nth match. Good for adding new code after a known marker (e.g. after a function signature or import block). Requires exact anchor match."
+  },
+  {
+    "name": "delete_block",
+    "category": "Code Modifications",
+    "rating": "Good (Targeted removal)",
+    "description": "Delete an exact text block from a file. Supports occurrence param for nth match. Internally uses find-and-replace with empty replacement. Requires exact string match."
+  },
+  {
+    "name": "run_shell_command",
+    "category": "Execution & Shell",
+    "rating": "Powerful (Command execution)",
+    "description": "Run a shell command via subprocess. Captures stdout+stderr. Has a configurable timeout. Use for git, pip, npm, build tools, etc."
+  },
+  {
+    "name": "run_powershell",
+    "category": "Execution & Shell",
+    "rating": "Best for Windows inspection & tests",
+    "description": "Run a PowerShell command via 'powershell -Command'. Best for Windows-specific operations, registry, services, and complex scripting. Captures stdout+stderr."
+  },
+  {
+    "name": "request_follow_up",
+    "category": "Control Flow",
+    "rating": "Safe",
+    "description": "Request another AI turn for multi-step work. The AI calls this when it needs more turns to complete a task. Returns a reason string. No side effects."
+  }
+]

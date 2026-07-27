@@ -42,6 +42,7 @@ MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
 MODELS_PAGE_SIZE = 1000
 MODEL_PREFS_FILE = Path(__file__).with_name("model_prefs.json")
+TOOLS_FILE = Path(__file__).with_name("tools.json")
 PROMPT_HISTORY_FILE = Path(__file__).with_name("prompt_history.txt")
 API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.lock")
 API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
@@ -1149,8 +1150,24 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
     return f"Unknown tool: {name}"
 
 
+_TOOLS_CACHE: Optional[List[Dict[str, str]]] = None
+
+
 def list_tool_catalog() -> List[Dict[str, str]]:
-    return [
+    """Load tool catalog from tools.json. Falls back to hardcoded defaults if missing."""
+    global _TOOLS_CACHE
+    if _TOOLS_CACHE is not None:
+        return _TOOLS_CACHE
+    try:
+        if TOOLS_FILE.exists():
+            data = json.loads(TOOLS_FILE.read_text(encoding="utf-8"))
+            if isinstance(data, list) and len(data) > 0:
+                _TOOLS_CACHE = data
+                return _TOOLS_CACHE
+    except Exception:
+        pass
+    # Hardcoded fallback (should not be reached if tools.json exists)
+    _TOOLS_CACHE = [
         {"name": "read_file", "category": "Inspection & File System", "rating": "Best (Essential)", "description": "Read a local file."},
         {"name": "write_file", "category": "Code Modifications", "rating": "Use with caution (Overwrites)", "description": "Write content to a local file."},
         {"name": "replace_file", "category": "Code Modifications", "rating": "Use with caution (Overwrites full file)", "description": "[Code-Merge] Replace full contents of a file."},
@@ -1171,6 +1188,7 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "run_powershell", "category": "Execution & Shell", "rating": "Best for Windows inspection & tests", "description": "Run a PowerShell command."},
         {"name": "request_follow_up", "category": "Control Flow", "rating": "Safe", "description": "Request another turn for multi-step work."},
     ]
+    return _TOOLS_CACHE
 
 
 def tool_name_set() -> Set[str]:
@@ -1987,7 +2005,14 @@ def pick_tool_interactive(disabled_tools: Set[str], title_text: str = "Manage To
 
     overall_changed = False
     while True:
-        categories = ["Code Modifications", "Inspection & File System", "Execution & Shell", "Control Flow"]
+        categories_order = ["Code Modifications", "Inspection & File System", "Execution & Shell", "Control Flow"]
+        seen = set(categories_order)
+        for tool in list_tool_catalog():
+            cat = str(tool.get("category", ""))
+            if cat and cat not in seen:
+                categories_order.append(cat)
+                seen.add(cat)
+        categories = categories_order
         category_items: List[Dict[str, Any]] = []
         for cat in categories:
             cat_all = [t for t in list_tool_catalog() if t.get("category") == cat]
