@@ -13,6 +13,7 @@ from typing import Iterable, Optional
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+DEFAULT_REPO = Path(__file__).resolve().parents[3]
 
 
 def run_git(repo: Path, *args: str, timeout: int = 30) -> subprocess.CompletedProcess[str]:
@@ -196,7 +197,7 @@ class GitRefRescueApp(tk.Tk):
         self.geometry("960x700")
         self.minsize(860, 620)
 
-        self.repo_var = tk.StringVar(value=str(Path.cwd()))
+        self.repo_var = tk.StringVar(value=str(DEFAULT_REPO))
         self.branch_var = tk.StringVar(value="-")
         self.upstream_var = tk.StringVar(value="-")
         self.head_var = tk.StringVar(value="-")
