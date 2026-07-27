@@ -1803,6 +1803,7 @@ def interactive_select(
     render_item,
     header_lines: Optional[List[str]] = None,
     footer_lines: Optional[List[str]] = None,
+    dynamic_footer: Optional[Callable[[Dict[str, Any]], List[str]]] = None,
     instructions: str = "Use Up/Down, Enter to choose, Esc to cancel.",
     on_space: Optional[Callable[[Dict[str, Any], int], None]] = None,
 ) -> Optional[Dict[str, Any]]:
@@ -1823,7 +1824,11 @@ def interactive_select(
         for i, item in enumerate(items):
             line = render_item(item, i, i == index)
             print(line)
-        if footer_lines:
+        if dynamic_footer is not None:
+            print()
+            for line in dynamic_footer(items[index]):
+                print(line)
+        elif footer_lines:
             print()
             for line in footer_lines:
                 print(line)
@@ -1880,23 +1885,17 @@ def pick_model_interactive(
 
 def build_tool_table_widths(tools: List[Dict[str, Any]]) -> Dict[str, int]:
     name_width = 0
-    desc_width = 0
-    rating_width = 0
     for tool in tools:
         name_width = max(name_width, len(str(tool.get("name", ""))))
-        desc_width = max(desc_width, len(str(tool.get("description", ""))))
-        rating_width = max(rating_width, len(str(tool.get("rating", ""))))
     return {
-        "name": min(max(name_width, 10), 24),
-        "rating": min(max(rating_width, 10), 38),
-        "description": min(max(desc_width, 20), 45),
+        "name": min(max(name_width, 10), 30),
     }
 
 
 def build_tool_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Tool':<{widths['name']}}  {'Rating / Advice':<{widths['rating']}}  {'Description':<{widths['description']}}  State",
-        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['rating']}  {'-' * widths['description']}  -----",
+        f"  {'Id':>2}  {'Tool':<{widths['name']}}  State",
+        f"  {'--':>2}  {'-' * widths['name']}  -----",
     ]
 
 
@@ -1915,28 +1914,14 @@ def format_tool_entry(
         return _ansi_wrap(row, "1;36")
 
     name = str(tool.get("name", ""))
-    rating = str(tool.get("rating", ""))
-    description = str(tool.get("description", ""))
     enabled = bool(tool.get("enabled", True))
     marker = ">" if selected else " "
     state = "on" if enabled else "off"
     state_text = _ansi_wrap(state, "31") if not enabled else _ansi_wrap(state, "32")
 
-    rating_colored = rating
-    if "Best" in rating:
-        rating_colored = _ansi_wrap(rating, "32")
-    elif "Good" in rating or "Safe" in rating:
-        rating_colored = _ansi_wrap(rating, "36")
-    elif "caution" in rating.lower() or "strict" in rating.lower():
-        rating_colored = _ansi_wrap(rating, "33")
-    elif "Destructive" in rating:
-        rating_colored = _ansi_wrap(rating, "31")
-
     row = (
         f"{marker} {index:>2}  "
         f"{name:<{widths['name']}}  "
-        f"{rating:<{widths['rating']}}  "
-        f"{description:<{widths['description']}}  "
         f"{state_text}"
     ).rstrip()
     if selected:
@@ -1977,16 +1962,25 @@ def pick_tool_interactive(disabled_tools: Set[str], title_text: str = "Manage To
                 tool["enabled"] = True
             cat_changed = True
 
+        def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
+            desc = str(current_item.get("description", ""))
+            rating = str(current_item.get("rating", ""))
+            lines = [
+                "----------------------------------------------------------------",
+                f"Info: {desc}",
+            ]
+            if rating:
+                lines.append(f"Advice: {rating}")
+            lines.append("Press Space to toggle | Enter/Esc to return to Category Menu")
+            return lines
+
         interactive_select(
             title_text=f"Manage Tools -> {cat_name}",
             items=cat_tools,
             render_item=render_cat_item,
             header_lines=build_tool_table_header(widths),
-            footer_lines=[
-                "Press Space to toggle the highlighted tool.",
-                "Press Enter or Esc to return to Category Menu.",
-            ],
-            instructions="Use Up/Down, Space to toggle, Enter/Esc to go back.",
+            dynamic_footer=render_footer_info,
+            instructions="Use Up/Down to navigate tools, Space to toggle on/off.",
             on_space=toggle_cat_tool,
         )
         return cat_changed
