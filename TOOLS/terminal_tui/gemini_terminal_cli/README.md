@@ -108,7 +108,7 @@ The CLI exposes only local, standard-library tools:
 `apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, validates the context first, and then writes the touched files. It can be toggled from `/tool` like every other local tool.
 When an `apply_patch` call is shown in the terminal, removed diff lines render red and added diff lines render green.
 
-`run_powershell` is the preferred inspection and command tool on Windows. It runs commands through `powershell.exe -NoProfile`, so the model can use commands such as `rg`, `Get-Content`, `git status`, and test commands before choosing an edit.
+`run_powershell` is the preferred inspection and command tool on Windows. It runs commands through `powershell.exe -NoProfile`, so the model can use commands such as `rg`, `Get-Content`, `git status`, and test commands before choosing an edit. For literal code searches with `Select-String`, prefer `-SimpleMatch` and single-quoted patterns, for example `Select-String -SimpleMatch 'preview.contentEditable = "true";'`.
 
 ## Notes
 

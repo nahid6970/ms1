@@ -34,6 +34,7 @@ DEFAULT_SYSTEM = (
     "You are a terminal coding assistant. "
     "Be concise, practical, and ask before making destructive changes. "
     "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
+    "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch for edits only after refreshing the exact surrounding context."
 )
 DEFAULT_TOOL_LOOPS = 8
@@ -788,7 +789,7 @@ FUNCTIONS = {
     },
     "run_powershell": {
         "name": "run_powershell",
-        "description": "Run a PowerShell command for inspection, git checks, tests, or targeted local scripting.",
+        "description": "Run a PowerShell command for inspection, git checks, tests, or targeted local scripting. Use Select-String -SimpleMatch with single-quoted patterns for literal code searches.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
