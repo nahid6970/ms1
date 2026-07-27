@@ -9,6 +9,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import time
 import subprocess
 import sys
@@ -155,38 +156,64 @@ def read_dynamic_prompt(
     comp_index = -1
     comp_base_buffer = ""
     had_preview = False
+    preview_line_count = 0
+
+    def _terminal_cols() -> int:
+        try:
+            return max(40, shutil.get_terminal_size().columns)
+        except Exception:
+            return 80
 
     def clear_preview() -> None:
-        nonlocal had_preview
-        if had_preview:
-            # Move down, clear line, move back up
-            sys.stdout.write("\033[1B\r\033[2K\033[1A\r")
+        nonlocal had_preview, preview_line_count
+        if had_preview and preview_line_count > 0:
+            # Move to first preview line, clear each, then return to input line
+            sys.stdout.write("\033[1B")
+            for _ in range(preview_line_count):
+                sys.stdout.write("\r\033[2K")
+                if _ < preview_line_count - 1:
+                    sys.stdout.write("\033[1B")
+            # Move back up to the input line
+            sys.stdout.write(f"\033[{preview_line_count}A\r")
             sys.stdout.flush()
-            had_preview = False
+        had_preview = False
+        preview_line_count = 0
 
     def redraw(force: bool = False) -> None:
-        nonlocal displayed_prompt, next_refresh, had_preview
+        nonlocal displayed_prompt, next_refresh, had_preview, preview_line_count
         now = time.monotonic()
         if not force and buffer:
             return
         if not force and (completions or now < next_refresh):
             return
-        
+
         prompt = prompt_provider()
         clear_preview()
+        # Always clear the input line before reprinting to avoid stacked prompts
         sys.stdout.write("\r\033[2K" + prompt + "".join(buffer))
-        
+
         if completions:
+            cols = _terminal_cols()
+            max_items = 6
+            preview_items = completions[:max_items]
+            lines: List[str] = []
+            for i, c in enumerate(preview_items):
+                label = str(c["label"])
+                # Truncate long labels so they never wrap
+                max_label = max(12, cols - 6)
+                if len(label) > max_label:
+                    label = label[: max_label - 1] + "…"
+                style = "7" if i == comp_index else "90"
+                lines.append("  " + _ansi_wrap(label, style))
+            if len(completions) > max_items:
+                lines.append(_ansi_wrap("  ...", "90"))
+            preview_line_count = len(lines)
             had_preview = True
-            preview_items = completions[:8]
-            preview_str = "  " + " ".join(
-                _ansi_wrap(str(c["label"]), "7") if i == comp_index else _ansi_wrap(str(c["label"]), "90")
-                for i, c in enumerate(preview_items)
-            )
-            if len(completions) > 8:
-                preview_str += _ansi_wrap(" ...", "90")
-            # Save cursor position, move down, clear line, print preview, restore cursor
-            sys.stdout.write("\033[s\n\033[2K" + preview_str + "\033[u")
+            # Save cursor, print each preview line below, restore cursor
+            sys.stdout.write("\033[s")
+            for line in lines:
+                sys.stdout.write("\n\033[2K" + line)
+            sys.stdout.write("\033[u")
 
         sys.stdout.flush()
         displayed_prompt = prompt
