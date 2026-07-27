@@ -1063,6 +1063,23 @@ def _format_tool_value(value: Any) -> str:
     return str(value)
 
 
+def _format_patch_preview(patch_text: str) -> List[str]:
+    lines: List[str] = []
+    for raw_line in patch_text.rstrip().splitlines():
+        if raw_line.startswith(("--- ", "+++ ")):
+            styled = _ansi_wrap(raw_line, "1")
+        elif raw_line.startswith("@@ "):
+            styled = _ansi_wrap(raw_line, "36")
+        elif raw_line.startswith("+"):
+            styled = _ansi_wrap(raw_line, "32")
+        elif raw_line.startswith("-"):
+            styled = _ansi_wrap(raw_line, "31")
+        else:
+            styled = raw_line
+        lines.append(f"    {styled}")
+    return lines
+
+
 def format_tool_call(name: str, args: Dict[str, Any]) -> str:
     if name in {"run_shell_command", "run_powershell"}:
         command = str(args.get("command", "")).rstrip()
@@ -1071,6 +1088,11 @@ def format_tool_call(name: str, args: Dict[str, Any]) -> str:
             return "Ran " + label + " script:\n" + "\n".join(f"  {line}" for line in command.splitlines())
         if command:
             return f"Ran {command}"
+
+    if name == "apply_patch" and isinstance(args.get("patch"), str):
+        lines = ["[tool] apply_patch", "  patch:"]
+        lines.extend(_format_patch_preview(str(args.get("patch", ""))))
+        return "\n".join(lines)
 
     lines = [f"[tool] {name}"]
     if not args:
