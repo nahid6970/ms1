@@ -90,11 +90,21 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 The CLI exposes only local, standard-library tools:
 - `read_file`
 - `write_file`
+- `replace_file`
 - `delete_file`
 - `list_directory`
+- `search_file`
+- `search_web`
+- `search_tavily`
+- `replace_block`
+- `insert_after`
+- `delete_block`
+- `apply_patch`
 - `run_shell_command`
 - `get_system_info`
 - `request_follow_up`
+
+`apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, validates the context first, and then writes the touched files. It can be toggled from `/tool` like every other local tool.
 
 ## Notes
 
@@ -116,3 +126,4 @@ The CLI exposes only local, standard-library tools:
 - The password flag is reused for both loading and saving the locked API account file in that session.
 - `/test` is the current command for model testing; `/mm test` remains an alias.
 - `/tool` is the only local tool command; `Space` toggles the selected tool and disabled tools show `off` in red.
+- Enable `apply_patch` when you want efficient multi-file code edits; disable it when you want the model limited to smaller exact block operations.

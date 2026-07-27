@@ -33,8 +33,8 @@ DEFAULT_MODEL = "gemini-2.5-flash"
 DEFAULT_SYSTEM = (
     "You are a terminal coding assistant. "
     "Be concise, practical, and ask before making destructive changes. "
-    "When editing code, prefer search_file and minimal block edits "
-    "(replace_block, insert_after, delete_block) over rewriting whole files."
+    "When editing code, prefer search_file and apply_patch for multi-file changes; "
+    "use minimal block edits (replace_block, insert_after, delete_block) for small changes."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -363,6 +363,159 @@ def delete_block_in_file(path: Path, block_text: str, occurrence: int = 1) -> st
         return f"Error deleting block: {exc}"
 
 
+def _patch_path(raw: str, cwd: Path) -> Optional[Path]:
+    raw = raw.strip()
+    if raw == "/dev/null":
+        return None
+    if "\t" in raw:
+        raw = raw.split("\t", 1)[0]
+    if " " in raw:
+        raw = raw.split(" ", 1)[0]
+    if raw.startswith("a/") or raw.startswith("b/"):
+        raw = raw[2:]
+    return resolve_path(raw, cwd)
+
+
+def _parse_hunk_header(line: str) -> Optional[tuple[int, int, int, int]]:
+    match = re.match(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)
+    if not match:
+        return None
+    old_start = int(match.group(1))
+    old_count = int(match.group(2) or "1")
+    new_start = int(match.group(3))
+    new_count = int(match.group(4) or "1")
+    return old_start, old_count, new_start, new_count
+
+
+def apply_unified_patch(patch_text: str, cwd: Path) -> str:
+    if not patch_text.strip():
+        return "Error: patch is required."
+
+    lines = patch_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    file_patches: List[Dict[str, Any]] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if line.startswith("diff --git "):
+            index += 1
+            continue
+        if not line.startswith("--- "):
+            index += 1
+            continue
+
+        old_path = _patch_path(line[4:].strip(), cwd)
+        index += 1
+        if index >= len(lines) or not lines[index].startswith("+++ "):
+            return "Error: malformed patch; expected +++ after ---."
+        new_path = _patch_path(lines[index][4:].strip(), cwd)
+        index += 1
+
+        hunks: List[List[str]] = []
+        while index < len(lines):
+            if lines[index].startswith("--- ") or lines[index].startswith("diff --git "):
+                break
+            if not lines[index].startswith("@@ "):
+                index += 1
+                continue
+            hunk: List[str] = [lines[index]]
+            index += 1
+            while index < len(lines):
+                current = lines[index]
+                if current.startswith("@@ ") or current.startswith("--- ") or current.startswith("diff --git "):
+                    break
+                if current.startswith("\\ No newline at end of file"):
+                    index += 1
+                    continue
+                if current and current[0] not in {" ", "+", "-"}:
+                    return f"Error: malformed patch line: {current[:80]}"
+                hunk.append(current)
+                index += 1
+            hunks.append(hunk)
+
+        if not hunks:
+            return "Error: patch contains a file header without hunks."
+        file_patches.append({"old_path": old_path, "new_path": new_path, "hunks": hunks})
+
+    if not file_patches:
+        return "Error: no unified diff file patches found."
+
+    updates: Dict[Path, Optional[str]] = {}
+    touched: List[Path] = []
+    for file_patch in file_patches:
+        target_path = file_patch["new_path"] or file_patch["old_path"]
+        if target_path is None:
+            return "Error: patch cannot use /dev/null for both old and new paths."
+
+        old_path = file_patch["old_path"]
+        new_path = file_patch["new_path"]
+        is_new_file = old_path is None
+        is_delete = new_path is None
+
+        if is_new_file:
+            if target_path.exists():
+                return f"Error: target file already exists: {target_path}"
+            original_lines: List[str] = []
+        else:
+            if not target_path.exists():
+                return f"Error: path not found: {target_path}"
+            if target_path.is_dir():
+                return f"Error: {target_path} is a directory."
+            try:
+                original_lines = target_path.read_text(encoding="utf-8", errors="replace").splitlines()
+            except Exception as exc:
+                return f"Error reading {target_path}: {exc}"
+
+        result_lines = list(original_lines)
+        offset = 0
+        for hunk in file_patch["hunks"]:
+            parsed = _parse_hunk_header(hunk[0])
+            if parsed is None:
+                return f"Error: malformed hunk header: {hunk[0]}"
+            old_start, _old_count, _new_start, _new_count = parsed
+            pos = max(old_start - 1 + offset, 0)
+
+            old_segment: List[str] = []
+            new_segment: List[str] = []
+            for hunk_line in hunk[1:]:
+                marker = hunk_line[:1]
+                text = hunk_line[1:]
+                if marker == " ":
+                    old_segment.append(text)
+                    new_segment.append(text)
+                elif marker == "-":
+                    old_segment.append(text)
+                elif marker == "+":
+                    new_segment.append(text)
+
+            current_segment = result_lines[pos:pos + len(old_segment)]
+            if current_segment != old_segment:
+                return f"Error: patch context did not match {target_path} near line {old_start}."
+
+            result_lines[pos:pos + len(old_segment)] = new_segment
+            offset += len(new_segment) - len(old_segment)
+
+        if is_delete:
+            if result_lines:
+                return f"Error: delete patch did not remove all content from {target_path}."
+            updates[target_path] = None
+        else:
+            updates[target_path] = "\n".join(result_lines) + ("\n" if result_lines else "")
+        touched.append(target_path)
+
+    try:
+        for path, content in updates.items():
+            if content is None:
+                path.unlink()
+            else:
+                if path.parent:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+    except Exception as exc:
+        return f"Error applying patch: {exc}"
+
+    return "Applied patch:\n" + "\n".join(str(path) for path in touched)
+
+
 def list_directory(path: Path) -> str:
     try:
         if not path.exists():
@@ -545,6 +698,20 @@ FUNCTIONS = {
             "required": ["filepath", "block_text"],
         },
     },
+    "apply_patch": {
+        "name": "apply_patch",
+        "description": "Apply a unified diff patch across one or more local files.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "patch": {
+                    "type": "STRING",
+                    "description": "A unified diff with ---/+++ file headers and @@ hunks.",
+                },
+            },
+            "required": ["patch"],
+        },
+    },
     "run_shell_command": {
         "name": "run_shell_command",
         "description": "Run a shell command.",
@@ -616,6 +783,8 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         block_text = str(args.get("block_text", ""))
         occurrence = int(args.get("occurrence", 1) or 1)
         return delete_block_in_file(filepath, block_text, occurrence=occurrence)
+    if name == "apply_patch":
+        return apply_unified_patch(str(args.get("patch", "")), cwd)
     if name == "run_shell_command":
         return run_shell_command(str(args.get("command", "")), cwd)
     if name == "request_follow_up":
@@ -638,6 +807,7 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "replace_block", "description": "[Code-Merge] Replace an exact block of text in a file."},
         {"name": "insert_after", "description": "[Code-Merge] Insert text after an exact anchor in a file."},
         {"name": "delete_block", "description": "[Code-Merge] Delete an exact block of text from a file."},
+        {"name": "apply_patch", "description": "[Code-Merge] Apply a unified diff across files."},
         {"name": "run_shell_command", "description": "Run a shell command."},
         {"name": "request_follow_up", "description": "Request another turn for multi-step work."},
     ]
