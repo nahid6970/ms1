@@ -152,7 +152,7 @@ def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[Li
             auto_suggest=AutoSuggestFromHistory(),
             complete_style=CompleteStyle.READLINE_LIKE,
             mouse_support=False,
-            wrap_lines=False,
+            wrap_lines=True,
             refresh_interval=0.25,
         )
 
