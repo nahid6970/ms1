@@ -2693,6 +2693,7 @@ def main() -> int:
                     temperature=args.temperature,
                     max_output_tokens=args.max_output_tokens,
                 )
+                record_model_usage(client.model)
             except RuntimeError as exc:
                 msg = str(exc).strip()
                 error(msg)
@@ -2726,7 +2727,6 @@ def main() -> int:
             function_calls = extract_function_calls(parts)
             if not function_calls:
                 contents.append(content_obj)
-                record_model_usage(client.model)
                 write_notification()
                 return
 

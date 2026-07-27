@@ -128,6 +128,7 @@ When an `apply_patch` call is shown in the terminal, removed diff lines render r
 - `/failover default on` and `/failover default off` change the global default used when no project override exists.
 - The `/api` picker shows a `Failovers` column with the number of times each Gemini account has been reached by automatic failover.
 - The `/mm` picker shows cumulative model `Uses` counts, not per-account counts.
+- `Uses` increments once for every successful Gemini generation call, including tool-loop calls and successful retries after API account failover.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.
