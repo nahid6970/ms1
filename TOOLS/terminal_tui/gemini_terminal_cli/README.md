@@ -116,6 +116,7 @@ When an `apply_patch` call is shown in the terminal, removed diff lines render r
 - It uses Gemini's function-calling API directly over HTTP.
 - Shell commands are intentionally explicit; the model must ask for them through the tool loop.
 - Hidden models, last model, and speed tags are stored in `model_prefs.json`.
+- Model visibility, speed tags, and `Uses` counts are shared across Gemini API accounts.
 - Disabled tools are stored in `model_prefs.json` and in saved transcripts.
 - Named API accounts are stored in `api_accounts.lock`.
 - REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts; the file is ignored by Git.
@@ -126,6 +127,7 @@ When an `apply_patch` call is shown in the terminal, removed diff lines render r
 - `/failover session on` and `/failover session off` only affect the current process.
 - `/failover default on` and `/failover default off` change the global default used when no project override exists.
 - The `/api` picker shows a `Failovers` column with the number of times each Gemini account has been reached by automatic failover.
+- The `/mm` picker shows cumulative model `Uses` counts, not per-account counts.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
 - The password flag is reused for both loading and saving the locked API account file in that session.

@@ -1353,6 +1353,20 @@ def load_model_prefs() -> Dict[str, Any]:
         last_api_account = str(data.get("last_api_account") or "")
         if last_api_account and last_api_account not in normalized_api_accounts:
             normalized_api_accounts[last_api_account] = account_model_prefs
+        account_usage_sources = list(normalized_api_accounts.values())
+        if account_usage_sources:
+            merged_hidden = set(account_model_prefs.get("hidden_models", []))
+            merged_speed_tags = dict(account_model_prefs.get("speed_tags", {}))
+            merged_usage_counts: Dict[str, int] = {}
+            for account_prefs in account_usage_sources:
+                merged_hidden.update(str(item) for item in account_prefs.get("hidden_models", []))
+                merged_speed_tags.update({str(k): str(v) for k, v in dict(account_prefs.get("speed_tags", {})).items()})
+                for model, count in dict(account_prefs.get("model_usage_counts", {})).items():
+                    model_key = str(model)
+                    merged_usage_counts[model_key] = int(merged_usage_counts.get(model_key, 0) or 0) + int(count)
+            account_model_prefs["hidden_models"] = sorted(merged_hidden)
+            account_model_prefs["speed_tags"] = merged_speed_tags
+            account_model_prefs["model_usage_counts"] = merged_usage_counts
         disabled_tools = data.get("disabled_tools", [])
         if not isinstance(disabled_tools, list):
             disabled_tools = []
@@ -1406,16 +1420,11 @@ def save_model_prefs(
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
-        str(account_name): serialize_model_prefs(
-            list(account_prefs.get("hidden_models", [])),
-            dict(account_prefs.get("speed_tags", {})),
-            dict(account_prefs.get("model_usage_counts", {})),
-            int(account_prefs.get("failover_uses", 0) or 0),
-        )
+        str(account_name): {"failover_uses": max(0, int(account_prefs.get("failover_uses", 0) or 0))}
         for account_name, account_prefs in (api_account_model_prefs or {}).items()
     }
     if last_api_account:
-        api_accounts[last_api_account] = account_model_prefs
+        api_accounts[last_api_account] = {"failover_uses": max(0, int(failover_uses))}
     payload = {
         **account_model_prefs,
         "api_accounts": dict(sorted(api_accounts.items())),
@@ -2322,19 +2331,11 @@ def main() -> int:
 
     def snapshot_active_account_model_prefs() -> None:
         if active_api_account:
-            api_account_model_prefs[active_api_account] = serialize_model_prefs(
-                hidden_models,
-                speed_tags,
-                model_usage_counts,
-                failover_uses,
-            )
+            api_account_model_prefs[active_api_account] = {"failover_uses": max(0, int(failover_uses))}
 
     def load_account_model_prefs(account_name: str) -> None:
-        nonlocal hidden_models, speed_tags, model_usage_counts, failover_uses
+        nonlocal failover_uses
         account_prefs = normalize_account_model_prefs(api_account_model_prefs.get(account_name, {}))
-        hidden_models = list(account_prefs.get("hidden_models", []))
-        speed_tags = dict(account_prefs.get("speed_tags", {}))
-        model_usage_counts = dict(account_prefs.get("model_usage_counts", {}))
         failover_uses = int(account_prefs.get("failover_uses", 0) or 0)
 
     def switch_api_account(account_name: str, key: str) -> None:
@@ -2568,12 +2569,7 @@ def main() -> int:
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
         if account_name:
-            api_account_model_prefs[account_name] = serialize_model_prefs(
-                hidden_models,
-                speed_tags,
-                model_usage_counts,
-                failover_uses,
-            )
+            api_account_model_prefs[account_name] = {"failover_uses": max(0, int(failover_uses))}
         save_model_prefs(
             hidden_models,
             speed_tags,
