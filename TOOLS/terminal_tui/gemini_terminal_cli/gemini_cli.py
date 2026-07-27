@@ -1553,6 +1553,123 @@ def pick_api_account_interactive(
     }
 
 
+def build_failover_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int]:
+    scope_width = 0
+    state_width = 0
+    desc_width = 0
+    for item in items:
+        scope_width = max(scope_width, len(str(item.get("scope", ""))))
+        state_width = max(state_width, len(str(item.get("state", ""))))
+        desc_width = max(desc_width, len(str(item.get("description", ""))))
+    return {
+        "scope": min(max(scope_width, 14), 28),
+        "state": min(max(state_width, 7), 12),
+        "description": min(max(desc_width, 28), 60),
+    }
+
+
+def build_failover_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Scope':<{widths['scope']}}  {'State':<{widths['state']}}  Description",
+        f"  {'--':>2}  {'-' * widths['scope']}  {'-' * widths['state']}  {'-' * 11}",
+    ]
+
+
+def format_failover_entry(
+    index: int,
+    item: Dict[str, Any],
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    scope = str(item.get("scope", ""))
+    state = str(item.get("state", ""))
+    description = str(item.get("description", ""))
+    marker = ">" if selected else " "
+    state_text = state
+    if state == "on":
+        state_text = _ansi_wrap(state, "32")
+    elif state == "off":
+        state_text = _ansi_wrap(state, "31")
+    elif state in {"inherit", "none"}:
+        state_text = _ansi_wrap(state, "33")
+    row = (
+        f"{marker} {index:>2}  "
+        f"{scope:<{widths['scope']}}  "
+        f"{state_text:<{widths['state']}}  "
+        f"{description}"
+    ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    return row
+
+
+def pick_failover_interactive(
+    current_project_state: Optional[bool],
+    session_state: Optional[bool],
+    global_default_state: bool,
+    title_text: str = "Auto Failover",
+) -> Optional[Dict[str, Any]]:
+    items: List[Dict[str, Any]] = [
+        {
+            "kind": "project",
+            "scope": "Current project",
+            "state": "inherit" if current_project_state is None else ("on" if current_project_state else "off"),
+            "description": "Persistent override for the current project root.",
+        },
+        {
+            "kind": "session",
+            "scope": "This session",
+            "state": "none" if session_state is None else ("on" if session_state else "off"),
+            "description": "Temporary override until the CLI exits.",
+        },
+        {
+            "kind": "default",
+            "scope": "Global default",
+            "state": "on" if global_default_state else "off",
+            "description": "Fallback when no project override exists.",
+        },
+    ]
+    widths = build_failover_table_widths(items)
+    changed = False
+
+    def render_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
+        return format_failover_entry(index + 1, item, widths, selected=selected)
+
+    def toggle_item(item: Dict[str, Any], _: int) -> None:
+        nonlocal changed
+        kind = str(item.get("kind", ""))
+        if kind in {"project", "session", "default"}:
+            item["state"] = "on" if str(item.get("state", "")) != "on" else "off"
+            changed = True
+
+    chosen = interactive_select(
+        title_text=title_text,
+        items=items,
+        render_item=render_item,
+        header_lines=build_failover_table_header(widths),
+        footer_lines=[
+            "Press Space to toggle the highlighted scope.",
+            "Press Enter or Esc to close.",
+        ],
+        instructions="Use Up/Down, Space to toggle, Enter to close, Esc to cancel.",
+        on_space=toggle_item,
+    )
+    if chosen is None and not changed:
+        return None
+
+    result = {
+        "project": "inherit" if current_project_state is None else ("on" if current_project_state else "off"),
+        "session": "none" if session_state is None else ("on" if session_state else "off"),
+        "default": "on" if global_default_state else "off",
+    }
+    for item in items:
+        kind = str(item.get("kind", ""))
+        state = str(item.get("state", ""))
+        if kind in {"project", "session", "default"}:
+            result[kind] = state
+    return result
+
+
 def first_api_account_name(accounts: Dict[str, str]) -> Optional[str]:
     if not accounts:
         return None
@@ -1797,20 +1914,21 @@ def print_help() -> None:
               /exit                Quit
               /reset               Clear conversation history
               /mm                  Open the model picker
-            /test                Test all models and hide failures
-            /api                 Open the API account picker
-            /loops <n>           Set max tool-call loops
-            /failover ...        Control automatic API account failover
-            /tool                Open the tool manager and toggle tools with Space
-            /system <text|file>  Replace system instruction or load it from a file
-            /save <file>         Save transcript JSON
-            /load <file>         Load transcript JSON
+              /test                Test all models and hide failures
+              /api                 Open the API account picker
+              /loops <n>           Set max tool-call loops
+              /failover            Open the auto-failover picker
+              /failover ...        Control automatic API account failover directly
+              /tool                Open the tool manager and toggle tools with Space
+              /system <text|file>   Replace system instruction or load it from a file
+              /save <file>         Save transcript JSON
+              /load <file>         Load transcript JSON
 
             Tips:
               - Prefix a prompt with @file to inject a file's contents into the request.
               - Use /mm to pick a model with the arrow keys, or /test to test all models.
               - Use /api to add or switch saved API accounts.
-              - Use /failover to enable account rotation for quota or rate-limit errors.
+              - Use /failover to open the failover picker, or pass on/off/session/default directly.
               - Use /tool to see and toggle the implemented local tools.
               - Use /loops to raise or lower the tool-call depth.
             """
@@ -1950,6 +2068,9 @@ def main() -> int:
     def project_auto_failover_enabled() -> bool:
         return auto_failover_projects.get(current_project_key(), auto_failover_default)
 
+    def current_project_auto_failover_state() -> Optional[bool]:
+        return auto_failover_projects.get(current_project_key())
+
     def effective_auto_failover_enabled() -> bool:
         if auto_failover_session_override is not None:
             return auto_failover_session_override
@@ -1977,6 +2098,27 @@ def main() -> int:
     def set_session_auto_failover(enabled: Optional[bool]) -> None:
         nonlocal auto_failover_session_override
         auto_failover_session_override = enabled
+
+    def apply_failover_picker_state(selection: Dict[str, str]) -> None:
+        nonlocal auto_failover_default
+        project_state = str(selection.get("project", "inherit"))
+        session_state = str(selection.get("session", "none"))
+        default_state = str(selection.get("default", "on"))
+
+        if project_state == "inherit":
+            auto_failover_projects.pop(current_project_key(), None)
+        elif project_state in {"on", "off"}:
+            auto_failover_projects[current_project_key()] = project_state == "on"
+
+        if session_state == "none":
+            set_session_auto_failover(None)
+        elif session_state in {"on", "off"}:
+            set_session_auto_failover(session_state == "on")
+
+        if default_state in {"on", "off"}:
+            auto_failover_default = default_state == "on"
+
+        persist_selection()
 
     def format_auto_failover_status() -> str:
         return "on" if effective_auto_failover_enabled() else "off"
@@ -2439,13 +2581,32 @@ def main() -> int:
                 if command == "/failover":
                     parts = remainder.lower().split()
                     if not parts:
-                        project_setting = auto_failover_projects.get(current_project_key())
+                        chosen = pick_failover_interactive(
+                            current_project_auto_failover_state(),
+                            auto_failover_session_override,
+                            auto_failover_default,
+                        )
+                        if chosen is None:
+                            continue
+                        apply_failover_picker_state(chosen)
+                        info(failover_status_line())
+                        continue
+                    if len(parts) == 1 and parts[0] in {"status", "show"}:
                         info(failover_status_line())
                         info(f"Global default: {'on' if auto_failover_default else 'off'}")
-                        if project_setting is None:
-                            info("Project override: none")
-                        else:
-                            info(f"Project override: {'on' if project_setting else 'off'}")
+                        project_setting = current_project_auto_failover_state()
+                        info(
+                            "Project override: "
+                            + ("none" if project_setting is None else ("on" if project_setting else "off"))
+                        )
+                        info(
+                            "Session override: "
+                            + (
+                                "none"
+                                if auto_failover_session_override is None
+                                else ("on" if auto_failover_session_override else "off")
+                            )
+                        )
                         continue
                     if len(parts) == 1 and parts[0] in {"on", "off"}:
                         set_project_auto_failover(parts[0] == "on")
@@ -2465,7 +2626,7 @@ def main() -> int:
                         persist_selection()
                         info(f"Auto failover global default set to {'on' if auto_failover_default else 'off'}.")
                         continue
-                    warn("Usage: /failover [on|off|clear|reset|session on|session off|default on|default off]")
+                    warn("Usage: /failover [status|on|off|clear|reset|session on|session off|default on|default off]")
                     continue
                 if command == "/tool":
                     changed = pick_tool_interactive(disabled_tools)

@@ -71,7 +71,8 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
-- `/failover ...` - control automatic API account rotation on quota or rate-limit errors
+- `/failover` - open the auto-failover picker
+- `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file
 - `/tool` - open the tool manager; use Space to toggle tools on or off
 - `/save <file>` - write transcript JSON
@@ -97,6 +98,7 @@ The CLI exposes only local, standard-library tools:
 - Disabled tools are stored in `model_prefs.json` and in saved transcripts.
 - Named API accounts are stored in `api_accounts.lock`.
 - The CLI restores the last-used API account and model on startup when they have been saved.
+- `/failover` opens an interactive picker where Space toggles the highlighted scope.
 - `/failover on` and `/failover off` store a project-specific override in `model_prefs.json` using the current `--project-root`.
 - `/failover session on` and `/failover session off` only affect the current process.
 - `/failover default on` and `/failover default off` change the global default used when no project override exists.
