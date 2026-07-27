@@ -527,6 +527,135 @@ def apply_unified_patch(patch_text: str, cwd: Path) -> str:
 
             current_segment = result_lines[pos:pos + len(old_segment)]
             if current_segment != old_segment:
+                return f"Error: patch context did not match {target_path} near line {old_start}."
+
+            result_lines[pos:pos + len(old_segment)] = new_segment
+            offset += len(new_segment) - len(old_segment)
+
+        if is_delete:
+            if result_lines:
+                return f"Error: delete patch did not remove all content from {target_path}."
+            updates[target_path] = None
+        else:
+            updates[target_path] = "\n".join(result_lines) + ("\n" if result_lines else "")
+        touched.append(target_path)
+
+    try:
+        for path, content in updates.items():
+            if content is None:
+                path.unlink()
+            else:
+                if path.parent:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+    except Exception as exc:
+        return f"Error applying patch: {exc}"
+
+    return "Applied patch:\n" + "\n".join(str(path) for path in touched)
+
+
+def apply_fuzzy_unified_patch(patch_text: str, cwd: Path) -> str:
+    if not patch_text.strip():
+        return "Error: patch is required."
+
+    lines = patch_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    file_patches: List[Dict[str, Any]] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if line.startswith("diff --git "):
+            index += 1
+            continue
+        if not line.startswith("--- "):
+            index += 1
+            continue
+
+        old_path = _patch_path(line[4:].strip(), cwd)
+        index += 1
+        if index >= len(lines) or not lines[index].startswith("+++ "):
+            return "Error: malformed patch; expected +++ after ---."
+        new_path = _patch_path(lines[index][4:].strip(), cwd)
+        index += 1
+
+        hunks: List[List[str]] = []
+        while index < len(lines):
+            if lines[index].startswith("--- ") or lines[index].startswith("diff --git "):
+                break
+            if not lines[index].startswith("@@ "):
+                index += 1
+                continue
+            hunk: List[str] = [lines[index]]
+            index += 1
+            while index < len(lines):
+                current = lines[index]
+                if current.startswith("@@ ") or current.startswith("--- ") or current.startswith("diff --git "):
+                    break
+                if current.startswith("\\ No newline at end of file"):
+                    index += 1
+                    continue
+                if current and current[0] not in {" ", "+", "-"}:
+                    return f"Error: malformed patch line: {current[:80]}"
+                hunk.append(current)
+                index += 1
+            hunks.append(hunk)
+
+        if not hunks:
+            return "Error: patch contains a file header without hunks."
+        file_patches.append({"old_path": old_path, "new_path": new_path, "hunks": hunks})
+
+    if not file_patches:
+        return "Error: no unified diff file patches found."
+
+    updates: Dict[Path, Optional[str]] = {}
+    touched: List[Path] = []
+    for file_patch in file_patches:
+        target_path = file_patch["new_path"] or file_patch["old_path"]
+        if target_path is None:
+            return "Error: patch cannot use /dev/null for both old and new paths."
+
+        old_path = file_patch["old_path"]
+        new_path = file_patch["new_path"]
+        is_new_file = old_path is None
+        is_delete = new_path is None
+
+        if is_new_file:
+            if target_path.exists():
+                return f"Error: target file already exists: {target_path}"
+            original_lines: List[str] = []
+        else:
+            if not target_path.exists():
+                return f"Error: path not found: {target_path}"
+            if target_path.is_dir():
+                return f"Error: {target_path} is a directory."
+            try:
+                original_lines = target_path.read_text(encoding="utf-8", errors="replace").splitlines()
+            except Exception as exc:
+                return f"Error reading {target_path}: {exc}"
+
+        result_lines = list(original_lines)
+        offset = 0
+        for hunk in file_patch["hunks"]:
+            parsed = _parse_hunk_header(hunk[0])
+            if parsed is None:
+                return f"Error: malformed hunk header: {hunk[0]}"
+            old_start, _old_count, _new_start, _new_count = parsed
+            pos = max(old_start - 1 + offset, 0)
+
+            old_segment: List[str] = []
+            new_segment: List[str] = []
+            for hunk_line in hunk[1:]:
+                marker = hunk_line[:1]
+                text = hunk_line[1:]
+                if marker == " ":
+                    old_segment.append(text)
+                    new_segment.append(text)
+                elif marker == "-":
+                    old_segment.append(text)
+                elif marker == "+":
+                    new_segment.append(text)
+
+            current_segment = result_lines[pos:pos + len(old_segment)]
+            if current_segment != old_segment:
                 # Fuzzy window search (search +- 50 lines around pos)
                 found_pos = -1
                 search_radius = 50
@@ -865,6 +994,20 @@ FUNCTIONS = {
             "required": ["patch"],
         },
     },
+    "fuzzy_apply_patch": {
+        "name": "fuzzy_apply_patch",
+        "description": "Apply a unified diff patch with +-50 line sliding window and line-ending/whitespace fallback.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "patch": {
+                    "type": "STRING",
+                    "description": "A unified diff with ---/+++ file headers and @@ hunks.",
+                },
+            },
+            "required": ["patch"],
+        },
+    },
     "run_shell_command": {
         "name": "run_shell_command",
         "description": "Run a shell command.",
@@ -990,6 +1133,8 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         return delete_block_in_file(filepath, block_text, occurrence=occurrence)
     if name == "apply_patch":
         return apply_unified_patch(str(args.get("patch", "")), cwd)
+    if name == "fuzzy_apply_patch":
+        return apply_fuzzy_unified_patch(str(args.get("patch", "")), cwd)
     if name == "run_shell_command":
         return run_shell_command(str(args.get("command", "")), cwd)
     if name == "run_powershell":
@@ -1006,24 +1151,25 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
 
 def list_tool_catalog() -> List[Dict[str, str]]:
     return [
-        {"name": "read_file", "description": "Read a local file."},
-        {"name": "write_file", "description": "Write content to a local file."},
-        {"name": "replace_file", "description": "[Code-Merge] Replace the full contents of a file."},
-        {"name": "delete_file", "description": "Delete a local file or directory."},
-        {"name": "list_directory", "description": "List directory contents."},
-        {"name": "get_system_info", "description": "Get system information."},
-        {"name": "search_file", "description": "Search text within a file or directory."},
-        {"name": "search_web", "description": "Search the web without a saved API key."},
-        {"name": "search_tavily", "description": "Search the web with saved Tavily API keys."},
-        {"name": "replace_block", "description": "[Code-Merge] Replace an exact block of text in a file."},
-        {"name": "smart_replace_block", "description": "[Code-Merge] Replace block with fuzzy line-ending/whitespace fallback."},
-        {"name": "replace_lines", "description": "[Code-Merge] Replace 1-indexed line range with new text."},
-        {"name": "insert_after", "description": "[Code-Merge] Insert text after an exact anchor in a file."},
-        {"name": "delete_block", "description": "[Code-Merge] Delete an exact block of text from a file."},
-        {"name": "apply_patch", "description": "[Code-Merge] Apply a unified diff across files."},
-        {"name": "run_shell_command", "description": "Run a shell command."},
-        {"name": "run_powershell", "description": "Run a PowerShell command."},
-        {"name": "request_follow_up", "description": "Request another turn for multi-step work."},
+        {"name": "read_file", "category": "Inspection & File System", "rating": "Best (Essential)", "description": "Read a local file."},
+        {"name": "write_file", "category": "Code Modifications", "rating": "Use with caution (Overwrites)", "description": "Write content to a local file."},
+        {"name": "replace_file", "category": "Code Modifications", "rating": "Use with caution (Overwrites full file)", "description": "[Code-Merge] Replace full contents of a file."},
+        {"name": "delete_file", "category": "Inspection & File System", "rating": "Destructive", "description": "Delete a local file or directory."},
+        {"name": "list_directory", "category": "Inspection & File System", "rating": "Best (Safe)", "description": "List directory contents."},
+        {"name": "get_system_info", "category": "Inspection & File System", "rating": "Best (Safe)", "description": "Get system information."},
+        {"name": "search_file", "category": "Inspection & File System", "rating": "Best (Safe)", "description": "Search text within a file or directory."},
+        {"name": "search_web", "category": "Inspection & File System", "rating": "Safe", "description": "Search the web without a saved API key."},
+        {"name": "search_tavily", "category": "Inspection & File System", "rating": "Safe", "description": "Search the web with saved Tavily API keys."},
+        {"name": "fuzzy_apply_patch", "category": "Code Modifications", "rating": "Best for multi-file changes (Resilient)", "description": "[Code-Merge] Unified diff with fuzzy window fallback."},
+        {"name": "smart_replace_block", "category": "Code Modifications", "rating": "Best for targeted edits (High accuracy)", "description": "[Code-Merge] Replace block with fuzzy fallback."},
+        {"name": "replace_lines", "category": "Code Modifications", "rating": "Best for exact line ranges (Low token)", "description": "[Code-Merge] Replace 1-indexed line range."},
+        {"name": "replace_block", "category": "Code Modifications", "rating": "Good (Requires exact text match)", "description": "[Code-Merge] Replace an exact block of text in a file."},
+        {"name": "apply_patch", "category": "Code Modifications", "rating": "Strict (Fails on small line drifts)", "description": "[Code-Merge] Apply a strict unified diff across files."},
+        {"name": "insert_after", "category": "Code Modifications", "rating": "Good (Targeted insertion)", "description": "[Code-Merge] Insert text after an exact anchor."},
+        {"name": "delete_block", "category": "Code Modifications", "rating": "Good (Targeted removal)", "description": "[Code-Merge] Delete an exact block of text from a file."},
+        {"name": "run_shell_command", "category": "Execution & Shell", "rating": "Powerful (Command execution)", "description": "Run a shell command."},
+        {"name": "run_powershell", "category": "Execution & Shell", "rating": "Best for Windows inspection & tests", "description": "Run a PowerShell command."},
+        {"name": "request_follow_up", "category": "Control Flow", "rating": "Safe", "description": "Request another turn for multi-step work."},
     ]
 
 
@@ -1735,19 +1881,22 @@ def pick_model_interactive(
 def build_tool_table_widths(tools: List[Dict[str, Any]]) -> Dict[str, int]:
     name_width = 0
     desc_width = 0
+    rating_width = 0
     for tool in tools:
         name_width = max(name_width, len(str(tool.get("name", ""))))
         desc_width = max(desc_width, len(str(tool.get("description", ""))))
+        rating_width = max(rating_width, len(str(tool.get("rating", ""))))
     return {
-        "name": min(max(name_width, 10), 26),
-        "description": min(max(desc_width, 24), 56),
+        "name": min(max(name_width, 10), 24),
+        "rating": min(max(rating_width, 10), 38),
+        "description": min(max(desc_width, 20), 45),
     }
 
 
 def build_tool_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Tool':<{widths['name']}}  {'Description':<{widths['description']}}  State",
-        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['description']}  -----",
+        f"  {'Id':>2}  {'Tool':<{widths['name']}}  {'Rating / Advice':<{widths['rating']}}  {'Description':<{widths['description']}}  State",
+        f"  {'--':>2}  {'-' * widths['name']}  {'-' * widths['rating']}  {'-' * widths['description']}  -----",
     ]
 
 
@@ -1757,15 +1906,36 @@ def format_tool_entry(
     widths: Dict[str, int],
     selected: bool = False,
 ) -> str:
+    if tool.get("_is_category"):
+        marker = ">" if selected else " "
+        title_str = f"=== {tool['category']} ({tool['enabled_count']}/{tool['total_count']} active) ==="
+        row = f"{marker} {index:>2}  {title_str}"
+        if selected:
+            return _ansi_wrap(row, "48;5;24;97")
+        return _ansi_wrap(row, "1;36")
+
     name = str(tool.get("name", ""))
+    rating = str(tool.get("rating", ""))
     description = str(tool.get("description", ""))
     enabled = bool(tool.get("enabled", True))
     marker = ">" if selected else " "
     state = "on" if enabled else "off"
     state_text = _ansi_wrap(state, "31") if not enabled else _ansi_wrap(state, "32")
+
+    rating_colored = rating
+    if "Best" in rating:
+        rating_colored = _ansi_wrap(rating, "32")
+    elif "Good" in rating or "Safe" in rating:
+        rating_colored = _ansi_wrap(rating, "36")
+    elif "caution" in rating.lower() or "strict" in rating.lower():
+        rating_colored = _ansi_wrap(rating, "33")
+    elif "Destructive" in rating:
+        rating_colored = _ansi_wrap(rating, "31")
+
     row = (
         f"{marker} {index:>2}  "
         f"{name:<{widths['name']}}  "
+        f"{rating:<{widths['rating']}}  "
         f"{description:<{widths['description']}}  "
         f"{state_text}"
     ).rstrip()
@@ -1777,45 +1947,86 @@ def format_tool_entry(
 
 
 def pick_tool_interactive(disabled_tools: Set[str], title_text: str = "Manage Tools") -> bool:
-    tools: List[Dict[str, Any]] = []
     disabled = set(disabled_tools)
-    for tool in list_tool_catalog():
-        tool_copy = dict(tool)
-        tool_copy["enabled"] = tool_copy["name"] not in disabled
-        tools.append(tool_copy)
 
-    widths = build_tool_table_widths(tools)
-    changed = False
+    def open_category_picker(cat_name: str) -> bool:
+        cat_tools: List[Dict[str, Any]] = []
+        for tool in list_tool_catalog():
+            if tool.get("category") == cat_name:
+                tool_copy = dict(tool)
+                tool_copy["enabled"] = tool_copy["name"] not in disabled
+                cat_tools.append(tool_copy)
 
-    def render_item(tool: Dict[str, Any], index: int, selected: bool = False) -> str:
-        return format_tool_entry(index + 1, tool, widths, selected=selected)
+        if not cat_tools:
+            return False
 
-    def toggle_tool(tool: Dict[str, Any], _: int) -> None:
-        nonlocal changed
-        name = str(tool.get("name", ""))
-        if bool(tool.get("enabled", True)):
-            disabled.add(name)
-            tool["enabled"] = False
-        else:
-            disabled.discard(name)
-            tool["enabled"] = True
-        changed = True
+        widths = build_tool_table_widths(cat_tools)
+        cat_changed = False
 
-    interactive_select(
-        title_text=title_text,
-        items=tools,
-        render_item=render_item,
-        header_lines=build_tool_table_header(widths),
-        footer_lines=[
-            "Press Space to toggle the highlighted tool.",
-            "Press Enter or Esc to close.",
-        ],
-        instructions="Use Up/Down, Space to toggle, Enter to close, Esc to cancel.",
-        on_space=toggle_tool,
-    )
+        def render_cat_item(tool: Dict[str, Any], index: int, selected: bool = False) -> str:
+            return format_tool_entry(index + 1, tool, widths, selected=selected)
+
+        def toggle_cat_tool(tool: Dict[str, Any], _: int) -> None:
+            nonlocal cat_changed
+            name = str(tool.get("name", ""))
+            if bool(tool.get("enabled", True)):
+                disabled.add(name)
+                tool["enabled"] = False
+            else:
+                disabled.discard(name)
+                tool["enabled"] = True
+            cat_changed = True
+
+        interactive_select(
+            title_text=f"Manage Tools -> {cat_name}",
+            items=cat_tools,
+            render_item=render_cat_item,
+            header_lines=build_tool_table_header(widths),
+            footer_lines=[
+                "Press Space to toggle the highlighted tool.",
+                "Press Enter or Esc to return to Category Menu.",
+            ],
+            instructions="Use Up/Down, Space to toggle, Enter/Esc to go back.",
+            on_space=toggle_cat_tool,
+        )
+        return cat_changed
+
+    overall_changed = False
+    while True:
+        categories = ["Code Modifications", "Inspection & File System", "Execution & Shell", "Control Flow"]
+        category_items: List[Dict[str, Any]] = []
+        for cat in categories:
+            cat_all = [t for t in list_tool_catalog() if t.get("category") == cat]
+            enabled_count = sum(1 for t in cat_all if t["name"] not in disabled)
+            category_items.append({
+                "_is_category": True,
+                "category": cat,
+                "enabled_count": enabled_count,
+                "total_count": len(cat_all),
+            })
+
+        def render_main_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
+            return format_tool_entry(index + 1, item, {}, selected=selected)
+
+        chosen_cat = interactive_select(
+            title_text=title_text,
+            items=category_items,
+            render_item=render_main_item,
+            header_lines=["  Select a Category to manage its tools:"],
+            footer_lines=["Press Enter to open category. Press Esc or Q to finish."],
+            instructions="Use Up/Down, Enter to select category, Esc to close.",
+        )
+        if not chosen_cat:
+            break
+
+        cat_name = str(chosen_cat.get("category", ""))
+        if cat_name:
+            if open_category_picker(cat_name):
+                overall_changed = True
+
     disabled_tools.clear()
     disabled_tools.update(disabled)
-    return changed
+    return overall_changed
 
 
 def test_all_models(client: GeminiClient, models: List[Dict[str, Any]]) -> List[str]:
