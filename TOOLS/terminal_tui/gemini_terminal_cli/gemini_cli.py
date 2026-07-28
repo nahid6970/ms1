@@ -2561,27 +2561,18 @@ def print_help() -> None:
         textwrap.dedent(
             """
             Commands:
-              /help                Show this message
-              /exit                Quit
-              /reset               Clear conversation history
-              /mm                  Open the model picker
-              /test                Test all models and hide failures
-              /api                 Open the API account picker
-              /loops <n>           Set max tool-call loops
-              /failover            Open the auto-failover picker
-              /failover ...        Control automatic API account failover directly
-              /tool                Open the tool manager and toggle tools with Space
+              /help                 Show this message
+              /exit                 Quit
+              /reset                Clear conversation history
+              /mm                   Open the model picker
+              /test                 Test all models and hide failures
+              /api                  Open the API account picker
+              /loops <n>            Set max tool-call loops
+              /failover             Open the auto-failover picker
+              /tool                 Open the tool manager and toggle tools with Space
               /system <text|file>   Replace system instruction or load it from a file
-              /save <file>         Save transcript JSON
-              /load <file>         Load transcript JSON
-
-            Tips:
-              - Prefix a prompt with @file to inject a file's contents into the request.
-              - Use /mm to pick a model with the arrow keys, or /test to test all models.
-              - Use /api to add or switch saved API accounts.
-              - Use /failover to open the failover picker, or pass on/off/session/default directly.
-              - Use /tool to see and toggle the implemented local tools.
-              - Use /loops to raise or lower the tool-call depth.
+              /save <file>          Save transcript JSON
+              /load <file>          Load transcript JSON
             """
         ).strip()
     )
