@@ -62,6 +62,7 @@ try:
     from prompt_toolkit.history import FileHistory
     from prompt_toolkit.history import InMemoryHistory
     from prompt_toolkit.shortcuts import CompleteStyle
+    from prompt_toolkit.styles import Style
 except Exception:
     pt_prompt = None
     AutoSuggestFromHistory = None
@@ -71,6 +72,7 @@ except Exception:
     FileHistory = None
     InMemoryHistory = None
     CompleteStyle = None
+    Style = None
 
 
 def _now_stamp() -> str:
@@ -271,10 +273,16 @@ def read_dynamic_prompt(
     cwd: Optional[Path] = None,
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
-    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None:
+    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
         # Use InMemoryHistory with our managed deduplicated list for strict control
         prompt_history = InMemoryHistory(history or [])
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
+        
+        # Style to make user input text red
+        user_style = Style.from_dict({
+            '': 'ansired', 
+        })
+        
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
             history=prompt_history,
@@ -285,6 +293,7 @@ def read_dynamic_prompt(
             mouse_support=False,
             wrap_lines=True,
             refresh_interval=0.25,
+            style=user_style,
         )
 
     return input(prompt_provider())
