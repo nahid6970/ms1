@@ -2888,7 +2888,12 @@ def main() -> int:
             scope = "project setting"
         else:
             scope = "global default"
-        return f"Auto failover: {format_auto_failover_status()} ({scope})"
+        
+        status = format_auto_failover_status()
+        if status == "off":
+            status = _ansi_wrap(status, "31") # Red
+            
+        return f"Auto failover: {status} ({scope})"
 
     if args.no_tools:
         disabled_tools = set(all_tool_names)
@@ -2945,7 +2950,6 @@ def main() -> int:
     title("Gemini Terminal CLI")
     info(f"Project root: {cwd}")
     info(failover_status_line())
-    info("Type / for commands or @ for file suggestions.")
 
     model_cache: List[Dict[str, Any]] = []
 
