@@ -1787,6 +1787,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "disabled_tools": [str(item) for item in disabled_tools],
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": last_api_account,
+            "system_instruction": str(data.get("system_instruction") or DEFAULT_SYSTEM),
             "tool_loop_limit": int(data.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS),
             "auto_failover_default": normalize_bool(data.get("auto_failover_default", False)),
             "auto_failover_projects": {
@@ -1821,6 +1822,7 @@ def save_model_prefs(
     disabled_tools: List[str],
     last_model: str,
     last_api_account: str,
+    system_instruction: str,
     tool_loop_limit: int,
     auto_failover_default: bool = False,
     auto_failover_projects: Optional[Dict[str, bool]] = None,
@@ -1839,6 +1841,7 @@ def save_model_prefs(
         "disabled_tools": sorted(set(disabled_tools)),
         "last_model": last_model,
         "last_api_account": last_api_account,
+        "system_instruction": system_instruction,
         "tool_loop_limit": int(tool_loop_limit),
         "auto_failover_default": bool(auto_failover_default),
         "auto_failover_projects": dict(sorted((str(k), bool(v)) for k, v in (auto_failover_projects or {}).items())),
@@ -2713,13 +2716,18 @@ def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
     )
 
 
-def resolve_system_instruction_input(text: str, cwd: Path) -> str:
+def resolve_system_instruction_input(text: str, cwd: Path) -> tuple[str, bool]:
+    """Returns (content, was_file_found)."""
+    # Detect if user is likely trying to provide a path
+    is_path_like = any(c in text for c in "/\\") or text.endswith((".md", ".txt"))
     candidate = resolve_path(text, cwd)
+    
     if candidate.exists() and candidate.is_file():
         content = read_file(candidate)
         if not content.startswith("Error:"):
-            return content
-    return text
+            return content, True
+            
+    return text, not is_path_like
 
 
 def main() -> int:
@@ -2752,6 +2760,7 @@ def main() -> int:
     disabled_tools: Set[str] = set(str(item) for item in model_prefs.get("disabled_tools", []))
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
+    saved_system_instruction = str(model_prefs.get("system_instruction") or DEFAULT_SYSTEM)
     tool_loop_limit = int(model_prefs.get("tool_loop_limit") or DEFAULT_TOOL_LOOPS)
     auto_failover_default = normalize_bool(model_prefs.get("auto_failover_default", False))
     auto_failover_projects_raw = model_prefs.get("auto_failover_projects", {})
@@ -2915,7 +2924,7 @@ def main() -> int:
         return 1
 
     client = GeminiClient(api_key, active_model)
-    system_instruction = args.system
+    system_instruction = saved_system_instruction if args.system == DEFAULT_SYSTEM else args.system
     contents: List[Dict[str, Any]] = []
     model_cooldowns: Dict[str, dt.datetime] = {}
 
@@ -3040,6 +3049,7 @@ def main() -> int:
             sorted(disabled_tools),
             client.model,
             account_name,
+            system_instruction,
             tool_loop_limit,
             auto_failover_default,
             auto_failover_projects,
@@ -3385,14 +3395,24 @@ def main() -> int:
                     continue
                 if command == "/system":
                     if remainder:
-                        system_instruction = resolve_system_instruction_input(remainder, cwd)
-                        loaded_path = resolve_path(remainder, cwd)
-                        if loaded_path.exists() and loaded_path.is_file():
-                            info(f"System instruction loaded from {loaded_path}")
+                        content, found = resolve_system_instruction_input(remainder, cwd)
+                        if not found:
+                            warn(f"Warning: File not found or path invalid: {remainder}")
+                            warn("The system instruction has been set to that literal text instead.")
+                        
+                        system_instruction = content
+                        persist_selection()
+                        
+                        if found:
+                            info(f"System instruction loaded from file.")
                         else:
-                            info("System instruction replaced.")
+                            info("System instruction updated with provided text.")
                     else:
-                        warn("Usage: /system <text|file>")
+                        info("Current System Instruction:")
+                        print(_ansi_wrap("-" * 40, "90"))
+                        print(system_instruction)
+                        print(_ansi_wrap("-" * 40, "90"))
+                        print("Usage: /system <text|file> to update.")
                     continue
                 if command == "/save":
                     if remainder:
