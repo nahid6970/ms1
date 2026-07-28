@@ -3154,72 +3154,77 @@ def main() -> int:
         contents.append(make_user_content(user_text))
         failed_accounts: Set[str] = set()
 
-        for _ in range(tool_loop_limit):
-            try:
-                response = client.generate(
-                    contents=contents,
-                    system_instruction=system_instruction,
-                    tool_names=enabled_tool_names(disabled_tools),
-                    temperature=args.temperature,
-                    max_output_tokens=args.max_output_tokens,
-                )
-                record_model_usage(client.model)
-            except RuntimeError as exc:
-                msg = str(exc).strip()
-                error(msg)
-                retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
-                if retry_match:
-                    model_cooldowns[client.model] = _now() + dt.timedelta(minutes=1)
-                    warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
-                if active_api_account:
-                    failed_accounts.add(active_api_account)
-                if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
-                    warn(f"Retrying the same request with {active_api_account}.")
-                    continue
-                if retryable_account_error(msg):
-                    warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
+        try:
+            for _ in range(tool_loop_limit):
+                try:
+                    response = client.generate(
+                        contents=contents,
+                        system_instruction=system_instruction,
+                        tool_names=enabled_tool_names(disabled_tools),
+                        temperature=args.temperature,
+                        max_output_tokens=args.max_output_tokens,
+                    )
+                    record_model_usage(client.model)
+                except RuntimeError as exc:
+                    msg = str(exc).strip()
+                    error(msg)
+                    retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
+                    if retry_match:
+                        model_cooldowns[client.model] = _now() + dt.timedelta(minutes=1)
+                        warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
+                    if active_api_account:
+                        failed_accounts.add(active_api_account)
+                    if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
+                        warn(f"Retrying the same request with {active_api_account}.")
+                        continue
+                    if retryable_account_error(msg):
+                        warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
+                        write_notification()
+                    return
+                candidates = response.get("candidates", [])
+                if not candidates:
+                    error("Gemini returned no candidates.")
                     write_notification()
-                return
-            candidates = response.get("candidates", [])
-            if not candidates:
-                error("Gemini returned no candidates.")
-                write_notification()
-                return
+                    return
 
-            content_obj = candidates[0].get("content", {})
-            parts = content_obj.get("parts", [])
-            text = render_model_parts(parts)
-            if text:
-                print()
-                print(text)
-                print()
+                content_obj = candidates[0].get("content", {})
+                parts = content_obj.get("parts", [])
+                text = render_model_parts(parts)
+                if text:
+                    print()
+                    print(text)
+                    print()
 
-            function_calls = extract_function_calls(parts)
-            if not function_calls:
+                function_calls = extract_function_calls(parts)
+                if not function_calls:
+                    contents.append(content_obj)
+                    write_notification()
+                    return
+
                 contents.append(content_obj)
-                write_notification()
-                return
-
-            contents.append(content_obj)
-            responses: List[Dict[str, Any]] = []
-            for function_call in function_calls:
-                name = function_call.get("name", "")
-                call_args = function_call.get("args", {}) or {}
-                info(format_tool_call(name, call_args))
-                result = execute_tool(name, call_args, cwd, ensure_tavily_accounts_loaded())
-                responses.append(
-                    {
-                        "functionResponse": {
-                            "name": name,
-                            "response": {"result": result},
+                responses: List[Dict[str, Any]] = []
+                for function_call in function_calls:
+                    name = function_call.get("name", "")
+                    call_args = function_call.get("args", {}) or {}
+                    info(format_tool_call(name, call_args))
+                    result = execute_tool(name, call_args, cwd, ensure_tavily_accounts_loaded())
+                    responses.append(
+                        {
+                            "functionResponse": {
+                                "name": name,
+                                "response": {"result": result},
+                            }
                         }
-                    }
-                )
-                info(format_tool_result(result))
+                    )
+                    info(format_tool_result(result))
 
-            contents.append({"role": "user", "parts": responses})
+                contents.append({"role": "user", "parts": responses})
 
-        warn(f"Reached the maximum tool-call loop depth ({tool_loop_limit}).")
+            warn(f"Reached the maximum tool-call loop depth ({tool_loop_limit}).")
+        except KeyboardInterrupt:
+            print()
+            warn("Interrupted by user.")
+        
         write_notification()
 
     if args.prompt:
