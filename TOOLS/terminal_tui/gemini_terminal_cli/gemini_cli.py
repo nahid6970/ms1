@@ -57,6 +57,7 @@ except Exception:
 try:
     from prompt_toolkit import prompt as pt_prompt
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+    from prompt_toolkit.completion import Completer, Completion
     from prompt_toolkit.formatted_text import ANSI
     from prompt_toolkit.history import FileHistory
     from prompt_toolkit.history import InMemoryHistory
@@ -64,6 +65,8 @@ try:
 except Exception:
     pt_prompt = None
     AutoSuggestFromHistory = None
+    Completer = None
+    Completion = None
     ANSI = None
     FileHistory = None
     InMemoryHistory = None
@@ -140,18 +143,126 @@ def append_prompt_history(user_input: str, memory_history: List[str], max_items:
         pass
 
 
-def read_dynamic_prompt(prompt_provider: Callable[[], str], history: Optional[List[str]] = None) -> str:
+if Completer is not None:
+    class GeminiCliCompleter(Completer):
+        SLASH_COMMANDS = [
+            ("/help", "Show available commands"),
+            ("/exit", "Quit CLI"),
+            ("/quit", "Quit CLI"),
+            ("/reset", "Clear conversation history"),
+            ("/mm", "Open model picker / switch model"),
+            ("/test", "Test all models and hide failures"),
+            ("/api", "Open API account picker"),
+            ("/loops", "Set max tool-call loops"),
+            ("/failover", "Open auto-failover picker"),
+            ("/tool", "Open tool manager"),
+            ("/system", "Replace or load system instruction"),
+            ("/save", "Save transcript JSON"),
+            ("/load", "Load transcript JSON"),
+        ]
+
+        def __init__(self, cwd: Optional[Path] = None):
+            self.cwd = Path(cwd) if cwd else Path.cwd()
+
+        def _get_path_completions(self, raw_path: str) -> List[tuple[str, str, str]]:
+            raw_path = raw_path.replace("\\", "/")
+            if "/" in raw_path:
+                dir_part, _, search_part = raw_path.rpartition("/")
+            else:
+                dir_part, search_part = "", raw_path
+
+            if dir_part:
+                if dir_part == "~" or dir_part.startswith("~/"):
+                    target_dir = Path(dir_part).expanduser()
+                else:
+                    target_dir = self.cwd / dir_part
+            else:
+                target_dir = self.cwd
+
+            if not target_dir.exists() or not target_dir.is_dir():
+                return []
+
+            results: List[tuple[str, str, str]] = []
+            try:
+                for entry in sorted(target_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
+                    name = entry.name
+                    if name.startswith(".") and not search_part.startswith("."):
+                        continue
+                    if name == "__pycache__" and not search_part.startswith("__"):
+                        continue
+                    if not search_part or search_part.lower() in name.lower():
+                        is_dir = entry.is_dir()
+                        item_name = name + ("/" if is_dir else "")
+                        full_rel = f"{dir_part}/{item_name}" if dir_part else item_name
+                        meta = "Directory" if is_dir else "File"
+                        results.append((full_rel, item_name, meta))
+            except Exception:
+                pass
+            return results
+
+        def get_completions(self, document, complete_event):
+            text = document.text_before_cursor
+
+            # 1. Slash commands at start of line
+            if text.startswith("/"):
+                if " " not in text:
+                    for cmd, desc in self.SLASH_COMMANDS:
+                        if cmd.lower().startswith(text.lower()) or text.lower() in cmd.lower():
+                            yield Completion(
+                                cmd,
+                                start_position=-len(text),
+                                display=cmd,
+                                display_meta=desc,
+                            )
+                    return
+                else:
+                    cmd_part, _, arg_part = text.partition(" ")
+                    cmd_lower = cmd_part.lower()
+                    if cmd_lower in {"/save", "/load", "/system"}:
+                        for full_rel, display_name, meta in self._get_path_completions(arg_part):
+                            yield Completion(
+                                full_rel,
+                                start_position=-len(arg_part),
+                                display=display_name,
+                                display_meta=meta,
+                            )
+                        return
+
+            # 2. @ file and folder completions anywhere in the line
+            last_at = text.rfind("@")
+            if last_at != -1:
+                after_at = text[last_at + 1 :]
+                if " " not in after_at and "\t" not in after_at:
+                    for full_rel, display_name, meta in self._get_path_completions(after_at):
+                        yield Completion(
+                            full_rel,
+                            start_position=-len(after_at),
+                            display=display_name,
+                            display_meta=meta,
+                        )
+else:
+    GeminiCliCompleter = None
+
+
+def read_dynamic_prompt(
+    prompt_provider: Callable[[], str],
+    history: Optional[List[str]] = None,
+    cwd: Optional[Path] = None,
+) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None:
         if FileHistory is not None:
             prompt_history = FileHistory(str(PROMPT_HISTORY_FILE))
         else:
             prompt_history = InMemoryHistory(history or [])
+        completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
             history=prompt_history,
-            auto_suggest=AutoSuggestFromHistory(),
-            complete_style=CompleteStyle.READLINE_LIKE,
+            auto_suggest=AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
+            completer=completer,
+            complete_while_typing=True,
+            complete_style=CompleteStyle.COLUMN,
             mouse_support=False,
             wrap_lines=True,
             refresh_interval=0.25,
@@ -2825,7 +2936,7 @@ def main() -> int:
     title("Gemini Terminal CLI")
     info(f"Project root: {cwd}")
     info(failover_status_line())
-    print_help()
+    info("Type / for commands or @ for file suggestions.")
 
     model_cache: List[Dict[str, Any]] = []
 
@@ -3107,7 +3218,7 @@ def main() -> int:
         command_history: List[str] = load_prompt_history()
         while True:
             try:
-                user_input = read_dynamic_prompt(prompt_text, command_history).strip()
+                user_input = read_dynamic_prompt(prompt_text, command_history, cwd=cwd).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
