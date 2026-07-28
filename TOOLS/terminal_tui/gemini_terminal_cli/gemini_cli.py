@@ -96,6 +96,11 @@ def _ansi_wrap(text: str, code: str) -> str:
     return f"\033[{code}m{text}\033[0m"
 
 
+def _visible_len(text: str) -> int:
+    """Calculate the visible length of a string, ignoring ANSI escape codes."""
+    return len(re.sub(r'\x1b\[[0-9;]*[mK]', '', text))
+
+
 def _format_seconds(seconds: float) -> str:
     total = max(0, int(seconds + 0.999))
     minutes, secs = divmod(total, 60)
@@ -1469,55 +1474,124 @@ def _render_inline_markdown(text: str) -> str:
 def render_markdown_text(text: str) -> str:
     lines: List[str] = []
     in_code_block = False
-    for raw_line in text.splitlines():
-        line = raw_line.rstrip()
+    raw_lines = text.splitlines()
+    idx = 0
+    
+    while idx < len(raw_lines):
+        line = raw_lines[idx]
+        stripped_line = line.strip()
+        
+        # 1. Code Block Handling
         fence = re.match(r"^\s*```(\w+)?\s*$", line)
         if fence:
             in_code_block = not in_code_block
-            language = fence.group(1) or ""
-            fence_label = f"```{language}" if language else "```"
-            lines.append(_style_text(fence_label, "90"))
+            lines.append(_style_text(line, "90"))
+            idx += 1
             continue
         if in_code_block:
-            lines.append(f"  {raw_line}")
-            continue
-        if not line.strip():
-            lines.append("")
+            lines.append(f"  {line}")
+            idx += 1
             continue
 
-        heading = re.match(r"^(#{1,6})\s+(.*)$", line)
-        if heading:
-            level = len(heading.group(1))
-            content = _render_inline_markdown(heading.group(2).strip())
-            if level <= 2:
-                lines.append(_style_text(content, "1;35"))
-            elif level == 3:
-                lines.append(_style_text(content, "1;36"))
+        # 2. Table Handling (Lookahead for blocks containing '|')
+        if not in_code_block and "|" in stripped_line:
+            table_rows = []
+            while idx < len(raw_lines) and "|" in raw_lines[idx]:
+                table_rows.append(raw_lines[idx])
+                idx += 1
+            
+            if len(table_rows) >= 2:
+                # Parse cells and find max widths
+                grid = []
+                for row in table_rows:
+                    row_content = row.strip()
+                    if row_content.startswith("|"): row_content = row_content[1:]
+                    if row_content.endswith("|"): row_content = row_content[:-1]
+                    cells = [c.strip() for c in row_content.split("|")]
+                    # Identify if this is a separator row
+                    is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells)
+                    
+                    rendered_cells = []
+                    if not is_sep:
+                        rendered_cells = [_render_inline_markdown(c) for c in cells]
+                    
+                    grid.append({
+                        "cells": cells,
+                        "rendered": rendered_cells,
+                        "is_sep": is_sep
+                    })
+                
+                col_count = max(len(row["cells"]) for row in grid)
+                col_widths = [0] * col_count
+                
+                # Calculate widths based on visible length of rendered content
+                for row in grid:
+                    if row["is_sep"]: continue
+                    for c_idx, rendered_cell in enumerate(row["rendered"]):
+                        if c_idx < col_count:
+                            v_len = _visible_len(rendered_cell)
+                            col_widths[c_idx] = max(col_widths[c_idx], v_len)
+
+                border_color = "36" # Cyan
+                def get_sep(left, mid, right, dash):
+                    return _style_text(left + mid.join(dash * (w + 2) for w in col_widths) + right, border_color)
+
+                # 1. Top border
+                lines.append(get_sep("┌", "┬", "┐", "─"))
+
+                for r_idx, row in enumerate(grid):
+                    if row["is_sep"]:
+                        # 2. Header-to-Body separator
+                        lines.append(get_sep("├", "┼", "┤", "─"))
+                    else:
+                        # 3. Content Row
+                        styled_cells = []
+                        for c_idx in range(col_count):
+                            rendered_cell = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
+                            width = col_widths[c_idx]
+                            v_len = _visible_len(rendered_cell)
+                            padding = " " * (width - v_len)
+                            styled_cells.append(f" {rendered_cell}{padding} ")
+                        
+                        v_bar = _style_text("│", border_color)
+                        lines.append(f"{v_bar}{v_bar.join(styled_cells)}{v_bar}")
+                        
+                        # 4. Row-to-Row separator
+                        if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
+                             lines.append(get_sep("├", "┼", "┤", "─"))
+
+                # 5. Bottom border
+                lines.append(get_sep("└", "┴", "┘", "─"))
+                continue
             else:
-                lines.append(_style_text(content, "1"))
-            continue
+                # If only one line with '|', process it as a single row below
+                line = table_rows[0]
+                stripped_line = line.strip()
 
-        bullet = re.match(r"^\s*[-*+]\s+(.*)$", line)
-        if bullet:
-            lines.append(f"• {_render_inline_markdown(bullet.group(1))}")
-            continue
-
-        ordered = re.match(r"^\s*(\d+)\.\s+(.*)$", line)
-        if ordered:
-            lines.append(f"{ordered.group(1)}. {_render_inline_markdown(ordered.group(2))}")
-            continue
-
-        quote = re.match(r"^\s*>\s?(.*)$", line)
-        if quote:
-            lines.append(f"{_style_text('> ', '90')}{_render_inline_markdown(quote.group(1))}")
-            continue
-
-        horizontal_rule = re.match(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$", line)
-        if horizontal_rule:
+        # 3. Standard Markdown Elements
+        if not stripped_line:
+            lines.append("")
+        elif stripped_line.startswith("#"):
+            heading = re.match(r"^(#{1,6})\s+(.*)$", stripped_line)
+            if heading:
+                level = len(heading.group(1))
+                content = _render_inline_markdown(heading.group(2))
+                color = "1;35" if level <= 2 else ("1;36" if level == 3 else "1")
+                lines.append(_style_text(content, color))
+            else:
+                lines.append(_render_inline_markdown(line))
+        elif re.match(r"^\s*[-*+]\s+", line):
+            lines.append(f"• {_render_inline_markdown(stripped_line.lstrip('-*+ '))}")
+        elif re.match(r"^\s*\d+\.\s+", line):
+            lines.append(_render_inline_markdown(line))
+        elif stripped_line.startswith(">"):
+            lines.append(f"{_style_text('> ', '90')}{_render_inline_markdown(stripped_line[1:].strip())}")
+        elif re.match(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$", stripped_line):
             lines.append(_style_text("─" * 32, "90"))
-            continue
-
-        lines.append(_render_inline_markdown(line))
+        else:
+            lines.append(_render_inline_markdown(line))
+        
+        idx += 1
 
     return "\n".join(lines).strip()
 
