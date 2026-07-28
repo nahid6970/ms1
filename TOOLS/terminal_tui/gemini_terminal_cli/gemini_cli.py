@@ -2832,12 +2832,8 @@ def main() -> int:
             disabled_tools = set(all_tool_names)
 
     title("Gemini Terminal CLI")
-    info(f"Model: {client.model}")
-    if active_api_account:
-        info(f"API account: {active_api_account}")
     info(f"Project root: {cwd}")
     info(failover_status_line())
-    info(f"Tools on: {len(enabled_tool_names(disabled_tools))}/{len(all_tool_names)}")
     print_help()
 
     model_cache: List[Dict[str, Any]] = []
@@ -2923,7 +2919,8 @@ def main() -> int:
 
     def prompt_text() -> str:
         prune_model_cooldowns()
-        prefix = f"gemini-{short_model_label(client.model)}"
+        acc = active_api_account if active_api_account else "api"
+        prefix = f"{acc} : {short_model_label(client.model)}"
         cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
