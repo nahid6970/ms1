@@ -1,86 +1,28 @@
-﻿# qBittorrent Theme Setup Guide (AI Agent SOP)
+﻿# Windows Customization & qBittorrent Setup Guide (AI Agent SOP)
 
-This guide documents the exact procedure to detect, download, configure, and apply custom Qt6 `.qbtheme` files for qBittorrent on Windows (supporting both standard AppData and Scoop installations).
-
----
-
-## 📌 Environment Detection
-
-1. **Config File Paths**:
-   - **Scoop Installation**: `C:\Users\nahid\scoop\persist\qbittorrent\profile\qBittorrent\config\qBittorrent.ini`
-   - **Standard AppData**: `%APPDATA%\qBittorrent\qBittorrent.ini`
-
-2. **Executable Paths**:
-   - **Scoop**: `C:\Users\nahid\scoop\shims\qbittorrent.exe`
-   - **Standard**: `C:\Program Files\qBittorrent\qbittorrent.exe`
-
-3. **Themes Storage Location**:
-   - `C:\Users\nahid\scoop\persist\qbittorrent\themes\`
+This guide documents the exact procedures to configure qBittorrent dark themes, disable Windows transparency/glassy effects, and disable Windows 11 rounded window corners permanently at startup.
 
 ---
 
-## 📦 Theme Sources (Qt6 / qBittorrent v5.x+)
+## 🎨 1. qBittorrent Dark Theme Setup
 
-Direct GitHub Releases containing compiled `.qbtheme` bundle files:
-- **Catppuccin** (`mocha`, `macchiato`, `frappe`):  
-  `https://github.com/catppuccin/qbittorrent/releases/latest`
-- **MahdiMirzadeh** (`dracula`, `dark`, `gruvbox-dark`, `solarized-dark`):  
-  `https://github.com/MahdiMirzadeh/qbittorrent/releases/latest`
-- **JagannathArjun** (`mumble-dark`, `breeze-dark`):  
-  `https://github.com/jagannatharjun/qbt-theme/releases/latest`
+### Environment Detection
+- **Scoop Config Path**: `C:\Users\nahid\scoop\persist\qbittorrent\profile\qBittorrent\config\qBittorrent.ini`
+- **Themes Folder**: `C:\Users\nahid\scoop\persist\qbittorrent\themes\`
+- **Executable**: `C:\Users\nahid\scoop\shims\qbittorrent.exe`
 
----
+### Pre-Downloaded Qt6 Dark Themes
+- `catppuccin-mocha.qbtheme` *(Currently Active)*
+- `catppuccin-macchiato.qbtheme`
+- `dracula.qbtheme`
+- `dark.qbtheme` *(Minimal Dark)*
+- `gruvbox-dark.qbtheme`
+- `solarized-dark.qbtheme`
+- `breeze-dark.qbtheme`
+- `mumble-dark.qbtheme`
 
-## ⚙️ Automated Execution Workflow
-
-When modifying qBittorrent configuration via script, always terminate the running process first. Otherwise, qBittorrent will overwrite `qBittorrent.ini` upon exit.
-
-```powershell
-# 1. Gracefully terminate qBittorrent
-Stop-Process -Name "qbittorrent" -Force -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 1
-
-# 2. Ensure themes directory exists
-$themeDir = "C:\Users\nahid\scoop\persist\qbittorrent\themes"
-if (!(Test-Path $themeDir)) { New-Item -ItemType Directory -Path $themeDir | Out-Null }
-
-# 3. Download themes if missing (e.g. Catppuccin Mocha)
-$mochaUrl = "https://github.com/catppuccin/qbittorrent/releases/download/v2.0.1/catppuccin-mocha.qbtheme"
-$mochaPath = Join-Path $themeDir "catppuccin-mocha.qbtheme"
-if (!(Test-Path $mochaPath)) {
-    Invoke-WebRequest -Uri $mochaUrl -OutFile $mochaPath -UserAgent "Mozilla/5.0"
-}
-
-# 4. Update qBittorrent.ini
-$iniPath = "C:\Users\nahid\scoop\persist\qbittorrent\profile\qBittorrent\config\qBittorrent.ini"
-$content = Get-Content $iniPath
-$cleanContent = $content | Where-Object { 
-    $_ -notmatch "General\\UseCustomUITheme=" -and $_ -notmatch "General\\CustomUIThemePath=" 
-}
-
-$prefIndex = $cleanContent.IndexOf("[Preferences]")
-if ($prefIndex -ge 0) {
-    $formattedPath = "C:/Users/nahid/scoop/persist/qbittorrent/themes/catppuccin-mocha.qbtheme"
-    $firstPart = $cleanContent[0..$prefIndex]
-    $secondPart = $cleanContent[($prefIndex + 1)..($cleanContent.Count - 1)]
-    $inserted = @(
-        "General\UseCustomUITheme=true",
-        "General\CustomUIThemePath=$formattedPath"
-    )
-    $finalContent = $firstPart + $inserted + $secondPart
-    $finalContent | Set-Content $iniPath -Encoding UTF8
-}
-
-# 5. Relaunch qBittorrent
-Start-Process "C:\Users\nahid\scoop\shims\qbittorrent.exe"
-```
-
----
-
-## 🛠️ INI Settings Reference
-
+### INI Configuration Reference
 In `qBittorrent.ini`, under the `[Preferences]` section:
-
 ```ini
 [Preferences]
 General\UseCustomUITheme=true
@@ -89,11 +31,31 @@ General\CustomUIThemePath=C:/Users/nahid/scoop/persist/qbittorrent/themes/catppu
 
 ---
 
-## 🖥️ Manual GUI Switch Method
+## 🪟 2. Windows Transparency / Glassy Effects Disabling
 
-1. Open **qBittorrent**.
-2. Go to **Tools** > **Options** (`Alt + O`).
-3. Navigate to **Behavior** > **Interface**.
-4. Check **Use custom UI theme**.
-5. Click `...` and pick any file from `C:\Users\nahid\scoop\persist\qbittorrent\themes\`.
-6. Click **Apply** and restart qBittorrent.
+Disabling transparency turns off the glassy/acrylic background blur on the taskbar, Start Menu, settings, and window borders, saving GPU/CPU resources (`dwm.exe`).
+
+### Registry Setting
+- **Key Path**: `HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
+- **Value Name**: `EnableTransparency`
+- **Value**: `0` (Disabled) / `1` (Enabled)
+
+### PowerShell Command
+```powershell
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0
+```
+
+---
+
+## 📐 3. Windows 11 Disable Rounded Window Corners (Startup Task)
+
+Windows 11 hardcodes rounded window corners in `uDWM.dll`. The open-source utility `win11-toggle-rounded-corners` memory-patches `dwm.exe` to enforce square window corners.
+
+### Installer Location
+- Downloaded installer: `C:\Users\nahid\Downloads\win11-toggle-rounded-corners-setup.exe`
+- GitHub Repository: `https://github.com/rich-ayr/win11-toggle-rounded-corners`
+
+### Setup & Startup Persistence
+1. Run `win11-toggle-rounded-corners-setup.exe`.
+2. Completing the installer registers a Windows Scheduled Task (`Win11ToggleRoundedCorners`) that runs automatically at Windows logon/startup with highest privileges.
+3. This ensures square window corners persist across system reboots and logons automatically.
