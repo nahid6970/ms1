@@ -113,31 +113,52 @@ def error(text: str) -> None:
 
 
 def load_prompt_history(max_items: int = 200) -> List[str]:
+    """Load history, deduplicating globally and stripping legacy prefixes."""
     try:
         if not PROMPT_HISTORY_FILE.exists():
             return []
+        
+        raw_lines = PROMPT_HISTORY_FILE.read_text(encoding="utf-8", errors="replace").splitlines()
         items: List[str] = []
-        for line in PROMPT_HISTORY_FILE.read_text(encoding="utf-8", errors="replace").splitlines():
+        seen = set()
+        
+        # Process from newest to oldest to preserve most recent entries
+        for line in reversed(raw_lines):
             value = line.strip()
-            if value and (not items or items[-1] != value):
+            # Clean legacy prefixes if they exist (e.g. from external logs)
+            if value.startswith('+'):
+                value = value[1:].strip()
+            # Skip comments and empty lines
+            if not value or value.startswith('#'):
+                continue
+                
+            if value not in seen:
                 items.append(value)
-        return items[-max_items:]
+                seen.add(value)
+            if len(items) >= max_items:
+                break
+        
+        return list(reversed(items))
     except Exception:
         return []
 
 
 def append_prompt_history(user_input: str, memory_history: List[str], max_items: int = 200) -> None:
+    """Add item to history, moving it to the end if it already exists, and sync to file."""
     value = user_input.strip()
     if not value:
         return
-    if memory_history and memory_history[-1] == value:
-        return
+        
+    # Global deduplication: remove existing instances to move this command to the end
+    if value in memory_history:
+        memory_history[:] = [item for item in memory_history if item != value]
+        
     memory_history.append(value)
     if len(memory_history) > max_items:
         del memory_history[:-max_items]
-    if FileHistory is not None:
-        return
+        
     try:
+        # Overwrite file to maintain a deduplicated and cleaned state
         PROMPT_HISTORY_FILE.write_text("\n".join(memory_history) + "\n", encoding="utf-8")
     except Exception:
         pass
@@ -251,10 +272,8 @@ def read_dynamic_prompt(
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None:
-        if FileHistory is not None:
-            prompt_history = FileHistory(str(PROMPT_HISTORY_FILE))
-        else:
-            prompt_history = InMemoryHistory(history or [])
+        # Use InMemoryHistory with our managed deduplicated list for strict control
+        prompt_history = InMemoryHistory(history or [])
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
