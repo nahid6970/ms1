@@ -2636,7 +2636,8 @@ class StatusBar(QMainWindow):
         
         def update_helium_style():
             active = is_incognito_active()
-            color = CP_CYAN if active else CP_RED
+            # Reversed: Red when active, Cyan when inactive
+            color = CP_RED if active else CP_CYAN
             text = "\udb81\udd62"
             helium_toggle.setText(text)
             helium_toggle.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; margin-left: 2px; margin-right: 1px;")
