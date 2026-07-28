@@ -81,52 +81,77 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file
-- `/tool` - open the tool manager; use Space to toggle tools on or off
+- `/tool` - open the categorized tool manager; browse by category, toggle with Space
 - `/save <file>` - write transcript JSON
 - `/load <file>` - load transcript JSON
 
-## Local tools
+## Local Tools
 
-The CLI exposes only local, standard-library tools:
-- `read_file`
-- `write_file`
-- `replace_file`
-- `delete_file`
-- `list_directory`
-- `search_file`
-- `search_web`
-- `search_tavily`
-- `replace_block`
-- `smart_replace_block`
-- `replace_lines`
-- `insert_after`
-- `delete_block`
-- `apply_patch`
-- `run_shell_command`
-- `run_powershell`
-- `get_system_info`
-- `request_follow_up`
+Tool definitions are stored in **`tools.json`** — an editable JSON array. Each entry has:
+- `name` — tool function name
+- `category` — grouping shown in `/tool` menu
+- `rating` — short advice shown in the info footer
+- `description` — detailed explanation shown when selected
 
-`apply_patch` is the preferred editing tool for larger code changes. It accepts a standard unified diff with `---`/`+++` file headers and `@@` hunks, supports a ±50 line fuzzy search window with normalized whitespace matching if line numbers drift, and writes the touched files. It can be toggled from `/tool` like every other local tool.
-When an `apply_patch` call is shown in the terminal, removed diff lines render red and added diff lines render green.
+The `/tool` menu loads categories dynamically from `tools.json`. Adding a new category in the JSON will auto-create a new section in the menu.
 
-`replace_lines` allows replacing exact 1-indexed line ranges in a file directly, while `smart_replace_block` provides fuzzy fallback matching for line endings (`\r\n` vs `\n`) and trailing whitespace.
+### Tool Categories
 
-`run_powershell` is the preferred inspection and command tool on Windows. It runs commands through `powershell.exe -NoProfile`, so the model can use commands such as `rg`, `Get-Content`, `git status`, and test commands before choosing an edit. For literal code searches with `Select-String`, prefer `-SimpleMatch` and single-quoted patterns, for example `Select-String -SimpleMatch 'preview.contentEditable = "true";'`.
-- REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts; the file is ignored by Git.
-- The CLI restores the last-used API account and model on startup when they have been saved.
-- `/failover` opens an interactive picker for the project, session, and global failover scopes.
-- Auto failover only retries retryable quota/rate-limit errors and walks saved API accounts in circular order, skipping accounts already tried in the same turn.
-- `/failover on` and `/failover off` store a project-specific override in `model_prefs.json` using the current `--project-root`.
-- `/failover session on` and `/failover session off` only affect the current process.
-- `/failover default on` and `/failover default off` change the global default used when no project override exists.
-- The `/api` picker shows a `Failovers` column with the number of times each Gemini account has been reached by automatic failover.
-- The `/mm` picker shows cumulative model `Uses` counts, not per-account counts.
-- `Uses` increments once for every successful Gemini generation call, including tool-loop calls and successful retries after API account failover.
+**Inspection & File System** (read-only, safe):
+- `read_file` — read file content (truncates at 12k chars)
+- `list_directory` — list dir contents
+- `get_system_info` — OS, Python version, cwd
+- `search_file` — case-insensitive text search in files/dirs
+- `search_web` — DuckDuckGo web search (no API key)
+- `search_tavily` — Tavily web search (uses saved API keys)
+- `delete_file` — delete file or directory (destructive)
+
+**Code Modifications** (editing tools, toggleable):
+- `fuzzy_apply_patch` — unified diff with ±50 line fuzzy search + normalized whitespace matching
+- `smart_replace_block` — find-and-replace with 3-tier fallback (exact → CRLF normalized → trailing whitespace stripped)
+- `replace_lines` — replace 1-indexed line range (lowest token cost)
+- `replace_block` — strict exact find-and-replace (no fallback)
+- `apply_patch` — strict unified diff (no fuzzy search)
+- `insert_after` — insert text after exact anchor string
+- `delete_block` — delete exact text block
+- `write_file` — overwrite entire file (high token cost)
+- `replace_file` — alias for write_file
+
+**Execution & Shell**:
+- `run_shell_command` — run shell commands via subprocess
+- `run_powershell` — run PowerShell commands (preferred on Windows)
+
+**Control Flow**:
+- `request_follow_up` — request another AI turn for multi-step work
+
+### Recommended Configuration
+
+For best balance of reliability and token efficiency, enable only:
+- ✅ `fuzzy_apply_patch` — resilient multi-file edits
+- ✅ `smart_replace_block` — targeted single-file edits with fuzzy fallback
+- ✅ `replace_lines` — low-token line-range replacement
+
+Keep disabled:
+- ❌ `apply_patch` — superseded by `fuzzy_apply_patch`
+- ❌ `replace_block` — superseded by `smart_replace_block`
+- ❌ `write_file` / `replace_file` — full-file overwrite, wastes tokens
+
+### Tool State (on/off)
+
+Disabled tools are stored in `model_prefs.json` under the `disabled_tools` array. Only disabled tool names are listed; if a tool is absent from the array, it's enabled. You can edit this manually or use `/tool` in the REPL.
+
+## Notes
+
+- `run_powershell` runs through `powershell.exe -NoProfile`. Use for `rg`, `Get-Content`, `git status`, and tests before editing. For literal searches with `Select-String`, prefer `-SimpleMatch` and single-quoted patterns.
+- When an `apply_patch` or `fuzzy_apply_patch` call is shown in the terminal, removed diff lines render red and added diff lines render green.
+- REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts.
+- The CLI restores the last-used API account and model on startup when saved.
+- `/failover` opens an interactive picker for project, session, and global failover scopes.
+- Auto failover retries retryable quota/rate-limit errors, walking saved API accounts in circular order.
+- `/failover on|off` stores a project-specific override; `/failover session on|off` is process-only; `/failover default on|off` sets the global default.
+- The `/api` picker shows a `Failovers` column per account.
+- The `/mm` picker shows cumulative model `Uses` counts.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
-- `--password` or `--api-password` can be used to avoid interactive password prompts for locked API accounts.
-- The password flag is reused for both loading and saving the locked API account file in that session.
-- `/test` is the current command for model testing; `/mm test` remains an alias.
-- `/tool` is the only local tool command; `Space` toggles the selected tool and disabled tools show `off` in red.
-- Enable `apply_patch` when you want efficient multi-file code edits; disable it when you want the model limited to smaller exact block operations.
-- Enable `run_powershell` for a Codex-like command-first workflow; command calls are displayed as `Ran <command>` in the transcript.
+- `--password` or `--api-password` avoids interactive password prompts for locked API accounts.
+- `/test` is the model testing command; `/mm test` remains an alias.
+
