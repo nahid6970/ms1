@@ -1471,12 +1471,43 @@ def _render_inline_markdown(text: str) -> str:
     return text
 
 
+def _wrap_visible(text: str, max_width: int) -> List[str]:
+    """Wraps text containing ANSI codes into multiple lines based on visible width."""
+    if _visible_len(text) <= max_width:
+        return [text]
+    
+    # Simple word wrap logic that preserves ANSI
+    words = text.split(' ')
+    lines = []
+    cur_line = []
+    cur_len = 0
+    
+    for word in words:
+        w_len = _visible_len(word)
+        if cur_len + w_len + (1 if cur_line else 0) <= max_width:
+            cur_line.append(word)
+            cur_len += w_len + (1 if cur_line else 0)
+        else:
+            if cur_line:
+                lines.append(' '.join(cur_line))
+            cur_line = [word]
+            cur_len = w_len
+    if cur_line:
+        lines.append(' '.join(cur_line))
+    return lines
+
 def render_markdown_text(text: str) -> str:
     lines: List[str] = []
     in_code_block = False
     raw_lines = text.splitlines()
     idx = 0
     
+    # Get terminal width for intelligent table wrapping
+    try:
+        term_width = os.get_terminal_size().columns
+    except Exception:
+        term_width = 100
+
     while idx < len(raw_lines):
         line = raw_lines[idx]
         stripped_line = line.strip()
@@ -1493,7 +1524,7 @@ def render_markdown_text(text: str) -> str:
             idx += 1
             continue
 
-        # 2. Table Handling (Lookahead for blocks containing '|')
+        # 2. Table Handling
         if not in_code_block and "|" in stripped_line:
             table_rows = []
             while idx < len(raw_lines) and "|" in raw_lines[idx]:
@@ -1501,70 +1532,70 @@ def render_markdown_text(text: str) -> str:
                 idx += 1
             
             if len(table_rows) >= 2:
-                # Parse cells and find max widths
+                # Parse
                 grid = []
                 for row in table_rows:
                     row_content = row.strip()
                     if row_content.startswith("|"): row_content = row_content[1:]
                     if row_content.endswith("|"): row_content = row_content[:-1]
                     cells = [c.strip() for c in row_content.split("|")]
-                    # Identify if this is a separator row
                     is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells)
-                    
-                    rendered_cells = []
-                    if not is_sep:
-                        rendered_cells = [_render_inline_markdown(c) for c in cells]
-                    
-                    grid.append({
-                        "cells": cells,
-                        "rendered": rendered_cells,
-                        "is_sep": is_sep
-                    })
+                    rendered = [_render_inline_markdown(c) for c in cells] if not is_sep else []
+                    grid.append({"rendered": rendered, "is_sep": is_sep})
                 
-                col_count = max(len(row["cells"]) for row in grid)
+                col_count = max(len(r["rendered"]) for r in grid if not r["is_sep"])
+                
+                # Calculate basic widths
                 col_widths = [0] * col_count
-                
-                # Calculate widths based on visible length of rendered content
                 for row in grid:
                     if row["is_sep"]: continue
-                    for c_idx, rendered_cell in enumerate(row["rendered"]):
+                    for c_idx, cell in enumerate(row["rendered"]):
                         if c_idx < col_count:
-                            v_len = _visible_len(rendered_cell)
-                            col_widths[c_idx] = max(col_widths[c_idx], v_len)
+                            col_widths[c_idx] = max(col_widths[c_idx], _visible_len(cell))
+                
+                # Constrain width if table exceeds terminal
+                total_w = sum(col_widths) + (col_count * 3) + 1
+                if total_w > term_width:
+                    shrink_factor = (term_width - 10) / total_w
+                    col_widths = [max(10, int(w * shrink_factor)) for w in col_widths]
 
-                border_color = "36" # Cyan
-                def get_sep(left, mid, right, dash):
-                    return _style_text(left + mid.join(dash * (w + 2) for w in col_widths) + right, border_color)
+                border_color = "36"
+                def get_sep_line(left, mid, right):
+                    return _style_text(left + mid.join("─" * (w + 2) for w in col_widths) + right, border_color)
 
-                # 1. Top border
-                lines.append(get_sep("┌", "┬", "┐", "─"))
+                lines.append(get_sep_line("┌", "┬", "┐"))
+                v_bar = _style_text("│", border_color)
 
                 for r_idx, row in enumerate(grid):
                     if row["is_sep"]:
-                        # 2. Header-to-Body separator
-                        lines.append(get_sep("├", "┼", "┤", "─"))
-                    else:
-                        # 3. Content Row
-                        styled_cells = []
+                        lines.append(get_sep_line("├", "┼", "┤"))
+                        continue
+                    
+                    # Multi-line cell wrapping
+                    wrapped_cells = []
+                    for c_idx in range(col_count):
+                        content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
+                        wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
+                    
+                    row_height = max(len(c) for c in wrapped_cells)
+                    
+                    # Render all lines of this row
+                    for sub_idx in range(row_height):
+                        line_parts = []
                         for c_idx in range(col_count):
-                            rendered_cell = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
-                            width = col_widths[c_idx]
-                            v_len = _visible_len(rendered_cell)
-                            padding = " " * (width - v_len)
-                            styled_cells.append(f" {rendered_cell}{padding} ")
-                        
-                        v_bar = _style_text("│", border_color)
-                        lines.append(f"{v_bar}{v_bar.join(styled_cells)}{v_bar}")
-                        
-                        # 4. Row-to-Row separator
-                        if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
-                             lines.append(get_sep("├", "┼", "┤", "─"))
+                            cell_lines = wrapped_cells[c_idx]
+                            cell_line = cell_lines[sub_idx] if sub_idx < len(cell_lines) else ""
+                            pad = " " * (col_widths[c_idx] - _visible_len(cell_line))
+                            line_parts.append(f" {cell_line}{pad} ")
+                        lines.append(f"{v_bar}{v_bar.join(line_parts)}{v_bar}")
 
-                # 5. Bottom border
-                lines.append(get_sep("└", "┴", "┘", "─"))
+                    # Separator between content rows
+                    if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
+                        lines.append(get_sep_line("├", "┼", "┤"))
+
+                lines.append(get_sep_line("└", "┴", "┘"))
                 continue
             else:
-                # If only one line with '|', process it as a single row below
                 line = table_rows[0]
                 stripped_line = line.strip()
 
