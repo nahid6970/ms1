@@ -3113,7 +3113,8 @@ def main() -> int:
                 break
 
             if not user_input:
-                continue
+                user_input = "continue"
+                info("continue")
             append_prompt_history(user_input, command_history)
             if user_input.startswith("/"):
                 command, _, remainder = user_input.partition(" ")
