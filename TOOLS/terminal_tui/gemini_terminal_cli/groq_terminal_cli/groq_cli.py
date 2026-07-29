@@ -106,6 +106,161 @@ def _clean_response_text(text: str) -> str:
         return ""
     # Remove everything between <think> and </think> tags, including the tags themselves
     return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+def _visible_len(text: str) -> int:
+    """Calculate the visible length of a string, ignoring ANSI escape codes."""
+    return len(re.sub(r'\x1b\[[0-9;]*[mK]', '', text))
+
+
+def _format_seconds(seconds: float) -> str:
+    total = max(0, int(seconds + 0.999))
+    minutes, secs = divmod(total, 60)
+    return f"{minutes:02d}:{secs:02d}"
+
+
+def _render_inline_markdown(text: str) -> str:
+    if not text:
+        return text
+
+    def replace_link(match: re.Match[str]) -> str:
+        label = match.group(1)
+        url = match.group(2)
+        if sys.stdout.isatty():
+            return f"{_ansi_wrap(label, '4;36')} ({url})"
+        return f"{label} ({url})"
+
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_link, text)
+    text = re.sub(r"(?<!\*)\*\*(.+?)\*\*(?!\*)", lambda m: _ansi_wrap(m.group(1), "1"), text)
+    text = re.sub(r"(?<!_)__(.+?)__(?!_)", lambda m: _ansi_wrap(m.group(1), "1"), text)
+    text = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", lambda m: _ansi_wrap(m.group(1), "3"), text)
+    text = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", lambda m: _ansi_wrap(m.group(1), "3"), text)
+    text = re.sub(r"`([^`]+)`", lambda m: _ansi_wrap(m.group(1), "38;5;214"), text)
+    return text
+
+
+def _wrap_visible(text: str, max_width: int) -> List[str]:
+    """Wraps text containing ANSI codes into multiple lines based on visible width."""
+    if _visible_len(text) <= max_width:
+        return [text]
+    words = text.split(' ')
+    lines = []
+    cur_line = []
+    cur_len = 0
+    for word in words:
+        w_len = _visible_len(word)
+        if cur_len + w_len + (1 if cur_line else 0) <= max_width:
+            cur_line.append(word)
+            cur_len += w_len + (1 if cur_line else 0)
+        else:
+            if cur_line:
+                lines.append(' '.join(cur_line))
+            cur_line = [word]
+            cur_len = w_len
+    if cur_line:
+        lines.append(' '.join(cur_line))
+    return lines
+
+
+def render_markdown_text(text: str) -> str:
+    lines: List[str] = []
+    in_code_block = False
+    raw_lines = text.splitlines()
+    idx = 0
+    try:
+        term_width = os.get_terminal_size().columns
+    except Exception:
+        term_width = 100
+
+    while idx < len(raw_lines):
+        line = raw_lines[idx]
+        stripped_line = line.strip()
+        fence = re.match(r"^\s*```(\w+)?\s*$", line)
+        if fence:
+            in_code_block = not in_code_block
+            lines.append(_ansi_wrap(line, "90"))
+            idx += 1
+            continue
+        if in_code_block:
+            lines.append(f"  {line}")
+            idx += 1
+            continue
+
+        if not in_code_block and "|" in stripped_line:
+            table_rows = []
+            while idx < len(raw_lines) and "|" in raw_lines[idx]:
+                table_rows.append(raw_lines[idx])
+                idx += 1
+            if len(table_rows) >= 2:
+                grid = []
+                for row in table_rows:
+                    row_content = row.strip()
+                    if row_content.startswith("|"): row_content = row_content[1:]
+                    if row_content.endswith("|"): row_content = row_content[:-1]
+                    cells = [c.strip() for c in row_content.split("|")]
+                    is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells)
+                    rendered = [_render_inline_markdown(c) for c in cells] if not is_sep else []
+                    grid.append({"rendered": rendered, "is_sep": is_sep})
+                col_count = max(len(r["rendered"]) for r in grid if not r["is_sep"])
+                col_widths = [0] * col_count
+                for row in grid:
+                    if row["is_sep"]: continue
+                    for c_idx, cell in enumerate(row["rendered"]):
+                        if c_idx < col_count:
+                            col_widths[c_idx] = max(col_widths[c_idx], _visible_len(cell))
+                total_w = sum(col_widths) + (col_count * 3) + 1
+                if total_w > term_width:
+                    shrink_factor = (term_width - 10) / total_w
+                    col_widths = [max(10, int(w * shrink_factor)) for w in col_widths]
+
+                border_color = "36"
+                def get_sep_line(left, mid, right):
+                    return _ansi_wrap(left + mid.join("─" * (w + 2) for w in col_widths) + right, border_color)
+
+                lines.append(get_sep_line("┌", "┬", "┐"))
+                v_bar = _ansi_wrap("│", border_color)
+                for r_idx, row in enumerate(grid):
+                    if row["is_sep"]:
+                        lines.append(get_sep_line("├", "┼", "┤"))
+                        continue
+                    wrapped_cells = []
+                    for c_idx in range(col_count):
+                        content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
+                        wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
+                    row_height = max(len(c) for c in wrapped_cells)
+                    for sub_idx in range(row_height):
+                        line_parts = []
+                        for c_idx in range(col_count):
+                            cell_lines = wrapped_cells[c_idx]
+                            cell_line = cell_lines[sub_idx] if sub_idx < len(cell_lines) else ""
+                            pad = " " * (col_widths[c_idx] - _visible_len(cell_line))
+                            line_parts.append(f" {cell_line}{pad} ")
+                        lines.append(f"{v_bar}{v_bar.join(line_parts)}{v_bar}")
+                    if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
+                        lines.append(get_sep_line("├", "┼", "┤"))
+                lines.append(get_sep_line("└", "┴", "┘"))
+                continue
+        
+        if not stripped_line:
+            lines.append("")
+        elif stripped_line.startswith("#"):
+            heading = re.match(r"^(#{1,6})\s+(.*)$", stripped_line)
+            if heading:
+                level = len(heading.group(1))
+                content = _render_inline_markdown(heading.group(2))
+                color = "1;35" if level <= 2 else ("1;36" if level == 3 else "1")
+                lines.append(_ansi_wrap(content, color))
+            else:
+                lines.append(_render_inline_markdown(line))
+        elif re.match(r"^\s*[-*+]\s+", line):
+            lines.append(f"• {_render_inline_markdown(stripped_line.lstrip('-*+ '))}")
+        elif stripped_line.startswith(">"):
+            lines.append(f"{_ansi_wrap('> ', '90')}{_render_inline_markdown(stripped_line[1:].strip())}")
+        else:
+            lines.append(_render_inline_markdown(line))
+        idx += 1
+    return "\n".join(lines).strip()
+
+
+
 
 
 
@@ -762,14 +917,40 @@ def main():
                 active_tools = [t for t in all_tools if t['function']['name'] not in disabled_tools]
                 response = client.generate(messages, system_instruction=system_instruction, tools=active_tools)
                 record_usage(client.model)
-            except Exception as e: error(str(e)); break
+            except RuntimeError as exc:
+                msg = str(exc)
+                error(msg)
+                match = re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
+                if match:
+                    wait_seconds = float(match.group(1))
+                    start_time = time.time()
+                    try:
+                        while True:
+                            elapsed = time.time() - start_time
+                            remaining = wait_seconds - elapsed
+                            if remaining <= 0:
+                                break
+                            sys.stdout.write(f"\r{_ansi_wrap('Rate limit cooldown:', '33')} {_format_seconds(remaining)}  ")
+                            sys.stdout.flush()
+                            time.sleep(0.5)
+                        sys.stdout.write("\r" + " " * 40 + "\r")
+                        sys.stdout.flush()
+                    except KeyboardInterrupt:
+                        print()
+                        break
+                break
+            except Exception as e:
+                error(str(e))
+                break
                 
             msg = response["choices"][0]["message"]
             messages.append(msg)
             if msg.get("content"):
                 cleaned_text = _clean_response_text(msg['content'])
                 if cleaned_text:
-                    print(f"\n{cleaned_text}\n")
+                    print()
+                    print(render_markdown_text(cleaned_text))
+                    print()
             if not msg.get("tool_calls"): write_notification(); break
                 
             for tool_call in msg["tool_calls"]:
