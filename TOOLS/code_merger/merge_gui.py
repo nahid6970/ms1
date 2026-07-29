@@ -45,6 +45,19 @@ def _custom_normpath(path):
 
 os.path.normpath = _custom_normpath
 
+def is_subpath(filepath: str, root_dir: str) -> bool:
+    """Return True if filepath is located inside root_dir."""
+    if not filepath or not root_dir:
+        return False
+    try:
+        f_norm = os.path.normpath(os.path.abspath(filepath))
+        r_norm = os.path.normpath(os.path.abspath(root_dir))
+        rel = os.path.relpath(f_norm, r_norm)
+        return not rel.startswith('..') and not os.path.isabs(rel)
+    except Exception:
+        return False
+
+
 # ── PALETTE ──────────────────────────────────────────────────────────────────
 CP_BG     = "#050505"
 CP_PANEL  = "#111111"
@@ -2519,11 +2532,14 @@ class PrepTab(QWidget):
     def _set_project_root(self, d: str, save_recent: bool = True):
         d = os.path.normpath(d)
         self.project_root = d
+        # Purge any external files outside the project root
+        self.files = [f for f in self.files if is_subpath(f, d)]
+        self.disabled_files = {f for f in self.disabled_files if is_subpath(f, d)}
         if self.root_cb:
             self.root_cb(d)
         self._update_project_label()
         if save_recent:
-            add_recent(d, [], [], overwrite_existing=True)
+            add_recent(d, self.files, [], overwrite_existing=True)
         self._save_session()
         self._update_active_project_highlight()
 
@@ -3197,8 +3213,10 @@ class PrepTab(QWidget):
         self._save_session()
 
     def _load_all_project_files(self, d: str):
+        d = os.path.normpath(d)
         self.files.clear()
         self.file_list.clear()
+        self.disabled_files = {f for f in self.disabled_files if is_subpath(f, d)}
         
         count = 0
         added_files = []
@@ -3217,29 +3235,33 @@ class PrepTab(QWidget):
                     self._add_file_item(fp)
                     count += 1
                     
-        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
         self._set_project_root(d, save_recent=False)
+        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
         self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
         self._update_root()
         self._save_session()
 
     def _edit_project(self, path: str):
+        norm_p = os.path.normpath(path)
         items = load_recent_details()
         target_item = None
         for item in items:
-            if os.path.normpath(item["path"]) == os.path.normpath(path):
+            if os.path.normpath(item["path"]) == norm_p:
                 target_item = item
                 break
 
         if not target_item:
-            target_item = {"path": path, "name": "", "category": "", "icon": "", "disabled_files": []}
+            target_item = {"path": norm_p, "name": "", "category": "", "icon": "", "disabled_files": []}
 
         curr_disabled = target_item.get("disabled_files", [])
-        if os.path.normpath(path) == os.path.normpath(self.project_root):
+        if norm_p == os.path.normpath(self.project_root):
             curr_disabled = list(self.disabled_files)
 
+        # Filter out any legacy external files outside the project root
+        curr_disabled = [f for f in curr_disabled if is_subpath(f, norm_p)]
+
         dlg = EditProjectDialog(
-            path=path,
+            path=norm_p,
             name=target_item.get("name", ""),
             category=target_item.get("category", ""),
             icon=target_item.get("icon", ""),
