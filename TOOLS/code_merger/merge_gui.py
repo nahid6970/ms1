@@ -3239,12 +3239,23 @@ class PrepTab(QWidget):
 
     def _load_all_project_files(self, d: str):
         d = os.path.normpath(d)
+
+        # Retrieve saved disabled files for target project d
+        if os.path.normpath(self.project_root) == d:
+            target_disabled = {f for f in self.disabled_files if is_subpath(f, d)}
+        else:
+            target_disabled = set()
+            for item in load_recent_details():
+                if os.path.normpath(item["path"]) == d:
+                    target_disabled = {os.path.normpath(f) for f in item.get("disabled_files", []) if is_subpath(f, d)}
+                    break
+
         old_external = [f for f in self.files if not is_subpath(f, d)]
         old_disabled_ext = [f for f in self.disabled_files if not is_subpath(f, d)]
 
         self.files.clear()
         self.file_list.clear()
-        self.disabled_files = {f for f in self.disabled_files if is_subpath(f, d)}
+        self.disabled_files = target_disabled
         
         count = 0
         added_files = []
@@ -3264,7 +3275,7 @@ class PrepTab(QWidget):
                     count += 1
                     
         self._set_project_root(d, save_recent=False)
-        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
+        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True, disabled_files=list(self.disabled_files))
 
         total_removed = len(old_external) + len(old_disabled_ext)
         if total_removed > 0:

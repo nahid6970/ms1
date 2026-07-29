@@ -32,17 +32,17 @@
       ],
       "disabled_files": [
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
       ],
       "extensions": [
         "",
         ".json",
-        ".py",
-        ".md"
+        ".md",
+        ".py"
       ],
-      "clicks": 102
+      "clicks": 121
     },
     {
       "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
@@ -67,11 +67,11 @@
       ],
       "extensions": [
         ".json",
-        ".py",
         ".md",
-        ".txt"
+        ".txt",
+        ".py"
       ],
-      "clicks": 53
+      "clicks": 68
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
@@ -647,9 +647,9 @@
     "file_modes": {},
     "disabled_files": [
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
     ]
   },
   "backup": false,
