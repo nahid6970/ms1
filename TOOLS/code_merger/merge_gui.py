@@ -1395,39 +1395,7 @@ class SettingsDialog(QDialog):
         layout.setSpacing(10)
 
         self.tabs = QTabWidget()
-        # --- TAB 5: TAILSCALE FUNNEL ---
-        tab_ts = QWidget()
-        v_ts = QVBoxLayout(tab_ts)
-        v_ts.setContentsMargins(8, 8, 8, 8)
-        v_ts.setSpacing(10)
 
-        lbl_ts = QLabel("Tailscale Funnel Bridge:")
-        lbl_ts.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        v_ts.addWidget(lbl_ts)
-
-        lbl_ts_info = QLabel(
-            "1. Run this in your terminal:\n"
-            "   tailscale funnel 8080\n\n"
-            "2. Provide your Tailscale URL below:"
-        )
-        lbl_ts_info.setStyleSheet(f"color: {CP_TEXT};")
-        v_ts.addWidget(lbl_ts_info)
-
-        self.input_ts_url = QLineEdit()
-        self.input_ts_url.setPlaceholderText("https://your-machine.tailnet-name.ts.net")
-        self.input_ts_url.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
-        
-        # Load existing TS URL if any
-        try:
-            if os.path.exists(SETTINGS_PATH):
-                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    self.input_ts_url.setText(data.get('tailscale_url', ""))
-        except: pass
-
-        v_ts.addWidget(self.input_ts_url)
-        v_ts.addStretch()
-        self.tabs.addTab(tab_ts, "🌐 TAILSCALE")
 
 
         # --- TAB 1: DISPLAY SIZES ---
@@ -1646,38 +1614,7 @@ class SettingsDialog(QDialog):
 
         info_cloud = QLabel(
             "Mirroring: Creates a secret Gist with your code.\n"
-            "Tailscale: Serves code directly from your machine (run 'tailscale funnel 8080')."
-        )
-        info_cloud.setStyleSheet(f"color: {CP_SUB}; font-size: 8pt;")
-        v_cloud.addWidget(info_cloud)
-        v_cloud.addStretch()
-
-        self.tabs.addTab(tab_cloud, "☁️ CLOUD BRIDGE")
-
-        # --- TAB 4: CLOUD BRIDGE ---
-        tab_cloud = QWidget()
-        v_cloud = QVBoxLayout(tab_cloud)
-        v_cloud.setContentsMargins(8, 8, 8, 8)
-        v_cloud.setSpacing(10)
-
-        lbl_cloud = QLabel("Google AI Studio Bridge Settings:")
-        lbl_cloud.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
-        v_cloud.addWidget(lbl_cloud)
-
-        lbl_token = QLabel("GitHub Personal Access Token (for Gist mirroring):")
-        lbl_token.setStyleSheet(f"color: {CP_TEXT};")
-        v_cloud.addWidget(lbl_token)
-
-        self.input_token = QLineEdit(self.github_token)
-        self.input_token.setEchoMode(QLineEdit.EchoMode.Password)
-        self.input_token.setPlaceholderText("ghp_xxxxxxxxxxxx")
-        self.input_token.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
-        v_cloud.addWidget(self.input_token)
-
-        info_cloud = QLabel(
-            "This token is used to create ephemeral Gists.\n"
-            "AI Studio can then read your codebase via the Gist's 'Raw' URL.\n\n"
-            "⚠️ Use a token with only 'gist' permissions."
+            "Tailscale: Serves code directly from your machine (run 'tailscale funnel 8999')."
         )
         info_cloud.setStyleSheet(f"color: {CP_SUB}; font-size: 8pt;")
         v_cloud.addWidget(info_cloud)
