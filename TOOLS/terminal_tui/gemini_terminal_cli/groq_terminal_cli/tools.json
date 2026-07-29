@@ -1,6 +1,8 @@
 [
   {
     "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Essential)",
     "function": {
       "name": "read_file",
       "description": "Read a local file and return its text content (UTF-8). Truncates at 12000 chars.",
@@ -15,6 +17,8 @@
   },
   {
     "type": "function",
+    "category": "Code Modifications",
+    "rating": "Use with caution (Overwrites)",
     "function": {
       "name": "write_file",
       "description": "Write content to a file, creating parent dirs if needed. OVERWRITES the entire file.",
@@ -30,6 +34,8 @@
   },
   {
     "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
     "function": {
       "name": "list_directory",
       "description": "List directory contents sorted (dirs first, then files).",
@@ -44,6 +50,8 @@
   },
   {
     "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
     "function": {
       "name": "get_system_info",
       "description": "Returns OS platform, Python version, and current working directory.",
@@ -55,6 +63,8 @@
   },
   {
     "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
     "function": {
       "name": "search_file",
       "description": "Case-insensitive text search within a file or directory.",
@@ -72,6 +82,8 @@
   },
   {
     "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for multi-file changes (Resilient)",
     "function": {
       "name": "fuzzy_apply_patch",
       "description": "Apply a unified diff patch with fuzzy matching and line-ending fallback.",
@@ -86,6 +98,8 @@
   },
   {
     "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for targeted edits (High accuracy)",
     "function": {
       "name": "smart_replace_block",
       "description": "Replace a text block in a file with fuzzy fallback matching for line-endings and whitespace.",
@@ -103,6 +117,8 @@
   },
   {
     "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for exact line ranges (Low token)",
     "function": {
       "name": "replace_lines",
       "description": "Replace a specific range of 1-indexed line numbers in a file.",
@@ -120,6 +136,8 @@
   },
   {
     "type": "function",
+    "category": "Execution & Shell",
+    "rating": "Best for Windows inspection & tests",
     "function": {
       "name": "run_powershell",
       "description": "Run a PowerShell command for inspection, git checks, or tests.",
@@ -135,6 +153,8 @@
   },
   {
     "type": "function",
+    "category": "Control Flow",
+    "rating": "Safe",
     "function": {
       "name": "request_follow_up",
       "description": "Request another turn for multi-step work.",

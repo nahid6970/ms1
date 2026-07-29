@@ -381,7 +381,8 @@ def pick_tool_interactive(disabled_tools: Set[str]) -> bool:
     while True:
         cat_items = []
         for cat in categories:
-            tools_in_cat = [t for t in catalog if t.get('category') == cat]
+            # Ensure we use the same default 'Other' when filtering tools for the category view
+            tools_in_cat = [t for t in catalog if t.get('category', 'Other') == cat]
             enabled_count = sum(1 for t in tools_in_cat if t['function']['name'] not in disabled_tools)
             cat_items.append({
                 "name": cat,
