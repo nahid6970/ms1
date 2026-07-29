@@ -1291,8 +1291,19 @@ class EditProjectDialog(QDialog):
         self.setWindowTitle("✏️ EDIT PROJECT DETAILS")
         self.resize(560, 480)
         self.setStyleSheet(THEME)
-        self.path = path
-        self.disabled_files = list(disabled_files)
+        self.path = os.path.normpath(path)
+        
+        # Filter disabled files so only files belonging inside this project root are shown
+        norm_proj_root = self.path
+        self.disabled_files = []
+        for df in disabled_files:
+            norm_df = os.path.normpath(df)
+            try:
+                rel = os.path.relpath(norm_df, norm_proj_root)
+                if not rel.startswith(".."):
+                    self.disabled_files.append(norm_df)
+            except Exception:
+                pass
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 14, 14, 14)
@@ -3176,12 +3187,19 @@ class PrepTab(QWidget):
         self._save_session()
 
     def _load_specific_files(self, d: str, files: list[str], extensions: list[str]):
+        d = os.path.normpath(d)
         if not files:
             self._load_all_project_files(d)
             return
 
         self.files.clear()
         self.file_list.clear()
+        
+        # Clean disabled files list so files outside this project root are pruned
+        self.disabled_files = {
+            os.path.normpath(df) for df in self.disabled_files
+            if not os.path.relpath(os.path.normpath(df), d).startswith("..")
+        }
         
         count = 0
         for fp in files:
