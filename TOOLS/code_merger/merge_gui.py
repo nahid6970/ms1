@@ -130,6 +130,9 @@ EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
 EXTENSION_ICON_SIZE = 16
 SHOW_FILE_MODE_CONTROLS = True
+PANEL_WEIGHT_PROJECTS = 260
+PANEL_WEIGHT_FILES = 360
+PANEL_WEIGHT_PROMPT = 560
 
 try:
     from PyQt6.QtSvg import QSvgRenderer
@@ -166,6 +169,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
     try:
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -178,6 +182,9 @@ def load_settings():
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
                 SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
+                PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
+                PANEL_WEIGHT_FILES = data.get('panel_weight_files', 360)
+                PANEL_WEIGHT_PROMPT = data.get('panel_weight_prompt', 560)
         elif os.path.exists(SESSION_PATH):
             # Fallback for older format
             with open(SESSION_PATH, 'r', encoding='utf-8') as f:
@@ -193,14 +200,18 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int, show_file_mode_controls: bool = True):
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560):
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
     EXTENSION_ICON_SIZE = icon_size
     SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
+    PANEL_WEIGHT_PROJECTS = w_projects
+    PANEL_WEIGHT_FILES = w_files
+    PANEL_WEIGHT_PROMPT = w_prompt
     try:
         data = {}
         if os.path.exists(SETTINGS_PATH):
@@ -213,6 +224,9 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
         data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
+        data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
+        data['panel_weight_files'] = PANEL_WEIGHT_FILES
+        data['panel_weight_prompt'] = PANEL_WEIGHT_PROMPT
         with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
@@ -1312,6 +1326,9 @@ class SettingsDialog(QDialog):
         self.font_size = SOURCE_FILES_FONT_SIZE
         self.icon_size = EXTENSION_ICON_SIZE
         self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
+        self.w_projects = PANEL_WEIGHT_PROJECTS
+        self.w_files = PANEL_WEIGHT_FILES
+        self.w_prompt = PANEL_WEIGHT_PROMPT
 
         self._build()
 
@@ -1382,6 +1399,54 @@ class SettingsDialog(QDialog):
         self.chk_show_mode.setStyleSheet(f"color: {CP_TEXT};")
         self.chk_show_mode.setToolTip("When unchecked, the Full/Outline selector per file and the\nMinify / Set-all toolbar are hidden to save space.")
         v_font.addWidget(self.chk_show_mode)
+
+        # ── PANEL WIDTH WEIGHTS SECTION ──
+        lbl_panels = QLabel("Panel Initial Widths (px):")
+        lbl_panels.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; margin-top: 10px;")
+        v_font.addWidget(lbl_panels)
+
+        h_panels = QHBoxLayout()
+        h_panels.setSpacing(12)
+
+        # Projects Panel Width
+        v_p1 = QVBoxLayout()
+        lbl_p1 = QLabel("Projects Panel:")
+        lbl_p1.setStyleSheet(f"color: {CP_TEXT}; font-size: 8.5pt;")
+        self.spin_w_proj = QSpinBox()
+        self.spin_w_proj.setRange(100, 1000)
+        self.spin_w_proj.setValue(self.w_projects)
+        self.spin_w_proj.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+        v_p1.addWidget(lbl_p1)
+        v_p1.addWidget(self.spin_w_proj)
+
+        # Source Files Panel Width
+        v_p2 = QVBoxLayout()
+        lbl_p2 = QLabel("Source Files Panel:")
+        lbl_p2.setStyleSheet(f"color: {CP_TEXT}; font-size: 8.5pt;")
+        self.spin_w_files = QSpinBox()
+        self.spin_w_files.setRange(100, 1000)
+        self.spin_w_files.setValue(self.w_files)
+        self.spin_w_files.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+        v_p2.addWidget(lbl_p2)
+        v_p2.addWidget(self.spin_w_files)
+
+        # Prompt Panel Width
+        v_p3 = QVBoxLayout()
+        lbl_p3 = QLabel("Task / Prompt Panel:")
+        lbl_p3.setStyleSheet(f"color: {CP_TEXT}; font-size: 8.5pt;")
+        self.spin_w_prompt = QSpinBox()
+        self.spin_w_prompt.setRange(100, 2000)
+        self.spin_w_prompt.setValue(self.w_prompt)
+        self.spin_w_prompt.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+        v_p3.addWidget(lbl_p3)
+        v_p3.addWidget(self.spin_w_prompt)
+
+        h_panels.addLayout(v_p1)
+        h_panels.addLayout(v_p2)
+        h_panels.addLayout(v_p3)
+        h_panels.addStretch()
+
+        v_font.addLayout(h_panels)
 
         v_font.addStretch()
 
@@ -1702,8 +1767,11 @@ class SettingsDialog(QDialog):
         font_size = self.spin_fs.value()
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
+        w_proj = self.spin_w_proj.value()
+        w_files = self.spin_w_files.value()
+        w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, icon_size, show_mode)
+        save_settings(ignores, icons, font_size, icon_size, show_mode, w_proj, w_files, w_prompt)
         self.accept()
 
 
@@ -1873,6 +1941,11 @@ class PrepTab(QWidget):
         except Exception as e:
             print(f"Error saving session: {e}", file=sys.stderr)
         self._sync_to_recent_projects()
+
+    def apply_panel_sizes(self):
+        if hasattr(self, 'splitter'):
+            self.splitter.setSizes([PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT])
+
 
     def _sync_to_recent_projects(self):
         if not self.files:
@@ -2568,15 +2641,16 @@ class PrepTab(QWidget):
         right_layout.addLayout(btn_row2, 0)
 
         # Assemble Splitter
-        splitter.addWidget(sidebar_widget)
-        splitter.addWidget(left_widget)
-        splitter.addWidget(right_widget)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 1)
-        splitter.setStretchFactor(2, 2)
-        splitter.setSizes([260, 360, 560])
+        self.splitter = splitter
+        self.splitter.addWidget(sidebar_widget)
+        self.splitter.addWidget(left_widget)
+        self.splitter.addWidget(right_widget)
+        self.splitter.setStretchFactor(0, 1)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setStretchFactor(2, 2)
+        self.apply_panel_sizes()
 
-        layout.addWidget(splitter)
+        layout.addWidget(self.splitter)
 
     def _add_files(self):
         files, _ = QFileDialog.getOpenFileNames(self, "Select Files")
@@ -3293,7 +3367,8 @@ class MainWindow(QMainWindow):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.prep_tab._refresh_file_items()
             self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
-            self._set_status(f"Settings saved. Applied new font size ({SOURCE_FILES_FONT_SIZE}pt), icon mappings, and icon size ({EXTENSION_ICON_SIZE}px).")
+            self.prep_tab.apply_panel_sizes()
+            self._set_status(f"Settings saved. Applied panel widths ({PANEL_WEIGHT_PROJECTS}px / {PANEL_WEIGHT_FILES}px / {PANEL_WEIGHT_PROMPT}px).")
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
