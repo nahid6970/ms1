@@ -3219,6 +3219,7 @@ class DiffPreviewDialog(QDialog):
         scroll_content = QWidget()
         v_box = QVBoxLayout(scroll_content)
         v_box.setSpacing(14)
+        v_box.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         import difflib
 
@@ -3229,6 +3230,7 @@ class DiffPreviewDialog(QDialog):
             group = QGroupBox(f" Block #{idx+1} · [{mode.upper()}]  {ch['file']} ")
             g_layout = QVBoxLayout(group)
             g_layout.setSpacing(6)
+            g_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
             chk_row = QHBoxLayout()
             chk = QCheckBox("Apply this change block")
@@ -3307,6 +3309,7 @@ class DiffPreviewDialog(QDialog):
             g_layout.addWidget(diff_view)
             v_box.addWidget(group)
 
+        v_box.addStretch()
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll)
 
