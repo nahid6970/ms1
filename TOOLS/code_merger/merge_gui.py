@@ -132,6 +132,7 @@ EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
 PROJECTS_FONT_SIZE = 10
 PROJECTS_NAME_COLOR = "#FCEE0A"
+APP_NAME = "CODE MERGER // CYBERPUNK EDITION"
 EXTENSION_ICON_SIZE = 16
 SHOW_FILE_MODE_CONTROLS = True
 PANEL_WEIGHT_PROJECTS = 260
@@ -173,7 +174,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
     try:
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -186,6 +187,7 @@ def load_settings():
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 PROJECTS_FONT_SIZE = data.get('projects_font_size', 10)
                 PROJECTS_NAME_COLOR = data.get('projects_name_color', '#FCEE0A')
+                APP_NAME = data.get('app_name', 'CODE MERGER // CYBERPUNK EDITION')
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
                 SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
                 PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
@@ -206,15 +208,16 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A"):
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A", app_name: str = "CODE MERGER // CYBERPUNK EDITION"):
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
     PROJECTS_FONT_SIZE = proj_font_size
     PROJECTS_NAME_COLOR = proj_name_color
+    APP_NAME = app_name
     EXTENSION_ICON_SIZE = icon_size
     SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
     PANEL_WEIGHT_PROJECTS = w_projects
@@ -232,6 +235,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['projects_font_size'] = PROJECTS_FONT_SIZE
         data['projects_name_color'] = PROJECTS_NAME_COLOR
+        data['app_name'] = APP_NAME
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
         data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
         data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
@@ -1445,6 +1449,7 @@ class SettingsDialog(QDialog):
         self.font_size = SOURCE_FILES_FONT_SIZE
         self.proj_font_size = PROJECTS_FONT_SIZE
         self.proj_name_color = PROJECTS_NAME_COLOR
+        self.app_name = APP_NAME
         self.icon_size = EXTENSION_ICON_SIZE
         self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
         self.w_projects = PANEL_WEIGHT_PROJECTS
@@ -1469,6 +1474,17 @@ class SettingsDialog(QDialog):
         lbl_font = QLabel("Adjust display settings:")
         lbl_font.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
         v_font.addWidget(lbl_font)
+
+        # Custom Application / GUI Name
+        h_app_name = QHBoxLayout()
+        lbl_an = QLabel("Application / GUI Name:")
+        lbl_an.setStyleSheet(f"color: {CP_TEXT};")
+        self.input_app_name = QLineEdit(self.app_name)
+        self.input_app_name.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+        h_app_name.addWidget(lbl_an)
+        h_app_name.addWidget(self.input_app_name, 1)
+        v_font.addLayout(h_app_name)
+
 
         # Source Files List Font Size
         h_font_settings = QHBoxLayout()
@@ -1950,13 +1966,14 @@ class SettingsDialog(QDialog):
         font_size = self.spin_fs.value()
         proj_font_size = self.spin_pfs.value()
         proj_color = self.proj_name_color or "#FCEE0A"
+        app_name = self.input_app_name.text().strip() or "CODE MERGER // CYBERPUNK EDITION"
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
         w_proj = self.spin_w_proj.value()
         w_files = self.spin_w_files.value()
         w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color)
+        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color, app_name)
         self.accept()
 
 
@@ -3652,7 +3669,7 @@ class CommandTab(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CODE MERGER  //  CYBERPUNK EDITION")
+        self.setWindowTitle(APP_NAME)
         self.resize(1280, 800)
         self.setMinimumSize(1024, 600)
         self.setStyleSheet(THEME)
@@ -3666,11 +3683,11 @@ class MainWindow(QMainWindow):
         root_layout.setSpacing(6)
 
         # Header
-        hdr = QLabel("// CODE MERGER")
-        hdr.setStyleSheet(f"color: {CP_YELLOW}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;")
+        self.hdr_lbl = QLabel(f"// {APP_NAME.upper()}")
+        self.hdr_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;")
         sub = QLabel("Prep files for AI  ·  Merge AI responses back to disk")
         sub.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt;")
-        root_layout.addWidget(hdr)
+        root_layout.addWidget(self.hdr_lbl)
         root_layout.addWidget(sub)
 
         # Tabs
@@ -3771,11 +3788,13 @@ class MainWindow(QMainWindow):
     def _open_settings(self):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.setWindowTitle(APP_NAME)
+            self.hdr_lbl.setText(f"// {APP_NAME.upper()}")
             self.prep_tab._refresh_file_items()
             self.prep_tab._populate_projects()
             self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
             self.prep_tab.apply_panel_sizes()
-            self._set_status(f"Settings saved. Applied project font size ({PROJECTS_FONT_SIZE}pt) and panel widths.")
+            self._set_status(f"Settings saved. Updated GUI title to '{APP_NAME}'.")
 
     def get_match_mode(self) -> str:
         return self.combo_match_mode.currentText()
