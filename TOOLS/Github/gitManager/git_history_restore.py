@@ -987,9 +987,9 @@ class MainWindow(QMainWindow):
 
         # Table Setup
         self.table = QTableWidget()
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["HASH", "DATE", "MESSAGE"])
-        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["HASH", "DATE", "AUTHOR", "MESSAGE"])
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -1098,9 +1098,9 @@ class MainWindow(QMainWindow):
         file_history_layout.addLayout(file_history_header_layout)
         
         self.file_history_table = QTableWidget()
-        self.file_history_table.setColumnCount(3)
-        self.file_history_table.setHorizontalHeaderLabels(["HASH", "DATE", "MESSAGE"])
-        self.file_history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.file_history_table.setColumnCount(4)
+        self.file_history_table.setHorizontalHeaderLabels(["HASH", "DATE", "AUTHOR", "MESSAGE"])
+        self.file_history_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.file_history_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.file_history_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.file_history_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -2356,7 +2356,8 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Action Not Applicable", "You cannot 'restore' to the uncommitted state as it represents your current working files.")
             return
 
-        commit_msg = self.table.item(row, 3).text()
+        msg_item = self.table.item(row, 3)
+        commit_msg = msg_item.text() if msg_item else "No message"
         directory = self.path_input.text()
 
         confirm = QMessageBox.question(
@@ -2397,7 +2398,8 @@ class MainWindow(QMainWindow):
             commit_msg = "Uncommitted Changes"
         else:
             parent_hash = f"{commit_hash}^"
-            commit_msg = self.table.item(row, 3).text()
+            msg_item = self.table.item(row, 3)
+            commit_msg = msg_item.text() if msg_item else "No message"
 
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
@@ -2461,7 +2463,8 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Action Not Applicable", "You cannot restore files 'from' the uncommitted state as they are already in your working directory.")
             return
 
-        commit_msg = self.table.item(row, 3).text()
+        msg_item = self.table.item(row, 3)
+        commit_msg = msg_item.text() if msg_item else "No message"
         directory = self.path_input.text()
         base_dir = GitWorker.get_git_root(directory)
         
