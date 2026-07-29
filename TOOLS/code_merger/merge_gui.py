@@ -3289,7 +3289,7 @@ class DiffPreviewDialog(QDialog):
                 if line.startswith('+'):
                     html_parts.append(f'<div style="color: {CP_GREEN}; background-color: #002e07; font-weight: bold; padding: 1px 4px;">{escaped}</div>')
                 elif line.startswith('-'):
-                    html_parts.append(f'<div style="color: {CP_RED}; background-color: #3b000d; text-decoration: line-through; padding: 1px 4px;">{escaped}</div>')
+                    html_parts.append(f'<div style="color: {CP_RED}; background-color: #3b000d; padding: 1px 4px;">{escaped}</div>')
                 elif line.startswith('@@'):
                     html_parts.append(f'<div style="color: {CP_CYAN}; font-weight: bold; background-color: #11222e; margin-top: 4px; margin-bottom: 4px; padding: 2px 4px;">{escaped}</div>')
                 else:
