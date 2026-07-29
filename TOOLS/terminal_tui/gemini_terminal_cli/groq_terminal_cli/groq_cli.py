@@ -117,6 +117,16 @@ def _format_seconds(seconds: float) -> str:
     return f"{minutes:02d}:{secs:02d}"
 
 
+def format_cooldown_until(until: Optional[dt.datetime]) -> str:
+    if until is None:
+        return ""
+    remaining = int((until - _now()).total_seconds() + 0.999)
+    if remaining <= 0:
+        return ""
+    return f"cooldown {_format_seconds(remaining)}"
+
+
+
 def _render_inline_markdown(text: str) -> str:
     if not text:
         return text
@@ -452,22 +462,24 @@ def model_group(model: Dict[str, Any]) -> str:
 
 
 def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
-    short_w = 0; name_w = 0; tag_w = 0
+    short_w = 0; name_w = 0; tag_w = 0; state_w = 0
     for m in models:
         short_w = max(short_w, len(short_model_name(m)))
         name_w = max(name_w, len(model_name(m)))
         tag_w = max(tag_w, len(str(m.get("_tag") or "")))
+        state_w = max(state_w, len(str(m.get("_state") or "")))
     return {
         "short": min(max(short_w, 15), 30),
         "name": min(max(name_w, 20), 45),
         "tag": min(max(tag_w, 4), 10),
+        "state": min(max(state_w, 6), 16),
     }
 
 
 def build_model_table_header(widths: Dict[str, int]) -> List[str]:
     return [
-        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur",
-        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---",
+        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  {'State':<{widths['state']}}",
+        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  {'-' * widths['state']}",
     ]
 
 
@@ -483,6 +495,9 @@ def format_model_entry(
     active = "*" if name == current_model else " "
     tag = str(model.get("_tag") or "")
     usage = int(model.get("_uses") or 0)
+    state = str(model.get("_state") or "")
+    if state.startswith("cooldown"):
+        state = _ansi_wrap(state, "31")
     marker = ">" if selected else " "
     
     # Constrain strings to calculated widths to prevent overflow
@@ -495,8 +510,9 @@ def format_model_entry(
         f"{name_clipped:<{widths['name']}}  "
         f"{usage:>4}  "
         f"{tag:<{widths['tag']}}  "
-        f"{active}"
-    )
+        f"{active}  "
+        f"{state:<{widths['state']}}"
+    ).rstrip()
     
     if selected: return _ansi_wrap(row, "48;5;24;97")
     if name == current_model: return _ansi_wrap(row, "32")
@@ -759,6 +775,7 @@ def main():
     client = GroqClient(api_key, active_model)
     messages: List[Dict[str, Any]] = []
     cwd = Path.cwd()
+    model_cooldowns: Dict[str, dt.datetime] = {}
     # Load tools and prepare initial active list
     all_tools = json.loads(TOOLS_FILE.read_text(encoding="utf-8")) if TOOLS_FILE.exists() else []
     tools = [t for t in all_tools if t['function']['name'] not in disabled_tools]
@@ -782,8 +799,19 @@ def main():
     title("Groq Terminal CLI (Fully Functional Port)")
     info(f"Model: {client.model} | Root: {cwd}")
 
+    def prune_model_cooldowns():
+        expired = [name for name, until in model_cooldowns.items() if until <= _now()]
+        for name in expired:
+            model_cooldowns.pop(name, None)
+            write_notification()
+
     def get_prompt():
-        return _ansi_wrap(f"groq:{client.model.split('-')[0]}> ", "1;32")
+        prune_model_cooldowns()
+        prefix = f"groq:{client.model.split('-')[0]}"
+        cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
+        if cooldown_text:
+            prefix += f" [{cooldown_text}]"
+        return _ansi_wrap(f"{prefix}> ", "1;32")
 
     while True:
         try:
@@ -807,6 +835,7 @@ def main():
             if cmd == "/reset": messages = []; info("Reset."); continue
             if cmd == "/mm":
                 try:
+                    prune_model_cooldowns()
                     raw_models = client.list_models()
                     # Filter and decorate
                     decorated = []
@@ -816,6 +845,8 @@ def main():
                         copy_m["_tag"] = speed_tags.get(m_id, "")
                         copy_m["_uses"] = model_usage_counts.get(m_id, 0)
                         copy_m["_hidden"] = m_id in hidden_models
+                        cooldown_text = format_cooldown_until(model_cooldowns.get(m_id))
+                        copy_m["_state"] = cooldown_text or ("hidden" if copy_m["_hidden"] else "")
                         decorated.append(copy_m)
                     
                     decorated.sort(key=lambda x: (model_group(x), x['id']))
@@ -923,21 +954,11 @@ def main():
                 match = re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
                 if match:
                     wait_seconds = float(match.group(1))
-                    start_time = time.time()
-                    try:
-                        while True:
-                            elapsed = time.time() - start_time
-                            remaining = wait_seconds - elapsed
-                            if remaining <= 0:
-                                break
-                            sys.stdout.write(f"\r{_ansi_wrap('Rate limit cooldown:', '33')} {_format_seconds(remaining)}  ")
-                            sys.stdout.flush()
-                            time.sleep(0.5)
-                        sys.stdout.write("\r" + " " * 40 + "\r")
-                        sys.stdout.flush()
-                    except KeyboardInterrupt:
-                        print()
-                        break
+                    # Set cooldown for 1 minute or the requested time, whichever is longer
+                    cooldown_duration = max(60.0, wait_seconds)
+                    model_cooldowns[client.model] = _now() + dt.timedelta(seconds=cooldown_duration)
+                    warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
+                    write_notification()
                 break
             except Exception as e:
                 error(str(e))
