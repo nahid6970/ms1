@@ -1259,11 +1259,11 @@ class RecentPopup(QFrame):
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
 # ── EDIT PROJECT DIALOG ─────────────────────────────────────────────────────
 class EditProjectDialog(QDialog):
-    """Unified modal dialog to edit project alias name, category, icon, and manage hidden files."""
-    def __init__(self, path: str, name: str, category: str, icon: str, disabled_files: list[str], parent=None):
+    """Unified modal dialog to edit project alias name, category, icon, pin status/index, and manage hidden files."""
+    def __init__(self, path: str, name: str, category: str, icon: str, disabled_files: list[str], pinned: bool = False, pin_index: int = 1, parent=None):
         super().__init__(parent)
         self.setWindowTitle("✏️ EDIT PROJECT DETAILS")
-        self.resize(560, 480)
+        self.resize(560, 520)
         self.setStyleSheet(THEME)
         self.path = path
         self.disabled_files = list(disabled_files)
@@ -1321,6 +1321,40 @@ class EditProjectDialog(QDialog):
         h_icon.addWidget(self.input_icon, 1)
         h_icon.addWidget(self.icon_preview, 0)
         layout.addLayout(h_icon)
+
+        # Pin Settings Row
+        h_pin = QHBoxLayout()
+        lbl_p = QLabel("Pin Settings:")
+        lbl_p.setFixedWidth(110)
+        lbl_p.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold;")
+
+        self.chk_pinned = QCheckBox("Pin to top")
+        self.chk_pinned.setChecked(pinned)
+        self.chk_pinned.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+
+        lbl_idx = QLabel("Pin Index:")
+        lbl_idx.setStyleSheet(f"color: {CP_TEXT}; margin-left: 10px;")
+
+        self.spin_pin_index = QSpinBox()
+        self.spin_pin_index.setRange(1, 999)
+        self.spin_pin_index.setValue(pin_index if pin_index >= 1 else 1)
+        self.spin_pin_index.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        self.spin_pin_index.setEnabled(pinned)
+        self.chk_pinned.toggled.connect(self.spin_pin_index.setEnabled)
+
+        h_pin.addWidget(lbl_p)
+        h_pin.addWidget(self.chk_pinned)
+        h_pin.addWidget(lbl_idx)
+        h_pin.addWidget(self.spin_pin_index)
+        h_pin.addStretch()
+        layout.addLayout(h_pin)
 
         # Hidden / Disabled Files Manager
         grp_files = QGroupBox("HIDDEN / DISABLED FILES IN THIS PROJECT")
@@ -1417,8 +1451,15 @@ class EditProjectDialog(QDialog):
             self.file_list.addItem(li)
 
 
-    def get_details(self) -> tuple[str, str, str, list[str]]:
-        return self.input_name.text().strip(), self.input_cat.text().strip(), self.input_icon.text().strip(), self.disabled_files
+    def get_details(self) -> tuple[str, str, str, list[str], bool, int]:
+        return (
+            self.input_name.text().strip(),
+            self.input_cat.text().strip(),
+            self.input_icon.text().strip(),
+            self.disabled_files,
+            self.chk_pinned.isChecked(),
+            self.spin_pin_index.value()
+        )
 
 SCRIPTS_EXTS = {'.py', '.ps1', '.bat', '.sh', '.cmd', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.cpp', '.c', '.h', '.cs', '.java', '.kt', '.rb', '.pl', '.php'}
 WEB_EXTS     = {'.html', '.htm', '.css', '.scss', '.sass', '.less', '.vue', '.svelte'}
@@ -3304,7 +3345,7 @@ class PrepTab(QWidget):
                 break
 
         if not target_item:
-            target_item = {"path": norm_p, "name": "", "category": "", "icon": "", "disabled_files": []}
+            target_item = {"path": norm_p, "name": "", "category": "", "icon": "", "disabled_files": [], "pinned": False, "pin_index": 1}
 
         curr_disabled = target_item.get("disabled_files", [])
         if norm_p == os.path.normpath(self.project_root):
@@ -3316,11 +3357,13 @@ class PrepTab(QWidget):
             category=target_item.get("category", ""),
             icon=target_item.get("icon", ""),
             disabled_files=curr_disabled,
+            pinned=target_item.get("pinned", False),
+            pin_index=target_item.get("pin_index", 1),
             parent=self
         )
 
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            new_name, new_cat, new_icon, updated_disabled = dlg.get_details()
+            new_name, new_cat, new_icon, updated_disabled, new_pinned, new_pin_index = dlg.get_details()
             norm_p = os.path.normpath(path)
             
             for item in items:
@@ -3329,6 +3372,8 @@ class PrepTab(QWidget):
                     item["category"] = new_cat
                     item["icon"] = new_icon
                     item["disabled_files"] = updated_disabled
+                    item["pinned"] = new_pinned
+                    item["pin_index"] = new_pin_index
 
             PROJECT_ICONS[norm_p] = new_icon
             save_recent(items)
