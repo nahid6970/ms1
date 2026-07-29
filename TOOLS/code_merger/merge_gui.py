@@ -3065,7 +3065,7 @@ class PrepTab(QWidget):
         final_prompt = self._build_prompt(is_cloud=True)
         raw_url = f"{ts_url}/codebase"
         self.prompt_out.setPlainText(f"Codebase URL: {raw_url}\n\n{final_prompt}")
-        self.status_cb("✔ Tailscale Prompt Ready (Serving on 8080)")
+        self.status_cb("✔ Tailscale Prompt Ready (Serving on 8999)")
 
     def _mirror_to_cloud(self):
         token = ""
