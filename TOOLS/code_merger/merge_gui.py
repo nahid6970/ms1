@@ -326,39 +326,34 @@ def load_recent_details() -> list[dict]:
 def save_recent(items: list[dict]):
     import json
     try:
+        proj_map = {}
+        for item in items:
+            p = os.path.normpath(item["path"])
+            name = item.get("name", "")
+            proj_map[p] = name
+
         settings_data = {}
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                 settings_data = json.load(f)
-        
-        # Keep existing projects, update names, add new ones
-        existing_projects = settings_data.get('projects', [])
-        proj_map = {os.path.normpath(p["path"]): p.get("name", "") for p in existing_projects if "path" in p}
-        
-        changed = False
-        for item in items:
-            p = os.path.normpath(item["path"])
-            name = item.get("name", "")
-            if p not in proj_map or proj_map[p] != name:
-                proj_map[p] = name
-                changed = True
-                
-        if changed:
-            # Sort alphabetically by path so the order in JSON never changes based on recency
-            new_projects = [{"path": k, "name": v} for k, v in sorted(proj_map.items())]
-            settings_data['projects'] = new_projects
-            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(settings_data, f, indent=2, ensure_ascii=False)
-            
+            if not isinstance(settings_data, dict):
+                settings_data = {}
+
+        new_projects = [{"path": k, "name": v} for k, v in sorted(proj_map.items())]
+        settings_data['projects'] = new_projects
+        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
+            json.dump(settings_data, f, indent=2, ensure_ascii=False)
+
         session_data = {}
         if os.path.exists(SESSION_PATH):
             with open(SESSION_PATH, 'r', encoding='utf-8') as f:
                 session_data = json.load(f)
-                
-        # Save exact recency order and states to session
+            if not isinstance(session_data, dict):
+                session_data = {}
+
         session_data['project_states'] = [
             {
-                "path": item["path"],
+                "path": os.path.normpath(item["path"]),
                 "files": item.get("files", []),
                 "extensions": item.get("extensions", []),
                 "clicks": item.get("clicks", 0)
