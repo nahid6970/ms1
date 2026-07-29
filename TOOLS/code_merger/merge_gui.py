@@ -427,6 +427,8 @@ _TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
 
 def _normalize(text: str) -> str:
     """Normalize AI response: strip markdown fences, ensure @@ tokens are on their own lines."""
+    text = text.replace('\r\n', '\n')
+
     # 1. Strip markdown code fences (```lang ... ```) wrapping the whole response or blocks
     text = re.sub(r'^```[^\n]*\n', '', text, flags=re.MULTILINE)
     text = re.sub(r'^```$', '', text, flags=re.MULTILINE)
@@ -686,21 +688,24 @@ def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str 
                     )
                     continue
                 with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
-                    content = f.read()
+                    content = f.read().replace('\r\n', '\n')
+
+                target_from = ch["from"].replace('\r\n', '\n')
+                target_to = ch["to"].replace('\r\n', '\n')
 
                 if is_fuzzy:
-                    new_content = fuzzy_replace_block(content, ch["from"], ch["to"])
+                    new_content = fuzzy_replace_block(content, target_from, target_to)
                     if new_content is not None:
                         if backup:
                             _backup(fpath)
-                        with open(fpath, 'w', encoding='utf-8') as f:
+                        with open(fpath, 'w', encoding='utf-8', newline='\n') as f:
                             f.write(new_content)
                         results.append(f"✔ replace_block (fuzzy) → {ch['file']}")
                         continue
 
-                if ch["from"] not in content:
+                if target_from not in content:
                     try:
-                        failure_info = analyze_match_failure(content, ch["from"], "replace_block")
+                        failure_info = analyze_match_failure(content, target_from, "replace_block")
                     except Exception as ex:
                         failure_info = f"Failed to generate diff analysis: {str(ex)}"
                     results.append(
@@ -713,8 +718,8 @@ def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str 
                     continue
                 if backup:
                     _backup(fpath)
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(content.replace(ch["from"], ch["to"], 1))
+                with open(fpath, 'w', encoding='utf-8', newline='\n') as f:
+                    f.write(content.replace(target_from, target_to, 1))
                 results.append(f"✔ replace_block → {ch['file']}")
 
             elif mode == "insert_after":
@@ -3118,6 +3123,136 @@ def extract_commit_message(text: str) -> str:
     if m3:
         return m3.group(1).strip()
     return ""
+
+
+# ── DIFF PREVIEW DIALOG ───────────────────────────────────────────────────────
+class DiffPreviewDialog(QDialog):
+    """Interactive visual diff preview dialog allowing selective block merge."""
+    def __init__(self, changes: list[dict], root: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("DIFF PREVIEW & SELECTIVE MERGE")
+        self.resize(850, 600)
+        self.setStyleSheet(THEME)
+        self.changes = changes
+        self.root = root
+        self.check_states: list[QCheckBox] = []
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
+
+        lbl_hdr = QLabel(f"Review changes ({len(self.changes)} block(s) detected):")
+        lbl_hdr.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
+        layout.addWidget(lbl_hdr)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_content = QWidget()
+        v_box = QVBoxLayout(scroll_content)
+        v_box.setSpacing(12)
+
+        import difflib
+
+        for idx, ch in enumerate(self.changes):
+            fpath = os.path.join(self.root, ch["file"].lstrip("/\\"))
+            mode = ch["mode"]
+
+            group = QGroupBox(f"[{mode.upper()}]  {ch['file']}")
+            g_layout = QVBoxLayout(group)
+
+            chk = QCheckBox("Apply this change")
+            chk.setChecked(True)
+            chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+            self.check_states.append(chk)
+            g_layout.addWidget(chk)
+
+            diff_view = QTextEdit()
+            diff_view.setReadOnly(True)
+            diff_view.setFont(QFont("Consolas", 9))
+            diff_view.setStyleSheet(f"background-color: #080808; border: 1px solid {CP_DIM}; padding: 4px;")
+
+            old_lines = []
+            new_lines = []
+
+            if os.path.exists(fpath):
+                try:
+                    with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
+                        old_lines = f.read().replace('\r\n', '\n').splitlines()
+                except Exception:
+                    pass
+
+            if mode == "replace_file":
+                new_lines = ch["to"].replace('\r\n', '\n').splitlines()
+            elif mode == "replace_block":
+                from_lines = ch["from"].replace('\r\n', '\n').splitlines()
+                to_lines = ch["to"].replace('\r\n', '\n').splitlines()
+                old_lines = from_lines
+                new_lines = to_lines
+            elif mode == "insert_after":
+                old_lines = ch["after"].replace('\r\n', '\n').splitlines()
+                new_lines = old_lines + ch["insert"].replace('\r\n', '\n').splitlines()
+            elif mode == "delete_block":
+                old_lines = ch["from"].replace('\r\n', '\n').splitlines()
+                new_lines = []
+
+            diff = difflib.unified_diff(
+                old_lines, new_lines,
+                fromfile="Original", tofile="Proposed Change", lineterm=""
+            )
+            diff_lines = list(diff)[2:]  # Skip header
+
+            html_parts = []
+            for line in diff_lines:
+                escaped = (line.replace("&", "&amp;")
+                               .replace("<", "&lt;")
+                               .replace(">", "&gt;"))
+                if line.startswith('+'):
+                    html_parts.append(f'<span style="color: {CP_GREEN}; background-color: #002b07;">{escaped}</span>')
+                elif line.startswith('-'):
+                    html_parts.append(f'<span style="color: {CP_RED}; background-color: #3b000d;">{escaped}</span>')
+                elif line.startswith('@@'):
+                    html_parts.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{escaped}</span>')
+                else:
+                    html_parts.append(f'<span style="color: {CP_TEXT};">{escaped}</span>')
+
+            diff_view.setHtml("<pre style='margin:0; font-family:Consolas;'>" + "<br>".join(html_parts) + "</pre>")
+            diff_view.setMaximumHeight(180)
+            g_layout.addWidget(diff_view)
+
+            v_box.addWidget(group)
+
+        scroll.setWidget(scroll_content)
+        layout.addWidget(scroll)
+
+        # Buttons
+        btn_row = QHBoxLayout()
+        btn_all = QPushButton("SELECT ALL")
+        btn_none = QPushButton("SELECT NONE")
+        btn_all.clicked.connect(lambda: [c.setChecked(True) for c in self.check_states])
+        btn_none.clicked.connect(lambda: [c.setChecked(False) for c in self.check_states])
+
+        btn_ok = QPushButton("✔ APPLY SELECTED")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_row.addWidget(btn_all)
+        btn_row.addWidget(btn_none)
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+    def get_selected_changes(self) -> list[dict]:
+        return [ch for ch, chk in zip(self.changes, self.check_states) if chk.isChecked()]
+
 
 
 # ── MERGE TAB ─────────────────────────────────────────────────────────────────
