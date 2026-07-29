@@ -393,9 +393,9 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     save_recent(current[:MAX_RECENT])
 
 def remove_recent(path: str):
-    path = os.path.normpath(path)
+    target = os.path.normpath(path).lower()
     current = load_recent_details()
-    current = [item for item in current if os.path.normpath(item["path"]) != path]
+    current = [item for item in current if os.path.normpath(item["path"]).lower() != target]
     save_recent(current)
 
 # ── MERGE LOGIC ───────────────────────────────────────────────────────────────
@@ -3390,13 +3390,13 @@ class PrepTab(QWidget):
             item.setHidden(not visible)
 
     def _update_active_project_highlight(self):
-        norm_root = os.path.normpath(self.project_root) if self.project_root else ""
+        norm_root = os.path.normpath(self.project_root).lower() if self.project_root else ""
         for i in range(self.project_list.count()):
             item = self.project_list.item(i)
             data = item.data(Qt.ItemDataRole.UserRole)
             if not data:
                 continue
-            path = os.path.normpath(data.get("path", ""))
+            path = os.path.normpath(data.get("path", "")).lower()
             widget = self.project_list.itemWidget(item)
             if not widget:
                 continue
@@ -3483,7 +3483,15 @@ class PrepTab(QWidget):
         elif action == act_open:
             self._open_explorer(path)
         elif action == act_remove:
+            norm_p = os.path.normpath(path).lower()
+            if self.project_root and os.path.normpath(self.project_root).lower() == norm_p:
+                self.project_root = ""
+                self.files.clear()
+                self.disabled_files.clear()
+                self.file_list.clear()
+                self._update_project_label()
             remove_recent(path)
+            self._save_session()
             self._populate_projects()
             self.status_cb(f"Removed project: {path}")
 
