@@ -2900,7 +2900,7 @@ class PrepTab(QWidget):
         parent = self
         class DumpHandler(BaseHTTPRequestHandler):
             def do_GET(self):
-                if self.path == "/codebase":
+                if self.path in ("/", "/codebase"):
                     self.send_response(200)
                     self.send_header("Content-type", "text/plain")
                     self.end_headers()
@@ -2989,7 +2989,7 @@ class PrepTab(QWidget):
         parent = self
         class DumpHandler(BaseHTTPRequestHandler):
             def do_GET(self):
-                if self.path == "/codebase":
+                if self.path in ("/", "/codebase"):
                     self.send_response(200)
                     self.send_header("Content-type", "text/plain")
                     self.end_headers()
