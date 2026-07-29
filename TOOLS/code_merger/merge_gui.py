@@ -1352,7 +1352,12 @@ class EditProjectDialog(QDialog):
 
         if self.disabled_files:
             for df in self.disabled_files:
-                li = QListWidgetItem(f"🚫 {os.path.basename(df)} ({df})")
+                try:
+                    rel_p = os.path.relpath(df, self.path)
+                except Exception:
+                    rel_p = os.path.basename(df)
+                li = QListWidgetItem(f"🚫  {rel_p}")
+                li.setToolTip(df)
                 li.setData(Qt.ItemDataRole.UserRole, df)
                 self.file_list.addItem(li)
         else:
