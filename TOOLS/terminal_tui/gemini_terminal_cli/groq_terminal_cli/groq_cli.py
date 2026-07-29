@@ -257,6 +257,77 @@ def replace_lines_in_file(path: Path, start_line: int, end_line: int, new_text: 
     except Exception as exc: return str(exc)
 
 
+# --- MODEL METADATA & TUI (Ported from Gemini CLI) ---
+
+def model_name(model: Dict[str, Any]) -> str:
+    return str(model.get("id", ""))
+
+
+def short_model_name(model: Dict[str, Any]) -> str:
+    name = model_name(model)
+    short = name
+    for prefix in ("llama-", "llama3-", "mixtral-", "gemma-", "gemma2-"):
+        if short.lower().startswith(prefix):
+            short = short[len(prefix):]
+            break
+    return short.replace("-", " ")
+
+
+def model_group(model: Dict[str, Any]) -> str:
+    name = model_name(model).lower()
+    if "llama" in name: return "Llama"
+    if "mixtral" in name: return "Mixtral"
+    if "gemma" in name: return "Gemma"
+    return "Other"
+
+
+def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
+    short_w = 0; name_w = 0; tag_w = 0
+    for m in models:
+        short_w = max(short_w, len(short_model_name(m)))
+        name_w = max(name_w, len(model_name(m)))
+        tag_w = max(tag_w, len(str(m.get("_tag") or "")))
+    return {
+        "short": min(max(short_w, 12), 28),
+        "name": min(max(name_w, 18), 42),
+        "tag": min(max(tag_w, 4), 12),
+    }
+
+
+def build_model_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur",
+        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---",
+    ]
+
+
+def format_model_entry(
+    index: int,
+    model: Dict[str, Any],
+    current_model: str,
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    name = model_name(model)
+    display_name = short_model_name(model)
+    active = "*" if name == current_model else " "
+    tag = str(model.get("_tag") or "")
+    usage = int(model.get("_uses") or 0)
+    marker = ">" if selected else " "
+    row = (
+        f"{marker} {index:>2}  "
+        f"{display_name:<{widths['short']}}  "
+        f"{name:<{widths['name']}}  "
+        f"{usage:>4}  "
+        f"{tag:<{widths['tag']}}  "
+        f"{active}"
+    ).rstrip()
+    if selected: return _ansi_wrap(row, "48;5;24;97")
+    if name == current_model: return _ansi_wrap(row, "32")
+    if model.get("_hidden"): return _ansi_wrap(row, "2")
+    return row
+
+
 class GroqClient:
     def __init__(self, api_key: str, model: str) -> None:
         self.api_key = api_key
@@ -381,8 +452,20 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-key")
     parser.add_argument("--password")
-    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--model", default=None)
     args = parser.parse_args()
+
+    # Load Preferences
+    prefs = {}
+    if MODEL_PREFS_FILE.exists():
+        try: prefs = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
+        except: pass
+
+    hidden_models = list(prefs.get("hidden_models", []))
+    speed_tags = dict(prefs.get("speed_tags", {}))
+    model_usage_counts = dict(prefs.get("model_usage_counts", {}))
+    last_model = str(prefs.get("last_model") or DEFAULT_MODEL)
+    system_instruction = str(prefs.get("system_instruction") or DEFAULT_SYSTEM)
 
     api_accounts = {}
     if API_ACCOUNTS_FILE.exists():
@@ -395,12 +478,26 @@ def main():
         error("No API key found. Start with --api-key or use /api.")
         api_key = "placeholder"
 
-    client = GroqClient(api_key, args.model)
+    active_model = args.model or last_model
+    client = GroqClient(api_key, active_model)
     messages: List[Dict[str, Any]] = []
     cwd = Path.cwd()
     tools = json.loads(TOOLS_FILE.read_text(encoding="utf-8")) if TOOLS_FILE.exists() else None
     history = load_prompt_history()
-    system_instruction = DEFAULT_SYSTEM
+
+    def persist_selection():
+        payload = {
+            "hidden_models": sorted(set(hidden_models)),
+            "speed_tags": speed_tags,
+            "model_usage_counts": model_usage_counts,
+            "last_model": client.model,
+            "system_instruction": system_instruction,
+        }
+        MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def record_usage(m_id: str):
+        model_usage_counts[m_id] = model_usage_counts.get(m_id, 0) + 1
+        persist_selection()
 
     title("Groq Terminal CLI (Fully Functional Port)")
     info(f"Model: {client.model} | Root: {cwd}")
@@ -431,20 +528,70 @@ def main():
             if cmd == "/mm":
                 try:
                     raw_models = client.list_models()
-                    models = [m['id'] for m in raw_models]
-                    chosen = interactive_select("Select Model", models, lambda item, i, sel: f"{'> ' if sel else '  '}{item}")
-                    if chosen: client.model = chosen; info(f"Switched to {chosen}")
+                    # Filter and decorate
+                    decorated = []
+                    for m in raw_models:
+                        m_id = m['id']
+                        copy_m = dict(m)
+                        copy_m["_tag"] = speed_tags.get(m_id, "")
+                        copy_m["_uses"] = model_usage_counts.get(m_id, 0)
+                        copy_m["_hidden"] = m_id in hidden_models
+                        decorated.append(copy_m)
+                    
+                    decorated.sort(key=lambda x: (model_group(x), x['id']))
+                    
+                    # If arg provided, try to switch directly
+                    if rem:
+                        target = rem.strip()
+                        if target.isdigit():
+                            idx = int(target) - 1
+                            if 0 <= idx < len(decorated):
+                                client.model = decorated[idx]['id']
+                                info(f"Switched to {client.model}"); persist_selection()
+                                continue
+                        # Match by name
+                        for m in decorated:
+                            if target in m['id']:
+                                client.model = m['id']
+                                info(f"Switched to {client.model}"); persist_selection()
+                                break
+                        continue
+
+                    # Otherwise, show interactive TUI
+                    widths = build_model_table_widths(decorated)
+                    print()
+                    for line in build_model_table_header(widths): print(line)
+                    
+                    chosen = interactive_select("Select Model", decorated, 
+                        lambda m, i, sel: format_model_entry(i+1, m, client.model, widths, sel))
+                    
+                    if chosen:
+                        client.model = chosen['id']
+                        info(f"Model set to {client.model}"); persist_selection()
                 except Exception as e: error(str(e))
                 continue
             if cmd == "/test":
-                info("Testing models...")
+                info("Testing all models and auto-hiding failures...")
                 try:
                     raw_models = client.list_models()
+                    passed_any = False
                     for m in raw_models:
-                        mid = m['id']
-                        print(f"- {mid} ... ", end="", flush=True)
-                        res = test_model(client, mid)
-                        print(f"{res}")
+                        m_id = m['id']
+                        print(f"- {m_id} ... ", end="", flush=True)
+                        start_t = time.perf_counter()
+                        res = test_model(client, m_id)
+                        elapsed = time.perf_counter() - start_t
+                        
+                        if res == "OK":
+                            print(_ansi_wrap(f"OK ({elapsed:.2f}s)", "32"))
+                            if m_id in hidden_models: hidden_models.remove(m_id)
+                            passed_any = True
+                        else:
+                            print(_ansi_wrap(f"FAIL ({res})", "31"))
+                            if m_id not in hidden_models: hidden_models.append(m_id)
+                    
+                    persist_selection()
+                    if passed_any: info("Tests complete. Hidden models updated.")
                 except Exception as e: error(str(e))
                 continue
             if cmd == "/api":
@@ -482,6 +629,7 @@ def main():
         for _ in range(DEFAULT_TOOL_LOOPS):
             try:
                 response = client.generate(messages, system_instruction=system_instruction, tools=tools)
+                record_usage(client.model)
             except Exception as e: error(str(e)); break
                 
             msg = response["choices"][0]["message"]
