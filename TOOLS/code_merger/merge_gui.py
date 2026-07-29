@@ -406,6 +406,50 @@ def remove_recent(path: str):
     current = [item for item in current if os.path.normpath(item["path"]).lower() != target]
     save_recent(current)
 
+def resequence_pinned_projects(items: list[dict], target_path: str = None, set_pinned: bool = None, target_index: int = None) -> list[dict]:
+    """
+    Re-sequences all pinned projects to ensure proper contiguous ordering (1, 2, 3...).
+    Inserts target_path at target_index, shifting existing pinned items and filling any gaps.
+    """
+    norm_target = os.path.normpath(target_path) if target_path else None
+
+    pinned_list = []
+    unpinned_list = []
+
+    for item in items:
+        p_norm = os.path.normpath(item["path"])
+        if norm_target and p_norm == norm_target:
+            if set_pinned is not None:
+                item["pinned"] = set_pinned
+            if target_index is not None and set_pinned:
+                item["pin_index"] = target_index
+
+        if item.get("pinned", False):
+            pinned_list.append(item)
+        else:
+            item["pinned"] = False
+            item["pin_index"] = 0
+            unpinned_list.append(item)
+
+    # Sort existing pinned items by current pin_index
+    pinned_list.sort(key=lambda x: x.get("pin_index", 1))
+
+    # If target_path is being pinned or re-indexed, place it at position target_index - 1
+    if norm_target and set_pinned:
+        target_item = next((x for x in pinned_list if os.path.normpath(x["path"]) == norm_target), None)
+        if target_item:
+            pinned_list.remove(target_item)
+            idx_pos = max(0, min(len(pinned_list), (target_index or 1) - 1))
+            pinned_list.insert(idx_pos, target_item)
+
+    # Re-assign strictly contiguous 1-based indices (1, 2, 3...)
+    for idx, item in enumerate(pinned_list, start=1):
+        item["pinned"] = True
+        item["pin_index"] = idx
+
+    return items
+
+
 # ── MERGE LOGIC ───────────────────────────────────────────────────────────────
 _TOKENS = r'(@@FILE:|@@MODE:|@@TO:|@@FROM:|@@AFTER:|@@INSERT:|@@END)'
 
@@ -3372,10 +3416,12 @@ class PrepTab(QWidget):
                     item["category"] = new_cat
                     item["icon"] = new_icon
                     item["disabled_files"] = updated_disabled
-                    item["pinned"] = new_pinned
-                    item["pin_index"] = new_pin_index
 
             PROJECT_ICONS[norm_p] = new_icon
+
+            # Automatically shift existing items and re-sequence pin indices cleanly
+            resequence_pinned_projects(items, target_path=norm_p, set_pinned=new_pinned, target_index=new_pin_index)
+
             save_recent(items)
 
             if norm_p == os.path.normpath(self.project_root):
@@ -3406,6 +3452,7 @@ class PrepTab(QWidget):
     def _populate_projects(self):
         self.project_list.clear()
         items = load_recent_details()
+        items = resequence_pinned_projects(items)
 
         # Sort pinned projects to top by pin_index ascending, then unpinned projects
         def sort_projects_key(item):
@@ -3593,22 +3640,19 @@ class PrepTab(QWidget):
         if action == act_pin:
             items = load_recent_details()
             norm_p = os.path.normpath(path)
-            for it in items:
-                if os.path.normpath(it["path"]) == norm_p:
-                    if is_pinned:
-                        it["pinned"] = False
-                        self.status_cb(f"Unpinned project: {name}")
-                    else:
-                        val, ok = QInputDialog.getInt(
-                            self, "Pin Project",
-                            f"Enter pin index for '{name}' (1 = top position):",
-                            value=1, min=1, max=999
-                        )
-                        if ok:
-                            it["pinned"] = True
-                            it["pin_index"] = val
-                            self.status_cb(f"Pinned '{name}' at index #{val}")
-                    break
+            if is_pinned:
+                resequence_pinned_projects(items, target_path=norm_p, set_pinned=False)
+                self.status_cb(f"Unpinned project: {name}")
+            else:
+                val, ok = QInputDialog.getInt(
+                    self, "Pin Project",
+                    f"Enter pin index for '{name}' (1 = top position):",
+                    value=1, min=1, max=999
+                )
+                if ok:
+                    resequence_pinned_projects(items, target_path=norm_p, set_pinned=True, target_index=val)
+                    self.status_cb(f"Pinned '{name}' at index #{val}")
+
             save_recent(items)
             self._populate_projects()
         elif action == act_load_all:
