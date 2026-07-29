@@ -382,6 +382,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
             break
 
     name = existing.get("name", "") if existing else ""
+    category = existing.get("category", "") if existing else ""
+    icon = existing.get("icon", "") if existing else ""
     clicks = existing.get("clicks", 0) if existing else 0
     clicks += 1
 
@@ -417,6 +419,10 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     }
     if name:
         new_entry["name"] = name
+    if category:
+        new_entry["category"] = category
+    if icon:
+        new_entry["icon"] = icon
     current.insert(0, new_entry)
     save_recent(current[:MAX_RECENT])
 
