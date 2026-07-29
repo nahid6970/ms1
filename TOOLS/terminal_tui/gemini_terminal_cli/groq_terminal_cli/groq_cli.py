@@ -395,6 +395,51 @@ def list_directory(path: Path) -> str:
         entries = [f"{item.name}{'/' if item.is_dir() else ''}" for item in sorted(path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))]
         return "\n".join(entries) if entries else "Directory is empty."
     except Exception as exc: return str(exc)
+def search_web(query: str, max_results: int = 5) -> str:
+    if not query.strip(): return "Error: query is required."
+    max_results = max(1, min(int(max_results or 5), 10))
+    url = "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query})
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except Exception as exc: return f"Error: {exc}"
+
+    results: List[str] = []
+    pattern = re.compile(r'<a[^>]+class="result__a"[^>]+href="(?P<href>[^"]+)"[^>]*>(?P<title>.*?)</a>', re.I | re.S)
+    for match in pattern.finditer(raw):
+        href = html.unescape(match.group("href"))
+        title = html.unescape(re.sub(r"<[^>]+>", "", match.group("title"))).strip()
+        parsed = urllib.parse.urlparse(href)
+        params = urllib.parse.parse_qs(parsed.query)
+        if "uddg" in params: href = params["uddg"][0]
+        if title and href: results.append(f"{len(results)+1}. {title}\n   {href}")
+        if len(results) >= max_results: break
+    return "\n".join(results) if results else "No results found."
+
+
+def search_tavily(query: str, tavily_accounts: Dict[str, str], max_results: int = 5) -> str:
+    if not query.strip(): return "Error: query is required."
+    if not tavily_accounts: return "Error: no Tavily API accounts saved. Use /api to add one."
+    max_results = max(1, min(int(max_results or 5), 10))
+    errors = []
+    for acc_name, api_key in sorted(tavily_accounts.items()):
+        payload = {"api_key": api_key, "query": query, "max_results": max_results}
+        req = urllib.request.Request("https://api.tavily.com/search", data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                body = json.loads(resp.read().decode())
+                res_list = body.get("results", [])
+                lines = [f"Tavily account: {acc_name}"]
+                for i, r in enumerate(res_list[:max_results], 1):
+                    lines.append(f"{i}. {r.get('title')}\n   {r.get('url')}\n   {r.get('content')}")
+                return "\n".join(lines)
+        except Exception as e:
+            errors.append(f"{acc_name}: {e}")
+    return "Error: Tavily failed.\n" + "\n".join(errors)
+
+
+
 
 
 def run_powershell_command(command: str, cwd: Path, timeout_seconds: int = 60) -> str:
@@ -517,6 +562,89 @@ def build_model_table_header(widths: Dict[str, int]) -> List[str]:
         f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  {'State':<{widths['state']}}",
         f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  {'-' * widths['state']}",
     ]
+
+
+def build_api_account_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int]:
+    prov_w = 0; name_w = 0; key_w = 0
+    for item in items:
+        prov_w = max(prov_w, len(str(item.get("provider", ""))))
+        name_w = max(name_w, len(str(item.get("name", ""))))
+        key_w = max(key_w, len(str(item.get("masked_key", ""))))
+    return {
+        "prov": min(max(prov_w, 6), 10),
+        "name": min(max(name_w, 10), 28),
+        "key": min(max(key_w, 10), 24),
+    }
+
+
+def build_api_account_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Prov':<{widths['prov']}}  {'Account':<{widths['name']}}  {'Key':<{widths['key']}}  State",
+        f"  {'--':>2}  {'-' * widths['prov']}  {'-' * widths['name']}  {'-' * widths['key']}  -----",
+    ]
+
+
+def format_api_account_entry(
+    index: int,
+    item: Dict[str, Any],
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    action = str(item.get("action", "load"))
+    provider = str(item.get("provider", ""))
+    name = str(item.get("name", ""))
+    key = str(item.get("masked_key", ""))
+    state = str(item.get("state", ""))
+    marker = ">" if selected else " "
+    row = (
+        f"{marker} {index:>2}  "
+        f"{provider:<{widths['prov']}}  "
+        f"{name:<{widths['name']}}  "
+        f"{key:<{widths['key']}}  "
+        f"{state}"
+    ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    if action == "add":
+        return _ansi_wrap(row, "32")
+    return row
+
+
+def pick_api_account_interactive(
+    accounts: Dict[str, str],
+    tavily_accounts: Dict[str, str],
+    active_api_account: str = "",
+    title_text: str = "Manage API Accounts",
+) -> Optional[Dict[str, str]]:
+    items: List[Dict[str, Any]] = [
+        {"action": "add", "provider": "groq", "name": "Add Groq API", "masked_key": "", "state": "new"},
+        {"action": "add", "provider": "tavily", "name": "Add Tavily API", "masked_key": "", "state": "new"}
+    ]
+    for name, key in sorted(accounts.items(), key=lambda item: item[0].lower()):
+        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+        state = "active" if name == active_api_account else "saved"
+        items.append({"action": "load", "provider": "groq", "name": name, "masked_key": masked, "state": state})
+    for name, key in sorted(tavily_accounts.items(), key=lambda item: item[0].lower()):
+        masked = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+        items.append({"action": "load", "provider": "tavily", "name": name, "masked_key": masked, "state": "saved"})
+    widths = build_api_account_table_widths(items)
+
+    def render_item(item: Dict[str, Any], _: int, selected: bool = False) -> str:
+        return format_api_account_entry(_ + 1, item, widths, selected=selected)
+
+    chosen = interactive_select(
+        title_text=title_text,
+        items=items,
+        render_item=render_item,
+    )
+    if not chosen:
+        return None
+    return {
+        "action": str(chosen["action"]),
+        "provider": str(chosen["provider"]),
+        "name": str(chosen["name"]),
+    }
+
 
 
 def format_model_entry(
@@ -703,12 +831,14 @@ class GroqClient:
             return json.loads(resp.read().decode("utf-8")).get("data", [])
 
 
-def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
+def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None) -> str:
     if name == "read_file": return read_file(resolve_path(args.get("filepath", ""), cwd))
     if name == "write_file": return write_file(resolve_path(args.get("filepath", ""), cwd), args.get("content", ""))
     if name == "list_directory": return list_directory(resolve_path(args.get("path", "."), cwd))
     if name == "get_system_info": return f"OS: {platform.system()} | CWD: {cwd}"
     if name == "search_file": return search_file(resolve_path(args.get("path", "."), cwd), str(args.get("query", "")), bool(args.get("recursive", False)))
+    if name == "search_web": return search_web(str(args.get("query", "")), int(args.get("max_results", 5) or 5))
+    if name == "search_tavily": return search_tavily(str(args.get("query", "")), tavily_accounts or {}, int(args.get("max_results", 5) or 5))
     if name == "run_powershell": return run_powershell_command(str(args.get("command", "")), cwd, int(args.get("timeout_seconds", 60) or 60))
     if name == "smart_replace_block": return smart_replace_block_in_file(resolve_path(args.get("filepath", ""), cwd), str(args.get("old_text", "")), str(args.get("new_text", "")), int(args.get("occurrence", 1) or 1))
     if name == "replace_lines": return replace_lines_in_file(resolve_path(args.get("filepath", ""), cwd), int(args.get("start_line", 1)), int(args.get("end_line", 1)), str(args.get("new_text", "")))
@@ -719,9 +849,12 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path) -> str:
 def _require_api_crypto():
     if not all([AES, PBKDF2, get_random_bytes]): raise RuntimeError("pycryptodome required.")
 
-def _encrypt_api_accounts(accounts: Dict[str, str], password: str) -> bytes:
+def _encrypt_api_accounts(accounts: Dict[str, str], password: str, tavily_accounts: Optional[Dict[str, str]] = None) -> bytes:
     _require_api_crypto()
-    payload = json.dumps({"accounts": accounts}, indent=2).encode("utf-8")
+    payload = json.dumps({
+        "accounts": accounts,
+        "tavily_accounts": tavily_accounts or {}
+    }, indent=2).encode("utf-8")
     salt = get_random_bytes(16)
     key = PBKDF2(password.encode(), salt, dkLen=32, count=200_000)
     cipher = AES.new(key, AES.MODE_EAX)
@@ -729,7 +862,7 @@ def _encrypt_api_accounts(accounts: Dict[str, str], password: str) -> bytes:
     def pack(b): return len(b).to_bytes(4, 'big') + b
     return API_ACCOUNTS_MAGIC + pack(salt) + pack(cipher.nonce) + pack(tag) + pack(ciphertext)
 
-def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, str]:
+def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, Any]:
     _require_api_crypto()
     if not blob.startswith(API_ACCOUNTS_MAGIC): raise ValueError("Invalid lock file.")
     def unpack(b, o):
@@ -739,7 +872,11 @@ def _decrypt_api_accounts(blob: bytes, password: str) -> Dict[str, str]:
     salt, o = unpack(blob, o); nonce, o = unpack(blob, o); tag, o = unpack(blob, o); ct, o = unpack(blob, o)
     key = PBKDF2(password.encode(), salt, dkLen=32, count=200_000)
     cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
-    return json.loads(cipher.decrypt_and_verify(ct, tag).decode())["accounts"]
+    data = json.loads(cipher.decrypt_and_verify(ct, tag).decode())
+    if not isinstance(data, dict): data = {"accounts": {}}
+    if "accounts" not in data: data = {"accounts": data, "tavily_accounts": {}}
+    if "tavily_accounts" not in data: data["tavily_accounts"] = {}
+    return data
 
 
 def test_model(client: GroqClient, model_id: str) -> str:
@@ -794,15 +931,26 @@ def main():
     model_usage_counts = dict(prefs.get("model_usage_counts", {}))
     disabled_tools = set(prefs.get("disabled_tools", []))
     last_model = str(prefs.get("last_model") or DEFAULT_MODEL)
+    last_api_account = str(prefs.get("last_api_account") or "")
     system_instruction = str(prefs.get("system_instruction") or DEFAULT_SYSTEM)
 
     api_accounts = {}
+    tavily_accounts = {}
     if API_ACCOUNTS_FILE.exists():
         pwd = args.password or getpass.getpass("Groq Lock Password: ")
-        try: api_accounts = _decrypt_api_accounts(API_ACCOUNTS_FILE.read_bytes(), pwd)
+        try:
+            decrypted = _decrypt_api_accounts(API_ACCOUNTS_FILE.read_bytes(), pwd)
+            api_accounts = decrypted.get("accounts", {})
+            tavily_accounts = decrypted.get("tavily_accounts", {})
         except: error("Failed to unlock API accounts."); return 1
 
-    api_key = args.api_key or (next(iter(api_accounts.values())) if api_accounts else os.environ.get("GROQ_API_KEY"))
+    active_api_account = ""
+    api_key = args.api_key or os.environ.get("GROQ_API_KEY")
+    
+    if not api_key and api_accounts:
+        active_api_account = last_api_account if last_api_account in api_accounts else next(iter(sorted(api_accounts.keys(), key=str.lower)))
+        api_key = api_accounts[active_api_account]
+
     if not api_key:
         error("No API key found. Start with --api-key or use /api.")
         api_key = "placeholder"
@@ -824,6 +972,7 @@ def main():
             "model_usage_counts": model_usage_counts,
             "disabled_tools": sorted(list(disabled_tools)),
             "last_model": client.model,
+            "last_api_account": active_api_account,
             "system_instruction": system_instruction,
         }
         MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -942,12 +1091,35 @@ def main():
                 except Exception as e: error(str(e))
                 continue
             if cmd == "/api":
-                name = input("Account Name: "); key = input("Key: ")
-                if name and key:
-                    api_accounts[name] = key
+                chosen_api = pick_api_account_interactive(api_accounts, tavily_accounts, active_api_account)
+                if not chosen_api: continue
+                
+                prov = chosen_api["provider"]
+                if chosen_api["action"] == "add":
+                    name = input(f"{prov.title()} API name: ").strip()
+                    if not name: continue
+                    key = input(f"{prov.title()} API key: ").strip()
+                    if not key: continue
+                    
                     pwd = args.password or getpass.getpass("Password to protect API file: ")
-                    API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(api_accounts, pwd))
-                    client.api_key = key; info("Saved and switched.")
+                    if prov == "tavily": tavily_accounts[name] = key
+                    else: api_accounts[name] = key
+                    
+                    try:
+                        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(api_accounts, pwd, tavily_accounts))
+                        if prov == "groq":
+                            active_api_account = name
+                            client.api_key = key
+                            persist_selection()
+                        info(f"Added {prov} account: {name}")
+                    except Exception as e: error(f"Failed to save: {e}")
+                elif prov == "tavily":
+                    info(f"Tavily account: {chosen_api['name']} (Key: {tavily_accounts[chosen_api['name']][:4]}...)")
+                else:
+                    active_api_account = chosen_api["name"]
+                    client.api_key = api_accounts[active_api_account]
+                    persist_selection()
+                    info(f"Switched to API account: {active_api_account}")
                 continue
             if cmd == "/system":
                 if rem: system_instruction = rem; info("System instruction updated.")
@@ -1027,7 +1199,7 @@ def main():
                 except: t_args = {}
                 
                 info(f"[tool] {t_name}")
-                result = execute_tool(t_name, t_args, cwd)
+                result = execute_tool(t_name, t_args, cwd, tavily_accounts=tavily_accounts)
                 messages.append({"role": "tool", "tool_call_id": t_id, "content": result})
                 info(f"[result] {str(result)[:80]}...")
 

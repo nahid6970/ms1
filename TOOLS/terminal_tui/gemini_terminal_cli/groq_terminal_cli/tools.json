@@ -82,6 +82,40 @@
   },
   {
     "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "function": {
+      "name": "search_web",
+      "description": "Web search using DuckDuckGo HTML scraping. No API key needed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "function": {
+      "name": "search_tavily",
+      "description": "Web search using Tavily API. Requires saved Tavily API keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
     "category": "Code Modifications",
     "rating": "Best for multi-file changes (Resilient)",
     "function": {
