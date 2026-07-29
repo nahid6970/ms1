@@ -965,7 +965,17 @@ def main():
                 break
                 
             msg = response["choices"][0]["message"]
-            messages.append(msg)
+            
+            # Sanitize message for cross-model compatibility by removing reasoning/think fields
+            sanitized_msg = {
+                "role": msg.get("role"),
+                "content": msg.get("content")
+            }
+            if msg.get("tool_calls"):
+                sanitized_msg["tool_calls"] = msg.get("tool_calls")
+            
+            messages.append(sanitized_msg)
+            
             if msg.get("content"):
                 cleaned_text = _clean_response_text(msg['content'])
                 if cleaned_text:
