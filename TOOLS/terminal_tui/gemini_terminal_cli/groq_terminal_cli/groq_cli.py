@@ -13,6 +13,8 @@ import time
 import subprocess
 import sys
 import textwrap
+import unicodedata
+
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -107,8 +109,17 @@ def _clean_response_text(text: str) -> str:
     # Remove everything between <think> and </think> tags, including the tags themselves
     return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
 def _visible_len(text: str) -> int:
-    """Calculate the visible length of a string, ignoring ANSI escape codes."""
-    return len(re.sub(r'\x1b\[[0-9;]*[mK]', '', text))
+    """Calculate the visible length of a string, ignoring ANSI escape codes and accounting for wide characters."""
+    clean_text = re.sub(r'\x1b\[[0-9;]*[mK]', '', text)
+    width = 0
+    for char in clean_text:
+        # unicodedata.east_asian_width returns 'W' (Wide) or 'F' (Fullwidth) for characters
+        # that typically take up two columns in a terminal (like emojis or CJK characters).
+        if unicodedata.east_asian_width(char) in ('W', 'F'):
+            width += 2
+        else:
+            width += 1
+    return width
 
 
 def _format_seconds(seconds: float) -> str:
