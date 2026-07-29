@@ -385,18 +385,20 @@ def main():
     title("Groq Terminal CLI (Fully Functional Port)")
     info(f"Model: {client.model} | Root: {cwd}")
 
+    def get_prompt():
+        return _ansi_wrap(f"groq:{client.model.split('-')[0]}> ", "1;32")
+
     while True:
         try:
-            if pt_prompt:
-                user_input = pt_prompt(
-                    ANSI(_ansi_wrap(f"groq:{client.model.split('-')[0]}> ", "1;32")),
-                    history=InMemoryHistory(history),
-                    auto_suggest=AutoSuggestFromHistory()
-                ).strip()
-            else:
-                user_input = input(_ansi_wrap(f"groq:{client.model.split('-')[0]}> ", "1;32")).strip()
-        except (EOFError, KeyboardInterrupt): break
-        if not user_input: continue
+            user_input = read_dynamic_prompt(get_prompt, history, cwd=cwd).strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        if not user_input:
+            user_input = "continue"
+            info("continue")
+        
         append_prompt_history(user_input, history)
 
         if user_input.startswith("/"):
@@ -478,6 +480,129 @@ def main():
                 info(f"[result] {str(result)[:80]}...")
 
     return 0
+
+if Completer is not None:
+    class GroqCliCompleter(Completer):
+        SLASH_COMMANDS = [
+            ("/help", "Show available commands"),
+            ("/exit", "Quit CLI"),
+            ("/quit", "Quit CLI"),
+            ("/reset", "Clear conversation history"),
+            ("/mm", "Open model picker / switch model"),
+            ("/test", "Test all models"),
+            ("/api", "Open API account picker"),
+            ("/system", "Replace or load system instruction"),
+            ("/save", "Save transcript JSON"),
+            ("/load", "Load transcript JSON"),
+        ]
+
+        def __init__(self, cwd: Optional[Path] = None):
+            self.cwd = Path(cwd) if cwd else Path.cwd()
+
+        def _get_path_completions(self, raw_path: str) -> List[tuple[str, str, str]]:
+            raw_path = raw_path.replace("\\", "/")
+            if "/" in raw_path:
+                dir_part, _, search_part = raw_path.rpartition("/")
+            else:
+                dir_part, search_part = "", raw_path
+
+            if dir_part:
+                if dir_part == "~" or dir_part.startswith("~/"):
+                    target_dir = Path(dir_part).expanduser()
+                else:
+                    target_dir = self.cwd / dir_part
+            else:
+                target_dir = self.cwd
+
+            if not target_dir.exists() or not target_dir.is_dir():
+                return []
+
+            results: List[tuple[str, str, str]] = []
+            try:
+                for entry in sorted(target_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
+                    name = entry.name
+                    if name.startswith(".") and not search_part.startswith("."):
+                        continue
+                    if name == "__pycache__" and not search_part.startswith("__"):
+                        continue
+                    if not search_part or search_part.lower() in name.lower():
+                        is_dir = entry.is_dir()
+                        item_name = name + ("/" if is_dir else "")
+                        full_rel = f"{dir_part}/{item_name}" if dir_part else item_name
+                        meta = "Directory" if is_dir else "File"
+                        results.append((full_rel, item_name, meta))
+            except Exception:
+                pass
+            return results
+
+        def get_completions(self, document, complete_event):
+            text = document.text_before_cursor
+
+            # 1. Slash commands at start of line
+            if text.startswith("/"):
+                if " " not in text:
+                    for cmd, desc in self.SLASH_COMMANDS:
+                        if cmd.lower().startswith(text.lower()) or text.lower() in cmd.lower():
+                            yield Completion(
+                                cmd,
+                                start_position=-len(text),
+                                display=cmd,
+                                display_meta=desc,
+                            )
+                    return
+                else:
+                    cmd_part, _, arg_part = text.partition(" ")
+                    cmd_lower = cmd_part.lower()
+                    if cmd_lower in {"/save", "/load", "/system"}:
+                        for full_rel, display_name, meta in self._get_path_completions(arg_part):
+                            yield Completion(
+                                full_rel,
+                                start_position=-len(arg_part),
+                                display=display_name,
+                                display_meta=meta,
+                            )
+                        return
+
+            # 2. @ file and folder completions anywhere in the line
+            last_at = text.rfind("@")
+            if last_at != -1:
+                after_at = text[last_at + 1 :]
+                if " " not in after_at and "\t" not in after_at:
+                    for full_rel, display_name, meta in self._get_path_completions(after_at):
+                        yield Completion(
+                            full_rel,
+                            start_position=-len(after_at),
+                            display=display_name,
+                            display_meta=meta,
+                        )
+else:
+    GroqCliCompleter = None
+
+
+def read_dynamic_prompt(
+    prompt_provider: Callable[[], str],
+    history: Optional[List[str]] = None,
+    cwd: Optional[Path] = None,
+) -> str:
+    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
+        prompt_history = InMemoryHistory(history or [])
+        completer = GroqCliCompleter(cwd=cwd) if GroqCliCompleter is not None else None
+        user_style = Style.from_dict({'': 'ansired'})
+        
+        return pt_prompt(
+            message=lambda: ANSI(prompt_provider()),
+            history=prompt_history,
+            auto_suggest=AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
+            completer=completer,
+            complete_while_typing=True,
+            complete_style=CompleteStyle.COLUMN,
+            mouse_support=False,
+            wrap_lines=True,
+            refresh_interval=0.25,
+            style=user_style,
+        )
+    return input(prompt_provider())
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
