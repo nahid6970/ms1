@@ -136,6 +136,7 @@ PROJECTS_NAME_COLOR = "#FCEE0A"
 APP_NAME = "CODE MERGER // CYBERPUNK EDITION"
 EXTENSION_ICON_SIZE = 16
 SHOW_FILE_MODE_CONTROLS = True
+SHOW_PROJECT_PATHS = True
 PANEL_WEIGHT_PROJECTS = 260
 PANEL_WEIGHT_FILES = 360
 PANEL_WEIGHT_PROMPT = 560
@@ -175,7 +176,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, PROJECT_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME, SHOW_PROJECT_PATHS
     try:
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -192,6 +193,7 @@ def load_settings():
                 APP_NAME = data.get('app_name', 'CODE MERGER // CYBERPUNK EDITION')
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
                 SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
+                SHOW_PROJECT_PATHS = data.get('show_project_paths', True)
                 PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
                 PANEL_WEIGHT_FILES = data.get('panel_weight_files', 360)
                 PANEL_WEIGHT_PROMPT = data.get('panel_weight_prompt', 560)
@@ -210,9 +212,9 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A", app_name: str = "CODE MERGER // CYBERPUNK EDITION", proj_icons: dict[str, str] = None):
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A", app_name: str = "CODE MERGER // CYBERPUNK EDITION", proj_icons: dict[str, str] = None, show_project_paths: bool = True):
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, PROJECT_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME, SHOW_PROJECT_PATHS
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
@@ -224,6 +226,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
     APP_NAME = app_name
     EXTENSION_ICON_SIZE = icon_size
     SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
+    SHOW_PROJECT_PATHS = show_project_paths
     PANEL_WEIGHT_PROJECTS = w_projects
     PANEL_WEIGHT_FILES = w_files
     PANEL_WEIGHT_PROMPT = w_prompt
@@ -243,6 +246,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
         data['app_name'] = APP_NAME
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
         data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
+        data['show_project_paths'] = SHOW_PROJECT_PATHS
         data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
         data['panel_weight_files'] = PANEL_WEIGHT_FILES
         data['panel_weight_prompt'] = PANEL_WEIGHT_PROMPT
@@ -1458,6 +1462,7 @@ class SettingsDialog(QDialog):
         self.app_name = APP_NAME
         self.icon_size = EXTENSION_ICON_SIZE
         self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
+        self.show_project_paths = SHOW_PROJECT_PATHS
         self.w_projects = PANEL_WEIGHT_PROJECTS
         self.w_files = PANEL_WEIGHT_FILES
         self.w_prompt = PANEL_WEIGHT_PROMPT
@@ -1575,6 +1580,14 @@ class SettingsDialog(QDialog):
         self.chk_show_mode.setStyleSheet(f"color: {CP_TEXT};")
         self.chk_show_mode.setToolTip("When unchecked, the Full/Outline selector per file and the\nMinify / Set-all toolbar are hidden to save space.")
         v_font.addWidget(self.chk_show_mode)
+
+        # Show / Hide Project Directory Paths
+        self.chk_show_proj_paths = QCheckBox("Show directory paths under project names in Projects panel")
+        self.chk_show_proj_paths.setChecked(self.show_project_paths)
+        self.chk_show_proj_paths.setStyleSheet(f"color: {CP_TEXT};")
+        self.chk_show_proj_paths.setToolTip("Uncheck to hide directory paths under project names in the sidebar.")
+        v_font.addWidget(self.chk_show_proj_paths)
+
 
         # ── PANEL WIDTH WEIGHTS SECTION ──
         lbl_panels = QLabel("Panel Initial Widths (px):")
@@ -1995,7 +2008,7 @@ class SettingsDialog(QDialog):
         name_item = QTableWidgetItem(name)
         name_item.setToolTip(path)
         name_item.setData(Qt.ItemDataRole.UserRole, path)
-        name_item.setFont(QFont("Consolas", 9.5))
+        name_item.setFont(QFont("Consolas", 10))
         self.proj_icon_table.setItem(row, 0, name_item)
 
         widget = QWidget()
@@ -2082,11 +2095,12 @@ class SettingsDialog(QDialog):
         app_name = self.input_app_name.text().strip() or "CODE MERGER // CYBERPUNK EDITION"
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
+        show_proj_paths = self.chk_show_proj_paths.isChecked()
         w_proj = self.spin_w_proj.value()
         w_files = self.spin_w_files.value()
         w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color, app_name, proj_icons)
+        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color, app_name, proj_icons, show_proj_paths)
         self.accept()
 
 
@@ -3109,7 +3123,7 @@ class PrepTab(QWidget):
                 list(CUSTOM_IGNORED_EXTS), EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE,
                 PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS,
                 PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT,
-                PROJECTS_NAME_COLOR, APP_NAME, PROJECT_ICONS
+                PROJECTS_NAME_COLOR, APP_NAME, PROJECT_ICONS, SHOW_PROJECT_PATHS
             )
             self.status_cb(f"Updated icon for project: {os.path.basename(path)}")
             self._populate_projects()
@@ -3171,7 +3185,8 @@ class PrepTab(QWidget):
             else:
                 vl.addWidget(lbl_name)
 
-            vl.addWidget(lbl_path)
+            if SHOW_PROJECT_PATHS:
+                vl.addWidget(lbl_path)
             
             item_h = max(44, PROJECTS_FONT_SIZE + 28)
             li.setSizeHint(QSize(0, item_h))
