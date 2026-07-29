@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
     QDialog, QScrollArea, QGridLayout, QComboBox, QTableWidget,
-    QTableWidgetItem, QHeaderView, QSpinBox, QColorDialog
+    QTableWidgetItem, QHeaderView, QSpinBox, QColorDialog, QInputDialog
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
@@ -288,7 +288,9 @@ def load_recent_details() -> list[dict]:
                     "files": [os.path.normpath(f) for f in p.get("files", [])],
                     "disabled_files": [os.path.normpath(f) for f in p.get("disabled_files", [])],
                     "extensions": p.get("extensions", []),
-                    "clicks": p.get("clicks", 0)
+                    "clicks": p.get("clicks", 0),
+                    "pinned": p.get("pinned", False),
+                    "pin_index": p.get("pin_index", 0)
                 })
         return out
     except Exception:
@@ -315,7 +317,9 @@ def save_recent(items: list[dict]):
                 "files": [os.path.normpath(f) for f in item.get("files", [])],
                 "disabled_files": [os.path.normpath(f) for f in item.get("disabled_files", [])],
                 "extensions": item.get("extensions", []),
-                "clicks": item.get("clicks", 0)
+                "clicks": item.get("clicks", 0),
+                "pinned": item.get("pinned", False),
+                "pin_index": item.get("pin_index", 0)
             }
             if item.get("icon"):
                 PROJECT_ICONS[p] = item["icon"]
@@ -344,6 +348,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     category = existing.get("category", "") if existing else ""
     icon = existing.get("icon", "") if existing else ""
     clicks = existing.get("clicks", 0) if existing else 0
+    pinned = existing.get("pinned", False) if existing else False
+    pin_index = existing.get("pin_index", 0) if existing else 0
     clicks += 1
 
     # If overwrite_existing is False, preserve any existing saved selection details
@@ -381,7 +387,9 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
         "files": normalized_files,
         "disabled_files": normalized_disabled,
         "extensions": extensions,
-        "clicks": clicks
+        "clicks": clicks,
+        "pinned": pinned,
+        "pin_index": pin_index
     }
     if name:
         new_entry["name"] = name
@@ -3353,27 +3361,38 @@ class PrepTab(QWidget):
     def _populate_projects(self):
         self.project_list.clear()
         items = load_recent_details()
+
+        # Sort pinned projects to top by pin_index ascending, then unpinned projects
+        def sort_projects_key(item):
+            is_pinned = item.get("pinned", False)
+            pin_idx = item.get("pin_index", 0)
+            return (0 if is_pinned else 1, pin_idx if is_pinned else 0)
+
+        items.sort(key=sort_projects_key)
+
         for item in items:
             path = item["path"]
             name = item.get("name")
             files = item.get("files", [])
-            
+            is_pinned = item.get("pinned", False)
+            pin_idx = item.get("pin_index", 0)
+
             li = QListWidgetItem()
             li.setData(Qt.ItemDataRole.UserRole, item)
-            
+
             widget = QWidget()
             widget.setObjectName("proj_item_container")
             vl = QVBoxLayout(widget)
             vl.setContentsMargins(10, 4, 6, 4)
             vl.setSpacing(2)
             vl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-            
+
             category = item.get("category", "")
             icon_val = item.get("icon", "") or PROJECT_ICONS.get(os.path.normpath(path), "")
 
             display_name = name if name else os.path.basename(path)
             if not display_name: display_name = path
-            
+
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
             lbl_name.setStyleSheet(f"color: {PROJECTS_NAME_COLOR}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
@@ -3389,7 +3408,15 @@ class PrepTab(QWidget):
                 icon_lbl.setStyleSheet("background: transparent;")
                 hl_title.addWidget(icon_lbl, 0)
 
-            hl_title.addWidget(lbl_name, 1)
+            hl_title.addWidget(lbl_name, 0)
+
+            if is_pinned:
+                red_dot = QLabel("🔴")
+                red_dot.setStyleSheet(f"font-size: 7.5pt; color: {CP_RED}; background: transparent;")
+                red_dot.setToolTip(f"Pinned Project (Index #{pin_idx})")
+                hl_title.addWidget(red_dot, 0)
+
+            hl_title.addStretch(1)
 
             if category:
                 lbl_cat = QLabel(f"[{category}]")
@@ -3404,12 +3431,12 @@ class PrepTab(QWidget):
 
             if SHOW_PROJECT_PATHS:
                 vl.addWidget(lbl_path)
-            
+
             item_h = max(44, PROJECTS_FONT_SIZE + 28)
             li.setSizeHint(QSize(0, item_h))
             self.project_list.addItem(li)
             self.project_list.setItemWidget(li, widget)
-        
+
         self._filter_projects()
         self._update_active_project_highlight()
 
@@ -3496,21 +3523,50 @@ class PrepTab(QWidget):
         if not item: return
         data = item.data(Qt.ItemDataRole.UserRole)
         path = data.get("path")
-        
+        name = data.get("name") or os.path.basename(path) or path
+        is_pinned = data.get("pinned", False)
+        pin_index = data.get("pin_index", 1)
+
         menu = QMenu(self)
         menu.setStyleSheet(f"""
             QMenu {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; }}
             QMenu::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; }}
         """)
-        
+
+        if is_pinned:
+            act_pin = menu.addAction(f"📌  Unpin Project (Index #{pin_index})")
+        else:
+            act_pin = menu.addAction("📌  Pin Project to Top...")
+
         act_load_all = menu.addAction("🔄  Re-scan & Load All")
         act_edit     = menu.addAction("✏️  Edit Project Details")
         act_open     = menu.addAction("📂  Open in Explorer")
         menu.addSeparator()
         act_remove   = menu.addAction("✕  Remove from List")
-        
+
         action = menu.exec(self.project_list.viewport().mapToGlobal(pos))
-        if action == act_load_all:
+        if action == act_pin:
+            items = load_recent_details()
+            norm_p = os.path.normpath(path)
+            for it in items:
+                if os.path.normpath(it["path"]) == norm_p:
+                    if is_pinned:
+                        it["pinned"] = False
+                        self.status_cb(f"Unpinned project: {name}")
+                    else:
+                        val, ok = QInputDialog.getInt(
+                            self, "Pin Project",
+                            f"Enter pin index for '{name}' (1 = top position):",
+                            value=1, min=1, max=999
+                        )
+                        if ok:
+                            it["pinned"] = True
+                            it["pin_index"] = val
+                            self.status_cb(f"Pinned '{name}' at index #{val}")
+                    break
+            save_recent(items)
+            self._populate_projects()
+        elif action == act_load_all:
             self._load_all_project_files(path)
             self._populate_projects()
         elif action == act_edit:
