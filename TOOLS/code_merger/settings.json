@@ -149,7 +149,7 @@
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\alarm_timer",
-      "name": "Tool - Alarm Countodwn Timer"
+      "name": "Alarm Countodwn Timer"
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\code_merger",
@@ -176,5 +176,5 @@
   "panel_weight_projects": 300,
   "panel_weight_files": 500,
   "panel_weight_prompt": 400,
-  "projects_font_size": 13
+  "projects_font_size": 15
 }

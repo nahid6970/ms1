@@ -2830,9 +2830,9 @@ class PrepTab(QWidget):
             widget = QWidget()
             widget.setObjectName("proj_item_container")
             vl = QVBoxLayout(widget)
-            vl.setContentsMargins(10, 5, 6, 5)
-            vl.setSpacing(1)
-            vl.setAlignment(Qt.AlignmentFlag.AlignTop)
+            vl.setContentsMargins(10, 4, 6, 4)
+            vl.setSpacing(2)
+            vl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
             
             display_name = name if name else os.path.basename(path)
             if not display_name: display_name = path
@@ -2840,17 +2840,16 @@ class PrepTab(QWidget):
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
             lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
-            lbl_name.setWordWrap(True)
             
             lbl_path = QLabel(path)
             lbl_path.setObjectName("proj_path_label")
             lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
-            lbl_path.setWordWrap(True)
             
             vl.addWidget(lbl_name)
             vl.addWidget(lbl_path)
             
-            li.setSizeHint(widget.sizeHint())
+            item_h = max(44, PROJECTS_FONT_SIZE + 28)
+            li.setSizeHint(QSize(0, item_h))
             self.project_list.addItem(li)
             self.project_list.setItemWidget(li, widget)
         
