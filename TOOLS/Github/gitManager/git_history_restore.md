@@ -5,7 +5,7 @@ A powerful and visually striking GUI tool for navigating Git history and restori
 ## Features
 
 - **Cyberpunk UI**: A high-contrast, themed interface designed for developers.
-- **Commit History**: Browse recent commits with details on hash, date, author, and messages.
+- **Commit History**: Browse recent commits with details on hash, date, and messages.
 - **Commit Explorer**: Browse the **entire repository structure** at any specific commit point in a themed tree view.
 - **Detailed Diffs**: Interactive diff viewer with syntax highlighting (additions/deletions) and expandable/collapsable file sections.
 - **Selective Restoration**: 
