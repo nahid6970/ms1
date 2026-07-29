@@ -16,33 +16,27 @@ Follow these steps in order when working with Google AI Studio:
 
 ```
 ┌──────────────────────────┐    ┌──────────────────────────┐    ┌──────────────────────────┐
-│ 1. Start Tailscale       │ ──>│ 2. Save URL in Settings  │ ──>│ 3. Select Files &        │
-│    `tailscale funnel 8999`    │    │    in Code Merger       │    │    Click 🌐 TS Prompt    │
+│ 1. Save URL in Settings  │ ──>│ 2. Select Files &        │ ──>│ 3. Paste & Run in        │
+│    (One-time setup)      │    │    Click 🌐 TS Prompt    │    │    Google AI Studio      │
 └──────────────────────────┘    └──────────────────────────┘    └──────────────────────────┘
-                                                                             │
-┌──────────────────────────┐    ┌──────────────────────────┐                 ▼
-│ 6. Apply Changes to Disk │ <──│ 5. Parse in MERGE Tab    │ <──│ 4. Run in AI Studio     │
-│    (Click ✔ APPLY)       │    │    (Click 🔍 PARSE)      │    │    (Paste & Generate)    │
-└──────────────────────────┘    └──────────────────────────┘    └──────────────────────────┘
+                                             │
+┌──────────────────────────┐    ┌──────────────────────────┐                 │
+│ 5. Apply Changes to Disk │ <──│ 4. Parse in MERGE Tab    │ <───────────────┘
+│    (Click ✔ APPLY)       │    │    (Click 🔍 PARSE)      │
+└──────────────────────────┘    └──────────────────────────┘
 ```
 
-### Step 1: Start Tailscale Funnel First
-Open terminal / PowerShell and run:
-```bash
-tailscale funnel 8999
-```
-*Tailscale will display your public HTTPS URL (e.g., `https://your-device.tailnet-name.ts.net`). Keep this terminal open while working.*
-
-### Step 2: Configure Code Merger (One-time or per session)
+### Step 1: Configure Settings (One-time Setup)
 1. Open **Code Merger** (`python merge_gui.py`).
 2. Click **⚙ SETTINGS** (top-right).
-3. Paste your public Tailscale URL (e.g. `https://your-device.tailnet-name.ts.net`) into the **Tailscale Funnel URL** field and save.
+3. Paste your Tailscale URL (e.g. `https://your-device.tailnet-name.ts.net`) into the **Tailscale Funnel URL** field and save.
 
-### Step 3: Bundle Code & Generate Prompt (`⚙ PREP Tab`)
+### Step 2: Bundle Code & Generate Prompt (`⚙ PREP Tab`)
 1. Open Code Merger and select your project folder/files.
 2. Type what you want the AI to do in the **TASK / INSTRUCTIONS** box.
 3. Click **🌐 TS** (Tailscale Prompt).
-   - Code Merger automatically hosts your bundled codebase at `http://127.0.0.1:8999/codebase` and generates the exact prompt pointing to your public Tailscale URL context.
+   - Code Merger automatically launches a terminal window to reset and serve `tailscale funnel 8999`.
+   - Your codebase dump is served live at both `https://your-device.tailnet-name.ts.net/` and `https://your-device.tailnet-name.ts.net/codebase`.
 4. Click **📋 COPY TO CLIPBOARD**.
 
 ### Step 4: Run in Google AI Studio
