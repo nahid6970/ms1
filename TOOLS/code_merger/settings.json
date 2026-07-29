@@ -30,14 +30,19 @@
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
       ],
-      "disabled_files": [],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
       "extensions": [
         "",
         ".json",
         ".py",
         ".md"
       ],
-      "clicks": 57
+      "clicks": 102
     },
     {
       "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
@@ -55,36 +60,18 @@
         "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
         "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
         "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json"
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json"
       ],
       "extensions": [
         ".json",
         ".py",
-        ".txt",
-        ".md"
-      ],
-      "clicks": 35
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
-      "name": "Git Manager",
-      "category": "Tools",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.md",
-        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.py",
-        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_ref_rescue_gui.md",
-        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_ref_rescue_gui.py"
-      ],
-      "disabled_files": [],
-      "extensions": [
         ".md",
-        ".py"
+        ".txt"
       ],
-      "clicks": 24
+      "clicks": 53
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
@@ -129,18 +116,18 @@
       ],
       "disabled_files": [
         "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt",
         "C:\\@delta\\db\\@Convex\\myhome-convex\\.gitignore",
         "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md"
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md"
       ],
       "extensions": [
         "",
@@ -153,7 +140,25 @@
         ".txt",
         ".py"
       ],
-      "clicks": 21
+      "clicks": 30
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
+      "name": "Git Manager",
+      "category": "Tools",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.md",
+        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_history_restore.py",
+        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_ref_rescue_gui.md",
+        "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager\\git_ref_rescue_gui.py"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".md",
+        ".py"
+      ],
+      "clicks": 33
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\image-share",
@@ -640,7 +645,12 @@
     "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "minify": false,
     "file_modes": {},
-    "disabled_files": []
+    "disabled_files": [
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+    ]
   },
   "backup": false,
   "preview": true

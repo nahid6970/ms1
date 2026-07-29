@@ -2924,6 +2924,20 @@ class PrepTab(QWidget):
         self.project_path_lbl.setWordWrap(False)
         self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
 
+        btn_open_folder = QPushButton("📂")
+        btn_open_folder.setFixedHeight(22)
+        btn_open_folder.setFixedWidth(28)
+        btn_open_folder.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_open_folder.setToolTip("Open active project root folder in File Manager")
+        btn_open_folder.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_YELLOW};
+                font-size: 9pt; padding: 2px;
+            }}
+            QPushButton:hover {{ border-color: {CP_YELLOW}; background-color: #2a2a2a; }}
+        """)
+        btn_open_folder.clicked.connect(self._open_project_folder)
+
         btn_clear = QPushButton("✕ CLEAR")
         btn_clear.setFixedHeight(22)
         btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -2950,6 +2964,7 @@ class PrepTab(QWidget):
         btn_all_en.clicked.connect(self._toggle_all)
 
         top_bar.addWidget(self.project_path_lbl, 1)
+        top_bar.addWidget(btn_open_folder, 0)
         top_bar.addWidget(btn_clear, 0)
         top_bar.addWidget(btn_all_en, 0)
 
@@ -3314,6 +3329,15 @@ class PrepTab(QWidget):
         self.file_list.clear()
         self._save_session()
         self.status_cb("File list cleared")
+
+    def _open_project_folder(self):
+        root = self.project_root.strip()
+        if root and os.path.exists(root):
+            self._open_explorer(root)
+            self.status_cb(f"Opened project directory: {root}")
+        else:
+            self.status_cb("⚠ No valid project directory set")
+
 
     def _populate_projects(self):
         self.project_list.clear()
