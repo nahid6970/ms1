@@ -3249,7 +3249,7 @@ class DiffPreviewDialog(QDialog):
             diff_view = QTextEdit()
             diff_view.setReadOnly(True)
             diff_view.setFont(QFont("Consolas", 10))
-            diff_view.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+            diff_view.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
             diff_view.setStyleSheet(f"background-color: #060606; border: 1px solid {CP_DIM}; padding: 6px;")
             self.diff_views.append(diff_view)
 
@@ -3289,15 +3289,15 @@ class DiffPreviewDialog(QDialog):
                                .replace("<", "&lt;")
                                .replace(">", "&gt;"))
                 if line.startswith('+'):
-                    html_parts.append(f'<div style="color: {CP_GREEN}; background-color: #002e07; font-weight: bold; padding: 1px 4px;">{escaped}</div>')
+                    html_parts.append(f'<div style="color: {CP_GREEN}; background-color: #002e07; font-weight: bold; padding: 1px 4px; white-space: pre-wrap; word-wrap: break-word;">{escaped}</div>')
                 elif line.startswith('-'):
-                    html_parts.append(f'<div style="color: {CP_RED}; background-color: #3b000d; padding: 1px 4px;">{escaped}</div>')
+                    html_parts.append(f'<div style="color: {CP_RED}; background-color: #3b000d; padding: 1px 4px; white-space: pre-wrap; word-wrap: break-word;">{escaped}</div>')
                 elif line.startswith('@@'):
-                    html_parts.append(f'<div style="color: {CP_CYAN}; font-weight: bold; background-color: #11222e; margin-top: 4px; margin-bottom: 4px; padding: 2px 4px;">{escaped}</div>')
+                    html_parts.append(f'<div style="color: {CP_CYAN}; font-weight: bold; background-color: #11222e; margin-top: 4px; margin-bottom: 4px; padding: 2px 4px; white-space: pre-wrap; word-wrap: break-word;">{escaped}</div>')
                 else:
-                    html_parts.append(f'<div style="color: {CP_TEXT}; padding: 0 4px;">{escaped}</div>')
+                    html_parts.append(f'<div style="color: {CP_TEXT}; padding: 0 4px; white-space: pre-wrap; word-wrap: break-word;">{escaped}</div>')
 
-            diff_view.setHtml("<pre style='margin:0; font-family:Consolas; line-height:1.3;'>" + "".join(html_parts) + "</pre>")
+            diff_view.setHtml("<div style='margin:0; font-family:Consolas; line-height:1.3; white-space: pre-wrap; word-wrap: break-word;'>" + "".join(html_parts) + "</div>")
 
             # Extended dynamic height based on line count (from 160px up to 600px tall per block)
             line_count = len(diff_lines) or 5
