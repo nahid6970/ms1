@@ -1,0 +1,203 @@
+[
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Essential)",
+    "function": {
+      "name": "read_file",
+      "description": "Read a local file and return its text content (UTF-8). Truncates at 12000 chars.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" }
+        },
+        "required": ["filepath"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Code Modifications",
+    "rating": "Use with caution (Overwrites)",
+    "function": {
+      "name": "write_file",
+      "description": "Write content to a file, creating parent dirs if needed. OVERWRITES the entire file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["filepath", "content"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "function": {
+      "name": "list_directory",
+      "description": "List directory contents sorted (dirs first, then files).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "function": {
+      "name": "get_system_info",
+      "description": "Returns OS platform, Python version, and current working directory.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Best (Safe)",
+    "function": {
+      "name": "search_file",
+      "description": "Case-insensitive text search within a file or directory.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "query": { "type": "string" },
+          "recursive": { "type": "boolean" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["path", "query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "function": {
+      "name": "search_web",
+      "description": "Web search using DuckDuckGo HTML scraping. No API key needed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Inspection & File System",
+    "rating": "Safe",
+    "function": {
+      "name": "search_tavily",
+      "description": "Web search using Tavily API. Requires saved Tavily API keys.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for multi-file changes (Resilient)",
+    "function": {
+      "name": "fuzzy_apply_patch",
+      "description": "Apply a unified diff patch with fuzzy matching and line-ending fallback.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "patch": { "type": "string", "description": "A unified diff with ---/+++ headers." }
+        },
+        "required": ["patch"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for targeted edits (High accuracy)",
+    "function": {
+      "name": "smart_replace_block",
+      "description": "Replace a text block in a file with fuzzy fallback matching for line-endings and whitespace.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "old_text": { "type": "string" },
+          "new_text": { "type": "string" },
+          "occurrence": { "type": "integer" }
+        },
+        "required": ["filepath", "old_text", "new_text"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Code Modifications",
+    "rating": "Best for exact line ranges (Low token)",
+    "function": {
+      "name": "replace_lines",
+      "description": "Replace a specific range of 1-indexed line numbers in a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "start_line": { "type": "integer" },
+          "end_line": { "type": "integer" },
+          "new_text": { "type": "string" }
+        },
+        "required": ["filepath", "start_line", "end_line", "new_text"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Execution & Shell",
+    "rating": "Best for Windows inspection & tests",
+    "function": {
+      "name": "run_powershell",
+      "description": "Run a PowerShell command for inspection, git checks, or tests.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string" },
+          "timeout_seconds": { "type": "integer" }
+        },
+        "required": ["command"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "category": "Control Flow",
+    "rating": "Safe",
+    "function": {
+      "name": "request_follow_up",
+      "description": "Request another turn for multi-step work.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+]

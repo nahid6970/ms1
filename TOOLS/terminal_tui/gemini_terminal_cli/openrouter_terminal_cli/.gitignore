@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+transcripts/
+session*.json
+.env
+api_accounts.lock
+model_prefs.json
+prompt_history.txt
