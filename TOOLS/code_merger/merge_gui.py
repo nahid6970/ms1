@@ -2326,17 +2326,17 @@ class PrepTab(QWidget):
         self.project_list.setStyleSheet(f"""
             QListWidget {{
                 background-color: {CP_PANEL}; border: 1px solid {CP_DIM};
+                outline: none;
             }}
             QListWidget::item {{
                 background: transparent;
+                border: none;
                 border-bottom: 1px solid #1a1a1a;
             }}
-            QListWidget::item:selected {{
+            QListWidget::item:selected, QListWidget::item:hover {{
                 background: transparent;
                 border: none;
-            }}
-            QListWidget::item:hover {{
-                background-color: #161616;
+                outline: none;
             }}
         """)
         self.project_list.itemClicked.connect(self._on_project_clicked)
@@ -2722,9 +2722,10 @@ class PrepTab(QWidget):
             li.setData(Qt.ItemDataRole.UserRole, item)
             
             widget = QWidget()
+            widget.setObjectName("proj_item_container")
             vl = QVBoxLayout(widget)
-            vl.setContentsMargins(6, 4, 6, 4)
-            vl.setSpacing(2)
+            vl.setContentsMargins(10, 6, 6, 6)
+            vl.setSpacing(3)
             
             display_name = name if name else os.path.basename(path)
             if not display_name: display_name = path
@@ -2778,16 +2779,24 @@ class PrepTab(QWidget):
             
             if is_active:
                 widget.setStyleSheet(f"""
-                    QWidget {{
+                    QWidget#proj_item_container {{
                         background-color: #1c3335;
                         border-left: 3px solid {CP_CYAN};
+                    }}
+                    QLabel {{
+                        border: none;
+                        background: transparent;
                     }}
                 """)
             else:
                 widget.setStyleSheet("""
-                    QWidget {
+                    QWidget#proj_item_container {
                         background-color: transparent;
                         border-left: 3px solid transparent;
+                    }
+                    QLabel {
+                        border: none;
+                        background: transparent;
                     }
                 """)
 
