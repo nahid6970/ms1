@@ -2187,7 +2187,6 @@ class PrepTab(QWidget):
             QMenu::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; }}
         """)
         act_remove = menu.addAction(f"✕  Remove  {os.path.basename(fp)}")
-        act_remove.setForeground(QColor(CP_RED))
         action = menu.exec(widget.mapToGlobal(pos))
         if action == act_remove:
             self._remove_file(fp, item)
@@ -2296,7 +2295,7 @@ class PrepTab(QWidget):
         self.btn_col_ext.setStyleSheet(f"QPushButton {{ {base} {ext_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
         self.btn_col_name.setText(f"NAME {name_arrow}")
         self.btn_col_name.setStyleSheet(f"QPushButton {{ {base} {name_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
-        self.btn_col_tokens.setText(f"TOKENS {tokens_arrow}")
+        self.btn_col_tokens.setText(f"TOK {tokens_arrow}")
         self.btn_col_tokens.setStyleSheet(f"QPushButton {{ {base} {tokens_s} }} QPushButton:hover {{ color: {CP_CYAN}; }}")
 
     def _build(self):
@@ -2321,6 +2320,7 @@ class PrepTab(QWidget):
         vp.addWidget(self.project_search)
 
         self.project_list = QListWidget()
+        self.project_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.project_list.setAlternatingRowColors(True)
         self.project_list.setStyleSheet(f"""
             QListWidget {{
@@ -2417,19 +2417,46 @@ class PrepTab(QWidget):
 
         self.btn_col_ext = QPushButton("EXT ↕")
         self.btn_col_ext.setFixedHeight(20)
-        self.btn_col_ext.setFixedWidth(52)
+        self.btn_col_ext.setMinimumWidth(38)
         self.btn_col_ext.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_ext.setToolTip("Sort by file extension")
+        self.btn_col_ext.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 7.5pt; font-weight: bold;
+                padding: 0 1px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
         self.btn_col_ext.clicked.connect(self._sort_by_ext)
 
         self.btn_col_name = QPushButton("NAME ↕")
         self.btn_col_name.setFixedHeight(20)
         self.btn_col_name.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_name.setToolTip("Sort by file name")
+        self.btn_col_name.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 7.5pt; font-weight: bold;
+                padding: 0 1px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
         self.btn_col_name.clicked.connect(self._sort_by_name)
 
-        self.btn_col_tokens = QPushButton("TOKENS ↕")
+        self.btn_col_tokens = QPushButton("TOK ↕")
         self.btn_col_tokens.setFixedHeight(20)
-        self.btn_col_tokens.setFixedWidth(72)
+        self.btn_col_tokens.setMinimumWidth(42)
         self.btn_col_tokens.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_col_tokens.setToolTip("Sort by estimated token count")
+        self.btn_col_tokens.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; border: none;
+                color: {CP_SUB}; font-family: 'Consolas'; font-size: 7.5pt; font-weight: bold;
+                padding: 0 1px;
+            }}
+            QPushButton:hover {{ color: {CP_CYAN}; }}
+        """)
         self.btn_col_tokens.clicked.connect(self._sort_by_tokens)
 
         hh.addWidget(self.btn_col_ext)
@@ -2447,14 +2474,24 @@ class PrepTab(QWidget):
         left_layout.addWidget(grp_files, 1)
 
         btn_row = QHBoxLayout()
-        btn_add     = QPushButton("＋ ADD FILES")
+        btn_row.setSpacing(4)
+        btn_add     = QPushButton("＋ ADD")
         btn_clear   = QPushButton("✕ CLEAR")
         btn_all_en  = QPushButton("⬤ ALL")
-        btn_all_en.setFixedWidth(50)
+        btn_all_en.setFixedWidth(45)
         btn_all_en.setToolTip("Toggle all files enabled/disabled")
         
+        btn_style = f"""
+            QPushButton {{
+                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
+                padding: 4px 6px; font-weight: bold; font-family: 'Consolas'; font-size: 8pt;
+            }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+        """
         for b in (btn_add, btn_clear, btn_all_en):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setStyleSheet(btn_style)
+
         btn_add.clicked.connect(self._add_files)
         btn_clear.clicked.connect(self._clear_files)
         btn_all_en.clicked.connect(self._toggle_all)
@@ -2517,8 +2554,9 @@ class PrepTab(QWidget):
         splitter.addWidget(left_widget)
         splitter.addWidget(right_widget)
         splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
-        splitter.setStretchFactor(2, 3)
+        splitter.setStretchFactor(1, 1)
+        splitter.setStretchFactor(2, 2)
+        splitter.setSizes([260, 360, 560])
 
         layout.addWidget(splitter)
 
@@ -2681,7 +2719,8 @@ class PrepTab(QWidget):
             if not display_name: display_name = path
             
             lbl_name = QLabel(display_name)
-            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 9pt;")
+            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 8.5pt;")
+            lbl_name.setWordWrap(True)
             
             lbl_path = QLabel(path)
             lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7pt;")
@@ -2734,7 +2773,6 @@ class PrepTab(QWidget):
         act_open     = menu.addAction("📂  Open in Explorer")
         menu.addSeparator()
         act_remove   = menu.addAction("✕  Remove from List")
-        act_remove.setForeground(QColor(CP_RED))
         
         action = menu.exec(self.project_list.viewport().mapToGlobal(pos))
         if action == act_load_all:
@@ -3098,7 +3136,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CODE MERGER  //  CYBERPUNK EDITION")
-        self.resize(900, 680)
+        self.resize(1280, 800)
+        self.setMinimumSize(1024, 600)
         self.setStyleSheet(THEME)
         self._build()
 
