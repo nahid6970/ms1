@@ -267,35 +267,9 @@ def load_recent_details() -> list[dict]:
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                 settings_data = json.load(f)
         
-        # Backward compatibility with old recent_projects.json
-        old_recent = os.path.join(_HERE, "recent_projects.json")
-        if not os.path.exists(SETTINGS_PATH) and os.path.exists(old_recent):
-            with open(old_recent, 'r', encoding='utf-8') as f:
-                raw = json.load(f)
-            out = []
-            seen = set()
-            for item in raw:
-                if isinstance(item, dict):
-                    p = item.get("path")
-                else:
-                    p = item
-                if not p:
-                    continue
-                n = os.path.normpath(p)
-                if n not in seen:
-                    seen.add(n)
-                    out.append({
-                        "path": n,
-                        "name": item.get("name", "") if isinstance(item, dict) else "",
-                        "files": item.get("files", []) if isinstance(item, dict) else [],
-                        "extensions": item.get("extensions", []) if isinstance(item, dict) else [],
-                        "clicks": item.get("clicks", 0) if isinstance(item, dict) else 0
-                    })
-            return out
-
         projects = settings_data.get('projects', [])
-        # Create a lookup for names from settings.json
-        name_map = {os.path.normpath(p.get("path", "")): p.get("name", "") for p in projects if "path" in p}
+        # Create lookups for metadata from settings.json
+        proj_meta = {os.path.normpath(p.get("path", "")): p for p in projects if "path" in p}
         
         session_data = {}
         if os.path.exists(SESSION_PATH):
@@ -306,22 +280,24 @@ def load_recent_details() -> list[dict]:
         
         out = []
         seen = set()
-        # Iterate over project_states to preserve recency order!
         for state in project_states:
             path = state.get("path")
             if not path: continue
             n = os.path.normpath(path)
             if n not in seen:
                 seen.add(n)
+                meta = proj_meta.get(n, {})
                 out.append({
                     "path": n,
-                    "name": name_map.get(n, ""),
+                    "name": meta.get("name", ""),
+                    "category": meta.get("category", ""),
+                    "icon": meta.get("icon", "") or PROJECT_ICONS.get(n, ""),
                     "files": state.get("files", []),
+                    "disabled_files": state.get("disabled_files", []),
                     "extensions": state.get("extensions", []),
                     "clicks": state.get("clicks", 0)
                 })
         
-        # Also include any projects from settings that aren't in session state
         for p in projects:
             path = p.get("path")
             if not path: continue
@@ -331,7 +307,10 @@ def load_recent_details() -> list[dict]:
                 out.append({
                     "path": n,
                     "name": p.get("name", ""),
+                    "category": p.get("category", ""),
+                    "icon": p.get("icon", "") or PROJECT_ICONS.get(n, ""),
                     "files": [],
+                    "disabled_files": [],
                     "extensions": [],
                     "clicks": 0
                 })
@@ -343,11 +322,18 @@ def load_recent_details() -> list[dict]:
 def save_recent(items: list[dict]):
     import json
     try:
-        proj_map = {}
+        proj_list = []
         for item in items:
             p = os.path.normpath(item["path"])
-            name = item.get("name", "")
-            proj_map[p] = name
+            entry = {
+                "path": p,
+                "name": item.get("name", ""),
+                "category": item.get("category", ""),
+                "icon": item.get("icon", "")
+            }
+            if item.get("icon"):
+                PROJECT_ICONS[p] = item["icon"]
+            proj_list.append(entry)
 
         settings_data = {}
         if os.path.exists(SETTINGS_PATH):
@@ -356,8 +342,8 @@ def save_recent(items: list[dict]):
             if not isinstance(settings_data, dict):
                 settings_data = {}
 
-        new_projects = [{"path": k, "name": v} for k, v in sorted(proj_map.items())]
-        settings_data['projects'] = new_projects
+        settings_data['projects'] = proj_list
+        settings_data['project_icons'] = PROJECT_ICONS
         with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
             json.dump(settings_data, f, indent=2, ensure_ascii=False)
 
@@ -372,6 +358,7 @@ def save_recent(items: list[dict]):
             {
                 "path": os.path.normpath(item["path"]),
                 "files": item.get("files", []),
+                "disabled_files": item.get("disabled_files", []),
                 "extensions": item.get("extensions", []),
                 "clicks": item.get("clicks", 0)
             }
@@ -1290,6 +1277,129 @@ class RecentPopup(QFrame):
 
 
 # ── EXTENSION SELECTOR DIALOG ────────────────────────────────────────────────
+# ── EDIT PROJECT DIALOG ─────────────────────────────────────────────────────
+class EditProjectDialog(QDialog):
+    """Unified modal dialog to edit project alias name, category, icon, and manage hidden files."""
+    def __init__(self, path: str, name: str, category: str, icon: str, disabled_files: list[str], parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("✏️ EDIT PROJECT DETAILS")
+        self.resize(560, 480)
+        self.setStyleSheet(THEME)
+        self.path = path
+        self.disabled_files = list(disabled_files)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(12)
+
+        # Path Read-only label
+        lbl_path = QLabel(f"Project Path: {path}")
+        lbl_path.setWordWrap(True)
+        lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 8.5pt;")
+        layout.addWidget(lbl_path)
+
+        # Name input
+        h_name = QHBoxLayout()
+        lbl_n = QLabel("Project Alias:")
+        lbl_n.setFixedWidth(110)
+        lbl_n.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold;")
+        self.input_name = QLineEdit(name)
+        self.input_name.setPlaceholderText("Custom display name…")
+        h_name.addWidget(lbl_n)
+        h_name.addWidget(self.input_name)
+        layout.addLayout(h_name)
+
+        # Category input
+        h_cat = QHBoxLayout()
+        lbl_c = QLabel("Category / Tags:")
+        lbl_c.setFixedWidth(110)
+        lbl_c.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold;")
+        self.input_cat = QLineEdit(category)
+        self.input_cat.setPlaceholderText("e.g. Frontend, Tools, Python, AI…")
+        h_cat.addWidget(lbl_c)
+        h_cat.addWidget(self.input_cat)
+        layout.addLayout(h_cat)
+
+        # Custom Icon input + preview
+        h_icon = QHBoxLayout()
+        lbl_i = QLabel("Custom Icon:")
+        lbl_i.setFixedWidth(110)
+        lbl_i.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold;")
+
+        self.input_icon = QLineEdit(icon)
+        self.input_icon.setPlaceholderText("Emoji, Nerd Font, or SVG XML snippet…")
+
+        self.icon_preview = QLabel()
+        self.icon_preview.setFixedSize(24, 24)
+        self.icon_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.icon_preview.setStyleSheet("background: transparent;")
+        self.icon_preview.setPixmap(render_extension_icon(icon, 20))
+
+        self.input_icon.textChanged.connect(lambda text: self.icon_preview.setPixmap(render_extension_icon(text, 20)))
+
+        h_icon.addWidget(lbl_i)
+        h_icon.addWidget(self.input_icon, 1)
+        h_icon.addWidget(self.icon_preview, 0)
+        layout.addLayout(h_icon)
+
+        # Hidden / Disabled Files Manager
+        grp_files = QGroupBox("HIDDEN / DISABLED FILES IN THIS PROJECT")
+        v_gf = QVBoxLayout(grp_files)
+
+        self.file_list = QListWidget()
+        self.file_list.setMaximumHeight(140)
+        self.file_list.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM};")
+
+        if self.disabled_files:
+            for df in self.disabled_files:
+                li = QListWidgetItem(f"🚫 {os.path.basename(df)} ({df})")
+                li.setData(Qt.ItemDataRole.UserRole, df)
+                self.file_list.addItem(li)
+        else:
+            li = QListWidgetItem("No hidden/disabled files for this project.")
+            li.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.file_list.addItem(li)
+
+        v_gf.addWidget(self.file_list)
+
+        btn_unhide = QPushButton("✔ Un-hide Selected File")
+        btn_unhide.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_unhide.setStyleSheet(f"background-color: {CP_DIM}; font-size: 8.5pt;")
+        btn_unhide.clicked.connect(self._unhide_selected)
+        v_gf.addWidget(btn_unhide)
+
+        layout.addWidget(grp_files)
+
+        # Buttons
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ SAVE DETAILS")
+        btn_cancel = QPushButton("✕ CANCEL")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                                 f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
+
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel.clicked.connect(self.reject)
+
+        btn_row.addStretch()
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+    def _unhide_selected(self):
+        curr = self.file_list.currentItem()
+        if curr:
+            fp = curr.data(Qt.ItemDataRole.UserRole)
+            if fp and fp in self.disabled_files:
+                self.disabled_files.remove(fp)
+                self.file_list.takeItem(self.file_list.row(curr))
+
+    def get_details(self) -> tuple[str, str, str, list[str]]:
+        return self.input_name.text().strip(), self.input_cat.text().strip(), self.input_icon.text().strip(), self.disabled_files
+
 SCRIPTS_EXTS = {'.py', '.ps1', '.bat', '.sh', '.cmd', '.js', '.ts', '.jsx', '.tsx', '.go', '.rs', '.cpp', '.c', '.h', '.cs', '.java', '.kt', '.rb', '.pl', '.php'}
 WEB_EXTS     = {'.html', '.htm', '.css', '.scss', '.sass', '.less', '.vue', '.svelte'}
 
@@ -3102,37 +3212,49 @@ class PrepTab(QWidget):
         self._update_root()
         self._save_session()
 
-    def _rename_recent(self, path: str):
-        from PyQt6.QtWidgets import QInputDialog
-        current_name = ""
+    def _edit_project(self, path: str):
         items = load_recent_details()
+        target_item = None
         for item in items:
-            if item["path"] == path:
-                current_name = item.get("name", "")
+            if os.path.normpath(item["path"]) == os.path.normpath(path):
+                target_item = item
                 break
-        new_name, ok = QInputDialog.getText(self, "Rename Project", "Enter new name (leave empty to show full path):", text=current_name)
-        if ok:
-            for item in items:
-                if item["path"] == path:
-                    item["name"] = new_name.strip()
-            save_recent(items)
-            self.status_cb(f"Renamed: {path}")
-            self._populate_projects()
 
-    def _change_project_icon(self, path: str):
-        from PyQt6.QtWidgets import QInputDialog
-        norm_p = os.path.normpath(path)
-        current_icon = PROJECT_ICONS.get(norm_p, "")
-        new_icon, ok = QInputDialog.getText(self, "Change Project Icon", "Enter Emoji, Nerd Font character, or SVG XML snippet:", text=current_icon)
-        if ok:
-            PROJECT_ICONS[norm_p] = new_icon.strip()
-            save_settings(
-                list(CUSTOM_IGNORED_EXTS), EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE,
-                PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS,
-                PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT,
-                PROJECTS_NAME_COLOR, APP_NAME, PROJECT_ICONS, SHOW_PROJECT_PATHS
-            )
-            self.status_cb(f"Updated icon for project: {os.path.basename(path)}")
+        if not target_item:
+            target_item = {"path": path, "name": "", "category": "", "icon": "", "disabled_files": []}
+
+        curr_disabled = target_item.get("disabled_files", [])
+        if os.path.normpath(path) == os.path.normpath(self.project_root):
+            curr_disabled = list(self.disabled_files)
+
+        dlg = EditProjectDialog(
+            path=path,
+            name=target_item.get("name", ""),
+            category=target_item.get("category", ""),
+            icon=target_item.get("icon", ""),
+            disabled_files=curr_disabled,
+            parent=self
+        )
+
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            new_name, new_cat, new_icon, updated_disabled = dlg.get_details()
+            norm_p = os.path.normpath(path)
+            
+            for item in items:
+                if os.path.normpath(item["path"]) == norm_p:
+                    item["name"] = new_name
+                    item["category"] = new_cat
+                    item["icon"] = new_icon
+                    item["disabled_files"] = updated_disabled
+
+            PROJECT_ICONS[norm_p] = new_icon
+            save_recent(items)
+
+            if norm_p == os.path.normpath(self.project_root):
+                self.disabled_files = set(updated_disabled)
+                self._refresh_file_items()
+
+            self.status_cb(f"Updated details for project: {os.path.basename(path)}")
             self._populate_projects()
 
 
@@ -3162,35 +3284,39 @@ class PrepTab(QWidget):
             vl.setSpacing(2)
             vl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
             
+            category = item.get("category", "")
+            icon_val = item.get("icon", "") or PROJECT_ICONS.get(os.path.normpath(path), "")
+
             display_name = name if name else os.path.basename(path)
             if not display_name: display_name = path
             
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
             lbl_name.setStyleSheet(f"color: {PROJECTS_NAME_COLOR}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
-            
+
+            hl_title = QHBoxLayout()
+            hl_title.setContentsMargins(0, 0, 0, 0)
+            hl_title.setSpacing(6)
+
+            if icon_val:
+                icon_lbl = QLabel()
+                icon_lbl.setPixmap(render_extension_icon(icon_val, EXTENSION_ICON_SIZE))
+                icon_lbl.setFixedSize(EXTENSION_ICON_SIZE, EXTENSION_ICON_SIZE)
+                icon_lbl.setStyleSheet("background: transparent;")
+                hl_title.addWidget(icon_lbl, 0)
+
+            hl_title.addWidget(lbl_name, 1)
+
+            if category:
+                lbl_cat = QLabel(f"[{category}]")
+                lbl_cat.setStyleSheet(f"color: {CP_CYAN}; font-size: 8pt; font-weight: bold;")
+                hl_title.addWidget(lbl_cat, 0)
+
+            vl.addLayout(hl_title)
+
             lbl_path = QLabel(path)
             lbl_path.setObjectName("proj_path_label")
             lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
-
-            norm_p = os.path.normpath(path)
-            proj_icon_val = PROJECT_ICONS.get(norm_p, "")
-            
-            if proj_icon_val:
-                hl_title = QHBoxLayout()
-                hl_title.setContentsMargins(0, 0, 0, 0)
-                hl_title.setSpacing(6)
-                
-                icon_lbl = QLabel()
-                icon_lbl.setPixmap(render_extension_icon(proj_icon_val, EXTENSION_ICON_SIZE))
-                icon_lbl.setFixedSize(EXTENSION_ICON_SIZE, EXTENSION_ICON_SIZE)
-                icon_lbl.setStyleSheet("background: transparent;")
-                
-                hl_title.addWidget(icon_lbl, 0)
-                hl_title.addWidget(lbl_name, 1)
-                vl.addLayout(hl_title)
-            else:
-                vl.addWidget(lbl_name)
 
             if SHOW_PROJECT_PATHS:
                 vl.addWidget(lbl_path)
@@ -3210,7 +3336,8 @@ class PrepTab(QWidget):
             data = item.data(Qt.ItemDataRole.UserRole)
             path = data.get("path", "").lower()
             name = data.get("name", "").lower()
-            visible = (not query) or (query in path) or (query in name)
+            category = data.get("category", "").lower()
+            visible = (not query) or (query in path) or (query in name) or (query in category)
             item.setHidden(not visible)
 
     def _update_active_project_highlight(self):
@@ -3279,8 +3406,7 @@ class PrepTab(QWidget):
         """)
         
         act_load_all = menu.addAction("🔄  Re-scan & Load All")
-        act_rename   = menu.addAction("✏️  Rename Alias")
-        act_icon     = menu.addAction("🎨  Change Project Icon")
+        act_edit     = menu.addAction("✏️  Edit Project Details")
         act_open     = menu.addAction("📂  Open in Explorer")
         menu.addSeparator()
         act_remove   = menu.addAction("✕  Remove from List")
@@ -3289,10 +3415,8 @@ class PrepTab(QWidget):
         if action == act_load_all:
             self._load_all_project_files(path)
             self._populate_projects()
-        elif action == act_rename:
-            self._rename_recent(path)
-        elif action == act_icon:
-            self._change_project_icon(path)
+        elif action == act_edit:
+            self._edit_project(path)
         elif action == act_open:
             self._open_explorer(path)
         elif action == act_remove:
