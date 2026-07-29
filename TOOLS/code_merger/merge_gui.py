@@ -3268,6 +3268,8 @@ class DiffPreviewDialog(QDialog):
             diff_view.setReadOnly(True)
             diff_view.setFont(QFont("Consolas", 10))
             diff_view.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+            diff_view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            diff_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             diff_view.setStyleSheet(f"background-color: #060606; border: 1px solid {CP_DIM}; padding: 6px;")
             self.diff_views.append(diff_view)
 
@@ -3317,12 +3319,12 @@ class DiffPreviewDialog(QDialog):
 
             diff_view.setHtml("<div style='margin:0; font-family:Consolas; line-height:1.3; white-space: pre-wrap; word-wrap: break-word;'>" + "".join(html_parts) + "</div>")
 
-            # Extended dynamic height based on line count (from 160px up to 600px tall per block)
-            line_count = len(diff_lines) or 5
-            calculated_height = max(160, min(600, line_count * 20 + 30))
-            diff_view.setFixedHeight(calculated_height)
+            # Expand box to full content height so inner scrollbars are completely eliminated
+            diff_view.document().adjustSize()
+            full_content_height = max(100, int(diff_view.document().size().height()) + 24)
+            diff_view.setFixedHeight(full_content_height)
 
-            btn_toggle_view.clicked.connect(lambda _, dv=diff_view, btn=btn_toggle_view, h=calculated_height: self._toggle_single_view(dv, btn, h))
+            btn_toggle_view.clicked.connect(lambda _, dv=diff_view, btn=btn_toggle_view: self._toggle_single_view(dv, btn))
 
             g_layout.addWidget(diff_view)
             self.groups.append(group)
@@ -3404,13 +3406,12 @@ class DiffPreviewDialog(QDialog):
             self.lbl_hdr.setText(f"⚠ {len(self.changes)} change block(s) remaining (Failed to merge):")
             self.lbl_hdr.setStyleSheet(f"color: {CP_RED}; font-weight: bold; font-size: 11pt;")
 
-    def _toggle_single_view(self, diff_view: QTextEdit, btn: QPushButton, original_height: int):
+    def _toggle_single_view(self, diff_view: QTextEdit, btn: QPushButton):
         if diff_view.isVisible():
             diff_view.setVisible(False)
             btn.setText("▼ Expand")
         else:
             diff_view.setVisible(True)
-            diff_view.setFixedHeight(original_height)
             btn.setText("▲ Minimize")
 
     def _expand_all(self):
