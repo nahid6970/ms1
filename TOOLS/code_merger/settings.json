@@ -24,11 +24,51 @@
       "name": ""
     },
     {
+      "path": "C:\\@delta\\db\\@Convex\\image-share",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\db\\fifa",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\db\\vlr",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\lol\\@AutoHotKey\\shortcut_manager",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\lol\\TOOLS\\ENV",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\lol\\TOOLS\\espanso",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\lol\\TOOLS\\profile_analyze",
+      "name": ""
+    },
+    {
       "path": "C:\\@delta\\ms1",
       "name": ""
     },
     {
       "path": "C:\\@delta\\ms1\\@@init\\application_install",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
       "name": ""
     },
     {
@@ -44,7 +84,15 @@
       "name": ""
     },
     {
+      "path": "C:\\@delta\\ms1\\@Flask\\5151_gallery",
+      "name": ""
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\ENV",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\Editor",
       "name": ""
     },
     {
@@ -52,7 +100,19 @@
       "name": "Git Manager"
     },
     {
+      "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\alarm_timer",
+      "name": ""
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\nerd-font-icon",
       "name": ""
     },
     {
@@ -77,6 +137,14 @@
     },
     {
       "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\Automation",
+      "name": ""
+    },
+    {
+      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
       "name": ""
     },
     {
