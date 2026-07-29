@@ -2379,15 +2379,21 @@ class PrepTab(QWidget):
             self._add_file_item(fp)
 
     def _update_root(self):
-        if self.root_cb and self.files:
-            common = os.path.commonpath(self.files)
-            if os.path.isfile(common):
-                common = os.path.dirname(common)
-            self.project_root = common
-            self.root_cb(common)
-            self._update_project_label()
-            self._refresh_file_items()
-            self._update_file_item_texts()
+        if not self.files:
+            return
+        if not self.project_root:
+            try:
+                common = os.path.commonpath(self.files)
+                if os.path.isfile(common):
+                    common = os.path.dirname(common)
+                self.project_root = common
+            except Exception:
+                pass
+        if self.root_cb and self.project_root:
+            self.root_cb(self.project_root)
+        self._update_project_label()
+        self._refresh_file_items()
+        self._update_file_item_texts()
 
     def _set_project_root(self, d: str, save_recent: bool = True):
         d = os.path.normpath(d)
@@ -3020,6 +3026,7 @@ class PrepTab(QWidget):
 
 
     def _load_dir(self, d: str, selected_exts: set[str] = None, overwrite_recent: bool = False):
+        d = os.path.normpath(d)
         count = 0
         added_files = []
         discovered_exts = set()
@@ -3033,7 +3040,7 @@ class PrepTab(QWidget):
                 discovered_exts.add(ext)
                 if selected_exts is not None and ext not in selected_exts:
                     continue
-                fp = os.path.join(root, fn)
+                fp = os.path.normpath(os.path.join(root, fn))
                 added_files.append(fp)
                 if fp not in self.files:
                     self.files.append(fp)
@@ -3041,8 +3048,8 @@ class PrepTab(QWidget):
                     count += 1
         
         exts_list = list(selected_exts) if selected_exts is not None else list(discovered_exts)
-        add_recent(d, added_files, exts_list, overwrite_existing=overwrite_recent)
         self._set_project_root(d, save_recent=False)
+        add_recent(d, added_files, exts_list, overwrite_existing=overwrite_recent)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
