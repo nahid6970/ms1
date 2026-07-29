@@ -116,7 +116,6 @@ QStatusBar {{ background: {CP_PANEL}; color: {CP_SUB}; border-top: 1px solid {CP
 _HERE        = os.path.dirname(os.path.abspath(__file__))
 GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
 SETTINGS_PATH = os.path.join(_HERE, "settings.json")
-SESSION_PATH = os.path.join(_HERE, "session.json")
 MAX_RECENT   = 999999
 
 IGNORE_PATTERNS = {
@@ -210,18 +209,6 @@ def load_settings():
                 PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
                 PANEL_WEIGHT_FILES = data.get('panel_weight_files', 360)
                 PANEL_WEIGHT_PROMPT = data.get('panel_weight_prompt', 560)
-        elif os.path.exists(SESSION_PATH):
-            # Fallback for older format
-            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            if isinstance(data, dict):
-                ignores = data.get('custom_ignored_exts', [])
-                CUSTOM_IGNORED_EXTS = set(ignores)
-                IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
-                EXTENSION_ICONS = data.get('extension_icons', {})
-                SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
-                EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
-                SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
@@ -275,43 +262,19 @@ def load_recent() -> list[str]:
 def load_recent_details() -> list[dict]:
     try:
         import json
-        settings_data = {}
-        if os.path.exists(SETTINGS_PATH):
-            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
-                settings_data = json.load(f)
-        
+        if not os.path.exists(SETTINGS_PATH):
+            return []
+        with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+            settings_data = json.load(f)
+        if not isinstance(settings_data, dict):
+            return []
+
         projects = settings_data.get('projects', [])
-        # Create lookups for metadata from settings.json
-        proj_meta = {os.path.normpath(p.get("path", "")): p for p in projects if "path" in p}
-        
-        session_data = {}
-        if os.path.exists(SESSION_PATH):
-            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
-                session_data = json.load(f)
-        
-        project_states = session_data.get('project_states', [])
-        
         out = []
         seen = set()
-        for state in project_states:
-            path = state.get("path")
-            if not path: continue
-            n = os.path.normpath(path)
-            if n not in seen:
-                seen.add(n)
-                meta = proj_meta.get(n, {})
-                out.append({
-                    "path": n,
-                    "name": meta.get("name", ""),
-                    "category": meta.get("category", ""),
-                    "icon": meta.get("icon", "") or PROJECT_ICONS.get(n, ""),
-                    "files": state.get("files", []),
-                    "disabled_files": state.get("disabled_files", []),
-                    "extensions": state.get("extensions", []),
-                    "clicks": state.get("clicks", 0)
-                })
-        
         for p in projects:
+            if not isinstance(p, dict):
+                continue
             path = p.get("path")
             if not path: continue
             n = os.path.normpath(path)
@@ -322,12 +285,11 @@ def load_recent_details() -> list[dict]:
                     "name": p.get("name", ""),
                     "category": p.get("category", ""),
                     "icon": p.get("icon", "") or PROJECT_ICONS.get(n, ""),
-                    "files": [],
-                    "disabled_files": [],
-                    "extensions": [],
-                    "clicks": 0
+                    "files": [os.path.normpath(f) for f in p.get("files", [])],
+                    "disabled_files": [os.path.normpath(f) for f in p.get("disabled_files", [])],
+                    "extensions": p.get("extensions", []),
+                    "clicks": p.get("clicks", 0)
                 })
-                
         return out
     except Exception:
         return []
@@ -335,19 +297,6 @@ def load_recent_details() -> list[dict]:
 def save_recent(items: list[dict]):
     import json
     try:
-        proj_list = []
-        for item in items:
-            p = os.path.normpath(item["path"])
-            entry = {
-                "path": p,
-                "name": item.get("name", ""),
-                "category": item.get("category", ""),
-                "icon": item.get("icon", "")
-            }
-            if item.get("icon"):
-                PROJECT_ICONS[p] = item["icon"]
-            proj_list.append(entry)
-
         settings_data = {}
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -355,30 +304,27 @@ def save_recent(items: list[dict]):
             if not isinstance(settings_data, dict):
                 settings_data = {}
 
+        proj_list = []
+        for item in items:
+            p = os.path.normpath(item["path"])
+            entry = {
+                "path": p,
+                "name": item.get("name", ""),
+                "category": item.get("category", ""),
+                "icon": item.get("icon", ""),
+                "files": [os.path.normpath(f) for f in item.get("files", [])],
+                "disabled_files": [os.path.normpath(f) for f in item.get("disabled_files", [])],
+                "extensions": item.get("extensions", []),
+                "clicks": item.get("clicks", 0)
+            }
+            if item.get("icon"):
+                PROJECT_ICONS[p] = item["icon"]
+            proj_list.append(entry)
+
         settings_data['projects'] = proj_list
         settings_data['project_icons'] = PROJECT_ICONS
         with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
             json.dump(settings_data, f, indent=2, ensure_ascii=False)
-
-        session_data = {}
-        if os.path.exists(SESSION_PATH):
-            with open(SESSION_PATH, 'r', encoding='utf-8') as f:
-                session_data = json.load(f)
-            if not isinstance(session_data, dict):
-                session_data = {}
-
-        session_data['project_states'] = [
-            {
-                "path": os.path.normpath(item["path"]),
-                "files": item.get("files", []),
-                "disabled_files": item.get("disabled_files", []),
-                "extensions": item.get("extensions", []),
-                "clicks": item.get("clicks", 0)
-            }
-            for item in items
-        ]
-        with open(SESSION_PATH, 'w', encoding='utf-8') as f:
-            json.dump(session_data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving recent projects: {e}", file=sys.stderr)
 
@@ -1049,9 +995,9 @@ class RecentPopup(QFrame):
         self.on_rename    = on_rename
         self.sort_mode   = "Rec"
         try:
-            if os.path.exists(SESSION_PATH):
+            if os.path.exists(SETTINGS_PATH):
                 import json
-                with open(SESSION_PATH, 'r') as f:
+                with open(SETTINGS_PATH, 'r') as f:
                     data = json.load(f)
                 if isinstance(data, dict) and 'recent_sort_mode' in data:
                     self.sort_mode = data['recent_sort_mode']
@@ -1245,13 +1191,13 @@ class RecentPopup(QFrame):
         try:
             import json
             data = {}
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r') as f:
                     data = json.load(f)
             if not isinstance(data, dict):
                 data = {}
             data['recent_sort_mode'] = self.sort_mode
-            with open(SESSION_PATH, 'w') as f:
+            with open(SETTINGS_PATH, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception:
             pass
@@ -2428,20 +2374,24 @@ class PrepTab(QWidget):
         import json
         try:
             data = {}
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if not isinstance(data, dict):
                     data = {}
         except Exception:
             data = {}
-        data['files'] = self.files
-        data['project_root'] = self.project_root.strip()
-        data['minify'] = self.chk_minify.isChecked()
-        data['file_modes'] = self.file_modes
-        data['disabled_files'] = list(self.disabled_files)
+
+        data['active_session'] = {
+            'files': self.files,
+            'project_root': self.project_root.strip(),
+            'minify': self.chk_minify.isChecked(),
+            'file_modes': self.file_modes,
+            'disabled_files': list(self.disabled_files)
+        }
+
         try:
-            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving session: {e}", file=sys.stderr)
@@ -2486,26 +2436,30 @@ class PrepTab(QWidget):
     def _load_session(self):
         import json
         try:
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                saved = data if isinstance(data, list) else data.get('files', [])
-                self.project_root = data.get('project_root', '') if isinstance(data, dict) else ""
-                if isinstance(data, dict):
+                if not isinstance(data, dict):
+                    return
+                session = data.get('active_session', {})
+                if isinstance(session, dict):
+                    saved = session.get('files', [])
+                    self.project_root = session.get('project_root', '')
                     self.chk_minify.blockSignals(True)
-                    self.chk_minify.setChecked(data.get('minify', False))
+                    self.chk_minify.setChecked(session.get('minify', False))
                     self.chk_minify.blockSignals(False)
-                    self.file_modes = data.get('file_modes', {})
-                    self.disabled_files = set(data.get('disabled_files', []))
-                for fp in saved:
-                    if fp not in self.files and os.path.exists(fp):
-                        self.files.append(fp)
-                        self._add_file_item(fp)
-                if self.files:
-                    self._update_root()
-                    self.status_cb(f"Restored {len(self.files)} file(s) from last session")
-                elif self.project_root:
-                    self._update_project_label()
+                    self.file_modes = session.get('file_modes', {})
+                    self.disabled_files = set(session.get('disabled_files', []))
+                    for fp in saved:
+                        norm_fp = os.path.normpath(fp)
+                        if norm_fp not in self.files and os.path.exists(norm_fp):
+                            self.files.append(norm_fp)
+                            self._add_file_item(norm_fp)
+                    if self.files:
+                        self._update_root()
+                        self.status_cb(f"Restored {len(self.files)} file(s) from last session")
+                    elif self.project_root:
+                        self._update_project_label()
         except Exception as e:
             print(f"Error loading session: {e}", file=sys.stderr)
 
@@ -3847,8 +3801,8 @@ class MergeTab(QWidget):
         import json
         try:
             data = {}
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if not isinstance(data, dict):
                     data = {}
@@ -3857,7 +3811,7 @@ class MergeTab(QWidget):
         data['backup']  = self.chk_backup.isChecked()
         data['preview'] = self.chk_preview.isChecked()
         try:
-            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving prefs: {e}", file=sys.stderr)
@@ -3865,8 +3819,8 @@ class MergeTab(QWidget):
     def _load_prefs(self):
         import json
         try:
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if isinstance(data, dict):
                     self.chk_backup.blockSignals(True)
@@ -4240,8 +4194,8 @@ class MainWindow(QMainWindow):
 
     def _load_match_mode_pref(self):
         try:
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if isinstance(data, dict) and 'match_mode' in data:
                     self.combo_match_mode.setCurrentText(data['match_mode'])
@@ -4251,13 +4205,13 @@ class MainWindow(QMainWindow):
     def _save_match_mode_pref(self, text: str):
         try:
             data = {}
-            if os.path.exists(SESSION_PATH):
-                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+            if os.path.exists(SETTINGS_PATH):
+                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
             if not isinstance(data, dict):
                 data = {}
             data['match_mode'] = text
-            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception:
             pass
