@@ -507,8 +507,9 @@ if Completer is not None:
                 dir_part, search_part = "", raw_path
 
             if dir_part:
-                if dir_part == "~" or dir_part.startswith("~/"):
-                    target_dir = Path(dir_part).expanduser()
+                p_dir = Path(dir_part)
+                if p_dir.is_absolute() or dir_part.startswith("~"):
+                    target_dir = p_dir.expanduser()
                 else:
                     target_dir = self.cwd / dir_part
             else:
