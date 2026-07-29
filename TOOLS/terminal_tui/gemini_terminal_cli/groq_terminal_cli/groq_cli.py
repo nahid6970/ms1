@@ -139,10 +139,13 @@ def _render_inline_markdown(text: str) -> str:
         return f"{label} ({url})"
 
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_link, text)
+    # Bold
     text = re.sub(r"(?<!\*)\*\*(.+?)\*\*(?!\*)", lambda m: _ansi_wrap(m.group(1), "1"), text)
     text = re.sub(r"(?<!_)__(.+?)__(?!_)", lambda m: _ansi_wrap(m.group(1), "1"), text)
-    text = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", lambda m: _ansi_wrap(m.group(1), "3"), text)
-    text = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", lambda m: _ansi_wrap(m.group(1), "3"), text)
+    # Italic - more permissive boundary check to catch * at start of lines or inside punctuation
+    text = re.sub(r"(\s|^|[(\[{])\*(?!\s)(.+?)(?<!\s)\*(\s|$|[.,!?;:)}\]])", lambda m: f"{m.group(1)}{_ansi_wrap(m.group(2), '3')}{m.group(3)}", text)
+    text = re.sub(r"(\s|^|[(\[{])_(?!\s)(.+?)(?<!\s)_(\s|$|[.,!?;:)}\]])", lambda m: f"{m.group(1)}{_ansi_wrap(m.group(2), '3')}{m.group(3)}", text)
+    # Inline Code
     text = re.sub(r"`([^`]+)`", lambda m: _ansi_wrap(m.group(1), "38;5;214"), text)
     return text
 
@@ -262,8 +265,12 @@ def render_markdown_text(text: str) -> str:
                 lines.append(_render_inline_markdown(line))
         elif re.match(r"^\s*[-*+]\s+", line):
             lines.append(f"• {_render_inline_markdown(stripped_line.lstrip('-*+ '))}")
+        elif re.match(r"^\s*\d+\.\s+", line):
+            lines.append(_render_inline_markdown(line))
         elif stripped_line.startswith(">"):
             lines.append(f"{_ansi_wrap('> ', '90')}{_render_inline_markdown(stripped_line[1:].strip())}")
+        elif re.match(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$", stripped_line):
+            lines.append(_ansi_wrap("─" * 32, "90"))
         else:
             lines.append(_render_inline_markdown(line))
         idx += 1
