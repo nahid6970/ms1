@@ -3201,10 +3201,11 @@ class DiffPreviewDialog(QDialog):
         self.setWindowTitle("DIFF PREVIEW & SELECTIVE MERGE")
         self.resize(1180, 820)
         self.setStyleSheet(THEME)
-        self.changes = changes
+        self.changes = list(changes)
         self.root = root
         self.check_states: list[QCheckBox] = []
         self.diff_views: list[QTextEdit] = []
+        self.groups: list[QGroupBox] = []
         self._build()
 
     def _build(self):
@@ -3214,9 +3215,9 @@ class DiffPreviewDialog(QDialog):
 
         # Header bar with summary & view toggles
         top_bar = QHBoxLayout()
-        lbl_hdr = QLabel(f"Review changes ({len(self.changes)} block(s) detected):")
-        lbl_hdr.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
-        top_bar.addWidget(lbl_hdr, 1)
+        self.lbl_hdr = QLabel(f"Review changes ({len(self.changes)} block(s) detected):")
+        self.lbl_hdr.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
+        top_bar.addWidget(self.lbl_hdr, 1)
 
         btn_exp_all = QPushButton("📖 EXPAND ALL")
         btn_coll_all = QPushButton("📁 COLLAPSE ALL")
@@ -3324,6 +3325,7 @@ class DiffPreviewDialog(QDialog):
             btn_toggle_view.clicked.connect(lambda _, dv=diff_view, btn=btn_toggle_view, h=calculated_height: self._toggle_single_view(dv, btn, h))
 
             g_layout.addWidget(diff_view)
+            self.groups.append(group)
             v_box.addWidget(group)
 
         v_box.addStretch()
@@ -3340,7 +3342,7 @@ class DiffPreviewDialog(QDialog):
         btn_none.clicked.connect(lambda: [c.setChecked(False) for c in self.check_states])
 
         btn_ok = QPushButton("✔ APPLY SELECTED CHANGES")
-        btn_cancel = QPushButton("✕ CANCEL")
+        btn_cancel = QPushButton("✕ CLOSE")
         btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; font-size: 10pt; }}"
@@ -3348,7 +3350,7 @@ class DiffPreviewDialog(QDialog):
         btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; font-size: 10pt; }}"
                                  f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
 
-        btn_ok.clicked.connect(self.accept)
+        btn_ok.clicked.connect(self._on_apply_selected)
         btn_cancel.clicked.connect(self.reject)
 
         btn_row.addWidget(btn_all)
@@ -3357,6 +3359,50 @@ class DiffPreviewDialog(QDialog):
         btn_row.addWidget(btn_ok)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
+
+    def _on_apply_selected(self):
+        selected_indices = [i for i, chk in enumerate(self.check_states) if chk.isChecked()]
+        if not selected_indices:
+            QMessageBox.information(self, "No Selection", "Please select at least one change block to apply.")
+            return
+
+        selected_changes = [self.changes[i] for i in selected_indices]
+        backup = self.parent().chk_backup.isChecked() if hasattr(self.parent(), 'chk_backup') else True
+        match_mode = "fuzzy" if hasattr(self.parent(), 'match_mode_cb') and self.parent().match_mode_cb and "Fuzzy" in self.parent().match_mode_cb() else "exact"
+
+        results = apply_changes(selected_changes, self.root, backup, match_mode=match_mode)
+
+        failed_indices = []
+        successful_indices = []
+
+        for idx_in_sel, res in enumerate(results):
+            orig_idx = selected_indices[idx_in_sel]
+            if res.startswith("✔"):
+                successful_indices.append(orig_idx)
+            else:
+                failed_indices.append((orig_idx, res))
+
+        if hasattr(self.parent(), 'result_out'):
+            self.parent().result_out.setPlainText("\n\n".join(results))
+
+        # Remove UI cards for successful merges
+        for orig_idx in sorted(successful_indices, reverse=True):
+            group_widget = self.groups[orig_idx]
+            group_widget.setParent(None)
+            del self.changes[orig_idx]
+            del self.check_states[orig_idx]
+            del self.diff_views[orig_idx]
+            del self.groups[orig_idx]
+
+        if not self.changes:
+            if hasattr(self.parent(), 'status_cb'):
+                self.parent().status_cb(f"✔ All {len(successful_indices)} change block(s) merged successfully!")
+            self.accept()
+        elif failed_indices:
+            if hasattr(self.parent(), 'status_cb'):
+                self.parent().status_cb(f"⚠ {len(failed_indices)} change(s) failed. Showing failed block(s) for review.")
+            self.lbl_hdr.setText(f"⚠ {len(self.changes)} change block(s) remaining (Failed to merge):")
+            self.lbl_hdr.setStyleSheet(f"color: {CP_RED}; font-weight: bold; font-size: 11pt;")
 
     def _toggle_single_view(self, diff_view: QTextEdit, btn: QPushButton, original_height: int):
         if diff_view.isVisible():
@@ -3520,51 +3566,24 @@ class MergeTab(QWidget):
             self.status_cb("⚠ Set a valid project root directory")
             return
 
-        changes_to_apply = self._pending_changes
-
         if self.chk_preview.isChecked():
             dlg = DiffPreviewDialog(self._pending_changes, root, self)
-            if dlg.exec() != QDialog.DialogCode.Accepted:
-                return
-            selected = dlg.get_selected_changes()
-            if not selected:
-                self.status_cb("No changes selected")
-                return
-            changes_to_apply = selected
+            dlg.exec()
+        else:
+            match_mode = "fuzzy" if self.match_mode_cb and self.match_mode_cb() and "Fuzzy" in self.match_mode_cb() else "exact"
+            results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked(), match_mode=match_mode)
+            ok  = sum(1 for r in results if r.startswith("✔"))
+            err = len(results) - ok
 
-        match_mode = "fuzzy" if self.match_mode_cb and "Fuzzy" in self.match_mode_cb() else "exact"
-        results = apply_changes(changes_to_apply, root, self.chk_backup.isChecked(), match_mode=match_mode)
-        ok  = sum(1 for r in results if r.startswith("✔"))
-        err = len(results) - ok
+            if ok > 0:
+                commit_msg = self._parsed_commit_msg or "update files"
+                results.append("\nSuggested Git Commit Command:")
+                results.append(f'git commit -m "{commit_msg}"')
 
-        if ok > 0:
-            commit_msg = self._parsed_commit_msg
-            if not commit_msg:
-                # Fallback commit message generated automatically based on changed files
-                successful_files = []
-                for r in results:
-                    if r.startswith("✔"):
-                        parts = r.split("→")
-                        if len(parts) > 1:
-                            filepath = parts[1].strip()
-                            basename = os.path.basename(filepath)
-                            if basename not in successful_files:
-                                successful_files.append(basename)
-                if successful_files:
-                    files_str = ", ".join(successful_files[:3])
-                    if len(successful_files) > 3:
-                        files_str += f" and {len(successful_files) - 3} other(s)"
-                    commit_msg = f"update {files_str}"
-                else:
-                    commit_msg = "update files"
-
-            results.append("\nSuggested Git Commit Command:")
-            results.append(f'git commit -m "{commit_msg}"')
-
-        self.result_out.setPlainText('\n'.join(results))
-        self.status_cb(f"Done — {ok} applied, {err} failed")
-        self._pending_changes = []
-        self._parsed_commit_msg = ""
+            self.result_out.setPlainText('\n'.join(results))
+            self.status_cb(f"Done — {ok} applied, {err} failed")
+            self._pending_changes = []
+            self._parsed_commit_msg = ""
 
     def _clear(self):
         self.response_input.clear()
@@ -3572,6 +3591,19 @@ class MergeTab(QWidget):
         self._pending_changes = []
         self._parsed_commit_msg = ""
         self.status_cb("Cleared")
+
+    def _preview_diff(self):
+        if not self._pending_changes:
+            self._parse()
+        if not self._pending_changes:
+            return
+        root = self.root_input.text().strip()
+        if not root or not os.path.isdir(root):
+            self.status_cb("⚠ Set a valid project root directory")
+            return
+
+        dlg = DiffPreviewDialog(self._pending_changes, root, self)
+        dlg.exec()
 
 
 # ── COMMAND TAB ───────────────────────────────────────────────────────────────
