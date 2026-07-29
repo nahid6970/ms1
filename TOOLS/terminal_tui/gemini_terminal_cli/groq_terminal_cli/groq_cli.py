@@ -340,6 +340,104 @@ def format_model_entry(
     return row
 
 
+# --- TOOL MANAGEMENT (Ported from Gemini CLI) ---
+
+def list_tool_catalog() -> List[Dict[str, Any]]:
+    try:
+        if TOOLS_FILE.exists():
+            data = json.loads(TOOLS_FILE.read_text(encoding="utf-8"))
+            return data
+    except: pass
+    return []
+
+
+def build_tool_table_header() -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Tool':<25}  State",
+        f"  {'--':>2}  {'-' * 25}  -----",
+    ]
+
+
+def format_tool_entry(index: int, tool: Dict[str, Any], disabled: Set[str], selected: bool = False) -> str:
+    name = tool['function']['name']
+    is_enabled = name not in disabled
+    marker = ">" if selected else " "
+    state = _ansi_wrap("on", "32") if is_enabled else _ansi_wrap("off", "31")
+    
+    row = f"{marker} {index:>2}  {name:<25}  {state}"
+    if selected: return _ansi_wrap(row, "48;5;24;97")
+    return row
+
+
+def pick_tool_interactive(disabled_tools: Set[str]) -> bool:
+    catalog = list_tool_catalog()
+    if not catalog:
+        error("No tools found in tools.json")
+        return False
+
+    categories = sorted(list(set(t.get('category', 'Other') for t in catalog)))
+    changed = False
+
+    while True:
+        cat_items = []
+        for cat in categories:
+            tools_in_cat = [t for t in catalog if t.get('category') == cat]
+            enabled_count = sum(1 for t in tools_in_cat if t['function']['name'] not in disabled_tools)
+            cat_items.append({
+                "name": cat,
+                "label": f"=== {cat} ({enabled_count}/{len(tools_in_cat)} active) ==="
+            })
+
+        chosen_cat = interactive_select("Manage Tools - Categories", cat_items, 
+            lambda item, i, sel: _ansi_wrap(f"{'> ' if sel else '  '}{item['label']}", "1;36" if not sel else "48;5;24;97"))
+        
+        if not chosen_cat: break
+
+        # Sub-menu for tools in category
+        cat_name = chosen_cat['name']
+        tools_in_cat = [t for t in catalog if t.get('category') == cat_name]
+        
+        while True:
+            def render_tool(t, i, sel):
+                return format_tool_entry(i+1, t, disabled_tools, sel)
+
+            def toggle_tool(t, i):
+                nonlocal changed
+                name = t['function']['name']
+                if name in disabled_tools: disabled_tools.remove(name)
+                else: disabled_tools.add(name)
+                changed = True
+
+            # Modified interactive_select to support toggling with Space
+            clear_screen(); title(f"Tools: {cat_name}")
+            print("Use Up/Down, Space to toggle, Enter/Esc to return.\n")
+            for line in build_tool_table_header(): print(line)
+            
+            # Simple manual loop for the sub-menu to allow Space key
+            idx = 0
+            while True:
+                clear_screen(); title(f"Tools: {cat_name}")
+                print("Use Up/Down, Space to toggle, Enter/Esc to return.\n")
+                for line in build_tool_table_header(): print(line)
+                for i, t in enumerate(tools_in_cat):
+                    print(render_tool(t, i, i == idx))
+                
+                # Show info footer
+                cur = tools_in_cat[idx]
+                print(f"\nInfo: {cur['function']['description']}")
+                if cur.get('rating'): print(f"Advice: {cur['rating']}")
+
+                k = read_key()
+                if k in ("\r", "\n", "\x1b"): break
+                if k == " ": toggle_tool(tools_in_cat[idx], idx)
+                if k in ("\xe0H", "\x00H"): idx = (idx - 1) % len(tools_in_cat)
+                elif k in ("\xe0P", "\x00P"): idx = (idx + 1) % len(tools_in_cat)
+            break
+            
+    return changed
+
+
+
 class GroqClient:
     def __init__(self, api_key: str, model: str) -> None:
         self.api_key = api_key
@@ -476,6 +574,7 @@ def main():
     hidden_models = list(prefs.get("hidden_models", []))
     speed_tags = dict(prefs.get("speed_tags", {}))
     model_usage_counts = dict(prefs.get("model_usage_counts", {}))
+    disabled_tools = set(prefs.get("disabled_tools", []))
     last_model = str(prefs.get("last_model") or DEFAULT_MODEL)
     system_instruction = str(prefs.get("system_instruction") or DEFAULT_SYSTEM)
 
@@ -494,7 +593,9 @@ def main():
     client = GroqClient(api_key, active_model)
     messages: List[Dict[str, Any]] = []
     cwd = Path.cwd()
-    tools = json.loads(TOOLS_FILE.read_text(encoding="utf-8")) if TOOLS_FILE.exists() else None
+    # Load tools and prepare initial active list
+    all_tools = json.loads(TOOLS_FILE.read_text(encoding="utf-8")) if TOOLS_FILE.exists() else []
+    tools = [t for t in all_tools if t['function']['name'] not in disabled_tools]
     history = load_prompt_history()
 
     def persist_selection():
@@ -502,6 +603,7 @@ def main():
             "hidden_models": sorted(set(hidden_models)),
             "speed_tags": speed_tags,
             "model_usage_counts": model_usage_counts,
+            "disabled_tools": sorted(list(disabled_tools)),
             "last_model": client.model,
             "system_instruction": system_instruction,
         }
@@ -631,8 +733,13 @@ def main():
                 system_instruction = data.get("system", system_instruction)
                 info(f"Loaded transcript from {rem}")
                 continue
+            if cmd == "/tool":
+                if pick_tool_interactive(disabled_tools):
+                    persist_selection()
+                    info("Tool settings updated.")
+                continue
             
-            warn(f"Commands: /mm, /test, /api, /system, /save, /load, /reset, /exit")
+            warn(f"Commands: /mm, /test, /tool, /api, /system, /save, /load, /reset, /exit")
             continue
 
         expanded_input = expand_at_file_prompt(user_input, cwd)
@@ -640,7 +747,9 @@ def main():
         
         for _ in range(DEFAULT_TOOL_LOOPS):
             try:
-                response = client.generate(messages, system_instruction=system_instruction, tools=tools)
+                # Refresh active tools each turn to respect changes made via /tool
+                active_tools = [t for t in all_tools if t['function']['name'] not in disabled_tools]
+                response = client.generate(messages, system_instruction=system_instruction, tools=active_tools)
                 record_usage(client.model)
             except Exception as e: error(str(e)); break
                 
