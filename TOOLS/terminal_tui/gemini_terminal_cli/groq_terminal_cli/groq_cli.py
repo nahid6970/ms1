@@ -644,6 +644,82 @@ def pick_api_account_interactive(
         "provider": str(chosen["provider"]),
         "name": str(chosen["name"]),
     }
+def build_failover_table_widths(items: List[Dict[str, Any]]) -> Dict[str, int]:
+    scope_w = 0; state_w = 0; desc_w = 0
+    for item in items:
+        scope_w = max(scope_w, len(str(item.get("scope", ""))))
+        state_w = max(state_w, len(str(item.get("state", ""))))
+        desc_w = max(desc_w, len(str(item.get("description", ""))))
+    return {
+        "scope": min(max(scope_w, 14), 28),
+        "state": min(max(state_w, 7), 12),
+        "description": min(max(desc_w, 28), 60),
+    }
+
+
+def build_failover_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Scope':<{widths['scope']}}  {'State':<{widths['state']}}  Description",
+        f"  {'--':>2}  {'-' * widths['scope']}  {'-' * widths['state']}  {'-' * 11}",
+    ]
+
+
+def format_failover_entry(index: int, item: Dict[str, Any], widths: Dict[str, int], selected: bool = False) -> str:
+    scope = str(item.get("scope", ""))
+    state = str(item.get("state", ""))
+    description = str(item.get("description", ""))
+    marker = ">" if selected else " "
+    state_text = state
+    if state == "on": state_text = _ansi_wrap(state, "32")
+    elif state == "off": state_text = _ansi_wrap(state, "31")
+    elif state in {"inherit", "none"}: state_text = _ansi_wrap(state, "33")
+    row = f"{marker} {index:>2}  {scope:<{widths['scope']}}  {state_text:<{widths['state']}}  {description}"
+    if selected: return _ansi_wrap(row, "48;5;24;97")
+    return row
+
+
+def pick_failover_interactive(
+    current_project_state: Optional[bool],
+    session_state: Optional[bool],
+    global_default_state: bool,
+    title_text: str = "Auto Failover",
+) -> Optional[Dict[str, Any]]:
+    items = [
+        {"kind": "project", "scope": "Current project", "state": "inherit" if current_project_state is None else ("on" if current_project_state else "off"), "description": "Persistent override for the current project root."},
+        {"kind": "session", "scope": "This session", "state": "none" if session_state is None else ("on" if session_state else "off"), "description": "Temporary override until the CLI exits."},
+        {"kind": "default", "scope": "Global default", "state": "on" if global_default_state else "off", "description": "Fallback when no project override exists."},
+    ]
+    widths = build_failover_table_widths(items)
+    changed = False
+
+    def render_item(item, idx, sel): return format_failover_entry(idx + 1, item, widths, sel)
+
+    while True:
+        clear_screen(); title(title_text)
+        print("Use Up/Down to navigate, Space to toggle, Enter to close, Esc to cancel.\n")
+        for line in build_failover_table_header(widths): print(line)
+        idx = 0 # This is a simplified selector for the manual loop below
+        
+        # We use a manual loop here to support Space toggling similar to the tool manager
+        curr_idx = 0
+        while True:
+            clear_screen(); title(title_text)
+            print("Use Up/Down to navigate, Space to toggle, Enter to close, Esc to cancel.\n")
+            for line in build_failover_table_header(widths): print(line)
+            for i, item in enumerate(items):
+                print(render_item(item, i, i == curr_idx))
+            
+            k = read_key()
+            if k in ("\r", "\n"): return {it["kind"]: it["state"] for it in items}
+            if k == "\x1b": return None
+            if k == " ":
+                items[curr_idx]["state"] = "on" if items[curr_idx]["state"] != "on" else "off"
+            if k in ("\xe0H", "\x00H"): curr_idx = (curr_idx - 1) % len(items)
+            elif k in ("\xe0P", "\x00P"): curr_idx = (curr_idx + 1) % len(items)
+    return None
+
+
+
 
 
 
@@ -933,6 +1009,10 @@ def main():
     last_model = str(prefs.get("last_model") or DEFAULT_MODEL)
     last_api_account = str(prefs.get("last_api_account") or "")
     system_instruction = str(prefs.get("system_instruction") or DEFAULT_SYSTEM)
+    failover_uses = int(prefs.get("failover_uses") or 0)
+    auto_failover_default = bool(prefs.get("auto_failover_default", False))
+    auto_failover_projects = dict(prefs.get("auto_failover_projects", {}))
+    auto_failover_session_override: Optional[bool] = None
 
     api_accounts = {}
     tavily_accounts = {}
@@ -974,15 +1054,50 @@ def main():
             "last_model": client.model,
             "last_api_account": active_api_account,
             "system_instruction": system_instruction,
+            "failover_uses": failover_uses,
+            "auto_failover_default": auto_failover_default,
+            "auto_failover_projects": auto_failover_projects,
         }
         MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def effective_failover_enabled() -> bool:
+        if auto_failover_session_override is not None: return auto_failover_session_override
+        proj_root = str(cwd.resolve())
+        return auto_failover_projects.get(proj_root, auto_failover_default)
+
+    def failover_status_line() -> str:
+        status = "on" if effective_failover_enabled() else "off"
+        if status == "off": status = _ansi_wrap(status, "31")
+        return f"Auto failover: {status}"
 
     def record_usage(m_id: str):
         model_usage_counts[m_id] = model_usage_counts.get(m_id, 0) + 1
         persist_selection()
 
+    def attempt_failover(failed_accounts: Set[str]) -> bool:
+        nonlocal active_api_account, api_key, failover_uses
+        if not effective_failover_enabled() or len(api_accounts) < 2: return False
+        
+        ordered = sorted(api_accounts.keys(), key=str.lower)
+        start_idx = ordered.index(active_api_account) + 1 if active_api_account in ordered else 0
+        candidates = ordered[start_idx:] + ordered[:start_idx]
+        
+        for cand in candidates:
+            if cand == active_api_account or cand in failed_accounts: continue
+            active_api_account = cand
+            api_key = api_accounts[cand]
+            client.api_key = api_key
+            failover_uses += 1
+            persist_selection()
+            info(f"Auto failover switched to: {cand}")
+            return True
+        return False
+
+
     title("Groq Terminal CLI (Fully Functional Port)")
     info(f"Model: {client.model} | Root: {cwd}")
+    info(failover_status_line())
+
 
     def prune_model_cooldowns():
         expired = [name for name, until in model_cooldowns.items() if until <= _now()]
@@ -1121,6 +1236,29 @@ def main():
                     persist_selection()
                     info(f"Switched to API account: {active_api_account}")
                 continue
+            if cmd == "/failover":
+                proj_root = str(cwd.resolve())
+                current_proj_state = auto_failover_projects.get(proj_root)
+                
+                chosen = pick_failover_interactive(current_proj_state, auto_failover_session_override, auto_failover_default)
+                if chosen:
+                    # Update Project
+                    p_state = chosen["project"]
+                    if p_state == "inherit": auto_failover_projects.pop(proj_root, None)
+                    else: auto_failover_projects[proj_root] = (p_state == "on")
+                    
+                    # Update Session
+                    s_state = chosen["session"]
+                    if s_state == "none": auto_failover_session_override = None
+                    else: auto_failover_session_override = (s_state == "on")
+                    
+                    # Update Global
+                    auto_failover_default = (chosen["default"] == "on")
+                    
+                    persist_selection()
+                    info(failover_status_line())
+                continue
+
             if cmd == "/system":
                 if rem: system_instruction = rem; info("System instruction updated.")
                 else: print(f"Current System Instruction:\n{system_instruction}")
@@ -1150,6 +1288,7 @@ def main():
         expanded_input = expand_at_file_prompt(user_input, cwd)
         messages.append({"role": "user", "content": expanded_input})
         
+        failed_accounts: Set[str] = set()
         for _ in range(DEFAULT_TOOL_LOOPS):
             try:
                 # Refresh active tools each turn to respect changes made via /tool
@@ -1159,14 +1298,21 @@ def main():
             except RuntimeError as exc:
                 msg = str(exc)
                 error(msg)
+                
+                is_rate_limit = any(t in msg.lower() for t in ["rate limit", "429", "quota", "too many requests"])
                 match = re.search(r"try again in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
+                
                 if match:
                     wait_seconds = float(match.group(1))
-                    # Set cooldown for 1 minute or the requested time, whichever is longer
-                    cooldown_duration = max(60.0, wait_seconds)
-                    model_cooldowns[client.model] = _now() + dt.timedelta(seconds=cooldown_duration)
+                    model_cooldowns[client.model] = _now() + dt.timedelta(seconds=max(60.0, wait_seconds))
                     warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
                     write_notification()
+
+                if is_rate_limit:
+                    if active_api_account: failed_accounts.add(active_api_account)
+                    if attempt_failover(failed_accounts):
+                        warn(f"Retrying request with account: {active_api_account}")
+                        continue
                 break
             except Exception as e:
                 error(str(e))
@@ -1216,6 +1362,8 @@ if Completer is not None:
             ("/test", "Test all models"),
             ("/api", "Open API account picker"),
             ("/tool", "Open tool manager"),
+            ("/failover", "Open auto-failover picker"),
+
             ("/system", "Replace or load system instruction"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
