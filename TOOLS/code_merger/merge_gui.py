@@ -1509,30 +1509,18 @@ class SettingsDialog(QDialog):
 
         v_font.addLayout(h_font_settings)
 
-        # Projects Name Text Color Selector
+        # Combined Color Picker & Preview Button
         h_color_settings = QHBoxLayout()
         lbl_pcolor = QLabel("Projects Name Text Color:")
         lbl_pcolor.setStyleSheet(f"color: {CP_TEXT};")
 
-        self.input_pcolor = QLineEdit(self.proj_name_color)
-        self.input_pcolor.setFixedWidth(90)
-        self.input_pcolor.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
-
-        self.swatch_pcolor = QLabel()
-        self.swatch_pcolor.setFixedSize(24, 24)
-        self.swatch_pcolor.setStyleSheet(f"background-color: {self.proj_name_color}; border: 1px solid {CP_DIM};")
-
-        btn_pick_color = QPushButton("🎨 PICK COLOR")
-        btn_pick_color.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_pick_color.setStyleSheet(f"background-color: {CP_DIM}; padding: 4px 8px; font-size: 8.5pt;")
-        btn_pick_color.clicked.connect(self._choose_proj_color)
-
-        self.input_pcolor.textChanged.connect(lambda text: self.swatch_pcolor.setStyleSheet(f"background-color: {text}; border: 1px solid {CP_DIM};"))
+        self.btn_pick_color = QPushButton()
+        self.btn_pick_color.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_pick_color.clicked.connect(self._choose_proj_color)
+        self._update_color_button_style()
 
         h_color_settings.addWidget(lbl_pcolor)
-        h_color_settings.addWidget(self.input_pcolor)
-        h_color_settings.addWidget(self.swatch_pcolor)
-        h_color_settings.addWidget(btn_pick_color)
+        h_color_settings.addWidget(self.btn_pick_color)
         h_color_settings.addStretch()
 
         v_font.addLayout(h_color_settings)
@@ -1778,12 +1766,32 @@ class SettingsDialog(QDialog):
         self.form_preview.setPixmap(pix)
 
     def _choose_proj_color(self):
-        initial = QColor(self.input_pcolor.text().strip() or "#FCEE0A")
+        initial = QColor(self.proj_name_color or "#FCEE0A")
         color = QColorDialog.getColor(initial, self, "Select Project Name Color")
         if color.isValid():
-            hex_color = color.name()
-            self.input_pcolor.setText(hex_color)
-            self.swatch_pcolor.setStyleSheet(f"background-color: {hex_color}; border: 1px solid {CP_DIM};")
+            self.proj_name_color = color.name()
+            self._update_color_button_style()
+
+    def _update_color_button_style(self):
+        hex_code = (self.proj_name_color or "#FCEE0A").upper()
+        col = QColor(hex_code)
+        lum = (0.299 * col.red() + 0.587 * col.green() + 0.114 * col.blue()) if col.isValid() else 255
+        text_col = "#000000" if lum > 128 else "#FFFFFF"
+        self.btn_pick_color.setText(f"🎨  {hex_code}")
+        self.btn_pick_color.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {hex_code};
+                color: {text_col};
+                border: 1px solid {CP_DIM};
+                font-family: 'Consolas';
+                font-weight: bold;
+                font-size: 9.5pt;
+                padding: 4px 14px;
+            }}
+            QPushButton:hover {{
+                border-color: {CP_CYAN};
+            }}
+        """)
 
 
     def _add_from_form(self):
@@ -1941,7 +1949,7 @@ class SettingsDialog(QDialog):
         icons = self._get_icon_mappings()
         font_size = self.spin_fs.value()
         proj_font_size = self.spin_pfs.value()
-        proj_color = self.input_pcolor.text().strip() or "#FCEE0A"
+        proj_color = self.proj_name_color or "#FCEE0A"
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
         w_proj = self.spin_w_proj.value()
