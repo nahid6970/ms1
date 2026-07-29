@@ -2321,13 +2321,23 @@ class PrepTab(QWidget):
         vp.addWidget(self.project_search)
 
         self.project_list = QListWidget()
+        self.project_list.setObjectName("project_list_widget")
         self.project_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.project_list.setAlternatingRowColors(True)
         self.project_list.setStyleSheet(f"""
             QListWidget {{
                 background-color: {CP_PANEL}; border: 1px solid {CP_DIM};
             }}
-            QListWidget::item {{ border-bottom: 1px solid {CP_DIM}; }}
+            QListWidget::item {{
+                background: transparent;
+                border-bottom: 1px solid #1a1a1a;
+            }}
+            QListWidget::item:selected {{
+                background: transparent;
+                border: none;
+            }}
+            QListWidget::item:hover {{
+                background-color: #161616;
+            }}
         """)
         self.project_list.itemClicked.connect(self._on_project_clicked)
         self.project_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -2721,21 +2731,16 @@ class PrepTab(QWidget):
             
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
-            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 8.5pt;")
+            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;")
             lbl_name.setWordWrap(True)
             
             lbl_path = QLabel(path)
             lbl_path.setObjectName("proj_path_label")
-            lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7pt;")
+            lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
             lbl_path.setWordWrap(True)
-            
-            lbl_info = QLabel(f"{len(files)} files saved")
-            lbl_info.setObjectName("proj_info_label")
-            lbl_info.setStyleSheet(f"color: {CP_CYAN}; font-size: 7pt; font-style: italic;")
             
             vl.addWidget(lbl_name)
             vl.addWidget(lbl_path)
-            vl.addWidget(lbl_info)
             
             li.setSizeHint(widget.sizeHint())
             self.project_list.addItem(li)
@@ -2770,36 +2775,26 @@ class PrepTab(QWidget):
             
             lbl_name = widget.findChild(QLabel, "proj_name_label")
             lbl_path = widget.findChild(QLabel, "proj_path_label")
-            lbl_info = widget.findChild(QLabel, "proj_info_label")
             
             if is_active:
                 widget.setStyleSheet(f"""
                     QWidget {{
-                        background-color: #1a3b3d;
-                        border-left: 4px solid {CP_CYAN};
+                        background-color: #1c3335;
+                        border-left: 3px solid {CP_CYAN};
                     }}
                 """)
-                if lbl_name:
-                    lbl_name.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 8.5pt;")
-                if lbl_path:
-                    lbl_path.setStyleSheet("color: #E0E0E0; font-size: 7pt;")
-                if lbl_info:
-                    lbl_info.setStyleSheet(f"color: {CP_YELLOW}; font-size: 7.5pt; font-weight: bold;")
-                    lbl_info.setText(f"▶ ACTIVE ({len(data.get('files', []))} files)")
             else:
                 widget.setStyleSheet("""
                     QWidget {
                         background-color: transparent;
-                        border-left: 4px solid transparent;
+                        border-left: 3px solid transparent;
                     }
                 """)
-                if lbl_name:
-                    lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 8.5pt;")
-                if lbl_path:
-                    lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7pt;")
-                if lbl_info:
-                    lbl_info.setStyleSheet(f"color: {CP_CYAN}; font-size: 7pt; font-style: italic;")
-                    lbl_info.setText(f"{len(data.get('files', []))} files saved")
+
+            if lbl_name:
+                lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;")
+            if lbl_path:
+                lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
 
 
     def _on_project_clicked(self, item):
