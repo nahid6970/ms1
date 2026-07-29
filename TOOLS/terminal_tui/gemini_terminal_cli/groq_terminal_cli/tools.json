@@ -1,0 +1,134 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "read_file",
+      "description": "Read a local file and return its text content (UTF-8). Truncates at 12000 chars.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" }
+        },
+        "required": ["filepath"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_directory",
+      "description": "List directory contents sorted.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_system_info",
+      "description": "Get system information.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "search_file",
+      "description": "Search text within a file or directory.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "query": { "type": "string" },
+          "recursive": { "type": "boolean" },
+          "max_results": { "type": "integer" }
+        },
+        "required": ["path", "query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "fuzzy_apply_patch",
+      "description": "Apply a unified diff patch with fuzzy matching.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "patch": { "type": "string" }
+        },
+        "required": ["patch"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "smart_replace_block",
+      "description": "Replace a block of text in a file with fuzzy fallback matching.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "old_text": { "type": "string" },
+          "new_text": { "type": "string" },
+          "occurrence": { "type": "integer" }
+        },
+        "required": ["filepath", "old_text", "new_text"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "replace_lines",
+      "description": "Replace a specific range of 1-indexed line numbers in a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "start_line": { "type": "integer" },
+          "end_line": { "type": "integer" },
+          "new_text": { "type": "string" }
+        },
+        "required": ["filepath", "start_line", "end_line", "new_text"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "run_powershell",
+      "description": "Run a PowerShell command for inspection, git checks, or tests.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string" },
+          "timeout_seconds": { "type": "integer" }
+        },
+        "required": ["command"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "request_follow_up",
+      "description": "Request another turn for multi-step work.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+]
