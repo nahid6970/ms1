@@ -186,6 +186,8 @@ def render_markdown_text(text: str) -> str:
     while idx < len(raw_lines):
         line = raw_lines[idx]
         stripped_line = line.strip()
+        
+        # 1. Code Block Handling
         fence = re.match(r"^\s*```(\w+)?\s*$", line)
         if fence:
             in_code_block = not in_code_block
@@ -197,11 +199,13 @@ def render_markdown_text(text: str) -> str:
             idx += 1
             continue
 
+        # 2. Table Handling
         if not in_code_block and "|" in stripped_line:
             table_rows = []
             while idx < len(raw_lines) and "|" in raw_lines[idx]:
                 table_rows.append(raw_lines[idx])
                 idx += 1
+            
             if len(table_rows) >= 2:
                 grid = []
                 for row in table_rows:
@@ -212,6 +216,7 @@ def render_markdown_text(text: str) -> str:
                     is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells)
                     rendered = [_render_inline_markdown(c) for c in cells] if not is_sep else []
                     grid.append({"rendered": rendered, "is_sep": is_sep})
+                
                 col_count = max(len(r["rendered"]) for r in grid if not r["is_sep"])
                 col_widths = [0] * col_count
                 for row in grid:
@@ -219,6 +224,7 @@ def render_markdown_text(text: str) -> str:
                     for c_idx, cell in enumerate(row["rendered"]):
                         if c_idx < col_count:
                             col_widths[c_idx] = max(col_widths[c_idx], _visible_len(cell))
+                
                 total_w = sum(col_widths) + (col_count * 3) + 1
                 if total_w > term_width:
                     shrink_factor = (term_width - 10) / total_w
@@ -230,15 +236,19 @@ def render_markdown_text(text: str) -> str:
 
                 lines.append(get_sep_line("┌", "┬", "┐"))
                 v_bar = _ansi_wrap("│", border_color)
+
                 for r_idx, row in enumerate(grid):
                     if row["is_sep"]:
                         lines.append(get_sep_line("├", "┼", "┤"))
                         continue
+                    
                     wrapped_cells = []
                     for c_idx in range(col_count):
                         content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
                         wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
+                    
                     row_height = max(len(c) for c in wrapped_cells)
+                    
                     for sub_idx in range(row_height):
                         line_parts = []
                         for c_idx in range(col_count):
@@ -247,11 +257,17 @@ def render_markdown_text(text: str) -> str:
                             pad = " " * (col_widths[c_idx] - _visible_len(cell_line))
                             line_parts.append(f" {cell_line}{pad} ")
                         lines.append(f"{v_bar}{v_bar.join(line_parts)}{v_bar}")
+
                     if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
                         lines.append(get_sep_line("├", "┼", "┤"))
+
                 lines.append(get_sep_line("└", "┴", "┘"))
                 continue
-        
+            else:
+                line = table_rows[0]
+                stripped_line = line.strip()
+
+        # 3. Standard Markdown Elements
         if not stripped_line:
             lines.append("")
         elif stripped_line.startswith("#"):
@@ -273,7 +289,9 @@ def render_markdown_text(text: str) -> str:
             lines.append(_ansi_wrap("─" * 32, "90"))
         else:
             lines.append(_render_inline_markdown(line))
+        
         idx += 1
+
     return "\n".join(lines).strip()
 
 
