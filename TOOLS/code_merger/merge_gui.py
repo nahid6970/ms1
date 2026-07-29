@@ -2362,13 +2362,48 @@ class PrepTab(QWidget):
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
 
+        # Path Label + Top Action Buttons Row (Clear & Toggle All)
+        top_bar = QHBoxLayout()
+        top_bar.setContentsMargins(0, 0, 0, 0)
+        top_bar.setSpacing(4)
+
         self.project_path_lbl = QLabel("<not set>")
         self.project_path_lbl.setStyleSheet(
             "color: lightgreen; font-size: 9pt; font-family: 'Consolas';"
         )
         self.project_path_lbl.setWordWrap(False)
         self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
-        vf.addWidget(self.project_path_lbl)
+
+        btn_clear = QPushButton("✕ CLEAR")
+        btn_clear.setFixedHeight(22)
+        btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_clear.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-size: 8pt; padding: 2px 6px; font-weight: bold;
+            }}
+            QPushButton:hover {{ border-color: {CP_RED}; color: {CP_RED}; }}
+        """)
+        btn_clear.clicked.connect(self._clear_files)
+
+        btn_all_en = QPushButton("⬤ ALL")
+        btn_all_en.setFixedHeight(22)
+        btn_all_en.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_all_en.setToolTip("Toggle all files enabled/disabled")
+        btn_all_en.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-size: 8pt; padding: 2px 6px; font-weight: bold;
+            }}
+            QPushButton:hover {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
+        """)
+        btn_all_en.clicked.connect(self._toggle_all)
+
+        top_bar.addWidget(self.project_path_lbl, 1)
+        top_bar.addWidget(btn_clear, 0)
+        top_bar.addWidget(btn_all_en, 0)
+
+        vf.addLayout(top_bar)
 
         # File List Search/Filter Bar
         self.search_input = QLineEdit()
@@ -2483,34 +2518,6 @@ class PrepTab(QWidget):
         self.file_list.viewport().installEventFilter(self)
         vf.addWidget(self.file_list)
         left_layout.addWidget(grp_files, 1)
-
-        btn_row = QHBoxLayout()
-        btn_row.setSpacing(4)
-        btn_add     = QPushButton("＋ ADD")
-        btn_clear   = QPushButton("✕ CLEAR")
-        btn_all_en  = QPushButton("⬤ ALL")
-        btn_all_en.setFixedWidth(45)
-        btn_all_en.setToolTip("Toggle all files enabled/disabled")
-        
-        btn_style = f"""
-            QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white;
-                padding: 4px 6px; font-weight: bold; font-family: 'Consolas'; font-size: 8pt;
-            }}
-            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
-        """
-        for b in (btn_add, btn_clear, btn_all_en):
-            b.setCursor(Qt.CursorShape.PointingHandCursor)
-            b.setStyleSheet(btn_style)
-
-        btn_add.clicked.connect(self._add_files)
-        btn_clear.clicked.connect(self._clear_files)
-        btn_all_en.clicked.connect(self._toggle_all)
-        
-        btn_row.addWidget(btn_add)
-        btn_row.addWidget(btn_clear)
-        btn_row.addWidget(btn_all_en)
-        left_layout.addLayout(btn_row, 0)
 
         # ── RIGHT PANEL (PROMPT) ─────────────────────────────────
 
