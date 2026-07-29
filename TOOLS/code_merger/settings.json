@@ -35,50 +35,7 @@
         ".py",
         ".md"
       ],
-      "clicks": 21
-    },
-    {
-      "path": "C:\\@delta\\lol\\TOOLS\\ENV",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\lol\\TOOLS\\ENV\\aliases_export.json",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\context_menu_export.json",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\CONTEXT_MENU_GUIDE.md",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\CREATE_SCRIPT.md",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\ENV_MANAGER_README.md",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\env_variable_manager.py",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\SUBMENU_ICON_ISSUE.md",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\icons\\ai_agen.svg",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\icons\\dot_blue.svg",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\icons\\dot_redd.svg",
-        "C:\\@delta\\lol\\TOOLS\\ENV\\icons\\kiro.svg"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        ".svg",
-        ".py",
-        ".md",
-        ".json"
-      ],
-      "clicks": 4
-    },
-    {
-      "path": "C:\\@delta\\lol\\TOOLS\\profile_analyze",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\lol\\TOOLS\\profile_analyze\\cli_profile.py",
-        "C:\\@delta\\lol\\TOOLS\\profile_analyze\\cli_profile_linux.py",
-        "C:\\@delta\\lol\\TOOLS\\profile_analyze\\INCOGNITO_ISSUE.md",
-        "C:\\@delta\\lol\\TOOLS\\profile_analyze\\profile_switcher_gui.py",
-        "C:\\@delta\\lol\\TOOLS\\profile_analyze\\switcher_state.json"
-      ],
-      "disabled_files": [],
-      "extensions": [],
-      "clicks": 1
+      "clicks": 22
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\Editor",
@@ -572,16 +529,6 @@
       "disabled_files": [],
       "extensions": [],
       "clicks": 0
-    },
-    {
-      "path": "C:\\@delta\\lol\\@AutoHotKey\\shortcut_manager",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [],
-      "disabled_files": [],
-      "extensions": [],
-      "clicks": 0
     }
   ],
   "show_file_mode_controls": false,
@@ -598,7 +545,6 @@
     "C:\\@delta\\db\\@Convex\\image-share": "",
     "C:\\@delta\\db\\@Convex\\myhome-convex": "",
     "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator": "",
-    "C:\\@delta\\lol\\TOOLS\\ENV": "",
     "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager": "",
     "C:\\@delta\\ms1\\TOOLS\\Editor": "",
     "C:\\@delta\\ms1\\TOOLS\\ENV": ""
