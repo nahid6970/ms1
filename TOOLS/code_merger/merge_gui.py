@@ -3174,27 +3174,43 @@ class DiffPreviewDialog(QDialog):
     def __init__(self, changes: list[dict], root: str, parent=None):
         super().__init__(parent)
         self.setWindowTitle("DIFF PREVIEW & SELECTIVE MERGE")
-        self.resize(850, 600)
+        self.resize(1180, 820)
         self.setStyleSheet(THEME)
         self.changes = changes
         self.root = root
         self.check_states: list[QCheckBox] = []
+        self.diff_views: list[QTextEdit] = []
         self._build()
 
     def _build(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setContentsMargins(14, 14, 14, 14)
         layout.setSpacing(10)
 
+        # Header bar with summary & view toggles
+        top_bar = QHBoxLayout()
         lbl_hdr = QLabel(f"Review changes ({len(self.changes)} block(s) detected):")
         lbl_hdr.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 11pt;")
-        layout.addWidget(lbl_hdr)
+        top_bar.addWidget(lbl_hdr, 1)
+
+        btn_exp_all = QPushButton("📖 EXPAND ALL")
+        btn_coll_all = QPushButton("📁 COLLAPSE ALL")
+        btn_exp_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_coll_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_exp_all.setStyleSheet(f"background-color: {CP_DIM}; padding: 4px 8px; font-size: 8.5pt;")
+        btn_coll_all.setStyleSheet(f"background-color: {CP_DIM}; padding: 4px 8px; font-size: 8.5pt;")
+        btn_exp_all.clicked.connect(self._expand_all)
+        btn_coll_all.clicked.connect(self._collapse_all)
+
+        top_bar.addWidget(btn_exp_all)
+        top_bar.addWidget(btn_coll_all)
+        layout.addLayout(top_bar)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll_content = QWidget()
         v_box = QVBoxLayout(scroll_content)
-        v_box.setSpacing(12)
+        v_box.setSpacing(14)
 
         import difflib
 
@@ -3202,19 +3218,30 @@ class DiffPreviewDialog(QDialog):
             fpath = os.path.join(self.root, ch["file"].lstrip("/\\"))
             mode = ch["mode"]
 
-            group = QGroupBox(f"[{mode.upper()}]  {ch['file']}")
+            group = QGroupBox(f" Block #{idx+1} · [{mode.upper()}]  {ch['file']} ")
             g_layout = QVBoxLayout(group)
+            g_layout.setSpacing(6)
 
-            chk = QCheckBox("Apply this change")
+            chk_row = QHBoxLayout()
+            chk = QCheckBox("Apply this change block")
             chk.setChecked(True)
-            chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold;")
+            chk.setStyleSheet(f"color: {CP_CYAN}; font-weight: bold; font-size: 9.5pt;")
             self.check_states.append(chk)
-            g_layout.addWidget(chk)
+            chk_row.addWidget(chk, 1)
+
+            btn_toggle_view = QPushButton("▲ Minimize")
+            btn_toggle_view.setFixedWidth(90)
+            btn_toggle_view.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_toggle_view.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; font-size: 8pt; color: {CP_SUB};")
+            chk_row.addWidget(btn_toggle_view)
+            g_layout.addLayout(chk_row)
 
             diff_view = QTextEdit()
             diff_view.setReadOnly(True)
-            diff_view.setFont(QFont("Consolas", 9))
-            diff_view.setStyleSheet(f"background-color: #080808; border: 1px solid {CP_DIM}; padding: 4px;")
+            diff_view.setFont(QFont("Consolas", 10))
+            diff_view.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+            diff_view.setStyleSheet(f"background-color: #060606; border: 1px solid {CP_DIM}; padding: 6px;")
+            self.diff_views.append(diff_view)
 
             old_lines = []
             new_lines = []
@@ -3252,35 +3279,45 @@ class DiffPreviewDialog(QDialog):
                                .replace("<", "&lt;")
                                .replace(">", "&gt;"))
                 if line.startswith('+'):
-                    html_parts.append(f'<span style="color: {CP_GREEN}; background-color: #002b07;">{escaped}</span>')
+                    html_parts.append(f'<div style="color: {CP_GREEN}; background-color: #002e07; font-weight: bold; padding: 1px 4px;">{escaped}</div>')
                 elif line.startswith('-'):
-                    html_parts.append(f'<span style="color: {CP_RED}; background-color: #3b000d;">{escaped}</span>')
+                    html_parts.append(f'<div style="color: {CP_RED}; background-color: #3b000d; text-decoration: line-through; padding: 1px 4px;">{escaped}</div>')
                 elif line.startswith('@@'):
-                    html_parts.append(f'<span style="color: {CP_CYAN}; font-weight: bold;">{escaped}</span>')
+                    html_parts.append(f'<div style="color: {CP_CYAN}; font-weight: bold; background-color: #11222e; margin-top: 4px; margin-bottom: 4px; padding: 2px 4px;">{escaped}</div>')
                 else:
-                    html_parts.append(f'<span style="color: {CP_TEXT};">{escaped}</span>')
+                    html_parts.append(f'<div style="color: {CP_TEXT}; padding: 0 4px;">{escaped}</div>')
 
-            diff_view.setHtml("<pre style='margin:0; font-family:Consolas;'>" + "<br>".join(html_parts) + "</pre>")
-            diff_view.setMaximumHeight(180)
+            diff_view.setHtml("<pre style='margin:0; font-family:Consolas; line-height:1.3;'>" + "".join(html_parts) + "</pre>")
+
+            # Extended dynamic height based on line count (from 160px up to 600px tall per block)
+            line_count = len(diff_lines) or 5
+            calculated_height = max(160, min(600, line_count * 20 + 30))
+            diff_view.setFixedHeight(calculated_height)
+
+            btn_toggle_view.clicked.connect(lambda _, dv=diff_view, btn=btn_toggle_view, h=calculated_height: self._toggle_single_view(dv, btn, h))
+
             g_layout.addWidget(diff_view)
-
             v_box.addWidget(group)
 
         scroll.setWidget(scroll_content)
         layout.addWidget(scroll)
 
-        # Buttons
+        # Bottom Selection & Action Buttons
         btn_row = QHBoxLayout()
         btn_all = QPushButton("SELECT ALL")
         btn_none = QPushButton("SELECT NONE")
+        btn_all.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_none.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_all.clicked.connect(lambda: [c.setChecked(True) for c in self.check_states])
         btn_none.clicked.connect(lambda: [c.setChecked(False) for c in self.check_states])
 
-        btn_ok = QPushButton("✔ APPLY SELECTED")
+        btn_ok = QPushButton("✔ APPLY SELECTED CHANGES")
         btn_cancel = QPushButton("✕ CANCEL")
-        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; font-size: 10pt; }}"
                              f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
-        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+        btn_cancel.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; font-size: 10pt; }}"
                                  f"QPushButton:hover {{ background: {CP_RED}; color: #000; border-color: {CP_RED}; }}")
 
         btn_ok.clicked.connect(self.accept)
@@ -3292,6 +3329,23 @@ class DiffPreviewDialog(QDialog):
         btn_row.addWidget(btn_ok)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
+
+    def _toggle_single_view(self, diff_view: QTextEdit, btn: QPushButton, original_height: int):
+        if diff_view.isVisible():
+            diff_view.setVisible(False)
+            btn.setText("▼ Expand")
+        else:
+            diff_view.setVisible(True)
+            diff_view.setFixedHeight(original_height)
+            btn.setText("▲ Minimize")
+
+    def _expand_all(self):
+        for dv in self.diff_views:
+            dv.setVisible(True)
+
+    def _collapse_all(self):
+        for dv in self.diff_views:
+            dv.setVisible(False)
 
     def get_selected_changes(self) -> list[dict]:
         return [ch for ch, chk in zip(self.changes, self.check_states) if chk.isChecked()]
