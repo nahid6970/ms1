@@ -1367,7 +1367,7 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("SETTINGS")
-        self.resize(550, 480)
+        self.resize(720, 480)
         self.setStyleSheet(THEME)
 
         self.custom_ignores = list(CUSTOM_IGNORED_EXTS)
