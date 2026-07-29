@@ -49,7 +49,7 @@
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
-      "name": ""
+      "name": "Git Manager"
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
@@ -145,7 +145,7 @@
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\Image folder mover",
-      "name": "Tool - Image Mover"
+      "name": "Image Mover"
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\alarm_timer",
@@ -157,7 +157,7 @@
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\nerd-font-icon",
-      "name": "Tool - Nerd Icon Cnverter"
+      "name": "Nerd Icon Cnverter"
     },
     {
       "path": "\\home\\nahid\\@delta\\ms1\\TOOLS\\terminal_tui",
@@ -175,5 +175,6 @@
   "show_file_mode_controls": false,
   "panel_weight_projects": 300,
   "panel_weight_files": 500,
-  "panel_weight_prompt": 400
+  "panel_weight_prompt": 400,
+  "projects_font_size": 13
 }

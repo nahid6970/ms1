@@ -85,12 +85,14 @@ QListWidget {{
 }}
 QListWidget::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; border-left: 2px solid {CP_CYAN}; }}
 QListWidget::item:hover {{ background-color: #1a1a1a; }}
-QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0; }}
-QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; background: none; }}
-QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0; }}
-QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
-QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0; background: none; }}
+QScrollBar:vertical {{ background: transparent; width: 5px; margin: 0; }}
+QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 2px; }}
+QScrollBar::handle:vertical:hover {{ background: {CP_YELLOW}; }}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; width: 0; background: none; }}
+QScrollBar:horizontal {{ background: transparent; height: 5px; margin: 0; }}
+QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 2px; }}
+QScrollBar::handle:horizontal:hover {{ background: {CP_YELLOW}; }}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ height: 0; width: 0; background: none; }}
 QCheckBox {{ spacing: 8px; color: {CP_TEXT}; background: transparent; }}
 QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
 QCheckBox::indicator:checked {{ background: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
@@ -128,6 +130,7 @@ IGNORE_EXTS = {
 CUSTOM_IGNORED_EXTS = set()
 EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
+PROJECTS_FONT_SIZE = 10
 EXTENSION_ICON_SIZE = 16
 SHOW_FILE_MODE_CONTROLS = True
 PANEL_WEIGHT_PROJECTS = 260
@@ -168,7 +171,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
     return pixmap
 
 def load_settings():
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
     try:
         if os.path.exists(SETTINGS_PATH):
@@ -180,6 +183,7 @@ def load_settings():
                 IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
+                PROJECTS_FONT_SIZE = data.get('projects_font_size', 10)
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
                 SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
                 PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
@@ -200,13 +204,14 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560):
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560):
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
+    PROJECTS_FONT_SIZE = proj_font_size
     EXTENSION_ICON_SIZE = icon_size
     SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
     PANEL_WEIGHT_PROJECTS = w_projects
@@ -222,6 +227,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, ico
         data['custom_ignored_exts'] = list(CUSTOM_IGNORED_EXTS)
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
+        data['projects_font_size'] = PROJECTS_FONT_SIZE
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
         data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
         data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
@@ -1324,6 +1330,7 @@ class SettingsDialog(QDialog):
         self.custom_ignores = list(CUSTOM_IGNORED_EXTS)
         self.icons = dict(EXTENSION_ICONS)
         self.font_size = SOURCE_FILES_FONT_SIZE
+        self.proj_font_size = PROJECTS_FONT_SIZE
         self.icon_size = EXTENSION_ICON_SIZE
         self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
         self.w_projects = PANEL_WEIGHT_PROJECTS
@@ -1367,6 +1374,23 @@ class SettingsDialog(QDialog):
         """)
         h_font_settings.addWidget(lbl_fs)
         h_font_settings.addWidget(self.spin_fs)
+
+        lbl_pfs = QLabel("Projects Font Size (pt):")
+        lbl_pfs.setStyleSheet(f"color: {CP_TEXT}; margin-left: 14px;")
+
+        self.spin_pfs = QSpinBox()
+        self.spin_pfs.setRange(6, 24)
+        self.spin_pfs.setValue(self.proj_font_size)
+        self.spin_pfs.setStyleSheet(f"""
+            QSpinBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+            }}
+        """)
+        h_font_settings.addWidget(lbl_pfs)
+        h_font_settings.addWidget(self.spin_pfs)
         h_font_settings.addStretch()
 
         v_font.addLayout(h_font_settings)
@@ -1765,13 +1789,14 @@ class SettingsDialog(QDialog):
 
         icons = self._get_icon_mappings()
         font_size = self.spin_fs.value()
+        proj_font_size = self.spin_pfs.value()
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
         w_proj = self.spin_w_proj.value()
         w_files = self.spin_w_files.value()
         w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, icon_size, show_mode, w_proj, w_files, w_prompt)
+        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt)
         self.accept()
 
 
@@ -2805,15 +2830,16 @@ class PrepTab(QWidget):
             widget = QWidget()
             widget.setObjectName("proj_item_container")
             vl = QVBoxLayout(widget)
-            vl.setContentsMargins(10, 6, 6, 6)
-            vl.setSpacing(3)
+            vl.setContentsMargins(10, 5, 6, 5)
+            vl.setSpacing(1)
+            vl.setAlignment(Qt.AlignmentFlag.AlignTop)
             
             display_name = name if name else os.path.basename(path)
             if not display_name: display_name = path
             
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
-            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;")
+            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
             lbl_name.setWordWrap(True)
             
             lbl_path = QLabel(path)
@@ -2882,7 +2908,7 @@ class PrepTab(QWidget):
                 """)
 
             if lbl_name:
-                lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;")
+                lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
             if lbl_path:
                 lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
 
@@ -3366,9 +3392,10 @@ class MainWindow(QMainWindow):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.prep_tab._refresh_file_items()
+            self.prep_tab._populate_projects()
             self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
             self.prep_tab.apply_panel_sizes()
-            self._set_status(f"Settings saved. Applied panel widths ({PANEL_WEIGHT_PROJECTS}px / {PANEL_WEIGHT_FILES}px / {PANEL_WEIGHT_PROMPT}px).")
+            self._set_status(f"Settings saved. Applied project font size ({PROJECTS_FONT_SIZE}pt) and panel widths.")
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
