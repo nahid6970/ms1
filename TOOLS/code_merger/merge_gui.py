@@ -129,6 +129,7 @@ IGNORE_EXTS = {
 
 CUSTOM_IGNORED_EXTS = set()
 EXTENSION_ICONS = {}
+PROJECT_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
 PROJECTS_FONT_SIZE = 10
 PROJECTS_NAME_COLOR = "#FCEE0A"
@@ -173,7 +174,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
     return pixmap
 
 def load_settings():
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, PROJECT_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
     try:
         if os.path.exists(SETTINGS_PATH):
@@ -184,6 +185,7 @@ def load_settings():
                 CUSTOM_IGNORED_EXTS = set(ignores)
                 IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
                 EXTENSION_ICONS = data.get('extension_icons', {})
+                PROJECT_ICONS = data.get('project_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 PROJECTS_FONT_SIZE = data.get('projects_font_size', 10)
                 PROJECTS_NAME_COLOR = data.get('projects_name_color', '#FCEE0A')
@@ -208,12 +210,14 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A", app_name: str = "CODE MERGER // CYBERPUNK EDITION"):
-    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A", app_name: str = "CODE MERGER // CYBERPUNK EDITION", proj_icons: dict[str, str] = None):
+    global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, PROJECT_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
+    if proj_icons is not None:
+        PROJECT_ICONS = proj_icons
     SOURCE_FILES_FONT_SIZE = font_size
     PROJECTS_FONT_SIZE = proj_font_size
     PROJECTS_NAME_COLOR = proj_name_color
@@ -232,6 +236,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
                 data = {}
         data['custom_ignored_exts'] = list(CUSTOM_IGNORED_EXTS)
         data['extension_icons'] = EXTENSION_ICONS
+        data['project_icons'] = PROJECT_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['projects_font_size'] = PROJECTS_FONT_SIZE
         data['projects_name_color'] = PROJECTS_NAME_COLOR
@@ -1446,6 +1451,7 @@ class SettingsDialog(QDialog):
 
         self.custom_ignores = list(CUSTOM_IGNORED_EXTS)
         self.icons = dict(EXTENSION_ICONS)
+        self.proj_icons = dict(PROJECT_ICONS)
         self.font_size = SOURCE_FILES_FONT_SIZE
         self.proj_font_size = PROJECTS_FONT_SIZE
         self.proj_name_color = PROJECTS_NAME_COLOR
@@ -1720,6 +1726,55 @@ class SettingsDialog(QDialog):
 
         self.tabs.addTab(tab_icons, "🎨 EXTENSION ICONS")
 
+        # --- TAB 3: PROJECT ICONS ---
+        tab_proj_icons = QWidget()
+        v_picons = QVBoxLayout(tab_proj_icons)
+        v_picons.setContentsMargins(8, 8, 8, 8)
+        v_picons.setSpacing(8)
+
+        lbl_picons = QLabel("Assign custom SVG icons, Emojis, or Nerd Fonts to individual projects:")
+        lbl_picons.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+        v_picons.addWidget(lbl_picons)
+
+        self.proj_icon_table = QTableWidget(0, 3)
+        self.proj_icon_table.setHorizontalHeaderLabels(["Project Name / Path", "Custom Icon (SVG/Emoji)", "Preview"])
+        self.proj_icon_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        self.proj_icon_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.proj_icon_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.proj_icon_table.setColumnWidth(0, 200)
+        self.proj_icon_table.setColumnWidth(2, 60)
+        self.proj_icon_table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {CP_PANEL};
+                gridline-color: {CP_DIM};
+                border: 1px solid {CP_DIM};
+                color: {CP_TEXT};
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+            QHeaderView::section {{
+                background-color: {CP_PANEL};
+                color: {CP_YELLOW};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+        """)
+        v_picons.addWidget(self.proj_icon_table)
+
+        # Populate project icon table
+        recent_projs = load_recent_details()
+        for p_item in recent_projs:
+            p_path = p_item["path"]
+            p_name = p_item.get("name") or os.path.basename(p_path) or p_path
+            norm_p = os.path.normpath(p_path)
+            curr_icon = self.proj_icons.get(norm_p, "")
+            self._insert_proj_icon_row(norm_p, p_name, curr_icon)
+
+        self.tabs.addTab(tab_proj_icons, "📁 PROJECT ICONS")
+
+
         # Populate table
         for ext, icon_val in sorted(self.icons.items()):
             self._insert_table_row(ext, icon_val)
@@ -1933,6 +1988,63 @@ class SettingsDialog(QDialog):
         if curr_row >= 0:
             self.table.removeRow(curr_row)
 
+    def _insert_proj_icon_row(self, path: str, name: str, icon_value: str = ""):
+        row = self.proj_icon_table.rowCount()
+        self.proj_icon_table.insertRow(row)
+
+        name_item = QTableWidgetItem(name)
+        name_item.setToolTip(path)
+        name_item.setData(Qt.ItemDataRole.UserRole, path)
+        name_item.setFont(QFont("Consolas", 9.5))
+        self.proj_icon_table.setItem(row, 0, name_item)
+
+        widget = QWidget()
+        hl = QHBoxLayout(widget)
+        hl.setContentsMargins(2, 2, 2, 2)
+        hl.setSpacing(4)
+
+        val_input = QLineEdit(icon_value)
+        val_input.setStyleSheet(f"background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM};")
+        val_input.setFont(QFont("Consolas", 9))
+        val_input.setToolTip("Enter an Emoji, Nerd Font character, or raw SVG XML code.")
+
+        btn_edit = QPushButton("✏️")
+        btn_edit.setFixedWidth(28)
+        btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_edit.setStyleSheet(f"QPushButton {{ background-color: {CP_DIM}; padding: 2px; }}")
+        btn_edit.clicked.connect(lambda _, inp=val_input: self._open_multiline_editor(inp))
+
+        hl.addWidget(val_input, 1)
+        hl.addWidget(btn_edit, 0)
+        self.proj_icon_table.setCellWidget(row, 1, widget)
+
+        preview_lbl = QLabel()
+        preview_lbl.setFixedSize(24, 24)
+        preview_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        preview_lbl.setStyleSheet("background: transparent;")
+        preview_lbl.setPixmap(render_extension_icon(icon_value, 20))
+        self.proj_icon_table.setCellWidget(row, 2, preview_lbl)
+
+        val_input.textChanged.connect(lambda text, lbl=preview_lbl: lbl.setPixmap(render_extension_icon(text, 20)))
+
+    def _get_proj_icon_mappings(self) -> dict[str, str]:
+        mappings = {}
+        for row in range(self.proj_icon_table.rowCount()):
+            item = self.proj_icon_table.item(row, 0)
+            if not item:
+                continue
+            path = item.data(Qt.ItemDataRole.UserRole)
+            if not path:
+                continue
+            cell_widget = self.proj_icon_table.cellWidget(row, 1)
+            if cell_widget:
+                inp = cell_widget.findChild(QLineEdit)
+                val = inp.text().strip() if inp else ""
+                if val:
+                    mappings[os.path.normpath(path)] = val
+        return mappings
+
+
     def _get_icon_mappings(self) -> dict[str, str]:
         mappings = {}
         for row in range(self.table.rowCount()):
@@ -1963,6 +2075,7 @@ class SettingsDialog(QDialog):
                 ignores.append(cleaned)
 
         icons = self._get_icon_mappings()
+        proj_icons = self._get_proj_icon_mappings()
         font_size = self.spin_fs.value()
         proj_font_size = self.spin_pfs.value()
         proj_color = self.proj_name_color or "#FCEE0A"
@@ -1973,7 +2086,7 @@ class SettingsDialog(QDialog):
         w_files = self.spin_w_files.value()
         w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color, app_name)
+        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color, app_name, proj_icons)
         self.accept()
 
 
@@ -2985,6 +3098,23 @@ class PrepTab(QWidget):
             self.status_cb(f"Renamed: {path}")
             self._populate_projects()
 
+    def _change_project_icon(self, path: str):
+        from PyQt6.QtWidgets import QInputDialog
+        norm_p = os.path.normpath(path)
+        current_icon = PROJECT_ICONS.get(norm_p, "")
+        new_icon, ok = QInputDialog.getText(self, "Change Project Icon", "Enter Emoji, Nerd Font character, or SVG XML snippet:", text=current_icon)
+        if ok:
+            PROJECT_ICONS[norm_p] = new_icon.strip()
+            save_settings(
+                list(CUSTOM_IGNORED_EXTS), EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE,
+                PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS,
+                PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT,
+                PROJECTS_NAME_COLOR, APP_NAME, PROJECT_ICONS
+            )
+            self.status_cb(f"Updated icon for project: {os.path.basename(path)}")
+            self._populate_projects()
+
+
 
 
     def _clear_files(self):
@@ -3021,8 +3151,26 @@ class PrepTab(QWidget):
             lbl_path = QLabel(path)
             lbl_path.setObjectName("proj_path_label")
             lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
+
+            norm_p = os.path.normpath(path)
+            proj_icon_val = PROJECT_ICONS.get(norm_p, "")
             
-            vl.addWidget(lbl_name)
+            if proj_icon_val:
+                hl_title = QHBoxLayout()
+                hl_title.setContentsMargins(0, 0, 0, 0)
+                hl_title.setSpacing(6)
+                
+                icon_lbl = QLabel()
+                icon_lbl.setPixmap(render_extension_icon(proj_icon_val, EXTENSION_ICON_SIZE))
+                icon_lbl.setFixedSize(EXTENSION_ICON_SIZE, EXTENSION_ICON_SIZE)
+                icon_lbl.setStyleSheet("background: transparent;")
+                
+                hl_title.addWidget(icon_lbl, 0)
+                hl_title.addWidget(lbl_name, 1)
+                vl.addLayout(hl_title)
+            else:
+                vl.addWidget(lbl_name)
+
             vl.addWidget(lbl_path)
             
             item_h = max(44, PROJECTS_FONT_SIZE + 28)
@@ -3110,6 +3258,7 @@ class PrepTab(QWidget):
         
         act_load_all = menu.addAction("🔄  Re-scan & Load All")
         act_rename   = menu.addAction("✏️  Rename Alias")
+        act_icon     = menu.addAction("🎨  Change Project Icon")
         act_open     = menu.addAction("📂  Open in Explorer")
         menu.addSeparator()
         act_remove   = menu.addAction("✕  Remove from List")
@@ -3120,6 +3269,8 @@ class PrepTab(QWidget):
             self._populate_projects()
         elif action == act_rename:
             self._rename_recent(path)
+        elif action == act_icon:
+            self._change_project_icon(path)
         elif action == act_open:
             self._open_explorer(path)
         elif action == act_remove:
