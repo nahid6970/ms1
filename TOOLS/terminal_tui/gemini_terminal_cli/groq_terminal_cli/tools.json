@@ -17,7 +17,7 @@
     "type": "function",
     "function": {
       "name": "list_directory",
-      "description": "List directory contents sorted.",
+      "description": "List directory contents sorted (dirs first, then files).",
       "parameters": {
         "type": "object",
         "properties": {
@@ -31,7 +31,7 @@
     "type": "function",
     "function": {
       "name": "get_system_info",
-      "description": "Get system information.",
+      "description": "Returns OS platform, Python version, and current working directory.",
       "parameters": {
         "type": "object",
         "properties": {}
@@ -42,7 +42,7 @@
     "type": "function",
     "function": {
       "name": "search_file",
-      "description": "Search text within a file or directory.",
+      "description": "Case-insensitive text search within a file or directory.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -59,11 +59,11 @@
     "type": "function",
     "function": {
       "name": "fuzzy_apply_patch",
-      "description": "Apply a unified diff patch with fuzzy matching.",
+      "description": "Apply a unified diff patch with fuzzy matching and line-ending fallback.",
       "parameters": {
         "type": "object",
         "properties": {
-          "patch": { "type": "string" }
+          "patch": { "type": "string", "description": "A unified diff with ---/+++ headers." }
         },
         "required": ["patch"]
       }
@@ -73,7 +73,7 @@
     "type": "function",
     "function": {
       "name": "smart_replace_block",
-      "description": "Replace a block of text in a file with fuzzy fallback matching.",
+      "description": "Replace a text block in a file with fuzzy fallback matching.",
       "parameters": {
         "type": "object",
         "properties": {
