@@ -141,6 +141,26 @@ def resolve_path(raw: str, cwd: Path) -> Path:
     return candidate.resolve()
 
 
+def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
+    stripped = user_text.strip()
+    if not stripped.startswith("@"):
+        return user_text
+
+    head, _, tail = stripped[1:].partition(" ")
+    file_path = resolve_path(head, cwd)
+    file_text = read_file(file_path)
+    if tail.strip():
+        request_text = tail.strip()
+    else:
+        request_text = "Review the file content above."
+
+    return (
+        f"File: {file_path}\n\n"
+        f"Content:\n{file_text}\n\n"
+        f"User request: {request_text}"
+    )
+
+
 def read_file(path: Path) -> str:
     if not path.exists():
         return f"Error: file not found: {path}"
@@ -456,7 +476,8 @@ def main():
             warn(f"Commands: /mm, /test, /api, /system, /save, /load, /reset, /exit")
             continue
 
-        messages.append({"role": "user", "content": user_input})
+        expanded_input = expand_at_file_prompt(user_input, cwd)
+        messages.append({"role": "user", "content": expanded_input})
         
         for _ in range(DEFAULT_TOOL_LOOPS):
             try:
