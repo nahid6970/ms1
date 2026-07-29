@@ -1721,6 +1721,7 @@ class PrepTab(QWidget):
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
         self._load_session()
+        self._populate_projects()
 
     def eventFilter(self, obj, event):
         if hasattr(self, 'file_list') and obj == self.file_list.viewport() and event.type() == QEvent.Type.Resize:
@@ -2305,7 +2306,43 @@ class PrepTab(QWidget):
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # ── LEFT PANEL ───────────────────────────────────────────
+        # ── PROJECTS SIDEBAR ─────────────────────────────────────
+        sidebar_widget = QWidget()
+        sidebar_layout = QVBoxLayout(sidebar_widget)
+        sidebar_layout.setContentsMargins(0, 0, 6, 0)
+        sidebar_layout.setSpacing(8)
+
+        grp_projects = QGroupBox("PROJECTS")
+        vp = QVBoxLayout(grp_projects)
+
+        self.project_search = QLineEdit()
+        self.project_search.setPlaceholderText("🔍 Search projects…")
+        self.project_search.textChanged.connect(self._filter_projects)
+        vp.addWidget(self.project_search)
+
+        self.project_list = QListWidget()
+        self.project_list.setAlternatingRowColors(True)
+        self.project_list.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM};
+            }}
+            QListWidget::item {{ border-bottom: 1px solid {CP_DIM}; }}
+        """)
+        self.project_list.itemClicked.connect(self._on_project_clicked)
+        self.project_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.project_list.customContextMenuRequested.connect(self._project_context_menu)
+        vp.addWidget(self.project_list)
+
+        sidebar_layout.addWidget(grp_projects)
+        
+        btn_row_side = QHBoxLayout()
+        btn_add_dir = QPushButton("📁 NEW ROOT")
+        btn_add_dir.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_add_dir.clicked.connect(self._add_dir)
+        btn_row_side.addWidget(btn_add_dir)
+        sidebar_layout.addLayout(btn_row_side)
+
+        # ── MIDDLE PANEL (FILES) ─────────────────────────────────
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
         left_layout.setContentsMargins(0, 0, 6, 0)
@@ -2335,17 +2372,13 @@ class PrepTab(QWidget):
         bulk_row.setContentsMargins(0, 0, 0, 0)
         bulk_row.setSpacing(4)
         
-        self.chk_minify = QCheckBox("Minify (save tokens)")
+        self.chk_minify = QCheckBox("Minify")
         self.chk_minify.setChecked(False)
-        self.chk_minify.setToolTip("Strips comments and blank lines from full code files to minimize prompt size.")
+        self.chk_minify.setToolTip("Strips comments and blank lines to save tokens.")
         self.chk_minify.stateChanged.connect(self._save_session)
         bulk_row.addWidget(self.chk_minify)
         
         bulk_row.addStretch()
-        
-        lbl_bulk = QLabel("Set all:")
-        lbl_bulk.setStyleSheet(f"color: {CP_SUB}; font-size: 8pt;")
-        bulk_row.addWidget(lbl_bulk)
         
         btn_bulk_full = QPushButton("FULL")
         btn_bulk_full.setFixedWidth(50)
@@ -2386,64 +2419,22 @@ class PrepTab(QWidget):
         self.btn_col_ext.setFixedHeight(20)
         self.btn_col_ext.setFixedWidth(52)
         self.btn_col_ext.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_col_ext.setToolTip("Sort by file extension")
-        self.btn_col_ext.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent; border: none;
-                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
-                padding: 0 2px;
-            }}
-            QPushButton:hover {{ color: {CP_CYAN}; }}
-        """)
         self.btn_col_ext.clicked.connect(self._sort_by_ext)
 
         self.btn_col_name = QPushButton("NAME ↕")
         self.btn_col_name.setFixedHeight(20)
         self.btn_col_name.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_col_name.setToolTip("Sort by file name")
-        self.btn_col_name.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent; border: none;
-                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
-                padding: 0 2px;
-            }}
-            QPushButton:hover {{ color: {CP_CYAN}; }}
-        """)
         self.btn_col_name.clicked.connect(self._sort_by_name)
-
-        self.btn_col_toggle = QPushButton("⬤ TOGGLE ALL")
-        self.btn_col_toggle.setFixedHeight(20)
-        self.btn_col_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_col_toggle.setToolTip("Enable all / Disable all")
-        self.btn_col_toggle.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent; border: none;
-                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
-                padding: 0 4px;
-            }}
-            QPushButton:hover {{ color: {CP_GREEN}; }}
-        """)
-        self.btn_col_toggle.clicked.connect(self._toggle_all)
 
         self.btn_col_tokens = QPushButton("TOKENS ↕")
         self.btn_col_tokens.setFixedHeight(20)
         self.btn_col_tokens.setFixedWidth(72)
         self.btn_col_tokens.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_col_tokens.setToolTip("Sort by estimated token count")
-        self.btn_col_tokens.setStyleSheet(f"""
-            QPushButton {{
-                background: transparent; border: none;
-                color: {CP_SUB}; font-family: 'Consolas'; font-size: 8pt; font-weight: bold;
-                padding: 0 2px;
-            }}
-            QPushButton:hover {{ color: {CP_CYAN}; }}
-        """)
         self.btn_col_tokens.clicked.connect(self._sort_by_tokens)
 
         hh.addWidget(self.btn_col_ext)
         hh.addWidget(self.btn_col_name, 1)
         hh.addWidget(self.btn_col_tokens)
-        hh.addWidget(self.btn_col_toggle)
         vf.addWidget(header_bar)
         # ── end header bar ─────────────────────────────────────
 
@@ -2457,20 +2448,23 @@ class PrepTab(QWidget):
 
         btn_row = QHBoxLayout()
         btn_add     = QPushButton("＋ ADD FILES")
-        btn_add_dir = QPushButton("📁 ADD DIR / ROOT")
-        btn_recent  = QPushButton("🕘 RECENT")
-        btn_clear   = QPushButton("✕ CLEAR ALL")
-        for b in (btn_add, btn_add_dir, btn_recent, btn_clear):
+        btn_clear   = QPushButton("✕ CLEAR")
+        btn_all_en  = QPushButton("⬤ ALL")
+        btn_all_en.setFixedWidth(50)
+        btn_all_en.setToolTip("Toggle all files enabled/disabled")
+        
+        for b in (btn_add, btn_clear, btn_all_en):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add.clicked.connect(self._add_files)
-        btn_add_dir.clicked.connect(self._add_dir)
-        btn_recent.clicked.connect(self._show_recent)
         btn_clear.clicked.connect(self._clear_files)
+        btn_all_en.clicked.connect(self._toggle_all)
+        
         btn_row.addWidget(btn_add)
-        btn_row.addWidget(btn_add_dir)
-        btn_row.addWidget(btn_recent)
         btn_row.addWidget(btn_clear)
+        btn_row.addWidget(btn_all_en)
         left_layout.addLayout(btn_row, 0)
+
+        # ── RIGHT PANEL (PROMPT) ─────────────────────────────────
 
         # ── RIGHT PANEL ──────────────────────────────────────────
         right_widget = QWidget()
@@ -2519,10 +2513,12 @@ class PrepTab(QWidget):
         right_layout.addLayout(btn_row2, 0)
 
         # Assemble Splitter
+        splitter.addWidget(sidebar_widget)
         splitter.addWidget(left_widget)
         splitter.addWidget(right_widget)
-        splitter.setStretchFactor(0, 2)
-        splitter.setStretchFactor(1, 3)
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 2)
+        splitter.setStretchFactor(2, 3)
 
         layout.addWidget(splitter)
 
@@ -2561,6 +2557,8 @@ class PrepTab(QWidget):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             selected_exts = dialog.get_selected()
             self._load_dir(d, selected_exts, overwrite_recent=True)
+        self._populate_projects()
+
 
     def _load_dir(self, d: str, selected_exts: set[str] = None, overwrite_recent: bool = False):
         count = 0
@@ -2653,33 +2651,117 @@ class PrepTab(QWidget):
                     item["name"] = new_name.strip()
             save_recent(items)
             self.status_cb(f"Renamed: {path}")
+            self._populate_projects()
 
-    def _show_recent(self):
-        btn = self.sender()
-        popup = RecentPopup(
-            self,
-            on_load=self._load_specific_files,
-            on_load_all=self._load_all_project_files,
-            on_remove=lambda p: (
-                remove_recent(p),
-                self.status_cb(f"Removed: {p}")
-            ),
-            on_rename=self._rename_recent
-        )
-        btn_pos = btn.mapToGlobal(QPoint(0, 0))
-        popup_height = popup.sizeHint().height()
-        y = btn_pos.y() - popup_height - 2
-        if y < 10:
-            y = btn_pos.y() + btn.height() + 2
-        pos = QPoint(btn_pos.x(), y)
-        popup.move(pos)
-        popup.show()
+
 
     def _clear_files(self):
         self.files.clear()
         self.file_list.clear()
         self._save_session()
         self.status_cb("File list cleared")
+
+    def _populate_projects(self):
+        self.project_list.clear()
+        items = load_recent_details()
+        for item in items:
+            path = item["path"]
+            name = item.get("name")
+            files = item.get("files", [])
+            
+            li = QListWidgetItem()
+            li.setData(Qt.ItemDataRole.UserRole, item)
+            
+            widget = QWidget()
+            vl = QVBoxLayout(widget)
+            vl.setContentsMargins(6, 4, 6, 4)
+            vl.setSpacing(2)
+            
+            display_name = name if name else os.path.basename(path)
+            if not display_name: display_name = path
+            
+            lbl_name = QLabel(display_name)
+            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: 9pt;")
+            
+            lbl_path = QLabel(path)
+            lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7pt;")
+            lbl_path.setWordWrap(True)
+            
+            lbl_info = QLabel(f"{len(files)} files saved")
+            lbl_info.setStyleSheet(f"color: {CP_CYAN}; font-size: 7pt; font-style: italic;")
+            
+            vl.addWidget(lbl_name)
+            vl.addWidget(lbl_path)
+            vl.addWidget(lbl_info)
+            
+            li.setSizeHint(widget.sizeHint())
+            self.project_list.addItem(li)
+            self.project_list.setItemWidget(li, widget)
+        
+        self._filter_projects()
+
+    def _filter_projects(self):
+        query = self.project_search.text().strip().lower()
+        for i in range(self.project_list.count()):
+            item = self.project_list.item(i)
+            data = item.data(Qt.ItemDataRole.UserRole)
+            path = data.get("path", "").lower()
+            name = data.get("name", "").lower()
+            visible = (not query) or (query in path) or (query in name)
+            item.setHidden(not visible)
+
+    def _on_project_clicked(self, item):
+        data = item.data(Qt.ItemDataRole.UserRole)
+        path = data.get("path")
+        files = data.get("files", [])
+        extensions = data.get("extensions", [])
+        self._load_specific_files(path, files, extensions)
+
+    def _project_context_menu(self, pos):
+        item = self.project_list.itemAt(pos)
+        if not item: return
+        data = item.data(Qt.ItemDataRole.UserRole)
+        path = data.get("path")
+        
+        menu = QMenu(self)
+        menu.setStyleSheet(f"""
+            QMenu {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT}; }}
+            QMenu::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; }}
+        """)
+        
+        act_load_all = menu.addAction("🔄  Re-scan & Load All")
+        act_rename   = menu.addAction("✏️  Rename Alias")
+        act_open     = menu.addAction("📂  Open in Explorer")
+        menu.addSeparator()
+        act_remove   = menu.addAction("✕  Remove from List")
+        act_remove.setForeground(QColor(CP_RED))
+        
+        action = menu.exec(self.project_list.viewport().mapToGlobal(pos))
+        if action == act_load_all:
+            self._load_all_project_files(path)
+            self._populate_projects()
+        elif action == act_rename:
+            self._rename_recent(path)
+        elif action == act_open:
+            self._open_explorer(path)
+        elif action == act_remove:
+            remove_recent(path)
+            self._populate_projects()
+            self.status_cb(f"Removed project: {path}")
+
+    def _open_explorer(self, p):
+        try:
+            if hasattr(os, 'startfile'):
+                os.startfile(p)
+            elif sys.platform.startswith('darwin'):
+                import subprocess
+                subprocess.Popen(['open', p])
+            else:
+                import subprocess
+                subprocess.Popen(['xdg-open', p])
+        except Exception:
+            pass
+
 
     def _generate(self):
         if not self.files and not self.project_root:
