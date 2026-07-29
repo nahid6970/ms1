@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QListWidget, QListWidgetItem, QSplitter,
     QStatusBar, QCheckBox, QMessageBox, QLineEdit, QMenu, QFrame,
     QDialog, QScrollArea, QGridLayout, QComboBox, QTableWidget,
-    QTableWidgetItem, QHeaderView, QSpinBox
+    QTableWidgetItem, QHeaderView, QSpinBox, QColorDialog
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
@@ -131,6 +131,7 @@ CUSTOM_IGNORED_EXTS = set()
 EXTENSION_ICONS = {}
 SOURCE_FILES_FONT_SIZE = 9
 PROJECTS_FONT_SIZE = 10
+PROJECTS_NAME_COLOR = "#FCEE0A"
 EXTENSION_ICON_SIZE = 16
 SHOW_FILE_MODE_CONTROLS = True
 PANEL_WEIGHT_PROJECTS = 260
@@ -172,7 +173,7 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
 
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR
     try:
         if os.path.exists(SETTINGS_PATH):
             with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
@@ -184,6 +185,7 @@ def load_settings():
                 EXTENSION_ICONS = data.get('extension_icons', {})
                 SOURCE_FILES_FONT_SIZE = data.get('source_files_font_size', 9)
                 PROJECTS_FONT_SIZE = data.get('projects_font_size', 10)
+                PROJECTS_NAME_COLOR = data.get('projects_name_color', '#FCEE0A')
                 EXTENSION_ICON_SIZE = data.get('extension_icon_size', 16)
                 SHOW_FILE_MODE_CONTROLS = data.get('show_file_mode_controls', True)
                 PANEL_WEIGHT_PROJECTS = data.get('panel_weight_projects', 260)
@@ -204,14 +206,15 @@ def load_settings():
     except Exception as e:
         print(f"Error loading settings: {e}", file=sys.stderr)
 
-def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560):
+def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, proj_font_size: int, icon_size: int, show_file_mode_controls: bool = True, w_projects: int = 260, w_files: int = 360, w_prompt: int = 560, proj_name_color: str = "#FCEE0A"):
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
-    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT
+    global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR
     CUSTOM_IGNORED_EXTS = set(ignores)
     IGNORE_EXTS.update(CUSTOM_IGNORED_EXTS)
     EXTENSION_ICONS = icons
     SOURCE_FILES_FONT_SIZE = font_size
     PROJECTS_FONT_SIZE = proj_font_size
+    PROJECTS_NAME_COLOR = proj_name_color
     EXTENSION_ICON_SIZE = icon_size
     SHOW_FILE_MODE_CONTROLS = show_file_mode_controls
     PANEL_WEIGHT_PROJECTS = w_projects
@@ -228,6 +231,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
         data['extension_icons'] = EXTENSION_ICONS
         data['source_files_font_size'] = SOURCE_FILES_FONT_SIZE
         data['projects_font_size'] = PROJECTS_FONT_SIZE
+        data['projects_name_color'] = PROJECTS_NAME_COLOR
         data['extension_icon_size'] = EXTENSION_ICON_SIZE
         data['show_file_mode_controls'] = SHOW_FILE_MODE_CONTROLS
         data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
@@ -1440,6 +1444,7 @@ class SettingsDialog(QDialog):
         self.icons = dict(EXTENSION_ICONS)
         self.font_size = SOURCE_FILES_FONT_SIZE
         self.proj_font_size = PROJECTS_FONT_SIZE
+        self.proj_name_color = PROJECTS_NAME_COLOR
         self.icon_size = EXTENSION_ICON_SIZE
         self.show_file_mode_controls = SHOW_FILE_MODE_CONTROLS
         self.w_projects = PANEL_WEIGHT_PROJECTS
@@ -1503,6 +1508,34 @@ class SettingsDialog(QDialog):
         h_font_settings.addStretch()
 
         v_font.addLayout(h_font_settings)
+
+        # Projects Name Text Color Selector
+        h_color_settings = QHBoxLayout()
+        lbl_pcolor = QLabel("Projects Name Text Color:")
+        lbl_pcolor.setStyleSheet(f"color: {CP_TEXT};")
+
+        self.input_pcolor = QLineEdit(self.proj_name_color)
+        self.input_pcolor.setFixedWidth(90)
+        self.input_pcolor.setStyleSheet(f"background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;")
+
+        self.swatch_pcolor = QLabel()
+        self.swatch_pcolor.setFixedSize(24, 24)
+        self.swatch_pcolor.setStyleSheet(f"background-color: {self.proj_name_color}; border: 1px solid {CP_DIM};")
+
+        btn_pick_color = QPushButton("🎨 PICK COLOR")
+        btn_pick_color.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_pick_color.setStyleSheet(f"background-color: {CP_DIM}; padding: 4px 8px; font-size: 8.5pt;")
+        btn_pick_color.clicked.connect(self._choose_proj_color)
+
+        self.input_pcolor.textChanged.connect(lambda text: self.swatch_pcolor.setStyleSheet(f"background-color: {text}; border: 1px solid {CP_DIM};"))
+
+        h_color_settings.addWidget(lbl_pcolor)
+        h_color_settings.addWidget(self.input_pcolor)
+        h_color_settings.addWidget(self.swatch_pcolor)
+        h_color_settings.addWidget(btn_pick_color)
+        h_color_settings.addStretch()
+
+        v_font.addLayout(h_color_settings)
 
         # Extension Icon Display Size
         h_icon_settings = QHBoxLayout()
@@ -1744,6 +1777,15 @@ class SettingsDialog(QDialog):
         pix = render_extension_icon(text, 20)
         self.form_preview.setPixmap(pix)
 
+    def _choose_proj_color(self):
+        initial = QColor(self.input_pcolor.text().strip() or "#FCEE0A")
+        color = QColorDialog.getColor(initial, self, "Select Project Name Color")
+        if color.isValid():
+            hex_color = color.name()
+            self.input_pcolor.setText(hex_color)
+            self.swatch_pcolor.setStyleSheet(f"background-color: {hex_color}; border: 1px solid {CP_DIM};")
+
+
     def _add_from_form(self):
         ext = self.input_ext.text().strip()
         icon = self.input_icon.text().strip()
@@ -1899,13 +1941,14 @@ class SettingsDialog(QDialog):
         icons = self._get_icon_mappings()
         font_size = self.spin_fs.value()
         proj_font_size = self.spin_pfs.value()
+        proj_color = self.input_pcolor.text().strip() or "#FCEE0A"
         icon_size = self.spin_is.value()
         show_mode = self.chk_show_mode.isChecked()
         w_proj = self.spin_w_proj.value()
         w_files = self.spin_w_files.value()
         w_prompt = self.spin_w_prompt.value()
 
-        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt)
+        save_settings(ignores, icons, font_size, proj_font_size, icon_size, show_mode, w_proj, w_files, w_prompt, proj_color)
         self.accept()
 
 
@@ -2948,7 +2991,7 @@ class PrepTab(QWidget):
             
             lbl_name = QLabel(display_name)
             lbl_name.setObjectName("proj_name_label")
-            lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
+            lbl_name.setStyleSheet(f"color: {PROJECTS_NAME_COLOR}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
             
             lbl_path = QLabel(path)
             lbl_path.setObjectName("proj_path_label")
@@ -3016,7 +3059,7 @@ class PrepTab(QWidget):
                 """)
 
             if lbl_name:
-                lbl_name.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
+                lbl_name.setStyleSheet(f"color: {PROJECTS_NAME_COLOR}; font-weight: bold; font-size: {PROJECTS_FONT_SIZE}pt;")
             if lbl_path:
                 lbl_path.setStyleSheet(f"color: {CP_SUB}; font-size: 7.5pt;")
 
@@ -3386,6 +3429,8 @@ class MergeTab(QWidget):
 
     def _apply(self):
         if not self._pending_changes:
+            self._parse()
+        if not self._pending_changes:
             self.status_cb("⚠ Parse changes first")
             return
         root = self.root_input.text().strip()
@@ -3393,17 +3438,20 @@ class MergeTab(QWidget):
             self.status_cb("⚠ Set a valid project root directory")
             return
 
+        changes_to_apply = self._pending_changes
+
         if self.chk_preview.isChecked():
-            reply = QMessageBox.question(
-                self, "CONFIRM APPLY",
-                f"Apply {len(self._pending_changes)} change(s) to:\n{root}\n\nContinue?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
-            if reply != QMessageBox.StandardButton.Yes:
+            dlg = DiffPreviewDialog(self._pending_changes, root, self)
+            if dlg.exec() != QDialog.DialogCode.Accepted:
                 return
+            selected = dlg.get_selected_changes()
+            if not selected:
+                self.status_cb("No changes selected")
+                return
+            changes_to_apply = selected
 
         match_mode = "fuzzy" if self.match_mode_cb and "Fuzzy" in self.match_mode_cb() else "exact"
-        results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked(), match_mode=match_mode)
+        results = apply_changes(changes_to_apply, root, self.chk_backup.isChecked(), match_mode=match_mode)
         ok  = sum(1 for r in results if r.startswith("✔"))
         err = len(results) - ok
 

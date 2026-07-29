@@ -148,5 +148,6 @@
   "panel_weight_projects": 300,
   "panel_weight_files": 500,
   "panel_weight_prompt": 400,
-  "projects_font_size": 15
+  "projects_font_size": 15,
+  "projects_name_color": "#55aaff"
 }
