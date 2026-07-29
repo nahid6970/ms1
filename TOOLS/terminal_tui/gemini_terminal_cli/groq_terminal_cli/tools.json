@@ -16,6 +16,21 @@
   {
     "type": "function",
     "function": {
+      "name": "write_file",
+      "description": "Write content to a file, creating parent dirs if needed. OVERWRITES the entire file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filepath": { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["filepath", "content"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "list_directory",
       "description": "List directory contents sorted (dirs first, then files).",
       "parameters": {
@@ -73,7 +88,7 @@
     "type": "function",
     "function": {
       "name": "smart_replace_block",
-      "description": "Replace a text block in a file with fuzzy fallback matching.",
+      "description": "Replace a text block in a file with fuzzy fallback matching for line-endings and whitespace.",
       "parameters": {
         "type": "object",
         "properties": {
