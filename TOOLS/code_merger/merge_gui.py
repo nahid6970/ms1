@@ -488,6 +488,8 @@ def parse_ai_response(text: str) -> list[dict]:
 
 
 def analyze_match_failure(content: str, target_block: str, mode: str) -> str:
+
+
     """Analyze why target_block (either 'from' or 'after') was not found in content."""
     lines_content = content.splitlines()
     lines_block = target_block.splitlines()
@@ -584,9 +586,86 @@ def analyze_match_failure(content: str, target_block: str, mode: str) -> str:
     )
 
 
-def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
+def fuzzy_replace_block(content: str, from_block: str, to_block: str, threshold: float = 0.70) -> str | None:
+    if from_block in content:
+        return content.replace(from_block, to_block, 1)
+
+    lines_content = content.splitlines(keepends=True)
+    lines_content_raw = [l.strip() for l in content.splitlines()]
+    lines_from_raw = [l.strip() for l in from_block.splitlines()]
+
+    if not lines_from_raw:
+        return None
+
+    n_from = len(lines_from_raw)
+    for i in range(len(lines_content_raw) - n_from + 1):
+        slice_raw = lines_content_raw[i : i + n_from]
+        if slice_raw == lines_from_raw:
+            target_substr = "".join(lines_content[i : i + n_from])
+            return content.replace(target_substr, to_block, 1)
+
+    import difflib
+    best_ratio = 0.0
+    best_range = None
+
+    for window_len in range(max(1, n_from - 2), n_from + 3):
+        for i in range(len(lines_content) - window_len + 1):
+            slice_str = "".join(lines_content[i : i + window_len])
+            matcher = difflib.SequenceMatcher(None, slice_str, from_block)
+            ratio = matcher.ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_range = (i, i + window_len)
+
+    if best_ratio >= threshold and best_range is not None:
+        start_idx, end_idx = best_range
+        target_substr = "".join(lines_content[start_idx:end_idx])
+        return content.replace(target_substr, to_block, 1)
+
+    return None
+
+
+def fuzzy_find_anchor(content: str, anchor: str, threshold: float = 0.70) -> str | None:
+    if anchor in content:
+        return anchor
+
+    lines_content = content.splitlines(keepends=True)
+    lines_content_raw = [l.strip() for l in content.splitlines()]
+    lines_anchor_raw = [l.strip() for l in anchor.splitlines()]
+
+    if not lines_anchor_raw:
+        return None
+
+    n_anchor = len(lines_anchor_raw)
+    for i in range(len(lines_content_raw) - n_anchor + 1):
+        slice_raw = lines_content_raw[i : i + n_anchor]
+        if slice_raw == lines_anchor_raw:
+            return "".join(lines_content[i : i + n_anchor])
+
+    import difflib
+    best_ratio = 0.0
+    best_range = None
+
+    for window_len in range(max(1, n_anchor - 2), n_anchor + 3):
+        for i in range(len(lines_content) - window_len + 1):
+            slice_str = "".join(lines_content[i : i + window_len])
+            matcher = difflib.SequenceMatcher(None, slice_str, anchor)
+            ratio = matcher.ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_range = (i, i + window_len)
+
+    if best_ratio >= threshold and best_range is not None:
+        start_idx, end_idx = best_range
+        return "".join(lines_content[start_idx:end_idx])
+
+    return None
+
+
+def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str = "exact") -> list[str]:
     """Apply parsed changes. Returns list of result messages."""
     results = []
+    is_fuzzy = (match_mode == "fuzzy")
     for ch in changes:
         try:
             fpath = os.path.join(root, ch["file"].lstrip("/\\"))
@@ -613,6 +692,17 @@ def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
                     continue
                 with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
                     content = f.read()
+
+                if is_fuzzy:
+                    new_content = fuzzy_replace_block(content, ch["from"], ch["to"])
+                    if new_content is not None:
+                        if backup:
+                            _backup(fpath)
+                        with open(fpath, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        results.append(f"✔ replace_block (fuzzy) → {ch['file']}")
+                        continue
+
                 if ch["from"] not in content:
                     try:
                         failure_info = analyze_match_failure(content, ch["from"], "replace_block")
@@ -645,7 +735,14 @@ def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
                     continue
                 with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
                     content = f.read()
-                if ch["after"] not in content:
+
+                anchor_target = None
+                if is_fuzzy:
+                    anchor_target = fuzzy_find_anchor(content, ch["after"])
+                elif ch["after"] in content:
+                    anchor_target = ch["after"]
+
+                if not anchor_target:
                     try:
                         failure_info = analyze_match_failure(content, ch["after"], "insert_after")
                     except Exception as ex:
@@ -660,10 +757,11 @@ def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
                     continue
                 if backup:
                     _backup(fpath)
-                new = content.replace(ch["after"], ch["after"] + '\n' + ch["insert"], 1)
+                new = content.replace(anchor_target, anchor_target + '\n' + ch["insert"], 1)
                 with open(fpath, 'w', encoding='utf-8') as f:
                     f.write(new)
-                results.append(f"✔ insert_after  → {ch['file']}")
+                tag = "insert_after (fuzzy)" if is_fuzzy and anchor_target != ch["after"] else "insert_after"
+                results.append(f"✔ {tag}  → {ch['file']}")
 
             elif mode == "delete_block":
                 if not os.path.exists(fpath):
@@ -678,6 +776,17 @@ def apply_changes(changes: list[dict], root: str, backup: bool) -> list[str]:
                     continue
                 with open(fpath, 'r', encoding='utf-8', errors='replace') as f:
                     content = f.read()
+
+                if is_fuzzy:
+                    new_content = fuzzy_replace_block(content, ch["from"], "")
+                    if new_content is not None:
+                        if backup:
+                            _backup(fpath)
+                        with open(fpath, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        results.append(f"✔ delete_block (fuzzy)  → {ch['file']}")
+                        continue
+
                 if ch["from"] not in content:
                     try:
                         failure_info = analyze_match_failure(content, ch["from"], "delete_block")
@@ -3018,9 +3127,10 @@ def extract_commit_message(text: str) -> str:
 
 # ── MERGE TAB ─────────────────────────────────────────────────────────────────
 class MergeTab(QWidget):
-    def __init__(self, status_cb):
+    def __init__(self, status_cb, match_mode_cb=None):
         super().__init__()
         self.status_cb = status_cb
+        self.match_mode_cb = match_mode_cb
         self._parsed_commit_msg = ""
         self._build()
         self._load_prefs()
@@ -3162,7 +3272,8 @@ class MergeTab(QWidget):
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
-        results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked())
+        match_mode = "fuzzy" if self.match_mode_cb and "Fuzzy" in self.match_mode_cb() else "exact"
+        results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked(), match_mode=match_mode)
         ok  = sum(1 for r in results if r.startswith("✔"))
         err = len(results) - ok
 
@@ -3375,11 +3486,38 @@ class MainWindow(QMainWindow):
         """)
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
 
+        self.combo_match_mode = QComboBox()
+        self.combo_match_mode.addItems(["🎯 Exact Match", "⚡ Smart / Fuzzy Match"])
+        self.combo_match_mode.setToolTip("Select code matching engine:\n• Exact Match: Strict string matching\n• Smart / Fuzzy Match: Insensitive to trailing spaces/minor LLM formatting errors")
+        self.combo_match_mode.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.combo_match_mode.setStyleSheet(f"""
+            QComboBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px 8px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+                font-weight: bold;
+            }}
+            QComboBox::drop-down {{ border: none; }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                selection-background-color: {CP_CYAN};
+                selection-color: black;
+                border: 1px solid {CP_DIM};
+            }}
+        """)
+        self._load_match_mode_pref()
+        self.combo_match_mode.currentTextChanged.connect(self._save_match_mode_pref)
+
+        corner_layout.addWidget(self.combo_match_mode)
         corner_layout.addWidget(btn_settings)
         corner_layout.addWidget(btn_restart)
         self.tabs.setCornerWidget(corner_widget, Qt.Corner.TopRightCorner)
 
-        self.merge_tab = MergeTab(self._set_status)
+        self.merge_tab = MergeTab(self._set_status, self.get_match_mode)
         self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
         self.command_tab = CommandTab(self._set_status, lambda: self.merge_tab.root_input.text().strip())
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
@@ -3395,6 +3533,34 @@ class MainWindow(QMainWindow):
             self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
             self.prep_tab.apply_panel_sizes()
             self._set_status(f"Settings saved. Applied project font size ({PROJECTS_FONT_SIZE}pt) and panel widths.")
+
+    def get_match_mode(self) -> str:
+        return self.combo_match_mode.currentText()
+
+    def _load_match_mode_pref(self):
+        try:
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if isinstance(data, dict) and 'match_mode' in data:
+                    self.combo_match_mode.setCurrentText(data['match_mode'])
+        except Exception:
+            pass
+
+    def _save_match_mode_pref(self, text: str):
+        try:
+            data = {}
+            if os.path.exists(SESSION_PATH):
+                with open(SESSION_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            if not isinstance(data, dict):
+                data = {}
+            data['match_mode'] = text
+            with open(SESSION_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        except Exception:
+            pass
+
 
     def _set_status(self, msg: str):
         self.status_bar.showMessage(f"  {msg}")
