@@ -265,8 +265,12 @@ def model_name(model: Dict[str, Any]) -> str:
 
 def short_model_name(model: Dict[str, Any]) -> str:
     name = model_name(model)
+    # Strip common provider prefixes and repo paths
     short = name
-    for prefix in ("llama-", "llama3-", "mixtral-", "gemma-", "gemma2-"):
+    if "/" in short:
+        short = short.split("/")[-1]
+    
+    for prefix in ("llama-", "llama3-", "mixtral-", "gemma-", "gemma2-", "llama-3.1-", "llama-3.2-", "llama-3.3-"):
         if short.lower().startswith(prefix):
             short = short[len(prefix):]
             break
@@ -278,6 +282,8 @@ def model_group(model: Dict[str, Any]) -> str:
     if "llama" in name: return "Llama"
     if "mixtral" in name: return "Mixtral"
     if "gemma" in name: return "Gemma"
+    if "whisper" in name: return "Whisper"
+    if "qwen" in name: return "Qwen"
     return "Other"
 
 
@@ -288,9 +294,9 @@ def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
         name_w = max(name_w, len(model_name(m)))
         tag_w = max(tag_w, len(str(m.get("_tag") or "")))
     return {
-        "short": min(max(short_w, 12), 28),
-        "name": min(max(name_w, 18), 42),
-        "tag": min(max(tag_w, 4), 12),
+        "short": min(max(short_w, 15), 30),
+        "name": min(max(name_w, 20), 45),
+        "tag": min(max(tag_w, 4), 10),
     }
 
 
@@ -314,14 +320,20 @@ def format_model_entry(
     tag = str(model.get("_tag") or "")
     usage = int(model.get("_uses") or 0)
     marker = ">" if selected else " "
+    
+    # Constrain strings to calculated widths to prevent overflow
+    disp_clipped = display_name[:widths['short']]
+    name_clipped = name[:widths['name']]
+    
     row = (
         f"{marker} {index:>2}  "
-        f"{display_name:<{widths['short']}}  "
-        f"{name:<{widths['name']}}  "
+        f"{disp_clipped:<{widths['short']}}  "
+        f"{name_clipped:<{widths['name']}}  "
         f"{usage:>4}  "
         f"{tag:<{widths['tag']}}  "
         f"{active}"
-    ).rstrip()
+    )
+    
     if selected: return _ansi_wrap(row, "48;5;24;97")
     if name == current_model: return _ansi_wrap(row, "32")
     if model.get("_hidden"): return _ansi_wrap(row, "2")
