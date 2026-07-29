@@ -100,6 +100,15 @@ def warn(text: str) -> None:
 
 def error(text: str) -> None:
     print(_ansi_wrap(text, "31"))
+def _clean_response_text(text: str) -> str:
+    """Removes <think>...</think> blocks from reasoning models."""
+    if not text:
+        return ""
+    # Remove everything between <think> and </think> tags, including the tags themselves
+    return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+
+
+
 
 
 def title(text: str) -> None:
@@ -530,7 +539,8 @@ def test_model(client: GroqClient, model_id: str) -> str:
     test_client = GroqClient(client.api_key, model_id)
     try:
         resp = test_client.generate([{"role": "user", "content": "Say exactly: OK"}], system_instruction="Reply OK only.", temperature=0.0)
-        return resp["choices"][0]["message"]["content"].strip()
+        content = resp["choices"][0]["message"]["content"]
+        return _clean_response_text(content)
     except Exception as e: return f"Error: {e}"
 
 
@@ -756,7 +766,10 @@ def main():
                 
             msg = response["choices"][0]["message"]
             messages.append(msg)
-            if msg.get("content"): print(f"\n{msg['content']}\n")
+            if msg.get("content"):
+                cleaned_text = _clean_response_text(msg['content'])
+                if cleaned_text:
+                    print(f"\n{cleaned_text}\n")
             if not msg.get("tool_calls"): write_notification(); break
                 
             for tool_call in msg["tool_calls"]:
