@@ -1371,11 +1371,16 @@ class EditProjectDialog(QDialog):
 
         if self.disabled_files:
             for df in self.disabled_files:
-                try:
-                    rel_p = os.path.relpath(df, self.path)
-                except Exception:
-                    rel_p = os.path.basename(df)
-                li = QListWidgetItem(f"🚫  {rel_p}")
+                is_ext = not is_subpath(df, self.path)
+                if is_ext:
+                    li = QListWidgetItem(f"⚠️  [OUTSIDE PROJECT] {df}")
+                    li.setForeground(QColor(CP_RED))
+                else:
+                    try:
+                        rel_p = os.path.relpath(df, self.path)
+                    except Exception:
+                        rel_p = os.path.basename(df)
+                    li = QListWidgetItem(f"🚫  {rel_p}")
                 li.setToolTip(df)
                 li.setData(Qt.ItemDataRole.UserRole, df)
                 self.file_list.addItem(li)
@@ -1386,11 +1391,20 @@ class EditProjectDialog(QDialog):
 
         v_gf.addWidget(self.file_list)
 
+        btn_box = QHBoxLayout()
         btn_unhide = QPushButton("✔ Un-hide Selected File")
         btn_unhide.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_unhide.setStyleSheet(f"background-color: {CP_DIM}; font-size: 8.5pt;")
         btn_unhide.clicked.connect(self._unhide_selected)
-        v_gf.addWidget(btn_unhide)
+
+        btn_purge_ext = QPushButton("🗑️ Purge External Files")
+        btn_purge_ext.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_purge_ext.setStyleSheet(f"background-color: {CP_PANEL}; border: 1px solid {CP_RED}; color: {CP_RED}; font-size: 8.5pt;")
+        btn_purge_ext.clicked.connect(self._purge_external_files)
+
+        btn_box.addWidget(btn_unhide)
+        btn_box.addWidget(btn_purge_ext)
+        v_gf.addLayout(btn_box)
 
         layout.addWidget(grp_files)
 
@@ -1420,6 +1434,27 @@ class EditProjectDialog(QDialog):
             if fp and fp in self.disabled_files:
                 self.disabled_files.remove(fp)
                 self.file_list.takeItem(self.file_list.row(curr))
+
+    def _purge_external_files(self):
+        to_remove = [df for df in self.disabled_files if not is_subpath(df, self.path)]
+        for df in to_remove:
+            self.disabled_files.remove(df)
+        self.file_list.clear()
+        if self.disabled_files:
+            for df in self.disabled_files:
+                try:
+                    rel_p = os.path.relpath(df, self.path)
+                except Exception:
+                    rel_p = os.path.basename(df)
+                li = QListWidgetItem(f"🚫  {rel_p}")
+                li.setToolTip(df)
+                li.setData(Qt.ItemDataRole.UserRole, df)
+                self.file_list.addItem(li)
+        else:
+            li = QListWidgetItem("No hidden/disabled files for this project.")
+            li.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.file_list.addItem(li)
+
 
     def get_details(self) -> tuple[str, str, str, list[str]]:
         return self.input_name.text().strip(), self.input_cat.text().strip(), self.input_icon.text().strip(), self.disabled_files
@@ -3214,6 +3249,9 @@ class PrepTab(QWidget):
 
     def _load_all_project_files(self, d: str):
         d = os.path.normpath(d)
+        old_external = [f for f in self.files if not is_subpath(f, d)]
+        old_disabled_ext = [f for f in self.disabled_files if not is_subpath(f, d)]
+
         self.files.clear()
         self.file_list.clear()
         self.disabled_files = {f for f in self.disabled_files if is_subpath(f, d)}
@@ -3237,7 +3275,13 @@ class PrepTab(QWidget):
                     
         self._set_project_root(d, save_recent=False)
         add_recent(d, added_files, list(discovered_exts), overwrite_existing=True)
-        self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
+
+        total_removed = len(old_external) + len(old_disabled_ext)
+        if total_removed > 0:
+            self.status_cb(f"Re-scanned {count} file(s). Purged {total_removed} external file(s) outside project folder.")
+        else:
+            self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
+
         self._update_root()
         self._save_session()
 
@@ -3256,9 +3300,6 @@ class PrepTab(QWidget):
         curr_disabled = target_item.get("disabled_files", [])
         if norm_p == os.path.normpath(self.project_root):
             curr_disabled = list(self.disabled_files)
-
-        # Filter out any legacy external files outside the project root
-        curr_disabled = [f for f in curr_disabled if is_subpath(f, norm_p)]
 
         dlg = EditProjectDialog(
             path=norm_p,
